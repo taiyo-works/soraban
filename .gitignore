@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+.vscode/settings.json
+.idea/
+*.log
+supabase/.branches
+supabase/.temp
