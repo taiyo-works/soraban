@@ -15,10 +15,28 @@
 - → 山陰全域 → 中国地方へ段階展開
 
 ## 技術スタック
-- Next.js 15 + Tailwind v4 + MapLibre GL
+- Next.js 16 + Tailwind v4 + MapLibre GL（`apps/web`）
 - Supabase (PostgreSQL 15 + PostGIS + pg_cron)
 - Gemini 3 Flash-Lite
 - TypeScript strict / pnpm workspace
+
+## モノレポ構成
+```
+apps/
+  web/       — Next.js 16 (App Router, Turbopack, Tailwind v4)
+  scraper/   — 条例スクレイパ
+  api/       — バックエンドAPI
+packages/
+  db/          — @soraban/db: Supabase クライアント
+  regulations/ — @soraban/regulations: 規制データ／型
+  geo/         — @soraban/geo: 緯度経度・GSI ヘルパ
+```
+
+## 開発コマンド
+- `pnpm install` — 依存関係取得
+- `pnpm dev` — Web を起動（`apps/web`）
+- `pnpm typecheck` — 全 workspace の型検査
+- `pnpm lint` — 全 workspace の lint
 
 ## 作成者
 奥田憲章

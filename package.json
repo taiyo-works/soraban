@@ -1,0 +1,16 @@
+{
+  "name": "soraban",
+  "version": "0.0.0",
+  "private": true,
+  "description": "そらばん（Soraban）山陰の業務ドローン運用者向けコンプライアンス統合SaaS。",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @soraban/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
