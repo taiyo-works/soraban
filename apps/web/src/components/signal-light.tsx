@@ -16,6 +16,7 @@ const colorClass: Record<RegulationStatus, string> = {
   red: "bg-rose-500 border-rose-600 shadow-[0_0_18px_rgba(244,63,94,0.55)]",
   yellow: "bg-amber-400 border-amber-500 shadow-[0_0_18px_rgba(251,191,36,0.55)]",
   green: "bg-emerald-500 border-emerald-600 shadow-[0_0_18px_rgba(16,185,129,0.55)]",
+  unknown: "bg-zinc-400 border-zinc-500",
 };
 
 const dimClass = "bg-zinc-200 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-700";
