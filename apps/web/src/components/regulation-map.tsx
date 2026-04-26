@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl, {
   type Map as MapLibreMap,
   type Marker,
@@ -13,7 +13,10 @@ import {
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  SENSITIVE_FACILITY_BUFFER_M,
+  YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
+  YONAGO_SENSITIVE_FACILITIES,
 } from "@soraban/regulations";
 
 type Props = {
@@ -67,6 +70,59 @@ const EMPTY_FC: GeoJSON.FeatureCollection = {
   features: [],
 };
 
+type LayerKey = "did" | "airports" | "base" | "parks" | "heritage" | "sensitive";
+
+const LAYER_GROUPS: ReadonlyArray<{
+  readonly key: LayerKey;
+  readonly label: string;
+  readonly source: string;
+  readonly swatch: string;
+  readonly layerIds: readonly string[];
+}> = [
+  {
+    key: "did",
+    label: "DID（航空法132条）",
+    source: "国 / 国土数値情報 A16-15",
+    swatch: "bg-rose-500/40 ring-rose-600 rounded-sm",
+    layerIds: ["did-fill", "did-outline"],
+  },
+  {
+    key: "airports",
+    label: "空港等周辺",
+    source: "国 / 国土数値情報 C28-20",
+    swatch: "bg-violet-500/40 ring-violet-700 rounded-sm",
+    layerIds: ["airports-fill", "airports-outline"],
+  },
+  {
+    key: "base",
+    label: "美保基地 300m / 1.5km",
+    source: "小型無人機等飛行禁止法",
+    swatch: "bg-rose-500/50 ring-rose-700 rounded-full",
+    layerIds: ["base-yellow-fill", "base-yellow-outline", "base-red-fill", "base-red-outline"],
+  },
+  {
+    key: "parks",
+    label: "米子市都市公園 (8件)",
+    source: "米子市都市公園条例",
+    swatch: "bg-emerald-500/40 ring-emerald-700 rounded-sm",
+    layerIds: ["parks-fill", "parks-outline"],
+  },
+  {
+    key: "heritage",
+    label: "指定史跡 (2件)",
+    source: "文化財保護法125条 / 米子市文化財条例",
+    swatch: "bg-orange-500/40 ring-orange-700 rounded-sm",
+    layerIds: ["heritage-fill", "heritage-outline"],
+  },
+  {
+    key: "sensitive",
+    label: "公衆密集地 100m (4件)",
+    source: "鳥取県迷惑行為等防止条例",
+    swatch: "bg-yellow-500/40 ring-yellow-700 rounded-full",
+    layerIds: ["sensitive-fill", "sensitive-outline"],
+  },
+];
+
 export function RegulationMap({ center, prefCode, onPick }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -74,6 +130,14 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
   const onPickRef = useRef<typeof onPick>(onPick);
   onPickRef.current = onPick;
   const loadedPrefRef = useRef<string | null>(null);
+  const [layerVisibility, setLayerVisibility] = useState<Record<LayerKey, boolean>>({
+    did: true,
+    airports: true,
+    base: true,
+    parks: true,
+    heritage: true,
+    sensitive: true,
+  });
 
   useEffect(() => {
     const node = containerRef.current;
@@ -97,6 +161,14 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
       circlePolygon(MIHO_AIRBASE_CENTER, MIHO_AIRBASE_YELLOW_M),
     ]);
     const parksFc = polygonsToFeatureCollection(YONAGO_PARKS.map((p) => p.polygon));
+    const heritageFc = polygonsToFeatureCollection(
+      YONAGO_HERITAGE_SITES.map((s) => s.polygon),
+    );
+    const sensitiveFc = polygonsToFeatureCollection(
+      YONAGO_SENSITIVE_FACILITIES.map((f) =>
+        circlePolygon(f.center, SENSITIVE_FACILITY_BUFFER_M, 48),
+      ),
+    );
 
     map.on("load", () => {
       // DID — populated dynamically from /api/did/[pref]
@@ -183,6 +255,34 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
         source: "parks",
         paint: { "line-color": "#047857", "line-width": 1.5 },
       });
+
+      map.addSource("heritage", { type: "geojson", data: heritageFc });
+      map.addLayer({
+        id: "heritage-fill",
+        type: "fill",
+        source: "heritage",
+        paint: { "fill-color": "#f97316", "fill-opacity": 0.30 },
+      });
+      map.addLayer({
+        id: "heritage-outline",
+        type: "line",
+        source: "heritage",
+        paint: { "line-color": "#c2410c", "line-width": 1.5, "line-dasharray": [3, 1] },
+      });
+
+      map.addSource("sensitive", { type: "geojson", data: sensitiveFc });
+      map.addLayer({
+        id: "sensitive-fill",
+        type: "fill",
+        source: "sensitive",
+        paint: { "fill-color": "#eab308", "fill-opacity": 0.18 },
+      });
+      map.addLayer({
+        id: "sensitive-outline",
+        type: "line",
+        source: "sensitive",
+        paint: { "line-color": "#a16207", "line-width": 1, "line-dasharray": [1, 1] },
+      });
     });
 
     map.on("click", (e) => {
@@ -207,6 +307,23 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     map.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: 800 });
     marker.setLngLat([center.lng, center.lat]);
   }, [center.lat, center.lng]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const apply = () => {
+      for (const group of LAYER_GROUPS) {
+        const visible = layerVisibility[group.key];
+        for (const id of group.layerIds) {
+          if (map.getLayer(id)) {
+            map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+          }
+        }
+      }
+    };
+    if (map.isStyleLoaded()) apply();
+    else map.once("load", apply);
+  }, [layerVisibility]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -240,35 +357,62 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     };
   }, [prefCode]);
 
+  const visibleCount = Object.values(layerVisibility).filter(Boolean).length;
+
   return (
     <div className="flex flex-col gap-2">
       <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
         <div ref={containerRef} className="aspect-[16/9] w-full" />
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-rose-500/40 ring-1 ring-rose-600" />
-          DID 平成27年（航空法132条）
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-violet-500/40 ring-1 ring-violet-700" />
-          空港等（C28-20）
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-rose-500/50 ring-1 ring-rose-700" />
-          美保基地 300m
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-500/40 ring-1 ring-amber-600" />
-          美保基地 1.5km
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500/40 ring-1 ring-emerald-700" />
-          米子市公園
-        </span>
-        <span className="ml-auto text-zinc-500 dark:text-zinc-500">
-          地図クリックで判定地点を選択
-        </span>
+      <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white/60 p-3 text-xs dark:border-zinc-800 dark:bg-zinc-950/60">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="font-medium text-zinc-700 dark:text-zinc-200">
+            規制レイヤー（{visibleCount}/{LAYER_GROUPS.length} 表示）
+          </span>
+          <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+            ・チェックで地図表示を切替 ・地図クリックで判定地点を選択
+          </span>
+        </div>
+        <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+          {LAYER_GROUPS.map((group) => {
+            const checked = layerVisibility[group.key];
+            return (
+              <li key={group.key}>
+                <label
+                  className={`flex cursor-pointer items-start gap-2 rounded-md border px-2 py-1.5 transition-colors ${
+                    checked
+                      ? "border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
+                      : "border-transparent text-zinc-400 hover:bg-zinc-50 dark:text-zinc-500 dark:hover:bg-zinc-900/40"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setLayerVisibility((prev) => ({
+                        ...prev,
+                        [group.key]: e.target.checked,
+                      }))
+                    }
+                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-zinc-700 dark:accent-zinc-300"
+                  />
+                  <span
+                    className={`mt-0.5 inline-block h-2.5 w-2.5 ring-1 ${group.swatch}`}
+                    aria-hidden
+                  />
+                  <span className="flex flex-1 flex-col leading-tight">
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                      {group.label}
+                    </span>
+                    <span className="text-[10px] text-zinc-500 dark:text-zinc-500">
+                      {group.source}
+                    </span>
+                  </span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );
