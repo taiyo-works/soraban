@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { isValidLatLng } from "@soraban/geo";
 import { runRegulationCheck } from "@/server/regulation-check";
 
-export const runtime = "nodejs";
-
 export async function POST(req: Request) {
   let body: unknown;
   try {

@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const runtime = "nodejs";
-
 const DID_DIR = path.resolve(
   process.env["DID_DATA_DIR"] ??
     path.join(process.cwd(), "..", "..", "packages", "regulations", "data", "did", "by-pref"),

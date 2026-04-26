@@ -93,13 +93,23 @@ const TECH_STACK: ReadonlyArray<{
   readonly category: string;
   readonly value: string;
 }> = [
-  { category: "Frontend", value: "Next.js 16 / TypeScript strict / Tailwind v4" },
-  { category: "Map", value: "MapLibre GL + 国土地理院ベクタータイル" },
+  { category: "Frontend", value: "Next.js 16 (App Router / React Server Components) / TypeScript strict / Tailwind v4" },
+  {
+    category: "キャッシュ戦略",
+    value:
+      "Next.js 16 Cache Components（'use cache' ディレクティブ + cacheLife('days') + cacheTag によるタグ無効化）。Phase 1 のスクレイパ更新時に updateTag/revalidateTag で即時反映",
+  },
+  { category: "Map", value: "MapLibre GL + 国土地理院ベクタータイル / 6 レイヤー個別トグル" },
   { category: "Geo", value: "ハーバサイン距離・Ray-casting Point-in-Polygon・PostGIS互換ポリゴン" },
   { category: "判定エンジン", value: "soraban-0.2.0-clausegraph（条文の例外節を機械可読 ClauseGraph 化）" },
   { category: "監査トレイル", value: "SHA-256 evidenceId 採番（座標・時刻・適用規制IDを正規化してハッシュ）" },
   { category: "ジオコーディング", value: "国土地理院 LonLatToAddress / アドレス検索 API" },
   { category: "データ整形", value: "Shell + jq による国土数値情報 (GML/Shapefile) → GeoJSON パイプライン" },
+  {
+    category: "アーキテクチャ",
+    value:
+      "Jamstack（静的 Markup + クライアント JS + サーバレス Route Handlers）／pnpm monorepo (web / regulations / geo / db / scraper)",
+  },
 ];
 
 const sourceTone = {

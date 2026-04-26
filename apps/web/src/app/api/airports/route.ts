@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export const runtime = "nodejs";
-
 const AIRPORTS_FILE = path.resolve(
   process.env["REGULATION_DATA_DIR"] ??
     path.join(process.cwd(), "..", "..", "packages", "regulations", "data"),

@@ -2,6 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { cacheLife, cacheTag } from "next/cache";
 import type { LatLng, Polygon } from "@soraban/geo";
 import {
   DEFAULT_DISCLAIMER,
@@ -68,9 +69,6 @@ type DidGeoJson = {
   }>;
 };
 
-const prefCache = new Map<string, readonly DidCandidate[] | null>();
-let airportCache: readonly AirportCandidate[] | null | undefined;
-
 const ringToPolygon = (ring: number[][]): Polygon =>
   ring.map(([lng, lat]) => ({ lat: lat ?? 0, lng: lng ?? 0 }));
 
@@ -106,8 +104,13 @@ type AirportGeoJson = {
   }>;
 };
 
+// Next.js 16 Cache Components: 'use cache' を関数単位に付け、
+// 引数（airports は無し / prefCode）を自動的にキャッシュキーに含める。
+// ファイル更新時は cacheTag を revalidateTag/updateTag で叩いて即時無効化できる。
 const loadAirports = async (): Promise<readonly AirportCandidate[] | null> => {
-  if (airportCache !== undefined) return airportCache;
+  "use cache";
+  cacheLife("days");
+  cacheTag("regulation-data:airports");
   try {
     const json = JSON.parse(
       await fs.readFile(AIRPORTS_FILE, "utf8"),
@@ -129,10 +132,8 @@ const loadAirports = async (): Promise<readonly AirportCandidate[] | null> => {
         center: { lat: f.properties.centerLat, lng: f.properties.centerLng },
       };
     });
-    airportCache = candidates;
     return candidates;
   } catch {
-    airportCache = null;
     return null;
   }
 };
@@ -140,18 +141,16 @@ const loadAirports = async (): Promise<readonly AirportCandidate[] | null> => {
 const loadPrefDid = async (
   prefCode: string,
 ): Promise<readonly DidCandidate[] | null> => {
-  if (prefCache.has(prefCode)) return prefCache.get(prefCode) ?? null;
+  "use cache";
+  cacheLife("days");
+  cacheTag("regulation-data:did", `regulation-data:did:pref-${prefCode}`);
   const file = path.join(DID_DIR, `pref-${prefCode}.geojson`);
   try {
     const json = JSON.parse(await fs.readFile(file, "utf8")) as DidGeoJson;
     const candidates = json.features.flatMap(flattenFeatureToCandidates);
-    prefCache.set(prefCode, candidates);
     return candidates;
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      prefCache.set(prefCode, null);
-      return null;
-    }
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw err;
   }
 };
