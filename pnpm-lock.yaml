@@ -90,6 +90,10 @@ importers:
         version: 5.9.3
 
   packages/regulations:
+    dependencies:
+      '@soraban/geo':
+        specifier: workspace:*
+        version: link:../geo
     devDependencies:
       typescript:
         specifier: ^5
