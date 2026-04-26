@@ -1,0 +1,36 @@
+// 各規制レコードに付随する確信度メタデータ（特許①コア）。
+//
+// LLM抽出やバッファ近似など、不確実性が混入する経路を通ったデータを
+// 二値で扱わず、判定出力と一緒に確信度を伝播させる。
+// 監査・損保引受時の証跡として用いるため、verifiedAt は必ず保持する。
+
+export type ConfidenceLevel = "high" | "medium" | "low";
+
+export type RegulationConfidence = {
+  // 判定に使うジオメトリの精度
+  // high   = 公的GISデータをそのまま使用
+  // medium = 半径バッファ・公開資料からの近似ポリゴン
+  // low    = 文字列住所からの推定
+  readonly geometric: ConfidenceLevel;
+  // 条文抽出の精度
+  // high   = 人手検証済み
+  // medium = LLM抽出かつ自動検証パス
+  // low    = LLM抽出のみ
+  readonly extraction: ConfidenceLevel;
+  // 最終検証日時 (ISO 8601)
+  readonly verifiedAt: string;
+};
+
+export const CONFIDENCE_LABEL: Readonly<Record<ConfidenceLevel, string>> = {
+  high: "高",
+  medium: "中",
+  low: "低",
+};
+
+// 2軸の確信度を1軸の表示用ラベルに集約する（より低い方を採用）。
+export const summarizeConfidence = (c: RegulationConfidence): ConfidenceLevel => {
+  const order: Readonly<Record<ConfidenceLevel, number>> = { low: 0, medium: 1, high: 2 };
+  return (order[c.geometric] ?? 2) <= (order[c.extraction] ?? 2)
+    ? c.geometric
+    : c.extraction;
+};
