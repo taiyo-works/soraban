@@ -5,7 +5,10 @@ import {
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  SENSITIVE_FACILITY_BUFFER_M,
+  YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
+  YONAGO_SENSITIVE_FACILITIES,
 } from "./zones";
 
 export type RegulationSource = "国" | "都道府県" | "市町村";
@@ -176,6 +179,93 @@ const AIRPORT_REG: Regulation = {
   },
 };
 
+const YONAGO_HERITAGE_REG: Regulation = {
+  id: "yonago-heritage-protection",
+  source: "市町村",
+  authority: "米子市教育委員会・文化庁",
+  title: "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+  summary:
+    "米子城跡などの国指定史跡では、文化財保護法第125条により現状変更には文化庁長官（実務上は教育委員会経由）の許可が必要。市指定文化財も米子市文化財保護条例で同様の規制があります。ドローン飛行に伴う墜落・離着陸・低空通過は史跡毀損リスクとして規制対象になり得ます。",
+  url: "https://www.bunka.go.jp/seisaku/bunkazai/shokai/shiseki/index.html",
+  clauseGraph: {
+    main: {
+      text:
+        "国指定史跡の現状を変更し、又はその保存に影響を及ぼす行為をしようとするときは、文化庁長官の許可を受けなければならない。",
+      effect: "requires_application",
+    },
+    exceptions: [
+      {
+        id: "heritage-ex-permit",
+        condition: "文化庁長官の許可（市指定の場合は教育委員会の許可）を取得している場合",
+        effect: "permit",
+        machine: { type: "permit_holder", value: "bunkacho_or_kyoiku" },
+      },
+      {
+        id: "heritage-ex-emergency",
+        condition: "災害復旧・人命救助等の緊急行為",
+        effect: "permit",
+        machine: { type: "purpose", value: "emergency" },
+      },
+    ],
+    conditions: [
+      {
+        id: "heritage-cond-zone",
+        description: "判定地点が指定史跡区域内に含まれること",
+        machine: { type: "in_zone", value: "yonago_heritage_polygon" },
+      },
+    ],
+  },
+  confidence: {
+    geometric: "low",
+    extraction: "low",
+    verifiedAt: "2026-04-26T00:00:00+09:00",
+  },
+};
+
+const TOTTORI_NUISANCE_REG: Regulation = {
+  id: "tottori-pref-nuisance-prevention",
+  source: "都道府県",
+  authority: "鳥取県",
+  title: "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+  summary:
+    "鳥取県迷惑行為等防止条例では、公衆に著しい迷惑をかける行為を禁じています。病院・学校・庁舎・駅・温泉街など公衆密集地周辺での無人航空機の飛行は、騒音・落下リスクの観点から自粛・事前調整が推奨されます。",
+  url: "https://www1.g-reiki.net/tottori/",
+  clauseGraph: {
+    main: {
+      text:
+        "公衆に著しく迷惑をかける行為（騒音・粗野な行為等）をしてはならない。",
+      effect: "deny",
+    },
+    exceptions: [
+      {
+        id: "nuisance-ex-permit",
+        condition: "施設管理者・自治体担当部署と事前調整し、合意を得た場合",
+        effect: "permit",
+        machine: { type: "permit_holder", value: "facility_manager" },
+      },
+      {
+        id: "nuisance-ex-public",
+        condition: "警察・消防・自治体等の公務として行う飛行",
+        effect: "permit",
+        machine: { type: "purpose", value: "public_duty" },
+      },
+    ],
+    conditions: [
+      {
+        id: "nuisance-cond-buffer",
+        description:
+          "判定地点が病院・学校・庁舎・駅・温泉街等の公衆密集施設からおおむね100m以内であること",
+        machine: { type: "in_zone", value: "sensitive_facility_buffer" },
+      },
+    ],
+  },
+  confidence: {
+    geometric: "low",
+    extraction: "low",
+    verifiedAt: "2026-04-26T00:00:00+09:00",
+  },
+};
+
 const YONAGO_PARK_REG: Regulation = {
   id: "yonago-park-ordinance",
   source: "市町村",
@@ -329,6 +419,76 @@ export const evaluateYonagoParks = (
   };
 };
 
+export const evaluateYonagoHeritage = (
+  loc: LatLng,
+  muniCode: string | undefined,
+): RegulationWithStatus => {
+  if (muniCode !== YONAGO_MUNI_CODE) {
+    return {
+      ...YONAGO_HERITAGE_REG,
+      status: "unknown",
+      note: "判定地点は米子市外です。当該市町村の指定文化財データは未整備のため判定できません（Phase 0 では米子市のみ対応）。",
+    };
+  }
+  const hit = YONAGO_HERITAGE_SITES.find((s) => pointInPolygon(loc, s.polygon));
+  if (hit) {
+    const requireBunkacho = hit.designation === "国指定史跡";
+    return {
+      ...YONAGO_HERITAGE_REG,
+      status: "red",
+      note: `判定地点は「${hit.name}」(${hit.designation})の区域内です。${
+        requireBunkacho ? "文化財保護法第125条" : "米子市文化財保護条例"
+      }に基づき、現状変更には事前許可が必要です。ドローン飛行は史跡毀損リスクの観点から原則として申請対象です。`,
+    };
+  }
+  return {
+    ...YONAGO_HERITAGE_REG,
+    status: "green",
+    note: "判定地点は登録された米子市内の指定史跡区域外です（Phase 0 のデータは2件のみ。最終確認は米子市教育委員会・文化庁データベースで）。",
+  };
+};
+
+export const evaluateTottoriNuisance = (
+  loc: LatLng,
+  muniCode: string | undefined,
+): RegulationWithStatus => {
+  // 県条例なので鳥取県内（県コード 31）であれば適用範囲。
+  // 未解決時は unknown を返す。
+  if (muniCode === undefined || !muniCode.startsWith("31")) {
+    return {
+      ...TOTTORI_NUISANCE_REG,
+      status: "unknown",
+      note: "判定地点は鳥取県外、または市町村コード未解決のため、鳥取県条例の適用判定をスキップしました。",
+    };
+  }
+  let nearest: { name: string; category: string; distance: number } | null = null;
+  for (const f of YONAGO_SENSITIVE_FACILITIES) {
+    const d = haversineMeters(loc, f.center);
+    if (nearest === null || d < nearest.distance) {
+      nearest = { name: f.name, category: f.category, distance: d };
+    }
+  }
+  if (nearest === null) {
+    return {
+      ...TOTTORI_NUISANCE_REG,
+      status: "unknown",
+      note: "公衆密集地データを読み込めませんでした。",
+    };
+  }
+  if (nearest.distance <= SENSITIVE_FACILITY_BUFFER_M) {
+    return {
+      ...TOTTORI_NUISANCE_REG,
+      status: "yellow",
+      note: `判定地点は ${nearest.category}「${nearest.name}」からおよそ ${Math.round(nearest.distance)} m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。`,
+    };
+  }
+  return {
+    ...TOTTORI_NUISANCE_REG,
+    status: "green",
+    note: `最寄りの公衆密集地は「${nearest.name}」(${nearest.category})までおよそ ${(nearest.distance / 1000).toFixed(1)} km。条例運用上の推奨バッファ（100m）外です。`,
+  };
+};
+
 export const computeOverall = (
   items: readonly RegulationWithStatus[],
 ): RegulationStatus => {
@@ -378,9 +538,12 @@ export {
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  SENSITIVE_FACILITY_BUFFER_M,
+  YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
+  YONAGO_SENSITIVE_FACILITIES,
 } from "./zones";
-export type { Park } from "./zones";
+export type { HeritageSite, Park, SensitiveFacility } from "./zones";
 
 export type {
   ClauseEffect,
