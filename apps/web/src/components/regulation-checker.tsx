@@ -31,6 +31,48 @@ const overallHelp: Record<RegulationStatus, string> = {
 
 const round6 = (n: number): string => n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
 
+type DemoPreset = {
+  readonly id: string;
+  readonly name: string;
+  readonly loc: LatLng;
+  readonly hint: string;
+};
+
+// デモシナリオ用の固定地点。市役所→湊山公園→皆生温泉→医療センター→境港駅 の順で
+// 6 規制レイヤーのコントラストが最大になるよう選定。
+const DEMO_PRESETS: readonly DemoPreset[] = [
+  {
+    id: "yonago-city-hall",
+    name: "米子市役所",
+    loc: YONAGO_CITY_HALL,
+    hint: "DID + 県条例（庁舎0m）",
+  },
+  {
+    id: "minatoyama-park",
+    name: "湊山公園（米子城跡）",
+    loc: { lat: 35.4267, lng: 133.322 },
+    hint: "公園条例 × 文化財保護法 同時red",
+  },
+  {
+    id: "kaike-onsen",
+    name: "皆生温泉",
+    loc: { lat: 35.4538, lng: 133.3333 },
+    hint: "公園条例 + 県条例（温泉街）",
+  },
+  {
+    id: "tottori-univ-hospital",
+    name: "鳥取大学医学部附属病院",
+    loc: { lat: 35.4495, lng: 133.343 },
+    hint: "県条例（病院近接）",
+  },
+  {
+    id: "sakaiminato-station",
+    name: "境港駅（市外）",
+    loc: { lat: 35.543, lng: 133.228 },
+    hint: "米子限定条例が unknown、空港バッファ要確認",
+  },
+];
+
 export function RegulationChecker() {
   const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
   const [lng, setLng] = useState<string>(String(YONAGO_CITY_HALL.lng));
@@ -194,16 +236,32 @@ export function RegulationChecker() {
           >
             {isChecking ? "判定中…" : "規制をチェック"}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              applyLocation(YONAGO_CITY_HALL);
-              runCheck(YONAGO_CITY_HALL);
-            }}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            米子市役所
-          </button>
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            デモ用プリセット
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {DEMO_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => {
+                  applyLocation(preset.loc);
+                  runCheck(preset.loc);
+                }}
+                title={preset.hint}
+                className="inline-flex flex-col items-start gap-0.5 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-left text-xs transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+              >
+                <span className="font-medium text-zinc-800 dark:text-zinc-100">
+                  {preset.name}
+                </span>
+                <span className="text-[10px] leading-tight text-zinc-500 dark:text-zinc-400">
+                  {preset.hint}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
         {error ? (
           <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
