@@ -7,8 +7,6 @@ type GsiFeature = {
   properties: { addressCode: string; title: string };
 };
 
-export const dynamic = "force-dynamic";
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
