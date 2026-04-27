@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { isValidLatLng, YONAGO_CITY_HALL, type LatLng } from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
@@ -81,6 +81,7 @@ export function RegulationChecker() {
   const [geocodeResults, setGeocodeResults] = useState<readonly GeocodeResult[]>([]);
   const [geocoding, setGeocoding] = useState<boolean>(false);
   const [result, setResult] = useState<RegulationCheckResult | null>(null);
+  const [responseMs, setResponseMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
@@ -93,9 +94,11 @@ export function RegulationChecker() {
 
   const runCheck = (loc: LatLng): void => {
     startChecking(async () => {
+      const t0 = performance.now();
       try {
         const res = await checkLocation(loc);
         setResult(res);
+        setResponseMs(Math.round(performance.now() - t0));
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
@@ -104,6 +107,16 @@ export function RegulationChecker() {
       }
     });
   };
+
+  // デモ初動短縮: 米子市役所で初期判定をプリロードして
+  // 「ページが開いた瞬間に red 信号機」が見える状態にする。
+  const didAutoRunRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (didAutoRunRef.current) return;
+    didAutoRunRef.current = true;
+    runCheck(YONAGO_CITY_HALL);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePick = (loc: LatLng): void => {
     if (!isValidLatLng(loc)) return;
@@ -327,6 +340,14 @@ export function RegulationChecker() {
             </span>
             <span>エンジン: {result.engineVersion}</span>
             <span>判定時刻: {new Date(result.checkedAt).toLocaleString("ja-JP")}</span>
+            {responseMs !== null ? (
+              <span>
+                応答:{" "}
+                <span className="font-medium tabular-nums text-zinc-700 dark:text-zinc-200">
+                  {responseMs} ms
+                </span>
+              </span>
+            ) : null}
           </div>
         </section>
       ) : null}
