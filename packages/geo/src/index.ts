@@ -8,6 +8,49 @@ export type Polygon = readonly LatLng[];
 export const isValidLatLng = ({ lat, lng }: LatLng): boolean =>
   Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 
+// 結合形式の座標文字列を {lat, lng} に解する。
+// 想定入力:
+//   "35.428303,133.330614"     ← Google Maps の「座標をコピー」
+//   "35.428303, 133.330614"    ← 上の空白入り
+//   "35.428303 133.330614"     ← 空白区切り
+//   "35.428303，133.330614"    ← 全角カンマ（日本語IME経由）
+//   "https://...maps...@35.428303,133.330614,15z" ← Google Maps URL（@パターン）
+//   "https://...?q=35.428303,133.330614"          ← Google Maps URL（?qパターン）
+// パース不能・範囲外は null を返す（呼び出し側で「形式が違う」と表示）。
+export const parseCombinedLatLng = (input: string): LatLng | null => {
+  const text = input.trim();
+  if (text.length === 0) return null;
+
+  const tryFinalize = (latStr: string, lngStr: string): LatLng | null => {
+    const lat = Number(latStr);
+    const lng = Number(lngStr);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const candidate: LatLng = { lat, lng };
+    return isValidLatLng(candidate) ? candidate : null;
+  };
+
+  const atMatch = text.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  if (atMatch?.[1] && atMatch[2]) {
+    const got = tryFinalize(atMatch[1], atMatch[2]);
+    if (got) return got;
+  }
+
+  const qMatch = text.match(/[?&]q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  if (qMatch?.[1] && qMatch[2]) {
+    const got = tryFinalize(qMatch[1], qMatch[2]);
+    if (got) return got;
+  }
+
+  // 全角カンマ・空白を半角に正規化してから素朴に2値抽出
+  const normalized = text.replace(/[，、]/g, ",").replace(/\s+/g, " ");
+  const pairMatch = normalized.match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/);
+  if (pairMatch?.[1] && pairMatch[2]) {
+    return tryFinalize(pairMatch[1], pairMatch[2]);
+  }
+
+  return null;
+};
+
 export const YONAGO_CITY_HALL: LatLng = {
   lat: 35.4283,
   lng: 133.3306,

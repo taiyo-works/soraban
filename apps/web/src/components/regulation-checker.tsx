@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { isValidLatLng, YONAGO_CITY_HALL, type LatLng } from "@soraban/geo";
+import {
+  isValidLatLng,
+  parseCombinedLatLng,
+  YONAGO_CITY_HALL,
+  type LatLng,
+} from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
@@ -77,6 +82,12 @@ export function RegulationChecker() {
   const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
   const [lng, setLng] = useState<string>(String(YONAGO_CITY_HALL.lng));
   const [center, setCenter] = useState<LatLng>(YONAGO_CITY_HALL);
+  const [combined, setCombined] = useState<string>("");
+  // 結合入力フィールドのフィードバック。null=未入力、true=反映成功、false=形式エラー
+  const [combinedStatus, setCombinedStatus] = useState<{
+    readonly ok: boolean;
+    readonly message: string;
+  } | null>(null);
   const [address, setAddress] = useState<string>("");
   const [geocodeResults, setGeocodeResults] = useState<readonly GeocodeResult[]>([]);
   const [geocoding, setGeocoding] = useState<boolean>(false);
@@ -122,6 +133,38 @@ export function RegulationChecker() {
     if (!isValidLatLng(loc)) return;
     applyLocation(loc);
     runCheck(loc);
+  };
+
+  // 結合形式（"lat,lng" や Google Maps URL）を反映する。
+  // 成功時は lat/lng を埋め、判定までトリガする（デモ・現場での「貼って即判定」UX）。
+  const applyCombined = (text: string): boolean => {
+    const parsed = parseCombinedLatLng(text);
+    if (!parsed) {
+      setCombinedStatus({ ok: false, message: "形式を認識できませんでした" });
+      return false;
+    }
+    applyLocation(parsed);
+    runCheck(parsed);
+    setCombinedStatus({
+      ok: true,
+      message: `✓ 反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
+    });
+    return true;
+  };
+
+  // 緯度/経度の単一フィールドに結合形式が貼られた場合、自動で2値に分割して即判定。
+  // 単一数値を貼っているだけのケースは default の貼り付け挙動に任せる。
+  const handleSplitPaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
+    const pasted = e.clipboardData.getData("text");
+    const parsed = parseCombinedLatLng(pasted);
+    if (!parsed) return;
+    e.preventDefault();
+    applyLocation(parsed);
+    runCheck(parsed);
+    setCombinedStatus({
+      ok: true,
+      message: `✓ 自動分割: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -217,6 +260,63 @@ export function RegulationChecker() {
           ) : null}
         </div>
 
+        <div className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            座標を貼り付け（Google Maps の「座標をコピー」や URL に対応）
+          </span>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              value={combined}
+              onChange={(e) => {
+                setCombined(e.target.value);
+                if (combinedStatus !== null) setCombinedStatus(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyCombined(combined);
+                }
+              }}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData("text");
+                const parsed = parseCombinedLatLng(pasted);
+                if (!parsed) return;
+                e.preventDefault();
+                setCombined(pasted.trim());
+                applyLocation(parsed);
+                runCheck(parsed);
+                setCombinedStatus({
+                  ok: true,
+                  message: `✓ 反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
+                });
+              }}
+              placeholder="例: 35.428303, 133.330614 ／ https://maps.google.com/...@35.428303,133.330614,15z"
+              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
+            />
+            <button
+              type="button"
+              onClick={() => applyCombined(combined)}
+              disabled={combined.trim().length === 0}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              反映
+            </button>
+          </div>
+          {combinedStatus !== null ? (
+            <p
+              className={
+                combinedStatus.ok
+                  ? "text-xs text-emerald-600 dark:text-emerald-400"
+                  : "text-xs text-rose-600 dark:text-rose-400"
+              }
+              role="status"
+            >
+              {combinedStatus.message}
+            </p>
+          ) : null}
+        </div>
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="font-medium text-zinc-700 dark:text-zinc-300">緯度 (lat)</span>
@@ -225,6 +325,7 @@ export function RegulationChecker() {
               inputMode="decimal"
               value={lat}
               onChange={(e) => setLat(e.target.value)}
+              onPaste={handleSplitPaste}
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
               placeholder="35.4283"
             />
@@ -236,6 +337,7 @@ export function RegulationChecker() {
               inputMode="decimal"
               value={lng}
               onChange={(e) => setLng(e.target.value)}
+              onPaste={handleSplitPaste}
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
               placeholder="133.3306"
             />
