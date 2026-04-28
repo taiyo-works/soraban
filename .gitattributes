@@ -1,0 +1,21 @@
+# 既定: テキストは LF 統一（Mac/Linux/Windows でセットアップ可能にする）
+* text=auto eol=lf
+
+# シェルスクリプトは必ず LF（CRLF だと bash が解釈不能）
+*.sh text eol=lf
+
+# Windows 専用スクリプトは CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# 画像・地理空間バイナリはバイナリ扱い
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico  binary
+*.zip  binary
+*.docx binary
+*.pdf  binary
+*.xlsx binary
