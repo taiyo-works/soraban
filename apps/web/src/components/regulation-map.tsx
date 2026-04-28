@@ -10,13 +10,13 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import {
+  ALL_MUNICIPAL_PARKS,
+  ALL_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
   SENSITIVE_FACILITY_BUFFER_M,
   YONAGO_HERITAGE_SITES,
-  YONAGO_PARKS,
-  YONAGO_SENSITIVE_FACILITIES,
 } from "@soraban/regulations";
 
 type Props = {
@@ -102,8 +102,8 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
   {
     key: "parks",
-    label: "米子市都市公園 (8件)",
-    source: "米子市都市公園条例",
+    label: "都市公園（米子8 + 境港4 件）",
+    source: "米子市・境港市 都市公園条例",
     swatch: "bg-emerald-500/40 ring-emerald-700 rounded-sm",
     layerIds: ["parks-fill", "parks-outline"],
   },
@@ -116,7 +116,7 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
   {
     key: "sensitive",
-    label: "公衆密集地 100m (4件)",
+    label: "公衆密集地 100m（米子4 + 境港3 件）",
     source: "鳥取県迷惑行為等防止条例",
     swatch: "bg-yellow-500/40 ring-yellow-700 rounded-full",
     layerIds: ["sensitive-fill", "sensitive-outline"],
@@ -160,12 +160,12 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     const baseYellowFc = polygonsToFeatureCollection([
       circlePolygon(MIHO_AIRBASE_CENTER, MIHO_AIRBASE_YELLOW_M),
     ]);
-    const parksFc = polygonsToFeatureCollection(YONAGO_PARKS.map((p) => p.polygon));
+    const parksFc = polygonsToFeatureCollection(ALL_MUNICIPAL_PARKS.map((p) => p.polygon));
     const heritageFc = polygonsToFeatureCollection(
       YONAGO_HERITAGE_SITES.map((s) => s.polygon),
     );
     const sensitiveFc = polygonsToFeatureCollection(
-      YONAGO_SENSITIVE_FACILITIES.map((f) =>
+      ALL_SENSITIVE_FACILITIES.map((f) =>
         circlePolygon(f.center, SENSITIVE_FACILITY_BUFFER_M, 48),
       ),
     );

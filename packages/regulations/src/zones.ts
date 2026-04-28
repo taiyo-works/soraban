@@ -177,4 +177,86 @@ export const YONAGO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   },
 ];
 
+// 境港市内の主要都市公園（簡易ポリゴン）。
+// Phase 1 で境港市公園台帳から正規ポリゴン置換予定。
+// 鳥取県境港市の市町村コード = 31204。
+export const SAKAIMINATO_PARKS: readonly Park[] = [
+  {
+    id: "yume-minato-park",
+    name: "夢みなと公園",
+    polygon: [
+      // JR 境港駅 (35.543, 133.228) を含めないため、駅の北西側に配置。
+      { lat: 35.5470, lng: 133.2210 },
+      { lat: 35.5470, lng: 133.2255 },
+      { lat: 35.5445, lng: 133.2255 },
+      { lat: 35.5445, lng: 133.2210 },
+    ],
+  },
+  {
+    id: "watari-park",
+    name: "渡公園",
+    polygon: [
+      { lat: 35.5250, lng: 133.2400 },
+      { lat: 35.5250, lng: 133.2435 },
+      { lat: 35.5230, lng: 133.2435 },
+      { lat: 35.5230, lng: 133.2400 },
+    ],
+  },
+  {
+    id: "amari-park",
+    name: "余子公園",
+    polygon: [
+      { lat: 35.5400, lng: 133.2420 },
+      { lat: 35.5400, lng: 133.2455 },
+      { lat: 35.5375, lng: 133.2455 },
+      { lat: 35.5375, lng: 133.2420 },
+    ],
+  },
+  {
+    id: "nakano-park",
+    name: "中野公園",
+    polygon: [
+      { lat: 35.5475, lng: 133.2255 },
+      { lat: 35.5475, lng: 133.2290 },
+      { lat: 35.5450, lng: 133.2290 },
+      { lat: 35.5450, lng: 133.2255 },
+    ],
+  },
+];
+
+// 境港市内の "公衆密集地" 想定エリア。鳥取県迷惑行為等防止条例の運用上、
+// 上空飛行の自粛が推奨される場所。半径 100m を半径バッファとして適用する。
+export const SAKAIMINATO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "sakaiminato-city-hall",
+    name: "境港市役所",
+    category: "庁舎",
+    center: { lat: 35.5404, lng: 133.2326 },
+  },
+  {
+    id: "sakaiminato-station",
+    name: "JR境港駅",
+    category: "駅",
+    center: { lat: 35.5430, lng: 133.2280 },
+  },
+  {
+    id: "sakaiminato-general-hospital",
+    name: "境港総合病院",
+    category: "病院",
+    center: { lat: 35.5310, lng: 133.2440 },
+  },
+];
+
+// 全自治体合算（地図レイヤ・県条例の公衆密集地評価で使用）。
+// 自治体追加時はここに append するだけで、UI 側は変更不要。
+export const ALL_MUNICIPAL_PARKS: readonly Park[] = [
+  ...YONAGO_PARKS,
+  ...SAKAIMINATO_PARKS,
+];
+
+export const ALL_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  ...YONAGO_SENSITIVE_FACILITIES,
+  ...SAKAIMINATO_SENSITIVE_FACILITIES,
+];
+
 export const SENSITIVE_FACILITY_BUFFER_M = 100;

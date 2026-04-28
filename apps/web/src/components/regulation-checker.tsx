@@ -43,8 +43,8 @@ type DemoPreset = {
   readonly hint: string;
 };
 
-// デモシナリオ用の固定地点。市役所→湊山公園→皆生温泉→医療センター→境港駅 の順で
-// 6 規制レイヤーのコントラストが最大になるよう選定。
+// デモシナリオ用の固定地点。市役所→湊山公園→皆生温泉→医療センター→境港駅→夢みなと公園 の順で
+// 6 規制レイヤーのコントラストと自治体カバレッジ拡大を可視化する。
 const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "yonago-city-hall",
@@ -54,7 +54,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   },
   {
     id: "minatoyama-park",
-    name: "湊山公園（米子城跡）",
+    name: "湊山公園(米子城跡)",
     loc: { lat: 35.4267, lng: 133.322 },
     hint: "公園条例 × 文化財保護法 同時red",
   },
@@ -72,9 +72,15 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   },
   {
     id: "sakaiminato-station",
-    name: "境港駅（市外）",
+    name: "境港駅",
     loc: { lat: 35.543, lng: 133.228 },
-    hint: "米子限定条例が unknown、空港バッファ要確認",
+    hint: "境港市カバレッジ + 県条例（駅0m）",
+  },
+  {
+    id: "yume-minato-park",
+    name: "夢みなと公園(境港)",
+    loc: { lat: 35.5455, lng: 133.2235 },
+    hint: "境港市公園条例 red（自治体追加デモ）",
   },
 ];
 

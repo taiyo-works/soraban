@@ -30,10 +30,10 @@ const COVERAGE_LAYERS: ReadonlyArray<{
   },
   {
     source: "市町村",
-    title: "米子市都市公園条例",
-    coverage: "米子市",
+    title: "都市公園条例（自治体レジストリ方式）",
+    coverage: "米子市・境港市（Phase 1 拡大中）",
     dataset: "公園台帳簡易ポリゴン",
-    count: "8 公園（Phase 1 で正規ポリゴン置換）",
+    count: "12 公園（米子8 + 境港4、Phase 1 で正規ポリゴン置換）",
   },
   {
     source: "市町村",
@@ -47,7 +47,7 @@ const COVERAGE_LAYERS: ReadonlyArray<{
     title: "鳥取県迷惑行為等防止条例",
     coverage: "鳥取県全域",
     dataset: "公衆密集地 100m バッファ",
-    count: "4 施設（市役所・病院・駅・温泉街）",
+    count: "7 施設（米子4 + 境港3：市役所・病院・駅・温泉街）",
   },
 ];
 

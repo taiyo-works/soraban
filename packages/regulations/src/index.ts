@@ -2,13 +2,15 @@ import { haversineMeters, pointInPolygon, type LatLng, type Polygon } from "@sor
 import type { ClauseGraph } from "./clause-graph";
 import type { ConfidenceLevel, RegulationConfidence } from "./confidence";
 import {
+  ALL_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  SAKAIMINATO_PARKS,
   SENSITIVE_FACILITY_BUFFER_M,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
-  YONAGO_SENSITIVE_FACILITIES,
+  type Park,
 } from "./zones";
 
 export type RegulationSource = "国" | "都道府県" | "市町村";
@@ -266,14 +268,21 @@ const TOTTORI_NUISANCE_REG: Regulation = {
   },
 };
 
-const YONAGO_PARK_REG: Regulation = {
-  id: "yonago-park-ordinance",
+// 都市公園条例は自治体ごとに条文・例外節がほぼ同形のため、
+// 同じテンプレートから自治体名差し替えで Regulation を生成する。
+// 自治体固有の条例 URL や verifiedAt はテンプレ呼び出し時に上書きする。
+const buildMunicipalParkReg = (params: {
+  readonly muniCode: string;
+  readonly muniName: string;
+  readonly url: string;
+  readonly verifiedAt: string;
+}): Regulation => ({
+  id: `${params.muniCode}-park-ordinance`,
   source: "市町村",
-  authority: "米子市",
-  title: "米子市都市公園条例 — 都市公園内での無人航空機の使用",
-  summary:
-    "米子市内の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要です。",
-  url: "https://www.city.yonago.lg.jp/",
+  authority: params.muniName,
+  title: `${params.muniName}都市公園条例 — 都市公園内での無人航空機の使用`,
+  summary: `${params.muniName}内の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要です。`,
+  url: params.url,
   clauseGraph: {
     main: {
       text:
@@ -282,13 +291,13 @@ const YONAGO_PARK_REG: Regulation = {
     },
     exceptions: [
       {
-        id: "yonago-park-ex-permit",
+        id: `${params.muniCode}-park-ex-permit`,
         condition: "都市公園の管理者の許可を受けた場合は、この限りでない。",
         effect: "permit",
         machine: { type: "permit_holder", value: "park_manager" },
       },
       {
-        id: "yonago-park-ex-event",
+        id: `${params.muniCode}-park-ex-event`,
         condition: "市が主催し、又は後援する行事のために行う飛行",
         effect: "permit",
         machine: { type: "purpose", value: "city_event" },
@@ -296,18 +305,32 @@ const YONAGO_PARK_REG: Regulation = {
     ],
     conditions: [
       {
-        id: "yonago-park-cond-zone",
-        description: "判定地点が米子市内の都市公園区域に含まれること",
-        machine: { type: "in_zone", value: "yonago_park_polygon" },
+        id: `${params.muniCode}-park-cond-zone`,
+        description: `判定地点が${params.muniName}内の都市公園区域に含まれること`,
+        machine: { type: "in_zone", value: "municipal_park_polygon" },
       },
     ],
   },
   confidence: {
     geometric: "low",
     extraction: "medium",
-    verifiedAt: "2026-04-25T00:00:00+09:00",
+    verifiedAt: params.verifiedAt,
   },
-};
+});
+
+const YONAGO_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31202",
+  muniName: "米子市",
+  url: "https://www.city.yonago.lg.jp/",
+  verifiedAt: "2026-04-25T00:00:00+09:00",
+});
+
+const SAKAIMINATO_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31204",
+  muniName: "境港市",
+  url: "https://www.city.sakaiminato.lg.jp/",
+  verifiedAt: "2026-04-29T00:00:00+09:00",
+});
 
 export const evaluateDid = (
   loc: LatLng,
@@ -392,32 +415,64 @@ export const evaluateMihoBase = (loc: LatLng): RegulationWithStatus => {
 };
 
 const YONAGO_MUNI_CODE = "31202";
+const SAKAIMINATO_MUNI_CODE = "31204";
 
-export const evaluateYonagoParks = (
+// muniCode → 当該市町村の公園条例レコード + 公園ポリゴン群。
+// 自治体追加時はここに 1 行追加するだけで evaluator は自動対応する。
+type MunicipalParkEntry = {
+  readonly muniName: string;
+  readonly parks: readonly Park[];
+  readonly reg: Regulation;
+};
+
+const MUNICIPAL_PARKS: Readonly<Record<string, MunicipalParkEntry>> = {
+  [YONAGO_MUNI_CODE]: {
+    muniName: "米子市",
+    parks: YONAGO_PARKS,
+    reg: YONAGO_PARK_REG,
+  },
+  [SAKAIMINATO_MUNI_CODE]: {
+    muniName: "境港市",
+    parks: SAKAIMINATO_PARKS,
+    reg: SAKAIMINATO_PARK_REG,
+  },
+};
+
+const COVERAGE_MUNI_NAMES = Object.values(MUNICIPAL_PARKS)
+  .map((e) => e.muniName)
+  .join("・");
+
+export const evaluateMunicipalParks = (
   loc: LatLng,
   muniCode: string | undefined,
 ): RegulationWithStatus => {
-  if (muniCode !== YONAGO_MUNI_CODE) {
+  const entry = muniCode !== undefined ? MUNICIPAL_PARKS[muniCode] : undefined;
+  if (!entry) {
     return {
       ...YONAGO_PARK_REG,
       status: "unknown",
-      note: "判定地点は米子市外です。当該市町村の都市公園条例データは未整備のため判定できません（Phase 0 では米子市のみ対応）。",
+      note: `判定地点はカバレッジ対象自治体外です。Phase 1 のカバレッジは ${COVERAGE_MUNI_NAMES}。当該市町村の都市公園条例データは未整備のため判定できません。`,
     };
   }
-  const hit = YONAGO_PARKS.find((p) => pointInPolygon(loc, p.polygon));
+  const hit = entry.parks.find((p) => pointInPolygon(loc, p.polygon));
   if (hit) {
     return {
-      ...YONAGO_PARK_REG,
+      ...entry.reg,
       status: "red",
-      note: `判定地点は「${hit.name}」内です。米子市都市公園条例に基づき、原則飛行禁止または事前申請が必要です。`,
+      note: `判定地点は「${hit.name}」内です。${entry.muniName}都市公園条例に基づき、原則飛行禁止または事前申請が必要です。`,
     };
   }
   return {
-    ...YONAGO_PARK_REG,
+    ...entry.reg,
     status: "green",
-    note: "判定地点は登録された米子市内の都市公園ポリゴン外です（Phase 0 のデータは2公園のみ。最終確認は米子市公園台帳で）。",
+    note: `判定地点は登録された${entry.muniName}内の都市公園ポリゴン外です（Phase 1 のデータは ${entry.parks.length} 公園のみ。最終確認は${entry.muniName}公園台帳で）。`,
   };
 };
+
+// 後方互換: 旧 API を残しておき、apps/web 側の段階的移行を許容。
+// 実装は evaluateMunicipalParks に委譲。
+/** @deprecated evaluateMunicipalParks に置き換え予定 */
+export const evaluateYonagoParks = evaluateMunicipalParks;
 
 export const evaluateYonagoHeritage = (
   loc: LatLng,
@@ -427,7 +482,7 @@ export const evaluateYonagoHeritage = (
     return {
       ...YONAGO_HERITAGE_REG,
       status: "unknown",
-      note: "判定地点は米子市外です。当該市町村の指定文化財データは未整備のため判定できません（Phase 0 では米子市のみ対応）。",
+      note: "判定地点は米子市外です。当該市町村の指定文化財データは未整備のため判定できません（Phase 1 拡大予定：境港市・出雲市の国指定史跡データ）。",
     };
   }
   const hit = YONAGO_HERITAGE_SITES.find((s) => pointInPolygon(loc, s.polygon));
@@ -462,7 +517,7 @@ export const evaluateTottoriNuisance = (
     };
   }
   let nearest: { name: string; category: string; distance: number } | null = null;
-  for (const f of YONAGO_SENSITIVE_FACILITIES) {
+  for (const f of ALL_SENSITIVE_FACILITIES) {
     const d = haversineMeters(loc, f.center);
     if (nearest === null || d < nearest.distance) {
       nearest = { name: f.name, category: f.category, distance: d };
@@ -535,9 +590,13 @@ export const DEFAULT_DISCLAIMER =
   "本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。実運用前に必ず国土交通省 DIPS、警察庁、各自治体の最新情報をご確認ください。";
 
 export {
+  ALL_MUNICIPAL_PARKS,
+  ALL_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  SAKAIMINATO_PARKS,
+  SAKAIMINATO_SENSITIVE_FACILITIES,
   SENSITIVE_FACILITY_BUFFER_M,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
