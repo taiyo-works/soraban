@@ -11,6 +11,12 @@
     "dev": "pnpm --filter @soraban/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.5",
+    "vitest": "^4.1.5"
   }
 }
