@@ -11,9 +11,9 @@ import {
   evaluateAirports,
   evaluateDid,
   evaluateMihoBase,
+  evaluateMunicipalHeritage,
   evaluateMunicipalParks,
-  evaluateTottoriNuisance,
-  evaluateYonagoHeritage,
+  evaluatePrefecturalNuisance,
   type AirportCandidate,
   type DidCandidate,
   type RegulationCheckResult,
@@ -196,8 +196,8 @@ export const runRegulationCheck = async (
     evaluateAirports(loc, airportCandidates ?? []),
     evaluateMihoBase(loc),
     evaluateMunicipalParks(loc, geocode.muniCode),
-    evaluateYonagoHeritage(loc, geocode.muniCode),
-    evaluateTottoriNuisance(loc, geocode.muniCode),
+    evaluateMunicipalHeritage(loc, geocode.muniCode),
+    evaluatePrefecturalNuisance(loc, geocode.muniCode),
   ];
 
   const checkedAt = new Date().toISOString();

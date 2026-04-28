@@ -1,4 +1,28 @@
+import { COVERAGE_SUMMARY, SENSITIVE_FACILITY_BUFFER_M } from "@soraban/regulations";
 import { RegulationChecker } from "@/components/regulation-checker";
+
+// 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
+// レジストリに自治体を1行追加するだけで COVERAGE_SUMMARY 経由で自動反映される。
+const formatMuniBreakdown = (
+  entries: ReadonlyArray<readonly [string, number]>,
+): string =>
+  entries
+    .filter(([, n]) => n > 0)
+    .map(([name, n]) => `${name.replace(/[市区町村]$/, "")}${n}`)
+    .join(" + ");
+
+const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
+const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
+  .map(([name]) => name)
+  .join("・");
+const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
+const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
+const HERITAGE_BREAKDOWN = formatMuniBreakdown(
+  COVERAGE_SUMMARY.municipalHeritageCounts,
+);
+const SENSITIVE_BREAKDOWN = formatMuniBreakdown(
+  COVERAGE_SUMMARY.municipalSensitiveCounts,
+);
 
 const COVERAGE_LAYERS: ReadonlyArray<{
   readonly source: "国" | "都道府県" | "市町村";
@@ -31,23 +55,23 @@ const COVERAGE_LAYERS: ReadonlyArray<{
   {
     source: "市町村",
     title: "都市公園条例（自治体レジストリ方式）",
-    coverage: "米子市・境港市（Phase 1 拡大中）",
+    coverage: `${PARK_MUNI_LABEL}（Phase 1 拡大中）`,
     dataset: "公園台帳簡易ポリゴン",
-    count: "12 公園（米子8 + 境港4、Phase 1 で正規ポリゴン置換）",
+    count: `計 ${COVERAGE_SUMMARY.totalParks} 公園（${PARK_BREAKDOWN}、Phase 1 で正規ポリゴン置換）`,
   },
   {
     source: "市町村",
-    title: "文化財保護法125条 / 米子市文化財条例",
-    coverage: "米子市",
+    title: `文化財保護法125条 / ${HERITAGE_MUNI_LABEL} 文化財条例`,
+    coverage: HERITAGE_MUNI_LABEL,
     dataset: "国指定史跡 + 県指定",
-    count: "2 件（米子城跡、福市遺跡）",
+    count: `計 ${COVERAGE_SUMMARY.totalHeritage} 件（${HERITAGE_BREAKDOWN}）`,
   },
   {
     source: "都道府県",
-    title: "鳥取県迷惑行為等防止条例",
-    coverage: "鳥取県全域",
-    dataset: "公衆密集地 100m バッファ",
-    count: "7 施設（米子4 + 境港3：市役所・病院・駅・温泉街）",
+    title: `${PREF_NUISANCE_LABEL} 迷惑行為等防止条例`,
+    coverage: `${PREF_NUISANCE_LABEL}全域`,
+    dataset: `公衆密集地 ${SENSITIVE_FACILITY_BUFFER_M}m バッファ`,
+    count: `計 ${COVERAGE_SUMMARY.totalSensitive} 施設（${SENSITIVE_BREAKDOWN}：市役所・病院・駅・温泉街・大社）`,
   },
 ];
 
@@ -55,19 +79,19 @@ const ROADMAP: ReadonlyArray<{
   readonly phase: string;
   readonly when: string;
   readonly scope: string;
-  readonly status: "current" | "next" | "future";
+  readonly status: "done" | "current" | "next" | "future";
 }> = [
   {
     phase: "Phase 0",
     when: "4月末",
     scope: "米子市 PoC",
-    status: "current",
+    status: "done",
   },
   {
     phase: "Phase 1",
     when: "〜7月",
-    scope: "山陰主要 12 自治体・α版",
-    status: "next",
+    scope: `山陰主要自治体 α 版（現在 ${COVERAGE_SUMMARY.municipalParkNames.length} 市 / 目標 12 市）`,
+    status: "current",
   },
   {
     phase: "Phase 2",
@@ -147,7 +171,7 @@ export default function Home() {
           </p>
         </div>
         <p className="max-w-2xl text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          自治体条例レイヤーは既存サービス全社の盲点。米子市 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。
+          自治体条例レイヤーは既存サービス全社の盲点。{PARK_MUNI_LABEL} 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。自治体は registry に1行追加するだけで判定エンジン・地図・カバレッジ表示すべてに自動反映されます。
         </p>
       </header>
 
@@ -157,7 +181,10 @@ export default function Home() {
             現在のカバレッジ（6 規制レイヤー）
           </h2>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">
-            国 3 / 都道府県 1 / 市町村 2
+            国 {COVERAGE_LAYERS.filter((l) => l.source === "国").length}{" "}
+            / 都道府県 {COVERAGE_LAYERS.filter((l) => l.source === "都道府県").length}{" "}
+            / 市町村 {COVERAGE_LAYERS.filter((l) => l.source === "市町村").length}{" "}
+            ・ 自治体 {COVERAGE_SUMMARY.municipalParkNames.length}
           </span>
         </div>
         <ul className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
@@ -198,9 +225,11 @@ export default function Home() {
               className={`flex flex-col gap-0.5 rounded-lg border p-3 ${
                 r.status === "current"
                   ? "border-zinc-900 bg-white shadow-sm dark:border-zinc-100 dark:bg-zinc-950"
-                  : r.status === "next"
-                    ? "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-950"
-                    : "border-dashed border-zinc-300 bg-transparent dark:border-zinc-700"
+                  : r.status === "done"
+                    ? "border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/30"
+                    : r.status === "next"
+                      ? "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+                      : "border-dashed border-zinc-300 bg-transparent dark:border-zinc-700"
               }`}
             >
               <div className="flex items-center gap-1.5">
@@ -208,7 +237,9 @@ export default function Home() {
                   className={`text-xs font-semibold ${
                     r.status === "current"
                       ? "text-zinc-900 dark:text-zinc-50"
-                      : "text-zinc-600 dark:text-zinc-300"
+                      : r.status === "done"
+                        ? "text-emerald-800 dark:text-emerald-200"
+                        : "text-zinc-600 dark:text-zinc-300"
                   }`}
                 >
                   {r.phase}
@@ -216,6 +247,13 @@ export default function Home() {
                 {r.status === "current" ? (
                   <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0 text-[9px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
                     NOW
+                  </span>
+                ) : r.status === "done" ? (
+                  <span
+                    className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                    aria-label="達成済み"
+                  >
+                    ✓ DONE
                   </span>
                 ) : null}
               </div>
@@ -267,7 +305,7 @@ export default function Home() {
       <footer className="mt-auto flex flex-col gap-1 border-t border-zinc-200 pt-6 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
         <p>© 2026 そらばん（Soraban）／ 奥田憲章 ・ 個人開発・社内検討段階</p>
         <p>
-          出典: 国土交通省「国土数値情報（人口集中地区 A16-15、空港 C28-20）」、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、米子市例規集、鳥取県例規集、文化庁国指定文化財等データベース
+          出典: 国土交通省「国土数値情報（人口集中地区 A16-15、空港 C28-20）」、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、米子市・境港市・出雲市例規集、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>
     </div>

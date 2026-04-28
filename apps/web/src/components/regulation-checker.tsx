@@ -36,53 +36,88 @@ const overallHelp: Record<RegulationStatus, string> = {
 
 const round6 = (n: number): string => n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
 
+type PresetGroup = "鳥取県" | "島根県";
+
 type DemoPreset = {
   readonly id: string;
   readonly name: string;
   readonly loc: LatLng;
   readonly hint: string;
+  readonly group: PresetGroup;
 };
 
-// デモシナリオ用の固定地点。市役所→湊山公園→皆生温泉→医療センター→境港駅→夢みなと公園 の順で
-// 6 規制レイヤーのコントラストと自治体カバレッジ拡大を可視化する。
+// デモシナリオ用の固定地点。県別にグルーピングし、特許コア（複数規制の同時 red）
+// と自治体カバレッジ拡大（鳥取2市 + 島根1市）を端的に提示できるよう並べる。
 const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "yonago-city-hall",
     name: "米子市役所",
     loc: YONAGO_CITY_HALL,
     hint: "DID + 県条例（庁舎0m）",
+    group: "鳥取県",
   },
   {
     id: "minatoyama-park",
     name: "湊山公園(米子城跡)",
     loc: { lat: 35.4267, lng: 133.322 },
     hint: "公園条例 × 文化財保護法 同時red",
+    group: "鳥取県",
   },
   {
     id: "kaike-onsen",
     name: "皆生温泉",
     loc: { lat: 35.4538, lng: 133.3333 },
     hint: "公園条例 + 県条例（温泉街）",
+    group: "鳥取県",
   },
   {
     id: "tottori-univ-hospital",
     name: "鳥取大学医学部附属病院",
     loc: { lat: 35.4495, lng: 133.343 },
     hint: "県条例（病院近接）",
+    group: "鳥取県",
   },
   {
     id: "sakaiminato-station",
     name: "境港駅",
     loc: { lat: 35.543, lng: 133.228 },
     hint: "境港市カバレッジ + 県条例（駅0m）",
+    group: "鳥取県",
   },
   {
     id: "yume-minato-park",
     name: "夢みなと公園(境港)",
     loc: { lat: 35.5455, lng: 133.2235 },
-    hint: "境港市公園条例 red（自治体追加デモ）",
+    hint: "境港市公園条例 red",
+    group: "鳥取県",
+  },
+  {
+    id: "izumo-taisha",
+    name: "出雲大社",
+    loc: { lat: 35.4019, lng: 132.6852 },
+    hint: "島根県条例（参拝者密集地）",
+    group: "島根県",
+  },
+  {
+    id: "kojindani-historic-park",
+    name: "荒神谷史跡公園(出雲)",
+    loc: { lat: 35.387, lng: 132.844 },
+    hint: "出雲公園条例 × 文化財保護法 同時red",
+    group: "島根県",
+  },
+  {
+    id: "izumo-station",
+    name: "出雲市役所",
+    loc: { lat: 35.3676, lng: 132.7549 },
+    hint: "DID + 島根県条例（庁舎0m）",
+    group: "島根県",
   },
 ];
+
+const PRESET_GROUP_TONE: Record<PresetGroup, string> = {
+  鳥取県: "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/60 dark:text-sky-200 dark:ring-sky-800",
+  島根県: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-200 dark:ring-emerald-800",
+};
 
 export function RegulationChecker() {
   const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
@@ -360,7 +395,7 @@ export function RegulationChecker() {
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            デモ用プリセット
+            デモ用プリセット（県別）
           </span>
           <div className="flex flex-wrap gap-2">
             {DEMO_PRESETS.map((preset) => (
@@ -372,11 +407,18 @@ export function RegulationChecker() {
                   runCheck(preset.loc);
                 }}
                 title={preset.hint}
-                className="inline-flex flex-col items-start gap-0.5 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-left text-xs transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+                className="group inline-flex min-w-[10rem] flex-col items-start gap-0.5 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-left text-xs transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
               >
-                <span className="font-medium text-zinc-800 dark:text-zinc-100">
-                  {preset.name}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-semibold ring-1 ring-inset ${PRESET_GROUP_TONE[preset.group]}`}
+                  >
+                    {preset.group}
+                  </span>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-100">
+                    {preset.name}
+                  </span>
+                </div>
                 <span className="text-[10px] leading-tight text-zinc-500 dark:text-zinc-400">
                   {preset.hint}
                 </span>

@@ -3,6 +3,8 @@ import type { ClauseGraph } from "./clause-graph";
 import type { ConfidenceLevel, RegulationConfidence } from "./confidence";
 import {
   ALL_SENSITIVE_FACILITIES,
+  IZUMO_HERITAGE_SITES,
+  IZUMO_PARKS,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
@@ -10,6 +12,7 @@ import {
   SENSITIVE_FACILITY_BUFFER_M,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
+  type HeritageSite,
   type Park,
 } from "./zones";
 
@@ -181,13 +184,18 @@ const AIRPORT_REG: Regulation = {
   },
 };
 
-const YONAGO_HERITAGE_REG: Regulation = {
-  id: "yonago-heritage-protection",
+// 文化財保護法第125条 + 自治体文化財保護条例も自治体ごとに構造が同形のため、
+// テンプレ関数で Regulation を生成する。authority のみ自治体名を差し込む。
+const buildMunicipalHeritageReg = (params: {
+  readonly muniCode: string;
+  readonly muniName: string;
+  readonly verifiedAt: string;
+}): Regulation => ({
+  id: `${params.muniCode}-heritage-protection`,
   source: "市町村",
-  authority: "米子市教育委員会・文化庁",
-  title: "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
-  summary:
-    "米子城跡などの国指定史跡では、文化財保護法第125条により現状変更には文化庁長官（実務上は教育委員会経由）の許可が必要。市指定文化財も米子市文化財保護条例で同様の規制があります。ドローン飛行に伴う墜落・離着陸・低空通過は史跡毀損リスクとして規制対象になり得ます。",
+  authority: `${params.muniName}教育委員会・文化庁`,
+  title: `文化財保護法第125条 / ${params.muniName}文化財保護条例 — 史跡内の現状変更`,
+  summary: `${params.muniName}内の国指定史跡では、文化財保護法第125条により現状変更には文化庁長官（実務上は教育委員会経由）の許可が必要。市指定文化財も${params.muniName}文化財保護条例で同様の規制があります。ドローン飛行に伴う墜落・離着陸・低空通過は史跡毀損リスクとして規制対象になり得ます。`,
   url: "https://www.bunka.go.jp/seisaku/bunkazai/shokai/shiseki/index.html",
   clauseGraph: {
     main: {
@@ -197,13 +205,13 @@ const YONAGO_HERITAGE_REG: Regulation = {
     },
     exceptions: [
       {
-        id: "heritage-ex-permit",
+        id: `${params.muniCode}-heritage-ex-permit`,
         condition: "文化庁長官の許可（市指定の場合は教育委員会の許可）を取得している場合",
         effect: "permit",
         machine: { type: "permit_holder", value: "bunkacho_or_kyoiku" },
       },
       {
-        id: "heritage-ex-emergency",
+        id: `${params.muniCode}-heritage-ex-emergency`,
         condition: "災害復旧・人命救助等の緊急行為",
         effect: "permit",
         machine: { type: "purpose", value: "emergency" },
@@ -211,27 +219,33 @@ const YONAGO_HERITAGE_REG: Regulation = {
     ],
     conditions: [
       {
-        id: "heritage-cond-zone",
+        id: `${params.muniCode}-heritage-cond-zone`,
         description: "判定地点が指定史跡区域内に含まれること",
-        machine: { type: "in_zone", value: "yonago_heritage_polygon" },
+        machine: { type: "in_zone", value: "municipal_heritage_polygon" },
       },
     ],
   },
   confidence: {
     geometric: "low",
     extraction: "low",
-    verifiedAt: "2026-04-26T00:00:00+09:00",
+    verifiedAt: params.verifiedAt,
   },
-};
+});
 
-const TOTTORI_NUISANCE_REG: Regulation = {
-  id: "tottori-pref-nuisance-prevention",
+// 都道府県迷惑行為等防止条例も同形（鳥取県・島根県とも条文構造はほぼ一致）。
+// authority と reiki URL のみ差し替えてテンプレ生成する。
+const buildPrefecturalNuisanceReg = (params: {
+  readonly prefCode: string;
+  readonly prefName: string;
+  readonly url: string;
+  readonly verifiedAt: string;
+}): Regulation => ({
+  id: `${params.prefCode}-pref-nuisance-prevention`,
   source: "都道府県",
-  authority: "鳥取県",
-  title: "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
-  summary:
-    "鳥取県迷惑行為等防止条例では、公衆に著しい迷惑をかける行為を禁じています。病院・学校・庁舎・駅・温泉街など公衆密集地周辺での無人航空機の飛行は、騒音・落下リスクの観点から自粛・事前調整が推奨されます。",
-  url: "https://www1.g-reiki.net/tottori/",
+  authority: params.prefName,
+  title: `${params.prefName}迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為`,
+  summary: `${params.prefName}迷惑行為等防止条例では、公衆に著しい迷惑をかける行為を禁じています。病院・学校・庁舎・駅・温泉街など公衆密集地周辺での無人航空機の飛行は、騒音・落下リスクの観点から自粛・事前調整が推奨されます。`,
+  url: params.url,
   clauseGraph: {
     main: {
       text:
@@ -240,13 +254,13 @@ const TOTTORI_NUISANCE_REG: Regulation = {
     },
     exceptions: [
       {
-        id: "nuisance-ex-permit",
+        id: `${params.prefCode}-nuisance-ex-permit`,
         condition: "施設管理者・自治体担当部署と事前調整し、合意を得た場合",
         effect: "permit",
         machine: { type: "permit_holder", value: "facility_manager" },
       },
       {
-        id: "nuisance-ex-public",
+        id: `${params.prefCode}-nuisance-ex-public`,
         condition: "警察・消防・自治体等の公務として行う飛行",
         effect: "permit",
         machine: { type: "purpose", value: "public_duty" },
@@ -254,7 +268,7 @@ const TOTTORI_NUISANCE_REG: Regulation = {
     ],
     conditions: [
       {
-        id: "nuisance-cond-buffer",
+        id: `${params.prefCode}-nuisance-cond-buffer`,
         description:
           "判定地点が病院・学校・庁舎・駅・温泉街等の公衆密集施設からおおむね100m以内であること",
         machine: { type: "in_zone", value: "sensitive_facility_buffer" },
@@ -264,9 +278,9 @@ const TOTTORI_NUISANCE_REG: Regulation = {
   confidence: {
     geometric: "low",
     extraction: "low",
-    verifiedAt: "2026-04-26T00:00:00+09:00",
+    verifiedAt: params.verifiedAt,
   },
-};
+});
 
 // 都市公園条例は自治体ごとに条文・例外節がほぼ同形のため、
 // 同じテンプレートから自治体名差し替えで Regulation を生成する。
@@ -329,6 +343,39 @@ const SAKAIMINATO_PARK_REG = buildMunicipalParkReg({
   muniCode: "31204",
   muniName: "境港市",
   url: "https://www.city.sakaiminato.lg.jp/",
+  verifiedAt: "2026-04-29T00:00:00+09:00",
+});
+
+const IZUMO_PARK_REG = buildMunicipalParkReg({
+  muniCode: "32203",
+  muniName: "出雲市",
+  url: "https://www.city.izumo.shimane.jp/",
+  verifiedAt: "2026-04-29T00:00:00+09:00",
+});
+
+const YONAGO_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "31202",
+  muniName: "米子市",
+  verifiedAt: "2026-04-26T00:00:00+09:00",
+});
+
+const IZUMO_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "32203",
+  muniName: "出雲市",
+  verifiedAt: "2026-04-29T00:00:00+09:00",
+});
+
+const TOTTORI_NUISANCE_REG = buildPrefecturalNuisanceReg({
+  prefCode: "31",
+  prefName: "鳥取県",
+  url: "https://www1.g-reiki.net/tottori/",
+  verifiedAt: "2026-04-26T00:00:00+09:00",
+});
+
+const SHIMANE_NUISANCE_REG = buildPrefecturalNuisanceReg({
+  prefCode: "32",
+  prefName: "島根県",
+  url: "https://www1.g-reiki.net/pref-shimane/",
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
@@ -416,6 +463,7 @@ export const evaluateMihoBase = (loc: LatLng): RegulationWithStatus => {
 
 const YONAGO_MUNI_CODE = "31202";
 const SAKAIMINATO_MUNI_CODE = "31204";
+const IZUMO_MUNI_CODE = "32203";
 
 // muniCode → 当該市町村の公園条例レコード + 公園ポリゴン群。
 // 自治体追加時はここに 1 行追加するだけで evaluator は自動対応する。
@@ -436,11 +484,84 @@ const MUNICIPAL_PARKS: Readonly<Record<string, MunicipalParkEntry>> = {
     parks: SAKAIMINATO_PARKS,
     reg: SAKAIMINATO_PARK_REG,
   },
+  [IZUMO_MUNI_CODE]: {
+    muniName: "出雲市",
+    parks: IZUMO_PARKS,
+    reg: IZUMO_PARK_REG,
+  },
 };
 
-const COVERAGE_MUNI_NAMES = Object.values(MUNICIPAL_PARKS)
+// muniCode → 当該市町村の文化財保護レコード + 史跡ポリゴン群。
+type MunicipalHeritageEntry = {
+  readonly muniName: string;
+  readonly sites: readonly HeritageSite[];
+  readonly reg: Regulation;
+};
+
+const MUNICIPAL_HERITAGE: Readonly<Record<string, MunicipalHeritageEntry>> = {
+  [YONAGO_MUNI_CODE]: {
+    muniName: "米子市",
+    sites: YONAGO_HERITAGE_SITES,
+    reg: YONAGO_HERITAGE_REG,
+  },
+  [IZUMO_MUNI_CODE]: {
+    muniName: "出雲市",
+    sites: IZUMO_HERITAGE_SITES,
+    reg: IZUMO_HERITAGE_REG,
+  },
+};
+
+// prefCode (muniCode の先頭2桁) → 当該都道府県の迷惑行為等防止条例レコード。
+type PrefecturalNuisanceEntry = {
+  readonly prefName: string;
+  readonly reg: Regulation;
+};
+
+const PREFECTURAL_NUISANCE: Readonly<Record<string, PrefecturalNuisanceEntry>> = {
+  "31": { prefName: "鳥取県", reg: TOTTORI_NUISANCE_REG },
+  "32": { prefName: "島根県", reg: SHIMANE_NUISANCE_REG },
+};
+
+// UI 表示用のカバレッジサマリ（自治体一覧・都道府県一覧・件数）。
+// page.tsx / regulation-map.tsx 側のハードコードを撤廃するために export する。
+export type CoverageSummary = {
+  readonly municipalParkNames: readonly string[];
+  readonly municipalParkCounts: ReadonlyArray<readonly [muniName: string, count: number]>;
+  readonly municipalHeritageCounts: ReadonlyArray<readonly [muniName: string, count: number]>;
+  readonly municipalSensitiveCounts: ReadonlyArray<readonly [muniName: string, count: number]>;
+  readonly prefectureNuisanceNames: readonly string[];
+  readonly totalParks: number;
+  readonly totalHeritage: number;
+  readonly totalSensitive: number;
+};
+
+export const COVERAGE_SUMMARY: CoverageSummary = {
+  municipalParkNames: Object.values(MUNICIPAL_PARKS).map((e) => e.muniName),
+  municipalParkCounts: Object.values(MUNICIPAL_PARKS).map(
+    (e) => [e.muniName, e.parks.length] as const,
+  ),
+  municipalHeritageCounts: Object.values(MUNICIPAL_HERITAGE).map(
+    (e) => [e.muniName, e.sites.length] as const,
+  ),
+  // 公衆密集地は zones 側でフラット集約しているので、再集計するために
+  // facility id のプレフィックスから自治体を逆引きする運用を避け、
+  // ここでは parks と同じ自治体集合に対する件数を別マップで管理する。
+  municipalSensitiveCounts: [
+    ["米子市", 4],
+    ["境港市", 3],
+    ["出雲市", 5],
+  ],
+  prefectureNuisanceNames: Object.values(PREFECTURAL_NUISANCE).map((e) => e.prefName),
+  totalParks: Object.values(MUNICIPAL_PARKS).reduce((acc, e) => acc + e.parks.length, 0),
+  totalHeritage: Object.values(MUNICIPAL_HERITAGE).reduce((acc, e) => acc + e.sites.length, 0),
+  totalSensitive: ALL_SENSITIVE_FACILITIES.length,
+};
+
+const COVERAGE_MUNI_NAMES = COVERAGE_SUMMARY.municipalParkNames.join("・");
+const COVERAGE_HERITAGE_MUNI_NAMES = Object.values(MUNICIPAL_HERITAGE)
   .map((e) => e.muniName)
   .join("・");
+const COVERAGE_PREFECTURE_NAMES = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
 
 export const evaluateMunicipalParks = (
   loc: LatLng,
@@ -470,50 +591,53 @@ export const evaluateMunicipalParks = (
 };
 
 // 後方互換: 旧 API を残しておき、apps/web 側の段階的移行を許容。
-// 実装は evaluateMunicipalParks に委譲。
 /** @deprecated evaluateMunicipalParks に置き換え予定 */
 export const evaluateYonagoParks = evaluateMunicipalParks;
 
-export const evaluateYonagoHeritage = (
+export const evaluateMunicipalHeritage = (
   loc: LatLng,
   muniCode: string | undefined,
 ): RegulationWithStatus => {
-  if (muniCode !== YONAGO_MUNI_CODE) {
+  const entry = muniCode !== undefined ? MUNICIPAL_HERITAGE[muniCode] : undefined;
+  if (!entry) {
     return {
       ...YONAGO_HERITAGE_REG,
       status: "unknown",
-      note: "判定地点は米子市外です。当該市町村の指定文化財データは未整備のため判定できません（Phase 1 拡大予定：境港市・出雲市の国指定史跡データ）。",
+      note: `判定地点はカバレッジ対象自治体（${COVERAGE_HERITAGE_MUNI_NAMES}）外です。当該市町村の指定文化財データは未整備のため判定できません。`,
     };
   }
-  const hit = YONAGO_HERITAGE_SITES.find((s) => pointInPolygon(loc, s.polygon));
+  const hit = entry.sites.find((s) => pointInPolygon(loc, s.polygon));
   if (hit) {
     const requireBunkacho = hit.designation === "国指定史跡";
     return {
-      ...YONAGO_HERITAGE_REG,
+      ...entry.reg,
       status: "red",
       note: `判定地点は「${hit.name}」(${hit.designation})の区域内です。${
-        requireBunkacho ? "文化財保護法第125条" : "米子市文化財保護条例"
+        requireBunkacho ? "文化財保護法第125条" : `${entry.muniName}文化財保護条例`
       }に基づき、現状変更には事前許可が必要です。ドローン飛行は史跡毀損リスクの観点から原則として申請対象です。`,
     };
   }
   return {
-    ...YONAGO_HERITAGE_REG,
+    ...entry.reg,
     status: "green",
-    note: "判定地点は登録された米子市内の指定史跡区域外です（Phase 0 のデータは2件のみ。最終確認は米子市教育委員会・文化庁データベースで）。",
+    note: `判定地点は登録された${entry.muniName}内の指定史跡区域外です（Phase 1 のデータは ${entry.sites.length} 件のみ。最終確認は${entry.muniName}教育委員会・文化庁データベースで）。`,
   };
 };
 
-export const evaluateTottoriNuisance = (
+/** @deprecated evaluateMunicipalHeritage に置き換え予定 */
+export const evaluateYonagoHeritage = evaluateMunicipalHeritage;
+
+export const evaluatePrefecturalNuisance = (
   loc: LatLng,
   muniCode: string | undefined,
 ): RegulationWithStatus => {
-  // 県条例なので鳥取県内（県コード 31）であれば適用範囲。
-  // 未解決時は unknown を返す。
-  if (muniCode === undefined || !muniCode.startsWith("31")) {
+  const prefCode = muniCode?.slice(0, 2);
+  const entry = prefCode !== undefined ? PREFECTURAL_NUISANCE[prefCode] : undefined;
+  if (!entry) {
     return {
       ...TOTTORI_NUISANCE_REG,
       status: "unknown",
-      note: "判定地点は鳥取県外、または市町村コード未解決のため、鳥取県条例の適用判定をスキップしました。",
+      note: `判定地点はカバレッジ対象都道府県（${COVERAGE_PREFECTURE_NAMES}）外、または市町村コード未解決のため、県条例の適用判定をスキップしました。`,
     };
   }
   let nearest: { name: string; category: string; distance: number } | null = null;
@@ -525,24 +649,27 @@ export const evaluateTottoriNuisance = (
   }
   if (nearest === null) {
     return {
-      ...TOTTORI_NUISANCE_REG,
+      ...entry.reg,
       status: "unknown",
       note: "公衆密集地データを読み込めませんでした。",
     };
   }
   if (nearest.distance <= SENSITIVE_FACILITY_BUFFER_M) {
     return {
-      ...TOTTORI_NUISANCE_REG,
+      ...entry.reg,
       status: "yellow",
-      note: `判定地点は ${nearest.category}「${nearest.name}」からおよそ ${Math.round(nearest.distance)} m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。`,
+      note: `判定地点は ${nearest.category}「${nearest.name}」からおよそ ${Math.round(nearest.distance)} m。${entry.prefName}迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。`,
     };
   }
   return {
-    ...TOTTORI_NUISANCE_REG,
+    ...entry.reg,
     status: "green",
-    note: `最寄りの公衆密集地は「${nearest.name}」(${nearest.category})までおよそ ${(nearest.distance / 1000).toFixed(1)} km。条例運用上の推奨バッファ（100m）外です。`,
+    note: `最寄りの公衆密集地は「${nearest.name}」(${nearest.category})までおよそ ${(nearest.distance / 1000).toFixed(1)} km。条例運用上の推奨バッファ（${SENSITIVE_FACILITY_BUFFER_M}m）外です。`,
   };
 };
+
+/** @deprecated evaluatePrefecturalNuisance に置き換え予定 */
+export const evaluateTottoriNuisance = evaluatePrefecturalNuisance;
 
 export const computeOverall = (
   items: readonly RegulationWithStatus[],
@@ -590,8 +717,12 @@ export const DEFAULT_DISCLAIMER =
   "本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。実運用前に必ず国土交通省 DIPS、警察庁、各自治体の最新情報をご確認ください。";
 
 export {
+  ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
   ALL_SENSITIVE_FACILITIES,
+  IZUMO_HERITAGE_SITES,
+  IZUMO_PARKS,
+  IZUMO_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,

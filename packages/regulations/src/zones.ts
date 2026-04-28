@@ -104,10 +104,9 @@ export const YONAGO_PARKS: readonly Park[] = [
   },
 ];
 
-// 米子市内の文化財・史跡（簡易ポリゴン）。
-// 米子城跡は国指定史跡（昭和31年指定）で、文化財保護法第125条により
-// 現状変更には文化庁長官の許可が必要。Phase 1 で文化庁データベースから
-// 正規ポリゴンに置換する。
+// 文化財・史跡（簡易ポリゴン）。
+// 国指定史跡は文化財保護法第125条により現状変更には文化庁長官の許可が必要。
+// Phase 1 で文化庁国指定文化財データベースから正規ポリゴンに置換する。
 export type HeritageSite = {
   readonly id: string;
   readonly name: string;
@@ -247,16 +246,145 @@ export const SAKAIMINATO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   },
 ];
 
+// 出雲市内の主要都市公園（簡易ポリゴン）。
+// Phase 1 で出雲市公園台帳から正規ポリゴン置換予定。
+// 島根県出雲市の市町村コード = 32203。
+export const IZUMO_PARKS: readonly Park[] = [
+  {
+    id: "izumo-dome-park",
+    name: "出雲ドーム公園",
+    polygon: [
+      { lat: 35.3700, lng: 132.7550 },
+      { lat: 35.3700, lng: 132.7595 },
+      { lat: 35.3672, lng: 132.7595 },
+      { lat: 35.3672, lng: 132.7550 },
+    ],
+  },
+  {
+    id: "izumo-taisha-park",
+    name: "大社公園（出雲大社東側）",
+    polygon: [
+      // 出雲大社境内遺跡を含めず、東側の市営公園相当エリアを対象。
+      { lat: 35.4030, lng: 132.6885 },
+      { lat: 35.4030, lng: 132.6920 },
+      { lat: 35.4002, lng: 132.6920 },
+      { lat: 35.4002, lng: 132.6885 },
+    ],
+  },
+  {
+    id: "hamayama-park",
+    name: "浜山公園",
+    polygon: [
+      { lat: 35.3810, lng: 132.7320 },
+      { lat: 35.3810, lng: 132.7390 },
+      { lat: 35.3760, lng: 132.7390 },
+      { lat: 35.3760, lng: 132.7320 },
+    ],
+  },
+  {
+    id: "takasegawa-park",
+    name: "高瀬川河川敷公園",
+    polygon: [
+      { lat: 35.3700, lng: 132.7610 },
+      { lat: 35.3700, lng: 132.7660 },
+      { lat: 35.3675, lng: 132.7660 },
+      { lat: 35.3675, lng: 132.7610 },
+    ],
+  },
+  {
+    id: "kojindani-historic-park",
+    name: "荒神谷史跡公園",
+    polygon: [
+      // 国指定史跡「荒神谷遺跡」を含む史跡公園。史跡レイヤと一部重なる構造で
+      // "公園条例 × 文化財保護法" の同時 red を出雲側でも再現できる。
+      { lat: 35.3885, lng: 132.8420 },
+      { lat: 35.3885, lng: 132.8460 },
+      { lat: 35.3855, lng: 132.8460 },
+      { lat: 35.3855, lng: 132.8420 },
+    ],
+  },
+];
+
+// 出雲市内の "公衆密集地" 想定エリア。
+// 島根県迷惑行為等防止条例の運用上、上空飛行の自粛が推奨される場所。
+export const IZUMO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "izumo-city-hall",
+    name: "出雲市役所",
+    category: "庁舎",
+    center: { lat: 35.3676, lng: 132.7549 },
+  },
+  {
+    id: "izumo-station",
+    name: "JR出雲市駅",
+    category: "駅",
+    center: { lat: 35.3625, lng: 132.7549 },
+  },
+  {
+    id: "izumo-taisha-mae-station",
+    name: "一畑電車 出雲大社前駅",
+    category: "駅",
+    center: { lat: 35.3994, lng: 132.6862 },
+  },
+  {
+    id: "shimane-pref-central-hospital",
+    name: "島根県立中央病院",
+    category: "病院",
+    center: { lat: 35.3712, lng: 132.7519 },
+  },
+  {
+    id: "izumo-taisha",
+    name: "出雲大社（参拝者密集地）",
+    category: "宿泊地",
+    center: { lat: 35.4019, lng: 132.6852 },
+  },
+];
+
+// 出雲市内の指定文化財・史跡（簡易ポリゴン）。
+// 荒神谷遺跡: 銅剣358本ほか出土、昭和62年国指定史跡。文化財保護法第125条適用。
+// 出雲大社境内遺跡: 平成16年国指定史跡（巨大柱遺構等）。
+export const IZUMO_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "kojindani-ruins",
+    name: "荒神谷遺跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.3878, lng: 132.8425 },
+      { lat: 35.3878, lng: 132.8455 },
+      { lat: 35.3858, lng: 132.8455 },
+      { lat: 35.3858, lng: 132.8425 },
+    ],
+  },
+  {
+    id: "izumo-taisha-keidai-ruins",
+    name: "出雲大社境内遺跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.4030, lng: 132.6840 },
+      { lat: 35.4030, lng: 132.6870 },
+      { lat: 35.4008, lng: 132.6870 },
+      { lat: 35.4008, lng: 132.6840 },
+    ],
+  },
+];
+
 // 全自治体合算（地図レイヤ・県条例の公衆密集地評価で使用）。
 // 自治体追加時はここに append するだけで、UI 側は変更不要。
 export const ALL_MUNICIPAL_PARKS: readonly Park[] = [
   ...YONAGO_PARKS,
   ...SAKAIMINATO_PARKS,
+  ...IZUMO_PARKS,
 ];
 
 export const ALL_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   ...YONAGO_SENSITIVE_FACILITIES,
   ...SAKAIMINATO_SENSITIVE_FACILITIES,
+  ...IZUMO_SENSITIVE_FACILITIES,
+];
+
+export const ALL_HERITAGE_SITES: readonly HeritageSite[] = [
+  ...YONAGO_HERITAGE_SITES,
+  ...IZUMO_HERITAGE_SITES,
 ];
 
 export const SENSITIVE_FACILITY_BUFFER_M = 100;

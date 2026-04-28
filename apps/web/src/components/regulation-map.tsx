@@ -10,13 +10,14 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import {
+  ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
   ALL_SENSITIVE_FACILITIES,
+  COVERAGE_SUMMARY,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
   SENSITIVE_FACILITY_BUFFER_M,
-  YONAGO_HERITAGE_SITES,
 } from "@soraban/regulations";
 
 type Props = {
@@ -72,6 +73,25 @@ const EMPTY_FC: GeoJSON.FeatureCollection = {
 
 type LayerKey = "did" | "airports" | "base" | "parks" | "heritage" | "sensitive";
 
+// 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
+// レジストリ追加だけで自動的に表記が伸びる。
+const formatMuniBreakdown = (
+  entries: ReadonlyArray<readonly [string, number]>,
+): string =>
+  entries
+    .filter(([, n]) => n > 0)
+    .map(([name, n]) => `${name.replace(/[市区町村]$/, "")}${n}`)
+    .join(" + ");
+
+const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
+const HERITAGE_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalHeritageCounts);
+const SENSITIVE_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalSensitiveCounts);
+const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
+const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
+  .map(([name]) => name)
+  .join("・");
+const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
+
 const LAYER_GROUPS: ReadonlyArray<{
   readonly key: LayerKey;
   readonly label: string;
@@ -102,22 +122,22 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
   {
     key: "parks",
-    label: "都市公園（米子8 + 境港4 件）",
-    source: "米子市・境港市 都市公園条例",
+    label: `都市公園（${PARK_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalParks} 件）`,
+    source: `${PARK_MUNI_LABEL} 都市公園条例`,
     swatch: "bg-emerald-500/40 ring-emerald-700 rounded-sm",
     layerIds: ["parks-fill", "parks-outline"],
   },
   {
     key: "heritage",
-    label: "指定史跡 (2件)",
-    source: "文化財保護法125条 / 米子市文化財条例",
+    label: `指定史跡（${HERITAGE_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalHeritage} 件）`,
+    source: `文化財保護法125条 / ${HERITAGE_MUNI_LABEL} 文化財条例`,
     swatch: "bg-orange-500/40 ring-orange-700 rounded-sm",
     layerIds: ["heritage-fill", "heritage-outline"],
   },
   {
     key: "sensitive",
-    label: "公衆密集地 100m（米子4 + 境港3 件）",
-    source: "鳥取県迷惑行為等防止条例",
+    label: `公衆密集地 ${SENSITIVE_FACILITY_BUFFER_M}m（${SENSITIVE_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalSensitive} 件）`,
+    source: `${PREF_NUISANCE_LABEL} 迷惑行為等防止条例`,
     swatch: "bg-yellow-500/40 ring-yellow-700 rounded-full",
     layerIds: ["sensitive-fill", "sensitive-outline"],
   },
@@ -127,8 +147,12 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  // 地図クリックハンドラから常に最新の onPick を読めるよう ref に保持。
+  // React のルール上、ref の更新は effect で行う（render 中の代入は禁止）。
   const onPickRef = useRef<typeof onPick>(onPick);
-  onPickRef.current = onPick;
+  useEffect(() => {
+    onPickRef.current = onPick;
+  }, [onPick]);
   const loadedPrefRef = useRef<string | null>(null);
   const [layerVisibility, setLayerVisibility] = useState<Record<LayerKey, boolean>>({
     did: true,
@@ -162,7 +186,7 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     ]);
     const parksFc = polygonsToFeatureCollection(ALL_MUNICIPAL_PARKS.map((p) => p.polygon));
     const heritageFc = polygonsToFeatureCollection(
-      YONAGO_HERITAGE_SITES.map((s) => s.polygon),
+      ALL_HERITAGE_SITES.map((s) => s.polygon),
     );
     const sensitiveFc = polygonsToFeatureCollection(
       ALL_SENSITIVE_FACILITIES.map((f) =>
