@@ -1,11 +1,14 @@
 import type { LatLng } from "@soraban/geo";
-import type { RegulationCheckResult } from "@soraban/regulations";
+import type { FlightContext, RegulationCheckResult } from "@soraban/regulations";
 
-export const checkLocation = async (loc: LatLng): Promise<RegulationCheckResult> => {
+export const checkLocation = async (
+  loc: LatLng,
+  ctx?: FlightContext,
+): Promise<RegulationCheckResult> => {
   const res = await fetch("/api/check", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(loc),
+    body: JSON.stringify({ lat: loc.lat, lng: loc.lng, ctx }),
   });
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as { error?: string };

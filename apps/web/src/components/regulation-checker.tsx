@@ -10,6 +10,7 @@ import {
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
+  type FlightContext,
   type RegulationCheckResult,
   type RegulationStatus,
 } from "@soraban/regulations";
@@ -140,6 +141,36 @@ export function RegulationChecker() {
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
 
+  // ── FlightContext: 機体・運航条件 ──
+  // 空文字 = "未指定"。最も厳しい解釈になる。
+  // 数値 < 100 で 100g 未満例外がマッチし、DID/空港/美保 → green に降格。
+  const [droneWeightInput, setDroneWeightInput] = useState<string>("");
+  const [hasMlitPermit, setHasMlitPermit] = useState<boolean>(false);
+  const [hasFacilityPermit, setHasFacilityPermit] = useState<boolean>(false);
+  const [hasParkPermit, setHasParkPermit] = useState<boolean>(false);
+  const [hasBunkachoPermit, setHasBunkachoPermit] = useState<boolean>(false);
+  const [purpose, setPurpose] = useState<"general" | "emergency" | "public_duty" | "city_event">("general");
+
+  // ctx 構築。空 / デフォルト値しかなければ undefined を返す（API もそれで処理する）。
+  const buildCtx = (): FlightContext | undefined => {
+    const ctx: { -readonly [K in keyof FlightContext]: FlightContext[K] } = {};
+    const w = Number(droneWeightInput);
+    if (droneWeightInput.trim().length > 0 && Number.isFinite(w) && w >= 0) {
+      ctx.droneWeightG = w;
+    }
+    const permits: string[] = [];
+    if (hasMlitPermit) permits.push("mlit");
+    if (hasFacilityPermit) {
+      permits.push("facility_manager");
+      permits.push("facility_manager_and_pref_pubsafety");
+    }
+    if (hasParkPermit) permits.push("park_manager");
+    if (hasBunkachoPermit) permits.push("bunkacho_or_kyoiku");
+    if (permits.length > 0) ctx.pilotPermits = permits;
+    if (purpose !== "general") ctx.purpose = purpose;
+    return Object.keys(ctx).length > 0 ? ctx : undefined;
+  };
+
   const applyLocation = (loc: LatLng): void => {
     setLat(round6(loc.lat));
     setLng(round6(loc.lng));
@@ -147,10 +178,11 @@ export function RegulationChecker() {
   };
 
   const runCheck = (loc: LatLng): void => {
+    const ctx = buildCtx();
     startChecking(async () => {
       const t0 = performance.now();
       try {
-        const res = await checkLocation(loc);
+        const res = await checkLocation(loc, ctx);
         setResult(res);
         setResponseMs(Math.round(performance.now() - t0));
         setError(null);
@@ -161,6 +193,14 @@ export function RegulationChecker() {
       }
     });
   };
+
+  // ctx の値が変わったら、現在の中心地点で再判定して画面に即反映する。
+  // 最低限の依存配列（重量・運航種別・各許可フラグ）だけに絞る。
+  useEffect(() => {
+    if (!result) return; // 初回オートランより前は走らせない
+    runCheck(center);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [droneWeightInput, hasMlitPermit, hasFacilityPermit, hasParkPermit, hasBunkachoPermit, purpose]);
 
   // デモ初動短縮: 米子市役所で初期判定をプリロードして
   // 「ページが開いた瞬間に red 信号機」が見える状態にする。
@@ -409,6 +449,121 @@ export function RegulationChecker() {
                 placeholder="133.3805"
               />
             </label>
+          </div>
+        </fieldset>
+
+        {/* 機体・運航条件 — ClauseGraph の例外節と照合される */}
+        <fieldset className="flex flex-col gap-3 border-t border-rule pt-5">
+          <legend className="eyebrow">
+            <span aria-hidden className="bearing-mark" />
+            05 — 機体・運航条件
+            <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+              （例外節を自動適用 / 未指定 = 最も厳しい解釈）
+            </span>
+          </legend>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* 機体重量 */}
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                drone weight (g)
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={droneWeightInput}
+                  onChange={(e) => setDroneWeightInput(e.target.value)}
+                  className={`${fieldClass} flex-1 font-mono`}
+                  placeholder="例: 900（DJI Mavic）／ 80（マイクロ機）"
+                />
+                {droneWeightInput.trim().length > 0 && Number(droneWeightInput) < 100 ? (
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-signal-green whitespace-nowrap">
+                    ▸ &lt;100g 例外
+                  </span>
+                ) : null}
+              </div>
+              <span className="text-[10px] leading-tight text-ink-mute">
+                100g 未満は航空法上の無人航空機に非該当（DID / 空港 / 美保基地が対象外）
+              </span>
+            </label>
+
+            {/* 運航目的 */}
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                purpose
+              </span>
+              <select
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value as typeof purpose)}
+                className={fieldClass}
+              >
+                <option value="general">通常運航</option>
+                <option value="emergency">緊急（災害復旧・人命救助）</option>
+                <option value="public_duty">公務（警察・消防・自治体）</option>
+                <option value="city_event">市が主催・後援する行事</option>
+              </select>
+              <span className="text-[10px] leading-tight text-ink-mute">
+                史跡・公園・県条例の例外節と照合
+              </span>
+            </label>
+          </div>
+
+          {/* 取得済み許可 */}
+          <div className="flex flex-col gap-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              permits held
+            </span>
+            <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  state: hasMlitPermit,
+                  set: setHasMlitPermit,
+                  key: "mlit",
+                  label: "国交省 DIPS",
+                  desc: "航空法 DID / 空港",
+                },
+                {
+                  state: hasParkPermit,
+                  set: setHasParkPermit,
+                  key: "park",
+                  label: "公園管理者",
+                  desc: "都市公園条例",
+                },
+                {
+                  state: hasFacilityPermit,
+                  set: setHasFacilityPermit,
+                  key: "facility",
+                  label: "施設管理者",
+                  desc: "県条例 / 美保基地",
+                },
+                {
+                  state: hasBunkachoPermit,
+                  set: setHasBunkachoPermit,
+                  key: "bunkacho",
+                  label: "文化庁・教育委員会",
+                  desc: "文化財保護法 125 条",
+                },
+              ].map((p) => (
+                <label
+                  key={p.key}
+                  className={`flex cursor-pointer items-start gap-2 px-3 py-2.5 transition-colors ${p.state ? "bg-brand-50" : "bg-paper hover:bg-paper-soft"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={p.state}
+                    onChange={(e) => p.set(e.target.checked)}
+                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-brand-700"
+                  />
+                  <span className="flex flex-1 flex-col leading-tight">
+                    <span className="text-xs font-medium text-ink">{p.label}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                      {p.desc}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </fieldset>
 

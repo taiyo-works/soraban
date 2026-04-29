@@ -16,6 +16,7 @@ import {
   evaluatePrefecturalNuisance,
   type AirportCandidate,
   type DidCandidate,
+  type FlightContext,
   type RegulationCheckResult,
   type RegulationWithStatus,
 } from "@soraban/regulations";
@@ -30,6 +31,19 @@ type EvidenceInputs = {
   readonly lng: number;
   readonly checkedAt: string;
   readonly regulationIds: readonly string[];
+  readonly ctx?: FlightContext;
+};
+
+// FlightContext を決定論的にシリアライズ（キー順を固定）。
+// 機体条件が変われば evidenceId も変わる（同一座標・同一時刻でも別 ID）。
+const stableCtx = (ctx: FlightContext | undefined): unknown => {
+  if (!ctx) return null;
+  const out: Record<string, unknown> = {};
+  if (typeof ctx.droneWeightG === "number") out["w"] = ctx.droneWeightG;
+  if (Array.isArray(ctx.pilotPermits)) out["p"] = [...ctx.pilotPermits].sort();
+  if (typeof ctx.purpose === "string") out["u"] = ctx.purpose;
+  if (typeof ctx.droneClass === "string") out["c"] = ctx.droneClass;
+  return Object.keys(out).length > 0 ? out : null;
 };
 
 const computeEvidenceId = (input: EvidenceInputs): string => {
@@ -40,6 +54,7 @@ const computeEvidenceId = (input: EvidenceInputs): string => {
     lng: Number(input.lng.toFixed(6)),
     t: input.checkedAt,
     r: sortedIds,
+    x: stableCtx(input.ctx),
   });
   const hex = createHash("sha256").update(payload).digest("hex");
   return `ev_${hex.slice(0, 16)}`;
@@ -183,6 +198,7 @@ const reverseGeocode = async (loc: LatLng): Promise<ReverseGeocode> => {
 
 export const runRegulationCheck = async (
   loc: LatLng,
+  ctx?: FlightContext,
 ): Promise<RegulationCheckResult> => {
   const [geocode, airportCandidates] = await Promise.all([
     reverseGeocode(loc),
@@ -192,12 +208,12 @@ export const runRegulationCheck = async (
   const didCandidates = prefCode ? await loadPrefDid(prefCode) : null;
 
   const regulations: readonly RegulationWithStatus[] = [
-    evaluateDid(loc, didCandidates ?? []),
-    evaluateAirports(loc, airportCandidates ?? []),
-    evaluateMihoBase(loc),
-    evaluateMunicipalParks(loc, geocode.muniCode),
-    evaluateMunicipalHeritage(loc, geocode.muniCode),
-    evaluatePrefecturalNuisance(loc, geocode.muniCode),
+    evaluateDid(loc, didCandidates ?? [], ctx),
+    evaluateAirports(loc, airportCandidates ?? [], ctx),
+    evaluateMihoBase(loc, ctx),
+    evaluateMunicipalParks(loc, geocode.muniCode, ctx),
+    evaluateMunicipalHeritage(loc, geocode.muniCode, ctx),
+    evaluatePrefecturalNuisance(loc, geocode.muniCode, ctx),
   ];
 
   const checkedAt = new Date().toISOString();
@@ -206,6 +222,7 @@ export const runRegulationCheck = async (
     lng: loc.lng,
     checkedAt,
     regulationIds: regulations.map((r) => r.id),
+    ctx,
   });
 
   return {

@@ -66,6 +66,24 @@ export function RegulationCard({ regulation }: Props) {
         <span className="eyebrow !text-[9px]">この地点</span>{" "}
         <span className="text-ink-soft">{regulation.note}</span>
       </p>
+      {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
+        <div className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green">
+          <p className="eyebrow !text-[9px] !text-signal-green">
+            <span aria-hidden>✓ </span>
+            適用された例外節
+          </p>
+          <ul className="mt-1 flex flex-col gap-0.5">
+            {regulation.appliedExceptions.map((ex) => (
+              <li key={ex.id} className="leading-snug">
+                ・{ex.condition}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1 text-[10px] text-ink-mute">
+            このため status を一段降格しました
+          </p>
+        </div>
+      ) : null}
       {exceptions.length > 0 ? (
         <details className="border border-rule bg-paper-soft px-3 py-2 text-[11px] leading-relaxed text-ink-soft">
           <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-wider text-ink-mute">

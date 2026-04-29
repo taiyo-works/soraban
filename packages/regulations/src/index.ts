@@ -1,5 +1,10 @@
 import { haversineMeters, pointInPolygon, type LatLng, type Polygon } from "@soraban/geo";
-import type { ClauseGraph } from "./clause-graph";
+import {
+  findPermittingExceptions,
+  type ClauseException,
+  type ClauseGraph,
+  type FlightContext,
+} from "./clause-graph";
 import type { ConfidenceLevel, RegulationConfidence } from "./confidence";
 import {
   ALL_SENSITIVE_FACILITIES,
@@ -35,6 +40,38 @@ export type Regulation = {
 export type RegulationWithStatus = Regulation & {
   readonly status: RegulationStatus;
   readonly note: string;
+  /**
+   * FlightContext との照合で適用された permit 効果の例外節。
+   * ここが非空なら、当該規制は status が一段降格されている（red→green / yellow→green）。
+   * UI 側で「この条件で適用された例外」として可視化する。
+   */
+  readonly appliedExceptions?: readonly ClauseException[];
+};
+
+/**
+ * 評価器の status と ClauseGraph + ctx を受けて、permit 例外がマッチしていれば
+ * status を green に降格しつつ、適用された例外節と note を返すヘルパー。
+ * 評価器ごとに同じパターンを書かずに済むよう共通化する。
+ *
+ * 動作:
+ *   - ctx 未指定 / 例外マッチ無し: そのまま返す
+ *   - red / yellow から permit 例外マッチ: status="green", appliedExceptions に保存、
+ *     note の末尾に「(機体重量 100g 未満により対象外)」のような追記を挿入
+ *   - green / unknown: 例外マッチがあっても status は触らない (既に最弱なので)
+ */
+const applyExemptions = (
+  base: { status: RegulationStatus; note: string; clauseGraph: ClauseGraph },
+  ctx: FlightContext | undefined,
+): { status: RegulationStatus; note: string; appliedExceptions?: readonly ClauseException[] } => {
+  if (base.status !== "red" && base.status !== "yellow") return base;
+  const matched = findPermittingExceptions(base.clauseGraph, ctx);
+  if (matched.length === 0) return base;
+  const reasons = matched.map((m) => m.condition).join(" / ");
+  return {
+    status: "green",
+    note: `${base.note} ※適用例外: ${reasons}`,
+    appliedExceptions: matched,
+  };
 };
 
 export type RegulationCheckResult = {
@@ -382,25 +419,25 @@ const SHIMANE_NUISANCE_REG = buildPrefecturalNuisanceReg({
 export const evaluateDid = (
   loc: LatLng,
   candidates: readonly DidCandidate[],
+  ctx?: FlightContext,
 ): RegulationWithStatus => {
   const hit = candidates.find((c) => pointInPolygon(loc, c.polygon));
-  if (hit) {
-    return {
-      ...DID_REG,
-      status: "red",
-      note: `判定地点は ${hit.muniName} の DID（人口集中地区, 平成27年国勢調査）内です。原則として許可・承認なく飛行できません。`,
-    };
-  }
-  return {
-    ...DID_REG,
-    status: "green",
-    note: "判定地点は平成27年国勢調査ベースの DID 外です。最新は国土交通省 DIPS で要再確認。",
-  };
+  const base = hit
+    ? {
+        status: "red" as RegulationStatus,
+        note: `判定地点は ${hit.muniName} の DID（人口集中地区, 平成27年国勢調査）内です。原則として許可・承認なく飛行できません。`,
+      }
+    : {
+        status: "green" as RegulationStatus,
+        note: "判定地点は平成27年国勢調査ベースの DID 外です。最新は国土交通省 DIPS で要再確認。",
+      };
+  return { ...DID_REG, ...applyExemptions({ ...base, clauseGraph: DID_REG.clauseGraph }, ctx) };
 };
 
 export const evaluateAirports = (
   loc: LatLng,
   airports: readonly AirportCandidate[],
+  ctx?: FlightContext,
 ): RegulationWithStatus => {
   const onAirport = airports.find((a) =>
     a.polygons.some((p) => pointInPolygon(loc, p)),
@@ -408,8 +445,14 @@ export const evaluateAirports = (
   if (onAirport) {
     return {
       ...AIRPORT_REG,
-      status: "red",
-      note: `判定地点は ${onAirport.name} の敷地内です。航空法に基づき、許可・承認なしに飛行できません。`,
+      ...applyExemptions(
+        {
+          status: "red",
+          note: `判定地点は ${onAirport.name} の敷地内です。航空法に基づき、許可・承認なしに飛行できません。`,
+          clauseGraph: AIRPORT_REG.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   let nearest: { name: string; distance: number } | null = null;
@@ -420,8 +463,14 @@ export const evaluateAirports = (
   if (nearest !== null && nearest.distance <= AIRPORT_AROUND_M) {
     return {
       ...AIRPORT_REG,
-      status: "yellow",
-      note: `最寄りの ${nearest.name} までおよそ ${(nearest.distance / 1000).toFixed(1)} km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。`,
+      ...applyExemptions(
+        {
+          status: "yellow",
+          note: `最寄りの ${nearest.name} までおよそ ${(nearest.distance / 1000).toFixed(1)} km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。`,
+          clauseGraph: AIRPORT_REG.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   if (nearest !== null) {
@@ -438,20 +487,35 @@ export const evaluateAirports = (
   };
 };
 
-export const evaluateMihoBase = (loc: LatLng): RegulationWithStatus => {
+export const evaluateMihoBase = (
+  loc: LatLng,
+  ctx?: FlightContext,
+): RegulationWithStatus => {
   const distance = haversineMeters(loc, MIHO_AIRBASE_CENTER);
   if (distance <= MIHO_AIRBASE_RED_M) {
     return {
       ...MIHO_REG,
-      status: "red",
-      note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。小型無人機等飛行禁止法の対象範囲（おおむね 300m）に含まれます。`,
+      ...applyExemptions(
+        {
+          status: "red",
+          note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。小型無人機等飛行禁止法の対象範囲（おおむね 300m）に含まれます。`,
+          clauseGraph: MIHO_REG.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   if (distance <= MIHO_AIRBASE_YELLOW_M) {
     return {
       ...MIHO_REG,
-      status: "yellow",
-      note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。空港周辺の進入表面・要確認エリアに該当する可能性があります。`,
+      ...applyExemptions(
+        {
+          status: "yellow",
+          note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。空港周辺の進入表面・要確認エリアに該当する可能性があります。`,
+          clauseGraph: MIHO_REG.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   return {
@@ -566,6 +630,7 @@ const COVERAGE_PREFECTURE_NAMES = COVERAGE_SUMMARY.prefectureNuisanceNames.join(
 export const evaluateMunicipalParks = (
   loc: LatLng,
   muniCode: string | undefined,
+  ctx?: FlightContext,
 ): RegulationWithStatus => {
   const entry = muniCode !== undefined ? MUNICIPAL_PARKS[muniCode] : undefined;
   if (!entry) {
@@ -579,8 +644,14 @@ export const evaluateMunicipalParks = (
   if (hit) {
     return {
       ...entry.reg,
-      status: "red",
-      note: `判定地点は「${hit.name}」内です。${entry.muniName}都市公園条例に基づき、原則飛行禁止または事前申請が必要です。`,
+      ...applyExemptions(
+        {
+          status: "red",
+          note: `判定地点は「${hit.name}」内です。${entry.muniName}都市公園条例に基づき、原則飛行禁止または事前申請が必要です。`,
+          clauseGraph: entry.reg.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   return {
@@ -597,6 +668,7 @@ export const evaluateYonagoParks = evaluateMunicipalParks;
 export const evaluateMunicipalHeritage = (
   loc: LatLng,
   muniCode: string | undefined,
+  ctx?: FlightContext,
 ): RegulationWithStatus => {
   const entry = muniCode !== undefined ? MUNICIPAL_HERITAGE[muniCode] : undefined;
   if (!entry) {
@@ -611,10 +683,16 @@ export const evaluateMunicipalHeritage = (
     const requireBunkacho = hit.designation === "国指定史跡";
     return {
       ...entry.reg,
-      status: "red",
-      note: `判定地点は「${hit.name}」(${hit.designation})の区域内です。${
-        requireBunkacho ? "文化財保護法第125条" : `${entry.muniName}文化財保護条例`
-      }に基づき、現状変更には事前許可が必要です。ドローン飛行は史跡毀損リスクの観点から原則として申請対象です。`,
+      ...applyExemptions(
+        {
+          status: "red",
+          note: `判定地点は「${hit.name}」(${hit.designation})の区域内です。${
+            requireBunkacho ? "文化財保護法第125条" : `${entry.muniName}文化財保護条例`
+          }に基づき、現状変更には事前許可が必要です。ドローン飛行は史跡毀損リスクの観点から原則として申請対象です。`,
+          clauseGraph: entry.reg.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   return {
@@ -630,6 +708,7 @@ export const evaluateYonagoHeritage = evaluateMunicipalHeritage;
 export const evaluatePrefecturalNuisance = (
   loc: LatLng,
   muniCode: string | undefined,
+  ctx?: FlightContext,
 ): RegulationWithStatus => {
   const prefCode = muniCode?.slice(0, 2);
   const entry = prefCode !== undefined ? PREFECTURAL_NUISANCE[prefCode] : undefined;
@@ -657,8 +736,14 @@ export const evaluatePrefecturalNuisance = (
   if (nearest.distance <= SENSITIVE_FACILITY_BUFFER_M) {
     return {
       ...entry.reg,
-      status: "yellow",
-      note: `判定地点は ${nearest.category}「${nearest.name}」からおよそ ${Math.round(nearest.distance)} m。${entry.prefName}迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。`,
+      ...applyExemptions(
+        {
+          status: "yellow",
+          note: `判定地点は ${nearest.category}「${nearest.name}」からおよそ ${Math.round(nearest.distance)} m。${entry.prefName}迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。`,
+          clauseGraph: entry.reg.clauseGraph,
+        },
+        ctx,
+      ),
     };
   }
   return {
@@ -740,10 +825,11 @@ export type {
   ClauseException,
   ClauseCondition,
   ClauseGraph,
+  FlightContext,
   MachineCondition,
   MachineConditionType,
 } from "./clause-graph";
-export { CLAUSE_EFFECT_LABEL } from "./clause-graph";
+export { CLAUSE_EFFECT_LABEL, findPermittingExceptions, matchesException } from "./clause-graph";
 
 export type { ConfidenceLevel, RegulationConfidence } from "./confidence";
 export { CONFIDENCE_LABEL, summarizeConfidence } from "./confidence";

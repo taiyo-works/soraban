@@ -5,6 +5,7 @@ import {
   COVERAGE_SUMMARY,
   computeOverall,
   computeOverallConfidence,
+  evaluateDid,
   evaluateMihoBase,
   evaluateMunicipalHeritage,
   evaluateMunicipalParks,
@@ -17,6 +18,8 @@ import {
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   YONAGO_SENSITIVE_FACILITIES,
+  type DidCandidate,
+  type FlightContext,
   type RegulationStatus,
   type RegulationWithStatus,
 } from "./index";
@@ -184,6 +187,100 @@ describe("COVERAGE_SUMMARY", () => {
   it("includes 鳥取県 and 島根県 in prefecture coverage", () => {
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("鳥取県");
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("島根県");
+  });
+});
+
+// FlightContext: 例外節の自動適用（特許①の機械可読 ClauseGraph がここで効く）
+describe("FlightContext exemption application", () => {
+  // 米子市役所は DID 内 + 県条例 yellow + park green の典型ケース。
+  // dummy DID polygon を使って evaluateDid のみで例外マッチを検証する。
+  const yonagoDid: DidCandidate = {
+    muniCode: yonagoMuni,
+    muniName: "米子市",
+    polygon: [
+      { lat: 35.41, lng: 133.31 },
+      { lat: 35.41, lng: 133.36 },
+      { lat: 35.46, lng: 133.36 },
+      { lat: 35.46, lng: 133.31 },
+    ],
+  };
+  const yonagoCityHall = { lat: 35.4283, lng: 133.3306 }; // DID 内
+
+  it("DID red without ctx (default = strict)", () => {
+    const r = evaluateDid(yonagoCityHall, [yonagoDid]);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.appliedExceptions).toBeUndefined();
+  });
+
+  it("DID drops to green when drone is < 100g (weight_below_g exception)", () => {
+    const ctx: FlightContext = { droneWeightG: 50 };
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.appliedExceptions).toBeDefined();
+    expect(r.appliedExceptions?.[0]?.condition).toMatch(/100g/);
+  });
+
+  it("DID stays red when drone is >= 100g", () => {
+    const ctx: FlightContext = { droneWeightG: 900 }; // DJI Mavic 級
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.appliedExceptions).toBeUndefined();
+  });
+
+  it("DID drops to green when MLIT permit holder", () => {
+    const ctx: FlightContext = { pilotPermits: ["mlit"] };
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("mlit");
+  });
+
+  it("DID does NOT drop on irrelevant permit", () => {
+    const ctx: FlightContext = { pilotPermits: ["park_manager"] };
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    expect(r.status).toBe<RegulationStatus>("red");
+  });
+
+  it("park ordinance drops to green with park_manager permit", () => {
+    const r = evaluateMunicipalParks(
+      { lat: 35.4267, lng: 133.322 }, // 湊山公園内
+      yonagoMuni,
+      { pilotPermits: ["park_manager"] },
+    );
+    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("park_manager");
+  });
+
+  it("heritage drops to green with emergency purpose", () => {
+    const r = evaluateMunicipalHeritage(
+      { lat: 35.4267, lng: 133.322 }, // 米子城跡
+      yonagoMuni,
+      { purpose: "emergency" },
+    );
+    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("emergency");
+  });
+
+  it("prefectural nuisance drops to green with facility_manager permit", () => {
+    const r = evaluatePrefecturalNuisance(
+      { lat: 35.4283, lng: 133.3306 }, // 米子市役所 0m
+      yonagoMuni,
+      { pilotPermits: ["facility_manager"] },
+    );
+    expect(r.status).toBe<RegulationStatus>("green");
+  });
+
+  it("MihoBase drops to green for facility_manager + pref_pubsafety", () => {
+    const r = evaluateMihoBase(MIHO_AIRBASE_CENTER, {
+      pilotPermits: ["facility_manager_and_pref_pubsafety"],
+    });
+    expect(r.status).toBe<RegulationStatus>("green");
+  });
+
+  it("note string includes the exempted reason", () => {
+    const ctx: FlightContext = { droneWeightG: 50 };
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    expect(r.note).toContain("適用例外");
+    expect(r.note).toContain("100g");
   });
 });
 
