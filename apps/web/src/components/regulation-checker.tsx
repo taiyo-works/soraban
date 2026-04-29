@@ -58,7 +58,16 @@ type DemoPreset = {
 
 // デモシナリオ用の固定地点。県別にグルーピングし、特許コア（複数規制の同時 red）
 // と自治体カバレッジ拡大（鳥取2市 + 島根1市）を端的に提示できるよう並べる。
+// 先頭はユーザの本社拠点 (起点) を置き、現場運用で「拠点と出張先のコントラスト」を
+// 1 タップで切り替えられるようにする。
 const DEMO_PRESETS: readonly DemoPreset[] = [
+  {
+    id: "taiyo-tsushin-hq",
+    name: "タイヨー通信本社（拠点）",
+    loc: { lat: 35.434238, lng: 133.380508 },
+    hint: "拠点 / 全レイヤー green（DID 外・空港 14km）",
+    group: "鳥取県",
+  },
   {
     id: "yonago-city-hall",
     name: "米子市役所",
@@ -100,6 +109,27 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     loc: { lat: 35.5455, lng: 133.2235 },
     hint: "境港市公園条例 red",
     group: "鳥取県",
+  },
+  {
+    id: "tottori-castle",
+    name: "鳥取城跡(久松公園)",
+    loc: { lat: 35.504, lng: 134.244 },
+    hint: "鳥取市公園条例 × 文化財保護法 同時red",
+    group: "鳥取県",
+  },
+  {
+    id: "uchibuki-park",
+    name: "打吹公園(倉吉)",
+    loc: { lat: 35.4264, lng: 133.823 },
+    hint: "倉吉市公園条例 + 県条例（白壁土蔵群近接）",
+    group: "鳥取県",
+  },
+  {
+    id: "matsue-castle",
+    name: "松江城(国指定史跡・国宝)",
+    loc: { lat: 35.4745, lng: 133.0515 },
+    hint: "松江市公園条例 × 文化財保護法 同時red",
+    group: "島根県",
   },
   {
     id: "izumo-taisha",
@@ -414,7 +444,7 @@ export function RegulationChecker() {
                   void handleGeocode();
                 }
               }}
-              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3"
+              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3（タイヨー通信本社）"
               className={fieldClass}
             />
             <button
@@ -486,7 +516,7 @@ export function RegulationChecker() {
                   message: `反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
                 });
               }}
-              placeholder="例: 35.434238, 133.380508 ／ https://maps.google.com/...@35.434238,133.380508,15z"
+              placeholder="拠点（本社）35.434238, 133.380508 ／ 移動先（Google Maps URL）https://maps.google.com/...@35.4283,133.3306,15z"
               className={`${fieldClass} font-mono`}
             />
             <button

@@ -10,11 +10,17 @@ import {
   ALL_SENSITIVE_FACILITIES,
   IZUMO_HERITAGE_SITES,
   IZUMO_PARKS,
+  KURAYOSHI_HERITAGE_SITES,
+  KURAYOSHI_PARKS,
+  MATSUE_HERITAGE_SITES,
+  MATSUE_PARKS,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
   SAKAIMINATO_PARKS,
   SENSITIVE_FACILITY_BUFFER_M,
+  TOTTORI_HERITAGE_SITES,
+  TOTTORI_PARKS,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   type HeritageSite,
@@ -369,11 +375,25 @@ const buildMunicipalParkReg = (params: {
   },
 });
 
+const TOTTORI_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31201",
+  muniName: "鳥取市",
+  url: "https://www.city.tottori.lg.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
 const YONAGO_PARK_REG = buildMunicipalParkReg({
   muniCode: "31202",
   muniName: "米子市",
   url: "https://www.city.yonago.lg.jp/",
   verifiedAt: "2026-04-25T00:00:00+09:00",
+});
+
+const KURAYOSHI_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31203",
+  muniName: "倉吉市",
+  url: "https://www.city.kurayoshi.lg.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
 });
 
 const SAKAIMINATO_PARK_REG = buildMunicipalParkReg({
@@ -383,6 +403,13 @@ const SAKAIMINATO_PARK_REG = buildMunicipalParkReg({
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
+const MATSUE_PARK_REG = buildMunicipalParkReg({
+  muniCode: "32201",
+  muniName: "松江市",
+  url: "https://www.city.matsue.lg.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
 const IZUMO_PARK_REG = buildMunicipalParkReg({
   muniCode: "32203",
   muniName: "出雲市",
@@ -390,10 +417,28 @@ const IZUMO_PARK_REG = buildMunicipalParkReg({
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
+const TOTTORI_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "31201",
+  muniName: "鳥取市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
 const YONAGO_HERITAGE_REG = buildMunicipalHeritageReg({
   muniCode: "31202",
   muniName: "米子市",
   verifiedAt: "2026-04-26T00:00:00+09:00",
+});
+
+const KURAYOSHI_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "31203",
+  muniName: "倉吉市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const MATSUE_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "32201",
+  muniName: "松江市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
 });
 
 const IZUMO_HERITAGE_REG = buildMunicipalHeritageReg({
@@ -525,8 +570,11 @@ export const evaluateMihoBase = (
   };
 };
 
+const TOTTORI_MUNI_CODE = "31201";
 const YONAGO_MUNI_CODE = "31202";
+const KURAYOSHI_MUNI_CODE = "31203";
 const SAKAIMINATO_MUNI_CODE = "31204";
+const MATSUE_MUNI_CODE = "32201";
 const IZUMO_MUNI_CODE = "32203";
 
 // muniCode → 当該市町村の公園条例レコード + 公園ポリゴン群。
@@ -538,15 +586,30 @@ type MunicipalParkEntry = {
 };
 
 const MUNICIPAL_PARKS: Readonly<Record<string, MunicipalParkEntry>> = {
+  [TOTTORI_MUNI_CODE]: {
+    muniName: "鳥取市",
+    parks: TOTTORI_PARKS,
+    reg: TOTTORI_PARK_REG,
+  },
   [YONAGO_MUNI_CODE]: {
     muniName: "米子市",
     parks: YONAGO_PARKS,
     reg: YONAGO_PARK_REG,
   },
+  [KURAYOSHI_MUNI_CODE]: {
+    muniName: "倉吉市",
+    parks: KURAYOSHI_PARKS,
+    reg: KURAYOSHI_PARK_REG,
+  },
   [SAKAIMINATO_MUNI_CODE]: {
     muniName: "境港市",
     parks: SAKAIMINATO_PARKS,
     reg: SAKAIMINATO_PARK_REG,
+  },
+  [MATSUE_MUNI_CODE]: {
+    muniName: "松江市",
+    parks: MATSUE_PARKS,
+    reg: MATSUE_PARK_REG,
   },
   [IZUMO_MUNI_CODE]: {
     muniName: "出雲市",
@@ -563,10 +626,25 @@ type MunicipalHeritageEntry = {
 };
 
 const MUNICIPAL_HERITAGE: Readonly<Record<string, MunicipalHeritageEntry>> = {
+  [TOTTORI_MUNI_CODE]: {
+    muniName: "鳥取市",
+    sites: TOTTORI_HERITAGE_SITES,
+    reg: TOTTORI_HERITAGE_REG,
+  },
   [YONAGO_MUNI_CODE]: {
     muniName: "米子市",
     sites: YONAGO_HERITAGE_SITES,
     reg: YONAGO_HERITAGE_REG,
+  },
+  [KURAYOSHI_MUNI_CODE]: {
+    muniName: "倉吉市",
+    sites: KURAYOSHI_HERITAGE_SITES,
+    reg: KURAYOSHI_HERITAGE_REG,
+  },
+  [MATSUE_MUNI_CODE]: {
+    muniName: "松江市",
+    sites: MATSUE_HERITAGE_SITES,
+    reg: MATSUE_HERITAGE_REG,
   },
   [IZUMO_MUNI_CODE]: {
     muniName: "出雲市",
@@ -611,8 +689,11 @@ export const COVERAGE_SUMMARY: CoverageSummary = {
   // facility id のプレフィックスから自治体を逆引きする運用を避け、
   // ここでは parks と同じ自治体集合に対する件数を別マップで管理する。
   municipalSensitiveCounts: [
+    ["鳥取市", 4],
     ["米子市", 4],
+    ["倉吉市", 4],
     ["境港市", 3],
+    ["松江市", 5],
     ["出雲市", 5],
   ],
   prefectureNuisanceNames: Object.values(PREFECTURAL_NUISANCE).map((e) => e.prefName),
@@ -808,12 +889,21 @@ export {
   IZUMO_HERITAGE_SITES,
   IZUMO_PARKS,
   IZUMO_SENSITIVE_FACILITIES,
+  KURAYOSHI_HERITAGE_SITES,
+  KURAYOSHI_PARKS,
+  KURAYOSHI_SENSITIVE_FACILITIES,
+  MATSUE_HERITAGE_SITES,
+  MATSUE_PARKS,
+  MATSUE_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
   SAKAIMINATO_PARKS,
   SAKAIMINATO_SENSITIVE_FACILITIES,
   SENSITIVE_FACILITY_BUFFER_M,
+  TOTTORI_HERITAGE_SITES,
+  TOTTORI_PARKS,
+  TOTTORI_SENSITIVE_FACILITIES,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   YONAGO_SENSITIVE_FACILITIES,

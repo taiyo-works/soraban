@@ -13,8 +13,18 @@ import {
   IZUMO_HERITAGE_SITES,
   IZUMO_PARKS,
   IZUMO_SENSITIVE_FACILITIES,
+  KURAYOSHI_HERITAGE_SITES,
+  KURAYOSHI_PARKS,
+  KURAYOSHI_SENSITIVE_FACILITIES,
+  MATSUE_HERITAGE_SITES,
+  MATSUE_PARKS,
+  MATSUE_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
   SAKAIMINATO_PARKS,
+  SAKAIMINATO_SENSITIVE_FACILITIES,
+  TOTTORI_HERITAGE_SITES,
+  TOTTORI_PARKS,
+  TOTTORI_SENSITIVE_FACILITIES,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   YONAGO_SENSITIVE_FACILITIES,
@@ -24,8 +34,11 @@ import {
   type RegulationWithStatus,
 } from "./index";
 
+const tottoriMuni = "31201";
 const yonagoMuni = "31202";
+const kurayoshiMuni = "31203";
 const sakaiminatoMuni = "31204";
+const matsueMuni = "32201";
 const izumoMuni = "32203";
 
 describe("evaluateMunicipalParks", () => {
@@ -43,6 +56,21 @@ describe("evaluateMunicipalParks", () => {
   it("returns red for 境港市 park (夢みなと公園)", () => {
     const r = evaluateMunicipalParks({ lat: 35.5455, lng: 133.2235 }, sakaiminatoMuni);
     expect(r.status).toBe<RegulationStatus>("red");
+  });
+  it("returns red for 鳥取市 park (久松公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.5040, lng: 134.2440 }, tottoriMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("鳥取市");
+  });
+  it("returns red for 倉吉市 park (打吹公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.4264, lng: 133.8230 }, kurayoshiMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("倉吉市");
+  });
+  it("returns red for 松江市 park (城山公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.4740, lng: 133.0510 }, matsueMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("松江市");
   });
   it("returns green when point is outside known park polygons", () => {
     const r = evaluateMunicipalParks({ lat: 35.4283, lng: 133.3306 }, yonagoMuni); // 米子市役所
@@ -73,6 +101,21 @@ describe("evaluateMunicipalHeritage", () => {
   it("returns unknown for 境港市 (no heritage data yet)", () => {
     const r = evaluateMunicipalHeritage({ lat: 35.5455, lng: 133.2235 }, sakaiminatoMuni);
     expect(r.status).toBe<RegulationStatus>("unknown");
+  });
+  it("flags 鳥取城跡 (国指定史跡) as red for 鳥取市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.5040, lng: 134.2440 }, tottoriMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("国指定史跡");
+  });
+  it("flags 伯耆国分寺跡 (国指定史跡) as red for 倉吉市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.4304, lng: 133.7900 }, kurayoshiMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("伯耆国分寺");
+  });
+  it("flags 松江城跡 (国指定史跡) as red for 松江市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.4745, lng: 133.0515 }, matsueMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("松江城");
   });
 });
 
@@ -156,37 +199,62 @@ describe("computeOverall", () => {
 });
 
 describe("COVERAGE_SUMMARY", () => {
-  it("totalParks matches sum of municipal park lists", () => {
+  it("totalParks matches sum of all municipal park lists (6 cities)", () => {
     expect(COVERAGE_SUMMARY.totalParks).toBe(
-      YONAGO_PARKS.length + SAKAIMINATO_PARKS.length + IZUMO_PARKS.length,
+      TOTTORI_PARKS.length +
+        YONAGO_PARKS.length +
+        KURAYOSHI_PARKS.length +
+        SAKAIMINATO_PARKS.length +
+        MATSUE_PARKS.length +
+        IZUMO_PARKS.length,
     );
     expect(COVERAGE_SUMMARY.totalParks).toBe(ALL_MUNICIPAL_PARKS.length);
   });
-  it("totalHeritage matches sum of municipal heritage lists", () => {
+  it("totalHeritage matches sum of all municipal heritage lists (5 cities × 1+ sites)", () => {
     expect(COVERAGE_SUMMARY.totalHeritage).toBe(
-      YONAGO_HERITAGE_SITES.length + IZUMO_HERITAGE_SITES.length,
+      TOTTORI_HERITAGE_SITES.length +
+        YONAGO_HERITAGE_SITES.length +
+        KURAYOSHI_HERITAGE_SITES.length +
+        MATSUE_HERITAGE_SITES.length +
+        IZUMO_HERITAGE_SITES.length,
     );
     expect(COVERAGE_SUMMARY.totalHeritage).toBe(ALL_HERITAGE_SITES.length);
   });
   it("totalSensitive matches ALL_SENSITIVE_FACILITIES length", () => {
     expect(COVERAGE_SUMMARY.totalSensitive).toBe(ALL_SENSITIVE_FACILITIES.length);
   });
-  it("municipalSensitiveCounts sum equals totalSensitive", () => {
+  it("municipalSensitiveCounts sum equals totalSensitive (auto-calculated)", () => {
     const sum = COVERAGE_SUMMARY.municipalSensitiveCounts.reduce(
       (acc, [, n]) => acc + n,
       0,
     );
     expect(sum).toBe(COVERAGE_SUMMARY.totalSensitive);
-    // また zones.ts の (米子4 + 境港3 + 出雲5) と一致すること。
+    // 各市の sensitive facilities 数が手書きカウントと一致すること
     expect(sum).toBe(
-      YONAGO_SENSITIVE_FACILITIES.length +
-        3 + // sakaiminato — SAKAIMINATO_SENSITIVE_FACILITIES 直接 export していないが3件で固定
+      TOTTORI_SENSITIVE_FACILITIES.length +
+        YONAGO_SENSITIVE_FACILITIES.length +
+        KURAYOSHI_SENSITIVE_FACILITIES.length +
+        SAKAIMINATO_SENSITIVE_FACILITIES.length +
+        MATSUE_SENSITIVE_FACILITIES.length +
         IZUMO_SENSITIVE_FACILITIES.length,
     );
   });
   it("includes 鳥取県 and 島根県 in prefecture coverage", () => {
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("鳥取県");
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("島根県");
+  });
+  it("covers 6 cities (3 per prefecture × 2 prefectures)", () => {
+    expect(COVERAGE_SUMMARY.municipalParkNames).toHaveLength(6);
+    expect(COVERAGE_SUMMARY.municipalParkNames).toEqual(
+      expect.arrayContaining([
+        "鳥取市",
+        "米子市",
+        "倉吉市",
+        "境港市",
+        "松江市",
+        "出雲市",
+      ]),
+    );
   });
 });
 

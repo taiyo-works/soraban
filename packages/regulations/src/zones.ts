@@ -3,8 +3,11 @@ import type { LatLng, Polygon } from "@soraban/geo";
 // 都市公園 polygon は data/parks/by-muni/{muniCode}.json から読み込む。
 // 自治体追加・正規ポリゴン置換時はこの JSON を更新すれば evaluator/UI に
 // 自動反映される。詳細フローは packages/regulations/scripts/README.md。
+import tottoriParksJson from "../data/parks/by-muni/31201.json";
 import yonagoParksJson from "../data/parks/by-muni/31202.json";
+import kurayoshiParksJson from "../data/parks/by-muni/31203.json";
 import sakaiminatoParksJson from "../data/parks/by-muni/31204.json";
+import matsueParksJson from "../data/parks/by-muni/32201.json";
 import izumoParksJson from "../data/parks/by-muni/32203.json";
 
 // 自衛隊美保基地（米子鬼太郎空港共用） — 滑走路中央付近。
@@ -214,22 +217,183 @@ export const IZUMO_HERITAGE_SITES: readonly HeritageSite[] = [
   },
 ];
 
+// =====================================================================
+// 鳥取市 (31201) — 鳥取県県都
+// =====================================================================
+export const TOTTORI_PARKS: readonly Park[] = toParks(tottoriParksJson);
+
+export const TOTTORI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "tottori-city-hall",
+    name: "鳥取市役所",
+    category: "庁舎",
+    center: { lat: 35.5036, lng: 134.2389 },
+  },
+  {
+    id: "tottori-pref-office",
+    name: "鳥取県庁",
+    category: "庁舎",
+    center: { lat: 35.5036, lng: 134.2381 },
+  },
+  {
+    id: "tottori-station",
+    name: "JR鳥取駅",
+    category: "駅",
+    center: { lat: 35.4994, lng: 134.2331 },
+  },
+  {
+    id: "tottori-pref-central-hospital",
+    name: "鳥取県立中央病院",
+    category: "病院",
+    center: { lat: 35.4928, lng: 134.2255 },
+  },
+];
+
+// 鳥取城跡: 久松山一帯、戦国〜近世の山城・平山城。
+// 1957 (昭和32) 年国指定史跡。文化財保護法第125条適用。
+export const TOTTORI_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "tottori-castle-ruins",
+    name: "鳥取城跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.5060, lng: 134.2410 },
+      { lat: 35.5060, lng: 134.2470 },
+      { lat: 35.5020, lng: 134.2470 },
+      { lat: 35.5020, lng: 134.2410 },
+    ],
+  },
+];
+
+// =====================================================================
+// 倉吉市 (31203) — 鳥取県中部
+// =====================================================================
+export const KURAYOSHI_PARKS: readonly Park[] = toParks(kurayoshiParksJson);
+
+export const KURAYOSHI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "kurayoshi-city-hall",
+    name: "倉吉市役所",
+    category: "庁舎",
+    center: { lat: 35.4296, lng: 133.8222 },
+  },
+  {
+    id: "kurayoshi-station",
+    name: "JR倉吉駅",
+    category: "駅",
+    center: { lat: 35.4317, lng: 133.8403 },
+  },
+  {
+    id: "kurayoshi-koseibyoin",
+    name: "厚生病院（倉吉）",
+    category: "病院",
+    center: { lat: 35.4248, lng: 133.8184 },
+  },
+  {
+    id: "kurayoshi-shirakabe-dozogun",
+    name: "白壁土蔵群（観光客密集地）",
+    category: "宿泊地",
+    center: { lat: 35.4313, lng: 133.8230 },
+  },
+];
+
+// 伯耆国分寺跡: 倉吉市国府、奈良時代の国分寺遺構。
+// 国指定史跡 (1922 大正11年指定)。
+export const KURAYOSHI_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "houki-kokubunji-ruins",
+    name: "伯耆国分寺跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.4318, lng: 133.7870 },
+      { lat: 35.4318, lng: 133.7930 },
+      { lat: 35.4290, lng: 133.7930 },
+      { lat: 35.4290, lng: 133.7870 },
+    ],
+  },
+];
+
+// =====================================================================
+// 松江市 (32201) — 島根県県都
+// =====================================================================
+export const MATSUE_PARKS: readonly Park[] = toParks(matsueParksJson);
+
+export const MATSUE_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "matsue-city-hall",
+    name: "松江市役所",
+    category: "庁舎",
+    center: { lat: 35.4677, lng: 133.0508 },
+  },
+  {
+    id: "shimane-pref-office",
+    name: "島根県庁",
+    category: "庁舎",
+    center: { lat: 35.4720, lng: 133.0510 },
+  },
+  {
+    id: "matsue-station",
+    name: "JR松江駅",
+    category: "駅",
+    center: { lat: 35.4577, lng: 133.0517 },
+  },
+  {
+    id: "matsue-redcross-hospital",
+    name: "松江赤十字病院",
+    category: "病院",
+    center: { lat: 35.4693, lng: 133.0606 },
+  },
+  {
+    id: "matsue-shinjiko-onsen",
+    name: "松江しんじ湖温泉",
+    category: "宿泊地",
+    center: { lat: 35.4750, lng: 133.0270 },
+  },
+];
+
+// 松江城跡: 松江市殿町。慶長16年築城、現存12天守の1つ。
+// 国宝 (天守、2015 平成27年指定) + 国指定史跡 (1934 昭和9年指定)。
+export const MATSUE_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "matsue-castle-ruins",
+    name: "松江城跡（国指定史跡・天守国宝）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.4760, lng: 133.0490 },
+      { lat: 35.4760, lng: 133.0540 },
+      { lat: 35.4730, lng: 133.0540 },
+      { lat: 35.4730, lng: 133.0490 },
+    ],
+  },
+];
+
+// =====================================================================
 // 全自治体合算（地図レイヤ・県条例の公衆密集地評価で使用）。
 // 自治体追加時はここに append するだけで、UI 側は変更不要。
+// =====================================================================
 export const ALL_MUNICIPAL_PARKS: readonly Park[] = [
+  ...TOTTORI_PARKS,
   ...YONAGO_PARKS,
+  ...KURAYOSHI_PARKS,
   ...SAKAIMINATO_PARKS,
+  ...MATSUE_PARKS,
   ...IZUMO_PARKS,
 ];
 
 export const ALL_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  ...TOTTORI_SENSITIVE_FACILITIES,
   ...YONAGO_SENSITIVE_FACILITIES,
+  ...KURAYOSHI_SENSITIVE_FACILITIES,
   ...SAKAIMINATO_SENSITIVE_FACILITIES,
+  ...MATSUE_SENSITIVE_FACILITIES,
   ...IZUMO_SENSITIVE_FACILITIES,
 ];
 
 export const ALL_HERITAGE_SITES: readonly HeritageSite[] = [
+  ...TOTTORI_HERITAGE_SITES,
   ...YONAGO_HERITAGE_SITES,
+  ...KURAYOSHI_HERITAGE_SITES,
+  ...MATSUE_HERITAGE_SITES,
   ...IZUMO_HERITAGE_SITES,
 ];
 
