@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import {
   isValidLatLng,
   parseCombinedLatLng,
@@ -17,6 +17,15 @@ import {
 
 import { searchAddress, type GeocodeResult } from "@/lib/geocode";
 import { checkLocation } from "@/lib/check";
+import {
+  clearHistory,
+  getHistoryServerSnapshot,
+  getHistorySnapshot,
+  removeHistory,
+  saveHistory,
+  subscribeHistory,
+  type SavedCheck,
+} from "@/lib/history";
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
 import { RegulationMap } from "./regulation-map";
@@ -151,6 +160,42 @@ export function RegulationChecker() {
   const [hasBunkachoPermit, setHasBunkachoPermit] = useState<boolean>(false);
   const [purpose, setPurpose] = useState<"general" | "emergency" | "public_duty" | "city_event">("general");
 
+  // ── 履歴 ──
+  // localStorage を外部ストアとして React に同期。
+  // 別タブからの 'storage' イベントと、同タブ内の save/remove/clear から
+  // 発火するカスタムイベントの両方を購読することで自動再描画される。
+  const history = useSyncExternalStore(
+    subscribeHistory,
+    getHistorySnapshot,
+    getHistoryServerSnapshot,
+  );
+
+  // 履歴から SavedCheck を復元: ctx の各フィールドを state に戻し、loc に飛ぶ。
+  // ctx 復元 → useEffect で再判定 が走るため、明示的に runCheck は呼ばない。
+  const restoreFromHistory = (entry: SavedCheck): void => {
+    setDroneWeightInput(entry.ctx?.droneWeightG !== undefined ? String(entry.ctx.droneWeightG) : "");
+    const permits = entry.ctx?.pilotPermits ?? [];
+    setHasMlitPermit(permits.includes("mlit"));
+    setHasFacilityPermit(permits.includes("facility_manager"));
+    setHasParkPermit(permits.includes("park_manager"));
+    setHasBunkachoPermit(permits.includes("bunkacho_or_kyoiku"));
+    setPurpose(
+      (entry.ctx?.purpose as typeof purpose) ?? "general",
+    );
+    applyLocation(entry.loc);
+    // ctx 変更で useEffect の自動再判定が走るのを待たず、明示的に呼んで即時反映
+    setTimeout(() => runCheck(entry.loc), 0);
+  };
+
+  const handleRemoveHistory = (evidenceId: string): void => {
+    removeHistory(evidenceId);
+  };
+
+  const handleClearHistory = (): void => {
+    if (typeof window !== "undefined" && !window.confirm("判定履歴を全削除しますか？")) return;
+    clearHistory();
+  };
+
   // ctx 構築。空 / デフォルト値しかなければ undefined を返す（API もそれで処理する）。
   const buildCtx = (): FlightContext | undefined => {
     const ctx: { -readonly [K in keyof FlightContext]: FlightContext[K] } = {};
@@ -188,6 +233,19 @@ export function RegulationChecker() {
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
+        // 履歴に自動保存。同一 evidenceId は idempotent (= 重複しない)。
+        // useSyncExternalStore がイベント経由で再描画してくれるので setHistory 不要。
+        saveHistory({
+          evidenceId: res.evidenceId,
+          savedAt: new Date().toISOString(),
+          loc,
+          ctx,
+          overall: res.overall,
+          resolvedAddress: res.resolvedAddress,
+          engineVersion: res.engineVersion,
+          checkedAt: res.checkedAt,
+          muniCode: res.muniCode,
+        });
       } catch (err) {
         setError(`判定に失敗しました: ${(err as Error).message}`);
       }
@@ -748,6 +806,89 @@ export function RegulationChecker() {
               </dd>
             </div>
           </dl>
+        </section>
+      ) : null}
+
+      {/* ─── HISTORY ───────────────────────────────── */}
+      {history.length > 0 ? (
+        <section
+          className="flex flex-col gap-4 border border-rule bg-paper p-4 sm:p-6"
+          aria-labelledby="history-heading"
+        >
+          <div className="flex items-end justify-between gap-3 border-b border-rule pb-2">
+            <div className="flex flex-col gap-0.5">
+              <p id="history-heading" className="eyebrow">
+                <span aria-hidden className="bearing-mark" />
+                判定履歴
+                <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+                  （ローカル保存 / 最大 50 件）
+                </span>
+              </p>
+              <p className="font-mono text-[10px] tnum text-ink-mute">
+                {history.length} entr{history.length === 1 ? "y" : "ies"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              className="font-mono text-[10px] uppercase tracking-wider text-ink-mute hover:text-signal-red"
+            >
+              全削除
+            </button>
+          </div>
+          <ul className="flex flex-col divide-y divide-rule">
+            {history.slice(0, 10).map((h) => {
+              const dotTone =
+                h.overall === "red"
+                  ? "bg-signal-red"
+                  : h.overall === "yellow"
+                    ? "bg-signal-amber"
+                    : h.overall === "green"
+                      ? "bg-signal-green"
+                      : "bg-signal-mute";
+              const checkedDate = new Date(h.checkedAt);
+              const dateStr = `${String(checkedDate.getMonth() + 1).padStart(2, "0")}/${String(checkedDate.getDate()).padStart(2, "0")} ${String(checkedDate.getHours()).padStart(2, "0")}:${String(checkedDate.getMinutes()).padStart(2, "0")}`;
+              return (
+                <li key={h.evidenceId} className="flex items-center gap-3 py-2.5">
+                  <button
+                    type="button"
+                    onClick={() => restoreFromHistory(h)}
+                    className="flex flex-1 items-center gap-3 text-left transition-colors hover:bg-paper-soft"
+                    title={`Evidence ${h.evidenceId} を復元して再判定`}
+                  >
+                    <span aria-hidden className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/20 ${dotTone}`} />
+                    <span className="flex flex-1 flex-col leading-tight">
+                      <span className="text-sm text-ink">
+                        {h.resolvedAddress ?? `${h.loc.lat.toFixed(4)}°N · ${h.loc.lng.toFixed(4)}°E`}
+                      </span>
+                      <span className="font-mono text-[10px] tnum text-ink-mute">
+                        {dateStr}
+                        {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
+                        {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${h.ctx.purpose}` : ""}
+                        {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · permit×${h.ctx.pilotPermits.length}` : ""}
+                        {" · "}
+                        {h.evidenceId}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveHistory(h.evidenceId)}
+                    className="font-mono text-[10px] text-ink-mute hover:text-signal-red"
+                    aria-label="この履歴を削除"
+                    title="削除"
+                  >
+                    ×
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {history.length > 10 ? (
+            <p className="font-mono text-[10px] tnum text-ink-mute">
+              ... and {history.length - 10} more (oldest will be evicted at 50)
+            </p>
+          ) : null}
         </section>
       ) : null}
     </div>
