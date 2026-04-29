@@ -149,6 +149,7 @@ export function RegulationChecker() {
   const [error, setError] = useState<string | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
+  const [pdfBusy, setPdfBusy] = useState<boolean>(false);
 
   // ── FlightContext: 機体・運航条件 ──
   // 空文字 = "未指定"。最も厳しい解釈になる。
@@ -194,6 +195,41 @@ export function RegulationChecker() {
   const handleClearHistory = (): void => {
     if (typeof window !== "undefined" && !window.confirm("判定履歴を全削除しますか？")) return;
     clearHistory();
+  };
+
+  // PDF ダウンロード。@react-pdf/renderer は ~4MB あるので動的 import で
+  // 初期バンドルに含めない（ボタン押下時に 1 度だけ取得）。
+  const handlePdfExport = async (): Promise<void> => {
+    if (!result) return;
+    setPdfBusy(true);
+    try {
+      const [{ pdf }, { RegulationPdfDocument }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("./regulation-pdf"),
+      ]);
+      const ctx = buildCtx();
+      const blob = await pdf(
+        <RegulationPdfDocument
+          result={result}
+          loc={center}
+          ctx={ctx}
+        />,
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `soraban-${result.evidenceId}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      // フォントを CDN から取り直す副作用が次回も起きるが、
+      // ブラウザ HTTP cache で実質ゼロコスト
+      setTimeout(() => URL.revokeObjectURL(url), 5_000);
+    } catch (err) {
+      setError(`PDF 生成に失敗しました: ${(err as Error).message}`);
+    } finally {
+      setPdfBusy(false);
+    }
   };
 
   // ctx 構築。空 / デフォルト値しかなければ undefined を返す（API もそれで処理する）。
@@ -750,6 +786,16 @@ export function RegulationChecker() {
                 {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => void handlePdfExport()}
+              disabled={pdfBusy}
+              className="inline-flex h-11 items-center gap-2 self-stretch rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium uppercase tracking-wider text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:opacity-40 sm:self-start"
+              title="この判定を A4 1 枚 PDF レポートとして書き出し"
+            >
+              <span aria-hidden className="font-mono text-[10px] tracking-[0.2em] opacity-70">▾</span>
+              {pdfBusy ? "PDF 生成中…" : "PDF 出力"}
+            </button>
           </div>
 
           {/* disclaimer — brand outlined, never amber */}
