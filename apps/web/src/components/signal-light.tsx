@@ -12,14 +12,16 @@ const sizeClass = {
   lg: "h-12 w-12",
 } as const;
 
+// アクティブな灯火: 製図インク調の色 + 紙地に映える微弱なリング。
+// 派手な glow は撤廃して "ledではなくインクで描かれた信号" の語彙に寄せる。
 const colorClass: Record<RegulationStatus, string> = {
-  red: "bg-rose-500 border-rose-600 shadow-[0_0_18px_rgba(244,63,94,0.55)]",
-  yellow: "bg-amber-400 border-amber-500 shadow-[0_0_18px_rgba(251,191,36,0.55)]",
-  green: "bg-emerald-500 border-emerald-600 shadow-[0_0_18px_rgba(16,185,129,0.55)]",
-  unknown: "bg-zinc-400 border-zinc-500",
+  red: "bg-signal-red border-signal-red ring-2 ring-signal-red/30",
+  yellow: "bg-signal-amber border-signal-amber ring-2 ring-signal-amber/30",
+  green: "bg-signal-green border-signal-green ring-2 ring-signal-green/30",
+  unknown: "bg-signal-mute border-signal-mute",
 };
 
-const dimClass = "bg-zinc-200 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-700";
+const dimClass = "bg-paper-deep border-rule";
 
 export function SignalLight({ status, size = "lg" }: Props) {
   const lights: ReadonlyArray<RegulationStatus> = ["red", "yellow", "green"];
@@ -27,7 +29,7 @@ export function SignalLight({ status, size = "lg" }: Props) {
     <div
       role="img"
       aria-label={`総合判定: ${status}`}
-      className="inline-flex flex-col items-center gap-1.5 rounded-2xl border border-zinc-300 bg-zinc-900 p-2 dark:border-zinc-700"
+      className="inline-flex flex-col items-center gap-1.5 rounded-sharp border border-ink/80 bg-ink p-2.5"
     >
       {lights.map((light) => (
         <span

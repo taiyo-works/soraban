@@ -24,13 +24,15 @@ const SENSITIVE_BREAKDOWN = formatMuniBreakdown(
   COVERAGE_SUMMARY.municipalSensitiveCounts,
 );
 
-const COVERAGE_LAYERS: ReadonlyArray<{
+type CoverageRow = {
   readonly source: "国" | "都道府県" | "市町村";
   readonly title: string;
   readonly coverage: string;
   readonly dataset: string;
   readonly count: string;
-}> = [
+};
+
+const COVERAGE_LAYERS: readonly CoverageRow[] = [
   {
     source: "国",
     title: "航空法第132条 — DID（人口集中地区）",
@@ -117,168 +119,253 @@ const TECH_STACK: ReadonlyArray<{
   readonly category: string;
   readonly value: string;
 }> = [
-  { category: "Frontend", value: "Next.js 16 (App Router / React Server Components) / TypeScript strict / Tailwind v4" },
+  {
+    category: "Frontend",
+    value:
+      "Next.js 16 (App Router / RSC) / TypeScript strict / Tailwind v4 / Cache Components",
+  },
   {
     category: "キャッシュ戦略",
     value:
-      "Next.js 16 Cache Components（'use cache' ディレクティブ + cacheLife('days') + cacheTag によるタグ無効化）。Phase 1 のスクレイパ更新時に updateTag/revalidateTag で即時反映",
+      "'use cache' + cacheLife('days') + cacheTag。Phase 1 のスクレイパ更新時に updateTag/revalidateTag で即時反映",
   },
-  { category: "Map", value: "MapLibre GL + 国土地理院ベクタータイル / 6 レイヤー個別トグル" },
-  { category: "Geo", value: "ハーバサイン距離・Ray-casting Point-in-Polygon・PostGIS互換ポリゴン" },
-  { category: "判定エンジン", value: "soraban-0.2.0-clausegraph（条文の例外節を機械可読 ClauseGraph 化）" },
-  { category: "監査トレイル", value: "SHA-256 evidenceId 採番（座標・時刻・適用規制IDを正規化してハッシュ）" },
-  { category: "ジオコーディング", value: "国土地理院 LonLatToAddress / アドレス検索 API" },
-  { category: "データ整形", value: "Shell + jq による国土数値情報 (GML/Shapefile) → GeoJSON パイプライン" },
+  {
+    category: "Map",
+    value: "MapLibre GL + 国土地理院ベクタータイル / 6 レイヤー個別トグル",
+  },
+  {
+    category: "Geo",
+    value: "ハーバサイン距離・Ray-casting Point-in-Polygon・PostGIS互換ポリゴン",
+  },
+  {
+    category: "判定エンジン",
+    value:
+      "soraban-0.2.0-clausegraph（条文の例外節を機械可読 ClauseGraph 化）",
+  },
+  {
+    category: "監査トレイル",
+    value:
+      "SHA-256 evidenceId 採番（座標・時刻・適用規制IDを正規化してハッシュ）",
+  },
+  {
+    category: "ジオコーディング",
+    value: "国土地理院 LonLatToAddress / アドレス検索 API",
+  },
+  {
+    category: "データ整形",
+    value: "Shell + jq による国土数値情報 (GML/Shapefile) → GeoJSON パイプライン",
+  },
   {
     category: "アーキテクチャ",
     value:
-      "Jamstack（静的 Markup + クライアント JS + サーバレス Route Handlers）／pnpm monorepo (web / regulations / geo / db / scraper)",
+      "Jamstack (静的 Markup + クライアント JS + サーバレス Route Handlers) / pnpm monorepo (web / regulations / geo / db / scraper)",
   },
 ];
 
-const sourceTone = {
-  国: "bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-950 dark:text-indigo-200 dark:ring-indigo-800",
-  都道府県:
-    "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800",
-  市町村:
-    "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-950 dark:text-teal-200 dark:ring-teal-800",
-} as const;
+// 出典・管轄を表す細い角バッジ。色は付けずインクの濃淡だけで階層を作る。
+const sourceTone: Record<CoverageRow["source"], string> = {
+  国: "border-ink/40 text-ink",
+  都道府県: "border-brand-500 text-brand-700",
+  市町村: "border-rule text-ink-soft",
+};
 
 export default function Home() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-6 py-10 sm:py-16">
-      <header className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
-            社内限定 / Phase 0 PoC
-          </span>
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            特許出願準備中
-          </span>
-          <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
-            engine: soraban-0.2.0-clausegraph
-          </span>
+    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-16 px-6 py-12 sm:py-20">
+      {/* ============================ HERO ============================ */}
+      <header className="relative flex flex-col gap-8">
+        {/* 紙の上にうっすら方位記 (decorative) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 hidden flex-col items-end gap-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-mute/60 sm:flex"
+        >
+          <span>N 35°26′03″</span>
+          <span>E 133°22′50″</span>
+          <span className="mt-1 text-[8px]">Hiezu / Tottori</span>
         </div>
-        <div className="flex flex-col gap-2">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">
-            そらばん ／ Soraban
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-            山陰の業務ドローン、6 規制レイヤーを 1 クリック判定。
-          </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-            航空法（DID・空港）、小型無人機等飛行禁止法、自治体条例（都市公園・指定史跡・公衆密集地）を地理空間ポリゴンで重ね、信号機で総合判定。<span className="text-zinc-500 dark:text-zinc-400">「空（飛行空域）×&nbsp;番（守護）×&nbsp;算盤（瞬時計算）」を 4 音に圧縮した造語。</span>
+
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow">Soraban — Aerial Compliance Atlas</p>
+          <div className="flex items-end gap-3">
+            <h1 className="font-display text-5xl font-light leading-[0.95] tracking-tight text-ink sm:text-6xl">
+              そらばん
+            </h1>
+            <span className="font-display pb-2 text-base italic text-ink-mute">
+              / Soraban
+            </span>
+          </div>
+          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
+            山陰の業務ドローン、6 規制レイヤーを 1 クリックで判定。
+            <br className="hidden sm:block" />
+            航空法（DID・空港）／小型無人機等飛行禁止法／自治体条例（都市公園・指定史跡・公衆密集地）を地理空間ポリゴンで重ね、信号機で総合判定します。
           </p>
         </div>
-        <p className="max-w-2xl text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          自治体条例レイヤーは既存サービス全社の盲点。{PARK_MUNI_LABEL} 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。自治体は registry に1行追加するだけで判定エンジン・地図・カバレッジ表示すべてに自動反映されます。
+
+        {/* メタ表示。バッジ感を減らし、ドラフター文書の脇書きとして配置 */}
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs font-mono text-ink-mute sm:grid-cols-4">
+          <div className="flex flex-col gap-0.5">
+            <dt className="eyebrow !text-[9px]">Status</dt>
+            <dd className="text-ink-soft">社内限定 PoC ／ Phase 1</dd>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <dt className="eyebrow !text-[9px]">Engine</dt>
+            <dd className="tnum text-ink-soft">soraban-0.2.0-clausegraph</dd>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <dt className="eyebrow !text-[9px]">Patent</dt>
+            <dd className="text-ink-soft">
+              <span aria-hidden className="bearing-mark" />
+              出願準備中
+            </dd>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <dt className="eyebrow !text-[9px]">Coverage</dt>
+            <dd className="tnum text-ink-soft">
+              {COVERAGE_LAYERS.length} layers ／ {COVERAGE_SUMMARY.municipalParkNames.length} cities
+            </dd>
+          </div>
+        </dl>
+
+        <p className="max-w-3xl border-l-2 border-brand-700 pl-4 text-xs leading-relaxed text-ink-mute">
+          自治体条例レイヤーは既存サービス全社の盲点。{PARK_MUNI_LABEL} 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。自治体は registry に 1 行追加するだけで判定エンジン・地図・カバレッジ表示すべてに自動反映。
         </p>
       </header>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="flex flex-wrap items-baseline gap-3">
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            現在のカバレッジ（6 規制レイヤー）
-          </h2>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
-            国 {COVERAGE_LAYERS.filter((l) => l.source === "国").length}{" "}
-            / 都道府県 {COVERAGE_LAYERS.filter((l) => l.source === "都道府県").length}{" "}
-            / 市町村 {COVERAGE_LAYERS.filter((l) => l.source === "市町村").length}{" "}
-            ・ 自治体 {COVERAGE_SUMMARY.municipalParkNames.length}
-          </span>
+      {/* ============================ COVERAGE ============================ */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-end justify-between border-b border-rule pb-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow">§01 — Coverage</p>
+            <h2 className="font-display text-2xl font-light text-ink">
+              <span aria-hidden className="bearing-mark" />
+              現在のカバレッジ
+            </h2>
+          </div>
+          <p className="font-mono text-[11px] tnum text-ink-mute">
+            国 {COVERAGE_LAYERS.filter((l) => l.source === "国").length} / 都道府県 {COVERAGE_LAYERS.filter((l) => l.source === "都道府県").length} / 市町村 {COVERAGE_LAYERS.filter((l) => l.source === "市町村").length}
+          </p>
         </div>
-        <ul className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
-          {COVERAGE_LAYERS.map((layer) => (
+
+        <ul className="grid grid-cols-1 gap-px overflow-hidden bg-rule lg:grid-cols-2">
+          {COVERAGE_LAYERS.map((layer, idx) => (
             <li
               key={layer.title}
-              className="flex flex-col gap-1 rounded-lg border border-zinc-100 p-3 dark:border-zinc-900"
+              className="flex flex-col gap-2 bg-paper px-5 py-4"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-[10px] tnum text-ink-mute">
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
                 <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${sourceTone[layer.source]}`}
+                  className={`inline-flex items-center border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider ${sourceTone[layer.source]}`}
                 >
                   {layer.source}
                 </span>
-                <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  {layer.coverage}
-                </span>
+                <span className="text-[11px] text-ink-mute">{layer.coverage}</span>
               </div>
-              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">
+              <p className="font-display text-base font-medium leading-snug text-ink">
                 {layer.title}
               </p>
-              <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-400">
-                {layer.dataset} ・ {layer.count}
+              <p className="text-[11px] leading-relaxed text-ink-mute">
+                {layer.dataset}
+                <span className="mx-1.5 text-rule">·</span>
+                {layer.count}
               </p>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-          段階展開ロードマップ
-        </h2>
-        <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          {ROADMAP.map((r) => (
-            <li
-              key={r.phase}
-              className={`flex flex-col gap-0.5 rounded-lg border p-3 ${
-                r.status === "current"
-                  ? "border-zinc-900 bg-white shadow-sm dark:border-zinc-100 dark:bg-zinc-950"
-                  : r.status === "done"
-                    ? "border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/30"
-                    : r.status === "next"
-                      ? "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-950"
-                      : "border-dashed border-zinc-300 bg-transparent dark:border-zinc-700"
-              }`}
-            >
-              <div className="flex items-center gap-1.5">
-                <span
-                  className={`text-xs font-semibold ${
-                    r.status === "current"
-                      ? "text-zinc-900 dark:text-zinc-50"
-                      : r.status === "done"
-                        ? "text-emerald-800 dark:text-emerald-200"
-                        : "text-zinc-600 dark:text-zinc-300"
-                  }`}
+      {/* ============================ CHECKER ============================ */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-end justify-between border-b border-rule pb-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow">§02 — Compliance check</p>
+            <h2 className="font-display text-2xl font-light text-ink">
+              <span aria-hidden className="bearing-mark" />
+              判定する
+            </h2>
+          </div>
+          <p className="font-mono text-[11px] text-ink-mute">
+            click map · paste coords · search address
+          </p>
+        </div>
+        <RegulationChecker />
+      </section>
+
+      {/* ============================ ROADMAP ============================ */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-end justify-between border-b border-rule pb-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow">§03 — Roadmap</p>
+            <h2 className="font-display text-2xl font-light text-ink">
+              <span aria-hidden className="bearing-mark" />
+              段階展開
+            </h2>
+          </div>
+        </div>
+
+        <ol className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-5">
+          {ROADMAP.map((r) => {
+            const tone =
+              r.status === "current"
+                ? "bg-brand-700 text-paper"
+                : r.status === "done"
+                  ? "bg-paper-soft text-ink"
+                  : r.status === "next"
+                    ? "bg-paper text-ink"
+                    : "bg-paper text-ink-mute";
+            return (
+              <li
+                key={r.phase}
+                className={`flex min-h-[8rem] flex-col gap-1.5 px-4 py-4 ${tone}`}
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-xs uppercase tracking-wider">
+                    {r.phase}
+                  </span>
+                  {r.status === "current" ? (
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper/70">
+                      ▸ now
+                    </span>
+                  ) : r.status === "done" ? (
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-mute">
+                      ✓ done
+                    </span>
+                  ) : null}
+                </div>
+                <p
+                  className={`font-mono text-[10px] tnum ${r.status === "current" ? "text-paper/80" : "text-ink-mute"}`}
                 >
-                  {r.phase}
-                </span>
-                {r.status === "current" ? (
-                  <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0 text-[9px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-                    NOW
-                  </span>
-                ) : r.status === "done" ? (
-                  <span
-                    className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                    aria-label="達成済み"
-                  >
-                    ✓ DONE
-                  </span>
-                ) : null}
-              </div>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{r.when}</p>
-              <p className="text-xs leading-snug text-zinc-700 dark:text-zinc-200">
-                {r.scope}
-              </p>
-            </li>
-          ))}
+                  {r.when}
+                </p>
+                <p
+                  className={`mt-auto text-xs leading-snug ${r.status === "current" ? "text-paper" : ""}`}
+                >
+                  {r.scope}
+                </p>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
-      <RegulationChecker />
-
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-          採用技術 / 判定アルゴリズム
-        </h2>
-        <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+      {/* ============================ TECH STACK ============================ */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-end justify-between border-b border-rule pb-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow">§04 — Implementation</p>
+            <h2 className="font-display text-2xl font-light text-ink">
+              <span aria-hidden className="bearing-mark" />
+              採用技術 / 判定アルゴリズム
+            </h2>
+          </div>
+        </div>
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
           {TECH_STACK.map((item) => (
-            <div key={item.category} className="flex flex-col gap-0.5">
-              <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
-                {item.category}
-              </dt>
-              <dd className="text-xs leading-snug text-zinc-700 dark:text-zinc-300">
+            <div key={item.category} className="flex flex-col gap-1 border-l border-rule pl-3">
+              <dt className="eyebrow">{item.category}</dt>
+              <dd className="text-xs leading-relaxed text-ink-soft">
                 {item.value}
               </dd>
             </div>
@@ -286,25 +373,32 @@ export default function Home() {
         </dl>
       </section>
 
-      <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-        <p>
-          <span className="font-semibold">免責: </span>
+      {/* ============================ DISCLAIMER + FOOTER ============================ */}
+      <section className="border-t border-double border-rule pt-5">
+        <p className="text-[11px] leading-relaxed text-ink-mute">
+          <span className="eyebrow !text-[9px]">Disclaimer ·</span>{" "}
           本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。緊急用務空域等の動的情報は反映していません。実運用前に必ず{" "}
           <a
             href="https://www.dips.mlit.go.jp/portal/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline-offset-2 hover:underline"
+            className="text-brand-700 underline-offset-2 hover:underline"
           >
             国土交通省 DIPS
           </a>
-          、警察庁、各自治体の最新情報をご確認ください。Phase 0 段階の自治体条例データは手動シードを含み、verifiedAt と確信度（low/medium/high）で監査可能性を担保しています。
+          、警察庁、各自治体の最新情報をご確認ください。Phase 0/1 段階の自治体条例データは手動シードを含み、verifiedAt と確信度（low/medium/high）で監査可能性を担保しています。
         </p>
       </section>
 
-      <footer className="mt-auto flex flex-col gap-1 border-t border-zinc-200 pt-6 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
-        <p>© 2026 そらばん（Soraban）／ 奥田憲章 ・ 個人開発・社内検討段階</p>
-        <p>
+      <footer className="mt-auto flex flex-col gap-2 border-t border-rule pt-5 text-[10px] font-mono text-ink-mute">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span>© 2026 Soraban</span>
+          <span aria-hidden>—</span>
+          <span>奥田憲章 · 個人開発・社内検討段階</span>
+          <span aria-hidden>—</span>
+          <span className="tnum">base · 35°26′03″N · 133°22′50″E（鳥取県西伯郡日吉津村）</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-ink-mute/80">
           出典: 国土交通省「国土数値情報（人口集中地区 A16-15、空港 C28-20）」、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、米子市・境港市・出雲市例規集、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>

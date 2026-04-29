@@ -1,26 +1,207 @@
 @import "tailwindcss";
 
+/* ============================================================
+ * Soraban — design tokens
+ * ----------------------------------------------------------
+ * Aesthetic: 「測量野帳 (Surveyor's Field Notebook)」
+ *   - 紙: 暖色オフホワイト (paper)
+ *   - インク: 黒よりわずかに青寄り (ink)
+ *   - ブランドアクセント: 藍 (indigo) 1色のみ
+ *   - 信号 (signal): rose / amber / emerald を製図インク調に減彩
+ *   - 線: 1px hairline。たまに dotted (等高線の語彙)
+ *   - 角丸: 2px シャープ
+ *   - 影: 原則 0
+ *
+ *   信号と amber バッジが意味的に競合しないよう、ブランドアクセントは
+ *   完全に独立した藍系に固定する。
+ * ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Paper / Ink */
+  --color-paper: #f5f2ea;
+  --color-paper-soft: #ede9dd;
+  --color-paper-deep: #e7e1d1;
+  --color-ink: #0e1421;
+  --color-ink-soft: #2a2f3a;
+  --color-ink-mute: #5b6170;
+  --color-rule: #c9c2ad;
+  --color-rule-soft: #d8d1bd;
+
+  /* Brand accent — 藍 (single color, 5 stops) */
+  --color-indigo-50: #e9edf3;
+  --color-indigo-100: #c3cedc;
+  --color-indigo-300: #6c83a4;
+  --color-indigo-500: #2f4868;
+  --color-indigo-700: #1d3557;
+  --color-indigo-900: #0e1d34;
+
+  /* Semantic signal — 製図インク調に減彩 */
+  --color-signal-red: #b53a3a;
+  --color-signal-red-soft: #f1d9d9;
+  --color-signal-amber: #b97e1e;
+  --color-signal-amber-soft: #f3e6c8;
+  --color-signal-green: #3a7a4f;
+  --color-signal-green-soft: #d6e6da;
+  --color-signal-mute: #9da4b1;
+  --color-signal-mute-soft: #e6e6e2;
+
+  /* Geometry */
+  --radius-sharp: 2px;
+  --radius-soft: 6px;
+  --hairline: 1px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark mode = "blueprint" inverse */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-paper: #0c1320;
+    --color-paper-soft: #131c2c;
+    --color-paper-deep: #1a2438;
+    --color-ink: #e7e2d2;
+    --color-ink-soft: #c3bfb1;
+    --color-ink-mute: #8a8a85;
+    --color-rule: #2c3550;
+    --color-rule-soft: #1f263a;
+
+    --color-indigo-50: #1a2438;
+    --color-indigo-100: #243352;
+    --color-indigo-300: #6c83a4;
+    --color-indigo-500: #8aa4c6;
+    --color-indigo-700: #c3cedc;
+    --color-indigo-900: #e9edf3;
+
+    --color-signal-red: #d05959;
+    --color-signal-red-soft: #3a1818;
+    --color-signal-amber: #d29c3a;
+    --color-signal-amber-soft: #3a2a10;
+    --color-signal-green: #5fa275;
+    --color-signal-green-soft: #1a2a1f;
+    --color-signal-mute: #5b6170;
+    --color-signal-mute-soft: #1c2438;
   }
 }
 
+@theme inline {
+  /* Surfaces */
+  --color-paper: var(--color-paper);
+  --color-paper-soft: var(--color-paper-soft);
+  --color-paper-deep: var(--color-paper-deep);
+
+  /* Type */
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-mute: var(--color-ink-mute);
+
+  /* Lines */
+  --color-rule: var(--color-rule);
+  --color-rule-soft: var(--color-rule-soft);
+
+  /* Brand */
+  --color-brand-50: var(--color-indigo-50);
+  --color-brand-100: var(--color-indigo-100);
+  --color-brand-300: var(--color-indigo-300);
+  --color-brand-500: var(--color-indigo-500);
+  --color-brand-700: var(--color-indigo-700);
+  --color-brand-900: var(--color-indigo-900);
+
+  /* Semantic signals */
+  --color-signal-red: var(--color-signal-red);
+  --color-signal-red-soft: var(--color-signal-red-soft);
+  --color-signal-amber: var(--color-signal-amber);
+  --color-signal-amber-soft: var(--color-signal-amber-soft);
+  --color-signal-green: var(--color-signal-green);
+  --color-signal-green-soft: var(--color-signal-green-soft);
+  --color-signal-mute: var(--color-signal-mute);
+  --color-signal-mute-soft: var(--color-signal-mute-soft);
+
+  /* Geometry */
+  --radius-sharp: var(--radius-sharp);
+  --radius-soft: var(--radius-soft);
+
+  /* Fonts */
+  --font-display: var(--font-display), "Noto Serif JP", "ヒラギノ明朝 ProN",
+    "Hiragino Mincho ProN", serif;
+  --font-sans: var(--font-sans), "Hiragino Sans", "Yu Gothic", "Meiryo",
+    sans-serif;
+  --font-mono: var(--font-mono), "Menlo", "Monaco", "Courier New", monospace;
+}
+
+/* --------------------------------------------------
+ * 紙のテクスチャ感: 微細なノイズではなく、薄い網目線
+ * ------------------------------------------------ */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "palt" 1, "ss01" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    /* 5mm × 5mm の薄方眼 (野帳の風合い) */
+    linear-gradient(to right, color-mix(in srgb, var(--color-rule) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-rule) 22%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+/* 数字を全幅でカチッと並べる用 (座標 / ms / カウンタ向け) */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ヘッダの small-caps トラッキング (測量原図のキャプション風) */
+.eyebrow {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--color-ink-mute);
+}
+
+/* セクション見出し横の方位記 (decorative, aria-hidden 必須) */
+.bearing-mark {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border: 1px solid var(--color-ink-mute);
+  margin-right: 0.5em;
+  position: relative;
+  transform: rotate(45deg);
+  vertical-align: middle;
+}
+.bearing-mark::after {
+  content: "";
+  position: absolute;
+  inset: 25%;
+  background: var(--color-ink-mute);
+}
+
+/* 等高線風の点線 hr */
+.contour-rule {
+  border: 0;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-rule) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+/* テキストリンクの控えめな下線 */
+a {
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* Selection: ブランドアクセントを軽く敷く */
+::selection {
+  background: color-mix(in srgb, var(--color-brand-700) 22%, transparent);
+  color: var(--color-ink);
+}
+
+/* スクロール挙動 */
+html {
+  scroll-behavior: smooth;
 }

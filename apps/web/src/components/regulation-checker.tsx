@@ -21,10 +21,10 @@ import { RegulationCard } from "./regulation-card";
 import { RegulationMap } from "./regulation-map";
 
 const overallTone: Record<RegulationStatus, string> = {
-  red: "text-rose-600 dark:text-rose-400",
-  yellow: "text-amber-600 dark:text-amber-400",
-  green: "text-emerald-600 dark:text-emerald-400",
-  unknown: "text-zinc-600 dark:text-zinc-400",
+  red: "text-signal-red",
+  yellow: "text-signal-amber",
+  green: "text-signal-green",
+  unknown: "text-ink-mute",
 };
 
 const overallHelp: Record<RegulationStatus, string> = {
@@ -114,9 +114,11 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   },
 ];
 
+// 県別チップは色相で差別化せず、ブランド藍の塗り (鳥取県) / 抜き (島根県) で
+// "1色のみ" 縛りを守る。長期的なカラーパレット汚染を防ぐ。
 const PRESET_GROUP_TONE: Record<PresetGroup, string> = {
-  鳥取県: "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/60 dark:text-sky-200 dark:ring-sky-800",
-  島根県: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-200 dark:ring-emerald-800",
+  鳥取県: "bg-brand-700 text-paper border-brand-700",
+  島根県: "border-brand-700 text-brand-700 bg-transparent",
 };
 
 export function RegulationChecker() {
@@ -244,16 +246,28 @@ export function RegulationChecker() {
     }
   };
 
+  // 共通スタイル: 紙地のフィールドカード ＋ シャープ角丸
+  const fieldClass =
+    "w-full rounded-sharp border border-rule bg-paper px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-1 focus:ring-brand-700";
+  const ghostBtn =
+    "inline-flex h-10 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-xs font-medium uppercase tracking-wider text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft disabled:opacity-40";
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
+      {/* ─── INPUT FORM ───────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-5 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+        className="flex flex-col gap-7 border border-rule bg-paper-soft/50 p-6"
       >
-        <div className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            住所から検索（国土地理院ジオコーダ）
-          </span>
+        {/* address geocode */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="eyebrow">
+            <span aria-hidden className="bearing-mark" />
+            01 — 住所から位置決定
+            <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+              （国土地理院ジオコーダ）
+            </span>
+          </legend>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
@@ -265,20 +279,20 @@ export function RegulationChecker() {
                   void handleGeocode();
                 }
               }}
-              placeholder="例: 鳥取県米子市加茂町1-1"
-              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
+              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3"
+              className={fieldClass}
             />
             <button
               type="button"
               onClick={() => void handleGeocode()}
               disabled={geocoding || address.trim().length === 0}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className={ghostBtn}
             >
               {geocoding ? "検索中…" : "住所で位置決定"}
             </button>
           </div>
           {geocodeResults.length > 1 ? (
-            <ul className="mt-1 flex flex-col gap-1 rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <ul className="mt-1 flex flex-col divide-y divide-rule border border-rule bg-paper">
               {geocodeResults.map((r) => (
                 <li key={`${r.addressCode}-${r.lat}-${r.lng}`}>
                   <button
@@ -288,23 +302,28 @@ export function RegulationChecker() {
                       runCheck({ lat: r.lat, lng: r.lng });
                       setGeocodeResults([]);
                     }}
-                    className="w-full rounded px-2 py-1.5 text-left hover:bg-white dark:hover:bg-zinc-800"
+                    className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left hover:bg-paper-soft"
                   >
-                    <span className="font-medium">{r.title}</span>
-                    <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-                      ({round6(r.lat)}, {round6(r.lng)})
+                    <span className="text-sm font-medium text-ink">{r.title}</span>
+                    <span className="font-mono text-[11px] tnum text-ink-mute">
+                      {round6(r.lat)}, {round6(r.lng)}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : null}
-        </div>
+        </fieldset>
 
-        <div className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            座標を貼り付け（Google Maps の「座標をコピー」や URL に対応）
-          </span>
+        {/* combined coords */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="eyebrow">
+            <span aria-hidden className="bearing-mark" />
+            02 — 座標貼り付け
+            <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+              （Google Maps 「座標をコピー」 / URL に対応）
+            </span>
+          </legend>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
@@ -329,75 +348,99 @@ export function RegulationChecker() {
                 runCheck(parsed);
                 setCombinedStatus({
                   ok: true,
-                  message: `✓ 反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
+                  message: `反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
                 });
               }}
-              placeholder="例: 35.428303, 133.330614 ／ https://maps.google.com/...@35.428303,133.330614,15z"
-              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
+              placeholder="例: 35.434238, 133.380508 ／ https://maps.google.com/...@35.434238,133.380508,15z"
+              className={`${fieldClass} font-mono`}
             />
             <button
               type="button"
               onClick={() => applyCombined(combined)}
               disabled={combined.trim().length === 0}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className={ghostBtn}
             >
               反映
             </button>
           </div>
           {combinedStatus !== null ? (
             <p
-              className={
-                combinedStatus.ok
-                  ? "text-xs text-emerald-600 dark:text-emerald-400"
-                  : "text-xs text-rose-600 dark:text-rose-400"
-              }
+              className={`font-mono text-[11px] ${combinedStatus.ok ? "text-signal-green" : "text-signal-red"}`}
               role="status"
             >
+              <span aria-hidden>{combinedStatus.ok ? "✓ " : "× "}</span>
               {combinedStatus.message}
+            </p>
+          ) : null}
+        </fieldset>
+
+        {/* lat / lng */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="eyebrow">
+            <span aria-hidden className="bearing-mark" />
+            03 — 緯度 / 経度 直接入力
+          </legend>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                lat (N°)
+              </span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={lat}
+                onChange={(e) => setLat(e.target.value)}
+                onPaste={handleSplitPaste}
+                className={`${fieldClass} font-mono`}
+                placeholder="35.4342"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                lng (E°)
+              </span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={lng}
+                onChange={(e) => setLng(e.target.value)}
+                onPaste={handleSplitPaste}
+                className={`${fieldClass} font-mono`}
+                placeholder="133.3805"
+              />
+            </label>
+          </div>
+        </fieldset>
+
+        {/* primary action */}
+        <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4">
+          <button
+            type="submit"
+            disabled={isChecking}
+            className="group inline-flex h-11 items-center gap-2 rounded-sharp bg-brand-700 px-6 text-sm font-medium text-paper transition-colors hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 focus:ring-offset-paper disabled:opacity-40"
+          >
+            <span aria-hidden className="font-mono text-[10px] uppercase tracking-[0.2em] opacity-70">
+              ▸
+            </span>
+            {isChecking ? "判定中…" : "規制をチェック"}
+          </button>
+          {error ? (
+            <p className="text-xs text-signal-red" role="alert">
+              {error}
             </p>
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">緯度 (lat)</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={lat}
-              onChange={(e) => setLat(e.target.value)}
-              onPaste={handleSplitPaste}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-              placeholder="35.4283"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">経度 (lng)</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={lng}
-              onChange={(e) => setLng(e.target.value)}
-              onPaste={handleSplitPaste}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-              placeholder="133.3306"
-            />
-          </label>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={isChecking}
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-zinc-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            {isChecking ? "判定中…" : "規制をチェック"}
-          </button>
-        </div>
-        <div className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            デモ用プリセット（県別）
-          </span>
-          <div className="flex flex-wrap gap-2">
+        {/* presets */}
+        <div className="flex flex-col gap-3 border-t border-rule pt-5">
+          <p className="eyebrow">
+            <span aria-hidden className="bearing-mark" />
+            04 — デモ用プリセット
+            <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+              （県別）
+            </span>
+          </p>
+          <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-3">
             {DEMO_PRESETS.map((preset) => (
               <button
                 key={preset.id}
@@ -407,66 +450,70 @@ export function RegulationChecker() {
                   runCheck(preset.loc);
                 }}
                 title={preset.hint}
-                className="group inline-flex min-w-[10rem] flex-col items-start gap-0.5 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-left text-xs transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+                className="flex flex-col items-start gap-1 bg-paper px-4 py-3 text-left transition-colors hover:bg-paper-soft"
               >
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-semibold ring-1 ring-inset ${PRESET_GROUP_TONE[preset.group]}`}
+                    className={`inline-flex items-center border px-1.5 py-px text-[9px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
                   >
                     {preset.group}
                   </span>
-                  <span className="font-medium text-zinc-800 dark:text-zinc-100">
+                  <span className="font-display text-sm font-medium text-ink">
                     {preset.name}
                   </span>
                 </div>
-                <span className="text-[10px] leading-tight text-zinc-500 dark:text-zinc-400">
+                <span className="text-[11px] leading-tight text-ink-mute">
                   {preset.hint}
                 </span>
               </button>
             ))}
           </div>
         </div>
-        {error ? (
-          <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
-            {error}
-          </p>
-        ) : null}
       </form>
 
+      {/* ─── MAP ───────────────────────────────── */}
       <RegulationMap center={center} prefCode={prefCode} onPick={handlePick} />
 
+      {/* ─── RESULT ───────────────────────────────── */}
       {result ? (
         <section
-          className="flex flex-col gap-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/40"
+          className="flex flex-col gap-7 border-y border-double border-rule bg-paper-soft/40 p-6"
           aria-live="polite"
         >
-          <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+          {/* signal + headline */}
+          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
             <SignalLight status={result.overall === "unknown" ? "yellow" : result.overall} size="lg" />
-            <div className="flex flex-col gap-1">
-              <p className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <div className="flex flex-1 flex-col gap-1">
+              <p className="eyebrow">
+                <span aria-hidden className="bearing-mark" />
                 総合判定
               </p>
-              <p className={`text-2xl font-semibold ${overallTone[result.overall]}`}>
+              <p className={`font-display text-3xl font-light tracking-tight ${overallTone[result.overall]}`}>
                 {STATUS_LABEL[result.overall]}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="text-sm leading-relaxed text-ink-soft">
                 {overallHelp[result.overall]}
               </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                判定地点 緯度 {lat} / 経度 {lng}
-                {result.resolvedAddress ? `（${result.resolvedAddress}）` : ""}
+              <p className="font-mono text-[11px] tnum text-ink-mute">
+                {lat}°N · {lng}°E
+                {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-            <span className="font-semibold">免責: </span>
+          {/* disclaimer — brand outlined, never amber */}
+          <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
+            <span className="eyebrow !text-[9px]">disclaimer</span>{" "}
             {result.disclaimer}
           </div>
 
+          {/* per-regulation cards */}
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              関連条例 ({result.regulations.length} 件)
+            <p className="eyebrow">
+              <span aria-hidden className="bearing-mark" />
+              関連条例 (
+              <span className="tnum">{String(result.regulations.length).padStart(2, "0")}</span>
+              {" "}件)
             </p>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
               {result.regulations.map((r) => (
@@ -475,30 +522,39 @@ export function RegulationChecker() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-zinc-200 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-            <span>
-              判定ID:{" "}
-              <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+          {/* audit meta — designed as drafter's stamp block */}
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid-cols-5">
+            <div className="flex flex-col gap-0.5 col-span-2">
+              <dt className="eyebrow !text-[9px]">Evidence ID</dt>
+              <dd className="tnum normal-case tracking-normal text-ink">
                 {result.evidenceId}
-              </code>
-            </span>
-            <span>
-              全体確信度:{" "}
-              <span className="font-medium text-zinc-700 dark:text-zinc-200">
+              </dd>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <dt className="eyebrow !text-[9px]">Confidence</dt>
+              <dd className="normal-case tracking-normal text-ink">
                 {CONFIDENCE_LABEL[result.overallConfidence]}
-              </span>
-            </span>
-            <span>エンジン: {result.engineVersion}</span>
-            <span>判定時刻: {new Date(result.checkedAt).toLocaleString("ja-JP")}</span>
-            {responseMs !== null ? (
-              <span>
-                応答:{" "}
-                <span className="font-medium tabular-nums text-zinc-700 dark:text-zinc-200">
-                  {responseMs} ms
-                </span>
-              </span>
-            ) : null}
-          </div>
+              </dd>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <dt className="eyebrow !text-[9px]">Engine</dt>
+              <dd className="tnum normal-case tracking-normal text-ink">
+                {result.engineVersion}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <dt className="eyebrow !text-[9px]">Latency</dt>
+              <dd className="tnum normal-case tracking-normal text-ink">
+                {responseMs !== null ? `${responseMs} ms` : "—"}
+              </dd>
+            </div>
+            <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-5">
+              <dt className="eyebrow !text-[9px]">Checked at</dt>
+              <dd className="normal-case tracking-normal text-ink">
+                {new Date(result.checkedAt).toLocaleString("ja-JP")}
+              </dd>
+            </div>
+          </dl>
         </section>
       ) : null}
     </div>
