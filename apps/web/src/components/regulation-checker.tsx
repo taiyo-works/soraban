@@ -287,17 +287,18 @@ export function RegulationChecker() {
   };
 
   // 共通スタイル: 紙地のフィールドカード ＋ シャープ角丸
+  // モバイルでもタップ精度が出るよう、高さ 44px 以上を確保。
   const fieldClass =
-    "w-full rounded-sharp border border-rule bg-paper px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-1 focus:ring-brand-700";
+    "w-full rounded-sharp border border-rule bg-paper px-3 py-3 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-1 focus:ring-brand-700 sm:py-2.5 sm:text-sm";
   const ghostBtn =
-    "inline-flex h-10 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-xs font-medium uppercase tracking-wider text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft disabled:opacity-40";
+    "inline-flex h-11 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-xs font-medium uppercase tracking-wider text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft active:bg-paper-soft disabled:opacity-40";
 
   return (
     <div className="flex flex-col gap-10">
       {/* ─── INPUT FORM ───────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-7 border border-rule bg-paper-soft/50 p-6"
+        className="flex flex-col gap-6 border border-rule bg-paper-soft/50 p-4 sm:gap-7 sm:p-6"
       >
         {/* address geocode */}
         <fieldset className="flex flex-col gap-2">
@@ -452,15 +453,21 @@ export function RegulationChecker() {
           </div>
         </fieldset>
 
-        {/* 機体・運航条件 — ClauseGraph の例外節と照合される */}
-        <fieldset className="flex flex-col gap-3 border-t border-rule pt-5">
-          <legend className="eyebrow">
+        {/* 機体・運航条件 — ClauseGraph の例外節と照合される
+            モバイルでは折りたたみが標準（"上級設定" 扱い）。デフォルト = 最も厳しい解釈で
+            まず判定し、必要なときだけ展開する流れ */}
+        <details className="flex flex-col gap-3 border-t border-rule pt-5 [&>summary::-webkit-details-marker]:hidden">
+          <summary className="eyebrow flex cursor-pointer items-center gap-1 select-none list-none">
             <span aria-hidden className="bearing-mark" />
             05 — 機体・運航条件
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
-              （例外節を自動適用 / 未指定 = 最も厳しい解釈）
+              （例外節を自動適用 / タップで展開）
             </span>
-          </legend>
+            <span aria-hidden className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mute transition-transform group-open:rotate-90 [details[open]_&]:rotate-90">
+              ▸
+            </span>
+          </summary>
+          <div className="mt-3 flex flex-col gap-3">
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* 機体重量 */}
@@ -547,16 +554,16 @@ export function RegulationChecker() {
               ].map((p) => (
                 <label
                   key={p.key}
-                  className={`flex cursor-pointer items-start gap-2 px-3 py-2.5 transition-colors ${p.state ? "bg-brand-50" : "bg-paper hover:bg-paper-soft"}`}
+                  className={`flex min-h-[52px] cursor-pointer items-start gap-2 px-3 py-3 transition-colors ${p.state ? "bg-brand-50" : "bg-paper active:bg-paper-soft sm:hover:bg-paper-soft"}`}
                 >
                   <input
                     type="checkbox"
                     checked={p.state}
                     onChange={(e) => p.set(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-brand-700"
+                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700"
                   />
                   <span className="flex flex-1 flex-col leading-tight">
-                    <span className="text-xs font-medium text-ink">{p.label}</span>
+                    <span className="text-sm font-medium text-ink sm:text-xs">{p.label}</span>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
                       {p.desc}
                     </span>
@@ -565,7 +572,8 @@ export function RegulationChecker() {
               ))}
             </div>
           </div>
-        </fieldset>
+          </div>
+        </details>
 
         {/* primary action */}
         <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4">
@@ -586,16 +594,46 @@ export function RegulationChecker() {
           ) : null}
         </div>
 
-        {/* presets */}
+        {/* presets — モバイルでは snap-x の横スクロール、sm 以上はグリッド */}
         <div className="flex flex-col gap-3 border-t border-rule pt-5">
           <p className="eyebrow">
             <span aria-hidden className="bearing-mark" />
             04 — デモ用プリセット
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
-              （県別）
+              （県別 ／ 横スクロール）
             </span>
           </p>
-          <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-3">
+          {/* モバイル: 横スクロール scroll-snap */}
+          <div className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 sm:hidden">
+            {DEMO_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => {
+                  applyLocation(preset.loc);
+                  runCheck(preset.loc);
+                }}
+                title={preset.hint}
+                className="flex min-w-[14rem] shrink-0 snap-start flex-col items-start gap-1 border border-rule bg-paper px-4 py-3 text-left transition-colors active:bg-paper-soft"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center border px-1.5 py-px text-[9px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
+                  >
+                    {preset.group}
+                  </span>
+                  <span className="font-display text-sm font-medium text-ink">
+                    {preset.name}
+                  </span>
+                </div>
+                <span className="text-[11px] leading-tight text-ink-mute">
+                  {preset.hint}
+                </span>
+              </button>
+            ))}
+          </div>
+          {/* sm 以上: 既存のグリッド */}
+          <div className="hidden grid-cols-2 gap-px overflow-hidden bg-rule sm:grid lg:grid-cols-3">
             {DEMO_PRESETS.map((preset) => (
               <button
                 key={preset.id}
@@ -632,7 +670,7 @@ export function RegulationChecker() {
       {/* ─── RESULT ───────────────────────────────── */}
       {result ? (
         <section
-          className="flex flex-col gap-7 border-y border-double border-rule bg-paper-soft/40 p-6"
+          className="flex flex-col gap-6 border-y border-double border-rule bg-paper-soft/40 p-4 sm:gap-7 sm:p-6"
           aria-live="polite"
         >
           {/* signal + headline */}

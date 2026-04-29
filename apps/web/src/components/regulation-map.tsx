@@ -385,59 +385,70 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <div ref={containerRef} className="aspect-[16/9] w-full" />
+      {/* 地図: モバイルでは aspect 4:5 (縦長) で画面の主役に近づける。
+          touch-action で縦スクロールとピンチを両立させる */}
+      <div className="overflow-hidden border border-rule">
+        <div
+          ref={containerRef}
+          className="aspect-[4/5] w-full sm:aspect-[16/9]"
+          style={{ touchAction: "pan-x pan-y" }}
+        />
       </div>
-      <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white/60 p-3 text-xs dark:border-zinc-800 dark:bg-zinc-950/60">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="font-medium text-zinc-700 dark:text-zinc-200">
-            規制レイヤー（{visibleCount}/{LAYER_GROUPS.length} 表示）
+      {/* レイヤーレジェンド: モバイルではデフォルト折りたたみ */}
+      <details
+        className="flex flex-col gap-2 border border-rule bg-paper/60 p-3 text-xs sm:[&>summary]:hidden sm:[&>div]:!flex"
+        open
+      >
+        <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-ink select-none [&::-webkit-details-marker]:hidden">
+          <span>規制レイヤー（{visibleCount}/{LAYER_GROUPS.length} 表示）</span>
+          <span aria-hidden className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mute">
+            ▾ tap
           </span>
-          <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+        </summary>
+        <div className="flex flex-col gap-2 sm:!flex">
+          <span className="text-[11px] text-ink-mute hidden sm:block">
             ・チェックで地図表示を切替 ・地図クリックで判定地点を選択
           </span>
+          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+            {LAYER_GROUPS.map((group) => {
+              const checked = layerVisibility[group.key];
+              return (
+                <li key={group.key}>
+                  <label
+                    className={`flex min-h-[44px] cursor-pointer items-start gap-2 border px-2 py-2 transition-colors ${
+                      checked
+                        ? "border-rule bg-paper-soft"
+                        : "border-transparent text-ink-mute"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setLayerVisibility((prev) => ({
+                          ...prev,
+                          [group.key]: e.target.checked,
+                        }))
+                      }
+                      className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700"
+                    />
+                    <span
+                      className={`mt-0.5 inline-block h-2.5 w-2.5 ring-1 ${group.swatch}`}
+                      aria-hidden
+                    />
+                    <span className="flex flex-1 flex-col leading-tight">
+                      <span className="font-medium text-ink">{group.label}</span>
+                      <span className="text-[10px] text-ink-mute">
+                        {group.source}
+                      </span>
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-          {LAYER_GROUPS.map((group) => {
-            const checked = layerVisibility[group.key];
-            return (
-              <li key={group.key}>
-                <label
-                  className={`flex cursor-pointer items-start gap-2 rounded-md border px-2 py-1.5 transition-colors ${
-                    checked
-                      ? "border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
-                      : "border-transparent text-zinc-400 hover:bg-zinc-50 dark:text-zinc-500 dark:hover:bg-zinc-900/40"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(e) =>
-                      setLayerVisibility((prev) => ({
-                        ...prev,
-                        [group.key]: e.target.checked,
-                      }))
-                    }
-                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-zinc-700 dark:accent-zinc-300"
-                  />
-                  <span
-                    className={`mt-0.5 inline-block h-2.5 w-2.5 ring-1 ${group.swatch}`}
-                    aria-hidden
-                  />
-                  <span className="flex flex-1 flex-col leading-tight">
-                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                      {group.label}
-                    </span>
-                    <span className="text-[10px] text-zinc-500 dark:text-zinc-500">
-                      {group.source}
-                    </span>
-                  </span>
-                </label>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      </details>
     </div>
   );
 }

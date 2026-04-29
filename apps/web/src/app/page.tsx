@@ -171,9 +171,9 @@ const sourceTone: Record<CoverageRow["source"], string> = {
 
 export default function Home() {
   return (
-    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-16 px-6 py-12 sm:py-20">
+    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-10 px-4 py-8 sm:gap-16 sm:px-6 sm:py-20">
       {/* ============================ HERO ============================ */}
-      <header className="relative flex flex-col gap-8">
+      <header className="relative flex flex-col gap-5 sm:gap-8">
         {/* 紙の上にうっすら方位記 (decorative) */}
         <div
           aria-hidden
@@ -186,11 +186,11 @@ export default function Home() {
 
         <div className="flex flex-col gap-3">
           <p className="eyebrow">Soraban — Aerial Compliance Atlas</p>
-          <div className="flex items-end gap-3">
-            <h1 className="font-display text-5xl font-light leading-[0.95] tracking-tight text-ink sm:text-6xl">
+          <div className="flex items-end gap-2 sm:gap-3">
+            <h1 className="font-display text-4xl font-light leading-[0.95] tracking-tight text-ink sm:text-6xl">
               そらばん
             </h1>
-            <span className="font-display pb-2 text-base italic text-ink-mute">
+            <span className="font-display pb-1 text-sm italic text-ink-mute sm:pb-2 sm:text-base">
               / Soraban
             </span>
           </div>
@@ -236,7 +236,7 @@ export default function Home() {
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
             <p className="eyebrow">§01 — Coverage</p>
-            <h2 className="font-display text-2xl font-light text-ink">
+            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
               現在のカバレッジ
             </h2>
@@ -281,7 +281,7 @@ export default function Home() {
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
             <p className="eyebrow">§02 — Compliance check</p>
-            <h2 className="font-display text-2xl font-light text-ink">
+            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
               判定する
             </h2>
@@ -298,7 +298,7 @@ export default function Home() {
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
             <p className="eyebrow">§03 — Roadmap</p>
-            <h2 className="font-display text-2xl font-light text-ink">
+            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
               段階展開
             </h2>
@@ -355,7 +355,7 @@ export default function Home() {
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
             <p className="eyebrow">§04 — Implementation</p>
-            <h2 className="font-display text-2xl font-light text-ink">
+            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
               採用技術 / 判定アルゴリズム
             </h2>
