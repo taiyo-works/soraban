@@ -22,6 +22,7 @@ packages/regulations/data/did/by-pref/
 packages/regulations/data/did/all.geojson
 packages/regulations/data/airports/raw/
 packages/regulations/data/airports/airports.geojson
+packages/regulations/data/parks/raw/
 
 # ローカル作業用アーカイブ
 files.zip

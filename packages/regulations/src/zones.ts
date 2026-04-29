@@ -1,5 +1,12 @@
 import type { LatLng, Polygon } from "@soraban/geo";
 
+// 都市公園 polygon は data/parks/by-muni/{muniCode}.json から読み込む。
+// 自治体追加・正規ポリゴン置換時はこの JSON を更新すれば evaluator/UI に
+// 自動反映される。詳細フローは packages/regulations/scripts/README.md。
+import yonagoParksJson from "../data/parks/by-muni/31202.json";
+import sakaiminatoParksJson from "../data/parks/by-muni/31204.json";
+import izumoParksJson from "../data/parks/by-muni/32203.json";
+
 // 自衛隊美保基地（米子鬼太郎空港共用） — 滑走路中央付近。
 // 35°29′37″N 133°14′10″E
 export const MIHO_AIRBASE_CENTER: LatLng = {
@@ -19,90 +26,27 @@ export type Park = {
   readonly polygon: Polygon;
 };
 
-// 米子市内の主要都市公園（簡易ポリゴン）。
-// Phase 1 で米子市公園台帳の正規ポリゴンに置換予定。
-export const YONAGO_PARKS: readonly Park[] = [
-  {
-    id: "minatoyama-park",
-    name: "湊山公園（米子城跡）",
-    polygon: [
-      { lat: 35.4287, lng: 133.3194 },
-      { lat: 35.4287, lng: 133.3245 },
-      { lat: 35.4248, lng: 133.3245 },
-      { lat: 35.4248, lng: 133.3194 },
-    ],
-  },
-  {
-    id: "higashiyama-park",
-    name: "東山公園（どらドラパーク米子）",
-    polygon: [
-      { lat: 35.4180, lng: 133.3500 },
-      { lat: 35.4180, lng: 133.3580 },
-      { lat: 35.4130, lng: 133.3580 },
-      { lat: 35.4130, lng: 133.3500 },
-    ],
-  },
-  {
-    id: "kamo-park",
-    name: "加茂中央公園",
-    polygon: [
-      { lat: 35.4310, lng: 133.3340 },
-      { lat: 35.4310, lng: 133.3375 },
-      { lat: 35.4286, lng: 133.3375 },
-      { lat: 35.4286, lng: 133.3340 },
-    ],
-  },
-  {
-    id: "kaike-onsen-park",
-    name: "皆生温泉海浜公園",
-    polygon: [
-      { lat: 35.4540, lng: 133.3300 },
-      { lat: 35.4540, lng: 133.3380 },
-      { lat: 35.4510, lng: 133.3380 },
-      { lat: 35.4510, lng: 133.3300 },
-    ],
-  },
-  {
-    id: "uchihama-park",
-    name: "内浜産業道路緑地",
-    polygon: [
-      { lat: 35.4615, lng: 133.3120 },
-      { lat: 35.4615, lng: 133.3185 },
-      { lat: 35.4595, lng: 133.3185 },
-      { lat: 35.4595, lng: 133.3120 },
-    ],
-  },
-  {
-    id: "yonago-stadium-park",
-    name: "米子市民球場周辺緑地",
-    polygon: [
-      { lat: 35.4203, lng: 133.3445 },
-      { lat: 35.4203, lng: 133.3490 },
-      { lat: 35.4180, lng: 133.3490 },
-      { lat: 35.4180, lng: 133.3445 },
-    ],
-  },
-  {
-    id: "fukuichi-park",
-    name: "福市遺跡公園",
-    polygon: [
-      { lat: 35.4012, lng: 133.3215 },
-      { lat: 35.4012, lng: 133.3260 },
-      { lat: 35.3985, lng: 133.3260 },
-      { lat: 35.3985, lng: 133.3215 },
-    ],
-  },
-  {
-    id: "yonago-waterfront-park",
-    name: "中海ふれあい公園",
-    polygon: [
-      { lat: 35.4358, lng: 133.3070 },
-      { lat: 35.4358, lng: 133.3125 },
-      { lat: 35.4330, lng: 133.3125 },
-      { lat: 35.4330, lng: 133.3070 },
-    ],
-  },
-];
+// JSON で取り込んだ raw data を Park[] に整形する。
+// 将来の N06 GeoJSON 置換時もここを通すことでスキーマ変更を 1 箇所で吸収できる。
+type ParksFile = {
+  readonly muniCode: string;
+  readonly muniName: string;
+  readonly parks: ReadonlyArray<{
+    readonly id: string;
+    readonly name: string;
+    readonly polygon: ReadonlyArray<{ readonly lat: number; readonly lng: number }>;
+  }>;
+};
+
+const toParks = (file: ParksFile): readonly Park[] =>
+  file.parks.map((p) => ({
+    id: p.id,
+    name: p.name,
+    polygon: p.polygon.map((pt) => ({ lat: pt.lat, lng: pt.lng })),
+  }));
+
+// 米子市内の主要都市公園。data/parks/by-muni/31202.json から取り込み。
+export const YONAGO_PARKS: readonly Park[] = toParks(yonagoParksJson);
 
 // 文化財・史跡（簡易ポリゴン）。
 // 国指定史跡は文化財保護法第125条により現状変更には文化庁長官の許可が必要。
@@ -176,52 +120,8 @@ export const YONAGO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   },
 ];
 
-// 境港市内の主要都市公園（簡易ポリゴン）。
-// Phase 1 で境港市公園台帳から正規ポリゴン置換予定。
-// 鳥取県境港市の市町村コード = 31204。
-export const SAKAIMINATO_PARKS: readonly Park[] = [
-  {
-    id: "yume-minato-park",
-    name: "夢みなと公園",
-    polygon: [
-      // JR 境港駅 (35.543, 133.228) を含めないため、駅の北西側に配置。
-      { lat: 35.5470, lng: 133.2210 },
-      { lat: 35.5470, lng: 133.2255 },
-      { lat: 35.5445, lng: 133.2255 },
-      { lat: 35.5445, lng: 133.2210 },
-    ],
-  },
-  {
-    id: "watari-park",
-    name: "渡公園",
-    polygon: [
-      { lat: 35.5250, lng: 133.2400 },
-      { lat: 35.5250, lng: 133.2435 },
-      { lat: 35.5230, lng: 133.2435 },
-      { lat: 35.5230, lng: 133.2400 },
-    ],
-  },
-  {
-    id: "amari-park",
-    name: "余子公園",
-    polygon: [
-      { lat: 35.5400, lng: 133.2420 },
-      { lat: 35.5400, lng: 133.2455 },
-      { lat: 35.5375, lng: 133.2455 },
-      { lat: 35.5375, lng: 133.2420 },
-    ],
-  },
-  {
-    id: "nakano-park",
-    name: "中野公園",
-    polygon: [
-      { lat: 35.5475, lng: 133.2255 },
-      { lat: 35.5475, lng: 133.2290 },
-      { lat: 35.5450, lng: 133.2290 },
-      { lat: 35.5450, lng: 133.2255 },
-    ],
-  },
-];
+// 境港市内の主要都市公園。data/parks/by-muni/31204.json から取り込み。
+export const SAKAIMINATO_PARKS: readonly Park[] = toParks(sakaiminatoParksJson);
 
 // 境港市内の "公衆密集地" 想定エリア。鳥取県迷惑行為等防止条例の運用上、
 // 上空飛行の自粛が推奨される場所。半径 100m を半径バッファとして適用する。
@@ -246,64 +146,10 @@ export const SAKAIMINATO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   },
 ];
 
-// 出雲市内の主要都市公園（簡易ポリゴン）。
-// Phase 1 で出雲市公園台帳から正規ポリゴン置換予定。
-// 島根県出雲市の市町村コード = 32203。
-export const IZUMO_PARKS: readonly Park[] = [
-  {
-    id: "izumo-dome-park",
-    name: "出雲ドーム公園",
-    polygon: [
-      { lat: 35.3700, lng: 132.7550 },
-      { lat: 35.3700, lng: 132.7595 },
-      { lat: 35.3672, lng: 132.7595 },
-      { lat: 35.3672, lng: 132.7550 },
-    ],
-  },
-  {
-    id: "izumo-taisha-park",
-    name: "大社公園（出雲大社東側）",
-    polygon: [
-      // 出雲大社境内遺跡を含めず、東側の市営公園相当エリアを対象。
-      { lat: 35.4030, lng: 132.6885 },
-      { lat: 35.4030, lng: 132.6920 },
-      { lat: 35.4002, lng: 132.6920 },
-      { lat: 35.4002, lng: 132.6885 },
-    ],
-  },
-  {
-    id: "hamayama-park",
-    name: "浜山公園",
-    polygon: [
-      { lat: 35.3810, lng: 132.7320 },
-      { lat: 35.3810, lng: 132.7390 },
-      { lat: 35.3760, lng: 132.7390 },
-      { lat: 35.3760, lng: 132.7320 },
-    ],
-  },
-  {
-    id: "takasegawa-park",
-    name: "高瀬川河川敷公園",
-    polygon: [
-      { lat: 35.3700, lng: 132.7610 },
-      { lat: 35.3700, lng: 132.7660 },
-      { lat: 35.3675, lng: 132.7660 },
-      { lat: 35.3675, lng: 132.7610 },
-    ],
-  },
-  {
-    id: "kojindani-historic-park",
-    name: "荒神谷史跡公園",
-    polygon: [
-      // 国指定史跡「荒神谷遺跡」を含む史跡公園。史跡レイヤと一部重なる構造で
-      // "公園条例 × 文化財保護法" の同時 red を出雲側でも再現できる。
-      { lat: 35.3885, lng: 132.8420 },
-      { lat: 35.3885, lng: 132.8460 },
-      { lat: 35.3855, lng: 132.8460 },
-      { lat: 35.3855, lng: 132.8420 },
-    ],
-  },
-];
+// 出雲市内の主要都市公園。data/parks/by-muni/32203.json から取り込み。
+// 荒神谷史跡公園は史跡レイヤと一部重なる構造で「公園条例 × 文化財保護法」
+// の同時 red を出雲側でも再現できるよう、JSON 側で明示している。
+export const IZUMO_PARKS: readonly Park[] = toParks(izumoParksJson);
 
 // 出雲市内の "公衆密集地" 想定エリア。
 // 島根県迷惑行為等防止条例の運用上、上空飛行の自粛が推奨される場所。

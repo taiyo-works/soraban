@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "fetch:did": "bash scripts/fetch-did.sh",
     "fetch:airports": "bash scripts/fetch-airports.sh",
-    "fetch:all": "bash scripts/fetch-did.sh && bash scripts/fetch-airports.sh"
+    "fetch:parks": "bash scripts/fetch-parks.sh",
+    "fetch:all": "bash scripts/fetch-did.sh && bash scripts/fetch-airports.sh && bash scripts/fetch-parks.sh"
   },
   "dependencies": {
     "@soraban/geo": "workspace:*"
