@@ -17,12 +17,23 @@ import {
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  MISASA_HERITAGE_SITES,
+  MISASA_PARKS,
+  OHDA_HERITAGE_SITES,
+  OHDA_PARKS,
   SAKAIMINATO_PARKS,
   SENSITIVE_FACILITY_BUFFER_M,
   TOTTORI_HERITAGE_SITES,
   TOTTORI_PARKS,
+  UNNAN_HERITAGE_SITES,
+  UNNAN_PARKS,
+  YASUGI_HERITAGE_SITES,
+  YASUGI_PARKS,
+  YAZU_PARKS,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
+  YURIHAMA_HERITAGE_SITES,
+  YURIHAMA_PARKS,
   type HeritageSite,
   type Park,
 } from "./zones";
@@ -417,6 +428,48 @@ const IZUMO_PARK_REG = buildMunicipalParkReg({
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
+const MISASA_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31364",
+  muniName: "三朝町",
+  url: "https://www.town.misasa.tottori.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const YURIHAMA_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31370",
+  muniName: "湯梨浜町",
+  url: "https://www.yurihama.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const YAZU_PARK_REG = buildMunicipalParkReg({
+  muniCode: "31329",
+  muniName: "八頭町",
+  url: "https://www.town.yazu.tottori.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const YASUGI_PARK_REG = buildMunicipalParkReg({
+  muniCode: "32206",
+  muniName: "安来市",
+  url: "https://www.city.yasugi.shimane.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const UNNAN_PARK_REG = buildMunicipalParkReg({
+  muniCode: "32209",
+  muniName: "雲南市",
+  url: "https://www.city.unnan.shimane.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const OHDA_PARK_REG = buildMunicipalParkReg({
+  muniCode: "32205",
+  muniName: "大田市",
+  url: "https://www.city.ohda.lg.jp/",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
 const TOTTORI_HERITAGE_REG = buildMunicipalHeritageReg({
   muniCode: "31201",
   muniName: "鳥取市",
@@ -445,6 +498,36 @@ const IZUMO_HERITAGE_REG = buildMunicipalHeritageReg({
   muniCode: "32203",
   muniName: "出雲市",
   verifiedAt: "2026-04-29T00:00:00+09:00",
+});
+
+const MISASA_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "31364",
+  muniName: "三朝町",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const YURIHAMA_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "31370",
+  muniName: "湯梨浜町",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const YASUGI_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "32206",
+  muniName: "安来市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const UNNAN_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "32209",
+  muniName: "雲南市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
+});
+
+const OHDA_HERITAGE_REG = buildMunicipalHeritageReg({
+  muniCode: "32205",
+  muniName: "大田市",
+  verifiedAt: "2026-04-30T00:00:00+09:00",
 });
 
 const TOTTORI_NUISANCE_REG = buildPrefecturalNuisanceReg({
@@ -574,8 +657,14 @@ const TOTTORI_MUNI_CODE = "31201";
 const YONAGO_MUNI_CODE = "31202";
 const KURAYOSHI_MUNI_CODE = "31203";
 const SAKAIMINATO_MUNI_CODE = "31204";
+const YAZU_MUNI_CODE = "31329";
+const MISASA_MUNI_CODE = "31364";
+const YURIHAMA_MUNI_CODE = "31370";
 const MATSUE_MUNI_CODE = "32201";
 const IZUMO_MUNI_CODE = "32203";
+const OHDA_MUNI_CODE = "32205";
+const YASUGI_MUNI_CODE = "32206";
+const UNNAN_MUNI_CODE = "32209";
 
 // muniCode → 当該市町村の公園条例レコード + 公園ポリゴン群。
 // 自治体追加時はここに 1 行追加するだけで evaluator は自動対応する。
@@ -616,6 +705,36 @@ const MUNICIPAL_PARKS: Readonly<Record<string, MunicipalParkEntry>> = {
     parks: IZUMO_PARKS,
     reg: IZUMO_PARK_REG,
   },
+  [MISASA_MUNI_CODE]: {
+    muniName: "三朝町",
+    parks: MISASA_PARKS,
+    reg: MISASA_PARK_REG,
+  },
+  [YURIHAMA_MUNI_CODE]: {
+    muniName: "湯梨浜町",
+    parks: YURIHAMA_PARKS,
+    reg: YURIHAMA_PARK_REG,
+  },
+  [YAZU_MUNI_CODE]: {
+    muniName: "八頭町",
+    parks: YAZU_PARKS,
+    reg: YAZU_PARK_REG,
+  },
+  [YASUGI_MUNI_CODE]: {
+    muniName: "安来市",
+    parks: YASUGI_PARKS,
+    reg: YASUGI_PARK_REG,
+  },
+  [UNNAN_MUNI_CODE]: {
+    muniName: "雲南市",
+    parks: UNNAN_PARKS,
+    reg: UNNAN_PARK_REG,
+  },
+  [OHDA_MUNI_CODE]: {
+    muniName: "大田市",
+    parks: OHDA_PARKS,
+    reg: OHDA_PARK_REG,
+  },
 };
 
 // muniCode → 当該市町村の文化財保護レコード + 史跡ポリゴン群。
@@ -650,6 +769,31 @@ const MUNICIPAL_HERITAGE: Readonly<Record<string, MunicipalHeritageEntry>> = {
     muniName: "出雲市",
     sites: IZUMO_HERITAGE_SITES,
     reg: IZUMO_HERITAGE_REG,
+  },
+  [MISASA_MUNI_CODE]: {
+    muniName: "三朝町",
+    sites: MISASA_HERITAGE_SITES,
+    reg: MISASA_HERITAGE_REG,
+  },
+  [YURIHAMA_MUNI_CODE]: {
+    muniName: "湯梨浜町",
+    sites: YURIHAMA_HERITAGE_SITES,
+    reg: YURIHAMA_HERITAGE_REG,
+  },
+  [YASUGI_MUNI_CODE]: {
+    muniName: "安来市",
+    sites: YASUGI_HERITAGE_SITES,
+    reg: YASUGI_HERITAGE_REG,
+  },
+  [UNNAN_MUNI_CODE]: {
+    muniName: "雲南市",
+    sites: UNNAN_HERITAGE_SITES,
+    reg: UNNAN_HERITAGE_REG,
+  },
+  [OHDA_MUNI_CODE]: {
+    muniName: "大田市",
+    sites: OHDA_HERITAGE_SITES,
+    reg: OHDA_HERITAGE_REG,
   },
 };
 
@@ -693,8 +837,14 @@ export const COVERAGE_SUMMARY: CoverageSummary = {
     ["米子市", 4],
     ["倉吉市", 4],
     ["境港市", 3],
+    ["八頭町", 3],
+    ["三朝町", 3],
+    ["湯梨浜町", 3],
     ["松江市", 5],
     ["出雲市", 5],
+    ["大田市", 4],
+    ["安来市", 4],
+    ["雲南市", 3],
   ],
   prefectureNuisanceNames: Object.values(PREFECTURAL_NUISANCE).map((e) => e.prefName),
   totalParks: Object.values(MUNICIPAL_PARKS).reduce((acc, e) => acc + e.parks.length, 0),
@@ -898,15 +1048,32 @@ export {
   MIHO_AIRBASE_CENTER,
   MIHO_AIRBASE_RED_M,
   MIHO_AIRBASE_YELLOW_M,
+  MISASA_HERITAGE_SITES,
+  MISASA_PARKS,
+  MISASA_SENSITIVE_FACILITIES,
+  OHDA_HERITAGE_SITES,
+  OHDA_PARKS,
+  OHDA_SENSITIVE_FACILITIES,
   SAKAIMINATO_PARKS,
   SAKAIMINATO_SENSITIVE_FACILITIES,
   SENSITIVE_FACILITY_BUFFER_M,
   TOTTORI_HERITAGE_SITES,
   TOTTORI_PARKS,
   TOTTORI_SENSITIVE_FACILITIES,
+  UNNAN_HERITAGE_SITES,
+  UNNAN_PARKS,
+  UNNAN_SENSITIVE_FACILITIES,
+  YASUGI_HERITAGE_SITES,
+  YASUGI_PARKS,
+  YASUGI_SENSITIVE_FACILITIES,
+  YAZU_PARKS,
+  YAZU_SENSITIVE_FACILITIES,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   YONAGO_SENSITIVE_FACILITIES,
+  YURIHAMA_HERITAGE_SITES,
+  YURIHAMA_PARKS,
+  YURIHAMA_SENSITIVE_FACILITIES,
 } from "./zones";
 export type { HeritageSite, Park, SensitiveFacility } from "./zones";
 

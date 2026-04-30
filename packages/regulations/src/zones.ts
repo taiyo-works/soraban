@@ -7,8 +7,14 @@ import tottoriParksJson from "../data/parks/by-muni/31201.json";
 import yonagoParksJson from "../data/parks/by-muni/31202.json";
 import kurayoshiParksJson from "../data/parks/by-muni/31203.json";
 import sakaiminatoParksJson from "../data/parks/by-muni/31204.json";
+import yazuParksJson from "../data/parks/by-muni/31329.json";
+import misasaParksJson from "../data/parks/by-muni/31364.json";
+import yurihamaParksJson from "../data/parks/by-muni/31370.json";
 import matsueParksJson from "../data/parks/by-muni/32201.json";
 import izumoParksJson from "../data/parks/by-muni/32203.json";
+import ohdaParksJson from "../data/parks/by-muni/32205.json";
+import yasugiParksJson from "../data/parks/by-muni/32206.json";
+import unnanParksJson from "../data/parks/by-muni/32209.json";
 
 // 自衛隊美保基地（米子鬼太郎空港共用） — 滑走路中央付近。
 // 35°29′37″N 133°14′10″E
@@ -368,6 +374,268 @@ export const MATSUE_HERITAGE_SITES: readonly HeritageSite[] = [
 ];
 
 // =====================================================================
+// 三朝町 (31364) — 鳥取県中部・三朝温泉/三徳山
+// =====================================================================
+export const MISASA_PARKS: readonly Park[] = toParks(misasaParksJson);
+
+export const MISASA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "misasa-town-hall",
+    name: "三朝町役場",
+    category: "庁舎",
+    center: { lat: 35.4022, lng: 133.8775 },
+  },
+  {
+    id: "misasa-onsen",
+    name: "三朝温泉街",
+    category: "宿泊地",
+    center: { lat: 35.4030, lng: 133.8755 },
+  },
+  {
+    id: "misasa-medical-center",
+    name: "鳥取大学医学部附属病院 三朝医療センター",
+    category: "病院",
+    center: { lat: 35.4045, lng: 133.8800 },
+  },
+];
+
+// 三徳山: 三佛寺奥院（投入堂）は国宝、三徳山一帯は「国指定名勝及び史跡」
+// （1934 昭和9年指定）。文化財保護法第125条適用。
+// 「日本遺産」第一号（2015 平成27年認定: 三徳山・三朝温泉）。
+export const MISASA_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "mitokusan-sanbutsuji",
+    name: "三徳山（三佛寺・投入堂）（国指定名勝及び史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.4010, lng: 133.9340 },
+      { lat: 35.4010, lng: 133.9420 },
+      { lat: 35.3960, lng: 133.9420 },
+      { lat: 35.3960, lng: 133.9340 },
+    ],
+  },
+];
+
+// =====================================================================
+// 湯梨浜町 (31370) — 鳥取県中部・東郷池/はわい温泉
+// =====================================================================
+export const YURIHAMA_PARKS: readonly Park[] = toParks(yurihamaParksJson);
+
+export const YURIHAMA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "yurihama-town-hall",
+    name: "湯梨浜町役場",
+    category: "庁舎",
+    center: { lat: 35.4863, lng: 133.9075 },
+  },
+  {
+    id: "matsuzaki-station",
+    name: "JR松崎駅",
+    category: "駅",
+    center: { lat: 35.4778, lng: 133.9112 },
+  },
+  {
+    id: "hawai-onsen",
+    name: "はわい温泉街",
+    category: "宿泊地",
+    center: { lat: 35.4880, lng: 133.8990 },
+  },
+];
+
+// 馬ノ山古墳群: 4世紀後半〜5世紀の前方後円墳群、県指定史跡。
+export const YURIHAMA_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "umanoyama-kofun-gun",
+    name: "馬ノ山古墳群（県指定史跡）",
+    designation: "県指定",
+    polygon: [
+      { lat: 35.4940, lng: 133.8830 },
+      { lat: 35.4940, lng: 133.8880 },
+      { lat: 35.4910, lng: 133.8880 },
+      { lat: 35.4910, lng: 133.8830 },
+    ],
+  },
+];
+
+// =====================================================================
+// 八頭町 (31329) — 鳥取県東部・郡家/船岡/八東 (3町合併)
+// =====================================================================
+export const YAZU_PARKS: readonly Park[] = toParks(yazuParksJson);
+
+// Phase 0/1 簡易ポイント。GSI 逆ジオコーダで 31329 領域内であることを確認済み。
+// Phase 1 後半で国交省 P-Hospital 等の正規データに置換予定。
+export const YAZU_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "yazu-town-hall",
+    name: "八頭町役場（郡家本庁舎）",
+    category: "庁舎",
+    center: { lat: 35.4395, lng: 134.2950 },
+  },
+  {
+    id: "kunge-station",
+    name: "JR郡家駅（若桜鉄道分岐）",
+    category: "駅",
+    center: { lat: 35.4380, lng: 134.2920 },
+  },
+  {
+    id: "yazu-funaoka-clinic",
+    name: "公立八頭病院",
+    category: "病院",
+    center: { lat: 35.4350, lng: 134.2960 },
+  },
+];
+
+// =====================================================================
+// 安来市 (32206) — 島根県東部・足立美術館/月山富田城跡
+// =====================================================================
+export const YASUGI_PARKS: readonly Park[] = toParks(yasugiParksJson);
+
+export const YASUGI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "yasugi-city-hall",
+    name: "安来市役所",
+    category: "庁舎",
+    center: { lat: 35.4318, lng: 133.2497 },
+  },
+  {
+    id: "yasugi-station",
+    name: "JR安来駅",
+    category: "駅",
+    center: { lat: 35.4347, lng: 133.2580 },
+  },
+  {
+    id: "yasugi-municipal-hospital",
+    name: "安来市立病院",
+    category: "病院",
+    center: { lat: 35.4280, lng: 133.2475 },
+  },
+  {
+    id: "adachi-museum",
+    name: "足立美術館（観光客密集地）",
+    category: "宿泊地",
+    center: { lat: 35.3895, lng: 133.1928 },
+  },
+];
+
+// 月山富田城跡: 戦国大名尼子氏の本拠地。1934 昭和9年国指定史跡。
+// 文化財保護法第125条適用。
+export const YASUGI_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "gassan-toda-castle-ruins",
+    name: "月山富田城跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.3740, lng: 133.1950 },
+      { lat: 35.3740, lng: 133.2015 },
+      { lat: 35.3695, lng: 133.2015 },
+      { lat: 35.3695, lng: 133.1950 },
+    ],
+  },
+];
+
+// =====================================================================
+// 雲南市 (32209) — 島根県東部・加茂岩倉遺跡
+// =====================================================================
+export const UNNAN_PARKS: readonly Park[] = toParks(unnanParksJson);
+
+export const UNNAN_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "unnan-city-hall",
+    name: "雲南市役所",
+    category: "庁舎",
+    center: { lat: 35.2972, lng: 132.8965 },
+  },
+  {
+    id: "kisuki-station",
+    name: "JR木次駅",
+    category: "駅",
+    center: { lat: 35.2933, lng: 132.8888 },
+  },
+  {
+    id: "unnan-shimin-hospital",
+    name: "雲南市立病院",
+    category: "病院",
+    center: { lat: 35.2998, lng: 132.8910 },
+  },
+];
+
+// 加茂岩倉遺跡: 1996 平成8年に銅鐸39個一括出土、平成11年国指定史跡。
+// 神原神社古墳: 4世紀後半の方墳、出土の三角縁神獣鏡で著名。県指定史跡。
+export const UNNAN_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "kamoiwakura-iseki",
+    name: "加茂岩倉遺跡（国指定史跡）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.3625, lng: 132.9020 },
+      { lat: 35.3625, lng: 132.9065 },
+      { lat: 35.3595, lng: 132.9065 },
+      { lat: 35.3595, lng: 132.9020 },
+    ],
+  },
+  {
+    id: "kanbara-jinja-kofun",
+    name: "神原神社古墳（県指定史跡）",
+    designation: "県指定",
+    polygon: [
+      { lat: 35.3105, lng: 132.9215 },
+      { lat: 35.3105, lng: 132.9245 },
+      { lat: 35.3088, lng: 132.9245 },
+      { lat: 35.3088, lng: 132.9215 },
+    ],
+  },
+];
+
+// =====================================================================
+// 大田市 (32205) — 島根県中部・石見銀山遺跡(世界遺産)
+// =====================================================================
+export const OHDA_PARKS: readonly Park[] = toParks(ohdaParksJson);
+
+export const OHDA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
+  {
+    id: "ohda-city-hall",
+    name: "大田市役所",
+    category: "庁舎",
+    center: { lat: 35.1928, lng: 132.5028 },
+  },
+  {
+    id: "ohda-shi-station",
+    name: "JR大田市駅",
+    category: "駅",
+    center: { lat: 35.1942, lng: 132.5068 },
+  },
+  {
+    id: "ohda-municipal-hospital",
+    name: "大田市立病院",
+    category: "病院",
+    center: { lat: 35.1880, lng: 132.5095 },
+  },
+  {
+    id: "iwami-ginzan-omori",
+    name: "石見銀山大森地区（世界遺産観光客密集地）",
+    category: "宿泊地",
+    center: { lat: 35.1170, lng: 132.4380 },
+  },
+];
+
+// 石見銀山遺跡: 1969 昭和44年国指定史跡、2007 平成19年世界文化遺産登録。
+// 文化財保護法第125条適用。世界遺産条約による国際的保護義務も加わる。
+// 物部神社: 石見国一宮、本殿は国重要文化財。
+export const OHDA_HERITAGE_SITES: readonly HeritageSite[] = [
+  {
+    id: "iwami-ginzan-iseki",
+    name: "石見銀山遺跡（国指定史跡・世界文化遺産）",
+    designation: "国指定史跡",
+    polygon: [
+      { lat: 35.1230, lng: 132.4280 },
+      { lat: 35.1230, lng: 132.4470 },
+      { lat: 35.1090, lng: 132.4470 },
+      { lat: 35.1090, lng: 132.4280 },
+    ],
+  },
+];
+
+// =====================================================================
 // 全自治体合算（地図レイヤ・県条例の公衆密集地評価で使用）。
 // 自治体追加時はここに append するだけで、UI 側は変更不要。
 // =====================================================================
@@ -376,8 +644,14 @@ export const ALL_MUNICIPAL_PARKS: readonly Park[] = [
   ...YONAGO_PARKS,
   ...KURAYOSHI_PARKS,
   ...SAKAIMINATO_PARKS,
+  ...YAZU_PARKS,
+  ...MISASA_PARKS,
+  ...YURIHAMA_PARKS,
   ...MATSUE_PARKS,
   ...IZUMO_PARKS,
+  ...OHDA_PARKS,
+  ...YASUGI_PARKS,
+  ...UNNAN_PARKS,
 ];
 
 export const ALL_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
@@ -385,16 +659,27 @@ export const ALL_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   ...YONAGO_SENSITIVE_FACILITIES,
   ...KURAYOSHI_SENSITIVE_FACILITIES,
   ...SAKAIMINATO_SENSITIVE_FACILITIES,
+  ...YAZU_SENSITIVE_FACILITIES,
+  ...MISASA_SENSITIVE_FACILITIES,
+  ...YURIHAMA_SENSITIVE_FACILITIES,
   ...MATSUE_SENSITIVE_FACILITIES,
   ...IZUMO_SENSITIVE_FACILITIES,
+  ...OHDA_SENSITIVE_FACILITIES,
+  ...YASUGI_SENSITIVE_FACILITIES,
+  ...UNNAN_SENSITIVE_FACILITIES,
 ];
 
 export const ALL_HERITAGE_SITES: readonly HeritageSite[] = [
   ...TOTTORI_HERITAGE_SITES,
   ...YONAGO_HERITAGE_SITES,
   ...KURAYOSHI_HERITAGE_SITES,
+  ...MISASA_HERITAGE_SITES,
+  ...YURIHAMA_HERITAGE_SITES,
   ...MATSUE_HERITAGE_SITES,
   ...IZUMO_HERITAGE_SITES,
+  ...OHDA_HERITAGE_SITES,
+  ...YASUGI_HERITAGE_SITES,
+  ...UNNAN_HERITAGE_SITES,
 ];
 
 export const SENSITIVE_FACILITY_BUFFER_M = 100;

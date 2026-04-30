@@ -20,14 +20,31 @@ import {
   MATSUE_PARKS,
   MATSUE_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
+  MISASA_HERITAGE_SITES,
+  MISASA_PARKS,
+  MISASA_SENSITIVE_FACILITIES,
+  OHDA_HERITAGE_SITES,
+  OHDA_PARKS,
+  OHDA_SENSITIVE_FACILITIES,
   SAKAIMINATO_PARKS,
   SAKAIMINATO_SENSITIVE_FACILITIES,
   TOTTORI_HERITAGE_SITES,
   TOTTORI_PARKS,
   TOTTORI_SENSITIVE_FACILITIES,
+  UNNAN_HERITAGE_SITES,
+  UNNAN_PARKS,
+  UNNAN_SENSITIVE_FACILITIES,
+  YASUGI_HERITAGE_SITES,
+  YASUGI_PARKS,
+  YASUGI_SENSITIVE_FACILITIES,
+  YAZU_PARKS,
+  YAZU_SENSITIVE_FACILITIES,
   YONAGO_HERITAGE_SITES,
   YONAGO_PARKS,
   YONAGO_SENSITIVE_FACILITIES,
+  YURIHAMA_HERITAGE_SITES,
+  YURIHAMA_PARKS,
+  YURIHAMA_SENSITIVE_FACILITIES,
   type DidCandidate,
   type FlightContext,
   type RegulationStatus,
@@ -38,8 +55,14 @@ const tottoriMuni = "31201";
 const yonagoMuni = "31202";
 const kurayoshiMuni = "31203";
 const sakaiminatoMuni = "31204";
+const yazuMuni = "31329";
+const misasaMuni = "31364";
+const yurihamaMuni = "31370";
 const matsueMuni = "32201";
 const izumoMuni = "32203";
+const ohdaMuni = "32205";
+const yasugiMuni = "32206";
+const unnanMuni = "32209";
 
 describe("evaluateMunicipalParks", () => {
   it("returns red when point is inside a 米子市 park polygon", () => {
@@ -71,6 +94,36 @@ describe("evaluateMunicipalParks", () => {
     const r = evaluateMunicipalParks({ lat: 35.4740, lng: 133.0510 }, matsueMuni);
     expect(r.status).toBe<RegulationStatus>("red");
     expect(r.note).toContain("松江市");
+  });
+  it("returns red for 三朝町 park (三朝中央公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.3995, lng: 133.8790 }, misasaMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("三朝町");
+  });
+  it("returns red for 湯梨浜町 park (東郷湖羽合臨海公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.4855, lng: 133.9020 }, yurihamaMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("湯梨浜町");
+  });
+  it("returns red for 八頭町 park (船岡竹林公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.4158, lng: 134.2900 }, yazuMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("八頭町");
+  });
+  it("returns red for 安来市 park (月山公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.3720, lng: 133.1985 }, yasugiMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("安来市");
+  });
+  it("returns red for 雲南市 park (加茂岩倉遺跡ガイダンス公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.3610, lng: 132.9040 }, unnanMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("雲南市");
+  });
+  it("returns red for 大田市 park (石見銀山公園)", () => {
+    const r = evaluateMunicipalParks({ lat: 35.1170, lng: 132.4380 }, ohdaMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("大田市");
   });
   it("returns green when point is outside known park polygons", () => {
     const r = evaluateMunicipalParks({ lat: 35.4283, lng: 133.3306 }, yonagoMuni); // 米子市役所
@@ -116,6 +169,30 @@ describe("evaluateMunicipalHeritage", () => {
     const r = evaluateMunicipalHeritage({ lat: 35.4745, lng: 133.0515 }, matsueMuni);
     expect(r.status).toBe<RegulationStatus>("red");
     expect(r.note).toContain("松江城");
+  });
+  it("flags 三徳山 (国指定名勝及び史跡) as red for 三朝町", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.3985, lng: 133.9380 }, misasaMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("三徳山");
+  });
+  it("flags 月山富田城跡 (国指定史跡) as red for 安来市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.3720, lng: 133.1985 }, yasugiMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("月山富田城");
+  });
+  it("flags 加茂岩倉遺跡 (国指定史跡) as red for 雲南市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.3610, lng: 132.9040 }, unnanMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("加茂岩倉");
+  });
+  it("flags 石見銀山遺跡 (国指定史跡・世界文化遺産) as red for 大田市", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.1170, lng: 132.4380 }, ohdaMuni);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("石見銀山");
+  });
+  it("returns unknown for 八頭町 (no heritage data registered)", () => {
+    const r = evaluateMunicipalHeritage({ lat: 35.4395, lng: 134.2950 }, yazuMuni);
+    expect(r.status).toBe<RegulationStatus>("unknown");
   });
 });
 
@@ -199,24 +276,35 @@ describe("computeOverall", () => {
 });
 
 describe("COVERAGE_SUMMARY", () => {
-  it("totalParks matches sum of all municipal park lists (6 cities)", () => {
+  it("totalParks matches sum of all municipal park lists (12 munis)", () => {
     expect(COVERAGE_SUMMARY.totalParks).toBe(
       TOTTORI_PARKS.length +
         YONAGO_PARKS.length +
         KURAYOSHI_PARKS.length +
         SAKAIMINATO_PARKS.length +
+        YAZU_PARKS.length +
+        MISASA_PARKS.length +
+        YURIHAMA_PARKS.length +
         MATSUE_PARKS.length +
-        IZUMO_PARKS.length,
+        IZUMO_PARKS.length +
+        OHDA_PARKS.length +
+        YASUGI_PARKS.length +
+        UNNAN_PARKS.length,
     );
     expect(COVERAGE_SUMMARY.totalParks).toBe(ALL_MUNICIPAL_PARKS.length);
   });
-  it("totalHeritage matches sum of all municipal heritage lists (5 cities × 1+ sites)", () => {
+  it("totalHeritage matches sum of all municipal heritage lists", () => {
     expect(COVERAGE_SUMMARY.totalHeritage).toBe(
       TOTTORI_HERITAGE_SITES.length +
         YONAGO_HERITAGE_SITES.length +
         KURAYOSHI_HERITAGE_SITES.length +
+        MISASA_HERITAGE_SITES.length +
+        YURIHAMA_HERITAGE_SITES.length +
         MATSUE_HERITAGE_SITES.length +
-        IZUMO_HERITAGE_SITES.length,
+        IZUMO_HERITAGE_SITES.length +
+        OHDA_HERITAGE_SITES.length +
+        YASUGI_HERITAGE_SITES.length +
+        UNNAN_HERITAGE_SITES.length,
     );
     expect(COVERAGE_SUMMARY.totalHeritage).toBe(ALL_HERITAGE_SITES.length);
   });
@@ -229,30 +317,42 @@ describe("COVERAGE_SUMMARY", () => {
       0,
     );
     expect(sum).toBe(COVERAGE_SUMMARY.totalSensitive);
-    // 各市の sensitive facilities 数が手書きカウントと一致すること
+    // 各市町村の sensitive facilities 数が手書きカウントと一致すること
     expect(sum).toBe(
       TOTTORI_SENSITIVE_FACILITIES.length +
         YONAGO_SENSITIVE_FACILITIES.length +
         KURAYOSHI_SENSITIVE_FACILITIES.length +
         SAKAIMINATO_SENSITIVE_FACILITIES.length +
+        YAZU_SENSITIVE_FACILITIES.length +
+        MISASA_SENSITIVE_FACILITIES.length +
+        YURIHAMA_SENSITIVE_FACILITIES.length +
         MATSUE_SENSITIVE_FACILITIES.length +
-        IZUMO_SENSITIVE_FACILITIES.length,
+        IZUMO_SENSITIVE_FACILITIES.length +
+        OHDA_SENSITIVE_FACILITIES.length +
+        YASUGI_SENSITIVE_FACILITIES.length +
+        UNNAN_SENSITIVE_FACILITIES.length,
     );
   });
   it("includes 鳥取県 and 島根県 in prefecture coverage", () => {
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("鳥取県");
     expect(COVERAGE_SUMMARY.prefectureNuisanceNames).toContain("島根県");
   });
-  it("covers 6 cities (3 per prefecture × 2 prefectures)", () => {
-    expect(COVERAGE_SUMMARY.municipalParkNames).toHaveLength(6);
+  it("covers 12 munis (6 per prefecture × 2 prefectures)", () => {
+    expect(COVERAGE_SUMMARY.municipalParkNames).toHaveLength(12);
     expect(COVERAGE_SUMMARY.municipalParkNames).toEqual(
       expect.arrayContaining([
         "鳥取市",
         "米子市",
         "倉吉市",
         "境港市",
+        "三朝町",
+        "湯梨浜町",
+        "八頭町",
         "松江市",
         "出雲市",
+        "安来市",
+        "雲南市",
+        "大田市",
       ]),
     );
   });
