@@ -26,3 +26,6 @@ packages/regulations/data/parks/raw/
 
 # ローカル作業用アーカイブ
 files.zip
+
+# Claude Code local config
+.claude/
