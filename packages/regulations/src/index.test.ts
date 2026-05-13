@@ -10,6 +10,9 @@ import {
   evaluateMunicipalHeritage,
   evaluateMunicipalParks,
   evaluatePrefecturalNuisance,
+  formatMachineCondition,
+  LOW_CONFIDENCE_THRESHOLD,
+  shouldWarnConfidence,
   IZUMO_HERITAGE_SITES,
   IZUMO_PARKS,
   IZUMO_SENSITIVE_FACILITIES,
@@ -532,4 +535,65 @@ describe("demo preset regressions", () => {
       }
     });
   }
+});
+
+// 特許①従属項8 の実施例: overallConfidence が閾値以下なら警告を出すフラグを返す。
+describe("shouldWarnConfidence (特許①従属項8)", () => {
+  it("threshold is fixed at medium", () => {
+    expect(LOW_CONFIDENCE_THRESHOLD).toBe("medium");
+  });
+  it("high → no warning", () => {
+    expect(shouldWarnConfidence("high")).toBe(false);
+  });
+  it("medium → warn (= threshold)", () => {
+    expect(shouldWarnConfidence("medium")).toBe(true);
+  });
+  it("low → warn", () => {
+    expect(shouldWarnConfidence("low")).toBe(true);
+  });
+});
+
+// 特許①従属項10 の実施例: 適用例外節を自然言語+機械可読併出力する整形ヘルパ。
+describe("formatMachineCondition (特許①従属項10)", () => {
+  it("weight_below_g shows numeric inequality with unit", () => {
+    expect(formatMachineCondition({ type: "weight_below_g", value: 100 })).toBe(
+      "weight_below_g < 100g",
+    );
+  });
+  it("weight_above_g shows ≥ with unit", () => {
+    expect(formatMachineCondition({ type: "weight_above_g", value: 25_000 })).toBe(
+      "weight_above_g ≥ 25000g",
+    );
+  });
+  it("permit_holder uses equality", () => {
+    expect(formatMachineCondition({ type: "permit_holder", value: "mlit" })).toBe(
+      "permit_holder == mlit",
+    );
+  });
+  it("purpose uses equality", () => {
+    expect(formatMachineCondition({ type: "purpose", value: "emergency" })).toBe(
+      "purpose == emergency",
+    );
+  });
+  it("in_zone uses equality with zone id", () => {
+    expect(formatMachineCondition({ type: "in_zone", value: "municipal_park_polygon" })).toBe(
+      "in_zone == municipal_park_polygon",
+    );
+  });
+  it("time_window uses colon notation", () => {
+    expect(formatMachineCondition({ type: "time_window", value: "22:00-04:00" })).toBe(
+      "time_window: 22:00-04:00",
+    );
+  });
+  it("other with value uses colon notation", () => {
+    expect(formatMachineCondition({ type: "other", value: "see clause" })).toBe(
+      "other: see clause",
+    );
+  });
+  it("value-less conditions degrade gracefully", () => {
+    expect(formatMachineCondition({ type: "weight_below_g" })).toBe("weight_below_g");
+    expect(formatMachineCondition({ type: "permit_holder" })).toBe("permit_holder");
+    expect(formatMachineCondition({ type: "time_window" })).toBe("time_window");
+    expect(formatMachineCondition({ type: "other" })).toBe("other");
+  });
 });

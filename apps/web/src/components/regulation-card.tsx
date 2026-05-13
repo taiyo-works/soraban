@@ -1,5 +1,6 @@
 import {
   CONFIDENCE_LABEL,
+  formatMachineCondition,
   summarizeConfidence,
   type RegulationWithStatus,
 } from "@soraban/regulations";
@@ -72,10 +73,15 @@ export function RegulationCard({ regulation }: Props) {
             <span aria-hidden>✓ </span>
             適用された例外節
           </p>
-          <ul className="mt-1 flex flex-col gap-0.5">
+          <ul className="mt-1 flex flex-col gap-1">
             {regulation.appliedExceptions.map((ex) => (
               <li key={ex.id} className="leading-snug">
-                ・{ex.condition}
+                <span>・{ex.condition}</span>
+                {ex.machine ? (
+                  <span className="block pl-2.5 font-mono text-[10px] uppercase tracking-wider text-signal-green/70">
+                    {formatMachineCondition(ex.machine)}
+                  </span>
+                ) : null}
               </li>
             ))}
           </ul>

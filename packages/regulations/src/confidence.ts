@@ -27,10 +27,22 @@ export const CONFIDENCE_LABEL: Readonly<Record<ConfidenceLevel, string>> = {
   low: "低",
 };
 
+const CONFIDENCE_ORDER: Readonly<Record<ConfidenceLevel, number>> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+};
+
 // 2軸の確信度を1軸の表示用ラベルに集約する（より低い方を採用）。
-export const summarizeConfidence = (c: RegulationConfidence): ConfidenceLevel => {
-  const order: Readonly<Record<ConfidenceLevel, number>> = { low: 0, medium: 1, high: 2 };
-  return (order[c.geometric] ?? 2) <= (order[c.extraction] ?? 2)
+export const summarizeConfidence = (c: RegulationConfidence): ConfidenceLevel =>
+  CONFIDENCE_ORDER[c.geometric] <= CONFIDENCE_ORDER[c.extraction]
     ? c.geometric
     : c.extraction;
-};
+
+// 特許①従属項8 の「所定の閾値」を実装上は medium に固定する。
+// summarizeConfidence の結果が medium 以下（= medium or low）のとき、
+// 判定結果に「現地での再確認を促す警告」を併せて出力する根拠とする。
+export const LOW_CONFIDENCE_THRESHOLD: ConfidenceLevel = "medium";
+
+export const shouldWarnConfidence = (level: ConfidenceLevel): boolean =>
+  CONFIDENCE_ORDER[level] <= CONFIDENCE_ORDER[LOW_CONFIDENCE_THRESHOLD];

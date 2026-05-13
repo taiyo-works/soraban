@@ -10,6 +10,7 @@ import {
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
+  shouldWarnConfidence,
   type FlightContext,
   type RegulationCheckResult,
   type RegulationStatus,
@@ -827,6 +828,16 @@ export function RegulationChecker() {
               {pdfBusy ? "PDF 生成中…" : "PDF 出力"}
             </button>
           </div>
+
+          {/* 低確信度警告 — 特許①従属項8 の実施例。閾値未満のときだけ出る */}
+          {shouldWarnConfidence(result.overallConfidence) ? (
+            <div className="border-l-2 border-signal-amber bg-signal-amber-soft px-4 py-3 text-xs leading-relaxed text-ink-soft">
+              <span className="eyebrow !text-[9px] !text-signal-amber">
+                confidence · {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
+              </span>{" "}
+              本判定はジオメトリ精度または条文抽出精度が低いレコードを含みます。引受・許可申請の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
+            </div>
+          ) : null}
 
           {/* disclaimer — brand outlined, never amber */}
           <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
