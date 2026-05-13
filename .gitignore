@@ -7,6 +7,8 @@ build/
 .next/
 .turbo/
 .DS_Store
+# macOS AppleDouble metadata (exFAT 等の non-HFS+ FS 上で発生)
+._*
 __pycache__/
 *.pyc
 .venv/
