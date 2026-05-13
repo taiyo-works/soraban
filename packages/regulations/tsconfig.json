@@ -13,7 +13,12 @@
     "declaration": true,
     "noEmit": true,
     "resolveJsonModule": true,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@soraban/geo": ["../geo/src/index.ts"],
+      "@soraban/db": ["../db/src/index.ts"]
+    }
   },
   "include": ["src/**/*", "data/**/*.json"]
 }

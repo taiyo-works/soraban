@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@soraban/db": ["../../packages/db/src/index.ts"],
+      "@soraban/geo": ["../../packages/geo/src/index.ts"],
+      "@soraban/regulations": ["../../packages/regulations/src/index.ts"]
     }
   },
   "include": [
