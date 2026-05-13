@@ -1086,7 +1086,17 @@ export type {
   MachineCondition,
   MachineConditionType,
 } from "./clause-graph";
-export { CLAUSE_EFFECT_LABEL, findPermittingExceptions, matchesException } from "./clause-graph";
+export {
+  CLAUSE_EFFECT_LABEL,
+  findPermittingExceptions,
+  formatMachineCondition,
+  matchesException,
+} from "./clause-graph";
 
 export type { ConfidenceLevel, RegulationConfidence } from "./confidence";
-export { CONFIDENCE_LABEL, summarizeConfidence } from "./confidence";
+export {
+  CONFIDENCE_LABEL,
+  LOW_CONFIDENCE_THRESHOLD,
+  shouldWarnConfidence,
+  summarizeConfidence,
+} from "./confidence";

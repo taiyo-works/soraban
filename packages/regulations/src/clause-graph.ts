@@ -58,6 +58,35 @@ export const CLAUSE_EFFECT_LABEL: Readonly<Record<ClauseEffect, string>> = {
   conditional: "条件付き",
 };
 
+// 特許①従属項10「適用された例外節について、自然言語テキストと機械可読条件とを併せて含む」
+// の根拠として、UI / PDF に機械可読条件を一行で併記するためのフォーマッタ。
+// 例:
+//   { type: "weight_below_g", value: 100 }  → "weight_below_g < 100g"
+//   { type: "permit_holder",  value: "mlit" } → "permit_holder == mlit"
+//   { type: "purpose",        value: "emergency" } → "purpose == emergency"
+//   { type: "time_window",    value: "22:00-04:00" } → "time_window: 22:00-04:00"
+export const formatMachineCondition = (m: MachineCondition): string => {
+  switch (m.type) {
+    case "weight_below_g":
+      return typeof m.value === "number"
+        ? `weight_below_g < ${m.value}g`
+        : "weight_below_g";
+    case "weight_above_g":
+      return typeof m.value === "number"
+        ? `weight_above_g ≥ ${m.value}g`
+        : "weight_above_g";
+    case "permit_holder":
+    case "purpose":
+    case "drone_class":
+    case "in_zone":
+      return m.value !== undefined ? `${m.type} == ${m.value}` : m.type;
+    case "time_window":
+      return m.value !== undefined ? `time_window: ${m.value}` : "time_window";
+    case "other":
+      return m.value !== undefined ? `other: ${m.value}` : "other";
+  }
+};
+
 // ============================================================
 // FlightContext: 飛行計画ごとの可変条件（機体・操縦者・運航種別・時刻）。
 // 評価エンジンは ClauseGraph の例外節 machine condition と FlightContext を

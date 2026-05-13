@@ -12,6 +12,8 @@ import type { LatLng } from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
+  formatMachineCondition,
+  shouldWarnConfidence,
   type FlightContext,
   type RegulationCheckResult,
 } from "@soraban/regulations";
@@ -263,6 +265,26 @@ const styles = StyleSheet.create({
     color: COLOR.signalGreen,
     lineHeight: 1.4,
   },
+  appliedMachine: {
+    fontSize: 7,
+    fontFamily: "IBM Plex Mono",
+    color: COLOR.signalGreen,
+    opacity: 0.7,
+    marginLeft: 8,
+    marginTop: 1,
+    letterSpacing: 0.6,
+  },
+  warningBox: {
+    marginTop: 10,
+    paddingLeft: 8,
+    paddingVertical: 6,
+    paddingRight: 8,
+    borderLeftWidth: 1.5,
+    borderLeftColor: COLOR.signalAmber,
+    fontSize: 8,
+    lineHeight: 1.5,
+    color: COLOR.inkSoft,
+  },
   // ── footer ──
   disclaimer: {
     marginTop: 18,
@@ -391,6 +413,17 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         </View>
 
+        {/* CONFIDENCE WARNING — 特許①従属項8 の実施例。閾値未満のときだけ出る */}
+        {shouldWarnConfidence(result.overallConfidence) ? (
+          <Text style={styles.warningBox}>
+            <Text style={{ fontWeight: 700, color: COLOR.signalAmber }}>
+              確信度 {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
+            </Text>
+            {"  "}
+            本判定はジオメトリ精度または条文抽出精度が低いレコードを含みます。引受・許可申請の前に、該当条文の原本と現地状況をご確認ください。
+          </Text>
+        ) : null}
+
         {/* FLIGHT CONTEXT */}
         {ctx ? (
           <View style={styles.ctxBox}>
@@ -455,9 +488,14 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
               <View style={styles.appliedBox}>
                 <Text style={styles.appliedTitle}>✓ 適用された例外節</Text>
                 {reg.appliedExceptions.map((ex) => (
-                  <Text key={ex.id} style={styles.appliedItem}>
-                    ・{ex.condition}
-                  </Text>
+                  <View key={ex.id}>
+                    <Text style={styles.appliedItem}>・{ex.condition}</Text>
+                    {ex.machine ? (
+                      <Text style={styles.appliedMachine}>
+                        {formatMachineCondition(ex.machine)}
+                      </Text>
+                    ) : null}
+                  </View>
                 ))}
               </View>
             ) : null}
