@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { COVERAGE_SUMMARY, SENSITIVE_FACILITY_BUFFER_M } from "@soraban/regulations";
 import { RegulationChecker } from "@/components/regulation-checker";
 
@@ -174,17 +175,41 @@ export default function Home() {
     <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-10 px-4 py-8 sm:gap-16 sm:px-6 sm:py-20">
       {/* ============================ HERO ============================ */}
       <header className="relative flex flex-col gap-5 sm:gap-8">
-        {/* 紙の上にうっすら方位記 (decorative) */}
+        {/* ドローン線画 — hero の主題として敷く透かし。
+            z-0 で文字より背後。PNG 側に alpha が焼き込み済（scripts/drone-png-alpha.mjs）
+            なので白地は完全に透明、blend mode 不要。dark:invert でダークモード時は
+            線を白色に反転（paper が暗い時もコントラストを確保）。
+            幅は viewport に合わせて連続的に拡大: モバイル w-40 (160px) →
+            sm w-[28rem] → md w-[40rem] → lg w-[52rem] → xl w-[60rem]。
+            h-auto で 2:1 アスペクトを保つので、どの幅でもクリッピングなし。 */}
         <div
           aria-hidden
-          className="pointer-events-none absolute right-0 top-0 hidden flex-col items-end gap-1 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-mute/60 sm:flex"
+          className="pointer-events-none absolute right-0 top-0 z-0"
         >
-          <span>N 35°26′03″</span>
-          <span>E 133°22′50″</span>
-          <span className="mt-1 text-[8px]">Hiezu / Tottori</span>
+          <Image
+            src="/drone-01.png"
+            alt=""
+            width={3047}
+            height={1422}
+            priority
+            sizes="(min-width: 1280px) 30rem, (min-width: 1024px) 26rem, (min-width: 768px) 20rem, (min-width: 640px) 14rem, 20vw"
+            className="h-auto w-20 opacity-80 dark:invert sm:w-[14rem] md:w-[20rem] lg:w-[26rem] xl:w-[30rem]"
+          />
         </div>
 
-        <div className="flex flex-col gap-3">
+        {/* 製図の title block — ドローンの右肩に被せる小さな脇書き。
+            z-30 で透かしより前。 */}
+        <aside
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 z-30 hidden flex-col items-end gap-0.5 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-mute sm:flex"
+        >
+          <span className="text-[8px]">Subject — UAV / aerial unit</span>
+          <span>N 35°26′03″</span>
+          <span>E 133°22′50″</span>
+          <span className="text-[8px]">Hiezu / Tottori</span>
+        </aside>
+
+        <div className="relative z-10 flex flex-col gap-3">
           <p className="eyebrow">Soraban — Aerial Compliance Atlas</p>
           <div className="flex items-end gap-2 sm:gap-3">
             <h1 className="font-display text-4xl font-light leading-[0.95] tracking-tight text-ink sm:text-6xl">
@@ -202,7 +227,7 @@ export default function Home() {
         </div>
 
         {/* メタ表示。バッジ感を減らし、ドラフター文書の脇書きとして配置 */}
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs font-mono text-ink-mute sm:grid-cols-4">
+        <dl className="relative z-10 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs font-mono text-ink-mute sm:grid-cols-4">
           <div className="flex flex-col gap-0.5">
             <dt className="eyebrow !text-[9px]">Status</dt>
             <dd className="text-ink-soft">社内限定 PoC ／ Phase 1</dd>
@@ -226,7 +251,7 @@ export default function Home() {
           </div>
         </dl>
 
-        <p className="max-w-3xl border-l-2 border-brand-700 pl-4 text-xs leading-relaxed text-ink-mute">
+        <p className="relative z-10 max-w-3xl border-l-2 border-brand-700 bg-paper/40 pl-4 text-xs leading-relaxed text-ink-mute">
           自治体条例レイヤーは既存サービス全社の盲点。{PARK_MUNI_LABEL} 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。自治体は registry に 1 行追加するだけで判定エンジン・地図・カバレッジ表示すべてに自動反映。
         </p>
       </header>
