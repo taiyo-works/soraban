@@ -987,13 +987,20 @@ export const evaluatePrefecturalNuisance = (
 /** @deprecated evaluatePrefecturalNuisance に置き換え予定 */
 export const evaluateTottoriNuisance = evaluatePrefecturalNuisance;
 
+// 総合判定の集約。red/yellow は確定的な規制適用なので unknown より優先する。
+// 一方で、known が全部 green でも unknown が混ざっているケースは「データ欠落
+// による飛行可断定」というサイレント false-OK を生むため、green に降格させず
+// unknown のまま返す。コンプライアンス用途では「カバレッジに穴がある」ことを
+// 利用者に明示的に伝える方が安全側。
+//   red    > yellow > green = all known green AND no unknown
+//   unknown = any unknown alongside green-only-or-empty known set
 export const computeOverall = (
   items: readonly RegulationWithStatus[],
 ): RegulationStatus => {
-  const known = items.filter((r) => r.status !== "unknown");
-  if (known.length === 0) return "unknown";
-  if (known.some((r) => r.status === "red")) return "red";
-  if (known.some((r) => r.status === "yellow")) return "yellow";
+  if (items.some((r) => r.status === "red")) return "red";
+  if (items.some((r) => r.status === "yellow")) return "yellow";
+  if (items.some((r) => r.status === "unknown")) return "unknown";
+  if (items.length === 0) return "unknown";
   return "green";
 };
 
