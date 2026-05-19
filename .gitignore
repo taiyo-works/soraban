@@ -27,6 +27,10 @@ packages/regulations/data/airports/raw/
 # Phase 1 後半で fetch-airports.sh による C28-20 正規データに置換した時点で、
 # データサイズに応じて再度 ignore するか検討する。
 packages/regulations/data/parks/raw/
+# OSM 生取得データ (fetch-parks-osm.mjs で再生成可能、マージ前の中間成果物)
+packages/regulations/data/parks/by-muni-osm/
+# マージ前のハンドメイド版バックアップ (git 履歴に残っているので不要)
+packages/regulations/data/parks/by-muni-handdrawn-backup/
 
 # ローカル作業用アーカイブ
 files.zip
