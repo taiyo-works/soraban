@@ -58,14 +58,14 @@ const COVERAGE_LAYERS: readonly CoverageRow[] = [
   {
     source: "市町村",
     title: "都市公園条例（自治体レジストリ方式）",
-    coverage: `${PARK_MUNI_LABEL}（Phase 1 拡大中）`,
+    coverage: `${COVERAGE_SUMMARY.municipalParkNames.length} 市町村（Phase 1 拡大中）`,
     dataset: "公園台帳簡易ポリゴン",
     count: `計 ${COVERAGE_SUMMARY.totalParks} 公園（${PARK_BREAKDOWN}、Phase 1 で正規ポリゴン置換）`,
   },
   {
     source: "市町村",
-    title: `文化財保護法125条 / ${HERITAGE_MUNI_LABEL} 文化財条例`,
-    coverage: HERITAGE_MUNI_LABEL,
+    title: "文化財保護法125条 / 自治体文化財条例",
+    coverage: `${COVERAGE_SUMMARY.municipalHeritageCounts.length} 市町村`,
     dataset: "国指定史跡 + 県指定",
     count: `計 ${COVERAGE_SUMMARY.totalHeritage} 件（${HERITAGE_BREAKDOWN}）`,
   },
