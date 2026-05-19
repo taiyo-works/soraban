@@ -100,7 +100,8 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "sakaiminato-station",
     name: "境港駅",
-    loc: { lat: 35.543, lng: 133.228 },
+    // JR境港駅 (境港市大正町209-1): 35°32′41″N 133°13′37″E
+    loc: { lat: 35.5447, lng: 133.2269 },
     hint: "境港市カバレッジ + 県条例（駅0m）",
     group: "鳥取県",
   },
@@ -121,14 +122,15 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "uchibuki-park",
     name: "打吹公園(倉吉)",
-    loc: { lat: 35.4264, lng: 133.823 },
+    loc: { lat: 35.4250, lng: 133.8235 },
     hint: "倉吉市公園条例 + 県条例（白壁土蔵群近接）",
     group: "鳥取県",
   },
   {
     id: "matsue-castle",
     name: "松江城(国指定史跡・国宝)",
-    loc: { lat: 35.4745, lng: 133.0515 },
+    // 松江城天守: 35°28′32″N 133°03′02″E
+    loc: { lat: 35.4753, lng: 133.0506 },
     hint: "松江市公園条例 × 文化財保護法 同時red",
     group: "島根県",
   },
@@ -149,7 +151,8 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "izumo-station",
     name: "出雲市役所",
-    loc: { lat: 35.3676, lng: 132.7549 },
+    // 出雲市今市町70: 35°22′06″N 132°45′24″E
+    loc: { lat: 35.3683, lng: 132.7567 },
     hint: "DID + 島根県条例（庁舎0m）",
     group: "島根県",
   },
