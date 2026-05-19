@@ -12,8 +12,11 @@ Soraban の規制データ（DID / 空港 / 都市公園）を国土数値情報
 |---|---|---|
 | `fetch-did.sh` | 国土数値情報 A16-15「人口集中地区」を都道府県別に分割 | `data/did/by-pref/pref-{code}.geojson` |
 | `fetch-airports.sh` | 国土数値情報 C28-20「空港」のうち供用中のみ抽出 | `data/airports/airports.geojson` |
-| `fetch-parks.sh` | 国土数値情報 N06「都市公園」を市町村別に分割 | `data/parks/by-muni/{muniCode}.json` |
-| `extract-*.jq` | 各 fetch スクリプトが呼ぶ jq フィルタ | （標準出力経由） |
+| `fetch-parks.sh` | （旧経路）国土数値情報 N06「都市公園」を市町村別に分割。**P13/N06 は 2011 年版で更新停止 + 非商用ライセンスのため Phase 1 では非推奨**。OSM 経路を優先 | `data/parks/by-muni/{muniCode}.json` |
+| `fetch-parks-osm.mjs` | **(現行)** OpenStreetMap Overpass API から `leisure=park` を 12 市町村分取得 | `data/parks/by-muni-osm/{muniCode}.json` (gitignore) |
+| `merge-parks-osm.mjs` | ハンドメイド seed と OSM データを名前重複排除でマージし `by-muni/` を上書き | `data/parks/by-muni/{muniCode}.json` |
+| `validate-parks-osm.mjs` | 既存テスト fixture (lat, lng) が新公園 polygon に含まれるか確認 | stdout |
+| `extract-*.jq` | 旧 fetch-*.sh が呼ぶ jq フィルタ（jq 必須、Windows では未導入のことが多い） | （標準出力経由） |
 
 ## データフロー
 
@@ -31,21 +34,29 @@ data/{did,airports,parks}/...    ← git 管理。zones.ts / regulation-check.ts
 ## Phase 0/1 の運用
 
 - **DID / 空港**: 既に `fetch-*.sh` で生成・配布済み。データは大容量なので git 管理外（`.gitignore` 参照）、再生成は `pnpm -F @soraban/regulations fetch:all`。
-- **都市公園**: Phase 0/1 段階では手描き簡易ポリゴンを `data/parks/by-muni/{muniCode}.json` に直書きしている。`fetch-parks.sh` は **Phase 1 後半で N06 正規ポリゴンに置換するときに使う雛形**。実 N06 リリース URL を `SORABAN_N06_URL` 環境変数で渡す想定。
+- **都市公園**: Phase 0/1 では手描き簡易ポリゴンを `data/parks/by-muni/{muniCode}.json` に直書き → Phase 1 後半で OSM (Overpass API) から取得した実 polygon をマージ済（`fetch-parks-osm.mjs` + `merge-parks-osm.mjs`）。N06 (P13) は 2011 年版以降更新がなく、非商用ライセンスのため採用断念。
 - **史跡 / 公衆密集地**: 国土数値情報には該当データがないため、当面 `zones.ts` のハードコード（後で同様に JSON 外出し予定）。
 
-## 都市公園を N06 から再生成する手順（Phase 1 着手時）
+## 都市公園を OSM から再生成・マージする手順（現行）
 
-1. 最新 N06 のダウンロード URL を確認（[KSJ N06](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N06.html)）
-2. URL を環境変数で渡して fetch:
+1. **fetch**: Overpass API から全 12 市町村の `leisure=park` を取得
    ```bash
-   SORABAN_N06_URL="https://nlftp.mlit.go.jp/ksj/gml/data/N06/.../N06-XX_GML.zip" \
-     bash packages/regulations/scripts/fetch-parks.sh
+   node packages/regulations/scripts/fetch-parks-osm.mjs
    ```
-3. `data/parks/by-muni/{31202,31204,32203}.json` が更新される
-4. `pnpm test` で regulations の回帰スイートが green であることを確認
-5. `pnpm dev` でデモプリセット 9 地点の判定が壊れていないことを目視確認
-6. Cache Components のキャッシュ無効化: 公開時は `revalidateTag("regulation-data:parks")` を呼ぶ Server Action 経由で叩く（要追加実装）
+   出力: `data/parks/by-muni-osm/{muniCode}.json` (gitignore)。Overpass の rate-limit (429/504) は exponential backoff で 3 回リトライ。すでに取得済の muni は skip (`--force` で強制再取得)。
+2. **validate**: 既存テスト fixture が OSM polygon に含まれているかを確認
+   ```bash
+   node packages/regulations/scripts/validate-parks-osm.mjs
+   ```
+3. **merge**: ハンドメイド seed と OSM データを名前重複排除でマージし `by-muni/` を上書き
+   ```bash
+   node packages/regulations/scripts/merge-parks-osm.mjs --dry-run  # 件数だけ確認
+   node packages/regulations/scripts/merge-parks-osm.mjs            # 実行 (by-muni-handdrawn-backup/ にバックアップ自動作成)
+   ```
+   ハンドメイド版が先頭に来るので、test fixture (湊山公園 35.4267,133.322 等) の polygon が温存される。
+4. **regression**: `pnpm test` で回帰スイートが green であることを確認 (101/101)
+5. **UI 目視**: `pnpm dev` でデモプリセット 13 地点の判定が壊れていないか確認
+6. **キャッシュ無効化**: 本番投入時は `revalidateTag("regulation-data:parks")` を呼ぶ Server Action 経由で叩く (要追加実装)
 
 ## 自治体を追加するときの手順
 
