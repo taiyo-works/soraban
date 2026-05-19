@@ -23,7 +23,9 @@ packages/regulations/data/did/raw/
 packages/regulations/data/did/by-pref/
 packages/regulations/data/did/all.geojson
 packages/regulations/data/airports/raw/
-packages/regulations/data/airports/airports.geojson
+# airports.geojson は Phase 0/1 では手描き seed (山陰 + 但馬 6 空港) を直接 track。
+# Phase 1 後半で fetch-airports.sh による C28-20 正規データに置換した時点で、
+# データサイズに応じて再度 ignore するか検討する。
 packages/regulations/data/parks/raw/
 
 # ローカル作業用アーカイブ

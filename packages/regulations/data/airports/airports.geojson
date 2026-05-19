@@ -1,0 +1,127 @@
+{
+  "type": "FeatureCollection",
+  "_source": "Phase 0/1 手描き seed。山陰圏 + 隣接県の主要供用中空港のみ。Phase 1 後半で国土数値情報 C28-20 (scripts/fetch-airports.sh) の正規ポリゴンに置換予定。座標は公開地形図・空港要覧から目視取り（敷地外周・滑走路を含む rough rect）。",
+  "_verifiedAt": "2026-05-14T00:00:00+09:00",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [132.880, 35.405],
+          [132.900, 35.405],
+          [132.900, 35.420],
+          [132.880, 35.420],
+          [132.880, 35.405]
+        ]]
+      },
+      "properties": {
+        "id": "RJOC",
+        "name": "出雲縁結び空港",
+        "status": "供用中",
+        "centerLat": 35.4133,
+        "centerLng": 132.8897
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [133.225, 35.485],
+          [133.250, 35.485],
+          [133.250, 35.500],
+          [133.225, 35.500],
+          [133.225, 35.485]
+        ]]
+      },
+      "properties": {
+        "id": "RJOH",
+        "name": "米子鬼太郎空港（美保基地共用）",
+        "status": "供用中",
+        "centerLat": 35.4925,
+        "centerLng": 133.2364
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [131.780, 34.670],
+          [131.800, 34.670],
+          [131.800, 34.685],
+          [131.780, 34.685],
+          [131.780, 34.670]
+        ]]
+      },
+      "properties": {
+        "id": "RJOW",
+        "name": "萩・石見空港",
+        "status": "供用中",
+        "centerLat": 34.6764,
+        "centerLng": 131.7903
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [133.318, 36.170],
+          [133.332, 36.170],
+          [133.332, 36.187],
+          [133.318, 36.187],
+          [133.318, 36.170]
+        ]]
+      },
+      "properties": {
+        "id": "RJNO",
+        "name": "隠岐空港",
+        "status": "供用中",
+        "centerLat": 36.1782,
+        "centerLng": 133.3253
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [134.158, 35.524],
+          [134.176, 35.524],
+          [134.176, 35.538],
+          [134.158, 35.538],
+          [134.158, 35.524]
+        ]]
+      },
+      "properties": {
+        "id": "RJOR",
+        "name": "鳥取砂丘コナン空港",
+        "status": "供用中",
+        "centerLat": 35.5306,
+        "centerLng": 134.1672
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [134.780, 35.507],
+          [134.795, 35.507],
+          [134.795, 35.519],
+          [134.780, 35.519],
+          [134.780, 35.507]
+        ]]
+      },
+      "properties": {
+        "id": "RJBT",
+        "name": "但馬空港（コウノトリ但馬空港）",
+        "status": "供用中",
+        "centerLat": 35.5128,
+        "centerLng": 134.7872
+      }
+    }
+  ]
+}

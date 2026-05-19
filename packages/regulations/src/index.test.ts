@@ -5,11 +5,13 @@ import {
   COVERAGE_SUMMARY,
   computeOverall,
   computeOverallConfidence,
+  evaluateAirports,
   evaluateDid,
   evaluateMihoBase,
   evaluateMunicipalHeritage,
   evaluateMunicipalParks,
   evaluatePrefecturalNuisance,
+  type AirportCandidate,
   formatMachineCondition,
   LOW_CONFIDENCE_THRESHOLD,
   shouldWarnConfidence,
@@ -225,6 +227,75 @@ describe("evaluatePrefecturalNuisance", () => {
   });
 });
 
+// evaluateAirports: seed airports.geojson の山陰圏空港について、
+// 敷地内 red / 6km 圏 yellow / 圏外 green / データ無し unknown の
+// 4 区分が正しく決まるかを確認する。出雲空港バグの回帰防止。
+describe("evaluateAirports", () => {
+  const izumoAirport: AirportCandidate = {
+    id: "RJOC",
+    name: "出雲縁結び空港",
+    polygons: [
+      [
+        { lat: 35.405, lng: 132.880 },
+        { lat: 35.405, lng: 132.900 },
+        { lat: 35.420, lng: 132.900 },
+        { lat: 35.420, lng: 132.880 },
+      ],
+    ],
+    center: { lat: 35.4133, lng: 132.8897 },
+  };
+  const yonagoAirport: AirportCandidate = {
+    id: "RJOH",
+    name: "米子鬼太郎空港",
+    polygons: [
+      [
+        { lat: 35.485, lng: 133.225 },
+        { lat: 35.485, lng: 133.250 },
+        { lat: 35.500, lng: 133.250 },
+        { lat: 35.500, lng: 133.225 },
+      ],
+    ],
+    center: { lat: 35.4925, lng: 133.2364 },
+  };
+  const airports = [izumoAirport, yonagoAirport];
+
+  it("flags red for 出雲空港 center (on-airport polygon)", () => {
+    const r = evaluateAirports({ lat: 35.4133, lng: 132.8897 }, airports);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.note).toContain("出雲縁結び空港");
+    expect(r.note).toContain("敷地内");
+  });
+
+  it("flags yellow within 6km of 出雲空港", () => {
+    // 約 3km 北 (0.027° ≒ 3km)。on-polygon ではない。
+    const r = evaluateAirports({ lat: 35.440, lng: 132.8897 }, airports);
+    expect(r.status).toBe<RegulationStatus>("yellow");
+    expect(r.note).toContain("出雲縁結び空港");
+  });
+
+  it("flags green well outside 6km", () => {
+    // 出雲市役所 (35.3676, 132.7549) は出雲空港から ~13km。
+    const r = evaluateAirports({ lat: 35.3676, lng: 132.7549 }, airports);
+    expect(r.status).toBe<RegulationStatus>("green");
+  });
+
+  it("returns unknown when airport dataset is empty (data gap)", () => {
+    const r = evaluateAirports({ lat: 35.4133, lng: 132.8897 }, []);
+    expect(r.status).toBe<RegulationStatus>("unknown");
+    expect(r.note).toContain("空港データを読み込めませんでした");
+  });
+
+  it("drops red on airport to green with <100g weight exception", () => {
+    const r = evaluateAirports(
+      { lat: 35.4133, lng: 132.8897 },
+      airports,
+      { droneWeightG: 50 },
+    );
+    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.appliedExceptions?.[0]?.machine?.value).toBe(100);
+  });
+});
+
 describe("evaluateMihoBase", () => {
   it("flags red at the airbase center", () => {
     expect(evaluateMihoBase(MIHO_AIRBASE_CENTER).status).toBe<RegulationStatus>("red");
@@ -264,8 +335,19 @@ describe("computeOverall", () => {
   it("unknown alone returns unknown", () => {
     expect(computeOverall([make("unknown")])).toBe<RegulationStatus>("unknown");
   });
-  it("ignores unknown when other statuses are present", () => {
-    expect(computeOverall([make("unknown"), make("green")])).toBe<RegulationStatus>("green");
+  // 「データ欠落のサイレント緑化」防止: unknown が混在していれば全体は
+  // green に降格しない。red/yellow はそれ自体が確定的なので unknown を勝つ。
+  it("unknown alongside green degrades overall to unknown (no silent gaps)", () => {
+    expect(computeOverall([make("unknown"), make("green")])).toBe<RegulationStatus>("unknown");
+  });
+  it("red still dominates unknown", () => {
+    expect(computeOverall([make("unknown"), make("red")])).toBe<RegulationStatus>("red");
+  });
+  it("yellow still dominates unknown", () => {
+    expect(computeOverall([make("unknown"), make("yellow")])).toBe<RegulationStatus>("yellow");
+  });
+  it("empty items returns unknown", () => {
+    expect(computeOverall([])).toBe<RegulationStatus>("unknown");
   });
 
   it("computeOverallConfidence picks the worst rung", () => {

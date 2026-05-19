@@ -41,8 +41,9 @@ const overallTone: Record<RegulationStatus, string> = {
 const overallHelp: Record<RegulationStatus, string> = {
   red: "1件以上の規制で飛行不可。許可取得または別地点での運用を検討してください。",
   yellow: "要確認の規制があります。詳細を確認のうえ、必要に応じて許可申請してください。",
-  green: "現在チェックした条例の範囲では、飛行可能です。",
-  unknown: "判定可能な規制データが見つかりませんでした。管轄機関に直接ご確認ください。",
+  green: "現在チェックした全ての規制で、適用外または例外節該当（飛行可能と判断できる状態）です。",
+  unknown:
+    "一部の規制でデータが未整備のため、飛行可否を確証できません。下記カードで「未整備」となっている項目を確認し、該当機関に直接ご確認ください。",
 };
 
 const round6 = (n: number): string => n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
@@ -66,7 +67,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "taiyo-tsushin-hq",
     name: "タイヨー通信本社（拠点）",
     loc: { lat: 35.434238, lng: 133.380508 },
-    hint: "拠点 / 全レイヤー green（DID 外・空港 14km）",
+    hint: "拠点 / 国法は green。日吉津村は自治体カバレッジ外（一部判定不能）",
     group: "鳥取県",
   },
   {
@@ -103,6 +104,13 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     // JR境港駅 (境港市大正町209-1): 35°32′41″N 133°13′37″E
     loc: { lat: 35.5447, lng: 133.2269 },
     hint: "境港市カバレッジ + 県条例（駅0m）",
+    group: "鳥取県",
+  },
+  {
+    id: "yonago-airport",
+    name: "米子鬼太郎空港",
+    loc: { lat: 35.4925, lng: 133.2364 },
+    hint: "空港敷地内 + 美保基地 red（航空法 × 小型無人機等飛行禁止法）",
     group: "鳥取県",
   },
   {
@@ -154,6 +162,13 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     // 出雲市今市町70: 35°22′06″N 132°45′24″E
     loc: { lat: 35.3683, lng: 132.7567 },
     hint: "DID + 島根県条例（庁舎0m）",
+    group: "島根県",
+  },
+  {
+    id: "izumo-airport",
+    name: "出雲縁結び空港",
+    loc: { lat: 35.4133, lng: 132.8897 },
+    hint: "空港敷地内 red（航空法 132 条）",
     group: "島根県",
   },
 ];
