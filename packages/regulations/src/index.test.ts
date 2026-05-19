@@ -201,12 +201,12 @@ describe("evaluateMunicipalHeritage", () => {
 
 describe("evaluatePrefecturalNuisance", () => {
   it("returns yellow within 100m of 米子市役所 (鳥取県)", () => {
-    const r = evaluatePrefecturalNuisance({ lat: 35.4283, lng: 133.3306 }, yonagoMuni);
+    const r = evaluatePrefecturalNuisance({ lat: 35.4278, lng: 133.3314 }, yonagoMuni);
     expect(r.status).toBe<RegulationStatus>("yellow");
     expect(r.note).toContain("鳥取県");
   });
   it("returns yellow within 100m of 出雲市役所 (島根県)", () => {
-    const r = evaluatePrefecturalNuisance({ lat: 35.3676, lng: 132.7549 }, izumoMuni);
+    const r = evaluatePrefecturalNuisance({ lat: 35.3683, lng: 132.7567 }, izumoMuni);
     expect(r.status).toBe<RegulationStatus>("yellow");
     expect(r.note).toContain("島根県");
   });
@@ -433,7 +433,7 @@ describe("FlightContext exemption application", () => {
 
   it("prefectural nuisance drops to green with facility_manager permit", () => {
     const r = evaluatePrefecturalNuisance(
-      { lat: 35.4283, lng: 133.3306 }, // 米子市役所 0m
+      { lat: 35.4278, lng: 133.3314 }, // 米子市役所 0m
       yonagoMuni,
       { pilotPermits: ["facility_manager"] },
     );
@@ -469,7 +469,7 @@ describe("demo preset regressions", () => {
   const cases: readonly Case[] = [
     {
       label: "米子市役所",
-      loc: { lat: 35.4283, lng: 133.3306 },
+      loc: { lat: 35.4278, lng: 133.3314 },
       muni: yonagoMuni,
       expectedParks: "green",
       expectedPref: "yellow",
@@ -489,7 +489,7 @@ describe("demo preset regressions", () => {
     },
     {
       label: "境港駅",
-      loc: { lat: 35.543, lng: 133.228 },
+      loc: { lat: 35.5447, lng: 133.2269 },
       muni: sakaiminatoMuni,
       expectedPref: "yellow",
     },
@@ -516,7 +516,7 @@ describe("demo preset regressions", () => {
     },
     {
       label: "出雲市役所",
-      loc: { lat: 35.3676, lng: 132.7549 },
+      loc: { lat: 35.3683, lng: 132.7567 },
       muni: izumoMuni,
       expectedPref: "yellow",
     },

@@ -51,9 +51,10 @@ export const parseCombinedLatLng = (input: string): LatLng | null => {
   return null;
 };
 
+// 米子市役所（米子市加茂町一丁目1番地）。公式: 35°25′40″N 133°19′53″E。
 export const YONAGO_CITY_HALL: LatLng = {
-  lat: 35.4283,
-  lng: 133.3306,
+  lat: 35.4278,
+  lng: 133.3314,
 };
 
 const EARTH_RADIUS_M = 6371008.8;

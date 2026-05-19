@@ -107,7 +107,8 @@ export const YONAGO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "yonago-city-hall",
     name: "米子市役所",
     category: "庁舎",
-    center: { lat: 35.4283, lng: 133.3306 },
+    // 米子市加茂町1-1: 35°25′40″N 133°19′53″E
+    center: { lat: 35.4278, lng: 133.3314 },
   },
   {
     id: "yonago-medical-center",
@@ -139,19 +140,22 @@ export const SAKAIMINATO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "sakaiminato-city-hall",
     name: "境港市役所",
     category: "庁舎",
-    center: { lat: 35.5404, lng: 133.2326 },
+    // 境港市上道町3000: 35°32′20″N 133°13′54″E
+    center: { lat: 35.5389, lng: 133.2317 },
   },
   {
     id: "sakaiminato-station",
     name: "JR境港駅",
     category: "駅",
-    center: { lat: 35.5430, lng: 133.2280 },
+    // 境港市大正町209-1: 35°32′41″N 133°13′37″E
+    center: { lat: 35.5447, lng: 133.2269 },
   },
   {
     id: "sakaiminato-general-hospital",
     name: "境港総合病院",
     category: "病院",
-    center: { lat: 35.5310, lng: 133.2440 },
+    // 境港市米川町10: 35°31′55″N 133°15′28″E
+    center: { lat: 35.5320, lng: 133.2578 },
   },
 ];
 
@@ -167,19 +171,22 @@ export const IZUMO_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "izumo-city-hall",
     name: "出雲市役所",
     category: "庁舎",
-    center: { lat: 35.3676, lng: 132.7549 },
+    // 出雲市今市町70: 35°22′06″N 132°45′24″E
+    center: { lat: 35.3683, lng: 132.7567 },
   },
   {
     id: "izumo-station",
     name: "JR出雲市駅",
     category: "駅",
-    center: { lat: 35.3625, lng: 132.7549 },
+    // 出雲市駅北町: 35°21′45″N 132°45′24″E
+    center: { lat: 35.3625, lng: 132.7567 },
   },
   {
     id: "izumo-taisha-mae-station",
     name: "一畑電車 出雲大社前駅",
     category: "駅",
-    center: { lat: 35.3994, lng: 132.6862 },
+    // 大社町杵築南: 35°23′59″N 132°41′16″E
+    center: { lat: 35.3997, lng: 132.6878 },
   },
   {
     id: "shimane-pref-central-hospital",
@@ -233,25 +240,29 @@ export const TOTTORI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "tottori-city-hall",
     name: "鳥取市役所",
     category: "庁舎",
+    // 鳥取市尚徳町116: 35°30′13″N 134°14′20″E
     center: { lat: 35.5036, lng: 134.2389 },
   },
   {
     id: "tottori-pref-office",
     name: "鳥取県庁",
     category: "庁舎",
+    // 鳥取市東町1: 35°30′13″N 134°14′17″E
     center: { lat: 35.5036, lng: 134.2381 },
   },
   {
     id: "tottori-station",
     name: "JR鳥取駅",
     category: "駅",
-    center: { lat: 35.4994, lng: 134.2331 },
+    // 鳥取市東品治町111-1: 35°29′41″N 134°13′47″E
+    center: { lat: 35.4947, lng: 134.2297 },
   },
   {
     id: "tottori-pref-central-hospital",
     name: "鳥取県立中央病院",
     category: "病院",
-    center: { lat: 35.4928, lng: 134.2255 },
+    // 鳥取市江津730: 35°29′16″N 134°13′55″E
+    center: { lat: 35.4878, lng: 134.2319 },
   },
 ];
 
@@ -281,19 +292,22 @@ export const KURAYOSHI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "kurayoshi-city-hall",
     name: "倉吉市役所",
     category: "庁舎",
-    center: { lat: 35.4296, lng: 133.8222 },
+    // 倉吉市葵町722: 35°25′47″N 133°49′20″E
+    center: { lat: 35.4297, lng: 133.8222 },
   },
   {
     id: "kurayoshi-station",
     name: "JR倉吉駅",
     category: "駅",
-    center: { lat: 35.4317, lng: 133.8403 },
+    // 倉吉市山根557-1: 35°26′01″N 133°50′24″E
+    center: { lat: 35.4336, lng: 133.8400 },
   },
   {
     id: "kurayoshi-koseibyoin",
     name: "厚生病院（倉吉）",
     category: "病院",
-    center: { lat: 35.4248, lng: 133.8184 },
+    // 倉吉市東昭和町150: 35°25′25″N 133°49′17″E
+    center: { lat: 35.4236, lng: 133.8214 },
   },
   {
     id: "kurayoshi-shirakabe-dozogun",
@@ -329,31 +343,36 @@ export const MATSUE_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "matsue-city-hall",
     name: "松江市役所",
     category: "庁舎",
-    center: { lat: 35.4677, lng: 133.0508 },
+    // 松江市末次町86: 35°28′05″N 133°03′03″E
+    center: { lat: 35.4681, lng: 133.0508 },
   },
   {
     id: "shimane-pref-office",
     name: "島根県庁",
     category: "庁舎",
-    center: { lat: 35.4720, lng: 133.0510 },
+    // 松江市殿町1: 35°28′16″N 133°03′04″E
+    center: { lat: 35.4711, lng: 133.0511 },
   },
   {
     id: "matsue-station",
     name: "JR松江駅",
     category: "駅",
-    center: { lat: 35.4577, lng: 133.0517 },
+    // 松江市朝日町472-2: 35°27′27″N 133°03′07″E
+    center: { lat: 35.4575, lng: 133.0519 },
   },
   {
     id: "matsue-redcross-hospital",
     name: "松江赤十字病院",
     category: "病院",
-    center: { lat: 35.4693, lng: 133.0606 },
+    // 松江市横浜町200: 35°28′10″N 133°03′37″E
+    center: { lat: 35.4694, lng: 133.0603 },
   },
   {
     id: "matsue-shinjiko-onsen",
     name: "松江しんじ湖温泉",
     category: "宿泊地",
-    center: { lat: 35.4750, lng: 133.0270 },
+    // 一畑電車駅周辺 (松江市西茶町): 35°28′32″N 133°02′27″E
+    center: { lat: 35.4756, lng: 133.0408 },
   },
 ];
 
@@ -383,7 +402,8 @@ export const MISASA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "misasa-town-hall",
     name: "三朝町役場",
     category: "庁舎",
-    center: { lat: 35.4022, lng: 133.8775 },
+    // 三朝町大瀬1156-6: 35°24′12″N 133°52′40″E
+    center: { lat: 35.4033, lng: 133.8778 },
   },
   {
     id: "misasa-onsen",
@@ -426,13 +446,15 @@ export const YURIHAMA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "yurihama-town-hall",
     name: "湯梨浜町役場",
     category: "庁舎",
-    center: { lat: 35.4863, lng: 133.9075 },
+    // 湯梨浜町久留19-1: 35°29′11″N 133°54′32″E
+    center: { lat: 35.4864, lng: 133.9089 },
   },
   {
     id: "matsuzaki-station",
     name: "JR松崎駅",
     category: "駅",
-    center: { lat: 35.4778, lng: 133.9112 },
+    // 湯梨浜町松崎: 35°28′44″N 133°54′40″E
+    center: { lat: 35.4789, lng: 133.9111 },
   },
   {
     id: "hawai-onsen",
@@ -469,19 +491,22 @@ export const YAZU_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "yazu-town-hall",
     name: "八頭町役場（郡家本庁舎）",
     category: "庁舎",
-    center: { lat: 35.4395, lng: 134.2950 },
+    // 八頭町宮谷254: 35°26′35″N 134°17′27″E
+    center: { lat: 35.4431, lng: 134.2908 },
   },
   {
     id: "kunge-station",
     name: "JR郡家駅（若桜鉄道分岐）",
     category: "駅",
-    center: { lat: 35.4380, lng: 134.2920 },
+    // 八頭町郡家64: 35°26′16″N 134°17′28″E
+    center: { lat: 35.4378, lng: 134.2911 },
   },
   {
     id: "yazu-funaoka-clinic",
     name: "公立八頭病院",
     category: "病院",
-    center: { lat: 35.4350, lng: 134.2960 },
+    // 八頭町久能寺725-3: 35°25′10″N 134°16′44″E
+    center: { lat: 35.4194, lng: 134.2789 },
   },
 ];
 
@@ -495,25 +520,29 @@ export const YASUGI_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "yasugi-city-hall",
     name: "安来市役所",
     category: "庁舎",
-    center: { lat: 35.4318, lng: 133.2497 },
+    // 安来市安来町878-2: 35°25′55″N 133°14′59″E
+    center: { lat: 35.4319, lng: 133.2497 },
   },
   {
     id: "yasugi-station",
     name: "JR安来駅",
     category: "駅",
-    center: { lat: 35.4347, lng: 133.2580 },
+    // 安来市安来町2093-2: 35°26′05″N 133°15′29″E
+    center: { lat: 35.4347, lng: 133.2581 },
   },
   {
     id: "yasugi-municipal-hospital",
     name: "安来市立病院",
     category: "病院",
-    center: { lat: 35.4280, lng: 133.2475 },
+    // 安来市安来町96-1: 35°25′44″N 133°14′53″E
+    center: { lat: 35.4289, lng: 133.2481 },
   },
   {
     id: "adachi-museum",
     name: "足立美術館（観光客密集地）",
     category: "宿泊地",
-    center: { lat: 35.3895, lng: 133.1928 },
+    // 安来市古川町320: 35°22′47″N 133°10′57″E
+    center: { lat: 35.3797, lng: 133.1825 },
   },
 ];
 
@@ -543,19 +572,22 @@ export const UNNAN_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "unnan-city-hall",
     name: "雲南市役所",
     category: "庁舎",
-    center: { lat: 35.2972, lng: 132.8965 },
+    // 雲南市木次町里方531-1: 35°17′50″N 132°53′53″E
+    center: { lat: 35.2972, lng: 132.8981 },
   },
   {
     id: "kisuki-station",
     name: "JR木次駅",
     category: "駅",
-    center: { lat: 35.2933, lng: 132.8888 },
+    // 雲南市木次町木次: 35°17′47″N 132°53′54″E
+    center: { lat: 35.2964, lng: 132.8983 },
   },
   {
     id: "unnan-shimin-hospital",
     name: "雲南市立病院",
     category: "病院",
-    center: { lat: 35.2998, lng: 132.8910 },
+    // 雲南市大東町飯田96-1: 35°19′59″N 132°56′13″E
+    center: { lat: 35.3331, lng: 132.9369 },
   },
 ];
 
@@ -596,19 +628,22 @@ export const OHDA_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
     id: "ohda-city-hall",
     name: "大田市役所",
     category: "庁舎",
-    center: { lat: 35.1928, lng: 132.5028 },
+    // 大田市大田町大田ハ111: 35°11′33″N 132°30′10″E
+    center: { lat: 35.1925, lng: 132.5028 },
   },
   {
     id: "ohda-shi-station",
     name: "JR大田市駅",
     category: "駅",
-    center: { lat: 35.1942, lng: 132.5068 },
+    // 大田市大田町: 35°11′40″N 132°30′23″E
+    center: { lat: 35.1944, lng: 132.5064 },
   },
   {
     id: "ohda-municipal-hospital",
     name: "大田市立病院",
     category: "病院",
-    center: { lat: 35.1880, lng: 132.5095 },
+    // 大田市大田町吉永1428: 35°11′23″N 132°30′21″E
+    center: { lat: 35.1897, lng: 132.5058 },
   },
   {
     id: "iwami-ginzan-omori",
