@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-
-const DID_DIR = path.resolve(
-  process.env["DID_DATA_DIR"] ??
-    path.join(process.cwd(), "..", "..", "packages", "regulations", "data", "did", "by-pref"),
-);
+import { DID_DIR } from "@/server/regulation-data-dir";
 
 export async function GET(
   _req: Request,

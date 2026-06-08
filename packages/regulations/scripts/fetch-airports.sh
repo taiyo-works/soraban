@@ -11,7 +11,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 RAW_DIR="$PKG_DIR/data/airports/raw"
-OUT="$PKG_DIR/data/airports/airports.geojson"
+OUT="$PKG_DIR/data/airports/airports.json"
 
 URL="https://nlftp.mlit.go.jp/ksj/gml/data/C28/C28-20/C28-20_GML.zip"
 ZIP="$RAW_DIR/C28-20_GML.zip"
