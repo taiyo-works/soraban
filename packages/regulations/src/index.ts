@@ -1107,3 +1107,6 @@ export {
   shouldWarnConfidence,
   summarizeConfidence,
 } from "./confidence";
+
+export type { AirportFeature, AirportFeatureCollection } from "./airports";
+export { AIRPORTS_GEOJSON } from "./airports";

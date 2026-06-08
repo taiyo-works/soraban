@@ -4,7 +4,9 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { cacheLife, cacheTag } from "next/cache";
 import type { LatLng, Polygon } from "@soraban/geo";
+import { DID_DIR } from "./regulation-data-dir";
 import {
+  AIRPORTS_GEOJSON,
   DEFAULT_DISCLAIMER,
   computeOverall,
   computeOverallConfidence,
@@ -60,15 +62,8 @@ const computeEvidenceId = (input: EvidenceInputs): string => {
   return `ev_${hex.slice(0, 16)}`;
 };
 
-// Turbopack の require.resolve は virtual path (`[project]/...`) を返すため、
-// process.cwd() (= apps/web) からモノレポルート相対で解決する。
-// 本番ビルドではデータの配置戦略を見直し（公開バケット or 同梱）。
-const DATA_ROOT = path.resolve(
-  process.env["REGULATION_DATA_DIR"] ??
-    path.join(process.cwd(), "..", "..", "packages", "regulations", "data"),
-);
-const DID_DIR = path.join(DATA_ROOT, "did", "by-pref");
-const AIRPORTS_FILE = path.join(DATA_ROOT, "airports", "airports.geojson");
+// 空港 GeoJSON は @soraban/regulations が静的 import で同梱 (AIRPORTS_GEOJSON)。
+// DID は regulation-data-dir の DID_DIR (実データ未追跡の本番では unknown に縮退)。
 
 type DidGeoJson = {
   readonly type: "FeatureCollection";
@@ -102,55 +97,26 @@ const flattenFeatureToCandidates = (
     .map((ring) => ({ muniCode, muniName, polygon: ringToPolygon(ring) }));
 };
 
-type AirportGeoJson = {
-  readonly type: "FeatureCollection";
-  readonly features: ReadonlyArray<{
-    readonly type: "Feature";
-    readonly geometry:
-      | { readonly type: "Polygon"; readonly coordinates: number[][][] }
-      | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
-    readonly properties: {
-      readonly id: string;
-      readonly name: string;
-      readonly status: string;
-      readonly centerLat: number;
-      readonly centerLng: number;
+// 空港候補は @soraban/regulations が静的 import で同梱した GeoJSON から組み立てる。
+// ファイル I/O が無いので Vercel serverless でも確実に動く (バンドル済み)。
+const loadAirports = (): readonly AirportCandidate[] => {
+  return AIRPORTS_GEOJSON.features.map((f) => {
+    const polygons: Polygon[] =
+      f.geometry.type === "Polygon"
+        ? f.geometry.coordinates[0]
+          ? [ringToPolygon(f.geometry.coordinates[0])]
+          : []
+        : f.geometry.coordinates
+            .map((poly) => poly[0])
+            .filter((r): r is number[][] => Array.isArray(r))
+            .map(ringToPolygon);
+    return {
+      id: f.properties.id,
+      name: f.properties.name,
+      polygons,
+      center: { lat: f.properties.centerLat, lng: f.properties.centerLng },
     };
-  }>;
-};
-
-// Next.js 16 Cache Components: 'use cache' を関数単位に付け、
-// 引数（airports は無し / prefCode）を自動的にキャッシュキーに含める。
-// ファイル更新時は cacheTag を revalidateTag/updateTag で叩いて即時無効化できる。
-const loadAirports = async (): Promise<readonly AirportCandidate[] | null> => {
-  "use cache";
-  cacheLife("days");
-  cacheTag("regulation-data:airports");
-  try {
-    const json = JSON.parse(
-      await fs.readFile(AIRPORTS_FILE, "utf8"),
-    ) as AirportGeoJson;
-    const candidates: AirportCandidate[] = json.features.map((f) => {
-      const polygons: Polygon[] =
-        f.geometry.type === "Polygon"
-          ? f.geometry.coordinates[0]
-            ? [ringToPolygon(f.geometry.coordinates[0])]
-            : []
-          : f.geometry.coordinates
-              .map((poly) => poly[0])
-              .filter((r): r is number[][] => Array.isArray(r))
-              .map(ringToPolygon);
-      return {
-        id: f.properties.id,
-        name: f.properties.name,
-        polygons,
-        center: { lat: f.properties.centerLat, lng: f.properties.centerLng },
-      };
-    });
-    return candidates;
-  } catch {
-    return null;
-  }
+  });
 };
 
 const loadPrefDid = async (

@@ -32,8 +32,12 @@ packages/regulations/data/parks/by-muni-osm/
 # マージ前のハンドメイド版バックアップ (git 履歴に残っているので不要)
 packages/regulations/data/parks/by-muni-handdrawn-backup/
 
+# ローカル作業で生成され得る一時データコピー (コミット対象外)
+apps/web/regulation-data/
+
 # ローカル作業用アーカイブ
 files.zip
 
 # Claude Code local config
 .claude/
+.vercel
