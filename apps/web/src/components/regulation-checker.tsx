@@ -234,6 +234,8 @@ export function RegulationChecker() {
   // 立入管理措置の有無／第三者上空か（カテゴリー II / III 切り分け用）。
   // "yes" = 立入管理措置あり, "no_third_party" = 措置なし＝第三者上空（III）, "" = 未選択
   const [accessMode, setAccessMode] = useState<"" | "yes" | "no_third_party">("");
+  // 目視外飛行時の補助者の有無（プリフィルの運航条件に反映）。"" = 未選択
+  const [bvlosObserver, setBvlosObserver] = useState<"" | "with" | "without">("");
   const [diagnosis, setDiagnosis] = useState<DiagnoseResponse | null>(null);
   const [diagnoseError, setDiagnoseError] = useState<string | null>(null);
 
@@ -274,6 +276,7 @@ export function RegulationChecker() {
     setMethodFlags([]);
     setAirspaceFlags([]);
     setAccessMode("");
+    setBvlosObserver("");
     setPlannedDate("");
     applyLocation(entry.loc);
     // ctx 変更で useEffect の自動再判定が走るのを待たず、明示的に呼んで即時反映
@@ -402,6 +405,7 @@ export function RegulationChecker() {
         plannedDate: plannedDate.trim().length > 0 ? plannedDate : undefined,
         accessControl: accessMode === "" ? undefined : accessMode === "yes",
         thirdPartyOverflight: accessMode === "no_third_party" ? true : undefined,
+        bvlosWithObserver: bvlosObserver === "" ? undefined : bvlosObserver === "with",
       });
       setDiagnosis(res);
       setDiagnoseError(null);
@@ -432,7 +436,7 @@ export function RegulationChecker() {
     if (!result) return; // 初回オートランより前は走らせない
     void runDiagnose(center);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [methodFlags, airspaceFlags, plannedDate, accessMode, droneWeightInput]);
+  }, [methodFlags, airspaceFlags, plannedDate, accessMode, bvlosObserver, droneWeightInput]);
 
   // デモ初動短縮: 米子市役所で初期判定をプリロードして
   // 「ページが開いた瞬間に red 信号機」が見える状態にする。
@@ -539,7 +543,7 @@ export function RegulationChecker() {
   // 共通スタイル: 紙地のフィールドカード ＋ シャープ角丸
   // モバイルでもタップ精度が出るよう、高さ 44px 以上を確保。
   const fieldClass =
-    "w-full rounded-sharp border border-rule bg-paper px-3 py-3 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-1 focus:ring-brand-700 sm:py-2.5 sm:text-sm";
+    "w-full rounded-sharp border border-rule bg-paper px-3 py-3 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-1 focus:ring-offset-paper sm:py-2.5 sm:text-sm";
   const ghostBtn =
     "inline-flex h-11 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-xs font-medium uppercase tracking-wider text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft active:bg-paper-soft disabled:opacity-40";
 
@@ -939,6 +943,27 @@ export function RegulationChecker() {
               </span>
             </label>
           </div>
+
+          {/* 目視外飛行を選んでいる場合のみ補助者の有無を尋ねる（プリフィルの運航条件に反映）。 */}
+          {methodFlags.includes("method_bvlos") ? (
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                目視外飛行の補助者
+              </span>
+              <select
+                value={bvlosObserver}
+                onChange={(e) => setBvlosObserver(e.target.value as typeof bvlosObserver)}
+                className={fieldClass}
+              >
+                <option value="">未選択</option>
+                <option value="with">補助者あり</option>
+                <option value="without">補助者なし（より上位の運航要件）</option>
+              </select>
+              <span className="text-[10px] leading-tight text-ink-mute">
+                補助者の有無で運航条件が変わるため、プリフィル表に反映します
+              </span>
+            </label>
+          ) : null}
 
           {diagnoseError ? (
             <p className="text-xs text-signal-red" role="alert">

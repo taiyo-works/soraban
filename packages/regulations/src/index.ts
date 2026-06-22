@@ -1149,3 +1149,24 @@ export {
   toJstIsoDate,
   classifyDeadlineUrgency,
 } from "./business-days";
+
+// ── DIPS 入力プリフィル ＋ 独自飛行マニュアル骨子ドラフト（Sprint 3）──
+export type {
+  PrefillField,
+  PrefillSystem,
+  BuildPrefillInput,
+  ManualBaseSection,
+  ManualMethodSection,
+  StandardManualReference,
+  ManualChoice,
+  FlightManualDraft,
+  BuildManualInput,
+} from "./prefill";
+export {
+  buildPrefillFields,
+  buildFlightManualDraft,
+  formatManualDraftText,
+  STANDARD_MANUAL_REFERENCE,
+  ALL_MANUAL_BASE_SECTIONS,
+  ALL_MANUAL_METHOD_SECTIONS,
+} from "./prefill";

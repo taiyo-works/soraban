@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { isValidLatLng } from "@soraban/geo";
 import {
+  buildPrefillFields,
   deriveDiagnosis,
   extractAirspaceFlagsFromRegulations,
   SPECIFIC_FLIGHT_FLAG_LABEL,
   type ApplicationDiagnosis,
+  type PrefillField,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { runRegulationCheck } from "@/server/regulation-check";
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
   const plannedDate = parsePlannedDate(obj["plannedDate"]);
   const accessControl = parseBool(obj["accessControl"]);
   const thirdPartyOverflight = parseBool(obj["thirdPartyOverflight"]);
+  const bvlosWithObserver = parseBool(obj["bvlosWithObserver"]);
 
   // 信号機判定を実行し、空域フラグ（DID・空港 red）を自動導出してユーザー入力に合流。
   // ctx には機体重量だけ渡す（例外節適用と evidenceId の一貫性のため）。
@@ -71,24 +74,46 @@ export async function POST(req: Request) {
     droneWeightG !== undefined ? { droneWeightG } : undefined,
   );
   const airspaceFlags = extractAirspaceFlagsFromRegulations(checkResult.regulations);
+  // 飛行方法フラグ ＋ 判定由来の空域フラグを合流した最終フラグ集合。
+  const mergedFlags: readonly SpecificFlightFlag[] = [...airspaceFlags, ...userFlags];
 
   const diagnosis: ApplicationDiagnosis = deriveDiagnosis({
-    flags: [...airspaceFlags, ...userFlags],
+    flags: mergedFlags,
     droneWeightG,
     plannedDate,
     accessControl,
     thirdPartyOverflight,
   });
 
+  // DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値）。
+  // evidenceId と同じ判定入力から生成するため、サーバ側で組み立てて返す。
+  const prefill: readonly PrefillField[] = buildPrefillFields({
+    lat,
+    lng,
+    resolvedAddress: checkResult.resolvedAddress,
+    flags: mergedFlags,
+    droneWeightG,
+    plannedDate,
+    accessControl,
+    thirdPartyOverflight,
+    bvlosWithObserver,
+  });
+
   // 証跡同定のため、信号機判定の evidenceId / engineVersion を併せて返す。
   return NextResponse.json({
     ...diagnosis,
+    prefill,
     evidenceId: checkResult.evidenceId,
     engineVersion: checkResult.engineVersion,
     checkedAt: checkResult.checkedAt,
     resolvedAddress: checkResult.resolvedAddress,
     muniCode: checkResult.muniCode,
+    // 判定地点の座標も返す（PDF・プリフィル表の参照用）。
+    lat,
+    lng,
     // どの空域フラグが判定由来で合流したかを UI が示せるように返す。
     derivedAirspaceFlags: airspaceFlags,
+    // どのフラグ集合（空域＋方法）で診断したか（マニュアル骨子・PDF の生成根拠）。
+    flags: mergedFlags,
   });
 }

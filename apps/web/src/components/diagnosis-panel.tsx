@@ -1,10 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { getCategoryDefinition, type DiagnosisCategory } from "@soraban/regulations";
+import {
+  buildFlightManualDraft,
+  getCategoryDefinition,
+  toJstIsoDate,
+  type DiagnosisCategory,
+  type ManualChoice,
+} from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { ProcedureCard } from "./procedure-card";
 import { DeadlineCalendar } from "./deadline-calendar";
+import { PrefillTable } from "./prefill-table";
+import { ManualDraft } from "./manual-draft";
 
 type Props = {
   readonly diagnosis: DiagnoseResponse;
@@ -105,10 +113,56 @@ export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
     setDoneMap((prev) => ({ ...prev, [id]: done }));
   };
 
+  // 飛行マニュアルの方針（標準／独自）。既定は独自（骨子が見える方）。
+  // 束ね PDF にも同じ選択を反映するためパネルで状態を保持する。
+  const [manualChoice, setManualChoice] = useState<ManualChoice>("custom");
+  // 束ね PDF 生成中フラグ。
+  const [bundleBusy, setBundleBusy] = useState<boolean>(false);
+  const [bundleError, setBundleError] = useState<string | null>(null);
+
   const deadlineFor = (id: string): string | undefined =>
     diagnosis.deadlines.find((d) => d.procedureId === id)?.basis;
 
   const doneCount = diagnosis.procedures.filter((p) => doneMap[p.id]).length;
+
+  // 束ね PDF 出力。既存単発 PDF と同じ作法（@react-pdf/renderer・self-host フォント・
+  // 動的 import）。ファイル名に evidenceId を含め、いつのロジックの診断か同定可能にする。
+  const handleBundlePdfExport = async (): Promise<void> => {
+    setBundleBusy(true);
+    setBundleError(null);
+    try {
+      const [{ pdf }, { ApplicationPdfDocument }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("./application-pdf"),
+      ]);
+      // PDF に焼く飛行マニュアルは、画面で選択中の方針（標準／独自）と一致させる。
+      const manualDraft = buildFlightManualDraft({
+        choice: manualChoice,
+        flags: diagnosis.flags,
+      });
+      const blob = await pdf(
+        <ApplicationPdfDocument
+          diagnosis={diagnosis}
+          manualDraft={manualDraft}
+          plannedDate={plannedDate}
+          todayIso={toJstIsoDate()}
+        />,
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      // ファイル名に evidenceId を含める（束ね PDF と単発 PDF を名前で区別）。
+      anchor.download = `soraban-application-${diagnosis.evidenceId}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      setTimeout(() => URL.revokeObjectURL(url), 5_000);
+    } catch (err) {
+      setBundleError(`束ね PDF の生成に失敗しました: ${(err as Error).message}`);
+    } finally {
+      setBundleBusy(false);
+    }
+  };
 
   return (
     <section
@@ -256,6 +310,52 @@ export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
           飛行予定日が未入力なら「飛行予定日を入力してください」と促し、
           入力済みなら各手続きの具体的な期限日と残り日数のアラート色を出す。 */}
       <DeadlineCalendar diagnosis={diagnosis} plannedDate={plannedDate} />
+
+      {/* 申請内容プリフィル表（DIPS／DRS の入力欄に対応する値・各行コピペ）。 */}
+      <PrefillTable prefill={diagnosis.prefill} />
+
+      {/* 書類ドラフト（独自飛行マニュアル骨子 ／ 標準を使う選択）。
+          選択（manualChoice）は束ね PDF にも反映する。 */}
+      <ManualDraft
+        flags={diagnosis.flags}
+        choice={manualChoice}
+        onChoiceChange={setManualChoice}
+      />
+
+      {/* 束ね PDF 出力（カテゴリー・チェックリスト・期限・プリフィル・書類ドラフトを 1 PDF に）。
+          既存の単発判定 PDF（総合判定セクションの「PDF 出力」）とは別の導線。
+          このパネルの締めくくりの主要アクションとして、藍の二重罫で面を起こし
+          「ここまでの申請支援を 1 枚に束ねる」終端であることを構図で示す。 */}
+      <div className="flex flex-col gap-3 border border-double border-brand-700/40 bg-paper px-4 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow !text-[9px] flex items-center gap-1.5 text-brand-700">
+              <span aria-hidden className="inline-block h-1.5 w-1.5 bg-brand-700" />
+              束ね PDF 出力
+            </p>
+            <p className="max-w-prose text-xs leading-relaxed text-ink-soft">
+              カテゴリー切り分け・必要手続き・提出期限・プリフィル表・書類ドラフトを 1 つの PDF にまとめます。
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleBundlePdfExport()}
+            disabled={bundleBusy}
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-sharp bg-brand-700 px-5 text-xs font-medium uppercase tracking-wider text-paper transition-colors hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 focus:ring-offset-paper disabled:opacity-40"
+            title="申請支援サマリを 1 枚の PDF として書き出し（evidenceId 入り）"
+          >
+            <span aria-hidden className="font-mono text-[10px] tracking-[0.2em] opacity-70">
+              ▾
+            </span>
+            {bundleBusy ? "束ね PDF 生成中…" : "束ね PDF を出力"}
+          </button>
+        </div>
+        {bundleError ? (
+          <p className="text-xs text-signal-red" role="alert">
+            {bundleError}
+          </p>
+        ) : null}
+      </div>
 
       {/* DRS と DIPS2.0 の別導線を明示（混同防止の固定注意）。
           手続きカードと同じ系統バッジ（DRS=墨抜き / DIPS2.0=藍塗り）で

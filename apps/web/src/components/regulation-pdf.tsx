@@ -17,6 +17,7 @@ import {
   type FlightContext,
   type RegulationCheckResult,
 } from "@soraban/regulations";
+import { MonoText } from "./pdf-mono-text";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
 // Helvetica で日本語が出ないため、Noto Sans JP / IBM Plex Mono を 2 ウェイトずつ使う。
@@ -381,15 +382,15 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
           <View style={styles.metaCol}>
             <Text style={styles.metaLabel}>Confidence</Text>
-            <Text style={styles.metaValue}>
+            <MonoText style={styles.metaValue}>
               {CONFIDENCE_LABEL[result.overallConfidence]}
-            </Text>
+            </MonoText>
           </View>
           <View style={styles.metaCol}>
             <Text style={styles.metaLabel}>Checked at</Text>
-            <Text style={styles.metaValue}>
+            <MonoText style={styles.metaValue}>
               {new Date(result.checkedAt).toLocaleString("ja-JP")}
-            </Text>
+            </MonoText>
           </View>
         </View>
 
@@ -416,10 +417,10 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={[styles.overallStatus, { color: overallColor }]}>
               {STATUS_LABEL[result.overall]}
             </Text>
-            <Text style={styles.locLine}>
+            <MonoText style={styles.locLine}>
               {loc.lat.toFixed(6)}°N · {loc.lng.toFixed(6)}°E
               {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
-            </Text>
+            </MonoText>
           </View>
         </View>
 
@@ -520,10 +521,10 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
 
         {/* FOOTER */}
         <View style={styles.footer} fixed>
-          <Text>© 2026 Soraban · 奥田憲章</Text>
-          <Text>
+          <MonoText>© 2026 Soraban · 奥田憲章</MonoText>
+          <MonoText>
             出典: 国交省 国土数値情報 / 国土地理院 / 警察庁・防衛省 / 各自治体例規集
-          </Text>
+          </MonoText>
         </View>
       </Page>
     </Document>
