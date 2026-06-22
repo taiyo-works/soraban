@@ -1110,3 +1110,29 @@ export {
 
 export type { AirportFeature, AirportFeatureCollection } from "./airports";
 export { AIRPORTS_GEOJSON } from "./airports";
+
+// ── DIPS 飛行許可・承認 申請支援（手続き診断）──
+export type {
+  SpecificFlightFlag,
+  RequiredProcedure,
+  RequiredProcedureKind,
+  ProcedureSystem,
+  DiagnosisCategory,
+  CategoryDefinition,
+  FlightMethodContext,
+  ApplicationDiagnosis,
+  DeriveDiagnosisInput,
+} from "./diagnosis";
+export {
+  FLIGHT_METHOD_FLAGS,
+  AIRSPACE_FLAGS,
+  SPECIFIC_FLIGHT_FLAG_LABEL,
+  REQUIRED_PROCEDURE_KIND_LABEL,
+  ALL_PROCEDURES,
+  ALL_CATEGORY_DEFINITIONS,
+  DRONE_THRESHOLD_G,
+  DIAGNOSIS_DISCLAIMER,
+  deriveDiagnosis,
+  getCategoryDefinition,
+  extractAirspaceFlagsFromRegulations,
+} from "./diagnosis";

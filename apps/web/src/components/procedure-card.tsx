@@ -1,0 +1,112 @@
+"use client";
+
+import {
+  REQUIRED_PROCEDURE_KIND_LABEL,
+  type RequiredProcedure,
+} from "@soraban/regulations";
+
+type Props = {
+  readonly procedure: RequiredProcedure;
+  /** 飛行予定日からの提出期限の根拠説明（あれば表示） */
+  readonly deadlineBasis?: string;
+  /** 完了チェックの状態と更新ハンドラ（完了管理） */
+  readonly done: boolean;
+  readonly onToggleDone: (id: string, done: boolean) => void;
+};
+
+// システム系統バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分け、
+// DRS（登録）と DIPS2.0（許可承認）と 条例 を視覚的に別物として扱う。
+// パネル末尾の「2 系統の窓口」案内と同じ塗り分けで一貫させる。
+const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
+  "DIPS2.0": "border-brand-700 text-brand-700 bg-brand-50",
+  DRS: "border-ink text-ink bg-paper-soft",
+  "条例（各管理者）": "border-rule text-ink-soft bg-paper-soft",
+};
+
+export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: Props) {
+  const kindLabel = REQUIRED_PROCEDURE_KIND_LABEL[procedure.kind];
+  return (
+    <article
+      className={`flex flex-col gap-3 border p-5 transition-colors ${
+        done ? "border-signal-green bg-signal-green-soft" : "border-rule bg-paper hover:border-ink/40"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-flex items-center border px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider ${systemTone[procedure.system]}`}
+        >
+          {procedure.system}
+        </span>
+        <span className="text-[11px] text-ink-mute">{kindLabel}</span>
+        {procedure.waivableByIIB ? (
+          <span className="ml-auto inline-flex items-center gap-1 border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+            <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-current" />
+            IIB 相当で不要化可
+          </span>
+        ) : (
+          <span className="ml-auto inline-flex items-center gap-1 border border-signal-amber bg-signal-amber-soft px-2 py-0.5 text-[10px] font-medium text-signal-amber">
+            <span aria-hidden className="inline-block h-1.5 w-1.5 bg-current" />
+            IIA 相当・不要化不可
+          </span>
+        )}
+      </div>
+
+      <label className="group/check flex cursor-pointer items-start gap-2.5">
+        <input
+          type="checkbox"
+          checked={done}
+          onChange={(e) => onToggleDone(procedure.id, e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          aria-label={`${procedure.title} を完了にする`}
+        />
+        <h4
+          className={`font-display text-base font-medium leading-snug transition-colors ${
+            done ? "text-signal-green line-through" : "text-ink group-hover/check:text-brand-700"
+          }`}
+        >
+          {procedure.title}
+        </h4>
+      </label>
+
+      {procedure.note ? (
+        <p className="text-xs leading-relaxed text-ink-soft">{procedure.note}</p>
+      ) : null}
+
+      <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
+        <span className="eyebrow !text-[9px]">法的根拠</span>{" "}
+        <span className="text-ink-soft">{procedure.legalBasis}</span>
+      </p>
+
+      {deadlineBasis ? (
+        <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
+          <span className="eyebrow !text-[9px]">提出期限</span>{" "}
+          <span className="text-ink-soft">{deadlineBasis}</span>
+        </p>
+      ) : null}
+
+      {/* システム系統 URL（手続きをする場所）と 出典 URL（条文・手引き）を別導線で。
+          手続き窓口を主導線（藍・矢印つき）、出典を従（控えめ）として段差をつける。 */}
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider">
+        <a
+          href={procedure.systemUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+          title={`${procedure.system} の手続き画面を開く`}
+        >
+          {procedure.system} で手続き ↗
+        </a>
+        <span aria-hidden className="h-3 w-px bg-rule" />
+        <a
+          href={procedure.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-ink-mute underline-offset-2 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+          title="根拠条文・手引きの出典を開く"
+        >
+          出典 ↗
+        </a>
+      </div>
+    </article>
+  );
+}

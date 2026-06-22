@@ -1,0 +1,94 @@
+import { NextResponse } from "next/server";
+import { isValidLatLng } from "@soraban/geo";
+import {
+  deriveDiagnosis,
+  extractAirspaceFlagsFromRegulations,
+  SPECIFIC_FLIGHT_FLAG_LABEL,
+  type ApplicationDiagnosis,
+  type SpecificFlightFlag,
+} from "@soraban/regulations";
+import { runRegulationCheck } from "@/server/regulation-check";
+
+// 既存 /api/check を壊さず、診断は新規 /api/diagnose に分離する（spec §10-1 推奨）。
+//
+// 入力: { lat, lng, droneWeightG?, flags?, plannedDate?, accessControl?, thirdPartyOverflight? }
+//   - flags はユーザーが選んだ飛行方法フラグ（夜間・目視外・30m・催し・危険物・投下・150m）。
+//   - 空域フラグ（DID・空港）はサーバ側で信号機判定（runRegulationCheck）から自動導出して合流する。
+// 出力: ApplicationDiagnosis（procedures 配列を含む）。
+
+const VALID_FLAGS = new Set<SpecificFlightFlag>(
+  Object.keys(SPECIFIC_FLIGHT_FLAG_LABEL) as SpecificFlightFlag[],
+);
+
+// 信頼境界で flags をサニタイズ。未知の文字列は捨てる。
+const parseFlags = (raw: unknown): SpecificFlightFlag[] => {
+  if (!Array.isArray(raw)) return [];
+  const out: SpecificFlightFlag[] = [];
+  for (const v of raw) {
+    if (typeof v === "string" && VALID_FLAGS.has(v as SpecificFlightFlag)) {
+      out.push(v as SpecificFlightFlag);
+    }
+  }
+  return out;
+};
+
+const parseWeight = (raw: unknown): number | undefined => {
+  if (typeof raw === "number" && Number.isFinite(raw) && raw >= 0) return raw;
+  return undefined;
+};
+
+const parseBool = (raw: unknown): boolean | undefined =>
+  typeof raw === "boolean" ? raw : undefined;
+
+// ISO 日付（YYYY-MM-DD）の最低限の形式チェック。
+const parsePlannedDate = (raw: unknown): string | undefined =>
+  typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : undefined;
+
+export async function POST(req: Request) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "invalid json" }, { status: 400 });
+  }
+  const obj = (body ?? {}) as Record<string, unknown>;
+  const lat = Number(obj["lat"]);
+  const lng = Number(obj["lng"]);
+  if (!isValidLatLng({ lat, lng })) {
+    return NextResponse.json({ error: "invalid lat/lng" }, { status: 400 });
+  }
+
+  const droneWeightG = parseWeight(obj["droneWeightG"]);
+  const userFlags = parseFlags(obj["flags"]);
+  const plannedDate = parsePlannedDate(obj["plannedDate"]);
+  const accessControl = parseBool(obj["accessControl"]);
+  const thirdPartyOverflight = parseBool(obj["thirdPartyOverflight"]);
+
+  // 信号機判定を実行し、空域フラグ（DID・空港 red）を自動導出してユーザー入力に合流。
+  // ctx には機体重量だけ渡す（例外節適用と evidenceId の一貫性のため）。
+  const checkResult = await runRegulationCheck(
+    { lat, lng },
+    droneWeightG !== undefined ? { droneWeightG } : undefined,
+  );
+  const airspaceFlags = extractAirspaceFlagsFromRegulations(checkResult.regulations);
+
+  const diagnosis: ApplicationDiagnosis = deriveDiagnosis({
+    flags: [...airspaceFlags, ...userFlags],
+    droneWeightG,
+    plannedDate,
+    accessControl,
+    thirdPartyOverflight,
+  });
+
+  // 証跡同定のため、信号機判定の evidenceId / engineVersion を併せて返す。
+  return NextResponse.json({
+    ...diagnosis,
+    evidenceId: checkResult.evidenceId,
+    engineVersion: checkResult.engineVersion,
+    checkedAt: checkResult.checkedAt,
+    resolvedAddress: checkResult.resolvedAddress,
+    muniCode: checkResult.muniCode,
+    // どの空域フラグが判定由来で合流したかを UI が示せるように返す。
+    derivedAirspaceFlags: airspaceFlags,
+  });
+}

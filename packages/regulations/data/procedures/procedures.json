@@ -1,0 +1,163 @@
+{
+  "$schema": "../../README.md",
+  "_note": "DIPS 飛行許可・承認 申請支援機能の手続き定義（素データ）。各レコードは legalBasis（法的根拠）と sourceUrl（出典 URL）を必ず持つ。コードに直書きせず、改正時はこの JSON を差し替える。出典は docs/spec.md §3 に裏取り済みの一次情報。IIA／IIB の呼称は §3.6 で正式名称が要再確認のため『相当』表記とする。",
+  "verifiedAt": "2026-06-22T00:00:00+09:00",
+  "procedures": [
+    {
+      "id": "flight-permission-airport",
+      "kind": "flight_permission",
+      "title": "飛行許可（空港等周辺）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（空港等の周辺の空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。"
+    },
+    {
+      "id": "flight-permission-150m",
+      "kind": "flight_permission",
+      "title": "飛行許可（150m以上の高さ）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（150m以上の高さの空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "地表または水面から150m以上の高さの飛行は IIA 相当の許可が必要です。"
+    },
+    {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第3号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。"
+    },
+    {
+      "id": "flight-permission-emergency-airspace",
+      "kind": "flight_permission",
+      "title": "緊急用務空域（原則飛行禁止）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第4号（緊急用務空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "緊急用務空域に指定された区域は原則として飛行が禁止されます。指定はリアルタイムで変動するため、飛行直前に国土交通省の最新情報を必ず確認してください。"
+    },
+    {
+      "id": "flight-approval-night",
+      "kind": "flight_approval",
+      "title": "飛行承認（夜間飛行）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第1号（夜間における飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。"
+    },
+    {
+      "id": "flight-approval-bvlos",
+      "kind": "flight_approval",
+      "title": "飛行承認（目視外飛行）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第2号（目視の範囲外での飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "目視外飛行は IIB 条件で不要化できる区分（IIB 相当）です。補助者の有無により運航条件が変わる場合があります（補助者なしはより上位の要件）。"
+    },
+    {
+      "id": "flight-approval-30m",
+      "kind": "flight_approval",
+      "title": "飛行承認（人・物件から30m未満）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第3号（人・物件から30m未満の距離での飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "第三者または物件との距離が30m未満になる飛行は IIB 条件で不要化できる区分（IIB 相当）です。"
+    },
+    {
+      "id": "flight-approval-event",
+      "kind": "flight_approval",
+      "title": "飛行承認（催し場所上空）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第4号（催し場所上空での飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "祭礼・縁日・展示会等、多数の者が集合する催し場所の上空は IIB 条件による不要化ができない区分（IIA 相当）です。"
+    },
+    {
+      "id": "flight-approval-dangerous",
+      "kind": "flight_approval",
+      "title": "飛行承認（危険物の輸送）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第5号（危険物の輸送）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "火薬類・高圧ガス・引火性液体等の危険物を輸送する飛行は IIB 条件による不要化ができない区分（IIA 相当）です。"
+    },
+    {
+      "id": "flight-approval-drop",
+      "kind": "flight_approval",
+      "title": "飛行承認（物件の投下）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第6号（物件の投下）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "農薬散布等を含む物件の投下は IIB 条件による不要化ができない区分（IIA 相当）です。"
+    },
+    {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS2.0）とは別ドメインの独立系統です。"
+    },
+    {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。"
+    },
+    {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。"
+    }
+  ]
+}

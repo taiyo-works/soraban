@@ -11,13 +11,18 @@ import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
   shouldWarnConfidence,
+  FLIGHT_METHOD_FLAGS,
+  AIRSPACE_FLAGS,
+  SPECIFIC_FLIGHT_FLAG_LABEL,
   type FlightContext,
   type RegulationCheckResult,
   type RegulationStatus,
+  type SpecificFlightFlag,
 } from "@soraban/regulations";
 
 import { searchAddress, type GeocodeResult } from "@/lib/geocode";
 import { checkLocation } from "@/lib/check";
+import { diagnoseLocation, type DiagnoseResponse } from "@/lib/diagnose";
 import {
   clearHistory,
   getHistoryServerSnapshot,
@@ -30,6 +35,7 @@ import {
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
 import { RegulationMap } from "./regulation-map";
+import { DiagnosisPanel } from "./diagnosis-panel";
 
 const overallTone: Record<RegulationStatus, string> = {
   red: "text-signal-red",
@@ -56,6 +62,10 @@ type DemoPreset = {
   readonly loc: LatLng;
   readonly hint: string;
   readonly group: PresetGroup;
+  // この地点で前提となる空域フラグ（DID・空港等）。プリセットの curated 知見
+  // （hint と同じ出所）を申請支援診断に引き継ぐ。DID polygon データは未追跡で
+  // エンジンが unknown 縮退するため、curated なプリセットで空域フラグを補完する。
+  readonly airspaceFlags?: readonly SpecificFlightFlag[];
 };
 
 // デモシナリオ用の固定地点。県別にグルーピングし、特許コア（複数規制の同時 red）
@@ -76,6 +86,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     loc: YONAGO_CITY_HALL,
     hint: "DID + 県条例（庁舎0m）",
     group: "鳥取県",
+    airspaceFlags: ["airspace_did"],
   },
   {
     id: "minatoyama-park",
@@ -112,6 +123,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     loc: { lat: 35.4925, lng: 133.2364 },
     hint: "空港敷地内 + 美保基地 red（航空法 × 小型無人機等飛行禁止法）",
     group: "鳥取県",
+    airspaceFlags: ["airspace_airport"],
   },
   {
     id: "yume-minato-park",
@@ -163,6 +175,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     loc: { lat: 35.3683, lng: 132.7567 },
     hint: "DID + 島根県条例（庁舎0m）",
     group: "島根県",
+    airspaceFlags: ["airspace_did"],
   },
   {
     id: "izumo-airport",
@@ -170,6 +183,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     loc: { lat: 35.4133, lng: 132.8897 },
     hint: "空港敷地内 red（航空法 132 条）",
     group: "島根県",
+    airspaceFlags: ["airspace_airport"],
   },
 ];
 
@@ -210,6 +224,30 @@ export function RegulationChecker() {
   const [hasBunkachoPermit, setHasBunkachoPermit] = useState<boolean>(false);
   const [purpose, setPurpose] = useState<"general" | "emergency" | "public_duty" | "city_event">("general");
 
+  // ── 申請支援（DIPS 飛行許可・承認 診断）の入力 ──
+  // 飛行方法フラグ（夜間・目視外・30m未満・催し上空・危険物・物件投下・150m以上）= ユーザー選択。
+  const [methodFlags, setMethodFlags] = useState<readonly SpecificFlightFlag[]>([]);
+  // 空域フラグ（DID・空港等周辺・緊急用務空域）。原則は信号機判定の red から自動プリチェック、
+  // プリセット選択時は curated な airspaceFlags でも補完し、ユーザーが手動で増減もできる。
+  const [airspaceFlags, setAirspaceFlags] = useState<readonly SpecificFlightFlag[]>([]);
+  const [plannedDate, setPlannedDate] = useState<string>(""); // ISO 日付（任意）。S1 では保持のみ。
+  // 立入管理措置の有無／第三者上空か（カテゴリー II / III 切り分け用）。
+  // "yes" = 立入管理措置あり, "no_third_party" = 措置なし＝第三者上空（III）, "" = 未選択
+  const [accessMode, setAccessMode] = useState<"" | "yes" | "no_third_party">("");
+  const [diagnosis, setDiagnosis] = useState<DiagnoseResponse | null>(null);
+  const [diagnoseError, setDiagnoseError] = useState<string | null>(null);
+
+  const toggleMethodFlag = (flag: SpecificFlightFlag): void => {
+    setMethodFlags((prev) =>
+      prev.includes(flag) ? prev.filter((f) => f !== flag) : [...prev, flag],
+    );
+  };
+  const toggleAirspaceFlag = (flag: SpecificFlightFlag): void => {
+    setAirspaceFlags((prev) =>
+      prev.includes(flag) ? prev.filter((f) => f !== flag) : [...prev, flag],
+    );
+  };
+
   // ── 履歴 ──
   // localStorage を外部ストアとして React に同期。
   // 別タブからの 'storage' イベントと、同タブ内の save/remove/clear から
@@ -232,9 +270,17 @@ export function RegulationChecker() {
     setPurpose(
       (entry.ctx?.purpose as typeof purpose) ?? "general",
     );
+    // 申請支援の入力は履歴に保存していないため、復元時はリセットする。
+    setMethodFlags([]);
+    setAirspaceFlags([]);
+    setAccessMode("");
+    setPlannedDate("");
     applyLocation(entry.loc);
     // ctx 変更で useEffect の自動再判定が走るのを待たず、明示的に呼んで即時反映
-    setTimeout(() => runCheck(entry.loc), 0);
+    setTimeout(() => {
+      runCheck(entry.loc);
+      void runDiagnose(entry.loc, []);
+    }, 0);
   };
 
   const handleRemoveHistory = (evidenceId: string): void => {
@@ -337,6 +383,41 @@ export function RegulationChecker() {
     });
   };
 
+  // 申請支援診断を実行。/api/diagnose は信号機判定を内部で再実行し、
+  // 空域フラグ（DID・空港）を自動導出する。クライアント側でも飛行方法フラグ＋空域フラグ
+  // （プリチェック済み）を送り、サーバ側導出と合流させる（DID データ縮退時の保険）。
+  // 引数で flags を明示注入できるようにし、プリセット選択直後の state 反映待ちを避ける。
+  const runDiagnose = async (
+    loc: LatLng,
+    overrideAirspace?: readonly SpecificFlightFlag[],
+  ): Promise<void> => {
+    const w = Number(droneWeightInput);
+    const weight =
+      droneWeightInput.trim().length > 0 && Number.isFinite(w) && w >= 0 ? w : undefined;
+    const air = overrideAirspace ?? airspaceFlags;
+    try {
+      const res = await diagnoseLocation(loc, {
+        droneWeightG: weight,
+        flags: [...methodFlags, ...air],
+        plannedDate: plannedDate.trim().length > 0 ? plannedDate : undefined,
+        accessControl: accessMode === "" ? undefined : accessMode === "yes",
+        thirdPartyOverflight: accessMode === "no_third_party" ? true : undefined,
+      });
+      setDiagnosis(res);
+      setDiagnoseError(null);
+      // サーバ側で判定由来の空域フラグ（DID・空港 red）が導出されていれば、
+      // UI のチェックボックスにも反映してプリチェック状態を一致させる。
+      if (res.derivedAirspaceFlags.length > 0) {
+        setAirspaceFlags((prev) => {
+          const merged = new Set<SpecificFlightFlag>([...prev, ...res.derivedAirspaceFlags]);
+          return Array.from(merged);
+        });
+      }
+    } catch (err) {
+      setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
+    }
+  };
+
   // ctx の値が変わったら、現在の中心地点で再判定して画面に即反映する。
   // 最低限の依存配列（重量・運航種別・各許可フラグ）だけに絞る。
   useEffect(() => {
@@ -345,6 +426,14 @@ export function RegulationChecker() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [droneWeightInput, hasMlitPermit, hasFacilityPermit, hasParkPermit, hasBunkachoPermit, purpose]);
 
+  // 申請支援の入力（飛行方法フラグ・飛行予定日・立入管理措置）が変わったら、
+  // 信号機判定は変わらないので診断だけを再実行する（無駄な /api/check 呼び出しを避ける）。
+  useEffect(() => {
+    if (!result) return; // 初回オートランより前は走らせない
+    void runDiagnose(center);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [methodFlags, airspaceFlags, plannedDate, accessMode, droneWeightInput]);
+
   // デモ初動短縮: 米子市役所で初期判定をプリロードして
   // 「ページが開いた瞬間に red 信号機」が見える状態にする。
   const didAutoRunRef = useRef<boolean>(false);
@@ -352,6 +441,7 @@ export function RegulationChecker() {
     if (didAutoRunRef.current) return;
     didAutoRunRef.current = true;
     runCheck(YONAGO_CITY_HALL);
+    void runDiagnose(YONAGO_CITY_HALL, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -359,6 +449,19 @@ export function RegulationChecker() {
     if (!isValidLatLng(loc)) return;
     applyLocation(loc);
     runCheck(loc);
+    void runDiagnose(loc);
+  };
+
+  // プリセット選択: 位置適用 + 信号機判定に加えて、curated な空域フラグ（DID・空港）を
+  // 申請支援診断に引き継ぐ。state 反映を待たずに override で即座に診断へ渡す。
+  const selectPreset = (preset: DemoPreset): void => {
+    applyLocation(preset.loc);
+    const seeded = preset.airspaceFlags ?? [];
+    const mergedAirspace = Array.from(new Set<SpecificFlightFlag>([...airspaceFlags, ...seeded]));
+    setAirspaceFlags(mergedAirspace);
+    runCheck(preset.loc);
+    // override 付きで明示的に診断を回し、state 反映前でも preset の空域フラグを確実に反映する。
+    void runDiagnose(preset.loc, mergedAirspace);
   };
 
   // 結合形式（"lat,lng" や Google Maps URL）を反映する。
@@ -371,6 +474,7 @@ export function RegulationChecker() {
     }
     applyLocation(parsed);
     runCheck(parsed);
+    void runDiagnose(parsed);
     setCombinedStatus({
       ok: true,
       message: `✓ 反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
@@ -387,6 +491,7 @@ export function RegulationChecker() {
     e.preventDefault();
     applyLocation(parsed);
     runCheck(parsed);
+    void runDiagnose(parsed);
     setCombinedStatus({
       ok: true,
       message: `✓ 自動分割: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
@@ -405,6 +510,7 @@ export function RegulationChecker() {
     setError(null);
     setCenter({ lat: latNum, lng: lngNum });
     runCheck({ lat: latNum, lng: lngNum });
+    void runDiagnose({ lat: latNum, lng: lngNum });
   };
 
   const handleGeocode = async () => {
@@ -420,6 +526,7 @@ export function RegulationChecker() {
         const first = found[0]!;
         applyLocation({ lat: first.lat, lng: first.lng });
         runCheck({ lat: first.lat, lng: first.lng });
+        void runDiagnose({ lat: first.lat, lng: first.lng });
         setGeocodeResults([]);
       }
     } catch (err) {
@@ -484,6 +591,7 @@ export function RegulationChecker() {
                     onClick={() => {
                       applyLocation({ lat: r.lat, lng: r.lng });
                       runCheck({ lat: r.lat, lng: r.lng });
+                      void runDiagnose({ lat: r.lat, lng: r.lng });
                       setGeocodeResults([]);
                     }}
                     className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left hover:bg-paper-soft"
@@ -530,6 +638,7 @@ export function RegulationChecker() {
                 setCombined(pasted.trim());
                 applyLocation(parsed);
                 runCheck(parsed);
+                void runDiagnose(parsed);
                 setCombinedStatus({
                   ok: true,
                   message: `反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
@@ -718,6 +827,119 @@ export function RegulationChecker() {
           </div>
         </details>
 
+        {/* 飛行方法・運航条件（申請支援 診断の入力）
+            既存フォームに地続きで追加。空港・DID 等の空域フラグは地点判定から自動導出されるため、
+            ここではユーザーにしか分からない「飛行方法」と「立入管理措置／第三者上空」「飛行予定日」を集める。 */}
+        <fieldset className="flex flex-col gap-3 border-t border-rule pt-5">
+          <legend className="eyebrow flex items-center gap-1">
+            <span aria-hidden className="bearing-mark" />
+            06 — 飛行方法（申請支援）
+            <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
+              （該当する方法を選ぶと必要手続きを診断）
+            </span>
+          </legend>
+
+          {/* 空域フラグ（DID・空港等周辺・緊急用務空域）。判定由来の red は自動プリチェック。
+              DID polygon データが未整備の環境でも、ここで手動チェックして診断できる。 */}
+          <div className="flex flex-col gap-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              空域（地点判定から自動／手動でも調整可）
+            </span>
+            <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-3">
+              {AIRSPACE_FLAGS.map((flag) => {
+                const checked = airspaceFlags.includes(flag);
+                return (
+                  <label
+                    key={flag}
+                    className={`flex min-h-[52px] cursor-pointer items-start gap-2 px-3 py-3 transition-colors ${checked ? "bg-brand-50" : "bg-paper active:bg-paper-soft sm:hover:bg-paper-soft"}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleAirspaceFlag(flag)}
+                      className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                    />
+                    <span className="text-sm font-medium leading-tight text-ink sm:text-xs">
+                      {SPECIFIC_FLIGHT_FLAG_LABEL[flag]}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 飛行方法チェックボックス群 */}
+          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+            飛行方法（該当するものを選択）
+          </span>
+          <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-3">
+            {FLIGHT_METHOD_FLAGS.map((flag) => {
+              const checked = methodFlags.includes(flag);
+              return (
+                <label
+                  key={flag}
+                  className={`flex min-h-[52px] cursor-pointer items-start gap-2 px-3 py-3 transition-colors ${checked ? "bg-brand-50" : "bg-paper active:bg-paper-soft sm:hover:bg-paper-soft"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleMethodFlag(flag)}
+                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                  />
+                  <span className="text-sm font-medium leading-tight text-ink sm:text-xs">
+                    {SPECIFIC_FLIGHT_FLAG_LABEL[flag]}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* 飛行予定日 */}
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                飛行予定日
+              </span>
+              <input
+                type="date"
+                value={plannedDate}
+                onChange={(e) => setPlannedDate(e.target.value)}
+                className={fieldClass}
+              />
+              <span className="text-[10px] leading-tight text-ink-mute">
+                提出期限の逆算に使用（飛行開始の 10 開庁日以上前。具体的な期限日算出は今後対応）
+              </span>
+            </label>
+
+            {/* 立入管理措置／第三者上空（カテゴリー II/III 切り分け） */}
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                立入管理措置／第三者上空
+              </span>
+              <select
+                value={accessMode}
+                onChange={(e) => setAccessMode(e.target.value as typeof accessMode)}
+                className={fieldClass}
+              >
+                <option value="">未選択</option>
+                <option value="yes">立入管理措置あり（第三者の上空で飛ばさない＝カテゴリー II）</option>
+                <option value="no_third_party">
+                  立入管理措置なし（第三者の上空＝カテゴリー III／レベル4）
+                </option>
+              </select>
+              <span className="text-[10px] leading-tight text-ink-mute">
+                第三者上空はレベル4（一等＋第一種機体認証が必須）の切り分けに使用
+              </span>
+            </label>
+          </div>
+
+          {diagnoseError ? (
+            <p className="text-xs text-signal-red" role="alert">
+              {diagnoseError}
+            </p>
+          ) : null}
+        </fieldset>
+
         {/* primary action */}
         <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4">
           <button
@@ -752,10 +974,7 @@ export function RegulationChecker() {
               <button
                 key={preset.id}
                 type="button"
-                onClick={() => {
-                  applyLocation(preset.loc);
-                  runCheck(preset.loc);
-                }}
+                onClick={() => selectPreset(preset)}
                 title={preset.hint}
                 className="flex min-w-[14rem] shrink-0 snap-start flex-col items-start gap-1 border border-rule bg-paper px-4 py-3 text-left transition-colors active:bg-paper-soft"
               >
@@ -781,10 +1000,7 @@ export function RegulationChecker() {
               <button
                 key={preset.id}
                 type="button"
-                onClick={() => {
-                  applyLocation(preset.loc);
-                  runCheck(preset.loc);
-                }}
+                onClick={() => selectPreset(preset)}
                 title={preset.hint}
                 className="flex flex-col items-start gap-1 bg-paper px-4 py-3 text-left transition-colors hover:bg-paper-soft"
               >
@@ -913,6 +1129,9 @@ export function RegulationChecker() {
           </dl>
         </section>
       ) : null}
+
+      {/* ─── 申請支援 診断（必要手続きチェックリスト） ───────────────────────────────── */}
+      {diagnosis ? <DiagnosisPanel diagnosis={diagnosis} /> : null}
 
       {/* ─── HISTORY ───────────────────────────────── */}
       {history.length > 0 ? (
