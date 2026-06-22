@@ -1136,3 +1136,16 @@ export {
   getCategoryDefinition,
   extractAirspaceFlagsFromRegulations,
 } from "./diagnosis";
+
+// ── 開庁日計算（提出期限の逆算・期限カレンダー）──
+export type { DeadlineUrgency } from "./business-days";
+export {
+  ALL_HOLIDAYS,
+  HOLIDAY_COVERAGE,
+  isJapaneseHoliday,
+  isBusinessDay,
+  subtractBusinessDays,
+  daysBetween,
+  toJstIsoDate,
+  classifyDeadlineUrgency,
+} from "./business-days";

@@ -147,13 +147,15 @@ describe("deriveDiagnosis — 重複フラグ・未知フラグの正規化", ()
   });
 });
 
-describe("deriveDiagnosis — deadlines basis", () => {
-  it("飛行予定日 未入力時は basis に逆算開庁日数を含む案内が入る", () => {
+describe("deriveDiagnosis — deadlines basis / submitBy（提出期限の逆算）", () => {
+  it("飛行予定日 未入力時は submitBy が無く、basis に逆算開庁日数を含む案内が入る", () => {
     const r = deriveDiagnosis({ flags: ["method_night"], droneWeightG: 900 });
     const d = r.deadlines.find((x) => x.procedureId === "flight-approval-night");
+    expect(d?.submitBy).toBeUndefined();
     expect(d?.basis).toContain("10 開庁日");
+    expect(d?.basis).toContain("飛行予定日を入力");
   });
-  it("飛行予定日 入力時は basis に日付が反映される", () => {
+  it("飛行予定日 入力時は basis に飛行日が反映される", () => {
     const r = deriveDiagnosis({
       flags: ["method_night"],
       droneWeightG: 900,
@@ -161,6 +163,40 @@ describe("deriveDiagnosis — deadlines basis", () => {
     });
     const d = r.deadlines.find((x) => x.procedureId === "flight-approval-night");
     expect(d?.basis).toContain("2026-07-15");
+  });
+
+  // ★ 契約の中核ケース ★ 2026-07-31（金）起点で 10 開庁日前 = 2026-07-16（海の日除外）。
+  it("2026-07-31 起点で submitBy が 2026-07-16（海の日を跨ぐ手計算と一致）", () => {
+    const r = deriveDiagnosis({
+      flags: ["method_night"],
+      droneWeightG: 900,
+      plannedDate: "2026-07-31",
+    });
+    const d = r.deadlines.find((x) => x.procedureId === "flight-approval-night");
+    expect(d?.submitBy).toBe("2026-07-16");
+    expect(d?.basis).toContain("2026-07-16");
+  });
+
+  it("leadTime 0 の手続き（登録・通報・日誌）は deadlines から除外される", () => {
+    const r = deriveDiagnosis({
+      flags: ["method_night"],
+      droneWeightG: 900,
+      plannedDate: "2026-07-31",
+    });
+    const ids = r.deadlines.map((d) => d.procedureId);
+    expect(ids).not.toContain("drone-registration");
+    expect(ids).not.toContain("flight-plan-report");
+    expect(ids).not.toContain("flight-logbook");
+  });
+
+  it("飛行許可（DID）も同じ起点で submitBy が 2026-07-16", () => {
+    const r = deriveDiagnosis({
+      flags: ["airspace_did", "method_night"],
+      droneWeightG: 900,
+      plannedDate: "2026-07-31",
+    });
+    const d = r.deadlines.find((x) => x.procedureId === "flight-permission-did");
+    expect(d?.submitBy).toBe("2026-07-16");
   });
 });
 

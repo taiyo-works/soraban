@@ -19,19 +19,35 @@ import {
 } from "@soraban/regulations";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
-// Helvetica で日本語が出ないため、Noto Sans JP の woff2 を 2 ウェイトだけ取得。
-// CDN は Google Fonts の static URL (Cloudflare 経由)。
+// Helvetica で日本語が出ないため、Noto Sans JP / IBM Plex Mono を 2 ウェイトずつ使う。
+//
+// ⚠️ 以前は fonts.gstatic.com のハッシュ付き URL（NotoSansJP v53 等）を直接参照していたが、
+// Google 側でファイル名のハッシュがローテートされると旧 URL が 404 になり、
+// 「PDF生成に失敗」が発生していた。恒久対策として、安定取得した静的ウェイトの
+// .ttf を apps/web/public/fonts/ に同梱（self-host）し、ローカルパスから登録する。
+// （空港データを静的 import 化したのと同じ「外部の揺れに依存しない」思想。）
+//
+// 配置: apps/web/public/fonts/{NotoSansJP-Regular,NotoSansJP-Bold,IBMPlexMono-Regular,IBMPlexMono-Medium}.ttf
+//   - Noto Sans JP: @expo-google-fonts/noto-sans-jp（静的ウェイト 400/700, OFL）由来。
+//   - IBM Plex Mono: google/fonts（静的ウェイト 400/500, OFL）由来。
+//
+// この PDF コンポーネントはクライアント（ブラウザ）でのみ動的 import されて動くため、
+// ルート相対パス（/fonts/...）はページのオリジンに対して解決され、ブラウザ fetch で
+// 取得できる（Vercel serverless でも public/ 配下として配信される）。
+const fontUrl = (file: string): string => {
+  // SSR/Edge で誤って評価された場合の保険として origin を前置できるが、
+  // 実運用ではクライアントからのみ呼ばれるためルート相対で十分。
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return `${window.location.origin}/fonts/${file}`;
+  }
+  return `/fonts/${file}`;
+};
+
 Font.register({
   family: "Noto Sans JP",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/notosansjp/v53/-F62fjtqLzI2JPCgQBnw7HFow2oe0e7G_PFr5zbqfMog.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/notosansjp/v53/-F62fjtqLzI2JPCgQBnw7HFow2oe0e7G_PNH5zbqfMog.ttf",
-      fontWeight: 700,
-    },
+    { src: fontUrl("NotoSansJP-Regular.ttf"), fontWeight: 400 },
+    { src: fontUrl("NotoSansJP-Bold.ttf"), fontWeight: 700 },
   ],
 });
 
@@ -39,14 +55,8 @@ Font.register({
 Font.register({
   family: "IBM Plex Mono",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n5io.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/ibmplexmono/v19/-F6qfjptAgt5VM-kVkqdyU8n3kw_5VVF.ttf",
-      fontWeight: 500,
-    },
+    { src: fontUrl("IBMPlexMono-Regular.ttf"), fontWeight: 400 },
+    { src: fontUrl("IBMPlexMono-Medium.ttf"), fontWeight: 500 },
   ],
 });
 

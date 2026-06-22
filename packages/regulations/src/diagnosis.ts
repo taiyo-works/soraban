@@ -13,6 +13,7 @@
 
 import proceduresData from "../data/procedures/procedures.json";
 import categoriesData from "../data/categories/categories.json";
+import { subtractBusinessDays } from "./business-days";
 
 // ── 特定飛行の区分（航空法 132条の85=空域 / 132条の86=方法）──
 export type SpecificFlightFlag =
@@ -402,16 +403,30 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
 
   const category = classifyCategory(flags, isRegulated, input);
 
-  // deadlines は S1 では submitBy を算出せず basis のみ（S2 で期限カレンダー実装）。
+  // deadlines: 提出期限の逆算（S2 期限カレンダー）。
+  //   - 飛行予定日が入力されていれば「飛行日 − leadTime 開庁日（土日祝除く）」で
+  //     具体的な提出期限日（submitBy）を算出する。
+  //   - 未入力なら submitBy は未確定（UI 側で「飛行予定日を入力してください」と促す）。
+  // leadTime 0 の手続き（登録・通報・日誌）は提出期限の逆算対象外なので除外する。
   const planned = input.plannedDate;
   const deadlines = procedures
     .filter((p) => p.leadTimeBusinessDays > 0)
-    .map((p) => ({
-      procedureId: p.id,
-      basis: planned
-        ? `飛行予定日（${planned}）の ${p.leadTimeBusinessDays} 開庁日以上前までに提出（土日祝を除く。具体的な期限日は期限カレンダーで算出予定）`
-        : `飛行開始の ${p.leadTimeBusinessDays} 開庁日以上前までに提出（飛行予定日を入力すると具体的な期限日を算出します）`,
-    }));
+    .map((p) => {
+      const submitBy =
+        planned !== undefined
+          ? (subtractBusinessDays(planned, p.leadTimeBusinessDays) ?? undefined)
+          : undefined;
+      return {
+        procedureId: p.id,
+        ...(submitBy !== undefined ? { submitBy } : {}),
+        basis:
+          planned !== undefined && submitBy !== undefined
+            ? `飛行予定日（${planned}）の ${p.leadTimeBusinessDays} 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は ${submitBy}。`
+            : planned !== undefined
+              ? `飛行予定日（${planned}）の ${p.leadTimeBusinessDays} 開庁日以上前までに提出（土日・国民の祝日を除く）。`
+              : `飛行開始の ${p.leadTimeBusinessDays} 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。`,
+      };
+    });
 
   return {
     category,

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { DiagnosisCategory } from "@soraban/regulations";
+import { getCategoryDefinition, type DiagnosisCategory } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { ProcedureCard } from "./procedure-card";
+import { DeadlineCalendar } from "./deadline-calendar";
 
 type Props = {
   readonly diagnosis: DiagnoseResponse;
+  /** 入力中の飛行予定日（ISO 日付。未入力なら空文字）。期限カレンダーで使う。 */
+  readonly plannedDate: string;
 };
 
 // カテゴリー切り分けの severity 表現。信号機と同じ「色＋符号＋ラベル」の
@@ -95,7 +98,7 @@ function SeverityMark({ shape, className }: { shape: CategorySeverity["mark"]; c
   return <span aria-hidden className={`inline-block h-2 w-2 rotate-45 bg-current ${className}`} />;
 }
 
-export function DiagnosisPanel({ diagnosis }: Props) {
+export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
   // 完了チェックの状態（手続き id → done）。完了管理用のローカル状態。
   const [doneMap, setDoneMap] = useState<Readonly<Record<string, boolean>>>({});
   const toggleDone = (id: string, done: boolean): void => {
@@ -127,6 +130,9 @@ export function DiagnosisPanel({ diagnosis }: Props) {
           severity を示し、III＝レベル4 は赤の面取りで最も強く警告する。 */}
       {(() => {
         const sev = categorySeverity[diagnosis.category];
+        // カテゴリー定義（出典 URL を含む）。出典は制度データ（categories.json）由来で
+        // コード直書きしない。バナーに出典を併記する契約を満たす。
+        const def = getCategoryDefinition(diagnosis.category);
         return (
           <div
             className={`border-l-2 ${sev.rule} ${sev.surface} px-4 py-3.5 ${sev.emphatic ? "border-y border-r" : ""}`}
@@ -152,10 +158,30 @@ export function DiagnosisPanel({ diagnosis }: Props) {
               <p className="mt-2.5 flex gap-2 border-t border-signal-red/30 pt-2.5 text-xs font-medium leading-relaxed text-signal-red">
                 <SeverityMark shape="triangle" className="mt-0.5 shrink-0" />
                 <span>
-                  ※ 単純な飛行許可・承認の申請では実施できません。一等無人航空機操縦士 ＋ 第一種機体認証の取得が前提です。
+                  ※ 単純な飛行許可・承認の申請では実施できません。一等無人航空機操縦士 ＋ 第一種機体認証が必須です。
                 </span>
               </p>
             ) : null}
+            {/* IIA／IIB は正式名称が未確認（spec §11-D）。「相当」表記であることの断りと
+                出典を併記する。確定的に正式名称と断定しない。 */}
+            {diagnosis.category === "II_A" || diagnosis.category === "II_B_eligible" ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-ink-mute">
+                ※「IIA／IIB」の呼称が国土交通省の正式名称か運用通称かは要確認のため「相当」表記としています（制度実体＝申請が必要な区分と不要化できる区分の別は確実）。
+              </p>
+            ) : null}
+            {/* 出典の併記（契約：カテゴリー切り分けバナーに出典を併記）。 */}
+            <p className="mt-2 border-t border-rule/60 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              出典{" "}
+              <a
+                href={def.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+                title="カテゴリー制度・レベル4 の出典（国土交通省）"
+              >
+                国土交通省 無人航空機のレベル4飛行 ↗
+              </a>
+            </p>
           </div>
         );
       })()}
@@ -225,6 +251,11 @@ export function DiagnosisPanel({ diagnosis }: Props) {
           </div>
         )}
       </div>
+
+      {/* 提出期限カレンダー（飛行予定日 − 10 開庁日・土日祝除く）。
+          飛行予定日が未入力なら「飛行予定日を入力してください」と促し、
+          入力済みなら各手続きの具体的な期限日と残り日数のアラート色を出す。 */}
+      <DeadlineCalendar diagnosis={diagnosis} plannedDate={plannedDate} />
 
       {/* DRS と DIPS2.0 の別導線を明示（混同防止の固定注意）。
           手続きカードと同じ系統バッジ（DRS=墨抜き / DIPS2.0=藍塗り）で

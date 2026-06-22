@@ -895,19 +895,26 @@ export function RegulationChecker() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* 飛行予定日 */}
+            {/* 飛行予定日 — 提出期限カレンダーの「起算日」。ここから各手続きの期限を逆算する。 */}
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
                 飛行予定日
+                <span
+                  aria-hidden
+                  className="inline-flex items-center gap-1 border border-rule px-1.5 py-px text-[9px] tracking-[0.18em] text-ink-mute/80"
+                >
+                  <span className="inline-block h-1 w-1 rotate-45 bg-ink-mute" />
+                  起算日
+                </span>
               </span>
               <input
                 type="date"
                 value={plannedDate}
                 onChange={(e) => setPlannedDate(e.target.value)}
-                className={fieldClass}
+                className={`${fieldClass} font-mono tnum`}
               />
               <span className="text-[10px] leading-tight text-ink-mute">
-                提出期限の逆算に使用（飛行開始の 10 開庁日以上前。具体的な期限日算出は今後対応）
+                提出期限の逆算に使用（飛行開始の 10 開庁日以上前。土日・国民の祝日を除いた具体的な期限日を算出）
               </span>
             </label>
 
@@ -1131,7 +1138,7 @@ export function RegulationChecker() {
       ) : null}
 
       {/* ─── 申請支援 診断（必要手続きチェックリスト） ───────────────────────────────── */}
-      {diagnosis ? <DiagnosisPanel diagnosis={diagnosis} /> : null}
+      {diagnosis ? <DiagnosisPanel diagnosis={diagnosis} plannedDate={plannedDate} /> : null}
 
       {/* ─── HISTORY ───────────────────────────────── */}
       {history.length > 0 ? (
