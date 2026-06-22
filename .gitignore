@@ -38,6 +38,15 @@ apps/web/regulation-data/
 # ローカル作業用アーカイブ
 files.zip
 
+# QA・デザイン検証で生成されるスクラッチ（スクショ/PDF/Playwright 出力。再生成可能）
+.designer-shots/
+.playwright-mcp/
+# evaluator が一時生成する検証アーティファクト（リポジトリ直下）
+/eval-*.png
+/eval-*.jpeg
+/eval-*.pdf
+/eval-*.txt
+
 # Claude Code local config
 .claude/
 .vercel
