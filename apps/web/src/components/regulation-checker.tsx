@@ -15,7 +15,9 @@ import {
   AIRSPACE_FLAGS,
   SPECIFIC_FLIGHT_FLAG_LABEL,
   DIAGNOSIS_DISCLAIMER,
+  type DiagnosisCategory,
   type FlightContext,
+  type ManualChoice,
   type RegulationCheckResult,
   type RegulationStatus,
   type SpecificFlightFlag,
@@ -28,10 +30,12 @@ import {
   clearHistory,
   getHistoryServerSnapshot,
   getHistorySnapshot,
+  patchHistoryDiagnosis,
   removeHistory,
   saveHistory,
   subscribeHistory,
   type SavedCheck,
+  type SavedDiagnosisInput,
 } from "@/lib/history";
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
@@ -231,14 +235,51 @@ export function RegulationChecker() {
   // 空域フラグ（DID・空港等周辺・緊急用務空域）。原則は信号機判定の red から自動プリチェック、
   // プリセット選択時は curated な airspaceFlags でも補完し、ユーザーが手動で増減もできる。
   const [airspaceFlags, setAirspaceFlags] = useState<readonly SpecificFlightFlag[]>([]);
-  const [plannedDate, setPlannedDate] = useState<string>(""); // ISO 日付（任意）。S1 では保持のみ。
+  const [plannedDate, setPlannedDate] = useState<string>(""); // ISO 日付（任意）。
   // 立入管理措置の有無／第三者上空か（カテゴリー II / III 切り分け用）。
   // "yes" = 立入管理措置あり, "no_third_party" = 措置なし＝第三者上空（III）, "" = 未選択
   const [accessMode, setAccessMode] = useState<"" | "yes" | "no_third_party">("");
   // 目視外飛行時の補助者の有無（プリフィルの運航条件に反映）。"" = 未選択
   const [bvlosObserver, setBvlosObserver] = useState<"" | "with" | "without">("");
+  // 飛行マニュアル方針（標準／独自）と手続き完了チェック状態（手続き id → done）。
+  // 履歴にも保存し、案件ごとの進捗を復元できるようにする。
+  const [manualChoice, setManualChoice] = useState<ManualChoice>("custom");
+  const [doneMap, setDoneMap] = useState<Readonly<Record<string, boolean>>>({});
   const [diagnosis, setDiagnosis] = useState<DiagnoseResponse | null>(null);
   const [diagnoseError, setDiagnoseError] = useState<string | null>(null);
+  // 履歴復元中の useEffect 二重発火を抑止するフラグ。
+  const isRestoringRef = useRef<boolean>(false);
+
+  const doneMapToCompletedIds = (
+    map: Readonly<Record<string, boolean>>,
+  ): readonly string[] =>
+    Object.entries(map)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+
+  const completedIdsToDoneMap = (
+    ids: readonly string[] | undefined,
+  ): Readonly<Record<string, boolean>> => {
+    const out: Record<string, boolean> = {};
+    for (const id of ids ?? []) out[id] = true;
+    return out;
+  };
+
+  const buildDiagnosisInput = (
+    overrides?: Partial<SavedDiagnosisInput>,
+  ): SavedDiagnosisInput => {
+    const pd = (overrides?.plannedDate ?? plannedDate).trim();
+    return {
+      methodFlags: overrides?.methodFlags ?? methodFlags,
+      airspaceFlags: overrides?.airspaceFlags ?? airspaceFlags,
+      ...(pd.length > 0 ? { plannedDate: pd } : {}),
+      accessMode: overrides?.accessMode ?? accessMode,
+      bvlosObserver: overrides?.bvlosObserver ?? bvlosObserver,
+      manualChoice: overrides?.manualChoice ?? manualChoice,
+      completedProcedureIds:
+        overrides?.completedProcedureIds ?? doneMapToCompletedIds(doneMap),
+    };
+  };
 
   const toggleMethodFlag = (flag: SpecificFlightFlag): void => {
     setMethodFlags((prev) =>
@@ -251,6 +292,25 @@ export function RegulationChecker() {
     );
   };
 
+  const handleToggleProcedureDone = (id: string, done: boolean): void => {
+    setDoneMap((prev) => {
+      const next = { ...prev, [id]: done };
+      patchHistoryDiagnosis({
+        loc: center,
+        diagnosisInput: { completedProcedureIds: doneMapToCompletedIds(next) },
+      });
+      return next;
+    });
+  };
+
+  const handleManualChoiceChange = (choice: ManualChoice): void => {
+    setManualChoice(choice);
+    patchHistoryDiagnosis({
+      loc: center,
+      diagnosisInput: { manualChoice: choice },
+    });
+  };
+
   // ── 履歴 ──
   // localStorage を外部ストアとして React に同期。
   // 別タブからの 'storage' イベントと、同タブ内の save/remove/clear から
@@ -261,30 +321,60 @@ export function RegulationChecker() {
     getHistoryServerSnapshot,
   );
 
-  // 履歴から SavedCheck を復元: ctx の各フィールドを state に戻し、loc に飛ぶ。
-  // ctx 復元 → useEffect で再判定 が走るため、明示的に runCheck は呼ばない。
+  // 履歴から SavedCheck を復元: ctx と申請支援の入力・完了状態をすべて state に戻し、
+  // 明示的 override 引数で runCheck / runDiagnose を即時実行する（state 反映前の古いクロージャ参照を防ぐ）。
   const restoreFromHistory = (entry: SavedCheck): void => {
-    setDroneWeightInput(entry.ctx?.droneWeightG !== undefined ? String(entry.ctx.droneWeightG) : "");
+    isRestoringRef.current = true;
+    const weightStr =
+      entry.ctx?.droneWeightG !== undefined ? String(entry.ctx.droneWeightG) : "";
+    setDroneWeightInput(weightStr);
     const permits = entry.ctx?.pilotPermits ?? [];
     setHasMlitPermit(permits.includes("mlit"));
     setHasFacilityPermit(permits.includes("facility_manager"));
     setHasParkPermit(permits.includes("park_manager"));
     setHasBunkachoPermit(permits.includes("bunkacho_or_kyoiku"));
-    setPurpose(
-      (entry.ctx?.purpose as typeof purpose) ?? "general",
-    );
-    // 申請支援の入力は履歴に保存していないため、復元時はリセットする。
-    setMethodFlags([]);
-    setAirspaceFlags([]);
-    setAccessMode("");
-    setBvlosObserver("");
-    setPlannedDate("");
+    setPurpose((entry.ctx?.purpose as typeof purpose) ?? "general");
+
+    const nextMethodFlags = entry.diagnosisInput?.methodFlags ?? [];
+    const nextAirspaceFlags = entry.diagnosisInput?.airspaceFlags ?? [];
+    const nextPlannedDate = entry.diagnosisInput?.plannedDate ?? "";
+    const nextAccessMode = entry.diagnosisInput?.accessMode ?? "";
+    const nextBvlosObserver = entry.diagnosisInput?.bvlosObserver ?? "";
+    const nextManualChoice = entry.diagnosisInput?.manualChoice ?? "custom";
+    const nextCompletedIds = entry.diagnosisInput?.completedProcedureIds ?? [];
+
+    setMethodFlags(nextMethodFlags);
+    setAirspaceFlags(nextAirspaceFlags);
+    setPlannedDate(nextPlannedDate);
+    setAccessMode(nextAccessMode);
+    setBvlosObserver(nextBvlosObserver);
+    setManualChoice(nextManualChoice);
+    setDoneMap(completedIdsToDoneMap(nextCompletedIds));
     applyLocation(entry.loc);
-    // ctx 変更で useEffect の自動再判定が走るのを待たず、明示的に呼んで即時反映
-    setTimeout(() => {
-      runCheck(entry.loc);
-      void runDiagnose(entry.loc, []);
-    }, 0);
+
+    const restoredDiagInput: SavedDiagnosisInput = {
+      methodFlags: nextMethodFlags,
+      airspaceFlags: nextAirspaceFlags,
+      ...(nextPlannedDate.trim().length > 0 ? { plannedDate: nextPlannedDate.trim() } : {}),
+      accessMode: nextAccessMode,
+      bvlosObserver: nextBvlosObserver,
+      manualChoice: nextManualChoice,
+      completedProcedureIds: nextCompletedIds,
+    };
+
+    runCheck(entry.loc, entry.ctx ?? null, restoredDiagInput);
+    void runDiagnose(entry.loc, {
+      airspaceFlags: nextAirspaceFlags,
+      methodFlags: nextMethodFlags,
+      plannedDate: nextPlannedDate,
+      accessMode: nextAccessMode,
+      bvlosObserver: nextBvlosObserver,
+      droneWeightG: entry.ctx?.droneWeightG ?? null,
+      manualChoice: nextManualChoice,
+      completedProcedureIds: nextCompletedIds,
+    }).finally(() => {
+      isRestoringRef.current = false;
+    });
   };
 
   const handleRemoveHistory = (evidenceId: string): void => {
@@ -357,8 +447,13 @@ export function RegulationChecker() {
     setCenter(loc);
   };
 
-  const runCheck = (loc: LatLng): void => {
-    const ctx = buildCtx();
+  const runCheck = (
+    loc: LatLng,
+    overrideCtx?: FlightContext | null,
+    overrideDiagInput?: SavedDiagnosisInput,
+  ): void => {
+    const ctx = overrideCtx !== undefined ? (overrideCtx ?? undefined) : buildCtx();
+    const diagInput = overrideDiagInput ?? buildDiagnosisInput();
     startChecking(async () => {
       const t0 = performance.now();
       try {
@@ -380,6 +475,7 @@ export function RegulationChecker() {
           engineVersion: res.engineVersion,
           checkedAt: res.checkedAt,
           muniCode: res.muniCode,
+          diagnosisInput: diagInput,
         });
       } catch (err) {
         setError(`判定に失敗しました: ${(err as Error).message}`);
@@ -387,37 +483,83 @@ export function RegulationChecker() {
     });
   };
 
+  type RunDiagnoseOverrides = {
+    readonly airspaceFlags?: readonly SpecificFlightFlag[];
+    readonly methodFlags?: readonly SpecificFlightFlag[];
+    readonly plannedDate?: string;
+    readonly accessMode?: "" | "yes" | "no_third_party";
+    readonly bvlosObserver?: "" | "with" | "without";
+    readonly droneWeightG?: number | null;
+    readonly manualChoice?: ManualChoice;
+    readonly completedProcedureIds?: readonly string[];
+  };
+
   // 申請支援診断を実行。/api/diagnose は信号機判定を内部で再実行し、
   // 空域フラグ（DID・空港）を自動導出する。クライアント側でも飛行方法フラグ＋空域フラグ
   // （プリチェック済み）を送り、サーバ側導出と合流させる（DID データ縮退時の保険）。
-  // 引数で flags を明示注入できるようにし、プリセット選択直後の state 反映待ちを避ける。
+  // 引数で flags / 条件を明示注入できるようにし、プリセット選択や履歴復元直後の state 反映待ちを避ける。
   const runDiagnose = async (
     loc: LatLng,
-    overrideAirspace?: readonly SpecificFlightFlag[],
+    overrideOrAirspace?: readonly SpecificFlightFlag[] | RunDiagnoseOverrides,
   ): Promise<void> => {
+    const overrides: RunDiagnoseOverrides = Array.isArray(overrideOrAirspace)
+      ? { airspaceFlags: overrideOrAirspace }
+      : ((overrideOrAirspace as RunDiagnoseOverrides | undefined) ?? {});
+
     const w = Number(droneWeightInput);
     const weight =
-      droneWeightInput.trim().length > 0 && Number.isFinite(w) && w >= 0 ? w : undefined;
-    const air = overrideAirspace ?? airspaceFlags;
+      overrides.droneWeightG !== undefined
+        ? (overrides.droneWeightG ?? undefined)
+        : droneWeightInput.trim().length > 0 && Number.isFinite(w) && w >= 0
+          ? w
+          : undefined;
+    const effMethodFlags = overrides.methodFlags ?? methodFlags;
+    const effAirspace = overrides.airspaceFlags ?? airspaceFlags;
+    const effPlannedDate = overrides.plannedDate ?? plannedDate;
+    const effAccessMode = overrides.accessMode ?? accessMode;
+    const effBvlosObserver = overrides.bvlosObserver ?? bvlosObserver;
+
     try {
       const res = await diagnoseLocation(loc, {
         droneWeightG: weight,
-        flags: [...methodFlags, ...air],
-        plannedDate: plannedDate.trim().length > 0 ? plannedDate : undefined,
-        accessControl: accessMode === "" ? undefined : accessMode === "yes",
-        thirdPartyOverflight: accessMode === "no_third_party" ? true : undefined,
-        bvlosWithObserver: bvlosObserver === "" ? undefined : bvlosObserver === "with",
+        flags: [...effMethodFlags, ...effAirspace],
+        plannedDate: effPlannedDate.trim().length > 0 ? effPlannedDate.trim() : undefined,
+        accessControl: effAccessMode === "" ? undefined : effAccessMode === "yes",
+        thirdPartyOverflight: effAccessMode === "no_third_party" ? true : undefined,
+        bvlosWithObserver: effBvlosObserver === "" ? undefined : effBvlosObserver === "with",
       });
       setDiagnosis(res);
       setDiagnoseError(null);
       // サーバ側で判定由来の空域フラグ（DID・空港 red）が導出されていれば、
       // UI のチェックボックスにも反映してプリチェック状態を一致させる。
+      const mergedAirspace = Array.from(
+        new Set<SpecificFlightFlag>([...effAirspace, ...res.derivedAirspaceFlags]),
+      );
       if (res.derivedAirspaceFlags.length > 0) {
         setAirspaceFlags((prev) => {
           const merged = new Set<SpecificFlightFlag>([...prev, ...res.derivedAirspaceFlags]);
           return Array.from(merged);
         });
       }
+      // 履歴エントリに診断入力と診断サマリ（カテゴリー・手続き件数・診断証跡ID）をパッチ保存。
+      patchHistoryDiagnosis({
+        loc,
+        diagnosisInput: buildDiagnosisInput({
+          methodFlags: effMethodFlags,
+          airspaceFlags: mergedAirspace,
+          plannedDate: effPlannedDate,
+          accessMode: effAccessMode,
+          bvlosObserver: effBvlosObserver,
+          manualChoice: overrides.manualChoice,
+          completedProcedureIds: overrides.completedProcedureIds,
+        }),
+        diagnosisSummary: {
+          diagnosisEvidenceId: res.evidenceId,
+          category: res.category,
+          isSpecificFlight: res.isSpecificFlight,
+          procedureCount: res.procedures.length,
+        },
+      });
     } catch (err) {
       setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
     }
@@ -426,7 +568,7 @@ export function RegulationChecker() {
   // ctx の値が変わったら、現在の中心地点で再判定して画面に即反映する。
   // 最低限の依存配列（重量・運航種別・各許可フラグ）だけに絞る。
   useEffect(() => {
-    if (!result) return; // 初回オートランより前は走らせない
+    if (!result || isRestoringRef.current) return; // 初回オートランより前、または履歴復元中は走らせない
     runCheck(center);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [droneWeightInput, hasMlitPermit, hasFacilityPermit, hasParkPermit, hasBunkachoPermit, purpose]);
@@ -434,7 +576,7 @@ export function RegulationChecker() {
   // 申請支援の入力（飛行方法フラグ・飛行予定日・立入管理措置）が変わったら、
   // 信号機判定は変わらないので診断だけを再実行する（無駄な /api/check 呼び出しを避ける）。
   useEffect(() => {
-    if (!result) return; // 初回オートランより前は走らせない
+    if (!result || isRestoringRef.current) return; // 初回オートランより前、または履歴復元中は走らせない
     void runDiagnose(center);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [methodFlags, airspaceFlags, plannedDate, accessMode, bvlosObserver, droneWeightInput]);
@@ -1175,7 +1317,16 @@ export function RegulationChecker() {
       ) : null}
 
       {/* ─── 申請支援 診断（必要手続きチェックリスト） ───────────────────────────────── */}
-      {diagnosis ? <DiagnosisPanel diagnosis={diagnosis} plannedDate={plannedDate} /> : null}
+      {diagnosis ? (
+        <DiagnosisPanel
+          diagnosis={diagnosis}
+          plannedDate={plannedDate}
+          doneMap={doneMap}
+          onToggleDone={handleToggleProcedureDone}
+          manualChoice={manualChoice}
+          onManualChoiceChange={handleManualChoiceChange}
+        />
+      ) : null}
 
       {/* ─── HISTORY ───────────────────────────────── */}
       {history.length > 0 ? (
@@ -1216,13 +1367,22 @@ export function RegulationChecker() {
                       : "bg-signal-mute";
               const checkedDate = new Date(h.checkedAt);
               const dateStr = `${String(checkedDate.getMonth() + 1).padStart(2, "0")}/${String(checkedDate.getDate()).padStart(2, "0")} ${String(checkedDate.getHours()).padStart(2, "0")}:${String(checkedDate.getMinutes()).padStart(2, "0")}`;
+              const catShort: Record<DiagnosisCategory, string> = {
+                I: "cat:I",
+                II_A: "cat:IIA相当",
+                II_B_eligible: "cat:IIB相当",
+                III_level4: "cat:III(Lv4)",
+              };
+              const completedCount = h.diagnosisInput?.completedProcedureIds?.length ?? 0;
+              const procCount = h.diagnosisSummary?.procedureCount;
+              const methodCount = h.diagnosisInput?.methodFlags?.length ?? 0;
               return (
                 <li key={h.evidenceId} className="flex items-center gap-3 py-2.5">
                   <button
                     type="button"
                     onClick={() => restoreFromHistory(h)}
                     className="flex flex-1 items-center gap-3 text-left transition-colors hover:bg-paper-soft"
-                    title={`Evidence ${h.evidenceId} を復元して再判定`}
+                    title={`Evidence ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
                   >
                     <span aria-hidden className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/20 ${dotTone}`} />
                     <span className="flex flex-1 flex-col leading-tight">
@@ -1234,8 +1394,20 @@ export function RegulationChecker() {
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
                         {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${h.ctx.purpose}` : ""}
                         {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · permit×${h.ctx.pilotPermits.length}` : ""}
+                        {h.diagnosisSummary ? ` · ${catShort[h.diagnosisSummary.category]}` : ""}
+                        {procCount !== undefined
+                          ? completedCount > 0
+                            ? ` · 手続き${completedCount}/${procCount}`
+                            : ` · 手続き${procCount}件`
+                          : ""}
+                        {methodCount > 0 ? ` · 方法×${methodCount}` : ""}
+                        {h.diagnosisInput?.plannedDate ? ` · 予定:${h.diagnosisInput.plannedDate}` : ""}
                         {" · "}
                         {h.evidenceId}
+                        {h.diagnosisSummary?.diagnosisEvidenceId &&
+                        h.diagnosisSummary.diagnosisEvidenceId !== h.evidenceId
+                          ? ` / diag:${h.diagnosisSummary.diagnosisEvidenceId}`
+                          : ""}
                       </span>
                     </span>
                   </button>

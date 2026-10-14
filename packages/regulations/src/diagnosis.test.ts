@@ -1,4 +1,5 @@
 import {
+  buildDiagnosisEvidencePayload,
   deriveDiagnosis,
   extractAirspaceFlagsFromRegulations,
   getCategoryDefinition,
@@ -283,3 +284,58 @@ describe("メタ — FLIGHT_METHOD_FLAGS とカテゴリー定義の健全性", 
     }
   });
 });
+
+describe("buildDiagnosisEvidencePayload — 申請支援診断の決定論的証跡ペイロード", () => {
+  const baseInput = {
+    engineVersion: "soraban-0.2.0-clausegraph",
+    lat: 35.4278,
+    lng: 133.3314,
+    checkedAt: "2026-10-14T00:00:00.000Z",
+    regulationIds: ["31202-park-ordinance", "aviation-law-did"],
+    droneWeightG: 900,
+    flags: ["method_bvlos", "airspace_did", "method_night"] as const,
+    plannedDate: "2026-11-10",
+    accessControl: true,
+    thirdPartyOverflight: false,
+    bvlosWithObserver: true,
+    category: "II_B_eligible" as const,
+    procedureIds: ["flight-approval-night", "flight-permission-did", "drone-registration"],
+  };
+
+  it("フラグ・手続きID・規制IDの入力順序が異なっても正規化され同一のペイロード文字列を返す", () => {
+    const p1 = buildDiagnosisEvidencePayload(baseInput);
+    const p2 = buildDiagnosisEvidencePayload({
+      ...baseInput,
+      regulationIds: ["aviation-law-did", "31202-park-ordinance"],
+      flags: ["method_night", "method_bvlos", "airspace_did", "method_night"],
+      procedureIds: ["drone-registration", "flight-permission-did", "flight-approval-night"],
+    });
+    expect(p1).toBe(p2);
+  });
+
+  it("飛行方法・予定日・立入管理措置・目視外補助者・カテゴリーが変われば異なるペイロードになる", () => {
+    const base = buildDiagnosisEvidencePayload(baseInput);
+    const diffFlag = buildDiagnosisEvidencePayload({
+      ...baseInput,
+      flags: ["airspace_did", "method_night"],
+    });
+    const diffDate = buildDiagnosisEvidencePayload({
+      ...baseInput,
+      plannedDate: "2026-11-11",
+    });
+    const diffCategory = buildDiagnosisEvidencePayload({
+      ...baseInput,
+      thirdPartyOverflight: true,
+      category: "III_level4",
+    });
+    const diffObserver = buildDiagnosisEvidencePayload({
+      ...baseInput,
+      bvlosWithObserver: false,
+    });
+    expect(diffFlag).not.toBe(base);
+    expect(diffDate).not.toBe(base);
+    expect(diffCategory).not.toBe(base);
+    expect(diffObserver).not.toBe(base);
+  });
+});
+

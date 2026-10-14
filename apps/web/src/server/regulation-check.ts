@@ -8,6 +8,7 @@ import { DID_DIR } from "./regulation-data-dir";
 import {
   AIRPORTS_GEOJSON,
   DEFAULT_DISCLAIMER,
+  buildDiagnosisEvidencePayload,
   computeOverall,
   computeOverallConfidence,
   evaluateAirports,
@@ -17,6 +18,7 @@ import {
   evaluateMunicipalParks,
   evaluatePrefecturalNuisance,
   type AirportCandidate,
+  type DiagnosisEvidencePayloadInput,
   type DidCandidate,
   type FlightContext,
   type RegulationCheckResult,
@@ -57,6 +59,20 @@ const computeEvidenceId = (input: EvidenceInputs): string => {
     t: input.checkedAt,
     r: sortedIds,
     x: stableCtx(input.ctx),
+  });
+  const hex = createHash("sha256").update(payload).digest("hex");
+  return `ev_${hex.slice(0, 16)}`;
+};
+
+// 申請支援診断（/api/diagnose）用の証跡ID採番。
+// 位置・規制リストに加えて、選択フラグ・飛行予定日・立入管理措置・導出カテゴリー・必要手続きID群を
+// SHA-256 ハッシュに含めることで「どの条件の申請支援診断か」を一意に同定する（spec §6.3）。
+export const computeDiagnosisEvidenceId = (
+  input: Omit<DiagnosisEvidencePayloadInput, "engineVersion">,
+): string => {
+  const payload = buildDiagnosisEvidencePayload({
+    ...input,
+    engineVersion: ENGINE_VERSION,
   });
   const hex = createHash("sha256").update(payload).digest("hex");
   return `ev_${hex.slice(0, 16)}`;

@@ -38,6 +38,19 @@ export default defineConfig({
           globals: true,
         },
       },
+      {
+        resolve: {
+          alias: {
+            ...sorabanAlias,
+            "@": fileURLToPath(new URL("./apps/web/src", import.meta.url)),
+          },
+        },
+        test: {
+          name: "web",
+          include: ["apps/web/src/**/*.test.ts"],
+          globals: true,
+        },
+      },
     ],
   },
 });

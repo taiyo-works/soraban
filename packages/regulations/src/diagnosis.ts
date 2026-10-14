@@ -524,3 +524,51 @@ export const REQUIRED_PROCEDURE_KIND_LABEL: Readonly<
   insurance: "保険",
   ordinance_coordination: "条例協議",
 };
+
+export type DiagnosisEvidencePayloadInput = {
+  readonly engineVersion: string;
+  readonly lat: number;
+  readonly lng: number;
+  readonly checkedAt: string;
+  readonly regulationIds: readonly string[];
+  readonly droneWeightG?: number;
+  readonly flags: readonly SpecificFlightFlag[];
+  readonly plannedDate?: string;
+  readonly accessControl?: boolean;
+  readonly thirdPartyOverflight?: boolean;
+  readonly bvlosWithObserver?: boolean;
+  readonly category: DiagnosisCategory;
+  readonly procedureIds: readonly string[];
+};
+
+/**
+ * 申請支援診断の証跡（evidenceId）採番用に、入力・導出結果を決定論的な JSON 文字列に正規化する。
+ * キー順・配列順（flags / regulationIds / procedureIds のソート）を固定し、
+ * 同一の診断条件・同一時刻であれば常に同一のペイロード文字列を返す（spec §6.3）。
+ */
+export const buildDiagnosisEvidencePayload = (
+  input: DiagnosisEvidencePayloadInput,
+): string => {
+  const sortedRegulations = [...input.regulationIds].sort();
+  const sortedFlags = [...new Set(input.flags)].sort();
+  const sortedProcedures = [...input.procedureIds].sort();
+  return JSON.stringify({
+    v: input.engineVersion,
+    lat: Number(input.lat.toFixed(6)),
+    lng: Number(input.lng.toFixed(6)),
+    t: input.checkedAt,
+    r: sortedRegulations,
+    w: typeof input.droneWeightG === "number" ? input.droneWeightG : null,
+    d: {
+      f: sortedFlags,
+      pd: input.plannedDate ?? null,
+      ac: typeof input.accessControl === "boolean" ? input.accessControl : null,
+      tp: typeof input.thirdPartyOverflight === "boolean" ? input.thirdPartyOverflight : null,
+      bv: typeof input.bvlosWithObserver === "boolean" ? input.bvlosWithObserver : null,
+      cat: input.category,
+      p: sortedProcedures,
+      ver: PROCEDURES_VERIFIED_AT || null,
+    },
+  });
+};
+

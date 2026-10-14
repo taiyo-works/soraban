@@ -9,7 +9,10 @@ import {
   type PrefillField,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
-import { runRegulationCheck } from "@/server/regulation-check";
+import {
+  computeDiagnosisEvidenceId,
+  runRegulationCheck,
+} from "@/server/regulation-check";
 
 // 既存 /api/check を壊さず、診断は新規 /api/diagnose に分離する（spec §10-1 推奨）。
 //
@@ -74,8 +77,10 @@ export async function POST(req: Request) {
     droneWeightG !== undefined ? { droneWeightG } : undefined,
   );
   const airspaceFlags = extractAirspaceFlagsFromRegulations(checkResult.regulations);
-  // 飛行方法フラグ ＋ 判定由来の空域フラグを合流した最終フラグ集合。
-  const mergedFlags: readonly SpecificFlightFlag[] = [...airspaceFlags, ...userFlags];
+  // 飛行方法フラグ ＋ 判定由来の空域フラグを合流した最終フラグ集合（重複排除）。
+  const mergedFlags: readonly SpecificFlightFlag[] = Array.from(
+    new Set<SpecificFlightFlag>([...airspaceFlags, ...userFlags]),
+  );
 
   const diagnosis: ApplicationDiagnosis = deriveDiagnosis({
     flags: mergedFlags,
@@ -99,11 +104,28 @@ export async function POST(req: Request) {
     bvlosWithObserver,
   });
 
-  // 証跡同定のため、信号機判定の evidenceId / engineVersion を併せて返す。
+  // 診断結果も含めた決定論的証跡 ID を採番（spec §6.3）。
+  // ベースとなる地点判定の checkEvidenceId も併せて返し、双方を追跡可能にする。
+  const diagnosisEvidenceId = computeDiagnosisEvidenceId({
+    lat,
+    lng,
+    checkedAt: checkResult.checkedAt,
+    regulationIds: checkResult.regulations.map((r) => r.id),
+    droneWeightG,
+    flags: mergedFlags,
+    plannedDate,
+    accessControl,
+    thirdPartyOverflight,
+    bvlosWithObserver,
+    category: diagnosis.category,
+    procedureIds: diagnosis.procedures.map((p) => p.id),
+  });
+
   return NextResponse.json({
     ...diagnosis,
     prefill,
-    evidenceId: checkResult.evidenceId,
+    evidenceId: diagnosisEvidenceId,
+    checkEvidenceId: checkResult.evidenceId,
     engineVersion: checkResult.engineVersion,
     checkedAt: checkResult.checkedAt,
     resolvedAddress: checkResult.resolvedAddress,

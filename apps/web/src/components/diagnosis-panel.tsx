@@ -19,6 +19,12 @@ type Props = {
   readonly diagnosis: DiagnoseResponse;
   /** 入力中の飛行予定日（ISO 日付。未入力なら空文字）。期限カレンダーで使う。 */
   readonly plannedDate: string;
+  /** 手続き完了チェック状態（親で履歴と同期する場合に指定、未指定時は内部 state で動作） */
+  readonly doneMap?: Readonly<Record<string, boolean>>;
+  readonly onToggleDone?: (id: string, done: boolean) => void;
+  /** 飛行マニュアル方針（親で履歴と同期する場合に指定、未指定時は内部 state で動作） */
+  readonly manualChoice?: ManualChoice;
+  readonly onManualChoiceChange?: (choice: ManualChoice) => void;
 };
 
 // カテゴリー切り分けの severity 表現。信号機と同じ「色＋符号＋ラベル」の
@@ -107,16 +113,31 @@ function SeverityMark({ shape, className }: { shape: CategorySeverity["mark"]; c
   return <span aria-hidden className={`inline-block h-2 w-2 rotate-45 bg-current ${className}`} />;
 }
 
-export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
-  // 完了チェックの状態（手続き id → done）。完了管理用のローカル状態。
-  const [doneMap, setDoneMap] = useState<Readonly<Record<string, boolean>>>({});
+export function DiagnosisPanel({
+  diagnosis,
+  plannedDate,
+  doneMap: controlledDoneMap,
+  onToggleDone,
+  manualChoice: controlledManualChoice,
+  onManualChoiceChange,
+}: Props) {
+  // 完了チェックの状態（手続き id → done）。親から制御されない場合のローカルフォールバック。
+  const [internalDoneMap, setInternalDoneMap] = useState<Readonly<Record<string, boolean>>>({});
+  const doneMap = controlledDoneMap ?? internalDoneMap;
   const toggleDone = (id: string, done: boolean): void => {
-    setDoneMap((prev) => ({ ...prev, [id]: done }));
+    setInternalDoneMap((prev) => ({ ...prev, [id]: done }));
+    onToggleDone?.(id, done);
   };
 
   // 飛行マニュアルの方針（標準／独自）。既定は独自（骨子が見える方）。
   // 束ね PDF にも同じ選択を反映するためパネルで状態を保持する。
-  const [manualChoice, setManualChoice] = useState<ManualChoice>("custom");
+  const [internalManualChoice, setInternalManualChoice] = useState<ManualChoice>("custom");
+  const manualChoice = controlledManualChoice ?? internalManualChoice;
+  const handleManualChoiceChange = (choice: ManualChoice): void => {
+    setInternalManualChoice(choice);
+    onManualChoiceChange?.(choice);
+  };
+
   // 束ね PDF 生成中フラグ。
   const [bundleBusy, setBundleBusy] = useState<boolean>(false);
   const [bundleError, setBundleError] = useState<string | null>(null);
@@ -320,7 +341,7 @@ export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
       <ManualDraft
         flags={diagnosis.flags}
         choice={manualChoice}
-        onChoiceChange={setManualChoice}
+        onChoiceChange={handleManualChoiceChange}
       />
 
       {/* 束ね PDF 出力（カテゴリー・チェックリスト・期限・プリフィル・書類ドラフトを 1 PDF に）。
@@ -404,9 +425,17 @@ export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
       {/* 証跡メタ */}
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid-cols-3">
         <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
-          <dt className="eyebrow !text-[9px]">Evidence ID</dt>
+          <dt className="eyebrow !text-[9px]">Evidence ID（申請支援診断）</dt>
           <dd className="tnum normal-case tracking-normal text-ink">{diagnosis.evidenceId}</dd>
         </div>
+        {diagnosis.checkEvidenceId ? (
+          <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
+            <dt className="eyebrow !text-[9px]">Check Evidence ID（地点判定）</dt>
+            <dd className="tnum normal-case tracking-normal text-ink">
+              {diagnosis.checkEvidenceId}
+            </dd>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-0.5">
           <dt className="eyebrow !text-[9px]">Engine</dt>
           <dd className="tnum normal-case tracking-normal text-ink">{diagnosis.engineVersion}</dd>

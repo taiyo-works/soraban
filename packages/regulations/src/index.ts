@@ -1122,6 +1122,7 @@ export type {
   FlightMethodContext,
   ApplicationDiagnosis,
   DeriveDiagnosisInput,
+  DiagnosisEvidencePayloadInput,
 } from "./diagnosis";
 export {
   FLIGHT_METHOD_FLAGS,
@@ -1136,6 +1137,7 @@ export {
   deriveDiagnosis,
   getCategoryDefinition,
   extractAirspaceFlagsFromRegulations,
+  buildDiagnosisEvidencePayload,
 } from "./diagnosis";
 
 // ── 開庁日計算（提出期限の逆算・期限カレンダー）──

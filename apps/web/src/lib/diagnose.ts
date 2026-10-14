@@ -9,7 +9,10 @@ import type {
 export type DiagnoseResponse = ApplicationDiagnosis & {
   /** DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値） */
   readonly prefill: readonly PrefillField[];
+  /** 申請支援診断（入力条件＋導出結果）を含む決定論的証跡 ID */
   readonly evidenceId: string;
+  /** ベースとなる地点規制判定の証跡 ID */
+  readonly checkEvidenceId?: string;
   readonly engineVersion: string;
   readonly checkedAt: string;
   readonly resolvedAddress?: string;
