@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   buildFlightManualDraft,
   getCategoryDefinition,
+  AIRSPACE_DETERMINATION_LABEL,
   toJstIsoDate,
   PROCEDURES_VERIFIED_AT,
   type DiagnosisCategory,
@@ -61,6 +62,14 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     mark: "diamond",
     emphatic: false,
   },
+  needs_verification: {
+    rule: "border-signal-amber",
+    accent: "text-signal-amber",
+    surface: "bg-signal-amber-soft",
+    severity: "要確認 / unverified",
+    mark: "triangle",
+    emphatic: false,
+  },
   II_A: {
     rule: "border-brand-700",
     accent: "text-brand-700",
@@ -89,6 +98,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
 
 const categoryHeadline: Readonly<Record<DiagnosisCategory, string>> = {
   I: "カテゴリー I（特定飛行に非該当）",
+  needs_verification: "要確認（DID 等の空域該当が未確認）",
   II_A: "カテゴリー II（IIA 相当・申請が必要）",
   II_B_eligible: "カテゴリー II（IIB 相当・申請を不要化できる可能性）",
   III_level4: "カテゴリー III（レベル4・第三者上空）",
@@ -230,6 +240,16 @@ export function DiagnosisPanel({
               {categoryHeadline[diagnosis.category]}
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{diagnosis.categoryNote}</p>
+            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute" data-testid="diagnosis-did-status">
+              DID（人口集中地区）: {AIRSPACE_DETERMINATION_LABEL[diagnosis.didStatus ?? "unverified"]}
+            </p>
+            {(diagnosis.verificationNotes ?? []).length > 0 ? (
+              <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">
+                {(diagnosis.verificationNotes ?? []).map((n) => (
+                  <li key={n}>※ 要確認: {n}</li>
+                ))}
+              </ul>
+            ) : null}
             {diagnosis.category === "III_level4" ? (
               <p className="mt-2.5 flex gap-2 border-t border-signal-red/30 pt-2.5 text-xs font-medium leading-relaxed text-signal-red">
                 <SeverityMark shape="triangle" className="mt-0.5 shrink-0" />

@@ -171,6 +171,19 @@
       "leadTimeBusinessDays": 0,
       "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。"
+    },
+    {
+      "id": "insurance-third-party-25kg",
+      "kind": "insurance",
+      "title": "第三者賠償責任保険への加入（総重量25kg以上）",
+      "system": "DIPS2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "無人航空機の飛行に関する許可・承認の審査要領（カテゴリーⅡ飛行）— 令和7年10月1日以降の新規申請で総重量25kg以上は第三者賠償責任保険の加入が必要",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "verifiedAt": "2026-10-14T00:00:00+09:00",
+      "note": "申請書に第三者賠償責任保険の記載が必須です。飛行時は付保状況・有効期間を必ず確認してください（国交省 2025-09-10 お知らせ）。"
     }
   ]
 }

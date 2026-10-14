@@ -5,6 +5,7 @@
 
 import type { LatLng } from "@soraban/geo";
 import type {
+  AirspaceDeterminationStatus,
   DiagnosisCategory,
   FlightContext,
   ManualChoice,
@@ -13,6 +14,9 @@ import type {
 } from "@soraban/regulations";
 
 const STORAGE_KEY = "soraban:history:v1";
+// 地点判定より先に届いた診断結果を runId 単位で一時保管するキー（応答順に依存しないため）。
+const PENDING_KEY = "soraban:history:pending:v1";
+const MAX_PENDING = 20;
 // 同タブ内の変更を useSyncExternalStore に伝えるためのカスタムイベント。
 // 別タブからの localStorage 変更は 'storage' イベントが拾うが、
 // 同タブ内の自分自身の書き込みでは発火しない仕様なので分けて出す。
@@ -35,6 +39,10 @@ export type SavedDiagnosisInput = {
   readonly bvlosObserver?: "" | "with" | "without";
   readonly manualChoice?: ManualChoice;
   readonly completedProcedureIds?: readonly string[];
+  /** ユーザーが手動で指定した空域フラグ（自動判定由来は含めない）。 */
+  readonly userAirspaceFlags?: readonly SpecificFlightFlag[];
+  /** DID 非該当をユーザーが確認済み。 */
+  readonly didConfirmedNotApplicable?: boolean;
 };
 
 // 申請支援診断の軽量サマリ（履歴リスト表示・証跡同定用）。
@@ -43,12 +51,16 @@ export type SavedDiagnosisSummary = {
   readonly category: DiagnosisCategory;
   readonly isSpecificFlight: boolean;
   readonly procedureCount: number;
+  /** DID 該当の三値（旧形式エントリには無い）。 */
+  readonly didStatus?: AirspaceDeterminationStatus;
 };
 
 // SavedCheck: 履歴 1 エントリ。完全な RegulationCheckResult ではなく
 // "後で再現できる十分な手がかり + 軽量サマリ" のみ保存することで
 // localStorage 容量逼迫を避ける。詳細は再判定で復元する設計。
 export type SavedCheck = {
+  /** 1 回のチェック実行（地点判定＋申請支援診断）を表す ID。旧形式エントリには無い。 */
+  readonly runId?: string;
   readonly evidenceId: string;
   readonly savedAt: string; // ISO
   readonly loc: LatLng;
@@ -142,6 +154,9 @@ export const saveHistory = (entry: SavedCheck): readonly SavedCheck[] => {
 };
 
 /**
+ * @deprecated Sprint 6 以降の UI は recordHistoryDiagnosis（runId 指定）を使う。
+ * 座標フォールバックは古い同一座標エントリを誤更新し得るため、後方互換のためだけに残す。
+ *
  * 既存の履歴エントリに対して、申請支援の入力（diagnosisInput）や診断サマリ（diagnosisSummary）を
  * 部分更新する。対象エントリは以下の優先順で特定する：
  *   1. evidenceId が一致するエントリ（地点判定の evidenceId または diagnosisEvidenceId）
@@ -179,6 +194,124 @@ export const patchHistoryDiagnosis = (
   return next;
 };
 
+// ============================================================
+// runId 単位の履歴書き込み（Sprint 6: 応答順レース対策）
+// ============================================================
+
+type PendingDiagnosis = {
+  readonly runId: string;
+  readonly diagnosisInput?: SavedDiagnosisInput;
+  readonly diagnosisSummary?: SavedDiagnosisSummary;
+};
+
+const readPending = (): PendingDiagnosis[] => {
+  if (!isBrowser()) return [];
+  try {
+    const raw = window.localStorage.getItem(PENDING_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (p): p is PendingDiagnosis =>
+            typeof p === "object" && p !== null && typeof p.runId === "string",
+        )
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const writePending = (entries: readonly PendingDiagnosis[]): void => {
+  if (!isBrowser()) return;
+  try {
+    if (entries.length === 0) window.localStorage.removeItem(PENDING_KEY);
+    else window.localStorage.setItem(PENDING_KEY, JSON.stringify(entries.slice(0, MAX_PENDING)));
+  } catch {
+    // 静かに諦める
+  }
+};
+
+/** チェック実行ごとの履歴 ID を採番する（地点判定・診断の両結果をこの ID に書き込む）。 */
+export const createHistoryRunId = (): string => {
+  const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  if (c?.randomUUID) return `run_${c.randomUUID()}`;
+  return `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+/**
+ * 地点判定の結果を runId のエントリに書き込む。
+ *   - 同じ runId のエントリがあれば判定部分のみ更新（診断部分は保持）
+ *   - 無ければ新規作成し、先に届いていた診断結果（pending）を合流する
+ *   - 別 runId で同じ evidenceId のエントリは重複として除去する（idempotent）
+ * 座標一致での照合は行わない（古い同一座標エントリを誤更新しない）。
+ */
+export const recordHistoryCheck = (
+  runId: string,
+  entry: Omit<SavedCheck, "runId">,
+): readonly SavedCheck[] => {
+  const current = safeRead();
+  const existing = current.find((e) => e.runId === runId);
+  const pendingAll = readPending();
+  const pending = pendingAll.find((p) => p.runId === runId);
+  const base = existing ?? pending;
+  const merged: SavedCheck = {
+    ...entry,
+    runId,
+    // 判定時点の入力スナップショットに、診断側（より新しい／確定した）入力を重ねる。
+    diagnosisInput: mergeDiagnosisInput(entry.diagnosisInput, base?.diagnosisInput),
+    diagnosisSummary: base?.diagnosisSummary ?? entry.diagnosisSummary,
+  };
+  const withoutDup = current.filter(
+    (e) => e.runId === runId || e.evidenceId !== entry.evidenceId,
+  );
+  const next = (
+    existing
+      ? withoutDup.map((e) => (e.runId === runId ? merged : e))
+      : [merged, ...withoutDup]
+  ).slice(0, MAX_ENTRIES);
+  if (pending) writePending(pendingAll.filter((p) => p.runId !== runId));
+  safeWrite(next);
+  notifyChange();
+  return next;
+};
+
+/**
+ * 申請支援診断の結果・入力（およびチェックリスト操作）を runId のエントリに書き込む。
+ * 地点判定がまだ届いていなければ pending に保管し、判定到着時に合流させる。
+ */
+export const recordHistoryDiagnosis = (
+  runId: string,
+  patch: {
+    readonly diagnosisInput?: Partial<SavedDiagnosisInput>;
+    readonly diagnosisSummary?: SavedDiagnosisSummary;
+  },
+): readonly SavedCheck[] => {
+  const current = safeRead();
+  const idx = current.findIndex((e) => e.runId === runId);
+  if (idx === -1) {
+    const pendingAll = readPending();
+    const prev = pendingAll.find((p) => p.runId === runId);
+    const nextPending: PendingDiagnosis = {
+      runId,
+      diagnosisInput: mergeDiagnosisInput(prev?.diagnosisInput, patch.diagnosisInput),
+      diagnosisSummary: patch.diagnosisSummary ?? prev?.diagnosisSummary,
+    };
+    writePending([nextPending, ...pendingAll.filter((p) => p.runId !== runId)]);
+    return current;
+  }
+  const target = current[idx]!;
+  const updated: SavedCheck = {
+    ...target,
+    diagnosisInput: mergeDiagnosisInput(target.diagnosisInput, patch.diagnosisInput),
+    diagnosisSummary: patch.diagnosisSummary ?? target.diagnosisSummary,
+  };
+  const next = [...current];
+  next[idx] = updated;
+  safeWrite(next);
+  notifyChange();
+  return next;
+};
+
 export const removeHistory = (evidenceId: string): readonly SavedCheck[] => {
   const next = safeRead().filter((e) => e.evidenceId !== evidenceId);
   safeWrite(next);
@@ -188,6 +321,7 @@ export const removeHistory = (evidenceId: string): readonly SavedCheck[] => {
 
 export const clearHistory = (): readonly SavedCheck[] => {
   safeWrite([]);
+  writePending([]);
   notifyChange();
   return [];
 };

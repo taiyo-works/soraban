@@ -1,5 +1,6 @@
 import type { LatLng } from "@soraban/geo";
 import type {
+  AirspaceDeterminationStatus,
   ApplicationDiagnosis,
   PrefillField,
   SpecificFlightFlag,
@@ -21,6 +22,8 @@ export type DiagnoseResponse = ApplicationDiagnosis & {
   readonly lat: number;
   readonly lng: number;
   readonly derivedAirspaceFlags: readonly SpecificFlightFlag[];
+  /** 地点判定（自動）による DID 該当の三値。 */
+  readonly autoDidStatus: AirspaceDeterminationStatus;
   /** 診断に使った最終フラグ集合（空域＋方法）。マニュアル骨子の生成根拠。 */
   readonly flags: readonly SpecificFlightFlag[];
 };
@@ -32,16 +35,20 @@ export type DiagnoseInput = {
   readonly accessControl?: boolean;
   readonly thirdPartyOverflight?: boolean;
   readonly bvlosWithObserver?: boolean;
+  /** DID 非該当をユーザーが確認済み（自動判定が未確認のときのみ有効）。 */
+  readonly didConfirmedNotApplicable?: boolean;
 };
 
 // 新規 /api/diagnose を叩く。既存 checkLocation（/api/check）とは独立。
 export const diagnoseLocation = async (
   loc: LatLng,
   input: DiagnoseInput,
+  signal?: AbortSignal,
 ): Promise<DiagnoseResponse> => {
   const res = await fetch("/api/diagnose", {
     method: "POST",
     headers: { "content-type": "application/json" },
+    signal,
     body: JSON.stringify({
       lat: loc.lat,
       lng: loc.lng,
@@ -51,6 +58,7 @@ export const diagnoseLocation = async (
       accessControl: input.accessControl,
       thirdPartyOverflight: input.thirdPartyOverflight,
       bvlosWithObserver: input.bvlosWithObserver,
+      didConfirmedNotApplicable: input.didConfirmedNotApplicable === true ? true : undefined,
     }),
   });
   if (!res.ok) {

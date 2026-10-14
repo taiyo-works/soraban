@@ -1,6 +1,7 @@
 import {
   buildDiagnosisEvidencePayload,
   deriveDiagnosis,
+  deriveDidStatusFromRegulations,
   extractAirspaceFlagsFromRegulations,
   getCategoryDefinition,
   ALL_PROCEDURES,
@@ -50,8 +51,10 @@ describe("制度データ（procedures.json）", () => {
   });
 
   it("確定事実として表示する手続きには法的根拠と出典 URL が必ず併記されている", () => {
-    // 25kg 保険義務化（要再確認・§11-A）は確定事実として手続き化していない＝insurance kind は出さない。
-    expect(ALL_PROCEDURES.some((p) => p.kind === "insurance")).toBe(false);
+    // 25kg 保険義務化は国交省（koku_fr10_000042, R7.10.1〜）で確認済みのため手続き化（Sprint 6）。
+    const ins = ALL_PROCEDURES.find((p) => p.kind === "insurance");
+    expect(ins?.id).toBe("insurance-third-party-25kg");
+    expect(ins?.sourceUrl).toBe("https://www.mlit.go.jp/koku/koku_fr10_000042.html");
     for (const p of ALL_PROCEDURES) {
       expect(p.legalBasis.length).toBeGreaterThan(0);
       expect(p.sourceUrl.length).toBeGreaterThan(0);
@@ -70,14 +73,78 @@ describe("カテゴリー定義（categories.json）— 検証日メタ", () => 
   });
 });
 
-describe("要再確認事項（spec §11）を確定事実として表示しない", () => {
-  // §11-A: 25kg 以上の保険義務化は手続きとして導出されない（確証未取得）。
-  it("25kg 保険義務化は deriveDiagnosis の出力に現れない（保険 kind を導出しない）", () => {
-    const r = deriveDiagnosis({
-      flags: ["method_night", "airspace_did"],
-      droneWeightG: 30_000, // 30kg（25kg 超）でも insurance 手続きは出さない
-    });
+describe("25kg 境界と第三者賠償責任保険（Sprint 6）", () => {
+  const iibFlags: SpecificFlightFlag[] = ["airspace_did", "method_night"];
+  it("24.99kg（24,990g）は IIB 相当のまま・保険手続きなし", () => {
+    const r = deriveDiagnosis({ flags: iibFlags, droneWeightG: 24_990, didStatus: "applicable" });
+    expect(r.category).toBe("II_B_eligible");
     expect(r.procedures.some((p) => p.kind === "insurance")).toBe(false);
+  });
+  it("25kg（25,000g）ちょうどは IIA 相当（許可・承認が必要）＋ 保険必須", () => {
+    const r = deriveDiagnosis({ flags: iibFlags, droneWeightG: 25_000, didStatus: "applicable" });
+    expect(r.category).toBe("II_A");
+    expect(idsOf(r.procedures)).toContain("insurance-third-party-25kg");
+    expect(r.verificationNotes.some((n) => n.includes("25kg"))).toBe(true);
+  });
+  it("30kg でも 'may be unnecessary'（IIB）にはならない", () => {
+    const r = deriveDiagnosis({ flags: ["method_bvlos"], droneWeightG: 30_000 });
+    expect(r.category).not.toBe("II_B_eligible");
+    expect(r.category).toBe("II_A");
+  });
+  it("25kg 以上でも特定飛行に非該当（DID 非該当確認済み）なら保険手続きは出さない", () => {
+    const r = deriveDiagnosis({ flags: [], droneWeightG: 30_000, didStatus: "not_applicable" });
+    expect(r.category).toBe("I");
+    expect(r.procedures.some((p) => p.kind === "insurance")).toBe(false);
+  });
+});
+
+describe("100g 境界（Sprint 6）", () => {
+  it("99g は航空法上の無人航空機に非該当（カテゴリー I・手続きなし）", () => {
+    const r = deriveDiagnosis({ flags: ["airspace_did"], droneWeightG: 99, didStatus: "applicable" });
+    expect(r.category).toBe("I");
+    expect(r.procedures).toHaveLength(0);
+  });
+  it("100g ちょうどは規制対象（DID 許可・登録が必要）", () => {
+    const r = deriveDiagnosis({ flags: ["airspace_did"], droneWeightG: 100, didStatus: "applicable" });
+    expect(r.isSpecificFlight).toBe(true);
+    expect(idsOf(r.procedures)).toContain("flight-permission-did");
+    expect(idsOf(r.procedures)).toContain("drone-registration");
+  });
+});
+
+describe("DID 三値（該当／非該当／未確認）— Sprint 6", () => {
+  it("DID 未確認＋他フラグなしは カテゴリー I（申請不要）にならず needs_verification", () => {
+    const r = deriveDiagnosis({ flags: [], droneWeightG: 900, didStatus: "unverified" });
+    expect(r.category).toBe("needs_verification");
+    expect(r.category).not.toBe("I");
+    expect(r.didStatus).toBe("unverified");
+    expect(r.verificationNotes.some((n) => n.includes("要確認"))).toBe(true);
+    expect(getCategoryDefinition(r.category).description).toContain("要確認");
+  });
+  it("DID 未確認でも airspace_did をユーザーが指定すれば 該当 扱い", () => {
+    const r = deriveDiagnosis({ flags: ["airspace_did"], droneWeightG: 900, didStatus: "unverified" });
+    expect(r.didStatus).toBe("applicable");
+    expect(r.category).toBe("II_B_eligible");
+  });
+  it("DID 非該当（確認済み）なら カテゴリー I", () => {
+    const r = deriveDiagnosis({ flags: [], droneWeightG: 900, didStatus: "not_applicable" });
+    expect(r.category).toBe("I");
+    expect(r.verificationNotes).toHaveLength(0);
+  });
+  it("重量未指定（フェイルセーフ）＋DID 未確認も needs_verification", () => {
+    const r = deriveDiagnosis({ flags: [], didStatus: "unverified" });
+    expect(r.category).toBe("needs_verification");
+  });
+  it("100g 未満は DID 未確認でも航空法の対象外（カテゴリー I）", () => {
+    const r = deriveDiagnosis({ flags: [], droneWeightG: 80, didStatus: "unverified" });
+    expect(r.category).toBe("I");
+  });
+  it("deriveDidStatusFromRegulations: red=該当 / green=非該当 / unknown・yellow・欠落=未確認", () => {
+    expect(deriveDidStatusFromRegulations([{ id: "aviation-law-did", status: "red" }])).toBe("applicable");
+    expect(deriveDidStatusFromRegulations([{ id: "aviation-law-did", status: "green" }])).toBe("not_applicable");
+    expect(deriveDidStatusFromRegulations([{ id: "aviation-law-did", status: "unknown" }])).toBe("unverified");
+    expect(deriveDidStatusFromRegulations([{ id: "aviation-law-did", status: "yellow" }])).toBe("unverified");
+    expect(deriveDidStatusFromRegulations([])).toBe("unverified");
   });
 });
 

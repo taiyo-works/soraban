@@ -546,9 +546,18 @@ const SHIMANE_NUISANCE_REG = buildPrefecturalNuisanceReg({
 
 export const evaluateDid = (
   loc: LatLng,
-  candidates: readonly DidCandidate[],
+  candidates: readonly DidCandidate[] | null,
   ctx?: FlightContext,
 ): RegulationWithStatus => {
+  // DID ポリゴンデータ自体が読み込めない（未整備・未配置・都道府県不明）場合は
+  // 「DID 外 = green」と断定せず unknown（未確認）に倒す（フェイルセーフ）。
+  if (candidates === null) {
+    return {
+      ...DID_REG,
+      status: "unknown",
+      note: "DID（人口集中地区）データを読み込めないため、DID 該当／非該当を確認できません（未確認）。地理院地図・DIPS で必ず確認してください。",
+    };
+  }
   const hit = candidates.find((c) => pointInPolygon(loc, c.polygon));
   const base = hit
     ? {
@@ -1123,6 +1132,7 @@ export type {
   ApplicationDiagnosis,
   DeriveDiagnosisInput,
   DiagnosisEvidencePayloadInput,
+  AirspaceDeterminationStatus,
 } from "./diagnosis";
 export {
   FLIGHT_METHOD_FLAGS,
@@ -1132,6 +1142,9 @@ export {
   ALL_PROCEDURES,
   ALL_CATEGORY_DEFINITIONS,
   DRONE_THRESHOLD_G,
+  HEAVY_DRONE_THRESHOLD_G,
+  AIRSPACE_DETERMINATION_LABEL,
+  deriveDidStatusFromRegulations,
   DIAGNOSIS_DISCLAIMER,
   PROCEDURES_VERIFIED_AT,
   deriveDiagnosis,

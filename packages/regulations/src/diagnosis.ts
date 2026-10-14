@@ -110,7 +110,28 @@ export type RequiredProcedure = {
 };
 
 // ── カテゴリー定義 ──
-export type DiagnosisCategory = "I" | "II_A" | "II_B_eligible" | "III_level4";
+// "needs_verification" = 空域（DID 等）の該当／非該当を確認できず、特定飛行に該当するか
+// 断定できない状態。「申請不要（カテゴリー I）」とは絶対に表示しない（要確認）。
+export type DiagnosisCategory =
+  | "I"
+  | "needs_verification"
+  | "II_A"
+  | "II_B_eligible"
+  | "III_level4";
+
+// 空域判定の三値（該当／非該当／未確認）。DID データ未整備・判定不能は "unverified"。
+export type AirspaceDeterminationStatus = "applicable" | "not_applicable" | "unverified";
+
+export const AIRSPACE_DETERMINATION_LABEL: Readonly<
+  Record<AirspaceDeterminationStatus, string>
+> = {
+  applicable: "該当",
+  not_applicable: "非該当",
+  unverified: "未確認",
+};
+
+// 総重量 25kg 以上の境界（カテゴリー II の IIB 不要化不可・第三者賠償責任保険の必須化）。
+export const HEAVY_DRONE_THRESHOLD_G = 25_000;
 
 export type CategoryDefinition = {
   readonly id: DiagnosisCategory;
@@ -149,6 +170,10 @@ export type ApplicationDiagnosis = {
   }[];
   /** 特定飛行に該当するか（横断手続き付与の根拠） */
   readonly isSpecificFlight: boolean;
+  /** DID（人口集中地区）上空の該当状況（三値）。未確認は「申請不要」と扱わない。 */
+  readonly didStatus: AirspaceDeterminationStatus;
+  /** 要確認事項（DID 未確認・25kg 以上 等）。UI／PDF に表示する。 */
+  readonly verificationNotes: readonly string[];
   /** 免責文（DEFAULT_DISCLAIMER を本機能向けに拡張） */
   readonly disclaimer: string;
 };
@@ -288,7 +313,13 @@ const CATEGORIES: ReadonlyMap<DiagnosisCategory, CategoryDefinition> = (() => {
       ? dataset.verifiedAt
       : undefined;
   const raw = dataset.categories ?? [];
-  const valid: ReadonlySet<DiagnosisCategory> = new Set(["I", "II_A", "II_B_eligible", "III_level4"]);
+  const valid: ReadonlySet<DiagnosisCategory> = new Set([
+    "I",
+    "needs_verification",
+    "II_A",
+    "II_B_eligible",
+    "III_level4",
+  ]);
   const map = new Map<DiagnosisCategory, CategoryDefinition>();
   for (const c of raw) {
     if (typeof c.id !== "string" || !valid.has(c.id as DiagnosisCategory)) continue;
@@ -387,6 +418,25 @@ export type DeriveDiagnosisInput = {
   readonly thirdPartyOverflight?: boolean;
   /** 飛行予定日（ISO 日付）。S1 では deadlines.basis に保持のみ。 */
   readonly plannedDate?: string;
+  /**
+   * 地点判定由来の DID 該当状況（三値）。flags に airspace_did があれば常に "applicable"。
+   * 未指定は後方互換のため flags のみで判断する（API は常に指定する）。
+   */
+  readonly didStatus?: AirspaceDeterminationStatus;
+};
+
+const isHeavyDrone = (droneWeightG: number | undefined): boolean =>
+  typeof droneWeightG === "number" &&
+  Number.isFinite(droneWeightG) &&
+  droneWeightG >= HEAVY_DRONE_THRESHOLD_G;
+
+const resolveDidStatus = (
+  flags: readonly SpecificFlightFlag[],
+  didStatus: AirspaceDeterminationStatus | undefined,
+): AirspaceDeterminationStatus => {
+  if (flags.includes("airspace_did")) return "applicable";
+  if (didStatus === "unverified") return "unverified";
+  return "not_applicable";
 };
 
 // 重複・未知値を除いた特定飛行フラグの正規化（順序は SPECIFIC_FLIGHT_FLAG_LABEL に従う）。
@@ -410,17 +460,24 @@ const normalizeFlags = (
 //   - 第三者上空（立入管理措置なし）→ III＝レベル4
 //   - 該当する特定飛行が「すべて IIB で不要化可能」かつ重量規制対象 → IIB 相当
 //   - それ以外（IIB 不可の区分を含む）→ IIA 相当
+//   - 25kg 以上は IIB 不要化の対象外 → IIA 相当（許可・承認が必要）
+//   - 特定飛行フラグなし かつ DID 未確認 → needs_verification（申請不要とは断定しない）
 const classifyCategory = (
   flags: readonly SpecificFlightFlag[],
   isRegulated: boolean,
   input: DeriveDiagnosisInput,
+  didStatus: AirspaceDeterminationStatus,
 ): DiagnosisCategory => {
-  if (flags.length === 0) return "I";
+  if (flags.length === 0) {
+    return isRegulated && didStatus === "unverified" ? "needs_verification" : "I";
+  }
   // 第三者上空 / 立入管理措置なしを明示選択 → III（レベル4）。
   if (input.thirdPartyOverflight === true || input.accessControl === false) {
     return "III_level4";
   }
   if (!isRegulated) return "I"; // 100g 未満は航空法上の特定飛行に該当しない
+  // 総重量 25kg 以上は IIB（申請不要化）の対象外。個別に許可・承認が必要。
+  if (isHeavyDrone(input.droneWeightG)) return "II_A";
   // 該当フラグの手続きがすべて IIB で不要化可能なら IIB 相当。
   const allWaivable = flags.every((f) => {
     const id = FLAG_TO_PROCEDURE_ID[f];
@@ -458,7 +515,30 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
     }
   }
 
-  const category = classifyCategory(flags, isRegulated, input);
+  const didStatus = resolveDidStatus(flags, input.didStatus);
+  const category = classifyCategory(flags, isRegulated, input, didStatus);
+  const heavy = isRegulated && isHeavyDrone(input.droneWeightG);
+
+  // 25kg 以上で許可・承認申請が必要（または要確認）な場合は第三者賠償責任保険が必須
+  // （令和7年10月1日以降の新規申請。国交省 koku_fr10_000042）。
+  if (
+    heavy &&
+    (category === "II_A" || category === "III_level4" || category === "needs_verification")
+  ) {
+    pushUnique(proc("insurance-third-party-25kg"));
+  }
+
+  const verificationNotes: string[] = [];
+  if (isRegulated && didStatus === "unverified") {
+    verificationNotes.push(
+      "DID（人口集中地区）の該当／非該当を確認できていません（未確認）。地理院地図・DIPS で DID 該当を確認するまで「申請不要」とは判断できません（要確認）。",
+    );
+  }
+  if (heavy) {
+    verificationNotes.push(
+      "総重量 25kg 以上のため、カテゴリー II でも IIB による申請不要化はできません。新規の飛行許可・承認申請では第三者賠償責任保険への加入が必要です（令和7年10月1日以降）。",
+    );
+  }
 
   // deadlines: 提出期限の逆算（S2 期限カレンダー）。
   //   - 飛行予定日が入力されていれば「飛行日 − leadTime 開庁日（土日祝除く）」で
@@ -491,6 +571,8 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
     procedures,
     deadlines,
     isSpecificFlight,
+    didStatus,
+    verificationNotes,
     disclaimer: DIAGNOSIS_DISCLAIMER,
   };
 };
@@ -511,6 +593,18 @@ export const extractAirspaceFlagsFromRegulations = (
     if (r.id === "aviation-law-airport") flags.push("airspace_airport");
   }
   return flags;
+};
+
+// 地点判定の DID 規制（aviation-law-did）の status を三値に写像する。
+//   red → 該当 / green → 非該当 / yellow・unknown・レコード欠落 → 未確認
+export const deriveDidStatusFromRegulations = (
+  regulations: readonly { readonly id: string; readonly status: string }[],
+): AirspaceDeterminationStatus => {
+  const did = regulations.find((r) => r.id === "aviation-law-did");
+  if (!did) return "unverified";
+  if (did.status === "red") return "applicable";
+  if (did.status === "green") return "not_applicable";
+  return "unverified";
 };
 
 export const REQUIRED_PROCEDURE_KIND_LABEL: Readonly<
@@ -539,6 +633,8 @@ export type DiagnosisEvidencePayloadInput = {
   readonly bvlosWithObserver?: boolean;
   readonly category: DiagnosisCategory;
   readonly procedureIds: readonly string[];
+  /** DID 該当状況（三値）。未指定は null として正規化。 */
+  readonly didStatus?: AirspaceDeterminationStatus;
 };
 
 /**
@@ -567,6 +663,7 @@ export const buildDiagnosisEvidencePayload = (
       bv: typeof input.bvlosWithObserver === "boolean" ? input.bvlosWithObserver : null,
       cat: input.category,
       p: sortedProcedures,
+      did: input.didStatus ?? null,
       ver: PROCEDURES_VERIFIED_AT || null,
     },
   });
