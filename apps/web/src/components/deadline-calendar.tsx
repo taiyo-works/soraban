@@ -260,9 +260,9 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
       {/* 期限は目安である旨の断り（spec §11-C: 標準処理期間は目安）。 */}
       {hasPlannedDate && items.length > 0 ? (
         <p className="text-[11px] leading-relaxed text-ink-mute">
-          ※ 「10 開庁日前」は手引き記載に基づく逆算の目安です（標準処理期間は目安であり、
-          内容により前後します）。祝日は内閣府公開データに基づきます。最終的な提出可否は DIPS
-          ／航空局でご確認ください。
+          ※ 「飛行開始の 10 開庁日以上前」を計算根拠としていますが、標準処理期間は目安であり、
+          確定的な法定処理期間ではありません（内容により前後します）。祝日は内閣府公開データに基づきます。
+          最終的な提出可否は DIPS／航空局でご確認ください。
         </p>
       ) : null}
     </section>

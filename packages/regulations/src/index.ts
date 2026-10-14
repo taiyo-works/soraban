@@ -1132,6 +1132,7 @@ export {
   ALL_CATEGORY_DEFINITIONS,
   DRONE_THRESHOLD_G,
   DIAGNOSIS_DISCLAIMER,
+  PROCEDURES_VERIFIED_AT,
   deriveDiagnosis,
   getCategoryDefinition,
   extractAirspaceFlagsFromRegulations,

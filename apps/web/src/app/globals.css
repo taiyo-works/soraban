@@ -195,6 +195,16 @@ a {
   text-decoration-thickness: 1px;
 }
 
+/* 本文リンクのフォーカスリング (North Star §4.5: 藍 2px、絶対に消さない / WCAG 2.4.7)。
+ * フォーム要素・ボタンは各所で focus / focus-visible:ring を持つが、本文中の <a>（出典 ↗・
+ * 別系統導線等）は UA 既定依存だった。ここで「藍 2px リング」を本文リンクにも統一する。
+ * 製図インクの語彙に合わせ、角はシャープ・オフセットは紙地で抜く。 */
+a:focus-visible {
+  outline: 2px solid var(--color-brand-700);
+  outline-offset: 2px;
+  border-radius: var(--radius-sharp);
+}
+
 /* Selection: ブランドアクセントを軽く敷く */
 ::selection {
   background: color-mix(in srgb, var(--color-brand-700) 22%, transparent);
@@ -204,4 +214,21 @@ a {
 /* スクロール挙動 */
 html {
   scroll-behavior: smooth;
+}
+
+/* 動きは最小限 (North Star §4.1-4 / §4.5)。prefers-reduced-motion を尊重し、
+ * 信号機点灯の 240ms 遷移・進捗トラックの width アニメ・hover の色遷移・smooth scroll を
+ * すべて無効化する。意味（色＋符号＋テキストの三重符号化）は静止状態でも完全に伝わる。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

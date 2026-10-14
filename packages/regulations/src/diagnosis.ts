@@ -99,6 +99,14 @@ export type RequiredProcedure = {
   readonly note?: string;
   /** §3.6 の要再確認事項に紐づくなら true（確定事実として表示しない） */
   readonly needsReverify?: boolean;
+  /**
+   * 改正レビュー用の検証日（ISO 8601）。この手続き定義を一次情報で確認した日付。
+   * 既存 `RegulationConfidence.verifiedAt` の作法に倣い、各レコードが個別に持つことで
+   * 「いつ時点の制度確認に基づくレコードか」を監査・改正レビューで同定できる（spec §8）。
+   * レコード個別に無ければデータセット全体の検証日（procedures.json の top-level verifiedAt）に
+   * フォールバックする。
+   */
+  readonly verifiedAt?: string;
 };
 
 // ── カテゴリー定義 ──
@@ -109,6 +117,8 @@ export type CategoryDefinition = {
   readonly label: string;
   readonly description: string;
   readonly sourceUrl: string;
+  /** 改正レビュー用の検証日（ISO 8601）。categories.json の検証日に基づく（spec §8）。 */
+  readonly verifiedAt?: string;
 };
 
 // ── 飛行方法・運航条件（既存 FlightContext を拡張する独立コンテキスト）──
@@ -175,11 +185,19 @@ type RawProcedure = {
   readonly leadTimeBusinessDays?: unknown;
   readonly note?: unknown;
   readonly needsReverify?: unknown;
+  readonly verifiedAt?: unknown;
 };
 
 // JSON の各レコードを RequiredProcedure に正規化する。
 // legalBasis・sourceUrl が空のレコードはデータ不備として落とす（安全クリティカル）。
-const parseProcedure = (raw: RawProcedure): RequiredProcedure | null => {
+//
+// 第 2 引数 datasetVerifiedAt は procedures.json の top-level 検証日。
+// レコード個別に verifiedAt が無い場合はこれにフォールバックし、
+// 「検証日メタが必ず入っている」契約（sprint-4）をデータ駆動で満たす。
+const parseProcedure = (
+  raw: RawProcedure,
+  datasetVerifiedAt: string | undefined,
+): RequiredProcedure | null => {
   if (typeof raw.id !== "string" || raw.id.length === 0) return null;
   if (typeof raw.kind !== "string" || !ALL_PROCEDURE_KINDS.has(raw.kind as RequiredProcedureKind)) {
     return null;
@@ -196,6 +214,11 @@ const parseProcedure = (raw: RawProcedure): RequiredProcedure | null => {
     typeof raw.leadTimeBusinessDays === "number" && Number.isFinite(raw.leadTimeBusinessDays)
       ? raw.leadTimeBusinessDays
       : 10;
+  // 検証日メタ: レコード個別 → データセット全体 の順でフォールバック。
+  const verifiedAt =
+    typeof raw.verifiedAt === "string" && raw.verifiedAt.length > 0
+      ? raw.verifiedAt
+      : datasetVerifiedAt;
   return {
     id: raw.id,
     kind: raw.kind as RequiredProcedureKind,
@@ -208,15 +231,31 @@ const parseProcedure = (raw: RawProcedure): RequiredProcedure | null => {
     leadTimeBusinessDays: leadTime,
     ...(typeof raw.note === "string" && raw.note.length > 0 ? { note: raw.note } : {}),
     ...(raw.needsReverify === true ? { needsReverify: true } : {}),
+    ...(typeof verifiedAt === "string" && verifiedAt.length > 0 ? { verifiedAt } : {}),
   };
 };
 
+// 制度データ（procedures.json）の検証日。一次情報でこのデータセットを確認した日付。
+// UI／PDF に「いつ時点の制度確認に基づくか」を明示するために export する（spec §8）。
+export const PROCEDURES_VERIFIED_AT: string = (() => {
+  const v = (proceduresData as { verifiedAt?: unknown }).verifiedAt;
+  return typeof v === "string" && v.length > 0 ? v : "";
+})();
+
 // 起動時に 1 度だけ手続き定義を読み込み、id → RequiredProcedure の索引を作る。
 const PROCEDURES: ReadonlyMap<string, RequiredProcedure> = (() => {
-  const raw = (proceduresData as { procedures?: readonly RawProcedure[] }).procedures ?? [];
+  const dataset = proceduresData as {
+    procedures?: readonly RawProcedure[];
+    verifiedAt?: unknown;
+  };
+  const datasetVerifiedAt =
+    typeof dataset.verifiedAt === "string" && dataset.verifiedAt.length > 0
+      ? dataset.verifiedAt
+      : undefined;
+  const raw = dataset.procedures ?? [];
   const map = new Map<string, RequiredProcedure>();
   for (const p of raw) {
-    const parsed = parseProcedure(p);
+    const parsed = parseProcedure(p, datasetVerifiedAt);
     if (parsed) map.set(parsed.id, parsed);
   }
   return map;
@@ -234,20 +273,38 @@ const proc = (id: string): RequiredProcedure => {
 export const ALL_PROCEDURES: readonly RequiredProcedure[] = Array.from(PROCEDURES.values());
 
 const CATEGORIES: ReadonlyMap<DiagnosisCategory, CategoryDefinition> = (() => {
-  const raw =
-    (categoriesData as { categories?: readonly { id?: unknown; label?: unknown; description?: unknown; sourceUrl?: unknown }[] })
-      .categories ?? [];
+  const dataset = categoriesData as {
+    categories?: readonly {
+      id?: unknown;
+      label?: unknown;
+      description?: unknown;
+      sourceUrl?: unknown;
+      verifiedAt?: unknown;
+    }[];
+    verifiedAt?: unknown;
+  };
+  const datasetVerifiedAt =
+    typeof dataset.verifiedAt === "string" && dataset.verifiedAt.length > 0
+      ? dataset.verifiedAt
+      : undefined;
+  const raw = dataset.categories ?? [];
   const valid: ReadonlySet<DiagnosisCategory> = new Set(["I", "II_A", "II_B_eligible", "III_level4"]);
   const map = new Map<DiagnosisCategory, CategoryDefinition>();
   for (const c of raw) {
     if (typeof c.id !== "string" || !valid.has(c.id as DiagnosisCategory)) continue;
     if (typeof c.label !== "string" || typeof c.description !== "string") continue;
     if (typeof c.sourceUrl !== "string" || c.sourceUrl.length === 0) continue;
+    // 検証日メタ: レコード個別 → データセット全体 の順でフォールバック（spec §8）。
+    const verifiedAt =
+      typeof c.verifiedAt === "string" && c.verifiedAt.length > 0
+        ? c.verifiedAt
+        : datasetVerifiedAt;
     map.set(c.id as DiagnosisCategory, {
       id: c.id as DiagnosisCategory,
       label: c.label,
       description: c.description,
       sourceUrl: c.sourceUrl,
+      ...(typeof verifiedAt === "string" && verifiedAt.length > 0 ? { verifiedAt } : {}),
     });
   }
   return map;

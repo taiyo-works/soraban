@@ -5,6 +5,7 @@ import {
   buildFlightManualDraft,
   getCategoryDefinition,
   toJstIsoDate,
+  PROCEDURES_VERIFIED_AT,
   type DiagnosisCategory,
   type ManualChoice,
 } from "@soraban/regulations";
@@ -416,6 +417,16 @@ export function DiagnosisPanel({ diagnosis, plannedDate }: Props) {
             {new Date(diagnosis.checkedAt).toLocaleString("ja-JP")}
           </dd>
         </div>
+        {/* 制度データ検証日（改正レビュー用）。確定事実が「いつ時点の制度確認に
+            基づくか」を画面でも明示する（spec §8 / sprint-4 検証日メタ）。 */}
+        {PROCEDURES_VERIFIED_AT ? (
+          <div className="flex flex-col gap-0.5">
+            <dt className="eyebrow !text-[9px]">制度データ検証日</dt>
+            <dd className="tnum normal-case tracking-normal text-ink">
+              {PROCEDURES_VERIFIED_AT.slice(0, 10)}
+            </dd>
+          </div>
+        ) : null}
       </dl>
     </section>
   );

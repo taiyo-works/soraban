@@ -14,6 +14,7 @@ import {
   FLIGHT_METHOD_FLAGS,
   AIRSPACE_FLAGS,
   SPECIFIC_FLIGHT_FLAG_LABEL,
+  DIAGNOSIS_DISCLAIMER,
   type FlightContext,
   type RegulationCheckResult,
   type RegulationStatus,
@@ -554,6 +555,17 @@ export function RegulationChecker() {
         onSubmit={handleSubmit}
         className="flex flex-col gap-6 border border-rule bg-paper-soft/50 p-4 sm:gap-7 sm:p-6"
       >
+        {/* 免責（入力前＝初期状態でも常に表示）。判定結果や診断パネルが出る前から、
+            「本機能は補助であり最終確認は DIPS／航空局で」を画面に出しておく契約
+            （sprint-4：免責を入力前・結果表示・チェックリスト・プリフィルの全画面状態に表示）。
+            入力前の段階では「これから記入する野帳の前書き」の位置づけ。結果・診断パネルに出る
+            同文の免責より一段控えめ（細字・補助色・薄い左罫）にして、全画面表示がくどくならない
+            ようにしつつ、可読性と趣旨は維持する。 */}
+        <p className="flex gap-2 border-l border-brand-700/60 pl-3 text-[11px] leading-relaxed text-ink-mute">
+          <span className="eyebrow !text-[9px] shrink-0 not-italic">disclaimer</span>
+          <span>{DIAGNOSIS_DISCLAIMER}</span>
+        </p>
+
         {/* address geocode */}
         <fieldset className="flex flex-col gap-2">
           <legend className="eyebrow">

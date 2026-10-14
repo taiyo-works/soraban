@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import {
   getCategoryDefinition,
+  PROCEDURES_VERIFIED_AT,
   REQUIRED_PROCEDURE_KIND_LABEL,
   type DiagnosisCategory,
   type FlightManualDraft,
@@ -362,6 +363,14 @@ export const ApplicationPdfDocument = ({
               {new Date(diagnosis.checkedAt).toLocaleString("ja-JP")}
             </MonoText>
           </View>
+          {PROCEDURES_VERIFIED_AT ? (
+            <View style={styles.metaCol}>
+              <Text style={styles.metaLabel}>制度データ検証日</Text>
+              <MonoText style={styles.metaValue}>
+                {PROCEDURES_VERIFIED_AT.slice(0, 10)}
+              </MonoText>
+            </View>
+          ) : null}
         </View>
 
         {/* ① カテゴリー切り分け */}
@@ -418,6 +427,9 @@ export const ApplicationPdfDocument = ({
               <View style={styles.procLinks}>
                 <MonoText>手続き（{p.system}）: {p.systemUrl}</MonoText>
                 <MonoText>出典: {p.sourceUrl}</MonoText>
+                {p.verifiedAt ? (
+                  <MonoText>検証日: {p.verifiedAt.slice(0, 10)}</MonoText>
+                ) : null}
               </View>
             </View>
           ))
@@ -453,7 +465,7 @@ export const ApplicationPdfDocument = ({
               );
             })}
             <Text style={styles.hint}>
-              ※ 「10 開庁日前」は手引き記載に基づく逆算の目安です（標準処理期間は目安）。祝日は内閣府公開データに基づきます。
+              ※ 「飛行開始の 10 開庁日以上前」を計算根拠としていますが、標準処理期間は目安であり、確定的な法定処理期間ではありません（内容により前後します）。祝日は内閣府公開データに基づきます。最終的な提出可否は DIPS／航空局でご確認ください。
             </Text>
           </>
         )}

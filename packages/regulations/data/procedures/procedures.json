@@ -1,6 +1,6 @@
 {
   "$schema": "../../README.md",
-  "_note": "DIPS 飛行許可・承認 申請支援機能の手続き定義（素データ）。各レコードは legalBasis（法的根拠）と sourceUrl（出典 URL）を必ず持つ。コードに直書きせず、改正時はこの JSON を差し替える。出典は docs/spec.md §3 に裏取り済みの一次情報。IIA／IIB の呼称は §3.6 で正式名称が要再確認のため『相当』表記とする。",
+  "_note": "DIPS 飛行許可・承認 申請支援機能の手続き定義（素データ）。各レコードは legalBasis（法的根拠）と sourceUrl（出典 URL）を必ず持つ。コードに直書きせず、改正時はこの JSON を差し替える。出典は docs/spec.md §3 に裏取り済みの一次情報。IIA／IIB の呼称は §3.6 で正式名称が要再確認のため『相当』表記とする。各レコードは改正レビュー用の検証日メタ verifiedAt（この手続き定義を一次情報で確認した日付）を持つ（spec §8）。値は確証取得日 2026-06-22（JST）。",
   "verifiedAt": "2026-06-22T00:00:00+09:00",
   "procedures": [
     {
@@ -13,6 +13,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -25,6 +26,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "地表または水面から150m以上の高さの飛行は IIA 相当の許可が必要です。"
     },
     {
@@ -37,6 +39,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。"
     },
     {
@@ -49,6 +52,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "緊急用務空域に指定された区域は原則として飛行が禁止されます。指定はリアルタイムで変動するため、飛行直前に国土交通省の最新情報を必ず確認してください。"
     },
     {
@@ -61,6 +65,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。"
     },
     {
@@ -73,6 +78,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "目視外飛行は IIB 条件で不要化できる区分（IIB 相当）です。補助者の有無により運航条件が変わる場合があります（補助者なしはより上位の要件）。"
     },
     {
@@ -85,6 +91,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "第三者または物件との距離が30m未満になる飛行は IIB 条件で不要化できる区分（IIB 相当）です。"
     },
     {
@@ -97,6 +104,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "祭礼・縁日・展示会等、多数の者が集合する催し場所の上空は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -109,6 +117,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "火薬類・高圧ガス・引火性液体等の危険物を輸送する飛行は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -121,6 +130,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "農薬散布等を含む物件の投下は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -133,6 +143,7 @@
       "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 0,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS2.0）とは別ドメインの独立系統です。"
     },
     {
@@ -145,6 +156,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 0,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。"
     },
     {
@@ -157,6 +169,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 0,
+      "verifiedAt": "2026-06-22T00:00:00+09:00",
       "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。"
     }
   ]

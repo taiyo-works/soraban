@@ -3,7 +3,9 @@ import {
   extractAirspaceFlagsFromRegulations,
   getCategoryDefinition,
   ALL_PROCEDURES,
+  ALL_CATEGORY_DEFINITIONS,
   FLIGHT_METHOD_FLAGS,
+  PROCEDURES_VERIFIED_AT,
   type RequiredProcedure,
   type SpecificFlightFlag,
 } from "./diagnosis";
@@ -29,6 +31,52 @@ describe("制度データ（procedures.json）", () => {
     expect(did?.system).toBe("DIPS2.0");
     expect(did?.systemUrl).toContain("ossportal");
     expect(drs?.systemUrl).not.toBe(did?.systemUrl);
+  });
+
+  // sprint-4 契約: 各手続きレコードに改正レビュー用の検証日メタ verifiedAt が入っている。
+  it("全手続きレコードが検証日メタ verifiedAt を持つ（ISO 日付）", () => {
+    expect(ALL_PROCEDURES.length).toBeGreaterThan(0);
+    for (const p of ALL_PROCEDURES) {
+      expect(p.verifiedAt).toBeDefined();
+      expect(typeof p.verifiedAt).toBe("string");
+      // YYYY-MM-DD で始まる ISO 日付であること。
+      expect(p.verifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
+  });
+
+  it("データセット全体の検証日（PROCEDURES_VERIFIED_AT）が 2026-06-22 を基準にしている", () => {
+    expect(PROCEDURES_VERIFIED_AT).toMatch(/^2026-06-22/);
+  });
+
+  it("確定事実として表示する手続きには法的根拠と出典 URL が必ず併記されている", () => {
+    // 25kg 保険義務化（要再確認・§11-A）は確定事実として手続き化していない＝insurance kind は出さない。
+    expect(ALL_PROCEDURES.some((p) => p.kind === "insurance")).toBe(false);
+    for (const p of ALL_PROCEDURES) {
+      expect(p.legalBasis.length).toBeGreaterThan(0);
+      expect(p.sourceUrl.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("カテゴリー定義（categories.json）— 検証日メタ", () => {
+  it("全カテゴリー定義が sourceUrl と検証日メタ verifiedAt を持つ", () => {
+    expect(ALL_CATEGORY_DEFINITIONS.length).toBeGreaterThan(0);
+    for (const c of ALL_CATEGORY_DEFINITIONS) {
+      expect(c.sourceUrl.length).toBeGreaterThan(0);
+      expect(c.verifiedAt).toBeDefined();
+      expect(c.verifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
+  });
+});
+
+describe("要再確認事項（spec §11）を確定事実として表示しない", () => {
+  // §11-A: 25kg 以上の保険義務化は手続きとして導出されない（確証未取得）。
+  it("25kg 保険義務化は deriveDiagnosis の出力に現れない（保険 kind を導出しない）", () => {
+    const r = deriveDiagnosis({
+      flags: ["method_night", "airspace_did"],
+      droneWeightG: 30_000, // 30kg（25kg 超）でも insurance 手続きは出さない
+    });
+    expect(r.procedures.some((p) => p.kind === "insurance")).toBe(false);
   });
 });
 

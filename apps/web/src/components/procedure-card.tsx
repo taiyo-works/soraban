@@ -5,6 +5,14 @@ import {
   type RequiredProcedure,
 } from "@soraban/regulations";
 
+// 検証日メタ（ISO 8601）を YYYY-MM-DD に短縮表示する。改正レビュー用の
+// 「いつ時点の制度確認に基づくレコードか」を監査可能に示す（spec §8 / sprint-4）。
+const shortVerifiedAt = (iso: string | undefined): string | null => {
+  if (typeof iso !== "string" || iso.length === 0) return null;
+  const m = /^(\d{4}-\d{2}-\d{2})/.exec(iso);
+  return m ? m[1]! : iso;
+};
+
 type Props = {
   readonly procedure: RequiredProcedure;
   /** 飛行予定日からの提出期限の根拠説明（あれば表示） */
@@ -25,6 +33,7 @@ const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
 
 export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: Props) {
   const kindLabel = REQUIRED_PROCEDURE_KIND_LABEL[procedure.kind];
+  const verifiedAt = shortVerifiedAt(procedure.verifiedAt);
   return (
     <article
       className={`flex flex-col gap-3 border p-5 transition-colors ${
@@ -106,6 +115,15 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
         >
           出典 ↗
         </a>
+        {/* 検証日メタ（改正レビュー用）。確定事実の出典と並べて「いつ確認したか」を示す。 */}
+        {verifiedAt ? (
+          <span
+            className="ml-auto text-ink-mute/80 normal-case tracking-normal"
+            title="この手続き定義を一次情報で確認した日付（改正レビュー用）"
+          >
+            verified {verifiedAt}
+          </span>
+        ) : null}
       </div>
     </article>
   );
