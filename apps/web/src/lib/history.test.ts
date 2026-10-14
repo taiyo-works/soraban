@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearHistory,
+  createHistoryRunId,
   getHistorySnapshot,
   loadHistory,
   patchHistoryDiagnosis,
+  recordHistoryCheck,
+  recordHistoryDiagnosis,
   removeHistory,
   saveHistory,
   type SavedCheck,
@@ -189,5 +192,102 @@ describe("history.ts — 判定履歴＋申請支援条件・進捗の保存と�
 
     clearHistory();
     expect(loadHistory()).toHaveLength(0);
+  });
+});
+
+describe("history.ts — runId 単位の書き込み（Sprint 6: 応答順レース対策）", () => {
+  let storage: MemoryStorage;
+  beforeEach(() => {
+    storage = new MemoryStorage();
+    vi.stubGlobal("window", {
+      localStorage: storage,
+      dispatchEvent: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+  });
+
+  const summary = {
+    diagnosisEvidenceId: "ev_diag000000000001",
+    category: "II_B_eligible" as const,
+    isSpecificFlight: true,
+    procedureCount: 5,
+    didStatus: "applicable" as const,
+  };
+  const { runId: _omit, ...checkPart } = makeBaseEntry({ evidenceId: "ev_check00000000001" });
+  void _omit;
+
+  it("createHistoryRunId は毎回異なる ID を返す", () => {
+    expect(createHistoryRunId()).not.toBe(createHistoryRunId());
+  });
+
+  it("地点判定 → 診断 の順で届いても同じエントリに両方が入る", () => {
+    const runId = createHistoryRunId();
+    recordHistoryCheck(runId, checkPart);
+    recordHistoryDiagnosis(runId, {
+      diagnosisInput: { methodFlags: ["method_night"] },
+      diagnosisSummary: summary,
+    });
+    const h = loadHistory();
+    expect(h).toHaveLength(1);
+    expect(h[0]?.runId).toBe(runId);
+    expect(h[0]?.evidenceId).toBe("ev_check00000000001");
+    expect(h[0]?.diagnosisSummary).toEqual(summary);
+    expect(h[0]?.diagnosisInput?.methodFlags).toEqual(["method_night"]);
+  });
+
+  it("診断 → 地点判定 の順で届いても同じエントリに両方が入る（pending 合流）", () => {
+    const runId = createHistoryRunId();
+    recordHistoryDiagnosis(runId, {
+      diagnosisInput: { methodFlags: ["method_bvlos"] },
+      diagnosisSummary: summary,
+    });
+    // 地点判定前は履歴一覧に現れない
+    expect(loadHistory()).toHaveLength(0);
+    recordHistoryCheck(runId, { ...checkPart, diagnosisInput: { methodFlags: [] } });
+    const h = loadHistory();
+    expect(h).toHaveLength(1);
+    expect(h[0]?.runId).toBe(runId);
+    expect(h[0]?.diagnosisSummary).toEqual(summary);
+    // 診断側の入力が判定時スナップショットより優先される
+    expect(h[0]?.diagnosisInput?.methodFlags).toEqual(["method_bvlos"]);
+    expect(storage.getItem("soraban:history:pending:v1")).toBeNull();
+  });
+
+  it("同一座標の古いエントリを誤って更新しない", () => {
+    const oldRun = createHistoryRunId();
+    recordHistoryCheck(oldRun, { ...checkPart, evidenceId: "ev_old0000000000001" });
+    recordHistoryDiagnosis(oldRun, { diagnosisSummary: { ...summary, diagnosisEvidenceId: "ev_old_diag" } });
+
+    const newRun = createHistoryRunId();
+    // 新しい実行の診断が先に届く（同一座標）
+    recordHistoryDiagnosis(newRun, { diagnosisSummary: { ...summary, diagnosisEvidenceId: "ev_new_diag" } });
+    let h = loadHistory();
+    expect(h).toHaveLength(1);
+    expect(h[0]?.diagnosisSummary?.diagnosisEvidenceId).toBe("ev_old_diag");
+
+    recordHistoryCheck(newRun, { ...checkPart, evidenceId: "ev_new0000000000001" });
+    h = loadHistory();
+    expect(h).toHaveLength(2);
+    const byRun = new Map(h.map((e) => [e.runId, e]));
+    expect(byRun.get(oldRun)?.diagnosisSummary?.diagnosisEvidenceId).toBe("ev_old_diag");
+    expect(byRun.get(newRun)?.diagnosisSummary?.diagnosisEvidenceId).toBe("ev_new_diag");
+  });
+
+  it("別 runId で同じ evidenceId は重複させない（idempotent）", () => {
+    recordHistoryCheck(createHistoryRunId(), checkPart);
+    recordHistoryCheck(createHistoryRunId(), checkPart);
+    expect(loadHistory()).toHaveLength(1);
+  });
+
+  it("チェックリスト操作も runId のエントリだけを更新する", () => {
+    const a = createHistoryRunId();
+    const b = createHistoryRunId();
+    recordHistoryCheck(a, { ...checkPart, evidenceId: "ev_a" });
+    recordHistoryCheck(b, { ...checkPart, evidenceId: "ev_b" });
+    recordHistoryDiagnosis(a, { diagnosisInput: { completedProcedureIds: ["drone-registration"] } });
+    const byRun = new Map(loadHistory().map((e) => [e.runId, e]));
+    expect(byRun.get(a)?.diagnosisInput?.completedProcedureIds).toEqual(["drone-registration"]);
+    expect(byRun.get(b)?.diagnosisInput?.completedProcedureIds).toBeUndefined();
   });
 });

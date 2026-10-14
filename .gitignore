@@ -50,3 +50,7 @@ files.zip
 # Claude Code local config
 .claude/
 .vercel
+
+# Playwright
+test-results/
+playwright-report/

@@ -3,8 +3,10 @@ import { isValidLatLng } from "@soraban/geo";
 import {
   buildPrefillFields,
   deriveDiagnosis,
+  deriveDidStatusFromRegulations,
   extractAirspaceFlagsFromRegulations,
   SPECIFIC_FLIGHT_FLAG_LABEL,
+  type AirspaceDeterminationStatus,
   type ApplicationDiagnosis,
   type PrefillField,
   type SpecificFlightFlag,
@@ -69,6 +71,8 @@ export async function POST(req: Request) {
   const accessControl = parseBool(obj["accessControl"]);
   const thirdPartyOverflight = parseBool(obj["thirdPartyOverflight"]);
   const bvlosWithObserver = parseBool(obj["bvlosWithObserver"]);
+  // ユーザーが地理院地図等で「DID 非該当」を確認済みと明示した場合のみ true。
+  const didConfirmedNotApplicable = obj["didConfirmedNotApplicable"] === true;
 
   // 信号機判定を実行し、空域フラグ（DID・空港 red）を自動導出してユーザー入力に合流。
   // ctx には機体重量だけ渡す（例外節適用と evidenceId の一貫性のため）。
@@ -77,6 +81,13 @@ export async function POST(req: Request) {
     droneWeightG !== undefined ? { droneWeightG } : undefined,
   );
   const airspaceFlags = extractAirspaceFlagsFromRegulations(checkResult.regulations);
+  // DID 該当の三値（該当／非該当／未確認）。データ未整備は「未確認」のまま診断へ渡す。
+  // 自動判定が「未確認」のときに限り、ユーザーの「非該当を確認済み」を採用する。
+  const autoDidStatus: AirspaceDeterminationStatus = deriveDidStatusFromRegulations(
+    checkResult.regulations,
+  );
+  const didStatusInput: AirspaceDeterminationStatus =
+    autoDidStatus === "unverified" && didConfirmedNotApplicable ? "not_applicable" : autoDidStatus;
   // 飛行方法フラグ ＋ 判定由来の空域フラグを合流した最終フラグ集合（重複排除）。
   const mergedFlags: readonly SpecificFlightFlag[] = Array.from(
     new Set<SpecificFlightFlag>([...airspaceFlags, ...userFlags]),
@@ -88,6 +99,7 @@ export async function POST(req: Request) {
     plannedDate,
     accessControl,
     thirdPartyOverflight,
+    didStatus: didStatusInput,
   });
 
   // DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値）。
@@ -119,6 +131,7 @@ export async function POST(req: Request) {
     bvlosWithObserver,
     category: diagnosis.category,
     procedureIds: diagnosis.procedures.map((p) => p.id),
+    didStatus: diagnosis.didStatus,
   });
 
   return NextResponse.json({
@@ -135,6 +148,8 @@ export async function POST(req: Request) {
     lng,
     // どの空域フラグが判定由来で合流したかを UI が示せるように返す。
     derivedAirspaceFlags: airspaceFlags,
+    // 地点判定（自動）の DID 三値。UI はユーザー確認前の状態として表示する。
+    autoDidStatus,
     // どのフラグ集合（空域＋方法）で診断したか（マニュアル骨子・PDF の生成根拠）。
     flags: mergedFlags,
   });

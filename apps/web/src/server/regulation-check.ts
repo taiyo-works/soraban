@@ -190,7 +190,7 @@ export const runRegulationCheck = async (
   const didCandidates = prefCode ? await loadPrefDid(prefCode) : null;
 
   const regulations: readonly RegulationWithStatus[] = [
-    evaluateDid(loc, didCandidates ?? [], ctx),
+    evaluateDid(loc, didCandidates, ctx),
     evaluateAirports(loc, airportCandidates ?? [], ctx),
     evaluateMihoBase(loc, ctx),
     evaluateMunicipalParks(loc, geocode.muniCode, ctx),

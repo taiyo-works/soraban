@@ -679,3 +679,14 @@ describe("formatMachineCondition (特許①従属項10)", () => {
     expect(formatMachineCondition({ type: "other" })).toBe("other");
   });
 });
+
+describe("evaluateDid — DID データ未整備時のフェイルセーフ（Sprint 6）", () => {
+  it("候補データが null（未読込）なら green ではなく unknown", () => {
+    const r = evaluateDid({ lat: 35.4278, lng: 133.3314 }, null);
+    expect(r.status).toBe("unknown");
+  });
+  it("候補データが空配列（読込済み・該当なし）なら green", () => {
+    const r = evaluateDid({ lat: 35.4278, lng: 133.3314 }, []);
+    expect(r.status).toBe("green");
+  });
+});

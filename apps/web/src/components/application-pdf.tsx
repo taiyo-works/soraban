@@ -9,6 +9,7 @@ import {
   View,
 } from "@react-pdf/renderer";
 import {
+  AIRSPACE_DETERMINATION_LABEL,
   getCategoryDefinition,
   PROCEDURES_VERIFIED_AT,
   REQUIRED_PROCEDURE_KIND_LABEL,
@@ -69,12 +70,14 @@ const COLOR = {
 // カテゴリー → 強調色。III（レベル4）は赤で最も強く。
 const CATEGORY_ACCENT: Record<DiagnosisCategory, string> = {
   I: COLOR.signalGreen,
+  needs_verification: COLOR.signalAmber,
   II_A: COLOR.brand,
   II_B_eligible: COLOR.brand,
   III_level4: COLOR.signalRed,
 };
 const CATEGORY_HEADLINE: Record<DiagnosisCategory, string> = {
   I: "カテゴリー I（特定飛行に非該当）",
+  needs_verification: "要確認（DID 等の空域該当が未確認）",
   II_A: "カテゴリー II（IIA 相当・申請が必要）",
   II_B_eligible: "カテゴリー II（IIB 相当・申請を不要化できる可能性）",
   III_level4: "カテゴリー III（レベル4・第三者上空）",
@@ -380,6 +383,14 @@ export const ApplicationPdfDocument = ({
             {CATEGORY_HEADLINE[diagnosis.category]}
           </Text>
           <Text style={styles.categoryNote}>{diagnosis.categoryNote}</Text>
+          <Text style={styles.categoryNote}>
+            DID（人口集中地区）: {AIRSPACE_DETERMINATION_LABEL[diagnosis.didStatus ?? "unverified"]}
+          </Text>
+          {(diagnosis.verificationNotes ?? []).map((n) => (
+            <Text key={n} style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
+              ※ 要確認: {n}
+            </Text>
+          ))}
           {diagnosis.category === "III_level4" ? (
             <Text style={[styles.categoryNote, { color: COLOR.signalRed, fontWeight: 700 }]}>
               ※ 単純な飛行許可・承認の申請では実施できません。一等無人航空機操縦士 ＋ 第一種機体認証が必須です。
