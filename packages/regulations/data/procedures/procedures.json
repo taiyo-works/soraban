@@ -184,6 +184,20 @@
       "leadTimeBusinessDays": 0,
       "verifiedAt": "2026-10-14T00:00:00+09:00",
       "note": "申請書に第三者賠償責任保険の記載が必須です。飛行時は付保状況・有効期間を必ず確認してください（国交省 2025-09-10 お知らせ）。"
+    },
+    {
+      "id": "small-drone-law-consent-notice",
+      "kind": "facility_consent_notice",
+      "title": "施設管理者の同意 ＋ 都道府県公安委員会への事前通報（飛行の 48 時間前まで）",
+      "system": "都道府県公安委員会",
+      "systemUrl": "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
+      "legalBasis": "重要施設の周辺地域の上空における小型無人機等の飛行の禁止に関する法律（平成28年法律第9号。令和8年法律第47号による改正後）第10条 — 対象施設の管理者の同意を得た飛行と、都道府県公安委員会への事前通報（項・号の番号は要再確認）",
+      "sourceUrl": "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
+      "needsReverify": true,
+      "note": "対象施設の周辺地域（敷地及びその周囲おおむね 1,000m）で飛行する場合、施設管理者の同意を得て、飛行開始の 48 時間前までに管轄警察署を経由して都道府県公安委員会へ通報します（同意を証明する書面の写しを添付）。海域では管区海上保安本部長への通報も必要です。期限は時間で数え、開庁日計算の対象ではありません。100g 未満の機体も対象です。"
     }
   ]
 }

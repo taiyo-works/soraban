@@ -1,7 +1,9 @@
 import type { LatLng } from "@soraban/geo";
 import type {
   AirspaceDeterminationStatus,
+  AmendmentRef,
   ApplicationDiagnosis,
+  DatasetRef,
   PrefillField,
   SpecificFlightFlag,
 } from "@soraban/regulations";
@@ -26,6 +28,12 @@ export type DiagnoseResponse = ApplicationDiagnosis & {
   readonly autoDidStatus: AirspaceDeterminationStatus;
   /** 診断に使った最終フラグ集合（空域＋方法）。マニュアル骨子の生成根拠。 */
   readonly flags: readonly SpecificFlightFlag[];
+  /** 判定に使ったデータセット（名称・基準年・確認日）。Sprint 7 より前の応答には無い。 */
+  readonly datasets?: readonly DatasetRef[];
+  /** 反映済みの法令改正。 */
+  readonly amendments?: readonly AmendmentRef[];
+  /** 小型無人機等飛行禁止法の周辺地域（red／yellow）に該当するか。 */
+  readonly smallDroneLawTriggered?: boolean;
 };
 
 export type DiagnoseInput = {

@@ -300,10 +300,9 @@ describe("evaluateMihoBase", () => {
   it("flags red at the airbase center", () => {
     expect(evaluateMihoBase(MIHO_AIRBASE_CENTER).status).toBe<RegulationStatus>("red");
   });
-  it("flags yellow within 1.5 km", () => {
-    // 中心から 0.5°/3600 ≒ 14m 程度では red のままなので 1km ほど東へずらす。
+  it("中心から東へ約 1km（旧実装では yellow）は 1,000m 周辺地域として red（Sprint 7）", () => {
     const east1km = { lat: MIHO_AIRBASE_CENTER.lat, lng: MIHO_AIRBASE_CENTER.lng + 0.011 };
-    expect(evaluateMihoBase(east1km).status).toBe<RegulationStatus>("yellow");
+    expect(evaluateMihoBase(east1km).status).toBe<RegulationStatus>("red");
   });
   it("flags green far away", () => {
     const r = evaluateMihoBase({ lat: 35.0, lng: 135.0 });
@@ -320,6 +319,8 @@ describe("computeOverall", () => {
     summary: "s",
     clauseGraph: { main: { text: "", effect: "permit" }, exceptions: [], conditions: [] },
     confidence: { geometric: "low", extraction: "low", verifiedAt: "2026-01-01" },
+    datasets: [],
+    amendments: [],
     status,
     note: "",
   });

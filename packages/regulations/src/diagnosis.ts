@@ -11,6 +11,8 @@
 //   - 機体重量 未指定／不明時は「厳しい側」に倒す（フェイルセーフ）。
 //     100g 以上前提の航空法系手続きを表示する。
 
+import type { DidDetail } from "./core";
+import { normalizeDatasetKeys } from "./evidence";
 import proceduresData from "../data/procedures/procedures.json";
 import categoriesData from "../data/categories/categories.json";
 import { subtractBusinessDays } from "./business-days";
@@ -76,9 +78,10 @@ export type RequiredProcedureKind =
   | "flight_plan_report"
   | "flight_logbook"
   | "insurance"
-  | "ordinance_coordination";
+  | "ordinance_coordination"
+  | "facility_consent_notice";
 
-export type ProcedureSystem = "DIPS2.0" | "DRS" | "条例（各管理者）";
+export type ProcedureSystem = "DIPS2.0" | "DRS" | "条例（各管理者）" | "都道府県公安委員会";
 
 export type RequiredProcedure = {
   readonly id: string;
@@ -172,6 +175,8 @@ export type ApplicationDiagnosis = {
   readonly isSpecificFlight: boolean;
   /** DID（人口集中地区）上空の該当状況（三値）。未確認は「申請不要」と扱わない。 */
   readonly didStatus: AirspaceDeterminationStatus;
+  /** DID 判定の詳細（「非該当（工業専用地域）」「除外未確認」の区別）。地点判定由来。 */
+  readonly didDetail?: DidDetail;
   /** 要確認事項（DID 未確認・25kg 以上 等）。UI／PDF に表示する。 */
   readonly verificationNotes: readonly string[];
   /** 免責文（DEFAULT_DISCLAIMER を本機能向けに拡張） */
@@ -190,12 +195,14 @@ const ALL_PROCEDURE_KINDS: ReadonlySet<RequiredProcedureKind> = new Set([
   "flight_logbook",
   "insurance",
   "ordinance_coordination",
+  "facility_consent_notice",
 ]);
 
 const ALL_SYSTEMS: ReadonlySet<ProcedureSystem> = new Set([
   "DIPS2.0",
   "DRS",
   "条例（各管理者）",
+  "都道府県公安委員会",
 ]);
 
 type RawProcedure = {
@@ -423,6 +430,13 @@ export type DeriveDiagnosisInput = {
    * 未指定は後方互換のため flags のみで判断する（API は常に指定する）。
    */
   readonly didStatus?: AirspaceDeterminationStatus;
+  /** 地点判定由来の DID 判定の詳細（表示用。カテゴリーには影響しない）。 */
+  readonly didDetail?: DidDetail;
+  /**
+   * 小型無人機等飛行禁止法の対象施設の周辺地域（red／yellow）に該当するか。
+   * true のとき「施設管理者の同意＋公安委員会への事前通報」を手続きに加える（重量に関係なく）。
+   */
+  readonly smallDroneLawTriggered?: boolean;
 };
 
 const isHeavyDrone = (droneWeightG: number | undefined): boolean =>
@@ -514,6 +528,10 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
       for (const id of CROSS_CUTTING_PROCEDURE_IDS) pushUnique(proc(id));
     }
   }
+  // 小型無人機等飛行禁止法は航空法と別系統で、100g 未満の機体も対象（重量で除外しない）。
+  if (input.smallDroneLawTriggered === true) {
+    pushUnique(proc(SMALL_DRONE_LAW_PROCEDURE_ID));
+  }
 
   const didStatus = resolveDidStatus(flags, input.didStatus);
   const category = classifyCategory(flags, isRegulated, input, didStatus);
@@ -572,9 +590,52 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
     deadlines,
     isSpecificFlight,
     didStatus,
+    ...(input.didDetail !== undefined ? { didDetail: input.didDetail } : {}),
     verificationNotes,
     disclaimer: DIAGNOSIS_DISCLAIMER,
   };
+};
+
+/** 飛行禁止法の手続き（施設管理者の同意＋公安委員会への事前通報）の id。 */
+export const SMALL_DRONE_LAW_PROCEDURE_ID = "small-drone-law-consent-notice";
+
+/**
+ * 判定由来の空域フラグとユーザー指定（プリセットの curated 値を含む）の空域フラグを合流する。
+ * エンジンの DID 判定が「該当」「非該当」のときは、ユーザー指定の airspace_did を採用しない
+ * （curated フラグはエンジンが「未確認」のときの補完に限る。Sprint 7）。
+ */
+export const mergeAirspaceFlags = (params: {
+  readonly derivedFlags: readonly SpecificFlightFlag[];
+  readonly userFlags: readonly SpecificFlightFlag[];
+  readonly autoDidStatus: AirspaceDeterminationStatus;
+}): readonly SpecificFlightFlag[] => {
+  const user =
+    params.autoDidStatus === "unverified"
+      ? params.userFlags
+      : params.userFlags.filter((f) => f !== "airspace_did");
+  return Array.from(new Set<SpecificFlightFlag>([...params.derivedFlags, ...user]));
+};
+
+/** 地点判定の DID 規制から判定の詳細を取り出す（無ければ undefined）。 */
+export const deriveDidDetailFromRegulations = (
+  regulations: readonly { readonly id: string; readonly didDetail?: DidDetail }[],
+): DidDetail | undefined => regulations.find((r) => r.id === "aviation-law-did")?.didDetail;
+
+/**
+ * DID 三値の表示文言。非該当のうち工業専用地域による除外は「非該当（工業専用地域）」と区別する。
+ * 該当のうち除外未確認は「該当（工業専用地域の除外：未確認）」と示す。
+ */
+export const formatDidDetermination = (
+  status: AirspaceDeterminationStatus,
+  detail?: DidDetail,
+): string => {
+  if (status === "not_applicable" && detail === "industrial_exclusive") {
+    return "非該当（工業専用地域）";
+  }
+  if (status === "applicable" && detail === "in_did_exclusion_unverified") {
+    return "該当（工業専用地域の除外：未確認）";
+  }
+  return AIRSPACE_DETERMINATION_LABEL[status];
 };
 
 // 既存 RegulationCheckResult の空域フラグ（DID・空港）から SpecificFlightFlag を抽出する。
@@ -617,6 +678,7 @@ export const REQUIRED_PROCEDURE_KIND_LABEL: Readonly<
   flight_logbook: "飛行日誌",
   insurance: "保険",
   ordinance_coordination: "条例協議",
+  facility_consent_notice: "同意・事前通報",
 };
 
 export type DiagnosisEvidencePayloadInput = {
@@ -635,6 +697,8 @@ export type DiagnosisEvidencePayloadInput = {
   readonly procedureIds: readonly string[];
   /** DID 該当状況（三値）。未指定は null として正規化。 */
   readonly didStatus?: AirspaceDeterminationStatus;
+  /** 判定に使ったデータセット（ID と確認日）。データ更新で証跡 ID が変わる。 */
+  readonly datasets?: readonly { readonly id: string; readonly verifiedAt: string }[];
 };
 
 /**
@@ -666,6 +730,7 @@ export const buildDiagnosisEvidencePayload = (
       did: input.didStatus ?? null,
       ver: PROCEDURES_VERIFIED_AT || null,
     },
+    ds: normalizeDatasetKeys(input.datasets ?? []),
   });
 };
 

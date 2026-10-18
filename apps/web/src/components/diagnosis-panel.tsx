@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   buildFlightManualDraft,
   getCategoryDefinition,
-  AIRSPACE_DETERMINATION_LABEL,
+  formatDidDetermination,
   toJstIsoDate,
   PROCEDURES_VERIFIED_AT,
   type DiagnosisCategory,
@@ -241,7 +241,7 @@ export function DiagnosisPanel({
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{diagnosis.categoryNote}</p>
             <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute" data-testid="diagnosis-did-status">
-              DID（人口集中地区）: {AIRSPACE_DETERMINATION_LABEL[diagnosis.didStatus ?? "unverified"]}
+              DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
             </p>
             {(diagnosis.verificationNotes ?? []).length > 0 ? (
               <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">

@@ -7,6 +7,7 @@ import type { LatLng } from "@soraban/geo";
 import type {
   AirspaceDeterminationStatus,
   DiagnosisCategory,
+  DidDetail,
   FlightContext,
   ManualChoice,
   RegulationStatus,
@@ -53,6 +54,8 @@ export type SavedDiagnosisSummary = {
   readonly procedureCount: number;
   /** DID 該当の三値（旧形式エントリには無い）。 */
   readonly didStatus?: AirspaceDeterminationStatus;
+  /** DID 判定の詳細（「非該当（工業専用地域）」等の区別。Sprint 7 以降のエントリのみ）。 */
+  readonly didDetail?: DidDetail;
 };
 
 // SavedCheck: 履歴 1 エントリ。完全な RegulationCheckResult ではなく
@@ -355,3 +358,100 @@ export const getHistorySnapshot = (): readonly SavedCheck[] => {
 };
 
 export const getHistoryServerSnapshot = (): readonly SavedCheck[] => EMPTY;
+
+// ============================================================
+// 履歴からの復元計画（Sprint 7: 旧形式・旧規制 ID の互換）
+// ============================================================
+
+/**
+ * Sprint 6 までの規制 ID・手続き ID を現行の ID に読み替える表。
+ * 復元時に完了チェック（completedProcedureIds）等へ旧 ID が含まれていても例外にしない。
+ */
+export const LEGACY_ID_ALIASES: Readonly<Record<string, string>> = {
+  // 規制 ID：美保基地のみ → 飛行禁止法の対象施設一般（Sprint 7）
+  "miho-airbase-no-fly": "small-drone-law",
+};
+
+const ALL_FLAGS: ReadonlySet<string> = new Set([
+  "airspace_airport",
+  "airspace_150m",
+  "airspace_did",
+  "airspace_emergency",
+  "method_night",
+  "method_bvlos",
+  "method_30m",
+  "method_event",
+  "method_dangerous",
+  "method_drop",
+]);
+
+const sanitizeFlags = (v: unknown): SpecificFlightFlag[] =>
+  Array.isArray(v)
+    ? v.filter((f): f is SpecificFlightFlag => typeof f === "string" && ALL_FLAGS.has(f))
+    : [];
+
+const sanitizeIds = (v: unknown): string[] =>
+  Array.isArray(v)
+    ? Array.from(
+        new Set(
+          v
+            .filter((x): x is string => typeof x === "string" && x.length > 0)
+            .map((x) => LEGACY_ID_ALIASES[x] ?? x),
+        ),
+      )
+    : [];
+
+const pick = <T extends string>(v: unknown, allowed: readonly T[], fallback: T): T =>
+  typeof v === "string" && (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
+
+export type RestorePlan = {
+  readonly loc: LatLng;
+  readonly ctx?: FlightContext;
+  readonly methodFlags: readonly SpecificFlightFlag[];
+  readonly userAirspaceFlags: readonly SpecificFlightFlag[];
+  readonly didConfirmedNotApplicable: boolean;
+  readonly plannedDate: string;
+  readonly accessMode: "" | "yes" | "no_third_party";
+  readonly bvlosObserver: "" | "with" | "without";
+  readonly manualChoice: ManualChoice;
+  readonly completedProcedureIds: readonly string[];
+};
+
+/**
+ * 履歴エントリから復元に必要な値を組み立てる純関数。
+ * 旧形式（Sprint 6 以前の soraban:history:v1、旧規制 ID・未知の値を含む）でも例外を出さず、
+ * 不正値は既定値に倒す。UI（regulation-checker）の restoreFromHistory はこの結果を state に戻す。
+ */
+export const buildRestorePlan = (entry: SavedCheck): RestorePlan => {
+  const input = (entry.diagnosisInput ?? {}) as Record<string, unknown>;
+  // 新形式はユーザー指定分のみ。旧形式（userAirspaceFlags なし）は当該地点の airspaceFlags をユーザー指定扱い。
+  const userAirspace =
+    input["userAirspaceFlags"] !== undefined
+      ? sanitizeFlags(input["userAirspaceFlags"])
+      : sanitizeFlags(input["airspaceFlags"]);
+  const plannedDate =
+    typeof input["plannedDate"] === "string" ? (input["plannedDate"] as string) : "";
+  const ctx =
+    entry.ctx && typeof entry.ctx === "object"
+      ? {
+          ...(typeof entry.ctx.droneWeightG === "number" ? { droneWeightG: entry.ctx.droneWeightG } : {}),
+          ...(Array.isArray(entry.ctx.pilotPermits)
+            ? { pilotPermits: entry.ctx.pilotPermits.filter((p) => typeof p === "string") }
+            : {}),
+          ...(typeof entry.ctx.purpose === "string" ? { purpose: entry.ctx.purpose } : {}),
+          ...(typeof entry.ctx.droneClass === "string" ? { droneClass: entry.ctx.droneClass } : {}),
+        }
+      : undefined;
+  return {
+    loc: { lat: entry.loc.lat, lng: entry.loc.lng },
+    ...(ctx && Object.keys(ctx).length > 0 ? { ctx } : {}),
+    methodFlags: sanitizeFlags(input["methodFlags"]),
+    userAirspaceFlags: userAirspace,
+    didConfirmedNotApplicable: input["didConfirmedNotApplicable"] === true,
+    plannedDate,
+    accessMode: pick(input["accessMode"], ["", "yes", "no_third_party"] as const, ""),
+    bvlosObserver: pick(input["bvlosObserver"], ["", "with", "without"] as const, ""),
+    manualChoice: pick(input["manualChoice"], ["standard", "custom"] as const, "custom"),
+    completedProcedureIds: sanitizeIds(input["completedProcedureIds"]),
+  };
+};

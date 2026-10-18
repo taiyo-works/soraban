@@ -2,6 +2,7 @@ import {
   CONFIDENCE_LABEL,
   formatMachineCondition,
   summarizeConfidence,
+  type DidDetail,
   type RegulationWithStatus,
 } from "@soraban/regulations";
 
@@ -38,12 +39,26 @@ const sourceTone = {
   市町村: "border-rule text-ink-soft",
 } as const;
 
+// DID の判定詳細の表示（「非該当（工業専用地域）」「除外未確認」を区別する）。
+const DID_DETAIL_LABEL: Readonly<Record<DidDetail, string>> = {
+  no_data: "DID：未確認（データなし）",
+  outside_did: "DID：非該当",
+  industrial_exclusive: "DID：非該当（工業専用地域）",
+  in_did: "DID：該当",
+  in_did_near_industrial_boundary: "DID：該当（工業専用地域の境界付近）",
+  in_did_exclusion_unverified: "DID：該当（工業専用地域の除外：未確認）",
+};
+
 export function RegulationCard({ regulation }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
   return (
-    <article className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40">
+    <article
+      data-testid={`regulation-card-${regulation.id}`}
+      data-status={regulation.status}
+      className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40"
+    >
       <div className="flex items-center gap-2">
         <span
           className={`inline-flex items-center border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider ${sourceTone[regulation.source]}`}
@@ -63,6 +78,11 @@ export function RegulationCard({ regulation }: Props) {
       <p className="text-xs leading-relaxed text-ink-soft">
         {regulation.summary}
       </p>
+      {regulation.didDetail ? (
+        <p data-testid="did-detail" className="text-xs font-medium text-ink">
+          {DID_DETAIL_LABEL[regulation.didDetail]}
+        </p>
+      ) : null}
       <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
         <span className="eyebrow !text-[9px]">この地点</span>{" "}
         <span className="text-ink-soft">{regulation.note}</span>
@@ -104,6 +124,41 @@ export function RegulationCard({ regulation }: Props) {
           </ul>
         </details>
       ) : null}
+      {/* データ出典と確認日（Sprint 7）・反映済みの改正 */}
+      <div
+        data-testid="regulation-datasets"
+        className="border-l border-rule pl-3 text-[11px] leading-relaxed text-ink-mute"
+      >
+        <p className="eyebrow !text-[9px]">使用データ</p>
+        <ul className="mt-0.5 flex flex-col gap-0.5">
+          {regulation.datasets.map((d) => (
+            <li key={d.id} className="text-ink-soft">
+              {d.name}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
+            </li>
+          ))}
+        </ul>
+        {regulation.amendments.length > 0 ? (
+          <>
+            <p className="eyebrow mt-1.5 !text-[9px]">反映済みの改正</p>
+            <ul className="mt-0.5 flex flex-col gap-0.5">
+              {regulation.amendments.map((a) => (
+                <li key={a.id} className="text-ink-soft">
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-700 underline-offset-2 hover:underline"
+                  >
+                    {a.title}
+                  </a>
+                  （施行・適用 {a.effectiveDate}）
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </div>
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
         {regulation.url ? (
           <a

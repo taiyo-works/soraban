@@ -10,7 +10,9 @@ Soraban の規制データ（DID / 空港 / 都市公園）を国土数値情報
 
 | スクリプト | 用途 | 出力 |
 |---|---|---|
-| `fetch-did.sh` | 国土数値情報 A16-15「人口集中地区」を都道府県別に分割 | `data/did/by-pref/pref-{code}.geojson` |
+| `build-did-r2.mjs` | **(Sprint 7 現行)** 国土数値情報 A16（令和2年）の GeoJSON から鳥取県・島根県の同梱データを作り、`src/data-bundle/did-bundle.ts` を再生成（単純化なし・小数 6 桁・10MB 上限） | `data/did/r2/pref-{code}.json` |
+| `build-industrial-exclusive.mjs` | **(Sprint 7)** 市町村の用途地域 GeoJSON から工業専用地域を取り出し、`src/data-bundle/industrial-bundle.ts` を再生成 | `data/industrial-exclusive/by-muni/{muniCode}.json` |
+| `fetch-did.sh` | （旧手順）国土数値情報 A16-15「人口集中地区」（平成27年）を都道府県別に分割。判定には使わない | `data/did/by-pref/pref-{code}.geojson` |
 | `fetch-airports.sh` | 国土数値情報 C28-20「空港」のうち供用中のみ抽出 | `data/airports/airports.geojson` |
 | `fetch-parks.sh` | （旧経路）国土数値情報 N06「都市公園」を市町村別に分割。**P13/N06 は 2011 年版で更新停止 + 非商用ライセンスのため Phase 1 では非推奨**。OSM 経路を優先 | `data/parks/by-muni/{muniCode}.json` |
 | `fetch-parks-osm.mjs` | **(現行)** OpenStreetMap Overpass API から `leisure=park` を 12 市町村分取得 | `data/parks/by-muni-osm/{muniCode}.json` (gitignore) |

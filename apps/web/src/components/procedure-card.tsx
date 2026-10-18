@@ -29,6 +29,7 @@ const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
   "DIPS2.0": "border-brand-700 text-brand-700 bg-brand-50",
   DRS: "border-ink text-ink bg-paper-soft",
   "条例（各管理者）": "border-rule text-ink-soft bg-paper-soft",
+  都道府県公安委員会: "border-signal-red text-signal-red bg-paper-soft",
 };
 
 export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: Props) {
@@ -47,7 +48,11 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
           {procedure.system}
         </span>
         <span className="text-[11px] text-ink-mute">{kindLabel}</span>
-        {procedure.waivableByIIB ? (
+        {procedure.kind === "facility_consent_notice" ? (
+          <span className="ml-auto inline-flex items-center gap-1 border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+            航空法とは別系統（飛行禁止法）
+          </span>
+        ) : procedure.waivableByIIB ? (
           <span className="ml-auto inline-flex items-center gap-1 border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-current" />
             IIB 相当で不要化可

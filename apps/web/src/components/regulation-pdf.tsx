@@ -12,8 +12,11 @@ import type { LatLng } from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
+  ALL_AMENDMENTS,
   formatMachineCondition,
   shouldWarnConfidence,
+  type AmendmentRef,
+  type DatasetRef,
   type FlightContext,
   type RegulationCheckResult,
 } from "@soraban/regulations";
@@ -256,6 +259,23 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0.5,
     borderLeftColor: COLOR.rule,
   },
+  dataLine: {
+    fontSize: 7,
+    lineHeight: 1.45,
+    color: COLOR.inkMute,
+    marginTop: 3,
+  },
+  sourcesBox: {
+    marginTop: 10,
+    padding: 8,
+    borderWidth: 0.5,
+    borderColor: COLOR.rule,
+  },
+  sourcesTitle: {
+    fontSize: 8,
+    fontWeight: 700,
+    marginBottom: 3,
+  },
   appliedBox: {
     marginTop: 4,
     padding: 6,
@@ -356,6 +376,19 @@ const PERMIT_LABEL: Record<string, string> = {
   facility_manager: "施設管理者",
   facility_manager_and_pref_pubsafety: "施設管理者+県公安委員会",
   bunkacho_or_kyoiku: "文化庁・教育委員会",
+};
+
+const uniqueDatasets = (result: RegulationCheckResult): readonly DatasetRef[] => {
+  const map = new Map<string, DatasetRef>();
+  for (const r of result.regulations) for (const d of r.datasets ?? []) map.set(d.id, d);
+  return Array.from(map.values());
+};
+
+// 判定結果に出てくる改正を施行日順に（判定結果に無くても全改正を示す）。
+const uniqueAmendments = (result: RegulationCheckResult): readonly AmendmentRef[] => {
+  const ids = new Set(result.regulations.flatMap((r) => (r.amendments ?? []).map((a) => a.id)));
+  const listed = ALL_AMENDMENTS.filter((a) => ids.has(a.id));
+  return listed.length > 0 ? listed : ALL_AMENDMENTS;
 };
 
 export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
@@ -495,6 +528,21 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{reg.summary}</Text>
             <Text style={styles.regNote}>{reg.note}</Text>
+            <Text style={styles.dataLine}>
+              使用データ：
+              {reg.datasets
+                .map(
+                  (d) =>
+                    `${d.name}${d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} 確認日 ${d.verifiedAt}`,
+                )
+                .join(" / ")}
+            </Text>
+            {reg.amendments.length > 0 ? (
+              <Text style={styles.dataLine}>
+                反映済みの改正：
+                {reg.amendments.map((a) => `${a.title}（施行・適用 ${a.effectiveDate}）`).join(" / ")}
+              </Text>
+            ) : null}
             {reg.appliedExceptions && reg.appliedExceptions.length > 0 ? (
               <View style={styles.appliedBox}>
                 <Text style={styles.appliedTitle}>✓ 適用された例外節</Text>
@@ -512,6 +560,23 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             ) : null}
           </View>
         ))}
+
+        {/* DATA SOURCES（Sprint 7）: 判定に使ったデータと確認日、反映済みの改正 */}
+        <View style={styles.sourcesBox} wrap={false}>
+          <Text style={styles.sourcesTitle}>データ出典と確認日</Text>
+          {uniqueDatasets(result).map((d) => (
+            <Text key={d.id} style={styles.dataLine}>
+              ・{d.name}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} — 確認日 {d.verifiedAt}
+            </Text>
+          ))}
+          <Text style={[styles.sourcesTitle, { marginTop: 6 }]}>反映済みの法令改正</Text>
+          {uniqueAmendments(result).map((a) => (
+            <Text key={a.id} style={styles.dataLine}>
+              ・{a.title} — 施行・適用 {a.effectiveDate}
+            </Text>
+          ))}
+        </View>
 
         {/* DISCLAIMER */}
         <Text style={styles.disclaimer}>

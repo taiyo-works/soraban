@@ -13,7 +13,8 @@ import {
   shouldWarnConfidence,
   FLIGHT_METHOD_FLAGS,
   AIRSPACE_FLAGS,
-  AIRSPACE_DETERMINATION_LABEL,
+  formatDidDetermination,
+  mergeAirspaceFlags,
   SPECIFIC_FLIGHT_FLAG_LABEL,
   DIAGNOSIS_DISCLAIMER,
   type DiagnosisCategory,
@@ -28,6 +29,7 @@ import { searchAddress, type GeocodeResult } from "@/lib/geocode";
 import { checkLocation } from "@/lib/check";
 import { diagnoseLocation, type DiagnoseResponse } from "@/lib/diagnose";
 import {
+  buildRestorePlan,
   clearHistory,
   createHistoryRunId,
   getHistoryServerSnapshot,
@@ -140,7 +142,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "yonago-airport",
     name: "米子鬼太郎空港",
     loc: { lat: 35.4925, lng: 133.2364 },
-    hint: "空港敷地内 + 美保基地 red（航空法 × 小型無人機等飛行禁止法）",
+    hint: "空港敷地内 + 美保基地周辺 red（航空法 × 小型無人機等飛行禁止法）",
     group: "鳥取県",
     airspaceFlags: ["airspace_airport"],
   },
@@ -235,7 +237,7 @@ export function RegulationChecker() {
 
   // ── FlightContext: 機体・運航条件 ──
   // 空文字 = "未指定"。最も厳しい解釈になる。
-  // 数値 < 100 で 100g 未満例外がマッチし、DID/空港/美保 → green に降格。
+  // 数値 < 100 で 100g 未満例外がマッチし、DID/空港 → green に降格（飛行禁止法は 100g 未満も対象）。
   const [droneWeightInput, setDroneWeightInput] = useState<string>("");
   const [hasMlitPermit, setHasMlitPermit] = useState<boolean>(false);
   const [hasFacilityPermit, setHasFacilityPermit] = useState<boolean>(false);
@@ -289,9 +291,12 @@ export function RegulationChecker() {
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.derivedAirspaceFlags : [];
   const autoDidStatus =
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.autoDidStatus : undefined;
-  const effectiveAirspaceFlags: readonly SpecificFlightFlag[] = Array.from(
-    new Set<SpecificFlightFlag>([...autoAirspaceFlags, ...userAirspaceFlags]),
-  );
+  // エンジンの DID 判定が確定（該当・非該当）しているときは、プリセットの curated DID フラグを使わない。
+  const effectiveAirspaceFlags: readonly SpecificFlightFlag[] = mergeAirspaceFlags({
+    derivedFlags: autoAirspaceFlags,
+    userFlags: userAirspaceFlags,
+    autoDidStatus: autoDidStatus ?? "unverified",
+  });
 
   const doneMapToCompletedIds = (
     map: Readonly<Record<string, boolean>>,
@@ -372,27 +377,26 @@ export function RegulationChecker() {
   // 明示的 override 引数で runCheck / runDiagnose を即時実行する（state 反映前の古いクロージャ参照を防ぐ）。
   const restoreFromHistory = (entry: SavedCheck): void => {
     isRestoringRef.current = true;
+    // 旧形式・旧規制 ID を含むエントリでも例外を出さないよう、純関数で正規化してから戻す（Sprint 7）。
+    const plan = buildRestorePlan(entry);
     const weightStr =
-      entry.ctx?.droneWeightG !== undefined ? String(entry.ctx.droneWeightG) : "";
+      plan.ctx?.droneWeightG !== undefined ? String(plan.ctx.droneWeightG) : "";
     setDroneWeightInput(weightStr);
-    const permits = entry.ctx?.pilotPermits ?? [];
+    const permits = plan.ctx?.pilotPermits ?? [];
     setHasMlitPermit(permits.includes("mlit"));
     setHasFacilityPermit(permits.includes("facility_manager"));
     setHasParkPermit(permits.includes("park_manager"));
     setHasBunkachoPermit(permits.includes("bunkacho_or_kyoiku"));
-    setPurpose((entry.ctx?.purpose as typeof purpose) ?? "general");
+    setPurpose((plan.ctx?.purpose as typeof purpose) ?? "general");
 
-    const nextMethodFlags = entry.diagnosisInput?.methodFlags ?? [];
-    // 新形式はユーザー指定分のみ復元。旧形式（userAirspaceFlags なし）は当該地点の airspaceFlags を
-    // ユーザー指定扱いで復元する（同一地点なので別地点への持ち越しは起きない）。
-    const nextAirspaceFlags =
-      entry.diagnosisInput?.userAirspaceFlags ?? entry.diagnosisInput?.airspaceFlags ?? [];
-    const nextDidConfirmed = entry.diagnosisInput?.didConfirmedNotApplicable === true;
-    const nextPlannedDate = entry.diagnosisInput?.plannedDate ?? "";
-    const nextAccessMode = entry.diagnosisInput?.accessMode ?? "";
-    const nextBvlosObserver = entry.diagnosisInput?.bvlosObserver ?? "";
-    const nextManualChoice = entry.diagnosisInput?.manualChoice ?? "custom";
-    const nextCompletedIds = entry.diagnosisInput?.completedProcedureIds ?? [];
+    const nextMethodFlags = plan.methodFlags;
+    const nextAirspaceFlags = plan.userAirspaceFlags;
+    const nextDidConfirmed = plan.didConfirmedNotApplicable;
+    const nextPlannedDate = plan.plannedDate;
+    const nextAccessMode = plan.accessMode;
+    const nextBvlosObserver = plan.bvlosObserver;
+    const nextManualChoice = plan.manualChoice;
+    const nextCompletedIds = plan.completedProcedureIds;
 
     setMethodFlags(nextMethodFlags);
     setUserAirspaceFlags(nextAirspaceFlags);
@@ -402,7 +406,7 @@ export function RegulationChecker() {
     setBvlosObserver(nextBvlosObserver);
     setManualChoice(nextManualChoice);
     setDoneMap(completedIdsToDoneMap(nextCompletedIds));
-    applyLocation(entry.loc);
+    applyLocation(plan.loc);
 
     const restoredDiagInput: SavedDiagnosisInput = {
       methodFlags: nextMethodFlags,
@@ -417,15 +421,15 @@ export function RegulationChecker() {
     };
 
     const runId = startNewRun();
-    runCheck(entry.loc, entry.ctx ?? null, restoredDiagInput, runId);
-    void runDiagnose(entry.loc, {
+    runCheck(plan.loc, plan.ctx ?? null, restoredDiagInput, runId);
+    void runDiagnose(plan.loc, {
       userAirspaceFlags: nextAirspaceFlags,
       didConfirmedNotApplicable: nextDidConfirmed,
       methodFlags: nextMethodFlags,
       plannedDate: nextPlannedDate,
       accessMode: nextAccessMode,
       bvlosObserver: nextBvlosObserver,
-      droneWeightG: entry.ctx?.droneWeightG ?? null,
+      droneWeightG: plan.ctx?.droneWeightG ?? null,
       manualChoice: nextManualChoice,
       completedProcedureIds: nextCompletedIds,
     }, runId).finally(() => {
@@ -606,9 +610,11 @@ export function RegulationChecker() {
       setDiagnosis(res);
       setDiagnoseError(null);
       // 自動検出の空域フラグは state に書き戻さない（表示は diagnosis から導出）。
-      const effectiveAirspace = Array.from(
-        new Set<SpecificFlightFlag>([...res.derivedAirspaceFlags, ...effUserAirspace]),
-      );
+      const effectiveAirspace = mergeAirspaceFlags({
+        derivedFlags: res.derivedAirspaceFlags,
+        userFlags: effUserAirspace,
+        autoDidStatus: res.autoDidStatus,
+      });
       recordHistoryDiagnosis(runId, {
         diagnosisInput: buildDiagnosisInput({
           methodFlags: effMethodFlags,
@@ -627,6 +633,7 @@ export function RegulationChecker() {
           isSpecificFlight: res.isSpecificFlight,
           procedureCount: res.procedures.length,
           didStatus: res.didStatus,
+          ...(res.didDetail !== undefined ? { didDetail: res.didDetail } : {}),
         },
       });
     } catch (err) {
@@ -992,7 +999,7 @@ export function RegulationChecker() {
                 ) : null}
               </div>
               <span className="text-[10px] leading-tight text-ink-mute">
-                100g 未満は航空法上の無人航空機に非該当（DID / 空港 / 美保基地が対象外）
+                100g 未満は航空法上の無人航空機に非該当（DID / 空港が対象外。小型無人機等飛行禁止法は 100g 未満も対象）
               </span>
             </label>
 
@@ -1043,7 +1050,7 @@ export function RegulationChecker() {
                   set: setHasFacilityPermit,
                   key: "facility",
                   label: "施設管理者",
-                  desc: "県条例 / 美保基地",
+                  desc: "県条例 / 飛行禁止法（同意＋公安委員会への通報）",
                 },
                 {
                   state: hasBunkachoPermit,
@@ -1135,7 +1142,7 @@ export function RegulationChecker() {
                   <span
                     className={`font-medium ${autoDidStatus === "unverified" ? "text-signal-amber" : "text-ink"}`}
                   >
-                    {AIRSPACE_DETERMINATION_LABEL[autoDidStatus]}
+                    {formatDidDetermination(autoDidStatus, diagnosis?.didDetail)}
                   </span>
                   {autoDidStatus === "unverified"
                     ? "（DID データ未整備または判定不能。確認するまで要確認として扱います）"
@@ -1527,7 +1534,7 @@ export function RegulationChecker() {
                         {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · permit×${h.ctx.pilotPermits.length}` : ""}
                         {h.diagnosisSummary ? ` · ${catShort[h.diagnosisSummary.category] ?? h.diagnosisSummary.category}` : ""}
                         {h.diagnosisSummary?.didStatus
-                          ? ` · DID:${AIRSPACE_DETERMINATION_LABEL[h.diagnosisSummary.didStatus]}`
+                          ? ` · DID:${formatDidDetermination(h.diagnosisSummary.didStatus, h.diagnosisSummary.didDetail)}`
                           : ""}
                         {procCount !== undefined
                           ? completedCount > 0

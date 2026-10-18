@@ -87,6 +87,93 @@ export const pointInPolygon = (point: LatLng, polygon: Polygon): boolean => {
   return inside;
 };
 
+// ── 境界までの距離（Sprint 7: 飛行禁止法の敷地境界 1,000m・工業専用地域の内側余裕）──
+//
+// 判定地点を原点とする局所正距円筒図法（equirectangular）で平面に写し、
+// 各辺（線分）までの最短距離をメートルで返す。数 km 規模では誤差は 0.1% 未満。
+
+// haversineMeters と同じ球（半径 EARTH_RADIUS_M）に揃える（距離の基準を一致させるため）。
+const M_PER_DEG_LAT = (EARTH_RADIUS_M * Math.PI) / 180;
+
+const toLocalXY = (origin: LatLng, p: LatLng): { x: number; y: number } => ({
+  x: (p.lng - origin.lng) * M_PER_DEG_LAT * Math.cos(toRad(origin.lat)),
+  y: (p.lat - origin.lat) * M_PER_DEG_LAT,
+});
+
+const distanceToSegmentOrigin = (
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+): number => {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, -(a.x * dx + a.y * dy) / len2));
+  const px = a.x + t * dx;
+  const py = a.y + t * dy;
+  return Math.sqrt(px * px + py * py);
+};
+
+/** 地点からリング（閉じた多角形の外周）の辺までの最短距離（m）。内外は問わない。 */
+export const distanceToRingMeters = (point: LatLng, ring: Polygon): number => {
+  if (ring.length === 0) return Number.POSITIVE_INFINITY;
+  if (ring.length === 1) return haversineMeters(point, ring[0]!);
+  let min = Number.POSITIVE_INFINITY;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = toLocalXY(point, ring[j]!);
+    const b = toLocalXY(point, ring[i]!);
+    const d = distanceToSegmentOrigin(a, b);
+    if (d < min) min = d;
+  }
+  return min;
+};
+
+/**
+ * 穴あき多角形（rings[0] が外周、rings[1..] が穴）の内外判定。
+ * 外周の内側かつどの穴の内側でもなければ内側。
+ */
+export const pointInPolygonWithHoles = (
+  point: LatLng,
+  rings: readonly Polygon[],
+): boolean => {
+  const outer = rings[0];
+  if (!outer || !pointInPolygon(point, outer)) return false;
+  for (let i = 1; i < rings.length; i++) {
+    if (pointInPolygon(point, rings[i]!)) return false;
+  }
+  return true;
+};
+
+/** 穴あき多角形の境界（外周・穴のすべての辺）までの最短距離（m）。 */
+export const distanceToPolygonBoundaryMeters = (
+  point: LatLng,
+  rings: readonly Polygon[],
+): number => {
+  let min = Number.POSITIVE_INFINITY;
+  for (const r of rings) {
+    const d = distanceToRingMeters(point, r);
+    if (d < min) min = d;
+  }
+  return min;
+};
+
+/**
+ * 多角形（穴あり可）までの距離（m）。内側なら 0、外側なら境界までの最短距離。
+ */
+export const distanceToPolygonMeters = (
+  point: LatLng,
+  rings: readonly Polygon[],
+): number =>
+  pointInPolygonWithHoles(point, rings) ? 0 : distanceToPolygonBoundaryMeters(point, rings);
+
+/**
+ * 基準点から東西・南北にメートル単位でずらした点（局所正距円筒近似）。
+ * テストやバッファ描画用。距離 1〜2km 程度での誤差は数 cm。
+ */
+export const offsetMeters = (origin: LatLng, eastM: number, northM: number): LatLng => ({
+  lat: origin.lat + northM / M_PER_DEG_LAT,
+  lng: origin.lng + eastM / (M_PER_DEG_LAT * Math.cos(toRad(origin.lat))),
+});
+
 // Approximate circle as a polygon ring of `segments` points.
 // Uses local equirectangular projection — accurate enough for buffers
 // of a few km at mid-latitudes.

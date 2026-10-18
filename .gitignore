@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 .next/
+.next-*/
 .turbo/
 .DS_Store
 # macOS AppleDouble metadata (exFAT 等の non-HFS+ FS 上で発生)

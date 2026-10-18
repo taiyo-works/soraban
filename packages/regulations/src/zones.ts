@@ -23,11 +23,8 @@ export const MIHO_AIRBASE_CENTER: LatLng = {
   lng: 133.2361,
 };
 
-// 小型無人機等飛行禁止法の対象範囲（おおむね 300m）。
-export const MIHO_AIRBASE_RED_M = 300;
-
-// 空港周辺の進入表面・要確認エリアの簡易バッファ（1.5km）。
-export const MIHO_AIRBASE_YELLOW_M = 1500;
+// 飛行禁止法の判定（周辺地域おおむね 1,000m・敷地境界基準）は small-drone-law.ts と
+// data/small-drone-law/facilities.json に移した（Sprint 7）。旧 300m／1.5km の定数は廃止。
 
 export type Park = {
   readonly id: string;

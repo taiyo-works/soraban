@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { DID_DIR } from "@/server/regulation-data-dir";
+import { readDidBundleFile } from "@/server/regulation-data-dir";
 
+// 地図の DID レイヤー用。同梱データ（鳥取県・島根県の令和2年 DID）を GeoJSON で返す。
+// DID_DATA_DIR があればそちらを優先する。未整備の都道府県は 404。
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ pref: string }> },
@@ -11,20 +11,21 @@ export async function GET(
   if (!/^\d{2}$/.test(pref)) {
     return NextResponse.json({ error: "invalid pref code" }, { status: 400 });
   }
-  const file = path.join(DID_DIR, `pref-${pref}.geojson`);
-  try {
-    const content = await fs.readFile(file, "utf8");
-    return new NextResponse(content, {
-      status: 200,
-      headers: {
-        "content-type": "application/geo+json",
-        "cache-control": "public, max-age=86400",
-      },
-    });
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      return NextResponse.json({ error: "not found" }, { status: 404 });
-    }
-    throw err;
-  }
+  const file = await readDidBundleFile(pref);
+  if (!file) return NextResponse.json({ error: "not found" }, { status: 404 });
+  const fc = {
+    type: "FeatureCollection",
+    features: file.features.map((f) => ({
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: f.rings },
+      properties: { muniCode: f.muniCode, muniName: f.muniName, baseYear: file.baseYear },
+    })),
+  };
+  return new NextResponse(JSON.stringify(fc), {
+    status: 200,
+    headers: {
+      "content-type": "application/geo+json",
+      "cache-control": "public, max-age=86400",
+    },
+  });
 }

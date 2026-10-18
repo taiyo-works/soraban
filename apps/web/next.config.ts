@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
   // バンドルに同梱する方針 (Turbopack ビルドは outputFileTracingIncludes を
   // 適用しないため、ランタイム fs 読みは使わない)。
   outputFileTracingRoot: repoRoot,
+
+  // E2E でフィクスチャ用の next dev を同時に起動するとき、.next のロックが衝突しないよう
+  // 出力先を環境変数で分けられるようにする（未設定は既定の .next）。
+  distDir: process.env["NEXT_DIST_DIR"] || ".next",
 };
 
 export default nextConfig;

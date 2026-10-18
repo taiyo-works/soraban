@@ -1,0 +1,103 @@
+{
+  "_note": "判定に使うデータセットの台帳（Sprint 7, spec §13.3.3）。各規制評価器の返り値はここの id を datasets として参照する。確認日（verifiedAt）を変えると証跡 ID が変わる。bundled=false は『台帳には載せたが本体データは未同梱』を表し、判定は縮退（未確認・未収録）に倒す。",
+  "datasets": [
+    {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "provider": "国土交通省 国土政策局（原典：総務省統計局 令和2年国勢調査 人口集中地区境界データ）",
+      "url": "https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A16-2020.html",
+      "license": "国土数値情報利用約款（1995年以降のデータは商用可。出典の明記が必要）",
+      "baseYear": 2020,
+      "version": "A16-20（2024年6月公開の2020年版）",
+      "acquiredAt": null,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）",
+      "coverage": "鳥取県（31）・島根県（32）。本体データは未同梱（作業環境から nlftp.mlit.go.jp に接続できず取得不可）。取得手順は data/did/README.md",
+      "bundled": false
+    },
+    {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "provider": "各市町（都市計画決定権者）／国土交通省 都市局（入手元は市町村ごとに data/industrial-exclusive/coverage.json に記録）",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "license": "市町村ごとに coverage.json に記録（未収録の市町村は該当なし）",
+      "baseYear": null,
+      "version": "収録範囲台帳 2026-10-19 版（収録済みの市町村なし）",
+      "acquiredAt": null,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）",
+      "coverage": "鳥取県・島根県の DID を含む市町村を台帳に列挙。ポリゴン収録済みの市町村はなし（全市町村で『除外：未確認』の縮退表示）",
+      "bundled": false
+    },
+    {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "provider": "防衛省・警察庁・鳥取県警察・島根県警察の公表資料を Soraban が構造化",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/shitei.html",
+      "license": "官公庁の公表資料（防衛省・警察庁・県警察のウェブサイト）を参照。位置は国土地理院 住所検索 API の検索結果",
+      "baseYear": 2026,
+      "version": "facilities.json 2026-10-19 版",
+      "acquiredAt": "2026-10-19",
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）",
+      "coverage": "鳥取県・島根県で指定を確認した施設のうち、位置を確認できたもの（詳細は data/small-drone-law/README.md）",
+      "bundled": true
+    },
+    {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）手描き seed",
+      "provider": "Soraban（公開地形図・空港要覧からの目視取り）",
+      "url": "https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-C28.html",
+      "license": "Soraban 作成（国土数値情報 C28 への置換予定）",
+      "baseYear": null,
+      "version": "airports.json（Phase 0/1 seed）",
+      "acquiredAt": "2026-05-14",
+      "verifiedAt": "2026-05-14",
+      "verifiedBy": "記録なし（Sprint 6 以前）",
+      "coverage": "出雲・米子・萩石見・隠岐・鳥取・但馬の 6 空港（敷地の概略矩形と中心点）",
+      "bundled": true
+    },
+    {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）手描き seed ＋ OpenStreetMap",
+      "provider": "Soraban 手描き seed ＋ OpenStreetMap contributors（Overpass API）",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "© OpenStreetMap contributors, ODbL（手描き部分は Soraban 作成）",
+      "baseYear": null,
+      "version": "data/parks/by-muni（2026-05-19 マージ版）",
+      "acquiredAt": "2026-05-19",
+      "verifiedAt": "2026-05-19",
+      "verifiedBy": "記録なし（Sprint 6 以前）",
+      "coverage": "鳥取市・米子市・倉吉市・境港市・八頭町・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市",
+      "bundled": true
+    },
+    {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）手描き seed",
+      "provider": "Soraban（文化庁 国指定文化財等データベース等を参照した手描き）",
+      "url": "https://kunishitei.bunka.go.jp/",
+      "license": "Soraban 作成",
+      "baseYear": null,
+      "version": "zones.ts ハードコード（Phase 1）",
+      "acquiredAt": "2026-04-30",
+      "verifiedAt": "2026-04-30",
+      "verifiedBy": "記録なし（Sprint 6 以前）",
+      "coverage": "鳥取市・米子市・倉吉市・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市",
+      "bundled": true
+    },
+    {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）手描き seed",
+      "provider": "Soraban（公開地図からの目視取り）",
+      "url": "https://www1.g-reiki.net/tottori/",
+      "license": "Soraban 作成",
+      "baseYear": null,
+      "version": "zones.ts ハードコード（Phase 1）",
+      "acquiredAt": "2026-04-30",
+      "verifiedAt": "2026-04-30",
+      "verifiedBy": "記録なし（Sprint 6 以前）",
+      "coverage": "鳥取県・島根県の 12 市町村の代表施設（中心点）",
+      "bundled": true
+    }
+  ]
+}

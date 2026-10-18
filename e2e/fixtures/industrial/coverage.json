@@ -1,0 +1,24 @@
+{
+ "_note": "テスト用フィクスチャ（Sprint 7 の E2E・統合テスト専用）。実在の DID・工業専用地域ではない。本番では使わない。",
+ "insideMarginM": 10,
+ "municipalities": [
+  {
+   "muniCode": "31202",
+   "muniName": "米子市",
+   "status": "not_recorded",
+   "didOverlap": "unverified",
+   "source": null,
+   "baseDate": null,
+   "checkedAt": "2026-10-19"
+  },
+  {
+   "muniCode": "31204",
+   "muniName": "境港市",
+   "status": "recorded",
+   "didOverlap": "overlap",
+   "source": "テスト用フィクスチャ",
+   "baseDate": "2026-04-01",
+   "checkedAt": "2026-10-19"
+  }
+ ]
+}

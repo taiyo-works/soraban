@@ -9,7 +9,8 @@ import {
   View,
 } from "@react-pdf/renderer";
 import {
-  AIRSPACE_DETERMINATION_LABEL,
+  ALL_AMENDMENTS,
+  formatDidDetermination,
   getCategoryDefinition,
   PROCEDURES_VERIFIED_AT,
   REQUIRED_PROCEDURE_KIND_LABEL,
@@ -384,7 +385,7 @@ export const ApplicationPdfDocument = ({
           </Text>
           <Text style={styles.categoryNote}>{diagnosis.categoryNote}</Text>
           <Text style={styles.categoryNote}>
-            DID（人口集中地区）: {AIRSPACE_DETERMINATION_LABEL[diagnosis.didStatus ?? "unverified"]}
+            DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
           </Text>
           {(diagnosis.verificationNotes ?? []).map((n) => (
             <Text key={n} style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
@@ -558,6 +559,23 @@ export const ApplicationPdfDocument = ({
             <Text style={styles.portalUrl}>https://www.ossportal.dips.mlit.go.jp/</Text>
             <Text style={styles.procMeta}>許可・承認／飛行計画通報／飛行日誌。</Text>
           </View>
+        </View>
+
+        {/* データ出典と確認日・反映済みの改正（Sprint 7） */}
+        <View style={styles.portalBox} wrap={false}>
+          <MonoText style={styles.portalLabel}>データ出典と確認日</MonoText>
+          {(diagnosis.datasets ?? []).map((d) => (
+            <Text key={d.id} style={styles.procMeta}>
+              ・{d.name}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} — 確認日 {d.verifiedAt}
+            </Text>
+          ))}
+          <MonoText style={[styles.portalLabel, { marginTop: 4 }]}>反映済みの法令改正</MonoText>
+          {((diagnosis.amendments ?? []).length > 0 ? diagnosis.amendments! : ALL_AMENDMENTS).map((a) => (
+            <Text key={a.id} style={styles.procMeta}>
+              ・{a.title} — 施行・適用 {a.effectiveDate}
+            </Text>
+          ))}
         </View>
 
         {/* ⑦ 免責 */}
