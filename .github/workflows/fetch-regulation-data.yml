@@ -149,7 +149,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive packages/regulations/data/sources.json packages/regulations/data/FETCH_REPORT.md packages/regulations/src/data-bundle
+          # 取得できなかったデータのディレクトリは存在しないことがあるため、存在するものだけ追加する
+          for p in packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive packages/regulations/data/sources.json packages/regulations/data/FETCH_REPORT.md packages/regulations/src/data-bundle; do
+            if [[ -e "$p" ]]; then git add -- "$p"; else echo "（なし）$p"; fi
+          done
+          git status --short
           if git diff --cached --quiet; then
             echo "変更なし（コミットしない）"
           else
