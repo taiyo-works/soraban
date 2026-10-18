@@ -113,9 +113,8 @@ test.describe("A. 小型無人機等飛行禁止法（本番相当サーバー�
 test.describe("B. DID データ（本番相当サーバー・DID_DATA_DIR なし）", () => {
   test("米子市役所は DID 該当（red）で未確認にならない／タイヨー通信本社は非該当（green）", async ({ page }) => {
     await page.goto("/");
-    // DID 本体データ（国土数値情報 A16 令和2年）が未同梱の間は判定が未確認に縮退するため、この確認はできない。
-    // 同梱（scripts/build-did-r2.mjs）した時点で自動的に有効になる。
-    test.fixme(!(await didBundled(page)), "DID 本体データ未同梱（data/did/README.md の取得手順を参照）");
+    // 同梱の DID（国土数値情報 A16 令和2年）が読めること自体も確かめる（未同梱なら失敗させる）。
+    expect(await didBundled(page)).toBe(true);
     await selectPreset(page, "米子市役所");
     await expect(card(page, "aviation-law-did")).toHaveAttribute("data-status", "red");
     await selectPreset(page, "タイヨー通信本社");
