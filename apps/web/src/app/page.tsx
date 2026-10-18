@@ -19,9 +19,6 @@ const formatMuniBreakdown = (
     .join(" + ");
 
 const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
-const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
-  .map(([name]) => name)
-  .join("・");
 const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
 const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
 const HERITAGE_BREAKDOWN = formatMuniBreakdown(

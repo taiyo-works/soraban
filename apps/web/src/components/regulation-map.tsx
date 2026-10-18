@@ -153,9 +153,9 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
   {
     key: "base",
-    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（赤＝敷地＋おおむね 1,000m の周辺地域〔いわゆるイエローゾーン〕／黄＝外側の要確認帯）`,
+    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（敷地＋おおむね 1,000m）`,
     source: `${datasetLegend(DATASET_IDS.smallDroneLawFacilities)}・敷地形状は概算`,
-    detail: "赤：敷地とその周囲おおむね 1,000m／黄：その外側の要確認帯（告示の区域図で確認）",
+    detail: "赤：敷地と周辺地域／黄：外側の要確認帯（色の意味は規制カードに記載）",
     swatch: "bg-rose-500/50 ring-2 ring-amber-500 rounded-full",
     layerIds: ["base-yellow-fill", "base-yellow-outline", "base-red-fill", "base-red-outline"],
   },

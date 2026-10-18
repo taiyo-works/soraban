@@ -21,6 +21,7 @@ import {
 } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { MonoText } from "./pdf-mono-text";
+import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 束ね PDF（申請支援サマリ）。既存 regulation-pdf.tsx の作法に合わせる:
 //   - 日本語グリフは self-host の Noto Sans JP（apps/web/public/fonts/*.ttf）を登録。
@@ -54,6 +55,9 @@ Font.register({
     { src: fontUrl("IBMPlexMono-Medium.ttf"), fontWeight: 500 },
   ],
 });
+
+// 日本語の行末に「-」が入らないよう、改行位置の扱いを差し替える（全 PDF 共通）。
+registerJapaneseLineBreaking();
 
 const COLOR = {
   paper: "#F5F2EA",
@@ -91,6 +95,8 @@ const SYSTEM_BORDER: Record<PrefillField["system"], string> = {
 };
 
 const styles = StyleSheet.create({
+  systemToneInk: { borderColor: COLOR.ink, color: COLOR.ink },
+  systemToneBrand: { borderColor: COLOR.brand, color: COLOR.brand },
   page: {
     padding: 36,
     paddingBottom: 48,
@@ -369,7 +375,7 @@ export const ApplicationPdfDocument = ({
           </View>
           {PROCEDURES_VERIFIED_AT ? (
             <View style={styles.metaCol}>
-              <Text style={styles.metaLabel}>制度データ検証日</Text>
+              <MonoText style={styles.metaLabel}>制度データ検証日</MonoText>
               <MonoText style={styles.metaValue}>
                 {PROCEDURES_VERIFIED_AT.slice(0, 10)}
               </MonoText>
@@ -383,7 +389,7 @@ export const ApplicationPdfDocument = ({
           <Text style={[styles.categoryHeadline, { color: accent }]}>
             {CATEGORY_HEADLINE[diagnosis.category]}
           </Text>
-          <Text style={styles.categoryNote}>{diagnosis.categoryNote}</Text>
+          <Text style={styles.categoryNote}>{keepSpaces(diagnosis.categoryNote)}</Text>
           <Text style={styles.categoryNote}>
             DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
           </Text>
@@ -417,25 +423,27 @@ export const ApplicationPdfDocument = ({
           diagnosis.procedures.map((p) => (
             <View key={p.id} style={styles.procBlock} wrap={false}>
               <View style={styles.procHeader}>
-                <Text
+                {/* 系統名に日本語（都道府県公安委員会・条例）を含むため、CJK を振り分ける MonoText で描く */}
+                <MonoText
                   style={[
                     styles.systemBadge,
-                    {
-                      borderColor: p.system === "DRS" ? COLOR.ink : COLOR.brand,
-                      color: p.system === "DRS" ? COLOR.ink : COLOR.brand,
-                    },
+                    p.system === "DRS" ? styles.systemToneInk : styles.systemToneBrand,
                   ]}
                 >
                   {p.system}
-                </Text>
+                </MonoText>
                 <Text style={styles.procKind}>{kindLabel(p)}</Text>
                 <Text style={styles.waivableBadge}>
-                  {p.waivableByIIB ? "IIB 相当で不要化可" : "IIA 相当・不要化不可"}
+                  {p.kind === "facility_consent_notice"
+                    ? "航空法とは別系統（飛行禁止法）"
+                    : p.waivableByIIB
+                      ? "IIB 相当で不要化可"
+                      : "IIA 相当・不要化不可"}
                 </Text>
               </View>
               <Text style={styles.procTitle}>{p.title}</Text>
-              {p.note ? <Text style={styles.procMeta}>{p.note}</Text> : null}
-              <Text style={styles.procMeta}>法的根拠: {p.legalBasis}</Text>
+              {p.note ? <Text style={styles.procMeta}>{keepSpaces(p.note)}</Text> : null}
+              <Text style={styles.procMeta}>法的根拠: {keepSpaces(p.legalBasis)}</Text>
               <View style={styles.procLinks}>
                 <MonoText>手続き（{p.system}）: {p.systemUrl}</MonoText>
                 <MonoText>出典: {p.sourceUrl}</MonoText>
@@ -581,7 +589,7 @@ export const ApplicationPdfDocument = ({
         {/* ⑦ 免責 */}
         <Text style={styles.disclaimer}>
           <Text style={{ fontWeight: 700 }}>免責 — </Text>
-          {diagnosis.disclaimer}
+          {keepSpaces(diagnosis.disclaimer)}
         </Text>
 
         {/* FOOTER（evidenceId を全ページに固定） */}

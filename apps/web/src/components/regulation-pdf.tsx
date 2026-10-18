@@ -21,6 +21,7 @@ import {
   type RegulationCheckResult,
 } from "@soraban/regulations";
 import { MonoText } from "./pdf-mono-text";
+import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
 // Helvetica で日本語が出ないため、Noto Sans JP / IBM Plex Mono を 2 ウェイトずつ使う。
@@ -63,6 +64,9 @@ Font.register({
     { src: fontUrl("IBMPlexMono-Medium.ttf"), fontWeight: 500 },
   ],
 });
+
+// 日本語の行末に「-」が入らないよう、改行位置の扱いを差し替える（全 PDF 共通）。
+registerJapaneseLineBreaking();
 
 // ── デザイントークンと整合する PDF 用カラー定義 ──
 const COLOR = {
@@ -537,8 +541,8 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
               </Text>
             </View>
             <Text style={styles.regTitle}>{reg.title}</Text>
-            <Text style={styles.regSummary}>{reg.summary}</Text>
-            <Text style={styles.regNote}>{reg.note}</Text>
+            <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
+            <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
             <View style={styles.dataGroup}>
               <Text style={styles.dataLine}>
                 使用データ：
@@ -594,7 +598,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
         {/* DISCLAIMER */}
         <Text style={styles.disclaimer}>
           <Text style={{ fontWeight: 700 }}>免責 — </Text>
-          {result.disclaimer}
+          {keepSpaces(result.disclaimer)}
         </Text>
 
         {/* FOOTER */}
