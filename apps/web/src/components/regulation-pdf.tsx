@@ -259,22 +259,33 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0.5,
     borderLeftColor: COLOR.rule,
   },
+  // 規制ブロック内の脚注（使用データ・反映済みの改正）。判定本文と罫線で区切る。
+  dataGroup: {
+    marginTop: 2,
+    paddingTop: 4,
+    borderTopWidth: 0.5,
+    borderTopColor: COLOR.rule,
+    borderTopStyle: "dashed",
+    flexDirection: "column",
+    gap: 1,
+  },
   dataLine: {
     fontSize: 7,
     lineHeight: 1.45,
     color: COLOR.inkMute,
-    marginTop: 3,
   },
   sourcesBox: {
-    marginTop: 10,
-    padding: 8,
+    marginTop: 12,
+    padding: 10,
     borderWidth: 0.5,
     borderColor: COLOR.rule,
+    flexDirection: "column",
+    gap: 1,
   },
-  sourcesTitle: {
-    fontSize: 8,
-    fontWeight: 700,
-    marginBottom: 3,
+  sourcesLine: {
+    fontSize: 7.5,
+    lineHeight: 1.5,
+    color: COLOR.inkSoft,
   },
   appliedBox: {
     marginTop: 4,
@@ -528,21 +539,23 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{reg.summary}</Text>
             <Text style={styles.regNote}>{reg.note}</Text>
-            <Text style={styles.dataLine}>
-              使用データ：
-              {reg.datasets
-                .map(
-                  (d) =>
-                    `${d.name}${d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} 確認日 ${d.verifiedAt}`,
-                )
-                .join(" / ")}
-            </Text>
-            {reg.amendments.length > 0 ? (
+            <View style={styles.dataGroup}>
               <Text style={styles.dataLine}>
-                反映済みの改正：
-                {reg.amendments.map((a) => `${a.title}（施行・適用 ${a.effectiveDate}）`).join(" / ")}
+                使用データ：
+                {reg.datasets
+                  .map(
+                    (d) =>
+                      `${d.name}${d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 ${d.verifiedAt}`,
+                  )
+                  .join(" / ")}
               </Text>
-            ) : null}
+              {reg.amendments.length > 0 ? (
+                <Text style={styles.dataLine}>
+                  反映済みの改正：
+                  {reg.amendments.map((a) => `${a.title}（施行・適用 ${a.effectiveDate}）`).join(" / ")}
+                </Text>
+              ) : null}
+            </View>
             {reg.appliedExceptions && reg.appliedExceptions.length > 0 ? (
               <View style={styles.appliedBox}>
                 <Text style={styles.appliedTitle}>✓ 適用された例外節</Text>
@@ -563,17 +576,17 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
 
         {/* DATA SOURCES（Sprint 7）: 判定に使ったデータと確認日、反映済みの改正 */}
         <View style={styles.sourcesBox} wrap={false}>
-          <Text style={styles.sourcesTitle}>データ出典と確認日</Text>
+          <Text style={styles.eyebrow}>データ出典と確認日</Text>
           {uniqueDatasets(result).map((d) => (
-            <Text key={d.id} style={styles.dataLine}>
+            <Text key={d.id} style={styles.sourcesLine}>
               ・{d.name}
-              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} — 確認日 {d.verifiedAt}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
             </Text>
           ))}
-          <Text style={[styles.sourcesTitle, { marginTop: 6 }]}>反映済みの法令改正</Text>
+          <Text style={[styles.eyebrow, { marginTop: 6 }]}>反映済みの法令改正</Text>
           {uniqueAmendments(result).map((a) => (
-            <Text key={a.id} style={styles.dataLine}>
-              ・{a.title} — 施行・適用 {a.effectiveDate}
+            <Text key={a.id} style={styles.sourcesLine}>
+              ・{a.title}（施行・適用 {a.effectiveDate}）
             </Text>
           ))}
         </View>

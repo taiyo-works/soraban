@@ -567,13 +567,13 @@ export const ApplicationPdfDocument = ({
           {(diagnosis.datasets ?? []).map((d) => (
             <Text key={d.id} style={styles.procMeta}>
               ・{d.name}
-              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""} — 確認日 {d.verifiedAt}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
             </Text>
           ))}
           <MonoText style={[styles.portalLabel, { marginTop: 4 }]}>反映済みの法令改正</MonoText>
           {((diagnosis.amendments ?? []).length > 0 ? diagnosis.amendments! : ALL_AMENDMENTS).map((a) => (
             <Text key={a.id} style={styles.procMeta}>
-              ・{a.title} — 施行・適用 {a.effectiveDate}
+              ・{a.title}（施行・適用 {a.effectiveDate}）
             </Text>
           ))}
         </View>

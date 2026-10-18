@@ -124,6 +124,8 @@ const LAYER_GROUPS: ReadonlyArray<{
   readonly key: LayerKey;
   readonly label: string;
   readonly source: string;
+  /** 色の意味など、ラベルだけでは伝わらない補足（任意） */
+  readonly detail?: string;
   readonly swatch: string;
   readonly layerIds: readonly string[];
 }> = [
@@ -138,6 +140,7 @@ const LAYER_GROUPS: ReadonlyArray<{
     key: "industrial",
     label: "工業専用地域（DID から除外・告示第435号）",
     source: datasetLegend(DATASET_IDS.industrialExclusive),
+    detail: "収録済みの市町村のみ表示",
     swatch: "bg-sky-500/40 ring-sky-700 rounded-sm",
     layerIds: ["industrial-fill", "industrial-outline"],
   },
@@ -152,7 +155,8 @@ const LAYER_GROUPS: ReadonlyArray<{
     key: "base",
     label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（敷地＋おおむね 1,000m）`,
     source: `${datasetLegend(DATASET_IDS.smallDroneLawFacilities)}・敷地形状は概算`,
-    swatch: "bg-rose-500/50 ring-rose-700 rounded-full",
+    detail: "赤：敷地とその周囲おおむね 1,000m／黄：その外側の要確認帯（告示の区域図で確認）",
+    swatch: "bg-rose-500/50 ring-2 ring-amber-500 rounded-full",
     layerIds: ["base-yellow-fill", "base-yellow-outline", "base-red-fill", "base-red-outline"],
   },
   {
@@ -500,7 +504,12 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
                     />
                     <span className="flex flex-1 flex-col leading-tight">
                       <span className="font-medium text-ink">{group.label}</span>
-                      <span className="text-[10px] text-ink-mute">
+                      {group.detail ? (
+                        <span className="mt-0.5 text-[10px] text-ink-soft">
+                          {group.detail}
+                        </span>
+                      ) : null}
+                      <span className="mt-0.5 text-[10px] text-ink-mute">
                         {group.source}
                       </span>
                     </span>

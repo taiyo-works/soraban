@@ -49,6 +49,16 @@ const DID_DETAIL_LABEL: Readonly<Record<DidDetail, string>> = {
   in_did_exclusion_unverified: "DID：該当（工業専用地域の除外：未確認）",
 };
 
+// DID 判定詳細の左罫線の色。文言に結論を含めたうえで、罫線は補助として信号色に揃える。
+const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
+  no_data: "border-signal-amber",
+  outside_did: "border-rule",
+  industrial_exclusive: "border-signal-green",
+  in_did: "border-signal-red",
+  in_did_near_industrial_boundary: "border-signal-red",
+  in_did_exclusion_unverified: "border-signal-amber",
+};
+
 export function RegulationCard({ regulation }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
@@ -79,7 +89,10 @@ export function RegulationCard({ regulation }: Props) {
         {regulation.summary}
       </p>
       {regulation.didDetail ? (
-        <p data-testid="did-detail" className="text-xs font-medium text-ink">
+        <p
+          data-testid="did-detail"
+          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-ink ${DID_DETAIL_TONE[regulation.didDetail]}`}
+        >
           {DID_DETAIL_LABEL[regulation.didDetail]}
         </p>
       ) : null}
@@ -124,39 +137,43 @@ export function RegulationCard({ regulation }: Props) {
           </ul>
         </details>
       ) : null}
-      {/* データ出典と確認日（Sprint 7）・反映済みの改正 */}
+      {/* データ出典と確認日（Sprint 7）・反映済みの改正。判定本文と区別するため脚注として置く */}
       <div
         data-testid="regulation-datasets"
-        className="border-l border-rule pl-3 text-[11px] leading-relaxed text-ink-mute"
+        className="flex flex-col gap-1.5 border-t border-dashed border-rule pt-2.5 text-[11px] leading-relaxed text-ink-mute"
       >
-        <p className="eyebrow !text-[9px]">使用データ</p>
-        <ul className="mt-0.5 flex flex-col gap-0.5">
-          {regulation.datasets.map((d) => (
-            <li key={d.id} className="text-ink-soft">
-              {d.name}
-              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
-            </li>
-          ))}
-        </ul>
+        <div>
+          <p className="eyebrow !text-[9px]">使用データ</p>
+          <ul className="mt-0.5 flex flex-col gap-0.5">
+            {regulation.datasets.map((d) => (
+              <li key={d.id}>
+                <span className="text-ink-soft">{d.name}</span>
+                <span className="tnum">
+                  {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
         {regulation.amendments.length > 0 ? (
-          <>
-            <p className="eyebrow mt-1.5 !text-[9px]">反映済みの改正</p>
+          <div>
+            <p className="eyebrow !text-[9px]">反映済みの改正</p>
             <ul className="mt-0.5 flex flex-col gap-0.5">
               {regulation.amendments.map((a) => (
-                <li key={a.id} className="text-ink-soft">
+                <li key={a.id}>
                   <a
                     href={a.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-700 underline-offset-2 hover:underline"
+                    className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
                   >
                     {a.title}
                   </a>
-                  （施行・適用 {a.effectiveDate}）
+                  <span className="tnum">（施行・適用 {a.effectiveDate}）</span>
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         ) : null}
       </div>
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute">

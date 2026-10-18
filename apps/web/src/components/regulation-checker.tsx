@@ -1140,7 +1140,12 @@ export function RegulationChecker() {
                 <span>
                   DID 自動判定：
                   <span
-                    className={`font-medium ${autoDidStatus === "unverified" ? "text-signal-amber" : "text-ink"}`}
+                    className={`font-medium ${
+                      autoDidStatus === "unverified" ||
+                      diagnosis?.didDetail === "in_did_exclusion_unverified"
+                        ? "text-signal-amber"
+                        : "text-ink"
+                    }`}
                   >
                     {formatDidDetermination(autoDidStatus, diagnosis?.didDetail)}
                   </span>
