@@ -53,7 +53,7 @@ if (kind === "did") {
     acquiredAt: today,
     verifiedAt: today,
     verifiedBy: "fetch-regulation-data（GitHub Actions、自動取得）",
-    coverage: `収録済み ${recorded.length} 市町村：${recorded.map((m) => m.muniName).join("・")}（DID との重なりは未確認）`,
+    coverage: `収録済み ${recorded.length} 市町村：${recorded.map((m) => m.muniName).join("・")}（DID との重なりは compute-did-overlap.mjs で計算して追記）`,
     bundled: recorded.length > 0,
   });
   console.log(`sources.json: industrial-exclusive を更新（収録 ${recorded.length} 市町村）`);

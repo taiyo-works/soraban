@@ -122,6 +122,26 @@ test.describe("B. DID データ（本番相当サーバー・DID_DATA_DIR なし
   });
 });
 
+test.describe("C. 工業専用地域の除外（本番相当サーバー・実データ）", () => {
+  test("境港市の工業専用地域内（実データ）では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // 同梱の DID（A16 令和2年）と工専（A29 令和元年度）で、境港市の DID 内かつ工専の内側（約 385m）にある地点
+    await gotoCoords(page, { lat: 35.541296, lng: 133.250208 });
+    const did = card(page, "aviation-law-did");
+    await expect(did).toHaveAttribute("data-status", "green");
+    await expect(did.getByTestId("did-detail")).toHaveText("DID：非該当（工業専用地域）");
+    await expect(did).toContainText("境港市 の工業専用地域内");
+    await expect(did.getByRole("link", { name: /国土交通省告示第435号/ })).toHaveAttribute(
+      "href",
+      "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+    );
+    await expect(page.getByTestId("diagnosis-did-status")).toContainText("非該当（工業専用地域）");
+  });
+});
+
+// 縮退表示（未収録の市町村）は実データに該当地点を固定しにくいため、フィクスチャで確かめる。
 test.describe("C. 工業専用地域の除外（フィクスチャ用サーバー）", () => {
   test.use({ baseURL: FIXTURE_URL });
 

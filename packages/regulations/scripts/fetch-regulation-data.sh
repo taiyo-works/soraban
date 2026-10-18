@@ -141,6 +141,9 @@ if [[ $SKIP_INDUSTRIAL -eq 0 ]]; then
   fi
 fi
 
+# ── DID と工業専用地域の重なり（台帳の didOverlap を確定）──
+node "$SCRIPT_DIR/compute-did-overlap.mjs" --date "$TODAY" 2>&1 | tee -a "$SUMMARY" || log "重なりの計算に失敗"
+
 # ── 容量 ──
 du -sh "$PKG_DIR/data/did/r2" "$PKG_DIR/data/industrial-exclusive/by-muni" 2>/dev/null | tee -a "$SUMMARY"
 total=$(du -cb "$PKG_DIR"/data/did/r2/*.json "$PKG_DIR"/data/industrial-exclusive/by-muni/*.json 2>/dev/null | tail -1 | cut -f1)

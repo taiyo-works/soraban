@@ -44,6 +44,11 @@ export type IndustrialExclusiveSource = {
   readonly insideMarginM: number;
   readonly coverage: (muniCode: string) => IndustrialCoverageEntry | undefined;
   readonly zones: (muniCode: string) => readonly IndustrialZone[];
+  /**
+   * 収録済みの全市町村の工専。地点を含む工専を市町村境をまたいで探すために使う
+   * （例：日吉津村の工専が米子市の DID に重なる帯）。
+   */
+  readonly allZones: () => readonly IndustrialZone[];
 };
 
 /** 工業専用地域の境界から内側に取る余裕（m）。ユーザー承認値 10m。 */
@@ -108,6 +113,10 @@ export const createIndustrialSource = (params: {
       const e = index.get(muniCode);
       return e?.status === "recorded" ? (params.zonesByMuni[muniCode] ?? []) : [];
     },
+    allZones: () =>
+      params.coverage
+        .filter((e) => e.status === "recorded")
+        .flatMap((e) => params.zonesByMuni[e.muniCode] ?? []),
   };
 };
 

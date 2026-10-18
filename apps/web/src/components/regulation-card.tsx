@@ -196,8 +196,11 @@ export function RegulationCard({ regulation }: Props) {
         >
           conf · {CONFIDENCE_LABEL[confidence]}
         </span>
-        <span title="最終検証日" className="tnum">
-          v · {verifiedAtDate}
+        <span
+          title="条文・規制内容を確認した日（使用データの確認日は上の「使用データ」欄）"
+          className="normal-case tracking-normal tnum"
+        >
+          条文確認 {verifiedAtDate}
         </span>
       </div>
     </article>

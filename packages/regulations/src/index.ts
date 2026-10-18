@@ -25,6 +25,7 @@ import type { DidCandidate, DidDataset } from "./did-data";
 import {
   DEFAULT_INDUSTRIAL_SOURCE,
   type IndustrialExclusiveSource,
+  type IndustrialZone,
 } from "./industrial-exclusive";
 import { evaluateSmallDroneLaw } from "./small-drone-law";
 import {
@@ -547,39 +548,46 @@ export const evaluateDid = (
   const industrial = opts?.industrial ?? DEFAULT_INDUSTRIAL_SOURCE;
   const coverage = industrial.coverage(hit.muniCode);
   const inDidPrefix = `判定地点は ${hit.muniName} の DID（人口集中地区、${yearLabel}）内です。`;
+  const margin = industrial.insideMarginM;
+  const zoneMuniName = (code: string): string => industrial.coverage(code)?.muniName ?? code;
+
+  // 地点を含む工専を、DID の市町村に限らず収録済みの全市町村から探す（市町村境をまたぐ重なりに対応）。
+  // 複数に含まれる場合は境界から最も深いものを採る。
+  let inside: { zone: IndustrialZone; depth: number } | null = null;
+  for (const z of industrial.allZones()) {
+    if (!pointInPolygonWithHoles(loc, z.rings)) continue;
+    const depth = distanceToPolygonBoundaryMeters(loc, z.rings);
+    if (inside === null || depth > inside.depth) inside = { zone: z, depth };
+  }
 
   let status: RegulationStatus;
   let note: string;
   let didDetail: DidDetail;
-  if (coverage?.status !== "recorded") {
-    // 分岐 5: 工業専用地域が未収録 → 該当として扱い、除外は未確認と明示（縮退表示）。
+  if (inside && inside.depth >= margin) {
+    // 分岐 3: 工業専用地域の内側 → 非該当（工業専用地域）。
+    const zName = zoneMuniName(inside.zone.muniCode);
+    return {
+      ...DID_REG,
+      status: "green",
+      didDetail: "industrial_exclusive",
+      note: `${inDidPrefix}ただし ${zName} の工業専用地域内（境界から内側におよそ ${Math.floor(inside.depth)}m）のため、DID の飛行許可は不要です（非該当（工業専用地域）。国土交通省告示第435号、2026-07-01 適用）。空港等周辺・150m 以上・緊急用務空域の許可と、夜間・目視外などの飛行の方法の承認は別途必要です。この判定は地点単位であり、飛行範囲全体が工業専用地域内かは別途確認してください。`,
+    };
+  }
+  if (inside) {
+    // 分岐 4（境界付近）: 工専の内側だが内側余裕未満 → 除外せず該当（安全側）。
+    status = "red";
+    didDetail = "in_did_near_industrial_boundary";
+    note = `${inDidPrefix}${zoneMuniName(inside.zone.muniCode)} の工業専用地域の境界から内側およそ ${Math.floor(inside.depth)}m で、境界付近（内側 ${margin}m 未満）のため除外せず該当として扱います。原則として許可・承認なく飛行できません。`;
+  } else if (coverage?.status !== "recorded") {
+    // 分岐 5: 当該市町村の工業専用地域が未収録 → 該当として扱い、除外は未確認と明示（縮退表示）。
     status = "red";
     didDetail = "in_did_exclusion_unverified";
     note = `${inDidPrefix}原則として許可・承認なく飛行できません。${INDUSTRIAL_EXCLUSION_UNVERIFIED_NOTE}`;
   } else {
-    const zones = industrial.zones(hit.muniCode);
-    const inside = zones.find((z) => pointInPolygonWithHoles(loc, z.rings));
-    const margin = industrial.insideMarginM;
-    const depth = inside ? distanceToPolygonBoundaryMeters(loc, inside.rings) : 0;
-    if (inside && depth >= margin) {
-      // 分岐 3: 工業専用地域の内側 → 非該当（工業専用地域）。
-      return {
-        ...DID_REG,
-        status: "green",
-        didDetail: "industrial_exclusive",
-        note: `${inDidPrefix}ただし ${hit.muniName} の工業専用地域内（境界から内側におよそ ${Math.floor(depth)}m）のため、DID の飛行許可は不要です（非該当（工業専用地域）。国土交通省告示第435号、2026-07-01 適用）。空港等周辺・150m 以上・緊急用務空域の許可と、夜間・目視外などの飛行の方法の承認は別途必要です。この判定は地点単位であり、飛行範囲全体が工業専用地域内かは別途確認してください。`,
-      };
-    }
+    // 分岐 4: 収録済みの工業専用地域のいずれにも含まれない。
     status = "red";
-    if (inside) {
-      // 分岐 4（境界付近）: 内側余裕未満。
-      didDetail = "in_did_near_industrial_boundary";
-      note = `${inDidPrefix}工業専用地域の境界から内側およそ ${Math.floor(depth)}m で、境界付近（内側 ${margin}m 未満）のため除外せず該当として扱います。原則として許可・承認なく飛行できません。`;
-    } else {
-      // 分岐 4: 工業専用地域外。
-      didDetail = "in_did";
-      note = `${inDidPrefix}${hit.muniName} の工業専用地域外です。原則として許可・承認なく飛行できません。`;
-    }
+    didDetail = "in_did";
+    note = `${inDidPrefix}収録済みの工業専用地域（${hit.muniName} を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。`;
   }
   // 工業専用地域の permit 例外節は位置で判定済みのため、ctx の例外照合は重量・許可のみが効く。
   return {

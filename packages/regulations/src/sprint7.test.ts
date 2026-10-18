@@ -282,7 +282,8 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
     expect(b3.status).toBe("green");
     expect(b3.didDetail).toBe("industrial_exclusive");
     expect(evaluateDid(inDidOutsideInd, did(RECORDED), undefined, opts).status).toBe("red");
-    const b5 = evaluateDid(o, did(NOT_RECORDED), undefined, opts);
+    // 分岐 5 は、どの収録済み工専にも含まれない地点で確かめる（工専は市町村境をまたいで探すため）
+    const b5 = evaluateDid(inDidOutsideInd, did(NOT_RECORDED), undefined, opts);
     expect(b5.status).toBe("red");
     expect(b5.didDetail).toBe("in_did_exclusion_unverified");
   });
@@ -325,11 +326,11 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
   });
 
   it("未収録（分岐 5）の note に『工業専用地域の除外：未確認』が入る", () => {
-    const r = evaluateDid(o, did(NOT_RECORDED), undefined, opts);
+    const r = evaluateDid(inDidOutsideInd, did(NOT_RECORDED), undefined, opts);
     expect(r.note).toContain("工業専用地域の除外：未確認");
     expect(r.note).toContain("市の用途地域図で確認");
     // 台帳に無い市町村も未収録として扱う
-    const unknownMuni = evaluateDid(o, did("99999"), undefined, opts);
+    const unknownMuni = evaluateDid(inDidOutsideInd, did("99999"), undefined, opts);
     expect(unknownMuni.status).toBe("red");
     expect(unknownMuni.note).toContain("工業専用地域の除外：未確認");
   });
@@ -340,6 +341,76 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
     expect(evaluateDid(o, did(RECORDED), undefined, { industrial: src }).didDetail).toBe(
       "in_did_exclusion_unverified",
     );
+  });
+
+  // 日吉津村の工専が米子市の DID に重なる帯（実データ）の構図を、架空のデータで再現する。
+  describe("工専の参照を DID の市町村コードに頼らない（市町村境をまたぐ重なり）", () => {
+    const DID_MUNI = "99911"; // DID を持つ市（収録済み）
+    const NEIGHBOR = "99912"; // 隣の村（収録済み）。その工専が市の DID にはみ出している
+    const UNRECORDED_DID = "99913"; // 工専未収録の市の DID
+    // 隣村の工専：幅 12m の細い帯と、内側に十分な広さのある区画
+    const strip: Polygon = [
+      offsetMeters(o, -300, -6),
+      offsetMeters(o, 300, -6),
+      offsetMeters(o, 300, 6),
+      offsetMeters(o, -300, 6),
+    ];
+    const wide: Polygon = [
+      offsetMeters(o, 700, -300),
+      offsetMeters(o, 1300, -300),
+      offsetMeters(o, 1300, 300),
+      offsetMeters(o, 700, 300),
+    ];
+    const src = createIndustrialSource({
+      coverage: [
+        { muniCode: DID_MUNI, muniName: "DID市", status: "recorded", didOverlap: "overlap", source: "テスト", baseDate: null, checkedAt: "2026-10-19" },
+        { muniCode: NEIGHBOR, muniName: "隣村", status: "recorded", didOverlap: "overlap", source: "テスト", baseDate: null, checkedAt: "2026-10-19" },
+      ],
+      zonesByMuni: {
+        [DID_MUNI]: [{ muniCode: DID_MUNI, rings: [indRing.map((p) => offsetMeters(p, -5000, -5000))] }],
+        [NEIGHBOR]: [
+          { muniCode: NEIGHBOR, rings: [strip] },
+          { muniCode: NEIGHBOR, rings: [wide] },
+        ],
+      },
+      insideMarginM: 10,
+    });
+    const didOf = (muniCode: string, muniName: string): DidCandidate[] => [
+      { muniCode, muniName, polygon: didRing },
+    ];
+
+    it("隣村の工専の細い帯（内側 10m 未満）にある地点は red・境界付近で、隣村の工専と書き、『工業専用地域外』と言い切らない", () => {
+      const r = evaluateDid(o, didOf(DID_MUNI, "DID市"), undefined, { industrial: src });
+      expect(r.status).toBe("red");
+      expect(r.didDetail).toBe("in_did_near_industrial_boundary");
+      expect(r.note).toContain("隣村 の工業専用地域の境界");
+      expect(r.note).not.toContain("工業専用地域外です");
+    });
+
+    it("隣村の工専の十分内側にある地点は green（非該当（工業専用地域））で、隣村の工専と書く", () => {
+      const p = offsetMeters(o, 1000, 0);
+      const r = evaluateDid(p, didOf(DID_MUNI, "DID市"), undefined, { industrial: src });
+      expect(r.status).toBe("green");
+      expect(r.didDetail).toBe("industrial_exclusive");
+      expect(r.note).toContain("隣村 の工業専用地域内");
+    });
+
+    it("DID の市町村が未収録でも、収録済みの隣村の工専内なら除外できる", () => {
+      const p = offsetMeters(o, 1000, 0);
+      const r = evaluateDid(p, didOf(UNRECORDED_DID, "未収録市"), undefined, { industrial: src });
+      expect(r.status).toBe("green");
+      expect(r.didDetail).toBe("industrial_exclusive");
+    });
+
+    it("どの工専にも含まれない地点は red。収録済みなら『収録済みの工業専用地域のいずれにも含まれません』", () => {
+      const p = offsetMeters(o, -1000, 1000);
+      const r = evaluateDid(p, didOf(DID_MUNI, "DID市"), undefined, { industrial: src });
+      expect(r.status).toBe("red");
+      expect(r.didDetail).toBe("in_did");
+      expect(r.note).toContain("収録済みの工業専用地域");
+      const u = evaluateDid(p, didOf(UNRECORDED_DID, "未収録市"), undefined, { industrial: src });
+      expect(u.didDetail).toBe("in_did_exclusion_unverified");
+    });
   });
 
   // 同梱データ（収録済み市町村の有無）に依存しない形で、既定の読み込み口の整合を確かめる。
@@ -353,6 +424,13 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
       } else {
         expect(DEFAULT_INDUSTRIAL_SOURCE.zones(e.muniCode)).toEqual([]);
       }
+    }
+  });
+
+  it("収録範囲台帳の didOverlap は全件が確定している（unverified がない）", () => {
+    // 同梱の DID と工専の重なりは scripts/compute-did-overlap.mjs で計算して確定する。
+    for (const e of INDUSTRIAL_COVERAGE) {
+      expect(e.didOverlap, `${e.muniCode} ${e.muniName}`).not.toBe("unverified");
     }
   });
 

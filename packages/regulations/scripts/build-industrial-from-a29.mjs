@@ -100,11 +100,23 @@ for (const [code, list] of byMuni) {
     source: `${sourceName} ${page}（取得日 ${today}）`,
     baseDate: "2019年度（令和元年度）",
     checkedAt: today,
-    note: "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要。DID との重なりは未確認",
+    note: "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要。DID との重なりは compute-did-overlap.mjs で計算",
   };
   const i = coverage.municipalities.findIndex((m) => m.muniCode === code);
   if (i >= 0) coverage.municipalities[i] = { ...coverage.municipalities[i], ...entry };
   else coverage.municipalities.push(entry);
+}
+// 入手元に用途地域データはあるが工業専用地域がない市町村（台帳にあるもの）は、その旨を記録する
+// （台帳上は未収録のまま＝DID 内は「除外：未確認」。didOverlap は compute-did-overlap.mjs で no_overlap になる）。
+const munisInSource = new Set(features.map((f) => String(f.properties?.[codeProp] ?? "")));
+for (const m of coverage.municipalities) {
+  if (m.muniCode.startsWith(pref) && munisInSource.has(m.muniCode) && !byMuni.has(m.muniCode) && m.status !== "recorded") {
+    m.industrialZoneInSource = false;
+    m.source = `${sourceName} ${page}（取得日 ${today}）`;
+    m.baseDate = "2019年度（令和元年度）";
+    m.checkedAt = today;
+    m.note = "入手元（A29 令和元年度）に当該市町村の用途地域データはあるが工業専用地域はない。市の最新の用途地域図との照合は未実施のため、台帳上は未収録とし、DID 内は「除外：未確認」で表示する（安全側）";
+  }
 }
 coverage.verifiedAt = today;
 coverage.municipalities.sort((a, b) => a.muniCode.localeCompare(b.muniCode));
