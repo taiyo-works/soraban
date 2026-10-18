@@ -5,6 +5,9 @@ name: Fetch regulation data
 # 処理本体：packages/regulations/scripts/fetch-regulation-data.sh
 
 on:
+  # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（成果物のみ、既定値で実行）。
+  push:
+    branches: ['data-fetch/**']
   workflow_dispatch:
     inputs:
       output:
@@ -49,8 +52,8 @@ jobs:
         env:
           WORK_DIR: ${{ runner.temp }}/regulation-data
         run: |
-          args=(--prefs "${{ inputs.prefs }}")
-          if [[ "${{ inputs.include_industrial }}" != "true" ]]; then args+=(--skip-industrial); fi
+          args=(--prefs "${{ inputs.prefs || '31 32' }}")
+          if [[ "${{ inputs.include_industrial }}" == "false" ]]; then args+=(--skip-industrial); fi
           bash packages/regulations/scripts/fetch-regulation-data.sh "${args[@]}"
           cat "$WORK_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
 
