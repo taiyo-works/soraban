@@ -19,6 +19,12 @@
 
 代替の入手元：e-Stat 統計GIS「境界データ」→ 令和2年国勢調査 → 人口集中地区（G空間情報センターにも「令和2年国勢調査人口集中地区境界データ」として掲載）。
 
+## GitHub Actions での取得（推奨）
+
+外部ネットワークに出られる GitHub Actions のランナーで取得・変換できる：Actions →「Fetch regulation data」→ Run workflow（`workflow_dispatch`）。
+入力 `output` は `artifact`（既定。成果物 `regulation-data` として保存）か `commit`（実行したブランチにコミットして push）。
+処理本体は `scripts/fetch-regulation-data.sh`。ダウンロード URL はダウンロードページの HTML から抜き出し（推測しない）、取得できない入手元はスキップしてジョブの Summary に残す。出典・取得日は `sources.json`・`coverage.json` に自動で記録される。合計 10MB 超でも失敗にせず、サイズを Summary に出す。
+
 ## 取得と同梱の手順
 
 1. 上記 URL から `A16-20_GML.zip`（または鳥取県・島根県の都道府県別ファイル）をダウンロードして展開する。GeoJSON が同梱されていればそれを使う。Shapefile しかない場合は GDAL 等で WGS84 の GeoJSON に変換する（`ogr2ogr -f GeoJSON -t_srs EPSG:4326 out.geojson in.shp`）。

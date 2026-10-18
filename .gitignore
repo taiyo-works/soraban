@@ -21,6 +21,7 @@ supabase/.temp
 
 # 大容量の規制データ（再生成可能）
 packages/regulations/data/did/raw/
+packages/regulations/data/.fetch-work/
 packages/regulations/data/did/by-pref/
 packages/regulations/data/did/all.geojson
 packages/regulations/data/airports/raw/

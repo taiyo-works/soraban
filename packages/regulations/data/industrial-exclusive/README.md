@@ -23,6 +23,12 @@
 
 **収録済みの市町村はない。** 作業環境から用途地域データの入手元（各市町の都市計画図の配布ページ、G空間情報センター、国土数値情報）に接続できず、ポリゴンを取得できなかった。DID データも未取得のため、DID と工業専用地域の重なりもどの市町村についても確認できていない（`coverage.json` の `didOverlap` はすべて `unverified`）。このため、DID 内の地点はすべて分岐 5（該当・除外未確認）で表示される。
 
+## GitHub Actions での取得（推奨）
+
+外部ネットワークに出られる GitHub Actions のランナーで取得・変換できる：Actions →「Fetch regulation data」→ Run workflow（`workflow_dispatch`）。
+入力 `output` は `artifact`（既定。成果物 `regulation-data` として保存）か `commit`（実行したブランチにコミットして push）。
+処理本体は `scripts/fetch-regulation-data.sh`。ダウンロード URL はダウンロードページの HTML から抜き出し（推測しない）、取得できない入手元はスキップしてジョブの Summary に残す。出典・取得日は `sources.json`・`coverage.json` に自動で記録される。合計 10MB 超でも失敗にせず、サイズを Summary に出す。
+
 ## 収録手順（市町村ごと）
 
 1. 入手元を優先順に確認する（`coverage.json` の `sourceCandidates`）。ライセンス、決定・変更の基準日、座標系を記録する。

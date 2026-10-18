@@ -40,7 +40,12 @@ if (src.type !== "FeatureCollection" || !Array.isArray(src.features)) {
   throw new Error("入力が GeoJSON FeatureCollection ではありません");
 }
 const sampleProps = src.features[0]?.properties ?? {};
-const codeProp = CODE_CANDIDATES.find((k) => k in sampleProps);
+// 市区町村コードの属性は「値が 5 桁の数字」であることを確かめて選ぶ（DIDid 等の 7 桁を取り違えない）。
+const isMuniCodeProp = (k) => {
+  const vals = src.features.slice(0, 50).map((f) => String(f.properties?.[k] ?? ""));
+  return vals.length > 0 && vals.filter((v) => /^\d{5}$/.test(v)).length / vals.length >= 0.9;
+};
+const codeProp = CODE_CANDIDATES.find((k) => k in sampleProps && isMuniCodeProp(k));
 const nameProp = NAME_CANDIDATES.find((k) => k in sampleProps);
 if (!codeProp || !nameProp) {
   throw new Error(
@@ -57,7 +62,7 @@ const outputs = [];
 for (const pref of prefs) {
   const features = [];
   for (const f of src.features) {
-    const code = String(f.properties?.[codeProp] ?? "").padStart(5, "0");
+    const code = String(f.properties?.[codeProp] ?? "");
     if (code.slice(0, 2) !== pref) continue;
     const name = String(f.properties?.[nameProp] ?? "");
     const polys = f.geometry?.type === "Polygon" ? [f.geometry.coordinates] : f.geometry?.type === "MultiPolygon" ? f.geometry.coordinates : [];
@@ -80,8 +85,12 @@ for (const pref of prefs) {
   outputs.push({ pref, text, count: features.length });
 }
 if (total > MAX_BYTES) {
-  console.error(`合計 ${(total / 1024 / 1024).toFixed(2)}MB が上限 10MB を超えるため書き出しません（オーケストレーターに報告）`);
-  process.exit(1);
+  if (process.env.ALLOW_OVERSIZE === "1") {
+    console.warn(`警告: 合計 ${(total / 1024 / 1024).toFixed(2)}MB が目安 10MB を超えています（ALLOW_OVERSIZE=1 のため書き出します）`);
+  } else {
+    console.error(`合計 ${(total / 1024 / 1024).toFixed(2)}MB が上限 10MB を超えるため書き出しません（オーケストレーターに報告）`);
+    process.exit(1);
+  }
 }
 mkdirSync(outDir, { recursive: true });
 for (const o of outputs) {
