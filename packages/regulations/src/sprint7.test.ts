@@ -342,9 +342,18 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
     );
   });
 
-  it("同梱の既定データ（収録済み市町村なし）では DID 内はすべて除外未確認になる", () => {
-    const r = evaluateDid(o, did("31202"), undefined, { industrial: DEFAULT_INDUSTRIAL_SOURCE });
+  // 同梱データ（収録済み市町村の有無）に依存しない形で、既定の読み込み口の整合を確かめる。
+  it("既定の読み込み口：台帳にない市町村は除外未確認、収録済みの市町村はポリゴンを持つ", () => {
+    const r = evaluateDid(o, did("99999"), undefined, { industrial: DEFAULT_INDUSTRIAL_SOURCE });
     expect(r.didDetail).toBe("in_did_exclusion_unverified");
+    for (const e of INDUSTRIAL_COVERAGE) {
+      const c = DEFAULT_INDUSTRIAL_SOURCE.coverage(e.muniCode);
+      if (c?.status === "recorded") {
+        expect(DEFAULT_INDUSTRIAL_SOURCE.zones(e.muniCode).length, e.muniCode).toBeGreaterThan(0);
+      } else {
+        expect(DEFAULT_INDUSTRIAL_SOURCE.zones(e.muniCode)).toEqual([]);
+      }
+    }
   });
 
   it("収録範囲台帳の全件に市町村コード・収録状況・確認日・DID 重複の確認結果がある", () => {

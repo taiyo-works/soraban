@@ -66,6 +66,7 @@ fetch_geojson() { # $1=page_url $2=html $3=zipname $4=outdir
     log "スキップ: ZIP として読めない $url"
     return 1
   fi
+  { echo "  - ZIP 内のファイル（$3）:"; unzip -Z1 "$4/$3" | sed 's/^/    - /'; } >> "$SUMMARY"
   unzip -qo "$4/$3" -d "$4/x"
   local gj
   gj="$(find "$4/x" -iname '*.geojson' | head -1)"

@@ -5,7 +5,8 @@ name: Fetch regulation data
 # 処理本体：packages/regulations/scripts/fetch-regulation-data.sh
 
 on:
-  # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（成果物のみ、既定値で実行）。
+  # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（既定値で実行し、
+  # 生成データと FETCH_REPORT.md を同じ data-fetch ブランチにコミットする）。
   push:
     branches: ['data-fetch/**']
   workflow_dispatch:
@@ -62,12 +63,51 @@ jobs:
           git status --short
           du -sh packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive/by-muni 2>/dev/null || true
 
-      # 生成データで判定・型・テストが壊れていないことを確かめる（失敗したらコミット・成果物化しない）
-      - run: pnpm typecheck
-      - run: pnpm test
+      # 生成データで判定・型・テストが壊れていないかを確かめる。失敗しても取得結果を確認できるよう、
+      # ここでは止めずに結果を記録し、成果物・コミットのあとでジョブを失敗にする。
+      - name: Typecheck and test (with generated data)
+        id: verify
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          { pnpm typecheck && pnpm test; } 2>&1 | tee "$RUNNER_TEMP/verify.log"
 
-      # 生成物は常に成果物として残す（commit を選んだ場合は次のジョブがこれを取り込んでコミットする）
+      - name: Write FETCH_REPORT.md
+        if: always()
+        env:
+          WORK_DIR: ${{ runner.temp }}/regulation-data
+          VERIFY: ${{ steps.verify.outcome }}
+        run: |
+          r=packages/regulations/data/FETCH_REPORT.md
+          {
+            echo "# 地図データ取得レポート（fetch-regulation-data）"
+            echo
+            echo "- 実行: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- ブランチ: ${GITHUB_REF_NAME}（${GITHUB_SHA}）"
+            echo "- 実行日時（UTC）: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- typecheck・test: ${VERIFY}"
+            echo
+            echo "## 取得・変換のログ（取得／スキップした URL、ZIP 内のファイル、先頭地物の属性、サイズ）"
+            echo
+            cat "$WORK_DIR/summary.md" 2>/dev/null || echo "（summary.md なし）"
+            echo
+            echo "## 生成ファイルのサイズ"
+            echo
+            echo '```'
+            ls -l packages/regulations/data/did/r2/ packages/regulations/data/industrial-exclusive/by-muni/ 2>/dev/null || true
+            echo '```'
+            echo
+            echo "## typecheck・test の結果（末尾 80 行）"
+            echo
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/verify.log" 2>/dev/null || echo "（ログなし）"
+            echo '```'
+          } > "$r"
+          cat "$r" >> "$GITHUB_STEP_SUMMARY"
+
+      # 生成物は常に成果物として残す（コミットする場合は commit ジョブがこれを取り込む）
       - name: Upload artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: regulation-data
@@ -77,17 +117,22 @@ jobs:
             packages/regulations/data/did/r2/
             packages/regulations/data/industrial-exclusive/
             packages/regulations/data/sources.json
+            packages/regulations/data/FETCH_REPORT.md
             packages/regulations/src/data-bundle/
-      - name: Upload summary
-        uses: actions/upload-artifact@v4
-        with:
-          name: regulation-data-summary
-          retention-days: 14
-          path: ${{ runner.temp }}/regulation-data/summary.md
 
+    outputs:
+      verify: ${{ steps.verify.outcome }}
+
+  # 生成データと FETCH_REPORT.md をコミットして push する。
+  #   - push（data-fetch/** への push）では常に、そのブランチへ。それ以外のブランチには書かない。
+  #   - 手動実行では output=commit のときだけ、実行したブランチへ。
+  # GITHUB_TOKEN による push は新しいワークフロー実行を起こさない（ループしない）。
   commit:
-    if: inputs.output == 'commit'
     needs: fetch
+    if: >-
+      always() && needs.fetch.result != 'cancelled' &&
+      ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/data-fetch/')) ||
+       (github.event_name == 'workflow_dispatch' && inputs.output == 'commit'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -99,13 +144,35 @@ jobs:
           name: regulation-data
           path: packages/regulations
       - name: Commit and push
+        env:
+          VERIFY: ${{ needs.fetch.outputs.verify }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive packages/regulations/data/sources.json packages/regulations/src/data-bundle
+          git add packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive packages/regulations/data/sources.json packages/regulations/data/FETCH_REPORT.md packages/regulations/src/data-bundle
           if git diff --cached --quiet; then
             echo "変更なし（コミットしない）"
-            exit 0
+          else
+            if [[ "$VERIFY" == "success" ]]; then
+              msg="data(regulations): 国土数値情報から DID・工業専用地域を取得して同梱（fetch-regulation-data、typecheck・test 通過）"
+            else
+              msg="data(regulations): 国土数値情報から DID・工業専用地域を取得（fetch-regulation-data）【typecheck・test 失敗（${VERIFY:-不明}）。FETCH_REPORT.md を参照】"
+            fi
+            git commit -m "$msg" -m "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
-          git commit -m "data(regulations): 国土数値情報から DID・工業専用地域を取得して同梱（fetch-regulation-data）"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Fail if typecheck/test failed
+        if: needs.fetch.outputs.verify != 'success'
+        run: |
+          echo "生成データで typecheck・test が失敗した（${{ needs.fetch.outputs.verify }}）。FETCH_REPORT.md を参照"
+          exit 1
+
+  # commit ジョブが走らない場合（artifact のみ）でも、テスト失敗をワークフローの結果に反映する。
+  verify-result:
+    needs: fetch
+    if: always() && needs.fetch.outputs.verify != 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "生成データで typecheck・test が失敗した（${{ needs.fetch.outputs.verify }}）"
+          exit 1
