@@ -68,9 +68,21 @@ fetch_geojson() { # $1=page_url $2=html $3=zipname $4=outdir
   fi
   { echo "  - ZIP 内のファイル（$3）:"; unzip -Z1 "$4/$3" | sed 's/^/    - /'; } >> "$SUMMARY"
   unzip -qo "$4/$3" -d "$4/x"
-  local gj
-  gj="$(find "$4/x" -iname '*.geojson' | head -1)"
-  if [[ -n "$gj" ]]; then echo "$gj"; return 0; fi
+  # GeoJSON が複数（例：A29 は市町村ごと）の場合は 1 つの FeatureCollection にまとめる
+  local gjs=()
+  mapfile -t gjs < <(find "$4/x" -iname '*.geojson' | sort)
+  if [[ ${#gjs[@]} -eq 1 ]]; then echo "${gjs[0]}"; return 0; fi
+  if [[ ${#gjs[@]} -gt 1 ]]; then
+    node -e '
+      const fs=require("fs"); const [out,...files]=process.argv.slice(1);
+      const features=files.flatMap(f=>JSON.parse(fs.readFileSync(f,"utf8")).features ?? []);
+      fs.writeFileSync(out, JSON.stringify({type:"FeatureCollection",features}));
+      console.error(`GeoJSON ${files.length} 件を結合（${features.length} 地物）`);
+    ' "$4/merged.geojson" "${gjs[@]}"
+    echo "  - GeoJSON ${#gjs[@]} 件を結合" >> "$SUMMARY"
+    echo "$4/merged.geojson"
+    return 0
+  fi
   local shp
   shp="$(find "$4/x" -iname '*.shp' | head -1)"
   if [[ -z "$shp" ]]; then

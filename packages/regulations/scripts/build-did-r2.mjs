@@ -32,8 +32,9 @@ if (!input) {
 const prefs = (args.get("--prefs") ?? "31,32").split(",").map((s) => s.trim());
 const year = Number(args.get("--year") ?? 2020);
 
-const CODE_CANDIDATES = [args.get("--code-prop"), "行政コード", "市区町村コード", "A16_001", "KEN_CITY"].filter(Boolean);
-const NAME_CANDIDATES = [args.get("--name-prop"), "市町村名称", "市区町村名", "A16_002", "CITY_NAME"].filter(Boolean);
+// A16-20 の GeoJSON（2026-10-18 の取得で確認）：A16_001=DIDid（7 桁）、A16_002=行政コード（5 桁）、A16_003=市区町村名称。
+const CODE_CANDIDATES = [args.get("--code-prop"), "行政コード", "市区町村コード", "A16_002", "KEN_CITY"].filter(Boolean);
+const NAME_CANDIDATES = [args.get("--name-prop"), "市町村名称", "市区町村名称", "市区町村名", "A16_003", "CITY_NAME"].filter(Boolean);
 
 const src = JSON.parse(readFileSync(input, "utf8"));
 if (src.type !== "FeatureCollection" || !Array.isArray(src.features)) {
@@ -46,7 +47,9 @@ const isMuniCodeProp = (k) => {
   return vals.length > 0 && vals.filter((v) => /^\d{5}$/.test(v)).length / vals.length >= 0.9;
 };
 const codeProp = CODE_CANDIDATES.find((k) => k in sampleProps && isMuniCodeProp(k));
-const nameProp = NAME_CANDIDATES.find((k) => k in sampleProps);
+const nameProp = NAME_CANDIDATES.find(
+  (k) => k in sampleProps && k !== codeProp && !/^\d+$/.test(String(sampleProps[k] ?? "")),
+);
 if (!codeProp || !nameProp) {
   throw new Error(
     `市区町村コード・名称の属性が見つかりません。--code-prop / --name-prop で指定してください。属性: ${Object.keys(sampleProps).join(", ")}`,
