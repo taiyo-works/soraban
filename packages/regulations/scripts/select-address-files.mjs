@@ -2,7 +2,7 @@
 //
 //   node select-address-files.mjs <feed.json> "<都道府県コード…>" <manifest.tsv>
 //
-// 出力（manifest.tsv）：category<TAB>url<TAB>最終更新日<TAB>ファイル名。標準出力には選定のログ（Markdown）を書く。
+// 出力（manifest.tsv）：category<TAB>url<TAB>最終更新日<TAB>ファイル名<TAB>ArcGIS アイテム ID。標準出力には選定のログ（Markdown）を書く。
 // パスの接頭辞は abr-geocoder（abrdb/internal/schema/config_full.yaml の s3_text_path・s3_pos_path）と同じ。
 // 最終更新日は abr-geocoder と同じく dataset.description の「最終更新日: …」から読む。
 import { readFileSync, writeFileSync } from "node:fs";
@@ -42,7 +42,9 @@ for (const ds of datasets) {
   for (const dist of ds.distribution ?? []) {
     const url = dist.accessURL ?? dist.downloadURL;
     if (typeof url !== "string" || !url.endsWith(".csv.zip")) continue;
-    all.push({ url, modified: modifiedOf(ds.description) || String(ds.modified ?? "") });
+    // ArcGIS のアイテム ID（identifier の id=…）。配布元が接続元の国で制限される場合の代替取得に使う
+    const item = /[?&]id=([0-9a-f]{32})/.exec(String(ds.identifier ?? ""))?.[1] ?? "";
+    all.push({ url, item, modified: modifiedOf(ds.description) || String(ds.modified ?? "") });
   }
 }
 console.log(`- .csv.zip の配布ファイル数: ${all.length}`);
@@ -72,7 +74,7 @@ for (const [category, [prefix, unit]] of Object.entries(CATEGORIES)) {
       (under.length > 0 && picked.length === 0 ? `（例：${under[0].url}）` : ""),
   );
   for (const f of picked.sort((a, b) => a.url.localeCompare(b.url))) {
-    rows.push([category, f.url, f.modified, f.url.split("/").pop()].join("\t"));
+    rows.push([category, f.url, f.modified, f.url.split("/").pop(), f.item].join("\t"));
   }
 }
 writeFileSync(outPath, rows.length ? rows.join("\n") + "\n" : "");

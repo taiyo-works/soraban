@@ -53,26 +53,34 @@ node -e 'const f=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
 
 # 取得と展開（ZIP の中に ZIP がある場合も展開する）
 fail=0
-first_fail_logged=0
-while IFS=$'\t' read -r category url modified file; do
+UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+# 1 つの URL を取得する。成功なら 0。最初の失敗だけ応答ヘッダーと本文をレポートに残す。
+try_get() { # $1=url $2=out $3=label
+  local code
+  code="$(curl -sSL --retry 2 -A "$UA" -D "$WORK/dl.headers" -o "$2" -w '%{http_code}' "$1" 2>"$WORK/curl.err")"
+  if [[ "$code" == "200" ]] && unzip -tq "$2" >/dev/null 2>&1; then return 0; fi
+  if [[ -z "${logged[$3]:-}" ]]; then
+    logged[$3]=1
+    { echo "  - 取得できない（HTTP ${code}、経路=$3）$1"; echo '```'; grep -iE '^(HTTP|server|content-type|content-length|location|x-amz-cf-pop|x-cache)' "$WORK/dl.headers" 2>/dev/null; sed -e 's/<[^>]*>/ /g' "$2" 2>/dev/null | tr -s ' \n' ' ' | head -c 600; echo; echo '```'; } >> "$SUMMARY"
+  fi
+  return 1
+}
+declare -A logged
+declare -A used
+while IFS=$'\t' read -r category url modified file item; do
   zdir="$WORK/zip/$category"; cdir="$WORK/csv/$category"
   mkdir -p "$zdir" "$cdir"
   ok=0
-  # 既定の User-Agent で拒否される場合に備え、abr-geocoder（Go の既定）と同じ User-Agent、
-  # データセットサイトからのリンクとしての Referer 付きでも試す
-  for variant in "go" "referer" "browser"; do
-    case "$variant" in
-      go) opts=(-A "Go-http-client/1.1") ;;
-      referer) opts=(-A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" -e "https://dataset.address-br.digital.go.jp/") ;;
-      browser) opts=(-A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" -H "Accept: */*" -H "Accept-Language: ja,en;q=0.8" -H "Origin: https://dataset.address-br.digital.go.jp" -e "https://dataset.address-br.digital.go.jp/") ;;
-    esac
-    code="$(curl -sSL --retry 2 "${opts[@]}" -D "$WORK/dl.headers" -o "$zdir/$file" -w '%{http_code}' "$url" 2>"$WORK/curl.err")"
-    if [[ "$code" == "200" ]]; then ok=1; break; fi
-    if [[ $first_fail_logged -eq 0 ]]; then
-      { echo "  - 取得できない（HTTP ${code}、方法=${variant}）$url"; echo '```'; cat "$WORK/dl.headers" 2>/dev/null; sed -e 's/<[^>]*>/ /g' "$zdir/$file" 2>/dev/null | tr -s ' \n' ' ' | head -c 1500; echo; echo '```'; } >> "$SUMMARY"
-    fi
-  done
-  [[ $ok -ne 1 ]] && first_fail_logged=1
+  # ① 配布元（data.address-br.digital.go.jp）② ArcGIS のアイテムのデータ（配布元が接続元の国で制限される場合）
+  if try_get "$url" "$zdir/$file" "配布元"; then ok=1; used["配布元"]=$(( ${used["配布元"]:-0} + 1 ))
+  elif [[ -n "$item" ]] && try_get "https://www.arcgis.com/sharing/rest/content/items/$item/data" "$zdir/$file" "ArcGIS"; then
+    ok=1; used["ArcGIS"]=$(( ${used["ArcGIS"]:-0} + 1 ))
+    echo "$category	$url	https://www.arcgis.com/sharing/rest/content/items/$item/data" >> "$WORK/alt-sources.tsv"
+  fi
+  if [[ $ok -ne 1 && -n "$item" && -z "${logged[item]:-}" ]]; then
+    logged[item]=1
+    { echo "  - ArcGIS アイテムの情報（$item）"; echo '```'; curl -sS -A "$UA" "https://www.arcgis.com/sharing/rest/content/items/$item?f=json" | head -c 1500; echo; echo '```'; } >> "$SUMMARY"
+  fi
   if [[ $ok -ne 1 ]]; then
     log "失敗: ダウンロード $url"; fail=1; continue
   fi
@@ -92,6 +100,10 @@ while IFS=$'\t' read -r category url modified file; do
 done < "$WORK/manifest.tsv"
 
 {
+  echo
+  echo "### 取得経路ごとのファイル数"
+  echo
+  for k in "${!used[@]}"; do echo "- $k: ${used[$k]}"; done
   echo
   echo "### 展開した CSV（種類ごとのファイル数・容量）"
   echo
