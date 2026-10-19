@@ -54,6 +54,8 @@ Vercel の Deployments（最新が Production か）と、Domains の soraban.fu
 
 soraban.futuretec.jp を Vercel に追加したのは 2026-10-19 17:54 JST で、Sprint 10a の main への反映（#15、19:16 JST）より前。その間に見た画面か、ブラウザに残った古い画面だった可能性が高い。スーパーリロード（またはシークレットウィンドウ）で、トップに「出願準備中」が無く、`X-Robots-Tag: noindex, nofollow` が返ることを目で確かめれば完了。
 
+**解消済み（2026-10-20）**：ユーザーがブラウザで確認し、「出願準備中」は出ていない。DIPS の申請書に soraban.futuretec.jp を書いてよい。
+
 Vercel コネクタの注意：チーム ID を付けずに呼ぶ（付けると空の結果が返る）。
 
 ### 4.1 調査の結果（2026-10-20、Claude Code）
