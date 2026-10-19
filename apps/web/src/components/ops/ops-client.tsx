@@ -2,7 +2,7 @@
 
 // 運航管理（Sprint 10）の画面の入力部品。どれも /api/ops/* を呼ぶだけで、判断はサーバー側（サービス層）が行う。
 // 見た目は components/ops/ui.tsx の部品と判定画面の意匠に合わせる。
-import { cloneElement, useEffect, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
+import { cloneElement, useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
 import {
@@ -47,16 +47,25 @@ export const versionOf = (r: ApiResult): string => (typeof r.data["version"] ===
 
 /**
  * 入力の誤りがあったとき、最初の誤りの項目へフォーカスを移す。項目の誤りが無ければ（版の衝突など）送信の結果のエラーへ移す。
- * 描画が済んでから探すため、次のフレームで行う。
+ * 送信の結果の処理で、誤りの状態（setErrors・setMessage）と一緒に requestErrorFocus() を呼ぶ。フォーカスの移動は、
+ * それらの状態が描画に反映された後（同じ描画の commit の後の effect）で行う。以前は requestAnimationFrame で次のフレームを
+ * 待っていたが、React の描画がそのフレームより後になると誤りの項目がまだ無く、フォーカスが移らないことがあった
+ * （Sprint 10 E2E-DB 21 が CI でときどき失敗）。
  */
-export const focusFirstError = (form: HTMLFormElement | null): void => {
-  window.requestAnimationFrame(() => {
+export const useErrorFocus = () => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (tick === 0) return;
+    const form = formRef.current;
     const el =
       form?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form?.querySelector<HTMLElement>("[data-form-error]");
     if (!el) return;
     el.focus({ preventScroll: true });
     el.scrollIntoView({ block: "center" });
-  });
+  }, [tick]);
+  const requestErrorFocus = useCallback(() => setTick((t) => t + 1), []);
+  return { formRef, requestErrorFocus };
 };
 
 export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
@@ -259,9 +268,9 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
   const flightId = useId();
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV({ ...v, [k]: e.target.value });
 
+  const { formRef, requestErrorFocus } = useErrorFocus();
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const h = Number(v.hours || "0");
@@ -290,7 +299,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
-      focusFirstError(form);
+      requestErrorFocus();
       return;
     }
     setErrors({});
@@ -311,7 +320,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
   const flightDescribedBy = [flightErrorId, `${flightId}-hint`].filter(Boolean).join(" ");
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" aria-label={editing ? "機体の訂正" : "機体の登録"}>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6" aria-label={editing ? "機体の訂正" : "機体の登録"}>
       <Group title="機体の識別">
         <Field
           label="登録記号"
@@ -472,22 +481,22 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { formRef, requestErrorFocus } = useErrorFocus();
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     const r = await send("POST", url, { expectedVersion: version, reason });
     setBusy(false);
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
-      focusFirstError(form);
+      requestErrorFocus();
       return;
     }
     reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: typeof r.data["version"] === "number" ? `取消しました（版 ${r.data["version"]}）。` : "取消しました。" });
   };
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${label}の取消`}>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${label}の取消`}>
       <Field
         label="取消の理由"
         required
@@ -553,9 +562,9 @@ export function PilotForm({
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV({ ...v, [k]: e.target.value });
   const check = (k: keyof typeof v) => (e: { target: { checked: boolean } }) => setV({ ...v, [k]: e.target.checked });
 
+  const { formRef, requestErrorFocus } = useErrorFocus();
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const body = {
@@ -578,7 +587,7 @@ export function PilotForm({
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
-      focusFirstError(form);
+      requestErrorFocus();
       return;
     }
     setErrors({});
@@ -592,7 +601,7 @@ export function PilotForm({
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" aria-label={editing ? "操縦者の訂正" : "操縦者の登録"}>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6" aria-label={editing ? "操縦者の訂正" : "操縦者の登録"}>
       <Group title="操縦者">
         <Field label="氏名" required error={errors["fullName"]}>
           <input className={inputClass} value={v.fullName} onChange={set("fullName")} />
@@ -704,9 +713,9 @@ export function MemberInviteForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { formRef, requestErrorFocus } = useErrorFocus();
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const r = await send("POST", "/api/ops/members", v);
@@ -714,7 +723,7 @@ export function MemberInviteForm() {
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
-      focusFirstError(form);
+      requestErrorFocus();
       return;
     }
     setErrors({});
@@ -722,7 +731,7 @@ export function MemberInviteForm() {
     reloadAfterChange({ target: MEMBER_INVITE_NOTICE_TARGET, message: "招待しました。利用者の一覧に「招待中」として加わりました。" });
   };
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5" aria-label="利用者の招待">
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-5" aria-label="利用者の招待">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label="メールアドレス"
@@ -777,9 +786,9 @@ export function MemberControls({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { formRef, requestErrorFocus } = useErrorFocus();
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const r = await send("PATCH", `/api/ops/members/${member.id}`, {
@@ -792,7 +801,7 @@ export function MemberControls({
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
-      focusFirstError(form);
+      requestErrorFocus();
       return;
     }
     setErrors({});
@@ -800,7 +809,7 @@ export function MemberControls({
     reloadAfterChange({ target: memberNoticeTarget(member.id), message: `${versionOf(r)}役割・利用を変更しました。` });
   };
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${member.displayName}の変更`}>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${member.displayName}の変更`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="役割" error={errors["role"]}>
           <select className={inputClass} value={role} onChange={(e) => setRole(e.target.value)}>
