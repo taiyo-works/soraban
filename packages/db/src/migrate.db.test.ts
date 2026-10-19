@@ -133,25 +133,35 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
   });
 
   it("アプリ用ロール soraban_app は evidence_log に追加できるが、更新・削除はできない", async () => {
-    await withClient(db.url, (c) =>
-      c.query(
-        "do $$ begin if not exists (select 1 from pg_roles where rolname = 'soraban_app') then create role soraban_app nologin; end if; end $$",
-      ),
-    );
-    expect((await migrate()).code).toBe(0);
-    await withClient(db.url, async (c) => {
-      await c.query("set role soraban_app");
-      await c.query(
-        `insert into evidence_log (evidence_id, engine_version, checked_at, loc, overall, overall_confidence,
-           regulation_ids, per_regulation_status)
-         values ('ev_role_test', 'e', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}')`,
-      );
-      expect((await c.query("select count(*)::int as n from evidence_log")).rows[0].n).toBe(1);
-      expect((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n).toBe(3);
-      await expect(c.query("update evidence_log set overall = 'red'")).rejects.toMatchObject({ code: "42501" });
-      await expect(c.query("delete from evidence_log")).rejects.toMatchObject({ code: "42501" });
-      await expect(c.query("insert into regulations (id) values ('x')")).rejects.toMatchObject({ code: "42501" });
+    // ロールはクラスター全体のもの。既にあれば作らず・消さず（使うのは使い捨て DB の中だけ）、
+    // 無ければこのテストで作り、使い捨て DB を消した後に消す（共有の DB サーバーに痕跡を残さない）。
+    const created = await withClient(ADMIN_URL!, async (c) => {
+      const exists = (await c.query("select 1 from pg_roles where rolname = 'soraban_app'")).rowCount === 1;
+      if (!exists) await c.query("create role soraban_app nologin");
+      return !exists;
     });
+    try {
+      expect((await migrate()).code).toBe(0);
+      await withClient(db.url, async (c) => {
+        await c.query("set role soraban_app");
+        await c.query(
+          `insert into evidence_log (evidence_id, engine_version, checked_at, loc, overall, overall_confidence,
+             regulation_ids, per_regulation_status)
+           values ('ev_role_test', 'e', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}')`,
+        );
+        expect((await c.query("select count(*)::int as n from evidence_log")).rows[0].n).toBe(1);
+        expect((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n).toBe(3);
+        await expect(c.query("update evidence_log set overall = 'red'")).rejects.toMatchObject({ code: "42501" });
+        await expect(c.query("delete from evidence_log")).rejects.toMatchObject({ code: "42501" });
+        await expect(c.query("insert into regulations (id) values ('x')")).rejects.toMatchObject({ code: "42501" });
+      });
+    } finally {
+      if (created) {
+        // 権限は使い捨て DB の中にしかないため、DB を消せばロールを消せる。
+        await db.drop();
+        await withClient(ADMIN_URL!, (c) => c.query("drop role if exists soraban_app"));
+      }
+    }
   });
 });
 

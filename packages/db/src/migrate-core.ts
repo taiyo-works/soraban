@@ -71,6 +71,15 @@ export const parseMigrationFiles = (
   return out;
 };
 
+/** 接続文字列のクエリパラメータ名（小文字）。 */
+const connectionParamNames = (connectionString: string): Set<string> => {
+  const q = connectionString.indexOf("?");
+  if (q < 0) return new Set();
+  return new Set(
+    Array.from(new URLSearchParams(connectionString.slice(q + 1)).keys()).map((k) => k.toLowerCase()),
+  );
+};
+
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 export type ConnectionTarget = {
@@ -96,9 +105,24 @@ export const validateConnectionTarget = (input: {
       "DATABASE_URL_UNPOOLED が設定されていません（マイグレーションは直結の接続文字列で実行します）。",
     );
   }
+  // 接続先を上書き・追加するパラメータは拒否する（pg は ?host= を URL のホスト名より優先するため、
+  // 表示・照合したホストと実際の接続先がずれる）。
+  const params = connectionParamNames(input.connectionString);
+  for (const name of ["host", "hostaddr"]) {
+    if (params.has(name)) {
+      throw new MigrationError(
+        `接続文字列の ${name} パラメータは使えません（実際の接続先と確認対象のホスト名がずれるため）。`,
+      );
+    }
+  }
   const c = describeConnection(input.connectionString);
   if (!c) throw new MigrationError("DATABASE_URL_UNPOOLED を接続文字列として解釈できません。");
   const host = c.host.toLowerCase();
+  if (host.length === 0 || host.startsWith("/") || host.includes(",")) {
+    throw new MigrationError(
+      "接続先のホスト名を 1 つに特定できません（ホスト名なし・Unix ソケット・複数ホストは使えません）。",
+    );
+  }
   if (host.includes("-pooler")) {
     throw new MigrationError(
       `ホスト名に -pooler を含む接続文字列は使えません（${host}）。Neon の Direct connection を使ってください。`,

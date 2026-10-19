@@ -98,6 +98,44 @@ describe("validateConnectionTarget", () => {
     expect(t).toEqual({ host: "ep-cool-1234.ap-southeast-1.aws.neon.tech", port: "5432", database: "neondb" });
   });
 
+  it("?host= / hostaddr で接続先を上書きする接続文字列は拒否（--target・-pooler の確認を回避させない）", () => {
+    const cases = [
+      // URL は localhost だが pg は ?host= の本番へ接続する
+      { cs: "postgresql://u:pw@localhost/db?host=ep-cool-1234.ap-southeast-1.aws.neon.tech", target: undefined },
+      // URL は直結だが実際の接続先はプール経由
+      {
+        cs: "postgresql://u:pw@ep-cool-1234.ap-southeast-1.aws.neon.tech/db?sslmode=require&host=ep-cool-1234-pooler.ap-southeast-1.aws.neon.tech",
+        target: "ep-cool-1234.ap-southeast-1.aws.neon.tech",
+      },
+      { cs: "postgresql://u:pw@localhost/db?hostaddr=203.0.113.10", target: undefined },
+      { cs: "postgresql://u:pw@localhost/db?HOST=example.com", target: undefined },
+    ];
+    for (const c of cases) {
+      for (const requireTarget of [true, false]) {
+        expect(() => validateConnectionTarget({ connectionString: c.cs, target: c.target, requireTarget })).toThrow(
+          /パラメータは使えません/,
+        );
+      }
+    }
+  });
+
+  it("ホスト名なし・Unix ソケット・複数ホストは拒否", () => {
+    for (const cs of ["postgresql:///db", "postgresql://u@%2Fvar%2Frun%2Fpostgresql/db", "postgresql://u:pw@h1,h2/db"]) {
+      expect(() => validateConnectionTarget({ connectionString: cs, target: undefined, requireTarget: false })).toThrow(
+        /特定できません/,
+      );
+    }
+  });
+
+  it("表示・照合するホストは pg が実際に接続するホスト（pg-connection-string と同じ解析）", () => {
+    const t = validateConnectionTarget({
+      connectionString: "postgresql://u:p%40ss@ep-cool-1234.ap-southeast-1.aws.neon.tech:6543/neondb?sslmode=verify-full",
+      target: "ep-cool-1234.ap-southeast-1.aws.neon.tech",
+      requireTarget: true,
+    });
+    expect(t).toEqual({ host: "ep-cool-1234.ap-southeast-1.aws.neon.tech", port: "6543", database: "neondb" });
+  });
+
   it("localhost・127.0.0.1 は --target 不要", () => {
     expect(
       validateConnectionTarget({ connectionString: "postgresql://p:p@localhost:5432/t", target: undefined, requireTarget: true })
@@ -155,6 +193,17 @@ describe("runMigrationCommand は検証に失敗したら DB に接続しない"
     },
     { label: "--target 不一致", dir: () => DEFAULT_MIGRATIONS_DIR, cs: remote, target: "ep-other.neon.tech" },
     { label: "localhost 以外で --target なし", dir: () => DEFAULT_MIGRATIONS_DIR, cs: remote },
+    {
+      label: "?host= で localhost を装った本番",
+      dir: () => DEFAULT_MIGRATIONS_DIR,
+      cs: "postgresql://owner:pw@localhost/neondb?host=ep-cool-1234.ap-southeast-1.aws.neon.tech",
+    },
+    {
+      label: "?host= で -pooler を隠した接続文字列",
+      dir: () => DEFAULT_MIGRATIONS_DIR,
+      cs: "postgresql://owner:pw@ep-cool-1234.ap-southeast-1.aws.neon.tech/neondb?host=ep-cool-1234-pooler.ap-southeast-1.aws.neon.tech",
+      target: "ep-cool-1234.ap-southeast-1.aws.neon.tech",
+    },
   ];
 
   for (const c of cases) {

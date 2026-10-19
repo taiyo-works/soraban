@@ -17,6 +17,13 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 
 値（接続文字列）はリポジトリに置かない。`.env.example` には名前だけを書いている。
 
+### `sslmode` は `verify-full` を推奨
+
+- Neon の Connect 画面が出す接続文字列は `sslmode=require` だが、`sslmode=verify-full` に書き換えて使う（`DATABASE_URL`・`DATABASE_URL_UNPOOLED` とも）。
+- 理由：pg 8.23 は `sslmode=require` を受け取ると SECURITY WARNING を出す。現在は `require` も証明書とホスト名を検証する扱いだが、pg の次のメジャー版で libpq と同じ意味（暗号化のみで、証明書を検証しない）に変わると予告されている。`verify-full` なら今後も検証が保たれる。
+- Neon は `verify-full` に対応し、推奨もしている（出典：https://neon.com/docs/connect/connect-securely 、2026-10-19 確認）。Neon の証明書は Let's Encrypt（ISRG Root X1）で、Node.js が内蔵するルート証明書に含まれるため、証明書ファイル（`sslrootcert`）の指定は要らない。
+- ローカル・CI のコンテナ（TLS なし）では `sslmode` を付けない。
+
 ## 接続層（`src/pool.ts`・`src/config.ts`）
 
 - `getPool()` は `DATABASE_URL` から `pg.Pool` を遅延生成して使い回す。未設定なら `null`（接続を試みない）。`isDbConfigured()` で判定できる。
@@ -122,32 +129,56 @@ docker stop soraban-pg
 
 エージェント（generator・evaluator を含む）は本番 Neon の接続文字列を持たず、本番 DB にも Vercel の環境変数にも触れない。以下はのりさん（または会社で決めた運用担当者）が行う。
 
+**実施の順番は 手順 2（ロール作成）→ 手順 3（マイグレーション適用）→ 手順 1（Vercel の環境変数）。** 番号は内容のまとまりで、実施順ではない。
+
 ### 1. Vercel の環境変数（taiyo-works-projects チーム、プロジェクト soraban）
 
 | 変数 | Production | Preview | Development | 値の取り方 |
 |---|---|---|---|---|
-| `DATABASE_URL` | 設定する | 設定しない（プレビューは DB なしで縮退動作） | 設定しない（ローカルは `.env.local` でコンテナか開発用ブランチを指す） | Neon コンソール → `soraban` → 既定ブランチ → Connect → **Pooled connection**（ホスト名に `-pooler`）。ロールは `soraban_app`（手順 2）。`sslmode=require` 付き |
+| `DATABASE_URL` | 設定する | 設定しない（プレビューは DB なしで縮退動作） | 設定しない（ローカルは `.env.local` でコンテナか開発用ブランチを指す） | Neon コンソール → `soraban` → 既定ブランチ → Connect → **Pooled connection**（ホスト名に `-pooler`）。ロールは `soraban_app`（手順 2）。`sslmode=require` を `sslmode=verify-full` に書き換える |
 | `DATABASE_URL_UNPOOLED` | 設定しない | 設定しない | — | マイグレーションを実行する人の手元でだけ使う（Direct connection、オーナーロール） |
 | `EVIDENCE_LOG` | 通常は設定しない | — | — | 書き込みを止めるときだけ `off` |
 
+- 追加画面（Settings → Environment Variables）では、対象の環境が初期状態で Production・Preview・Development の**すべて**選ばれている。**Production だけ**を残して他の選択を外す。
+- **Sensitive** を有効にする（保存後は値を画面で表示できなくなる。変更するときは値を入れ直す）。
 - Neon の Vercel 連携（プレビューごとに Neon ブランチを自動作成する機能）は使わない。ブランチが増えると計算資源の課金が増えるため。
 - 環境変数を変えたら、Production を再デプロイして反映する。
 
-### 2. アプリ用ロール `soraban_app` の作成（初回のみ、手順 3 の前）
+### 2. アプリ用ロール `soraban_app` の作成（初回のみ）
 
-1. Neon コンソール → `soraban` → 既定ブランチ → SQL Editor（オーナーロール）で、次を実行する。パスワードは手元で生成し、リポジトリ・チャットに貼らない。
+> **順番を守る：① ロール作成（この手順）→ ② マイグレーション適用（手順 3）→ ③ Vercel の設定（手順 1）。**
+> 0003 は、適用した時点で `soraban_app` が存在する場合にだけ権限を付ける。①より先に②を行うと、`soraban_app` は表を読めず、`/api/health/db` が `reachable: false` になり、証跡も書けない（判定自体は動く）。
+
+1. 手元でパスワードを英数字だけで生成する：`openssl rand -hex 24`（48 文字、約 192 ビット）。
+   - Neon は SQL で作るロールのパスワードに 60 ビット以上のエントロピーを求める（出典：https://neon.com/docs/manage/roles 、2026-10-19 確認）。
+   - 記号を含めると、接続文字列に入れるときに URL エンコードが要るため使わない。
+   - パスワードはリポジトリ・チャット・メモに貼らない（Vercel の環境変数にだけ入れる）。
+2. Neon コンソール → `soraban` → 既定ブランチ → SQL Editor（オーナーロール）で実行する：
    ```sql
    create role soraban_app with login password '<生成したパスワード>';
    ```
-2. アプリ用の接続文字列は、Pooled connection の接続文字列のユーザー名とパスワードを `soraban_app` のものに置き換えて作る（Connect 画面でロールを選べる場合はそれを使う）。
+3. アプリ用の接続文字列は、Pooled connection の接続文字列のユーザー名とパスワードを `soraban_app` のものに置き換え、`sslmode=verify-full` にして作る（Connect 画面でロールを選べる場合はそれを使う）。
+4. パスワードを再発行するときは、新しいパスワードを同じ方法で生成し、SQL Editor で `alter role soraban_app password '<新しいパスワード>';` を実行してから、Vercel の `DATABASE_URL` を入れ直して Production を再デプロイする。
+
+**順番を逆にした場合（②を先に行った場合）の復旧**：①でロールを作った後、SQL Editor（オーナーロール）で次を 1 回実行する。マイグレーションの再適用は要らない（してはいけない）。
+
+```sql
+grant usage on schema public to soraban_app;
+grant select on regulations, regulation_zones, schema_migrations to soraban_app;
+grant select, insert on evidence_log to soraban_app;
+```
 
 ### 3. 本番 DB へのマイグレーション適用
 
 - **誰が**：のりさん（本番の接続文字列を持つ人）。エージェントには依頼しない。
-- **いつ**：Sprint 8 の PR が `main` にマージされた後、Vercel の Production に `DATABASE_URL` を設定する**前**。以後、マイグレーションを含む PR をマージするたびに同じ手順を行う（マイグレーションは追加のみとし、旧コードでも動く形にする）。
+- **いつ**：Sprint 8 の PR が `main` にマージされた後。**手順 2（ロール作成）の後**、Vercel の Production に `DATABASE_URL` を設定する**前**。以後、マイグレーションを含む PR をマージするたびに同じ手順を行う（マイグレーションは追加のみとし、旧コードでも動く形にする）。
 - **どう**：
   1. リポジトリの `main` を手元に取得し、`pnpm install`。
-  2. Neon コンソールで既定ブランチの **Direct connection**（オーナーロール）の接続文字列を取得し、手元のシェルにだけ設定する：`export DATABASE_URL_UNPOOLED='postgresql://…'`（ファイルや履歴に残さない）。
+  2. Neon コンソールで既定ブランチの **Direct connection**（オーナーロール）の接続文字列を取得し（`sslmode=verify-full` に書き換える）、手元のシェルにだけ設定する。コマンドに直接書くと zsh 等の履歴にパスワードが残るため、入力を表示しない `read` で貼り付ける：
+     ```sh
+     read -rs DATABASE_URL_UNPOOLED && export DATABASE_URL_UNPOOLED
+     # 何も表示されないので、接続文字列を貼り付けて Enter
+     ```
   3. `pnpm db:status` で、未適用の版（初回は `0001`〜`0003`）と接続先のホスト名を確認する。
   4. 必要に応じて、Neon コンソールで既定ブランチから復元用のブランチ（例：`before-0003-20261127`）を作る。Neon の時点復元の保持期間はプランによる（計画時点では未確認）。
   5. `pnpm db:migrate --target <手順 3 で表示されたホスト名>` を実行する。
@@ -156,3 +187,13 @@ docker stop soraban-pg
   8. 地点判定を 1 回行い、Neon の SQL Editor で `select evidence_id, checked_at from evidence_log order by created_at desc limit 1;` に行があることを確認する（任意）。
   9. 復元用ブランチを作った場合は、確認後に削除する。
   10. `unset DATABASE_URL_UNPOOLED`。
+
+### 将来の選択肢：GitHub Actions で本番マイグレーションを実行する（案。ワークフローは未作成）
+
+手元の PC が無いときでも適用できるようにする案。採用する場合は別途計画し、ワークフローを作る。
+
+- `workflow_dispatch`（手動起動）だけのワークフローを作り、入力に `target`（確認用のホスト名）を取る。中身は `pnpm install --frozen-lockfile` → `pnpm db:status` → `pnpm db:migrate --target <入力>` → `pnpm db:status`。
+- GitHub の Environment `production` を作り、`DATABASE_URL_UNPOOLED`（Direct connection、オーナーロール、`sslmode=verify-full`）を Environment の秘密（secret）として置く。リポジトリ全体の秘密にはしない。
+- Environment に「Required reviewers（承認者）」を設定し、承認されるまでジョブが始まらないようにする。対象ブランチは `main` に限る（Deployment branches）。
+- CI（`ci.yml`）からはこの Environment を参照しない（CI の DB は引き続きサービスコンテナだけを使う）。
+- 注意：本番の接続文字列を GitHub に置くことになるため、spec §13.8.1 の「GitHub に Neon の秘密情報を置かない」方針の変更として、ユーザーの判断が要る。

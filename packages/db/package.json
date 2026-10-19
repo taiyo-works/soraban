@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@vercel/functions": "^3.10.1",
-    "pg": "^8.23.1"
+    "pg": "^8.23.1",
+    "pg-connection-string": "^2.14.1"
   }
 }

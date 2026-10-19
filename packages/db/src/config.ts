@@ -1,3 +1,5 @@
+import { parse as parseConnectionString } from "pg-connection-string";
+
 // 接続設定（Sprint 8）。値はここ 1 か所にまとめる。
 //
 // Neon は scale-to-zero のため、停止中の計算資源への初回接続は起動待ち（数百 ms〜数秒）が入る。
@@ -35,17 +37,21 @@ export const isDbConfigured = (env: DbEnv = process.env): boolean =>
 export const isEvidenceLogEnabled = (env: DbEnv = process.env): boolean =>
   (nonEmpty(env["EVIDENCE_LOG"]) ?? "").toLowerCase() !== "off";
 
-/** 接続文字列のホスト名とデータベース名（パスワードは返さない）。解釈できなければ null。 */
+/**
+ * 接続文字列の実際の接続先（ホスト名・ポート・データベース名。パスワードは返さない）。
+ * pg と同じ pg-connection-string で解析するため、`?host=` 等で上書きされた接続先も正しく返す。
+ * 解釈できなければ null。
+ */
 export const describeConnection = (
   connectionString: string,
 ): { readonly host: string; readonly port: string; readonly database: string } | null => {
+  if (!/^postgres(ql)?:\/\//i.test(connectionString.trim())) return null;
   try {
-    const u = new URL(connectionString);
-    if (u.protocol !== "postgres:" && u.protocol !== "postgresql:") return null;
+    const c = parseConnectionString(connectionString);
     return {
-      host: u.hostname,
-      port: u.port || "5432",
-      database: decodeURIComponent(u.pathname.replace(/^\//, "")) || "postgres",
+      host: c.host ?? "",
+      port: c.port || "5432",
+      database: c.database || "postgres",
     };
   } catch {
     return null;
