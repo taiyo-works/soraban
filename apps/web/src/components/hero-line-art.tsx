@@ -30,7 +30,7 @@ export function HeroLineArt({ className }: { readonly className?: string }) {
       width={WIDTH}
       height={HEIGHT}
       alt=""
-      sizes="(min-width: 1024px) 15rem, 0px"
+      sizes="(min-width: 1024px) 14.5rem, 0px"
       unoptimized
       draggable={false}
       data-testid="hero-line-art-image"

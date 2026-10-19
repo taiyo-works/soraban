@@ -127,7 +127,7 @@ export default function Home() {
       {/* ============================ 見出し ============================
           サービス名 → 目的 → できること → 運営者・利用の範囲・対象地域 → 免責 の順に読ませ、
           そのすぐ下に判定の入口（住所・座標の入力と地図）を置く。 */}
-      <header className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-16">
+      <header className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_14.5rem] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-5">
           <h1 className="flex flex-col gap-1.5 text-ink">
             <span className="text-4xl font-medium leading-tight tracking-[0.06em] sm:text-5xl">
@@ -183,7 +183,7 @@ export default function Home() {
         <div
           aria-hidden="true"
           data-testid="hero-line-art"
-          className="pointer-events-none hidden opacity-40 lg:block"
+          className="pointer-events-none hidden opacity-50 lg:block dark:opacity-40"
         >
           <HeroLineArt className="block h-auto w-full select-none dark:invert" />
         </div>
