@@ -48,6 +48,29 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 
 Vercel の Deployments（最新が Production か）と、Domains の soraban.futuretec.jp の割り当てを確認する。DIPS の申請書に URL を書く前に必ず解消する。
 
+### 4.1 調査の結果（2026-10-20、Claude Code）
+
+Vercel のダッシュボードは見られなかった（作業環境の Vercel コネクタは carta-lab-projects チームだけに権限があり、taiyo-works-projects は 403。soraban.futuretec.jp と vercel.app への接続も作業環境のネットワーク方針で拒否）。GitHub とリポジトリから分かったこと：
+
+- デプロイ先は taiyo-works-projects のプロジェクト soraban（`prj_rW9rpj8jsKZM2jinw5CD8wgVnBIX`、Root Directory `apps/web`）。main の CI はすべて成功。
+- 報告された古い文言（「出願準備中」「特許コア」「タイヨー通信本社（拠点）」「個人開発・社内検討段階」）は main には無い。main から消えたのは 2026-10-19 17:54〜18:40 JST（Sprint 10a）。
+- 同じ文言が残っているブランチは `private-preview`（最終 2026-06-08「空港データを静的import化しVercel serverlessで配信可能に」＝もとは Vercel に載せるためのブランチ）と `sprint6/reliability`（最終 2026-10-14）。
+- 候補 3（`'use cache'`）は外れ。トップ画面には無く、残るのは `server/regulation-check.ts` の DID データの取得だけ。データのキャッシュが画面の文言（JSX）を古くすることは無い。Service Worker もどのブランチにも無い。
+
+残る候補は、どれも「どのデプロイを独自ドメインに出すか」の設定：
+
+| 候補 | ダッシュボードでの見え方 | 直し方 |
+|---|---|---|
+| A. 本番ブランチが main でない（`private-preview` 等） | Deployments で main のデプロイに「Preview」と付く | Settings → Environments → Production の Branch Tracking を `main` に。最新の main のデプロイを Promote to Production |
+| B. soraban.futuretec.jp がブランチに割り当てられている | Settings → Domains の soraban.futuretec.jp に Git Branch（`private-preview` 等）が出る | 同じ画面の Edit で Production に戻す |
+| C. Instant Rollback や手動の Promote で、本番ドメインの自動割り当てが止まっている | main のデプロイは「Production」だが「Current」が付かない。上部に Rollback の表示 | 最新の main のデプロイを Promote する（Undo Rollback でも可） |
+
+soraban-gules.vercel.app も古ければ A か C、新しければ B。
+
+直ったかの確かめ方：`curl -sI https://soraban.futuretec.jp/ | grep -i x-robots-tag` で `noindex, nofollow` が返ること（noindex は #17 で main にだけ入った。古い版には付かない）と、トップに「出願準備中」が無いこと。古い版は noindex が無いため、検索エンジンに載りうる点でも急ぐ。
+
+直ったあとで、`private-preview` と `sprint6/reliability` の削除をユーザーに相談する（B のとき、先に割り当てを外してから）。
+
 ## 5. ユーザー作業（未完了）
 
 | 作業 | 時期 | 手順の置き場所 |
