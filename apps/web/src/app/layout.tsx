@@ -30,9 +30,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "そらばん（Soraban）— ドローン規制チェック",
+  title: "そらばん — 山陰のドローン飛行の可否判定と運航管理",
   description:
-    "山陰の業務ドローン運用者向けコンプライアンス統合 SaaS。緯度経度から関連条例と信号機判定を表示します。",
+    "鳥取県・島根県のドローン飛行の可否判定と運航管理。運営：フューチャーテック株式会社。現在は社内での試験運用中です。",
 };
 
 export default function RootLayout({

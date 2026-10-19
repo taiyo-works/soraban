@@ -358,7 +358,7 @@ export const ApplicationPdfDocument = ({
             <Text style={styles.metaValue}>{diagnosis.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Engine</Text>
+            <Text style={styles.metaLabel}>判定の版</Text>
             <Text style={styles.metaValue}>{diagnosis.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>
@@ -594,7 +594,7 @@ export const ApplicationPdfDocument = ({
 
         {/* FOOTER（evidenceId を全ページに固定） */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 Soraban · 申請支援サマリ</MonoText>
+          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
           <Text>Evidence {diagnosis.evidenceId}</Text>
         </View>
       </Page>

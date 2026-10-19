@@ -10,7 +10,7 @@ import { addressIndexAvailable } from "@soraban/regulations/address";
 import { RegulationChecker } from "@/components/regulation-checker";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
-// レジストリに自治体を1行追加するだけで COVERAGE_SUMMARY 経由で自動反映される。
+// 自治体の件数は COVERAGE_SUMMARY から出す（収録を増やすと自動で反映される）。
 const formatMuniBreakdown = (
   entries: ReadonlyArray<readonly [string, number]>,
 ): string =>
@@ -19,7 +19,6 @@ const formatMuniBreakdown = (
     .map(([name, n]) => `${name.replace(/[市区町村]$/, "")}${n}`)
     .join(" + ");
 
-const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
 const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
 const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
 const HERITAGE_BREAKDOWN = formatMuniBreakdown(
@@ -49,7 +48,7 @@ const COVERAGE_LAYERS: readonly CoverageRow[] = [
     source: "国",
     title: "航空法 — 空港等周辺",
     coverage: "山陰・但馬",
-    dataset: "空港 手描き seed（国土数値情報 C28 へ置換予定）",
+    dataset: "空港の周辺区域は公開資料からの概算",
     count: "6 空港",
   },
   {
@@ -61,109 +60,24 @@ const COVERAGE_LAYERS: readonly CoverageRow[] = [
   },
   {
     source: "市町村",
-    title: "都市公園条例（自治体レジストリ方式）",
-    coverage: `${COVERAGE_SUMMARY.municipalParkNames.length} 市町村（Phase 1 拡大中）`,
-    dataset: "公園台帳簡易ポリゴン",
-    count: `計 ${COVERAGE_SUMMARY.totalParks} 公園（${PARK_BREAKDOWN}、Phase 1 で正規ポリゴン置換）`,
+    title: "都市公園条例",
+    coverage: `${COVERAGE_SUMMARY.municipalParkNames.length} 市町村（収録を拡大中）`,
+    dataset: "公園の区域は公開資料からの概算",
+    count: `計 ${COVERAGE_SUMMARY.totalParks} 公園（${PARK_BREAKDOWN}）`,
   },
   {
     source: "市町村",
     title: "文化財保護法125条 / 自治体文化財条例",
     coverage: `${COVERAGE_SUMMARY.municipalHeritageCounts.length} 市町村`,
-    dataset: "国指定史跡 + 県指定",
+    dataset: "国指定史跡・県指定史跡（区域は概算）",
     count: `計 ${COVERAGE_SUMMARY.totalHeritage} 件（${HERITAGE_BREAKDOWN}）`,
   },
   {
     source: "都道府県",
     title: `${PREF_NUISANCE_LABEL} 迷惑行為等防止条例`,
     coverage: `${PREF_NUISANCE_LABEL}全域`,
-    dataset: `公衆密集地 ${SENSITIVE_FACILITY_BUFFER_M}m バッファ`,
+    dataset: `公衆が密集する施設の周辺 ${SENSITIVE_FACILITY_BUFFER_M}m（施設の位置は概算）`,
     count: `計 ${COVERAGE_SUMMARY.totalSensitive} 施設（${SENSITIVE_BREAKDOWN}：市役所・病院・駅・温泉街・大社）`,
-  },
-];
-
-const ROADMAP: ReadonlyArray<{
-  readonly phase: string;
-  readonly when: string;
-  readonly scope: string;
-  readonly status: "done" | "current" | "next" | "future";
-}> = [
-  {
-    phase: "Phase 0",
-    when: "4月末",
-    scope: "米子市 PoC",
-    status: "done",
-  },
-  {
-    phase: "Phase 1",
-    when: "〜7月",
-    scope: `山陰主要自治体 α 版（現在 ${COVERAGE_SUMMARY.municipalParkNames.length} 市 / 目標 12 市）`,
-    status: "current",
-  },
-  {
-    phase: "Phase 2",
-    when: "〜10月",
-    scope: "山陰全域 38〜42 自治体・β版・課金開始",
-    status: "future",
-  },
-  {
-    phase: "Phase 3",
-    when: "〜12月",
-    scope: "正式公開・ぼうさいこくたい 2026",
-    status: "future",
-  },
-  {
-    phase: "Phase 4",
-    when: "2027〜",
-    scope: "中国地方 → 全国",
-    status: "future",
-  },
-];
-
-const TECH_STACK: ReadonlyArray<{
-  readonly category: string;
-  readonly value: string;
-}> = [
-  {
-    category: "Frontend",
-    value:
-      "Next.js 16 (App Router / RSC) / TypeScript strict / Tailwind v4 / Cache Components",
-  },
-  {
-    category: "キャッシュ戦略",
-    value:
-      "'use cache' + cacheLife('days') + cacheTag。Phase 1 のスクレイパ更新時に updateTag/revalidateTag で即時反映",
-  },
-  {
-    category: "Map",
-    value: "MapLibre GL + 国土地理院ベクタータイル / 6 レイヤー個別トグル",
-  },
-  {
-    category: "Geo",
-    value: "ハーバサイン距離・Ray-casting Point-in-Polygon・PostGIS互換ポリゴン",
-  },
-  {
-    category: "判定エンジン",
-    value:
-      "soraban-0.2.0-clausegraph（条文の例外節を機械可読 ClauseGraph 化）",
-  },
-  {
-    category: "監査トレイル",
-    value:
-      "SHA-256 evidenceId 採番（座標・時刻・適用規制IDを正規化してハッシュ）",
-  },
-  {
-    category: "ジオコーディング",
-    value: "国土地理院 LonLatToAddress / アドレス検索 API",
-  },
-  {
-    category: "データ整形",
-    value: "Shell + jq による国土数値情報 (GML/Shapefile) → GeoJSON パイプライン",
-  },
-  {
-    category: "アーキテクチャ",
-    value:
-      "Jamstack (静的 Markup + クライアント JS + サーバレス Route Handlers) / pnpm monorepo (web / regulations / geo / db / scraper)",
   },
 ];
 
@@ -204,73 +118,55 @@ export default function Home() {
           />
         </div>
 
-        {/* 製図の title block — ドローンの右肩に被せる小さな脇書き。
-            z-30 で透かしより前。 */}
-        <aside
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 z-30 hidden flex-col items-end gap-0.5 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-mute sm:flex"
-        >
-          <span className="text-[8px]">Subject — UAV / aerial unit</span>
-          <span>N 35°26′03″</span>
-          <span>E 133°22′50″</span>
-          <span className="text-[8px]">Hiezu / Tottori</span>
-        </aside>
-
         <div className="relative z-10 flex flex-col gap-3">
-          <p className="eyebrow">Soraban — Aerial Compliance Atlas</p>
-          <div className="flex items-end gap-2 sm:gap-3">
-            <h1 className="font-display text-4xl font-light leading-[0.95] tracking-tight text-ink sm:text-6xl">
+          <h1 className="flex flex-col gap-2 text-ink">
+            <span className="font-display text-4xl font-light leading-[0.95] tracking-tight sm:text-6xl">
               そらばん
-            </h1>
-            <span className="font-display pb-1 text-sm italic text-ink-mute sm:pb-2 sm:text-base">
-              / Soraban
             </span>
-          </div>
+            <span className="text-base font-medium leading-snug sm:text-xl">
+              山陰のドローン飛行の可否判定と運航管理
+            </span>
+          </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
-            山陰の業務ドローン、6 規制レイヤーを 1 クリックで判定。
-            <br className="hidden sm:block" />
-            航空法（DID・空港）／小型無人機等飛行禁止法／自治体条例（都市公園・指定史跡・公衆密集地）を地理空間ポリゴンで重ね、信号機で総合判定します。
+            地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、鳥取県・島根県と県内市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
+          </p>
+          <p
+            data-testid="site-disclaimer"
+            className="max-w-2xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft sm:text-sm"
+          >
+            判定結果は参考情報です。飛行の可否は、国土交通省（DIPS 2.0）・警察・各自治体で最終確認してください。
           </p>
         </div>
 
-        {/* メタ表示。バッジ感を減らし、ドラフター文書の脇書きとして配置 */}
-        <dl className="relative z-10 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs font-mono text-ink-mute sm:grid-cols-4">
+        <dl
+          data-testid="site-facts"
+          className="relative z-10 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs text-ink-mute sm:grid-cols-3"
+        >
           <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">Status</dt>
-            <dd className="text-ink-soft">社内限定 PoC ／ Phase 1</dd>
+            <dt className="eyebrow !text-[9px]">運営者</dt>
+            <dd className="text-ink-soft">フューチャーテック株式会社</dd>
           </div>
           <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">Engine</dt>
-            <dd className="tnum text-ink-soft">soraban-0.2.0-clausegraph</dd>
+            <dt className="eyebrow !text-[9px]">利用の範囲</dt>
+            <dd className="text-ink-soft">現在は社内での試験運用中</dd>
           </div>
           <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">Patent</dt>
+            <dt className="eyebrow !text-[9px]">対象地域</dt>
             <dd className="text-ink-soft">
-              <span aria-hidden className="bearing-mark" />
-              出願準備中
-            </dd>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">Coverage</dt>
-            <dd className="tnum text-ink-soft">
-              {COVERAGE_LAYERS.length} layers ／ {COVERAGE_SUMMARY.municipalParkNames.length} cities
+              鳥取県・島根県（条例データを収録した市町村 {COVERAGE_SUMMARY.municipalParkNames.length}）
             </dd>
           </div>
         </dl>
-
-        <p className="relative z-10 max-w-3xl border-l-2 border-brand-700 bg-paper/40 pl-4 text-xs leading-relaxed text-ink-mute">
-          自治体条例レイヤーは既存サービス全社の盲点。{PARK_MUNI_LABEL} 3 カテゴリ条例（都市公園・文化財保護・県迷惑行為）を機械可読化し、特許コアの「マルチソース規制を地理空間 DB で統合判定する手法」の実証実装を行っています。自治体は registry に 1 行追加するだけで判定エンジン・地図・カバレッジ表示すべてに自動反映。
-        </p>
       </header>
 
       {/* ============================ COVERAGE ============================ */}
       <section className="flex flex-col gap-5">
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
-            <p className="eyebrow">§01 — Coverage</p>
+            <p className="eyebrow">§01</p>
             <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
-              現在のカバレッジ
+              収録している規制とデータ
             </h2>
           </div>
           <p className="font-mono text-[11px] tnum text-ink-mute">
@@ -312,103 +208,23 @@ export default function Home() {
       <section className="flex flex-col gap-5">
         <div className="flex items-end justify-between border-b border-rule pb-3">
           <div className="flex flex-col gap-1">
-            <p className="eyebrow">§02 — Compliance check</p>
+            <p className="eyebrow">§02</p>
             <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
               <span aria-hidden className="bearing-mark" />
               判定する
             </h2>
           </div>
           <p className="font-mono text-[11px] text-ink-mute">
-            click map · paste coords · search address
+            地図をクリック · 座標を貼り付け · 住所を検索
           </p>
         </div>
         <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
       </section>
 
-      {/* ============================ ROADMAP ============================ */}
-      <section className="flex flex-col gap-5">
-        <div className="flex items-end justify-between border-b border-rule pb-3">
-          <div className="flex flex-col gap-1">
-            <p className="eyebrow">§03 — Roadmap</p>
-            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
-              <span aria-hidden className="bearing-mark" />
-              段階展開
-            </h2>
-          </div>
-        </div>
-
-        <ol className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-5">
-          {ROADMAP.map((r) => {
-            const tone =
-              r.status === "current"
-                ? "bg-brand-700 text-paper"
-                : r.status === "done"
-                  ? "bg-paper-soft text-ink"
-                  : r.status === "next"
-                    ? "bg-paper text-ink"
-                    : "bg-paper text-ink-mute";
-            return (
-              <li
-                key={r.phase}
-                className={`flex min-h-[8rem] flex-col gap-1.5 px-4 py-4 ${tone}`}
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="font-mono text-xs uppercase tracking-wider">
-                    {r.phase}
-                  </span>
-                  {r.status === "current" ? (
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper/70">
-                      ▸ now
-                    </span>
-                  ) : r.status === "done" ? (
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-mute">
-                      ✓ done
-                    </span>
-                  ) : null}
-                </div>
-                <p
-                  className={`font-mono text-[10px] tnum ${r.status === "current" ? "text-paper/80" : "text-ink-mute"}`}
-                >
-                  {r.when}
-                </p>
-                <p
-                  className={`mt-auto text-xs leading-snug ${r.status === "current" ? "text-paper" : ""}`}
-                >
-                  {r.scope}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
-
-      {/* ============================ TECH STACK ============================ */}
-      <section className="flex flex-col gap-5">
-        <div className="flex items-end justify-between border-b border-rule pb-3">
-          <div className="flex flex-col gap-1">
-            <p className="eyebrow">§04 — Implementation</p>
-            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
-              <span aria-hidden className="bearing-mark" />
-              採用技術 / 判定アルゴリズム
-            </h2>
-          </div>
-        </div>
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
-          {TECH_STACK.map((item) => (
-            <div key={item.category} className="flex flex-col gap-1 border-l border-rule pl-3">
-              <dt className="eyebrow">{item.category}</dt>
-              <dd className="text-xs leading-relaxed text-ink-soft">
-                {item.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
       {/* ============================ DISCLAIMER + FOOTER ============================ */}
       <section className="border-t border-double border-rule pt-5">
         <p className="text-[11px] leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[9px]">Disclaimer ·</span>{" "}
+          <span className="eyebrow !text-[9px]">免責 ·</span>{" "}
           本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。緊急用務空域等の動的情報は反映していません。実運用前に必ず{" "}
           <a
             href="https://www.dips.mlit.go.jp/portal/"
@@ -418,15 +234,13 @@ export default function Home() {
           >
             国土交通省 DIPS
           </a>
-          、警察庁、各自治体の最新情報をご確認ください。Phase 0/1 段階の自治体条例データは手動シードを含み、verifiedAt と確信度（low/medium/high）で監査可能性を担保しています。
+          、警察庁、各自治体の最新情報をご確認ください。自治体の条例データの一部は手作業で収録しており、各データに確認日と確からしさ（低・中・高）を付けています。
         </p>
       </section>
 
       <footer className="mt-auto flex flex-col gap-2 border-t border-rule pt-5 text-[10px] font-mono text-ink-mute">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>© 2026 Soraban</span>
-          <span aria-hidden>—</span>
-          <span>奥田憲章 · 個人開発・社内検討段階</span>
+          <span>© 2026 フューチャーテック株式会社</span>
           <span aria-hidden>—</span>
           <span className="tnum">base · 35°26′03″N · 133°22′50″E（鳥取県西伯郡日吉津村）</span>
         </div>

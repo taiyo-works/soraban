@@ -110,8 +110,8 @@ type DemoPreset = {
   readonly airspaceFlags?: readonly SpecificFlightFlag[];
 };
 
-// デモシナリオ用の固定地点。県別にグルーピングし、特許コア（複数規制の同時 red）
-// と自治体カバレッジ拡大（鳥取2市 + 島根1市）を端的に提示できるよう並べる。
+// 地点の例（固定地点）。県別にグルーピングし、複数規制が同時に red になる地点と
+// 収録している自治体（鳥取・島根）の判定を端的に確かめられるよう並べる。
 // 先頭はユーザの本社拠点 (起点) を置き、現場運用で「拠点と出張先のコントラスト」を
 // 1 タップで切り替えられるようにする。
 // 地図の初期表示と最初の判定地点（本社：鳥取県西伯郡日吉津村日吉津45番地3）。
@@ -1358,7 +1358,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         <div className="flex flex-col gap-3 border-t border-rule pt-5">
           <p className="eyebrow">
             <span aria-hidden className="bearing-mark" />
-            04 — デモ用プリセット
+            04 — 地点の例
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
               （県別 ／ 横スクロール）
             </span>
@@ -1478,7 +1478,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             </button>
           </div>
 
-          {/* 低確信度警告 — 特許①従属項8 の実施例。閾値未満のときだけ出る */}
+          {/* 低確信度警告 — 確信度が閾値未満のときだけ警告を出す */}
           {shouldWarnConfidence(result.overallConfidence) ? (
             <div className="border-l-2 border-signal-amber bg-signal-amber-soft px-4 py-3 text-xs leading-relaxed text-ink-soft">
               <span className="eyebrow !text-[9px] !text-signal-amber">
@@ -1524,7 +1524,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               </dd>
             </div>
             <div className="flex flex-col gap-0.5">
-              <dt className="eyebrow !text-[9px]">Engine</dt>
+              <dt className="eyebrow !text-[9px]">判定の版</dt>
               <dd className="tnum normal-case tracking-normal text-ink">
                 {result.engineVersion}
               </dd>

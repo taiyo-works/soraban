@@ -425,7 +425,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={styles.metaValue}>{result.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Engine</Text>
+            <Text style={styles.metaLabel}>判定の版</Text>
             <Text style={styles.metaValue}>{result.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>
@@ -472,7 +472,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         </View>
 
-        {/* CONFIDENCE WARNING — 特許①従属項8 の実施例。閾値未満のときだけ出る */}
+        {/* CONFIDENCE WARNING — 確信度が閾値未満のときだけ警告を出す */}
         {shouldWarnConfidence(result.overallConfidence) ? (
           <Text style={styles.warningBox}>
             <Text style={{ fontWeight: 700, color: COLOR.signalAmber }}>
@@ -603,7 +603,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
 
         {/* FOOTER */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 Soraban · 奥田憲章</MonoText>
+          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
           <MonoText>
             出典: 国交省 国土数値情報 / 国土地理院 / 警察庁・防衛省 / 各自治体例規集
           </MonoText>

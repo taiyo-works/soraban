@@ -157,7 +157,7 @@ const AIRPORT_REG: Regulation = {
     conditions: [
       {
         id: "airport-cond-zone",
-        description: "進入表面等の上空に該当すること（PoC では半径6kmの簡易バッファで判定）",
+        description: "進入表面等の上空に該当すること（現在は半径6kmの簡易バッファで判定）",
         machine: { type: "in_zone", value: "approach_surface_buffer" },
       },
     ],
@@ -874,7 +874,7 @@ export const evaluateMunicipalParks = (
     return {
       ...YONAGO_PARK_REG,
       status: "unknown",
-      note: `判定地点はカバレッジ対象自治体外です。Phase 1 のカバレッジは ${COVERAGE_MUNI_NAMES}。当該市町村の都市公園条例データは未整備のため判定できません。`,
+      note: `判定地点はカバレッジ対象自治体外です。現在の収録範囲は ${COVERAGE_MUNI_NAMES}。当該市町村の都市公園条例データは未整備のため判定できません。`,
     };
   }
   const hit = entry.parks.find((p) => pointInPolygon(loc, p.polygon));
@@ -894,7 +894,7 @@ export const evaluateMunicipalParks = (
   return {
     ...entry.reg,
     status: "green",
-    note: `判定地点は登録された${entry.muniName}内の都市公園ポリゴン外です（Phase 1 のデータは ${entry.parks.length} 公園のみ。最終確認は${entry.muniName}公園台帳で）。`,
+    note: `判定地点は登録された${entry.muniName}内の都市公園ポリゴン外です（現在収録しているのは ${entry.parks.length} 公園のみ。最終確認は${entry.muniName}公園台帳で）。`,
   };
 };
 
@@ -935,7 +935,7 @@ export const evaluateMunicipalHeritage = (
   return {
     ...entry.reg,
     status: "green",
-    note: `判定地点は登録された${entry.muniName}内の指定史跡区域外です（Phase 1 のデータは ${entry.sites.length} 件のみ。最終確認は${entry.muniName}教育委員会・文化庁データベースで）。`,
+    note: `判定地点は登録された${entry.muniName}内の指定史跡区域外です（現在収録しているのは ${entry.sites.length} 件のみ。最終確認は${entry.muniName}教育委員会・文化庁データベースで）。`,
   };
 };
 

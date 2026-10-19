@@ -457,7 +457,7 @@ export function DiagnosisPanel({
           </div>
         ) : null}
         <div className="flex flex-col gap-0.5">
-          <dt className="eyebrow !text-[9px]">Engine</dt>
+          <dt className="eyebrow !text-[9px]">判定の版</dt>
           <dd className="tnum normal-case tracking-normal text-ink">{diagnosis.engineVersion}</dd>
         </div>
         <div className="flex flex-col gap-0.5">
