@@ -497,13 +497,13 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
           id: "current-location-fill",
           type: "fill",
           source: "current-location",
-          paint: { "fill-color": "#2563eb", "fill-opacity": 0.15 },
+          paint: { "fill-color": "#1d3557", "fill-opacity": 0.14 },
         });
         m.addLayer({
           id: "current-location-outline",
           type: "line",
           source: "current-location",
-          paint: { "line-color": "#1d4ed8", "line-width": 1.5 },
+          paint: { "line-color": "#1d3557", "line-width": 2 },
         });
       }
       if (candidate) {
@@ -515,7 +515,7 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
     candidateMarkerRef.current?.remove();
     candidateMarkerRef.current = null;
     if (candidate) {
-      candidateMarkerRef.current = new maplibregl.Marker({ color: "#2563eb" })
+      candidateMarkerRef.current = new maplibregl.Marker({ color: "#1d3557" })
         .setLngLat([candidate.lng, candidate.lat])
         .addTo(map);
       map.easeTo({
@@ -583,6 +583,22 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
       {/* 地図: モバイルでは aspect 4:5 (縦長) で画面の主役に近づける。
           touch-action で縦スクロールとピンチを両立させる */}
       <div className="overflow-hidden border border-rule">
+        {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
+            主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
+        <p
+          className="flex items-start gap-2 border-b border-rule bg-paper-soft px-3 py-2 text-xs leading-relaxed text-ink"
+          data-testid="map-pick-hint"
+        >
+          <span aria-hidden className="mt-[0.35em] inline-block h-2 w-2 shrink-0 rounded-full bg-[#dc2626]" />
+          <span>
+            <span className="pointer-fine:hidden">
+              地図を<strong className="font-medium">長押し</strong>すると、その位置を判定地点（赤い印）にします。指を動かすと地図の移動になります。
+            </span>
+            <span className="hidden pointer-fine:inline">
+              地図を<strong className="font-medium">クリック</strong>または<strong className="font-medium">右クリック</strong>すると、その位置を判定地点（赤い印）にします。
+            </span>
+          </span>
+        </p>
         <div
           ref={containerRef}
           data-testid="regulation-map"
@@ -603,7 +619,7 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
         </summary>
         <div className="flex flex-col gap-2 sm:!flex">
           <span className="text-[11px] text-ink-mute hidden sm:block">
-            ・チェックで地図表示を切替 ・地図のクリック／右クリック（スマートフォンは長押し）で判定地点を選択
+            ・チェックで地図表示を切替
           </span>
           <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {LAYER_GROUPS.map((group) => {

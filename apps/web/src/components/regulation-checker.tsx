@@ -887,32 +887,34 @@ export function RegulationChecker() {
             </button>
           </div>
           {geocodeResults.length > 1 ? (
-            <ul className="mt-1 flex flex-col divide-y divide-rule border border-rule bg-paper">
-              {geocodeResults.map((r) => (
-                <li key={`${r.source}-${r.level}-${r.lat}-${r.lng}`}>
-                  <button
-                    type="button"
-                    data-testid="geocode-result"
-                    data-source={r.source}
-                    data-level={r.level}
-                    onClick={() => selectGeocodeResult(r)}
-                    className="flex w-full flex-col gap-0.5 px-3 py-2 text-left hover:bg-paper-soft"
-                  >
-                    <span className="flex w-full items-baseline justify-between gap-2">
-                      <span className="text-sm font-medium text-ink">{r.title}</span>
-                      <span className="font-mono text-[11px] tnum text-ink-mute">
-                        {round6(r.lat)}, {round6(r.lng)}
+            <div className="mt-1 flex flex-col gap-1">
+              <p className="text-xs text-ink-soft">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
+              <ul className="flex flex-col divide-y divide-rule border border-rule bg-paper">
+                {geocodeResults.map((r) => (
+                  <li key={`${r.source}-${r.level}-${r.lat}-${r.lng}`}>
+                    <button
+                      type="button"
+                      data-testid="geocode-result"
+                      data-source={r.source}
+                      data-level={r.level}
+                      onClick={() => selectGeocodeResult(r)}
+                      className="flex min-h-12 w-full flex-col gap-1 px-3 py-2.5 text-left transition-colors hover:bg-paper-soft active:bg-paper-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-700"
+                    >
+                      <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                        <span className="text-sm font-medium text-ink">{r.title}</span>
+                        <span className="font-mono text-[11px] tnum text-ink-mute">
+                          {round6(r.lat)}, {round6(r.lng)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="text-[11px] text-ink-mute">
-                      出典：{GEOCODE_SOURCE_LABEL[r.source]}／{GEOCODE_LEVEL_NOTE[r.level]}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+                      <span className="text-xs leading-relaxed text-ink-soft">{GEOCODE_LEVEL_NOTE[r.level]}</span>
+                      <span className="text-[11px] text-ink-mute">出典：{GEOCODE_SOURCE_LABEL[r.source]}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
-          <p className="text-[10px] leading-relaxed text-ink-mute" data-testid="geocode-attribution">
+          <p className="text-[11px] leading-relaxed text-ink-mute" data-testid="geocode-attribution">
             出典：アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／国土地理院 住所検索
           </p>
         </fieldset>
@@ -1412,13 +1414,13 @@ export function RegulationChecker() {
         />
         {locationNote ? (
           <p
-            className="border-l-2 border-brand-700 pl-3 text-xs text-ink"
+            className="flex flex-col gap-0.5 border-l-2 border-brand-700 bg-paper-soft py-2 pl-3 pr-2 text-xs leading-relaxed text-ink"
             role="status"
             data-testid="location-note"
           >
-            {locationNote.title ? <span className="font-medium">{locationNote.title}：</span> : null}
-            {locationNote.source ? <span>出典 {locationNote.source}。</span> : null}
+            {locationNote.title ? <span className="text-sm font-medium">{locationNote.title}</span> : null}
             <span>{locationNote.text}</span>
+            {locationNote.source ? <span className="text-[11px] text-ink-mute">出典 {locationNote.source}。</span> : null}
           </p>
         ) : null}
         <RegulationMap
