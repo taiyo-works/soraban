@@ -1,7 +1,21 @@
 {
   "$schema": "../../README.md",
-  "_note": "DIPS 飛行許可・承認 申請支援機能の手続き定義（素データ）。各レコードは legalBasis（法的根拠）と sourceUrl（出典 URL）を必ず持つ。コードに直書きせず、改正時はこの JSON を差し替える。出典は docs/spec.md §3 に裏取り済みの一次情報。IIA／IIB の呼称は §3.6 で正式名称が要再確認のため『相当』表記とする。各レコードは改正レビュー用の検証日メタ verifiedAt（この手続き定義を一次情報で確認した日付）を持つ（spec §8）。値は確証取得日 2026-06-22（JST）。",
-  "verifiedAt": "2026-06-22T00:00:00+09:00",
+  "_note": "DIPS 飛行許可・承認 申請支援機能の手続き定義（素データ）。各レコードは legalBasis（法的根拠）と sourceUrl（出典 URL）を必ず持つ。コードに直書きせず、改正時はこの JSON を差し替える。出典は docs/spec.md §3 に裏取り済みの一次情報。IIA／IIB の呼称は §3.6 で正式名称が要再確認のため『相当』表記とする。各レコードは改正レビュー用の検証日メタ verifiedAt（この手続き定義を一次情報で確認した日付）を持つ（spec §8）。値は確証取得日 2026-06-22（JST）。2026-10-19：航空法第132条の85・第132条の86 を根拠とする手続きの条・項・号を _legalBasisSources の資料で確認し直し（150m 以上・緊急用務空域を第1項第1号、DID を第1項第2号に訂正）、全体の verifiedAt と該当レコードの verifiedAt を 2026-10-19 に更新した。",
+  "verifiedAt": "2026-10-19T00:00:00+09:00",
+  "_legalBasisSources": [
+    {
+      "title": "国土交通省「無人航空機の飛行禁止空域と飛行の方法」",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "checkedAt": "2026-10-19",
+      "note": "空港等周辺・緊急用務空域・150m 以上＝法132条の85第1項第1号、人口集中地区＝同第1項第2号と記載"
+    },
+    {
+      "title": "無人航空機に係る審査要領（国空航第690号・国空機第930号、令和8年4月1日最終改正 国空無機第350041号）",
+      "url": "https://www.mlit.go.jp/common/001303820.pdf",
+      "checkedAt": "2026-10-19",
+      "note": "人口集中地区＝第132条の85第1項第2号、夜間・目視外・30m・催し場所・危険物・物件投下＝第132条の86第2項第1〜6号と記載"
+    }
+  ],
   "procedures": [
     {
       "id": "flight-permission-airport",
@@ -13,7 +27,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -26,7 +40,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "地表または水面から150m以上の高さの飛行は IIA 相当の許可が必要です。"
     },
     {
@@ -39,7 +53,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。"
     },
     {
@@ -52,7 +66,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "緊急用務空域に指定された区域は原則として飛行が禁止されます。指定はリアルタイムで変動するため、飛行直前に国土交通省の最新情報を必ず確認してください。"
     },
     {
@@ -65,7 +79,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。"
     },
     {
@@ -78,7 +92,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "目視外飛行は IIB 条件で不要化できる区分（IIB 相当）です。補助者の有無により運航条件が変わる場合があります（補助者なしはより上位の要件）。"
     },
     {
@@ -91,7 +105,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": true,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "第三者または物件との距離が30m未満になる飛行は IIB 条件で不要化できる区分（IIB 相当）です。"
     },
     {
@@ -104,7 +118,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "祭礼・縁日・展示会等、多数の者が集合する催し場所の上空は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -117,7 +131,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "火薬類・高圧ガス・引火性液体等の危険物を輸送する飛行は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
@@ -130,7 +144,7 @@
       "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
       "waivableByIIB": false,
       "leadTimeBusinessDays": 10,
-      "verifiedAt": "2026-06-22T00:00:00+09:00",
+      "verifiedAt": "2026-10-19T00:00:00+09:00",
       "note": "農薬散布等を含む物件の投下は IIB 条件による不要化ができない区分（IIA 相当）です。"
     },
     {
