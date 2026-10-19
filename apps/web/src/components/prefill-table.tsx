@@ -91,7 +91,7 @@ export function PrefillTable({ prefill }: Props) {
         </div>
         {/* 系統の凡例（行頭の系統列と同じ塗り分け）。DRS と DIPS2.0 が別ポータルである
             ことを表頭で一目に示す。値・ラベルは変えず装飾の凡例のみ。 */}
-        <div className="flex shrink-0 items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+        <div className="flex shrink-0 items-center gap-3 text-[11px] tracking-wide text-ink-mute">
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden className={`inline-block h-2.5 w-2.5 border ${systemTone.DRS}`} />
             DRS
@@ -109,7 +109,7 @@ export function PrefillTable({ prefill }: Props) {
       <div className="-mx-4 overflow-x-auto border-y border-rule px-4 sm:mx-0 sm:border sm:px-0">
         <table className="w-full min-w-[680px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-ink/80 bg-paper-soft/60 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+            <tr className="border-b border-ink/80 bg-paper-soft/60 text-[11px] tracking-wide text-ink-mute">
               <th scope="col" className="w-8 py-2.5 pl-3 text-center font-medium">
                 <span aria-hidden>#</span>
               </th>

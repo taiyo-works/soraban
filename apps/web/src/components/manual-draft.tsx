@@ -110,9 +110,9 @@ export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
       {/* 出力（選択に応じて変わる） */}
       {choice === "standard" ? (
         <div className="flex flex-col gap-2 border-l-2 border-brand-700 bg-paper px-4 py-3.5">
-          <p className="eyebrow !text-[9px]">{draft.standardReference.label} を使用</p>
+          <p className="eyebrow !text-[11px]">{draft.standardReference.label} を使用</p>
           <p className="text-xs leading-relaxed text-ink-soft">{draft.standardNotice}</p>
-          <p className="border-t border-rule/60 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+          <p className="border-t border-rule/60 pt-2 text-[11px] tracking-wide text-ink-mute">
             参照{" "}
             <a
               href={draft.standardReference.sourceUrl}
@@ -133,7 +133,7 @@ export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
 
           {/* 基本構成 */}
           <div className="flex flex-col gap-2.5">
-            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+            <p className="flex items-center gap-2 text-[11px] tracking-wide text-ink-mute">
               <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-ink-mute" />
               基本構成
               <span aria-hidden className="h-px flex-1 bg-rule/60" />
@@ -151,7 +151,7 @@ export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
           {/* 飛行方法に応じた追記観点 */}
           {draft.methodSections.length > 0 ? (
             <div className="flex flex-col gap-2.5 border-t border-rule pt-3.5">
-              <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-brand-700">
+              <p className="flex items-center gap-2 text-[11px] tracking-wide text-brand-700">
                 <span aria-hidden className="inline-block h-1.5 w-1.5 bg-brand-700" />
                 選択した飛行方法に応じて追記する観点
                 <span aria-hidden className="h-px flex-1 bg-brand-700/30" />
@@ -168,7 +168,7 @@ export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                    <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute">
                       根拠 {m.legalBasis}{" "}
                       <a
                         href={m.sourceUrl}

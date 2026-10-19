@@ -88,20 +88,20 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
       ) : null}
 
       <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-        <span className="eyebrow !text-[9px]">法的根拠</span>{" "}
+        <span className="eyebrow !text-[11px]">法的根拠</span>{" "}
         <span className="text-ink-soft">{procedure.legalBasis}</span>
       </p>
 
       {deadlineBasis ? (
         <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[9px]">提出期限</span>{" "}
+          <span className="eyebrow !text-[11px]">提出期限</span>{" "}
           <span className="text-ink-soft">{deadlineBasis}</span>
         </p>
       ) : null}
 
       {/* システム系統 URL（手続きをする場所）と 出典 URL（条文・手引き）を別導線で。
           手続き窓口を主導線（藍・矢印つき）、出典を従（控えめ）として段差をつける。 */}
-      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider">
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 text-[11px]">
         <a
           href={procedure.systemUrl}
           target="_blank"
@@ -133,7 +133,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
             className="ml-auto text-ink-mute/80 normal-case tracking-normal"
             title="この手続き定義を一次情報で確認した日付（改正レビュー用）"
           >
-            verified {verifiedAt}
+            確認日 {verifiedAt}
           </span>
         ) : null}
       </div>

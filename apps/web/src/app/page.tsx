@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   COVERAGE_SUMMARY,
   DATASET_IDS,
@@ -127,7 +126,7 @@ export default function Home() {
       {/* ============================ 見出し ============================
           サービス名 → 目的 → できること → 運営者・利用の範囲・対象地域 → 免責 の順に読ませ、
           そのすぐ下に判定の入口（住所・座標の入力と地図）を置く。 */}
-      <header className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+      <header className="flex flex-col">
         <div className="flex min-w-0 flex-col gap-5">
           <h1 className="flex flex-col gap-1.5 text-ink">
             <span className="text-4xl font-medium leading-tight tracking-[0.06em] sm:text-5xl">
@@ -161,19 +160,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* ドローンの線画。PC では右の余白に控えめに置き、本文には重ねない。スマホでは出さない。
-            PNG は白地を透過済み（scripts/drone-png-alpha.mjs）。ダークモードでは線を反転する。 */}
-        <div aria-hidden className="pointer-events-none hidden lg:block">
-          <Image
-            src="/drone-01.png"
-            alt=""
-            width={3047}
-            height={1422}
-            priority
-            sizes="18rem"
-            className="h-auto w-full opacity-60 dark:invert"
-          />
-        </div>
       </header>
 
       {/* ============================ 判定 ============================ */}

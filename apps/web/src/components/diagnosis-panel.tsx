@@ -58,7 +58,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-signal-green",
     accent: "text-signal-green",
     surface: "bg-paper",
-    severity: "非該当 / clear",
+    severity: "非該当",
     mark: "diamond",
     emphatic: false,
   },
@@ -66,7 +66,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-signal-amber",
     accent: "text-signal-amber",
     surface: "bg-signal-amber-soft",
-    severity: "要確認 / unverified",
+    severity: "要確認",
     mark: "triangle",
     emphatic: false,
   },
@@ -74,7 +74,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-brand-700",
     accent: "text-brand-700",
     surface: "bg-paper",
-    severity: "要申請 / level 2",
+    severity: "要申請",
     mark: "square",
     emphatic: false,
   },
@@ -82,7 +82,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-brand-700",
     accent: "text-brand-700",
     surface: "bg-paper",
-    severity: "要申請（不要化余地あり） / level 2",
+    severity: "要申請（不要にできる場合あり）",
     mark: "square",
     emphatic: false,
   },
@@ -90,7 +90,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-signal-red",
     accent: "text-signal-red",
     surface: "bg-signal-red-soft",
-    severity: "最重要 / level 4",
+    severity: "最重要",
     mark: "triangle",
     emphatic: true,
   },
@@ -225,7 +225,7 @@ export function DiagnosisPanel({
           >
             <div className={`flex items-center gap-2 ${sev.accent}`}>
               <SeverityMark shape={sev.mark} className={sev.accent} />
-              <p className={`eyebrow !text-[9px] ${sev.accent}`}>カテゴリー切り分け</p>
+              <p className={`eyebrow !text-[11px] ${sev.accent}`}>カテゴリー切り分け</p>
               <span
                 className={`ml-auto inline-flex items-center border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${
                   sev.emphatic
@@ -240,7 +240,7 @@ export function DiagnosisPanel({
               {categoryHeadline[diagnosis.category]}
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{diagnosis.categoryNote}</p>
-            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute" data-testid="diagnosis-did-status">
+            <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute" data-testid="diagnosis-did-status">
               DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
             </p>
             {(diagnosis.verificationNotes ?? []).length > 0 ? (
@@ -266,7 +266,7 @@ export function DiagnosisPanel({
               </p>
             ) : null}
             {/* 出典の併記（契約：カテゴリー切り分けバナーに出典を併記）。 */}
-            <p className="mt-2 border-t border-rule/60 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+            <p className="mt-2 border-t border-rule/60 pt-2 text-[11px] tracking-wide text-ink-mute">
               出典{" "}
               <a
                 href={def.sourceUrl}
@@ -284,7 +284,7 @@ export function DiagnosisPanel({
 
       {/* 免責（全画面表示の契約）。最終確認は DIPS／航空局で。 */}
       <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
-        <span className="eyebrow !text-[9px]">免責</span> {diagnosis.disclaimer}
+        <span className="eyebrow !text-[11px]">免責</span> {diagnosis.disclaimer}
       </div>
 
       {/* 必要手続きチェックリスト */}
@@ -371,7 +371,7 @@ export function DiagnosisPanel({
       <div className="flex flex-col gap-3 border border-double border-brand-700/40 bg-paper px-4 py-4">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex flex-col gap-1">
-            <p className="eyebrow !text-[9px] flex items-center gap-1.5 text-brand-700">
+            <p className="eyebrow !text-[11px] flex items-center gap-1.5 text-brand-700">
               <span aria-hidden className="inline-block h-1.5 w-1.5 bg-brand-700" />
               束ね PDF 出力
             </p>
@@ -403,7 +403,7 @@ export function DiagnosisPanel({
           手続きカードと同じ系統バッジ（DRS=墨抜き / DIPS2.0=藍塗り）で
           「2 つの別ポータル」であることを一目で示す。 */}
       <div className="flex flex-col gap-2 border-t border-rule pt-4">
-        <p className="eyebrow !text-[9px]">2 系統の手続き窓口（混同しないこと）</p>
+        <p className="eyebrow !text-[11px]">2 系統の手続き窓口（混同しないこと）</p>
         <div className="grid grid-cols-1 gap-2 text-xs leading-relaxed text-ink-soft sm:grid-cols-2">
           <p className="border border-rule bg-paper px-3 py-2.5">
             <span className="mb-1 flex items-center gap-2">
@@ -443,25 +443,25 @@ export function DiagnosisPanel({
       </div>
 
       {/* 証跡メタ */}
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid-cols-3">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-[11px] tracking-wide text-ink-mute sm:grid-cols-3">
         <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
-          <dt className="eyebrow !text-[9px]">Evidence ID（申請支援診断）</dt>
+          <dt className="eyebrow !text-[11px]">証跡 ID（申請支援の診断）</dt>
           <dd className="tnum normal-case tracking-normal text-ink">{diagnosis.evidenceId}</dd>
         </div>
         {diagnosis.checkEvidenceId ? (
           <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
-            <dt className="eyebrow !text-[9px]">Check Evidence ID（地点判定）</dt>
+            <dt className="eyebrow !text-[11px]">証跡 ID（地点判定）</dt>
             <dd className="tnum normal-case tracking-normal text-ink">
               {diagnosis.checkEvidenceId}
             </dd>
           </div>
         ) : null}
         <div className="flex flex-col gap-0.5">
-          <dt className="eyebrow !text-[9px]">判定の版</dt>
+          <dt className="eyebrow !text-[11px]">判定の版</dt>
           <dd className="tnum normal-case tracking-normal text-ink">{diagnosis.engineVersion}</dd>
         </div>
         <div className="flex flex-col gap-0.5">
-          <dt className="eyebrow !text-[9px]">Checked at</dt>
+          <dt className="eyebrow !text-[11px]">判定日時</dt>
           <dd className="normal-case tracking-normal text-ink">
             {new Date(diagnosis.checkedAt).toLocaleString("ja-JP")}
           </dd>
@@ -470,7 +470,7 @@ export function DiagnosisPanel({
             基づくか」を画面でも明示する（spec §8 / sprint-4 検証日メタ）。 */}
         {PROCEDURES_VERIFIED_AT ? (
           <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">制度データ検証日</dt>
+            <dt className="eyebrow !text-[11px]">制度データ検証日</dt>
             <dd className="tnum normal-case tracking-normal text-ink">
               {PROCEDURES_VERIFIED_AT.slice(0, 10)}
             </dd>

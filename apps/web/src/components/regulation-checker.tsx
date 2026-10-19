@@ -117,19 +117,26 @@ type DemoPreset = {
 // 地図の初期表示と最初の判定地点（本社：鳥取県西伯郡日吉津村日吉津45番地3）。
 const HEAD_OFFICE: LatLng = { lat: 35.434238, lng: 133.380508 };
 
+// 履歴の一行に出す運航の目的の短い表記（選択肢の文言に合わせる）。
+const PURPOSE_SHORT: Readonly<Record<string, string>> = {
+  emergency: "緊急",
+  public_duty: "公務",
+  city_event: "市の行事",
+};
+
 const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "taiyo-tsushin-hq",
     name: "本社（日吉津村）",
     loc: HEAD_OFFICE,
-    hint: "拠点 / 国法は green。日吉津村は自治体カバレッジ外（一部判定不能）",
+    hint: "国の規制は該当なし。日吉津村の条例は未収録のため、市町村の規制は判定できません",
     group: "鳥取県",
   },
   {
     id: "yonago-city-hall",
     name: "米子市役所",
     loc: YONAGO_CITY_HALL,
-    hint: "DID + 県条例（庁舎0m）",
+    hint: "人口集中地区 + 鳥取県条例（庁舎）",
     group: "鳥取県",
     airspaceFlags: ["airspace_did"],
   },
@@ -137,21 +144,21 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "minatoyama-park",
     name: "湊山公園(米子城跡)",
     loc: { lat: 35.4267, lng: 133.322 },
-    hint: "公園条例 × 文化財保護法 同時red",
+    hint: "米子市の公園条例と文化財保護法の両方に該当",
     group: "鳥取県",
   },
   {
     id: "kaike-onsen",
     name: "皆生温泉",
     loc: { lat: 35.4538, lng: 133.3333 },
-    hint: "公園条例 + 県条例（温泉街）",
+    hint: "米子市の公園条例 + 鳥取県条例（温泉街）",
     group: "鳥取県",
   },
   {
     id: "tottori-univ-hospital",
     name: "鳥取大学医学部附属病院",
     loc: { lat: 35.4495, lng: 133.343 },
-    hint: "県条例（病院近接）",
+    hint: "鳥取県条例（病院の周辺）",
     group: "鳥取県",
   },
   {
@@ -159,14 +166,14 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     name: "境港駅",
     // JR境港駅 (境港市大正町209-1): 35°32′41″N 133°13′37″E
     loc: { lat: 35.5447, lng: 133.2269 },
-    hint: "境港市カバレッジ + 県条例（駅0m）",
+    hint: "境港市の条例 + 鳥取県条例（駅）",
     group: "鳥取県",
   },
   {
     id: "yonago-airport",
     name: "米子鬼太郎空港",
     loc: { lat: 35.4925, lng: 133.2364 },
-    hint: "空港敷地内 + 美保基地周辺 red（航空法 × 小型無人機等飛行禁止法）",
+    hint: "空港の敷地と美保基地の周辺（航空法と小型無人機等飛行禁止法）",
     group: "鳥取県",
     airspaceFlags: ["airspace_airport"],
   },
@@ -174,21 +181,21 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "yume-minato-park",
     name: "夢みなと公園(境港)",
     loc: { lat: 35.5455, lng: 133.2235 },
-    hint: "境港市公園条例 red",
+    hint: "境港市の公園条例に該当",
     group: "鳥取県",
   },
   {
     id: "tottori-castle",
     name: "鳥取城跡(久松公園)",
     loc: { lat: 35.504, lng: 134.244 },
-    hint: "鳥取市公園条例 × 文化財保護法 同時red",
+    hint: "鳥取市の公園条例と文化財保護法の両方に該当",
     group: "鳥取県",
   },
   {
     id: "uchibuki-park",
     name: "打吹公園(倉吉)",
     loc: { lat: 35.4250, lng: 133.8235 },
-    hint: "倉吉市公園条例 + 県条例（白壁土蔵群近接）",
+    hint: "倉吉市の公園条例 + 鳥取県条例（白壁土蔵群の周辺）",
     group: "鳥取県",
   },
   {
@@ -196,21 +203,21 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     name: "松江城(国指定史跡・国宝)",
     // 松江城天守: 35°28′32″N 133°03′02″E
     loc: { lat: 35.4753, lng: 133.0506 },
-    hint: "松江市公園条例 × 文化財保護法 同時red",
+    hint: "松江市の公園条例と文化財保護法の両方に該当",
     group: "島根県",
   },
   {
     id: "izumo-taisha",
     name: "出雲大社",
     loc: { lat: 35.4019, lng: 132.6852 },
-    hint: "島根県条例（参拝者密集地）",
+    hint: "島根県条例（参拝者が集まる場所）",
     group: "島根県",
   },
   {
     id: "kojindani-historic-park",
     name: "荒神谷史跡公園(出雲)",
     loc: { lat: 35.387, lng: 132.844 },
-    hint: "出雲公園条例 × 文化財保護法 同時red",
+    hint: "出雲市の公園条例と文化財保護法の両方に該当",
     group: "島根県",
   },
   {
@@ -218,7 +225,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     name: "出雲市役所",
     // 出雲市今市町70: 35°22′06″N 132°45′24″E
     loc: { lat: 35.3683, lng: 132.7567 },
-    hint: "DID + 島根県条例（庁舎0m）",
+    hint: "人口集中地区 + 島根県条例（庁舎）",
     group: "島根県",
     airspaceFlags: ["airspace_did"],
   },
@@ -226,7 +233,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "izumo-airport",
     name: "出雲縁結び空港",
     loc: { lat: 35.4133, lng: 132.8897 },
-    hint: "空港敷地内 red（航空法 132 条）",
+    hint: "空港の敷地（航空法第132条）",
     group: "島根県",
     airspaceFlags: ["airspace_airport"],
   },
@@ -261,7 +268,6 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // 現在地の候補（端末内の表示だけに使う。「この地点で判定」まで送信・保存しない）
   const [geoCandidate, setGeoCandidate] = useState<CurrentLocationCandidate | null>(null);
   const [result, setResult] = useState<RegulationCheckResult | null>(null);
-  const [responseMs, setResponseMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
@@ -553,12 +559,10 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     checkAbortRef.current = controller;
     const seq = ++checkSeqRef.current;
     startChecking(async () => {
-      const t0 = performance.now();
       try {
         const res = await checkLocation(loc, ctx, controller.signal);
         if (seq !== checkSeqRef.current) return; // 古い応答は無視
         setResult(res);
-        setResponseMs(Math.round(performance.now() - t0));
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
@@ -843,7 +847,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const fieldClass =
     "w-full rounded-sharp border border-rule bg-paper px-3 py-3 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-1 focus:ring-offset-paper sm:py-2.5 sm:text-sm";
   const ghostBtn =
-    "inline-flex h-11 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-xs font-medium uppercase tracking-wider text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft active:bg-paper-soft disabled:opacity-40";
+    "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-sharp border border-brand-700 bg-paper px-5 text-sm font-medium text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:cursor-not-allowed disabled:border-rule disabled:bg-paper-soft disabled:text-ink-mute disabled:hover:bg-paper-soft";
 
   return (
     <div className="flex flex-col gap-10">
@@ -859,7 +863,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             同文の免責より一段控えめ（細字・補助色・薄い左罫）にして、全画面表示がくどくならない
             ようにしつつ、可読性と趣旨は維持する。 */}
         <p className="flex gap-2 border-l border-brand-700/60 pl-3 text-[11px] leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[9px] shrink-0 not-italic">免責</span>
+          <span className="eyebrow !text-[11px] shrink-0 not-italic">免責</span>
           <span>{DIAGNOSIS_DISCLAIMER}</span>
         </p>
 
@@ -998,8 +1002,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-                lat (N°)
+              <span className="text-[11px] tracking-wide text-ink-mute">
+                緯度（北緯・度）
               </span>
               <input
                 type="text"
@@ -1012,8 +1016,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-                lng (E°)
+              <span className="text-[11px] tracking-wide text-ink-mute">
+                経度（東経・度）
               </span>
               <input
                 type="text"
@@ -1047,8 +1051,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* 機体重量 */}
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-                drone weight (g)
+              <span className="text-[11px] tracking-wide text-ink-mute">
+                機体の重さ（g）
               </span>
               <div className="flex items-center gap-2">
                 <input
@@ -1057,11 +1061,11 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   value={droneWeightInput}
                   onChange={(e) => setDroneWeightInput(e.target.value)}
                   className={`${fieldClass} flex-1 font-mono`}
-                  placeholder="例: 900（DJI Mavic）／ 80（マイクロ機）"
+                  placeholder="例: 900／80（100g 未満の機体）"
                 />
                 {droneWeightInput.trim().length > 0 && Number(droneWeightInput) < 100 ? (
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-signal-green whitespace-nowrap">
-                    ▸ &lt;100g 例外
+                  <span className="text-[11px] tracking-wide text-signal-green whitespace-nowrap">
+                    100g 未満の例外
                   </span>
                 ) : null}
               </div>
@@ -1072,8 +1076,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
             {/* 運航目的 */}
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-                purpose
+              <span className="text-[11px] tracking-wide text-ink-mute">
+                運航の目的
               </span>
               <select
                 value={purpose}
@@ -1093,8 +1097,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
           {/* 取得済み許可 */}
           <div className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-              permits held
+            <span className="text-[11px] tracking-wide text-ink-mute">
+              取得済みの許可
             </span>
             <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -1139,7 +1143,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   />
                   <span className="flex flex-1 flex-col leading-tight">
                     <span className="text-sm font-medium text-ink sm:text-xs">{p.label}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                    <span className="text-[11px] tracking-wide text-ink-mute">
                       {p.desc}
                     </span>
                   </span>
@@ -1165,7 +1169,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           {/* 空域フラグ（DID・空港等周辺・緊急用務空域）。判定由来の red は自動プリチェック。
               DID polygon データが未整備の環境でも、ここで手動チェックして診断できる。 */}
           <div className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+            <span className="text-[11px] tracking-wide text-ink-mute">
               空域（地点判定から自動／手動でも調整可）
             </span>
             <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-3">
@@ -1189,7 +1193,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     <span className="text-sm font-medium leading-tight text-ink sm:text-xs">
                       {SPECIFIC_FLIGHT_FLAG_LABEL[flag]}
                       {isAuto ? (
-                        <span className="ml-1 font-mono text-[9px] uppercase tracking-wider text-ink-mute">
+                        <span className="ml-1 font-mono text-[11px] uppercase tracking-wider text-ink-mute">
                           （自動検出）
                         </span>
                       ) : null}
@@ -1236,7 +1240,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
 
           {/* 飛行方法チェックボックス群 */}
-          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+          <span className="text-[11px] tracking-wide text-ink-mute">
             飛行方法（該当するものを選択）
           </span>
           <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-3">
@@ -1264,11 +1268,11 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* 飛行予定日 — 提出期限カレンダーの「起算日」。ここから各手続きの期限を逆算する。 */}
             <label className="flex flex-col gap-1.5">
-              <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              <span className="flex items-center gap-2 text-[11px] tracking-wide text-ink-mute">
                 飛行予定日
                 <span
                   aria-hidden
-                  className="inline-flex items-center gap-1 border border-rule px-1.5 py-px text-[9px] tracking-[0.18em] text-ink-mute/80"
+                  className="inline-flex items-center gap-1 border border-rule px-1.5 py-px text-[11px] tracking-[0.18em] text-ink-mute/80"
                 >
                   <span className="inline-block h-1 w-1 rotate-45 bg-ink-mute" />
                   起算日
@@ -1287,7 +1291,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
             {/* 立入管理措置／第三者上空（カテゴリー II/III 切り分け） */}
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              <span className="text-[11px] tracking-wide text-ink-mute">
                 立入管理措置／第三者上空
               </span>
               <select
@@ -1310,7 +1314,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           {/* 目視外飛行を選んでいる場合のみ補助者の有無を尋ねる（プリフィルの運航条件に反映）。 */}
           {methodFlags.includes("method_bvlos") ? (
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+              <span className="text-[11px] tracking-wide text-ink-mute">
                 目視外飛行の補助者
               </span>
               <select
@@ -1375,7 +1379,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               >
                 <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center border px-1.5 py-px text-[9px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
+                    className={`inline-flex items-center border px-1.5 py-px text-[11px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
                   >
                     {preset.group}
                   </span>
@@ -1401,7 +1405,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               >
                 <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center border px-1.5 py-px text-[9px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
+                    className={`inline-flex items-center border px-1.5 py-px text-[11px] font-medium uppercase tracking-wider ${PRESET_GROUP_TONE[preset.group]}`}
                   >
                     {preset.group}
                   </span>
@@ -1481,16 +1485,16 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           {/* 低確信度警告 — 確信度が閾値未満のときだけ警告を出す */}
           {shouldWarnConfidence(result.overallConfidence) ? (
             <div className="border-l-2 border-signal-amber bg-signal-amber-soft px-4 py-3 text-xs leading-relaxed text-ink-soft">
-              <span className="eyebrow !text-[9px] !text-signal-amber">
-                confidence · {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
+              <span className="eyebrow !text-[11px] !text-signal-amber">
+                確からしさ {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
               </span>{" "}
-              本判定はジオメトリ精度または条文抽出精度が低いレコードを含みます。引受・許可申請の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
+              この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。引受・許可申請の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
             </div>
           ) : null}
 
           {/* disclaimer — brand outlined, never amber */}
           <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
-            <span className="eyebrow !text-[9px]">免責</span>{" "}
+            <span className="eyebrow !text-[11px]">免責</span>{" "}
             {result.disclaimer}
           </div>
 
@@ -1510,33 +1514,27 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
 
           {/* audit meta — designed as drafter's stamp block */}
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid-cols-5">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs text-ink-mute sm:grid-cols-4">
             <div className="flex flex-col gap-0.5 col-span-2">
-              <dt className="eyebrow !text-[9px]">Evidence ID</dt>
-              <dd className="tnum normal-case tracking-normal text-ink" data-testid="evidence-id">
+              <dt className="eyebrow !text-[11px]">証跡 ID</dt>
+              <dd className="font-mono tnum text-ink" data-testid="evidence-id">
                 {result.evidenceId}
               </dd>
             </div>
             <div className="flex flex-col gap-0.5">
-              <dt className="eyebrow !text-[9px]">Confidence</dt>
+              <dt className="eyebrow !text-[11px]">確からしさ</dt>
               <dd className="normal-case tracking-normal text-ink">
                 {CONFIDENCE_LABEL[result.overallConfidence]}
               </dd>
             </div>
             <div className="flex flex-col gap-0.5">
-              <dt className="eyebrow !text-[9px]">判定の版</dt>
+              <dt className="eyebrow !text-[11px]">判定の版</dt>
               <dd className="tnum normal-case tracking-normal text-ink">
                 {result.engineVersion}
               </dd>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <dt className="eyebrow !text-[9px]">Latency</dt>
-              <dd className="tnum normal-case tracking-normal text-ink">
-                {responseMs !== null ? `${responseMs} ms` : "—"}
-              </dd>
-            </div>
-            <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-5">
-              <dt className="eyebrow !text-[9px]">Checked at</dt>
+            <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-4">
+              <dt className="eyebrow !text-[11px]">判定日時</dt>
               <dd className="normal-case tracking-normal text-ink">
                 {new Date(result.checkedAt).toLocaleString("ja-JP")}
               </dd>
@@ -1573,13 +1571,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 </span>
               </p>
               <p className="font-mono text-[10px] tnum text-ink-mute">
-                {history.length} entr{history.length === 1 ? "y" : "ies"}
+                {history.length} 件
               </p>
             </div>
             <button
               type="button"
               onClick={handleClearHistory}
-              className="font-mono text-[10px] uppercase tracking-wider text-ink-mute hover:text-signal-red"
+              className="text-[11px] tracking-wide text-ink-mute hover:text-signal-red"
             >
               全削除
             </button>
@@ -1612,7 +1610,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     type="button"
                     onClick={() => restoreFromHistory(h)}
                     className="flex flex-1 items-center gap-3 text-left transition-colors hover:bg-paper-soft"
-                    title={`Evidence ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
+                    title={`証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
                   >
                     <span aria-hidden className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/20 ${dotTone}`} />
                     <span className="flex flex-1 flex-col leading-tight">
@@ -1622,8 +1620,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                       <span className="font-mono text-[10px] tnum text-ink-mute">
                         {dateStr}
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
-                        {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${h.ctx.purpose}` : ""}
-                        {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · permit×${h.ctx.pilotPermits.length}` : ""}
+                        {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${PURPOSE_SHORT[h.ctx.purpose] ?? h.ctx.purpose}` : ""}
+                        {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · 許可${h.ctx.pilotPermits.length}件` : ""}
                         {h.diagnosisSummary ? ` · ${catShort[h.diagnosisSummary.category] ?? h.diagnosisSummary.category}` : ""}
                         {h.diagnosisSummary?.didStatus
                           ? ` · DID:${formatDidDetermination(h.diagnosisSummary.didStatus, h.diagnosisSummary.didDetail)}`

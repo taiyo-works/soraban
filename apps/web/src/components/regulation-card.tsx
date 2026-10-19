@@ -97,12 +97,12 @@ export function RegulationCard({ regulation }: Props) {
         </p>
       ) : null}
       <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-        <span className="eyebrow !text-[9px]">この地点</span>{" "}
+        <span className="eyebrow !text-[11px]">この地点</span>{" "}
         <span className="text-ink-soft">{regulation.note}</span>
       </p>
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
         <div className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green">
-          <p className="eyebrow !text-[9px] !text-signal-green">
+          <p className="eyebrow !text-[11px] !text-signal-green">
             <span aria-hidden>✓ </span>
             適用された例外節
           </p>
@@ -111,7 +111,7 @@ export function RegulationCard({ regulation }: Props) {
               <li key={ex.id} className="leading-snug">
                 <span>・{ex.condition}</span>
                 {ex.machine ? (
-                  <span className="block pl-2.5 font-mono text-[10px] uppercase tracking-wider text-signal-green/70">
+                  <span className="block pl-2.5 text-[11px] tracking-wide text-signal-green/70">
                     {formatMachineCondition(ex.machine)}
                   </span>
                 ) : null}
@@ -125,7 +125,7 @@ export function RegulationCard({ regulation }: Props) {
       ) : null}
       {exceptions.length > 0 ? (
         <details className="border border-rule bg-paper-soft px-3 py-2 text-[11px] leading-relaxed text-ink-soft">
-          <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+          <summary className="cursor-pointer text-[11px] tracking-wide text-ink-mute">
             例外節 {exceptions.length} 件
           </summary>
           <ul className="mt-2 flex flex-col gap-1.5">
@@ -143,7 +143,7 @@ export function RegulationCard({ regulation }: Props) {
         className="flex flex-col gap-1.5 border-t border-dashed border-rule pt-2.5 text-[11px] leading-relaxed text-ink-mute"
       >
         <div>
-          <p className="eyebrow !text-[9px]">使用データ</p>
+          <p className="eyebrow !text-[11px]">使用データ</p>
           <ul className="mt-0.5 flex flex-col gap-0.5">
             {regulation.datasets.map((d) => (
               <li key={d.id}>
@@ -157,7 +157,7 @@ export function RegulationCard({ regulation }: Props) {
         </div>
         {regulation.amendments.length > 0 ? (
           <div>
-            <p className="eyebrow !text-[9px]">反映済みの改正</p>
+            <p className="eyebrow !text-[11px]">反映済みの改正</p>
             <ul className="mt-0.5 flex flex-col gap-0.5">
               {regulation.amendments.map((a) => (
                 <li key={a.id}>
@@ -176,7 +176,7 @@ export function RegulationCard({ regulation }: Props) {
           </div>
         ) : null}
       </div>
-      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 text-[11px] tracking-wide text-ink-mute">
         {regulation.url ? (
           <a
             href={regulation.url}
@@ -188,13 +188,13 @@ export function RegulationCard({ regulation }: Props) {
           </a>
         ) : null}
         {regulation.dataYear ? (
-          <span className="tnum">{regulation.dataYear} year</span>
+          <span className="tnum">{regulation.dataYear} 年データ</span>
         ) : null}
         <span
-          title={`ジオメトリ: ${CONFIDENCE_LABEL[regulation.confidence.geometric]} / 抽出: ${CONFIDENCE_LABEL[regulation.confidence.extraction]}`}
+          title={`区域の位置: ${CONFIDENCE_LABEL[regulation.confidence.geometric]} / 条文の読み取り: ${CONFIDENCE_LABEL[regulation.confidence.extraction]}`}
           className={confidenceTone[confidence]}
         >
-          conf · {CONFIDENCE_LABEL[confidence]}
+          確からしさ {CONFIDENCE_LABEL[confidence]}
         </span>
         <span
           title="条文・規制内容を確認した日（使用データの確認日は上の「使用データ」欄）"

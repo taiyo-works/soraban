@@ -141,7 +141,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
         {hasPlannedDate ? (
           // 起算日（飛行予定日）。すべての提出期限はここから逆算される — その関係を
           // 「起算日 →」のラベルで明示し、日付は mono の tnum で固定幅に揃える。
-          <p className="flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+          <p className="flex items-baseline gap-2 text-[11px] tracking-wide text-ink-mute">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-ink-mute" />
             起算日 — 飛行予定日
             <span className="tnum text-[11px] font-medium normal-case tracking-normal text-ink">
