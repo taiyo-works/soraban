@@ -1,10 +1,13 @@
 // 運航管理（Sprint 10）の機能フラグの関所。認可はここに置かない（各ページ・ルートハンドラの冒頭で行う）。
 // - OPS_ENABLED が無効（既定）：/ops 以下、/api/ops、/api/auth（Neon Auth の中継）、/api/test-auth はすべて 404。
 // - 設定不足（misconfigured）：画面は「運航管理は準備中です」と理由コードだけの 503、API は 503。
-// - 有効：そのまま通す。Neon Auth のセッションの更新はページ・ルートハンドラの getSession() に任せ、ここでは行わない。
+// - 有効（neon）：/ops 以下で Neon Auth の SDK のミドルウェア処理（verifier の交換・Cookie の更新・未ログインの転送）を通す
+//   （server/ops/neon-proxy.ts）。有効（test）：そのまま通す。
+// - /api/test-auth は test 方式で有効なとき以外は常に 404。
 // matcher 以外のパス（地点判定・申請支援）には関与しない。
 import { NextResponse, type NextRequest } from "next/server";
 import { getOpsAvailability } from "@/server/ops/availability";
+import { runNeonAuthProxy } from "@/server/ops/neon-proxy";
 
 // 503 の画面はアプリの描画を通らないため、判定画面の配色（紙・インク・藍）を最小限のインラインの CSS で写す。
 const PAGE_503_STYLE =
@@ -23,10 +26,20 @@ const page503 = (reason: string): string =>
   `<p class="note">設定が完了していないため、運航管理の機能を使えません。管理者にお問い合わせください。</p>` +
   `<p>理由コード：<code>${reason}</code></p><p><a href="/">地点判定に戻る</a></p></main></body></html>`;
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const a = getOpsAvailability(process.env);
-  if (a.state === "enabled") return NextResponse.next();
-  const isApi = request.nextUrl.pathname.startsWith("/api/");
+  const pathname = request.nextUrl.pathname;
+  const isApi = pathname.startsWith("/api/");
+  // テスト用の本人確認は、test 方式で有効なとき以外は常に 404（設定不足・本番でも 503 ではなく 404）。
+  if (pathname.startsWith("/api/test-auth/") && !(a.state === "enabled" && a.provider === "test")) {
+    return NextResponse.json({ error: "not_found" }, { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  if (a.state === "enabled") {
+    // neon：/ops 以下で SDK のミドルウェア処理（Google から戻ったときの verifier の交換、セッションの Cookie の更新、
+    // 未ログインのサインイン画面への転送）を行う。/ops/sign-in・/ops/no-access は保護しないが、交換と更新は行う。
+    if (a.provider === "neon") return runNeonAuthProxy(request, process.env);
+    return NextResponse.next();
+  }
   if (a.state === "disabled") {
     return isApi
       ? NextResponse.json({ error: "not_found" }, { status: 404, headers: { "cache-control": "no-store" } })

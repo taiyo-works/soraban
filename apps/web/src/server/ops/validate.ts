@@ -299,7 +299,7 @@ export const validateChangeMeta = (
 /** 技能証明書番号を末尾 4 桁以外伏せる。 */
 export const maskLicenseNumber = (n: string | null): string | null => {
   if (n === null) return null;
-  // 4 文字以下の番号は末尾を見せると全桁が分かるため、すべて伏せる。
+  // 伏せ字は桁数が分からない固定長（4 文字）。4 文字以下の番号は末尾を見せると全桁が分かるため、すべて伏せる。
   const tail = n.length > 4 ? n.slice(-4) : "";
-  return `${"*".repeat(Math.max(n.length - tail.length, 4))}${tail}`;
+  return `****${tail}`;
 };

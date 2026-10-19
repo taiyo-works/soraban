@@ -30,7 +30,9 @@ describe("getOpsAvailability", () => {
     ["neon で NEON_AUTH_COOKIE_SECRET なし", { ...NEON, NEON_AUTH_COOKIE_SECRET: " " }, "neon_auth_cookie_secret_missing"],
     ["neon で NEON_AUTH_COOKIE_SECRET が 32 文字未満", { ...NEON, NEON_AUTH_COOKIE_SECRET: "short" }, "neon_auth_cookie_secret_too_short"],
     ["test で AUTH_TEST_SECRET なし", { ...TEST, AUTH_TEST_SECRET: undefined }, "auth_test_secret_missing"],
-    ["test かつ VERCEL_ENV=production", { ...TEST, VERCEL_ENV: "production" }, "test_auth_in_production"],
+    ["test かつ VERCEL_ENV=production", { ...TEST, VERCEL_ENV: "production" }, "test_auth_on_vercel"],
+    ["test かつ VERCEL_ENV=preview", { ...TEST, VERCEL_ENV: "preview" }, "test_auth_on_vercel"],
+    ["test かつ VERCEL_ENV=development", { ...TEST, VERCEL_ENV: "development" }, "test_auth_on_vercel"],
   ])("%s → misconfigured（%s）", (_l, env, reason) => {
     expect(getOpsAvailability(env)).toEqual({ state: "misconfigured", reason });
   });
@@ -40,8 +42,8 @@ describe("getOpsAvailability", () => {
     expect(getOpsAvailability({ ...NEON, VERCEL_ENV: "production" })).toEqual({ state: "enabled", provider: "neon" });
   });
 
-  it("test の環境変数がすべて揃う（本番以外） → enabled（test）", () => {
+  it("test の環境変数がすべて揃う（Vercel の外：CI・ローカル） → enabled（test）", () => {
     expect(getOpsAvailability(TEST)).toEqual({ state: "enabled", provider: "test" });
-    expect(getOpsAvailability({ ...TEST, VERCEL_ENV: "preview" })).toEqual({ state: "enabled", provider: "test" });
+    expect(getOpsAvailability({ ...TEST, VERCEL_ENV: " " })).toEqual({ state: "enabled", provider: "test" });
   });
 });

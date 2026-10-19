@@ -214,6 +214,53 @@ describe.skipIf(!ADMIN_URL)("運航管理の DB（版の履歴・権限・組織
     expect(await verify(b.id)).toEqual([]);
   });
 
+  it("13. verify_record_chain はヘッド表と版の表の不整合（最新版の削除・ヘッド表だけの書き換え・取消の不一致）も返す", async () => {
+    const ctx = ctxOf(managerA);
+    const verify = async (type: string, id: string) =>
+      (await owner.query("select * from verify_record_chain($1, $2)", [type, id])).rows as { version_no: number; problem: string }[];
+    const mk = async (mark: string) => {
+      const a = await svc.createAircraft(ctx, { ...AIRCRAFT, registrationMark: mark, maxTakeoffWeightKg: 6.4 });
+      await svc.updateAircraft(ctx, a.id, { expectedVersion: 1, reason: "訂正", modelName: "V2" });
+      return a.id;
+    };
+    // 改変なし（数値・取消を含む）は 0 行。操縦者（日付・真偽値・結び付け）と利用者も
+    const clean = await mk("JU13HEADOK");
+    expect(await verify("aircraft", clean)).toEqual([]);
+    const voided = await mk("JU13HEADVOID");
+    await svc.voidAircraft(ctx, voided, { expectedVersion: 2, reason: "誤登録" });
+    expect(await verify("aircraft", voided)).toEqual([]);
+    const pilots = await svc.listPilots(ctx);
+    for (const p of pilots) expect(await verify("pilot", p.id)).toEqual([]);
+    expect(await verify("member", managerA.id)).toEqual([]);
+
+    // 最新版の削除：ヘッド表の current_version と一致しない
+    const delLatest = await mk("JU13DELLATEST");
+    await owner.query("delete from record_versions where entity_id = $1 and version_no = 2", [delLatest]);
+    expect(await verify("aircraft", delLatest)).toEqual(
+      expect.arrayContaining([{ version_no: 1, problem: "head_version_mismatch" }, { version_no: 1, problem: "head_data_mismatch" }]),
+    );
+
+    // ヘッド表だけの書き換え
+    const headOnly = await mk("JU13HEADONLY");
+    await owner.query("update aircraft set model_name = '書き換え' where id = $1", [headOnly]);
+    expect(await verify("aircraft", headOnly)).toEqual([{ version_no: 2, problem: "head_data_mismatch" }]);
+    const headVer = await mk("JU13HEADVER");
+    await owner.query("update aircraft set current_version = 5 where id = $1", [headVer]);
+    expect(await verify("aircraft", headVer)).toEqual([{ version_no: 2, problem: "head_version_mismatch" }]);
+
+    // 取消の不一致（ヘッド表の voided_at だけを消す）
+    await owner.query("update aircraft set voided_at = null where id = $1", [voided]);
+    expect(await verify("aircraft", voided)).toEqual([{ version_no: 3, problem: "head_void_mismatch" }]);
+
+    // 版の全削除・ヘッド表の行の削除
+    const allGone = await mk("JU13ALLGONE");
+    await owner.query("delete from record_versions where entity_id = $1", [allGone]);
+    expect(await verify("aircraft", allGone)).toEqual([{ version_no: 0, problem: "head_without_versions" }]);
+    const headGone = await mk("JU13HEADGONE");
+    await owner.query("delete from aircraft where id = $1", [headGone]);
+    expect(await verify("aircraft", headGone)).toEqual([{ version_no: 2, problem: "head_missing" }]);
+  });
+
   it("9. 組織の最後の有効な運航管理者の降格・停止は 409 で、版が増えない", async () => {
     const before = await versionCount(managerB.id);
     const ctx = ctxOf(await reload(managerB));

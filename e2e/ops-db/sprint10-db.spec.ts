@@ -235,6 +235,8 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     await page.getByLabel("既存の総飛行時間（分）").fill("30");
     await page.getByRole("button", { name: "登録する" }).click();
     await expect(page).toHaveURL(/\/ops\/aircraft\/[0-9a-f-]{36}$/);
+    // 詳細画面への遷移（通常の画面遷移）が終わってから訂正する
+    await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(mark);
     await expect(page.getByTestId("aircraft-detail")).toContainText("12:30");
     await expect(page.getByTestId("version-row")).toHaveCount(1);
@@ -269,8 +271,8 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     const list = JSON.parse(listText) as { pilots: { id: string; fullName: string; licenseNumber: string | null }[] };
     const self = list.pilots.find((p) => p.fullName === "操縦 一郎")!;
     const other = list.pilots.find((p) => p.fullName === "操縦 二郎")!;
-    expect(self.licenseNumber).toBe("*********2222");
-    expect(other.licenseNumber).toBe("*********4444");
+    expect(self.licenseNumber).toBe("****2222");
+    expect(other.licenseNumber).toBe("****4444");
     expect(listText).not.toContain("1111");
     expect(listText).not.toContain("3333");
     for (const ctx of [pilot, viewer]) {
@@ -291,7 +293,7 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     // 本人：自分の分だけ全桁、他の操縦者は伏せた値だけ
     expect((await detail(pilot, self.id)).json).toMatchObject({ licenseNumber: "TEST-11112222", licenseNumberMasked: false });
     const pOther = await detail(pilot, other.id);
-    expect(pOther.json).toMatchObject({ licenseNumber: "*********4444", licenseNumberMasked: true });
+    expect(pOther.json).toMatchObject({ licenseNumber: "****4444", licenseNumberMasked: true });
     expect(pOther.text).not.toContain("3333");
     // 閲覧者：伏せた値だけ
     for (const id of [self.id, other.id]) {

@@ -75,7 +75,7 @@ North Star §0.1.7 の 1（記録の手間と誤りを減らす）・3（記録�
 |---|---|
 | `OPS_ENABLED` が `1` でない（既定） | `disabled` |
 | `OPS_ENABLED=1` だが、`DATABASE_URL` 未設定／`AUTH_PROVIDER` 未設定・不正／`AUTH_PROVIDER=neon` で `NEON_AUTH_BASE_URL`・`NEON_AUTH_COOKIE_SECRET` のどちらかが無い／`AUTH_PROVIDER=test` で `AUTH_TEST_SECRET` が無い | `misconfigured` |
-| `AUTH_PROVIDER=test` かつ `VERCEL_ENV=production` | `misconfigured`（本番でテスト用認証を使わせない） |
+| `AUTH_PROVIDER=test` かつ `VERCEL_ENV` が設定されている（production・preview・development。差し戻し 1 回目で preview 等にも広げた） | `misconfigured`（Vercel 上でテスト用認証を使わせない。`/api/test-auth/*` は 404） |
 | 上記以外 | `enabled` |
 
 - `disabled` のとき：`/ops` 以下の画面、`/api/ops/*`、`/api/auth/*`（Neon Auth の中継）、`/api/test-auth/*` はすべて 404。判定画面に運航管理へのリンクを出さない。Neon Auth の SDK を初期化しない（モジュールの読み込み時に環境変数を読まず、使うときに遅延生成する）。DB にも接続しない。

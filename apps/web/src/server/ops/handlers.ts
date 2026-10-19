@@ -1,5 +1,5 @@
 // 運航管理の API の処理本体（Sprint 10 設計 F）。route.ts から呼ぶ。
-import { availabilityResponse, json, opsHandler } from "./http";
+import { availabilityResponse, isSameOrigin, json, opsHandler } from "./http";
 import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
 import * as svc from "./service";
@@ -95,6 +95,8 @@ const testAuthUnavailable = (env: OpsEnv): Response | null => {
 export const handleTestSignIn = async (req: Request, env: OpsEnv = process.env): Promise<Response> => {
   const unavailable = testAuthUnavailable(env);
   if (unavailable) return unavailable;
+  // テスト用でも、他サイトからのログイン（ログイン CSRF）は拒否する。
+  if (!isSameOrigin(req)) return json(403, { error: "forbidden_origin" });
   let body: unknown;
   try {
     body = await req.json();
@@ -116,8 +118,8 @@ export const handleTestSignIn = async (req: Request, env: OpsEnv = process.env):
 export const handleTestSignOut = async (req: Request, env: OpsEnv = process.env): Promise<Response> => {
   const unavailable = testAuthUnavailable(env);
   if (unavailable) return unavailable;
+  if (!isSameOrigin(req)) return json(403, { error: "forbidden_origin" });
   const res = json(200, { ok: true });
   res.headers.append("set-cookie", `${TEST_AUTH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
-  void req;
   return res;
 };

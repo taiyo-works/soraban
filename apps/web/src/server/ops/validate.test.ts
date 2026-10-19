@@ -114,8 +114,11 @@ describe("validateChangeMeta・maskLicenseNumber", () => {
     expect(r.ok ? [] : Object.keys(r.errors).sort()).toEqual(["expectedVersion", "reason"]);
   });
 
-  it("技能証明書番号は末尾 4 桁以外を伏せる（4 桁以下はすべて伏せる）", () => {
-    expect(maskLicenseNumber("AB-12345678")).toBe("*******5678");
+  it("技能証明書番号は末尾 4 桁以外を固定長で伏せる（4 桁以下はすべて伏せる）", () => {
+    expect(maskLicenseNumber("AB-12345678")).toBe("****5678");
+    // 桁数が分からない固定長
+    expect(maskLicenseNumber("A-1234567890123456789012345678")).toBe("****5678");
+    expect(maskLicenseNumber("12345")).toBe("****2345");
     expect(maskLicenseNumber("1234")).toBe("****");
     expect(maskLicenseNumber(null)).toBeNull();
   });

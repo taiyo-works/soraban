@@ -256,7 +256,16 @@ create trigger record_versions_after_insert
 
 -- ---- 検証 ----------------------------------------------------
 
--- 連番の欠け、prev_hash のつながり、content_hash の再計算の不一致がある版を返す（改変がなければ 0 行）。
+-- 版の連鎖とヘッド表の整合を検証する。問題のある版（ヘッド表の問題は最新の版番号、版が無ければ 0）を返す。改変がなければ 0 行。
+--   missing_version        連番の欠け
+--   prev_hash_mismatch     prev_hash が直前の版の content_hash と一致しない
+--   content_hash_mismatch  content_hash の再計算が一致しない
+--   head_missing           版はあるがヘッド表の行が無い
+--   head_without_versions  ヘッド表の行はあるが版が無い（版の全削除）
+--   head_version_mismatch  ヘッド表の current_version が最新の版番号と一致しない（最新版の削除・ヘッド表の書き換え）
+--   head_data_mismatch     ヘッド表の値が最新の版の data と一致しない（ヘッド表だけの書き換え）
+--   head_void_mismatch     最新の版が取消（void）かどうかとヘッド表の voided_at が一致しない
+-- 限界：オーナーロールが最新版から後ろを全部作り直し、ヘッド表もそろえた改変は検出できない（外部の控えは Sprint 15 で検討）。
 create or replace function verify_record_chain(p_entity_type text, p_entity_id uuid)
 returns table (version_no integer, problem text)
 language plpgsql
@@ -267,6 +276,11 @@ declare
   r record;
   v_expected_no integer := 1;
   v_prev_hash text := '';
+  v_last record;
+  v_head jsonb;
+  v_table text;
+  v_key text;
+  v_found boolean := false;
 begin
   for r in
     select * from record_versions v
@@ -285,7 +299,38 @@ begin
     end if;
     v_expected_no := r.version_no + 1;
     v_prev_hash := r.content_hash;
+    v_last := r;
+    v_found := true;
   end loop;
+
+  v_table := case p_entity_type when 'member' then 'members' when 'aircraft' then 'aircraft' when 'pilot' then 'pilots' end;
+  if v_table is null then
+    return;
+  end if;
+  execute format('select to_jsonb(t) from %I t where t.id = $1', v_table) into v_head using p_entity_id;
+
+  if not v_found then
+    if v_head is not null then
+      version_no := 0; problem := 'head_without_versions'; return next;
+    end if;
+    return;
+  end if;
+  if v_head is null then
+    version_no := v_last.version_no; problem := 'head_missing'; return next;
+    return;
+  end if;
+  if (v_head->>'current_version')::integer is distinct from v_last.version_no then
+    version_no := v_last.version_no; problem := 'head_version_mismatch'; return next;
+  end if;
+  for v_key in select jsonb_object_keys(v_last.data) loop
+    if v_head ? v_key and (v_head->v_key) is distinct from (v_last.data->v_key) then
+      version_no := v_last.version_no; problem := 'head_data_mismatch'; return next;
+      exit;
+    end if;
+  end loop;
+  if (v_last.op = 'void') is distinct from (v_head->>'voided_at' is not null) then
+    version_no := v_last.version_no; problem := 'head_void_mismatch'; return next;
+  end if;
 end;
 $$;
 

@@ -43,6 +43,20 @@ describe("テスト用の本人確認", () => {
     expect(verifyTestAuthCookie(value, "secret-1")).toMatchObject({ provider: "test", authUserId: "u1", emailVerified: true });
   });
 
+  it("VERCEL_ENV=preview でも 404。他サイトの Origin からのログインは 403（Cookie を発行しない）", async () => {
+    expect((await signIn({ ...TEST_ENV, VERCEL_ENV: "preview" })).status).toBe(404);
+    const r = await handleTestSignIn(
+      new Request("http://127.0.0.1:3300/api/test-auth/sign-in", {
+        method: "POST",
+        headers: { host: "127.0.0.1:3300", origin: "https://evil.example", "content-type": "application/json" },
+        body: JSON.stringify({ authUserId: "u1", email: "a@example.com", emailVerified: true }),
+      }),
+      TEST_ENV,
+    );
+    expect(r.status).toBe(403);
+    expect(r.headers.get("set-cookie")).toBeNull();
+  });
+
   it("署名を 1 文字変えた Cookie は未ログイン扱い（null）", () => {
     const v = signTestAuthCookie({ authUserId: "u1", email: "a@example.com", emailVerified: true, name: null }, "secret-1");
     expect(verifyTestAuthCookie(v, "secret-1")).not.toBeNull();

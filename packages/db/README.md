@@ -137,7 +137,10 @@ grant select on organizations, members, aircraft, pilots to soraban_app;
   | 11 | `created_at` | 文字列（UTC、`YYYY-MM-DDTHH:MI:SS.ffffffZ`、マイクロ秒 6 桁） |
 
   - jsonb の文字列表現は PostgreSQL の正規形（オブジェクトのキーは長さの短い順、同じ長さはバイト順。区切りは `", "` と `": "`）。外部で再計算する場合はこの正規形に合わせる。
-- **検証**：`select * from verify_record_chain('<entity_type>', '<entity_id>');`（オーナーロール）。連番の欠け（`missing_version`）、`prev_hash` のつながりの不一致（`prev_hash_mismatch`）、`content_hash` の再計算の不一致（`content_hash_mismatch`）がある版を返す。改変がなければ 0 行。オーナーロールでの改変そのものは防げないが、この検証で検出できる。
+- **検証**：`select * from verify_record_chain('<entity_type>', '<entity_id>');`（オーナーロール）。改変がなければ 0 行。次の問題を返す（ヘッド表の問題は最新の版番号、版が無ければ 0）。
+  - 版の連鎖：連番の欠け（`missing_version`）、`prev_hash` のつながりの不一致（`prev_hash_mismatch`）、`content_hash` の再計算の不一致（`content_hash_mismatch`）
+  - ヘッド表との突き合わせ：ヘッド表の `current_version` が最新の版番号と違う（`head_version_mismatch`。最新版の削除など）、ヘッド表の値が最新の版の `data` と違う（`head_data_mismatch`。ヘッド表だけの書き換え）、最新の版が取消かどうかとヘッド表の `voided_at` が食い違う（`head_void_mismatch`）、ヘッド表の行が無い（`head_missing`）、版が無いのにヘッド表の行がある（`head_without_versions`）
+  - **検出できない改変（限界）**：オーナーロールが、ある版から後ろをすべて正しいハッシュで作り直し、ヘッド表もそれに合わせた改変は、DB の中だけでは検出できない（ハッシュ連鎖は DB の中で閉じているため）。最新の `content_hash` を DB の外に控える方法（出力への記載・外部への定期的な控え等）は Sprint 15 で検討する。
 - **最初の運航管理者**：`select ops_bootstrap('<組織名>', '<メールアドレス>', '<表示名>');`（オーナーロールだけが実行できる）。組織が無ければ作り、招待中の運航管理者を 1 人登録する。有効または招待中の運航管理者が既にいる組織では何もしない。本人が確認済みのメールアドレスで初めてログインしたときに結び付く。
 
 ## ローカル開発・テスト
@@ -267,7 +270,7 @@ grant select on organizations, members, aircraft, pilots to soraban_app;
    ```
 7. **Vercel の Production の環境変数**（Production だけを選び、秘密は Sensitive に）：`AUTH_PROVIDER=neon`、`NEON_AUTH_BASE_URL=<Auth URL>`、`NEON_AUTH_COOKIE_SECRET=<openssl rand -base64 32 の出力>`、最後に `OPS_ENABLED=1`。再デプロイし、`/ops` から Google でログインして、役割が「運航管理者」と出ることを確かめる。他の社員は `/ops/members` から招待する。
    - 問題が出たら `OPS_ENABLED` を削除して再デプロイすれば、利用者機能だけが止まる（DB の表は残る）。
-   - `AUTH_TEST_SECRET` は本番に設定しない（`AUTH_PROVIDER=test` は `VERCEL_ENV=production` では使えない設定不足として扱う）。
+   - `AUTH_TEST_SECRET` は本番に設定しない（`AUTH_PROVIDER=test` は `VERCEL_ENV` が設定された環境＝Vercel の Production・Preview・Development では設定不足として扱い、`/api/test-auth/*` は 404 になる。Vercel の「System Environment Variables を自動で公開する」設定は既定の有効のままにする）。
    - 設定が足りないと `/ops` は「運航管理は準備中です」と理由コード（例：`neon_auth_base_url_missing`）だけを示す 503 になる。
 
 **会社での決めごと（本番で使う前に）**：社員への利用目的の明示（飛行日誌の作成・保管のために氏名・技能証明書番号を記録すること）と、退職者の記録の扱い（版の表は追加のみで消せない。機体が登録されている間は保持する方針。誤登録の消去手順は Sprint 15）。
@@ -275,5 +278,5 @@ grant select on organizations, members, aircraft, pilots to soraban_app;
 **実装上の確認事項（本番の準備の最後に確かめる）**
 
 - `@neondatabase/auth` は `0.6.0-beta`（ベータ版）を版固定で使う。CI・E2E は Neon Auth に接続しないため、実際の Neon Auth との結合（Google ログイン → `/ops` に役割が出る）は手順 7 で初めて確かめる。
-- Neon Auth のセッション Cookie の更新は、ページ・API の `auth.getSession()` に任せ、`proxy.ts` では行っていない（`proxy.ts` は機能フラグの 404・503 だけ）。セッションの有効期限まわりで問題が出た場合は、`proxy.ts` に `/ops`・`/api/ops` に限って SDK の `auth.middleware()` を足す。
+- Neon Auth の SDK のミドルウェア処理（`processAuthMiddleware`）は `proxy.ts`（`apps/web/src/server/ops/neon-proxy.ts`）で、`AUTH_PROVIDER=neon` かつ有効なときの `/ops` 以下だけに通す。Google から戻ったとき（`?neon_auth_session_verifier=…` と challenge Cookie）の verifier のセッションへの交換、セッションの Cookie（`session_data` 等）の更新、未ログインのサインイン画面への転送を、ページの描画より前に行う（サーバーコンポーネントの中では Cookie を書けないため）。更新した Cookie は同じ要求の Cookie ヘッダーにも反映し、ページの `getSession()` は Cookie の写しだけで済む。`/ops/sign-in`・`/ops/no-access` は保護しないが、交換と更新は行う。`/api` 以下は対象外（ルートハンドラの `getSession()` は Cookie を書ける）。E2E-DB では Neon Auth の上流の模擬サーバー（`e2e/mock-neon-auth-server.mjs`）で、Google から戻ったときと Cookie の更新を確かめている（実際の Google・Neon Auth との結合は手順 7 で確かめる）。
 

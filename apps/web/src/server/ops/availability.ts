@@ -1,7 +1,8 @@
 // 運航管理（利用者機能）の可否を決める 1 か所の関数（Sprint 10 設計 A）。
 // - OPS_ENABLED が "1" でなければ disabled（既定）。/ops・/api/ops・/api/auth・/api/test-auth はすべて 404。
 // - 必要な環境変数が欠けていれば misconfigured（理由コードだけを示す。値は示さない）。
-// - AUTH_PROVIDER=test は本番（VERCEL_ENV=production）では使わせない。
+// - AUTH_PROVIDER=test は Vercel 上（VERCEL_ENV が設定されている環境：production・preview・development）では使わせない。
+//   Preview に OPS_ENABLED=1・test・DATABASE_URL が入ると、誰でも任意の利用者に成り代われるため（Sprint 10 差し戻し C）。
 // 環境変数はモジュールの読み込み時ではなく、呼ばれたときに読む。
 
 export type OpsEnv = Readonly<Record<string, string | undefined>>;
@@ -16,7 +17,7 @@ export type OpsMisconfigReason =
   | "neon_auth_cookie_secret_missing"
   | "neon_auth_cookie_secret_too_short"
   | "auth_test_secret_missing"
-  | "test_auth_in_production";
+  | "test_auth_on_vercel";
 
 export type OpsAvailability =
   | { readonly state: "disabled" }
@@ -44,7 +45,7 @@ export const getOpsAvailability = (env: OpsEnv = process.env): OpsAvailability =
     return { state: "enabled", provider: "neon" };
   }
   if (provider === "test") {
-    if (nonEmpty(env["VERCEL_ENV"]) === "production") return bad("test_auth_in_production");
+    if (nonEmpty(env["VERCEL_ENV"]) !== undefined) return bad("test_auth_on_vercel");
     if (!nonEmpty(env["AUTH_TEST_SECRET"])) return bad("auth_test_secret_missing");
     return { state: "enabled", provider: "test" };
   }

@@ -2,7 +2,6 @@
 
 // 運航管理（Sprint 10）の画面の入力部品。どれも /api/ops/* を呼ぶだけで、判断はサーバー側（サービス層）が行う。
 // 見た目は components/ops/ui.tsx の部品と判定画面の意匠に合わせる。
-import { useRouter } from "next/navigation";
 import { cloneElement, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { buttonDangerClass, buttonGhostClass, buttonPrimaryClass } from "./ui";
 
@@ -22,6 +21,14 @@ const send = async (method: string, url: string, body?: unknown): Promise<ApiRes
     // 本文なし
   }
   return { ok: res.ok, status: res.status, data };
+};
+
+/**
+ * 登録・訂正・取消の後に画面を読み直す。router.refresh() は、リンクの先読み等と重なると更新が捨てられることがあった
+ * （E2E-DB 17 で数回に 1 回、版の一覧が更新されない。Sprint 10 差し戻し B）。記録の画面は正しさを優先し、通常の読み直しにする。
+ */
+const reloadAfterChange = (): void => {
+  window.location.reload();
 };
 
 const ERROR_MESSAGES: Readonly<Record<string, string>> = {
@@ -188,7 +195,6 @@ const EMPTY_AIRCRAFT: AircraftFormValue = {
 };
 
 export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue }) {
-  const router = useRouter();
   const editing = initial?.id !== undefined;
   const v0 = initial ?? EMPTY_AIRCRAFT;
   const [v, setV] = useState({
@@ -250,8 +256,12 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
     const id = String(r.data["id"]);
     if (editing) {
       setV({ ...v, reason: "" });
-      router.refresh();
-    } else router.push(`/ops/aircraft/${id}`);
+      reloadAfterChange();
+    } else {
+      // 登録後は通常の画面遷移で詳細を開く。クライアント側の遷移（router.push）が終わる前に、続く訂正の
+      // router.refresh() が走ると更新が捨てられることがあるため（Sprint 10 差し戻し B）。
+      window.location.assign(`/ops/aircraft/${id}`);
+    }
   };
 
   const flightError = errors["initialFlightMinutes"];
@@ -416,7 +426,6 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
 // ---- 取消 ----------------------------------------------------
 
 export function VoidForm({ url, version, label }: { readonly url: string; readonly version: number; readonly label: string }) {
-  const router = useRouter();
   const [reason, setReason] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -431,7 +440,7 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
       setMessage(messageFor(r));
       return;
     }
-    router.refresh();
+    reloadAfterChange();
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${label}の取消`}>
@@ -480,7 +489,6 @@ export function PilotForm({
   /** 結び付ける利用者の選択肢（運航管理者のときだけ渡す）。 */
   readonly memberOptions?: readonly MemberOption[];
 }) {
-  const router = useRouter();
   const editing = initial?.id !== undefined;
   const [v, setV] = useState({
     fullName: initial?.fullName ?? "",
@@ -530,8 +538,10 @@ export function PilotForm({
     setErrors({});
     if (editing) {
       setV({ ...v, reason: "" });
-      router.refresh();
-    } else router.push(`/ops/pilots/${String(r.data["id"])}`);
+      reloadAfterChange();
+    } else {
+      window.location.assign(`/ops/pilots/${String(r.data["id"])}`);
+    }
   };
 
   return (
@@ -643,7 +653,6 @@ export function PilotForm({
 // ---- 利用者 --------------------------------------------------
 
 export function MemberInviteForm() {
-  const router = useRouter();
   const [v, setV] = useState({ email: "", displayName: "", role: "pilot" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -661,7 +670,7 @@ export function MemberInviteForm() {
     }
     setErrors({});
     setV({ email: "", displayName: "", role: "pilot" });
-    router.refresh();
+    reloadAfterChange();
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5" aria-label="利用者の招待">
@@ -713,7 +722,6 @@ export function MemberControls({
     readonly version: number;
   };
 }) {
-  const router = useRouter();
   const [role, setRole] = useState<string>(member.role);
   const [status, setStatus] = useState<string>(member.status === "disabled" ? "disabled" : "active");
   const [reason, setReason] = useState("");
@@ -738,7 +746,7 @@ export function MemberControls({
     }
     setErrors({});
     setReason("");
-    router.refresh();
+    reloadAfterChange();
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${member.displayName}の変更`}>

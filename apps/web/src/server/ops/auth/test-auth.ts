@@ -1,6 +1,6 @@
 // テスト用の本人確認（AUTH_PROVIDER=test。CI・E2E・ローカル専用。Sprint 10 設計 A）。
 // POST /api/test-auth/sign-in で AUTH_TEST_SECRET により HMAC-SHA256 で署名した Cookie を発行し、
-// getCurrentIdentity はその署名を検証して Identity を返す。本番（VERCEL_ENV=production）では使えない。
+// getCurrentIdentity はその署名を検証して Identity を返す。Vercel 上（VERCEL_ENV が設定されている環境）では使えない。
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Identity } from "./identity";
 

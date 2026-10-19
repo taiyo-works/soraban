@@ -25,6 +25,9 @@ export const OPS_TEST_MEMBERS: readonly SeedMember[] = [
   { key: "a-viewer", org: "a", role: "viewer", displayName: "閲覧 花子", authUserId: "a-viewer" },
   { key: "a-invited", org: "a", role: "pilot", displayName: "招待 三郎" },
   { key: "a-invited-unverified", org: "a", role: "viewer", displayName: "招待 四郎" },
+  // Neon Auth の模擬サーバー（e2e/mock-neon-auth-server.mjs）でログインする E2E 用（招待中）
+  { key: "a-neon", org: "a", role: "pilot", displayName: "ネオン 太郎" },
+  { key: "a-neon2", org: "a", role: "viewer", displayName: "ネオン 花子" },
   { key: "b-manager", org: "b", role: "manager", displayName: "組織B 管理者", authUserId: "b-manager" },
   { key: "b-pilot", org: "b", role: "pilot", displayName: "組織B 操縦者", authUserId: "b-pilot" },
 ];
