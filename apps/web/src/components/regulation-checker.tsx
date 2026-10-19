@@ -112,10 +112,12 @@ type DemoPreset = {
 
 // 地点の例（固定地点）。県別にグルーピングし、複数規制が同時に red になる地点と
 // 収録している自治体（鳥取・島根）の判定を端的に確かめられるよう並べる。
-// 先頭はユーザの本社拠点 (起点) を置き、現場運用で「拠点と出張先のコントラスト」を
-// 1 タップで切り替えられるようにする。
-// 地図の初期表示と最初の判定地点（本社：鳥取県西伯郡日吉津村日吉津45番地3）。
-const HEAD_OFFICE: LatLng = { lat: 35.434238, lng: 133.380508 };
+// 先頭の 3 地点は、社外の人が見ても判定の特徴（DID の許可・小型無人機等飛行禁止法・
+// 工業専用地域による DID の除外）が分かる地点にする（Sprint 11a A2）。
+// 社内拠点の座標・名前は公開のトップ画面のコードに持たない（Sprint 11a A5）。
+// 地図の初期表示と最初の判定地点。収録済みの市町村で全カードが判定でき、
+// DID の許可が要るという基本の特徴が初回から見える米子市役所にする（Sprint 11a A3）。
+const INITIAL_LOCATION: LatLng = YONAGO_CITY_HALL;
 
 // 履歴の一行に出す運航の目的の短い表記（選択肢の文言に合わせる）。
 const PURPOSE_SHORT: Readonly<Record<string, string>> = {
@@ -124,21 +126,28 @@ const PURPOSE_SHORT: Readonly<Record<string, string>> = {
   city_event: "市の行事",
 };
 
-const DEMO_PRESETS: readonly DemoPreset[] = [
-  {
-    id: "taiyo-tsushin-hq",
-    name: "本社（日吉津村）",
-    loc: HEAD_OFFICE,
-    hint: "国の規制は該当なし。日吉津村の条例は未収録のため、市町村の規制は判定できません",
-    group: "鳥取県",
-  },
+const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
   {
     id: "yonago-city-hall",
     name: "米子市役所",
     loc: YONAGO_CITY_HALL,
-    hint: "人口集中地区 + 鳥取県条例（庁舎）",
+    hint: "人口集中地区（航空法の許可が必要）＋鳥取県条例（庁舎）",
     group: "鳥取県",
     airspaceFlags: ["airspace_did"],
+  },
+  {
+    id: "miho-airbase-vicinity",
+    name: "美保基地の周辺（境港市）",
+    loc: { lat: 35.4936, lng: 133.26604 },
+    hint: "小型無人機等飛行禁止法（対象施設の周囲おおむね 1,000m）。空港の周辺は要確認",
+    group: "鳥取県",
+  },
+  {
+    id: "tottori-industrial",
+    name: "鳥取市の工業専用地域",
+    loc: { lat: 35.474926, lng: 134.222963 },
+    hint: "人口集中地区の中でも工業専用地域は DID の許可が不要（2026-07-01 から）",
+    group: "鳥取県",
   },
   {
     id: "minatoyama-park",
@@ -252,9 +261,9 @@ type RegulationCheckerProps = {
 };
 
 export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
-  const [lat, setLat] = useState<string>(String(HEAD_OFFICE.lat));
-  const [lng, setLng] = useState<string>(String(HEAD_OFFICE.lng));
-  const [center, setCenter] = useState<LatLng>(HEAD_OFFICE);
+  const [lat, setLat] = useState<string>(String(INITIAL_LOCATION.lat));
+  const [lng, setLng] = useState<string>(String(INITIAL_LOCATION.lng));
+  const [center, setCenter] = useState<LatLng>(INITIAL_LOCATION);
   const [combined, setCombined] = useState<string>("");
   // 結合入力フィールドのフィードバック。null=未入力、true=反映成功、false=形式エラー
   const [combinedStatus, setCombinedStatus] = useState<{
@@ -710,8 +719,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     if (didAutoRunRef.current) return;
     didAutoRunRef.current = true;
     const runId = startNewRun();
-    runCheck(HEAD_OFFICE, undefined, undefined, runId);
-    void runDiagnose(HEAD_OFFICE, { userAirspaceFlags: [] }, runId);
+    runCheck(INITIAL_LOCATION, undefined, undefined, runId);
+    void runDiagnose(INITIAL_LOCATION, { userAirspaceFlags: [] }, runId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -887,7 +896,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   void handleGeocode();
                 }
               }}
-              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3"
+              placeholder="例: 鳥取県米子市加茂町1丁目1番地"
               className={fieldClass}
             />
             <button
@@ -971,7 +980,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   message: `反映: ${round6(parsed.lat)}, ${round6(parsed.lng)}`,
                 });
               }}
-              placeholder="拠点（本社）35.434238, 133.380508 ／ 移動先（Google Maps URL）https://maps.google.com/...@35.4283,133.3306,15z"
+              placeholder="例: 35.4278, 133.3314 ／ Google マップの URL（https://maps.google.com/...@35.4283,133.3306,15z）"
               className={`${fieldClass} font-mono`}
             />
             <button
@@ -1012,7 +1021,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 onChange={(e) => setLat(e.target.value)}
                 onPaste={handleSplitPaste}
                 className={`${fieldClass} font-mono`}
-                placeholder="35.4342"
+                placeholder="35.4278"
               />
             </label>
             <label className="flex flex-col gap-1.5">
@@ -1026,7 +1035,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 onChange={(e) => setLng(e.target.value)}
                 onPaste={handleSplitPaste}
                 className={`${fieldClass} font-mono`}
-                placeholder="133.3805"
+                placeholder="133.3314"
               />
             </label>
           </div>
@@ -1369,7 +1378,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </p>
           {/* モバイル: 横スクロール scroll-snap */}
           <div className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 sm:hidden">
-            {DEMO_PRESETS.map((preset) => (
+            {EXAMPLE_LOCATIONS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
@@ -1395,7 +1404,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
           {/* sm 以上: 既存のグリッド */}
           <div className="hidden grid-cols-2 gap-px overflow-hidden bg-rule sm:grid lg:grid-cols-3">
-            {DEMO_PRESETS.map((preset) => (
+            {EXAMPLE_LOCATIONS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
@@ -1600,6 +1609,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 II_A: "cat:IIA相当",
                 II_B_eligible: "cat:IIB相当",
                 III_level4: "cat:III(Lv4)",
+                emergency_no_fly: "飛行不可(緊急用務空域)",
               };
               const completedCount = h.diagnosisInput?.completedProcedureIds?.length ?? 0;
               const procCount = h.diagnosisSummary?.procedureCount;

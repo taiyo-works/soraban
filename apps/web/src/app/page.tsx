@@ -136,9 +136,19 @@ export default function Home() {
               ドローン飛行の可否判定と運航管理
             </span>
           </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-[15px] sm:leading-[1.85]">
-            地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、鳥取県・島根県と県内市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
-          </p>
+          {/* 誰のための道具で、使うと何が得られるか（Sprint 11a B1）。地域名はここに書かず site-facts の対象地域にだけ書く。 */}
+          <div className="flex max-w-2xl flex-col gap-1.5">
+            <p
+              data-testid="site-lead"
+              className="text-sm leading-relaxed text-ink-soft sm:text-[15px] sm:leading-[1.85]"
+            >
+              業務でドローンを飛ばす事業者・操縦者のための道具です。飛ばす前に、その地点がどの法令・条例に当たり、どの手続きが要るかを一度に確かめ、出典つきの記録として残せます。
+            </p>
+            {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
+            <p data-testid="site-ops-note" className="text-xs leading-relaxed text-ink-mute">
+              運航管理（飛行計画・通報・飛行日誌）は、社内で試験運用しながら整えています。
+            </p>
+          </div>
 
           <dl
             data-testid="site-facts"
@@ -179,6 +189,9 @@ export default function Home() {
           title="収録している規制とデータ"
           note="件数と確認日は現在の収録内容から表示しています"
         />
+        <p className="max-w-2xl text-sm leading-relaxed text-ink-soft">
+          地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、都道府県と市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
+        </p>
 
         <ul className="grid grid-cols-1 gap-px overflow-hidden border border-rule bg-rule lg:grid-cols-2">
           {COVERAGE_LAYERS.map((layer) => (

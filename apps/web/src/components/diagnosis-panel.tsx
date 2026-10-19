@@ -94,6 +94,14 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     mark: "triangle",
     emphatic: true,
   },
+  emergency_no_fly: {
+    rule: "border-signal-red",
+    accent: "text-signal-red",
+    surface: "bg-signal-red-soft",
+    severity: "飛行不可",
+    mark: "triangle",
+    emphatic: true,
+  },
 };
 
 const categoryHeadline: Readonly<Record<DiagnosisCategory, string>> = {
@@ -102,7 +110,33 @@ const categoryHeadline: Readonly<Record<DiagnosisCategory, string>> = {
   II_A: "カテゴリー II（IIA 相当・申請が必要）",
   II_B_eligible: "カテゴリー II（IIB 相当・申請を不要化できる可能性）",
   III_level4: "カテゴリー III（レベル4・第三者上空）",
+  emergency_no_fly: "飛行できません（緊急用務空域・原則飛行禁止）",
 };
+
+// 注記の文中の URL（出典）をリンクにする。注記は文字列のまま持ち、PDF では URL の文字列として出す。
+const URL_PATTERN = /(https?:\/\/[^\s）)]+)/g;
+function NoteText({ text }: { text: string }) {
+  const parts = text.split(URL_PATTERN);
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="break-all underline underline-offset-2"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
 
 // severity glyph: CSS の border だけで描く製図記号。aria-hidden 前提（装飾）。
 function SeverityMark({ shape, className }: { shape: CategorySeverity["mark"]; className: string }) {
@@ -246,7 +280,9 @@ export function DiagnosisPanel({
             {(diagnosis.verificationNotes ?? []).length > 0 ? (
               <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">
                 {(diagnosis.verificationNotes ?? []).map((n) => (
-                  <li key={n}>※ 要確認: {n}</li>
+                  <li key={n}>
+                    ※ 要確認: <NoteText text={n} />
+                  </li>
                 ))}
               </ul>
             ) : null}
@@ -273,9 +309,15 @@ export function DiagnosisPanel({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
-                title="カテゴリー制度・レベル4 の出典（国土交通省）"
+                title={
+                  diagnosis.category === "emergency_no_fly"
+                    ? "緊急用務空域の出典（国土交通省）"
+                    : "カテゴリー制度・レベル4 の出典（国土交通省）"
+                }
               >
-                国土交通省 無人航空機のレベル4飛行 ↗
+                {diagnosis.category === "emergency_no_fly"
+                  ? "国土交通省 無人航空機の飛行禁止空域と飛行の方法 ↗"
+                  : "国土交通省 無人航空機のレベル4飛行 ↗"}
               </a>
             </p>
           </div>

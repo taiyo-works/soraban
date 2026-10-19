@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { PilotForm, VoidForm } from "@/components/ops/ops-client";
 import { VersionList } from "@/components/ops/versions";
 import { Badge, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
+import { LicenseRenewalNotice } from "@/components/ops/license-renewal";
+import { LICENSE_RENEWAL_SOURCE_URL, todayJst } from "@/server/ops/license";
 import { getPilot, listMembers, listPilotVersions, OpsError } from "@/server/ops/service";
 import { LICENSE_CLASS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
@@ -42,7 +44,25 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
         "—"
       ),
     ],
-    ["有効期限", p.licenseExpiresOn ? <span className="tnum">{p.licenseExpiresOn}</span> : "—"],
+    [
+      "有効期限",
+      p.licenseExpiresOn ? (
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="tnum">{p.licenseExpiresOn}</span>
+          <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={todayJst()} voided={p.voided} />
+          <a
+            href={LICENSE_RENEWAL_SOURCE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-brand-700 underline underline-offset-2"
+          >
+            更新の手続き（国土交通省）
+          </a>
+        </span>
+      ) : (
+        "—"
+      ),
+    ],
     ["限定事項", limits.length > 0 ? limits.join("・") : "なし"],
   ];
   const editNote = p.voided

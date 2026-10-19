@@ -10,6 +10,8 @@ import {
   PageHeader,
   VoidedToggle,
 } from "@/components/ops/ui";
+import { LicenseRenewalNotice } from "@/components/ops/license-renewal";
+import { todayJst } from "@/server/ops/license";
 import { listPilots } from "@/server/ops/service";
 import { LICENSE_CLASS_LABELS, requireOpsMember } from "@/server/ops/page";
 
@@ -21,6 +23,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
   const includeVoided = (await searchParams).includeVoided === "1";
   const rows = await listPilots(ctx, includeVoided);
   const manager = me.member.role === "manager";
+  const today = todayJst();
   return (
     <main className="flex flex-col gap-6">
       <PageHeader
@@ -62,6 +65,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
                   <span className="text-ink-soft">
                     <CellLabel>技能証明</CellLabel>
                     {p.hasLicense && p.licenseClass ? LICENSE_CLASS_LABELS[p.licenseClass] : "なし"}
+                    <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={today} voided={p.voided} />
                   </span>
                   <span className="flex min-w-0 items-baseline text-ink-soft">
                     <CellLabel>番号</CellLabel>

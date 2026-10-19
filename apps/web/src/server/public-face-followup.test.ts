@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 // - 申請支援診断の証跡 ID は、手続きデータの確認日（PROCEDURES_VERIFIED_AT）を 2026-06-22 → 2026-10-19 に
 //   更新したため、これ以降の診断では変わる（データの版が変わったことを表す）。変わる理由が確認日だけで
 //   あることを、確認日を旧値に戻したペイロードが修正前の証跡 ID と一致することで確かめる。
+//   Sprint 11a（制度データ revision 2）で証跡ペイロードに d.rev が加わった。確認日（2026-10-19）は同じなので、
+//   変わる理由は revision と確認日だけであることを、rev を除き確認日を旧値に戻したペイロードで確かめる
+//   （このテストの入力は Sprint 11a でカテゴリー・手続きが変わらない夜間・目視外）。
 // - 履歴（localStorage）に保存済みの証跡 ID は文字列として保存・表示され、再計算しないので変わらない。
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -16,6 +19,7 @@ import {
   didBundleToDataset,
   ENGINE_VERSION,
   industrialBundleToZones,
+  PROCEDURES_REVISION,
   PROCEDURES_VERIFIED_AT,
   type DidBundleFile,
   type IndustrialBundleFile,
@@ -85,11 +89,15 @@ describe("公開面の残り指摘：証跡 ID の回帰", () => {
     expect(PROCEDURES_VERIFIED_AT).toBe("2026-10-19T00:00:00+09:00");
     expect(id).not.toBe(BEFORE);
 
-    // 確認日だけを旧値に戻したペイロードは、修正前の証跡 ID と一致する（ほかの入力は変わっていない）
+    // 制度データの revision（Sprint 11a で追加した d.rev）を除き、確認日を旧値に戻したペイロードは、
+    // 修正前の証跡 ID と一致する（ほかの入力は変わっていない）
     const payload = buildDiagnosisEvidencePayload({ ...input, engineVersion: ENGINE_VERSION });
     const ver = JSON.stringify(PROCEDURES_VERIFIED_AT);
     expect(payload.split(ver)).toHaveLength(2);
-    const oldPayload = payload.replace(ver, JSON.stringify("2026-06-22T00:00:00+09:00"));
+    expect(payload.split(`,"rev":${PROCEDURES_REVISION}`)).toHaveLength(2);
+    const oldPayload = payload
+      .replace(`,"rev":${PROCEDURES_REVISION}`, "")
+      .replace(ver, JSON.stringify("2026-06-22T00:00:00+09:00"));
     const sha16 = (s: string) => `ev_${createHash("sha256").update(s).digest("hex").slice(0, 16)}`;
     expect(sha16(oldPayload)).toBe(BEFORE);
     expect(sha16(payload)).toBe(id);

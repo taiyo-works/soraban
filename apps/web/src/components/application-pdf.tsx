@@ -79,6 +79,7 @@ const CATEGORY_ACCENT: Record<DiagnosisCategory, string> = {
   II_A: COLOR.brand,
   II_B_eligible: COLOR.brand,
   III_level4: COLOR.signalRed,
+  emergency_no_fly: COLOR.signalRed,
 };
 const CATEGORY_HEADLINE: Record<DiagnosisCategory, string> = {
   I: "カテゴリー I（特定飛行に非該当）",
@@ -86,6 +87,14 @@ const CATEGORY_HEADLINE: Record<DiagnosisCategory, string> = {
   II_A: "カテゴリー II（IIA 相当・申請が必要）",
   II_B_eligible: "カテゴリー II（IIB 相当・申請を不要化できる可能性）",
   III_level4: "カテゴリー III（レベル4・第三者上空）",
+  emergency_no_fly: "飛行できません（緊急用務空域・原則飛行禁止）",
+};
+
+// 注記の文中の出典 URL を取り出す（PDF では本文と分け、URL の文字列を等幅で出す）。
+const NOTE_URL_PATTERN = /（出典: (https?:\/\/[^\s）]+) ）/;
+const splitNoteSource = (note: string): { readonly text: string; readonly url?: string } => {
+  const m = NOTE_URL_PATTERN.exec(note);
+  return m ? { text: note.replace(NOTE_URL_PATTERN, ""), url: m[1] } : { text: note };
 };
 
 // プリフィルの系統バッジ枠色（DRS=墨 / DIPS 2.0=藍）。
@@ -392,11 +401,19 @@ export const ApplicationPdfDocument = ({
           <Text style={styles.categoryNote}>
             DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
           </Text>
-          {(diagnosis.verificationNotes ?? []).map((n) => (
-            <Text key={n} style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
-              ※ 要確認: {n}
-            </Text>
-          ))}
+          {(diagnosis.verificationNotes ?? []).map((n) => {
+            const note = splitNoteSource(n);
+            return (
+              <View key={n}>
+                <Text style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
+                  ※ 要確認: {note.text}
+                </Text>
+                {note.url ? (
+                  <MonoText style={styles.categorySource}>出典: {note.url}</MonoText>
+                ) : null}
+              </View>
+            );
+          })}
           {diagnosis.category === "III_level4" ? (
             <Text style={[styles.categoryNote, { color: COLOR.signalRed, fontWeight: 700 }]}>
               ※ 単純な飛行許可・承認の申請では実施できません。一等無人航空機操縦士 ＋ 第一種機体認証が必須です。

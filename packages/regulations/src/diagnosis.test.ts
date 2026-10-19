@@ -52,9 +52,10 @@ describe("制度データ（procedures.json）", () => {
 
   it("確定事実として表示する手続きには法的根拠と出典 URL が必ず併記されている", () => {
     // 25kg 保険義務化は国交省（koku_fr10_000042, R7.10.1〜）で確認済みのため手続き化（Sprint 6）。
+    // Sprint 11a で出典を制度改正の資料（001909323.pdf。レベル3.5飛行も必須の記載あり）に替えた。
     const ins = ALL_PROCEDURES.find((p) => p.kind === "insurance");
     expect(ins?.id).toBe("insurance-third-party-25kg");
-    expect(ins?.sourceUrl).toBe("https://www.mlit.go.jp/koku/koku_fr10_000042.html");
+    expect(ins?.sourceUrl).toBe("https://www.mlit.go.jp/common/001909323.pdf");
     for (const p of ALL_PROCEDURES) {
       expect(p.legalBasis.length).toBeGreaterThan(0);
       expect(p.sourceUrl.length).toBeGreaterThan(0);

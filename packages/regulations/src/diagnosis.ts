@@ -120,7 +120,9 @@ export type DiagnosisCategory =
   | "needs_verification"
   | "II_A"
   | "II_B_eligible"
-  | "III_level4";
+  | "III_level4"
+  // 緊急用務空域の指定中＝原則飛行禁止。許可・承認の申請で飛べる区分ではない（Sprint 11a C4）。
+  | "emergency_no_fly";
 
 // 空域判定の三値（該当／非該当／未確認）。DID データ未整備・判定不能は "unverified"。
 export type AirspaceDeterminationStatus = "applicable" | "not_applicable" | "unverified";
@@ -274,6 +276,14 @@ export const PROCEDURES_VERIFIED_AT: string = (() => {
   return typeof v === "string" && v.length > 0 ? v : "";
 })();
 
+// 制度データ（手続き・カテゴリーのデータと判定規則）の版の番号。procedures.json の revision。
+// 同じ確認日に二度直しても申請支援の証跡 ID が版の違いを表せるよう、証跡ペイロードの d.rev に入れる
+// （Sprint 11a D2）。revision が無い旧データは 1 とみなす。
+export const PROCEDURES_REVISION: number = (() => {
+  const v = (proceduresData as { revision?: unknown }).revision;
+  return typeof v === "number" && Number.isInteger(v) && v > 0 ? v : 1;
+})();
+
 // 起動時に 1 度だけ手続き定義を読み込み、id → RequiredProcedure の索引を作る。
 const PROCEDURES: ReadonlyMap<string, RequiredProcedure> = (() => {
   const dataset = proceduresData as {
@@ -326,6 +336,7 @@ const CATEGORIES: ReadonlyMap<DiagnosisCategory, CategoryDefinition> = (() => {
     "II_A",
     "II_B_eligible",
     "III_level4",
+    "emergency_no_fly",
   ]);
   const map = new Map<DiagnosisCategory, CategoryDefinition>();
   for (const c of raw) {
@@ -437,7 +448,32 @@ export type DeriveDiagnosisInput = {
    * true のとき「施設管理者の同意＋公安委員会への事前通報」を手続きに加える（重量に関係なく）。
    */
   readonly smallDroneLawTriggered?: boolean;
+  /**
+   * 目視外飛行の補助者の有無。false（補助者なし）のとき、レベル3.5飛行の保険と
+   * 人口集中地区の上空を経路に含める場合の安全確保措置の注記を加える（Sprint 11a C2・C3）。
+   */
+  readonly bvlosWithObserver?: boolean;
 };
+
+// ── 注記の出典（一次資料。画面ではリンク、PDF では URL の文字列として出す）──
+/** 通達 国空無機第338898号（農薬等の空中散布の承認不要）。 */
+export const PESTICIDE_NOTICE_URL = "https://www.mlit.go.jp/common/001990796.pdf";
+/** 制度改正の資料（総重量25kg以上の第三者賠償責任保険・レベル3.5飛行）。 */
+export const INSURANCE_SOURCE_URL = "https://www.mlit.go.jp/common/001909323.pdf";
+/** 審査要領（カテゴリーⅡ飛行）最終改正 令和8年9月29日。 */
+export const CATEGORY_II_REVIEW_GUIDELINE_URL = "https://www.mlit.go.jp/koku/content/001866503.pdf";
+
+const PESTICIDE_NOTE =
+  "農薬等の空中散布で、通達（国空無機第338898号）の要件（第一種または第二種の機体認証、機体の種類に限定した一等または二等の技能証明、農地・森林の区域内で作物の上端等から 4m 以下、催し場所の上空以外 など）を満たす場合は、夜間・目視外・30m 未満・危険物輸送・物件投下の承認は不要です。人口集中地区の上空の許可は別に必要です。飛行計画の通報と飛行日誌は引き続き必要です。" +
+  `（出典: ${PESTICIDE_NOTICE_URL} ）`;
+const LEVEL35_INSURANCE_NOTE =
+  "補助者を配置しない目視外飛行で、立入管理措置をレベル3.5飛行（機上のカメラによる確認）で行う場合は、機体の重量にかかわらず第三者賠償責任保険への加入が必要です。" +
+  `（出典: ${INSURANCE_SOURCE_URL} ）`;
+const BVLOS_DID_NOTE =
+  "補助者を配置しない目視外飛行で、やむを得ず人口集中地区の上空を飛行経路に含める場合は、第三者及び物件への危害を防ぐための十分な安全確保措置が求められます（審査要領（カテゴリーⅡ飛行）5-4(3)c)ア。令和8年9月29日の改正で取扱いが明確化）。" +
+  `（出典: ${CATEGORY_II_REVIEW_GUIDELINE_URL} ）`;
+const EMERGENCY_NOTE =
+  "緊急用務空域の指定中は飛行できません。飛行計画の通報・飛行日誌などの手続きは、指定が解除された後に飛行する場合に必要になるものです（飛行しないなら不要です）。";
 
 const isHeavyDrone = (droneWeightG: number | undefined): boolean =>
   typeof droneWeightG === "number" &&
@@ -482,6 +518,9 @@ const classifyCategory = (
   input: DeriveDiagnosisInput,
   didStatus: AirspaceDeterminationStatus,
 ): DiagnosisCategory => {
+  // 緊急用務空域は原則飛行禁止で、他の許可があっても飛べない。第三者上空・25kg 以上・IIB の可否より先に、
+  // 機体の重量にかかわらず（100g 未満を含む。教則 第5版）判定する（Sprint 11a C4）。
+  if (flags.includes("airspace_emergency")) return "emergency_no_fly";
   if (flags.length === 0) {
     return isRegulated && didStatus === "unverified" ? "needs_verification" : "I";
   }
@@ -528,6 +567,10 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
       for (const id of CROSS_CUTTING_PROCEDURE_IDS) pushUnique(proc(id));
     }
   }
+  // 緊急用務空域の指定の確認は 100g 未満の機体も対象（教則 第5版）。申請する手続きではない（期限 0）。
+  if (flags.includes("airspace_emergency")) {
+    pushUnique(proc(FLAG_TO_PROCEDURE_ID.airspace_emergency));
+  }
   // 小型無人機等飛行禁止法は航空法と別系統で、100g 未満の機体も対象（重量で除外しない）。
   if (input.smallDroneLawTriggered === true) {
     pushUnique(proc(SMALL_DRONE_LAW_PROCEDURE_ID));
@@ -538,7 +581,7 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
   const heavy = isRegulated && isHeavyDrone(input.droneWeightG);
 
   // 25kg 以上で許可・承認申請が必要（または要確認）な場合は第三者賠償責任保険が必須
-  // （令和7年10月1日以降の新規申請。国交省 koku_fr10_000042）。
+  // （令和7年10月1日以降の新規申請。制度改正の資料 001909323.pdf）。emergency_no_fly は飛行しないため付けない。
   if (
     heavy &&
     (category === "II_A" || category === "III_level4" || category === "needs_verification")
@@ -556,6 +599,17 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
     verificationNotes.push(
       "総重量 25kg 以上のため、カテゴリー II でも IIB による申請不要化はできません。新規の飛行許可・承認申請では第三者賠償責任保険への加入が必要です（令和7年10月1日以降）。",
     );
+  }
+
+  if (category === "emergency_no_fly") {
+    verificationNotes.push(EMERGENCY_NOTE);
+  }
+  if (isRegulated && (flags.includes("method_drop") || flags.includes("method_dangerous"))) {
+    verificationNotes.push(PESTICIDE_NOTE);
+  }
+  if (isRegulated && flags.includes("method_bvlos") && input.bvlosWithObserver === false) {
+    verificationNotes.push(LEVEL35_INSURANCE_NOTE);
+    if (didStatus === "applicable") verificationNotes.push(BVLOS_DID_NOTE);
   }
 
   // deadlines: 提出期限の逆算（S2 期限カレンダー）。
@@ -729,6 +783,7 @@ export const buildDiagnosisEvidencePayload = (
       p: sortedProcedures,
       did: input.didStatus ?? null,
       ver: PROCEDURES_VERIFIED_AT || null,
+      rev: PROCEDURES_REVISION,
     },
     ds: normalizeDatasetKeys(input.datasets ?? []),
   });
