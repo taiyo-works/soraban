@@ -153,7 +153,7 @@ const LAYER_GROUPS: ReadonlyArray<{
 }> = [
   {
     key: "did",
-    label: "DID（航空法132条）",
+    label: "DID（航空法第132条の85）",
     source: datasetLegend(DATASET_IDS.did),
     swatch: "bg-rose-500/40 ring-rose-600 rounded-sm",
     layerIds: ["did-fill", "did-outline"],

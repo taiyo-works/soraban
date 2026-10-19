@@ -32,10 +32,13 @@ const SCREEN_FORBIDDEN = [
   "Jamstack",
   "奥田",
   "seed",
+  // 表記を「DIPS 2.0」にそろえる（公開面の残り指摘）
+  "DIPS2.0",
+  "年データ",
 ] as const;
 
 // 契約 8・9：PDF に出してはいけない語。
-const PDF_FORBIDDEN = ["特許", "Patent", "出願", "PoC", "Phase", "clausegraph", "奥田", "seed"] as const;
+const PDF_FORBIDDEN = ["特許", "Patent", "出願", "PoC", "Phase", "clausegraph", "奥田", "seed", "DIPS2.0"] as const;
 
 const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
 const waitDiagnose = (page: Page) =>
@@ -170,6 +173,9 @@ test.describe("C. PDF", () => {
     // メタのラベルは字間を空けて組むため、抽出テキストでは「判 定 の 版」になる。字形が無ければ抽出されない
     expect(t).toMatch(/判\s*定\s*の\s*版/);
     expect(t).toContain("免責");
+    // フッターの証跡 ID は日本語のラベルで出す（英字の「Evidence」にしない）
+    expect(t).toMatch(/証跡 ID ev_[0-9a-f]{16}/);
+    expect(t).not.toMatch(/Evidence ev_/);
     for (const w of PDF_FORBIDDEN) expect(t, `申請支援 PDF に「${w}」が残っている`).not.toContain(w);
   });
 });

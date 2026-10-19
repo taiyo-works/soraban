@@ -188,7 +188,7 @@ export function RegulationCard({ regulation }: Props) {
           </a>
         ) : null}
         {regulation.dataYear ? (
-          <span className="tnum">{regulation.dataYear} 年データ</span>
+          <span className="tnum">基準年 {regulation.dataYear}</span>
         ) : null}
         <span
           title={`区域の位置: ${CONFIDENCE_LABEL[regulation.confidence.geometric]} / 条文の読み取り: ${CONFIDENCE_LABEL[regulation.confidence.extraction]}`}

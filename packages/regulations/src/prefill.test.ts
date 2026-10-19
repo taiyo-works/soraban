@@ -5,9 +5,10 @@ import {
   STANDARD_MANUAL_REFERENCE,
   ALL_MANUAL_BASE_SECTIONS,
   ALL_MANUAL_METHOD_SECTIONS,
+  PREFILL_DID_UNVERIFIED_LABEL,
   type PrefillField,
 } from "./prefill";
-import type { SpecificFlightFlag } from "./diagnosis";
+import { deriveDiagnosis, type SpecificFlightFlag } from "./diagnosis";
 
 // 米子市役所の座標（DID 内）。spec の中核ケースに合わせる。
 const YONAGO = { lat: 35.4278, lng: 133.3314 };
@@ -36,7 +37,7 @@ describe("buildPrefillFields — 米子市役所＋夜間＋目視外（DID 内�
       expect(f.dipsFieldLabel.length).toBeGreaterThan(0);
       expect(f.value.length).toBeGreaterThan(0);
       expect(f.source.length).toBeGreaterThan(0);
-      expect(["DIPS2.0", "DRS"]).toContain(f.system);
+      expect(["DIPS 2.0", "DRS"]).toContain(f.system);
     }
   });
 
@@ -64,14 +65,14 @@ describe("buildPrefillFields — 米子市役所＋夜間＋目視外（DID 内�
     expect(weightField?.system).toBe("DRS");
   });
 
-  it("飛行範囲（座標）は DIPS2.0 行として区別される（DRS と別導線）", () => {
+  it("飛行範囲（座標）は DIPS 2.0 行として区別される（DRS と別導線）", () => {
     const latField = fields.find((f) => f.dipsFieldLabel === "飛行範囲の緯度（十進度）");
-    expect(latField?.system).toBe("DIPS2.0");
+    expect(latField?.system).toBe("DIPS 2.0");
   });
 
-  it("DRS 行と DIPS2.0 行の両方が存在する（別導線）", () => {
+  it("DRS 行と DIPS 2.0 行の両方が存在する（別導線）", () => {
     expect(fields.some((f) => f.system === "DRS")).toBe(true);
-    expect(fields.some((f) => f.system === "DIPS2.0")).toBe(true);
+    expect(fields.some((f) => f.system === "DIPS 2.0")).toBe(true);
   });
 
   it("目視外を選ぶと補助者配置の行が出る", () => {
@@ -111,6 +112,47 @@ describe("buildPrefillFields — 100g 未満は非該当が明示される", () 
     const v = valueOf(fields, "機体の重量区分（DRS 登録要否）") ?? "";
     expect(v).toContain("80");
     expect(v).toContain("非該当");
+  });
+});
+
+describe("buildPrefillFields — DID が未確認のときの「飛行の種類」（安全側）", () => {
+  const KIND = "飛行の種類（特定飛行の区分）";
+  const base = { lat: YONAGO.lat, lng: YONAGO.lng, droneWeightG: 900 };
+
+  it("飛行方法なし・DID 未確認：「特定飛行に非該当」とせず要確認を出し、診断のカテゴリーも要確認", () => {
+    const v = valueOf(buildPrefillFields({ ...base, flags: [], didStatus: "unverified" }), KIND) ?? "";
+    expect(v).toBe(PREFILL_DID_UNVERIFIED_LABEL);
+    expect(v).toContain("要確認");
+    expect(v).not.toContain("非該当（許可・承認の対象なし）");
+    expect(deriveDiagnosis({ flags: [], droneWeightG: 900, didStatus: "unverified" }).category).toBe(
+      "needs_verification",
+    );
+  });
+
+  it("飛行方法あり・DID 未確認：選んだ飛行方法に DID の要確認を併記する", () => {
+    const v =
+      valueOf(buildPrefillFields({ ...base, flags: ["method_night"], didStatus: "unverified" }), KIND) ?? "";
+    expect(v).toContain("夜間");
+    expect(v).toContain(PREFILL_DID_UNVERIFIED_LABEL);
+  });
+
+  it("DID 非該当（確定）なら従来どおり「特定飛行に非該当」", () => {
+    const v = valueOf(buildPrefillFields({ ...base, flags: [], didStatus: "not_applicable" }), KIND);
+    expect(v).toBe("特定飛行に非該当（許可・承認の対象なし）");
+  });
+
+  it("DID フラグが立っている（該当）なら要確認を出さない", () => {
+    const v =
+      valueOf(buildPrefillFields({ ...base, flags: ["airspace_did"], didStatus: "unverified" }), KIND) ?? "";
+    expect(v).not.toContain("要確認");
+  });
+
+  it("100g 未満は航空法上の無人航空機に当たらないため、未確認でも要確認にしない", () => {
+    const v = valueOf(
+      buildPrefillFields({ ...base, droneWeightG: 80, flags: [], didStatus: "unverified" }),
+      KIND,
+    );
+    expect(v).toBe("特定飛行に非該当（許可・承認の対象なし）");
   });
 });
 

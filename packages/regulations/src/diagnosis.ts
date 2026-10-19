@@ -81,7 +81,7 @@ export type RequiredProcedureKind =
   | "ordinance_coordination"
   | "facility_consent_notice";
 
-export type ProcedureSystem = "DIPS2.0" | "DRS" | "条例（各管理者）" | "都道府県公安委員会";
+export type ProcedureSystem = "DIPS 2.0" | "DRS" | "条例（各管理者）" | "都道府県公安委員会";
 
 export type RequiredProcedure = {
   readonly id: string;
@@ -89,9 +89,9 @@ export type RequiredProcedure = {
   /** 例: "飛行許可（DID上空）" */
   readonly title: string;
   readonly system: ProcedureSystem;
-  /** DRS と DIPS2.0 を別 URL で持つ（別導線で案内するため） */
+  /** DRS と DIPS 2.0 を別 URL で持つ（別導線で案内するため） */
   readonly systemUrl: string;
-  /** 例: "航空法 第132条の85 第1項第3号" */
+  /** 例: "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）" */
   readonly legalBasis: string;
   /** 出典 URL（条文・手引き）。空でないこと。 */
   readonly sourceUrl: string;
@@ -199,7 +199,7 @@ const ALL_PROCEDURE_KINDS: ReadonlySet<RequiredProcedureKind> = new Set([
 ]);
 
 const ALL_SYSTEMS: ReadonlySet<ProcedureSystem> = new Set([
-  "DIPS2.0",
+  "DIPS 2.0",
   "DRS",
   "条例（各管理者）",
   "都道府県公安委員会",

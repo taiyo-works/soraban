@@ -399,8 +399,8 @@ export function DiagnosisPanel({
         ) : null}
       </div>
 
-      {/* DRS と DIPS2.0 の別導線を明示（混同防止の固定注意）。
-          手続きカードと同じ系統バッジ（DRS=墨抜き / DIPS2.0=藍塗り）で
+      {/* DRS と DIPS 2.0 の別導線を明示（混同防止の固定注意）。
+          手続きカードと同じ系統バッジ（DRS=墨抜き / DIPS 2.0=藍塗り）で
           「2 つの別ポータル」であることを一目で示す。 */}
       <div className="flex flex-col gap-2 border-t border-rule pt-4">
         <p className="eyebrow !text-[11px]">2 系統の手続き窓口（混同しないこと）</p>
@@ -425,7 +425,7 @@ export function DiagnosisPanel({
           <p className="border border-rule bg-paper px-3 py-2.5">
             <span className="mb-1 flex items-center gap-2">
               <span className="inline-flex items-center border border-brand-700 bg-brand-50 px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider text-brand-700">
-                DIPS2.0
+                DIPS 2.0
               </span>
               <span className="text-[10px] text-ink-mute">飛行許可・承認</span>
             </span>

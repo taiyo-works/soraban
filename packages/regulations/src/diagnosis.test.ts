@@ -25,12 +25,12 @@ describe("制度データ（procedures.json）", () => {
     }
   });
 
-  it("DRS と DIPS2.0 が別 URL で案内される（混同防止）", () => {
+  it("DRS と DIPS 2.0 が別 URL で案内される（混同防止）", () => {
     const drs = ALL_PROCEDURES.find((p) => p.id === "drone-registration");
     const did = ALL_PROCEDURES.find((p) => p.id === "flight-permission-did");
     expect(drs?.system).toBe("DRS");
     expect(drs?.systemUrl).toContain("dips-reg");
-    expect(did?.system).toBe("DIPS2.0");
+    expect(did?.system).toBe("DIPS 2.0");
     expect(did?.systemUrl).toContain("ossportal");
     expect(drs?.systemUrl).not.toBe(did?.systemUrl);
   });
@@ -46,8 +46,8 @@ describe("制度データ（procedures.json）", () => {
     }
   });
 
-  it("データセット全体の検証日（PROCEDURES_VERIFIED_AT）が 2026-06-22 を基準にしている", () => {
-    expect(PROCEDURES_VERIFIED_AT).toMatch(/^2026-06-22/);
+  it("データセット全体の検証日（PROCEDURES_VERIFIED_AT）は、条・項・号を確認し直した 2026-10-19", () => {
+    expect(PROCEDURES_VERIFIED_AT).toMatch(/^2026-10-19/);
   });
 
   it("確定事実として表示する手続きには法的根拠と出典 URL が必ず併記されている", () => {

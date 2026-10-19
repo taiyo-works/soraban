@@ -38,14 +38,14 @@ type CoverageRow = {
 const COVERAGE_LAYERS: readonly CoverageRow[] = [
   {
     source: "国",
-    title: "航空法第132条 — DID（人口集中地区）",
+    title: "航空法第132条の85 — DID（人口集中地区）",
     coverage: "鳥取県・島根県",
     dataset: `国土数値情報 A16 令和2年国勢調査ベース（工業専用地域を除外：告示第435号、2026-07-01 適用）`,
     count: `本体データ ${getDataset(DATASET_IDS.did).bundled ? "同梱済み" : "未同梱（判定は未確認に縮退）"}・確認日 ${getDataset(DATASET_IDS.did).verifiedAt}`,
   },
   {
     source: "国",
-    title: "航空法 — 空港等周辺",
+    title: "航空法第132条の85 — 空港等周辺",
     coverage: "山陰・但馬",
     dataset: "空港の周辺区域は公開資料からの概算",
     count: "6 空港",
