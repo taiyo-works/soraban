@@ -2,11 +2,14 @@
 //   pnpm db:seed:ops-test   （接続先は DATABASE_URL_UNPOOLED。オーナーロールで接続する）
 // - localhost・127.0.0.1 以外の接続先では実行を拒否する（本番に投入しない）。
 // - 2 組織、各役割の利用者（テスト用の本人確認 test に結び付け済み）、招待中の利用者、操縦者・機体を作る。
+// - Sprint 11：組織 A に既存の総飛行時間が 0 と 0 以外（600 分）の機体、操縦者の行に結び付いていない操縦者役割の利用者を加える。
 // - 既に同じ名前の組織があれば何もしない。
 import pg from "pg";
 import { describeConnection } from "./config";
 
 export const OPS_TEST_ORGS = { a: "テスト組織A", b: "テスト組織B" } as const;
+/** 組織 A の機体の登録記号（Sprint 11）。 */
+export const OPS_TEST_AIRCRAFT = { zero: "JUSEEDA0001", initial600: "JUSEEDA0600" } as const;
 
 type SeedMember = {
   readonly key: string;
@@ -23,6 +26,8 @@ export const OPS_TEST_MEMBERS: readonly SeedMember[] = [
   { key: "a-pilot", org: "a", role: "pilot", displayName: "操縦 一郎", authUserId: "a-pilot" },
   { key: "a-pilot2", org: "a", role: "pilot", displayName: "操縦 二郎", authUserId: "a-pilot2" },
   { key: "a-viewer", org: "a", role: "viewer", displayName: "閲覧 花子", authUserId: "a-viewer" },
+  // Sprint 11：操縦者役割だが、操縦者の行に結び付いていない（飛行記録・日常点検を作れない）
+  { key: "a-pilot-unlinked", org: "a", role: "pilot", displayName: "未結付 五郎", authUserId: "a-pilot-unlinked" },
   { key: "a-invited", org: "a", role: "pilot", displayName: "招待 三郎" },
   { key: "a-invited-unverified", org: "a", role: "viewer", displayName: "招待 四郎" },
   // Neon Auth の模擬サーバー（e2e/mock-neon-auth-server.mjs）でログインする E2E 用（招待中）
@@ -97,21 +102,27 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
   await pilot("a", "操縦 一郎", "a-pilot", "TEST-11112222");
   await pilot("a", "操縦 二郎", "a-pilot2", "TEST-33334444");
   await pilot("b", "組織B 操縦者", "b-pilot", "TEST-55556666");
-  const aircraftId = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
-  await addVersion(c, orgIds.b, "aircraft", aircraftId, {
-    registration_mark: "JUORGB0001",
-    model_name: "組織Bの機体",
-    manufacturer: "テスト製作所",
-    serial_number: "B-0001",
-    type_certified: false,
-    type_cert_category: null,
-    type_cert_model: null,
-    type_cert_number: null,
-    airworthiness_class: null,
-    airworthiness_cert_number: null,
-    max_takeoff_weight_kg: null,
-    initial_flight_minutes: 0,
-    status: "active",
-  });
+  const aircraft = async (org: "a" | "b", mark: string, modelName: string, serial: string, initialFlightMinutes: number) => {
+    const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+    await addVersion(c, orgIds[org], "aircraft", id, {
+      registration_mark: mark,
+      model_name: modelName,
+      manufacturer: "テスト製作所",
+      serial_number: serial,
+      type_certified: false,
+      type_cert_category: null,
+      type_cert_model: null,
+      type_cert_number: null,
+      airworthiness_class: null,
+      airworthiness_cert_number: null,
+      max_takeoff_weight_kg: null,
+      initial_flight_minutes: initialFlightMinutes,
+      status: "active",
+    });
+  };
+  await aircraft("b", "JUORGB0001", "組織Bの機体", "B-0001", 0);
+  // Sprint 11：既存の総飛行時間が 0 と 0 以外の機体
+  await aircraft("a", OPS_TEST_AIRCRAFT.zero, "点検機（既存 0 分）", "A-0001", 0);
+  await aircraft("a", OPS_TEST_AIRCRAFT.initial600, "空撮機（既存 600 分）", "A-0002", 600);
   return { created: true, orgIds };
 };

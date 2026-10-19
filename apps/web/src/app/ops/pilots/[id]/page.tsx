@@ -3,7 +3,7 @@ import { PilotForm, VoidForm } from "@/components/ops/ops-client";
 import { VersionList } from "@/components/ops/versions";
 import { Badge, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
 import { getPilot, listMembers, listPilotVersions, OpsError } from "@/server/ops/service";
-import { LICENSE_CLASS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
+import { formatMinutes, LICENSE_CLASS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
 // 操縦者の詳細。技能証明書番号の全桁は運航管理者と本人にだけ示す（API の応答そのものから除く）。
 export default async function PilotDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
@@ -44,6 +44,17 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
     ],
     ["有効期限", p.licenseExpiresOn ? <span className="tnum">{p.licenseExpiresOn}</span> : "—"],
     ["限定事項", limits.length > 0 ? limits.join("・") : "なし"],
+    [
+      "そらばんで記録した飛行の累計",
+      <span key="rt" className="flex flex-col">
+        <span className="font-mono tnum" data-testid="pilot-recorded-total">
+          {formatMinutes(p.recordedFlightMinutes)}
+        </span>
+        <span className="text-xs text-ink-mute">
+          取消していない飛行記録 {p.recordedFlightCount} 件の飛行時間の合計（全機体）。そらばんで記録する前の飛行時間は含みません。
+        </span>
+      </span>,
+    ],
   ];
   const editNote = p.voided
     ? null

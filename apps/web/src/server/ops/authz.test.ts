@@ -27,6 +27,31 @@ const TABLE: readonly Row[] = [
   { action: "member.read", manager: true, pilot: false, viewer: false },
   { action: "member.invite", manager: true, pilot: false, viewer: false },
   { action: "member.update", manager: true, pilot: false, viewer: false },
+
+  // Sprint 11 契約 14：docs/sprints/sprint-11.md 設計 D の表
+  // 飛行記録・日常点検記録の一覧と詳細の閲覧
+  { action: "flight.read", manager: true, pilot: true, viewer: true },
+  { action: "inspection.read", manager: true, pilot: true, viewer: true },
+  // 飛行記録の作成（運航管理者はどの操縦者の分も、操縦者は自分に結び付いた操縦者の分だけ）
+  { action: "flight.create", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "flight.create", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 飛行記録の訂正（操縦者は自分の分だけ）
+  { action: "flight.update", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "flight.update", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 飛行記録の取消（運航管理者だけ。操縦者は自分の分でも不可）
+  { action: "flight.void", isSelf: true, manager: true, pilot: false, viewer: false },
+  { action: "flight.void", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 日常点検記録の作成・訂正（操縦者は実施者が自分の分だけ）
+  { action: "inspection.create", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "inspection.create", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "inspection.update", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "inspection.update", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 日常点検記録の取消（運航管理者だけ）
+  { action: "inspection.void", isSelf: true, manager: true, pilot: false, viewer: false },
+  { action: "inspection.void", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 技能証明書番号（飛行記録の写し）の全桁（操縦者は自分の分だけ。閲覧者は不可）
+  { action: "flight.readLicenseNumber", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "flight.readLicenseNumber", isSelf: false, manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {
@@ -41,6 +66,13 @@ describe("can（役割 × 操作）", () => {
       });
     }
   }
+
+  it("操縦者の行に結び付いていない操縦者役割の利用者（isSelf を渡さない）は、飛行記録・日常点検を作れない", () => {
+    for (const a of ["flight.create", "flight.update", "inspection.create", "inspection.update", "flight.readLicenseNumber"] as const) {
+      expect(can("pilot", a)).toBe(false);
+      expect(can("pilot", a, { isSelf: false })).toBe(false);
+    }
+  });
 
   it("閲覧者は自分の操縦者であっても訂正・全桁表示ができない", () => {
     expect(can("viewer", "pilot.update", { isSelf: true })).toBe(false);

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Sprint 10 の E2E-DB：DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与えた next start に対する運航管理の E2E。
+// Sprint 10・11 の E2E-DB：DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与えた next start に対する運航管理の E2E。
 // - DB は PostGIS のコンテナ（CI は db ジョブのサービスコンテナ）。マイグレーションとテスト用の初期データ
 //   （pnpm db:seed:ops-test）を投入しておく。アプリは soraban_app で接続する（E2E_OPS_DATABASE_URL）。
 // - Neon Auth には接続しない。AUTH_TEST_SECRET は E2E 専用の使い捨ての値。
@@ -44,6 +44,11 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 180_000,
       env: {
+        // Sprint 11：サーバーの TZ に依らないことを確かめるため UTC で起動する（Vercel も UTC）。
+        TZ: "UTC",
+        // Sprint 11：テスト用の時計（test 方式でだけ効く）。ブラウザの時計（page.clock）を 2027-01-05 に固定して保存まで通すため、
+        // 離陸が未来でないかの判定に使うサーバーの現在時刻を JST 2027-01-05 12:00 に固定する。
+        OPS_TEST_NOW: "2027-01-05T12:00:00+09:00",
         OPS_ENABLED: "1",
         AUTH_PROVIDER: "test",
         AUTH_TEST_SECRET: "e2e-only-not-a-secret",

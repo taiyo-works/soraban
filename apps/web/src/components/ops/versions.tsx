@@ -63,13 +63,11 @@ export function VersionList({ versions }: { readonly versions: readonly VersionD
   );
 }
 
-export function Forbidden() {
+export function Forbidden({ message = "この操作は運航管理者だけが行えます。" }: { readonly message?: string }) {
   return (
     <main className="flex max-w-xl flex-col gap-4">
       <h1 className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl">権限がありません</h1>
-      <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft">
-        この操作は運航管理者だけが行えます。
-      </p>
+      <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft">{message}</p>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 import { availabilityResponse, isSameOrigin, json, opsHandler } from "./http";
 import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
+import * as rec from "./records";
 import * as svc from "./service";
 
 const includeVoided = (req: Request): boolean => new URL(req.url).searchParams.get("includeVoided") === "1";
@@ -79,6 +80,62 @@ export const memberUpdate = opsHandler(
 );
 export const memberVersions = opsHandler("GET /api/ops/members/[id]/versions", async ({ ctx, params }) =>
   json(200, { versions: await svc.listMemberVersions(ctx, params["id"] ?? "") }),
+);
+
+// ---- 飛行記録・日常点検記録（Sprint 11） ----
+// 作成は 201。同じ clientRequestId の作成が既にあれば、新しい記録を作らずに既存の記録を 200 で返す。
+// 応答の warnings は保存を止めない警告（当日の日常点検がない 等）。
+const saved = <T>(r: rec.SaveResult<T>, createdStatus = 201): Response =>
+  json(r.created ? createdStatus : 200, { ...r.record, warnings: r.warnings });
+
+export const flightList = opsHandler("GET /api/ops/flights", async ({ ctx, req }) =>
+  json(200, { flights: await rec.listFlights(ctx, rec.parseRecordFilter(new URL(req.url).searchParams)) }),
+);
+export const flightCreate = opsHandler(
+  "POST /api/ops/flights",
+  async ({ ctx, body }) => saved(await rec.createFlight(ctx, await body())),
+  { mutating: true },
+);
+export const flightGet = opsHandler("GET /api/ops/flights/[id]", async ({ ctx, params }) =>
+  json(200, await rec.getFlight(ctx, params["id"] ?? "")),
+);
+export const flightUpdate = opsHandler(
+  "PATCH /api/ops/flights/[id]",
+  async ({ ctx, params, body }) => saved(await rec.updateFlight(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const flightVoid = opsHandler(
+  "POST /api/ops/flights/[id]/void",
+  async ({ ctx, params, body }) => json(200, await rec.voidFlight(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const flightVersions = opsHandler("GET /api/ops/flights/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await rec.listFlightVersions(ctx, params["id"] ?? "") }),
+);
+
+export const inspectionList = opsHandler("GET /api/ops/inspections", async ({ ctx, req }) =>
+  json(200, { inspections: await rec.listInspections(ctx, rec.parseRecordFilter(new URL(req.url).searchParams)) }),
+);
+export const inspectionCreate = opsHandler(
+  "POST /api/ops/inspections",
+  async ({ ctx, body }) => saved(await rec.createInspection(ctx, await body())),
+  { mutating: true },
+);
+export const inspectionGet = opsHandler("GET /api/ops/inspections/[id]", async ({ ctx, params }) =>
+  json(200, await rec.getInspection(ctx, params["id"] ?? "")),
+);
+export const inspectionUpdate = opsHandler(
+  "PATCH /api/ops/inspections/[id]",
+  async ({ ctx, params, body }) => json(200, await rec.updateInspection(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const inspectionVoid = opsHandler(
+  "POST /api/ops/inspections/[id]/void",
+  async ({ ctx, params, body }) => json(200, await rec.voidInspection(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const inspectionVersions = opsHandler("GET /api/ops/inspections/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await rec.listInspectionVersions(ctx, params["id"] ?? "") }),
 );
 
 // ---- テスト用の本人確認（AUTH_PROVIDER=test のときだけ。本番では 404） ----

@@ -50,6 +50,8 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       ["0004", "ops_org_members"],
       ["0005", "ops_aircraft_pilots"],
       ["0006", "record_versions"],
+      ["0007", "ops_daily_inspections_flights"],
+      ["0008", "record_versions_flight_entities"],
     ]);
     for (const r of rows) {
       expect(r.checksum).toMatch(/^[0-9a-f]{64}$/);

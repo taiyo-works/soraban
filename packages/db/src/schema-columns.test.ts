@@ -84,8 +84,9 @@ describe("行型とマイグレーションの列名", () => {
 
   // Sprint 10 契約 19：運航管理の表に、保存しない個人情報（生年月日・住所・電話・画像・マイナンバー）に当たる列がない。
   // 判定の証跡（evidence_log.resolved_address：判定地点の住所）は利用者の個人情報ではないため対象外。
-  it("運航管理の表に、生年月日・住所・電話・画像・マイナンバーに当たる列がない", () => {
-    const forbidden = /birth|address|phone|tel|image|photo|avatar|my_?number/i;
+  // Sprint 11 契約 20：加えて、位置の連続した軌跡（track）・端末の識別子（device）に当たる列もない。
+  it("運航管理の表に、生年月日・住所・電話・画像・マイナンバー・軌跡・端末の識別子に当たる列がない", () => {
+    const forbidden = /birth|address|phone|tel|image|photo|avatar|my_?number|track|device/i;
     for (const table of OPS_TABLES) {
       const cols = fromSql.get(table);
       expect(cols, table).toBeDefined();
@@ -96,7 +97,9 @@ describe("行型とマイグレーションの列名", () => {
       .filter((f) => f.endsWith(".sql") && Number(f.slice(0, 4)) >= 4)
       .map((f) => stripComments(readFileSync(path.join(MIGRATIONS, f), "utf8")))
       .join("\n");
-    expect(opsSql).not.toMatch(/\b\w*(birth|address|phone|image|photo|avatar|my_?number)\w*\s+(text|date|bytea|varchar|integer|jsonb)/i);
+    expect(opsSql).not.toMatch(
+      /\b\w*(birth|address|phone|image|photo|avatar|my_?number|track|device)\w*\s+(text|date|bytea|varchar|integer|jsonb|numeric|uuid|boolean|timestamptz)/i,
+    );
   });
 
   it("パーサーは制約行を列として数えない", () => {

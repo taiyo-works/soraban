@@ -4,6 +4,7 @@
 // 見た目は components/ops/ui.tsx の部品と判定画面の意匠に合わせる。
 import { cloneElement, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
+import { clearOpsDrafts } from "./drafts";
 import {
   buttonDangerClass,
   buttonGhostClass,
@@ -13,9 +14,9 @@ import {
   VERSION_NOTICE_TARGET,
 } from "./ui";
 
-type ApiResult = { readonly ok: boolean; readonly status: number; readonly data: Record<string, unknown> };
+export type ApiResult = { readonly ok: boolean; readonly status: number; readonly data: Record<string, unknown> };
 
-const send = async (method: string, url: string, body?: unknown): Promise<ApiResult> => {
+export const send = async (method: string, url: string, body?: unknown): Promise<ApiResult> => {
   const res = await fetch(url, {
     method,
     headers: body === undefined ? undefined : { "content-type": "application/json" },
@@ -35,20 +36,20 @@ const send = async (method: string, url: string, body?: unknown): Promise<ApiRes
  * 登録・訂正・取消の後に画面を読み直す。router.refresh() は、リンクの先読み等と重なると更新が捨てられることがあった
  * （E2E-DB 17 で数回に 1 回、版の一覧が更新されない。Sprint 10 差し戻し B）。記録の画面は正しさを優先し、通常の読み直しにする。
  */
-const reloadAfterChange = (notice?: { readonly target: string; readonly message: string }): void => {
+export const reloadAfterChange = (notice?: { readonly target: string; readonly message: string }): void => {
   if (notice) setChangeFlash(window.location.pathname, notice.target, notice.message);
   window.location.reload();
 };
 
 /** 応答の版番号から「版 N として」を作る（版番号が無ければ空）。 */
-const versionOf = (r: ApiResult): string => (typeof r.data["version"] === "number" ? `版 ${r.data["version"]} として` : "");
+export const versionOf = (r: ApiResult): string => (typeof r.data["version"] === "number" ? `版 ${r.data["version"]} として` : "");
 
 
 /**
  * 入力の誤りがあったとき、最初の誤りの項目へフォーカスを移す。項目の誤りが無ければ（版の衝突など）送信の結果のエラーへ移す。
  * 描画が済んでから探すため、次のフレームで行う。
  */
-const focusFirstError = (form: HTMLFormElement | null): void => {
+export const focusFirstError = (form: HTMLFormElement | null): void => {
   window.requestAnimationFrame(() => {
     const el =
       form?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form?.querySelector<HTMLElement>("[data-form-error]");
@@ -58,7 +59,7 @@ const focusFirstError = (form: HTMLFormElement | null): void => {
   });
 };
 
-const ERROR_MESSAGES: Readonly<Record<string, string>> = {
+export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   invalid_input: "入力に誤りがあります。各項目の案内を確認してください。",
   version_conflict: "他の人が先に訂正しました。画面を読み込み直してから、もう一度操作してください。",
   voided: "取消済みのため変更できません。",
@@ -71,25 +72,29 @@ const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   unauthenticated: "ログインしていません。",
   no_access: "権限がありません。",
   not_found: "見つかりません。",
+  // Sprint 11
+  overlap: "同じ機体、または同じ操縦者の別の飛行記録と時間帯が重なっています。時刻を確かめてください。",
+  aircraft_unavailable: "取消済み・抹消の機体には記録を作れません。",
+  duplicate_request: "同じ内容が既に保存されています。一覧を確かめてください。",
 };
 
-const messageFor = (r: ApiResult): string => {
+export const messageFor = (r: ApiResult): string => {
   const code = typeof r.data["error"] === "string" ? r.data["error"] : "";
   return ERROR_MESSAGES[code] ?? `操作に失敗しました（${r.status}）。`;
 };
 
-const fieldErrorsOf = (r: ApiResult): Record<string, string> =>
+export const fieldErrorsOf = (r: ApiResult): Record<string, string> =>
   r.data["fields"] && typeof r.data["fields"] === "object" ? (r.data["fields"] as Record<string, string>) : {};
 
-const inputClass =
+export const inputClass =
   "w-full min-w-0 rounded-sharp border border-rule bg-paper px-3 py-2.5 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-1 focus:ring-offset-paper aria-[invalid=true]:border-signal-red sm:text-sm";
-const checkboxClass = "h-4 w-4 shrink-0 cursor-pointer accent-brand-700";
-const checkRowClass = "flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink";
+export const checkboxClass = "h-4 w-4 shrink-0 cursor-pointer accent-brand-700";
+export const checkRowClass = "flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink";
 const buttonClass = buttonPrimaryClass;
 const subtleButtonClass = buttonGhostClass;
 
 /** 項目名の右に付ける「必須」「任意」の札。読み上げは aria-required で伝えるため、札は読ませない。 */
-const RequiredTag = ({ required }: { readonly required?: boolean }) =>
+export const RequiredTag = ({ required }: { readonly required?: boolean }) =>
   required === undefined ? null : (
     <span
       aria-hidden
@@ -101,7 +106,7 @@ const RequiredTag = ({ required }: { readonly required?: boolean }) =>
     </span>
   );
 
-const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
+export const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
   message ? (
     <span id={id} role="alert" className="text-xs leading-relaxed text-signal-red">
       <span aria-hidden>! </span>
@@ -119,7 +124,7 @@ type ControlProps = {
  * ラベル・必須の札・案内・項目ごとのエラーをまとめた入力欄。
  * エラーは入力欄の直下に出し、aria-invalid と aria-describedby で入力欄に結び付ける。
  */
-const Field = ({
+export const Field = ({
   label,
   error,
   children,
@@ -159,7 +164,7 @@ const Field = ({
 };
 
 /** 送信の結果のエラー。長いフォームでも目に入るよう、送信ボタンの直上に出す。 */
-const FormError = ({ message }: { readonly message: string | null }) =>
+export const FormError = ({ message }: { readonly message: string | null }) =>
   message ? (
     <p
       role="alert"
@@ -172,7 +177,7 @@ const FormError = ({ message }: { readonly message: string | null }) =>
   ) : null;
 
 /** 入力欄のまとまり（狭い画面では 1 列、広い画面では 2 列）。 */
-const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
+export const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
   <fieldset className="flex min-w-0 flex-col gap-3">
     <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">{title}</legend>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
@@ -180,7 +185,7 @@ const Group = ({ title, children }: { readonly title: string; readonly children:
 );
 
 /** 送信ボタンと送信の結果のエラーの並び。 */
-const SubmitRow = ({ message, children }: { readonly message: string | null; readonly children: ReactNode }) => (
+export const SubmitRow = ({ message, children }: { readonly message: string | null; readonly children: ReactNode }) => (
   <div className="flex flex-col gap-3 border-t border-rule-soft pt-4">
     <FormError message={message} />
     <div className="flex flex-wrap items-center gap-3">{children}</div>
@@ -825,6 +830,8 @@ export function SignOutButton({ provider }: { readonly provider: "neon" | "test"
   const [busy, setBusy] = useState(false);
   const onClick = async () => {
     setBusy(true);
+    // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）
+    clearOpsDrafts();
     try {
       if (provider === "test") {
         await send("POST", "/api/test-auth/sign-out");

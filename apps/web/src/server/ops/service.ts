@@ -1,11 +1,12 @@
 // 運航管理のサービス層（Sprint 10）。画面（サーバーコンポーネント）と API（ルートハンドラ）の両方がここを通る。
 // 認可は authz.ts の can() だけで判断し、DB の読み書きは store.ts（org_id 必須）だけで行う。
 import { randomUUID } from "node:crypto";
-import type { AircraftRow, MemberRoleDb, MemberRow, PilotRow, RecordEntityTypeDb } from "@soraban/db";
+import type { MemberRoleDb, MemberRow, PilotRow, RecordEntityTypeDb } from "@soraban/db";
 import type { Identity } from "./auth/identity";
 import { can, type OpsAction } from "./authz";
 import * as store from "./store";
-import { OpsError, type OpsDb } from "./store";
+import { OpsError, type AircraftWithTotal, type OpsDb, type PilotWithTotal } from "./store";
+import { FLIGHT_FIELD_LABELS, INSPECTION_FIELD_LABELS } from "./validate-records";
 import {
   AIRCRAFT_FIELD_LABELS,
   AIRCRAFT_FIELDS,
@@ -23,20 +24,25 @@ import {
 
 export { OpsError } from "./store";
 
-export type OpsContext = { readonly db: OpsDb; readonly member: MemberRow };
+export type OpsContext = {
+  readonly db: OpsDb;
+  readonly member: MemberRow;
+  /** 現在時刻（離陸が未来でないかの判定に使う）。省略時は実時刻。テスト用の時計は availability.ts の opsNow。 */
+  readonly now?: () => Date;
+};
 
 type Input = Readonly<Record<string, unknown>>;
 
-const assertCan = (ctx: OpsContext, action: OpsAction, isSelf?: boolean): void => {
+export const assertCan = (ctx: OpsContext, action: OpsAction, isSelf?: boolean): void => {
   if (!can(ctx.member.role, action, { isSelf })) throw new OpsError(403, "forbidden");
 };
 
-const asInput = (body: unknown): Input => {
+export const asInput = (body: unknown): Input => {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw new OpsError(400, "invalid_body");
   return body as Input;
 };
 
-const iso = (v: unknown): string | null =>
+export const iso = (v: unknown): string | null =>
   v === null || v === undefined ? null : v instanceof Date ? v.toISOString() : String(v);
 
 // ---- 利用者の解決（設計 B「利用者として扱う条件」） ----------
@@ -135,6 +141,8 @@ const LABELS: Record<RecordEntityTypeDb, Readonly<Record<string, string>>> = {
   aircraft: AIRCRAFT_FIELD_LABELS,
   pilot: PILOT_FIELD_LABELS,
   member: MEMBER_FIELD_LABELS,
+  flight_record: FLIGHT_FIELD_LABELS,
+  daily_inspection: INSPECTION_FIELD_LABELS,
 };
 
 /** 2 つの版の data で値が違う項目の名前（表示名）を返す。 */
@@ -188,6 +196,9 @@ export type AircraftDto = {
   readonly maxTakeoffWeightKg: number | null;
   readonly initialFlightMinutes: number;
   readonly status: "active" | "suspended" | "deregistered";
+  /** 現在の総飛行時間（分）＝既存の総飛行時間＋取消していない飛行記録の飛行時間の合計（Sprint 11 設計 C）。 */
+  readonly totalFlightMinutes: number;
+  readonly flightCount: number;
   readonly version: number;
   readonly voided: boolean;
   readonly voidedAt: string | null;
@@ -195,7 +206,7 @@ export type AircraftDto = {
   readonly updatedAt: string | null;
 };
 
-const aircraftDto = (r: AircraftRow): AircraftDto => ({
+const aircraftDto = (r: AircraftWithTotal): AircraftDto => ({
   id: r.id,
   registrationMark: r.registration_mark,
   modelName: r.model_name,
@@ -210,6 +221,8 @@ const aircraftDto = (r: AircraftRow): AircraftDto => ({
   maxTakeoffWeightKg: r.max_takeoff_weight_kg === null ? null : Number(r.max_takeoff_weight_kg),
   initialFlightMinutes: r.initial_flight_minutes,
   status: r.status,
+  totalFlightMinutes: Number(r.total_flight_minutes),
+  flightCount: Number(r.flight_count),
   version: r.current_version,
   voided: r.voided_at !== null,
   voidedAt: iso(r.voided_at),
@@ -217,7 +230,7 @@ const aircraftDto = (r: AircraftRow): AircraftDto => ({
   updatedAt: iso(r.updated_at),
 });
 
-const aircraftData = (d: AircraftDto): AircraftData => ({
+const aircraftData = (d: Omit<AircraftDto, "totalFlightMinutes" | "flightCount">): AircraftData => ({
   registration_mark: d.registrationMark,
   model_name: d.modelName,
   manufacturer: d.manufacturer,
@@ -332,6 +345,9 @@ export type PilotDto = {
   readonly limitationVlos: boolean;
   readonly memberId: string | null;
   readonly isSelf: boolean;
+  /** そらばんで記録した飛行の累計（分。初期値なし。Sprint 11 設計 C）。 */
+  readonly recordedFlightMinutes: number;
+  readonly recordedFlightCount: number;
   readonly version: number;
   readonly voided: boolean;
   readonly voidedAt: string | null;
@@ -339,7 +355,7 @@ export type PilotDto = {
   readonly updatedAt: string | null;
 };
 
-const dateOnly = (v: unknown): string | null => {
+export const dateOnly = (v: unknown): string | null => {
   if (v === null || v === undefined) return null;
   if (v instanceof Date) {
     // pg は date をローカル時刻の 0 時の Date にする。
@@ -349,7 +365,7 @@ const dateOnly = (v: unknown): string | null => {
   return String(v).slice(0, 10);
 };
 
-const pilotDto = (r: PilotRow, ctx: OpsContext, revealLicense: boolean): PilotDto => {
+const pilotDto = (r: PilotWithTotal, ctx: OpsContext, revealLicense: boolean): PilotDto => {
   const isSelf = r.member_id !== null && r.member_id === ctx.member.id;
   const reveal = revealLicense && can(ctx.member.role, "pilot.readLicenseNumber", { isSelf });
   return {
@@ -366,6 +382,8 @@ const pilotDto = (r: PilotRow, ctx: OpsContext, revealLicense: boolean): PilotDt
     limitationVlos: r.limitation_vlos,
     memberId: r.member_id,
     isSelf,
+    recordedFlightMinutes: Number(r.recorded_flight_minutes),
+    recordedFlightCount: Number(r.recorded_flight_count),
     version: r.current_version,
     voided: r.voided_at !== null,
     voidedAt: iso(r.voided_at),
@@ -401,7 +419,7 @@ const pilotInput = (r: PilotRow): Record<string, unknown> => ({
   memberId: r.member_id,
 });
 
-const loadPilot = async (ctx: OpsContext, id: string): Promise<PilotRow> => {
+const loadPilot = async (ctx: OpsContext, id: string): Promise<PilotWithTotal> => {
   const r = isUuid(id) ? await store.getPilot(ctx.db, ctx.member.org_id, id) : null;
   if (!r) throw new OpsError(404, "not_found");
   return r;
@@ -603,6 +621,6 @@ export const listMemberVersions = async (ctx: OpsContext, id: string): Promise<V
   return listEntityVersions(ctx, "member", id);
 };
 
-function isUuid(v: string): boolean {
+export function isUuid(v: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 }

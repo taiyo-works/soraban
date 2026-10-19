@@ -62,6 +62,8 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0004 | 運航管理：`organizations`（組織）、`members`（利用者のヘッド表） |
 | 0005 | 運航管理：`aircraft`（機体）、`pilots`（操縦者）のヘッド表 |
 | 0006 | 版の履歴 `record_versions`、追加前・追加後のトリガー、`record_version_hash`・`verify_record_chain`・`ops_bootstrap`、アプリ用ロールへの権限付与 |
+| 0007 | 運航管理（Sprint 11）：`daily_inspections`（日常点検記録）・`flight_records`（飛行記録）のヘッド表、時刻の関数（`ops_jst_minute_to_timestamptz` 等）、総飛行時間のビュー（`flight_record_totals`・`aircraft_flight_totals`・`pilot_flight_totals`）、アプリ用ロールへの権限付与 |
+| 0008 | 運航管理（Sprint 11）：`record_versions.entity_type` に `daily_inspection`・`flight_record` を追加、追加前・追加後のトリガーと `verify_record_chain` の置き換え（DB が飛行時間を求める、飛行記録の重なりの拒否） |
 
 ### ランナー
 
@@ -97,9 +99,9 @@ pnpm db:migrate --target <ホスト名>    # 未適用を番号順に適用（lo
 | ロール | 用途 | 権限 |
 |---|---|---|
 | 既定のオーナーロール（Neon の `neondb_owner` 等） | マイグレーション（`DATABASE_URL_UNPOOLED`） | 表の作成・変更 |
-| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。`ops_bootstrap`・`verify_record_chain` は実行できない |
+| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。運航管理（0007）：`daily_inspections`・`flight_records` と総飛行時間のビューは参照のみ。`ops_bootstrap`・`verify_record_chain` は実行できない |
 
-- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
+- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006・0007 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006・0007 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
 
 ```sql
 grant usage on schema public to soraban_app;
@@ -108,25 +110,36 @@ grant select, insert on evidence_log to soraban_app;
 -- 0006 を適用済みの場合
 grant select, insert on record_versions to soraban_app;
 grant select on organizations, members, aircraft, pilots to soraban_app;
+-- 0007 を適用済みの場合
+grant select on daily_inspections, flight_records, flight_record_totals, aircraft_flight_totals, pilot_flight_totals to soraban_app;
+grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_to_jst_minute(timestamptz),
+  ops_jst_date(timestamptz), ops_flight_minutes(timestamptz, timestamptz) to soraban_app;
 ```
 
 - Neon のコンソール・API・CLI で作ったロールには `neon_superuser` が付くため、最小権限にならない。SQL の `create role` で作ったロールには付かない（出典：https://neon.com/docs/manage/database-access 、2026-10-19 確認）。そのため `soraban_app` は SQL Editor から作る。SQL で作ったロールを Connect 画面で選べるかは文書に記載がなく、実施時に確認する。
 
-## 版の履歴（Sprint 10、0006）
+## 版の履歴（Sprint 10、0006。Sprint 11 で 0008 により拡張）
 
-運航管理の記録は上書き・物理削除をせず、訂正を版として追記する。版の表 `record_versions` を正とし、ヘッド表（`members`・`aircraft`・`pilots`）は版の追加から DB のトリガーが作る。アプリ（`soraban_app`）はヘッド表を直接書けない。
+運航管理の記録は上書き・物理削除をせず、訂正を版として追記する。版の表 `record_versions` を正とし、ヘッド表（`members`・`aircraft`・`pilots`・`daily_inspections`・`flight_records`）は版の追加から DB のトリガーが作る。アプリ（`soraban_app`）はヘッド表を直接書けない。
 
 - **追加前のトリガー**：同じ実体（`entity_type`・`entity_id`）の版を `pg_advisory_xact_lock` で直列化し、`version_no`（1 からの連番）・`created_at`（`clock_timestamp()`）・`prev_hash`（直前の版の `content_hash`。初版は空文字）・`content_hash` を DB が決める。アプリが送った値は使わない。
 - **楽観的排他**：アプリは同じトランザクションで `select set_config('soraban.expected_version', '<画面が表示した版番号>', true)` を実行してから版を追加する。最新の版番号と違えば SQLSTATE `SB409`（detail `version_conflict`）で失敗し、API は 409 を返す。
 - **追加後のトリガー**：`data` からヘッド表の行を作る・更新する。`void`（取消）はヘッド表の `voided_at` を埋める（行は消さない）。ヘッド表の制約に反すれば版の追加ごと失敗する。組織の最後の有効な運航管理者を降格・停止する版は `SB409`（`last_manager`）で失敗する。
-- **独自の SQLSTATE**：`SB404`（実体がない・他の組織の実体）、`SB409`（detail：`version_conflict`・`voided`・`already_exists`・`last_manager`）。
+- **飛行記録・日常点検（Sprint 11、0008）**：
+  - 版の `data` の時刻（`takeoff_at`・`landing_at`・`inspected_at`）は日本時間の `YYYY-MM-DDTHH:MM`（1 分単位）。ヘッド表では `timestamptz` にする（`ops_jst_minute_to_timestamptz`。`+09:00` を明示して解釈するため、DB・アプリの TimeZone に依らない）。秒付き・タイムゾーン付きの形は SQLSTATE `22007`。
+  - 追加前のトリガーが、飛行記録の版の `data` に `flight_minutes`（着陸−離陸の分。同じ分なら 1。`ops_flight_minutes`）と `flight_date`（離陸の日本時間の日付）、日常点検の版の `data` に `inspected_date` と `has_abnormal` を入れる（アプリが送った値は上書き）。`content_hash` はこれらを含めて計算する。規則はアプリの `apps/web/src/lib/ops-time.ts` と同じ（`records.db.test.ts` で一致を確かめる）。
+  - 追加後のトリガーが、同じ機体、または同じ操縦者で、取消していない飛行記録どうしの〔離陸, 離陸＋飛行時間）が重なる版を `SB409`（detail `overlap`）で拒否する（接するだけは可）。飛行記録の版の追加は組織単位の `pg_advisory_xact_lock` で直列化する。`btree_gist` の排除制約は使わない（拡張に依らないため）。
+  - 機体・操縦者は同じ組織のものに限る（違えば `SB404`）。訂正で機体を変える版、別の機体の日常点検を紐付ける版は SQLSTATE `23514`（detail `aircraft_immutable`・`inspection_mismatch`）。
+  - 総飛行時間は保存しない。ビュー `flight_record_totals`（飛行記録ごと：機体の `initial_flight_minutes` ＋ 同じ機体の取消していない記録のうち離陸がその記録以前のものの飛行時間の合計）・`aircraft_flight_totals`（機体の現在の総飛行時間）・`pilot_flight_totals`（操縦者ごとの、そらばんで記録した飛行の累計。初期値なし）で読み出しのたびに求める。訂正・取消・後入力・既存の総飛行時間の訂正は、次の読み出しから自動的に反映される。
+  - `verify_record_chain` は時刻の列を日本時間の `YYYY-MM-DDTHH:MM` にして版の `data` と比べる。
+- **独自の SQLSTATE**：`SB404`（実体がない・他の組織の実体）、`SB409`（detail：`version_conflict`・`voided`・`already_exists`・`last_manager`・`overlap`）。
 - **`content_hash` の計算規則**（Sprint 15 の出力の照合で使う）：次の 11 要素をこの順に並べた jsonb の配列を `::text` で文字列にし、UTF-8 のバイト列の SHA-256 を 16 進小文字で表したもの（関数 `record_version_hash`）。
 
   | 順 | 要素 | 型・書式 |
   |---|---|---|
   | 1 | `"soraban-record-v1"` | 文字列（規則の版） |
   | 2 | `prev_hash` | 文字列（初版は `""`） |
-  | 3 | `entity_type` | 文字列（`member`・`aircraft`・`pilot`） |
+  | 3 | `entity_type` | 文字列（`member`・`aircraft`・`pilot`・`daily_inspection`・`flight_record`。後の 2 つは 0008 で追加。規則 `soraban-record-v1` は変えていない） |
   | 4 | `entity_id` | 文字列（UUID の小文字表記） |
   | 5 | `version_no` | 数値 |
   | 6 | `op` | 文字列（`create`・`update`・`void`） |
@@ -163,7 +176,7 @@ docker stop soraban-pg
 - CI の `db` ジョブ（`.github/workflows/ci.yml`）は、サービスコンテナに対して `soraban_app` の作成（マイグレーションより先）・`pnpm db:migrate`（2 回）・`pnpm db:status`・`soraban_app` の権限の確認・`TEST_DATABASE_URL` なしで失敗することの確認・`pnpm build`・`pnpm test:db`・テスト用の初期データの投入（`pnpm db:seed:ops-test`）・運航管理の E2E-DB（`pnpm test:e2e:ops`）を実行する。Neon の接続文字列・API キー・Neon Auth の URL・秘密は使わない。
 - `pnpm test:db` は、`soraban_app` が既にあれば作らず・消さない。無ければテストの中で作り、終わったら消す。
 
-### 運航管理の E2E-DB をローカルで動かす（Sprint 10）
+### 運航管理の E2E-DB をローカルで動かす（Sprint 10・11）
 
 ```sh
 psql "$TEST_DATABASE_URL" -c "create role soraban_app with login password 'local_only'"   # 初回だけ
@@ -175,6 +188,7 @@ E2E_OPS_DATABASE_URL=postgresql://soraban_app:local_only@localhost:5432/soraban_
 ```
 
 - `playwright.ops.config.ts` が `OPS_ENABLED=1`・`AUTH_PROVIDER=test`・E2E 専用の `AUTH_TEST_SECRET` を与えて `next start`（ポート 3300）を起動する。
+- Sprint 11：このサーバーは `TZ=UTC` で起動し、`OPS_TEST_NOW=2027-01-05T12:00:00+09:00` でサーバーの現在時刻（離陸が未来でないかの判定に使う）を固定する。`OPS_TEST_NOW` は `AUTH_PROVIDER=test`（Vercel 以外）で有効なときだけ効き、neon 方式・本番では無視される（`apps/web/src/server/ops/availability.ts` の `opsNow`）。画面のテストはブラウザを `timezoneId: 'America/Los_Angeles'`・幅 375px にし、時計を `page.clock` で固定する。
 - テスト用のログインは `POST /api/test-auth/sign-in`（本文：`authUserId`・`email`・`emailVerified`・`name`）。初期データの利用者は `packages/db/src/ops-seed.ts` を参照。
 - イメージのタグ `postgis/postgis:18-3.6` は Docker Hub で存在を確認した（2026-10-19、最終更新 2026-10-18）。本番（PostgreSQL 18、PostGIS 3.6.4）とメジャー版・マイナー版が一致する。
 - 開発環境で Docker が使えない場合は、OS のパッケージの PostgreSQL＋PostGIS でも `pnpm test:db` は動く（Sprint 8 の実装時は PostgreSQL 16＋PostGIS 3 で確認し、最終の合否は CI の PostgreSQL 18 で確認した）。
@@ -223,6 +237,10 @@ grant select, insert on evidence_log to soraban_app;
 -- 0006 を適用済みの場合
 grant select, insert on record_versions to soraban_app;
 grant select on organizations, members, aircraft, pilots to soraban_app;
+-- 0007 を適用済みの場合
+grant select on daily_inspections, flight_records, flight_record_totals, aircraft_flight_totals, pilot_flight_totals to soraban_app;
+grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_to_jst_minute(timestamptz),
+  ops_jst_date(timestamptz), ops_flight_minutes(timestamptz, timestamptz) to soraban_app;
 ```
 
 ### 3. 本番 DB へのマイグレーション適用
@@ -257,10 +275,10 @@ grant select on organizations, members, aircraft, pilots to soraban_app;
 
 ## 運航管理（Sprint 10）の本番準備（ユーザー作業。エージェントは行わない）
 
-利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0006 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
+利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0008 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
 
 1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0003 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
-2. **マイグレーション 0004〜0006 を本番に適用する**：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
+2. **マイグレーション 0004〜0008 を本番に適用する**（Sprint 11 の 0007・0008 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
 3. **Neon Auth を有効にする**：Neon コンソール → `soraban` → 既定ブランチ（本番）→ Auth → 有効化。aws-ap-southeast-1 で有効にできることをここで確かめる（できない場合は作業を止め、planner に戻す）。Auth URL を控える。プレビュー用・開発用のブランチでは有効にしない。
 4. **Google ログインを自社の資格情報にする**：Google Cloud コンソールで OAuth クライアント（ウェブアプリケーション）を作り、承認済みのリダイレクト URI に `{Auth URL}/callback/google`（末尾にスラッシュを付けない）を登録する。Neon の Auth の設定 → OAuth providers に Client ID・Secret を入れる。
 5. **Neon Auth の本番設定**：信頼するドメインに本番のドメインを追加、アプリ名を「そらばん」に、「Allow Localhost」を無効に。メールとパスワードによる登録を止められる場合は止める（止められなくても、アプリは確認済みのメールアドレスの招待者しか通さない）。
