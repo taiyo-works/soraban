@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_MANUAL_METHOD_SECTIONS,
   ALL_PROCEDURES,
+  buildPrefillFields,
   deriveDiagnosis,
   EMERGENCY_NO_FLY_NOTE,
   verificationNoteLabel,
@@ -38,6 +39,9 @@ describe("C1 農薬等の空中散布（通達 国空無機第338898号）", () 
     expect(d.category).toBe("II_A");
     expect(hasNote(d.verificationNotes, "国空無機第338898号", "4m", "人口集中地区")).toHaveLength(1);
     expect(hasNote(d.verificationNotes, "https://www.mlit.go.jp/common/001990796.pdf")).toHaveLength(1);
+    // 人口集中地区の上空は法第132条の85 の規定に従う（通達 4.）。「許可は別に必要」と断定しない
+    expect(hasNote(d.verificationNotes, "第132条の85 の規定に従う")).toHaveLength(1);
+    expect(hasNote(d.verificationNotes, "許可は別に必要")).toHaveLength(0);
     const dd = deriveDiagnosis({ flags: ["method_dangerous", "method_drop"], droneWeightG: 900 });
     expect(hasNote(dd.verificationNotes, "国空無機第338898号")).toHaveLength(1);
   });
@@ -129,16 +133,35 @@ describe("C4 緊急用務空域（原則飛行禁止）", () => {
     });
   }
 
-  it("16. 緊急用務空域の注記は原則飛行禁止を先に言い切り、「要確認」の見出しを付けない", () => {
+  it("16. 原則飛行禁止はカテゴリーの説明で言い切り、注記では繰り返さない。注記に「要確認」の見出しを付けない", () => {
     const d = deriveDiagnosis({ flags: ["airspace_emergency"], droneWeightG: 900 });
+    expect(d.categoryNote.startsWith("緊急用務空域に指定されている間は、原則として飛行できません")).toBe(true);
+    expect(d.categoryNote).toContain("飛行の直前に指定の有無を確認");
     const n = d.verificationNotes.find((x) => x.includes("緊急用務空域"));
     expect(n).toBe(EMERGENCY_NO_FLY_NOTE);
-    expect(n!.startsWith("緊急用務空域は原則として飛行禁止です")).toBe(true);
-    expect(n).toContain("飛行直前に確認");
+    expect(n).not.toContain("原則として飛行");
+    expect(n).not.toContain("許可があっても");
     expect(verificationNoteLabel(n!)).toBe("※ ");
     // ほかの注記は従来どおり「要確認」
     const drop = deriveDiagnosis({ flags: ["method_drop"], droneWeightG: 900 });
     expect(verificationNoteLabel(drop.verificationNotes[0]!)).toBe("※ 要確認: ");
+  });
+
+  it("16. 例外の許可（審査要領 5-1(2)c)）を示し、「申請する手続きではありません」と言い切らない", () => {
+    const p = proc("flight-permission-emergency-airspace");
+    expect(p.note).not.toContain("申請する手続きではありません");
+    expect(p.note).toContain("真に必要と認められる");
+    expect(p.note).toContain("5-1(2)c)");
+    expect(p.legalBasis).toContain("5-1(2)c)");
+    expect(getCategoryDefinition("emergency_no_fly").description).toContain("5-1(2)c)");
+  });
+
+  it("16. プリフィルの飛行の種類で緊急用務空域に「（指定中は飛行不可）」を添える", () => {
+    const f = buildPrefillFields({ lat: 35.4278, lng: 133.3314, flags: ["airspace_emergency", "airspace_did"], droneWeightG: 900 });
+    const row = f.find((x) => x.dipsFieldLabel.startsWith("飛行の種類"));
+    expect(row?.value).toContain("緊急用務空域（指定中は飛行不可）");
+    const g = buildPrefillFields({ lat: 35.4278, lng: 133.3314, flags: ["airspace_did"], droneWeightG: 900 });
+    expect(g.find((x) => x.dipsFieldLabel.startsWith("飛行の種類"))?.value).not.toContain("指定中は飛行不可");
   });
 
   it("16. カテゴリー定義の説明に「許可があっても」、手続きは期限 0", () => {

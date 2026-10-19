@@ -10,7 +10,7 @@ import {
  * 今日の日付（JST）は呼び出し側（サーバーの画面）で求めて渡す。
  *
  * 見た目は運航管理（Sprint 10）の札（Badge）に揃える。段階は札の文字で示し、色は補助にとどめる。
- *   一覧（compact）… 札だけ（「更新の申請期間」「更新の期限を過ぎています」「有効期限切れ」）
+ *   一覧（compact）… 札だけ（「更新の申請期間」「更新の申請期限を過ぎています」「有効期限切れ」）
  *   詳細           … 札＋期限の日付を入れた一文
  */
 type Stage = Exclude<LicenseRenewalStatus, "none">;
@@ -23,17 +23,17 @@ const STAGE_TONE: Readonly<Record<Stage, Tone>> = {
 
 const STAGE_LABEL: Readonly<Record<Stage, string>> = {
   renewal_window: "更新の申請期間",
-  past_deadline: "更新の期限を過ぎています",
+  past_deadline: "更新の申請期限を過ぎています",
   expired: "有効期限切れ",
 };
 
 const stageDetail = (stage: Stage, expiresOn: string): string => {
   const deadline = subtractCalendarMonths(expiresOn, 1) ?? "";
   if (stage === "renewal_window") {
-    return `満了の 1 か月前（${deadline}）までに、更新講習と身体適性検査を含めて更新の手続きを終える必要があります。`;
+    return `満了の 1 か月前（${deadline}）までに、更新講習の受講と身体適性検査を経て、DIPS 2.0 で更新の申請を済ませてください。`;
   }
   if (stage === "past_deadline") {
-    return `更新の申請期間（満了の 1 か月前、${deadline} まで）を過ぎています。`;
+    return `更新の申請期限（満了の 1 か月前、${deadline}）を過ぎています。`;
   }
   return `有効期限（${expiresOn}）が切れています。`;
 };

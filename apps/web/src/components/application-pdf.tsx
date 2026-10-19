@@ -21,7 +21,12 @@ import {
 } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { splitInlineSource } from "@/lib/inline-source";
-import { isNoFlyConfirmation, procedureKindDisplayLabel } from "@/lib/procedure-display";
+import {
+  isNoFlyConfirmation,
+  PROCEDURE_BADGE_LABEL,
+  procedureBadge,
+  procedureKindDisplayLabel,
+} from "@/lib/procedure-display";
 import { MonoText } from "./pdf-mono-text";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
@@ -453,13 +458,7 @@ export const ApplicationPdfDocument = ({
                       : styles.waivableBadge
                   }
                 >
-                  {isNoFlyConfirmation(p)
-                    ? "指定中は飛行不可"
-                    : p.kind === "facility_consent_notice"
-                    ? "航空法とは別系統（飛行禁止法）"
-                    : p.waivableByIIB
-                      ? "IIB 相当で不要化可"
-                      : "IIA 相当・不要化不可"}
+                  {PROCEDURE_BADGE_LABEL[procedureBadge(p, diagnosis.category)]}
                 </Text>
               </View>
               <Text style={styles.procTitle}>{p.title}</Text>

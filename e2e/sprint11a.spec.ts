@@ -171,13 +171,21 @@ test.describe("C. 制度の最新化（申請支援）", () => {
       if (line.includes("開庁日以上前までに提出")) expect(line).not.toContain("緊急用務");
     }
     await expect(section).not.toContainText("IIA 相当・申請が必要");
-    // 原則飛行禁止は「要確認」ではなく言い切る
-    await expect(section).toContainText("※ 緊急用務空域は原則として飛行禁止です");
+    // 原則飛行禁止はカテゴリーの説明で言い切り（例外の許可は審査要領 5-1(2)c)）、「要確認」の見出しを付けない
+    await expect(section).toContainText("緊急用務空域に指定されている間は、原則として飛行できません");
+    await expect(section).toContainText("5-1(2)c)");
     await expect(section).not.toContainText("要確認: 緊急用務空域");
+    await expect(section).not.toContainText("申請する手続きではありません");
+    // 横断手続きに「IIA 相当・不要化不可」を出さず、指定の解除後に飛行する場合の手続きと示す
+    await expect(section).not.toContainText("IIA 相当・不要化不可");
+    await expect(section.getByText("指定の解除後に飛行する場合").first()).toBeVisible();
+    // プリフィルの飛行の種類
+    await expect(page.getByText("緊急用務空域（指定中は飛行不可）").first()).toBeVisible();
     const t = await bundlePdf(page);
     expect(t).toContain("飛行できません");
-    expect(t).toContain("緊急用務空域は原則として飛行禁止です");
+    expect(t).toContain("5-1(2)c)");
     expect(t).not.toMatch(/要確認:\s*緊急用務空域/);
+    expect(t).not.toContain("IIA 相当・不要化不可");
     expect(t).not.toContain("IIA 相当・申請が必要");
   });
 });

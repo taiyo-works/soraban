@@ -1,8 +1,8 @@
 // 技能証明の有効期限の注意（Sprint 11a E）。
 //
 // 一次資料（国土交通省「無人航空機操縦者技能証明」、確認日 2026-10-19）：
-//   有効期間は 3 年。有効期間満了の 6 か月前から更新を申請でき、満了の 1 か月前までに
-//   更新講習・身体適性検査まで完了する必要がある。
+//   有効期間は 3 年。有効期間満了の 6 か月前から更新でき、満了の 1 か月前までに、
+//   更新講習の受講・身体適性検査を経て DIPS 2.0 での更新申請（STEP03）までを済ませる必要がある。
 // 新しい個人情報の項目は足さない（Sprint 10 E）。既存の任意項目 license_expires_on だけを使う純粋関数。
 
 export const LICENSE_RENEWAL_SOURCE_URL = "https://www.mlit.go.jp/koku/level4/license/";
@@ -10,8 +10,8 @@ export const LICENSE_RENEWAL_SOURCE_URL = "https://www.mlit.go.jp/koku/level4/li
 export type LicenseRenewalStatus = "none" | "renewal_window" | "past_deadline" | "expired";
 
 export const LICENSE_RENEWAL_LABEL: Readonly<Record<Exclude<LicenseRenewalStatus, "none">, string>> = {
-  renewal_window: "更新の申請期間です（満了の 1 か月前まで）",
-  past_deadline: "更新の申請期間（満了の 1 か月前まで）を過ぎています",
+  renewal_window: "更新の申請期間です（満了の 1 か月前までに申請）",
+  past_deadline: "更新の申請期限（満了の 1 か月前）を過ぎています",
   expired: "有効期限が切れています",
 };
 

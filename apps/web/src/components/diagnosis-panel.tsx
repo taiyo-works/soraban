@@ -398,6 +398,7 @@ export function DiagnosisPanel({
                 deadlineBasis={deadlineFor(p.id)}
                 done={doneMap[p.id] ?? false}
                 onToggleDone={toggleDone}
+                category={diagnosis.category}
               />
             ))}
           </div>

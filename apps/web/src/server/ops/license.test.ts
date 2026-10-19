@@ -33,3 +33,11 @@ describe("licenseRenewalStatus", () => {
     expect(todayJst(new Date("2026-10-19T14:59:59.000Z"))).toBe("2026-10-19");
   });
 });
+
+describe("更新の文言（満了の 1 か月前までに更新の申請を済ませる）", () => {
+  it("申請期限の言い方で揃える", async () => {
+    const { LICENSE_RENEWAL_LABEL } = await import("./license");
+    expect(LICENSE_RENEWAL_LABEL.past_deadline).toContain("更新の申請期限");
+    expect(LICENSE_RENEWAL_LABEL.renewal_window).toContain("申請");
+  });
+});
