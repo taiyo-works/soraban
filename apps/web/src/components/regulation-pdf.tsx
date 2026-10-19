@@ -425,7 +425,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={styles.metaValue}>{result.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>判定の版</Text>
+            <MonoText style={styles.metaLabel}>判定の版</MonoText>
             <Text style={styles.metaValue}>{result.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>

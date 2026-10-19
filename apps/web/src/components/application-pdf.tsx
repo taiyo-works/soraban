@@ -358,7 +358,7 @@ export const ApplicationPdfDocument = ({
             <Text style={styles.metaValue}>{diagnosis.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>判定の版</Text>
+            <MonoText style={styles.metaLabel}>判定の版</MonoText>
             <Text style={styles.metaValue}>{diagnosis.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>

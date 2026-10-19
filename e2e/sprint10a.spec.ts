@@ -5,7 +5,8 @@ import { expect, test, type Download, type Locator, type Page } from "@playwrigh
 // 本番相当サーバー（baseURL）だけを使う。
 
 const OPERATOR = "フューチャーテック株式会社";
-const TITLE = "そらばん — 山陰のドローン飛行の可否判定と運航管理";
+const TITLE = "そらばん — ドローン飛行の可否判定と運航管理";
+const PURPOSE = "ドローン飛行の可否判定と運航管理";
 
 // 契約 1：画面テキストに出してはいけない語。
 const SCREEN_FORBIDDEN = [
@@ -30,10 +31,11 @@ const SCREEN_FORBIDDEN = [
   "Tailwind",
   "Jamstack",
   "奥田",
+  "seed",
 ] as const;
 
 // 契約 8・9：PDF に出してはいけない語。
-const PDF_FORBIDDEN = ["特許", "Patent", "出願", "PoC", "Phase", "clausegraph", "奥田"] as const;
+const PDF_FORBIDDEN = ["特許", "Patent", "出願", "PoC", "Phase", "clausegraph", "奥田", "seed"] as const;
 
 const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
 const waitDiagnose = (page: Page) =>
@@ -77,8 +79,11 @@ test.describe("A. トップ画面の文言", () => {
     const h = hero(page);
     await expect(h.locator("h1")).toContainText("そらばん");
     await expect(h).toContainText("そらばん");
-    await expect(h).toContainText("山陰のドローン飛行の可否判定と運航管理");
+    await expect(h).toContainText(PURPOSE);
     const text = await h.innerText();
+    // 全国展開を見据え、見出しに地域を書かない（地域は site-facts の対象地域で示す）
+    expect(text).not.toContain("山陰");
+    await expect(page.getByTestId("site-facts")).toContainText("現在は鳥取県・島根県");
     expect(text).not.toContain("soraban-0.");
     expect(text).not.toContain("Engine");
   });
@@ -106,9 +111,12 @@ test.describe("A. トップ画面の文言", () => {
   test("6. document.title と meta description", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(TITLE);
-    const desc = await page.locator('meta[name="description"]').getAttribute("content");
-    expect(desc).toContain(OPERATOR);
-    expect(desc).not.toContain("SaaS");
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", TITLE);
+    for (const sel of ['meta[name="description"]', 'meta[property="og:description"]']) {
+      const desc = await page.locator(sel).getAttribute("content");
+      expect(desc, sel).toContain(OPERATOR);
+      for (const w of ["SaaS", "山陰", "鳥取", "島根"]) expect(desc, `${sel} に「${w}」`).not.toContain(w);
+    }
   });
 });
 
@@ -141,22 +149,26 @@ test.describe("B. 表示の崩れ", () => {
 });
 
 test.describe("C. PDF", () => {
-  test("8. 地点判定 PDF に運営者と免責があり、特許・社内向けの語がない", async ({ page }) => {
+  test("8. 地点判定 PDF に運営者・免責・「判定の版」があり、特許・社内向けの語がない", async ({ page }) => {
     await openReady(page);
     const dl = page.waitForEvent("download");
     await page.getByRole("button", { name: /PDF 出力/ }).first().click();
     const t = await pdfText(await dl);
     expect(t).toContain(OPERATOR);
+    // メタのラベルは字間を空けて組むため、抽出テキストでは「判 定 の 版」になる。字形が無ければ抽出されない
+    expect(t).toMatch(/判\s*定\s*の\s*版/);
     expect(t).toContain("免責");
     for (const w of PDF_FORBIDDEN) expect(t, `地点判定 PDF に「${w}」が残っている`).not.toContain(w);
   });
 
-  test("9. 申請支援 PDF に運営者と免責があり、特許・社内向けの語がない", async ({ page }) => {
+  test("9. 申請支援 PDF に運営者・免責・「判定の版」があり、特許・社内向けの語がない", async ({ page }) => {
     await openReady(page);
     const dl = page.waitForEvent("download");
     await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
     const t = await pdfText(await dl);
     expect(t).toContain(OPERATOR);
+    // メタのラベルは字間を空けて組むため、抽出テキストでは「判 定 の 版」になる。字形が無ければ抽出されない
+    expect(t).toMatch(/判\s*定\s*の\s*版/);
     expect(t).toContain("免責");
     for (const w of PDF_FORBIDDEN) expect(t, `申請支援 PDF に「${w}」が残っている`).not.toContain(w);
   });

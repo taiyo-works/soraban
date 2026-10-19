@@ -97,7 +97,7 @@ const SITE_FACTS: ReadonlyArray<readonly [string, string]> = [
   ["利用の範囲", "現在は社内での試験運用中"],
   [
     "対象地域",
-    `鳥取県・島根県（条例データを収録した市町村 ${COVERAGE_SUMMARY.municipalParkNames.length}）`,
+    `現在は鳥取県・島根県（条例データを収録した市町村 ${COVERAGE_SUMMARY.municipalParkNames.length}）`,
   ],
 ];
 
@@ -134,7 +134,7 @@ export default function Home() {
               そらばん
             </span>
             <span className="text-base font-medium leading-snug text-ink-soft sm:text-xl">
-              山陰のドローン飛行の可否判定と運航管理
+              ドローン飛行の可否判定と運航管理
             </span>
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-[15px] sm:leading-[1.85]">
@@ -243,7 +243,7 @@ export default function Home() {
           <span className="ml-3 text-ink-mute">鳥取県西伯郡日吉津村</span>
         </p>
         <p className="leading-relaxed">
-          出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（そらばん作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
+          出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開資料（地形図・空港要覧）からの概算（そらばん作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>
     </div>

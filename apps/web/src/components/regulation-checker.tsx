@@ -120,7 +120,7 @@ const HEAD_OFFICE: LatLng = { lat: 35.434238, lng: 133.380508 };
 const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "taiyo-tsushin-hq",
-    name: "タイヨー通信本社（拠点）",
+    name: "本社（日吉津村）",
     loc: HEAD_OFFICE,
     hint: "拠点 / 国法は green。日吉津村は自治体カバレッジ外（一部判定不能）",
     group: "鳥取県",
@@ -883,7 +883,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   void handleGeocode();
                 }
               }}
-              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3（タイヨー通信本社）"
+              placeholder="例: 鳥取県西伯郡日吉津村日吉津45番地3"
               className={fieldClass}
             />
             <button
