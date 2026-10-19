@@ -30,7 +30,7 @@ import {
   Field,
   FieldError,
   fieldErrorsOf,
-  focusFirstError,
+  useErrorFocus,
   FormError,
   inputClass,
   messageFor,
@@ -619,7 +619,7 @@ export function FlightForm({
     readonly ok: boolean;
     readonly list: readonly InspectionCandidate[];
   } | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const { formRef, requestErrorFocus } = useErrorFocus();
 
   // 下書きの読み込み（新規のときだけ）。点検の画面から来た場合は、その機体・点検を優先する。
   // localStorage はサーバーの描画では読めないため、描画の後に読む（次の処理単位で反映する）。
@@ -744,7 +744,7 @@ export function FlightForm({
         // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
         if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
       }
-      focusFirstError(formRef.current);
+      requestErrorFocus();
       return;
     }
     setOffline(false);
@@ -1160,7 +1160,7 @@ export function InspectionForm({
   const [staleDt, setStaleDt] = useState<string | null>(null);
   // 何も入力のない下書きの実施日時を今に入れ直したとき、その日時（知らせを出す。日時を直すと消える）
   const [refreshDt, setRefreshDt] = useState<string | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const { formRef, requestErrorFocus } = useErrorFocus();
 
   // 下書きの読み込み。実施日時の既定は「今」（端末の時計。描画の後に行う）。
   // 日時を利用者が入れた（手で直した・「今」を押した）下書きと、9 項目・場所など他の入力がある下書きは、日時を保つ
@@ -1255,7 +1255,7 @@ export function InspectionForm({
         // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
         if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
       }
-      focusFirstError(formRef.current);
+      requestErrorFocus();
       return;
     }
     setOffline(false);
