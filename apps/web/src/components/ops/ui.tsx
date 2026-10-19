@@ -44,7 +44,11 @@ export const ROLE_DESCRIPTIONS = {
   viewer: "機体と操縦者を閲覧できます。登録・訂正はできません。",
 } as const;
 
-/** 各画面の見出し。back を渡すと、見出しの上に一覧などへ戻るリンクを出す。 */
+/**
+ * 各画面の見出し。back を渡すと、見出しの上に一覧などへ戻るリンクを出す。
+ * 戻るリンクは先読み（prefetch）しない：詳細画面で訂正した直後の router.refresh() と、
+ * 動的な一覧の先読みが重なると、版の一覧が更新されないことがあった（CI の E2E-DB 17 で再現）。
+ */
 export function PageHeader({
   title,
   eyebrow,
@@ -61,7 +65,7 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-3">
       {back ? (
-        <Link href={back.href} className="self-start text-xs text-brand-700 underline-offset-2 hover:underline">
+        <Link href={back.href} prefetch={false} className="self-start text-xs text-brand-700 underline-offset-2 hover:underline">
           <span aria-hidden>← </span>
           {back.label}
         </Link>
