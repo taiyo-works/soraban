@@ -24,11 +24,16 @@ const nextConfig: NextConfig = {
   distDir: process.env["NEXT_DIST_DIR"] || ".next",
 
   // Sprint 9：現在地ボタンのため、位置情報を自サイトにだけ許可する（他の Permissions-Policy の設定はない）。
+  // 社内での試験運用中は、検索エンジンに載せない（X-Robots-Tag: noindex）。本格公開のときに外す。
+  // robots.txt で巡回を禁止すると noindex が読まれなくなるため、robots.txt では禁止しない。
   async headers() {
     return [
       {
         source: "/:path*",
-        headers: [{ key: "Permissions-Policy", value: "geolocation=(self)" }],
+        headers: [
+          { key: "Permissions-Policy", value: "geolocation=(self)" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
       },
     ];
   },
