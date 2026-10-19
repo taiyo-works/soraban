@@ -20,8 +20,13 @@ const loadPrefDid = async (prefCode: string): Promise<DidDataset | null> => {
   return readDidDataset(prefCode);
 };
 
+export const GSI_REVERSE_GEOCODER_ENDPOINT =
+  "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress";
+
 const reverseGeocode = async (loc: LatLng): Promise<ReverseGeocode> => {
-  const url = `https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=${loc.lng}&lat=${loc.lat}`;
+  // 呼び出し先は E2E で模擬サーバーに差し替えられる（GSI_REVERSE_GEOCODER_ENDPOINT。未設定なら国土地理院）。
+  const endpoint = process.env["GSI_REVERSE_GEOCODER_ENDPOINT"] || GSI_REVERSE_GEOCODER_ENDPOINT;
+  const url = `${endpoint}?lon=${loc.lng}&lat=${loc.lat}`;
   try {
     const res = await fetch(url, {
       headers: { accept: "application/json" },

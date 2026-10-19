@@ -25,7 +25,14 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 
-import { searchAddress, type GeocodeResult } from "@/lib/geocode";
+import {
+  GEOCODE_LEVEL_NOTE,
+  GEOCODE_SOURCE_LABEL,
+  GEOCODE_SERVICE_UNAVAILABLE,
+  searchAddress,
+  type GeocodeResult,
+} from "@/lib/geocode";
+import { candidateToLocation, type CurrentLocationCandidate } from "@/lib/current-location";
 import { checkLocation } from "@/lib/check";
 import { diagnoseLocation, type DiagnoseResponse } from "@/lib/diagnose";
 import {
@@ -43,7 +50,7 @@ import {
 } from "@/lib/history";
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
-import { RegulationMap } from "./regulation-map";
+import { RegulationMap, type MapPickMethod } from "./regulation-map";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
 const overallTone: Record<RegulationStatus, string> = {
@@ -74,6 +81,20 @@ const isAbortError = (err: unknown): boolean =>
   typeof err === "object" && err !== null && (err as { name?: string }).name === "AbortError";
 
 const round6 = (n: number): string => n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+
+const PICK_METHOD_LABEL: Readonly<Record<MapPickMethod, string>> = {
+  click: "クリック",
+  longpress: "長押し",
+  contextmenu: "右クリック",
+};
+
+/** 地点の決め方の表示（判定の入力・証跡・履歴には含めない）。 */
+type LocationNote = {
+  readonly kind: "geocode" | "map";
+  readonly text: string;
+  readonly source?: string;
+  readonly title?: string;
+};
 
 type PresetGroup = "鳥取県" | "島根県";
 
@@ -215,7 +236,12 @@ const PRESET_GROUP_TONE: Record<PresetGroup, string> = {
   島根県: "border-brand-700 text-brand-700 bg-transparent",
 };
 
-export function RegulationChecker() {
+type RegulationCheckerProps = {
+  /** 住所検索の同梱索引（アドレス・ベース・レジストリ）にデータがあるか。空なら ABR の出典と見出しを出さない。 */
+  readonly addressIndexAvailable?: boolean;
+};
+
+export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
   const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
   const [lng, setLng] = useState<string>(String(YONAGO_CITY_HALL.lng));
   const [center, setCenter] = useState<LatLng>(YONAGO_CITY_HALL);
@@ -228,6 +254,9 @@ export function RegulationChecker() {
   const [address, setAddress] = useState<string>("");
   const [geocodeResults, setGeocodeResults] = useState<readonly GeocodeResult[]>([]);
   const [geocoding, setGeocoding] = useState<boolean>(false);
+  const [locationNote, setLocationNote] = useState<LocationNote | null>(null);
+  // 現在地の候補（端末内の表示だけに使う。「この地点で判定」まで送信・保存しない）
+  const [geoCandidate, setGeoCandidate] = useState<CurrentLocationCandidate | null>(null);
   const [result, setResult] = useState<RegulationCheckResult | null>(null);
   const [responseMs, setResponseMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -685,6 +714,9 @@ export function RegulationChecker() {
     loc: LatLng,
     seedAirspace: readonly SpecificFlightFlag[] = [],
   ): void => {
+    // 地点の決め方の表示と現在地の候補は、地点が変わるたびに消す（呼び出し元が必要なら設定し直す）
+    setLocationNote(null);
+    setGeoCandidate(null);
     applyLocation(loc);
     const airspaceChanged = !sameFlagSet(userAirspaceFlags, seedAirspace);
     const didChanged = didConfirmedNotApplicable;
@@ -710,9 +742,28 @@ export function RegulationChecker() {
     );
   };
 
-  const handlePick = (loc: LatLng): void => {
+  const handlePick = (loc: LatLng, method: MapPickMethod = "click"): void => {
     if (!isValidLatLng(loc)) return;
     goToLocation(loc);
+    setLocationNote({ kind: "map", text: `地図で指定しました（${PICK_METHOD_LABEL[method]}）` });
+  };
+
+  // 現在地の「この地点で判定」：通常の地点と同じ流れで判定する（精度・取得時刻・指定方法は送らない）
+  const confirmCurrentLocation = (c: CurrentLocationCandidate): void => {
+    const loc = candidateToLocation(c);
+    if (!isValidLatLng(loc)) return;
+    goToLocation(loc);
+  };
+
+  const selectGeocodeResult = (r: GeocodeResult): void => {
+    goToLocation({ lat: r.lat, lng: r.lng });
+    setGeocodeResults([]);
+    setLocationNote({
+      kind: "geocode",
+      text: GEOCODE_LEVEL_NOTE[r.level],
+      source: GEOCODE_SOURCE_LABEL[r.source],
+      title: r.title,
+    });
   };
 
   // プリセット選択: curated な空域フラグ（DID・空港）を「その地点のユーザー指定分」として初期化する。
@@ -769,14 +820,13 @@ export function RegulationChecker() {
     setGeocoding(true);
     setError(null);
     try {
-      const found = await searchAddress(address);
+      const { results: found, serviceError } = await searchAddress(address);
       setGeocodeResults(found);
       if (found.length === 0) {
-        setError("住所が見つかりませんでした。");
+        // 該当なしと、住所検索サービスに接続できない場合を出し分ける
+        setError(serviceError ? GEOCODE_SERVICE_UNAVAILABLE : "住所が見つかりませんでした。");
       } else if (found.length === 1) {
-        const first = found[0]!;
-        goToLocation({ lat: first.lat, lng: first.lng });
-        setGeocodeResults([]);
+        selectGeocodeResult(found[0]!);
       }
     } catch (err) {
       setError(`ジオコーディングに失敗: ${(err as Error).message}`);
@@ -816,7 +866,7 @@ export function RegulationChecker() {
             <span aria-hidden className="bearing-mark" />
             01 — 住所から位置決定
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
-              （国土地理院ジオコーダ）
+              {addressIndexAvailable ? "（アドレス・ベース・レジストリ → 国土地理院）" : "（国土地理院）"}
             </span>
           </legend>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -843,26 +893,40 @@ export function RegulationChecker() {
             </button>
           </div>
           {geocodeResults.length > 1 ? (
-            <ul className="mt-1 flex flex-col divide-y divide-rule border border-rule bg-paper">
-              {geocodeResults.map((r) => (
-                <li key={`${r.addressCode}-${r.lat}-${r.lng}`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      goToLocation({ lat: r.lat, lng: r.lng });
-                      setGeocodeResults([]);
-                    }}
-                    className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left hover:bg-paper-soft"
-                  >
-                    <span className="text-sm font-medium text-ink">{r.title}</span>
-                    <span className="font-mono text-[11px] tnum text-ink-mute">
-                      {round6(r.lat)}, {round6(r.lng)}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-1 flex flex-col gap-1">
+              <p className="text-xs text-ink-soft">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
+              <ul className="flex flex-col divide-y divide-rule border border-rule bg-paper">
+                {geocodeResults.map((r) => (
+                  <li key={`${r.source}-${r.level}-${r.lat}-${r.lng}`}>
+                    <button
+                      type="button"
+                      data-testid="geocode-result"
+                      data-source={r.source}
+                      data-level={r.level}
+                      onClick={() => selectGeocodeResult(r)}
+                      className="flex min-h-12 w-full flex-col gap-1 px-3 py-2.5 text-left transition-colors hover:bg-paper-soft active:bg-paper-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-700"
+                    >
+                      <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                        <span className="text-sm font-medium text-ink">{r.title}</span>
+                        <span className="font-mono text-[11px] tnum text-ink-mute">
+                          {round6(r.lat)}, {round6(r.lng)}
+                        </span>
+                      </span>
+                      <span className="text-xs leading-relaxed text-ink-soft">{GEOCODE_LEVEL_NOTE[r.level]}</span>
+                      <span className="text-[11px] text-ink-mute">出典：{GEOCODE_SOURCE_LABEL[r.source]}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
+          <p className="text-[11px] leading-relaxed text-ink-mute" data-testid="geocode-attribution">
+            出典：
+            {addressIndexAvailable
+              ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／"
+              : ""}
+            国土地理院 住所検索
+          </p>
         </fieldset>
 
         {/* combined coords */}
@@ -1352,7 +1416,27 @@ export function RegulationChecker() {
       </form>
 
       {/* ─── MAP ───────────────────────────────── */}
-      <RegulationMap center={center} prefCode={prefCode} onPick={handlePick} />
+      <div className="flex flex-col gap-2">
+        {locationNote ? (
+          <p
+            className="flex flex-col gap-0.5 border-l-2 border-brand-700 bg-paper-soft py-2 pl-3 pr-2 text-xs leading-relaxed text-ink"
+            role="status"
+            data-testid="location-note"
+          >
+            {locationNote.title ? <span className="text-sm font-medium">{locationNote.title}</span> : null}
+            <span>{locationNote.text}</span>
+            {locationNote.source ? <span className="text-[11px] text-ink-mute">出典：{locationNote.source}</span> : null}
+          </p>
+        ) : null}
+        <RegulationMap
+          center={center}
+          prefCode={prefCode}
+          onPick={handlePick}
+          candidate={geoCandidate}
+          onCandidate={setGeoCandidate}
+          onConfirmCandidate={confirmCurrentLocation}
+        />
+      </div>
 
       {/* ─── RESULT ───────────────────────────────── */}
       {result ? (
@@ -1426,7 +1510,7 @@ export function RegulationChecker() {
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule pt-4 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid-cols-5">
             <div className="flex flex-col gap-0.5 col-span-2">
               <dt className="eyebrow !text-[9px]">Evidence ID</dt>
-              <dd className="tnum normal-case tracking-normal text-ink">
+              <dd className="tnum normal-case tracking-normal text-ink" data-testid="evidence-id">
                 {result.evidenceId}
               </dd>
             </div>

@@ -9,6 +9,10 @@ import maplibregl, {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
+import type { CurrentLocationCandidate } from "@/lib/current-location";
+import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
+import { createRightClickPicker } from "@/lib/right-click";
+import { CurrentLocationControl } from "./current-location-control";
 import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
@@ -21,11 +25,29 @@ import {
   type SmallDroneFacility,
 } from "@soraban/regulations";
 
+/** 地図での地点指定の方法（表示用。判定の入力・証跡には含めない）。 */
+export type MapPickMethod = "click" | "longpress" | "contextmenu";
+
 type Props = {
   readonly center: LatLng;
   readonly prefCode?: string;
-  readonly onPick?: (loc: LatLng) => void;
+  readonly onPick?: (loc: LatLng, method: MapPickMethod) => void;
+  /** 現在地の候補（精度の円と印を表示する。判定はしない）。 */
+  readonly candidate?: CurrentLocationCandidate | null;
+  /** 現在地の候補の更新（地図に重ねる現在地ボタン・候補のパネルから呼ぶ）。 */
+  readonly onCandidate?: (c: CurrentLocationCandidate | null) => void;
+  /** 現在地の候補で判定する（「この地点で判定」）。 */
+  readonly onConfirmCandidate?: (c: CurrentLocationCandidate) => void;
 };
+
+// タッチ直後にブラウザが合成する click・contextmenu を無視する時間（ms）。
+const TOUCH_GHOST_MS = 1500;
+
+/** 精度（m）に応じた表示ズーム。 */
+const zoomForAccuracy = (m: number): number => (m <= 50 ? 16 : m <= 200 ? 15 : m <= 1000 ? 13 : 12);
+
+const isTouchPointer = (ev: Event | undefined): boolean =>
+  !!ev && "pointerType" in ev && (ev as PointerEvent).pointerType === "touch";
 
 const STYLE: StyleSpecification = {
   version: 8,
@@ -182,10 +204,25 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
 ];
 
-export function RegulationMap({ center, prefCode, onPick }: Props) {
+export function RegulationMap({
+  center,
+  prefCode,
+  onPick,
+  candidate = null,
+  onCandidate,
+  onConfirmCandidate,
+}: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  const candidateMarkerRef = useRef<Marker | null>(null);
+  // 地図の load 後に実行する処理（isStyleLoaded はタイル読み込み中に false になるため自前で管理する）
+  const loadedRef = useRef<boolean>(false);
+  const pendingRef = useRef<(() => void)[]>([]);
+  const runWhenLoaded = (fn: () => void): void => {
+    if (loadedRef.current) fn();
+    else pendingRef.current.push(fn);
+  };
   // 地図クリックハンドラから常に最新の onPick を読めるよう ref に保持。
   // React のルール上、ref の更新は effect で行う（render 中の代入は禁止）。
   const onPickRef = useRef<typeof onPick>(onPick);
@@ -236,6 +273,8 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     );
 
     map.on("load", () => {
+      loadedRef.current = true;
+      queueMicrotask(() => pendingRef.current.splice(0).forEach((fn) => fn()));
       // DID — populated dynamically from /api/did/[pref]
       map.addSource("did", { type: "geojson", data: EMPTY_FC });
       map.addLayer({
@@ -375,15 +414,88 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
       });
     });
 
-    map.on("click", (e) => {
+    // ── 地点指定 ──
+    // マウス：左クリック（従来どおり）・右クリック（contextmenu）。
+    // タッチ：長押し（500ms 以上・移動 10px 以内）に一本化し、単タップでは指定しない（Sprint 9 未決 1）。
+    let lastTouchAt = -Infinity;
+    const recentlyTouched = () => performance.now() - lastTouchAt < TOUCH_GHOST_MS;
+    const pickAt = (lngLat: { lat: number; lng: number }, method: MapPickMethod) => {
       const cb = onPickRef.current;
-      if (!cb) return;
-      cb({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      if (cb) cb({ lat: lngLat.lat, lng: lngLat.lng }, method);
+    };
+    map.on("click", (e) => {
+      if (isTouchPointer(e.originalEvent) || recentlyTouched()) return;
+      pickAt(e.lngLat, "click");
+    });
+    // 右クリック：地図のライブラリの contextmenu は右ボタンでの回転操作と競合して発火しないことがあるため、
+    // DOM の contextmenu で扱う。地図上ではブラウザの右クリックメニューを出さない。
+    // 右ドラッグ（押した位置から 4px 以上の移動）で地図を回したときは地点にしない（createRightClickPicker）。
+    const toCanvas = (ev: MouseEvent) => {
+      const rect = map.getCanvas().getBoundingClientRect();
+      return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+    };
+    const rightClick = createRightClickPicker({
+      onPick: (p) => pickAt(map.unproject([p.x, p.y]), "contextmenu"),
+    });
+    const onRightDown = (ev: MouseEvent) => {
+      if (ev.button === 2) rightClick.down(toCanvas(ev));
+    };
+    const onRightMove = (ev: MouseEvent) => rightClick.move(toCanvas(ev));
+    const onRightUp = (ev: MouseEvent) => {
+      if (ev.button === 2) rightClick.up(toCanvas(ev));
+    };
+    const onContextMenu = (ev: MouseEvent) => {
+      ev.preventDefault();
+      // タッチの長押しでブラウザが出す contextmenu は、長押しの判定で扱う
+      if (isTouchPointer(ev) || recentlyTouched()) return;
+      rightClick.contextmenu(toCanvas(ev));
+    };
+    node.addEventListener("mousedown", onRightDown, true);
+    // ドラッグ中に地図の外へ出ても追えるよう、移動と離す操作は window で受ける
+    window.addEventListener("mousemove", onRightMove, true);
+    window.addEventListener("mouseup", onRightUp, true);
+    node.addEventListener("contextmenu", onContextMenu);
+
+    const longPress = createLongPressDetector({
+      onLongPress: (p) => pickAt(map.unproject([p.x, p.y]), "longpress"),
+    });
+    const toPoints = (points: readonly { x: number; y: number }[]): TouchPoint[] =>
+      points.map((pt) => ({ x: pt.x, y: pt.y }));
+    map.on("touchstart", (e) => {
+      lastTouchAt = performance.now();
+      longPress.start(toPoints(e.points));
+    });
+    map.on("touchmove", (e) => {
+      lastTouchAt = performance.now();
+      longPress.move(toPoints(e.points));
+    });
+    map.on("touchend", () => {
+      lastTouchAt = performance.now();
+      longPress.end();
+    });
+    map.on("touchcancel", () => longPress.cancel());
+    map.on("movestart", (e) => {
+      // 利用者の操作による移動（パン・ズーム）だけで取り消す（プログラムの easeTo は除く）
+      if ((e as { originalEvent?: Event }).originalEvent) longPress.mapMoved();
+    });
+    map.on("moveend", () => {
+      const c = map.getCenter();
+      node.dataset["centerLat"] = c.lat.toFixed(6);
+      node.dataset["centerLng"] = c.lng.toFixed(6);
     });
     map.getCanvas().style.cursor = "crosshair";
 
     return () => {
+      longPress.cancel();
+      node.removeEventListener("contextmenu", onContextMenu);
+      node.removeEventListener("mousedown", onRightDown, true);
+      window.removeEventListener("mousemove", onRightMove, true);
+      window.removeEventListener("mouseup", onRightUp, true);
+      candidateMarkerRef.current?.remove();
+      candidateMarkerRef.current = null;
       map.remove();
+      loadedRef.current = false;
+      pendingRef.current = [];
       mapRef.current = null;
       markerRef.current = null;
     };
@@ -397,6 +509,57 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     map.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: 800 });
     marker.setLngLat([center.lng, center.lat]);
   }, [center.lat, center.lng]);
+
+  // 現在地の候補：精度の円と印を表示し、地図をその位置に移す（判定はしない）。
+  useEffect(() => {
+    const map = mapRef.current;
+    const node = containerRef.current;
+    if (!map || !node) return;
+    const apply = () => {
+      const m = mapRef.current;
+      if (!m) return;
+      const fc: GeoJSON.FeatureCollection = candidate
+        ? polygonsToFeatureCollection([
+            circlePolygon({ lat: candidate.lat, lng: candidate.lng }, candidate.accuracyM, 64),
+          ])
+        : EMPTY_FC;
+      const src = m.getSource("current-location") as GeoJSONSource | undefined;
+      if (src) src.setData(fc);
+      else {
+        m.addSource("current-location", { type: "geojson", data: fc });
+        m.addLayer({
+          id: "current-location-fill",
+          type: "fill",
+          source: "current-location",
+          paint: { "fill-color": "#1d3557", "fill-opacity": 0.14 },
+        });
+        m.addLayer({
+          id: "current-location-outline",
+          type: "line",
+          source: "current-location",
+          paint: { "line-color": "#1d3557", "line-width": 2 },
+        });
+      }
+      if (candidate) {
+        node.dataset["accuracyRadiusM"] = String(Math.round(candidate.accuracyM));
+      } else {
+        delete node.dataset["accuracyRadiusM"];
+      }
+    };
+    candidateMarkerRef.current?.remove();
+    candidateMarkerRef.current = null;
+    if (candidate) {
+      candidateMarkerRef.current = new maplibregl.Marker({ color: "#1d3557" })
+        .setLngLat([candidate.lng, candidate.lat])
+        .addTo(map);
+      map.easeTo({
+        center: [candidate.lng, candidate.lat],
+        zoom: zoomForAccuracy(candidate.accuracyM),
+        duration: 600,
+      });
+    }
+    runWhenLoaded(apply);
+  }, [candidate]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -449,16 +612,44 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
 
   const visibleCount = Object.values(layerVisibility).filter(Boolean).length;
 
+  // モバイルは 2:3（下端に重ねる候補のパネルの上に、中央の精度の円が見える高さを確保する）、sm 以上は 16:9。
+  const canvas = (
+    <div
+      ref={containerRef}
+      data-testid="regulation-map"
+      className="aspect-[2/3] w-full sm:aspect-[16/9]"
+      style={{ touchAction: "pan-x pan-y" }}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-2">
-      {/* 地図: モバイルでは aspect 4:5 (縦長) で画面の主役に近づける。
+      {/* 地図: モバイルでは aspect 2:3 (縦長) で画面の主役に近づける。
           touch-action で縦スクロールとピンチを両立させる */}
       <div className="overflow-hidden border border-rule">
-        <div
-          ref={containerRef}
-          className="aspect-[4/5] w-full sm:aspect-[16/9]"
-          style={{ touchAction: "pan-x pan-y" }}
-        />
+        {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
+            主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
+        <p
+          className="flex items-start gap-2 border-b border-rule bg-paper-soft px-3 py-2 text-xs leading-relaxed text-ink"
+          data-testid="map-pick-hint"
+        >
+          <span aria-hidden className="mt-[0.35em] inline-block h-2 w-2 shrink-0 rounded-full bg-[#dc2626]" />
+          <span>
+            <span className="pointer-fine:hidden">
+              地図を<strong className="font-medium">長押し</strong>すると、その位置を判定地点（赤い印）にします。指を動かすと地図の移動になります。
+            </span>
+            <span className="hidden pointer-fine:inline">
+              地図を<strong className="font-medium">クリック</strong>または<strong className="font-medium">右クリック</strong>すると、その位置を判定地点（赤い印）にします。
+            </span>
+          </span>
+        </p>
+        {onCandidate && onConfirmCandidate ? (
+          <CurrentLocationControl candidate={candidate} onCandidate={onCandidate} onConfirm={onConfirmCandidate}>
+            {canvas}
+          </CurrentLocationControl>
+        ) : (
+          canvas
+        )}
       </div>
       {/* レイヤーレジェンド: モバイルではデフォルト折りたたみ */}
       <details
@@ -473,7 +664,7 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
         </summary>
         <div className="flex flex-col gap-2 sm:!flex">
           <span className="text-[11px] text-ink-mute hidden sm:block">
-            ・チェックで地図表示を切替 ・地図クリックで判定地点を選択
+            ・チェックで地図表示を切替
           </span>
           <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {LAYER_GROUPS.map((group) => {

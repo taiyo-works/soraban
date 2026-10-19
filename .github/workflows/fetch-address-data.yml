@@ -1,0 +1,161 @@
+name: Fetch address data
+
+# 住所検索の同梱索引（アドレス・ベース・レジストリ、鳥取県・島根県）を取得・変換する（Sprint 9）。
+# ダウンロード URL はデジタル庁の DCAT フィードから選ぶ（推測しない）。
+# 処理本体：packages/regulations/scripts/fetch-address-data.mjs → build-address-index.mjs
+
+on:
+  # data-fetch/address- で始まるブランチへの push で実行し、生成物と ADDRESS_FETCH_REPORT.md を同じブランチにコミットする。
+  push:
+    branches: ['data-fetch/address-**']
+  workflow_dispatch:
+    inputs:
+      output:
+        description: "生成物の扱い（artifact＝成果物として保存／commit＝実行したブランチにコミットして push）"
+        type: choice
+        options: [artifact, commit]
+        default: artifact
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fetch-address-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq unzip
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch and convert
+        id: fetch
+        continue-on-error: true
+        env:
+          WORK_DIR: ${{ runner.temp }}/address-data
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: node packages/regulations/scripts/fetch-address-data.mjs --prefs "31 32"
+
+      - name: Show changes and sizes
+        if: always()
+        run: |
+          git status --short
+          du -b packages/regulations/data/address/* 2>/dev/null || true
+
+      - name: Typecheck and test (with generated data)
+        id: verify
+        if: steps.fetch.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          { pnpm typecheck && pnpm test; } 2>&1 | tee "$RUNNER_TEMP/verify.log"
+
+      - name: Write ADDRESS_FETCH_REPORT.md
+        if: always()
+        env:
+          WORK_DIR: ${{ runner.temp }}/address-data
+          FETCH: ${{ steps.fetch.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+        run: |
+          r=packages/regulations/data/ADDRESS_FETCH_REPORT.md
+          {
+            echo "# 住所データ取得レポート（fetch-address-data）"
+            echo
+            echo "- 実行: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- ブランチ: ${GITHUB_REF_NAME}（${GITHUB_SHA}）"
+            echo "- 実行日時（UTC）: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- 取得・変換: ${FETCH}"
+            echo "- typecheck・test: ${VERIFY:-skipped}"
+            echo
+            echo "## 取得・変換のログ"
+            echo
+            cat "$WORK_DIR/summary.md" 2>/dev/null || echo "（summary.md なし）"
+            echo
+            echo "## 選定した配布ファイル（manifest.tsv）"
+            echo
+            echo '```'
+            cat "$WORK_DIR/manifest.tsv" 2>/dev/null | head -n 200 || true
+            echo '```'
+            echo
+            echo "## 生成ファイルのサイズ"
+            echo
+            echo '```'
+            ls -l packages/regulations/data/address/ 2>/dev/null || true
+            echo '```'
+            echo
+            echo "## typecheck・test の結果（末尾 80 行）"
+            echo
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/verify.log" 2>/dev/null || echo "（ログなし）"
+            echo '```'
+          } > "$r"
+          cat "$r" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: address-data
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            packages/regulations/data/address/
+            packages/regulations/data/ADDRESS_FETCH_REPORT.md
+            packages/regulations/src/data-bundle/address-bundle.ts
+
+    outputs:
+      fetch: ${{ steps.fetch.outcome }}
+      verify: ${{ steps.verify.outcome }}
+
+  commit:
+    needs: fetch
+    if: >-
+      always() && needs.fetch.result != 'cancelled' &&
+      ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/data-fetch/address-')) ||
+       (github.event_name == 'workflow_dispatch' && inputs.output == 'commit'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: address-data
+          path: packages/regulations
+      - name: Commit and push
+        env:
+          FETCH: ${{ needs.fetch.outputs.fetch }}
+          VERIFY: ${{ needs.fetch.outputs.verify }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # artifact は共通の祖先（packages/regulations）からの相対パスで保存される
+          ls -R packages/regulations | head -50
+          for p in packages/regulations/data/address packages/regulations/data/ADDRESS_FETCH_REPORT.md packages/regulations/src/data-bundle/address-bundle.ts; do
+            if [[ -e "$p" ]]; then git add -- "$p"; else echo "（なし）$p"; fi
+          done
+          git status --short
+          if git diff --cached --quiet; then
+            echo "変更なし（コミットしない）"
+          else
+            git commit -m "data(address): アドレス・ベース・レジストリ（鳥取・島根）から住所検索の索引を生成（fetch-address-data、取得 ${FETCH:-不明}・検証 ${VERIFY:-skipped}）" \
+              -m "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Fail if fetch or verify failed
+        if: needs.fetch.outputs.fetch != 'success' || needs.fetch.outputs.verify != 'success'
+        run: |
+          echo "取得 ${{ needs.fetch.outputs.fetch }}・検証 ${{ needs.fetch.outputs.verify }}。ADDRESS_FETCH_REPORT.md を参照"
+          exit 1

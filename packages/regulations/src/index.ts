@@ -1261,3 +1261,7 @@ export {
   ALL_MANUAL_BASE_SECTIONS,
   ALL_MANUAL_METHOD_SECTIONS,
 } from "./prefill";
+
+// 住所検索（Sprint 9）の型と定数。検索本体（索引を含む）は "@soraban/regulations/address" から import する。
+export type { GeocodeHit, GeocodeLevel, GeocodeSource } from "./address/types";
+export { GEOCODE_LEVELS, GEOCODE_SOURCES } from "./address/types";

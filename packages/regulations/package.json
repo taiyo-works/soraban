@@ -6,6 +6,7 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./address": "./src/address/index.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -13,7 +14,8 @@
     "fetch:did": "bash scripts/fetch-did.sh",
     "fetch:airports": "bash scripts/fetch-airports.sh",
     "fetch:parks": "bash scripts/fetch-parks.sh",
-    "fetch:all": "bash scripts/fetch-did.sh && bash scripts/fetch-airports.sh && bash scripts/fetch-parks.sh"
+    "fetch:all": "bash scripts/fetch-did.sh && bash scripts/fetch-airports.sh && bash scripts/fetch-parks.sh",
+    "fetch:address": "node scripts/fetch-address-data.mjs"
   },
   "dependencies": {
     "@soraban/geo": "workspace:*"

@@ -232,3 +232,20 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/* 現在地ボタンの照準記号 (decorative, aria-hidden 必須)。地図上の精度の円と同じ「円＋中心点」 */
+.locate-mark {
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  border: 1.5px solid currentColor;
+  border-radius: 9999px;
+  position: relative;
+}
+.locate-mark::after {
+  content: "";
+  position: absolute;
+  inset: 30%;
+  border-radius: 9999px;
+  background: currentColor;
+}

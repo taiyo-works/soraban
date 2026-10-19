@@ -98,6 +98,34 @@
       "verifiedBy": "記録なし（Sprint 6 以前）",
       "coverage": "鳥取県・島根県の 12 市町村の代表施設（中心点）",
       "bundled": true
+    },
+    {
+      "id": "abr-address",
+      "name": "アドレス・ベース・レジストリ（町字・住居表示・地番）— 住所検索の同梱索引",
+      "provider": "デジタル庁（Soraban が加工：出典「アドレス・ベース・レジストリ（デジタル庁）を加工して作成」）",
+      "url": "https://www.digital.go.jp/policies/base_registry_address",
+      "license": "公共データ利用規約（第1.0版）（PDL1.0。CC BY 4.0 互換、出典と加工した旨の表示が必要）https://www.digital.go.jp/policies/base_registry_address_tos 。地番マスターは登記所備付地図データ利用規約にも同意したものとみなされる（同規約の本文は未確認）",
+      "baseYear": null,
+      "version": "未取得（索引は空。配布元 data.address-br.digital.go.jp が日本国外からの取得を拒否するため、GitHub ホストのランナーで取得できなかった）",
+      "acquiredAt": null,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 9）。DCAT フィード https://dataset.address-br.digital.go.jp/api/feed/dcat-us/1.1.json を GitHub Actions で取得し、配布ファイルの URL・最終更新日・ライセンス表記を確認",
+      "coverage": "鳥取県（31）・島根県（32）の町字・住居表示（地番は 10MB 以内に収まる場合のみ）。現時点は未同梱（packages/regulations/data/address/README.md）",
+      "bundled": false
+    },
+    {
+      "id": "gsi-address-search",
+      "name": "国土地理院 住所検索（地理院地図の住所検索）",
+      "provider": "国土地理院",
+      "url": "https://msearch.gsi.go.jp/address-search/AddressSearch",
+      "license": "公式の API 仕様・利用条件・回数制限は未確認（地理院地図が使っているエンドポイント）。出典として国土地理院を表示する",
+      "baseYear": null,
+      "version": "実行時に問い合わせ（応答は 1 時間キャッシュ、タイムアウト 3 秒）",
+      "acquiredAt": null,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 9）",
+      "coverage": "全国（住所検索の補助。同梱索引で結果がないか町字止まりのときだけ呼ぶ）",
+      "bundled": false
     }
   ]
 }

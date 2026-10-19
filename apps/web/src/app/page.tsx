@@ -6,6 +6,7 @@ import {
   SENSITIVE_FACILITY_BUFFER_M,
   SMALL_DRONE_LAW_FACILITIES,
 } from "@soraban/regulations";
+import { addressIndexAvailable } from "@soraban/regulations/address";
 import { RegulationChecker } from "@/components/regulation-checker";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -173,6 +174,9 @@ const sourceTone: Record<CoverageRow["source"], string> = {
   市町村: "border-rule text-ink-soft",
 };
 
+// 住所検索の同梱索引（アドレス・ベース・レジストリ）が空なら、その出典を示さない（使っていない出典を出さない）。
+const ADDRESS_INDEX_AVAILABLE = addressIndexAvailable();
+
 export default function Home() {
   return (
     <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-10 px-4 py-8 sm:gap-16 sm:px-6 sm:py-20">
@@ -318,7 +322,7 @@ export default function Home() {
             click map · paste coords · search address
           </p>
         </div>
-        <RegulationChecker />
+        <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
       </section>
 
       {/* ============================ ROADMAP ============================ */}
@@ -427,7 +431,7 @@ export default function Home() {
           <span className="tnum">base · 35°26′03″N · 133°22′50″E（鳥取県西伯郡日吉津村）</span>
         </div>
         <p className="text-[10px] leading-relaxed text-ink-mute/80">
-          出典: 国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（Soraban 作成）、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
+          出典: 国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（Soraban 作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>
     </div>

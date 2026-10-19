@@ -7,8 +7,9 @@ name: Fetch regulation data
 on:
   # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（既定値で実行し、
   # 生成データと FETCH_REPORT.md を同じ data-fetch ブランチにコミットする）。
+  # data-fetch/address-** は住所データ用（fetch-address-data.yml）なので除く。
   push:
-    branches: ['data-fetch/**']
+    branches: ['data-fetch/**', '!data-fetch/address-**']
   workflow_dispatch:
     inputs:
       output:
