@@ -114,11 +114,14 @@ type DemoPreset = {
 // と自治体カバレッジ拡大（鳥取2市 + 島根1市）を端的に提示できるよう並べる。
 // 先頭はユーザの本社拠点 (起点) を置き、現場運用で「拠点と出張先のコントラスト」を
 // 1 タップで切り替えられるようにする。
+// 地図の初期表示と最初の判定地点（本社：鳥取県西伯郡日吉津村日吉津45番地3）。
+const HEAD_OFFICE: LatLng = { lat: 35.434238, lng: 133.380508 };
+
 const DEMO_PRESETS: readonly DemoPreset[] = [
   {
     id: "taiyo-tsushin-hq",
     name: "タイヨー通信本社（拠点）",
-    loc: { lat: 35.434238, lng: 133.380508 },
+    loc: HEAD_OFFICE,
     hint: "拠点 / 国法は green。日吉津村は自治体カバレッジ外（一部判定不能）",
     group: "鳥取県",
   },
@@ -242,9 +245,9 @@ type RegulationCheckerProps = {
 };
 
 export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
-  const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
-  const [lng, setLng] = useState<string>(String(YONAGO_CITY_HALL.lng));
-  const [center, setCenter] = useState<LatLng>(YONAGO_CITY_HALL);
+  const [lat, setLat] = useState<string>(String(HEAD_OFFICE.lat));
+  const [lng, setLng] = useState<string>(String(HEAD_OFFICE.lng));
+  const [center, setCenter] = useState<LatLng>(HEAD_OFFICE);
   const [combined, setCombined] = useState<string>("");
   // 結合入力フィールドのフィードバック。null=未入力、true=反映成功、false=形式エラー
   const [combinedStatus, setCombinedStatus] = useState<{
@@ -703,8 +706,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     if (didAutoRunRef.current) return;
     didAutoRunRef.current = true;
     const runId = startNewRun();
-    runCheck(YONAGO_CITY_HALL, undefined, undefined, runId);
-    void runDiagnose(YONAGO_CITY_HALL, { userAirspaceFlags: [] }, runId);
+    runCheck(HEAD_OFFICE, undefined, undefined, runId);
+    void runDiagnose(HEAD_OFFICE, { userAirspaceFlags: [] }, runId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
