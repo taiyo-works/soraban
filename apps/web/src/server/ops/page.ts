@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getPool } from "@soraban/db";
 import { getCurrentIdentity } from "./auth/current";
-import { getOpsAvailability, type AuthProviderName } from "./availability";
+import { getOpsAvailability, opsNow, type AuthProviderName } from "./availability";
 import { getMe, resolveMember, type MeDto, type OpsContext } from "./service";
 import type { OpsDb } from "./store";
 
@@ -31,7 +31,7 @@ export const requireOpsMember = async (): Promise<OpsPageSession> => {
   if (!db) notFound();
   const r = await resolveMember(db, identity);
   if (r.kind !== "member") redirect("/ops/no-access");
-  const ctx: OpsContext = { db, member: r.member };
+  const ctx: OpsContext = { db, member: r.member, now: () => opsNow(process.env) };
   return { ctx, me: await getMe(ctx), provider };
 };
 

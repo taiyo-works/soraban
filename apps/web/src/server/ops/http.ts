@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getPool } from "@soraban/db";
 import type { Identity } from "./auth/identity";
 import { describeError } from "./auth/identity";
-import { getOpsAvailability, type OpsEnv } from "./availability";
+import { getOpsAvailability, opsNow, type OpsEnv } from "./availability";
 import { OpsError, resolveMember, type OpsContext } from "./service";
 import type { OpsDb } from "./store";
 
@@ -94,10 +94,14 @@ export const opsHandler =
       if (!db) return json(503, { error: "ops_unavailable", reason: "database_url_missing" });
       const r = await resolveMember(db, identity);
       if (r.kind !== "member") return json(403, { error: "no_access" });
-      return await fn({ ctx: { db, member: r.member }, req, params, body: () => readJson(req) });
+      return await fn({ ctx: { db, member: r.member, now: () => opsNow(d.env) }, req, params, body: () => readJson(req) });
     } catch (e) {
       if (e instanceof OpsError) {
-        return json(e.status, e.fieldErrors ? { error: e.code, fields: e.fieldErrors } : { error: e.code });
+        return json(e.status, {
+          error: e.code,
+          ...(e.fieldErrors ? { fields: e.fieldErrors } : {}),
+          ...(e.fieldCodes ? { codes: e.fieldCodes } : {}),
+        });
       }
       logOpsError(route, e);
       return json(500, { error: "internal_error" });

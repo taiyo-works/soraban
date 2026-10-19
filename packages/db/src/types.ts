@@ -92,7 +92,7 @@ export type MemberStatusDb = "invited" | "active" | "disabled";
 export type AuthProviderDb = "neon" | "test";
 export type AircraftStatusDb = "active" | "suspended" | "deregistered";
 export type CertClassDb = "first" | "second";
-export type RecordEntityTypeDb = "member" | "aircraft" | "pilot";
+export type RecordEntityTypeDb = "member" | "aircraft" | "pilot" | "daily_inspection" | "flight_record";
 export type RecordOpDb = "create" | "update" | "void";
 export type RecordActorKindDb = "member" | "system";
 
@@ -153,6 +153,81 @@ export type PilotRow = {
   readonly limitation_daytime: boolean;
   readonly limitation_vlos: boolean;
   readonly member_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+// ---- 運航管理（Sprint 11。0007・0008） ----
+
+export type InspectionTimingDb = "pre_flight" | "post_flight";
+
+export type DailyInspectionRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly aircraft_id: string;
+  readonly pilot_id: string;
+  readonly inspected_at: string;
+  /** date。pg はローカル時刻の 0 時の Date で返す。 */
+  readonly inspected_date: string;
+  readonly timing: InspectionTimingDb;
+  readonly place_name: string;
+  /** numeric(9,6)。pg は文字列で返す。 */
+  readonly latitude: string | null;
+  readonly longitude: string | null;
+  readonly accuracy_m: number | null;
+  readonly items: Record<string, { readonly result: "normal" | "abnormal"; readonly note: string | null }>;
+  readonly has_abnormal: boolean;
+  readonly special_notes: string | null;
+  readonly inspector_name: string;
+  readonly inspector_version: number;
+  readonly client_request_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type FlightDefectDb = {
+  readonly occurred_on: string;
+  readonly description: string;
+  readonly action_on: string | null;
+  readonly action: string | null;
+  readonly confirmer_name: string | null;
+};
+
+export type FlightRecordRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly aircraft_id: string;
+  readonly pilot_id: string;
+  readonly daily_inspection_id: string | null;
+  readonly flight_plan_id: string | null;
+  readonly snapshot_id: string | null;
+  readonly purpose: string;
+  readonly waypoints: string | null;
+  readonly specific_flight_types: readonly string[];
+  readonly takeoff_place: string;
+  /** numeric(9,6)。pg は文字列で返す。 */
+  readonly takeoff_lat: string | null;
+  readonly takeoff_lng: string | null;
+  readonly takeoff_accuracy_m: number | null;
+  readonly landing_place: string;
+  readonly landing_lat: string | null;
+  readonly landing_lng: string | null;
+  readonly landing_accuracy_m: number | null;
+  readonly takeoff_at: string;
+  readonly landing_at: string;
+  readonly flight_minutes: number;
+  readonly flight_date: string;
+  readonly safety_issue: boolean;
+  readonly safety_issue_detail: string | null;
+  readonly defects: readonly FlightDefectDb[];
+  readonly pilot_name: string;
+  readonly pilot_license_number: string | null;
+  readonly pilot_version: number;
+  readonly client_request_id: string | null;
   readonly current_version: number;
   readonly created_at: string;
   readonly updated_at: string;
@@ -307,6 +382,66 @@ export const RECORD_VERSION_COLUMNS = columns<RecordVersionRow>()([
   "content_hash",
 ]);
 
+export const DAILY_INSPECTION_COLUMNS = columns<DailyInspectionRow>()([
+  "id",
+  "org_id",
+  "aircraft_id",
+  "pilot_id",
+  "inspected_at",
+  "inspected_date",
+  "timing",
+  "place_name",
+  "latitude",
+  "longitude",
+  "accuracy_m",
+  "items",
+  "has_abnormal",
+  "special_notes",
+  "inspector_name",
+  "inspector_version",
+  "client_request_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const FLIGHT_RECORD_COLUMNS = columns<FlightRecordRow>()([
+  "id",
+  "org_id",
+  "aircraft_id",
+  "pilot_id",
+  "daily_inspection_id",
+  "flight_plan_id",
+  "snapshot_id",
+  "purpose",
+  "waypoints",
+  "specific_flight_types",
+  "takeoff_place",
+  "takeoff_lat",
+  "takeoff_lng",
+  "takeoff_accuracy_m",
+  "landing_place",
+  "landing_lat",
+  "landing_lng",
+  "landing_accuracy_m",
+  "takeoff_at",
+  "landing_at",
+  "flight_minutes",
+  "flight_date",
+  "safety_issue",
+  "safety_issue_detail",
+  "defects",
+  "pilot_name",
+  "pilot_license_number",
+  "pilot_version",
+  "client_request_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -317,7 +452,17 @@ export const TABLE_COLUMNS = {
   aircraft: AIRCRAFT_COLUMNS,
   pilots: PILOT_COLUMNS,
   record_versions: RECORD_VERSION_COLUMNS,
+  daily_inspections: DAILY_INSPECTION_COLUMNS,
+  flight_records: FLIGHT_RECORD_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
-export const OPS_TABLES = ["organizations", "members", "aircraft", "pilots", "record_versions"] as const;
+/** 運航管理の表（Sprint 10・11）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+export const OPS_TABLES = [
+  "organizations",
+  "members",
+  "aircraft",
+  "pilots",
+  "record_versions",
+  "daily_inspections",
+  "flight_records",
+] as const;

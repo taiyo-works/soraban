@@ -56,6 +56,20 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
         <span className="ml-1 font-mono text-xs text-ink-mute">（{formatMinutes(a.initialFlightMinutes)}）</span>
       </span>,
     ],
+    [
+      "現在の総飛行時間",
+      <span key="t" className="flex flex-col">
+        <span className="font-mono tnum" data-testid="aircraft-total">
+          {formatMinutes(a.totalFlightMinutes)}
+        </span>
+        <span className="text-xs text-ink-mute">
+          既存の総飛行時間 ＋ 取消していない飛行記録 {a.flightCount} 件の飛行時間の合計。
+          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 text-brand-700 underline underline-offset-2">
+            この機体の飛行記録
+          </a>
+        </span>
+      </span>,
+    ],
     ["状態", <Badge key="s" tone={AIRCRAFT_STATUS_TONE[a.status]}>{AIRCRAFT_STATUS_LABELS[a.status]}</Badge>],
   ];
   return (

@@ -69,4 +69,49 @@ describe("運航管理の API のエラーログ", () => {
       expect(text).not.toContain(v);
     }
   });
+
+  // Sprint 11 契約 20：飛行記録の要求本文の氏名・技能証明書番号・緯度経度・場所名もログに出ない。
+  it("飛行記録の作成で例外が起きても、本文の氏名・技能証明書番号・緯度経度・場所名はログと応答に出ない", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const body = {
+      pilotName: "鳥取 花子",
+      pilotLicenseNumber: "XY-24681357",
+      takeoffPlace: "日吉津村役場前広場",
+      takeoffLat: 35.443211,
+      takeoffLng: 133.381234,
+    };
+    const handler = opsHandler(
+      "POST /api/ops/flights",
+      async ({ body: read }) => {
+        const b = (await read()) as typeof body;
+        throw Object.assign(new Error(`overlap ${b.pilotName} ${b.takeoffPlace} ${b.takeoffLat},${b.takeoffLng}`), {
+          code: "XX000",
+          detail: `Failing row contains (${b.pilotName}, ${b.pilotLicenseNumber}, ${b.takeoffPlace}, ${b.takeoffLat}, ${b.takeoffLng})`,
+        });
+      },
+      { mutating: true },
+    );
+    const deps: OpsDeps = {
+      env: { OPS_ENABLED: "1", DATABASE_URL: "postgresql://x", AUTH_PROVIDER: "test", AUTH_TEST_SECRET: "s" },
+      getIdentity: async () => ({ provider: "test", authUserId: "boss", email: "boss@example.com", emailVerified: true, name: "ボス" }),
+      getDb: fakeDb,
+    };
+    const res = await handler(
+      new Request("http://127.0.0.1/api/ops/flights", {
+        method: "POST",
+        headers: { host: "127.0.0.1", origin: "http://127.0.0.1", "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      {},
+      deps,
+    );
+    expect(res.status).toBe(500);
+    const text = await res.text();
+    const logged = spy.mock.calls.flat().map(String).join("\n");
+    expect(logged).toContain("POST /api/ops/flights");
+    for (const v of [body.pilotName, "鳥取", body.pilotLicenseNumber, "24681357", body.takeoffPlace, "日吉津", "35.443211", "133.381234"]) {
+      expect(logged).not.toContain(v);
+      expect(text).not.toContain(v);
+    }
+  });
 });

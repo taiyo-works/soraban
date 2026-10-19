@@ -1,6 +1,6 @@
 // Sprint 10 契約 1：getOpsAvailability が設計 A の表のすべての行で所定の結果と理由コードを返す。
 import { describe, expect, it } from "vitest";
-import { getOpsAvailability } from "./availability";
+import { getOpsAvailability, opsNow } from "./availability";
 
 const SECRET32 = "x".repeat(32);
 const NEON = {
@@ -45,5 +45,25 @@ describe("getOpsAvailability", () => {
   it("test の環境変数がすべて揃う（Vercel の外：CI・ローカル） → enabled（test）", () => {
     expect(getOpsAvailability(TEST)).toEqual({ state: "enabled", provider: "test" });
     expect(getOpsAvailability({ ...TEST, VERCEL_ENV: " " })).toEqual({ state: "enabled", provider: "test" });
+  });
+});
+
+describe("opsNow（Sprint 11：テスト用の時計）", () => {
+  const FIXED = "2027-01-05T09:31:00+09:00";
+  it("test 方式で有効なときだけ OPS_TEST_NOW に固定する", () => {
+    expect(opsNow({ ...TEST, OPS_TEST_NOW: FIXED }).toISOString()).toBe("2027-01-05T00:31:00.000Z");
+  });
+  it("neon 方式・無効・Vercel 上・解釈できない値では実時刻", () => {
+    const before = Date.now();
+    for (const env of [
+      { ...NEON, OPS_TEST_NOW: FIXED },
+      { OPS_TEST_NOW: FIXED },
+      { ...TEST, VERCEL_ENV: "preview", OPS_TEST_NOW: FIXED },
+      { ...TEST, OPS_TEST_NOW: "あした" },
+    ]) {
+      const t = opsNow(env).getTime();
+      expect(t).toBeGreaterThanOrEqual(before);
+      expect(t).toBeLessThan(before + 60_000);
+    }
   });
 });

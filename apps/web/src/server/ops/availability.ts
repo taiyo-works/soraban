@@ -51,3 +51,20 @@ export const getOpsAvailability = (env: OpsEnv = process.env): OpsAvailability =
   }
   return bad("auth_provider_invalid");
 };
+
+/**
+ * 運航管理のサーバーの現在時刻（Sprint 11。離陸が未来でないかの判定に使う）。
+ * テスト用の本人確認（AUTH_PROVIDER=test、Vercel 以外）で有効なときに限り、OPS_TEST_NOW（ISO 8601、オフセット付き）で固定できる。
+ * E2E-DB でブラウザの時計（page.clock）を 2027-01-05 に固定して保存まで通すため。neon 方式・本番では常に実時刻。
+ */
+export const opsNow = (env: OpsEnv = process.env): Date => {
+  const fixed = nonEmpty(env["OPS_TEST_NOW"]);
+  if (fixed) {
+    const a = getOpsAvailability(env);
+    if (a.state === "enabled" && a.provider === "test") {
+      const t = Date.parse(fixed);
+      if (Number.isFinite(t)) return new Date(t);
+    }
+  }
+  return new Date();
+};

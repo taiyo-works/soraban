@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/ops/ops-client";
-import { ROLE_DESCRIPTIONS } from "@/components/ops/ui";
+import { buttonGhostClass, buttonPrimaryClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
+import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
 // 運航管理のトップ：ログイン中の利用者の表示名と役割、機体・操縦者・利用者（運航管理者のみ）への入口、ログアウト。
 export default async function OpsHome() {
   const { me, provider } = await requireOpsMember();
   const role = me.member.role;
+  const canEnter = recordCreateDenied(me) === null;
   const menu = [
-    { href: "/ops/aircraft", title: "機体", body: "登録記号・型式・認証・既存の総飛行時間" },
+    { href: "/ops/flights", title: "飛行記録", body: "飛行ごとの記録・飛行時間・総飛行時間" },
+    { href: "/ops/inspections", title: "日常点検", body: "飛行前後の 9 項目の点検" },
+    { href: "/ops/aircraft", title: "機体", body: "登録記号・型式・認証・総飛行時間" },
     { href: "/ops/pilots", title: "操縦者", body: "氏名・技能証明・限定事項" },
     ...(role === "manager" ? [{ href: "/ops/members", title: "利用者", body: "招待・役割の変更・利用の停止" }] : []),
   ];
@@ -27,8 +31,18 @@ export default async function OpsHome() {
           {ROLE_DESCRIPTIONS[role]}
         </p>
       </section>
+      {canEnter ? (
+        <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Link href="/ops/flights/new" className={`${buttonPrimaryClass} min-h-14 text-base`} data-testid="ops-enter-flight">
+            飛行記録を入力
+          </Link>
+          <Link href="/ops/inspections/new" className={`${buttonGhostClass} min-h-14 border-brand-700 text-base text-brand-700`} data-testid="ops-enter-inspection">
+            日常点検を入力
+          </Link>
+        </nav>
+      ) : null}
       <nav aria-label="運航管理のメニュー">
-        <ul className={`grid grid-cols-1 gap-px overflow-hidden rounded-sharp border border-rule bg-rule ${menu.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+        <ul className={`grid grid-cols-1 gap-px overflow-hidden rounded-sharp border border-rule bg-rule sm:grid-cols-3`}>
           {menu.map((m, i) => (
             <li key={m.href} className="flex">
               <Link
