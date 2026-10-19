@@ -8,7 +8,7 @@
 //     診断入力（座標・住所・飛行方法・機体重量 等）から、DIPS／DRS の入力欄に対応する
 //     値の表（PrefillField[]）と、独自飛行マニュアルの骨子（構造化テキスト）を生成する。
 //   - 値は実データを反映する（空ダミー禁止）。座標は度分秒でなく十進度の文字列。
-//   - DRS（機体登録）と DIPS2.0（許可承認）で入力先が違う項目は system で区別し、
+//   - DRS（機体登録）と DIPS 2.0（許可承認）で入力先が違う項目は system で区別し、
 //     UI／PDF が「どちらのシステム向けか」を行で示せるようにする（別導線方針の維持）。
 //   - マニュアル骨子テンプレは data/manual-templates/manual-templates.json（出典付き）で
 //     保持し、コード直書きを避ける。標準マニュアル 01/02 の本文は転載しない。
@@ -16,17 +16,18 @@
 import manualTemplatesData from "../data/manual-templates/manual-templates.json";
 import {
   SPECIFIC_FLIGHT_FLAG_LABEL,
+  type AirspaceDeterminationStatus,
   type SpecificFlightFlag,
 } from "./diagnosis";
 
-// ── プリフィルの入力先システム（DRS と DIPS2.0 を別導線として区別）──
-export type PrefillSystem = "DIPS2.0" | "DRS";
+// ── プリフィルの入力先システム（DRS と DIPS 2.0 を別導線として区別）──
+export type PrefillSystem = "DIPS 2.0" | "DRS";
 
 // PrefillField: DIPS／DRS のどの入力欄に、何を、どこ由来で入れるか（spec §6）。
 //   - dipsFieldLabel … DIPS／DRS のどの入力欄か（ラベル）
 //   - value          … コピペ用の値（実データ。空ダミー禁止）
 //   - source         … どこから来た値か（判定 / 入力 / 既定）
-//   - system         … 入力先システム（DRS か DIPS2.0 か）。別導線で案内するため必須。
+//   - system         … 入力先システム（DRS か DIPS 2.0 か）。別導線で案内するため必須。
 export type PrefillField = {
   readonly dipsFieldLabel: string;
   readonly value: string;
@@ -53,7 +54,13 @@ export type BuildPrefillInput = {
   readonly thirdPartyOverflight?: boolean;
   /** 目視外: 補助者の有無 */
   readonly bvlosWithObserver?: boolean;
+  /** DID 該当の三値（診断と同じ値）。未確認のときは「飛行の種類」を要確認にする（安全側）。 */
+  readonly didStatus?: AirspaceDeterminationStatus;
 };
+
+/** DID が未確認のときの「飛行の種類」の表記（カテゴリーの「要確認」と食い違わせない）。 */
+export const PREFILL_DID_UNVERIFIED_LABEL =
+  "要確認（DID（人口集中地区）の該当／非該当が未確認。地理院地図・DIPS 2.0 で確認してください）";
 
 // 十進度の座標を、入力欄に貼りやすい固定桁の文字列にする（過剰桁を避ける）。
 const formatCoord = (n: number): string => {
@@ -84,7 +91,7 @@ const isRegisteredDroneWeight = (g: number | undefined): boolean => {
  * 生成方針:
  *   - 値は実データを反映（空ダミー禁止）。該当しない項目は「未選択」等の意味のある
  *     既定値を入れ、行自体は出す（コピペ運用で「ここは空でよい」と分かるように）。
- *   - DRS（機体登録）行と DIPS2.0（許可承認）行を system で区別する。
+ *   - DRS（機体登録）行と DIPS 2.0（許可承認）行を system で区別する。
  */
 export const buildPrefillFields = (
   input: BuildPrefillInput,
@@ -114,19 +121,19 @@ export const buildPrefillFields = (
     system: "DRS",
   });
 
-  // ── DIPS2.0（飛行許可・承認）系の入力欄 ──
+  // ── DIPS 2.0（飛行許可・承認）系の入力欄 ──
   // 飛行範囲（地点）。十進度の緯度・経度を別行で出し、住所があれば併記行も出す。
   fields.push({
     dipsFieldLabel: "飛行範囲の緯度（十進度）",
     value: formatCoord(input.lat),
     source: "入力（判定地点）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
   fields.push({
     dipsFieldLabel: "飛行範囲の経度（十進度）",
     value: formatCoord(input.lng),
     source: "入力（判定地点）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
   fields.push({
     dipsFieldLabel: "飛行範囲（住所・地名）",
@@ -135,18 +142,26 @@ export const buildPrefillFields = (
         ? input.resolvedAddress
         : `緯度 ${formatCoord(input.lat)} / 経度 ${formatCoord(input.lng)} 付近（住所未解決）`,
     source: input.resolvedAddress ? "判定（住所解決）" : "入力（座標から補完）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
 
   // 飛行の種類（飛行方法・空域）。承認・許可の対象になる飛行を列挙する。
+  // DID が未確認（データ未整備等）で DID フラグも立っていないときは、「非該当」と断定せず
+  // 要確認を出す（診断のカテゴリー needs_verification と揃える。安全側）。
+  // 100g 未満は航空法上の無人航空機に当たらないため、従来どおり非該当とする。
+  const didUnverified =
+    registered && input.didStatus === "unverified" && !input.flags.includes("airspace_did");
   fields.push({
     dipsFieldLabel: "飛行の種類（特定飛行の区分）",
-    value:
-      methodLabels.length > 0
+    value: didUnverified
+      ? methodLabels.length > 0
+        ? `${methodLabels.join("、")}、${PREFILL_DID_UNVERIFIED_LABEL}`
+        : PREFILL_DID_UNVERIFIED_LABEL
+      : methodLabels.length > 0
         ? methodLabels.join("、")
         : "特定飛行に非該当（許可・承認の対象なし）",
     source: "入力／判定（飛行方法・空域フラグ）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
 
   // 目視外を選んでいる場合、補助者の有無は運航条件に効くので明示行を出す。
@@ -160,7 +175,7 @@ export const buildPrefillFields = (
             ? "補助者あり"
             : "補助者なし（より上位の運航要件）",
       source: "入力（運航条件）",
-      system: "DIPS2.0",
+      system: "DIPS 2.0",
     });
   }
 
@@ -174,7 +189,7 @@ export const buildPrefillFields = (
           ? "立入管理措置あり（第三者の上空で飛行させない）"
           : "未選択（カテゴリー切り分けのため選択してください）",
     source: "入力（立入管理措置）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
 
   // 飛行予定日（飛行期間の開始日に対応）。
@@ -185,7 +200,7 @@ export const buildPrefillFields = (
         ? input.plannedDate
         : "未入力（飛行予定日を入力してください）",
     source: input.plannedDate ? "入力（飛行予定日）" : "既定（未入力）",
-    system: "DIPS2.0",
+    system: "DIPS 2.0",
   });
 
   return fields;

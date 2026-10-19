@@ -32,7 +32,7 @@ import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 // 束ねる内容（spec §1.2 ⑥ / sprint-3 契約）:
 //   ① カテゴリー切り分け ② 必要手続きチェックリスト ③ 提出期限カレンダー
 //   ④ DIPS／DRS 入力プリフィル表 ⑤ 書類ドラフト（飛行マニュアル骨子）
-//   ⑥ DRS と DIPS2.0 の別導線 ⑦ 免責文 ⑧ 各手続きの出典 URL ⑨ evidenceId（メタ/ファイル名）
+//   ⑥ DRS と DIPS 2.0 の別導線 ⑦ 免責文 ⑧ 各手続きの出典 URL ⑨ evidenceId（メタ/ファイル名）
 
 const fontUrl = (file: string): string => {
   if (typeof window !== "undefined" && window.location?.origin) {
@@ -88,10 +88,10 @@ const CATEGORY_HEADLINE: Record<DiagnosisCategory, string> = {
   III_level4: "カテゴリー III（レベル4・第三者上空）",
 };
 
-// プリフィルの系統バッジ枠色（DRS=墨 / DIPS2.0=藍）。
+// プリフィルの系統バッジ枠色（DRS=墨 / DIPS 2.0=藍）。
 const SYSTEM_BORDER: Record<PrefillField["system"], string> = {
   DRS: COLOR.ink,
-  "DIPS2.0": COLOR.brand,
+  "DIPS 2.0": COLOR.brand,
 };
 
 const styles = StyleSheet.create({
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.4,
     borderBottomColor: COLOR.rule,
   },
-  colSys: { width: 42 },
+  colSys: { width: 50 }, // 「DIPS 2.0」が折り返さない幅
   colLabel: { width: 130, paddingRight: 4 },
   colValue: { flex: 1, paddingRight: 4 },
   colSource: { width: 96 },
@@ -553,7 +553,7 @@ export const ApplicationPdfDocument = ({
           </View>
         )}
 
-        {/* ⑥ DRS と DIPS2.0 の別導線 */}
+        {/* ⑥ DRS と DIPS 2.0 の別導線 */}
         <Text style={styles.sectionTitle}>2 系統の手続き窓口（別導線・混同しないこと）</Text>
         <View style={styles.portalRow}>
           <View style={styles.portalBox}>
@@ -594,7 +594,7 @@ export const ApplicationPdfDocument = ({
         {/* FOOTER（evidenceId を全ページに固定） */}
         <View style={styles.footer} fixed>
           <MonoText>© 2026 フューチャーテック株式会社</MonoText>
-          <Text>Evidence {diagnosis.evidenceId}</Text>
+          <MonoText>証跡 ID {diagnosis.evidenceId}</MonoText>
         </View>
       </Page>
     </Document>

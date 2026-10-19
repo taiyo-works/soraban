@@ -7,10 +7,10 @@ type Props = {
   readonly prefill: readonly PrefillField[];
 };
 
-// system → 表示トーン（DRS=墨抜き / DIPS2.0=藍）。procedure-card・パネル末尾の
+// system → 表示トーン（DRS=墨抜き / DIPS 2.0=藍）。procedure-card・パネル末尾の
 // 「2 系統の窓口」と同じ塗り分けで一貫させ、別導線であることを一目で示す。
 const systemTone: Readonly<Record<PrefillField["system"], string>> = {
-  "DIPS2.0": "border-brand-700 text-brand-700 bg-brand-50",
+  "DIPS 2.0": "border-brand-700 text-brand-700 bg-brand-50",
   DRS: "border-ink text-ink bg-paper-soft",
 };
 
@@ -85,11 +85,11 @@ export function PrefillTable({ prefill }: Props) {
             <span className="tnum">{String(prefill.length).padStart(2, "0")}</span> 行)
           </p>
           <p className="max-w-prose text-xs leading-relaxed text-ink-soft">
-            各行の値をコピーして、DIPS2.0（許可・承認）／DRS（機体登録）のフォームに貼り付けてください。
+            各行の値をコピーして、DIPS 2.0（許可・承認）／DRS（機体登録）のフォームに貼り付けてください。
             自動入力はしません（規約・法的リスク回避）。入力先システムは行ごとに区別しています。
           </p>
         </div>
-        {/* 系統の凡例（行頭の系統列と同じ塗り分け）。DRS と DIPS2.0 が別ポータルである
+        {/* 系統の凡例（行頭の系統列と同じ塗り分け）。DRS と DIPS 2.0 が別ポータルである
             ことを表頭で一目に示す。値・ラベルは変えず装飾の凡例のみ。 */}
         <div className="flex shrink-0 items-center gap-3 text-[11px] tracking-wide text-ink-mute">
           <span className="inline-flex items-center gap-1.5">
@@ -97,8 +97,8 @@ export function PrefillTable({ prefill }: Props) {
             DRS
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden className={`inline-block h-2.5 w-2.5 border ${systemTone["DIPS2.0"]}`} />
-            DIPS2.0
+            <span aria-hidden className={`inline-block h-2.5 w-2.5 border ${systemTone["DIPS 2.0"]}`} />
+            DIPS 2.0
           </span>
         </div>
       </div>

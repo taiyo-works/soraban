@@ -18,6 +18,7 @@ export type Regulation = {
   readonly title: string;
   readonly summary: string;
   readonly url?: string;
+  /** 統計の基準年（DID の国勢調査年など）。基準年のない概算データ（空港など）には付けない。 */
   readonly dataYear?: number;
   readonly clauseGraph: ClauseGraph;
   readonly confidence: RegulationConfidence;

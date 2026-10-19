@@ -74,7 +74,7 @@ const JA_STYLE: SheetStyle = { fontFamily: "Noto Sans JP" };
  *
  * 使い方:
  *   <MonoText style={styles.th}>系統</MonoText>
- *   <MonoText style={styles.procLinks}>手続き（DIPS2.0）: {url}</MonoText>
+ *   <MonoText style={styles.procLinks}>手続き（DIPS 2.0）: {url}</MonoText>
  *
  * children は文字列（または文字列に評価される ReactNode の連なり）を想定する。
  * 文字列以外（要素）はそのまま素通しする（既存のネスト Text 等を壊さないため）。

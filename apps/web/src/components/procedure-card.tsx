@@ -23,10 +23,10 @@ type Props = {
 };
 
 // システム系統バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分け、
-// DRS（登録）と DIPS2.0（許可承認）と 条例 を視覚的に別物として扱う。
+// DRS（登録）と DIPS 2.0（許可承認）と 条例 を視覚的に別物として扱う。
 // パネル末尾の「2 系統の窓口」案内と同じ塗り分けで一貫させる。
 const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
-  "DIPS2.0": "border-brand-700 text-brand-700 bg-brand-50",
+  "DIPS 2.0": "border-brand-700 text-brand-700 bg-brand-50",
   DRS: "border-ink text-ink bg-paper-soft",
   "条例（各管理者）": "border-rule text-ink-soft bg-paper-soft",
   // 航空法とは別系統の窓口。信号色（赤）は判定結果専用なので使わず、墨の抜きで区別する。

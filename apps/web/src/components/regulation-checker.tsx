@@ -233,7 +233,7 @@ const DEMO_PRESETS: readonly DemoPreset[] = [
     id: "izumo-airport",
     name: "出雲縁結び空港",
     loc: { lat: 35.4133, lng: 132.8897 },
-    hint: "空港の敷地（航空法第132条）",
+    hint: "空港の敷地（航空法第132条の85）",
     group: "島根県",
     airspaceFlags: ["airspace_airport"],
   },

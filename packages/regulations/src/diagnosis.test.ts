@@ -25,12 +25,12 @@ describe("制度データ（procedures.json）", () => {
     }
   });
 
-  it("DRS と DIPS2.0 が別 URL で案内される（混同防止）", () => {
+  it("DRS と DIPS 2.0 が別 URL で案内される（混同防止）", () => {
     const drs = ALL_PROCEDURES.find((p) => p.id === "drone-registration");
     const did = ALL_PROCEDURES.find((p) => p.id === "flight-permission-did");
     expect(drs?.system).toBe("DRS");
     expect(drs?.systemUrl).toContain("dips-reg");
-    expect(did?.system).toBe("DIPS2.0");
+    expect(did?.system).toBe("DIPS 2.0");
     expect(did?.systemUrl).toContain("ossportal");
     expect(drs?.systemUrl).not.toBe(did?.systemUrl);
   });

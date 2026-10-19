@@ -82,7 +82,7 @@ const DID_REG: Regulation = {
   id: "aviation-law-did",
   source: "国",
   authority: "国土交通省",
-  title: "航空法第132条 — 人口集中地区(DID)上空の飛行",
+  title: "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
   summary:
     "国勢調査に基づく人口集中地区（DID）の上空での無人航空機の飛行は、原則として国土交通大臣の許可・承認が必要です。",
   url: "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
@@ -135,11 +135,10 @@ const AIRPORT_REG: Regulation = {
   id: "aviation-law-airport",
   source: "国",
   authority: "国土交通省",
-  title: "航空法 — 空港等の周辺における飛行",
+  title: "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
   summary:
     "空港等の周辺（進入表面・転移表面・水平表面の上空）での無人航空機の飛行は、原則として国土交通大臣の許可が必要です。",
   url: "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
-  dataYear: 2020,
   clauseGraph: {
     main: {
       text:

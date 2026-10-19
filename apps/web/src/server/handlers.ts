@@ -212,6 +212,8 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
     accessControl,
     thirdPartyOverflight,
     bvlosWithObserver,
+    // 診断と同じ DID の三値（未確認なら「飛行の種類」を要確認にする）
+    didStatus: diagnosis.didStatus,
   });
 
   // 診断結果も含めた決定論的証跡 ID を採番（spec §6.3）。
