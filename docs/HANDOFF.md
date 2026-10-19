@@ -48,6 +48,14 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 
 Vercel の Deployments（最新が Production か）と、Domains の soraban.futuretec.jp の割り当てを確認する。DIPS の申請書に URL を書く前に必ず解消する。
 
+### 4.0 結論（2026-10-20、Vercel コネクタで確認）
+
+**Vercel の設定に問題は無い。** 本番ブランチは main（main のデプロイの target が production）、soraban.futuretec.jp はブランチ割り当て無し（gitBranch null）。独自ドメインの alias は最新の main（#20、dcfeddd、`dpl_76hRM9umhVaTwNZb6W7pBQHN9B32`）に付いている。候補 A・B・C はすべて外れ。
+
+soraban.futuretec.jp を Vercel に追加したのは 2026-10-19 17:54 JST で、Sprint 10a の main への反映（#15、19:16 JST）より前。その間に見た画面か、ブラウザに残った古い画面だった可能性が高い。スーパーリロード（またはシークレットウィンドウ）で、トップに「出願準備中」が無く、`X-Robots-Tag: noindex, nofollow` が返ることを目で確かめれば完了。
+
+Vercel コネクタの注意：チーム ID を付けずに呼ぶ（付けると空の結果が返る）。
+
 ### 4.1 調査の結果（2026-10-20、Claude Code）
 
 Vercel のダッシュボードは見られなかった（作業環境の Vercel コネクタは carta-lab-projects チームだけに権限があり、taiyo-works-projects は 403。soraban.futuretec.jp と vercel.app への接続も作業環境のネットワーク方針で拒否）。GitHub とリポジトリから分かったこと：
