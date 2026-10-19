@@ -47,18 +47,32 @@ if [[ ! -s "$WORK/manifest.tsv" ]]; then
 fi
 log "対象ファイル数: $(wc -l < "$WORK/manifest.tsv")"
 
+# フィードの先頭のデータセット（配布ファイルの記述の確認用）
+node -e 'const f=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const d=(f.dataset||[]).find(x=>JSON.stringify(x).includes("mt_city_pref31")); console.log("\n### フィードの記述の例（mt_city_pref31）\n\n```json\n"+JSON.stringify(d,null,1).slice(0,3000)+"\n```\n"); console.log("フィードの最上位のキー: "+Object.keys(f).join(", ")+"\n");' "$WORK/feed.json" >> "$SUMMARY" || true
+{ echo "### フィードの応答ヘッダー"; echo '```'; cat "$WORK/feed.headers" 2>/dev/null; echo '```'; } >> "$SUMMARY"
+
 # 取得と展開（ZIP の中に ZIP がある場合も展開する）
 fail=0
+first_fail_logged=0
 while IFS=$'\t' read -r category url modified file; do
   zdir="$WORK/zip/$category"; cdir="$WORK/csv/$category"
   mkdir -p "$zdir" "$cdir"
   ok=0
-  # 既定の User-Agent で拒否される場合に備え、abr-geocoder（Go の既定）と同じ User-Agent でも試す
-  for ua in "Go-http-client/1.1" "curl/$(curl --version | head -1 | cut -d' ' -f2)" "Mozilla/5.0 (compatible; soraban-fetch/1.0)"; do
-    code="$(curl -sSL --retry 3 -A "$ua" -o "$zdir/$file" -w '%{http_code}' "$url" 2>"$WORK/curl.err")"
+  # 既定の User-Agent で拒否される場合に備え、abr-geocoder（Go の既定）と同じ User-Agent、
+  # データセットサイトからのリンクとしての Referer 付きでも試す
+  for variant in "go" "referer" "browser"; do
+    case "$variant" in
+      go) opts=(-A "Go-http-client/1.1") ;;
+      referer) opts=(-A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" -e "https://dataset.address-br.digital.go.jp/") ;;
+      browser) opts=(-A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" -H "Accept: */*" -H "Accept-Language: ja,en;q=0.8" -H "Origin: https://dataset.address-br.digital.go.jp" -e "https://dataset.address-br.digital.go.jp/") ;;
+    esac
+    code="$(curl -sSL --retry 2 "${opts[@]}" -D "$WORK/dl.headers" -o "$zdir/$file" -w '%{http_code}' "$url" 2>"$WORK/curl.err")"
     if [[ "$code" == "200" ]]; then ok=1; break; fi
-    log "取得できない（HTTP ${code}、UA=${ua}）$url：$(head -c 300 "$zdir/$file" 2>/dev/null | tr '\n' ' ') $(head -c 300 "$WORK/curl.err" | tr '\n' ' ')"
+    if [[ $first_fail_logged -eq 0 ]]; then
+      { echo "  - 取得できない（HTTP ${code}、方法=${variant}）$url"; echo '```'; cat "$WORK/dl.headers" 2>/dev/null; sed -e 's/<[^>]*>/ /g' "$zdir/$file" 2>/dev/null | tr -s ' \n' ' ' | head -c 1500; echo; echo '```'; } >> "$SUMMARY"
+    fi
   done
+  [[ $ok -ne 1 ]] && first_fail_logged=1
   if [[ $ok -ne 1 ]]; then
     log "失敗: ダウンロード $url"; fail=1; continue
   fi
