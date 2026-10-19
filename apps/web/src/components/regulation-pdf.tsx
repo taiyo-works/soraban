@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
     minWidth: 110,
   },
   metaLabel: {
-    fontSize: 6,
-    letterSpacing: 1.2,
+    fontSize: 7,
+    letterSpacing: 0.6,
     textTransform: "uppercase",
     color: COLOR.inkMute,
     marginBottom: 1,
@@ -409,33 +409,30 @@ const uniqueAmendments = (result: RegulationCheckResult): readonly AmendmentRef[
 export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
   const overallColor = SIGNAL_COLOR[result.overall] ?? COLOR.signalMute;
   return (
-    <Document title={`Soraban — ${result.evidenceId}`}>
+    <Document title={`そらばん 飛行可否レポート — ${result.evidenceId}`}>
       <Page size="A4" style={styles.page}>
         {/* HEADER */}
         <View>
-          <Text style={styles.eyebrow}>
-            Soraban — Aerial Compliance Atlas Report
-          </Text>
           <Text style={styles.h1}>そらばん 飛行可否レポート</Text>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Evidence ID</Text>
+            <MonoText style={styles.metaLabel}>証跡 ID</MonoText>
             <Text style={styles.metaValue}>{result.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Engine</Text>
+            <MonoText style={styles.metaLabel}>判定の版</MonoText>
             <Text style={styles.metaValue}>{result.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Confidence</Text>
+            <MonoText style={styles.metaLabel}>確からしさ</MonoText>
             <MonoText style={styles.metaValue}>
               {CONFIDENCE_LABEL[result.overallConfidence]}
             </MonoText>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Checked at</Text>
+            <MonoText style={styles.metaLabel}>判定日時</MonoText>
             <MonoText style={styles.metaValue}>
               {new Date(result.checkedAt).toLocaleString("ja-JP")}
             </MonoText>
@@ -472,14 +469,14 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         </View>
 
-        {/* CONFIDENCE WARNING — 特許①従属項8 の実施例。閾値未満のときだけ出る */}
+        {/* CONFIDENCE WARNING — 確信度が閾値未満のときだけ警告を出す */}
         {shouldWarnConfidence(result.overallConfidence) ? (
           <Text style={styles.warningBox}>
             <Text style={{ fontWeight: 700, color: COLOR.signalAmber }}>
-              確信度 {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
+              確からしさ {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨
             </Text>
             {"  "}
-            本判定はジオメトリ精度または条文抽出精度が低いレコードを含みます。引受・許可申請の前に、該当条文の原本と現地状況をご確認ください。
+            この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。引受・許可申請の前に、該当条文の原本と現地状況をご確認ください。
           </Text>
         ) : null}
 
@@ -603,7 +600,7 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
 
         {/* FOOTER */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 Soraban · 奥田憲章</MonoText>
+          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
           <MonoText>
             出典: 国交省 国土数値情報 / 国土地理院 / 警察庁・防衛省 / 各自治体例規集
           </MonoText>

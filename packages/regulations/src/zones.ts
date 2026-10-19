@@ -56,7 +56,7 @@ export const YONAGO_PARKS: readonly Park[] = toParks(yonagoParksJson);
 
 // 文化財・史跡（簡易ポリゴン）。
 // 国指定史跡は文化財保護法第125条により現状変更には文化庁長官の許可が必要。
-// Phase 1 で文化庁国指定文化財データベースから正規ポリゴンに置換する。
+// 後続で文化庁国指定文化財データベースの正規ポリゴンに置き換える。
 export type HeritageSite = {
   readonly id: string;
   readonly name: string;
@@ -481,8 +481,8 @@ export const YURIHAMA_HERITAGE_SITES: readonly HeritageSite[] = [
 // =====================================================================
 export const YAZU_PARKS: readonly Park[] = toParks(yazuParksJson);
 
-// Phase 0/1 簡易ポイント。GSI 逆ジオコーダで 31329 領域内であることを確認済み。
-// Phase 1 後半で国交省 P-Hospital 等の正規データに置換予定。
+// 現在は簡易ポイント。GSI 逆ジオコーダで 31329 領域内であることを確認済み。
+// 後続で国交省 P-Hospital 等の正規データに置き換える。
 export const YAZU_SENSITIVE_FACILITIES: readonly SensitiveFacility[] = [
   {
     id: "yazu-town-hall",

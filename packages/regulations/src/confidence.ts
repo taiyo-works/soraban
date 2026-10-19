@@ -1,4 +1,4 @@
-// 各規制レコードに付随する確信度メタデータ（特許①コア）。
+// 各規制レコードに付随する確信度メタデータ。
 //
 // LLM抽出やバッファ近似など、不確実性が混入する経路を通ったデータを
 // 二値で扱わず、判定出力と一緒に確信度を伝播させる。
@@ -39,7 +39,7 @@ export const summarizeConfidence = (c: RegulationConfidence): ConfidenceLevel =>
     ? c.geometric
     : c.extraction;
 
-// 特許①従属項8 の「所定の閾値」を実装上は medium に固定する。
+// 確信度の警告の閾値は medium に固定する。
 // summarizeConfidence の結果が medium 以下（= medium or low）のとき、
 // 判定結果に「現地での再確認を促す警告」を併せて出力する根拠とする。
 export const LOW_CONFIDENCE_THRESHOLD: ConfidenceLevel = "medium";

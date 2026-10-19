@@ -445,7 +445,7 @@ describe("COVERAGE_SUMMARY", () => {
   });
 });
 
-// FlightContext: 例外節の自動適用（特許①の機械可読 ClauseGraph がここで効く）
+// FlightContext: 例外節の自動適用（機械可読の ClauseGraph で例外節を解決する）
 describe("FlightContext exemption application", () => {
   // 米子市役所は DID 内 + 県条例 yellow + park green の典型ケース。
   // dummy DID polygon を使って evaluateDid のみで例外マッチを検証する。
@@ -623,8 +623,8 @@ describe("demo preset regressions", () => {
   }
 });
 
-// 特許①従属項8 の実施例: overallConfidence が閾値以下なら警告を出すフラグを返す。
-describe("shouldWarnConfidence (特許①従属項8)", () => {
+// 確信度が閾値以下なら警告を出すフラグを返す。
+describe("shouldWarnConfidence (確信度が閾値未満のときだけ警告する)", () => {
   it("threshold is fixed at medium", () => {
     expect(LOW_CONFIDENCE_THRESHOLD).toBe("medium");
   });
@@ -639,8 +639,8 @@ describe("shouldWarnConfidence (特許①従属項8)", () => {
   });
 });
 
-// 特許①従属項10 の実施例: 適用例外節を自然言語+機械可読併出力する整形ヘルパ。
-describe("formatMachineCondition (特許①従属項10)", () => {
+// 適用された例外節を自然言語と機械可読条件で併記するための整形ヘルパ。
+describe("formatMachineCondition (例外節の機械可読条件の一行表記)", () => {
   it("weight_below_g shows numeric inequality with unit", () => {
     expect(formatMachineCondition({ type: "weight_below_g", value: 100 })).toBe(
       "weight_below_g < 100g",

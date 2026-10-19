@@ -1,4 +1,4 @@
-// 規制条文の有向グラフ表現（特許①コア）。
+// 規制条文の有向グラフ表現。
 //
 // 主節（main）に対して例外節（exceptions）と条件節（conditions）を
 // 機械可読な形で保持することで、自治体例規に頻出する「ただし書き」と
@@ -58,8 +58,8 @@ export const CLAUSE_EFFECT_LABEL: Readonly<Record<ClauseEffect, string>> = {
   conditional: "条件付き",
 };
 
-// 特許①従属項10「適用された例外節について、自然言語テキストと機械可読条件とを併せて含む」
-// の根拠として、UI / PDF に機械可読条件を一行で併記するためのフォーマッタ。
+// 適用された例外節を自然言語と機械可読条件で併記するため、
+// UI / PDF に機械可読条件を一行で表すフォーマッタ。
 // 例:
 //   { type: "weight_below_g", value: 100 }  → "weight_below_g < 100g"
 //   { type: "permit_holder",  value: "mlit" } → "permit_holder == mlit"
@@ -109,7 +109,7 @@ export type FlightContext = {
   readonly purpose?: string;
   /**
    * 機体クラス（一等・二等資格対応）。drone_class 例外の value と照合する。
-   * Phase 1 では未使用 (将来の拡張枠)
+   * 現在は未使用（後続で使う拡張枠）
    */
   readonly droneClass?: string;
 };

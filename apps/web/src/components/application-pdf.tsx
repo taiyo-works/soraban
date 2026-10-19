@@ -127,8 +127,8 @@ const styles = StyleSheet.create({
   },
   metaCol: { flexDirection: "column", minWidth: 110 },
   metaLabel: {
-    fontSize: 6,
-    letterSpacing: 1.2,
+    fontSize: 7,
+    letterSpacing: 0.6,
     textTransform: "uppercase",
     color: COLOR.inkMute,
     marginBottom: 1,
@@ -345,20 +345,19 @@ export const ApplicationPdfDocument = ({
   const deadlineItems = diagnosis.procedures.filter((p) => deadlineMap.has(p.id));
 
   return (
-    <Document title={`Soraban 申請支援サマリ — ${diagnosis.evidenceId}`}>
+    <Document title={`そらばん 申請支援サマリ — ${diagnosis.evidenceId}`}>
       <Page size="A4" style={styles.page} wrap>
         {/* HEADER */}
         <View>
-          <Text style={styles.eyebrow}>Soraban — DIPS Application Support Summary</Text>
           <Text style={styles.h1}>そらばん 申請支援サマリ（束ねレポート）</Text>
         </View>
         <View style={styles.metaRow}>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Evidence ID</Text>
+            <MonoText style={styles.metaLabel}>証跡 ID</MonoText>
             <Text style={styles.metaValue}>{diagnosis.evidenceId}</Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Engine</Text>
+            <MonoText style={styles.metaLabel}>判定の版</MonoText>
             <Text style={styles.metaValue}>{diagnosis.engineVersion}</Text>
           </View>
           <View style={styles.metaCol}>
@@ -368,7 +367,7 @@ export const ApplicationPdfDocument = ({
             </Text>
           </View>
           <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Checked at</Text>
+            <MonoText style={styles.metaLabel}>判定日時</MonoText>
             <MonoText style={styles.metaValue}>
               {new Date(diagnosis.checkedAt).toLocaleString("ja-JP")}
             </MonoText>
@@ -594,7 +593,7 @@ export const ApplicationPdfDocument = ({
 
         {/* FOOTER（evidenceId を全ページに固定） */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 Soraban · 申請支援サマリ</MonoText>
+          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
           <Text>Evidence {diagnosis.evidenceId}</Text>
         </View>
       </Page>

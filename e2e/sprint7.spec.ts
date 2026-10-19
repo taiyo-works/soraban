@@ -104,20 +104,20 @@ test.describe("A. 小型無人機等飛行禁止法（本番相当サーバー�
       "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
     );
 
-    await selectPreset(page, "タイヨー通信本社");
+    await selectPreset(page, "本社（日吉津村）");
     await expect(card(page, "small-drone-law")).toHaveAttribute("data-status", "green");
     await expect(page.locator("article", { hasText: title })).toHaveCount(0);
   });
 });
 
 test.describe("B. DID データ（本番相当サーバー・DID_DATA_DIR なし）", () => {
-  test("米子市役所は DID 該当（red）で未確認にならない／タイヨー通信本社は非該当（green）", async ({ page }) => {
+  test("米子市役所は DID 該当（red）で未確認にならない／本社（日吉津村）は非該当（green）", async ({ page }) => {
     await page.goto("/");
     // 同梱の DID（国土数値情報 A16 令和2年）が読めること自体も確かめる（未同梱なら失敗させる）。
     expect(await didBundled(page)).toBe(true);
     await selectPreset(page, "米子市役所");
     await expect(card(page, "aviation-law-did")).toHaveAttribute("data-status", "red");
-    await selectPreset(page, "タイヨー通信本社");
+    await selectPreset(page, "本社（日吉津村）");
     await expect(card(page, "aviation-law-did")).toHaveAttribute("data-status", "green");
   });
 });
