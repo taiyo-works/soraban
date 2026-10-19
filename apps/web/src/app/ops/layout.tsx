@@ -13,7 +13,7 @@ export default function OpsLayout({ children }: { readonly children: React.React
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-6 sm:gap-10 sm:px-6 sm:py-10">
       <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-rule pb-3">
-        <Link href="/ops" className="flex flex-col gap-0.5 text-ink">
+        <Link href="/ops" className="flex min-h-11 flex-col justify-center gap-0.5 text-ink">
           <span className="eyebrow !text-[9px]">Soraban — Flight operations</span>
           <span className="font-display text-xl font-light leading-none">そらばん 運航管理</span>
         </Link>
