@@ -160,7 +160,7 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
     id: "kaike-onsen",
     name: "皆生温泉",
     loc: { lat: 35.4538, lng: 133.3333 },
-    hint: "米子市の公園条例 + 鳥取県条例（温泉街）",
+    hint: "米子市の公園条例＋鳥取県条例（温泉街）",
     group: "鳥取県",
   },
   {
@@ -175,7 +175,7 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
     name: "境港駅",
     // JR境港駅 (境港市大正町209-1): 35°32′41″N 133°13′37″E
     loc: { lat: 35.5447, lng: 133.2269 },
-    hint: "境港市の条例 + 鳥取県条例（駅）",
+    hint: "境港市の条例＋鳥取県条例（駅）",
     group: "鳥取県",
   },
   {
@@ -204,7 +204,7 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
     id: "uchibuki-park",
     name: "打吹公園(倉吉)",
     loc: { lat: 35.4250, lng: 133.8235 },
-    hint: "倉吉市の公園条例 + 鳥取県条例（白壁土蔵群の周辺）",
+    hint: "倉吉市の公園条例＋鳥取県条例（白壁土蔵群の周辺）",
     group: "鳥取県",
   },
   {
@@ -234,7 +234,7 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
     name: "出雲市役所",
     // 出雲市今市町70: 35°22′06″N 132°45′24″E
     loc: { lat: 35.3683, lng: 132.7567 },
-    hint: "人口集中地区 + 島根県条例（庁舎）",
+    hint: "人口集中地区＋島根県条例（庁舎）",
     group: "島根県",
     airspaceFlags: ["airspace_did"],
   },
@@ -1373,7 +1373,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             <span aria-hidden className="bearing-mark" />
             04 — 地点の例
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
-              （県別 ／ 横スクロール）
+              （県別<span className="sm:hidden"> ／ 横スクロール</span>）
             </span>
           </p>
           {/* モバイル: 横スクロール scroll-snap */}
@@ -1384,7 +1384,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 type="button"
                 onClick={() => selectPreset(preset)}
                 title={preset.hint}
-                className="flex min-w-[14rem] shrink-0 snap-start flex-col items-start gap-1 border border-rule bg-paper px-4 py-3 text-left transition-colors active:bg-paper-soft"
+                className="flex w-[16.5rem] max-w-[78vw] shrink-0 snap-start flex-col items-start gap-1.5 border border-rule bg-paper px-4 py-3 text-left transition-colors active:bg-paper-soft"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -1396,21 +1396,22 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     {preset.name}
                   </span>
                 </div>
-                <span className="text-[11px] leading-tight text-ink-mute">
+                <span className="text-[11px] leading-snug text-ink-mute">
                   {preset.hint}
                 </span>
               </button>
             ))}
           </div>
           {/* sm 以上: 既存のグリッド */}
-          <div className="hidden grid-cols-2 gap-px overflow-hidden bg-rule sm:grid lg:grid-cols-3">
+          {/* 罫線は各ボタンの右・下と外枠の左・上で引く（最後の行が欠けても空きの升が灰色で埋まらないように）。 */}
+          <div className="hidden grid-cols-2 border-l border-t border-rule sm:grid lg:grid-cols-3">
             {EXAMPLE_LOCATIONS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 onClick={() => selectPreset(preset)}
                 title={preset.hint}
-                className="flex flex-col items-start gap-1 bg-paper px-4 py-3 text-left transition-colors hover:bg-paper-soft"
+                className="flex flex-col items-start gap-1.5 border-b border-r border-rule bg-paper px-4 py-3 text-left transition-colors hover:bg-paper-soft"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -1422,7 +1423,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     {preset.name}
                   </span>
                 </div>
-                <span className="text-[11px] leading-tight text-ink-mute">
+                <span className="text-[11px] leading-snug text-ink-mute">
                   {preset.hint}
                 </span>
               </button>

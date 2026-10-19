@@ -13,13 +13,14 @@ import {
   formatDidDetermination,
   getCategoryDefinition,
   PROCEDURES_VERIFIED_AT,
-  REQUIRED_PROCEDURE_KIND_LABEL,
   type DiagnosisCategory,
   type FlightManualDraft,
   type PrefillField,
   type RequiredProcedure,
 } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
+import { splitInlineSource } from "@/lib/inline-source";
+import { isNoFlyConfirmation, procedureKindDisplayLabel } from "@/lib/procedure-display";
 import { MonoText } from "./pdf-mono-text";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
@@ -88,13 +89,6 @@ const CATEGORY_HEADLINE: Record<DiagnosisCategory, string> = {
   II_B_eligible: "カテゴリー II（IIB 相当・申請を不要化できる可能性）",
   III_level4: "カテゴリー III（レベル4・第三者上空）",
   emergency_no_fly: "飛行できません（緊急用務空域・原則飛行禁止）",
-};
-
-// 注記の文中の出典 URL を取り出す（PDF では本文と分け、URL の文字列を等幅で出す）。
-const NOTE_URL_PATTERN = /（出典: (https?:\/\/[^\s）]+) ）/;
-const splitNoteSource = (note: string): { readonly text: string; readonly url?: string } => {
-  const m = NOTE_URL_PATTERN.exec(note);
-  return m ? { text: note.replace(NOTE_URL_PATTERN, ""), url: m[1] } : { text: note };
 };
 
 // プリフィルの系統バッジ枠色（DRS=墨 / DIPS 2.0=藍）。
@@ -349,8 +343,7 @@ export const ApplicationPdfDocument = ({
   const accent = CATEGORY_ACCENT[diagnosis.category];
   const def = getCategoryDefinition(diagnosis.category);
   const deadlineMap = new Map(diagnosis.deadlines.map((d) => [d.procedureId, d]));
-  const kindLabel = (p: RequiredProcedure): string =>
-    REQUIRED_PROCEDURE_KIND_LABEL[p.kind];
+  const kindLabel = (p: RequiredProcedure): string => procedureKindDisplayLabel(p);
   const deadlineItems = diagnosis.procedures.filter((p) => deadlineMap.has(p.id));
 
   return (
@@ -402,15 +395,18 @@ export const ApplicationPdfDocument = ({
             DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
           </Text>
           {(diagnosis.verificationNotes ?? []).map((n) => {
-            const note = splitNoteSource(n);
+            // 注記の文中の出典 URL は本文から切り分け、注記の下に字下げした「出典:」行として出す。
+            const note = splitInlineSource(n);
             return (
               <View key={n}>
                 <Text style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
                   ※ 要確認: {note.text}
                 </Text>
-                {note.url ? (
-                  <MonoText style={styles.categorySource}>出典: {note.url}</MonoText>
-                ) : null}
+                {note.urls.map((url) => (
+                  <MonoText key={url} style={{ ...styles.categorySource, marginTop: 0.5, paddingLeft: 8 }}>
+                    出典: {url}
+                  </MonoText>
+                ))}
               </View>
             );
           })}
@@ -449,8 +445,16 @@ export const ApplicationPdfDocument = ({
                   {p.system}
                 </MonoText>
                 <Text style={styles.procKind}>{kindLabel(p)}</Text>
-                <Text style={styles.waivableBadge}>
-                  {p.kind === "facility_consent_notice"
+                <Text
+                  style={
+                    isNoFlyConfirmation(p)
+                      ? [styles.waivableBadge, { color: COLOR.signalRed, borderColor: COLOR.signalRed }]
+                      : styles.waivableBadge
+                  }
+                >
+                  {isNoFlyConfirmation(p)
+                    ? "指定中は飛行不可"
+                    : p.kind === "facility_consent_notice"
                     ? "航空法とは別系統（飛行禁止法）"
                     : p.waivableByIIB
                       ? "IIB 相当で不要化可"
@@ -461,7 +465,9 @@ export const ApplicationPdfDocument = ({
               {p.note ? <Text style={styles.procMeta}>{keepSpaces(p.note)}</Text> : null}
               <Text style={styles.procMeta}>法的根拠: {keepSpaces(p.legalBasis)}</Text>
               <View style={styles.procLinks}>
-                <MonoText>手続き（{p.system}）: {p.systemUrl}</MonoText>
+                <MonoText>
+                  {isNoFlyConfirmation(p) ? p.system : `手続き（${p.system}）`}: {p.systemUrl}
+                </MonoText>
                 <MonoText>出典: {p.sourceUrl}</MonoText>
                 {p.verifiedAt ? (
                   <MonoText>検証日: {p.verifiedAt.slice(0, 10)}</MonoText>
@@ -557,11 +563,20 @@ export const ApplicationPdfDocument = ({
             {manualDraft.methodSections.map((m) => (
               <View key={m.flag} wrap={false}>
                 <Text style={styles.manualSectionTitle}>{m.title}</Text>
-                {m.points.map((p, i) => (
-                  <Text key={i} style={styles.manualPoint}>
-                    ・{p}
-                  </Text>
-                ))}
+                {m.points.map((p, i) => {
+                  // 観点の文中の URL は本文から切り分け、観点の下に「出典:」行として出す。
+                  const point = splitInlineSource(p);
+                  return (
+                    <View key={i}>
+                      <Text style={styles.manualPoint}>・{point.text}</Text>
+                      {point.urls.map((url) => (
+                        <MonoText key={url} style={{ ...styles.manualSource, marginLeft: 14, marginTop: 0.5 }}>
+                          出典: {url}
+                        </MonoText>
+                      ))}
+                    </View>
+                  );
+                })}
                 <MonoText style={styles.manualSource}>
                   根拠: {m.legalBasis} ／ 出典: {m.sourceUrl}
                 </MonoText>

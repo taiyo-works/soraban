@@ -15,7 +15,7 @@ import { todayJst } from "@/server/ops/license";
 import { listPilots } from "@/server/ops/service";
 import { LICENSE_CLASS_LABELS, requireOpsMember } from "@/server/ops/page";
 
-const GRID = "sm:grid-cols-[minmax(0,1fr)_minmax(0,7rem)_minmax(0,12rem)_minmax(0,6rem)]";
+const GRID = "sm:grid-cols-[minmax(0,1fr)_minmax(0,10.5rem)_minmax(0,12rem)_minmax(0,6rem)]";
 
 // 操縦者の一覧。技能証明書番号は常に末尾 4 桁以外を伏せる（伏せた値は API の応答の時点で伏せてある）。
 export default async function PilotListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
@@ -62,10 +62,12 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
                     {p.fullName}
                     {p.isSelf ? <span className="ml-2 text-xs text-brand-700">（あなた）</span> : null}
                   </span>
-                  <span className="text-ink-soft">
-                    <CellLabel>技能証明</CellLabel>
-                    {p.hasLicense && p.licenseClass ? LICENSE_CLASS_LABELS[p.licenseClass] : "なし"}
-                    <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={today} voided={p.voided} />
+                  <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 text-ink-soft">
+                    <span>
+                      <CellLabel>技能証明</CellLabel>
+                      {p.hasLicense && p.licenseClass ? LICENSE_CLASS_LABELS[p.licenseClass] : "なし"}
+                    </span>
+                    <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={today} voided={p.voided} compact />
                   </span>
                   <span className="flex min-w-0 items-baseline text-ink-soft">
                     <CellLabel>番号</CellLabel>

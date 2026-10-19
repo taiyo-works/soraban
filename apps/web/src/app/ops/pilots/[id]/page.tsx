@@ -47,16 +47,16 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
     [
       "有効期限",
       p.licenseExpiresOn ? (
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex flex-col items-start gap-1.5">
           <span className="tnum">{p.licenseExpiresOn}</span>
           <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={todayJst()} voided={p.voided} />
           <a
             href={LICENSE_RENEWAL_SOURCE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-brand-700 underline underline-offset-2"
+            className="text-xs text-brand-700 underline underline-offset-2 hover:text-ink"
           >
-            更新の手続き（国土交通省）
+            更新の手続き（国土交通省）↗
           </a>
         </span>
       ) : (

@@ -11,6 +11,7 @@ import {
   type ManualChoice,
 } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
+import { shortUrl, splitInlineSource } from "@/lib/inline-source";
 import { ProcedureCard } from "./procedure-card";
 import { DeadlineCalendar } from "./deadline-calendar";
 import { PrefillTable } from "./prefill-table";
@@ -35,6 +36,8 @@ type Props = {
 //   I            … 特定飛行に非該当 → 緑（clear）。最も弱い。
 //   IIA / IIB    … 申請が必要 → ブランド藍。装飾色ではなく「要対応」の系統色。
 //   III(level4)  … 第三者上空 → 赤。パレット中で最も強い severity。最も目立たせる。
+//   緊急用務空域 … 原則飛行禁止 → 赤。III と同じ赤でも、符号（円に横棒＝進入禁止の形）・
+//                  ラベル（原則飛行禁止）・太い左罫で III（警告の三角・最重要）と区別する。
 //
 // glyph: bearing-mark と同じ製図記号の語彙。CSS の border だけで描き、新規
 // トークンや画像・絵文字は増やさない。
@@ -47,8 +50,8 @@ type CategorySeverity = {
   readonly surface: string;
   /** 三重符号化の「ラベル」要素。色・符号と並ぶ三つ目の手がかり。 */
   readonly severity: string;
-  /** glyph の形状（製図記号）。triangle=警告 / square=要対応 / diamond=clear */
-  readonly mark: "diamond" | "square" | "triangle";
+  /** glyph の形状（製図記号）。prohibit=飛行不可 / triangle=警告 / square=要対応 / diamond=clear */
+  readonly mark: "diamond" | "square" | "triangle" | "prohibit";
   /** III を最重要として面取りを強める */
   readonly emphatic: boolean;
 };
@@ -98,8 +101,8 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
     rule: "border-signal-red",
     accent: "text-signal-red",
     surface: "bg-signal-red-soft",
-    severity: "飛行不可",
-    mark: "triangle",
+    severity: "原則飛行禁止",
+    mark: "prohibit",
     emphatic: true,
   },
 };
@@ -113,33 +116,43 @@ const categoryHeadline: Readonly<Record<DiagnosisCategory, string>> = {
   emergency_no_fly: "飛行できません（緊急用務空域・原則飛行禁止）",
 };
 
-// 注記の文中の URL（出典）をリンクにする。注記は文字列のまま持ち、PDF では URL の文字列として出す。
-const URL_PATTERN = /(https?:\/\/[^\s）)]+)/g;
-function NoteText({ text }: { text: string }) {
-  const parts = text.split(URL_PATTERN);
+// 注記の文中の出典 URL は本文から切り分け、本文の下に短い表記の控えめなリンクとして添える
+// （注記の文字列はそのまま持ち、PDF では「出典:」行の URL 文字列として出す）。
+function NoteWithSource({ text }: { text: string }) {
+  const { text: body, urls } = splitInlineSource(text);
   return (
     <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
+      <span>{body}</span>
+      {urls.map((url) => (
+        <span key={url} className="mt-0.5 block text-[11px] font-normal text-ink-mute">
+          出典{" "}
           <a
-            key={i}
-            href={part}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all underline underline-offset-2"
+            className="break-all font-mono text-[10.5px] underline decoration-rule underline-offset-2 hover:text-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
           >
-            {part}
+            {shortUrl(url)}
           </a>
-        ) : (
-          <span key={i}>{part}</span>
-        ),
-      )}
+        </span>
+      ))}
     </>
   );
 }
 
 // severity glyph: CSS の border だけで描く製図記号。aria-hidden 前提（装飾）。
 function SeverityMark({ shape, className }: { shape: CategorySeverity["mark"]; className: string }) {
+  if (shape === "prohibit") {
+    // 飛行不可：円に横棒（進入禁止の形）。currentColor の罫線で描く。
+    return (
+      <span
+        aria-hidden
+        className={`relative inline-block h-[11px] w-[11px] shrink-0 rounded-full border-[1.5px] border-current ${className}`}
+      >
+        <span className="absolute left-[1.5px] right-[1.5px] top-1/2 h-[1.5px] -translate-y-1/2 bg-current" />
+      </span>
+    );
+  }
   if (shape === "triangle") {
     // 警告の三角。currentColor で塗る。
     return (
@@ -255,7 +268,7 @@ export function DiagnosisPanel({
         const def = getCategoryDefinition(diagnosis.category);
         return (
           <div
-            className={`border-l-2 ${sev.rule} ${sev.surface} px-4 py-3.5 ${sev.emphatic ? "border-y border-r" : ""}`}
+            className={`${diagnosis.category === "emergency_no_fly" ? "border-l-4" : "border-l-2"} ${sev.rule} ${sev.surface} px-4 py-3.5 ${sev.emphatic ? "border-y border-r" : ""}`}
           >
             <div className={`flex items-center gap-2 ${sev.accent}`}>
               <SeverityMark shape={sev.mark} className={sev.accent} />
@@ -281,7 +294,7 @@ export function DiagnosisPanel({
               <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">
                 {(diagnosis.verificationNotes ?? []).map((n) => (
                   <li key={n}>
-                    ※ 要確認: <NoteText text={n} />
+                    ※ 要確認: <NoteWithSource text={n} />
                   </li>
                 ))}
               </ul>

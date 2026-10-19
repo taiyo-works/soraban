@@ -137,15 +137,21 @@ export default function Home() {
             </span>
           </h1>
           {/* 誰のための道具で、使うと何が得られるか（Sprint 11a B1）。地域名はここに書かず site-facts の対象地域にだけ書く。 */}
-          <div className="flex max-w-2xl flex-col gap-1.5">
+          {/* 1 文目（対象）を墨、2 文目（得られること）を薄墨にして、誰のための道具か→何ができるかの順に読ませる。
+              運航管理の一文は本文と同じ幅で一段小さく添え、細い罫で本文と分ける（提供中の機能と読まれないように）。 */}
+          <div className="flex max-w-3xl flex-col gap-3">
             <p
               data-testid="site-lead"
-              className="text-sm leading-relaxed text-ink-soft sm:text-[15px] sm:leading-[1.85]"
+              className="text-[15px] leading-[1.9] text-ink-soft [word-break:auto-phrase] sm:text-base sm:leading-[1.95]"
             >
-              業務でドローンを飛ばす事業者・操縦者のための道具です。飛ばす前に、その地点がどの法令・条例に当たり、どの手続きが要るかを一度に確かめ、出典つきの記録として残せます。
+              <span className="text-ink">業務でドローンを飛ばす事業者・操縦者のための道具です。</span>
+              飛ばす前に、その地点がどの法令・条例に当たり、どの手続きが要るかを一度に確かめ、出典つきの記録として残せます。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
-            <p data-testid="site-ops-note" className="text-xs leading-relaxed text-ink-mute">
+            <p
+              data-testid="site-ops-note"
+              className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute [word-break:auto-phrase]"
+            >
               運航管理（飛行計画・通報・飛行日誌）は、社内で試験運用しながら整えています。
             </p>
           </div>
