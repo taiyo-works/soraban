@@ -52,7 +52,14 @@ fail=0
 while IFS=$'\t' read -r category url modified file; do
   zdir="$WORK/zip/$category"; cdir="$WORK/csv/$category"
   mkdir -p "$zdir" "$cdir"
-  if ! curl -fsSL --retry 3 -o "$zdir/$file" "$url"; then
+  ok=0
+  # 既定の User-Agent で拒否される場合に備え、abr-geocoder（Go の既定）と同じ User-Agent でも試す
+  for ua in "Go-http-client/1.1" "curl/$(curl --version | head -1 | cut -d' ' -f2)" "Mozilla/5.0 (compatible; soraban-fetch/1.0)"; do
+    code="$(curl -sSL --retry 3 -A "$ua" -o "$zdir/$file" -w '%{http_code}' "$url" 2>"$WORK/curl.err")"
+    if [[ "$code" == "200" ]]; then ok=1; break; fi
+    log "取得できない（HTTP ${code}、UA=${ua}）$url：$(head -c 300 "$zdir/$file" 2>/dev/null | tr '\n' ' ') $(head -c 300 "$WORK/curl.err" | tr '\n' ' ')"
+  done
+  if [[ $ok -ne 1 ]]; then
     log "失敗: ダウンロード $url"; fail=1; continue
   fi
   if ! unzip -tq "$zdir/$file" >/dev/null 2>&1; then
