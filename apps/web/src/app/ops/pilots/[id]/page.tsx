@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PilotForm, VoidForm } from "@/components/ops/ops-client";
 import { VersionList } from "@/components/ops/versions";
+import { Badge, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
 import { getPilot, listMembers, listPilotVersions, OpsError } from "@/server/ops/service";
 import { LICENSE_CLASS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
@@ -25,30 +26,57 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
     p.limitationDaytime ? "昼間" : null,
     p.limitationVlos ? "目視内" : null,
   ].filter(Boolean);
-  const rows: [string, string][] = [
+  const rows: [string, React.ReactNode][] = [
     ["氏名", p.fullName],
     ["技能証明", p.hasLicense && p.licenseClass ? `${LICENSE_CLASS_LABELS[p.licenseClass]}` : "なし"],
-    ["技能証明書番号", p.licenseNumber ?? "—"],
-    ["有効期限", p.licenseExpiresOn ?? "—"],
+    [
+      "技能証明書番号",
+      p.licenseNumber ? (
+        <span className="flex flex-col gap-0.5">
+          <LicenseNumber value={p.licenseNumber} />
+          {p.licenseNumberMasked ? (
+            <span className="text-xs text-ink-mute">末尾 4 桁以外を伏せています。全桁は運航管理者と本人だけが見られます。</span>
+          ) : null}
+        </span>
+      ) : (
+        "—"
+      ),
+    ],
+    ["有効期限", p.licenseExpiresOn ? <span className="tnum">{p.licenseExpiresOn}</span> : "—"],
     ["限定事項", limits.length > 0 ? limits.join("・") : "なし"],
   ];
+  const editNote = p.voided
+    ? null
+    : manager
+      ? null
+      : canEdit
+        ? "自分に結び付いた操縦者のため、訂正できます。取消は運航管理者だけが行えます。"
+        : "訂正・取消は運航管理者（自分に結び付いた操縦者は本人）だけが行えます。";
   return (
-    <main className="flex flex-col gap-6">
-      <h1 className="text-lg text-ink">
-        操縦者 {p.fullName}
-        {p.voided ? <span className="ml-2 text-sm text-signal-red">取消済み</span> : null}
-      </h1>
-      <dl className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]" data-testid="pilot-detail">
-        {rows.map(([k, v]) => (
-          <div key={k} className="contents">
-            <dt className="text-ink-mute">{k}</dt>
-            <dd className="break-all text-ink">{v}</dd>
-          </div>
-        ))}
-      </dl>
+    <main className="flex flex-col gap-10">
+      <div className="flex flex-col gap-5">
+        <PageHeader
+          eyebrow="操縦者の詳細"
+          back={{ href: "/ops/pilots", label: "操縦者の一覧" }}
+          title={
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="break-words">操縦者 {p.fullName}</span>
+              {p.isSelf ? <Badge tone="brand">あなた</Badge> : null}
+              {p.voided ? <Badge tone="red">取消済み</Badge> : null}
+            </span>
+          }
+        />
+        {p.voided ? (
+          <Note tone="red">
+            この操縦者は取り消されています。誤登録の記録として、登録内容と版の一覧を残しています。訂正はできません。
+          </Note>
+        ) : editNote ? (
+          <Note>{editNote}</Note>
+        ) : null}
+        <DetailList rows={rows} data-testid="pilot-detail" />
+      </div>
       {canEdit ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-base text-ink">訂正</h2>
+        <Section title="訂正" description="登録内容の誤りや変化を直します。訂正前の内容は版として残ります。">
           <PilotForm
             key={p.version}
             initial={p}
@@ -56,15 +84,18 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
               manager ? members.map((m) => ({ id: m.id, label: `${m.displayName}（${ROLE_LABELS[m.role]}）` })) : undefined
             }
           />
-        </section>
-      ) : null}
-      {manager && !p.voided ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-base text-ink">取消</h2>
-          <VoidForm url={`/api/ops/pilots/${p.id}/void`} version={p.version} label="この操縦者" />
-        </section>
+        </Section>
       ) : null}
       <VersionList versions={versions} />
+      {manager && !p.voided ? (
+        <Section
+          title="取消"
+          tone="danger"
+          description="誤って登録した操縦者を取り消します。削除ではありません。取り消した操縦者は一覧に出なくなりますが、登録内容と版の一覧は誤登録の記録として残り、以後は訂正できません。"
+        >
+          <VoidForm url={`/api/ops/pilots/${p.id}/void`} version={p.version} label="この操縦者" />
+        </Section>
+      ) : null}
     </main>
   );
 }

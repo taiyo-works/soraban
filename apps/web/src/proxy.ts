@@ -6,11 +6,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getOpsAvailability } from "@/server/ops/availability";
 
+// 503 の画面はアプリの描画を通らないため、判定画面の配色（紙・インク・藍）を最小限のインラインの CSS で写す。
+const PAGE_503_STYLE =
+  ":root{color-scheme:light dark;--paper:#f5f2ea;--ink:#0e1421;--mute:#5b6170;--rule:#c9c2ad;--brand:#1d3557}" +
+  "@media (prefers-color-scheme:dark){:root{--paper:#0c1320;--ink:#e7e2d2;--mute:#8a8a85;--rule:#2c3550;--brand:#c3cedc}}" +
+  "body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;line-height:1.8}" +
+  "main{max-width:36rem;margin:0 auto;padding:2.5rem 1rem}" +
+  ".eyebrow{margin:0;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-style:italic;color:var(--mute)}" +
+  "h1{margin:.25rem 0 1rem;padding-bottom:.75rem;border-bottom:1px solid var(--rule);font-family:serif;font-weight:300;font-size:1.6rem;line-height:1.3}" +
+  "p{margin:0 0 .9rem;font-size:.9rem}code{font-family:Menlo,Monaco,monospace;font-size:.85rem;padding:0 .3rem;border:1px solid var(--rule);border-radius:2px;overflow-wrap:anywhere}" +
+  ".note{padding-left:.75rem;border-left:2px solid var(--brand)}a{color:var(--brand);text-underline-offset:.2em}";
+
 const page503 = (reason: string): string =>
-  `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>運航管理は準備中です — そらばん</title></head>` +
-  `<body style="font-family:sans-serif;margin:2rem;line-height:1.7"><h1 style="font-size:1.25rem">運航管理は準備中です</h1>` +
-  `<p>設定が完了していないため、運航管理の機能を使えません。管理者にお問い合わせください。</p>` +
-  `<p>理由コード：<code>${reason}</code></p><p><a href="/">地点判定に戻る</a></p></body></html>`;
+  `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>運航管理は準備中です — そらばん</title><style>${PAGE_503_STYLE}</style></head>` +
+  `<body><main><p class="eyebrow">Soraban — Flight operations</p><h1>運航管理は準備中です</h1>` +
+  `<p class="note">設定が完了していないため、運航管理の機能を使えません。管理者にお問い合わせください。</p>` +
+  `<p>理由コード：<code>${reason}</code></p><p><a href="/">地点判定に戻る</a></p></main></body></html>`;
 
 export function proxy(request: NextRequest) {
   const a = getOpsAvailability(process.env);

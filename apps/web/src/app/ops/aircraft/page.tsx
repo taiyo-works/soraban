@@ -1,39 +1,77 @@
 import Link from "next/link";
+import {
+  AIRCRAFT_STATUS_TONE,
+  Badge,
+  buttonPrimaryClass,
+  CellLabel,
+  ListHead,
+  listRowClass,
+  Note,
+  PageHeader,
+  VoidedToggle,
+} from "@/components/ops/ui";
 import { listAircraft } from "@/server/ops/service";
 import { AIRCRAFT_STATUS_LABELS, requireOpsMember } from "@/server/ops/page";
 
-// 機体の一覧（?includeVoided=1 で取消済みを含める）。
+const GRID = "sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_minmax(0,9rem)]";
+
+// 機体の一覧（?includeVoided=1 で取消済みを含める）。狭い画面ではカード、広い画面では表の行で示す。
 export default async function AircraftListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
   const { ctx, me } = await requireOpsMember();
   const includeVoided = (await searchParams).includeVoided === "1";
   const rows = await listAircraft(ctx, includeVoided);
+  const manager = me.member.role === "manager";
   return (
-    <main className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-lg text-ink">機体</h1>
-        {me.member.role === "manager" ? (
-          <Link href="/ops/aircraft/new" className="border border-indigo-700 bg-indigo-700 px-4 py-2 text-sm text-paper">
-            機体を登録
-          </Link>
-        ) : null}
-      </div>
-      <Link href={includeVoided ? "/ops/aircraft" : "/ops/aircraft?includeVoided=1"} className="text-sm text-indigo-700 underline">
-        {includeVoided ? "取消済みを隠す" : "取消済みを含める"}
-      </Link>
-      {rows.length === 0 ? <p className="text-sm text-ink-mute">登録された機体はありません。</p> : null}
-      <ul className="flex flex-col gap-2" data-testid="aircraft-list">
-        {rows.map((a) => (
-          <li key={a.id}>
-            <Link href={`/ops/aircraft/${a.id}`} className="flex flex-col gap-0.5 border border-rule px-3 py-2 text-sm">
-              <span className="break-all text-ink">{a.registrationMark}</span>
-              <span className="text-ink-soft">
-                {a.modelName}（{a.manufacturer}）・{AIRCRAFT_STATUS_LABELS[a.status]}
-                {a.voided ? "・取消済み" : ""}
-              </span>
+    <main className="flex flex-col gap-6">
+      <PageHeader
+        title="機体"
+        back={{ href: "/ops", label: "運航管理のトップ" }}
+        aside={
+          manager ? (
+            <Link href="/ops/aircraft/new" className={buttonPrimaryClass}>
+              機体を登録
             </Link>
-          </li>
-        ))}
-      </ul>
+          ) : null
+        }
+      >
+        {manager ? null : <Note>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
+      </PageHeader>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />
+        <p className="font-mono text-[11px] tnum text-ink-mute">{rows.length} 件</p>
+      </div>
+      {rows.length === 0 ? (
+        <p className="border-y border-rule py-6 text-center text-sm text-ink-mute">登録された機体はありません。</p>
+      ) : (
+        <div className="flex flex-col">
+          <ListHead columns={["登録記号", "型式名（設計製造者）", "状態"]} gridClass={GRID} />
+          <ul className="flex flex-col gap-2 sm:gap-0" data-testid="aircraft-list">
+            {rows.map((a) => (
+              <li key={a.id}>
+                <Link
+                  href={`/ops/aircraft/${a.id}`}
+                  className={`${listRowClass} ${GRID} ${a.voided ? "text-ink-mute" : ""}`}
+                >
+                  <span className="min-w-0 break-all font-mono text-[15px] text-ink">
+                    <CellLabel>登録記号</CellLabel>
+                    {a.registrationMark}
+                  </span>
+                  <span className="min-w-0 break-words text-ink-soft">
+                    <CellLabel>型式名</CellLabel>
+                    {a.modelName}
+                    <span className="text-ink-mute">（{a.manufacturer}）</span>
+                  </span>
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <CellLabel>状態</CellLabel>
+                    <Badge tone={AIRCRAFT_STATUS_TONE[a.status]}>{AIRCRAFT_STATUS_LABELS[a.status]}</Badge>
+                    {a.voided ? <Badge tone="red">取消済み</Badge> : null}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
