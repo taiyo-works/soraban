@@ -79,7 +79,7 @@ soraban-gules.vercel.app も古ければ A か C、新しければ B。
 
 直ったかの確かめ方：`curl -sI https://soraban.futuretec.jp/ | grep -i x-robots-tag` で `noindex, nofollow` が返ること（noindex は #17 で main にだけ入った。古い版には付かない）と、トップに「出願準備中」が無いこと。古い版は noindex が無いため、検索エンジンに載りうる点でも急ぐ。
 
-直ったあとで、`private-preview` と `sprint6/reliability` の削除をユーザーに相談する（B のとき、先に割り当てを外してから）。
+`private-preview` と `sprint6/reliability` は 2026-10-20 にユーザーが GitHub の画面で削除した（済み）。
 
 ## 5. ユーザー作業（未完了）
 
