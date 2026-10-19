@@ -1,0 +1,180 @@
+{
+  "_note": "工業専用地域（DID 除外、国土交通省告示第435号・2026-07-01 適用）の収録範囲台帳。status=recorded の市町村だけ by-muni/{muniCode}.json のポリゴンで除外判定を行い、それ以外は『工業専用地域の除外：未確認（データ未収録）』として DID 該当で扱う（縮退）。didOverlap は DID と工業専用地域が重なるかの確認結果（overlap / no_overlap / unverified）。",
+  "datasetId": "industrial-exclusive",
+  "verifiedAt": "2026-10-18",
+  "verifiedBy": "generator（Claude、Sprint 7）",
+  "insideMarginM": 10,
+  "sourceCandidates": [
+    {
+      "priority": 1,
+      "name": "各市町の都市計画図（用途地域）",
+      "url": null,
+      "note": "決定権者の公式資料。市町ごとに URL・基準日・ライセンスを確認して記録する"
+    },
+    {
+      "priority": 2,
+      "name": "国土交通省 都市局『都市計画決定 GIS データ』（G空間情報センター）",
+      "url": "https://www.geospatial.jp/",
+      "note": "データセットの所在・ライセンス・更新時点は未確認（作業環境から接続不可）"
+    },
+    {
+      "priority": 3,
+      "name": "国土数値情報 用途地域（A29）",
+      "url": "https://nlftp.mlit.go.jp/ksj/",
+      "note": "国土数値情報のデータ一覧から A29 を選ぶ。更新時点が古い。ライセンスは未確認（作業環境から接続不可）"
+    },
+    {
+      "priority": 4,
+      "name": "とっとりWebマップ・マップonしまね",
+      "url": null,
+      "note": "閲覧用の地図サービス。データの二次利用条件は未確認"
+    }
+  ],
+  "municipalities": [
+    {
+      "muniCode": "31201",
+      "muniName": "鳥取市",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（鳥取市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "31202",
+      "muniName": "米子市",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（米子市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "31203",
+      "muniName": "倉吉市",
+      "status": "recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域は同梱の DID と重ならない（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "31204",
+      "muniName": "境港市",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（境港市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "31384",
+      "muniName": "日吉津村",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（米子市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32201",
+      "muniName": "松江市",
+      "status": "recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域は同梱の DID と重ならない（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32202",
+      "muniName": "浜田市",
+      "status": "not_recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "入手元（A29 令和元年度）に当該市の用途地域データはあるが工業専用地域はない（run 39168417203 の FETCH_REPORT.md）。市の最新の用途地域図との照合は未実施のため、台帳上は未収録とし、DID 内は「除外：未確認」で表示する（安全側）",
+      "industrialZoneInSource": false,
+      "overlapNote": "入手元（国土数値情報 用途地域 A29 令和元年度）に工業専用地域がないため重なりなし（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32203",
+      "muniName": "出雲市",
+      "status": "recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域は同梱の DID と重ならない（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32204",
+      "muniName": "益田市",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（益田市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32205",
+      "muniName": "大田市",
+      "status": "recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域は同梱の DID と重ならない（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32206",
+      "muniName": "安来市",
+      "status": "recorded",
+      "didOverlap": "overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域が DID（安来市）と重なる（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32207",
+      "muniName": "江津市",
+      "status": "not_recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "入手元（A29 令和元年度）に当該市の用途地域データはあるが工業専用地域はない（run 39168417203 の FETCH_REPORT.md）。市の最新の用途地域図との照合は未実施のため、台帳上は未収録とし、DID 内は「除外：未確認」で表示する（安全側）",
+      "industrialZoneInSource": false,
+      "overlapNote": "入手元（国土数値情報 用途地域 A29 令和元年度）に工業専用地域がないため重なりなし（compute-did-overlap.mjs、2026-10-19）"
+    },
+    {
+      "muniCode": "32209",
+      "muniName": "雲南市",
+      "status": "recorded",
+      "didOverlap": "no_overlap",
+      "source": "国土数値情報 用途地域（A29）令和元年度版（国土交通省） https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A29-v2_1.html（取得日 2026-10-18）",
+      "baseDate": "2019年度（令和元年度）",
+      "checkedAt": "2026-10-18",
+      "note": "fetch-regulation-data（GitHub Actions）で自動取得。更新時点が古い（令和元年度）ため、市の最新の用途地域図との照合が必要",
+      "overlapNote": "工業専用地域は同梱の DID と重ならない（compute-did-overlap.mjs、2026-10-19）"
+    }
+  ]
+}

@@ -12,12 +12,16 @@ import type { LatLng } from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
   STATUS_LABEL,
+  ALL_AMENDMENTS,
   formatMachineCondition,
   shouldWarnConfidence,
+  type AmendmentRef,
+  type DatasetRef,
   type FlightContext,
   type RegulationCheckResult,
 } from "@soraban/regulations";
 import { MonoText } from "./pdf-mono-text";
+import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
 // Helvetica で日本語が出ないため、Noto Sans JP / IBM Plex Mono を 2 ウェイトずつ使う。
@@ -60,6 +64,9 @@ Font.register({
     { src: fontUrl("IBMPlexMono-Medium.ttf"), fontWeight: 500 },
   ],
 });
+
+// 日本語の行末に「-」が入らないよう、改行位置の扱いを差し替える（全 PDF 共通）。
+registerJapaneseLineBreaking();
 
 // ── デザイントークンと整合する PDF 用カラー定義 ──
 const COLOR = {
@@ -256,6 +263,34 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0.5,
     borderLeftColor: COLOR.rule,
   },
+  // 規制ブロック内の脚注（使用データ・反映済みの改正）。判定本文と罫線で区切る。
+  dataGroup: {
+    marginTop: 2,
+    paddingTop: 4,
+    borderTopWidth: 0.5,
+    borderTopColor: COLOR.rule,
+    borderTopStyle: "dashed",
+    flexDirection: "column",
+    gap: 1,
+  },
+  dataLine: {
+    fontSize: 7,
+    lineHeight: 1.45,
+    color: COLOR.inkMute,
+  },
+  sourcesBox: {
+    marginTop: 12,
+    padding: 10,
+    borderWidth: 0.5,
+    borderColor: COLOR.rule,
+    flexDirection: "column",
+    gap: 1,
+  },
+  sourcesLine: {
+    fontSize: 7.5,
+    lineHeight: 1.5,
+    color: COLOR.inkSoft,
+  },
   appliedBox: {
     marginTop: 4,
     padding: 6,
@@ -356,6 +391,19 @@ const PERMIT_LABEL: Record<string, string> = {
   facility_manager: "施設管理者",
   facility_manager_and_pref_pubsafety: "施設管理者+県公安委員会",
   bunkacho_or_kyoiku: "文化庁・教育委員会",
+};
+
+const uniqueDatasets = (result: RegulationCheckResult): readonly DatasetRef[] => {
+  const map = new Map<string, DatasetRef>();
+  for (const r of result.regulations) for (const d of r.datasets ?? []) map.set(d.id, d);
+  return Array.from(map.values());
+};
+
+// 判定結果に出てくる改正を施行日順に（判定結果に無くても全改正を示す）。
+const uniqueAmendments = (result: RegulationCheckResult): readonly AmendmentRef[] => {
+  const ids = new Set(result.regulations.flatMap((r) => (r.amendments ?? []).map((a) => a.id)));
+  const listed = ALL_AMENDMENTS.filter((a) => ids.has(a.id));
+  return listed.length > 0 ? listed : ALL_AMENDMENTS;
 };
 
 export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
@@ -493,8 +541,25 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
               </Text>
             </View>
             <Text style={styles.regTitle}>{reg.title}</Text>
-            <Text style={styles.regSummary}>{reg.summary}</Text>
-            <Text style={styles.regNote}>{reg.note}</Text>
+            <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
+            <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
+            <View style={styles.dataGroup}>
+              <Text style={styles.dataLine}>
+                使用データ：
+                {reg.datasets
+                  .map(
+                    (d) =>
+                      `${d.name}${d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 ${d.verifiedAt}`,
+                  )
+                  .join(" / ")}
+              </Text>
+              {reg.amendments.length > 0 ? (
+                <Text style={styles.dataLine}>
+                  反映済みの改正：
+                  {reg.amendments.map((a) => `${a.title}（施行・適用 ${a.effectiveDate}）`).join(" / ")}
+                </Text>
+              ) : null}
+            </View>
             {reg.appliedExceptions && reg.appliedExceptions.length > 0 ? (
               <View style={styles.appliedBox}>
                 <Text style={styles.appliedTitle}>✓ 適用された例外節</Text>
@@ -513,10 +578,27 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         ))}
 
+        {/* DATA SOURCES（Sprint 7）: 判定に使ったデータと確認日、反映済みの改正 */}
+        <View style={styles.sourcesBox} wrap={false}>
+          <Text style={styles.eyebrow}>データ出典と確認日</Text>
+          {uniqueDatasets(result).map((d) => (
+            <Text key={d.id} style={styles.sourcesLine}>
+              ・{d.name}
+              {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
+            </Text>
+          ))}
+          <Text style={[styles.eyebrow, { marginTop: 6 }]}>反映済みの法令改正</Text>
+          {uniqueAmendments(result).map((a) => (
+            <Text key={a.id} style={styles.sourcesLine}>
+              ・{a.title}（施行・適用 {a.effectiveDate}）
+            </Text>
+          ))}
+        </View>
+
         {/* DISCLAIMER */}
         <Text style={styles.disclaimer}>
           <Text style={{ fontWeight: 700 }}>免責 — </Text>
-          {result.disclaimer}
+          {keepSpaces(result.disclaimer)}
         </Text>
 
         {/* FOOTER */}

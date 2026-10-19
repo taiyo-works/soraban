@@ -6,6 +6,7 @@ import {
   computeOverall,
   computeOverallConfidence,
   evaluateAirports,
+  createIndustrialSource,
   evaluateDid,
   evaluateMihoBase,
   evaluateMunicipalHeritage,
@@ -300,10 +301,9 @@ describe("evaluateMihoBase", () => {
   it("flags red at the airbase center", () => {
     expect(evaluateMihoBase(MIHO_AIRBASE_CENTER).status).toBe<RegulationStatus>("red");
   });
-  it("flags yellow within 1.5 km", () => {
-    // 中心から 0.5°/3600 ≒ 14m 程度では red のままなので 1km ほど東へずらす。
+  it("中心から東へ約 1km（旧実装では yellow）は 1,000m 周辺地域として red（Sprint 7）", () => {
     const east1km = { lat: MIHO_AIRBASE_CENTER.lat, lng: MIHO_AIRBASE_CENTER.lng + 0.011 };
-    expect(evaluateMihoBase(east1km).status).toBe<RegulationStatus>("yellow");
+    expect(evaluateMihoBase(east1km).status).toBe<RegulationStatus>("red");
   });
   it("flags green far away", () => {
     const r = evaluateMihoBase({ lat: 35.0, lng: 135.0 });
@@ -320,6 +320,8 @@ describe("computeOverall", () => {
     summary: "s",
     clauseGraph: { main: { text: "", effect: "permit" }, exceptions: [], conditions: [] },
     confidence: { geometric: "low", extraction: "low", verifiedAt: "2026-01-01" },
+    datasets: [],
+    amendments: [],
     status,
     note: "",
   });
@@ -447,6 +449,8 @@ describe("COVERAGE_SUMMARY", () => {
 describe("FlightContext exemption application", () => {
   // 米子市役所は DID 内 + 県条例 yellow + park green の典型ケース。
   // dummy DID polygon を使って evaluateDid のみで例外マッチを検証する。
+  // 工業専用地域は同梱データに依存しないよう「収録なし」の読み込み口を明示する。
+  const NO_INDUSTRIAL = { industrial: createIndustrialSource({ coverage: [], zonesByMuni: {} }) };
   const yonagoDid: DidCandidate = {
     muniCode: yonagoMuni,
     muniName: "米子市",
@@ -460,14 +464,14 @@ describe("FlightContext exemption application", () => {
   const yonagoCityHall = { lat: 35.4283, lng: 133.3306 }; // DID 内
 
   it("DID red without ctx (default = strict)", () => {
-    const r = evaluateDid(yonagoCityHall, [yonagoDid]);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], undefined, NO_INDUSTRIAL);
     expect(r.status).toBe<RegulationStatus>("red");
     expect(r.appliedExceptions).toBeUndefined();
   });
 
   it("DID drops to green when drone is < 100g (weight_below_g exception)", () => {
     const ctx: FlightContext = { droneWeightG: 50 };
-    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
     expect(r.status).toBe<RegulationStatus>("green");
     expect(r.appliedExceptions).toBeDefined();
     expect(r.appliedExceptions?.[0]?.condition).toMatch(/100g/);
@@ -475,21 +479,21 @@ describe("FlightContext exemption application", () => {
 
   it("DID stays red when drone is >= 100g", () => {
     const ctx: FlightContext = { droneWeightG: 900 }; // DJI Mavic 級
-    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
     expect(r.status).toBe<RegulationStatus>("red");
     expect(r.appliedExceptions).toBeUndefined();
   });
 
   it("DID drops to green when MLIT permit holder", () => {
     const ctx: FlightContext = { pilotPermits: ["mlit"] };
-    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
     expect(r.status).toBe<RegulationStatus>("green");
     expect(r.appliedExceptions?.[0]?.machine?.value).toBe("mlit");
   });
 
   it("DID does NOT drop on irrelevant permit", () => {
     const ctx: FlightContext = { pilotPermits: ["park_manager"] };
-    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
     expect(r.status).toBe<RegulationStatus>("red");
   });
 
@@ -531,7 +535,7 @@ describe("FlightContext exemption application", () => {
 
   it("note string includes the exempted reason", () => {
     const ctx: FlightContext = { droneWeightG: 50 };
-    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx);
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
     expect(r.note).toContain("適用例外");
     expect(r.note).toContain("100g");
   });

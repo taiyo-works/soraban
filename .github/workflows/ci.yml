@@ -46,6 +46,8 @@ jobs:
         env:
           CI: "1"
           E2E_SERVER_CMD: pnpm --filter @soraban/web exec next start -p 3100
+          # DID・工業専用地域をテスト用フィクスチャに差し替えたサーバー（同じビルドを使う）
+          E2E_FIXTURE_SERVER_CMD: NEXT_DIST_DIR=.next pnpm --filter @soraban/web exec next start -p 3101
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

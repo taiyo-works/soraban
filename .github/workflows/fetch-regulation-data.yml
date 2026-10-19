@@ -1,0 +1,182 @@
+name: Fetch regulation data
+
+# 地図データ（DID 令和2年・工業専用地域）を国土数値情報から取得し、同梱形式に変換する（手動実行のみ）。
+# ダウンロード URL はダウンロードページの HTML から抜き出す（推測しない）。取得できない入手元はスキップしてログに残す。
+# 処理本体：packages/regulations/scripts/fetch-regulation-data.sh
+
+on:
+  # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（既定値で実行し、
+  # 生成データと FETCH_REPORT.md を同じ data-fetch ブランチにコミットする）。
+  push:
+    branches: ['data-fetch/**']
+  workflow_dispatch:
+    inputs:
+      output:
+        description: "生成物の扱い（artifact＝成果物として保存／commit＝実行したブランチにコミットして push）"
+        type: choice
+        options: [artifact, commit]
+        default: artifact
+      prefs:
+        description: "都道府県コード（空白区切り）"
+        type: string
+        default: "31 32"
+      include_industrial:
+        description: "工業専用地域（国土数値情報 用途地域 A29）も取得する"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fetch-regulation-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install GDAL (Shapefile → GeoJSON)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq gdal-bin unzip
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch and convert
+        env:
+          WORK_DIR: ${{ runner.temp }}/regulation-data
+        run: |
+          args=(--prefs "${{ inputs.prefs || '31 32' }}")
+          if [[ "${{ inputs.include_industrial }}" == "false" ]]; then args+=(--skip-industrial); fi
+          bash packages/regulations/scripts/fetch-regulation-data.sh "${args[@]}"
+          cat "$WORK_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Show changes and sizes
+        run: |
+          git status --short
+          du -sh packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive/by-muni 2>/dev/null || true
+
+      # 生成データで判定・型・テストが壊れていないかを確かめる。失敗しても取得結果を確認できるよう、
+      # ここでは止めずに結果を記録し、成果物・コミットのあとでジョブを失敗にする。
+      - name: Typecheck and test (with generated data)
+        id: verify
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          { pnpm typecheck && pnpm test; } 2>&1 | tee "$RUNNER_TEMP/verify.log"
+
+      - name: Write FETCH_REPORT.md
+        if: always()
+        env:
+          WORK_DIR: ${{ runner.temp }}/regulation-data
+          VERIFY: ${{ steps.verify.outcome }}
+        run: |
+          r=packages/regulations/data/FETCH_REPORT.md
+          {
+            echo "# 地図データ取得レポート（fetch-regulation-data）"
+            echo
+            echo "- 実行: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- ブランチ: ${GITHUB_REF_NAME}（${GITHUB_SHA}）"
+            echo "- 実行日時（UTC）: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- typecheck・test: ${VERIFY}"
+            echo
+            echo "## 取得・変換のログ（取得／スキップした URL、ZIP 内のファイル、先頭地物の属性、サイズ）"
+            echo
+            cat "$WORK_DIR/summary.md" 2>/dev/null || echo "（summary.md なし）"
+            echo
+            echo "## 生成ファイルのサイズ"
+            echo
+            echo '```'
+            ls -l packages/regulations/data/did/r2/ packages/regulations/data/industrial-exclusive/by-muni/ 2>/dev/null || true
+            echo '```'
+            echo
+            echo "## typecheck・test の結果（末尾 80 行）"
+            echo
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/verify.log" 2>/dev/null || echo "（ログなし）"
+            echo '```'
+          } > "$r"
+          cat "$r" >> "$GITHUB_STEP_SUMMARY"
+
+      # 生成物は常に成果物として残す（コミットする場合は commit ジョブがこれを取り込む）
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regulation-data
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            packages/regulations/data/did/r2/
+            packages/regulations/data/industrial-exclusive/
+            packages/regulations/data/sources.json
+            packages/regulations/data/FETCH_REPORT.md
+            packages/regulations/src/data-bundle/
+
+    outputs:
+      verify: ${{ steps.verify.outcome }}
+
+  # 生成データと FETCH_REPORT.md をコミットして push する。
+  #   - push（data-fetch/** への push）では常に、そのブランチへ。それ以外のブランチには書かない。
+  #   - 手動実行では output=commit のときだけ、実行したブランチへ。
+  # GITHUB_TOKEN による push は新しいワークフロー実行を起こさない（ループしない）。
+  commit:
+    needs: fetch
+    if: >-
+      always() && needs.fetch.result != 'cancelled' &&
+      ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/data-fetch/')) ||
+       (github.event_name == 'workflow_dispatch' && inputs.output == 'commit'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # このジョブだけがブランチへ push する
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: regulation-data
+          path: packages/regulations
+      - name: Commit and push
+        env:
+          VERIFY: ${{ needs.fetch.outputs.verify }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 取得できなかったデータのディレクトリは存在しないことがあるため、存在するものだけ追加する
+          for p in packages/regulations/data/did/r2 packages/regulations/data/industrial-exclusive packages/regulations/data/sources.json packages/regulations/data/FETCH_REPORT.md packages/regulations/src/data-bundle; do
+            if [[ -e "$p" ]]; then git add -- "$p"; else echo "（なし）$p"; fi
+          done
+          git status --short
+          if git diff --cached --quiet; then
+            echo "変更なし（コミットしない）"
+          else
+            if [[ "$VERIFY" == "success" ]]; then
+              msg="data(regulations): 国土数値情報から DID・工業専用地域を取得して同梱（fetch-regulation-data、typecheck・test 通過）"
+            else
+              msg="data(regulations): 国土数値情報から DID・工業専用地域を取得（fetch-regulation-data）【typecheck・test 失敗（${VERIFY:-不明}）。FETCH_REPORT.md を参照】"
+            fi
+            git commit -m "$msg" -m "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Fail if typecheck/test failed
+        if: needs.fetch.outputs.verify != 'success'
+        run: |
+          echo "生成データで typecheck・test が失敗した（${{ needs.fetch.outputs.verify }}）。FETCH_REPORT.md を参照"
+          exit 1
+
+  # commit ジョブが走らない場合（artifact のみ）でも、テスト失敗をワークフローの結果に反映する。
+  verify-result:
+    needs: fetch
+    if: always() && needs.fetch.outputs.verify != 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "生成データで typecheck・test が失敗した（${{ needs.fetch.outputs.verify }}）"
+          exit 1

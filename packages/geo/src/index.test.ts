@@ -1,7 +1,12 @@
 import {
   YONAGO_CITY_HALL,
   circlePolygon,
+  distanceToPolygonBoundaryMeters,
+  distanceToPolygonMeters,
+  distanceToRingMeters,
   haversineMeters,
+  offsetMeters,
+  pointInPolygonWithHoles,
   isValidLatLng,
   parseCombinedLatLng,
   pointInPolygon,
@@ -124,5 +129,50 @@ describe("circlePolygon", () => {
       expect(d).toBeGreaterThan(radiusM * 0.95);
       expect(d).toBeLessThan(radiusM * 1.05);
     }
+  });
+});
+
+describe("境界までの距離（Sprint 7）", () => {
+  const o = { lat: 35.49, lng: 133.23 };
+  // 東西 2,000m × 南北 1,000m の長方形
+  const rect: Polygon = [
+    offsetMeters(o, -1000, -500),
+    offsetMeters(o, 1000, -500),
+    offsetMeters(o, 1000, 500),
+    offsetMeters(o, -1000, 500),
+  ];
+
+  it("外側の点は境界までの最短距離を返す（辺の垂線方向）", () => {
+    const p = offsetMeters(o, 0, 500 + 700);
+    expect(distanceToPolygonMeters(p, [rect])).toBeCloseTo(700, 0);
+  });
+
+  it("角の外側は頂点までの距離になる", () => {
+    const p = offsetMeters(o, 1000 + 300, 500 + 400);
+    expect(distanceToPolygonMeters(p, [rect])).toBeCloseTo(500, 0);
+  });
+
+  it("内側の点は 0、境界距離は別関数で取れる", () => {
+    const p = offsetMeters(o, 0, 490);
+    expect(distanceToPolygonMeters(p, [rect])).toBe(0);
+    expect(distanceToPolygonBoundaryMeters(p, [rect])).toBeCloseTo(10, 0);
+    expect(distanceToRingMeters(p, rect)).toBeCloseTo(10, 0);
+  });
+
+  it("haversine と 1m 未満で一致する（1km 規模）", () => {
+    const p = offsetMeters(o, 0, 1000);
+    expect(Math.abs(haversineMeters(o, p) - 1000)).toBeLessThan(1);
+  });
+
+  it("穴の内側は多角形の外側として扱う", () => {
+    const hole: Polygon = [
+      offsetMeters(o, -100, -100),
+      offsetMeters(o, 100, -100),
+      offsetMeters(o, 100, 100),
+      offsetMeters(o, -100, 100),
+    ];
+    expect(pointInPolygonWithHoles(o, [rect, hole])).toBe(false);
+    expect(pointInPolygonWithHoles(offsetMeters(o, 500, 0), [rect, hole])).toBe(true);
+    expect(distanceToPolygonMeters(o, [rect, hole])).toBeCloseTo(100, 0);
   });
 });

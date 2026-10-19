@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  buildRestorePlan,
   clearHistory,
   createHistoryRunId,
   getHistorySnapshot,
@@ -289,5 +290,95 @@ describe("history.ts — runId 単位の書き込み（Sprint 6: 応答順レー
     const byRun = new Map(loadHistory().map((e) => [e.runId, e]));
     expect(byRun.get(a)?.diagnosisInput?.completedProcedureIds).toEqual(["drone-registration"]);
     expect(byRun.get(b)?.diagnosisInput?.completedProcedureIds).toBeUndefined();
+  });
+});
+
+describe("history.ts — Sprint 6 形式の履歴の互換（Sprint 7）", () => {
+  let storage: MemoryStorage;
+  beforeEach(() => {
+    storage = new MemoryStorage();
+    vi.stubGlobal("window", {
+      localStorage: storage,
+      dispatchEvent: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+  });
+
+  // Sprint 6 時点の soraban:history:v1 の実例に近い形（旧エンジン版・旧規制 ID・未知の値を含む）。
+  const sprint6Raw = [
+    {
+      runId: "run_legacy_1",
+      evidenceId: "ev_aaaabbbbccccdddd",
+      savedAt: "2026-10-18T09:00:00.000Z",
+      loc: { lat: 35.4925, lng: 133.2364 },
+      ctx: { droneWeightG: 900, pilotPermits: ["facility_manager_and_pref_pubsafety"] },
+      overall: "red",
+      resolvedAddress: "鳥取県境港市佐斐神町",
+      engineVersion: "soraban-0.2.0-clausegraph",
+      checkedAt: "2026-10-18T09:00:00.000Z",
+      muniCode: "31204",
+      diagnosisInput: {
+        methodFlags: ["method_night", "method_unknown_future"],
+        airspaceFlags: ["airspace_airport"],
+        plannedDate: "2026-11-20",
+        accessMode: "yes",
+        bvlosObserver: "",
+        manualChoice: "standard",
+        completedProcedureIds: ["miho-airbase-no-fly", "drone-registration", 42],
+      },
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_1234123412341234",
+        category: "II_A",
+        isSpecificFlight: true,
+        procedureCount: 5,
+        didStatus: "unverified",
+      },
+    },
+    // さらに古い形式（runId・diagnosisInput なし）
+    {
+      evidenceId: "ev_0000111122223333",
+      savedAt: "2026-06-01T00:00:00.000Z",
+      loc: { lat: 35.4278, lng: 133.3314 },
+      overall: "unknown",
+      engineVersion: "soraban-0.1.0",
+      checkedAt: "2026-06-01T00:00:00.000Z",
+    },
+  ];
+
+  it("旧形式（Sprint 6 の soraban:history:v1、旧規制 ID を含む）が読み込め、復元時に例外が出ない", () => {
+    storage.setItem("soraban:history:v1", JSON.stringify(sprint6Raw));
+    const loaded = loadHistory();
+    expect(loaded).toHaveLength(2);
+    for (const e of loaded) {
+      expect(() => buildRestorePlan(e)).not.toThrow();
+    }
+    const plan = buildRestorePlan(loaded[0]!);
+    expect(plan.methodFlags).toEqual(["method_night"]);
+    expect(plan.userAirspaceFlags).toEqual(["airspace_airport"]);
+    expect(plan.completedProcedureIds).toEqual(["small-drone-law", "drone-registration"]);
+    expect(plan.manualChoice).toBe("standard");
+    expect(plan.ctx?.droneWeightG).toBe(900);
+    const old = buildRestorePlan(loaded[1]!);
+    expect(old.methodFlags).toEqual([]);
+    expect(old.ctx).toBeUndefined();
+    expect(old.accessMode).toBe("");
+  });
+
+  it("旧形式のエントリに Sprint 7 の判定を追記しても壊れない", () => {
+    storage.setItem("soraban:history:v1", JSON.stringify(sprint6Raw));
+    recordHistoryDiagnosis("run_legacy_1", {
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_new",
+        category: "I",
+        isSpecificFlight: false,
+        procedureCount: 1,
+        didStatus: "not_applicable",
+        didDetail: "industrial_exclusive",
+      },
+    });
+    const e = loadHistory().find((x) => x.runId === "run_legacy_1");
+    expect(e?.diagnosisSummary?.didDetail).toBe("industrial_exclusive");
+    expect(e?.engineVersion).toBe("soraban-0.2.0-clausegraph");
   });
 });

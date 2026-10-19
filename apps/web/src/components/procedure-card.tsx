@@ -29,6 +29,8 @@ const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
   "DIPS2.0": "border-brand-700 text-brand-700 bg-brand-50",
   DRS: "border-ink text-ink bg-paper-soft",
   "条例（各管理者）": "border-rule text-ink-soft bg-paper-soft",
+  // 航空法とは別系統の窓口。信号色（赤）は判定結果専用なので使わず、墨の抜きで区別する。
+  都道府県公安委員会: "border-ink-soft text-ink-soft bg-paper",
 };
 
 export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: Props) {
@@ -40,14 +42,18 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
         done ? "border-signal-green bg-signal-green-soft" : "border-rule bg-paper hover:border-ink/40"
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span
-          className={`inline-flex items-center border px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider ${systemTone[procedure.system]}`}
+          className={`inline-flex items-center whitespace-nowrap border px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider ${systemTone[procedure.system]}`}
         >
           {procedure.system}
         </span>
-        <span className="text-[11px] text-ink-mute">{kindLabel}</span>
-        {procedure.waivableByIIB ? (
+        <span className="whitespace-nowrap text-[11px] text-ink-mute">{kindLabel}</span>
+        {procedure.kind === "facility_consent_notice" ? (
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+            航空法とは別系統（飛行禁止法）
+          </span>
+        ) : procedure.waivableByIIB ? (
           <span className="ml-auto inline-flex items-center gap-1 border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-current" />
             IIB 相当で不要化可
@@ -101,9 +107,15 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
-          title={`${procedure.system} の手続き画面を開く`}
+          title={
+            procedure.kind === "facility_consent_notice"
+              ? "事前通報の方法（警察庁の案内）を開く"
+              : `${procedure.system} の手続き画面を開く`
+          }
         >
-          {procedure.system} で手続き ↗
+          {procedure.kind === "facility_consent_notice"
+            ? `${procedure.system}への通報方法 ↗`
+            : `${procedure.system} で手続き ↗`}
         </a>
         <span aria-hidden className="h-3 w-px bg-rule" />
         <a

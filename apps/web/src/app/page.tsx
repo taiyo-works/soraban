@@ -1,5 +1,11 @@
 import Image from "next/image";
-import { COVERAGE_SUMMARY, SENSITIVE_FACILITY_BUFFER_M } from "@soraban/regulations";
+import {
+  COVERAGE_SUMMARY,
+  DATASET_IDS,
+  getDataset,
+  SENSITIVE_FACILITY_BUFFER_M,
+  SMALL_DRONE_LAW_FACILITIES,
+} from "@soraban/regulations";
 import { RegulationChecker } from "@/components/regulation-checker";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -13,9 +19,6 @@ const formatMuniBreakdown = (
     .join(" + ");
 
 const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
-const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
-  .map(([name]) => name)
-  .join("・");
 const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
 const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
 const HERITAGE_BREAKDOWN = formatMuniBreakdown(
@@ -37,23 +40,23 @@ const COVERAGE_LAYERS: readonly CoverageRow[] = [
   {
     source: "国",
     title: "航空法第132条 — DID（人口集中地区）",
-    coverage: "全国",
-    dataset: "国土数値情報 A16-15 / 平成27年国勢調査ベース",
-    count: "47都道府県・約 4,800 ポリゴン",
+    coverage: "鳥取県・島根県",
+    dataset: `国土数値情報 A16 令和2年国勢調査ベース（工業専用地域を除外：告示第435号、2026-07-01 適用）`,
+    count: `本体データ ${getDataset(DATASET_IDS.did).bundled ? "同梱済み" : "未同梱（判定は未確認に縮退）"}・確認日 ${getDataset(DATASET_IDS.did).verifiedAt}`,
   },
   {
     source: "国",
     title: "航空法 — 空港等周辺",
-    coverage: "全国",
-    dataset: "国土数値情報 C28-20",
-    count: "108 空港",
+    coverage: "山陰・但馬",
+    dataset: "空港 手描き seed（国土数値情報 C28 へ置換予定）",
+    count: "6 空港",
   },
   {
     source: "国",
-    title: "小型無人機等飛行禁止法 — 重要施設",
-    coverage: "美保基地のみ（Phase 0）",
-    dataset: "300m / 1.5km バッファ",
-    count: "1 件（Phase 1 で 170+ 施設対応）",
+    title: "小型無人機等飛行禁止法 — 対象施設の周辺地域",
+    coverage: "鳥取県・島根県で指定を確認した施設",
+    dataset: "敷地境界からおおむね 1,000m（改正法 2026-07-14 施行）。敷地形状は概算",
+    count: `${SMALL_DRONE_LAW_FACILITIES.length} 施設・確認日 ${getDataset(DATASET_IDS.smallDroneLawFacilities).verifiedAt}`,
   },
   {
     source: "市町村",
@@ -424,7 +427,7 @@ export default function Home() {
           <span className="tnum">base · 35°26′03″N · 133°22′50″E（鳥取県西伯郡日吉津村）</span>
         </div>
         <p className="text-[10px] leading-relaxed text-ink-mute/80">
-          出典: 国土交通省「国土数値情報（人口集中地区 A16-15、空港 C28-20）」、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
+          出典: 国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（Soraban 作成）、国土地理院ジオコーダ・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>
     </div>

@@ -1,0 +1,154 @@
+{
+  "_note": "小型無人機等飛行禁止法の対象施設（鳥取県・島根県）。周辺地域は敷地又は区域及びその周囲おおむね 1,000m（令和8年法律第47号、2026-07-14 施行）。敷地形状（polygon）が未収録の施設は中心点＋推定敷地半径で保守側に判定し『概算』と表示する。指定の根拠・確認できなかった施設は README.md を参照。",
+  "datasetId": "small-drone-law-facilities",
+  "verifiedAt": "2026-10-19",
+  "verifiedBy": "generator（Claude、Sprint 7）",
+  "defaultAroundM": 1000,
+  "defaultYellowWidthM": 300,
+  "facilities": [
+    {
+      "id": "jasdf-miho",
+      "name": "航空自衛隊美保基地",
+      "kind": "対象防衛関係施設",
+      "prefCode": "31",
+      "location": "鳥取県境港市（敷地の一部は米子市）",
+      "designation": {
+        "title": "小型無人機等飛行禁止法に基づく対象防衛関係施設の指定について（防衛省、令和2年12月17日）。告示番号は未確認",
+        "date": "2020-12-17",
+        "effectiveDate": "2020-12-27",
+        "url": "https://www.mod.go.jp/j/press/news/2020/12/17b.pdf"
+      },
+      "areaMapUrl": "https://www.pref.tottori.lg.jp/295948.htm",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.4936, "lng": 133.2361 },
+        "estimatedSiteRadiusM": 2000
+      },
+      "geometrySource": "中心点のみ（既存 zones.ts の美保基地中心 35°29′37″N 133°14′10″E＝滑走路中央付近）。推定敷地半径 2,000m は滑走路長 2,500m の半分に誘導路・駐機場・基地施設の広がりを見込んだ保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    },
+    {
+      "id": "jgsdf-yonago",
+      "name": "陸上自衛隊米子駐屯地",
+      "kind": "対象防衛関係施設",
+      "prefCode": "31",
+      "location": "鳥取県米子市両三柳2603",
+      "designation": {
+        "title": "小型無人機等飛行禁止法に基づく対象防衛関係施設の指定について（防衛省、令和5年9月26日）。施設管理者の指定は防衛省告示第182号（令和5年9月26日）",
+        "date": "2023-09-26",
+        "effectiveDate": "2023-10-06",
+        "url": "https://www.mod.go.jp/j/press/news/2023/09/26a.pdf"
+      },
+      "areaMapUrl": "https://www.pref.tottori.lg.jp/295948.htm",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.456215, "lng": 133.324585 },
+        "estimatedSiteRadiusM": 800
+      },
+      "geometrySource": "中心点のみ（国土地理院 住所検索 API『鳥取県米子市両三柳２６０３番地』の地点）。推定敷地半径 800m は保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    },
+    {
+      "id": "jgsdf-izumo",
+      "name": "陸上自衛隊出雲駐屯地",
+      "kind": "対象防衛関係施設",
+      "prefCode": "32",
+      "location": "島根県出雲市松寄下町",
+      "designation": {
+        "title": "小型無人機等飛行禁止法に基づく対象防衛関係施設の指定について（防衛省、令和7年12月16日）。施設管理者の指定は防衛省告示第276号（令和7年12月16日）",
+        "date": "2025-12-16",
+        "effectiveDate": "2025-12-26",
+        "url": "https://www.mod.go.jp/j/press/news/2025/12/16a.pdf"
+      },
+      "areaMapUrl": "https://www.pref.shimane.lg.jp/police/05_application_and_procedures/application_procedures_list/drone/",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.366962, "lng": 132.721909 },
+        "estimatedSiteRadiusM": 1200
+      },
+      "geometrySource": "中心点のみ（国土地理院 住所検索 API『島根県出雲市松寄下町』の町字代表点。番地は未確認）。推定敷地半径 1,200m は町字代表点と敷地のずれを見込んだ保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    },
+    {
+      "id": "jasdf-takaoyama",
+      "name": "航空自衛隊高尾山分屯基地",
+      "kind": "対象防衛関係施設",
+      "prefCode": "32",
+      "location": "島根県松江市美保関町森山632",
+      "designation": {
+        "title": "小型無人機等飛行禁止法に基づく対象防衛関係施設の指定について（防衛省、令和3年12月20日）。告示番号は未確認",
+        "date": "2021-12-20",
+        "effectiveDate": "2021-12-30",
+        "url": "https://www.mod.go.jp/j/press/news/2021/12/20a.html"
+      },
+      "areaMapUrl": "https://www.pref.shimane.lg.jp/police/05_application_and_procedures/application_procedures_list/drone/",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.54443, "lng": 133.201508 },
+        "estimatedSiteRadiusM": 1500
+      },
+      "geometrySource": "中心点のみ（国土地理院 住所検索 API『島根県松江市美保関町森山』の町字代表点。番地は未確認）。推定敷地半径 1,500m は町字代表点と山頂の基地とのずれを見込んだ保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    },
+    {
+      "id": "jasdf-takaoyama-moriyama",
+      "name": "航空自衛隊高尾山分屯基地森山地区",
+      "kind": "対象防衛関係施設",
+      "prefCode": "32",
+      "location": "島根県松江市美保関町森山1488番地2",
+      "designation": {
+        "title": "警察庁『小型無人機等飛行禁止法に基づく対象施設の指定関係』の対象防衛関係施設一覧（No.152）。指定日・告示番号は未確認",
+        "date": null,
+        "effectiveDate": null,
+        "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/shitei.html"
+      },
+      "areaMapUrl": "https://www.pref.shimane.lg.jp/police/05_application_and_procedures/application_procedures_list/drone/",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.54443, "lng": 133.201508 },
+        "estimatedSiteRadiusM": 1500
+      },
+      "geometrySource": "中心点のみ（国土地理院 住所検索 API『島根県松江市美保関町森山』の町字代表点。番地 1488-2 の位置は未確認）。推定敷地半径 1,500m は保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    },
+    {
+      "id": "shimane-npp",
+      "name": "中国電力株式会社 島根原子力発電所",
+      "kind": "対象原子力事業所",
+      "prefCode": "32",
+      "location": "島根県松江市鹿島町片句654番地1",
+      "designation": {
+        "title": "警察庁『小型無人機等飛行禁止法に基づく対象施設の指定関係』の対象原子力事業所一覧（No.12）。告示番号は未確認",
+        "date": null,
+        "effectiveDate": null,
+        "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/shitei.html"
+      },
+      "areaMapUrl": "https://www.pref.shimane.lg.jp/police/05_application_and_procedures/application_procedures_list/drone/",
+      "geometry": {
+        "type": "center",
+        "center": { "lat": 35.539242, "lng": 132.991638 },
+        "estimatedSiteRadiusM": 1500
+      },
+      "geometrySource": "中心点のみ（国土地理院 住所検索 API『島根県松江市鹿島町片句』の町字代表点。番地は未確認）。推定敷地半径 1,500m は保守側の推定（区域図のトレースは未実施）",
+      "aroundM": 1000,
+      "yellowWidthM": 300,
+      "verifiedAt": "2026-10-19",
+      "verifiedBy": "generator（Claude、Sprint 7）"
+    }
+  ]
+}

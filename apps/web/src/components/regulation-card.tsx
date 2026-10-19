@@ -2,6 +2,7 @@ import {
   CONFIDENCE_LABEL,
   formatMachineCondition,
   summarizeConfidence,
+  type DidDetail,
   type RegulationWithStatus,
 } from "@soraban/regulations";
 
@@ -38,12 +39,36 @@ const sourceTone = {
   市町村: "border-rule text-ink-soft",
 } as const;
 
+// DID の判定詳細の表示（「非該当（工業専用地域）」「除外未確認」を区別する）。
+const DID_DETAIL_LABEL: Readonly<Record<DidDetail, string>> = {
+  no_data: "DID：未確認（データなし）",
+  outside_did: "DID：非該当",
+  industrial_exclusive: "DID：非該当（工業専用地域）",
+  in_did: "DID：該当",
+  in_did_near_industrial_boundary: "DID：該当（工業専用地域の境界付近）",
+  in_did_exclusion_unverified: "DID：該当（工業専用地域の除外：未確認）",
+};
+
+// DID 判定詳細の左罫線の色。文言に結論を含めたうえで、罫線は補助として信号色に揃える。
+const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
+  no_data: "border-signal-amber",
+  outside_did: "border-rule",
+  industrial_exclusive: "border-signal-green",
+  in_did: "border-signal-red",
+  in_did_near_industrial_boundary: "border-signal-red",
+  in_did_exclusion_unverified: "border-signal-amber",
+};
+
 export function RegulationCard({ regulation }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
   return (
-    <article className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40">
+    <article
+      data-testid={`regulation-card-${regulation.id}`}
+      data-status={regulation.status}
+      className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40"
+    >
       <div className="flex items-center gap-2">
         <span
           className={`inline-flex items-center border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider ${sourceTone[regulation.source]}`}
@@ -63,6 +88,14 @@ export function RegulationCard({ regulation }: Props) {
       <p className="text-xs leading-relaxed text-ink-soft">
         {regulation.summary}
       </p>
+      {regulation.didDetail ? (
+        <p
+          data-testid="did-detail"
+          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-ink ${DID_DETAIL_TONE[regulation.didDetail]}`}
+        >
+          {DID_DETAIL_LABEL[regulation.didDetail]}
+        </p>
+      ) : null}
       <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
         <span className="eyebrow !text-[9px]">この地点</span>{" "}
         <span className="text-ink-soft">{regulation.note}</span>
@@ -104,6 +137,45 @@ export function RegulationCard({ regulation }: Props) {
           </ul>
         </details>
       ) : null}
+      {/* データ出典と確認日（Sprint 7）・反映済みの改正。判定本文と区別するため脚注として置く */}
+      <div
+        data-testid="regulation-datasets"
+        className="flex flex-col gap-1.5 border-t border-dashed border-rule pt-2.5 text-[11px] leading-relaxed text-ink-mute"
+      >
+        <div>
+          <p className="eyebrow !text-[9px]">使用データ</p>
+          <ul className="mt-0.5 flex flex-col gap-0.5">
+            {regulation.datasets.map((d) => (
+              <li key={d.id}>
+                <span className="text-ink-soft">{d.name}</span>
+                <span className="tnum">
+                  {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {regulation.amendments.length > 0 ? (
+          <div>
+            <p className="eyebrow !text-[9px]">反映済みの改正</p>
+            <ul className="mt-0.5 flex flex-col gap-0.5">
+              {regulation.amendments.map((a) => (
+                <li key={a.id}>
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+                  >
+                    {a.title}
+                  </a>
+                  <span className="tnum">（施行・適用 {a.effectiveDate}）</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
         {regulation.url ? (
           <a
@@ -124,8 +196,11 @@ export function RegulationCard({ regulation }: Props) {
         >
           conf · {CONFIDENCE_LABEL[confidence]}
         </span>
-        <span title="最終検証日" className="tnum">
-          v · {verifiedAtDate}
+        <span
+          title="条文・規制内容を確認した日（使用データの確認日は上の「使用データ」欄）"
+          className="normal-case tracking-normal tnum"
+        >
+          条文確認 {verifiedAtDate}
         </span>
       </div>
     </article>

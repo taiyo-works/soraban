@@ -1,11 +1,33 @@
-import { haversineMeters, pointInPolygon, type LatLng, type Polygon } from "@soraban/geo";
 import {
-  findPermittingExceptions,
-  type ClauseException,
-  type ClauseGraph,
-  type FlightContext,
-} from "./clause-graph";
-import type { ConfidenceLevel, RegulationConfidence } from "./confidence";
+  distanceToPolygonBoundaryMeters,
+  haversineMeters,
+  pointInPolygon,
+  pointInPolygonWithHoles,
+  type LatLng,
+  type Polygon,
+} from "@soraban/geo";
+import type { FlightContext } from "./clause-graph";
+import type { ConfidenceLevel } from "./confidence";
+import {
+  applyExemptions,
+  type DidDetail,
+  type Regulation,
+  type RegulationSource,
+  type RegulationStatus,
+  type RegulationWithStatus,
+} from "./core";
+import {
+  AMENDMENT_MLIT_KOKUJI_435,
+  DATASET_IDS,
+  datasetRef,
+} from "./datasets";
+import type { DidCandidate, DidDataset } from "./did-data";
+import {
+  DEFAULT_INDUSTRIAL_SOURCE,
+  type IndustrialExclusiveSource,
+  type IndustrialZone,
+} from "./industrial-exclusive";
+import { evaluateSmallDroneLaw } from "./small-drone-law";
 import {
   ALL_SENSITIVE_FACILITIES,
   IZUMO_HERITAGE_SITES,
@@ -14,9 +36,6 @@ import {
   KURAYOSHI_PARKS,
   MATSUE_HERITAGE_SITES,
   MATSUE_PARKS,
-  MIHO_AIRBASE_CENTER,
-  MIHO_AIRBASE_RED_M,
-  MIHO_AIRBASE_YELLOW_M,
   MISASA_HERITAGE_SITES,
   MISASA_PARKS,
   OHDA_HERITAGE_SITES,
@@ -38,59 +57,6 @@ import {
   type Park,
 } from "./zones";
 
-export type RegulationSource = "国" | "都道府県" | "市町村";
-
-export type RegulationStatus = "red" | "yellow" | "green" | "unknown";
-
-export type Regulation = {
-  readonly id: string;
-  readonly source: RegulationSource;
-  readonly authority: string;
-  readonly title: string;
-  readonly summary: string;
-  readonly url?: string;
-  readonly dataYear?: number;
-  readonly clauseGraph: ClauseGraph;
-  readonly confidence: RegulationConfidence;
-};
-
-export type RegulationWithStatus = Regulation & {
-  readonly status: RegulationStatus;
-  readonly note: string;
-  /**
-   * FlightContext との照合で適用された permit 効果の例外節。
-   * ここが非空なら、当該規制は status が一段降格されている（red→green / yellow→green）。
-   * UI 側で「この条件で適用された例外」として可視化する。
-   */
-  readonly appliedExceptions?: readonly ClauseException[];
-};
-
-/**
- * 評価器の status と ClauseGraph + ctx を受けて、permit 例外がマッチしていれば
- * status を green に降格しつつ、適用された例外節と note を返すヘルパー。
- * 評価器ごとに同じパターンを書かずに済むよう共通化する。
- *
- * 動作:
- *   - ctx 未指定 / 例外マッチ無し: そのまま返す
- *   - red / yellow から permit 例外マッチ: status="green", appliedExceptions に保存、
- *     note の末尾に「(機体重量 100g 未満により対象外)」のような追記を挿入
- *   - green / unknown: 例外マッチがあっても status は触らない (既に最弱なので)
- */
-const applyExemptions = (
-  base: { status: RegulationStatus; note: string; clauseGraph: ClauseGraph },
-  ctx: FlightContext | undefined,
-): { status: RegulationStatus; note: string; appliedExceptions?: readonly ClauseException[] } => {
-  if (base.status !== "red" && base.status !== "yellow") return base;
-  const matched = findPermittingExceptions(base.clauseGraph, ctx);
-  if (matched.length === 0) return base;
-  const reasons = matched.map((m) => m.condition).join(" / ");
-  return {
-    status: "green",
-    note: `${base.note} ※適用例外: ${reasons}`,
-    appliedExceptions: matched,
-  };
-};
-
 export type RegulationCheckResult = {
   readonly overall: RegulationStatus;
   readonly overallConfidence: ConfidenceLevel;
@@ -101,12 +67,6 @@ export type RegulationCheckResult = {
   readonly evidenceId: string;
   readonly engineVersion: string;
   readonly disclaimer: string;
-};
-
-export type DidCandidate = {
-  readonly muniCode: string;
-  readonly muniName: string;
-  readonly polygon: Polygon;
 };
 
 export type AirportCandidate = {
@@ -126,7 +86,7 @@ const DID_REG: Regulation = {
   summary:
     "国勢調査に基づく人口集中地区（DID）の上空での無人航空機の飛行は、原則として国土交通大臣の許可・承認が必要です。",
   url: "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
-  dataYear: 2015,
+  dataYear: 2020,
   clauseGraph: {
     main: {
       text:
@@ -146,6 +106,13 @@ const DID_REG: Regulation = {
         effect: "permit",
         machine: { type: "permit_holder", value: "mlit" },
       },
+      {
+        id: "did-ex-industrial-exclusive",
+        condition:
+          "都市計画法第8条第1項第1号の工業専用地域内の区域（国土交通省告示第435号、2026-07-01 適用）では DID の飛行許可は不要",
+        effect: "permit",
+        machine: { type: "in_zone", value: "industrial_exclusive" },
+      },
     ],
     conditions: [
       {
@@ -158,46 +125,10 @@ const DID_REG: Regulation = {
   confidence: {
     geometric: "high",
     extraction: "high",
-    verifiedAt: "2025-12-01T00:00:00+09:00",
+    verifiedAt: "2026-10-19T00:00:00+09:00",
   },
-};
-
-const MIHO_REG: Regulation = {
-  id: "miho-airbase-no-fly",
-  source: "国",
-  authority: "防衛省・警察庁",
-  title: "小型無人機等飛行禁止法 — 自衛隊美保基地周辺",
-  summary:
-    "自衛隊美保基地は重要施設として小型無人機等飛行禁止法の対象。基地敷地および周囲おおむね 300m 上空での飛行は禁止されています。",
-  url: "https://www.npa.go.jp/bureau/security/kogata_muzin/index.html",
-  clauseGraph: {
-    main: {
-      text:
-        "対象施設の敷地および周囲おおむね300m上空での小型無人機等の飛行を禁止する。",
-      effect: "deny",
-    },
-    exceptions: [
-      {
-        id: "miho-ex-notice",
-        condition:
-          "対象施設の管理者の同意を得たうえで、都道府県公安委員会へ事前通報を行った場合",
-        effect: "permit",
-        machine: { type: "permit_holder", value: "facility_manager_and_pref_pubsafety" },
-      },
-    ],
-    conditions: [
-      {
-        id: "miho-cond-300m",
-        description: "対象施設の敷地境界からおおむね300m以内であること",
-        machine: { type: "in_zone", value: "300m_buffer" },
-      },
-    ],
-  },
-  confidence: {
-    geometric: "medium",
-    extraction: "high",
-    verifiedAt: "2026-04-25T00:00:00+09:00",
-  },
+  datasets: [datasetRef(DATASET_IDS.did), datasetRef(DATASET_IDS.industrialExclusive)],
+  amendments: [AMENDMENT_MLIT_KOKUJI_435],
 };
 
 const AIRPORT_REG: Regulation = {
@@ -236,6 +167,8 @@ const AIRPORT_REG: Regulation = {
     extraction: "high",
     verifiedAt: "2026-04-25T00:00:00+09:00",
   },
+  datasets: [datasetRef(DATASET_IDS.airports)],
+  amendments: [],
 };
 
 // 文化財保護法第125条 + 自治体文化財保護条例も自治体ごとに構造が同形のため、
@@ -284,6 +217,8 @@ const buildMunicipalHeritageReg = (params: {
     extraction: "low",
     verifiedAt: params.verifiedAt,
   },
+  datasets: [datasetRef(DATASET_IDS.heritage)],
+  amendments: [],
 });
 
 // 都道府県迷惑行為等防止条例も同形（鳥取県・島根県とも条文構造はほぼ一致）。
@@ -334,6 +269,8 @@ const buildPrefecturalNuisanceReg = (params: {
     extraction: "low",
     verifiedAt: params.verifiedAt,
   },
+  datasets: [datasetRef(DATASET_IDS.sensitiveFacilities)],
+  amendments: [],
 });
 
 // 都市公園条例は自治体ごとに条文・例外節がほぼ同形のため、
@@ -384,6 +321,8 @@ const buildMunicipalParkReg = (params: {
     extraction: "medium",
     verifiedAt: params.verifiedAt,
   },
+  datasets: [datasetRef(DATASET_IDS.parks)],
+  amendments: [],
 });
 
 const TOTTORI_PARK_REG = buildMunicipalParkReg({
@@ -544,10 +483,40 @@ const SHIMANE_NUISANCE_REG = buildPrefecturalNuisanceReg({
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
+export type EvaluateDidOptions = {
+  /** 工業専用地域データの読み込み口。未指定は同梱データ（DEFAULT_INDUSTRIAL_SOURCE）。 */
+  readonly industrial?: IndustrialExclusiveSource;
+  /** DID データの基準年（note の表記用）。未指定は 2020（令和2年国勢調査）。 */
+  readonly baseYear?: number | null;
+};
+
+const didYearLabel = (baseYear: number | null | undefined): string =>
+  baseYear === 2020 || baseYear === undefined
+    ? "令和2年国勢調査"
+    : baseYear === null
+      ? "基準年不明のデータ"
+      : `${baseYear}年国勢調査`;
+
+/** 工業専用地域の除外が未確認（データ未収録）の場合に note・UI に出す文言。 */
+export const INDUSTRIAL_EXCLUSION_UNVERIFIED_NOTE =
+  "工業専用地域の除外：未確認（データ未収録）。工業専用地域内であれば DID の飛行許可は不要。市の用途地域図で確認してください。";
+
+/**
+ * 航空法の DID（人口集中地区）判定。工業専用地域（国土交通省告示第435号、2026-07-01 適用）を差し引く。
+ *
+ *   1. DID データなし → unknown（未確認）
+ *   2. DID 外 → green（非該当）
+ *   3. DID 内・当該市町村の工業専用地域が収録済み・境界から内側余裕（既定 10m）以上内側 → green（非該当（工業専用地域））
+ *   4. DID 内・収録済み・工業専用地域外、または境界から内側余裕未満 → red（該当。境界付近はその旨を note に出す）
+ *   5. DID 内・当該市町村の工業専用地域が未収録 → red（該当として扱う）＋「工業専用地域の除外：未確認」
+ *
+ * candidates には DidCandidate[]（後方互換）または DidDataset を渡せる。
+ */
 export const evaluateDid = (
   loc: LatLng,
-  candidates: readonly DidCandidate[] | null,
+  candidates: readonly DidCandidate[] | DidDataset | null,
   ctx?: FlightContext,
+  opts?: EvaluateDidOptions,
 ): RegulationWithStatus => {
   // DID ポリゴンデータ自体が読み込めない（未整備・未配置・都道府県不明）場合は
   // 「DID 外 = green」と断定せず unknown（未確認）に倒す（フェイルセーフ）。
@@ -555,20 +524,77 @@ export const evaluateDid = (
     return {
       ...DID_REG,
       status: "unknown",
+      didDetail: "no_data",
       note: "DID（人口集中地区）データを読み込めないため、DID 該当／非該当を確認できません（未確認）。地理院地図・DIPS で必ず確認してください。",
     };
   }
-  const hit = candidates.find((c) => pointInPolygon(loc, c.polygon));
-  const base = hit
-    ? {
-        status: "red" as RegulationStatus,
-        note: `判定地点は ${hit.muniName} の DID（人口集中地区, 平成27年国勢調査）内です。原則として許可・承認なく飛行できません。`,
-      }
-    : {
-        status: "green" as RegulationStatus,
-        note: "判定地点は平成27年国勢調査ベースの DID 外です。最新は国土交通省 DIPS で要再確認。",
-      };
-  return { ...DID_REG, ...applyExemptions({ ...base, clauseGraph: DID_REG.clauseGraph }, ctx) };
+  const list: readonly DidCandidate[] = Array.isArray(candidates)
+    ? candidates
+    : (candidates as DidDataset).candidates;
+  const baseYear = Array.isArray(candidates)
+    ? opts?.baseYear
+    : ((candidates as DidDataset).baseYear ?? opts?.baseYear ?? null);
+  const yearLabel = didYearLabel(baseYear);
+  const hit = list.find((c) => pointInPolygon(loc, c.polygon));
+  if (!hit) {
+    return {
+      ...DID_REG,
+      status: "green",
+      didDetail: "outside_did",
+      note: `判定地点は DID（人口集中地区、${yearLabel}）の外です（非該当）。最新は国土交通省 DIPS・地理院地図で要再確認。`,
+    };
+  }
+
+  const industrial = opts?.industrial ?? DEFAULT_INDUSTRIAL_SOURCE;
+  const coverage = industrial.coverage(hit.muniCode);
+  const inDidPrefix = `判定地点は ${hit.muniName} の DID（人口集中地区、${yearLabel}）内です。`;
+  const margin = industrial.insideMarginM;
+  const zoneMuniName = (code: string): string => industrial.coverage(code)?.muniName ?? code;
+
+  // 地点を含む工専を、DID の市町村に限らず収録済みの全市町村から探す（市町村境をまたぐ重なりに対応）。
+  // 複数に含まれる場合は境界から最も深いものを採る。
+  let inside: { zone: IndustrialZone; depth: number } | null = null;
+  for (const z of industrial.allZones()) {
+    if (!pointInPolygonWithHoles(loc, z.rings)) continue;
+    const depth = distanceToPolygonBoundaryMeters(loc, z.rings);
+    if (inside === null || depth > inside.depth) inside = { zone: z, depth };
+  }
+
+  let status: RegulationStatus;
+  let note: string;
+  let didDetail: DidDetail;
+  if (inside && inside.depth >= margin) {
+    // 分岐 3: 工業専用地域の内側 → 非該当（工業専用地域）。
+    const zName = zoneMuniName(inside.zone.muniCode);
+    return {
+      ...DID_REG,
+      status: "green",
+      didDetail: "industrial_exclusive",
+      note: `${inDidPrefix}ただし ${zName} の工業専用地域内（境界から内側におよそ ${Math.floor(inside.depth)}m）のため、DID の飛行許可は不要です（非該当（工業専用地域）。国土交通省告示第435号、2026-07-01 適用）。空港等周辺・150m 以上・緊急用務空域の許可と、夜間・目視外などの飛行の方法の承認は別途必要です。この判定は地点単位であり、飛行範囲全体が工業専用地域内かは別途確認してください。`,
+    };
+  }
+  if (inside) {
+    // 分岐 4（境界付近）: 工専の内側だが内側余裕未満 → 除外せず該当（安全側）。
+    status = "red";
+    didDetail = "in_did_near_industrial_boundary";
+    note = `${inDidPrefix}${zoneMuniName(inside.zone.muniCode)} の工業専用地域の境界から内側およそ ${Math.floor(inside.depth)}m で、境界付近（内側 ${margin}m 未満）のため除外せず該当として扱います。原則として許可・承認なく飛行できません。`;
+  } else if (coverage?.status !== "recorded") {
+    // 分岐 5: 当該市町村の工業専用地域が未収録 → 該当として扱い、除外は未確認と明示（縮退表示）。
+    status = "red";
+    didDetail = "in_did_exclusion_unverified";
+    note = `${inDidPrefix}原則として許可・承認なく飛行できません。${INDUSTRIAL_EXCLUSION_UNVERIFIED_NOTE}`;
+  } else {
+    // 分岐 4: 収録済みの工業専用地域のいずれにも含まれない。
+    status = "red";
+    didDetail = "in_did";
+    note = `${inDidPrefix}収録済みの工業専用地域（${hit.muniName} を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。`;
+  }
+  // 工業専用地域の permit 例外節は位置で判定済みのため、ctx の例外照合は重量・許可のみが効く。
+  return {
+    ...DID_REG,
+    didDetail,
+    ...applyExemptions({ status, note, clauseGraph: DID_REG.clauseGraph }, ctx),
+  };
 };
 
 export const evaluateAirports = (
@@ -624,43 +650,14 @@ export const evaluateAirports = (
   };
 };
 
+/**
+ * @deprecated Sprint 7 で evaluateSmallDroneLaw（対象施設データ・敷地境界から 1,000m）に置き換え。
+ * 後方互換のため残す（美保基地だけでなく全対象施設で判定する）。
+ */
 export const evaluateMihoBase = (
   loc: LatLng,
   ctx?: FlightContext,
-): RegulationWithStatus => {
-  const distance = haversineMeters(loc, MIHO_AIRBASE_CENTER);
-  if (distance <= MIHO_AIRBASE_RED_M) {
-    return {
-      ...MIHO_REG,
-      ...applyExemptions(
-        {
-          status: "red",
-          note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。小型無人機等飛行禁止法の対象範囲（おおむね 300m）に含まれます。`,
-          clauseGraph: MIHO_REG.clauseGraph,
-        },
-        ctx,
-      ),
-    };
-  }
-  if (distance <= MIHO_AIRBASE_YELLOW_M) {
-    return {
-      ...MIHO_REG,
-      ...applyExemptions(
-        {
-          status: "yellow",
-          note: `判定地点は美保基地中心からおよそ ${Math.round(distance)} m。空港周辺の進入表面・要確認エリアに該当する可能性があります。`,
-          clauseGraph: MIHO_REG.clauseGraph,
-        },
-        ctx,
-      ),
-    };
-  }
-  return {
-    ...MIHO_REG,
-    status: "green",
-    note: `判定地点は美保基地中心からおよそ ${(distance / 1000).toFixed(1)} km 離れており、小型無人機等飛行禁止法の対象外です。`,
-  };
-};
+): RegulationWithStatus => evaluateSmallDroneLaw(loc, ctx);
 
 const TOTTORI_MUNI_CODE = "31201";
 const YONAGO_MUNI_CODE = "31202";
@@ -1062,8 +1059,6 @@ export {
   MATSUE_PARKS,
   MATSUE_SENSITIVE_FACILITIES,
   MIHO_AIRBASE_CENTER,
-  MIHO_AIRBASE_RED_M,
-  MIHO_AIRBASE_YELLOW_M,
   MISASA_HERITAGE_SITES,
   MISASA_PARKS,
   MISASA_SENSITIVE_FACILITIES,
@@ -1092,6 +1087,82 @@ export {
   YURIHAMA_SENSITIVE_FACILITIES,
 } from "./zones";
 export type { HeritageSite, Park, SensitiveFacility } from "./zones";
+
+export type {
+  DidDetail,
+  FacilityHit,
+  Regulation,
+  RegulationSource,
+  RegulationStatus,
+  RegulationWithStatus,
+} from "./core";
+export { applyExemptions } from "./core";
+
+// ── データセット台帳・反映済みの法令改正（Sprint 7）──
+export type { AmendmentRef, DatasetRecord, DatasetRef } from "./datasets";
+export {
+  ALL_AMENDMENTS,
+  ALL_DATASETS,
+  AMENDMENT_MLIT_KOKUJI_435,
+  AMENDMENT_SMALL_DRONE_LAW_2026,
+  DATASET_IDS,
+  datasetRef,
+  formatAmendmentRef,
+  formatDatasetRef,
+  getDataset,
+} from "./datasets";
+
+// ── DID・工業専用地域のデータ読み込み口（Sprint 7）──
+export type {
+  DidBundleFeature,
+  DidBundleFile,
+  DidCandidate,
+  DidDataset,
+} from "./did-data";
+export {
+  BUNDLED_DID_PREF_CODES,
+  didBundleToDataset,
+  getBundledDidFile,
+  loadBundledDid,
+} from "./did-data";
+export type {
+  IndustrialBundleFile,
+  IndustrialCoverageEntry,
+  IndustrialCoverageStatus,
+  IndustrialDidOverlap,
+  IndustrialExclusiveSource,
+  IndustrialZone,
+} from "./industrial-exclusive";
+export {
+  createIndustrialSource,
+  DEFAULT_INDUSTRIAL_SOURCE,
+  getBundledIndustrialFiles,
+  INDUSTRIAL_COVERAGE,
+  INDUSTRIAL_INSIDE_MARGIN_M,
+  industrialBundleToZones,
+} from "./industrial-exclusive";
+
+// ── 小型無人機等飛行禁止法（Sprint 7）──
+export type {
+  FacilityMeasurement,
+  SmallDroneFacility,
+  SmallDroneFacilityGeometry,
+} from "./small-drone-law";
+export {
+  evaluateSmallDroneLaw,
+  isSmallDroneLawTriggered,
+  LEGACY_MIHO_REG_ID,
+  measureFacility,
+  parseSmallDroneFacility,
+  SMALL_DRONE_LAW_AROUND_M,
+  SMALL_DRONE_LAW_DEFAULT_YELLOW_WIDTH_M,
+  SMALL_DRONE_LAW_FACILITIES,
+  SMALL_DRONE_LAW_REG_ID,
+} from "./small-drone-law";
+
+// ── 証跡（Sprint 7）──
+export type { CheckEvidencePayloadInput } from "./evidence";
+export { buildCheckEvidencePayload, ENGINE_VERSION, PREVIOUS_ENGINE_VERSIONS } from "./evidence";
 
 export type {
   ClauseEffect,
@@ -1151,6 +1222,10 @@ export {
   getCategoryDefinition,
   extractAirspaceFlagsFromRegulations,
   buildDiagnosisEvidencePayload,
+  deriveDidDetailFromRegulations,
+  formatDidDetermination,
+  mergeAirspaceFlags,
+  SMALL_DRONE_LAW_PROCEDURE_ID,
 } from "./diagnosis";
 
 // ── 開庁日計算（提出期限の逆算・期限カレンダー）──

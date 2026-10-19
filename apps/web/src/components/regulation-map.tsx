@@ -14,10 +14,11 @@ import {
   ALL_MUNICIPAL_PARKS,
   ALL_SENSITIVE_FACILITIES,
   COVERAGE_SUMMARY,
-  MIHO_AIRBASE_CENTER,
-  MIHO_AIRBASE_RED_M,
-  MIHO_AIRBASE_YELLOW_M,
+  DATASET_IDS,
+  getDataset,
   SENSITIVE_FACILITY_BUFFER_M,
+  SMALL_DRONE_LAW_FACILITIES,
+  type SmallDroneFacility,
 } from "@soraban/regulations";
 
 type Props = {
@@ -71,7 +72,34 @@ const EMPTY_FC: GeoJSON.FeatureCollection = {
   features: [],
 };
 
-type LayerKey = "did" | "airports" | "base" | "parks" | "heritage" | "sensitive";
+type LayerKey =
+  | "did"
+  | "industrial"
+  | "airports"
+  | "base"
+  | "parks"
+  | "heritage"
+  | "sensitive";
+
+// 凡例の出典表記（データセット台帳から組み立てる）。
+const datasetLegend = (id: string): string => {
+  const d = getDataset(id);
+  const year = d.baseYear !== null ? `・基準年 ${d.baseYear}` : "";
+  const bundled = d.bundled ? "" : "・本体データ未同梱";
+  return `${d.name}${year}・確認日 ${d.verifiedAt}${bundled}`;
+};
+
+// 飛行禁止法の対象施設：敷地（ポリゴン、または中心点＋推定半径）と、その外側 1,000m・
+// 1,000m＋yellow 幅の帯を描く。中心点のみの施設は円で近似（概算）。
+const facilitySiteRings = (f: SmallDroneFacility, extraM: number): Polygon[] => {
+  const g = f.geometry;
+  if (g.type === "center") {
+    return [circlePolygon(g.center, g.estimatedSiteRadiusM + extraM, 96)];
+  }
+  // ポリゴン敷地の外側バッファは描画上の近似として外周の各頂点を中心とする円で表す。
+  if (extraM === 0) return g.rings.slice(0, 1);
+  return g.rings[0]!.map((p) => circlePolygon(p, extraM, 48));
+};
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
 // レジストリ追加だけで自動的に表記が伸びる。
@@ -96,28 +124,39 @@ const LAYER_GROUPS: ReadonlyArray<{
   readonly key: LayerKey;
   readonly label: string;
   readonly source: string;
+  /** 色の意味など、ラベルだけでは伝わらない補足（任意） */
+  readonly detail?: string;
   readonly swatch: string;
   readonly layerIds: readonly string[];
 }> = [
   {
     key: "did",
     label: "DID（航空法132条）",
-    source: "国 / 国土数値情報 A16-15",
+    source: datasetLegend(DATASET_IDS.did),
     swatch: "bg-rose-500/40 ring-rose-600 rounded-sm",
     layerIds: ["did-fill", "did-outline"],
   },
   {
+    key: "industrial",
+    label: "工業専用地域（DID から除外・告示第435号）",
+    source: datasetLegend(DATASET_IDS.industrialExclusive),
+    detail: "収録済みの市町村のみ表示",
+    swatch: "bg-sky-500/40 ring-sky-700 rounded-sm",
+    layerIds: ["industrial-fill", "industrial-outline"],
+  },
+  {
     key: "airports",
     label: "空港等周辺",
-    source: "国 / 国土数値情報 C28-20",
+    source: datasetLegend(DATASET_IDS.airports),
     swatch: "bg-violet-500/40 ring-violet-700 rounded-sm",
     layerIds: ["airports-fill", "airports-outline"],
   },
   {
     key: "base",
-    label: "美保基地 300m / 1.5km",
-    source: "小型無人機等飛行禁止法",
-    swatch: "bg-rose-500/50 ring-rose-700 rounded-full",
+    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（敷地＋おおむね 1,000m）`,
+    source: `${datasetLegend(DATASET_IDS.smallDroneLawFacilities)}・敷地形状は概算`,
+    detail: "赤：敷地と周辺地域／黄：外側の要確認帯（色の意味は規制カードに記載）",
+    swatch: "bg-rose-500/50 ring-2 ring-amber-500 rounded-full",
     layerIds: ["base-yellow-fill", "base-yellow-outline", "base-red-fill", "base-red-outline"],
   },
   {
@@ -156,6 +195,7 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
   const loadedPrefRef = useRef<string | null>(null);
   const [layerVisibility, setLayerVisibility] = useState<Record<LayerKey, boolean>>({
     did: true,
+    industrial: true,
     airports: true,
     base: true,
     parks: true,
@@ -178,12 +218,13 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
       .setLngLat([center.lng, center.lat])
       .addTo(map);
 
-    const baseRedFc = polygonsToFeatureCollection([
-      circlePolygon(MIHO_AIRBASE_CENTER, MIHO_AIRBASE_RED_M),
-    ]);
-    const baseYellowFc = polygonsToFeatureCollection([
-      circlePolygon(MIHO_AIRBASE_CENTER, MIHO_AIRBASE_YELLOW_M),
-    ]);
+    // 敷地＋1,000m（red）と、その外側の yellow 幅（告示の区域図で要確認）。
+    const baseRedFc = polygonsToFeatureCollection(
+      SMALL_DRONE_LAW_FACILITIES.flatMap((f) => facilitySiteRings(f, f.aroundM)),
+    );
+    const baseYellowFc = polygonsToFeatureCollection(
+      SMALL_DRONE_LAW_FACILITIES.flatMap((f) => facilitySiteRings(f, f.aroundM + f.yellowWidthM)),
+    );
     const parksFc = polygonsToFeatureCollection(ALL_MUNICIPAL_PARKS.map((p) => p.polygon));
     const heritageFc = polygonsToFeatureCollection(
       ALL_HERITAGE_SITES.map((s) => s.polygon),
@@ -210,7 +251,32 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
         paint: { "line-color": "#dc2626", "line-width": 1, "line-dasharray": [2, 2] },
       });
 
-      // 空港 (全国・国土数値情報 C28-20)
+      // 工業専用地域（DID 除外）— /api/industrial から（収録済み市町村のみ）
+      map.addSource("industrial", { type: "geojson", data: EMPTY_FC });
+      map.addLayer({
+        id: "industrial-fill",
+        type: "fill",
+        source: "industrial",
+        paint: { "fill-color": "#0284c7", "fill-opacity": 0.22 },
+      });
+      map.addLayer({
+        id: "industrial-outline",
+        type: "line",
+        source: "industrial",
+        paint: { "line-color": "#0369a1", "line-width": 1.2 },
+      });
+      void fetch("/api/industrial")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!data) return;
+          const src = mapRef.current?.getSource("industrial") as GeoJSONSource | undefined;
+          if (src) src.setData(data as GeoJSON.FeatureCollection);
+        })
+        .catch(() => {
+          /* ignore */
+        });
+
+      // 空港（山陰・但馬の供用中空港 seed）
       map.addSource("airports", { type: "geojson", data: EMPTY_FC });
       map.addLayer({
         id: "airports-fill",
@@ -438,7 +504,12 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
                     />
                     <span className="flex flex-1 flex-col leading-tight">
                       <span className="font-medium text-ink">{group.label}</span>
-                      <span className="text-[10px] text-ink-mute">
+                      {group.detail ? (
+                        <span className="mt-0.5 text-[10px] text-ink-soft">
+                          {group.detail}
+                        </span>
+                      ) : null}
+                      <span className="mt-0.5 text-[10px] text-ink-mute">
                         {group.source}
                       </span>
                     </span>
