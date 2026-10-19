@@ -21,7 +21,9 @@ import {
   type RegulationCheckResult,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
+import { isEvidenceLogEnabled, type DbEnv } from "@soraban/db";
 import { collectDatasets, computeDiagnosisEvidenceId } from "./check-core";
+import { runEvidenceWriteSafely, type WriteEvidence } from "./evidence-log";
 
 export type RunCheck = (loc: LatLng, ctx?: FlightContext) => Promise<RegulationCheckResult>;
 
@@ -48,7 +50,27 @@ const parseFlightContext = (raw: unknown): FlightContext | undefined => {
   return Object.keys(ctx).length > 0 ? ctx : undefined;
 };
 
-export const handleCheckPost = async (req: Request, runCheck: RunCheck): Promise<Response> => {
+/** 応答後に実行する処理の登録口。route.ts は Next.js の after を渡す。 */
+export type ScheduleAfterResponse = (task: () => Promise<void>) => void;
+
+export type CheckPostOptions = {
+  /** 証跡の書き込み（Sprint 8）。未指定なら書かない（DB 未設定時は route.ts が渡さない）。 */
+  readonly writeEvidence?: WriteEvidence;
+  /** 応答後の実行方法。未指定なら待たずに起動するだけ（テスト用）。 */
+  readonly schedule?: ScheduleAfterResponse;
+  /** EVIDENCE_LOG を読む環境変数（既定は process.env）。 */
+  readonly env?: DbEnv;
+};
+
+const fireAndForget: ScheduleAfterResponse = (task) => {
+  void task();
+};
+
+export const handleCheckPost = async (
+  req: Request,
+  runCheck: RunCheck,
+  options: CheckPostOptions = {},
+): Promise<Response> => {
   let body: unknown;
   try {
     body = await req.json();
@@ -62,6 +84,16 @@ export const handleCheckPost = async (req: Request, runCheck: RunCheck): Promise
   }
   const ctx = parseFlightContext((body as { ctx?: unknown })?.ctx);
   const result = await runCheck({ lat, lng }, ctx);
+
+  // 証跡の書き込みは応答を待たせない。失敗しても応答の本文・状態コードは変えない。
+  const write = options.writeEvidence;
+  if (write && isEvidenceLogEnabled(options.env ?? process.env)) {
+    try {
+      (options.schedule ?? fireAndForget)(() => runEvidenceWriteSafely(write, result, { lat, lng }));
+    } catch (e) {
+      console.error(`[evidence_log] schedule failed: ${e instanceof Error ? e.name : "Error"}`);
+    }
+  }
   return NextResponse.json(result);
 };
 

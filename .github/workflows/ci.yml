@@ -56,3 +56,65 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  # Sprint 8: DB を使うテスト。PostgreSQL 18 + PostGIS 3.6 のサービスコンテナだけを使う。
+  # Neon の接続文字列・API キーは参照しない（GitHub に秘密情報を置かない）。
+  db:
+    name: db (PostGIS service container)
+    runs-on: ubuntu-latest
+    needs: verify
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # 管理用（テストが使い捨てのデータベースを作る）。
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      # TEST_DATABASE_URL が無いときにスキップで緑にしない。
+      REQUIRE_DB_TESTS: "1"
+      EXPECT_PG_MAJOR: "18"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: create migration target database
+        run: psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c "create database soraban_ci"
+      - name: pnpm db:migrate（空の DB に全マイグレーションを適用）
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+      - name: pnpm db:migrate（2 回目は何もしない）
+        run: |
+          out=$(pnpm db:migrate)
+          echo "$out"
+          echo "$out" | grep -q "未適用のマイグレーションはありません"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc 'select count(*) from schema_migrations')" = "3"
+        env:
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+      - name: pnpm db:status
+        run: pnpm db:status
+        env:
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+      - name: REQUIRE_DB_TESTS=1 で TEST_DATABASE_URL が無いと失敗することを確認
+        run: |
+          if env -u TEST_DATABASE_URL pnpm test:db; then
+            echo "TEST_DATABASE_URL なしで test:db が成功してしまった（スキップで緑になっている）" >&2
+            exit 1
+          fi
+      - run: pnpm build
+      - run: pnpm test:db

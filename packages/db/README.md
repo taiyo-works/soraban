@@ -1,40 +1,158 @@
 # `@soraban/db`
 
-Supabase / PostGIS バックエンドへの接続層。**Phase 0/1 前半は実 DB に接続せず**
-（評価エンジンは in-memory + ローカル GeoJSON で完結）、Phase 1 中盤の接続化に
-備えて型と client factory のみ提供している。
+Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `soraban`）への接続層と、SQL マイグレーション（Sprint 8）。
 
-## 役割
+- ドライバ：`pg`（node-postgres）。ローカル・CI の PostgreSQL コンテナと本番 Neon で同じドライバを使う。
+- マイグレーション：`packages/db/migrations/NNNN_名前.sql` と自前の最小ランナー（`src/migrate.ts`）。
+- 認証（Neon Auth）・運航管理の表は本パッケージの対象外（Sprint 10 以降）。
 
-- `Database` 型（`supabase/migrations/0001_initial_schema.sql` と同期）
-- `createSorabanClient(config)`: `@supabase/supabase-js` の薄いラッパー
-- `sorabanConfigFromEnv()`: `SUPABASE_URL` / `SUPABASE_ANON_KEY` から構成読み込み
+## 環境変数
 
-## なぜ Phase 0/1 前半は接続しないか
-
-1. 特許①の「例規集自動構造化＋地理空間DBへの変換システム」が出願完了するまで、地理空間DBの実体を外部に出さない（情報統制）
-2. 評価エンジンの ClauseGraph 設計が Phase 1 中で揺れる可能性があり、スキーマ確定を待ってから接続したい
-3. ローカル GeoJSON + JSON ファイルでも 12 自治体規模までは十分動く
-
-## Phase 1 接続化の手順（参考）
-
-1. Supabase プロジェクト作成（dashboard.supabase.com / 山陰拠点なら ap-northeast-1）
-2. `supabase/.env` に Supabase CLI ログイン用設定（プロジェクトリンク）
-3. `supabase db push` で `supabase/migrations/000{1,2}_*.sql` を本番に適用
-4. 自動生成型: `supabase gen types typescript --linked > packages/db/src/database.types.ts`
-5. 本ファイルの `Database` を `import type { Database } from "./database.types"` に置換
-6. `apps/web/src/server/regulation-check.ts` から `createSorabanClient(config)` を呼び、`evaluate*()` 評価器の入力源を順次 DB に切り替え
-7. ClauseGraph + ポリゴンを seed する script を `packages/regulations/scripts/seed-db.ts` に追加（`zones.ts` の値を流し込む）
-
-## スキーマ概要
-
-`supabase/migrations/0001_initial_schema.sql` 参照。要点:
-
-| テーブル | 役割 | 行数の目安 |
+| 変数 | 用途 | 置き場所 |
 |---|---|---|
-| `regulations` | 1 行 = 1 (規則 × 管轄)。米子市公園条例、鳥取県迷惑行為等防止条例、など | Phase 1 完了時 ~30 |
-| `regulation_zones` | 1 行 = 1 ポリゴン or バッファ中心点。米子市公園条例 → 8 ゾーン、など | Phase 1 完了時 ~300 |
-| `evidence_log` | 監査トレイル: 判定リクエスト 1 件 = 1 行 | デモ運用中も追記 |
+| `DATABASE_URL` | アプリ用。Neon の **Pooled connection**（ホスト名に `-pooler`）。未設定なら DB に接続せず、地点判定・申請支援は DB なしで動く | Vercel の Production だけ。ローカルは `.env.local` |
+| `DATABASE_URL_UNPOOLED` | マイグレーション用。Neon の **Direct connection** | 実行する人の手元のシェルだけ（ファイルや履歴に残さない） |
+| `EVIDENCE_LOG` | `off` で証跡（`evidence_log`）の書き込みを止める | 必要なときだけ |
+| `TEST_DATABASE_URL` / `REQUIRE_DB_TESTS` | `pnpm test:db` の接続先（管理用。テストが使い捨てのデータベースを作る）／`1` で未設定時に失敗させる | CI の `db` ジョブ、ローカル |
 
-`clause_graph` は JSONB で `packages/regulations/src/clause-graph.ts` の
-`ClauseGraph` 型と同形を保持し、GIN index で例外節検索が効くようにしている。
+値（接続文字列）はリポジトリに置かない。`.env.example` には名前だけを書いている。
+
+## 接続層（`src/pool.ts`・`src/config.ts`）
+
+- `getPool()` は `DATABASE_URL` から `pg.Pool` を遅延生成して使い回す。未設定なら `null`（接続を試みない）。`isDbConfigured()` で判定できる。
+- 設定値は `DB_POOL_DEFAULTS`（`src/config.ts`）の 1 か所にまとめている。
+
+| 設定 | 値 | 理由 |
+|---|---|---|
+| 接続タイムアウト | 5 秒 | scale-to-zero で停止中の計算資源の起動待ち（数百 ms〜数秒）を見込む |
+| 文のタイムアウト | 5 秒（クライアント側 `query_timeout`） | Neon のプール（PgBouncer）は未対応の起動パラメータを拒否するため、サーバー側 `statement_timeout` を起動パラメータで送らない |
+| 最大接続数 | 3 | 関数 1 インスタンスあたり。Neon 側のプールが多重化する |
+| 待機接続の破棄 | 5 秒 | 関数の延長稼働と計算資源の起動維持を短くする |
+
+### `attachDatabasePool`（`@vercel/functions`）：採用
+
+- Vercel の推奨（Fluid compute でプールを使い回す場合）。プール作成直後に `attachDatabasePool(pool)` を呼ぶと、関数が停止する前に待機接続が破棄されるまで関数を生かす（接続の取り残しを防ぐ）。
+- Vercel 以外（`VERCEL_URL`・`VERCEL_REGION` が無い環境：ローカル・CI・`next build`）では何もしない（`@vercel/functions@3.10.1` の実装で確認、2026-10-19）。
+- 延長されるのは待機接続の破棄時間（5 秒）＋α に限られるため、従量課金への影響は小さい。
+
+## マイグレーション
+
+### 規則
+
+- ファイルは `migrations/NNNN_名前.sql`（4 桁の連番、名前は英小文字・数字・`_`）。0001 から欠番なく並べる。
+- 適用済みのファイルは変更しない（チェックサム不一致で中止する）。変更は新しい番号のファイルで行う。
+- マイグレーションは追加のみとし、旧コードでも動く形にする（本番は「適用 → デプロイ」の順のため）。
+- 新しい版を足したら `src/migrations-manifest.ts` にも版を足す（`/api/health/db` が「未適用の有無」に使う。不一致は単体テストで検出）。
+- 表を足したら、手書きの行型（`src/types.ts`）と列名の一覧も足す（`src/schema-columns.test.ts` が SQL と突き合わせる）。アプリ用ロールへの権限付与も同じマイグレーションに書く（後述「DB ロール」）。
+
+| 版 | 内容 |
+|---|---|
+| 0001 | `regulations`・`regulation_zones`・enum・`set_updated_at`（旧スキーマの移植。意味は変えていない） |
+| 0002 | `evidence_log`（旧スキーマの移植） |
+| 0003 | `evidence_log.datasets`（判定で使ったデータセット）、`evidence_id` の説明の更新、アプリ用ロールへの権限付与 |
+
+### ランナー
+
+```sh
+pnpm db:status                         # 適用済み・未適用・不一致の一覧（DB を変更しない）
+pnpm db:migrate --target <ホスト名>    # 未適用を番号順に適用（localhost・127.0.0.1 は --target 不要）
+```
+
+- 接続先は `DATABASE_URL_UNPOOLED`。ホスト名に `-pooler` を含む接続文字列は拒否する（プール経由ではセッション単位のロックが効かない）。
+- `localhost`・`127.0.0.1` 以外へ適用するときは `--target` が必須。接続文字列のホスト名と一致しなければ中止する（本番への取り違え防止）。
+- 実行前に接続先のホスト名・データベース名と適用予定の版を表示する。パスワードは表示しない。
+- 適用記録は `schema_migrations`（版、名前、SHA-256 チェックサム、適用日時、所要時間）。ランナーが自分で作る。
+- 同時実行は `pg_advisory_lock` で防ぐ。1 ファイル 1 トランザクションで適用し、失敗したファイルは記録せず、以降も適用せずに非 0 で終了する。
+- チェックサム不一致、番号の重複・欠番、ファイルにない版が適用記録にある場合は、何も適用せず非 0 で終了する。
+- `next build`・Vercel のビルドではランナーを呼ばない。
+
+## DB 接続確認 API（`GET /api/health/db`）
+
+- 返す値：`configured`、`reachable`、`latencyMs`、`postgresMajorVersion`、`postgisVersion`、`latestAppliedMigration`、`hasPendingMigrations`。接続文字列・ホスト名・ロール名・エラーの生メッセージは返さない。
+- 未設定なら接続せず `configured: false`。不達・タイムアウトでも 200 で `reachable: false`（HTTP 状態での監視は想定しない）。
+- **定期監視（外部の死活監視、Vercel Cron 等）からは呼ばない。** 呼ぶたびに scale-to-zero 中の計算資源が起動し、従量課金が増えるため。デプロイ後の手動確認に使う。
+
+## 判定証跡（`evidence_log`）
+
+- `/api/check` の応答を返した後（Next.js の `after`）に 1 行追加する。`client_user_agent` は NULL、IP アドレスは記録しない。`evidence_id` の重複は無視する。
+- DB 未設定・不達・書き込み失敗でも、`/api/check` の応答は DB なしの場合と同じ。失敗はサーバーログに 1 行（`[evidence_log] write failed: <種別> code=<コード>`）。
+- 判定のたびに Neon の計算資源が起動する。請求額が多ければ `EVIDENCE_LOG=off` にする。
+
+## DB ロール
+
+アプリ用とマイグレーション用でロールを分ける（Sprint 8 で決定）。
+
+| ロール | 用途 | 権限 |
+|---|---|---|
+| 既定のオーナーロール（Neon の `neondb_owner` 等） | マイグレーション（`DATABASE_URL_UNPOOLED`） | 表の作成・変更 |
+| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可） |
+
+- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
+
+```sql
+grant usage on schema public to soraban_app;
+grant select on regulations, regulation_zones, schema_migrations to soraban_app;
+grant select, insert on evidence_log to soraban_app;
+```
+
+- Neon のコンソール・API・CLI で作ったロールには `neon_superuser` が付くため、最小権限にならない。SQL の `create role` で作ったロールには付かない（出典：https://neon.com/docs/manage/database-access 、2026-10-19 確認）。そのため `soraban_app` は SQL Editor から作る。SQL で作ったロールを Connect 画面で選べるかは文書に記載がなく、実施時に確認する。
+
+## ローカル開発・テスト
+
+CI と同じイメージ（`postgis/postgis:18-3.6`）をローカルで起動する例：
+
+```sh
+docker run --rm -d --name soraban-pg -p 5432:5432 \
+  -e POSTGRES_PASSWORD=postgres postgis/postgis:18-3.6
+export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+pnpm build          # next start を使うテストがあるため
+pnpm test:db
+# アプリから使う場合
+psql "$TEST_DATABASE_URL" -c "create database soraban_dev"
+DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@localhost:5432/soraban_dev pnpm db:migrate
+# .env.local: DATABASE_URL=postgresql://postgres:postgres@localhost:5432/soraban_dev
+docker stop soraban-pg
+```
+
+- CI の `db` ジョブ（`.github/workflows/ci.yml`）は、サービスコンテナに対して `pnpm db:migrate`（2 回）・`pnpm db:status`・`TEST_DATABASE_URL` なしで失敗することの確認・`pnpm build`・`pnpm test:db` を実行する。Neon の接続文字列・API キーは使わない。
+- イメージのタグ `postgis/postgis:18-3.6` は Docker Hub で存在を確認した（2026-10-19、最終更新 2026-10-18）。本番（PostgreSQL 18、PostGIS 3.6.4）とメジャー版・マイナー版が一致する。
+- 開発環境で Docker が使えない場合は、OS のパッケージの PostgreSQL＋PostGIS でも `pnpm test:db` は動く（Sprint 8 の実装時は PostgreSQL 16＋PostGIS 3 で確認し、最終の合否は CI の PostgreSQL 18 で確認した）。
+
+## ユーザー作業（エージェントは行わない）
+
+エージェント（generator・evaluator を含む）は本番 Neon の接続文字列を持たず、本番 DB にも Vercel の環境変数にも触れない。以下はのりさん（または会社で決めた運用担当者）が行う。
+
+### 1. Vercel の環境変数（taiyo-works-projects チーム、プロジェクト soraban）
+
+| 変数 | Production | Preview | Development | 値の取り方 |
+|---|---|---|---|---|
+| `DATABASE_URL` | 設定する | 設定しない（プレビューは DB なしで縮退動作） | 設定しない（ローカルは `.env.local` でコンテナか開発用ブランチを指す） | Neon コンソール → `soraban` → 既定ブランチ → Connect → **Pooled connection**（ホスト名に `-pooler`）。ロールは `soraban_app`（手順 2）。`sslmode=require` 付き |
+| `DATABASE_URL_UNPOOLED` | 設定しない | 設定しない | — | マイグレーションを実行する人の手元でだけ使う（Direct connection、オーナーロール） |
+| `EVIDENCE_LOG` | 通常は設定しない | — | — | 書き込みを止めるときだけ `off` |
+
+- Neon の Vercel 連携（プレビューごとに Neon ブランチを自動作成する機能）は使わない。ブランチが増えると計算資源の課金が増えるため。
+- 環境変数を変えたら、Production を再デプロイして反映する。
+
+### 2. アプリ用ロール `soraban_app` の作成（初回のみ、手順 3 の前）
+
+1. Neon コンソール → `soraban` → 既定ブランチ → SQL Editor（オーナーロール）で、次を実行する。パスワードは手元で生成し、リポジトリ・チャットに貼らない。
+   ```sql
+   create role soraban_app with login password '<生成したパスワード>';
+   ```
+2. アプリ用の接続文字列は、Pooled connection の接続文字列のユーザー名とパスワードを `soraban_app` のものに置き換えて作る（Connect 画面でロールを選べる場合はそれを使う）。
+
+### 3. 本番 DB へのマイグレーション適用
+
+- **誰が**：のりさん（本番の接続文字列を持つ人）。エージェントには依頼しない。
+- **いつ**：Sprint 8 の PR が `main` にマージされた後、Vercel の Production に `DATABASE_URL` を設定する**前**。以後、マイグレーションを含む PR をマージするたびに同じ手順を行う（マイグレーションは追加のみとし、旧コードでも動く形にする）。
+- **どう**：
+  1. リポジトリの `main` を手元に取得し、`pnpm install`。
+  2. Neon コンソールで既定ブランチの **Direct connection**（オーナーロール）の接続文字列を取得し、手元のシェルにだけ設定する：`export DATABASE_URL_UNPOOLED='postgresql://…'`（ファイルや履歴に残さない）。
+  3. `pnpm db:status` で、未適用の版（初回は `0001`〜`0003`）と接続先のホスト名を確認する。
+  4. 必要に応じて、Neon コンソールで既定ブランチから復元用のブランチ（例：`before-0003-20261127`）を作る。Neon の時点復元の保持期間はプランによる（計画時点では未確認）。
+  5. `pnpm db:migrate --target <手順 3 で表示されたホスト名>` を実行する。
+  6. `pnpm db:status` で未適用がないことを確認する。
+  7. Vercel の Production に `DATABASE_URL`（`soraban_app` の Pooled connection）を設定して再デプロイし、本番の `/api/health/db` が `reachable: true`、最新版 `0003`、`hasPendingMigrations: false` を返すことを確認する。
+  8. 地点判定を 1 回行い、Neon の SQL Editor で `select evidence_id, checked_at from evidence_log order by created_at desc limit 1;` に行があることを確認する（任意）。
+  9. 復元用ブランチを作った場合は、確認後に削除する。
+  10. `unset DATABASE_URL_UNPOOLED`。

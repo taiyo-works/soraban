@@ -19,4 +19,4 @@ pnpm --filter @soraban/scraper run scrape
 ## 後続
 - 取得した相対リンクを再帰追跡（深さ 1〜2）し、ドローン関連条例 PDF を抽出
 - Gemini 3 Flash-Lite で要約・規制種別の分類（`apps/api`）
-- Supabase の `regulations` テーブルへ書き込み（pg_cron で日次更新）
+- Neon（PostgreSQL）の `regulations` テーブルへ書き込み（更新の仕組みは Sprint 14 で決める）

@@ -45,7 +45,8 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
       // 本番相当：DID_DATA_DIR・INDUSTRIAL_DATA_DIR を渡さない（同梱データだけで判定する）。
-      env: { DID_DATA_DIR: "", INDUSTRIAL_DATA_DIR: "" },
+      // Sprint 8: DATABASE_URL を空にして DB なし（縮退動作）で起動する。
+      env: { DID_DATA_DIR: "", INDUSTRIAL_DATA_DIR: "", DATABASE_URL: "" },
     },
     {
       command:
@@ -58,6 +59,7 @@ export default defineConfig({
         DID_DATA_DIR: path.join(FIXTURES, "did"),
         INDUSTRIAL_DATA_DIR: path.join(FIXTURES, "industrial"),
         NEXT_DIST_DIR: ".next-e2e-fixture",
+        DATABASE_URL: "",
       },
     },
   ],

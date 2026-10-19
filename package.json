@@ -14,12 +14,16 @@
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "db:migrate": "tsx packages/db/src/cli.ts migrate",
+    "db:status": "tsx packages/db/src/cli.ts status"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
     "@vitest/coverage-v8": "^4.1.5",
     "pdfjs-dist": "^5.4.296",
+    "tsx": "^4.21.0",
     "vitest": "^4.1.5"
   }
 }

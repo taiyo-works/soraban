@@ -33,7 +33,7 @@ DIPS 飛行許可・承認の申請支援を段階的に拡張している。
 
 ## 技術スタック
 - Next.js 16 + Tailwind v4 + MapLibre GL（`apps/web`）
-- Supabase (PostgreSQL 15 + PostGIS + pg_cron)
+- Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1）。ドライバは `pg`、マイグレーションは `packages/db/migrations` の SQL ＋最小ランナー
 - Gemini 3 Flash-Lite
 - TypeScript strict / pnpm workspace
 
@@ -43,7 +43,7 @@ apps/
   web/       — Next.js 16 (App Router, Turbopack, Tailwind v4)
   scraper/   — 条例スクレイパ
 packages/
-  db/          — @soraban/db: Supabase クライアント
+  db/          — @soraban/db: Neon（pg）接続層・SQL マイグレーション
   regulations/ — @soraban/regulations: 規制データ／型
   geo/         — @soraban/geo: 緯度経度・GSI ヘルパ
 ```
@@ -56,9 +56,11 @@ packages/
 - `pnpm test` — 単体テスト（vitest）
 - `pnpm build` — 全 workspace のビルド
 - `pnpm test:e2e` — E2E（Playwright。初回は `pnpm exec playwright install chromium`）
+- `pnpm test:db` — DB を使うテスト（`TEST_DATABASE_URL` が必要。未設定ならスキップ、`REQUIRE_DB_TESTS=1` なら失敗）
+- `pnpm db:status`・`pnpm db:migrate` — マイグレーションの確認・適用（`DATABASE_URL_UNPOOLED`。手順は `packages/db/README.md`）
 
 ## CI
-`.github/workflows/ci.yml`：PR と main への push で typecheck / lint / test / build、続けて Playwright E2E を実行。
+`.github/workflows/ci.yml`：PR と main への push で typecheck / lint / test / build、続けて Playwright E2E（DB なし）と、PostGIS のサービスコンテナを使う `db` ジョブ（マイグレーション適用・`pnpm test:db`）を実行。
 
 ## 作成者
 奥田憲章
