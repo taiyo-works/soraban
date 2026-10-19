@@ -1,9 +1,12 @@
 "use client";
 
+import type { RequiredProcedure } from "@soraban/regulations";
 import {
-  REQUIRED_PROCEDURE_KIND_LABEL,
-  type RequiredProcedure,
-} from "@soraban/regulations";
+  isNoFlyConfirmation,
+  PROCEDURE_BADGE_LABEL,
+  procedureBadge,
+  procedureKindDisplayLabel,
+} from "@/lib/procedure-display";
 
 // 検証日メタ（ISO 8601）を YYYY-MM-DD に短縮表示する。改正レビュー用の
 // 「いつ時点の制度確認に基づくレコードか」を監査可能に示す（spec §8 / sprint-4）。
@@ -20,6 +23,8 @@ type Props = {
   /** 完了チェックの状態と更新ハンドラ（完了管理） */
   readonly done: boolean;
   readonly onToggleDone: (id: string, done: boolean) => void;
+  /** 診断のカテゴリー（緊急用務空域のとき札の文言を変えるため。表示の対応付けだけ） */
+  readonly category?: string;
 };
 
 // システム系統バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分け、
@@ -33,8 +38,10 @@ const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
   都道府県公安委員会: "border-ink-soft text-ink-soft bg-paper",
 };
 
-export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: Props) {
-  const kindLabel = REQUIRED_PROCEDURE_KIND_LABEL[procedure.kind];
+export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, category }: Props) {
+  const kindLabel = procedureKindDisplayLabel(procedure);
+  const noFly = isNoFlyConfirmation(procedure);
+  const badge = procedureBadge(procedure, category);
   const verifiedAt = shortVerifiedAt(procedure.verifiedAt);
   return (
     <article
@@ -49,7 +56,18 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
           {procedure.system}
         </span>
         <span className="whitespace-nowrap text-[11px] text-ink-mute">{kindLabel}</span>
-        {procedure.kind === "facility_consent_notice" ? (
+        {noFly ? (
+          <span className="ml-auto inline-flex items-center gap-1.5 whitespace-nowrap border border-signal-red bg-signal-red-soft px-2 py-0.5 text-[10px] font-medium text-signal-red">
+            <span aria-hidden className="relative inline-block h-2 w-2 rounded-full border border-current">
+              <span className="absolute inset-x-px top-1/2 h-px -translate-y-1/2 bg-current" />
+            </span>
+            指定中は飛行不可
+          </span>
+        ) : badge === "after_release" ? (
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+            {PROCEDURE_BADGE_LABEL.after_release}
+          </span>
+        ) : procedure.kind === "facility_consent_notice" ? (
           <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
             航空法とは別系統（飛行禁止法）
           </span>
@@ -110,12 +128,16 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone }: 
           title={
             procedure.kind === "facility_consent_notice"
               ? "事前通報の方法（警察庁の案内）を開く"
-              : `${procedure.system} の手続き画面を開く`
+              : noFly
+                ? `${procedure.system} のポータルを開く`
+                : `${procedure.system} の手続き画面を開く`
           }
         >
           {procedure.kind === "facility_consent_notice"
             ? `${procedure.system}への通報方法 ↗`
-            : `${procedure.system} で手続き ↗`}
+            : noFly
+              ? `${procedure.system} を開く ↗`
+              : `${procedure.system} で手続き ↗`}
         </a>
         <span aria-hidden className="h-3 w-px bg-rule" />
         <a

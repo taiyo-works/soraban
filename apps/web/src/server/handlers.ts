@@ -198,6 +198,7 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
     // 自動判定が未確認でユーザーが非該当を確認した場合は、自動判定の詳細（no_data）を付けない。
     ...(didDetail !== undefined && didStatusInput === autoDidStatus ? { didDetail } : {}),
     smallDroneLawTriggered,
+    ...(bvlosWithObserver !== undefined ? { bvlosWithObserver } : {}),
   });
 
   // DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値）。

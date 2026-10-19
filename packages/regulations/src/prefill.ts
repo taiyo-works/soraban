@@ -76,8 +76,18 @@ const flagsToMethodLabels = (
   // SPECIFIC_FLIGHT_FLAG_LABEL のキー順（UI と同じ並び）で安定化する。
   const order = Object.keys(SPECIFIC_FLIGHT_FLAG_LABEL) as SpecificFlightFlag[];
   const set = new Set(flags);
-  return order.filter((f) => set.has(f)).map((f) => SPECIFIC_FLIGHT_FLAG_LABEL[f]);
+  // 緊急用務空域は許可・承認の対象ではなく原則飛行禁止のため、DIPS に写すときに誤読しないよう添える（Sprint 11a）。
+  return order
+    .filter((f) => set.has(f))
+    .map((f) =>
+      f === "airspace_emergency"
+        ? `${SPECIFIC_FLIGHT_FLAG_LABEL[f]}${PREFILL_EMERGENCY_SUFFIX}`
+        : SPECIFIC_FLIGHT_FLAG_LABEL[f],
+    );
 };
+
+/** プリフィル表の「飛行の種類」で緊急用務空域に添える語。 */
+export const PREFILL_EMERGENCY_SUFFIX = "（指定中は飛行不可）";
 
 // 航空法上の無人航空機（100g 以上）か。未指定はフェイルセーフで対象扱い（厳しい側）。
 const isRegisteredDroneWeight = (g: number | undefined): boolean => {

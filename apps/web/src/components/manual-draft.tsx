@@ -7,6 +7,7 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { useState } from "react";
+import { shortUrl, splitInlineSource } from "@/lib/inline-source";
 
 type Props = {
   /** 診断に使った最終フラグ集合（空域＋方法）。骨子の追記観点の選定に使う。 */
@@ -161,12 +162,31 @@ export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
                   <li key={m.flag} className="border-l-2 border-brand-700 pl-3">
                     <p className="font-display text-sm font-medium text-ink">{m.title}</p>
                     <ul className="mt-1 flex flex-col gap-1">
-                      {m.points.map((p, i) => (
-                        <li key={i} className="flex gap-1.5 text-xs leading-relaxed text-ink-soft">
-                          <span aria-hidden className="mt-1.5 inline-block h-1 w-1 shrink-0 rotate-45 bg-brand-700" />
-                          <span>{p}</span>
-                        </li>
-                      ))}
+                      {m.points.map((p, i) => {
+                        // 観点の文中の URL は本文から切り分け、観点の下に短い表記の控えめなリンクとして添える。
+                        const point = splitInlineSource(p);
+                        return (
+                          <li key={i} className="flex gap-1.5 text-xs leading-relaxed text-ink-soft">
+                            <span aria-hidden className="mt-1.5 inline-block h-1 w-1 shrink-0 rotate-45 bg-brand-700" />
+                            <span className="min-w-0">
+                              {point.text}
+                              {point.urls.map((url) => (
+                                <span key={url} className="mt-0.5 block text-[11px] text-ink-mute">
+                                  出典{" "}
+                                  <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="break-all font-mono text-[10.5px] underline decoration-rule underline-offset-2 hover:text-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+                                  >
+                                    {shortUrl(url)}
+                                  </a>
+                                </span>
+                              ))}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                     <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute">
                       根拠 {m.legalBasis}{" "}

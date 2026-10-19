@@ -25,8 +25,8 @@ const openReady = async (page: Page, url = "/"): Promise<void> => {
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 };
 
-const latInput = (page: Page) => page.getByPlaceholder("35.4342", { exact: true });
-const lngInput = (page: Page) => page.getByPlaceholder("133.3805", { exact: true });
+const latInput = (page: Page) => page.getByPlaceholder("35.4278", { exact: true });
+const lngInput = (page: Page) => page.getByPlaceholder("133.3314", { exact: true });
 
 /** 地図の中心付近の画面座標。 */
 const mapPoint = async (page: Page, dx = 0, dy = 0) => {
@@ -282,7 +282,7 @@ test.describe("D. 長押し・右クリック・左クリック（本番相当�
 test.describe("A・B. 住所検索", () => {
   test("（フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す", async ({ page }) => {
     await openReady(page, FIXTURE_URL);
-    const input = page.getByPlaceholder(/日吉津村日吉津45番地3/);
+    const input = page.getByPlaceholder(/米子市加茂町1丁目1番地/);
 
     // 住居表示の住居まで一致（同梱索引で街区以上 → 国土地理院は呼ばない）
     let check = waitCheck(page);
