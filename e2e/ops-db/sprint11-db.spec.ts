@@ -439,22 +439,20 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await minHeight("/ops/inspections/new", ["すべて正常", "保存"]);
     });
 
-    test("差し戻し 1：日常点検の実施日時に手を触れていない下書きは、日をまたいで開き直すと今の分になる。手で入れた日時は残し「前回の入力のまま」と示す", async ({ page }) => {
+    test("差し戻し 1・2：何も入力のない日常点検の下書きは、日をまたぐと今の分に入れ直して知らせる。手で入れた日時は残し「前回の入力のまま」と示す", async ({ page }) => {
       await signIn(page.request, seeded("a-pilot"));
       await page.clock.setFixedTime(new Date("2027-01-04T10:15:20+09:00"));
       await page.goto("/ops/inspections/new");
       const iform = page.getByRole("form", { name: "日常点検の入力" });
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("10:15");
-      await iform.getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("本社 駐車場");
-      await expect.poll(() => draftText(page, "inspection")).toContain("本社 駐車場");
+      await expect.poll(() => draftText(page, "inspection")).toContain("10:15");
 
-      // 翌日 08:00 に開き直す：場所は残り、実施日時は今の分になる
+      // 何も入力しないまま、翌日 08:00 に開き直す：実施日時は今の分になり、入れ直したことを示す
       await page.clock.setFixedTime(new Date("2027-01-05T08:00:10+09:00"));
       await page.reload();
-      await expect(iform.getByRole("textbox", { name: /^実施場所(\s|$)/ })).toHaveValue("本社 駐車場");
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("08:00");
       await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-05");
-      await expect(page.getByTestId("draft-status")).toContainText("前回の入力の続きです。");
+      await expect(page.getByTestId("draft-refresh-note")).toHaveText("実施日時を今（2027-01-05 08:00）に入れ直しました。");
       await expect(page.getByTestId("draft-stale-note")).toHaveCount(0);
 
       // 手で入れた日時は勝手に変えず、日をまたいだら「前回の入力のまま」と目立たせる
@@ -465,6 +463,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("07:30");
       await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-05");
       await expect(page.getByTestId("draft-stale-note")).toContainText("実施日時が前回の入力（2027-01-05 07:30）のままです。");
+      await expect(page.getByTestId("draft-refresh-note")).toHaveCount(0);
       await expect(page.getByTestId("inspected-stale")).toBeVisible();
       // 「今」を押すと今の分になり、注意は消える
       await page.getByRole("button", { name: "今", exact: true }).click();
@@ -483,6 +482,52 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await expect(form.getByLabel("離陸日", { exact: true })).toHaveValue("2027-01-04");
       await expect(page.getByTestId("draft-stale-note")).toContainText("離陸日時が前回の入力（2027-01-04 15:00）のままです。");
       await expect(page.getByTestId("takeoff-stale")).toBeVisible();
+      await page.getByRole("button", { name: "下書きを消す" }).click();
+    });
+
+    test("差し戻し 2：9 項目を入れて保存に失敗した点検を翌日開き直すと、実施日時は保たれ「前回の入力のまま」と示す", async ({ page }) => {
+      const manager = await apiAs(seeded("a-manager"));
+      const aircraft = await createAircraft(manager);
+      await manager.dispose();
+      await signIn(page.request, seeded("a-pilot"));
+      await page.clock.setFixedTime(new Date("2027-01-04T17:50:05+09:00"));
+      await page.goto("/ops/inspections/new");
+      const iform = page.getByRole("form", { name: "日常点検の入力" });
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("17:50");
+      await iform.getByRole("combobox", { name: "機体", exact: true }).selectOption(aircraft.id);
+      await iform.getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("現場 B");
+      await page.getByRole("button", { name: "すべて正常" }).click();
+      await page.route("**/api/ops/inspections", (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.continue()));
+      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await expect(iform.getByText(/保存できませんでした。通信が戻ったら/)).toBeVisible();
+      await page.unroute("**/api/ops/inspections");
+
+      await page.clock.setFixedTime(new Date("2027-01-05T08:10:00+09:00"));
+      await page.reload();
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("17:50");
+      await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-04");
+      await expect(iform.getByRole("textbox", { name: /^実施場所(\s|$)/ })).toHaveValue("現場 B");
+      await expect(page.getByTestId("draft-stale-note")).toContainText("実施日時が前回の入力（2027-01-04 17:50）のままです。");
+      await expect(page.getByTestId("draft-refresh-note")).toHaveCount(0);
+      await expect(page.getByTestId("inspected-stale")).toBeVisible();
+      await page.getByRole("button", { name: "下書きを消す" }).click();
+    });
+
+    test("差し戻し 2：「今」を押した後に再読み込みしても、実施日時は押したときのまま", async ({ page }) => {
+      await signIn(page.request, seeded("a-pilot"));
+      await page.clock.setFixedTime(new Date("2027-01-05T10:15:30+09:00"));
+      await page.goto("/ops/inspections/new");
+      const iform = page.getByRole("form", { name: "日常点検の入力" });
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("10:15");
+      await page.getByRole("button", { name: "今", exact: true }).click();
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("10:15");
+      await expect.poll(() => draftText(page, "inspection")).toContain('"timeTouched":true');
+      await page.clock.setFixedTime(new Date("2027-01-05T10:40:00+09:00"));
+      await page.reload();
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("10:15");
+      await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-05");
+      await expect(page.getByTestId("draft-refresh-note")).toHaveCount(0);
+      await expect(page.getByTestId("draft-stale-note")).toHaveCount(0);
       await page.getByRole("button", { name: "下書きを消す" }).click();
     });
 
@@ -534,6 +579,8 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       }
       const home = await page.getByRole("link", { name: "地点判定へ" }).boundingBox();
       expect(home!.height).toBeGreaterThanOrEqual(44);
+      const logo = await page.getByRole("link", { name: /そらばん 運航管理/ }).boundingBox();
+      expect(logo!.height).toBeGreaterThanOrEqual(44);
     });
 
     test("20（画面）. ログアウトで下書きが消える", async ({ page }) => {

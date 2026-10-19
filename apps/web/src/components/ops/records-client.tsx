@@ -367,12 +367,15 @@ function DraftBar({
   canDiscard,
   onDiscard,
   staleNote,
+  refreshNote,
 }: {
   readonly restored: boolean;
   readonly canDiscard: boolean;
   readonly onDiscard: () => void;
   /** 前回の入力の日時が今日でないときの注意（例：「実施日時が 2027-01-04 10:15 のままです。」）。 */
   readonly staleNote?: string | null;
+  /** 何も入力のない下書きの日時を今に入れ直したときの知らせ（例：「実施日時を今（2027-01-05 08:10）に入れ直しました。」）。 */
+  readonly refreshNote?: string | null;
 }) {
   return (
     <div
@@ -396,6 +399,11 @@ function DraftBar({
         ) : (
           "入力中の内容はこの端末に下書きとして残り、再読み込みや通信の切断では消えません。保存すると下書きは消えます。"
         )}
+        {refreshNote ? (
+          <span role="status" className="mt-1 block font-medium text-ink" data-testid="draft-refresh-note">
+            {refreshNote}
+          </span>
+        ) : null}
       </p>
       {canDiscard ? (
         <button type="button" className={smallGhostClass} onClick={onDiscard}>
@@ -1150,10 +1158,14 @@ export function InspectionForm({
   const [restored, setRestored] = useState(false);
   // 手で入れた実施日時が今日でない下書きを読み込んだとき、その日時（目立たせる。日時を直すと消える）
   const [staleDt, setStaleDt] = useState<string | null>(null);
+  // 何も入力のない下書きの実施日時を今に入れ直したとき、その日時（知らせを出す。日時を直すと消える）
+  const [refreshDt, setRefreshDt] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // 下書きの読み込み。実施日時の既定は「今」（端末の時計。描画の後に行う）。
-  // 実施日時に手を触れていない下書きは、前回の時刻のまま残さず、読み込んだ時点の分で入れ直す（設計 E）。
+  // 日時を利用者が入れた（手で直した・「今」を押した）下書きと、9 項目・場所など他の入力がある下書きは、日時を保つ
+  // （保存に失敗した点検を翌日開き直しても、実際の日時のまま。今日でなければ「前回の入力のまま」と示す）。
+  // 何も入力のない下書きだけ、読み込んだ時点の分で入れ直し、そのことを画面に示す（設計 E「既定は今」）。
   useEffect(() => {
     if (isEdit) return;
     const t = window.setTimeout(() => {
@@ -1161,7 +1173,9 @@ export function InspectionForm({
       const d = loadDraft<InspectionState>(draftKey("inspection", memberId));
       const now = nowJstInput(new Date());
       if (d && typeof d === "object" && typeof d.clientRequestId === "string" && d.items) {
-        const keepTime = d.timeTouched === true && Boolean(d.date && d.time);
+        const has = inspectionHasInput(d);
+        const hasTime = Boolean(d.date && d.time);
+        const keepTime = hasTime && (d.timeTouched === true || has);
         setV({
           ...emptyInspection("", fixedPilotId ?? ""),
           ...d,
@@ -1169,9 +1183,12 @@ export function InspectionForm({
           ...(initialAircraftId ? { aircraftId: initialAircraftId } : {}),
           ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
         });
-        const has = inspectionHasInput(d);
         setRestored(has || keepTime);
         if (keepTime && d.date !== now.slice(0, 10)) setStaleDt(`${d.date} ${d.time.slice(0, 5)}`);
+        // 入れ直して日時が変わった場合は知らせる
+        if (!keepTime && hasTime && `${d.date}T${d.time.slice(0, 5)}` !== now) {
+          setRefreshDt(`${now.slice(0, 10)} ${now.slice(11, 16)}`);
+        }
       } else {
         setV((s) => ({ ...s, date: now.slice(0, 10), time: now.slice(11, 16) }));
       }
@@ -1202,6 +1219,7 @@ export function InspectionForm({
     setOffline(false);
     setRestored(false);
     setStaleDt(null);
+    setRefreshDt(null);
   };
 
   const submit = async () => {
@@ -1278,6 +1296,7 @@ export function InspectionForm({
           canDiscard={restored || inspectionHasInput(v)}
           onDiscard={discardDraft}
           staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
+          refreshNote={refreshDt ? `実施日時を今（${refreshDt}）に入れ直しました。` : null}
         />
       ) : null}
 
@@ -1313,11 +1332,9 @@ export function InspectionForm({
           stale={staleDt !== null}
           onChange={(d, t) => {
             setStaleDt(null);
+            setRefreshDt(null);
+            // 手で直した日時も「今」で入れた日時も、利用者が入れた日時として保つ
             setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
-          }}
-          onNow={(d, t) => {
-            setStaleDt(null);
-            setV((s) => ({ ...s, date: d, time: t, timeTouched: false }));
           }}
         />
         <ChoiceGroup legend="区分">
