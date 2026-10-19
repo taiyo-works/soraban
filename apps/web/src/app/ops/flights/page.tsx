@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
-import { Badge, buttonPrimaryClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
+import { Badge, buttonFieldClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
 import { listFlights, parseRecordFilter } from "@/server/ops/records";
 import { listAircraft, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 
-const GRID = "sm:grid-cols-[6.5rem_minmax(0,8rem)_minmax(0,1fr)_7rem_4rem_5rem]";
+// 狭い画面のカード：1 行目に飛行年月日と機体、2 行目に離着陸時刻と飛行時間、3 行目に操縦者と総飛行時間。
+// 広い画面では表の 1 行（列の順は見出しのとおり）。
+const GRID = "grid-cols-[auto_minmax(0,1fr)_auto] gap-x-3 sm:grid-cols-[6.5rem_minmax(0,8rem)_minmax(0,1fr)_8rem_4rem_6rem] sm:gap-x-4";
+const CARD = listRowClass.replace("grid-cols-1 ", "");
 
 // 飛行記録の一覧（新しい順。機体・期間で絞り込み）。各行に飛行年月日・機体・操縦者・離着陸時刻・飛行時間・総飛行時間。
 export default async function FlightListPage({
@@ -33,7 +36,7 @@ export default async function FlightListPage({
         back={{ href: "/ops", label: "運航管理のトップ" }}
         aside={
           canCreate ? (
-            <Link href="/ops/flights/new" className={`${buttonPrimaryClass} min-h-12`}>
+            <Link href="/ops/flights/new" className={buttonFieldClass}>
               飛行記録を入力
             </Link>
           ) : null
@@ -51,28 +54,28 @@ export default async function FlightListPage({
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="flight-list">
             {rows.map((f) => (
               <li key={f.id}>
-                <Link href={`/ops/flights/${f.id}`} className={`${listRowClass} ${GRID} ${f.voided ? "text-ink-mute" : ""}`}>
-                  <span className="font-mono tnum text-ink">
-                    <CellLabel>飛行年月日</CellLabel>
+                <Link href={`/ops/flights/${f.id}`} className={`${CARD} ${GRID} ${f.voided ? "text-ink-mute" : ""}`}>
+                  <span className="col-start-1 row-start-1 font-mono tnum text-ink sm:col-auto sm:row-auto">
+                    <span className="sr-only">飛行年月日</span>
                     {f.flightDate}
                   </span>
-                  <span className="min-w-0 break-all font-mono text-ink-soft">
-                    <CellLabel>機体</CellLabel>
+                  <span className="col-span-2 col-start-2 row-start-1 min-w-0 break-all font-mono text-ink-soft sm:col-span-1 sm:col-auto sm:row-auto">
+                    <span className="sr-only">機体</span>
                     {f.registrationMark}
                   </span>
-                  <span className="min-w-0 break-words">
+                  <span className="col-span-2 col-start-1 row-start-3 min-w-0 break-words text-ink-soft sm:col-span-1 sm:col-auto sm:row-auto sm:text-ink">
                     <CellLabel>操縦者</CellLabel>
                     {f.pilotName}
                   </span>
-                  <span className="font-mono text-[13px] tnum">
-                    <CellLabel>離陸–着陸</CellLabel>
+                  <span className="col-span-2 col-start-1 row-start-2 font-mono text-base tnum text-ink sm:col-span-1 sm:col-auto sm:row-auto sm:text-[13px]">
+                    <span className="sr-only">離陸–着陸</span>
                     {f.takeoffAtJst.slice(11)}–{f.landingAtJst}
                   </span>
-                  <span className="font-mono tnum">
+                  <span className="col-start-3 row-start-2 text-right font-mono text-base tnum sm:col-auto sm:row-auto sm:text-left sm:text-sm">
                     <CellLabel>飛行時間</CellLabel>
                     {formatHm(f.flightMinutes)}
                   </span>
-                  <span className="flex flex-wrap items-center gap-1.5 font-mono tnum">
+                  <span className="col-start-3 row-start-3 flex flex-wrap items-center justify-end gap-1.5 font-mono tnum sm:col-auto sm:row-auto sm:justify-start">
                     <CellLabel>総飛行時間</CellLabel>
                     {f.totalFlightMinutes === null ? <Badge tone="red">取消済み</Badge> : formatHm(f.totalFlightMinutes)}
                   </span>

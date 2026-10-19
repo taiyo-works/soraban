@@ -115,6 +115,7 @@ export const FieldError = ({ id, message }: { readonly id?: string; readonly mes
   ) : null;
 
 type ControlProps = {
+  id?: string;
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;
   "aria-required"?: boolean;
@@ -122,7 +123,8 @@ type ControlProps = {
 
 /**
  * ラベル・必須の札・案内・項目ごとのエラーをまとめた入力欄。
- * エラーは入力欄の直下に出し、aria-invalid と aria-describedby で入力欄に結び付ける。
+ * 読み上げ名（label）は項目名だけにする。案内とエラーは label の外に置き、aria-describedby で入力欄に結び付ける
+ * （label で全体を包むと、案内やエラーの文まで項目名として読まれるため）。
  */
 export const Field = ({
   label,
@@ -139,16 +141,18 @@ export const Field = ({
   readonly required?: boolean;
 }) => {
   const id = useId();
+  const controlId = children.props.id ?? `${id}-control`;
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
   return (
-    <label className="flex min-w-0 flex-col gap-1.5 text-sm text-ink">
+    <div className="flex min-w-0 flex-col gap-1.5 text-sm text-ink">
       <span className="flex items-center gap-2">
-        <span>{label}</span>
+        <label htmlFor={controlId}>{label}</label>
         <RequiredTag required={required} />
       </span>
       {cloneElement(children, {
+        id: controlId,
         "aria-invalid": error ? true : undefined,
         "aria-describedby": describedBy,
         "aria-required": required ? true : undefined,
@@ -159,7 +163,7 @@ export const Field = ({
           {hint}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 };
 

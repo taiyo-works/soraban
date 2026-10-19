@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/ops/ops-client";
-import { buttonGhostClass, buttonPrimaryClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
+import { buttonFieldClass, buttonOutlineBrandClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
@@ -33,10 +33,10 @@ export default async function OpsHome() {
       </section>
       {canEnter ? (
         <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Link href="/ops/flights/new" className={`${buttonPrimaryClass} min-h-14 text-base`} data-testid="ops-enter-flight">
+          <Link href="/ops/flights/new" className={buttonFieldClass} data-testid="ops-enter-flight">
             飛行記録を入力
           </Link>
-          <Link href="/ops/inspections/new" className={`${buttonGhostClass} min-h-14 border-brand-700 text-base text-brand-700`} data-testid="ops-enter-inspection">
+          <Link href="/ops/inspections/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
             日常点検を入力
           </Link>
         </nav>

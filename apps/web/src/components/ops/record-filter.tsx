@@ -11,10 +11,10 @@ export function RecordFilter({
   readonly value: { readonly aircraftId?: string; readonly from?: string; readonly to?: string; readonly includeVoided?: boolean };
 }) {
   const input =
-    "w-full min-w-0 rounded-sharp border border-rule bg-paper px-3 py-2 text-base text-ink outline-none focus:border-brand-700 focus:ring-2 focus:ring-brand-700 sm:text-sm";
+    "min-h-11 w-full min-w-0 rounded-sharp border border-rule bg-paper px-3 py-2 text-base text-ink outline-none focus:border-brand-700 focus:ring-2 focus:ring-brand-700 sm:text-sm";
   return (
-    <form method="get" action={basePath} className="grid grid-cols-1 gap-3 rounded-sharp border border-rule-soft p-3 sm:grid-cols-4 sm:items-end" aria-label="絞り込み">
-      <label className="flex min-w-0 flex-col gap-1 text-xs text-ink-mute">
+    <form method="get" action={basePath} className="grid grid-cols-2 gap-x-3 gap-y-2.5 rounded-sharp border border-rule-soft p-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end" aria-label="絞り込み">
+      <label className="col-span-2 flex min-w-0 flex-col gap-1 text-xs text-ink-mute sm:col-span-1">
         機体
         <select name="aircraftId" defaultValue={value.aircraftId ?? ""} className={input}>
           <option value="">すべて</option>
@@ -33,7 +33,7 @@ export function RecordFilter({
         期間（まで）
         <input type="date" name="to" defaultValue={value.to ?? ""} className={`${input} tnum`} />
       </label>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 sm:col-span-1 sm:justify-start">
         <label className="flex min-h-10 items-center gap-2 text-xs text-ink-soft">
           <input type="checkbox" name="includeVoided" value="1" defaultChecked={value.includeVoided} className="h-4 w-4 accent-brand-700" />
           取消済みも含める

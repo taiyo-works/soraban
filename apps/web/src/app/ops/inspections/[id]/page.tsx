@@ -2,12 +2,15 @@ import { notFound } from "next/navigation";
 import { VoidForm } from "@/components/ops/ops-client";
 import { InspectionForm } from "@/components/ops/records-client";
 import { VersionList } from "@/components/ops/versions";
-import { Badge, buttonPrimaryClass, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
+import { Badge, buttonGhostClass, buttonFieldClass, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
 import { INSPECTION_RESULT_LABELS, INSPECTION_TIMING_LABELS } from "@/lib/ops-records";
 import { getInspection, listInspectionVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { canCorrectRecord, recordCreateDenied, recordFormOptions } from "@/server/ops/record-page";
+
+/** 訂正の入力を開閉する見出し（ボタンと同じ押しやすさにする）。 */
+const CORRECT_SUMMARY = `${buttonGhostClass} cursor-pointer list-none gap-2 self-start [&::-webkit-details-marker]:hidden`;
 
 // 日常点検記録の詳細（9 項目の結果・訂正・取消・版の一覧）。保存後はここから飛行記録の入力へ進める。
 export default async function InspectionDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
@@ -70,7 +73,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
           aside={
             canEnterFlight ? (
               // 通常の画面遷移で開く（入力画面は下書きを端末から読み直すため。クライアント側の遷移の競合も避ける）
-              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} className={`${buttonPrimaryClass} min-h-12`}>
+              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} className={buttonFieldClass}>
                 この機体の飛行記録を入力
               </a>
             ) : null
@@ -81,9 +84,13 @@ export default async function InspectionDetailPage({ params }: { readonly params
       </div>
       {correctable && options ? (
         <Section title="訂正" description="記載の誤りを直します。訂正前の内容は版として残ります。">
-          <details>
-            <summary className="cursor-pointer text-sm text-brand-700 underline underline-offset-2">訂正の入力を開く</summary>
-            <div className="pt-4">
+          <details className="group/correct">
+            <summary className={CORRECT_SUMMARY}>
+              <span aria-hidden className="inline-block transition-transform group-open/correct:rotate-90">›</span>
+              <span className="group-open/correct:hidden">訂正の入力を開く</span>
+              <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
+            </summary>
+            <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
               <InspectionForm key={i.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} editing={i} />
             </div>
           </details>

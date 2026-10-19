@@ -2,13 +2,16 @@ import { notFound } from "next/navigation";
 import { VoidForm } from "@/components/ops/ops-client";
 import { FlightForm } from "@/components/ops/records-client";
 import { VersionList } from "@/components/ops/versions";
-import { Badge, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
+import { Badge, buttonGhostClass, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
 import { SPECIFIC_FLIGHT_TYPE_LABELS } from "@/lib/ops-records";
 import { getFlight, listFlightVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { canCorrectRecord, recordFormOptions } from "@/server/ops/record-page";
+
+/** 訂正の入力を開閉する見出し（ボタンと同じ押しやすさにする）。 */
+const CORRECT_SUMMARY = `${buttonGhostClass} cursor-pointer list-none gap-2 self-start [&::-webkit-details-marker]:hidden`;
 
 // 飛行記録の詳細（全項目・訂正・取消・版の一覧）。取消済みでも詳細と版の一覧は残る。
 export default async function FlightDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
@@ -32,7 +35,6 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
       </span>
     );
   const rows: [string, React.ReactNode][] = [
-    ["飛行年月日", <span key="d" className="font-mono tnum" data-testid="flight-date">{f.flightDate}</span>],
     ["機体（登録記号）", <span key="a" className="font-mono">{f.registrationMark}</span>],
     [
       "操縦者",
@@ -57,7 +59,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     [
       "離陸",
       <span key="t" className="flex flex-col">
-        <span className="font-mono tnum" data-testid="flight-takeoff">{f.takeoffAtJst.slice(11)}</span>
+        <span className="font-mono tnum">{f.takeoffAtJst.slice(11)}</span>
         <span>{f.takeoffPlace}</span>
         {coord(f.takeoffLat, f.takeoffLng, f.takeoffAccuracyM)}
       </span>,
@@ -65,21 +67,22 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     [
       "着陸",
       <span key="l" className="flex flex-col">
-        <span className="font-mono tnum" data-testid="flight-landing">{f.landingAtJst}</span>
+        <span className="font-mono tnum">{f.landingAtJst}</span>
         <span>{f.landingPlace}</span>
         {coord(f.landingLat, f.landingLng, f.landingAccuracyM)}
       </span>,
     ],
-    ["飛行時間", <span key="m" className="font-mono tnum" data-testid="flight-minutes-detail">{formatHm(f.flightMinutes)}</span>],
     [
-      "総飛行時間（機体）",
-      f.totalFlightMinutes === null ? (
-        <Badge key="tt" tone="mute" data-testid="flight-total">取消済み（数えない）</Badge>
+      "飛行の安全に影響のあった事項",
+      f.safetyIssue ? (
+        <span key="s" className="flex flex-col items-start gap-1">
+          <Badge tone="amber">あり</Badge>
+          <span>{f.safetyIssueDetail}</span>
+        </span>
       ) : (
-        <span key="tt" className="font-mono tnum" data-testid="flight-total">{formatHm(f.totalFlightMinutes)}</span>
+        "なし"
       ),
     ],
-    ["飛行の安全に影響のあった事項", f.safetyIssue ? <span key="s">あり：{f.safetyIssueDetail}</span> : "なし"],
     [
       "不具合（記事）",
       f.defects.length === 0 ? (
@@ -87,9 +90,11 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
       ) : (
         <ul key="df" className="flex flex-col gap-2">
           {f.defects.map((d, i) => (
-            <li key={i} className="flex flex-col border-l-2 border-rule pl-2">
-              <span>
-                <span className="font-mono text-xs tnum text-ink-mute">{d.occurredOn}</span> {d.description}
+            <li key={i} className="flex flex-col gap-0.5 border-l-2 border-rule pl-2">
+              <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span className="font-mono text-xs tnum text-ink-mute">{d.occurredOn}</span>
+                <span>{d.description}</span>
+                {d.actionOn === null && d.action === null ? <Badge tone="neutral">処置は未記載</Badge> : null}
               </span>
               <span className="text-xs text-ink-soft">
                 処置：{d.actionOn ?? "—"} {d.action ?? ""}／確認者：{d.confirmerName ?? "—"}
@@ -121,13 +126,44 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
         ) : correctable ? null : (
           <Note>訂正は運航管理者と、記録の操縦者本人だけが行えます。</Note>
         )}
+        <dl
+          aria-label="飛行の要点"
+          className="grid grid-cols-2 gap-px overflow-hidden rounded-sharp border border-rule bg-rule sm:grid-cols-5"
+        >
+          {(
+            [
+              ["飛行年月日", <span key="d" data-testid="flight-date">{f.flightDate}</span>, "col-span-2 sm:col-span-1"],
+              ["離陸", <span key="t" data-testid="flight-takeoff">{f.takeoffAtJst.slice(11)}</span>, ""],
+              ["着陸", <span key="l" data-testid="flight-landing">{f.landingAtJst}</span>, ""],
+              ["飛行時間", <span key="m" data-testid="flight-minutes-detail">{formatHm(f.flightMinutes)}</span>, ""],
+              [
+                "総飛行時間（機体）",
+                f.totalFlightMinutes === null ? (
+                  <Badge key="tt" tone="mute" data-testid="flight-total">取消済み（数えない）</Badge>
+                ) : (
+                  <span key="tt" data-testid="flight-total">{formatHm(f.totalFlightMinutes)}</span>
+                ),
+                "",
+              ],
+            ] as const
+          ).map(([k, val, cls]) => (
+            <div key={k} className={`flex flex-col gap-1 bg-paper px-3 py-2.5 ${cls}`}>
+              <dt className="text-xs text-ink-mute">{k}</dt>
+              <dd className="font-mono text-lg leading-tight tnum text-ink">{val}</dd>
+            </div>
+          ))}
+        </dl>
         <DetailList rows={rows} data-testid="flight-detail" />
       </div>
       {correctable && options ? (
         <Section title="訂正" description="記載の誤りを直します。訂正前の内容は版として残ります。">
-          <details className="group">
-            <summary className="cursor-pointer text-sm text-brand-700 underline underline-offset-2">訂正の入力を開く</summary>
-            <div className="pt-4">
+          <details className="group/correct">
+            <summary className={CORRECT_SUMMARY}>
+              <span aria-hidden className="inline-block transition-transform group-open/correct:rotate-90">›</span>
+              <span className="group-open/correct:hidden">訂正の入力を開く</span>
+              <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
+            </summary>
+            <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
               <FlightForm key={f.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} editing={f} />
             </div>
           </details>
