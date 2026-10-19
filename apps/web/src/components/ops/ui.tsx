@@ -193,6 +193,14 @@ export const buttonGhostClass =
 export const buttonDangerClass =
   "inline-flex min-h-11 items-center justify-center rounded-sharp border border-signal-red bg-paper px-4 text-sm font-medium text-signal-red transition-colors hover:bg-signal-red-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-red focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40";
 
+/** 屋外で手袋でも押せる大きさの主ボタン（高さ 56px）。クラスの重ね書きで高さが競合しないよう、置き換えで作る。 */
+export const buttonFieldClass = buttonPrimaryClass.replace("min-h-11", "min-h-14").replace("px-5", "px-8").replace("text-sm", "text-base");
+/** 藍の枠のボタン（主ボタンの次に押してほしい操作）。 */
+export const buttonOutlineBrandClass = buttonGhostClass
+  .replace("border-rule ", "border-brand-700 ")
+  .replace("text-ink-soft ", "font-medium text-brand-700 ")
+  .replace("hover:border-ink-soft hover:bg-paper-soft", "hover:bg-brand-50");
+
 /**
  * 技能証明書番号の表示。伏せた値（先頭が「*」）は、伏せた部分を薄く、見えている末尾を濃く示し、
  * 読み上げでは「末尾 4 桁は 2222（ほかは伏せています）」のように読む。伏せるかどうかはサーバー側が決める。

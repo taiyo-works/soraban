@@ -253,7 +253,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto("/ops/flights/new");
       const form = page.getByRole("form", { name: "飛行記録の入力" });
       await form.getByRole("combobox", { name: "機体", exact: true }).selectOption(aircraft.id);
-      await form.getByRole("textbox", { name: /^離陸場所(\s|$)/ }).fill("米子市日吉津 本社");
+      await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("米子市日吉津 本社");
       await page.getByRole("button", { name: "離陸：今" }).click();
       await expect(form.getByLabel("離陸時刻", { exact: true })).toHaveValue("09:30");
       await expect(form.getByLabel("離陸日", { exact: true })).toHaveValue(FIELD_DAY);
@@ -261,7 +261,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       // 再読み込みしても離陸時刻と入力済みの項目が残る
       await page.reload();
       await expect(form.getByLabel("離陸時刻", { exact: true })).toHaveValue("09:30");
-      await expect(form.getByRole("textbox", { name: /^離陸場所(\s|$)/ })).toHaveValue("米子市日吉津 本社");
+      await expect(form.getByRole("textbox", { name: "離陸場所", exact: true })).toHaveValue("米子市日吉津 本社");
       await expect(form.getByRole("combobox", { name: "機体", exact: true })).toHaveValue(aircraft.id);
 
       await page.clock.setFixedTime(at("09:30:55"));
@@ -270,8 +270,10 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await expect(page.getByTestId("flight-minutes")).toHaveText("0:01");
       await expect(form.getByText("（1 分未満は切り上げ）")).toBeVisible();
 
-      await form.getByRole("textbox", { name: /^着陸場所(\s|$)/ }).fill("米子市日吉津 本社");
+      await form.getByRole("textbox", { name: "着陸場所", exact: true }).fill("米子市日吉津 本社");
       await form.getByLabel("飛行の目的").fill("空撮");
+      // 読み上げ名は項目名だけで、案内は説明（aria-describedby）として読まれる
+      await expect(form.getByRole("textbox", { name: "飛行の目的", exact: true })).toHaveAccessibleDescription(/例：空撮/);
       await form.getByRole("radio", { name: "なし" }).check();
       await page.getByRole("button", { name: "保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
@@ -285,7 +287,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
 
       // 下書きが消えている（再度開くと空）
       await page.goto("/ops/flights/new");
-      await expect(form.getByRole("textbox", { name: /^離陸場所(\s|$)/ })).toHaveValue("");
+      await expect(form.getByRole("textbox", { name: "離陸場所", exact: true })).toHaveValue("");
       await expect(form.getByLabel("離陸時刻", { exact: true })).toHaveValue("");
       expect(await page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:flight"))).not.toContain("米子市日吉津");
     });
@@ -310,12 +312,12 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       const t = slot();
       await form.getByRole("combobox", { name: "機体", exact: true }).selectOption(aircraft.id);
       await form.getByRole("combobox", { name: "操縦者", exact: true }).selectOption(otherPilot);
-      await form.getByRole("textbox", { name: /^離陸場所(\s|$)/ }).fill("現場A");
+      await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("現場A");
       await form.getByLabel("離陸日", { exact: true }).fill(t.takeoffAt.slice(0, 10));
       await form.getByLabel("離陸時刻", { exact: true }).fill(t.takeoffAt.slice(11));
       await form.getByLabel("着陸日", { exact: true }).fill(t.landingAt.slice(0, 10));
       await form.getByLabel("着陸時刻", { exact: true }).fill(t.landingAt.slice(11));
-      await form.getByRole("textbox", { name: /^着陸場所(\s|$)/ }).fill("現場A");
+      await form.getByRole("textbox", { name: "着陸場所", exact: true }).fill("現場A");
       await form.getByLabel("飛行の目的").fill("インフラ点検");
       await form.getByRole("radio", { name: "なし" }).check();
       await page.route("**/api/ops/flights", (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.continue()));
@@ -346,7 +348,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       const iform = page.getByRole("form", { name: "日常点検の入力" });
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("08:00");
       await expect(page.getByRole("button", { name: "保存", exact: true })).toBeDisabled();
-      await iform.getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("本社 駐車場");
+      await iform.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
       await page.getByRole("button", { name: "すべて正常" }).click();
       await page.getByRole("button", { name: "保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/inspections\/[0-9a-f-]{36}$/);
@@ -364,12 +366,12 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       // 当日の点検がない機体を選ぶと警告が出るが、保存はできる
       await form.getByRole("combobox", { name: "機体", exact: true }).selectOption(withoutInspection.id);
       await expect(page.getByTestId("record-warnings")).toContainText("飛行日の日常点検がありません");
-      await form.getByRole("textbox", { name: /^離陸場所(\s|$)/ }).fill("本社");
+      await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("本社");
       await page.getByRole("button", { name: "離陸：今" }).click();
       await page.clock.setFixedTime(at("08:12:30"));
       await page.getByRole("button", { name: "着陸：今" }).click();
       await expect(page.getByTestId("flight-minutes")).toHaveText("0:12");
-      await form.getByRole("textbox", { name: /^着陸場所(\s|$)/ }).fill("本社");
+      await form.getByRole("textbox", { name: "着陸場所", exact: true }).fill("本社");
       await form.getByLabel("飛行の目的").fill("試験飛行");
       await form.getByRole("radio", { name: "なし" }).check();
       await page.getByRole("button", { name: "保存", exact: true }).click();
@@ -378,7 +380,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
 
       // 1 項目を「異常」にして備考なしで保存しようとすると、その項目に誤りが示される
       await page.goto(`/ops/inspections/new?aircraftId=${withInspection.id}`);
-      await iform.getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("本社 駐車場");
+      await iform.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
       await page.getByRole("button", { name: "すべて正常" }).click();
       await page.getByRole("radiogroup", { name: "フレームの結果" }).getByRole("radio", { name: "異常" }).check();
       await page.getByRole("button", { name: "保存", exact: true }).click();
@@ -428,10 +430,10 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await signIn(page.request, seeded("a-pilot"));
       await page.goto("/ops/flights/new");
       const form = page.getByRole("form", { name: "飛行記録の入力" });
-      await form.getByRole("textbox", { name: /^離陸場所(\s|$)/ }).fill("下書きの場所");
+      await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("下書きの場所");
       await expect.poll(() => page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:flight") ?? "")).toContain("下書きの場所");
       await page.goto(`/ops/inspections/new`);
-      await page.getByRole("form", { name: "日常点検の入力" }).getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("点検の下書き");
+      await page.getByRole("form", { name: "日常点検の入力" }).getByRole("textbox", { name: "実施場所", exact: true }).fill("点検の下書き");
       await expect.poll(() => page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:inspection") ?? "")).toContain("点検の下書き");
       await page.goto("/ops");
       await page.getByRole("button", { name: "ログアウト" }).click();

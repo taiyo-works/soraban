@@ -27,8 +27,6 @@ import {
 import { setChangeFlash } from "./change-notice";
 import { clearDraft, DRAFT_KEYS, loadDraft, newRequestId, saveDraft } from "./drafts";
 import {
-  checkboxClass,
-  checkRowClass,
   Field,
   FieldError,
   fieldErrorsOf,
@@ -42,7 +40,7 @@ import {
   versionOf,
   type ApiResult,
 } from "./ops-client";
-import { buttonGhostClass, buttonPrimaryClass, VERSION_NOTICE_TARGET } from "./ui";
+import { Badge, buttonFieldClass, buttonGhostClass, buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "./ui";
 
 /** 通信できない（fetch が例外）場合も ApiResult にする。status 0。 */
 const trySend = async (method: string, url: string, body?: unknown): Promise<ApiResult> => {
@@ -55,9 +53,82 @@ const trySend = async (method: string, url: string, body?: unknown): Promise<Api
 
 const OFFLINE_MESSAGE = "保存できませんでした。通信が戻ったら「再送する」を押してください。入力した内容はこの端末に残っています。";
 
-/** 屋外で押しやすい大きさ（高さ 44px 以上）。 */
-const bigButtonClass = `${buttonPrimaryClass} min-h-12 px-6 text-base`;
-const nowButtonClass = `${buttonGhostClass} min-h-12 whitespace-nowrap border-brand-700 text-brand-700 font-medium`;
+/** 屋外で押しやすい大きさ（高さ 44px 以上。手袋でも押せるよう、主な操作は 48〜56px にする）。 */
+const bigButtonClass = buttonFieldClass;
+const nowButtonClass = `${buttonOutlineBrandClass
+  .replace("min-h-11", "min-h-14")
+  .replace("px-4", "px-5")
+  .replace("text-sm", "text-base")
+  .replace("border border-brand-700", "border-2 border-brand-700")} w-full whitespace-nowrap sm:w-auto sm:min-w-[9rem]`;
+const tallGhostClass = buttonGhostClass.replace("min-h-11", "min-h-12");
+const smallGhostClass = buttonGhostClass.replace("px-4", "px-3").replace("text-sm", "text-xs");
+
+/** 2 択・多択の選択肢（ラジオ・チェックボックスを枠付きの押しやすい大きさにする）。状態は文字と印で示し、色は補助。 */
+const choiceClass = (checked: boolean, tone: "brand" | "red" = "brand") =>
+  `flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 rounded-sharp border px-3.5 text-sm transition-colors ${
+    checked
+      ? tone === "red"
+        ? "border-signal-red bg-signal-red-soft font-medium text-signal-red"
+        : "border-brand-700 bg-brand-50 font-medium text-brand-900"
+      : "border-rule bg-paper text-ink-soft hover:border-ink-soft"
+  }`;
+const choiceInputClass = "h-5 w-5 shrink-0 cursor-pointer";
+const brandAccent = "accent-brand-700";
+
+/**
+ * 入力の段（番号と見出し）。判定画面の節見出しと同じく罫線の上に見出しを置く。
+ * fieldset の名前は legend（読み上げ用）で付け、見た目の見出しは読ませない。
+ */
+function Step({ no, title, children }: { readonly no: string; readonly title: string; readonly children: ReactNode }) {
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-4 border-t border-rule pt-3">
+      <legend className="sr-only">{title}</legend>
+      <div aria-hidden className="flex items-baseline gap-2.5">
+        <span className="font-mono text-[11px] tnum text-ink-mute">{no}</span>
+        <span className="font-display text-lg font-light text-ink">{title}</span>
+      </div>
+      {children}
+    </fieldset>
+  );
+}
+
+/** 小さな見出し付きの選択肢のまとまり（安全に影響のあった事項・区分など）。 */
+function ChoiceGroup({
+  legend,
+  required,
+  error,
+  children,
+  columns = 2,
+  radiogroupLabel,
+}: {
+  readonly legend: string;
+  readonly required?: boolean;
+  readonly error?: string;
+  readonly children: ReactNode;
+  readonly columns?: 2 | 1;
+  /** ラジオのまとまりの読み上げ名。渡すと role="radiogroup" にし、誤りのときにフォーカスを移せるようにする。 */
+  readonly radiogroupLabel?: string;
+}) {
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-2">
+      <legend className="mb-1.5 flex items-center gap-2 text-sm text-ink">
+        <span>{legend}</span>
+        <RequiredTag required={required} />
+      </legend>
+      <div
+        className={`grid gap-2 rounded-sharp outline-none focus-visible:ring-2 focus-visible:ring-brand-700 ${
+          columns === 2 ? "grid-cols-2 sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
+        }`}
+        {...(radiogroupLabel
+          ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined }
+          : {})}
+      >
+        {children}
+      </div>
+      <FieldError message={error} />
+    </fieldset>
+  );
+}
 
 const WARNING_TEXT = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
@@ -109,24 +180,23 @@ function DateTimeInput({
 }) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
+  const hintId = `${id}-hint`;
+  const describedBy = [errorId, hintId].filter(Boolean).join(" ");
   const now = () => {
     const v = nowJstInput(new Date());
     onChange(v.slice(0, 10), v.slice(11, 16));
   };
   return (
-    <fieldset className="flex min-w-0 flex-col gap-1.5" data-testid={testId}>
+    <fieldset className="flex min-w-0 flex-col gap-2" data-testid={testId}>
       <legend className="mb-1.5 flex items-center gap-2 text-sm text-ink">
         <span>{label}</span>
         <RequiredTag required />
-        {nextDay ? (
-          <span className="rounded-sharp border border-signal-amber/60 bg-signal-amber-soft px-1 text-[11px] text-signal-amber" data-testid={`${testId}-next-day`}>
-            翌日
-          </span>
-        ) : null}
+        {nextDay ? <Badge tone="amber" data-testid={`${testId}-next-day`}>翌日</Badge> : null}
       </legend>
-      <div className="flex flex-wrap items-center gap-2">
+      {/* 狭い画面：「今」を 1 行で大きく、その下に日付と時刻を 2 列。広い画面：1 行に並べる。 */}
+      <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
         {nowLabel ? (
-          <button type="button" className={nowButtonClass} onClick={now}>
+          <button type="button" className={`${nowButtonClass} col-span-2`} onClick={now}>
             {nowLabel}
           </button>
         ) : null}
@@ -134,8 +204,8 @@ function DateTimeInput({
           type="date"
           aria-label={`${label.replace(/時刻$/, "")}日`}
           aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
-          className={`${inputClass.replace("w-full ", "")} tnum w-[10.5rem]`}
+          aria-describedby={describedBy}
+          className={`${inputClass} tnum min-h-12 sm:w-[11rem]`}
           value={date}
           onChange={(e) => onChange(e.target.value, time)}
         />
@@ -143,15 +213,17 @@ function DateTimeInput({
           type="time"
           aria-label={label}
           aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
+          aria-describedby={describedBy}
           step={60}
-          className={`${inputClass.replace("w-full ", "")} tnum w-[7.5rem]`}
+          className={`${inputClass} tnum min-h-12 sm:w-[8.5rem]`}
           value={time}
           onChange={(e) => onChange(date, e.target.value)}
         />
       </div>
       <FieldError id={errorId} message={error} />
-      <span className="text-xs text-ink-mute">日本時間（24 時間制、分まで）</span>
+      <span id={hintId} className="text-xs text-ink-mute">
+        日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。
+      </span>
     </fieldset>
   );
 }
@@ -196,33 +268,51 @@ function PlaceInput({
       { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     );
   };
+  const hasPos = pos.lat !== "" || pos.lng !== "";
+  // 緯度・経度の欄は折りたたむ（場所名だけでも記録できるため）。値か誤りがあるときは開いておく。
+  const coordOpen = hasPos || Boolean(errors[keys.lat] || errors[keys.lng] || errors[keys.acc]);
   return (
-    <div className="flex min-w-0 flex-col gap-3 sm:col-span-2">
+    <div className="flex min-w-0 flex-col gap-2.5">
       <Field label={label} required error={errors[keys.name]} hint="地名・施設名など、正確な位置が分かる名前（100 文字以内）">
-        <input className={inputClass} value={name} onChange={(e) => onName(e.target.value)} />
+        <input className={`${inputClass} min-h-12`} value={name} onChange={(e) => onName(e.target.value)} />
       </Field>
       <div className="flex flex-col gap-2 border-l-2 border-rule pl-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className={buttonGhostClass} onClick={locate}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <button type="button" className={`${tallGhostClass}`} onClick={locate}>
             現在地を入れる
           </button>
-          <span className="text-xs text-ink-mute">緯度・経度（任意）は世界測地系（WGS84）の 10 進度、小数 6 桁まで</span>
+          {hasPos ? (
+            <span className="font-mono text-xs tnum text-ink-soft">
+              {pos.lat || "—"}, {pos.lng || "—"}
+              {pos.acc ? `（精度 約 ${pos.acc} m）` : ""}
+            </span>
+          ) : null}
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Field label={`${label}の緯度`} required={false} error={errors[keys.lat]}>
-            <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lat} onChange={(e) => onPos({ ...pos, lat: e.target.value })} />
-          </Field>
-          <Field label={`${label}の経度`} required={false} error={errors[keys.lng]}>
-            <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lng} onChange={(e) => onPos({ ...pos, lng: e.target.value })} />
-          </Field>
-        </div>
-        {pos.acc ? <span className="text-xs text-ink-mute">測位の精度：約 {pos.acc} m</span> : null}
-        <FieldError message={errors[keys.acc]} />
         {status ? (
           <span role="status" className="text-xs text-ink-soft">
             {status}
           </span>
         ) : null}
+        <details open={coordOpen || undefined} className="group/coord">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-xs text-brand-700 [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="inline-block transition-transform group-open/coord:rotate-90">
+              ›
+            </span>
+            緯度・経度（世界測地系）を手で入れる（任意）
+          </summary>
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label={`${label}の緯度`} required={false} error={errors[keys.lat]}>
+                <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lat} onChange={(e) => onPos({ ...pos, lat: e.target.value })} />
+              </Field>
+              <Field label={`${label}の経度`} required={false} error={errors[keys.lng]}>
+                <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lng} onChange={(e) => onPos({ ...pos, lng: e.target.value })} />
+              </Field>
+            </div>
+            <span className="text-xs text-ink-mute">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
+          </div>
+        </details>
+        <FieldError message={errors[keys.acc]} />
         <span className="text-xs leading-relaxed text-ink-mute">
           位置は「保存」を押したときに限り、飛行日誌の記載事項（場所）として送られます。位置を続けて記録することはありません。
         </span>
@@ -247,15 +337,55 @@ const posOf = (lat: number | null, lng: number | null, acc: number | null): Posi
 function Warnings({ items }: { readonly items: readonly string[] }) {
   if (items.length === 0) return null;
   return (
-    <ul data-testid="record-warnings" className="flex flex-col gap-1 rounded-sharp border border-signal-amber/60 bg-signal-amber-soft px-3 py-2 text-sm text-signal-amber">
-      {items.map((w) => (
-        <li key={w}>
-          <span aria-hidden>! </span>
-          {w}
-          <span className="text-xs text-ink-soft">（保存はできます）</span>
-        </li>
-      ))}
-    </ul>
+    <div data-testid="record-warnings" className="flex flex-col gap-1.5 border-l-2 border-signal-amber bg-signal-amber-soft px-3 py-2.5">
+      <p className="text-xs font-medium text-ink-soft">確認してください（保存は止めません）</p>
+      <ul className="flex flex-col gap-1 text-sm text-ink">
+        {items.map((w) => (
+          <li key={w} className="flex gap-1.5">
+            <span aria-hidden className="font-medium text-signal-amber">
+              !
+            </span>
+            <span>{w}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** 下書きの状態（新規の入力だけ）。前回の入力の続きであることと、下書きを消す操作を、保存ボタンから離れた画面の上に置く。 */
+function DraftBar({
+  restored,
+  canDiscard,
+  onDiscard,
+}: {
+  readonly restored: boolean;
+  readonly canDiscard: boolean;
+  readonly onDiscard: () => void;
+}) {
+  return (
+    <div
+      data-testid="draft-status"
+      className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-sharp border px-3 py-2 ${
+        restored ? "border-brand-500 bg-brand-50" : "border-rule-soft"
+      }`}
+    >
+      <p className="min-w-0 flex-1 text-xs leading-relaxed text-ink-soft">
+        {restored ? (
+          <>
+            <span className="font-medium text-ink">前回の入力の続きです。</span>
+            この端末に残っていた下書きを読み込みました。
+          </>
+        ) : (
+          "入力中の内容はこの端末に下書きとして残り、再読み込みや通信の切断では消えません。保存すると下書きは消えます。"
+        )}
+      </p>
+      {canDiscard ? (
+        <button type="button" className={smallGhostClass} onClick={onDiscard}>
+          下書きを消す
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -278,18 +408,37 @@ function SaveRow({
   readonly children?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-t border-rule-soft pt-4">
-      <FormError message={message} />
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" className={bigButtonClass} disabled={busy || disabled}>
-          {label}
-        </button>
-        {offline ? (
-          <button type="button" className={`${buttonGhostClass} min-h-12`} onClick={onRetry} disabled={busy}>
+    <div className="flex flex-col gap-3 border-t border-rule pt-4">
+      {offline && message ? (
+        // 通信できなかったとき：誤りではないため赤ではなく注意の色にし、下書きが残っていることと再送の操作をまとめて示す
+        <div
+          role="alert"
+          tabIndex={-1}
+          data-form-error
+          className="flex flex-col gap-3 rounded-sharp border border-signal-amber/70 bg-signal-amber-soft px-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-signal-amber"
+        >
+          <p className="text-sm leading-relaxed text-ink">
+            <span className="mr-1.5 font-medium text-signal-amber">未送信</span>
+            {message}
+          </p>
+          <button type="button" className={`${bigButtonClass} w-full sm:w-auto sm:self-start`} onClick={onRetry} disabled={busy}>
             再送する
           </button>
-        ) : null}
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        </div>
+      ) : (
+        <FormError message={message} />
+      )}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+        <button
+          type="submit"
+          className={offline ? `${tallGhostClass} w-full sm:w-auto` : `${bigButtonClass} w-full sm:w-auto`}
+          disabled={busy || disabled}
+        >
+          {label}
+        </button>
+        <span aria-live="polite" className="text-xs text-ink-mute">
+          {busy ? "送信しています…" : null}
+        </span>
         {children}
       </div>
     </div>
@@ -399,6 +548,10 @@ const flightStateFrom = (f: FlightFormInitial): FlightState => ({
   })),
 });
 
+/** 下書きに、利用者が入れた内容があるか（表示の切り替えだけに使う。機体・操縦者は画面の既定で入るため数えない）。 */
+const flightHasInput = (d: Partial<FlightState>): boolean =>
+  Boolean(d.takeoffTime || d.landingTime || d.takeoffPlace || d.landingPlace || d.purpose || d.waypoints || d.safetyIssue || d.defects?.length);
+
 const joinDt = (d: string, t: string): string => (d && t ? `${d}T${t.slice(0, 5)}` : "");
 
 export function FlightForm({
@@ -428,6 +581,8 @@ export function FlightForm({
   const [message, setMessage] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
+  // 前回の入力の続き（下書きに入力済みの項目があった）かどうか。表示だけに使う。
+  const [restored, setRestored] = useState(false);
   // 日常点検の候補。どの機体・日の候補かを key で持ち、今の機体・日と違う間は「未取得」とみなす
   const [fetched, setFetched] = useState<{ readonly key: string; readonly list: readonly InspectionCandidate[] } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -445,6 +600,7 @@ export function FlightForm({
           ...(initialInspectionId ? { aircraftId: initialAircraftId ?? d.aircraftId, dailyInspectionId: initialInspectionId } : {}),
           ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
         });
+        setRestored(flightHasInput(d));
       }
       setLoaded(true);
     }, 0);
@@ -581,21 +737,19 @@ export function FlightForm({
     setErrors({});
     setMessage(null);
     setOffline(false);
+    setRestored(false);
   };
 
-  return (
-    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-7" aria-label={isEdit ? "飛行記録の訂正" : "飛行記録の入力"}>
-      {!isEdit ? (
-        <p className="text-xs leading-relaxed text-ink-mute">
-          入力中の内容はこの端末に下書きとして残り、再読み込みや通信の切断では消えません。保存すると下書きは消えます。
-        </p>
-      ) : null}
+  const noInspectionOnDay = Boolean(v.aircraftId && candidates !== null && sameDay.length === 0);
 
-      <fieldset className="flex min-w-0 flex-col gap-4">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">機体・操縦者・日常点検</legend>
+  return (
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={isEdit ? "飛行記録の訂正" : "飛行記録の入力"}>
+      {!isEdit ? <DraftBar restored={restored} canDiscard={restored || flightHasInput(v)} onDiscard={discardDraft} /> : null}
+
+      <Step no="01" title="機体・操縦者・日常点検">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。誤った場合は取り消して作り直してください。" : undefined}>
           <select
-            className={inputClass}
+            className={`${inputClass} min-h-12`}
             value={v.aircraftId}
             disabled={isEdit}
             onChange={(e) => setV((s) => ({ ...s, aircraftId: e.target.value, dailyInspectionId: "" }))}
@@ -609,7 +763,7 @@ export function FlightForm({
           </select>
         </Field>
         <Field label="操縦者" required error={errors["pilotId"]} hint={fixedPilotId ? "操縦者の役割では、自分の記録だけを入力できます。" : undefined}>
-          <select className={inputClass} value={v.pilotId} disabled={fixedPilotId !== null} onChange={(e) => set("pilotId", e.target.value)}>
+          <select className={`${inputClass} min-h-12`} value={v.pilotId} disabled={fixedPilotId !== null} onChange={(e) => set("pilotId", e.target.value)}>
             <option value="">選んでください</option>
             {pilots.map((p) => (
               <option key={p.id} value={p.id}>
@@ -619,7 +773,7 @@ export function FlightForm({
           </select>
         </Field>
         <Field label="日常点検" required={false} error={errors["dailyInspectionId"]} hint="同じ機体の、飛行日の点検から選びます。">
-          <select className={inputClass} value={v.dailyInspectionId} onChange={(e) => set("dailyInspectionId", e.target.value)} data-testid="inspection-select">
+          <select className={`${inputClass} min-h-12`} value={v.dailyInspectionId} onChange={(e) => set("dailyInspectionId", e.target.value)} data-testid="inspection-select">
             <option value="">紐付けない</option>
             {(candidates ?? [])
               .filter((c) => c.inspectedDate === flightDay || c.id === v.dailyInspectionId)
@@ -630,27 +784,24 @@ export function FlightForm({
               ))}
           </select>
         </Field>
-        {v.aircraftId && candidates !== null && sameDay.length === 0 ? (
-          <a href={`/ops/inspections/new?aircraftId=${v.aircraftId}`} className="self-start text-sm text-brand-700 underline underline-offset-2">
+        <Warnings items={warnings} />
+        {noInspectionOnDay ? (
+          <a href={`/ops/inspections/new?aircraftId=${v.aircraftId}`} className={`${buttonOutlineBrandClass} self-start`}>
             日常点検を入力する
           </a>
         ) : null}
-        <Warnings items={warnings} />
-      </fieldset>
+      </Step>
 
-      <fieldset className="flex min-w-0 flex-col gap-4">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">離陸</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <PlaceInput
-            label="離陸場所"
-            name={v.takeoffPlace}
-            pos={v.takeoffPos}
-            onName={(x) => set("takeoffPlace", x)}
-            onPos={(p) => set("takeoffPos", p)}
-            errors={errors}
-            keys={{ name: "takeoffPlace", lat: "takeoffLat", lng: "takeoffLng", acc: "takeoffAccuracyM" }}
-          />
-        </div>
+      <Step no="02" title="離陸">
+        <PlaceInput
+          label="離陸場所"
+          name={v.takeoffPlace}
+          pos={v.takeoffPos}
+          onName={(x) => set("takeoffPlace", x)}
+          onPos={(p) => set("takeoffPos", p)}
+          errors={errors}
+          keys={{ name: "takeoffPlace", lat: "takeoffLat", lng: "takeoffLng", acc: "takeoffAccuracyM" }}
+        />
         <DateTimeInput
           label="離陸時刻"
           nowLabel="離陸：今"
@@ -660,10 +811,9 @@ export function FlightForm({
           error={timeError("takeoffAt")}
           onChange={(d, t) => setV((s) => ({ ...s, takeoffDate: d, takeoffTime: t, landingDate: s.landingDate || d }))}
         />
-      </fieldset>
+      </Step>
 
-      <fieldset className="flex min-w-0 flex-col gap-4">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">着陸</legend>
+      <Step no="03" title="着陸">
         <DateTimeInput
           label="着陸時刻"
           nowLabel="着陸：今"
@@ -674,73 +824,95 @@ export function FlightForm({
           nextDay={Boolean(v.takeoffDate && v.landingDate && v.landingDate > v.takeoffDate)}
           onChange={(d, t) => setV((s) => ({ ...s, landingDate: d, landingTime: t }))}
         />
-        <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-ink" aria-live="polite">
+        <div
+          className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-sharp border px-4 py-3 ${
+            liveMinutesError ? "border-signal-red/60" : "border-rule bg-paper"
+          }`}
+          aria-live="polite"
+        >
           <span className="text-xs text-ink-mute">飛行時間</span>
           {minutes && minutes.ok ? (
             <>
-              <span className="font-mono text-xl tnum" data-testid="flight-minutes">
+              <span className="font-mono text-3xl leading-none tnum text-ink" data-testid="flight-minutes">
                 {formatHm(minutes.minutes)}
               </span>
               {minutes.roundedUp ? <span className="text-xs text-ink-soft">（1 分未満は切り上げ）</span> : null}
             </>
           ) : (
-            <span className="text-ink-mute" data-testid="flight-minutes">
+            <span className="font-mono text-3xl leading-none text-ink-mute" data-testid="flight-minutes">
               —
             </span>
           )}
-          {liveMinutesError ? <span className="text-xs text-signal-red">{liveMinutesError}</span> : null}
-        </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <PlaceInput
-            label="着陸場所"
-            name={v.landingPlace}
-            pos={v.landingPos}
-            onName={(x) => set("landingPlace", x)}
-            onPos={(p) => set("landingPos", p)}
-            errors={errors}
-            keys={{ name: "landingPlace", lat: "landingLat", lng: "landingLng", acc: "landingAccuracyM" }}
-          />
+          {liveMinutesError ? (
+            <span className="basis-full text-xs text-signal-red">
+              <span aria-hidden>! </span>
+              {liveMinutesError}
+            </span>
+          ) : !minutes ? (
+            <span className="basis-full text-xs text-ink-mute">離陸・着陸の時刻を入れると、ここに表示します。</span>
+          ) : null}
         </div>
+        <PlaceInput
+          label="着陸場所"
+          name={v.landingPlace}
+          pos={v.landingPos}
+          onName={(x) => set("landingPlace", x)}
+          onPos={(p) => set("landingPos", p)}
+          errors={errors}
+          keys={{ name: "landingPlace", lat: "landingLat", lng: "landingLng", acc: "landingAccuracyM" }}
+        />
         {v.takeoffPlace && !v.landingPlace ? (
-          <button type="button" className={`${buttonGhostClass} self-start`} onClick={() => setV((s) => ({ ...s, landingPlace: s.takeoffPlace, landingPos: s.takeoffPos }))}>
-            離陸場所と同じ
+          <button type="button" className={`${tallGhostClass} self-start`} onClick={() => setV((s) => ({ ...s, landingPlace: s.takeoffPlace, landingPos: s.takeoffPos }))}>
+            離陸場所と同じにする
           </button>
         ) : null}
-      </fieldset>
+      </Step>
 
-      <fieldset className="flex min-w-0 flex-col gap-4">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">飛行概要</legend>
+      <Step no="04" title="飛行概要">
         <Field label="飛行の目的" required error={errors["purpose"]} hint="例：空撮、インフラ点検、測量（100 文字以内）">
-          <input className={inputClass} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} />
+          <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} />
         </Field>
         <Field label="経由地" required={false} error={errors["waypoints"]} hint="電源を切らずに経由した場所（200 文字以内）">
           <input className={inputClass} value={v.waypoints} onChange={(e) => set("waypoints", e.target.value)} />
         </Field>
-        <fieldset className="flex min-w-0 flex-col gap-1">
-          <legend className="mb-1 text-sm text-ink">特定飛行の形態（該当するものをすべて選ぶ。なければ選ばない）</legend>
-          <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-            {SPECIFIC_FLIGHT_TYPES.map((t) => (
-              <label key={t.key} className={checkRowClass}>
-                <input type="checkbox" className={checkboxClass} checked={v.specificFlightTypes.includes(t.key)} onChange={() => toggleType(t.key)} />
-                {t.label}
-              </label>
-            ))}
-          </div>
+        <fieldset className="flex min-w-0 flex-col gap-3">
+          <legend className="mb-1 text-sm text-ink">
+            特定飛行の形態
+            <span className="ml-2 text-xs text-ink-mute">該当するものをすべて選びます。なければ選びません。</span>
+          </legend>
+          {(
+            [
+              ["airspace", "飛行禁止空域"],
+              ["method", "飛行の方法"],
+            ] as const
+          ).map(([group, title]) => (
+            <div key={group} className="flex flex-col gap-2">
+              <p aria-hidden className="font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                {title}
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {SPECIFIC_FLIGHT_TYPES.filter((t) => t.group === group).map((t) => {
+                  const checked = v.specificFlightTypes.includes(t.key);
+                  return (
+                    <label key={t.key} className={choiceClass(checked)}>
+                      <input type="checkbox" className={`${choiceInputClass} ${brandAccent}`} checked={checked} onChange={() => toggleType(t.key)} />
+                      {t.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
           <FieldError message={errors["specificFlightTypes"]} />
         </fieldset>
-      </fieldset>
+      </Step>
 
-      <fieldset className="flex min-w-0 flex-col gap-3">
-        <legend className="mb-1 flex items-center gap-2 text-sm text-ink">
-          <span>飛行の安全に影響のあった事項</span>
-          <RequiredTag required />
-        </legend>
-        <div
-          className="flex flex-wrap gap-x-6"
-          role="radiogroup"
-          tabIndex={-1}
-          aria-label="飛行の安全に影響のあった事項の有無"
-          aria-invalid={errors["safetyIssue"] ? true : undefined}
+      <Step no="05" title="安全に影響のあった事項・不具合">
+        <ChoiceGroup
+          legend="飛行の安全に影響のあった事項"
+          required
+          error={errors["safetyIssue"]}
+          radiogroupLabel="飛行の安全に影響のあった事項の有無"
         >
           {(
             [
@@ -748,71 +920,75 @@ export function FlightForm({
               ["yes", "あり"],
             ] as const
           ).map(([val, label]) => (
-            <label key={val} className={checkRowClass}>
+            <label key={val} className={choiceClass(v.safetyIssue === val)}>
               <input
                 type="radio"
                 name="safetyIssue"
-                className={checkboxClass}
+                className={`${choiceInputClass} ${brandAccent}`}
                 checked={v.safetyIssue === val}
                 onChange={() => set("safetyIssue", val)}
               />
               {label}
             </label>
           ))}
-        </div>
-        <FieldError message={errors["safetyIssue"]} />
+        </ChoiceGroup>
         {v.safetyIssue === "yes" ? (
           <Field label="影響のあった事項の内容" required error={errors["safetyIssueDetail"]} hint="飛行前後の機体の状況も含めて（500 文字以内）">
             <textarea className={inputClass} rows={3} value={v.safetyIssueDetail} onChange={(e) => set("safetyIssueDetail", e.target.value)} />
           </Field>
         ) : null}
-      </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3">
-        <legend className="mb-1 text-sm text-ink">不具合（記事）</legend>
-        {v.defects.map((d, i) => {
-          const upd = (k: keyof DefectState, val: string) =>
-            set(
-              "defects",
-              v.defects.map((x, j) => (j === i ? { ...x, [k]: val } : x)),
+        <fieldset className="flex min-w-0 flex-col gap-3">
+          <legend className="mb-1 flex items-center gap-2 text-sm text-ink">
+            <span>不具合（記事）</span>
+            <span className="text-xs text-ink-mute">{v.defects.length === 0 ? "なし" : `${v.defects.length} 件`}</span>
+          </legend>
+          {v.defects.map((d, i) => {
+            const upd = (k: keyof DefectState, val: string) =>
+              set(
+                "defects",
+                v.defects.map((x, j) => (j === i ? { ...x, [k]: val } : x)),
+              );
+            return (
+              <div key={i} className="flex flex-col gap-3 rounded-sharp border border-rule p-3" data-testid="defect-row">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-mono text-xs tnum text-ink-mute">不具合 {i + 1}</span>
+                  <button type="button" className={smallGhostClass} onClick={() => set("defects", v.defects.filter((_, j) => j !== i))}>
+                    不具合 {i + 1} を外す
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Field label={`不具合 ${i + 1} の発生日`} required error={errors[`defects.${i}.occurredOn`]}>
+                    <input type="date" className={`${inputClass} tnum`} value={d.occurredOn} onChange={(e) => upd("occurredOn", e.target.value)} />
+                  </Field>
+                  <Field label={`不具合 ${i + 1} の不具合事項`} required error={errors[`defects.${i}.description`]}>
+                    <input className={inputClass} value={d.description} onChange={(e) => upd("description", e.target.value)} />
+                  </Field>
+                  <Field label={`不具合 ${i + 1} の処置日`} required={false} error={errors[`defects.${i}.actionOn`]}>
+                    <input type="date" className={`${inputClass} tnum`} value={d.actionOn} onChange={(e) => upd("actionOn", e.target.value)} />
+                  </Field>
+                  <Field label={`不具合 ${i + 1} の処置その他`} required={false} error={errors[`defects.${i}.action`]}>
+                    <input className={inputClass} value={d.action} onChange={(e) => upd("action", e.target.value)} />
+                  </Field>
+                  <Field label={`不具合 ${i + 1} の確認者の氏名`} required={false} error={errors[`defects.${i}.confirmerName`]}>
+                    <input className={inputClass} value={d.confirmerName} onChange={(e) => upd("confirmerName", e.target.value)} />
+                  </Field>
+                </div>
+              </div>
             );
-          return (
-            <div key={i} className="grid grid-cols-1 gap-3 border-l-2 border-rule pl-3 sm:grid-cols-2" data-testid="defect-row">
-              <Field label={`不具合 ${i + 1} の発生日`} required error={errors[`defects.${i}.occurredOn`]}>
-                <input type="date" className={`${inputClass} tnum`} value={d.occurredOn} onChange={(e) => upd("occurredOn", e.target.value)} />
-              </Field>
-              <Field label={`不具合 ${i + 1} の不具合事項`} required error={errors[`defects.${i}.description`]}>
-                <input className={inputClass} value={d.description} onChange={(e) => upd("description", e.target.value)} />
-              </Field>
-              <Field label={`不具合 ${i + 1} の処置日`} required={false} error={errors[`defects.${i}.actionOn`]}>
-                <input type="date" className={`${inputClass} tnum`} value={d.actionOn} onChange={(e) => upd("actionOn", e.target.value)} />
-              </Field>
-              <Field label={`不具合 ${i + 1} の処置その他`} required={false} error={errors[`defects.${i}.action`]}>
-                <input className={inputClass} value={d.action} onChange={(e) => upd("action", e.target.value)} />
-              </Field>
-              <Field label={`不具合 ${i + 1} の確認者の氏名`} required={false} error={errors[`defects.${i}.confirmerName`]}>
-                <input className={inputClass} value={d.confirmerName} onChange={(e) => upd("confirmerName", e.target.value)} />
-              </Field>
-              <button
-                type="button"
-                className={`${buttonGhostClass} self-end`}
-                onClick={() => set("defects", v.defects.filter((_, j) => j !== i))}
-              >
-                不具合 {i + 1} を外す
-              </button>
-            </div>
-          );
-        })}
-        <button
-          type="button"
-          className={`${buttonGhostClass} self-start`}
-          onClick={() =>
-            set("defects", [...v.defects, { occurredOn: v.takeoffDate, description: "", actionOn: "", action: "", confirmerName: "" }])
-          }
-        >
-          不具合を加える
-        </button>
-      </fieldset>
+          })}
+          <button
+            type="button"
+            className={`${tallGhostClass} self-start`}
+            onClick={() =>
+              set("defects", [...v.defects, { occurredOn: v.takeoffDate, description: "", actionOn: "", action: "", confirmerName: "" }])
+            }
+          >
+            不具合を加える
+          </button>
+          <span className="text-xs text-ink-mute">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
+        </fieldset>
+      </Step>
 
       {isEdit ? (
         <Field label="訂正の理由" required error={errors["reason"]} hint="版の一覧に、訂正した人・日時とともに残ります。">
@@ -820,13 +996,7 @@ export function FlightForm({
         </Field>
       ) : null}
 
-      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "保存"} onRetry={() => void submit()}>
-        {!isEdit ? (
-          <button type="button" className={`${buttonGhostClass} ml-auto`} onClick={discardDraft}>
-            下書きを消す
-          </button>
-        ) : null}
-      </SaveRow>
+      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "保存"} onRetry={() => void submit()} />
     </form>
   );
 }
@@ -879,6 +1049,10 @@ const emptyInspection = (aircraftId: string, pilotId: string): InspectionState =
   specialNotes: "",
 });
 
+/** 下書きに、利用者が入れた内容があるか（表示の切り替えだけに使う）。 */
+const inspectionHasInput = (d: Partial<InspectionState>): boolean =>
+  Boolean(d.placeName || d.specialNotes || (d.items && Object.values(d.items).some((it) => it && (it.result || it.note))));
+
 export function InspectionForm({
   aircraft,
   pilots,
@@ -918,6 +1092,7 @@ export function InspectionForm({
   const [message, setMessage] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [restored, setRestored] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   // 下書きの読み込み。無ければ実施日時の既定を「今」にする（端末の時計。描画の後に行う）。
@@ -933,6 +1108,7 @@ export function InspectionForm({
           ...(initialAircraftId ? { aircraftId: initialAircraftId } : {}),
           ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
         });
+        setRestored(inspectionHasInput(d));
       } else {
         setV((s) => ({ ...s, date: now.slice(0, 10), time: now.slice(11, 16) }));
       }
@@ -950,7 +1126,19 @@ export function InspectionForm({
   const setItem = (key: InspectionItemKey, patch: Partial<ItemState>) =>
     setV((s) => ({ ...s, items: { ...s.items, [key]: { ...s.items[key], ...patch } } }));
   const allSelected = INSPECTION_ITEMS.every((it) => v.items[it.key].result !== "");
+  const selectedCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result !== "").length;
+  const abnormalCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result === "abnormal").length;
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
+
+  const discardDraft = () => {
+    clearDraft(DRAFT_KEYS.inspection);
+    const now = nowJstInput(new Date());
+    setV({ ...emptyInspection(initialAircraftId ?? "", fixedPilotId ?? ""), date: now.slice(0, 10), time: now.slice(11, 16) });
+    setErrors({});
+    setMessage(null);
+    setOffline(false);
+    setRestored(false);
+  };
 
   const submit = async () => {
     setBusy(true);
@@ -999,6 +1187,15 @@ export function InspectionForm({
     }
   };
 
+  const setAllNormal = () =>
+    setV((s) => ({
+      ...s,
+      items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal", note: s.items[it.key].note }])) as Record<
+        InspectionItemKey,
+        ItemState
+      >,
+    }));
+
   return (
     <form
       ref={formRef}
@@ -1006,13 +1203,14 @@ export function InspectionForm({
         e.preventDefault();
         void submit();
       }}
-      className="flex flex-col gap-7"
+      className="flex flex-col gap-8"
       aria-label={isEdit ? "日常点検の訂正" : "日常点検の入力"}
     >
-      <fieldset className="flex min-w-0 flex-col gap-4">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">機体・実施者・日時・場所</legend>
+      {!isEdit ? <DraftBar restored={restored} canDiscard={restored || inspectionHasInput(v)} onDiscard={discardDraft} /> : null}
+
+      <Step no="01" title="機体・実施者・日時・場所">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
-          <select className={inputClass} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
+          <select className={`${inputClass} min-h-12`} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
             <option value="">選んでください</option>
             {aircraft.map((a) => (
               <option key={a.id} value={a.id}>
@@ -1023,7 +1221,7 @@ export function InspectionForm({
         </Field>
         {selectedAircraft?.status === "suspended" ? <Warnings items={[WARNING_TEXT.aircraft_suspended]} /> : null}
         <Field label="実施者" required error={errors["pilotId"]}>
-          <select className={inputClass} value={v.pilotId} disabled={fixedPilotId !== null} onChange={(e) => set("pilotId", e.target.value)}>
+          <select className={`${inputClass} min-h-12`} value={v.pilotId} disabled={fixedPilotId !== null} onChange={(e) => set("pilotId", e.target.value)}>
             <option value="">選んでください</option>
             {pilots.map((p) => (
               <option key={p.id} value={p.id}>
@@ -1041,78 +1239,74 @@ export function InspectionForm({
           error={errors["inspectedAt"]}
           onChange={(d, t) => setV((s) => ({ ...s, date: d, time: t }))}
         />
-        <fieldset className="flex flex-col gap-1">
-          <legend className="mb-1 text-sm text-ink">区分</legend>
-          <div className="flex flex-wrap gap-x-6">
-            {(["pre_flight", "post_flight"] as const).map((t) => (
-              <label key={t} className={checkRowClass}>
-                <input type="radio" name="timing" className={checkboxClass} checked={v.timing === t} onChange={() => set("timing", t)} />
-                {INSPECTION_TIMING_LABELS[t]}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <PlaceInput
-            label="実施場所"
-            name={v.placeName}
-            pos={v.pos}
-            onName={(x) => set("placeName", x)}
-            onPos={(p) => set("pos", p)}
-            errors={errors}
-            keys={{ name: "placeName", lat: "latitude", lng: "longitude", acc: "accuracyM" }}
-          />
-        </div>
-      </fieldset>
+        <ChoiceGroup legend="区分">
+          {(["pre_flight", "post_flight"] as const).map((t) => (
+            <label key={t} className={choiceClass(v.timing === t)}>
+              <input type="radio" name="timing" className={`${choiceInputClass} ${brandAccent}`} checked={v.timing === t} onChange={() => set("timing", t)} />
+              {INSPECTION_TIMING_LABELS[t]}
+            </label>
+          ))}
+        </ChoiceGroup>
+        <PlaceInput
+          label="実施場所"
+          name={v.placeName}
+          pos={v.pos}
+          onName={(x) => set("placeName", x)}
+          onPos={(p) => set("pos", p)}
+          errors={errors}
+          keys={{ name: "placeName", lat: "latitude", lng: "longitude", acc: "accuracyM" }}
+        />
+      </Step>
 
-      <fieldset className="flex min-w-0 flex-col gap-3">
-        <legend className="mb-1 flex flex-wrap items-center gap-2 text-sm text-ink">
-          <span>点検項目（様式2）</span>
-          <RequiredTag required />
-        </legend>
-        <p className="text-xs leading-relaxed text-ink-mute">
-          9 項目すべてで「正常」「異常」のどちらかを選ぶと保存できます。具体的な点検内容は機体の取扱説明書によります。「異常」の項目は備考が必須です。
+      <Step no="02" title="点検項目（様式2）">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs leading-relaxed text-ink-mute sm:max-w-md">
+            9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
+          </p>
+          <button type="button" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
+            すべて正常
+          </button>
+        </div>
+        <p className="flex flex-wrap items-baseline gap-x-3 font-mono text-xs tnum text-ink-soft" aria-live="polite">
+          <span>
+            選択 {selectedCount} / {INSPECTION_ITEMS.length}
+          </span>
+          {abnormalCount > 0 ? <span className="text-signal-red">異常 {abnormalCount} 項目</span> : null}
         </p>
-        <button
-          type="button"
-          className={`${bigButtonClass} self-start`}
-          onClick={() =>
-            setV((s) => ({
-              ...s,
-              items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal", note: s.items[it.key].note }])) as Record<
-                InspectionItemKey,
-                ItemState
-              >,
-            }))
-          }
-        >
-          すべて正常
-        </button>
         <ol className="flex flex-col border-t border-rule">
           {INSPECTION_ITEMS.map((it, i) => {
             const st = v.items[it.key];
             const resultError = errors[`items.${it.key}`];
             const noteError = errors[`items.${it.key}.note`];
+            const abnormal = st.result === "abnormal";
             return (
-              <li key={it.key} className="flex flex-col gap-2 border-b border-rule-soft py-3" data-testid={`inspection-item-${it.key}`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm text-ink">
-                    <span className="mr-2 font-mono text-xs tnum text-ink-mute">{String(i + 1).padStart(2, "0")}</span>
+              <li
+                key={it.key}
+                className={`flex flex-col gap-2 border-b border-rule-soft py-2.5 pr-0.5 ${
+                  abnormal ? "-ml-3 border-l-2 border-l-signal-red pl-2.5" : ""
+                }`}
+                data-testid={`inspection-item-${it.key}`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <span className="flex min-w-0 items-baseline gap-2 text-sm text-ink">
+                    <span aria-hidden className="font-mono text-xs tnum text-ink-mute">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
                     {it.label}
                   </span>
                   <div
-                    className="flex gap-x-4"
+                    className="grid grid-cols-2 gap-2 rounded-sharp outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
                     role="radiogroup"
                     tabIndex={-1}
                     aria-label={`${it.label}の結果`}
                     aria-invalid={resultError ? true : undefined}
                   >
                     {(["normal", "abnormal"] as const).map((r) => (
-                      <label key={r} className={checkRowClass}>
+                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem]`}>
                         <input
                           type="radio"
                           name={`item-${it.key}`}
-                          className={checkboxClass}
+                          className={`${choiceInputClass} ${r === "abnormal" ? "accent-signal-red" : brandAccent}`}
                           checked={st.result === r}
                           onChange={() => setItem(it.key, { result: r })}
                         />
@@ -1122,16 +1316,16 @@ export function InspectionForm({
                   </div>
                 </div>
                 <FieldError message={resultError} />
-                {st.result === "abnormal" || st.note || noteError ? (
-                  <Field label={`${it.label}の備考`} required={st.result === "abnormal"} error={noteError}>
-                    <input className={inputClass} value={st.note} onChange={(e) => setItem(it.key, { note: e.target.value })} />
+                {abnormal || st.note || noteError ? (
+                  <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
+                    <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(it.key, { note: e.target.value })} />
                   </Field>
                 ) : null}
               </li>
             );
           })}
         </ol>
-      </fieldset>
+      </Step>
 
       <Field label="特記事項" required={false} error={errors["specialNotes"]} hint="取扱説明書の追加の点検項目など（500 文字以内）">
         <textarea className={inputClass} rows={2} value={v.specialNotes} onChange={(e) => set("specialNotes", e.target.value)} />
@@ -1151,7 +1345,11 @@ export function InspectionForm({
         onRetry={() => void submit()}
         disabled={!allSelected}
       >
-        {!allSelected ? <span className="text-xs text-ink-mute">9 項目すべてを選ぶと保存できます</span> : null}
+        {!allSelected ? (
+          <span className="text-xs text-ink-mute">
+            9 項目すべてを選ぶと保存できます（残り {INSPECTION_ITEMS.length - selectedCount} 項目）
+          </span>
+        ) : null}
       </SaveRow>
     </form>
   );
