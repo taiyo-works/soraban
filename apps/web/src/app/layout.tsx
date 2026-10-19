@@ -29,10 +29,22 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const SITE_TITLE = "そらばん — 山陰のドローン飛行の可否判定と運航管理";
+const SITE_DESCRIPTION =
+  "鳥取県・島根県のドローン飛行の可否判定と運航管理。運営：フューチャーテック株式会社。現在は社内での試験運用中です。";
+
+// アイコンは app/icon.svg・app/favicon.ico（算盤の珠と梁の単純な図形）。共有時の表示（OG）は文字情報のみ。
 export const metadata: Metadata = {
-  title: "そらばん — 山陰のドローン飛行の可否判定と運航管理",
-  description:
-    "鳥取県・島根県のドローン飛行の可否判定と運航管理。運営：フューチャーテック株式会社。現在は社内での試験運用中です。",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: "そらばん",
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    siteName: "そらばん",
+    locale: "ja_JP",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

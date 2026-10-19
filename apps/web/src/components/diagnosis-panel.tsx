@@ -284,7 +284,7 @@ export function DiagnosisPanel({
 
       {/* 免責（全画面表示の契約）。最終確認は DIPS／航空局で。 */}
       <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
-        <span className="eyebrow !text-[9px]">disclaimer</span> {diagnosis.disclaimer}
+        <span className="eyebrow !text-[9px]">免責</span> {diagnosis.disclaimer}
       </div>
 
       {/* 必要手続きチェックリスト */}

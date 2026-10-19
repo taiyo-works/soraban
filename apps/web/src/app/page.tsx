@@ -81,7 +81,7 @@ const COVERAGE_LAYERS: readonly CoverageRow[] = [
   },
 ];
 
-// 出典・管轄を表す細い角バッジ。色は付けずインクの濃淡だけで階層を作る。
+// 出典・管轄を表す細い角バッジ。色は付けずインクの濃淡と文字（国・都道府県・市町村）で区別する。
 const sourceTone: Record<CoverageRow["source"], string> = {
   国: "border-ink/40 text-ink",
   都道府県: "border-brand-500 text-brand-700",
@@ -91,146 +91,145 @@ const sourceTone: Record<CoverageRow["source"], string> = {
 // 住所検索の同梱索引（アドレス・ベース・レジストリ）が空なら、その出典を示さない（使っていない出典を出さない）。
 const ADDRESS_INDEX_AVAILABLE = addressIndexAvailable();
 
+// 運営者・利用の範囲・対象地域。スマホでは「項目名｜内容」の 2 列、PC では 3 段の並びにする。
+const SITE_FACTS: ReadonlyArray<readonly [string, string]> = [
+  ["運営者", "フューチャーテック株式会社"],
+  ["利用の範囲", "現在は社内での試験運用中"],
+  [
+    "対象地域",
+    `鳥取県・島根県（条例データを収録した市町村 ${COVERAGE_SUMMARY.municipalParkNames.length}）`,
+  ],
+];
+
+/** 節の見出し。日本語の見出しだけを置き、補足は右（スマホでは下）に小さく添える。 */
+function SectionHeading({
+  id,
+  title,
+  note,
+}: {
+  readonly id: string;
+  readonly title: string;
+  readonly note?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1 border-b border-rule pb-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+      <h2 id={id} className="text-lg font-medium tracking-wide text-ink sm:text-xl">
+        {title}
+      </h2>
+      {note ? <p className="text-xs text-ink-mute">{note}</p> : null}
+    </div>
+  );
+}
+
 export default function Home() {
   return (
-    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-10 px-4 py-8 sm:gap-16 sm:px-6 sm:py-20">
-      {/* ============================ HERO ============================ */}
-      <header className="relative flex flex-col gap-5 sm:gap-8">
-        {/* ドローン線画 — hero の主題として敷く透かし。
-            z-0 で文字より背後。PNG 側に alpha が焼き込み済（scripts/drone-png-alpha.mjs）
-            なので白地は完全に透明、blend mode 不要。dark:invert でダークモード時は
-            線を白色に反転（paper が暗い時もコントラストを確保）。
-            幅は viewport に合わせて連続的に拡大: モバイル w-40 (160px) →
-            sm w-[28rem] → md w-[40rem] → lg w-[52rem] → xl w-[60rem]。
-            h-auto で 2:1 アスペクトを保つので、どの幅でもクリッピングなし。 */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 z-0"
-        >
+    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-10 px-4 py-8 sm:gap-14 sm:px-6 sm:py-14">
+      {/* ============================ 見出し ============================
+          サービス名 → 目的 → できること → 運営者・利用の範囲・対象地域 → 免責 の順に読ませ、
+          そのすぐ下に判定の入口（住所・座標の入力と地図）を置く。 */}
+      <header className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+        <div className="flex min-w-0 flex-col gap-5">
+          <h1 className="flex flex-col gap-1.5 text-ink">
+            <span className="text-4xl font-medium leading-tight tracking-[0.06em] sm:text-5xl">
+              そらばん
+            </span>
+            <span className="text-base font-medium leading-snug text-ink-soft sm:text-xl">
+              山陰のドローン飛行の可否判定と運航管理
+            </span>
+          </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-[15px] sm:leading-[1.85]">
+            地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、鳥取県・島根県と県内市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
+          </p>
+
+          <dl
+            data-testid="site-facts"
+            className="grid grid-cols-[5.5em_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-y border-rule py-3 text-[13px] sm:grid-cols-3 sm:gap-x-6 sm:gap-y-0 sm:py-4"
+          >
+            {SITE_FACTS.map(([label, value]) => (
+              <div key={label} className="contents sm:flex sm:flex-col sm:gap-1">
+                <dt className="text-xs text-ink-mute">{label}</dt>
+                <dd className="text-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p
+            data-testid="site-disclaimer"
+            className="max-w-2xl border-l-2 border-brand-700 pl-3 text-[13px] leading-relaxed text-ink-soft"
+          >
+            判定結果は参考情報です。飛行の可否は、国土交通省（DIPS 2.0）・警察・各自治体で最終確認してください。
+          </p>
+        </div>
+
+        {/* ドローンの線画。PC では右の余白に控えめに置き、本文には重ねない。スマホでは出さない。
+            PNG は白地を透過済み（scripts/drone-png-alpha.mjs）。ダークモードでは線を反転する。 */}
+        <div aria-hidden className="pointer-events-none hidden lg:block">
           <Image
             src="/drone-01.png"
             alt=""
             width={3047}
             height={1422}
             priority
-            sizes="(min-width: 1280px) 30rem, (min-width: 1024px) 26rem, (min-width: 768px) 20rem, (min-width: 640px) 14rem, 20vw"
-            className="h-auto w-20 opacity-80 dark:invert sm:w-[14rem] md:w-[20rem] lg:w-[26rem] xl:w-[30rem]"
+            sizes="18rem"
+            className="h-auto w-full opacity-60 dark:invert"
           />
         </div>
-
-        <div className="relative z-10 flex flex-col gap-3">
-          <h1 className="flex flex-col gap-2 text-ink">
-            <span className="font-display text-4xl font-light leading-[0.95] tracking-tight sm:text-6xl">
-              そらばん
-            </span>
-            <span className="text-base font-medium leading-snug sm:text-xl">
-              山陰のドローン飛行の可否判定と運航管理
-            </span>
-          </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
-            地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、鳥取県・島根県と県内市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
-          </p>
-          <p
-            data-testid="site-disclaimer"
-            className="max-w-2xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft sm:text-sm"
-          >
-            判定結果は参考情報です。飛行の可否は、国土交通省（DIPS 2.0）・警察・各自治体で最終確認してください。
-          </p>
-        </div>
-
-        <dl
-          data-testid="site-facts"
-          className="relative z-10 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-rule pt-4 text-xs text-ink-mute sm:grid-cols-3"
-        >
-          <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">運営者</dt>
-            <dd className="text-ink-soft">フューチャーテック株式会社</dd>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">利用の範囲</dt>
-            <dd className="text-ink-soft">現在は社内での試験運用中</dd>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <dt className="eyebrow !text-[9px]">対象地域</dt>
-            <dd className="text-ink-soft">
-              鳥取県・島根県（条例データを収録した市町村 {COVERAGE_SUMMARY.municipalParkNames.length}）
-            </dd>
-          </div>
-        </dl>
       </header>
 
-      {/* ============================ COVERAGE ============================ */}
-      <section className="flex flex-col gap-5">
-        <div className="flex items-end justify-between border-b border-rule pb-3">
-          <div className="flex flex-col gap-1">
-            <p className="eyebrow">§01</p>
-            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
-              <span aria-hidden className="bearing-mark" />
-              収録している規制とデータ
-            </h2>
-          </div>
-          <p className="font-mono text-[11px] tnum text-ink-mute">
-            国 {COVERAGE_LAYERS.filter((l) => l.source === "国").length} / 都道府県 {COVERAGE_LAYERS.filter((l) => l.source === "都道府県").length} / 市町村 {COVERAGE_LAYERS.filter((l) => l.source === "市町村").length}
-          </p>
-        </div>
+      {/* ============================ 判定 ============================ */}
+      <section aria-labelledby="checker-heading" className="flex flex-col gap-5">
+        <SectionHeading
+          id="checker-heading"
+          title="地点を判定する"
+          note="住所・座標・地図のクリックで地点を指定できます"
+        />
+        <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
+      </section>
 
-        <ul className="grid grid-cols-1 gap-px overflow-hidden bg-rule lg:grid-cols-2">
-          {COVERAGE_LAYERS.map((layer, idx) => (
-            <li
-              key={layer.title}
-              className="flex flex-col gap-2 bg-paper px-5 py-4"
-            >
-              <div className="flex items-baseline gap-3">
-                <span className="font-mono text-[10px] tnum text-ink-mute">
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
+      {/* ============================ 収録範囲 ============================ */}
+      <section aria-labelledby="coverage-heading" className="flex flex-col gap-5">
+        <SectionHeading
+          id="coverage-heading"
+          title="収録している規制とデータ"
+          note="件数と確認日は現在の収録内容から表示しています"
+        />
+
+        <ul className="grid grid-cols-1 gap-px overflow-hidden border border-rule bg-rule lg:grid-cols-2">
+          {COVERAGE_LAYERS.map((layer) => (
+            <li key={layer.title} className="flex flex-col gap-2 bg-paper px-4 py-4 sm:px-5">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span
-                  className={`inline-flex items-center border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider ${sourceTone[layer.source]}`}
+                  className={`inline-flex shrink-0 items-center border px-1.5 py-px text-[11px] font-medium ${sourceTone[layer.source]}`}
                 >
                   {layer.source}
                 </span>
-                <span className="text-[11px] text-ink-mute">{layer.coverage}</span>
+                <span className="text-xs text-ink-mute">{layer.coverage}</span>
               </div>
-              <p className="font-display text-base font-medium leading-snug text-ink">
-                {layer.title}
-              </p>
-              <p className="text-[11px] leading-relaxed text-ink-mute">
+              <p className="text-[15px] font-medium leading-snug text-ink">{layer.title}</p>
+              <p className="text-xs leading-relaxed text-ink-mute">
                 {layer.dataset}
-                <span className="mx-1.5 text-rule">·</span>
-                {layer.count}
+                <span aria-hidden className="mx-1.5 text-rule">
+                  ／
+                </span>
+                <span className="tnum">{layer.count}</span>
               </p>
             </li>
           ))}
         </ul>
       </section>
 
-      {/* ============================ CHECKER ============================ */}
-      <section className="flex flex-col gap-5">
-        <div className="flex items-end justify-between border-b border-rule pb-3">
-          <div className="flex flex-col gap-1">
-            <p className="eyebrow">§02</p>
-            <h2 className="font-display text-xl font-light text-ink sm:text-2xl">
-              <span aria-hidden className="bearing-mark" />
-              判定する
-            </h2>
-          </div>
-          <p className="font-mono text-[11px] text-ink-mute">
-            地図をクリック · 座標を貼り付け · 住所を検索
-          </p>
-        </div>
-        <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
-      </section>
-
-      {/* ============================ DISCLAIMER + FOOTER ============================ */}
-      <section className="border-t border-double border-rule pt-5">
-        <p className="text-[11px] leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[9px]">免責 ·</span>{" "}
+      {/* ============================ 免責・フッター ============================ */}
+      <section aria-labelledby="disclaimer-heading" className="flex flex-col gap-2 border-t border-rule pt-5">
+        <h2 id="disclaimer-heading" className="text-xs font-medium text-ink-soft">
+          免責事項
+        </h2>
+        <p className="text-xs leading-relaxed text-ink-mute">
           本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。緊急用務空域等の動的情報は反映していません。実運用前に必ず{" "}
           <a
             href="https://www.dips.mlit.go.jp/portal/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-brand-700 underline-offset-2 hover:underline"
+            className="text-brand-700 underline underline-offset-2"
           >
             国土交通省 DIPS
           </a>
@@ -238,14 +237,13 @@ export default function Home() {
         </p>
       </section>
 
-      <footer className="mt-auto flex flex-col gap-2 border-t border-rule pt-5 text-[10px] font-mono text-ink-mute">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>© 2026 フューチャーテック株式会社</span>
-          <span aria-hidden>—</span>
-          <span className="tnum">base · 35°26′03″N · 133°22′50″E（鳥取県西伯郡日吉津村）</span>
-        </div>
-        <p className="text-[10px] leading-relaxed text-ink-mute/80">
-          出典: 国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（Soraban 作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
+      <footer className="mt-auto flex flex-col gap-2 border-t border-rule pt-5 text-[11px] text-ink-mute">
+        <p className="text-xs text-ink-soft">
+          © 2026 フューチャーテック株式会社
+          <span className="ml-3 text-ink-mute">鳥取県西伯郡日吉津村</span>
+        </p>
+        <p className="leading-relaxed">
+          出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開地形図・空港要覧からの目視取り（そらばん作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
         </p>
       </footer>
     </div>

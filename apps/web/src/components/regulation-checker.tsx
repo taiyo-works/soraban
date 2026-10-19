@@ -859,7 +859,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             同文の免責より一段控えめ（細字・補助色・薄い左罫）にして、全画面表示がくどくならない
             ようにしつつ、可読性と趣旨は維持する。 */}
         <p className="flex gap-2 border-l border-brand-700/60 pl-3 text-[11px] leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[9px] shrink-0 not-italic">disclaimer</span>
+          <span className="eyebrow !text-[9px] shrink-0 not-italic">免責</span>
           <span>{DIAGNOSIS_DISCLAIMER}</span>
         </p>
 
@@ -1490,7 +1490,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
           {/* disclaimer — brand outlined, never amber */}
           <div className="border-l-2 border-brand-700 bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft">
-            <span className="eyebrow !text-[9px]">disclaimer</span>{" "}
+            <span className="eyebrow !text-[9px]">免責</span>{" "}
             {result.disclaimer}
           </div>
 
