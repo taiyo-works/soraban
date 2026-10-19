@@ -11,6 +11,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import type { CurrentLocationCandidate } from "@/lib/current-location";
 import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
+import { createRightClickPicker } from "@/lib/right-click";
 import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
@@ -416,13 +417,31 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
     });
     // 右クリック：地図のライブラリの contextmenu は右ボタンでの回転操作と競合して発火しないことがあるため、
     // DOM の contextmenu で扱う。地図上ではブラウザの右クリックメニューを出さない。
+    // 右ドラッグ（押した位置から 4px 以上の移動）で地図を回したときは地点にしない（createRightClickPicker）。
+    const toCanvas = (ev: MouseEvent) => {
+      const rect = map.getCanvas().getBoundingClientRect();
+      return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+    };
+    const rightClick = createRightClickPicker({
+      onPick: (p) => pickAt(map.unproject([p.x, p.y]), "contextmenu"),
+    });
+    const onRightDown = (ev: MouseEvent) => {
+      if (ev.button === 2) rightClick.down(toCanvas(ev));
+    };
+    const onRightMove = (ev: MouseEvent) => rightClick.move(toCanvas(ev));
+    const onRightUp = (ev: MouseEvent) => {
+      if (ev.button === 2) rightClick.up(toCanvas(ev));
+    };
     const onContextMenu = (ev: MouseEvent) => {
       ev.preventDefault();
       // タッチの長押しでブラウザが出す contextmenu は、長押しの判定で扱う
       if (isTouchPointer(ev) || recentlyTouched()) return;
-      const rect = map.getCanvas().getBoundingClientRect();
-      pickAt(map.unproject([ev.clientX - rect.left, ev.clientY - rect.top]), "contextmenu");
+      rightClick.contextmenu(toCanvas(ev));
     };
+    node.addEventListener("mousedown", onRightDown, true);
+    // ドラッグ中に地図の外へ出ても追えるよう、移動と離す操作は window で受ける
+    window.addEventListener("mousemove", onRightMove, true);
+    window.addEventListener("mouseup", onRightUp, true);
     node.addEventListener("contextmenu", onContextMenu);
 
     const longPress = createLongPressDetector({
@@ -457,6 +476,9 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
     return () => {
       longPress.cancel();
       node.removeEventListener("contextmenu", onContextMenu);
+      node.removeEventListener("mousedown", onRightDown, true);
+      window.removeEventListener("mousemove", onRightMove, true);
+      window.removeEventListener("mouseup", onRightUp, true);
       candidateMarkerRef.current?.remove();
       candidateMarkerRef.current = null;
       map.remove();

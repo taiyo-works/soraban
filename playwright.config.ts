@@ -13,6 +13,10 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const FIXTURE_PORT = Number(process.env.E2E_FIXTURE_PORT ?? 3101);
 const FIXTURES = path.join(__dirname, "e2e", "fixtures");
+// Sprint 9：国土地理院の逆ジオコーダの模擬サーバー（e2e/mock-gsi-server.mjs）。外部サービスの応答で E2E が揺れないよう、
+// 両方のアプリサーバーの逆ジオコーダの呼び出し先をここに向ける。外部との疎通は scripts/smoke-external.mjs（CI では失敗しても止めない）。
+const MOCK_GSI_PORT = Number(process.env.E2E_MOCK_GSI_PORT ?? 3199);
+const MOCK_REVERSE_GEOCODER = `http://127.0.0.1:${MOCK_GSI_PORT}/reverse-geocoder/LonLatToAddress`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -40,6 +44,12 @@ export default defineConfig({
   },
   webServer: [
     {
+      command: `node e2e/mock-gsi-server.mjs ${MOCK_GSI_PORT}`,
+      url: `http://127.0.0.1:${MOCK_GSI_PORT}/health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
+    {
       command:
         process.env.E2E_SERVER_CMD ?? `pnpm --filter @soraban/web exec next dev -p ${PORT}`,
       url: `http://127.0.0.1:${PORT}`,
@@ -47,7 +57,12 @@ export default defineConfig({
       timeout: 180_000,
       // 本番相当：DID_DATA_DIR・INDUSTRIAL_DATA_DIR を渡さない（同梱データだけで判定する）。
       // Sprint 8: DATABASE_URL を空にして DB なし（縮退動作）で起動する。
-      env: { DID_DATA_DIR: "", INDUSTRIAL_DATA_DIR: "", DATABASE_URL: "" },
+      env: {
+        DID_DATA_DIR: "",
+        INDUSTRIAL_DATA_DIR: "",
+        DATABASE_URL: "",
+        GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
+      },
     },
     {
       command:
@@ -63,6 +78,7 @@ export default defineConfig({
         // （同梱索引の結果だけで画面の表示を確かめる）。
         ADDRESS_DATA_DIR: path.join(FIXTURES, "address"),
         GSI_ADDRESS_SEARCH_ENDPOINT: "http://127.0.0.1:9/address-search",
+        GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         NEXT_DIST_DIR: ".next-e2e-fixture",
         DATABASE_URL: "",
       },

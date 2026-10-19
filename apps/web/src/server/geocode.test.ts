@@ -31,6 +31,18 @@ describe("/api/geocode の検索順序（geocode）", () => {
     });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(out.results).toEqual([hit("machiaza")]);
+    expect(out.gsiError).toBe(true);
+  });
+
+  it("国土地理院が成功して 0 件なら gsiError を付けない（該当なしと接続失敗を区別する）", async () => {
+    const fetch = vi.fn(async () => Response.json([]));
+    const out = await geocode("x", { fetch: fetch as unknown as typeof globalThis.fetch, searchBundled: () => [] });
+    expect(out).toEqual({ results: [] });
+    const failed = await geocode("x", {
+      fetch: vi.fn(async () => new Response("x", { status: 503 })) as unknown as typeof globalThis.fetch,
+      searchBundled: () => [],
+    });
+    expect(failed).toEqual({ results: [], gsiError: true });
   });
 
   it("国土地理院が 500 を返しても同梱索引の結果を返す", async () => {

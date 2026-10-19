@@ -30,12 +30,20 @@
 
 ## 取得の手順（日本国内のネットワークで実行する）
 
+必要な環境：Node.js 22 以上、pnpm 10（リポジトリの `packageManager`）、`unzip` コマンド（macOS・Linux に標準で入っている）。
+bash の版や GNU coreutils には依存しない（macOS 標準の bash 3.2 でも動く）。
+
 ```bash
-# 手元の PC（日本国内）で。curl・unzip・node が必要
-bash packages/regulations/scripts/fetch-address-data.sh --prefs "31 32"
+pnpm install
+pnpm --filter @soraban/regulations fetch:address
+#   （同じ処理：node packages/regulations/scripts/fetch-address-data.mjs --prefs "31 32"
+#    または sh packages/regulations/scripts/fetch-address-data.sh）
 # → packages/regulations/data/address/（index-31.json・index-32.json・stats.json・README.md、上限内なら parcels-*.json）
-#   と packages/regulations/src/data-bundle/address-bundle.ts が生成される
+#   と packages/regulations/src/data-bundle/address-bundle.ts が生成される。
+#   取得の記録は packages/regulations/data/.fetch-work-address/summary.md（作業ディレクトリ。コミットしない）
 pnpm typecheck && pnpm test   # 同梱索引の照合精度のテスト（bundled.test.ts）が有効になる
 ```
+
+町字の座標付き件数が 0 件など、列名の想定と違う入力では索引を作らずに異常終了する（summary.md に見出し行を残す）。
 
 国内の self-hosted ランナーがあれば、`data-fetch/address-*` ブランチへの push で `.github/workflows/fetch-address-data.yml` を実行できる（`runs-on` の変更が必要）。

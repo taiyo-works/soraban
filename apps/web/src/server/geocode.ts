@@ -31,7 +31,16 @@ const DEEP_LEVELS: ReadonlySet<GeocodeHit["level"]> = new Set(["parcel", "reside
 export const needsGsi = (bundled: readonly GeocodeHit[]): boolean =>
   !bundled.some((h) => DEEP_LEVELS.has(h.level));
 
-export const searchGsi = async (q: string, deps: GeocodeDeps = {}): Promise<GeocodeHit[]> => {
+export type GsiOutcome = {
+  readonly hits: GeocodeHit[];
+  /** 接続できない・エラー応答・時間切れ・形式不正（「該当なし」とは区別する）。 */
+  readonly error: boolean;
+};
+
+export const searchGsi = async (q: string, deps: GeocodeDeps = {}): Promise<GeocodeHit[]> =>
+  (await searchGsiOutcome(q, deps)).hits;
+
+export const searchGsiOutcome = async (q: string, deps: GeocodeDeps = {}): Promise<GsiOutcome> => {
   const f = deps.fetch ?? fetch;
   const endpoint = deps.gsiEndpoint ?? process.env["GSI_ADDRESS_SEARCH_ENDPOINT"] ?? GSI_ADDRESS_SEARCH_ENDPOINT;
   const controller = new AbortController();
@@ -51,10 +60,10 @@ export const searchGsi = async (q: string, deps: GeocodeDeps = {}): Promise<Geoc
         }, timeout);
       }),
     ]);
-    if (!res.ok) return [];
+    if (!res.ok) return { hits: [], error: true };
     const data = (await res.json()) as unknown;
-    if (!Array.isArray(data)) return [];
-    return (data as GsiFeature[])
+    if (!Array.isArray(data)) return { hits: [], error: true };
+    const hits = (data as GsiFeature[])
       .filter(
         (d) =>
           typeof d.properties?.title === "string" &&
@@ -71,8 +80,9 @@ export const searchGsi = async (q: string, deps: GeocodeDeps = {}): Promise<Geoc
         lng: d.geometry!.coordinates![0],
         lat: d.geometry!.coordinates![1],
       }));
+    return { hits, error: false };
   } catch {
-    return [];
+    return { hits: [], error: true };
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -80,6 +90,8 @@ export const searchGsi = async (q: string, deps: GeocodeDeps = {}): Promise<Geoc
 
 export type GeocodeResponse = {
   readonly results: readonly GeocodeHit[];
+  /** 国土地理院の住所検索を呼んだが失敗した（接続不可・エラー・時間切れ）。呼ばなかった・成功したときは付けない。 */
+  readonly gsiError?: true;
 };
 
 export const geocode = async (q: string, deps: GeocodeDeps = {}): Promise<GeocodeResponse> => {
@@ -91,9 +103,9 @@ export const geocode = async (q: string, deps: GeocodeDeps = {}): Promise<Geocod
     bundled = [];
   }
   if (!needsGsi(bundled)) return { results: bundled.slice(0, MAX_RESULTS) };
-  const gsi = await searchGsi(q, deps);
+  const { hits: gsi, error } = await searchGsiOutcome(q, deps);
   // 同じ地点（小数 6 桁で一致）の重複は同梱索引の結果を残す
   const seen = new Set(bundled.map((h) => `${h.lat.toFixed(6)},${h.lng.toFixed(6)}`));
   const merged = [...bundled, ...gsi.filter((h) => !seen.has(`${h.lat.toFixed(6)},${h.lng.toFixed(6)}`))];
-  return { results: merged.slice(0, MAX_RESULTS) };
+  return { results: merged.slice(0, MAX_RESULTS), ...(error ? { gsiError: true as const } : {}) };
 };

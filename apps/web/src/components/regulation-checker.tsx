@@ -28,6 +28,7 @@ import {
 import {
   GEOCODE_LEVEL_NOTE,
   GEOCODE_SOURCE_LABEL,
+  GEOCODE_SERVICE_UNAVAILABLE,
   searchAddress,
   type GeocodeResult,
 } from "@/lib/geocode";
@@ -236,7 +237,12 @@ const PRESET_GROUP_TONE: Record<PresetGroup, string> = {
   島根県: "border-brand-700 text-brand-700 bg-transparent",
 };
 
-export function RegulationChecker() {
+type RegulationCheckerProps = {
+  /** 住所検索の同梱索引（アドレス・ベース・レジストリ）にデータがあるか。空なら ABR の出典と見出しを出さない。 */
+  readonly addressIndexAvailable?: boolean;
+};
+
+export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
   const [lat, setLat] = useState<string>(String(YONAGO_CITY_HALL.lat));
   const [lng, setLng] = useState<string>(String(YONAGO_CITY_HALL.lng));
   const [center, setCenter] = useState<LatLng>(YONAGO_CITY_HALL);
@@ -815,10 +821,11 @@ export function RegulationChecker() {
     setGeocoding(true);
     setError(null);
     try {
-      const found = await searchAddress(address);
+      const { results: found, serviceError } = await searchAddress(address);
       setGeocodeResults(found);
       if (found.length === 0) {
-        setError("住所が見つかりませんでした。");
+        // 該当なしと、住所検索サービスに接続できない場合を出し分ける
+        setError(serviceError ? GEOCODE_SERVICE_UNAVAILABLE : "住所が見つかりませんでした。");
       } else if (found.length === 1) {
         selectGeocodeResult(found[0]!);
       }
@@ -860,7 +867,7 @@ export function RegulationChecker() {
             <span aria-hidden className="bearing-mark" />
             01 — 住所から位置決定
             <span className="ml-2 normal-case tracking-normal text-ink-mute/70 not-italic">
-              （アドレス・ベース・レジストリ → 国土地理院）
+              {addressIndexAvailable ? "（アドレス・ベース・レジストリ → 国土地理院）" : "（国土地理院）"}
             </span>
           </legend>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -915,7 +922,11 @@ export function RegulationChecker() {
             </div>
           ) : null}
           <p className="text-[11px] leading-relaxed text-ink-mute" data-testid="geocode-attribution">
-            出典：アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／国土地理院 住所検索
+            出典：
+            {addressIndexAvailable
+              ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／"
+              : ""}
+            国土地理院 住所検索
           </p>
         </fieldset>
 

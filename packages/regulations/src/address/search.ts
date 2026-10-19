@@ -92,6 +92,32 @@ export const prepareAddressIndex = (
         towns[ti]!.parcels.set(p.split("-").map(num).join("-"), [lat, lng]);
       }
     }
+    // 丁目のある町は、町名だけ（丁目なし）の入力でも町字の代表点に合わせる。
+    // 町名だけの町字が索引にない場合に、丁目の代表点の平均を代表点とする町字を足す。
+    index.cities.forEach((_, ci) => {
+      const c = cities[ci]!;
+      const groups = new Map<string, { name: string; pts: LatLngPair[] }>();
+      index.towns.forEach(([tci, , oaza, chome, koaza, lat, lng]) => {
+        if (tci !== ci || !chome || koaza) return;
+        const key = normalizeAddress(oaza);
+        const g = groups.get(key) ?? { name: `${c.name}${oaza}`, pts: [] };
+        const pos = pair(lat, lng);
+        if (pos) g.pts.push(pos);
+        groups.set(key, g);
+      });
+      for (const [key, g] of groups) {
+        if (key.length === 0 || g.pts.length === 0 || c.towns.some((t) => t.key === key)) continue;
+        const avg = (i: 0 | 1) => Math.round((g.pts.reduce((sum, p) => sum + p[i], 0) / g.pts.length) * 1e6) / 1e6;
+        c.towns.push({
+          key,
+          name: g.name,
+          pos: [avg(0), avg(1)],
+          rsdt: false,
+          blocks: new Map(),
+          parcels: new Map(),
+        });
+      }
+    });
     for (const c of cities) c.towns.sort((a, b) => b.key.length - a.key.length);
   }
   cityKeys.sort((a, b) => b[0].length - a[0].length);
@@ -100,6 +126,9 @@ export const prepareAddressIndex = (
 
 let defaultPrepared: Prepared | null = null;
 const getDefault = (): Prepared => (defaultPrepared ??= prepareAddressIndex(ADDRESS_BUNDLE));
+
+/** 同梱索引に住所データがあるか（空なら住所検索は国土地理院だけで動き、ABR の出典を示さない）。 */
+export const addressIndexAvailable = (): boolean => Object.keys(ADDRESS_BUNDLE).length > 0;
 
 /** 同梱索引に地番を収録しているか。 */
 export const addressParcelsBundled = (): boolean => getDefault().parcelsBundled;

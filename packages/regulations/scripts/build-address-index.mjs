@@ -4,7 +4,7 @@
 //     --out packages/regulations/data/address --bundle packages/regulations/src/data-bundle/address-bundle.ts \
 //     --acquired YYYY-MM-DD --feed <DCAT フィード URL>
 //
-// 入力：<work>/csv/<category>/*.csv（fetch-address-data.sh が展開したもの。category は select-address-files.mjs と同じ）
+// 入力：<work>/csv/<category>/*.csv（fetch-address-data.mjs が展開したもの。category は select-address-files.mjs と同じ）
 // 出力：
 //   - <out>/index-<pref>.json   … 市区町村・町字・住居表示（街区・住居）。座標は [緯度, 経度] を小数 6 桁に丸める
 //   - <out>/parcels-<pref>.json … 地番（座標付き）。住所データの合計が 10MB 以内に収まる場合だけ書く
@@ -159,6 +159,13 @@ for (const f of csvFiles("town")) {
 }
 towns.sort((a, b) => (a.lg + a.id).localeCompare(b.lg + b.id));
 console.log(`町字: 全行 ${townAll}・有効 ${towns.length}（座標付き ${towns.filter((t) => t.pos).length}）`);
+// 列名の想定違い（本体と位置参照の結合失敗など）を黙って通さない
+if (towns.length > 0 && towns.every((t) => !t.pos)) {
+  console.error(
+    `町字の座標付き件数が 0（位置参照 town_pos の列名・結合キーの想定違いの可能性）。見出し：本体 ${JSON.stringify(headers.town)}`,
+  );
+  process.exit(6);
+}
 
 // ---- 住居表示：街区 ----
 const blkPos = await loadPos("rsdtdsp_blk_pos", (r) => `${r.lg_code}:${r.machiaza_id}:${r.blk_id}`);
@@ -356,7 +363,7 @@ const rows = (label, key) =>
 const readme = `# 住所検索の同梱索引（アドレス・ベース・レジストリ、鳥取県・島根県）
 
 > このファイルは \`packages/regulations/scripts/build-address-index.mjs\` が生成する（Sprint 9 A-1 の計測結果）。手で編集しない。
-> 取得・変換は GitHub Actions の \`fetch-address-data\` ワークフロー（\`packages/regulations/scripts/fetch-address-data.sh\`）。
+> 取得・変換は日本国内のネットワークで \`pnpm --filter @soraban/regulations fetch:address\`（\`packages/regulations/scripts/fetch-address-data.mjs\`）。
 
 ## 出典とライセンス
 

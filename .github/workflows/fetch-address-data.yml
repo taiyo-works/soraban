@@ -2,7 +2,7 @@ name: Fetch address data
 
 # 住所検索の同梱索引（アドレス・ベース・レジストリ、鳥取県・島根県）を取得・変換する（Sprint 9）。
 # ダウンロード URL はデジタル庁の DCAT フィードから選ぶ（推測しない）。
-# 処理本体：packages/regulations/scripts/fetch-address-data.sh → build-address-index.mjs
+# 処理本体：packages/regulations/scripts/fetch-address-data.mjs → build-address-index.mjs
 
 on:
   # data-fetch/address- で始まるブランチへの push で実行し、生成物と ADDRESS_FETCH_REPORT.md を同じブランチにコミットする。
@@ -45,7 +45,7 @@ jobs:
         env:
           WORK_DIR: ${{ runner.temp }}/address-data
           NODE_OPTIONS: --max-old-space-size=6144
-        run: bash packages/regulations/scripts/fetch-address-data.sh --prefs "31 32"
+        run: node packages/regulations/scripts/fetch-address-data.mjs --prefs "31 32"
 
       - name: Show changes and sizes
         if: always()

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type BrowserContext, type Page, type Request } from "@playwright/test";
 
@@ -261,6 +261,21 @@ test.describe("D. 長押し・右クリック・左クリック（本番相当�
     await check2;
     await expect(page.getByTestId("location-note")).toContainText("地図で指定しました（クリック）");
     await expect(lngInput(page)).not.toHaveValue(afterRight);
+
+    // 右ドラッグ（地図の回転）では地点を決めない
+    const afterLeft = await lngInput(page).inputValue();
+    const apiCalls: string[] = [];
+    page.on("request", (r) => {
+      if (isApi(r.url(), ["check"])) apiCalls.push(r.url());
+    });
+    const d = await mapPoint(page, 0, 0);
+    await page.mouse.move(d.x, d.y);
+    await page.mouse.down({ button: "right" });
+    await page.mouse.move(d.x + 60, d.y, { steps: 6 });
+    await page.mouse.up({ button: "right" });
+    await page.waitForTimeout(1500);
+    expect(apiCalls).toEqual([]);
+    await expect(lngInput(page)).toHaveValue(afterLeft);
   });
 });
 
@@ -287,16 +302,36 @@ test.describe("A・B. 住所検索", () => {
     await expect(note).toContainText("出典 アドレス・ベース・レジストリ");
     await expect(note).toContainText("町字の代表点。実際の飛行地点は地図で指定してください");
     await expect(latInput(page)).toHaveValue("35.4412");
+
+    // 同梱索引に一致せず、国土地理院にも接続できない（フィクスチャ用サーバーは接続できない宛先）→「該当なし」と区別して案内
+    const latBefore = await latInput(page).inputValue();
+    await input.fill("東京都千代田区霞が関一丁目");
+    const geo = page.waitForResponse((r) => r.url().includes("/api/geocode"));
+    await input.press("Enter");
+    const body = (await (await geo).json()) as { results: unknown[]; gsiError?: boolean };
+    expect(body).toEqual({ results: [], gsiError: true });
+    await expect(page.getByText("住所検索サービスに接続できません。地図の長押し・座標入力で指定してください")).toBeVisible();
+    await expect(page.getByText("住所が見つかりませんでした。")).toHaveCount(0);
+    await expect(latInput(page)).toHaveValue(latBefore);
   });
 
-  test("出典「アドレス・ベース・レジストリ（デジタル庁）を加工して作成」を表示し、台帳に 2 件の出典がある", async ({
+  test("出典の表示（同梱索引があるときだけ ABR を示す）と、台帳の 2 件の出典", async ({
     page,
   }) => {
     await openReady(page);
-    await expect(page.getByTestId("geocode-attribution")).toContainText(
-      "アドレス・ベース・レジストリ（デジタル庁）を加工して作成",
+    // 同梱索引が空（ABR 未取得）の間は、使っていない ABR の出典と見出しを出さない
+    const indexBundled = readdirSync(path.join(__dirname, "..", "packages", "regulations", "data", "address")).some(
+      (f) => /^index-\d+\.json$/.test(f),
     );
-    await expect(page.getByTestId("geocode-attribution")).toContainText("国土地理院");
+    const attribution = page.getByTestId("geocode-attribution");
+    await expect(attribution).toContainText("国土地理院");
+    if (indexBundled) {
+      await expect(attribution).toContainText("アドレス・ベース・レジストリ（デジタル庁）を加工して作成");
+      await expect(page.getByText("（アドレス・ベース・レジストリ → 国土地理院）")).toBeVisible();
+    } else {
+      await expect(attribution).not.toContainText("アドレス・ベース・レジストリ");
+      await expect(page.getByText("アドレス・ベース・レジストリ")).toHaveCount(0);
+    }
     const sources = JSON.parse(
       readFileSync(path.join(__dirname, "..", "packages", "regulations", "data", "sources.json"), "utf8"),
     ) as { datasets: { id: string; url: string; license: string; verifiedAt: string }[] };

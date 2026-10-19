@@ -80,7 +80,7 @@ describe("同梱索引の検索（架空の索引）", () => {
     expect(search("米子市加茂町一丁目")[0]).toMatchObject({ level: "machiaza", lat: 35.41 });
     expect(search("米子市加茂町1丁目99番")[0]).toMatchObject({ level: "machiaza", lat: 35.41 });
     // 「加茂町1」は「加茂町12…」に一致しない（数字の途中で切らない）
-    expect(search("米子市加茂町12")[0]?.level).toBe("city");
+    expect(search("米子市加茂町12")[0]).toMatchObject({ level: "machiaza", lat: 35.415 });
   });
 
   it("地番：郡・大字の省略、番地の表記揺れ", () => {
@@ -94,6 +94,13 @@ describe("同梱索引の検索（架空の索引）", () => {
     }
     // 町名の一部の漢数字（一ノ谷）も一致する
     expect(search("米子市一の谷100番地")[0]).toMatchObject({ level: "parcel", lat: 35.4301 });
+  });
+
+  it("丁目のある町は、町名だけの入力でも machiaza（丁目の代表点の平均）に合わせる", () => {
+    expect(search("米子市加茂町")[0]).toMatchObject({ level: "machiaza", lat: 35.415, lng: 133.315 });
+    expect(search("鳥取県米子市加茂町100番地")[0]).toMatchObject({ level: "machiaza", lat: 35.415 });
+    // 丁目付きの入力は従来どおり丁目に合わせる
+    expect(search("米子市加茂町2-3")[0]).toMatchObject({ level: "block", lat: 35.422 });
   });
 
   it("小字付きの町字は最長一致", () => {

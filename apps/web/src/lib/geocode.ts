@@ -22,11 +22,21 @@ export const GEOCODE_LEVEL_NOTE: Readonly<Record<GeocodeLevel, string>> = {
   unknown: "精度（一致した階層）は不明。地図で位置を確かめてください",
 };
 
-export const searchAddress = async (query: string): Promise<readonly GeocodeResult[]> => {
+/** 住所検索サービス（国土地理院）に接続できず、結果がないときの文言（「該当なし」と区別する）。 */
+export const GEOCODE_SERVICE_UNAVAILABLE =
+  "住所検索サービスに接続できません。地図の長押し・座標入力で指定してください";
+
+export type GeocodeSearch = {
+  readonly results: readonly GeocodeResult[];
+  /** 国土地理院の住所検索に接続できなかった。 */
+  readonly serviceError: boolean;
+};
+
+export const searchAddress = async (query: string): Promise<GeocodeSearch> => {
   const trimmed = query.trim();
-  if (trimmed.length === 0) return [];
+  if (trimmed.length === 0) return { results: [], serviceError: false };
   const res = await fetch(`/api/geocode?q=${encodeURIComponent(trimmed)}`);
   if (!res.ok) throw new Error(`geocode ${res.status}`);
-  const data = (await res.json()) as { results?: readonly GeocodeResult[] };
-  return data.results ?? [];
+  const data = (await res.json()) as { results?: readonly GeocodeResult[]; gsiError?: boolean };
+  return { results: data.results ?? [], serviceError: data.gsiError === true };
 };
