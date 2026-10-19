@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { TABLE_COLUMNS } from "./types";
+import { OPS_TABLES, TABLE_COLUMNS } from "./types";
 
 const MIGRATIONS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "migrations");
 
@@ -80,6 +80,23 @@ describe("行型とマイグレーションの列名", () => {
 
   it("evidence_log に 0003 で datasets が追加されている", () => {
     expect(fromSql.get("evidence_log")).toContain("datasets");
+  });
+
+  // Sprint 10 契約 19：運航管理の表に、保存しない個人情報（生年月日・住所・電話・画像・マイナンバー）に当たる列がない。
+  // 判定の証跡（evidence_log.resolved_address：判定地点の住所）は利用者の個人情報ではないため対象外。
+  it("運航管理の表に、生年月日・住所・電話・画像・マイナンバーに当たる列がない", () => {
+    const forbidden = /birth|address|phone|tel|image|photo|avatar|my_?number/i;
+    for (const table of OPS_TABLES) {
+      const cols = fromSql.get(table);
+      expect(cols, table).toBeDefined();
+      for (const c of cols ?? []) expect(c, `${table}.${c}`).not.toMatch(forbidden);
+    }
+    // 運航管理のマイグレーション（0004 以降）の本文全体にも、禁止語の列を作る記述がない。
+    const opsSql = readdirSync(MIGRATIONS)
+      .filter((f) => f.endsWith(".sql") && Number(f.slice(0, 4)) >= 4)
+      .map((f) => stripComments(readFileSync(path.join(MIGRATIONS, f), "utf8")))
+      .join("\n");
+    expect(opsSql).not.toMatch(/\b\w*(birth|address|phone|image|photo|avatar|my_?number)\w*\s+(text|date|bytea|varchar|integer|jsonb)/i);
   });
 
   it("パーサーは制約行を列として数えない", () => {

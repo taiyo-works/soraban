@@ -4,10 +4,14 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_MIGRATIONS_DIR } from "./migrate";
+import { LATEST_MIGRATION_VERSION as LATEST, MIGRATION_VERSIONS } from "./migrations-manifest";
 import { createTempDatabase, runCli, withClient, type TempDatabase } from "./test-db-helpers";
 import { resolveTestDatabaseUrl } from "./test-db-env";
 
 const ADMIN_URL = resolveTestDatabaseUrl();
+const N = MIGRATION_VERSIONS.length;
+/** 既存の最新の次の版（テスト用に一時的に置くファイルの番号）。 */
+const NEXT = String(N + 1).padStart(4, "0");
 
 const countMigrations = (url: string) =>
   withClient(url, async (c) => Number((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n));
@@ -31,10 +35,10 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
     for (const d of tmpDirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
-  it("空の DB に 0001〜0003 を適用し、適用記録に 3 行。2 回目は何もしない", async () => {
+  it(`空の DB に 0001〜${LATEST} を適用し、適用記録に ${N} 行。2 回目は何もしない`, async () => {
     const first = await migrate();
     expect(first.code, first.stderr).toBe(0);
-    expect(first.stdout).toContain("適用予定: 0001, 0002, 0003");
+    expect(first.stdout).toContain(`適用予定: ${MIGRATION_VERSIONS.join(", ")}`);
     expect(first.stdout).not.toMatch(/:[^@\s]*@/); // パスワードを表示しない
     const rows = await withClient(db.url, async (c) =>
       (await c.query("select version, name, checksum, applied_at, duration_ms from schema_migrations order by version")).rows,
@@ -43,6 +47,9 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       ["0001", "initial_schema"],
       ["0002", "evidence_log"],
       ["0003", "evidence_log_datasets"],
+      ["0004", "ops_org_members"],
+      ["0005", "ops_aircraft_pilots"],
+      ["0006", "record_versions"],
     ]);
     for (const r of rows) {
       expect(r.checksum).toMatch(/^[0-9a-f]{64}$/);
@@ -52,11 +59,11 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
     const second = await migrate();
     expect(second.code, second.stderr).toBe(0);
     expect(second.stdout).toContain("未適用のマイグレーションはありません");
-    expect(await countMigrations(db.url)).toBe(3);
+    expect(await countMigrations(db.url)).toBe(N);
 
     const status = await runCli(["status"], { DATABASE_URL_UNPOOLED: db.url });
     expect(status.code).toBe(0);
-    expect(status.stdout).toContain("適用済み 3 件、未適用 0 件");
+    expect(status.stdout).toContain(`適用済み ${N} 件、未適用 0 件`);
   });
 
   it("適用済みの 0002 を 1 文字変えるとチェックサム不一致で何も適用せず非 0", async () => {
@@ -64,29 +71,29 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
     const dir = copyMigrations();
     const p = path.join(dir, "0002_evidence_log.sql");
     writeFileSync(p, readFileSync(p, "utf8").replace("監査トレイル", "監査トレイA"));
-    // 何も適用しないことを確かめるため、正しい 0004 も置く。
-    writeFileSync(path.join(dir, "0004_should_not_apply.sql"), "create table should_not_apply (id int);");
+    // 何も適用しないことを確かめるため、正しい次の版も置く。
+    writeFileSync(path.join(dir, `${NEXT}_should_not_apply.sql`), "create table should_not_apply (id int);");
     const r = await migrate(["--dir", dir]);
     expect(r.code).not.toBe(0);
     expect(r.stderr).toMatch(/チェックサム/);
-    expect(await countMigrations(db.url)).toBe(3);
+    expect(await countMigrations(db.url)).toBe(N);
     const exists = await withClient(db.url, async (c) =>
       (await c.query("select to_regclass('public.should_not_apply') as t")).rows[0].t,
     );
     expect(exists).toBeNull();
   });
 
-  it("構文誤りの 0004 は記録されず、0004 内で作ろうとした表も残らない。非 0", async () => {
+  it("構文誤りの次の版は記録されず、その中で作ろうとした表も残らない。非 0", async () => {
     expect((await migrate()).code).toBe(0);
     const dir = copyMigrations();
     writeFileSync(
-      path.join(dir, "0004_broken.sql"),
+      path.join(dir, `${NEXT}_broken.sql`),
       "create table broken_should_rollback (id int primary key);\nselec 1;\n",
     );
     const r = await migrate(["--dir", dir]);
     expect(r.code).not.toBe(0);
-    expect(r.stderr).toContain("0004_broken.sql");
-    expect(await countMigrations(db.url)).toBe(3);
+    expect(r.stderr).toContain(`${NEXT}_broken.sql`);
+    expect(await countMigrations(db.url)).toBe(N);
     const exists = await withClient(db.url, async (c) =>
       (await c.query("select to_regclass('public.broken_should_rollback') as t")).rows[0].t,
     );
@@ -98,8 +105,8 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
     expect(a.code, a.stderr).toBe(0);
     expect(b.code, b.stderr).toBe(0);
     const appliedLines = (a.stdout + b.stdout).split("\n").filter((l) => l.startsWith("[db:migrate] 適用 "));
-    expect(appliedLines).toHaveLength(3);
-    expect(await countMigrations(db.url)).toBe(3);
+    expect(appliedLines).toHaveLength(N);
+    expect(await countMigrations(db.url)).toBe(N);
   });
 
   it("適用後、postgis_full_version() と regulation_zones への ST_DWithin（geography）検索が成功する", async () => {
@@ -150,7 +157,7 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
            values ('ev_role_test', 'e', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}')`,
         );
         expect((await c.query("select count(*)::int as n from evidence_log")).rows[0].n).toBe(1);
-        expect((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n).toBe(3);
+        expect((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n).toBe(N);
         await expect(c.query("update evidence_log set overall = 'red'")).rejects.toMatchObject({ code: "42501" });
         await expect(c.query("delete from evidence_log")).rejects.toMatchObject({ code: "42501" });
         await expect(c.query("insert into regulations (id) values ('x')")).rejects.toMatchObject({ code: "42501" });

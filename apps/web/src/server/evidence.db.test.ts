@@ -1,12 +1,12 @@
 // Sprint 8 契約 E・F の DB テスト（pnpm test:db）。
-// - /api/health/db が適用済みの DB で reachable: true・最新版 0003・未適用なしを返す。
+// - /api/health/db が適用済みの DB で reachable: true・最新版・未適用なしを返す。
 // - 証跡の書き込み関数が evidence_log に 1 行書く（重複は無視）。
 // - next start（ビルド済み）に DATABASE_URL を渡し、/api/check の応答後に evidence_log に行ができる。
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { closePool } from "@soraban/db";
+import { closePool, LATEST_MIGRATION_VERSION } from "@soraban/db";
 import { YONAGO_CITY_HALL } from "@soraban/geo";
 import type { RegulationCheckResult } from "@soraban/regulations";
 import { createTempDatabase, REPO_ROOT, runCli, withClient, type TempDatabase } from "../../../../packages/db/src/test-db-helpers";
@@ -33,14 +33,14 @@ describe.skipIf(!ADMIN_URL)("DB 接続確認と証跡の記録（DB）", () => {
     await db?.drop();
   });
 
-  it("GET /api/health/db: reachable: true、PostgreSQL のメジャー版、PostGIS の版、最新 0003、未適用なし", async () => {
+  it("GET /api/health/db: reachable: true、PostgreSQL のメジャー版、PostGIS の版、最新版、未適用なし", async () => {
     const res = await handleHealthDbGet({ DATABASE_URL: db.url });
     expect(res.status).toBe(200);
     const json = (await res.json()) as Record<string, unknown>;
     expect(json).toMatchObject({
       configured: true,
       reachable: true,
-      latestAppliedMigration: "0003",
+      latestAppliedMigration: LATEST_MIGRATION_VERSION,
       hasPendingMigrations: false,
     });
     expect(json["postgresMajorVersion"]).toEqual(expect.any(Number));
@@ -130,11 +130,11 @@ describe.skipIf(!ADMIN_URL)("DB 接続確認と証跡の記録（DB）", () => {
       }
     });
 
-    it("/api/health/db は reachable: true、最新 0003", async () => {
+    it("/api/health/db は reachable: true、最新版", async () => {
       const r = await fetch(`http://127.0.0.1:${NEXT_PORT}/api/health/db`);
       expect(r.status).toBe(200);
       const text = await r.text();
-      expect(JSON.parse(text)).toMatchObject({ configured: true, reachable: true, latestAppliedMigration: "0003" });
+      expect(JSON.parse(text)).toMatchObject({ configured: true, reachable: true, latestAppliedMigration: LATEST_MIGRATION_VERSION });
       expect(text).not.toContain(db.name);
     });
 

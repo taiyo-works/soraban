@@ -1,0 +1,114 @@
+// 運航管理のテスト用の初期データ（Sprint 10 設計 G）。CI の E2E-DB とローカルの確認で使う。
+//   pnpm db:seed:ops-test   （接続先は DATABASE_URL_UNPOOLED。オーナーロールで接続する）
+// - localhost・127.0.0.1 以外の接続先では実行を拒否する（本番に投入しない）。
+// - 2 組織、各役割の利用者（テスト用の本人確認 test に結び付け済み）、招待中の利用者、操縦者・機体を作る。
+// - 既に同じ名前の組織があれば何もしない。
+import pg from "pg";
+import { describeConnection } from "./config";
+
+export const OPS_TEST_ORGS = { a: "テスト組織A", b: "テスト組織B" } as const;
+
+type SeedMember = {
+  readonly key: string;
+  readonly org: "a" | "b";
+  readonly role: "manager" | "pilot" | "viewer";
+  readonly displayName: string;
+  /** 結び付け済み（active）にする場合の test の本人確認 ID。未指定は招待中。 */
+  readonly authUserId?: string;
+};
+
+/** メールアドレスは `${key}@example.test`。authUserId があれば結び付け済み。 */
+export const OPS_TEST_MEMBERS: readonly SeedMember[] = [
+  { key: "a-manager", org: "a", role: "manager", displayName: "運航 管理子", authUserId: "a-manager" },
+  { key: "a-pilot", org: "a", role: "pilot", displayName: "操縦 一郎", authUserId: "a-pilot" },
+  { key: "a-pilot2", org: "a", role: "pilot", displayName: "操縦 二郎", authUserId: "a-pilot2" },
+  { key: "a-viewer", org: "a", role: "viewer", displayName: "閲覧 花子", authUserId: "a-viewer" },
+  { key: "a-invited", org: "a", role: "pilot", displayName: "招待 三郎" },
+  { key: "a-invited-unverified", org: "a", role: "viewer", displayName: "招待 四郎" },
+  { key: "b-manager", org: "b", role: "manager", displayName: "組織B 管理者", authUserId: "b-manager" },
+  { key: "b-pilot", org: "b", role: "pilot", displayName: "組織B 操縦者", authUserId: "b-pilot" },
+];
+
+export const assertLocalTarget = (connectionString: string | undefined): string => {
+  if (!connectionString) throw new Error("DATABASE_URL_UNPOOLED が設定されていません。");
+  const c = describeConnection(connectionString);
+  if (!c) throw new Error("接続文字列を解釈できません。");
+  if (c.host !== "localhost" && c.host !== "127.0.0.1") {
+    throw new Error(`テスト用の初期データは localhost・127.0.0.1 にだけ投入できます（接続先：${c.host}）。`);
+  }
+  return connectionString;
+};
+
+type Q = Pick<pg.Client, "query">;
+
+const addVersion = async (c: Q, orgId: string, entityType: string, entityId: string, data: object): Promise<void> => {
+  await c.query(
+    `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind)
+     values ($1, $2, $3, 'create', $4::jsonb, 'system')`,
+    [orgId, entityType, entityId, JSON.stringify(data)],
+  );
+};
+
+export type SeedResult = { readonly created: boolean; readonly orgIds: Readonly<Record<"a" | "b", string>> };
+
+export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
+  const existing = await c.query<{ id: string; name: string }>("select id, name from organizations where name = any($1)", [
+    Object.values(OPS_TEST_ORGS),
+  ]);
+  if (existing.rows.length > 0) {
+    const byName = new Map(existing.rows.map((r) => [r.name, r.id]));
+    return { created: false, orgIds: { a: byName.get(OPS_TEST_ORGS.a) ?? "", b: byName.get(OPS_TEST_ORGS.b) ?? "" } };
+  }
+  const orgIds = {
+    a: (await c.query<{ id: string }>("insert into organizations (name) values ($1) returning id", [OPS_TEST_ORGS.a])).rows[0]!.id,
+    b: (await c.query<{ id: string }>("insert into organizations (name) values ($1) returning id", [OPS_TEST_ORGS.b])).rows[0]!.id,
+  };
+  const memberIds = new Map<string, string>();
+  for (const m of OPS_TEST_MEMBERS) {
+    const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+    memberIds.set(m.key, id);
+    await addVersion(c, orgIds[m.org], "member", id, {
+      email: `${m.key}@example.test`,
+      display_name: m.displayName,
+      role: m.role,
+      status: m.authUserId ? "active" : "invited",
+      auth_provider: m.authUserId ? "test" : null,
+      auth_user_id: m.authUserId ?? null,
+    });
+  }
+  const pilot = async (org: "a" | "b", fullName: string, memberKey: string | null, licenseNumber: string | null) => {
+    const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+    await addVersion(c, orgIds[org], "pilot", id, {
+      full_name: fullName,
+      has_license: licenseNumber !== null,
+      license_class: licenseNumber !== null ? "second" : null,
+      license_number: licenseNumber,
+      license_expires_on: licenseNumber !== null ? "2029-03-31" : null,
+      limitation_type: false,
+      limitation_weight: false,
+      limitation_daytime: false,
+      limitation_vlos: true,
+      member_id: memberKey ? memberIds.get(memberKey)! : null,
+    });
+  };
+  await pilot("a", "操縦 一郎", "a-pilot", "TEST-11112222");
+  await pilot("a", "操縦 二郎", "a-pilot2", "TEST-33334444");
+  await pilot("b", "組織B 操縦者", "b-pilot", "TEST-55556666");
+  const aircraftId = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+  await addVersion(c, orgIds.b, "aircraft", aircraftId, {
+    registration_mark: "JUORGB0001",
+    model_name: "組織Bの機体",
+    manufacturer: "テスト製作所",
+    serial_number: "B-0001",
+    type_certified: false,
+    type_cert_category: null,
+    type_cert_model: null,
+    type_cert_number: null,
+    airworthiness_class: null,
+    airworthiness_cert_number: null,
+    max_takeoff_weight_kg: null,
+    initial_flight_minutes: 0,
+    status: "active",
+  });
+  return { created: true, orgIds };
+};

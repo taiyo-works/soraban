@@ -76,12 +76,14 @@ jobs:
           while IFS= read -r line; do echo "::warning title=外部サービスの疎通確認::$line"; done < "$RUNNER_TEMP/smoke.log"
 
   # Sprint 8: DB を使うテスト。PostgreSQL 18 + PostGIS 3.6 のサービスコンテナだけを使う。
-  # Neon の接続文字列・API キーは参照しない（GitHub に秘密情報を置かない）。
+  # Neon の接続文字列・API キー・Neon Auth の URL・秘密は参照しない（GitHub に秘密情報を置かない）。
+  # Sprint 10: アプリ用ロール soraban_app を作ってからマイグレーションを適用し、test:db と運航管理の E2E-DB
+  # （AUTH_PROVIDER=test・OPS_ENABLED=1・soraban_app で接続した next start）を実行する。
   db:
     name: db (PostGIS service container)
     runs-on: ubuntu-latest
     needs: verify
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgis/postgis:18-3.6
@@ -102,6 +104,10 @@ jobs:
       # TEST_DATABASE_URL が無いときにスキップで緑にしない。
       REQUIRE_DB_TESTS: "1"
       EXPECT_PG_MAJOR: "18"
+      # マイグレーション・テスト用の初期データの投入（オーナーロール）。
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+      # E2E-DB のアプリの接続先（soraban_app。サービスコンテナ内だけの使い捨てのパスワード）。
+      E2E_OPS_DATABASE_URL: postgresql://soraban_app:soraban_app_ci_only@localhost:5432/soraban_ci
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -110,24 +116,27 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: create app role soraban_app（マイグレーションより先に作る）
+        run: psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c "create role soraban_app with login password 'soraban_app_ci_only'"
       - name: create migration target database
         run: psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c "create database soraban_ci"
       - name: pnpm db:migrate（空の DB に全マイグレーションを適用）
         run: pnpm db:migrate
-        env:
-          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
       - name: pnpm db:migrate（2 回目は何もしない）
         run: |
           out=$(pnpm db:migrate)
           echo "$out"
           echo "$out" | grep -q "未適用のマイグレーションはありません"
-          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc 'select count(*) from schema_migrations')" = "3"
-        env:
-          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+          expected=$(ls packages/db/migrations/*.sql | wc -l)
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc 'select count(*) from schema_migrations')" = "$expected"
       - name: pnpm db:status
         run: pnpm db:status
-        env:
-          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/soraban_ci
+      - name: soraban_app の権限（運航管理の表は参照と record_versions への追加だけ）
+        run: |
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'record_versions', 'INSERT')")" = "t"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'record_versions', 'UPDATE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'aircraft', 'INSERT')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'members', 'SELECT')")" = "t"
       - name: REQUIRE_DB_TESTS=1 で TEST_DATABASE_URL が無いと失敗することを確認
         run: |
           if env -u TEST_DATABASE_URL pnpm test:db; then
@@ -136,7 +145,22 @@ jobs:
           fi
       - run: pnpm build
       - run: pnpm test:db
-      - name: test:db が DB サーバーに痕跡（ロール・使い捨て DB）を残していないことを確認
+      - name: test:db が DB サーバーに痕跡（使い捨て DB）を残さず、先に作った soraban_app を消していないことを確認
         run: |
-          test "$(psql "$TEST_DATABASE_URL" -tAc "select count(*) from pg_roles where rolname = 'soraban_app'")" = "0"
+          test "$(psql "$TEST_DATABASE_URL" -tAc "select count(*) from pg_roles where rolname = 'soraban_app'")" = "1"
           test "$(psql "$TEST_DATABASE_URL" -tAc "select count(*) from pg_database where datname like 'soraban_t_%'")" = "0"
+      - name: テスト用の初期データ（運航管理。localhost だけに投入できる）
+        run: pnpm db:seed:ops-test
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: E2E-DB（運航管理。AUTH_PROVIDER=test・OPS_ENABLED=1・soraban_app で接続した next start）
+        run: pnpm test:e2e:ops
+        env:
+          CI: "1"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-ops
+          path: |
+            playwright-report-ops/
+            test-results/
+          retention-days: 7

@@ -42,12 +42,15 @@ describe("parseMigrationFiles", () => {
     expect(a!.checksum).not.toBe(b!.checksum);
   });
 
-  it("リポジトリのマイグレーションは 0001〜0003 で検証を通る", async () => {
+  it("リポジトリのマイグレーションは 0001〜0006 で検証を通る", async () => {
     const { readMigrationDir } = await import("./migrate");
     expect(readMigrationDir(DEFAULT_MIGRATIONS_DIR).map((x) => x.filename)).toEqual([
       "0001_initial_schema.sql",
       "0002_evidence_log.sql",
       "0003_evidence_log_datasets.sql",
+      "0004_ops_org_members.sql",
+      "0005_ops_aircraft_pilots.sql",
+      "0006_record_versions.sql",
     ]);
   });
 });

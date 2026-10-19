@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@neondatabase/auth": "0.6.0-beta",
     "@react-pdf/renderer": "^4.5.1",
     "@soraban/db": "workspace:*",
     "@soraban/geo": "workspace:*",
