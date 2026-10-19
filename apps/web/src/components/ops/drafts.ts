@@ -4,7 +4,27 @@
 
 const PREFIX = "soraban:ops-draft:";
 
-export const DRAFT_KEYS = { flight: `${PREFIX}flight`, inspection: `${PREFIX}inspection` } as const;
+export type DraftKind = "flight" | "inspection";
+
+/**
+ * 下書きのキー。利用者（内部 ID）ごとに分ける（共用の端末で、前の人の下書き・送信の識別子を次の人に引き継がないため）。
+ * 例：soraban:ops-draft:flight:<利用者の ID>
+ */
+export const draftKey = (kind: DraftKind, memberId: string): string => `${PREFIX}${kind}:${memberId}`;
+
+/** ある利用者のものでない下書き（他の利用者・利用者を区別していなかった旧形式）を消す。ログイン後の画面で呼ぶ。 */
+export const clearOtherUsersDrafts = (memberId: string): void => {
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (k?.startsWith(PREFIX) && !k.endsWith(`:${memberId}`)) keys.push(k);
+    }
+    for (const k of keys) window.localStorage.removeItem(k);
+  } catch {
+    // 何もしない
+  }
+};
 
 export const loadDraft = <T>(key: string): T | null => {
   try {

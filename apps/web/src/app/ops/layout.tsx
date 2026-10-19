@@ -17,7 +17,7 @@ export default function OpsLayout({ children }: { readonly children: React.React
           <span className="eyebrow !text-[9px]">Soraban — Flight operations</span>
           <span className="font-display text-xl font-light leading-none">そらばん 運航管理</span>
         </Link>
-        <Link href="/" className="text-xs text-ink-mute underline-offset-2 hover:text-brand-700 hover:underline">
+        <Link href="/" className="-my-3 inline-flex min-h-11 items-center text-xs text-ink-mute underline-offset-2 hover:text-brand-700 hover:underline">
           地点判定へ
         </Link>
       </header>

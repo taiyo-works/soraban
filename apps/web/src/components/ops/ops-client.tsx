@@ -2,9 +2,9 @@
 
 // 運航管理（Sprint 10）の画面の入力部品。どれも /api/ops/* を呼ぶだけで、判断はサーバー側（サービス層）が行う。
 // 見た目は components/ops/ui.tsx の部品と判定画面の意匠に合わせる。
-import { cloneElement, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
+import { cloneElement, useEffect, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
-import { clearOpsDrafts } from "./drafts";
+import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
 import {
   buttonDangerClass,
   buttonGhostClass,
@@ -76,6 +76,7 @@ export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   overlap: "同じ機体、または同じ操縦者の別の飛行記録と時間帯が重なっています。時刻を確かめてください。",
   aircraft_unavailable: "取消済み・抹消の機体には記録を作れません。",
   duplicate_request: "同じ内容が既に保存されています。一覧を確かめてください。",
+  request_conflict: "この下書きの送信の識別子は別の利用者の記録に使われています。識別子を作り直したので、内容を確かめてもう一度保存してください。",
 };
 
 export const messageFor = (r: ApiResult): string => {
@@ -876,4 +877,12 @@ export function GoogleSignInButton() {
       <FormError message={message} />
     </div>
   );
+}
+
+/** ログイン後のトップで、他の利用者の下書き（共用の端末で前の人が残したもの）を端末から消す（Sprint 11）。表示はしない。 */
+export function DraftOwnerGuard({ memberId }: { readonly memberId: string }) {
+  useEffect(() => {
+    clearOtherUsersDrafts(memberId);
+  }, [memberId]);
+  return null;
 }

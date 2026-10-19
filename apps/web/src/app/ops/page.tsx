@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SignOutButton } from "@/components/ops/ops-client";
+import { DraftOwnerGuard, SignOutButton } from "@/components/ops/ops-client";
 import { buttonFieldClass, buttonOutlineBrandClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
@@ -18,6 +18,7 @@ export default async function OpsHome() {
   ];
   return (
     <main className="flex flex-col gap-8">
+      <DraftOwnerGuard memberId={me.member.id} />
       <section className="flex flex-col gap-3" aria-label="ログイン中の利用者">
         <p className="eyebrow">{me.org.name}</p>
         <p className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl" data-testid="ops-me-name">

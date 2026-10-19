@@ -267,6 +267,25 @@ const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<Reco
   return out;
 };
 
+/**
+ * 同じ組織で同じ送信の識別子の作成が既にあるか。あれば、作成者が要求した利用者と同じときだけその記録の ID を返す。
+ * 別の利用者の作成なら 409（request_conflict）。共用の端末で前の利用者の下書きの識別子が残っていた場合などに、
+ * 他人の記録を返さないため。
+ */
+const existingRequest = async (
+  ctx: OpsContext,
+  entityType: "flight_record" | "daily_inspection",
+  requestId: string,
+): Promise<string | null> => {
+  const owner = await store.findRequestOwner(ctx.db, ctx.member.org_id, entityType, requestId);
+  if (!owner) return null;
+  if (owner.actor_member_id !== ctx.member.id) throw new OpsError(409, "request_conflict");
+  return owner.id;
+};
+
+/** API の UUID の比較用（大文字・小文字を区別しない）。 */
+const normId = (v: unknown): unknown => (typeof v === "string" ? v.toLowerCase() : v);
+
 export type SaveResult<T> = { readonly created: boolean; readonly record: T; readonly warnings: readonly RecordWarning[] };
 
 /** 日常点検の紐付けを確かめる（他の組織は 404、別の機体・取消済みは 400）。 */
@@ -288,8 +307,8 @@ export const createFlight = async (ctx: OpsContext, body: unknown): Promise<Save
   }
   // 二重送信：同じ組織で同じ識別子の作成が既にあれば、新しい記録を作らずに既存の記録を返す
   if (req.value) {
-    const existing = await store.findFlightByRequest(ctx.db, ctx.member.org_id, req.value);
-    if (existing) return { created: false, record: flightDto(existing, mine, ctx, true), warnings: [] };
+    const existingId = await existingRequest(ctx, "flight_record", req.value);
+    if (existingId) return { created: false, record: flightDto(await loadFlight(ctx, existingId), mine, ctx, true), warnings: [] };
   }
   const isSelf = mine !== null && mine.id === v.data.pilot_id;
   if (!can(ctx.member.role, "flight.create", { isSelf })) throw new OpsError(403, "forbidden");
@@ -318,8 +337,8 @@ export const createFlight = async (ctx: OpsContext, body: unknown): Promise<Save
     });
   } catch (e) {
     if (e instanceof OpsError && e.code === "duplicate_request" && req.value) {
-      const existing = await store.findFlightByRequest(ctx.db, ctx.member.org_id, req.value);
-      if (existing) return { created: false, record: flightDto(existing, mine, ctx, true), warnings: [] };
+      const existingId = await existingRequest(ctx, "flight_record", req.value);
+      if (existingId) return { created: false, record: flightDto(await loadFlight(ctx, existingId), mine, ctx, true), warnings: [] };
     }
     throw e;
   }
@@ -334,7 +353,7 @@ export const updateFlight = async (ctx: OpsContext, id: string, body: unknown): 
   assertCan(ctx, "flight.update", isSelf);
   const input = asInput(body);
   const meta = validateChangeMeta(input);
-  if ("aircraftId" in input && input["aircraftId"] !== current.aircraft_id) {
+  if ("aircraftId" in input && normId(input["aircraftId"]) !== current.aircraft_id) {
     throw new OpsError(
       400,
       "invalid_input",
@@ -504,8 +523,8 @@ export const createInspection = async (ctx: OpsContext, body: unknown): Promise<
     return invalid(v, req.ok ? undefined : { errors: { clientRequestId: "送信の識別子が正しくありません" }, codes: { clientRequestId: "invalid" } });
   }
   if (req.value) {
-    const existing = await store.findInspectionByRequest(ctx.db, ctx.member.org_id, req.value);
-    if (existing) return { created: false, record: inspectionDto(existing, mine), warnings: [] };
+    const existingId = await existingRequest(ctx, "daily_inspection", req.value);
+    if (existingId) return { created: false, record: inspectionDto(await loadInspection(ctx, existingId), mine), warnings: [] };
   }
   const isSelf = mine !== null && mine.id === v.data.pilot_id;
   if (!can(ctx.member.role, "inspection.create", { isSelf })) throw new OpsError(403, "forbidden");
@@ -529,8 +548,8 @@ export const createInspection = async (ctx: OpsContext, body: unknown): Promise<
     });
   } catch (e) {
     if (e instanceof OpsError && e.code === "duplicate_request" && req.value) {
-      const existing = await store.findInspectionByRequest(ctx.db, ctx.member.org_id, req.value);
-      if (existing) return { created: false, record: inspectionDto(existing, mine), warnings: [] };
+      const existingId = await existingRequest(ctx, "daily_inspection", req.value);
+      if (existingId) return { created: false, record: inspectionDto(await loadInspection(ctx, existingId), mine), warnings: [] };
     }
     throw e;
   }
@@ -544,7 +563,7 @@ export const updateInspection = async (ctx: OpsContext, id: string, body: unknow
   assertCan(ctx, "inspection.update", mine !== null && mine.id === current.pilot_id);
   const input = asInput(body);
   const meta = validateChangeMeta(input);
-  if ("aircraftId" in input && input["aircraftId"] !== current.aircraft_id) {
+  if ("aircraftId" in input && normId(input["aircraftId"]) !== current.aircraft_id) {
     throw new OpsError(
       400,
       "invalid_input",

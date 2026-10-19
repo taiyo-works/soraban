@@ -18,7 +18,7 @@ export default async function InspectionNewPage({ searchParams }: { readonly sea
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "日常点検の一覧" }}>
         <p className="text-xs leading-relaxed text-ink-mute">飛行の前（または後）に行った日常点検の結果を入力します。</p>
       </PageHeader>
-      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} initialAircraftId={aircraftId} />
+      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} />
     </main>
   );
 }

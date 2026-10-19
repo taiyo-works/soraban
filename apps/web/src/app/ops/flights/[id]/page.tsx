@@ -104,7 +104,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
         </ul>
       ),
     ],
-    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="text-brand-700 underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
+    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
   ];
   return (
     <main className="flex flex-col gap-10">
@@ -164,7 +164,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
               <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
             </summary>
             <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
-              <FlightForm key={f.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} editing={f} />
+              <FlightForm key={f.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} memberId={me.member.id} editing={f} />
             </div>
           </details>
         </Section>
