@@ -12,6 +12,7 @@ import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import type { CurrentLocationCandidate } from "@/lib/current-location";
 import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import { createRightClickPicker } from "@/lib/right-click";
+import { CurrentLocationControl } from "./current-location-control";
 import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
@@ -33,6 +34,10 @@ type Props = {
   readonly onPick?: (loc: LatLng, method: MapPickMethod) => void;
   /** 現在地の候補（精度の円と印を表示する。判定はしない）。 */
   readonly candidate?: CurrentLocationCandidate | null;
+  /** 現在地の候補の更新（地図に重ねる現在地ボタン・候補のパネルから呼ぶ）。 */
+  readonly onCandidate?: (c: CurrentLocationCandidate | null) => void;
+  /** 現在地の候補で判定する（「この地点で判定」）。 */
+  readonly onConfirmCandidate?: (c: CurrentLocationCandidate) => void;
 };
 
 // タッチ直後にブラウザが合成する click・contextmenu を無視する時間（ms）。
@@ -199,7 +204,14 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
 ];
 
-export function RegulationMap({ center, prefCode, onPick, candidate = null }: Props) {
+export function RegulationMap({
+  center,
+  prefCode,
+  onPick,
+  candidate = null,
+  onCandidate,
+  onConfirmCandidate,
+}: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -600,9 +612,19 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
 
   const visibleCount = Object.values(layerVisibility).filter(Boolean).length;
 
+  // モバイルは 2:3（下端に重ねる候補のパネルの上に、中央の精度の円が見える高さを確保する）、sm 以上は 16:9。
+  const canvas = (
+    <div
+      ref={containerRef}
+      data-testid="regulation-map"
+      className="aspect-[2/3] w-full sm:aspect-[16/9]"
+      style={{ touchAction: "pan-x pan-y" }}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-2">
-      {/* 地図: モバイルでは aspect 4:5 (縦長) で画面の主役に近づける。
+      {/* 地図: モバイルでは aspect 2:3 (縦長) で画面の主役に近づける。
           touch-action で縦スクロールとピンチを両立させる */}
       <div className="overflow-hidden border border-rule">
         {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
@@ -621,12 +643,13 @@ export function RegulationMap({ center, prefCode, onPick, candidate = null }: Pr
             </span>
           </span>
         </p>
-        <div
-          ref={containerRef}
-          data-testid="regulation-map"
-          className="aspect-[4/5] w-full sm:aspect-[16/9]"
-          style={{ touchAction: "pan-x pan-y" }}
-        />
+        {onCandidate && onConfirmCandidate ? (
+          <CurrentLocationControl candidate={candidate} onCandidate={onCandidate} onConfirm={onConfirmCandidate}>
+            {canvas}
+          </CurrentLocationControl>
+        ) : (
+          canvas
+        )}
       </div>
       {/* レイヤーレジェンド: モバイルではデフォルト折りたたみ */}
       <details

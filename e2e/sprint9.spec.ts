@@ -290,7 +290,7 @@ test.describe("A・B. 住所検索", () => {
     await input.press("Enter");
     await check;
     const note = page.getByTestId("location-note");
-    await expect(note).toContainText("出典 アドレス・ベース・レジストリ");
+    await expect(note).toContainText("出典：アドレス・ベース・レジストリ");
     await expect(note).toContainText("住居表示（住居）の代表点");
     await expect(latInput(page)).toHaveValue("35.43062");
 
@@ -299,7 +299,7 @@ test.describe("A・B. 住所検索", () => {
     await input.fill("西伯郡日吉津村大字試験100番地");
     await input.press("Enter");
     await check;
-    await expect(note).toContainText("出典 アドレス・ベース・レジストリ");
+    await expect(note).toContainText("出典：アドレス・ベース・レジストリ");
     await expect(note).toContainText("町字の代表点。実際の飛行地点は地図で指定してください");
     await expect(latInput(page)).toHaveValue("35.4412");
 

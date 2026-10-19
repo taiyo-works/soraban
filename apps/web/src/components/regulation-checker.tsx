@@ -51,7 +51,6 @@ import {
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
 import { RegulationMap, type MapPickMethod } from "./regulation-map";
-import { CurrentLocationControl } from "./current-location-control";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
 const overallTone: Record<RegulationStatus, string> = {
@@ -1418,11 +1417,6 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
       {/* ─── MAP ───────────────────────────────── */}
       <div className="flex flex-col gap-2">
-        <CurrentLocationControl
-          candidate={geoCandidate}
-          onCandidate={setGeoCandidate}
-          onConfirm={confirmCurrentLocation}
-        />
         {locationNote ? (
           <p
             className="flex flex-col gap-0.5 border-l-2 border-brand-700 bg-paper-soft py-2 pl-3 pr-2 text-xs leading-relaxed text-ink"
@@ -1431,7 +1425,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           >
             {locationNote.title ? <span className="text-sm font-medium">{locationNote.title}</span> : null}
             <span>{locationNote.text}</span>
-            {locationNote.source ? <span className="text-[11px] text-ink-mute">出典 {locationNote.source}。</span> : null}
+            {locationNote.source ? <span className="text-[11px] text-ink-mute">出典：{locationNote.source}</span> : null}
           </p>
         ) : null}
         <RegulationMap
@@ -1439,6 +1433,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           prefCode={prefCode}
           onPick={handlePick}
           candidate={geoCandidate}
+          onCandidate={setGeoCandidate}
+          onConfirmCandidate={confirmCurrentLocation}
         />
       </div>
 
