@@ -1,5 +1,5 @@
 // 判定履歴の localStorage 保管。
-// Phase 1 中盤の Supabase 接続化でサーバ側 evidence_log テーブルに移送する想定。
+// サーバ側の evidence_log（Sprint 8 から /api/check の応答後に記録）とは別に、利用者の端末にも残す。
 // 同じ evidenceId は重複保存しない (= 同一座標+同一ctxは自然に idempotent)。
 // LRU で最大 50 件まで保持、超えたら最古を削除。
 

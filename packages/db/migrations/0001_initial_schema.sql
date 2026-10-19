@@ -13,6 +13,8 @@
 -- - geom は GEOGRAPHY(Geometry, 4326)。Polygon と Point（バッファ運用）を
 --   同居させるため Geometry にしてある。GiST index で空間検索を高速化。
 -- - jurisdiction_code は柔軟運用: 5桁=市町村 / 2桁=都道府県 / NULL=国。
+-- - 2026-10（Sprint 8）: 旧 DB 製品向けのマイグレーション置き場から packages/db/migrations へ移した。
+--   表・列・制約・索引の意味は変えていない（コメントのみ修正）。
 -- =============================================================
 
 create extension if not exists postgis;
@@ -84,7 +86,7 @@ create type zone_kind as enum (
   'park_polygon',         -- 都市公園
   'heritage_polygon',     -- 指定史跡
   'sensitive_buffer',     -- 公衆密集地（中心 + buffer_m で運用）
-  'airbase_buffer',       -- 美保基地系
+  'airbase_buffer',       -- 小型無人機等飛行禁止法の対象施設（中心点＋推定半径の暫定運用）
   'did_polygon',          -- 人口集中地区
   'airport_polygon'       -- 空港等
 );
@@ -106,7 +108,8 @@ create table regulation_zones (
   -- Polygon (kind=*_polygon) または Point (kind=*_buffer)
   geom geography(Geometry, 4326) not null,
 
-  -- 中心 + バッファ運用の場合のみ NOT NULL（公衆密集地 100m, 美保基地 300m/1500m など）
+  -- 中心 + バッファ運用の場合のみ NOT NULL（公衆密集地 100m など。飛行禁止法の周辺地域は
+  -- 敷地境界からおおむね 1,000m で、判定ロジックは packages/regulations 側に持つ）
   buffer_m integer check (buffer_m is null or buffer_m > 0),
 
   created_at timestamptz not null default now()

@@ -16,8 +16,6 @@ __pycache__/
 .vscode/settings.json
 .idea/
 *.log
-supabase/.branches
-supabase/.temp
 
 # 大容量の規制データ（再生成可能）
 packages/regulations/data/did/raw/

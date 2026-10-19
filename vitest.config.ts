@@ -25,6 +25,16 @@ export default defineConfig({
       {
         resolve: { alias: sorabanAlias },
         test: {
+          name: "db",
+          include: ["packages/db/src/**/*.test.ts"],
+          // DB を使うテストは vitest.db.config.ts（pnpm test:db）で実行する。
+          exclude: ["**/*.db.test.ts", "**/node_modules/**"],
+          globals: true,
+        },
+      },
+      {
+        resolve: { alias: sorabanAlias },
+        test: {
           name: "geo",
           include: ["packages/geo/src/**/*.test.ts"],
           globals: true,
@@ -48,6 +58,7 @@ export default defineConfig({
         test: {
           name: "web",
           include: ["apps/web/src/**/*.test.ts"],
+          exclude: ["**/*.db.test.ts", "**/node_modules/**"],
           globals: true,
         },
       },
