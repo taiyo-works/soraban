@@ -177,14 +177,15 @@ export default function Home() {
           </p>
         </div>
 
-        {/* ドローンの線画（Sprint 11b）。PC（lg 以上）では右の列に控えめに置き、本文には重ねない。スマホでは出さない。
-            装飾なので読み上げない。線は currentColor で、色はトークン（text-ink-mute）に追従する。 */}
+        {/* ドローンの線画（Sprint 11b、ユーザーが Adobe Firefly で生成した PNG）。PC（lg 以上）では右の列に控えめに置き、
+            本文には重ねない。スマホでは出さない（hidden の間は lazy の画像を読み込まない）。装飾なので読み上げない。
+            線は黒。不透明度をここで下げ、ダークモードでは画像を反転して明るい線にする。 */}
         <div
           aria-hidden="true"
           data-testid="hero-line-art"
-          className="pointer-events-none hidden text-ink-mute opacity-60 lg:block"
+          className="pointer-events-none hidden opacity-40 lg:block"
         >
-          <HeroLineArt className="block h-auto w-full" />
+          <HeroLineArt className="block h-auto w-full select-none dark:invert" />
         </div>
       </header>
 
