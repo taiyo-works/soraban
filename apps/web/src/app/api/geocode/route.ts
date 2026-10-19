@@ -1,32 +1,14 @@
 import { NextResponse } from "next/server";
+import { resolveAddressSearch } from "@/server/address-data-dir";
+import { geocode } from "@/server/geocode";
 
-const GSI_ENDPOINT = "https://msearch.gsi.go.jp/address-search/AddressSearch";
-
-type GsiFeature = {
-  geometry: { type: "Point"; coordinates: [number, number] };
-  properties: { addressCode: string; title: string };
-};
-
+// 住所検索（Sprint 9）：①同梱索引（アドレス・ベース・レジストリ）→ ②国土地理院の住所検索。
+// 処理本体は server/geocode.ts。
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
   if (q.length === 0) {
     return NextResponse.json({ error: "missing q" }, { status: 400 });
   }
-  const url = `${GSI_ENDPOINT}?q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "soraban-geocoder/0.0.0" },
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) {
-    return NextResponse.json({ error: `GSI ${res.status}` }, { status: 502 });
-  }
-  const data = (await res.json()) as readonly GsiFeature[];
-  const results = data.slice(0, 5).map((f) => ({
-    title: f.properties.title,
-    addressCode: f.properties.addressCode,
-    lng: f.geometry.coordinates[0],
-    lat: f.geometry.coordinates[1],
-  }));
-  return NextResponse.json({ results });
+  return NextResponse.json(await geocode(q, { searchBundled: await resolveAddressSearch() }));
 }

@@ -42,7 +42,7 @@ for (const ds of datasets) {
   for (const dist of ds.distribution ?? []) {
     const url = dist.accessURL ?? dist.downloadURL;
     if (typeof url !== "string" || !url.endsWith(".csv.zip")) continue;
-    // ArcGIS のアイテム ID（identifier の id=…）。配布元が接続元の国で制限される場合の代替取得に使う
+    // ArcGIS のアイテム ID（identifier の id=…。記録用）
     const item = /[?&]id=([0-9a-f]{32})/.exec(String(ds.identifier ?? ""))?.[1] ?? "";
     all.push({ url, item, modified: modifiedOf(ds.description) || String(ds.modified ?? "") });
   }

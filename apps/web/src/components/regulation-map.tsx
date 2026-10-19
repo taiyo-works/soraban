@@ -9,6 +9,8 @@ import maplibregl, {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
+import type { CurrentLocationCandidate } from "@/lib/current-location";
+import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
@@ -21,11 +23,25 @@ import {
   type SmallDroneFacility,
 } from "@soraban/regulations";
 
+/** 地図での地点指定の方法（表示用。判定の入力・証跡には含めない）。 */
+export type MapPickMethod = "click" | "longpress" | "contextmenu";
+
 type Props = {
   readonly center: LatLng;
   readonly prefCode?: string;
-  readonly onPick?: (loc: LatLng) => void;
+  readonly onPick?: (loc: LatLng, method: MapPickMethod) => void;
+  /** 現在地の候補（精度の円と印を表示する。判定はしない）。 */
+  readonly candidate?: CurrentLocationCandidate | null;
 };
+
+// タッチ直後にブラウザが合成する click・contextmenu を無視する時間（ms）。
+const TOUCH_GHOST_MS = 1500;
+
+/** 精度（m）に応じた表示ズーム。 */
+const zoomForAccuracy = (m: number): number => (m <= 50 ? 16 : m <= 200 ? 15 : m <= 1000 ? 13 : 12);
+
+const isTouchPointer = (ev: Event | undefined): boolean =>
+  !!ev && "pointerType" in ev && (ev as PointerEvent).pointerType === "touch";
 
 const STYLE: StyleSpecification = {
   version: 8,
@@ -182,10 +198,18 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
 ];
 
-export function RegulationMap({ center, prefCode, onPick }: Props) {
+export function RegulationMap({ center, prefCode, onPick, candidate = null }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  const candidateMarkerRef = useRef<Marker | null>(null);
+  // 地図の load 後に実行する処理（isStyleLoaded はタイル読み込み中に false になるため自前で管理する）
+  const loadedRef = useRef<boolean>(false);
+  const pendingRef = useRef<(() => void)[]>([]);
+  const runWhenLoaded = (fn: () => void): void => {
+    if (loadedRef.current) fn();
+    else pendingRef.current.push(fn);
+  };
   // 地図クリックハンドラから常に最新の onPick を読めるよう ref に保持。
   // React のルール上、ref の更新は effect で行う（render 中の代入は禁止）。
   const onPickRef = useRef<typeof onPick>(onPick);
@@ -236,6 +260,8 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     );
 
     map.on("load", () => {
+      loadedRef.current = true;
+      queueMicrotask(() => pendingRef.current.splice(0).forEach((fn) => fn()));
       // DID — populated dynamically from /api/did/[pref]
       map.addSource("did", { type: "geojson", data: EMPTY_FC });
       map.addLayer({
@@ -375,15 +401,67 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
       });
     });
 
-    map.on("click", (e) => {
+    // ── 地点指定 ──
+    // マウス：左クリック（従来どおり）・右クリック（contextmenu）。
+    // タッチ：長押し（500ms 以上・移動 10px 以内）に一本化し、単タップでは指定しない（Sprint 9 未決 1）。
+    let lastTouchAt = -Infinity;
+    const recentlyTouched = () => performance.now() - lastTouchAt < TOUCH_GHOST_MS;
+    const pickAt = (lngLat: { lat: number; lng: number }, method: MapPickMethod) => {
       const cb = onPickRef.current;
-      if (!cb) return;
-      cb({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      if (cb) cb({ lat: lngLat.lat, lng: lngLat.lng }, method);
+    };
+    map.on("click", (e) => {
+      if (isTouchPointer(e.originalEvent) || recentlyTouched()) return;
+      pickAt(e.lngLat, "click");
+    });
+    // 右クリック：地図のライブラリの contextmenu は右ボタンでの回転操作と競合して発火しないことがあるため、
+    // DOM の contextmenu で扱う。地図上ではブラウザの右クリックメニューを出さない。
+    const onContextMenu = (ev: MouseEvent) => {
+      ev.preventDefault();
+      // タッチの長押しでブラウザが出す contextmenu は、長押しの判定で扱う
+      if (isTouchPointer(ev) || recentlyTouched()) return;
+      const rect = map.getCanvas().getBoundingClientRect();
+      pickAt(map.unproject([ev.clientX - rect.left, ev.clientY - rect.top]), "contextmenu");
+    };
+    node.addEventListener("contextmenu", onContextMenu);
+
+    const longPress = createLongPressDetector({
+      onLongPress: (p) => pickAt(map.unproject([p.x, p.y]), "longpress"),
+    });
+    const toPoints = (points: readonly { x: number; y: number }[]): TouchPoint[] =>
+      points.map((pt) => ({ x: pt.x, y: pt.y }));
+    map.on("touchstart", (e) => {
+      lastTouchAt = performance.now();
+      longPress.start(toPoints(e.points));
+    });
+    map.on("touchmove", (e) => {
+      lastTouchAt = performance.now();
+      longPress.move(toPoints(e.points));
+    });
+    map.on("touchend", () => {
+      lastTouchAt = performance.now();
+      longPress.end();
+    });
+    map.on("touchcancel", () => longPress.cancel());
+    map.on("movestart", (e) => {
+      // 利用者の操作による移動（パン・ズーム）だけで取り消す（プログラムの easeTo は除く）
+      if ((e as { originalEvent?: Event }).originalEvent) longPress.mapMoved();
+    });
+    map.on("moveend", () => {
+      const c = map.getCenter();
+      node.dataset["centerLat"] = c.lat.toFixed(6);
+      node.dataset["centerLng"] = c.lng.toFixed(6);
     });
     map.getCanvas().style.cursor = "crosshair";
 
     return () => {
+      longPress.cancel();
+      node.removeEventListener("contextmenu", onContextMenu);
+      candidateMarkerRef.current?.remove();
+      candidateMarkerRef.current = null;
       map.remove();
+      loadedRef.current = false;
+      pendingRef.current = [];
       mapRef.current = null;
       markerRef.current = null;
     };
@@ -397,6 +475,57 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
     map.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: 800 });
     marker.setLngLat([center.lng, center.lat]);
   }, [center.lat, center.lng]);
+
+  // 現在地の候補：精度の円と印を表示し、地図をその位置に移す（判定はしない）。
+  useEffect(() => {
+    const map = mapRef.current;
+    const node = containerRef.current;
+    if (!map || !node) return;
+    const apply = () => {
+      const m = mapRef.current;
+      if (!m) return;
+      const fc: GeoJSON.FeatureCollection = candidate
+        ? polygonsToFeatureCollection([
+            circlePolygon({ lat: candidate.lat, lng: candidate.lng }, candidate.accuracyM, 64),
+          ])
+        : EMPTY_FC;
+      const src = m.getSource("current-location") as GeoJSONSource | undefined;
+      if (src) src.setData(fc);
+      else {
+        m.addSource("current-location", { type: "geojson", data: fc });
+        m.addLayer({
+          id: "current-location-fill",
+          type: "fill",
+          source: "current-location",
+          paint: { "fill-color": "#2563eb", "fill-opacity": 0.15 },
+        });
+        m.addLayer({
+          id: "current-location-outline",
+          type: "line",
+          source: "current-location",
+          paint: { "line-color": "#1d4ed8", "line-width": 1.5 },
+        });
+      }
+      if (candidate) {
+        node.dataset["accuracyRadiusM"] = String(Math.round(candidate.accuracyM));
+      } else {
+        delete node.dataset["accuracyRadiusM"];
+      }
+    };
+    candidateMarkerRef.current?.remove();
+    candidateMarkerRef.current = null;
+    if (candidate) {
+      candidateMarkerRef.current = new maplibregl.Marker({ color: "#2563eb" })
+        .setLngLat([candidate.lng, candidate.lat])
+        .addTo(map);
+      map.easeTo({
+        center: [candidate.lng, candidate.lat],
+        zoom: zoomForAccuracy(candidate.accuracyM),
+        duration: 600,
+      });
+    }
+    runWhenLoaded(apply);
+  }, [candidate]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -456,6 +585,7 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
       <div className="overflow-hidden border border-rule">
         <div
           ref={containerRef}
+          data-testid="regulation-map"
           className="aspect-[4/5] w-full sm:aspect-[16/9]"
           style={{ touchAction: "pan-x pan-y" }}
         />
@@ -473,7 +603,7 @@ export function RegulationMap({ center, prefCode, onPick }: Props) {
         </summary>
         <div className="flex flex-col gap-2 sm:!flex">
           <span className="text-[11px] text-ink-mute hidden sm:block">
-            ・チェックで地図表示を切替 ・地図クリックで判定地点を選択
+            ・チェックで地図表示を切替 ・地図のクリック／右クリック（スマートフォンは長押し）で判定地点を選択
           </span>
           <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {LAYER_GROUPS.map((group) => {

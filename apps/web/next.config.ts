@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
   // E2E でフィクスチャ用の next dev を同時に起動するとき、.next のロックが衝突しないよう
   // 出力先を環境変数で分けられるようにする（未設定は既定の .next）。
   distDir: process.env["NEXT_DIST_DIR"] || ".next",
+
+  // Sprint 9：現在地ボタンのため、位置情報を自サイトにだけ許可する（他の Permissions-Policy の設定はない）。
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "Permissions-Policy", value: "geolocation=(self)" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

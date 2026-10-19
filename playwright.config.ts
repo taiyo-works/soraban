@@ -58,6 +58,10 @@ export default defineConfig({
       env: {
         DID_DATA_DIR: path.join(FIXTURES, "did"),
         INDUSTRIAL_DATA_DIR: path.join(FIXTURES, "industrial"),
+        // Sprint 9：住所検索の索引を架空のフィクスチャに差し替え、国土地理院の住所検索は接続できない宛先にする
+        // （同梱索引の結果だけで画面の表示を確かめる）。
+        ADDRESS_DATA_DIR: path.join(FIXTURES, "address"),
+        GSI_ADDRESS_SEARCH_ENDPOINT: "http://127.0.0.1:9/address-search",
         NEXT_DIST_DIR: ".next-e2e-fixture",
         DATABASE_URL: "",
       },

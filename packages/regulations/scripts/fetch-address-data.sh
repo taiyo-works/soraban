@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # アドレス・ベース・レジストリ（デジタル庁）の鳥取県（31）・島根県（32）分を取得し、住所検索の同梱索引に変換する（Sprint 9）。
-# GitHub Actions（.github/workflows/fetch-address-data.yml）での実行を想定（外部ネットワークが必要）。
+# 配布元は日本国外からの接続を拒否する（CloudFront の国別制限。2026-10-19 に GitHub ホストのランナーで確認）。
+# 日本国内のネットワーク（手元の PC、または国内の self-hosted ランナー）で実行する。
+# GitHub Actions（.github/workflows/fetch-address-data.yml）からも実行できるが、GitHub ホストのランナーでは取得に失敗する。
 #
 #   bash packages/regulations/scripts/fetch-address-data.sh [--prefs "31 32"]
 #
@@ -66,22 +68,14 @@ try_get() { # $1=url $2=out $3=label
   return 1
 }
 declare -A logged
-declare -A used
 while IFS=$'\t' read -r category url modified file item; do
   zdir="$WORK/zip/$category"; cdir="$WORK/csv/$category"
   mkdir -p "$zdir" "$cdir"
-  ok=0
-  # ① 配布元（data.address-br.digital.go.jp）② ArcGIS のアイテムのデータ（配布元が接続元の国で制限される場合）
-  if try_get "$url" "$zdir/$file" "配布元"; then ok=1; used["配布元"]=$(( ${used["配布元"]:-0} + 1 ))
-  elif [[ -n "$item" ]] && try_get "https://www.arcgis.com/sharing/rest/content/items/$item/data" "$zdir/$file" "ArcGIS"; then
-    ok=1; used["ArcGIS"]=$(( ${used["ArcGIS"]:-0} + 1 ))
-    echo "$category	$url	https://www.arcgis.com/sharing/rest/content/items/$item/data" >> "$WORK/alt-sources.tsv"
-  fi
-  if [[ $ok -ne 1 && -n "$item" && -z "${logged[item]:-}" ]]; then
-    logged[item]=1
-    { echo "  - ArcGIS アイテムの情報（$item）"; echo '```'; curl -sS -A "$UA" "https://www.arcgis.com/sharing/rest/content/items/$item?f=json" | head -c 1500; echo; echo '```'; } >> "$SUMMARY"
-  fi
-  if [[ $ok -ne 1 ]]; then
+  if ! try_get "$url" "$zdir/$file" "配布元"; then
+    if grep -q "block access from your country" "$zdir/$file" 2>/dev/null; then
+      log "中止: 配布元（data.address-br.digital.go.jp）が接続元の国からの取得を拒否した（CloudFront の国別制限）。日本国内のネットワークから実行すること（GitHub ホストのランナーは国外のため取得できない）"
+      exit 5
+    fi
     log "失敗: ダウンロード $url"; fail=1; continue
   fi
   if ! unzip -tq "$zdir/$file" >/dev/null 2>&1; then
@@ -100,10 +94,6 @@ while IFS=$'\t' read -r category url modified file item; do
 done < "$WORK/manifest.tsv"
 
 {
-  echo
-  echo "### 取得経路ごとのファイル数"
-  echo
-  for k in "${!used[@]}"; do echo "- $k: ${used[$k]}"; done
   echo
   echo "### 展開した CSV（種類ごとのファイル数・容量）"
   echo

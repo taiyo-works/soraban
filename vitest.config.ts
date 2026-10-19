@@ -11,6 +11,10 @@ const pkg = (name: string) =>
   fileURLToPath(new URL(`./packages/${name}/src/index.ts`, import.meta.url));
 
 const sorabanAlias = {
+  // サブパスは本体より先に書く（先に一致したものが使われる）
+  "@soraban/regulations/address": fileURLToPath(
+    new URL("./packages/regulations/src/address/index.ts", import.meta.url),
+  ),
   "@soraban/db": pkg("db"),
   "@soraban/geo": pkg("geo"),
   "@soraban/regulations": pkg("regulations"),
