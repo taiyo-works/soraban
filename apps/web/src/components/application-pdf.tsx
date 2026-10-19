@@ -11,6 +11,7 @@ import {
 import {
   ALL_AMENDMENTS,
   formatDidDetermination,
+  verificationNoteLabel,
   getCategoryDefinition,
   PROCEDURES_VERIFIED_AT,
   type DiagnosisCategory,
@@ -400,7 +401,7 @@ export const ApplicationPdfDocument = ({
             return (
               <View key={n}>
                 <Text style={[styles.categoryNote, { color: COLOR.signalAmber, fontWeight: 700 }]}>
-                  ※ 要確認: {note.text}
+                  {verificationNoteLabel(n)}{note.text}
                 </Text>
                 {note.urls.map((url) => (
                   <MonoText key={url} style={{ ...styles.categorySource, marginTop: 0.5, paddingLeft: 8 }}>

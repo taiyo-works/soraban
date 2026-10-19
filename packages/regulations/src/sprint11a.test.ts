@@ -5,6 +5,8 @@ import {
   ALL_MANUAL_METHOD_SECTIONS,
   ALL_PROCEDURES,
   deriveDiagnosis,
+  EMERGENCY_NO_FLY_NOTE,
+  verificationNoteLabel,
   getCategoryDefinition,
   PROCEDURES_VERIFIED_AT,
   type SpecificFlightFlag,
@@ -126,6 +128,18 @@ describe("C4 緊急用務空域（原則飛行禁止）", () => {
       expect(d.procedures.map((p) => p.id)).toContain("flight-permission-emergency-airspace");
     });
   }
+
+  it("16. 緊急用務空域の注記は原則飛行禁止を先に言い切り、「要確認」の見出しを付けない", () => {
+    const d = deriveDiagnosis({ flags: ["airspace_emergency"], droneWeightG: 900 });
+    const n = d.verificationNotes.find((x) => x.includes("緊急用務空域"));
+    expect(n).toBe(EMERGENCY_NO_FLY_NOTE);
+    expect(n!.startsWith("緊急用務空域は原則として飛行禁止です")).toBe(true);
+    expect(n).toContain("飛行直前に確認");
+    expect(verificationNoteLabel(n!)).toBe("※ ");
+    // ほかの注記は従来どおり「要確認」
+    const drop = deriveDiagnosis({ flags: ["method_drop"], droneWeightG: 900 });
+    expect(verificationNoteLabel(drop.verificationNotes[0]!)).toBe("※ 要確認: ");
+  });
 
   it("16. カテゴリー定義の説明に「許可があっても」、手続きは期限 0", () => {
     expect(getCategoryDefinition("emergency_no_fly").description).toContain("許可があっても");

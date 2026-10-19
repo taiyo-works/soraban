@@ -171,8 +171,13 @@ test.describe("C. 制度の最新化（申請支援）", () => {
       if (line.includes("開庁日以上前までに提出")) expect(line).not.toContain("緊急用務");
     }
     await expect(section).not.toContainText("IIA 相当・申請が必要");
+    // 原則飛行禁止は「要確認」ではなく言い切る
+    await expect(section).toContainText("※ 緊急用務空域は原則として飛行禁止です");
+    await expect(section).not.toContainText("要確認: 緊急用務空域");
     const t = await bundlePdf(page);
     expect(t).toContain("飛行できません");
+    expect(t).toContain("緊急用務空域は原則として飛行禁止です");
+    expect(t).not.toMatch(/要確認:\s*緊急用務空域/);
     expect(t).not.toContain("IIA 相当・申請が必要");
   });
 });

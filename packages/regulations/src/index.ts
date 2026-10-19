@@ -569,7 +569,7 @@ export const evaluateDid = (
       ...DID_REG,
       status: "green",
       didDetail: "industrial_exclusive",
-      note: `${inDidPrefix}ただし ${zName} の工業専用地域内（境界から内側におよそ ${Math.floor(inside.depth)}m）のため、DID の飛行許可は不要です（非該当（工業専用地域）。国土交通省告示第435号、2026-07-01 適用）。空港等周辺・150m 以上・緊急用務空域の許可と、夜間・目視外などの飛行の方法の承認は別途必要です。この判定は地点単位であり、飛行範囲全体が工業専用地域内かは別途確認してください。`,
+      note: `${inDidPrefix}ただし ${zName} の工業専用地域内（境界から内側におよそ ${Math.floor(inside.depth)}m）のため、DID の飛行許可は不要です（非該当（工業専用地域）。国土交通省告示第435号、2026-07-01 適用）。空港等周辺・150m 以上の飛行許可と、夜間・目視外などの飛行の方法の承認は別途必要です。緊急用務空域は原則として飛行禁止で、指定中は許可があっても飛行できません。この判定は地点単位であり、飛行範囲全体が工業専用地域内かは別途確認してください。`,
     };
   }
   if (inside) {
@@ -1218,6 +1218,8 @@ export {
   DIAGNOSIS_DISCLAIMER,
   PROCEDURES_VERIFIED_AT,
   PROCEDURES_REVISION,
+  EMERGENCY_NO_FLY_NOTE,
+  verificationNoteLabel,
   PESTICIDE_NOTICE_URL,
   INSURANCE_SOURCE_URL,
   CATEGORY_II_REVIEW_GUIDELINE_URL,

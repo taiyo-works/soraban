@@ -472,8 +472,16 @@ const LEVEL35_INSURANCE_NOTE =
 const BVLOS_DID_NOTE =
   "補助者を配置しない目視外飛行で、やむを得ず人口集中地区の上空を飛行経路に含める場合は、第三者及び物件への危害を防ぐための十分な安全確保措置が求められます（審査要領（カテゴリーⅡ飛行）5-4(3)c)ア。令和8年9月29日の改正で取扱いが明確化）。" +
   `（出典: ${CATEGORY_II_REVIEW_GUIDELINE_URL} ）`;
-const EMERGENCY_NOTE =
-  "緊急用務空域の指定中は飛行できません。飛行計画の通報・飛行日誌などの手続きは、指定が解除された後に飛行する場合に必要になるものです（飛行しないなら不要です）。";
+/**
+ * 緊急用務空域の注記。原則飛行禁止は確認待ちの事項ではなく事実のため、先に言い切る。
+ * 画面・PDF では「要確認」の見出しを付けない（verificationNoteLabel）。
+ */
+export const EMERGENCY_NO_FLY_NOTE =
+  "緊急用務空域は原則として飛行禁止です（空港等周辺・150m 以上・人口集中地区の許可があっても飛行できません）。指定の有無を飛行直前に確認してください。飛行計画の通報・飛行日誌などの手続きは、指定が解除された後に飛行する場合に必要になるものです（飛行しないなら不要です）。";
+
+/** 注記の見出し。緊急用務空域の注記は事実の言い切りなので「要確認」を付けない。 */
+export const verificationNoteLabel = (note: string): string =>
+  note === EMERGENCY_NO_FLY_NOTE ? "※ " : "※ 要確認: ";
 
 const isHeavyDrone = (droneWeightG: number | undefined): boolean =>
   typeof droneWeightG === "number" &&
@@ -602,7 +610,7 @@ export const deriveDiagnosis = (input: DeriveDiagnosisInput): ApplicationDiagnos
   }
 
   if (category === "emergency_no_fly") {
-    verificationNotes.push(EMERGENCY_NOTE);
+    verificationNotes.push(EMERGENCY_NO_FLY_NOTE);
   }
   if (isRegulated && (flags.includes("method_drop") || flags.includes("method_dangerous"))) {
     verificationNotes.push(PESTICIDE_NOTE);

@@ -5,6 +5,7 @@ import {
   buildFlightManualDraft,
   getCategoryDefinition,
   formatDidDetermination,
+  verificationNoteLabel,
   toJstIsoDate,
   PROCEDURES_VERIFIED_AT,
   type DiagnosisCategory,
@@ -294,7 +295,7 @@ export function DiagnosisPanel({
               <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">
                 {(diagnosis.verificationNotes ?? []).map((n) => (
                   <li key={n}>
-                    ※ 要確認: <NoteWithSource text={n} />
+                    {verificationNoteLabel(n)}<NoteWithSource text={n} />
                   </li>
                 ))}
               </ul>

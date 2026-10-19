@@ -281,6 +281,10 @@ describe("C. DID から工業専用地域を除く（告示第435号）", () => 
     const b3 = evaluateDid(o, did(RECORDED), undefined, opts);
     expect(b3.status).toBe("green");
     expect(b3.didDetail).toBe("industrial_exclusive");
+    // Sprint 11a：緊急用務空域を「許可の対象」として並べない（原則飛行禁止。教則 第5版）
+    expect(b3.note).not.toMatch(/緊急用務空域の許可|緊急用務空域の(飛行)?許可/);
+    expect(b3.note).not.toContain("150m 以上・緊急用務空域");
+    expect(b3.note).toContain("緊急用務空域は原則として飛行禁止");
     expect(evaluateDid(inDidOutsideInd, did(RECORDED), undefined, opts).status).toBe("red");
     // 分岐 5 は、どの収録済み工専にも含まれない地点で確かめる（工専は市町村境をまたいで探すため）
     const b5 = evaluateDid(inDidOutsideInd, did(NOT_RECORDED), undefined, opts);
