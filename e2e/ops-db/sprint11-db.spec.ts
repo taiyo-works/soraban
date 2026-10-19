@@ -83,6 +83,19 @@ const noHorizontalScroll = async (page: Page, label: string) => {
   expect(scrollWidth, label).toBeLessThanOrEqual(clientWidth);
 };
 
+/** 端末に残っている下書き（種類ごと、全利用者分）の中身をつないだ文字列。キーは soraban:ops-draft:<種類>:<利用者の ID>。 */
+const draftText = (page: Page, kind: "flight" | "inspection"): Promise<string> =>
+  page.evaluate(
+    (k) =>
+      Object.keys(window.localStorage)
+        .filter((x) => x.startsWith(`soraban:ops-draft:${k}:`))
+        .map((x) => window.localStorage.getItem(x) ?? "")
+        .join("\n"),
+    kind,
+  );
+const draftKeys = (page: Page): Promise<string[]> =>
+  page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("soraban:ops-draft:")));
+
 const FIELD_DAY = "2027-01-05";
 const at = (hhmmss: string) => new Date(`${FIELD_DAY}T${hhmmss}+09:00`);
 
@@ -289,7 +302,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto("/ops/flights/new");
       await expect(form.getByRole("textbox", { name: "離陸場所", exact: true })).toHaveValue("");
       await expect(form.getByLabel("離陸時刻", { exact: true })).toHaveValue("");
-      expect(await page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:flight"))).not.toContain("米子市日吉津");
+      expect(await draftText(page, "flight")).not.toContain("米子市日吉津");
     });
 
     test("17. 同じ clientRequestId の POST は 2 回目が 200 で同じ ID、記録は 1 件。保存の要求を遮断すると下書きが残り、再送ボタンで保存できる", async ({ page }) => {
@@ -324,7 +337,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.getByRole("button", { name: "保存", exact: true }).click();
       await expect(form.getByText(/保存できませんでした。通信が戻ったら/)).toBeVisible();
       await expect(page).toHaveURL(/\/ops\/flights\/new$/);
-      const draft = await page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:flight"));
+      const draft = await draftText(page, "flight");
       expect(draft).toContain("インフラ点検");
       // 通信が戻ったら再送する
       await page.unroute("**/api/ops/flights");
@@ -426,15 +439,112 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await minHeight("/ops/inspections/new", ["すべて正常", "保存"]);
     });
 
+    test("差し戻し 1：日常点検の実施日時に手を触れていない下書きは、日をまたいで開き直すと今の分になる。手で入れた日時は残し「前回の入力のまま」と示す", async ({ page }) => {
+      await signIn(page.request, seeded("a-pilot"));
+      await page.clock.setFixedTime(new Date("2027-01-04T10:15:20+09:00"));
+      await page.goto("/ops/inspections/new");
+      const iform = page.getByRole("form", { name: "日常点検の入力" });
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("10:15");
+      await iform.getByRole("textbox", { name: /^実施場所(\s|$)/ }).fill("本社 駐車場");
+      await expect.poll(() => draftText(page, "inspection")).toContain("本社 駐車場");
+
+      // 翌日 08:00 に開き直す：場所は残り、実施日時は今の分になる
+      await page.clock.setFixedTime(new Date("2027-01-05T08:00:10+09:00"));
+      await page.reload();
+      await expect(iform.getByRole("textbox", { name: /^実施場所(\s|$)/ })).toHaveValue("本社 駐車場");
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("08:00");
+      await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-05");
+      await expect(page.getByTestId("draft-status")).toContainText("前回の入力の続きです。");
+      await expect(page.getByTestId("draft-stale-note")).toHaveCount(0);
+
+      // 手で入れた日時は勝手に変えず、日をまたいだら「前回の入力のまま」と目立たせる
+      await iform.getByLabel("実施時刻", { exact: true }).fill("07:30");
+      await expect.poll(() => draftText(page, "inspection")).toContain("07:30");
+      await page.clock.setFixedTime(new Date("2027-01-06T09:00:10+09:00"));
+      await page.reload();
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("07:30");
+      await expect(iform.getByLabel("実施日", { exact: true })).toHaveValue("2027-01-05");
+      await expect(page.getByTestId("draft-stale-note")).toContainText("実施日時が前回の入力（2027-01-05 07:30）のままです。");
+      await expect(page.getByTestId("inspected-stale")).toBeVisible();
+      // 「今」を押すと今の分になり、注意は消える
+      await page.getByRole("button", { name: "今", exact: true }).click();
+      await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("09:00");
+      await expect(page.getByTestId("draft-stale-note")).toHaveCount(0);
+
+      // 飛行記録：前日に入れた離陸日時は残し、「前回の入力のまま」と示す
+      await page.clock.setFixedTime(new Date("2027-01-04T15:00:00+09:00"));
+      await page.goto("/ops/flights/new");
+      const form = page.getByRole("form", { name: "飛行記録の入力" });
+      await page.getByRole("button", { name: "離陸：今" }).click();
+      await expect(form.getByLabel("離陸時刻", { exact: true })).toHaveValue("15:00");
+      await expect.poll(() => draftText(page, "flight")).toContain("15:00");
+      await page.clock.setFixedTime(new Date("2027-01-05T08:00:00+09:00"));
+      await page.reload();
+      await expect(form.getByLabel("離陸日", { exact: true })).toHaveValue("2027-01-04");
+      await expect(page.getByTestId("draft-stale-note")).toContainText("離陸日時が前回の入力（2027-01-04 15:00）のままです。");
+      await expect(page.getByTestId("takeoff-stale")).toBeVisible();
+      await page.getByRole("button", { name: "下書きを消す" }).click();
+    });
+
+    test("差し戻し 1：下書きは利用者ごと。別の利用者でログインすると前の人の下書きは読まれず、端末から消える", async ({ page }) => {
+      await signIn(page.request, seeded("a-pilot"));
+      await page.goto("/ops/flights/new");
+      const form = page.getByRole("form", { name: "飛行記録の入力" });
+      await form.getByRole("textbox", { name: /^離陸場所(\s|$)/ }).fill("前の人の現場");
+      await form.getByLabel("飛行の目的").fill("前の人の目的");
+      await expect.poll(() => draftText(page, "flight")).toContain("前の人の目的");
+      const before = await draftKeys(page);
+      expect(before).toHaveLength(1);
+
+      // 同じ端末（同じブラウザ）で別の利用者がログインする（ログアウトせずにセッションが切れた想定）
+      await signIn(page.request, seeded("a-manager"));
+      await page.goto("/ops/flights/new");
+      await expect(form.getByRole("textbox", { name: /^離陸場所(\s|$)/ })).toHaveValue("");
+      await expect(form.getByLabel("飛行の目的")).toHaveValue("");
+      await expect(page.getByTestId("draft-status")).not.toContainText("前回の入力の続き");
+      await expect.poll(() => draftKeys(page)).not.toContain(before[0]);
+      expect(await draftText(page, "flight")).not.toContain("前の人");
+    });
+
+    test("差し戻し 1：日常点検の候補を取得できないときは「点検がない」とは示さず、取得できないと示す", async ({ page }) => {
+      const manager = await apiAs(seeded("a-manager"));
+      const aircraft = await createAircraft(manager);
+      await manager.dispose();
+      await signIn(page.request, seeded("a-manager"));
+      await page.route("**/api/ops/inspections?*", (route) => route.abort("internetdisconnected"));
+      await page.goto("/ops/flights/new");
+      const form = page.getByRole("form", { name: "飛行記録の入力" });
+      await form.getByRole("combobox", { name: "機体", exact: true }).selectOption(aircraft.id);
+      await expect(page.getByTestId("record-warnings")).toContainText("日常点検の候補を取得できません");
+      await expect(page.getByTestId("record-warnings")).not.toContainText("飛行日の日常点検がありません");
+      await page.unroute("**/api/ops/inspections?*");
+    });
+
+    test("差し戻し 1：「← 一覧」などのリンクの押せる範囲が高さ 44px 以上", async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      for (const [path, name] of [
+        ["/ops/flights", "運航管理のトップ"],
+        ["/ops/flights/new", "飛行記録の一覧"],
+        ["/ops/inspections/new", "日常点検の一覧"],
+      ] as const) {
+        await page.goto(path);
+        const box = await page.getByRole("link", { name, exact: false }).first().boundingBox();
+        expect(box, `${path} ${name}`).not.toBeNull();
+        expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(44);
+      }
+      const home = await page.getByRole("link", { name: "地点判定へ" }).boundingBox();
+      expect(home!.height).toBeGreaterThanOrEqual(44);
+    });
+
     test("20（画面）. ログアウトで下書きが消える", async ({ page }) => {
       await signIn(page.request, seeded("a-pilot"));
       await page.goto("/ops/flights/new");
       const form = page.getByRole("form", { name: "飛行記録の入力" });
       await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("下書きの場所");
-      await expect.poll(() => page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:flight") ?? "")).toContain("下書きの場所");
+      await expect.poll(() => draftText(page, "flight")).toContain("下書きの場所");
       await page.goto(`/ops/inspections/new`);
       await page.getByRole("form", { name: "日常点検の入力" }).getByRole("textbox", { name: "実施場所", exact: true }).fill("点検の下書き");
-      await expect.poll(() => page.evaluate(() => window.localStorage.getItem("soraban:ops-draft:inspection") ?? "")).toContain("点検の下書き");
+      await expect.poll(() => draftText(page, "inspection")).toContain("点検の下書き");
       await page.goto("/ops");
       await page.getByRole("button", { name: "ログアウト" }).click();
       await expect(page).toHaveURL(/\/ops\/sign-in$/);

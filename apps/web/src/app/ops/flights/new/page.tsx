@@ -30,6 +30,7 @@ export default async function FlightNewPage({
         aircraft={aircraft}
         pilots={pilots}
         fixedPilotId={fixedPilotId}
+        memberId={me.member.id}
         initialAircraftId={aircraftId}
         initialInspectionId={inspectionId}
       />

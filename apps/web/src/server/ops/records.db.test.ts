@@ -466,6 +466,57 @@ describe.skipIf(!ADMIN_URL)("飛行記録・日常点検記録の DB（時刻・
     expect(Number((await owner.query("select count(*)::int as n from flight_records where client_request_id = $1", [requestId])).rows[0].n)).toBe(1);
   });
 
+  it("差し戻し 1：同じ clientRequestId でも、別の利用者の作成には既存の記録を返さず 409 request_conflict。作成者本人には既存の記録を返す", async () => {
+    const a = await newAircraft(0);
+    const requestId = randomUUID();
+    const pctx = ctxOf(pilotMember);
+    const first = await rec.createFlight(pctx, { ...flightInput(a.id, pilotA.id, "2027-01-02T20:00", "2027-01-02T20:10"), clientRequestId: requestId });
+    expect(first.created).toBe(true);
+    // 別の利用者（運航管理者）が同じ識別子で送る（共用の端末で前の人の下書きが残っていた場合など）
+    const e = await expectOpsError(
+      rec.createFlight(mgr(), { ...flightInput(a.id, pilotB.id, "2027-01-02T21:00", "2027-01-02T21:10"), clientRequestId: requestId }),
+      409,
+      "request_conflict",
+    );
+    expect(e.code).toBe("request_conflict");
+    // 作成者本人の再送には既存の記録を返す
+    const again = await rec.createFlight(pctx, { ...flightInput(a.id, pilotA.id, "2027-01-02T20:00", "2027-01-02T20:10"), clientRequestId: requestId });
+    expect(again).toMatchObject({ created: false, record: { id: first.record.id } });
+    expect(Number((await owner.query("select count(*)::int as n from flight_records where aircraft_id = $1", [a.id])).rows[0].n)).toBe(1);
+
+    // 日常点検でも同じ
+    const iReq = randomUUID();
+    const inspection = {
+      aircraftId: a.id,
+      pilotId: pilotA.id,
+      inspectedAt: "2027-01-02T19:00",
+      placeName: "本社",
+      items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal" }])),
+      clientRequestId: iReq,
+    };
+    const i1 = await rec.createInspection(pctx, inspection);
+    await expectOpsError(rec.createInspection(mgr(), { ...inspection, pilotId: pilotB.id }), 409, "request_conflict");
+    expect((await rec.createInspection(pctx, inspection)).record.id).toBe(i1.record.id);
+  });
+
+  it("差し戻し 1：訂正の本文の aircraftId は大文字・小文字を区別せずに比べる（同じ機体なら aircraft_immutable にしない）", async () => {
+    const a = await newAircraft(0);
+    const f = (await rec.createFlight(mgr(), flightInput(a.id, pilotB.id, "2027-01-02T22:00", "2027-01-02T22:10"))).record;
+    const u = await rec.updateFlight(mgr(), f.id, { expectedVersion: 1, reason: "目的の訂正", aircraftId: a.id.toUpperCase(), purpose: "点検" });
+    expect(u.record).toMatchObject({ version: 2, purpose: "点検", aircraftId: a.id });
+    const i = (
+      await rec.createInspection(mgr(), {
+        aircraftId: a.id,
+        pilotId: pilotB.id,
+        inspectedAt: "2027-01-02T21:30",
+        placeName: "本社",
+        items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal" }])),
+      })
+    ).record;
+    const iu = await rec.updateInspection(mgr(), i.id, { expectedVersion: 1, reason: "特記事項", aircraftId: a.id.toUpperCase(), specialNotes: "x" });
+    expect(iu.version).toBe(2);
+  });
+
   it("14（DB 部分）. 操縦者は自分の分だけ作成・訂正でき、取消はできない。結び付いていない操縦者役割は作れない", async () => {
     const a = await newAircraft(0);
     const pctx = ctxOf(pilotMember);

@@ -241,10 +241,6 @@ const FLIGHT_SELECT = `select f.*, a.registration_mark, t.total_flight_minutes::
 export const getFlight = async (db: OpsDb, orgId: string, id: string): Promise<FlightWithTotal | null> =>
   (await db.query<FlightWithTotal>(`${FLIGHT_SELECT} where f.org_id = $1 and f.id = $2`, [orgId, id])).rows[0] ?? null;
 
-export const findFlightByRequest = async (db: OpsDb, orgId: string, requestId: string): Promise<FlightWithTotal | null> =>
-  (await db.query<FlightWithTotal>(`${FLIGHT_SELECT} where f.org_id = $1 and f.client_request_id = $2`, [orgId, requestId]))
-    .rows[0] ?? null;
-
 export type RecordFilter = {
   readonly aircraftId?: string;
   readonly pilotId?: string;
@@ -283,14 +279,6 @@ const INSPECTION_SELECT = `select i.*, a.registration_mark, to_char(i.inspected_
 
 export const getInspection = async (db: OpsDb, orgId: string, id: string): Promise<InspectionWithAircraft | null> =>
   (await db.query<InspectionWithAircraft>(`${INSPECTION_SELECT} where i.org_id = $1 and i.id = $2`, [orgId, id])).rows[0] ?? null;
-
-export const findInspectionByRequest = async (
-  db: OpsDb,
-  orgId: string,
-  requestId: string,
-): Promise<InspectionWithAircraft | null> =>
-  (await db.query<InspectionWithAircraft>(`${INSPECTION_SELECT} where i.org_id = $1 and i.client_request_id = $2`, [orgId, requestId]))
-    .rows[0] ?? null;
 
 /** 日常点検記録の一覧（新しい順、最大 500 件）。 */
 export const listInspections = async (db: OpsDb, orgId: string, f: RecordFilter): Promise<InspectionWithAircraft[]> => {
@@ -335,3 +323,27 @@ export const countInspectionsOn = async (db: OpsDb, orgId: string, aircraftId: s
       )
     ).rows[0]?.n ?? 0,
   );
+
+/**
+ * 送信の識別子（clientRequestId）で作られた記録の ID と、作成した利用者（版 1 の actor_member_id）。
+ * 二重送信の判定は作成者も含めて行う（別の利用者が同じ識別子を送っても、既存の記録を返さない）。
+ */
+export const findRequestOwner = async (
+  db: OpsDb,
+  orgId: string,
+  entityType: "flight_record" | "daily_inspection",
+  requestId: string,
+): Promise<{ readonly id: string; readonly actor_member_id: string | null } | null> => {
+  const table = entityType === "flight_record" ? "flight_records" : "daily_inspections";
+  return (
+    (
+      await db.query<{ id: string; actor_member_id: string | null }>(
+        `select h.id, v.actor_member_id
+           from ${table} h
+           join record_versions v on v.entity_type = $3 and v.entity_id = h.id and v.version_no = 1
+          where h.org_id = $1 and h.client_request_id = $2`,
+        [orgId, requestId, entityType],
+      )
+    ).rows[0] ?? null
+  );
+};

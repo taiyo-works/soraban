@@ -25,7 +25,7 @@ import {
   type InspectionTiming,
 } from "@/lib/ops-records";
 import { setChangeFlash } from "./change-notice";
-import { clearDraft, DRAFT_KEYS, loadDraft, newRequestId, saveDraft } from "./drafts";
+import { clearDraft, clearOtherUsersDrafts, draftKey, loadDraft, newRequestId, saveDraft } from "./drafts";
 import {
   Field,
   FieldError,
@@ -132,6 +132,7 @@ function ChoiceGroup({
 
 const WARNING_TEXT = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
+  inspections_unavailable: "日常点検の候補を取得できません（通信を確かめてください）。点検の有無は確かめられていません。",
   recent_inspection_abnormal: "この機体の直近の日常点検に「異常」があります。",
   license_expired: "操縦者の技能証明の有効期限が飛行日より前です。",
   aircraft_suspended: "この機体は休止中です。",
@@ -168,6 +169,8 @@ function DateTimeInput({
   error,
   nextDay,
   testId,
+  onNow,
+  stale,
 }: {
   readonly label: string;
   readonly nowLabel?: string;
@@ -177,6 +180,10 @@ function DateTimeInput({
   readonly error?: string;
   readonly nextDay?: boolean;
   readonly testId: string;
+  /** 「今」を押したとき（省略時は onChange）。手で入れた値と区別する場合に渡す。 */
+  readonly onNow?: (date: string, time: string) => void;
+  /** 前回の入力の続きで、日時が今日でない（目立たせる）。 */
+  readonly stale?: boolean;
 }) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
@@ -184,7 +191,7 @@ function DateTimeInput({
   const describedBy = [errorId, hintId].filter(Boolean).join(" ");
   const now = () => {
     const v = nowJstInput(new Date());
-    onChange(v.slice(0, 10), v.slice(11, 16));
+    (onNow ?? onChange)(v.slice(0, 10), v.slice(11, 16));
   };
   return (
     <fieldset className="flex min-w-0 flex-col gap-2" data-testid={testId}>
@@ -192,6 +199,7 @@ function DateTimeInput({
         <span>{label}</span>
         <RequiredTag required />
         {nextDay ? <Badge tone="amber" data-testid={`${testId}-next-day`}>翌日</Badge> : null}
+        {stale ? <Badge tone="amber" data-testid={`${testId}-stale`}>前回の入力のまま</Badge> : null}
       </legend>
       {/* 狭い画面：「今」を 1 行で大きく、その下に日付と時刻を 2 列。広い画面：1 行に並べる。 */}
       <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
@@ -358,10 +366,13 @@ function DraftBar({
   restored,
   canDiscard,
   onDiscard,
+  staleNote,
 }: {
   readonly restored: boolean;
   readonly canDiscard: boolean;
   readonly onDiscard: () => void;
+  /** 前回の入力の日時が今日でないときの注意（例：「実施日時が 2027-01-04 10:15 のままです。」）。 */
+  readonly staleNote?: string | null;
 }) {
   return (
     <div
@@ -375,6 +386,12 @@ function DraftBar({
           <>
             <span className="font-medium text-ink">前回の入力の続きです。</span>
             この端末に残っていた下書きを読み込みました。
+            {staleNote ? (
+              <span className="mt-1 block font-medium text-signal-amber" data-testid="draft-stale-note">
+                <span aria-hidden>! </span>
+                {staleNote}日時を確かめてください。
+              </span>
+            ) : null}
           </>
         ) : (
           "入力中の内容はこの端末に下書きとして残り、再読み込みや通信の切断では消えません。保存すると下書きは消えます。"
@@ -561,11 +578,14 @@ export function FlightForm({
   initialAircraftId,
   initialInspectionId,
   editing,
+  memberId,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
   /** 操縦者役割のとき、自分に結び付いた操縦者（固定）。 */
   readonly fixedPilotId: string | null;
+  /** ログイン中の利用者の内部 ID（下書きを利用者ごとに分ける）。 */
+  readonly memberId: string;
   readonly initialAircraftId?: string;
   readonly initialInspectionId?: string;
   /** 訂正のときの現在の内容（下書きは使わない）。 */
@@ -583,8 +603,14 @@ export function FlightForm({
   const [busy, setBusy] = useState(false);
   // 前回の入力の続き（下書きに入力済みの項目があった）かどうか。表示だけに使う。
   const [restored, setRestored] = useState(false);
+  // 前回の入力の離陸日時が今日でないとき、その日時（日時を目立たせる。離陸の日時を直すと消える）
+  const [staleDt, setStaleDt] = useState<string | null>(null);
   // 日常点検の候補。どの機体・日の候補かを key で持ち、今の機体・日と違う間は「未取得」とみなす
-  const [fetched, setFetched] = useState<{ readonly key: string; readonly list: readonly InspectionCandidate[] } | null>(null);
+  const [fetched, setFetched] = useState<{
+    readonly key: string;
+    readonly ok: boolean;
+    readonly list: readonly InspectionCandidate[];
+  } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // 下書きの読み込み（新規のときだけ）。点検の画面から来た場合は、その機体・点検を優先する。
@@ -592,7 +618,9 @@ export function FlightForm({
   useEffect(() => {
     if (isEdit) return;
     const t = window.setTimeout(() => {
-      const d = loadDraft<FlightState>(DRAFT_KEYS.flight);
+      // 共用の端末で、前の利用者の下書きを読まない・残さない
+      clearOtherUsersDrafts(memberId);
+      const d = loadDraft<FlightState>(draftKey("flight", memberId));
       if (d && typeof d === "object" && typeof d.clientRequestId === "string") {
         setV({
           ...emptyFlight("", fixedPilotId ?? "", ""),
@@ -601,6 +629,10 @@ export function FlightForm({
           ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
         });
         setRestored(flightHasInput(d));
+        // 離陸・着陸の日時は利用者が「今」か手で入れたもの。今日でなければ前回の入力のままと示す（勝手に変えない）
+        if (d.takeoffDate && d.takeoffTime && d.takeoffDate !== jstDate(new Date())) {
+          setStaleDt(`${d.takeoffDate} ${d.takeoffTime.slice(0, 5)}`);
+        }
       }
       setLoaded(true);
     }, 0);
@@ -611,8 +643,8 @@ export function FlightForm({
 
   // 下書きの保存（読み込みの後だけ。読み込み前の空の状態で上書きしない）
   useEffect(() => {
-    if (!isEdit && loaded) saveDraft(DRAFT_KEYS.flight, v);
-  }, [v, loaded, isEdit]);
+    if (!isEdit && loaded) saveDraft(draftKey("flight", memberId), v);
+  }, [v, loaded, isEdit, memberId]);
 
   const set = <K extends keyof FlightState>(k: K, value: FlightState[K]) => setV((s) => ({ ...s, [k]: value }));
 
@@ -630,14 +662,17 @@ export function FlightForm({
     const from = jstDate(new Date(Date.parse(`${day}T00:00:00+09:00`) - 30 * 24 * 3600 * 1000));
     void trySend("GET", `/api/ops/inspections?aircraftId=${aircraftId}&from=${from}&to=${day}`).then((r) => {
       if (cancelled) return;
-      const list = r.ok && Array.isArray(r.data["inspections"]) ? (r.data["inspections"] as InspectionCandidate[]) : [];
-      setFetched({ key: candidateKey, list });
+      const ok = r.ok && Array.isArray(r.data["inspections"]);
+      setFetched({ key: candidateKey, ok, list: ok ? (r.data["inspections"] as InspectionCandidate[]) : [] });
     });
     return () => {
       cancelled = true;
     };
   }, [candidateKey]);
-  const candidates = fetched && fetched.key === candidateKey ? fetched.list : null;
+  const current = fetched && fetched.key === candidateKey ? fetched : null;
+  // 取得できなかった（通信なし等）ときは null のまま（「点検がない」とは区別する）
+  const candidates = current && current.ok ? current.list : null;
+  const candidatesFailed = current !== null && !current.ok;
 
   const sameDay = useMemo(() => (candidates ?? []).filter((c) => c.inspectedDate === flightDay), [candidates, flightDay]);
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
@@ -645,6 +680,7 @@ export function FlightForm({
 
   const warnings: string[] = [];
   if (v.aircraftId && candidates !== null && sameDay.length === 0) warnings.push(WARNING_TEXT.no_inspection_on_day);
+  if (v.aircraftId && candidatesFailed) warnings.push(WARNING_TEXT.inspections_unavailable);
   const latest = (candidates ?? []).find((c) => !takeoffAt || c.inspectedAt <= takeoffAt);
   if (latest?.hasAbnormal) warnings.push(WARNING_TEXT.recent_inspection_abnormal);
   if (selectedPilot?.licenseExpiresOn && flightDay && selectedPilot.licenseExpiresOn < flightDay) warnings.push(WARNING_TEXT.license_expired);
@@ -697,6 +733,8 @@ export function FlightForm({
         setOffline(false);
         setErrors(fieldErrorsOf(r));
         setMessage(messageFor(r));
+        // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
+        if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
       }
       focusFirstError(formRef.current);
       return;
@@ -709,7 +747,7 @@ export function FlightForm({
       setReason("");
       reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: `${versionOf(r)}訂正しました。${note}` });
     } else {
-      clearDraft(DRAFT_KEYS.flight);
+      clearDraft(draftKey("flight", memberId));
       const id = String(r.data["id"]);
       setChangeFlash(`/ops/flights/${id}`, VERSION_NOTICE_TARGET, `飛行記録を保存しました。${note}`);
       window.location.assign(`/ops/flights/${id}`);
@@ -732,19 +770,27 @@ export function FlightForm({
     );
 
   const discardDraft = () => {
-    clearDraft(DRAFT_KEYS.flight);
+    clearDraft(draftKey("flight", memberId));
     setV(emptyFlight(initialAircraftId ?? "", fixedPilotId ?? "", initialInspectionId ?? ""));
     setErrors({});
     setMessage(null);
     setOffline(false);
     setRestored(false);
+    setStaleDt(null);
   };
 
   const noInspectionOnDay = Boolean(v.aircraftId && candidates !== null && sameDay.length === 0);
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={isEdit ? "飛行記録の訂正" : "飛行記録の入力"}>
-      {!isEdit ? <DraftBar restored={restored} canDiscard={restored || flightHasInput(v)} onDiscard={discardDraft} /> : null}
+      {!isEdit ? (
+        <DraftBar
+          restored={restored}
+          canDiscard={restored || flightHasInput(v)}
+          onDiscard={discardDraft}
+          staleNote={staleDt ? `離陸日時が前回の入力（${staleDt}）のままです。` : null}
+        />
+      ) : null}
 
       <Step no="01" title="機体・操縦者・日常点検">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。誤った場合は取り消して作り直してください。" : undefined}>
@@ -809,7 +855,11 @@ export function FlightForm({
           date={v.takeoffDate}
           time={v.takeoffTime}
           error={timeError("takeoffAt")}
-          onChange={(d, t) => setV((s) => ({ ...s, takeoffDate: d, takeoffTime: t, landingDate: s.landingDate || d }))}
+          stale={staleDt !== null}
+          onChange={(d, t) => {
+            setStaleDt(null);
+            setV((s) => ({ ...s, takeoffDate: d, takeoffTime: t, landingDate: s.landingDate || d }));
+          }}
         />
       </Step>
 
@@ -1016,6 +1066,8 @@ type InspectionState = {
   pos: Position;
   items: Record<InspectionItemKey, ItemState>;
   specialNotes: string;
+  /** 実施日時を利用者が手で直したか。直していない（既定の「今」のまま）下書きは、読み込み時に現在の分で入れ直す。 */
+  timeTouched?: boolean;
 };
 
 export type InspectionFormInitial = {
@@ -1059,12 +1111,15 @@ export function InspectionForm({
   fixedPilotId,
   initialAircraftId,
   editing,
+  memberId,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
   readonly fixedPilotId: string | null;
   readonly initialAircraftId?: string;
   readonly editing?: InspectionFormInitial;
+  /** ログイン中の利用者の内部 ID（下書きを利用者ごとに分ける）。 */
+  readonly memberId: string;
 }) {
   const isEdit = editing !== undefined;
   const [v, setV] = useState<InspectionState>(() =>
@@ -1093,22 +1148,30 @@ export function InspectionForm({
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
   const [restored, setRestored] = useState(false);
+  // 手で入れた実施日時が今日でない下書きを読み込んだとき、その日時（目立たせる。日時を直すと消える）
+  const [staleDt, setStaleDt] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // 下書きの読み込み。無ければ実施日時の既定を「今」にする（端末の時計。描画の後に行う）。
+  // 下書きの読み込み。実施日時の既定は「今」（端末の時計。描画の後に行う）。
+  // 実施日時に手を触れていない下書きは、前回の時刻のまま残さず、読み込んだ時点の分で入れ直す（設計 E）。
   useEffect(() => {
     if (isEdit) return;
     const t = window.setTimeout(() => {
-      const d = loadDraft<InspectionState>(DRAFT_KEYS.inspection);
+      clearOtherUsersDrafts(memberId);
+      const d = loadDraft<InspectionState>(draftKey("inspection", memberId));
       const now = nowJstInput(new Date());
       if (d && typeof d === "object" && typeof d.clientRequestId === "string" && d.items) {
+        const keepTime = d.timeTouched === true && Boolean(d.date && d.time);
         setV({
           ...emptyInspection("", fixedPilotId ?? ""),
           ...d,
+          ...(keepTime ? {} : { date: now.slice(0, 10), time: now.slice(11, 16), timeTouched: false }),
           ...(initialAircraftId ? { aircraftId: initialAircraftId } : {}),
           ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
         });
-        setRestored(inspectionHasInput(d));
+        const has = inspectionHasInput(d);
+        setRestored(has || keepTime);
+        if (keepTime && d.date !== now.slice(0, 10)) setStaleDt(`${d.date} ${d.time.slice(0, 5)}`);
       } else {
         setV((s) => ({ ...s, date: now.slice(0, 10), time: now.slice(11, 16) }));
       }
@@ -1119,8 +1182,8 @@ export function InspectionForm({
   }, []);
 
   useEffect(() => {
-    if (!isEdit && loaded) saveDraft(DRAFT_KEYS.inspection, v);
-  }, [v, loaded, isEdit]);
+    if (!isEdit && loaded) saveDraft(draftKey("inspection", memberId), v);
+  }, [v, loaded, isEdit, memberId]);
 
   const set = <K extends keyof InspectionState>(k: K, value: InspectionState[K]) => setV((s) => ({ ...s, [k]: value }));
   const setItem = (key: InspectionItemKey, patch: Partial<ItemState>) =>
@@ -1131,13 +1194,14 @@ export function InspectionForm({
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
 
   const discardDraft = () => {
-    clearDraft(DRAFT_KEYS.inspection);
+    clearDraft(draftKey("inspection", memberId));
     const now = nowJstInput(new Date());
     setV({ ...emptyInspection(initialAircraftId ?? "", fixedPilotId ?? ""), date: now.slice(0, 10), time: now.slice(11, 16) });
     setErrors({});
     setMessage(null);
     setOffline(false);
     setRestored(false);
+    setStaleDt(null);
   };
 
   const submit = async () => {
@@ -1170,6 +1234,8 @@ export function InspectionForm({
         setOffline(false);
         setErrors(fieldErrorsOf(r));
         setMessage(messageFor(r));
+        // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
+        if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
       }
       focusFirstError(formRef.current);
       return;
@@ -1180,7 +1246,7 @@ export function InspectionForm({
       setReason("");
       reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: `${versionOf(r)}訂正しました。` });
     } else {
-      clearDraft(DRAFT_KEYS.inspection);
+      clearDraft(draftKey("inspection", memberId));
       const id = String(r.data["id"]);
       setChangeFlash(`/ops/inspections/${id}`, VERSION_NOTICE_TARGET, "日常点検を保存しました。");
       window.location.assign(`/ops/inspections/${id}`);
@@ -1206,7 +1272,14 @@ export function InspectionForm({
       className="flex flex-col gap-8"
       aria-label={isEdit ? "日常点検の訂正" : "日常点検の入力"}
     >
-      {!isEdit ? <DraftBar restored={restored} canDiscard={restored || inspectionHasInput(v)} onDiscard={discardDraft} /> : null}
+      {!isEdit ? (
+        <DraftBar
+          restored={restored}
+          canDiscard={restored || inspectionHasInput(v)}
+          onDiscard={discardDraft}
+          staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
+        />
+      ) : null}
 
       <Step no="01" title="機体・実施者・日時・場所">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
@@ -1237,7 +1310,15 @@ export function InspectionForm({
           date={v.date}
           time={v.time}
           error={errors["inspectedAt"]}
-          onChange={(d, t) => setV((s) => ({ ...s, date: d, time: t }))}
+          stale={staleDt !== null}
+          onChange={(d, t) => {
+            setStaleDt(null);
+            setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
+          }}
+          onNow={(d, t) => {
+            setStaleDt(null);
+            setV((s) => ({ ...s, date: d, time: t, timeTouched: false }));
+          }}
         />
         <ChoiceGroup legend="区分">
           {(["pre_flight", "post_flight"] as const).map((t) => (

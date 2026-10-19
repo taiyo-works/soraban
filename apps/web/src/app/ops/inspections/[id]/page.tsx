@@ -91,7 +91,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
               <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
             </summary>
             <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
-              <InspectionForm key={i.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} editing={i} />
+              <InspectionForm key={i.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} memberId={me.member.id} editing={i} />
             </div>
           </details>
         </Section>
