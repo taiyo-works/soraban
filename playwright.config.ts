@@ -20,6 +20,8 @@ const MOCK_REVERSE_GEOCODER = `http://127.0.0.1:${MOCK_GSI_PORT}/reverse-geocode
 
 export default defineConfig({
   testDir: "./e2e",
+  // Sprint 10：DB と利用者機能を有効にしたサーバーで動かす E2E（e2e/ops-db）は playwright.ops.config.ts で実行する。
+  testIgnore: ["**/ops-db/**"],
   timeout: 120_000,
   expect: { timeout: 30_000 },
   fullyParallel: false,

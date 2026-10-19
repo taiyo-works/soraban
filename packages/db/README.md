@@ -4,7 +4,7 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 
 - ドライバ：`pg`（node-postgres）。ローカル・CI の PostgreSQL コンテナと本番 Neon で同じドライバを使う。
 - マイグレーション：`packages/db/migrations/NNNN_名前.sql` と自前の最小ランナー（`src/migrate.ts`）。
-- 認証（Neon Auth）・運航管理の表は本パッケージの対象外（Sprint 10 以降）。
+- 運航管理（Sprint 10）：組織・利用者・機体・操縦者の表と、版の履歴（`record_versions`、ハッシュ連鎖）。本人確認（Neon Auth）はアプリ（`apps/web/src/server/ops`）が扱い、本パッケージのマイグレーションは `neon_auth` スキーマに触れない。
 
 ## 環境変数
 
@@ -13,6 +13,8 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | `DATABASE_URL` | アプリ用。Neon の **Pooled connection**（ホスト名に `-pooler`）。未設定なら DB に接続せず、地点判定・申請支援は DB なしで動く | Vercel の Production だけ。ローカルは `.env.local` |
 | `DATABASE_URL_UNPOOLED` | マイグレーション用。Neon の **Direct connection** | 実行する人の手元のシェルだけ（ファイルや履歴に残さない） |
 | `EVIDENCE_LOG` | `off` で証跡（`evidence_log`）の書き込みを止める | 必要なときだけ |
+| `OPS_ENABLED` / `AUTH_PROVIDER` / `NEON_AUTH_BASE_URL` / `NEON_AUTH_COOKIE_SECRET` | 運航管理（Sprint 10）。既定は無効。下記「運航管理（Sprint 10）の本番準備」 | Vercel の Production だけ（準備が済んでから） |
+| `AUTH_TEST_SECRET` | `AUTH_PROVIDER=test`（CI・E2E・ローカル専用）の Cookie の署名 | CI・ローカルだけ。本番に設定しない |
 | `TEST_DATABASE_URL` / `REQUIRE_DB_TESTS` | `pnpm test:db` の接続先（管理用。テストが使い捨てのデータベースを作る）／`1` で未設定時に失敗させる | CI の `db` ジョブ、ローカル |
 
 値（接続文字列）はリポジトリに置かない。`.env.example` には名前だけを書いている。
@@ -57,6 +59,9 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0001 | `regulations`・`regulation_zones`・enum・`set_updated_at`（旧スキーマの移植。意味は変えていない） |
 | 0002 | `evidence_log`（旧スキーマの移植） |
 | 0003 | `evidence_log.datasets`（判定で使ったデータセット）、`evidence_id` の説明の更新、アプリ用ロールへの権限付与 |
+| 0004 | 運航管理：`organizations`（組織）、`members`（利用者のヘッド表） |
+| 0005 | 運航管理：`aircraft`（機体）、`pilots`（操縦者）のヘッド表 |
+| 0006 | 版の履歴 `record_versions`、追加前・追加後のトリガー、`record_version_hash`・`verify_record_chain`・`ops_bootstrap`、アプリ用ロールへの権限付与 |
 
 ### ランナー
 
@@ -92,17 +97,51 @@ pnpm db:migrate --target <ホスト名>    # 未適用を番号順に適用（lo
 | ロール | 用途 | 権限 |
 |---|---|---|
 | 既定のオーナーロール（Neon の `neondb_owner` 等） | マイグレーション（`DATABASE_URL_UNPOOLED`） | 表の作成・変更 |
-| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可） |
+| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。`ops_bootstrap`・`verify_record_chain` は実行できない |
 
-- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
+- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
 
 ```sql
 grant usage on schema public to soraban_app;
 grant select on regulations, regulation_zones, schema_migrations to soraban_app;
 grant select, insert on evidence_log to soraban_app;
+-- 0006 を適用済みの場合
+grant select, insert on record_versions to soraban_app;
+grant select on organizations, members, aircraft, pilots to soraban_app;
 ```
 
 - Neon のコンソール・API・CLI で作ったロールには `neon_superuser` が付くため、最小権限にならない。SQL の `create role` で作ったロールには付かない（出典：https://neon.com/docs/manage/database-access 、2026-10-19 確認）。そのため `soraban_app` は SQL Editor から作る。SQL で作ったロールを Connect 画面で選べるかは文書に記載がなく、実施時に確認する。
+
+## 版の履歴（Sprint 10、0006）
+
+運航管理の記録は上書き・物理削除をせず、訂正を版として追記する。版の表 `record_versions` を正とし、ヘッド表（`members`・`aircraft`・`pilots`）は版の追加から DB のトリガーが作る。アプリ（`soraban_app`）はヘッド表を直接書けない。
+
+- **追加前のトリガー**：同じ実体（`entity_type`・`entity_id`）の版を `pg_advisory_xact_lock` で直列化し、`version_no`（1 からの連番）・`created_at`（`clock_timestamp()`）・`prev_hash`（直前の版の `content_hash`。初版は空文字）・`content_hash` を DB が決める。アプリが送った値は使わない。
+- **楽観的排他**：アプリは同じトランザクションで `select set_config('soraban.expected_version', '<画面が表示した版番号>', true)` を実行してから版を追加する。最新の版番号と違えば SQLSTATE `SB409`（detail `version_conflict`）で失敗し、API は 409 を返す。
+- **追加後のトリガー**：`data` からヘッド表の行を作る・更新する。`void`（取消）はヘッド表の `voided_at` を埋める（行は消さない）。ヘッド表の制約に反すれば版の追加ごと失敗する。組織の最後の有効な運航管理者を降格・停止する版は `SB409`（`last_manager`）で失敗する。
+- **独自の SQLSTATE**：`SB404`（実体がない・他の組織の実体）、`SB409`（detail：`version_conflict`・`voided`・`already_exists`・`last_manager`）。
+- **`content_hash` の計算規則**（Sprint 15 の出力の照合で使う）：次の 11 要素をこの順に並べた jsonb の配列を `::text` で文字列にし、UTF-8 のバイト列の SHA-256 を 16 進小文字で表したもの（関数 `record_version_hash`）。
+
+  | 順 | 要素 | 型・書式 |
+  |---|---|---|
+  | 1 | `"soraban-record-v1"` | 文字列（規則の版） |
+  | 2 | `prev_hash` | 文字列（初版は `""`） |
+  | 3 | `entity_type` | 文字列（`member`・`aircraft`・`pilot`） |
+  | 4 | `entity_id` | 文字列（UUID の小文字表記） |
+  | 5 | `version_no` | 数値 |
+  | 6 | `op` | 文字列（`create`・`update`・`void`） |
+  | 7 | `data` | jsonb のオブジェクト |
+  | 8 | `reason` | 文字列または `null` |
+  | 9 | `actor_kind` | 文字列（`member`・`system`） |
+  | 10 | `actor_member_id` | 文字列（UUID）または `null` |
+  | 11 | `created_at` | 文字列（UTC、`YYYY-MM-DDTHH:MI:SS.ffffffZ`、マイクロ秒 6 桁） |
+
+  - jsonb の文字列表現は PostgreSQL の正規形（オブジェクトのキーは長さの短い順、同じ長さはバイト順。区切りは `", "` と `": "`）。外部で再計算する場合はこの正規形に合わせる。
+- **検証**：`select * from verify_record_chain('<entity_type>', '<entity_id>');`（オーナーロール）。改変がなければ 0 行。次の問題を返す（ヘッド表の問題は最新の版番号、版が無ければ 0）。
+  - 版の連鎖：連番の欠け（`missing_version`）、`prev_hash` のつながりの不一致（`prev_hash_mismatch`）、`content_hash` の再計算の不一致（`content_hash_mismatch`）
+  - ヘッド表との突き合わせ：ヘッド表の `current_version` が最新の版番号と違う（`head_version_mismatch`。最新版の削除など）、ヘッド表の値が最新の版の `data` と違う（`head_data_mismatch`。ヘッド表だけの書き換え）、最新の版が取消かどうかとヘッド表の `voided_at` が食い違う（`head_void_mismatch`）、ヘッド表の行が無い（`head_missing`）、版が無いのにヘッド表の行がある（`head_without_versions`）
+  - **検出できない改変（限界）**：オーナーロールが、ある版から後ろをすべて正しいハッシュで作り直し、ヘッド表もそれに合わせた改変は、DB の中だけでは検出できない（ハッシュ連鎖は DB の中で閉じているため）。最新の `content_hash` を DB の外に控える方法（出力への記載・外部への定期的な控え等）は Sprint 15 で検討する。
+- **最初の運航管理者**：`select ops_bootstrap('<組織名>', '<メールアドレス>', '<表示名>');`（オーナーロールだけが実行できる）。組織が無ければ作り、招待中の運航管理者を 1 人登録する。有効または招待中の運航管理者が既にいる組織では何もしない。本人が確認済みのメールアドレスで初めてログインしたときに結び付く。
 
 ## ローカル開発・テスト
 
@@ -121,7 +160,22 @@ DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@localhost:5432/soraban_dev 
 docker stop soraban-pg
 ```
 
-- CI の `db` ジョブ（`.github/workflows/ci.yml`）は、サービスコンテナに対して `pnpm db:migrate`（2 回）・`pnpm db:status`・`TEST_DATABASE_URL` なしで失敗することの確認・`pnpm build`・`pnpm test:db` を実行する。Neon の接続文字列・API キーは使わない。
+- CI の `db` ジョブ（`.github/workflows/ci.yml`）は、サービスコンテナに対して `soraban_app` の作成（マイグレーションより先）・`pnpm db:migrate`（2 回）・`pnpm db:status`・`soraban_app` の権限の確認・`TEST_DATABASE_URL` なしで失敗することの確認・`pnpm build`・`pnpm test:db`・テスト用の初期データの投入（`pnpm db:seed:ops-test`）・運航管理の E2E-DB（`pnpm test:e2e:ops`）を実行する。Neon の接続文字列・API キー・Neon Auth の URL・秘密は使わない。
+- `pnpm test:db` は、`soraban_app` が既にあれば作らず・消さない。無ければテストの中で作り、終わったら消す。
+
+### 運航管理の E2E-DB をローカルで動かす（Sprint 10）
+
+```sh
+psql "$TEST_DATABASE_URL" -c "create role soraban_app with login password 'local_only'"   # 初回だけ
+psql "$TEST_DATABASE_URL" -c "create database soraban_e2e"
+export DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@localhost:5432/soraban_e2e
+pnpm db:migrate && pnpm db:seed:ops-test       # 初期データは localhost・127.0.0.1 にだけ投入できる
+pnpm build
+E2E_OPS_DATABASE_URL=postgresql://soraban_app:local_only@localhost:5432/soraban_e2e pnpm test:e2e:ops
+```
+
+- `playwright.ops.config.ts` が `OPS_ENABLED=1`・`AUTH_PROVIDER=test`・E2E 専用の `AUTH_TEST_SECRET` を与えて `next start`（ポート 3300）を起動する。
+- テスト用のログインは `POST /api/test-auth/sign-in`（本文：`authUserId`・`email`・`emailVerified`・`name`）。初期データの利用者は `packages/db/src/ops-seed.ts` を参照。
 - イメージのタグ `postgis/postgis:18-3.6` は Docker Hub で存在を確認した（2026-10-19、最終更新 2026-10-18）。本番（PostgreSQL 18、PostGIS 3.6.4）とメジャー版・マイナー版が一致する。
 - 開発環境で Docker が使えない場合は、OS のパッケージの PostgreSQL＋PostGIS でも `pnpm test:db` は動く（Sprint 8 の実装時は PostgreSQL 16＋PostGIS 3 で確認し、最終の合否は CI の PostgreSQL 18 で確認した）。
 
@@ -166,6 +220,9 @@ docker stop soraban-pg
 grant usage on schema public to soraban_app;
 grant select on regulations, regulation_zones, schema_migrations to soraban_app;
 grant select, insert on evidence_log to soraban_app;
+-- 0006 を適用済みの場合
+grant select, insert on record_versions to soraban_app;
+grant select on organizations, members, aircraft, pilots to soraban_app;
 ```
 
 ### 3. 本番 DB へのマイグレーション適用
@@ -197,3 +254,29 @@ grant select, insert on evidence_log to soraban_app;
 - Environment に「Required reviewers（承認者）」を設定し、承認されるまでジョブが始まらないようにする。対象ブランチは `main` に限る（Deployment branches）。
 - CI（`ci.yml`）からはこの Environment を参照しない（CI の DB は引き続きサービスコンテナだけを使う）。
 - 注意：本番の接続文字列を GitHub に置くことになるため、spec §13.8.1 の「GitHub に Neon の秘密情報を置かない」方針の変更として、ユーザーの判断が要る。
+
+## 運航管理（Sprint 10）の本番準備（ユーザー作業。エージェントは行わない）
+
+利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0006 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
+
+1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0003 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
+2. **マイグレーション 0004〜0006 を本番に適用する**：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
+3. **Neon Auth を有効にする**：Neon コンソール → `soraban` → 既定ブランチ（本番）→ Auth → 有効化。aws-ap-southeast-1 で有効にできることをここで確かめる（できない場合は作業を止め、planner に戻す）。Auth URL を控える。プレビュー用・開発用のブランチでは有効にしない。
+4. **Google ログインを自社の資格情報にする**：Google Cloud コンソールで OAuth クライアント（ウェブアプリケーション）を作り、承認済みのリダイレクト URI に `{Auth URL}/callback/google`（末尾にスラッシュを付けない）を登録する。Neon の Auth の設定 → OAuth providers に Client ID・Secret を入れる。
+5. **Neon Auth の本番設定**：信頼するドメインに本番のドメインを追加、アプリ名を「そらばん」に、「Allow Localhost」を無効に。メールとパスワードによる登録を止められる場合は止める（止められなくても、アプリは確認済みのメールアドレスの招待者しか通さない）。
+6. **最初の運航管理者を作る**：Neon の SQL Editor（オーナーロール）で 1 回実行する。
+   ```sql
+   select ops_bootstrap('フューチャーテック株式会社', '<自分の Google アカウントのメール>', '<表示名>');
+   ```
+7. **Vercel の Production の環境変数**（Production だけを選び、秘密は Sensitive に）：`AUTH_PROVIDER=neon`、`NEON_AUTH_BASE_URL=<Auth URL>`、`NEON_AUTH_COOKIE_SECRET=<openssl rand -base64 32 の出力>`、最後に `OPS_ENABLED=1`。再デプロイし、`/ops` から Google でログインして、役割が「運航管理者」と出ることを確かめる。他の社員は `/ops/members` から招待する。
+   - 問題が出たら `OPS_ENABLED` を削除して再デプロイすれば、利用者機能だけが止まる（DB の表は残る）。
+   - `AUTH_TEST_SECRET` は本番に設定しない（`AUTH_PROVIDER=test` は `VERCEL_ENV` が設定された環境＝Vercel の Production・Preview・Development では設定不足として扱い、`/api/test-auth/*` は 404 になる。Vercel の「System Environment Variables を自動で公開する」設定は既定の有効のままにする）。
+   - 設定が足りないと `/ops` は「運航管理は準備中です」と理由コード（例：`neon_auth_base_url_missing`）だけを示す 503 になる。
+
+**会社での決めごと（本番で使う前に）**：社員への利用目的の明示（飛行日誌の作成・保管のために氏名・技能証明書番号を記録すること）と、退職者の記録の扱い（版の表は追加のみで消せない。機体が登録されている間は保持する方針。誤登録の消去手順は Sprint 15）。
+
+**実装上の確認事項（本番の準備の最後に確かめる）**
+
+- `@neondatabase/auth` は `0.6.0-beta`（ベータ版）を版固定で使う。CI・E2E は Neon Auth に接続しないため、実際の Neon Auth との結合（Google ログイン → `/ops` に役割が出る）は手順 7 で初めて確かめる。
+- Neon Auth の SDK のミドルウェア処理（`processAuthMiddleware`）は `proxy.ts`（`apps/web/src/server/ops/neon-proxy.ts`）で、`AUTH_PROVIDER=neon` かつ有効なときの `/ops` 以下だけに通す。Google から戻ったとき（`?neon_auth_session_verifier=…` と challenge Cookie）の verifier のセッションへの交換、セッションの Cookie（`session_data` 等）の更新、未ログインのサインイン画面への転送を、ページの描画より前に行う（サーバーコンポーネントの中では Cookie を書けないため）。更新した Cookie は同じ要求の Cookie ヘッダーにも反映し、ページの `getSession()` は Cookie の写しだけで済む。`/ops/sign-in`・`/ops/no-access` は保護しないが、交換と更新は行う。`/api` 以下は対象外（ルートハンドラの `getSession()` は Cookie を書ける）。E2E-DB では Neon Auth の上流の模擬サーバー（`e2e/mock-neon-auth-server.mjs`）で、Google から戻ったときと Cookie の更新を確かめている（実際の Google・Neon Auth との結合は手順 7 で確かめる）。
+

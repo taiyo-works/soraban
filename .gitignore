@@ -55,3 +55,4 @@ files.zip
 # Playwright
 test-results/
 playwright-report/
+playwright-report-ops/

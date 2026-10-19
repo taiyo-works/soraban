@@ -85,6 +85,96 @@ export type SchemaMigrationRow = {
   readonly duration_ms: number;
 };
 
+// ---- 運航管理（Sprint 10。0004〜0006） ----
+
+export type MemberRoleDb = "manager" | "pilot" | "viewer";
+export type MemberStatusDb = "invited" | "active" | "disabled";
+export type AuthProviderDb = "neon" | "test";
+export type AircraftStatusDb = "active" | "suspended" | "deregistered";
+export type CertClassDb = "first" | "second";
+export type RecordEntityTypeDb = "member" | "aircraft" | "pilot";
+export type RecordOpDb = "create" | "update" | "void";
+export type RecordActorKindDb = "member" | "system";
+
+export type OrganizationRow = {
+  readonly id: string;
+  readonly name: string;
+  readonly created_at: string;
+};
+
+export type MemberRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly email: string;
+  readonly display_name: string;
+  readonly role: MemberRoleDb;
+  readonly status: MemberStatusDb;
+  readonly auth_provider: AuthProviderDb | null;
+  readonly auth_user_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type AircraftRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly registration_mark: string;
+  readonly model_name: string;
+  readonly manufacturer: string;
+  readonly serial_number: string;
+  readonly type_certified: boolean;
+  readonly type_cert_category: string | null;
+  readonly type_cert_model: string | null;
+  readonly type_cert_number: string | null;
+  readonly airworthiness_class: CertClassDb | null;
+  readonly airworthiness_cert_number: string | null;
+  /** numeric(7,1)。pg は文字列で返す。 */
+  readonly max_takeoff_weight_kg: string | null;
+  readonly initial_flight_minutes: number;
+  readonly status: AircraftStatusDb;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type PilotRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly full_name: string;
+  readonly has_license: boolean;
+  readonly license_class: CertClassDb | null;
+  readonly license_number: string | null;
+  readonly license_expires_on: string | null;
+  readonly limitation_type: boolean;
+  readonly limitation_weight: boolean;
+  readonly limitation_daytime: boolean;
+  readonly limitation_vlos: boolean;
+  readonly member_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type RecordVersionRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly entity_type: RecordEntityTypeDb;
+  readonly entity_id: string;
+  readonly version_no: number;
+  readonly op: RecordOpDb;
+  readonly data: Record<string, unknown>;
+  readonly reason: string | null;
+  readonly actor_kind: RecordActorKindDb;
+  readonly actor_member_id: string | null;
+  readonly created_at: string;
+  readonly prev_hash: string;
+  readonly content_hash: string;
+};
+
 // ---- 列名の一覧（型の全キーを列挙していることを型で強制する） ----
 
 type ExactKeys<Row, Cols extends readonly string[]> = [Exclude<keyof Row, Cols[number]>] extends [never]
@@ -143,9 +233,91 @@ export const EVIDENCE_LOG_COLUMNS = columns<EvidenceLogRow>()([
   "datasets",
 ]);
 
+export const ORGANIZATION_COLUMNS = columns<OrganizationRow>()(["id", "name", "created_at"]);
+
+export const MEMBER_COLUMNS = columns<MemberRow>()([
+  "id",
+  "org_id",
+  "email",
+  "display_name",
+  "role",
+  "status",
+  "auth_provider",
+  "auth_user_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const AIRCRAFT_COLUMNS = columns<AircraftRow>()([
+  "id",
+  "org_id",
+  "registration_mark",
+  "model_name",
+  "manufacturer",
+  "serial_number",
+  "type_certified",
+  "type_cert_category",
+  "type_cert_model",
+  "type_cert_number",
+  "airworthiness_class",
+  "airworthiness_cert_number",
+  "max_takeoff_weight_kg",
+  "initial_flight_minutes",
+  "status",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const PILOT_COLUMNS = columns<PilotRow>()([
+  "id",
+  "org_id",
+  "full_name",
+  "has_license",
+  "license_class",
+  "license_number",
+  "license_expires_on",
+  "limitation_type",
+  "limitation_weight",
+  "limitation_daytime",
+  "limitation_vlos",
+  "member_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const RECORD_VERSION_COLUMNS = columns<RecordVersionRow>()([
+  "id",
+  "org_id",
+  "entity_type",
+  "entity_id",
+  "version_no",
+  "op",
+  "data",
+  "reason",
+  "actor_kind",
+  "actor_member_id",
+  "created_at",
+  "prev_hash",
+  "content_hash",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
   regulation_zones: REGULATION_ZONE_COLUMNS,
   evidence_log: EVIDENCE_LOG_COLUMNS,
+  organizations: ORGANIZATION_COLUMNS,
+  members: MEMBER_COLUMNS,
+  aircraft: AIRCRAFT_COLUMNS,
+  pilots: PILOT_COLUMNS,
+  record_versions: RECORD_VERSION_COLUMNS,
 } as const;
+
+/** 運航管理の表（Sprint 10）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+export const OPS_TABLES = ["organizations", "members", "aircraft", "pilots", "record_versions"] as const;
