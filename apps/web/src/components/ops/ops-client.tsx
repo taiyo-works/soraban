@@ -3,7 +3,15 @@
 // 運航管理（Sprint 10）の画面の入力部品。どれも /api/ops/* を呼ぶだけで、判断はサーバー側（サービス層）が行う。
 // 見た目は components/ops/ui.tsx の部品と判定画面の意匠に合わせる。
 import { cloneElement, useId, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
-import { buttonDangerClass, buttonGhostClass, buttonPrimaryClass } from "./ui";
+import { setChangeFlash } from "./change-notice";
+import {
+  buttonDangerClass,
+  buttonGhostClass,
+  buttonPrimaryClass,
+  MEMBER_INVITE_NOTICE_TARGET,
+  memberNoticeTarget,
+  VERSION_NOTICE_TARGET,
+} from "./ui";
 
 type ApiResult = { readonly ok: boolean; readonly status: number; readonly data: Record<string, unknown> };
 
@@ -27,8 +35,27 @@ const send = async (method: string, url: string, body?: unknown): Promise<ApiRes
  * 登録・訂正・取消の後に画面を読み直す。router.refresh() は、リンクの先読み等と重なると更新が捨てられることがあった
  * （E2E-DB 17 で数回に 1 回、版の一覧が更新されない。Sprint 10 差し戻し B）。記録の画面は正しさを優先し、通常の読み直しにする。
  */
-const reloadAfterChange = (): void => {
+const reloadAfterChange = (notice?: { readonly target: string; readonly message: string }): void => {
+  if (notice) setChangeFlash(window.location.pathname, notice.target, notice.message);
   window.location.reload();
+};
+
+/** 応答の版番号から「版 N として」を作る（版番号が無ければ空）。 */
+const versionOf = (r: ApiResult): string => (typeof r.data["version"] === "number" ? `版 ${r.data["version"]} として` : "");
+
+
+/**
+ * 入力の誤りがあったとき、最初の誤りの項目へフォーカスを移す。項目の誤りが無ければ（版の衝突など）送信の結果のエラーへ移す。
+ * 描画が済んでから探すため、次のフレームで行う。
+ */
+const focusFirstError = (form: HTMLFormElement | null): void => {
+  window.requestAnimationFrame(() => {
+    const el =
+      form?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form?.querySelector<HTMLElement>("[data-form-error]");
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: "center" });
+  });
 };
 
 const ERROR_MESSAGES: Readonly<Record<string, string>> = {
@@ -136,7 +163,9 @@ const FormError = ({ message }: { readonly message: string | null }) =>
   message ? (
     <p
       role="alert"
-      className="rounded-sharp border border-signal-red/60 bg-signal-red-soft px-3 py-2 text-sm leading-relaxed text-signal-red"
+      tabIndex={-1}
+      data-form-error
+      className="outline-none focus-visible:ring-2 focus-visible:ring-signal-red rounded-sharp border border-signal-red/60 bg-signal-red-soft px-3 py-2 text-sm leading-relaxed text-signal-red"
     >
       {message}
     </p>
@@ -222,6 +251,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const h = Number(v.hours || "0");
@@ -250,16 +280,18 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
+      focusFirstError(form);
       return;
     }
     setErrors({});
     const id = String(r.data["id"]);
     if (editing) {
       setV({ ...v, reason: "" });
-      reloadAfterChange();
+      reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: `${versionOf(r)}訂正しました。` });
     } else {
       // 登録後は通常の画面遷移で詳細を開く。クライアント側の遷移（router.push）が終わる前に、続く訂正の
       // router.refresh() が走ると更新が捨てられることがあるため（Sprint 10 差し戻し B）。
+      setChangeFlash(`/ops/aircraft/${id}`, VERSION_NOTICE_TARGET, "機体を登録しました。");
       window.location.assign(`/ops/aircraft/${id}`);
     }
   };
@@ -432,15 +464,17 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
   const [busy, setBusy] = useState(false);
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     const r = await send("POST", url, { expectedVersion: version, reason });
     setBusy(false);
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
+      focusFirstError(form);
       return;
     }
-    reloadAfterChange();
+    reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: typeof r.data["version"] === "number" ? `取消しました（版 ${r.data["version"]}）。` : "取消しました。" });
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${label}の取消`}>
@@ -511,6 +545,7 @@ export function PilotForm({
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const body = {
@@ -533,13 +568,15 @@ export function PilotForm({
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
+      focusFirstError(form);
       return;
     }
     setErrors({});
     if (editing) {
       setV({ ...v, reason: "" });
-      reloadAfterChange();
+      reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: `${versionOf(r)}訂正しました。` });
     } else {
+      setChangeFlash(`/ops/pilots/${String(r.data["id"])}`, VERSION_NOTICE_TARGET, "操縦者を登録しました。");
       window.location.assign(`/ops/pilots/${String(r.data["id"])}`);
     }
   };
@@ -659,6 +696,7 @@ export function MemberInviteForm() {
   const [busy, setBusy] = useState(false);
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const r = await send("POST", "/api/ops/members", v);
@@ -666,11 +704,12 @@ export function MemberInviteForm() {
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
+      focusFirstError(form);
       return;
     }
     setErrors({});
     setV({ email: "", displayName: "", role: "pilot" });
-    reloadAfterChange();
+    reloadAfterChange({ target: MEMBER_INVITE_NOTICE_TARGET, message: "招待しました。利用者の一覧に「招待中」として加わりました。" });
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5" aria-label="利用者の招待">
@@ -730,6 +769,7 @@ export function MemberControls({
   const [busy, setBusy] = useState(false);
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     setBusy(true);
     setMessage(null);
     const r = await send("PATCH", `/api/ops/members/${member.id}`, {
@@ -742,11 +782,12 @@ export function MemberControls({
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
       setMessage(messageFor(r));
+      focusFirstError(form);
       return;
     }
     setErrors({});
     setReason("");
-    reloadAfterChange();
+    reloadAfterChange({ target: memberNoticeTarget(member.id), message: `${versionOf(r)}役割・利用を変更しました。` });
   };
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${member.displayName}の変更`}>

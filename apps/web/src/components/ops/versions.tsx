@@ -1,9 +1,11 @@
 import type { VersionDto } from "@/server/ops/service";
 import { OP_LABELS } from "@/server/ops/page";
-import { Badge, OP_TONE, Section } from "./ui";
+import { ChangeNotice } from "./change-notice";
+import { Badge, OP_TONE, Section, VERSION_NOTICE_TARGET } from "./ui";
 
 // 詳細画面の版の一覧（版番号、操作、訂正者、日時（JST、分まで）、理由、変わった項目名）。
 // 狭い画面でも横スクロールしないよう、表ではなく項目の並びで示す。古い版から順に並べる（台帳と同じ向き）。
+// 登録・訂正・取消で読み直した直後は、結果を示して新しい行（最後の行）へスクロールし、フォーカスを移す。
 export function VersionList({ versions }: { readonly versions: readonly VersionDto[] }) {
   return (
     <Section
@@ -11,12 +13,14 @@ export function VersionList({ versions }: { readonly versions: readonly VersionD
       aria-label="版の一覧"
       description="登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。"
     >
+      <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-row"]:last-child' />
       <ol className="flex flex-col border-t border-rule" data-testid="version-list">
         {versions.map((v) => (
           <li
             key={v.versionNo}
-            className="grid grid-cols-1 gap-2 border-b border-rule-soft py-3 text-sm sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
+            className="grid scroll-mt-24 grid-cols-1 gap-2 border-b border-rule-soft py-3 text-sm outline-none focus-visible:bg-brand-50 focus-visible:ring-2 focus-visible:ring-brand-700 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
             data-testid="version-row"
+            tabIndex={-1}
           >
             <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1.5">
               <span className="font-mono text-xs tnum text-ink-mute">版 {v.versionNo}</span>

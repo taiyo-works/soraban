@@ -1,6 +1,16 @@
 import { MemberControls, MemberInviteForm } from "@/components/ops/ops-client";
 import { Forbidden } from "@/components/ops/versions";
-import { Badge, MEMBER_STATUS_TONE, PageHeader, ROLE_DESCRIPTIONS, ROLE_TONE, Section } from "@/components/ops/ui";
+import { ChangeNotice } from "@/components/ops/change-notice";
+import {
+  Badge,
+  MEMBER_INVITE_NOTICE_TARGET,
+  MEMBER_STATUS_TONE,
+  memberNoticeTarget,
+  PageHeader,
+  ROLE_DESCRIPTIONS,
+  ROLE_TONE,
+  Section,
+} from "@/components/ops/ui";
 import { listMembers } from "@/server/ops/service";
 import { MEMBER_STATUS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
@@ -32,6 +42,7 @@ export default async function MembersPage() {
                 <Badge tone={MEMBER_STATUS_TONE[m.status]}>{MEMBER_STATUS_LABELS[m.status]}</Badge>
               </span>
             </div>
+            <ChangeNotice target={memberNoticeTarget(m.id)} />
             <details className="group">
               <summary className="inline-flex min-h-10 cursor-pointer select-none items-center text-xs text-brand-700 underline-offset-2 hover:underline">
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
@@ -56,6 +67,7 @@ export default async function MembersPage() {
             </div>
           ))}
         </dl>
+        <ChangeNotice target={MEMBER_INVITE_NOTICE_TARGET} />
         <MemberInviteForm />
       </Section>
     </main>

@@ -260,6 +260,10 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     await expect(page.getByTestId("aircraft-detail")).toContainText("Mavic 3T");
     const first = page.getByTestId("version-row").nth(0);
     await expect(first.getByTestId("version-op")).toHaveText("登録");
+    // 読み直した後の結果の表示と、版の一覧の新しい行へのフォーカス（designer の推奨 1）
+    await expect(page.getByTestId("ops-change-notice")).toHaveText("版 2 として訂正しました。");
+    await expect(row).toBeFocused();
+    await expect(row).toBeInViewport();
   });
 
   test("18. 技能証明書番号：一覧は末尾 4 桁以外を伏せ、詳細は運航管理者と本人にだけ全桁", async () => {
@@ -319,5 +323,48 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
       }));
       expect(scrollWidth, path).toBeLessThanOrEqual(clientWidth);
     }
+  });
+
+  test("21. 画面の操作の結果：入力の誤りは最初の項目へフォーカス、取消・利用者の変更は結果を一度だけ示す", async ({ page }) => {
+    await pageAs(page, seeded("a-manager"));
+    // 入力の誤り：最初の誤りの項目（登録記号）へフォーカスが移る
+    await page.goto("/ops/aircraft/new");
+    await page.getByRole("button", { name: "登録する" }).click();
+    await expect(page.getByLabel("登録記号")).toBeFocused();
+
+    // 取消：結果を示し、版の一覧の新しい行（取消の版）へフォーカスが移る。読み直すと結果は消える（一度だけ）
+    const manager = await apiAs(seeded("a-manager"));
+    const created = (await (await manager.post("/api/ops/aircraft", { data: { ...AIRCRAFT, registrationMark: uniqueMark() } })).json()) as {
+      id: string;
+    };
+    await manager.dispose();
+    await page.goto(`/ops/aircraft/${created.id}`);
+    await page.getByRole("form", { name: "この機体の取消" }).getByLabel("取消の理由").fill("別の機体の情報を誤って登録した");
+    await page.getByRole("button", { name: "この機体を取り消す" }).click();
+    await expect(page.getByTestId("ops-change-notice")).toHaveText("取消しました（版 2）。");
+    const last = page.getByTestId("version-row").nth(1);
+    await expect(last.getByTestId("version-op")).toHaveText("取消");
+    await expect(last).toBeFocused();
+    await page.reload();
+    await expect(page.getByTestId("version-row")).toHaveCount(2);
+    await expect(page.getByTestId("ops-change-notice")).toHaveText("");
+
+    // 利用者：招待の結果と、役割の変更の結果を対象の行に示す
+    const email = `e2e-ui-${Date.now()}@example.test`;
+    await page.goto("/ops/members");
+    const invite = page.getByRole("form", { name: "利用者の招待" });
+    await invite.getByLabel("メールアドレス").fill(email);
+    await invite.getByLabel("表示名").fill("画面 招待");
+    await invite.getByRole("button", { name: "招待する" }).click();
+    await expect(page.getByText("招待しました。利用者の一覧に「招待中」として加わりました。")).toBeVisible();
+    const item = page.getByTestId("member-list").getByRole("listitem").filter({ hasText: email });
+    await item.getByText("役割・利用を変更する").click();
+    const change = item.getByRole("form", { name: "画面 招待の変更" });
+    await change.getByLabel("役割").selectOption("viewer");
+    await change.getByLabel("変更の理由").fill("閲覧だけにする");
+    await change.getByRole("button", { name: "変更する" }).click();
+    const notice = page.getByTestId("member-list").getByRole("listitem").filter({ hasText: email }).getByTestId("ops-change-notice");
+    await expect(notice).toHaveText(/^版 \d+ として役割・利用を変更しました。$/);
+    await expect(notice).toBeFocused();
   });
 });

@@ -219,3 +219,9 @@ export function LicenseNumber({ value, ...rest }: { readonly value: string } & R
     </span>
   );
 }
+
+/** 読み直し後の結果表示（change-notice.tsx）の target。サーバー・クライアントの両方から使うため、ここに置く。 */
+export const VERSION_NOTICE_TARGET = "versions";
+/** 利用者の画面の結果表示の target（行ごと・招待）。利用者の内部 ID だけを使う。 */
+export const memberNoticeTarget = (memberId: string): string => `member:${memberId}`;
+export const MEMBER_INVITE_NOTICE_TARGET = "member-invite";
