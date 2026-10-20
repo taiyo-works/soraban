@@ -1,8 +1,20 @@
 // Sprint 8: 証跡の書き込みと /api/health/db の単体テスト（DB を使わない）。
+import { readFileSync } from "node:fs";
 import { createServer, type AddressInfo } from "node:net";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { closePool } from "@soraban/db";
-import type { RegulationCheckResult } from "@soraban/regulations";
+import {
+  computeOverall,
+  createIndustrialSource,
+  didBundleToDataset,
+  ENGINE_VERSION,
+  type DidBundleFile,
+  type IndustrialCoverageEntry,
+  type RegulationCheckResult,
+} from "@soraban/regulations";
+import { runRegulationCheckWith, type RegulationDataProvider } from "./check-core";
 import { toEvidenceLogInsert, type WriteEvidence } from "./evidence-log";
 import { handleCheckPost, type RunCheck } from "./handlers";
 import { handleHealthDbGet } from "./health";
@@ -27,6 +39,20 @@ const RESULT: RegulationCheckResult = {
 };
 
 const runCheck: RunCheck = async () => RESULT;
+
+const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../../../e2e/fixtures");
+const readJson = <T,>(rel: string): T => JSON.parse(readFileSync(path.join(FIXTURES, rel), "utf8")) as T;
+const fixtureProvider = (muniCode: string): RegulationDataProvider => ({
+  loadDid: async (pref) =>
+    pref === "31" ? didBundleToDataset(readJson<DidBundleFile>("did/pref-31.json")) : null,
+  didPrefCodes: async () => ["31"],
+  industrial: createIndustrialSource({
+    coverage: readJson<{ municipalities: IndustrialCoverageEntry[] }>("industrial/coverage.json").municipalities,
+    zonesByMuni: {},
+    insideMarginM: 10,
+  }),
+  reverseGeocode: async () => ({ muniCode }),
+});
 
 const post = () =>
   new Request("http://localhost/api/check", {
@@ -129,7 +155,33 @@ describe("toEvidenceLogInsert", () => {
       regulationIds: ["aviation-law-did", "small-drone-law"],
       perRegulationStatus: { "aviation-law-did": "red", "small-drone-law": "green" },
       datasets: [{ id: "did-r2", name: "人口集中地区", baseYear: 2020, verifiedAt: "2026-10-19" }],
+      // verdict の無い結果（0.3.0 まで）は判定の列を null にする（Sprint 11d）
+      verdict: null,
+      verdictUnknownCount: null,
+      perRegulationVerdict: null,
+      appliedPermits: null,
     });
+  });
+
+  // Sprint 11d 契約 17：判定の列を埋め、overall は元の判定から求めた値。
+  it("verdict・verdict_unknown_count・per_regulation_verdict・applied_permits を埋める（Sprint 11d）", async () => {
+    const result = await runRegulationCheckWith(
+      fixtureProvider("31202"),
+      { lat: 35.4278, lng: 133.3314 },
+      { droneWeightG: 900, pilotPermits: ["mlit", "park_manager"] },
+      () => new Date("2026-10-20T00:00:00.000Z"),
+    );
+    const row = toEvidenceLogInsert(result, { lat: 35.4278, lng: 133.3314 });
+    expect(row.engineVersion).toBe(ENGINE_VERSION);
+    // DID は許可で満たしても元の判定は該当（red）のまま。overall は元の判定の集約。
+    expect(row.perRegulationStatus["aviation-law-did"]).toBe("red");
+    expect(row.overall).toBe(computeOverall(result.regulations));
+    expect(row.overall).toBe("red");
+    expect(row.perRegulationVerdict?.["aviation-law-did"]).toBe("procedure_done");
+    expect(row.verdict).toBe(result.verdict?.level);
+    expect(row.verdict).toBe("needs_procedure"); // 県条例（庁舎の周辺）が要手続き
+    expect(row.verdictUnknownCount).toBe(0);
+    expect(row.appliedPermits).toEqual(["mlit:did", "park_manager"]);
   });
 });
 

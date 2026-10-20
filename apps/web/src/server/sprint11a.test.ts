@@ -7,14 +7,17 @@ import {
   buildDiagnosisEvidencePayload,
   deriveDiagnosis,
   ENGINE_VERSION,
+  PREVIOUS_ENGINE_VERSIONS,
   PROCEDURES_REVISION,
   PROCEDURES_VERIFIED_AT,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 
 describe("Sprint 11a：申請支援の証跡 ID と制度データの revision", () => {
-  it("ENGINE_VERSION は変えない", () => {
-    expect(ENGINE_VERSION).toBe("soraban-0.3.0-regulations-2026-07");
+  // Sprint 11d で ENGINE_VERSION を 0.4.0 に上げた。以下の期待値は 0.3.0 の文字列を渡したペイロードで保つ。
+  it("ENGINE_VERSION は 0.4.0（Sprint 11d）。0.3.0 は過去の版", () => {
+    expect(ENGINE_VERSION).toMatch(/^soraban-0\.4\.0-verdict-/);
+    expect(PREVIOUS_ENGINE_VERSIONS).toContain("soraban-0.3.0-regulations-2026-07");
   });
 
   // 申請支援の証跡 ID。変更前（origin/main cb0275b）の値は、同じ入力・同じ時刻で変更前のコードから求めた値。

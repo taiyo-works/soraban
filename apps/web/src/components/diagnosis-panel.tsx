@@ -11,9 +11,11 @@ import {
   type DiagnosisCategory,
   type ManualChoice,
 } from "@soraban/regulations";
+import { MODEL_AIRCRAFT_CATEGORY_HEADLINE, MODEL_AIRCRAFT_CATEGORY_NOTE } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { shortUrl, splitInlineSource } from "@/lib/inline-source";
 import { ProcedureCard } from "./procedure-card";
+import { doneByProcedureId, isModelAircraftDiagnosis } from "@/lib/verdict-display";
 import { DeadlineCalendar } from "./deadline-calendar";
 import { PrefillTable } from "./prefill-table";
 import { ManualDraft } from "./manual-draft";
@@ -200,6 +202,9 @@ export function DiagnosisPanel({
   const [bundleBusy, setBundleBusy] = useState<boolean>(false);
   const [bundleError, setBundleError] = useState<string | null>(null);
 
+  // 手続き済み（条件付き）の印（Sprint 11d B2）。手続きそのものは消さない。
+  const satisfiedMap = doneByProcedureId(diagnosis.verdict);
+
   const deadlineFor = (id: string): string | undefined =>
     diagnosis.deadlines.find((d) => d.procedureId === id)?.basis;
 
@@ -219,6 +224,7 @@ export function DiagnosisPanel({
       const manualDraft = buildFlightManualDraft({
         choice: manualChoice,
         flags: diagnosis.flags,
+        ...(diagnosis.droneWeightG !== undefined ? { droneWeightG: diagnosis.droneWeightG } : {}),
       });
       const blob = await pdf(
         <ApplicationPdfDocument
@@ -263,7 +269,10 @@ export function DiagnosisPanel({
       {/* カテゴリー切り分けバナー（結果先頭）。色＋符号＋ラベルの三重符号化で
           severity を示し、III＝レベル4 は赤の面取りで最も強く警告する。 */}
       {(() => {
-        const sev = categorySeverity[diagnosis.category];
+        const modelAircraft = isModelAircraftDiagnosis(diagnosis);
+        const sev = modelAircraft
+          ? { ...categorySeverity[diagnosis.category], severity: "模型航空機" }
+          : categorySeverity[diagnosis.category];
         // カテゴリー定義（出典 URL を含む）。出典は制度データ（categories.json）由来で
         // コード直書きしない。バナーに出典を併記する契約を満たす。
         const def = getCategoryDefinition(diagnosis.category);
@@ -285,9 +294,13 @@ export function DiagnosisPanel({
               </span>
             </div>
             <p className={`mt-1.5 font-display text-lg font-medium leading-snug ${sev.accent}`}>
-              {categoryHeadline[diagnosis.category]}
+              <span data-testid="diagnosis-category-headline">
+                {modelAircraft ? MODEL_AIRCRAFT_CATEGORY_HEADLINE : categoryHeadline[diagnosis.category]}
+              </span>
             </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">{diagnosis.categoryNote}</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">
+              {modelAircraft ? MODEL_AIRCRAFT_CATEGORY_NOTE : diagnosis.categoryNote}
+            </p>
             <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute" data-testid="diagnosis-did-status">
               DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
             </p>
@@ -399,6 +412,7 @@ export function DiagnosisPanel({
                 done={doneMap[p.id] ?? false}
                 onToggleDone={toggleDone}
                 category={diagnosis.category}
+                satisfied={satisfiedMap.get(p.id)}
               />
             ))}
           </div>
@@ -419,6 +433,7 @@ export function DiagnosisPanel({
         flags={diagnosis.flags}
         choice={manualChoice}
         onChoiceChange={handleManualChoiceChange}
+        droneWeightG={diagnosis.droneWeightG}
       />
 
       {/* 束ね PDF 出力（カテゴリー・チェックリスト・期限・プリフィル・書類ドラフトを 1 PDF に）。

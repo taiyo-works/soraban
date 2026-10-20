@@ -13,6 +13,6 @@ describe("migrations-manifest", () => {
       .map((f) => f.slice(0, 4))
       .sort();
     expect([...MIGRATION_VERSIONS]).toEqual(versions);
-    expect(LATEST_MIGRATION_VERSION).toBe("0008");
+    expect(LATEST_MIGRATION_VERSION).toBe("0009");
   });
 });

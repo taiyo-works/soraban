@@ -1,5 +1,6 @@
 import {
-  findPermittingExceptions,
+  findExcludingExceptions,
+  findSatisfyingExceptions,
   type ClauseException,
   type ClauseGraph,
   type FlightContext,
@@ -11,6 +12,20 @@ export type RegulationSource = "国" | "都道府県" | "市町村";
 
 export type RegulationStatus = "red" | "yellow" | "green" | "unknown";
 
+/**
+ * 法的な重さ（Sprint 11d、spec §13.9.6）。手続きの並べ方に使う。
+ *   1: 国の法律（航空法・小型無人機等飛行禁止法・文化財保護法）
+ *   2: 条例（都市公園条例・県の迷惑行為等防止条例）
+ *   3: 施設管理者の取り決め
+ */
+export type LegalTier = 1 | 2 | 3;
+
+export const LEGAL_TIER_LABEL: Readonly<Record<LegalTier, string>> = {
+  1: "国の法律",
+  2: "条例",
+  3: "施設管理者の取り決め",
+};
+
 export type Regulation = {
   readonly id: string;
   readonly source: RegulationSource;
@@ -18,6 +33,8 @@ export type Regulation = {
   readonly title: string;
   readonly summary: string;
   readonly url?: string;
+  /** 法的な重さ（1 国の法律、2 条例、3 施設管理者の取り決め）。Sprint 11d。 */
+  readonly legalTier: LegalTier;
   /** 統計の基準年（DID の国勢調査年など）。基準年のない概算データ（空港など）には付けない。 */
   readonly dataYear?: number;
   readonly clauseGraph: ClauseGraph;
@@ -46,14 +63,32 @@ export type DidDetail =
   | "in_did_exclusion_unverified";
 
 export type RegulationWithStatus = Regulation & {
+  /**
+   * 元の判定（Sprint 11d、spec §13.9.3）：許可・同意・目的の例外を当てる前の、法令上の該当。
+   * red＝該当、yellow＝該当の可能性（要確認）、green＝非該当、unknown＝判定不能（データ未整備）。
+   * 対象外にする例外（機体重量 100g 未満・工業専用地域）だけが green にする。
+   */
   readonly status: RegulationStatus;
   readonly note: string;
   /**
-   * FlightContext との照合で適用された permit 効果の例外節。
-   * ここが非空なら、当該規制は status が一段降格されている（red→green / yellow→green）。
-   * UI 側で「この条件で適用された例外」として可視化する。
+   * 対象外にする例外（weight_below_g・in_zone）で当たった例外節。ここが非空なら status は green。
    */
   readonly appliedExceptions?: readonly ClauseException[];
+  /**
+   * 機体重量の対象外の例外（weight_below_g）で green にしたとき、例外を当てる前の判定（red／yellow）。
+   * 100g 未満の機体（模型航空機）の模型航空機の手続き（model-aircraft.ts）を判定に足すために使う（Sprint 11e A2）。
+   * status・appliedExceptions の意味は変えない。工業専用地域（in_zone）では持たない。
+   */
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  /**
+   * 満たす例外（許可・同意・目的）で当たった例外節（Sprint 11d）。status は変えない。
+   * 判定（verdict）はこれをもとに手続き済み（条件付き）になる。
+   */
+  readonly satisfiedBy?: readonly ClauseException[];
+  /**
+   * 飛行不可の区分（Sprint 11d A4）：空港の敷地内。満たす例外を当てず、判定は飛行不可。
+   */
+  readonly noFlyCategory?: boolean;
   /** DID 規制（aviation-law-did）のみ：判定の詳細。 */
   readonly didDetail?: DidDetail;
   /** 小型無人機等飛行禁止法（small-drone-law）のみ：周辺地域に該当した施設。 */
@@ -72,28 +107,51 @@ export type FacilityHit = {
 };
 
 /**
- * 評価器の status と ClauseGraph + ctx を受けて、permit 例外がマッチしていれば
- * status を green に降格しつつ、適用された例外節と note を返すヘルパー。
- * 評価器ごとに同じパターンを書かずに済むよう共通化する。
+ * 評価器の status と ClauseGraph + ctx を受けて、例外節を当てる（Sprint 11d で二つに分けた）。
  *
- * 動作:
- *   - ctx 未指定 / 例外マッチ無し: そのまま返す
- *   - red / yellow から permit 例外マッチ: status="green", appliedExceptions に保存、
- *     note の末尾に「(機体重量 100g 未満により対象外)」のような追記を挿入
- *   - green / unknown: 例外マッチがあっても status は触らない (既に最弱なので)
+ *   - 対象外にする例外（weight_below_g・in_zone）が当たる：status を green にし、appliedExceptions に記録、
+ *     note の末尾に「※適用例外: …」を足す。
+ *   - 満たす例外（permit_holder・permit_holder_all・purpose）が当たる：status と note は変えず、
+ *     satisfiedBy に記録する（判定は deriveFlightVerdict が手続き済み（条件付き）にする）。
+ *   - noFly（飛行不可の区分。空港の敷地内）：場所の区分による飛行不可のため、対象外にする例外（機体重量を含む）も
+ *     満たす例外も当てない（緊急用務空域と同じく重量に関係なく飛行不可。Sprint 11d 差し戻し 1 回目 F1）。
+ *   - green / unknown：何も当てない。
  */
 export const applyExemptions = (
   base: { status: RegulationStatus; note: string; clauseGraph: ClauseGraph },
   ctx: FlightContext | undefined,
-): { status: RegulationStatus; note: string; appliedExceptions?: readonly ClauseException[] } => {
-  if (base.status !== "red" && base.status !== "yellow") return base;
-  const matched = findPermittingExceptions(base.clauseGraph, ctx);
-  if (matched.length === 0) return base;
-  const reasons = matched.map((m) => m.condition).join(" / ");
+  opts: { readonly noFly?: boolean } = {},
+): {
+  status: RegulationStatus;
+  note: string;
+  appliedExceptions?: readonly ClauseException[];
+  satisfiedBy?: readonly ClauseException[];
+  noFlyCategory?: boolean;
+  statusBeforeExclusion?: "red" | "yellow";
+} => {
+  const noFly = opts.noFly === true ? { noFlyCategory: true } : {};
+  if (base.status !== "red" && base.status !== "yellow") {
+    return { status: base.status, note: base.note, ...noFly };
+  }
+  // 飛行不可の区分は、どの例外よりも先に評価する（重量の例外で非該当にしない）。
+  if (opts.noFly === true) {
+    return { status: base.status, note: base.note, ...noFly };
+  }
+  const excluded = findExcludingExceptions(base.clauseGraph, ctx);
+  if (excluded.length > 0) {
+    const reasons = excluded.map((m) => m.condition).join(" / ");
+    const byWeight = excluded.some((e) => e.machine?.type === "weight_below_g");
+    return {
+      status: "green",
+      note: `${base.note} ※適用例外: ${reasons}`,
+      appliedExceptions: excluded,
+      ...(byWeight ? { statusBeforeExclusion: base.status } : {}),
+    };
+  }
+  const satisfied = findSatisfyingExceptions(base.clauseGraph, ctx);
   return {
-    status: "green",
-    note: `${base.note} ※適用例外: ${reasons}`,
-    appliedExceptions: matched,
+    status: base.status,
+    note: base.note,
+    ...(satisfied.length > 0 ? { satisfiedBy: satisfied } : {}),
   };
 };
-

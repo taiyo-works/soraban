@@ -4,6 +4,12 @@ import { expect, test, type Download, type Locator, type Page } from "@playwrigh
 // Sprint 11c 契約（docs/sprints/sprint-11c.md）の E2E。許可の入力の不具合修正
 // （飛行禁止法の「同意」と「通報」を分ける、「国交省 DIPS」の説明を動きに合わせる）。
 // 本番相当サーバー（baseURL、同梱データ）だけを使う。
+//
+// Sprint 11d で直した表示の検査（地点・入力・期待する規制の該当は変えていない）：
+// - 許可・同意は status（元の判定）を変えなくなった（満たす例外）。カードの data-status は該当（red／yellow）のまま、
+//   判定は data-verdict（procedure_done／needs_procedure）で確かめる。
+// - カードの「適用された例外節」の欄は「適用した許可・同意・目的（元の判定は変えない）」に改めた。
+// - 「国交省 DIPS」は種類ごとの入力になった。DID 上空の許可のチェック（「国交省 DIPS：DID 上空の飛行許可」）で確かめる。
 
 const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
 const waitDiagnose = (page: Page) =>
@@ -41,7 +47,9 @@ const openConditions = async (page: Page): Promise<void> => {
 const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
 const consent = (page: Page) => conditions(page).getByRole("checkbox", { name: "施設管理者の同意" });
 const notice = (page: Page) => conditions(page).getByRole("checkbox", { name: "公安委員会への通報" });
-const dips = (page: Page) => conditions(page).getByRole("checkbox", { name: "国交省 DIPS" });
+const DIPS_DID = "国交省 DIPS：DID 上空の飛行許可";
+const dips = (page: Page) => conditions(page).getByRole("checkbox", { name: DIPS_DID });
+const APPLIED = "適用した許可・同意・目的";
 
 /** チェックを切り替え、再判定（地点判定・申請支援診断）が終わるのを待つ。 */
 const toggle = async (box: Locator, page: Page, on: boolean): Promise<void> => {
@@ -90,12 +98,14 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
 
     await toggle(consent(page), page, true);
     await expect(sdl).toHaveAttribute("data-status", "red");
-    await expect(sdl).not.toContainText("適用された例外節");
+    await expect(sdl).toHaveAttribute("data-verdict", "needs_procedure");
+    await expect(sdl).not.toContainText(APPLIED);
 
     await toggle(consent(page), page, false);
     await toggle(notice(page), page, true);
     await expect(sdl).toHaveAttribute("data-status", "red");
-    await expect(sdl).not.toContainText("適用された例外節");
+    await expect(sdl).toHaveAttribute("data-verdict", "needs_procedure");
+    await expect(sdl).not.toContainText(APPLIED);
   });
 
   test("4・11. 同意と通報の両方で例外が適用と表示され、PDF の取得済み許可に同意と通報が別の語で出る", async ({
@@ -107,9 +117,11 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
     await toggle(consent(page), page, true);
     await toggle(notice(page), page, true);
     const sdl = card(page, "small-drone-law");
-    await expect(sdl).toContainText("適用された例外節");
+    await expect(sdl).toContainText(APPLIED);
     await expect(sdl).toContainText(SDL_EXCEPTION);
-    await expect(sdl).toHaveAttribute("data-status", "green");
+    // Sprint 11d：元の判定は該当のまま、判定は手続き済み（条件付き）
+    await expect(sdl).toHaveAttribute("data-status", "red");
+    await expect(sdl).toHaveAttribute("data-verdict", "procedure_done");
 
     const text = await exportPdf(page);
     expect(text).toContain("施設管理者の同意");
@@ -123,11 +135,14 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
     await openConditions(page);
     const pref = card(page, "31-pref-nuisance-prevention");
     await expect(pref).toHaveAttribute("data-status", /^(red|yellow)$/);
-    await expect(pref).not.toContainText("適用された例外節");
+    await expect(pref).not.toContainText(APPLIED);
+    const before = await pref.getAttribute("data-status");
 
     await toggle(consent(page), page, true);
-    await expect(pref).toHaveAttribute("data-status", "green");
-    await expect(pref).toContainText("適用された例外節");
+    // Sprint 11d：元の判定は変わらず、判定は手続き済み（条件付き）
+    await expect(pref).toHaveAttribute("data-status", before!);
+    await expect(pref).toHaveAttribute("data-verdict", "procedure_done");
+    await expect(pref).toContainText(APPLIED);
     await expect(pref).toContainText("施設管理者・自治体担当部署と事前調整し、合意を得た場合");
   });
 
@@ -149,14 +164,14 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
 });
 
 test.describe("B. DIPS の説明", () => {
-  test("7. 「国交省 DIPS」の説明に「空港」がなく「DID」を含む", async ({ page }) => {
+  test("7. 「国交省 DIPS」（DID 上空の許可）の説明に「空港」がなく「DID」を含む", async ({ page }) => {
     await openReady(page);
     await openConditions(page);
     const label = conditions(page)
       .locator("label")
-      .filter({ has: page.getByRole("checkbox", { name: "国交省 DIPS" }) });
+      .filter({ has: page.getByRole("checkbox", { name: DIPS_DID }) });
     const text = await label.innerText();
-    const desc = text.replace("国交省 DIPS", "");
+    const desc = text.replace(DIPS_DID, "");
     expect(desc).toContain("DID");
     expect(desc).not.toContain("空港");
   });
@@ -230,7 +245,7 @@ test.describe("C. 旧形式の判定履歴の復元（evaluator 差し戻し 1 �
 
       const sdl = card(page, "small-drone-law");
       await expect(sdl).toHaveAttribute("data-status", "red");
-      await expect(sdl).not.toContainText("適用された例外節");
+      await expect(sdl).not.toContainText(APPLIED);
 
       await openConditions(page);
       await expect(notice(page)).not.toBeChecked();

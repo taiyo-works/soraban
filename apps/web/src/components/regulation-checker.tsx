@@ -9,7 +9,11 @@ import {
 } from "@soraban/geo";
 import {
   CONFIDENCE_LABEL,
-  STATUS_LABEL,
+  DIPS_PERMIT_KINDS,
+  DIPS_PERMIT_LABEL,
+  DRONE_THRESHOLD_G,
+  MODEL_AIRCRAFT_WEIGHT_NOTE,
+  MODEL_AIRCRAFT_WEIGHT_TAG,
   shouldWarnConfidence,
   FLIGHT_METHOD_FLAGS,
   AIRSPACE_FLAGS,
@@ -20,8 +24,8 @@ import {
   type DiagnosisCategory,
   type FlightContext,
   type ManualChoice,
+  type DipsPermitKind,
   type RegulationCheckResult,
-  type RegulationStatus,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 
@@ -41,6 +45,8 @@ import {
   createHistoryRunId,
   getHistoryServerSnapshot,
   getHistorySnapshot,
+  historyVerdictDisplay,
+  markHistoryDiagnosisFailed,
   recordHistoryCheck,
   recordHistoryDiagnosis,
   removeHistory,
@@ -48,30 +54,22 @@ import {
   type SavedCheck,
   type SavedDiagnosisInput,
 } from "@/lib/history";
-import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
+import { VerdictSummary } from "./verdict-summary";
+import { VerdictMark } from "./verdict-mark";
+import { VERDICT_CHECK_FAILED_NOTE } from "@/lib/verdict-display";
 import {
   buildPilotPermits,
+  EMPTY_DIPS_CHECKS,
   normalizeRestoredCtx,
   permitChecksFromPilotPermits,
+  type DipsPermitChecks,
 } from "@/lib/permits";
 import { RegulationMap, type MapPickMethod } from "./regulation-map";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
-const overallTone: Record<RegulationStatus, string> = {
-  red: "text-signal-red",
-  yellow: "text-signal-amber",
-  green: "text-signal-green",
-  unknown: "text-ink-mute",
-};
-
-const overallHelp: Record<RegulationStatus, string> = {
-  red: "1件以上の規制で飛行不可。許可取得または別地点での運用を検討してください。",
-  yellow: "要確認の規制があります。詳細を確認のうえ、必要に応じて許可申請してください。",
-  green: "現在チェックした全ての規制で、適用外または例外節該当（飛行可能と判断できる状態）です。",
-  unknown:
-    "一部の規制でデータが未整備のため、飛行可否を確証できません。下記カードで「未整備」となっている項目を確認し、該当機関に直接ご確認ください。",
-};
+// Sprint 11d：結論は 4 段の判定（VerdictSummary）。信号の 3 灯と STATUS_LABEL・overallHelp は廃止した
+// （段階の説明は @soraban/regulations の VERDICT_HELP）。
 
 // 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
 const sameFlagSet = (
@@ -285,6 +283,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // result を求めたときの ctx（カードの補足・PDF の「取得済み許可」を判定結果と揃えるため）。
   const [resultCtx, setResultCtx] = useState<FlightContext | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  // 地点判定（/api/check）の失敗と、result を求めた地点（差し戻し 3 回目 F3：前の地点の結果を混ぜない）。
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const [resultLoc, setResultLoc] = useState<LatLng | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
   const [pdfBusy, setPdfBusy] = useState<boolean>(false);
@@ -293,7 +294,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // 空文字 = "未指定"。最も厳しい解釈になる。
   // 数値 < 100 で 100g 未満例外がマッチし、DID/空港 → green に降格（飛行禁止法は 100g 未満も対象）。
   const [droneWeightInput, setDroneWeightInput] = useState<string>("");
-  const [hasMlitPermit, setHasMlitPermit] = useState<boolean>(false);
+  // 国交省 DIPS の許可・承認（種類ごと。Sprint 11d B1）。空港等周辺は入力に含めない。
+  const [dipsChecks, setDipsChecks] = useState<DipsPermitChecks>(EMPTY_DIPS_CHECKS);
   // 施設管理者の同意と公安委員会への通報（飛行禁止法）は別の入力（Sprint 11c）。
   const [hasFacilityConsent, setHasFacilityConsent] = useState<boolean>(false);
   const [hasPubsafetyNotice, setHasPubsafetyNotice] = useState<boolean>(false);
@@ -323,6 +325,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const [doneMap, setDoneMap] = useState<Readonly<Record<string, boolean>>>({});
   const [diagnosis, setDiagnosis] = useState<DiagnoseResponse | null>(null);
   const [diagnoseError, setDiagnoseError] = useState<string | null>(null);
+  // /api/diagnose の応答待ち（画面の結論は診断の判定を使い、届くまで「判定中」とする。未決 5）。
+  const [diagPending, setDiagPending] = useState<boolean>(true);
   // 履歴復元中の useEffect 二重発火を抑止するフラグ。
   const isRestoringRef = useRef<boolean>(false);
   // 地点変更ハンドラが空域 state をリセットした直後の診断 effect を 1 回だけ抑止する
@@ -336,6 +340,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const checkSeqRef = useRef<number>(0);
   const diagSeqRef = useRef<number>(0);
 
+  // 100g 未満（模型航空機）の入力か（重さの欄の表示用。判定はサーバーが行う）。
+  const isModelAircraftWeight =
+    droneWeightInput.trim().length > 0 &&
+    Number.isFinite(Number(droneWeightInput)) &&
+    Number(droneWeightInput) >= 0 &&
+    Number(droneWeightInput) < DRONE_THRESHOLD_G;
+
   const startNewRun = (): string => {
     const id = createHistoryRunId();
     runIdRef.current = id;
@@ -347,6 +358,36 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.derivedAirspaceFlags : [];
   const autoDidStatus =
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.autoDidStatus : undefined;
+  // 画面の結論に使う判定（未決 5）：現在の入力で成功した診断の判定（飛行の方法を含む）だけを使う。
+  // 届くまでは「判定中」。診断が失敗したときは「判定できません」とし、古い診断の判定も、飛行の方法を含まない
+  // 地点だけの判定（/api/check）も使わない（差し戻し 2 回目。見落としゼロ）。
+  const diagnosisIsCurrent = diagnosis !== null && sameLoc(center, diagnosis);
+  const verdictFailed = diagnoseError !== null && !diagPending;
+  const screenVerdict =
+    diagnosisIsCurrent && !diagPending && !verdictFailed && diagnosis.verdict !== undefined
+      ? diagnosis.verdict
+      : undefined;
+  // 地点判定の結果が現在の地点のものか。地点判定が失敗している間は、前の地点の規制・証跡 ID を出さない。
+  const resultIsCurrent = result !== null && resultLoc !== null && sameLoc(center, resultLoc);
+  const checkFailed = checkError !== null && !isChecking;
+  const conclusionFailed = verdictFailed || checkFailed;
+  const verdictPending =
+    !conclusionFailed &&
+    (diagPending || isChecking || screenVerdict === undefined || !resultIsCurrent);
+  const canExportPdf =
+    screenVerdict !== undefined && !verdictPending && !conclusionFailed && resultIsCurrent;
+  const showResultDetail = result !== null && resultIsCurrent && !checkFailed;
+  // 再試行：地点判定が失敗していれば地点判定と診断を新しい実行としてやり直し、診断だけの失敗なら診断をやり直す。
+  const retryVerdict = (): void => {
+    if (checkFailed) {
+      const runId = startNewRun();
+      runCheck(center, undefined, undefined, runId);
+      void runDiagnose(center, {}, runId);
+    } else {
+      void runDiagnose(center);
+    }
+  };
+
   // エンジンの DID 判定が確定（該当・非該当）しているときは、プリセットの curated DID フラグを使わない。
   const effectiveAirspaceFlags: readonly SpecificFlightFlag[] = mergeAirspaceFlags({
     derivedFlags: autoAirspaceFlags,
@@ -443,7 +484,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     setDroneWeightInput(weightStr);
     // 旧形式（facility_manager_and_pref_pubsafety）からは通報を済み扱いに戻さない（Sprint 11c）。
     const permitChecks = permitChecksFromPilotPermits(restoredCtx?.pilotPermits);
-    setHasMlitPermit(permitChecks.mlit);
+    setDipsChecks(permitChecks.dips);
     setHasFacilityConsent(permitChecks.facilityConsent);
     setHasPubsafetyNotice(permitChecks.pubsafetyNotice);
     setHasParkPermit(permitChecks.park);
@@ -491,6 +532,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       accessMode: nextAccessMode,
       bvlosObserver: nextBvlosObserver,
       droneWeightG: plan.ctx?.droneWeightG ?? null,
+      ctx: restoredCtx ?? null,
       manualChoice: nextManualChoice,
       completedProcedureIds: nextCompletedIds,
     }, runId).finally(() => {
@@ -510,8 +552,17 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // PDF ダウンロード。@react-pdf/renderer は ~4MB あるので動的 import で
   // 初期バンドルに含めない（ボタン押下時に 1 度だけ取得）。
   const handlePdfExport = async (): Promise<void> => {
-    // 再判定の応答待ちの間は、画面の入力と食い違う旧い結果で PDF を出さない。
-    if (!result || isChecking) return;
+    // 再判定の応答待ちの間・診断が失敗した間は、画面の入力と食い違う旧い結果で PDF を出さない。
+    if (
+      !result ||
+      isChecking ||
+      !canExportPdf ||
+      !resultIsCurrent ||
+      checkError !== null ||
+      screenVerdict === undefined ||
+      diagnosis === null
+    )
+      return;
     setPdfBusy(true);
     try {
       const [{ pdf }, { RegulationPdfDocument }] = await Promise.all([
@@ -520,17 +571,22 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       ]);
       // 画面に出ている判定結果を求めたときの ctx を使う（入力の変更と再判定の間でずれないように）。
       const ctx = resultCtx;
+      // 結論・段取りは画面と同じ判定（診断の判定。飛行の方法を含む）を使い、その診断の証跡 ID で出す
+      // （診断だけの入力を変えたとき、内容の違う PDF が同じ ID・同じファイル名にならないように。PR #23 P1）。
+      const diagnosisEvidenceId = diagnosis.evidenceId;
       const blob = await pdf(
         <RegulationPdfDocument
           result={result}
           loc={center}
           ctx={ctx}
+          verdict={screenVerdict}
+          diagnosisEvidenceId={diagnosisEvidenceId}
         />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `soraban-${result.evidenceId}.pdf`;
+      anchor.download = `soraban-${diagnosisEvidenceId}.pdf`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -552,7 +608,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       ctx.droneWeightG = w;
     }
     const permits = buildPilotPermits({
-      mlit: hasMlitPermit,
+      dips: dipsChecks,
       park: hasParkPermit,
       facilityConsent: hasFacilityConsent,
       pubsafetyNotice: hasPubsafetyNotice,
@@ -588,6 +644,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         if (seq !== checkSeqRef.current) return; // 古い応答は無視
         setResult(res);
         setResultCtx(ctx);
+        setResultLoc(loc);
+        setCheckError(null);
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
@@ -599,6 +657,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           loc,
           ctx,
           overall: res.overall,
+          ...(res.verdict
+            ? { verdict: res.verdict.level, verdictUnknownCount: res.verdict.unknownCount }
+            : {}),
           resolvedAddress: res.resolvedAddress,
           engineVersion: res.engineVersion,
           checkedAt: res.checkedAt,
@@ -607,6 +668,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         });
       } catch (err) {
         if (isAbortError(err) || seq !== checkSeqRef.current) return;
+        setCheckError((err as Error).message);
         setError(`判定に失敗しました: ${(err as Error).message}`);
       }
     });
@@ -620,6 +682,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     readonly accessMode?: "" | "yes" | "no_third_party";
     readonly bvlosObserver?: "" | "with" | "without";
     readonly droneWeightG?: number | null;
+    /** 許可・目的を取り出す ctx（履歴の復元。未指定は画面の入力から組み立てる）。 */
+    readonly ctx?: FlightContext | null;
     readonly manualChoice?: ManualChoice;
     readonly completedProcedureIds?: readonly string[];
   };
@@ -646,11 +710,14 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     const effPlannedDate = overrides.plannedDate ?? plannedDate;
     const effAccessMode = overrides.accessMode ?? accessMode;
     const effBvlosObserver = overrides.bvlosObserver ?? bvlosObserver;
+    // 許可・目的（Sprint 11d B2）。地点判定と同じ ctx から取り出す。
+    const effCtx = overrides.ctx !== undefined ? (overrides.ctx ?? undefined) : buildCtx();
 
     diagAbortRef.current?.abort();
     const controller = new AbortController();
     diagAbortRef.current = controller;
     const seq = ++diagSeqRef.current;
+    setDiagPending(true);
 
     try {
       const res = await diagnoseLocation(
@@ -664,12 +731,15 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           thirdPartyOverflight: effAccessMode === "no_third_party" ? true : undefined,
           bvlosWithObserver: effBvlosObserver === "" ? undefined : effBvlosObserver === "with",
           didConfirmedNotApplicable: effDidConfirmed,
+          ...(effCtx?.pilotPermits ? { pilotPermits: effCtx.pilotPermits } : {}),
+          ...(effCtx?.purpose ? { purpose: effCtx.purpose } : {}),
         },
         controller.signal,
       );
       if (seq !== diagSeqRef.current) return; // 古い応答は無視
       setDiagnosis(res);
       setDiagnoseError(null);
+      setDiagPending(false);
       // 自動検出の空域フラグは state に書き戻さない（表示は diagnosis から導出）。
       const effectiveAirspace = mergeAirspaceFlags({
         derivedFlags: res.derivedAirspaceFlags,
@@ -695,11 +765,18 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           procedureCount: res.procedures.length,
           didStatus: res.didStatus,
           ...(res.didDetail !== undefined ? { didDetail: res.didDetail } : {}),
+          // 飛行の方法を含む判定（画面の結論と同じ）。履歴の表示はこれを使う（PR #23 P1）。
+          ...(res.verdict
+            ? { verdict: res.verdict.level, verdictUnknownCount: res.verdict.unknownCount }
+            : {}),
         },
       });
     } catch (err) {
       if (isAbortError(err) || seq !== diagSeqRef.current) return;
+      setDiagPending(false);
       setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
+      // 履歴に前の診断の判定や地点だけの判定を残さない（判定未確定。差し戻し 2 回目）。
+      markHistoryDiagnosisFailed(runId);
     }
   };
 
@@ -715,7 +792,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     droneWeightInput,
-    hasMlitPermit,
+    dipsChecks,
     hasFacilityConsent,
     hasPubsafetyNotice,
     hasParkPermit,
@@ -1096,14 +1173,26 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   className={`${fieldClass} flex-1 font-mono`}
                   placeholder="例: 900／80（100g 未満の機体）"
                 />
-                {droneWeightInput.trim().length > 0 && Number(droneWeightInput) < 100 ? (
-                  <span className="text-[11px] tracking-wide text-signal-green whitespace-nowrap">
-                    100g 未満の例外
+                {isModelAircraftWeight ? (
+                  <span
+                    data-testid="model-aircraft-tag"
+                    className="whitespace-nowrap border border-ink/60 bg-paper px-1.5 py-px font-medium text-[11px] tracking-wide text-ink"
+                  >
+                    {MODEL_AIRCRAFT_WEIGHT_TAG}
                   </span>
                 ) : null}
               </div>
-              <span className="text-[10px] leading-tight text-ink-mute">
-                100g 未満は航空法上の無人航空機に非該当（DID / 空港が対象外。小型無人機等飛行禁止法は 100g 未満も対象）
+              <span
+                data-testid="model-aircraft-weight-note"
+                className={
+                  isModelAircraftWeight
+                    ? "border-l-2 border-ink/60 pl-2 text-[11px] leading-relaxed text-ink-soft"
+                    : "text-[10px] leading-tight text-ink-mute"
+                }
+              >
+                {isModelAircraftWeight
+                  ? MODEL_AIRCRAFT_WEIGHT_NOTE
+                  : "100g 未満の機体は模型航空機として判定します（航空法の無人航空機の規制は対象外。空港等の周辺と高い空域の手続き、小型無人機等飛行禁止法・条例は対象）"}
               </span>
             </label>
 
@@ -1140,13 +1229,6 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                  左の罫と枡の間の「＋」でひとまとまりに見せる。 */
               const permitItems = [
                 {
-                  state: hasMlitPermit,
-                  set: setHasMlitPermit,
-                  key: "mlit",
-                  label: "国交省 DIPS",
-                  desc: "航空法 DID（人口集中地区）の許可",
-                },
-                {
                   state: hasParkPermit,
                   set: setHasParkPermit,
                   key: "park",
@@ -1177,7 +1259,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   desc: "飛行の 48 時間前までに通報済み（飛行禁止法の対象施設の周辺だけで使う）",
                 },
               ];
-              const renderPermit = (p: (typeof permitItems)[number]) => (
+              const renderPermit = (p: {
+                readonly state: boolean;
+                readonly set: (v: boolean) => void;
+                readonly key: string;
+                readonly label: string;
+                readonly desc: string;
+              }) => (
                 <label
                   key={p.key}
                   className={`flex min-h-[52px] cursor-pointer items-start gap-2 px-3 py-3 transition-colors ${p.state ? "bg-brand-50" : "bg-paper active:bg-paper-soft sm:hover:bg-paper-soft"}`}
@@ -1196,9 +1284,36 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   </span>
                 </label>
               );
+              // 国交省 DIPS の許可・承認（種類ごと。Sprint 11d B1）。空港等周辺は入力に含めない
+              // （空港ごとの個別の許可と空港の設置管理者等との調整が要るため）。
+              const DIPS_DESC: Readonly<Record<DipsPermitKind, string>> = {
+                did: "航空法 DID（人口集中地区）の許可",
+                "150m": "地表・水面から 150m 以上の空域",
+                night: "日没後から日出まで",
+                bvlos: "目視の範囲外",
+                "30m": "人・物件から 30m 未満",
+                event: "祭礼・催しの場所の上空",
+                dangerous: "危険物の輸送",
+                drop: "物件の投下",
+              };
+              const dipsItems = DIPS_PERMIT_KINDS.map((k) => ({
+                state: dipsChecks[k],
+                set: (v: boolean) => setDipsChecks((prev) => ({ ...prev, [k]: v })),
+                key: `dips-${k}`,
+                label: `国交省 DIPS：${DIPS_PERMIT_LABEL[k]}`,
+                desc: DIPS_DESC[k],
+              }));
               return (
                 <div className="flex flex-col gap-px overflow-hidden bg-rule">
-                  <div className="grid grid-cols-1 gap-px sm:grid-cols-3">
+                  <div data-testid="dips-permits" className="flex flex-col gap-px bg-rule">
+                    <p className="bg-paper px-3 pt-2 text-[11px] leading-snug text-ink-mute">
+                      国交省 DIPS の許可・承認（種類ごと。範囲・期間は照合しません。空港等周辺は個別の許可のため入力に含めません）
+                    </p>
+                    <div className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4">
+                      {dipsItems.map(renderPermit)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-px sm:grid-cols-2">
                     {permitItems.map(renderPermit)}
                   </div>
                   <div className="relative border-l-2 border-brand-700 bg-rule">
@@ -1512,42 +1627,49 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       </div>
 
       {/* ─── RESULT ───────────────────────────────── */}
-      {result ? (
+      {result || checkError ? (
         <section
           className="flex flex-col gap-6 border-y border-double border-rule bg-paper-soft/40 p-4 sm:gap-7 sm:p-6"
           aria-live="polite"
         >
-          {/* signal + headline */}
-          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-            <SignalLight status={result.overall === "unknown" ? "yellow" : result.overall} size="lg" />
-            <div className="flex flex-1 flex-col gap-1">
-              <p className="eyebrow">
-                <span aria-hidden className="bearing-mark" />
-                総合判定
-              </p>
-              <p className={`font-display text-3xl font-light tracking-tight ${overallTone[result.overall]}`}>
-                {STATUS_LABEL[result.overall]}
-              </p>
-              <p className="text-sm leading-relaxed text-ink-soft">
-                {overallHelp[result.overall]}
-              </p>
+          {/* 結論（4 段の判定）と段取り（Sprint 11d D1） */}
+          <VerdictSummary
+            verdict={screenVerdict}
+            pending={verdictPending}
+            failed={conclusionFailed}
+            {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
+            onRetry={retryVerdict}
+            meta={
               <p className="font-mono text-[11px] tnum text-ink-mute">
                 {lat}°N · {lng}°E
-                {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
+                {showResultDetail && result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => void handlePdfExport()}
-              disabled={pdfBusy || isChecking}
-              className="inline-flex h-11 items-center gap-2 self-stretch rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium uppercase tracking-wider text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:opacity-40 sm:self-start"
-              title="この判定を A4 1 枚 PDF レポートとして書き出し"
-            >
-              <span aria-hidden className="font-mono text-[10px] tracking-[0.2em] opacity-70">▾</span>
-              {pdfBusy ? "PDF 生成中…" : "PDF 出力"}
-            </button>
-          </div>
+            }
+            actions={
+              <button
+                type="button"
+                onClick={() => void handlePdfExport()}
+                disabled={pdfBusy || isChecking || !canExportPdf}
+                className="inline-flex h-11 items-center gap-2 self-stretch rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium uppercase tracking-wider text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:opacity-40 sm:self-start"
+                title="この判定を A4 PDF レポートとして書き出し"
+              >
+                <span aria-hidden className="font-mono text-[10px] tracking-[0.2em] opacity-70">▾</span>
+                {pdfBusy ? "PDF 生成中…" : "PDF 出力"}
+              </button>
+            }
+          />
 
+          {!showResultDetail ? (
+            <p
+              data-testid="regulations-unavailable"
+              className="border border-dashed border-rule bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft"
+            >
+              この地点の地点判定の結果がまだありません（判定中、または失敗）。規制ごとの判定と証跡 ID は、地点判定が出てから表示します。
+            </p>
+          ) : null}
+
+          {showResultDetail ? (
+          <>
           {/* 低確信度警告 — 確信度が閾値未満のときだけ警告を出す */}
           {shouldWarnConfidence(result.overallConfidence) ? (
             <div className="border-l-2 border-signal-amber bg-signal-amber-soft px-4 py-3 text-xs leading-relaxed text-ink-soft">
@@ -1574,7 +1696,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             </p>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
               {result.regulations.map((r) => (
-                <RegulationCard key={r.id} regulation={r} pilotPermits={resultCtx?.pilotPermits} />
+                <RegulationCard
+                  key={r.id}
+                  regulation={r}
+                  pilotPermits={resultCtx?.pilotPermits}
+                  verdictItem={result.verdict?.items.find((i) => i.id === r.id)}
+                  provisional={screenVerdict === undefined || verdictPending || conclusionFailed}
+                />
               ))}
             </div>
           </div>
@@ -1606,6 +1734,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               </dd>
             </div>
           </dl>
+          </>
+          ) : null}
         </section>
       ) : null}
 
@@ -1650,14 +1780,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
           <ul className="flex flex-col divide-y divide-rule">
             {history.slice(0, 10).map((h) => {
-              const dotTone =
-                h.overall === "red"
-                  ? "bg-signal-red"
-                  : h.overall === "yellow"
-                    ? "bg-signal-amber"
-                    : h.overall === "green"
-                      ? "bg-signal-green"
-                      : "bg-signal-mute";
+              // 判定の表示（Sprint 11d C5）：新形式は 4 段の言葉、旧形式は旧版の値であることを明示する。
+              const vd = historyVerdictDisplay(h);
               const checkedDate = new Date(h.checkedAt);
               const dateStr = `${String(checkedDate.getMonth() + 1).padStart(2, "0")}/${String(checkedDate.getDate()).padStart(2, "0")} ${String(checkedDate.getHours()).padStart(2, "0")}:${String(checkedDate.getMinutes()).padStart(2, "0")}`;
               const catShort: Record<DiagnosisCategory, string> = {
@@ -1679,8 +1803,23 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     className="flex flex-1 items-center gap-3 text-left transition-colors hover:bg-paper-soft"
                     title={`証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
                   >
-                    <span aria-hidden className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/20 ${dotTone}`} />
+                    {vd.level ? (
+                      <VerdictMark level={vd.level} size="sm" decorative />
+                    ) : (
+                      <span aria-hidden className="inline-block h-3.5 w-3.5 shrink-0 border border-dashed border-ink-mute" />
+                    )}
                     <span className="flex flex-1 flex-col leading-tight">
+                      <span
+                        data-testid="history-verdict"
+                        data-legacy={vd.legacy ? "true" : "false"}
+                        data-level={vd.level ?? ""}
+                        className="text-[11px] font-medium text-ink-soft"
+                      >
+                        {vd.label}
+                        {vd.unknownCount !== undefined && vd.unknownCount > 0
+                          ? `・判定不能 ${vd.unknownCount} 件`
+                          : ""}
+                      </span>
                       <span className="text-sm text-ink">
                         {h.resolvedAddress ?? `${h.loc.lat.toFixed(4)}°N · ${h.loc.lng.toFixed(4)}°E`}
                       </span>

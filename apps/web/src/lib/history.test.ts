@@ -4,7 +4,9 @@ import {
   clearHistory,
   createHistoryRunId,
   getHistorySnapshot,
+  historyVerdictDisplay,
   loadHistory,
+  markHistoryDiagnosisFailed,
   patchHistoryDiagnosis,
   recordHistoryCheck,
   recordHistoryDiagnosis,
@@ -381,4 +383,107 @@ describe("history.ts — Sprint 6 形式の履歴の互換（Sprint 7）", () =>
     expect(e?.diagnosisSummary?.didDetail).toBe("industrial_exclusive");
     expect(e?.engineVersion).toBe("soraban-0.2.0-clausegraph");
   });
+});
+
+// Sprint 11d 契約 14・C5：旧形式（verdict なし、0.3.0／0.2.0）は旧版の判定であることが分かる表示。
+describe("historyVerdictDisplay（Sprint 11d）", () => {
+  const base = {
+    evidenceId: "ev_x",
+    savedAt: "2026-10-20T00:00:00.000Z",
+    loc: { lat: 35.4, lng: 133.3 },
+    checkedAt: "2026-10-20T00:00:00.000Z",
+  };
+  it("旧形式は旧版の値を明示する（飛べると読める語を出さない）", () => {
+    const g = historyVerdictDisplay({ ...base, overall: "green", engineVersion: "soraban-0.3.0-regulations-2026-07" });
+    expect(g).toEqual({ label: "適用外（旧版の判定）", legacy: true });
+    const r = historyVerdictDisplay({ ...base, overall: "red", engineVersion: "soraban-0.2.0-clausegraph" });
+    expect(r.legacy).toBe(true);
+    expect(r.label).toContain("旧版の判定");
+    const bad = historyVerdictDisplay({ ...base, overall: "bogus" as never, engineVersion: "x" });
+    expect(bad.label).toBe("判定不能（旧版の判定）");
+  });
+  it("新形式は診断の判定（4 段の言葉と判定不能の件数）を出す", () => {
+    const v = historyVerdictDisplay({
+      ...base,
+      overall: "red",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_d",
+        category: "I",
+        isSpecificFlight: false,
+        procedureCount: 1,
+        verdict: "procedure_done",
+        verdictUnknownCount: 0,
+      },
+    });
+    expect(v).toEqual({ level: "procedure_done", label: "手続き済み（条件付き）", legacy: false, unknownCount: 0 });
+  });
+
+  it("地点だけの判定しか無い新形式の項目は判定未確定（手続き不要と出さない。差し戻し 2 回目）", () => {
+    const v = historyVerdictDisplay({
+      ...base,
+      overall: "green",
+      verdict: "no_procedure",
+      verdictUnknownCount: 0,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    });
+    expect(v.level).toBeUndefined();
+    expect(v.label).toContain("判定未確定");
+    expect(v.label).not.toContain("手続き不要");
+  });
+
+  it("診断の失敗で、その実行の診断の判定を外す（前の判定を残さない）", () => {
+    recordHistoryCheck("run_f", {
+      ...base,
+      evidenceId: "ev_check_f",
+      overall: "green",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    recordHistoryDiagnosis("run_f", {
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_d_f",
+        category: "I",
+        isSpecificFlight: false,
+        procedureCount: 1,
+        verdict: "no_procedure",
+        verdictUnknownCount: 0,
+      },
+    });
+    markHistoryDiagnosisFailed("run_f");
+    const e = loadHistory().find((x) => x.runId === "run_f")!;
+    expect(e.diagnosisSummary?.verdict).toBeUndefined();
+    expect(historyVerdictDisplay(e).label).toContain("判定未確定");
+  });
+
+  it("診断の判定（飛行の方法を含む）を地点だけの判定より優先し、地点判定が後から届いても上書きしない（PR #23 P1）", () => {
+    recordHistoryDiagnosis("run_d", {
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_diag",
+        category: "II_B_eligible",
+        isSpecificFlight: true,
+        procedureCount: 3,
+        verdict: "needs_procedure",
+        verdictUnknownCount: 0,
+      },
+    });
+    recordHistoryCheck("run_d", {
+      ...base,
+      evidenceId: "ev_check_d",
+      overall: "green",
+      verdict: "no_procedure",
+      verdictUnknownCount: 0,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    const e = loadHistory().find((x) => x.runId === "run_d")!;
+    expect(historyVerdictDisplay(e)).toMatchObject({ level: "needs_procedure", label: "要手続き" });
+    recordHistoryDiagnosis("run_d", {
+      diagnosisSummary: { ...e.diagnosisSummary!, verdict: "no_procedure" },
+    });
+    const e2 = loadHistory().find((x) => x.runId === "run_d")!;
+    expect(historyVerdictDisplay(e2).level).toBe("no_procedure");
+  });
+
+
 });

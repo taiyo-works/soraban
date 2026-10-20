@@ -14,6 +14,7 @@ import {
   computeOverall,
   computeOverallConfidence,
   DEFAULT_DISCLAIMER,
+  deriveFlightVerdict,
   ENGINE_VERSION,
   evaluateAirports,
   evaluateDid,
@@ -160,7 +161,10 @@ export const runRegulationCheckWith = async (
   });
 
   return {
+    // overall は元の判定（許可を当てる前）の集約。互換のため残す（0.4.0 から意味が変わった。spec §13.9.7）。
     overall: computeOverall(regulations),
+    // 判定（4 段）：地点だけ（飛行の方法なし）。画面の結論は /api/diagnose の判定を使う（未決 5）。
+    verdict: deriveFlightVerdict({ regulations, ctx }),
     overallConfidence: computeOverallConfidence(regulations),
     regulations,
     checkedAt,

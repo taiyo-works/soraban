@@ -64,6 +64,7 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0006 | 版の履歴 `record_versions`、追加前・追加後のトリガー、`record_version_hash`・`verify_record_chain`・`ops_bootstrap`、アプリ用ロールへの権限付与 |
 | 0007 | 運航管理（Sprint 11）：`daily_inspections`（日常点検記録）・`flight_records`（飛行記録）のヘッド表、時刻の関数（`ops_jst_minute_to_timestamptz` 等）、総飛行時間のビュー（`flight_record_totals`・`aircraft_flight_totals`・`pilot_flight_totals`）、アプリ用ロールへの権限付与 |
 | 0008 | 運航管理（Sprint 11）：`record_versions.entity_type` に `daily_inspection`・`flight_record` を追加、追加前・追加後のトリガーと `verify_record_chain` の置き換え（DB が飛行時間を求める、飛行記録の重なりの拒否） |
+| 0009 | 判定の 4 段（Sprint 11d）：`evidence_log` に `verdict`（check 制約つき）・`verdict_unknown_count`・`per_regulation_verdict`・`applied_permits` を追加（いずれも null 可。既存の行は null のまま）。`overall`・`per_regulation_status` の列のコメントに、意味を `engine_version` で読み分けること（0.3.0 までは許可を当てた後、0.4.0 からは許可を当てる前の元の判定）を記録。アプリ用ロールの権限は変えない（表単位の insert で新しい列にも追加できる） |
 
 ### ランナー
 
@@ -278,7 +279,7 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
 利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0008 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
 
 1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0003 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
-2. **マイグレーション 0004〜0008 を本番に適用する**（Sprint 11 の 0007・0008 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
+2. **マイグレーション 0004〜0009 を本番に適用する**（Sprint 11 の 0007・0008、Sprint 11d の 0009 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
 3. **Neon Auth を有効にする**：Neon コンソール → `soraban` → 既定ブランチ（本番）→ Auth → 有効化。aws-ap-southeast-1 で有効にできることをここで確かめる（できない場合は作業を止め、planner に戻す）。Auth URL を控える。プレビュー用・開発用のブランチでは有効にしない。
 4. **Google ログインを自社の資格情報にする**：Google Cloud コンソールで OAuth クライアント（ウェブアプリケーション）を作り、承認済みのリダイレクト URI に `{Auth URL}/callback/google`（末尾にスラッシュを付けない）を登録する。Neon の Auth の設定 → OAuth providers に Client ID・Secret を入れる。
 5. **Neon Auth の本番設定**：信頼するドメインに本番のドメインを追加、アプリ名を「そらばん」に、「Allow Localhost」を無効に。メールとパスワードによる登録を止められる場合は止める（止められなくても、アプリは確認済みのメールアドレスの招待者しか通さない）。

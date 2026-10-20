@@ -28,6 +28,7 @@ import {
   type IndustrialZone,
 } from "./industrial-exclusive";
 import { evaluateSmallDroneLaw } from "./small-drone-law";
+import type { FlightVerdict } from "./verdict";
 import {
   ALL_SENSITIVE_FACILITIES,
   IZUMO_HERITAGE_SITES,
@@ -58,7 +59,13 @@ import {
 } from "./zones";
 
 export type RegulationCheckResult = {
+  /**
+   * 元の判定の集約（computeOverall）。互換のため残す。0.4.0 からは許可を当てる前の元の判定から求める。
+   * 画面の結論は verdict（4 段）を使う。
+   */
   readonly overall: RegulationStatus;
+  /** 判定（4 段＋判定不能。Sprint 11d）。地点だけの判定（飛行の方法なし）。 */
+  readonly verdict?: FlightVerdict;
   readonly overallConfidence: ConfidenceLevel;
   readonly regulations: readonly RegulationWithStatus[];
   readonly checkedAt: string;
@@ -86,6 +93,7 @@ const DID_REG: Regulation = {
   summary:
     "国勢調査に基づく人口集中地区（DID）の上空での無人航空機の飛行は、原則として国土交通大臣の許可・承認が必要です。",
   url: "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+  legalTier: 1,
   dataYear: 2020,
   clauseGraph: {
     main: {
@@ -104,7 +112,8 @@ const DID_REG: Regulation = {
         id: "did-ex-permit",
         condition: "国土交通大臣の許可・承認を取得している場合",
         effect: "permit",
-        machine: { type: "permit_holder", value: "mlit" },
+        // Sprint 11d：DIPS の許可・承認を種類ごとに入力する。旧値 mlit は mlit:did として読む（LEGACY_PERMIT_ALIASES）。
+        machine: { type: "permit_holder", value: "mlit:did" },
       },
       {
         id: "did-ex-industrial-exclusive",
@@ -139,6 +148,7 @@ const AIRPORT_REG: Regulation = {
   summary:
     "空港等の周辺（進入表面・転移表面・水平表面の上空）での無人航空機の飛行は、原則として国土交通大臣の許可が必要です。",
   url: "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+  legalTier: 1,
   clauseGraph: {
     main: {
       text:
@@ -183,6 +193,7 @@ const buildMunicipalHeritageReg = (params: {
   title: `文化財保護法第125条 / ${params.muniName}文化財保護条例 — 史跡内の現状変更`,
   summary: `${params.muniName}内の国指定史跡では、文化財保護法第125条により現状変更には文化庁長官（実務上は教育委員会経由）の許可が必要。市指定文化財も${params.muniName}文化財保護条例で同様の規制があります。ドローン飛行に伴う墜落・離着陸・低空通過は史跡毀損リスクとして規制対象になり得ます。`,
   url: "https://www.bunka.go.jp/seisaku/bunkazai/shokai/shiseki/index.html",
+  legalTier: 1,
   clauseGraph: {
     main: {
       text:
@@ -234,6 +245,7 @@ const buildPrefecturalNuisanceReg = (params: {
   title: `${params.prefName}迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為`,
   summary: `${params.prefName}迷惑行為等防止条例では、公衆に著しい迷惑をかける行為を禁じています。病院・学校・庁舎・駅・温泉街など公衆密集地周辺での無人航空機の飛行は、騒音・落下リスクの観点から自粛・事前調整が推奨されます。`,
   url: params.url,
+  legalTier: 2,
   clauseGraph: {
     main: {
       text:
@@ -287,6 +299,7 @@ const buildMunicipalParkReg = (params: {
   title: `${params.muniName}都市公園条例 — 都市公園内での無人航空機の使用`,
   summary: `${params.muniName}内の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要です。`,
   url: params.url,
+  legalTier: 2,
   clauseGraph: {
     main: {
       text:
@@ -610,10 +623,12 @@ export const evaluateAirports = (
       ...applyExemptions(
         {
           status: "red",
-          note: `判定地点は ${onAirport.name} の敷地内です。航空法に基づき、許可・承認なしに飛行できません。`,
+          note: `判定地点は ${onAirport.name} の敷地内です。空港の敷地内は飛行できません（許可・同意を入力しても変わりません）。`,
           clauseGraph: AIRPORT_REG.clauseGraph,
         },
         ctx,
+        // 空港の敷地内は飛行不可の区分（Sprint 11d A4）。満たす例外を当てない。
+        { noFly: true },
       ),
     };
   }
@@ -1028,12 +1043,8 @@ export const computeOverallConfidence = (
   return worst;
 };
 
-export const STATUS_LABEL: Readonly<Record<RegulationStatus, string>> = {
-  red: "飛行不可",
-  yellow: "要確認・要許可",
-  green: "飛行可能",
-  unknown: "判定不能（未整備）",
-};
+// Sprint 11d：旧 STATUS_LABEL（信号の 3 色の表示）は廃止。画面・PDF の結論は VERDICT_LABEL（4 段＋判定不能）、
+// 規制ごとの元の判定は BASE_STATUS_LABEL、旧版の履歴は LEGACY_STATUS_LABEL を使う（verdict.ts）。
 
 export const SOURCE_LABEL: Readonly<Record<RegulationSource, string>> = {
   国: "国",
@@ -1090,12 +1101,52 @@ export type { HeritageSite, Park, SensitiveFacility } from "./zones";
 export type {
   DidDetail,
   FacilityHit,
+  LegalTier,
   Regulation,
   RegulationSource,
   RegulationStatus,
   RegulationWithStatus,
 } from "./core";
-export { applyExemptions } from "./core";
+export { applyExemptions, LEGAL_TIER_LABEL } from "./core";
+
+// ── 判定の 4 段（Sprint 11d）──
+export type {
+  AppliedPermit,
+  DeriveFlightVerdictInput,
+  DipsPermitKind,
+  FlightVerdict,
+  ItemVerdict,
+  PerFlightDuty,
+  PerFlightDutyKind,
+  VerdictDeadline,
+  VerdictDoneItem,
+  VerdictItem,
+  VerdictLevel,
+  VerdictNoFlyItem,
+  VerdictProcedure,
+} from "./verdict";
+export {
+  aggregateVerdictLevel,
+  BASE_STATUS_LABEL,
+  deriveFlightVerdict,
+  DIPS_PERMIT_BY_FLAG,
+  DIPS_PERMIT_KINDS,
+  DIPS_PERMIT_LABEL,
+  dipsDeadline,
+  dipsPermitValue,
+  LEGACY_STATUS_LABEL,
+  PERMIT_SCOPE_NOT_VERIFIED_NOTE,
+  PERMIT_VALUE_LABEL,
+  perRegulationVerdict,
+  PURPOSE_EXCEPTION_CONDITION,
+  PURPOSE_VALUE_LABEL,
+  smallDroneConsentDeadline,
+  smallDroneNoticeDeadline,
+  sortVerdictProcedures,
+  VERDICT_HELP,
+  VERDICT_LABEL,
+  VERDICT_LEVELS,
+} from "./verdict";
 
 // ── データセット台帳・反映済みの法令改正（Sprint 7）──
 export type { AmendmentRef, DatasetRecord, DatasetRef } from "./datasets";
@@ -1167,6 +1218,7 @@ export { buildCheckEvidencePayload, ENGINE_VERSION, PREVIOUS_ENGINE_VERSIONS } f
 export {
   AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   AIRPORT_REGULATION_ID,
+  isDipsPermitValue,
   shouldShowAirportMlitNote,
 } from "./permit-notes";
 
@@ -1179,11 +1231,17 @@ export type {
   MachineCondition,
   MachineConditionType,
 } from "./clause-graph";
+export type { ExceptionKind } from "./clause-graph";
 export {
   CLAUSE_EFFECT_LABEL,
+  exceptionKind,
+  findExcludingExceptions,
   findPermittingExceptions,
+  findSatisfyingExceptions,
   formatMachineCondition,
+  LEGACY_PERMIT_ALIASES,
   matchesException,
+  normalizePilotPermits,
 } from "./clause-graph";
 
 export type { ConfidenceLevel, RegulationConfidence } from "./confidence";
@@ -1277,3 +1335,29 @@ export {
 // 住所検索（Sprint 9）の型と定数。検索本体（索引を含む）は "@soraban/regulations/address" から import する。
 export type { GeocodeHit, GeocodeLevel, GeocodeSource } from "./address/types";
 export { GEOCODE_LEVELS, GEOCODE_SOURCES } from "./address/types";
+
+// ── 100g 未満の機体（模型航空機）の扱い（Sprint 11e）──
+export type { ModelAircraftReference } from "./model-aircraft";
+export {
+  MODEL_AIRCRAFT_AIRPORT_ITEM_TITLE,
+  MODEL_AIRCRAFT_AIRPORT_PROCEDURE_TITLE,
+  MODEL_AIRCRAFT_AIRPORT_REASON,
+  MODEL_AIRCRAFT_CATEGORY_HEADLINE,
+  MODEL_AIRCRAFT_CATEGORY_NOTE,
+  MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL,
+  MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE,
+  MODEL_AIRCRAFT_DEADLINE_LABEL,
+  MODEL_AIRCRAFT_EXEMPT_REASON,
+  MODEL_AIRCRAFT_HIGH_PROCEDURE_TITLE,
+  MODEL_AIRCRAFT_HIGH_REASON,
+  MODEL_AIRCRAFT_LAW,
+  MODEL_AIRCRAFT_ORDINANCE,
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_REFERENCES,
+  MODEL_AIRCRAFT_RULES_CHECKED_AT,
+  MODEL_AIRCRAFT_SUBMIT_TO,
+  MODEL_AIRCRAFT_UNVERIFIED,
+  MODEL_AIRCRAFT_WEIGHT_NOTE,
+  MODEL_AIRCRAFT_WEIGHT_TAG,
+  modelAircraftManualOverride,
+} from "./model-aircraft";

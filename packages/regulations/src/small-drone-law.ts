@@ -203,6 +203,7 @@ const SMALL_DRONE_LAW_REG: Regulation = {
   summary:
     "防衛関係施設・原子力事業所などの対象施設の敷地又は区域と、その周囲おおむね 1,000m の周辺地域の上空では、小型無人機等（100g 未満の機体も含む）の飛行が禁止されています。2026年7月14日施行の改正（令和8年法律第47号）で周辺地域がおおむね 1,000m に広がり、周辺地域での飛行も罰則（6月以下の拘禁刑又は50万円以下の罰金）の対象になりました。施設管理者の同意を得て、飛行の 48 時間前までに都道府県公安委員会へ通報すれば飛行できます。周辺地域は警察庁のいう「イエローゾーン」ですが飛行禁止のため、このアプリでは敷地とあわせて赤で示します。黄はその外側に設けた要確認帯で、法律上のイエローゾーンではありません。",
   url: "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html",
+  legalTier: 1,
   clauseGraph: {
     main: {
       text:
@@ -215,7 +216,12 @@ const SMALL_DRONE_LAW_REG: Regulation = {
         condition:
           "対象施設の管理者の同意を得たうえで、飛行の 48 時間前までに都道府県公安委員会へ通報した場合",
         effect: "permit",
-        machine: { type: "permit_holder", value: "facility_manager_and_pref_pubsafety" },
+        // Sprint 11d：同意（facility_manager）と通報（pref_pubsafety_notice）の両方がそろったときだけ当たる。
+        // 例外節の id は変えない。旧値 facility_manager_and_pref_pubsafety はどの例外節にも当たらない。
+        machine: {
+          type: "permit_holder_all",
+          values: ["facility_manager", "pref_pubsafety_notice"],
+        },
       },
     ],
     conditions: [

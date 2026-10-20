@@ -114,7 +114,7 @@ soraban-gules.vercel.app も古ければ A か C、新しければ B。
 - Google Fonts をビルド時に取得する。取得できない環境では `NEXT_FONT_GOOGLE_MOCKED_RESPONSES` でモックする（モックはリポジトリに入れない）。
 - E2E は国土地理院の逆ジオコーダを模擬サーバー（`e2e/mock-gsi-server.mjs`）で置き換える。Neon Auth は `e2e/mock-neon-auth-server.mjs`。
 - DB を使う E2E は `pnpm test:e2e:ops`（PostgreSQL＋PostGIS と soraban_app ロールが必要。手順は CI の db ジョブ）。
-- 証跡 ID：地点判定の証跡 ID と `ENGINE_VERSION`（`soraban-0.3.0-regulations-2026-07`）は、文言の変更では変えない。申請支援の証跡 ID は手続きデータの `revision`・確認日で変わる（版の変更として正しい）。
+- 証跡 ID：地点判定の証跡 ID と `ENGINE_VERSION`（Sprint 11d から `soraban-0.4.0-verdict-2026-10`。旧版 0.3.0 の証跡 ID は旧版の文字列を渡したペイロードで再現できる）は、文言の変更では変えない。申請支援の証跡 ID は手続きデータの `revision`・確認日で変わる（版の変更として正しい）。
 - 適用済みの SQL マイグレーションは書き換えない（チェックサムで止まる）。
 - Next.js は破壊的変更を含む版。実装前に `node_modules/next/dist/docs/` を参照（`apps/web/AGENTS.md`）。
 

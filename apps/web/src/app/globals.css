@@ -45,6 +45,15 @@
   --color-signal-mute: #9da4b1;
   --color-signal-mute-soft: #e6e6e2;
 
+  /* Verdict（判定の 4 段＋判定不能。Sprint 11d D2）
+   * 文字にも使うため紙の上で 4.5:1 以上（実測：飛行不可 6.14 / 要手続き 5.29 / 手続き済み 11.05 /
+   * 手続き不要 5.76 / 判定不能 6.67）。意味は言葉と形が担い、色は補助。 */
+  --color-verdict-no-fly: #a33232;
+  --color-verdict-needs: #8a5a0e;
+  --color-verdict-done: #1d3557;
+  --color-verdict-clear: #2e6a42;
+  --color-verdict-unknown: #4f5564;
+
   /* Geometry */
   --radius-sharp: 2px;
   --radius-soft: 6px;
@@ -78,6 +87,13 @@
     --color-signal-green-soft: #1a2a1f;
     --color-signal-mute: #5b6170;
     --color-signal-mute-soft: #1c2438;
+
+    /* 実測（紙 #0C1320）：6.43 / 8.77 / 9.81 / 8.01 / 7.33 */
+    --color-verdict-no-fly: #e27a72;
+    --color-verdict-needs: #dcaa4e;
+    --color-verdict-done: #a9bedc;
+    --color-verdict-clear: #74b98a;
+    --color-verdict-unknown: #a3a39c;
   }
 }
 
@@ -113,6 +129,13 @@
   --color-signal-green-soft: var(--color-signal-green-soft);
   --color-signal-mute: var(--color-signal-mute);
   --color-signal-mute-soft: var(--color-signal-mute-soft);
+
+  /* Verdict */
+  --color-verdict-no-fly: var(--color-verdict-no-fly);
+  --color-verdict-needs: var(--color-verdict-needs);
+  --color-verdict-done: var(--color-verdict-done);
+  --color-verdict-clear: var(--color-verdict-clear);
+  --color-verdict-unknown: var(--color-verdict-unknown);
 
   /* Geometry */
   --radius-sharp: var(--radius-sharp);

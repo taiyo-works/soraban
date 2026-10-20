@@ -16,6 +16,8 @@ export type ClauseEffect =
 
 export type MachineConditionType =
   | "permit_holder"
+  /** 複数の値を全て要求する（例：飛行禁止法の同意と通報。Sprint 11d）。values に値を並べる。 */
+  | "permit_holder_all"
   | "weight_below_g"
   | "weight_above_g"
   | "time_window"
@@ -27,6 +29,8 @@ export type MachineConditionType =
 export type MachineCondition = {
   readonly type: MachineConditionType;
   readonly value?: string | number;
+  /** permit_holder_all のみ：全てそろって満たす値。 */
+  readonly values?: readonly string[];
 };
 
 export type ClauseException = {
@@ -80,6 +84,10 @@ export const formatMachineCondition = (m: MachineCondition): string => {
     case "drone_class":
     case "in_zone":
       return m.value !== undefined ? `${m.type} == ${m.value}` : m.type;
+    case "permit_holder_all":
+      return m.values !== undefined && m.values.length > 0
+        ? `permit_holder_all == ${m.values.join(" + ")}`
+        : "permit_holder_all";
     case "time_window":
       return m.value !== undefined ? `time_window: ${m.value}` : "time_window";
     case "other":
@@ -115,6 +123,27 @@ export type FlightContext = {
 };
 
 /**
+ * 旧版の許可の値の読み替え（Sprint 11d）。0.3.0 までの「国交省 DIPS」（mlit）は、
+ * 入力の説明（航空法 DID）と動きに合わせて DID 上空の許可（mlit:did）として読む。
+ * 夜間・目視外などの承認には当てない（docs/sprints/sprint-11d.md 未決 2）。
+ */
+export const LEGACY_PERMIT_ALIASES: Readonly<Record<string, string>> = {
+  mlit: "mlit:did",
+};
+
+/** pilotPermits を旧値の読み替え込みで正規化する（重複除去・入力順を保つ）。 */
+export const normalizePilotPermits = (permits: readonly string[] | undefined): readonly string[] => {
+  if (!Array.isArray(permits)) return [];
+  const out: string[] = [];
+  for (const p of permits) {
+    if (typeof p !== "string") continue;
+    const v = LEGACY_PERMIT_ALIASES[p] ?? p;
+    if (!out.includes(v)) out.push(v);
+  }
+  return out;
+};
+
+/**
  * machine condition と FlightContext を突き合わせ、その例外節が適用可能かを返す。
  * machine が無い例外（ヒトが読むためのテキストのみ）は自動適用しない。
  */
@@ -142,8 +171,16 @@ export const matchesException = (
       return (
         Array.isArray(ctx.pilotPermits) &&
         typeof m.value === "string" &&
-        ctx.pilotPermits.includes(m.value)
+        normalizePilotPermits(ctx.pilotPermits).includes(m.value)
       );
+    case "permit_holder_all": {
+      // 全ての値がそろったときだけ当たる。値の指定がない節は当てない（安全側）。
+      if (!Array.isArray(ctx.pilotPermits) || !Array.isArray(m.values) || m.values.length === 0) {
+        return false;
+      }
+      const have = normalizePilotPermits(ctx.pilotPermits);
+      return m.values.every((v) => have.includes(v));
+    }
     case "purpose":
       return typeof ctx.purpose === "string" && ctx.purpose === m.value;
     case "drone_class":
@@ -157,8 +194,39 @@ export const matchesException = (
 };
 
 /**
- * ClauseGraph 全体に対し、ctx で適用可能な permit 効果の例外節を返す。
- * マッチした例外節がひとつでもあれば、評価器側で status を 1 段降格する。
+ * 例外節の種類（Sprint 11d、spec §13.9.3）。
+ *   - exclude（対象外にする例外）：機体重量（weight_below_g）・区域（in_zone）。当たると元の判定を green にする。
+ *   - satisfy（満たす例外）：許可・同意（permit_holder・permit_holder_all）・目的（purpose）など。
+ *     元の判定は変えず、判定を手続き済み（条件付き）にする。
+ * 迷う種類（drone_class 等）は満たす例外として扱う（元の判定を変えない＝安全側）。
+ */
+export type ExceptionKind = "exclude" | "satisfy";
+
+export const exceptionKind = (exception: ClauseException): ExceptionKind => {
+  const t = exception.machine?.type;
+  return t === "weight_below_g" || t === "in_zone" ? "exclude" : "satisfy";
+};
+
+/** ctx で当たる、対象外にする例外節（元の判定を green にする）。 */
+export const findExcludingExceptions = (
+  graph: ClauseGraph,
+  ctx: FlightContext | undefined,
+): readonly ClauseException[] =>
+  graph.exceptions.filter(
+    (ex) => ex.effect === "permit" && exceptionKind(ex) === "exclude" && matchesException(ex, ctx),
+  );
+
+/** ctx で当たる、満たす例外節（許可・同意・目的。元の判定は変えない）。 */
+export const findSatisfyingExceptions = (
+  graph: ClauseGraph,
+  ctx: FlightContext | undefined,
+): readonly ClauseException[] =>
+  graph.exceptions.filter(
+    (ex) => ex.effect === "permit" && exceptionKind(ex) === "satisfy" && matchesException(ex, ctx),
+  );
+
+/**
+ * ClauseGraph 全体に対し、ctx で適用可能な permit 効果の例外節を返す（種類を問わない。後方互換）。
  */
 export const findPermittingExceptions = (
   graph: ClauseGraph,

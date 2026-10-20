@@ -4,14 +4,19 @@
 // LRU で最大 50 件まで保持、超えたら最古を削除。
 
 import type { LatLng } from "@soraban/geo";
-import type {
-  AirspaceDeterminationStatus,
-  DiagnosisCategory,
-  DidDetail,
-  FlightContext,
-  ManualChoice,
-  RegulationStatus,
-  SpecificFlightFlag,
+import { HISTORY_UNDETERMINED_LABEL } from "./verdict-display";
+import {
+  LEGACY_STATUS_LABEL,
+  VERDICT_LABEL,
+  VERDICT_LEVELS,
+  type AirspaceDeterminationStatus,
+  type DiagnosisCategory,
+  type DidDetail,
+  type FlightContext,
+  type ManualChoice,
+  type RegulationStatus,
+  type SpecificFlightFlag,
+  type VerdictLevel,
 } from "@soraban/regulations";
 
 const STORAGE_KEY = "soraban:history:v1";
@@ -56,6 +61,12 @@ export type SavedDiagnosisSummary = {
   readonly didStatus?: AirspaceDeterminationStatus;
   /** DID 判定の詳細（「非該当（工業専用地域）」等の区別。Sprint 7 以降のエントリのみ）。 */
   readonly didDetail?: DidDetail;
+  /**
+   * 飛行の方法を含む判定（/api/diagnose の verdict。画面の結論と同じ。Sprint 11d）。
+   * 地点だけの判定（SavedCheck.verdict）より優先して表示する。旧形式のエントリには無い。
+   */
+  readonly verdict?: VerdictLevel;
+  readonly verdictUnknownCount?: number;
 };
 
 // SavedCheck: 履歴 1 エントリ。完全な RegulationCheckResult ではなく
@@ -68,7 +79,12 @@ export type SavedCheck = {
   readonly savedAt: string; // ISO
   readonly loc: LatLng;
   readonly ctx?: FlightContext;
+  /** 元の判定の集約（0.3.0 までは許可を当てた後の値）。互換のため残す。 */
   readonly overall: RegulationStatus;
+  /** 地点の判定（4 段。/api/check の verdict）。Sprint 11d より前の旧形式エントリには無い。 */
+  readonly verdict?: VerdictLevel;
+  /** 判定不能（データ未整備）の規制の件数。 */
+  readonly verdictUnknownCount?: number;
   readonly resolvedAddress?: string;
   readonly engineVersion: string;
   readonly checkedAt: string; // ISO
@@ -454,4 +470,71 @@ export const buildRestorePlan = (entry: SavedCheck): RestorePlan => {
     manualChoice: pick(input["manualChoice"], ["standard", "custom"] as const, "custom"),
     completedProcedureIds: sanitizeIds(input["completedProcedureIds"]),
   };
+};
+
+// ============================================================
+// 履歴の判定の表示（Sprint 11d C5）
+// ============================================================
+
+export type HistoryVerdictDisplay = {
+  /** 4 段の判定（旧形式は undefined）。 */
+  readonly level?: VerdictLevel;
+  readonly label: string;
+  /** 旧版（verdict なし）の値か。 */
+  readonly legacy: boolean;
+  readonly unknownCount?: number;
+};
+
+/**
+ * 履歴 1 件の判定の表示。新形式は 4 段の言葉、旧形式（verdict なし。0.3.0／0.2.0）は旧版の値であることを
+ * 明示した言葉（例：適用外（旧版の判定））。旧版の緑の表示の言葉（飛べると読める語）は新旧とも出さない。
+ */
+export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay => {
+  // 飛行の方法を含む診断の判定だけを結論として出す（PR #23 P1）。
+  // 地点だけの判定（entry.verdict）しか無い新形式の項目は、診断が未完了または失敗したものとして「判定未確定」と出す
+  // （飛行の方法を含まない判定で「手続き不要」と出さない。差し戻し 2 回目）。
+  const isLevel = (x: unknown): x is VerdictLevel =>
+    typeof x === "string" && (VERDICT_LEVELS as readonly string[]).includes(x);
+  const v = entry.diagnosisSummary?.verdict;
+  if (!isLevel(v) && isLevel(entry.verdict)) {
+    return { label: HISTORY_UNDETERMINED_LABEL, legacy: false };
+  }
+  if (isLevel(v)) {
+    const rawN = entry.diagnosisSummary!.verdictUnknownCount;
+    const n = typeof rawN === "number" ? rawN : undefined;
+    return { level: v, label: VERDICT_LABEL[v], legacy: false, ...(n !== undefined ? { unknownCount: n } : {}) };
+  }
+  const overall: RegulationStatus =
+    entry.overall === "red" || entry.overall === "yellow" || entry.overall === "green"
+      ? entry.overall
+      : "unknown";
+  return { label: LEGACY_STATUS_LABEL[overall], legacy: true };
+};
+
+/**
+ * 申請支援の診断が失敗したとき、その実行（runId）の履歴から診断の判定を外す（差し戻し 2 回目）。
+ * 前の診断の判定や地点だけの判定で「手続き不要」と残さず、「判定未確定」と出す。
+ */
+export const markHistoryDiagnosisFailed = (runId: string): readonly SavedCheck[] => {
+  const strip = (s: SavedDiagnosisSummary | undefined): SavedDiagnosisSummary | undefined => {
+    if (!s) return s;
+    const { verdict: _v, verdictUnknownCount: _n, ...rest } = s;
+    void _v;
+    void _n;
+    return rest;
+  };
+  const pendingAll = readPending();
+  if (pendingAll.some((p) => p.runId === runId)) {
+    writePending(
+      pendingAll.map((p) => (p.runId === runId ? { ...p, diagnosisSummary: strip(p.diagnosisSummary) } : p)),
+    );
+  }
+  const current = safeRead();
+  const idx = current.findIndex((e) => e.runId === runId);
+  if (idx === -1) return current;
+  const next = [...current];
+  next[idx] = { ...current[idx]!, diagnosisSummary: strip(current[idx]!.diagnosisSummary) };
+  safeWrite(next);
+  notifyChange();
+  return next;
 };

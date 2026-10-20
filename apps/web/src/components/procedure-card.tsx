@@ -1,6 +1,8 @@
 "use client";
 
-import type { RequiredProcedure } from "@soraban/regulations";
+import type { RequiredProcedure, VerdictDoneItem } from "@soraban/regulations";
+import { VERDICT_LABEL } from "@/lib/verdict-display";
+import { VerdictMark } from "./verdict-mark";
 import {
   isNoFlyConfirmation,
   PROCEDURE_BADGE_LABEL,
@@ -25,6 +27,8 @@ type Props = {
   readonly onToggleDone: (id: string, done: boolean) => void;
   /** 診断のカテゴリー（緊急用務空域のとき札の文言を変えるため。表示の対応付けだけ） */
   readonly category?: string;
+  /** 入力した許可・同意で満たしている（手続き済み（条件付き））とき、その項目（Sprint 11d B2）。手続きは消さない。 */
+  readonly satisfied?: VerdictDoneItem;
 };
 
 // システム系統バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分け、
@@ -38,13 +42,16 @@ const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
   都道府県公安委員会: "border-ink-soft text-ink-soft bg-paper",
 };
 
-export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, category }: Props) {
+export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, category, satisfied }: Props) {
   const kindLabel = procedureKindDisplayLabel(procedure);
   const noFly = isNoFlyConfirmation(procedure);
   const badge = procedureBadge(procedure, category);
   const verifiedAt = shortVerifiedAt(procedure.verifiedAt);
   return (
     <article
+      data-testid="procedure-card"
+      data-procedure-id={procedure.id}
+      data-verdict={satisfied ? "procedure_done" : ""}
       className={`flex flex-col gap-3 border p-5 transition-colors ${
         done ? "border-signal-green bg-signal-green-soft" : "border-rule bg-paper hover:border-ink/40"
       }`}
@@ -100,6 +107,23 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
           {procedure.title}
         </h4>
       </label>
+
+      {satisfied ? (
+        <div
+          data-testid="procedure-verdict-done"
+          className="flex flex-col gap-1 border border-rule border-l-4 border-l-verdict-done bg-paper px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
+        >
+          <p className="flex items-center gap-1.5 font-semibold text-ink">
+            <VerdictMark level="procedure_done" size="sm" decorative />
+            {VERDICT_LABEL.procedure_done}：{satisfied.appliedPermits.map((p) => p.label).join(" / ")}
+          </p>
+          <ul className="ml-[20px] flex flex-col gap-0.5 border-l-2 border-dashed border-verdict-done pl-2.5">
+            {satisfied.conditions.map((c) => (
+              <li key={c}>・{c}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {procedure.note ? (
         <p className="text-xs leading-relaxed text-ink-soft">{procedure.note}</p>
