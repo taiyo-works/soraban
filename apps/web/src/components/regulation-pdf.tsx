@@ -13,7 +13,6 @@ import {
   AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   CONFIDENCE_LABEL,
   ALL_AMENDMENTS,
-  BASE_STATUS_LABEL,
   PERMIT_VALUE_LABEL,
   VERDICT_LABEL,
   formatMachineCondition,
@@ -25,6 +24,14 @@ import {
   type FlightVerdict,
   type RegulationCheckResult,
 } from "@soraban/regulations";
+import {
+  EXCLUDED_BY_WEIGHT_HEADING,
+  EXCLUDED_HEADING,
+  baseStatusDisplay,
+  regulationBaseLabel,
+  regulationNoteDisplay,
+  statusBeforeExclusionLine,
+} from "@/lib/verdict-display";
 import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictDetails } from "./pdf-verdict";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
@@ -541,13 +548,13 @@ export const RegulationPdfDocument = ({
                   },
                 ]}
               >
-                {`元の判定 ${BASE_STATUS_LABEL[reg.status] ?? reg.status}`}
+                {`元の判定 ${regulationBaseLabel(reg)}`}
               </Text>
             </View>
             {itemById.get(reg.id) ? (
               <Text style={styles.regNote}>
                 {keepSpaces(
-                  `元の判定 ${BASE_STATUS_LABEL[reg.status]} → 適用した許可 ${
+                  `元の判定 ${baseStatusDisplay(itemById.get(reg.id)!)} → 適用した許可 ${
                     itemById.get(reg.id)!.appliedPermits.map((p) => p.label).join(" / ") || "なし"
                   } → 判定 ${VERDICT_LABEL[itemById.get(reg.id)!.verdict]}`,
                 )}
@@ -555,7 +562,7 @@ export const RegulationPdfDocument = ({
             ) : null}
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
-            <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
+            <Text style={styles.regNote}>{keepSpaces(regulationNoteDisplay(reg))}</Text>
             {shouldShowAirportMlitNote(reg, ctx?.pilotPermits) ? (
               <Text style={styles.regNote}>
                 {keepSpaces(`入力した許可について：${AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}`)}
@@ -593,7 +600,12 @@ export const RegulationPdfDocument = ({
             ) : null}
             {reg.appliedExceptions && reg.appliedExceptions.length > 0 ? (
               <View style={styles.appliedBox}>
-                <Text style={styles.appliedTitle}>対象外にした例外（元の判定を非該当にしました）</Text>
+                <Text style={styles.appliedTitle}>
+                  {reg.statusBeforeExclusion !== undefined ? EXCLUDED_BY_WEIGHT_HEADING : EXCLUDED_HEADING}
+                </Text>
+                {reg.statusBeforeExclusion !== undefined ? (
+                  <Text style={styles.appliedItem}>{statusBeforeExclusionLine(reg.statusBeforeExclusion)}</Text>
+                ) : null}
                 {reg.appliedExceptions.map((ex) => (
                   <View key={ex.id}>
                     <Text style={styles.appliedItem}>・{ex.condition}</Text>

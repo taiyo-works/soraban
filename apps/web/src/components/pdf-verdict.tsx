@@ -22,6 +22,7 @@ import {
   CONDITIONAL_NOTE,
   deadlineCountdown,
   isConfirmProcedure,
+  baseStatusDisplay,
   legalTierLabel,
   legalTierWeight,
   PROCEDURE_COLUMNS,
@@ -445,7 +446,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
           <Text>{keepSpaces(it.title)}</Text>
           {hasRefs(it.reason) ? <PdfReason reason={it.reason} /> : null}
         </View>
-        <Text style={s.itemCellSm}>{BASE_STATUS_LABEL[it.baseStatus]}</Text>
+        <Text style={s.itemCellSm}>{baseStatusDisplay(it)}</Text>
         <Text style={s.itemCellSm}>
           {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
         </Text>

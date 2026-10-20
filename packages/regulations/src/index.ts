@@ -495,6 +495,41 @@ const SHIMANE_NUISANCE_REG = buildPrefecturalNuisanceReg({
   verifiedAt: "2026-04-29T00:00:00+09:00",
 });
 
+// ── 未収録の市町村・都道府県の判定不能（unknown）の表示（Sprint 11f E1）──
+// 収録していない市町村・都道府県で判定不能にするとき、収録済み自治体（米子市・鳥取県）のひな型の題名・出す先・概要・URL を
+// そのまま出すと、別の自治体の名前が出てしまう。ID・例外節・clauseGraph・legalTier・datasets はひな型のままにし（証跡に入るため）、
+// 題名・出す先・概要だけ自治体名を出さない種類名にする。URL は付けない（史跡は市町村に依存しない文化庁の頁のまま）。
+const UNCOVERED_HERITAGE_REG_TEXT = {
+  authority: "地点の市町村の教育委員会・文化庁",
+  title: "文化財保護法第125条 / 市町村の文化財保護条例（データ未整備）— 史跡内の現状変更",
+  summary:
+    "国指定史跡では、文化財保護法第125条により現状変更には文化庁長官（実務上は教育委員会経由）の許可が必要です。市町村指定の文化財も、各市町村の文化財保護条例で同様の規制があります。ドローン飛行に伴う墜落・離着陸・低空通過は史跡毀損リスクとして規制対象になり得ます。この地点の市町村の指定文化財データは未整備です。",
+} as const;
+
+const UNCOVERED_PARK_REG_TEXT = {
+  authority: "地点の市町村",
+  title: "市町村の都市公園条例（データ未整備）— 都市公園内での無人航空機の使用",
+  summary:
+    "市町村の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要な場合があります。この地点の市町村の都市公園条例データは未整備です。",
+} as const;
+
+const UNCOVERED_NUISANCE_REG_TEXT = {
+  authority: "地点の都道府県",
+  title: "都道府県の迷惑行為等防止条例（データ未整備）— 公衆密集地周辺での迷惑行為",
+  summary:
+    "都道府県の迷惑行為等防止条例では、公衆に著しい迷惑をかける行為を禁じています。病院・学校・庁舎・駅・温泉街など公衆密集地周辺での無人航空機の飛行は、騒音・落下リスクの観点から自粛・事前調整が推奨されます。この地点の都道府県の条例データは未整備です。",
+} as const;
+
+/** ひな型から URL を外し、題名・出す先・概要を差し替える。 */
+const uncoveredReg = (
+  template: Regulation,
+  text: { readonly authority: string; readonly title: string; readonly summary: string },
+  keepUrl: boolean,
+): Regulation => {
+  const { url, ...rest } = template;
+  return { ...rest, ...text, ...(keepUrl && url !== undefined ? { url } : {}) };
+};
+
 export type EvaluateDidOptions = {
   /** 工業専用地域データの読み込み口。未指定は同梱データ（DEFAULT_INDUSTRIAL_SOURCE）。 */
   readonly industrial?: IndustrialExclusiveSource;
@@ -886,7 +921,7 @@ export const evaluateMunicipalParks = (
   const entry = muniCode !== undefined ? MUNICIPAL_PARKS[muniCode] : undefined;
   if (!entry) {
     return {
-      ...YONAGO_PARK_REG,
+      ...uncoveredReg(YONAGO_PARK_REG, UNCOVERED_PARK_REG_TEXT, false),
       status: "unknown",
       note: `判定地点はカバレッジ対象自治体外です。現在の収録範囲は ${COVERAGE_MUNI_NAMES}。当該市町村の都市公園条例データは未整備のため判定できません。`,
     };
@@ -924,7 +959,7 @@ export const evaluateMunicipalHeritage = (
   const entry = muniCode !== undefined ? MUNICIPAL_HERITAGE[muniCode] : undefined;
   if (!entry) {
     return {
-      ...YONAGO_HERITAGE_REG,
+      ...uncoveredReg(YONAGO_HERITAGE_REG, UNCOVERED_HERITAGE_REG_TEXT, true),
       status: "unknown",
       note: `判定地点はカバレッジ対象自治体（${COVERAGE_HERITAGE_MUNI_NAMES}）外です。当該市町村の指定文化財データは未整備のため判定できません。`,
     };
@@ -965,7 +1000,7 @@ export const evaluatePrefecturalNuisance = (
   const entry = prefCode !== undefined ? PREFECTURAL_NUISANCE[prefCode] : undefined;
   if (!entry) {
     return {
-      ...TOTTORI_NUISANCE_REG,
+      ...uncoveredReg(TOTTORI_NUISANCE_REG, UNCOVERED_NUISANCE_REG_TEXT, false),
       status: "unknown",
       note: `判定地点はカバレッジ対象都道府県（${COVERAGE_PREFECTURE_NAMES}）外、または市町村コード未解決のため、県条例の適用判定をスキップしました。`,
     };
@@ -1128,6 +1163,7 @@ export type {
 export {
   aggregateVerdictLevel,
   BASE_STATUS_LABEL,
+  baseStatusDisplay,
   deriveFlightVerdict,
   DIPS_PERMIT_BY_FLAG,
   DIPS_PERMIT_KINDS,
@@ -1347,6 +1383,10 @@ export {
   MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL,
   MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE,
   MODEL_AIRCRAFT_DEADLINE_LABEL,
+  MODEL_AIRCRAFT_EXEMPT_LABEL,
+  MODEL_AIRCRAFT_DID_DETAIL_LABEL,
+  MODEL_AIRCRAFT_DID_NOTE,
+  DID_NOTE_PERMIT_SENTENCE,
   MODEL_AIRCRAFT_EXEMPT_REASON,
   MODEL_AIRCRAFT_HIGH_PROCEDURE_TITLE,
   MODEL_AIRCRAFT_HIGH_REASON,

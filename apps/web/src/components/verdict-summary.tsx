@@ -11,6 +11,7 @@ import {
 } from "@soraban/regulations";
 import {
   BASE_STATUS_LABEL,
+  baseStatusDisplay,
   CONDITIONAL_NOTE,
   deadlineCountdown,
   isConfirmProcedure,
@@ -566,7 +567,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                         ) : null}
                       </td>
                       <td data-label="元の判定" className={`${ITEM_CELL} text-ink-soft`}>
-                        {BASE_STATUS_LABEL[it.baseStatus]}
+                        {baseStatusDisplay(it)}
                       </td>
                       <td data-label="適用した許可" className={`${ITEM_CELL} text-ink-soft`}>
                         {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}

@@ -302,7 +302,7 @@ export function DiagnosisPanel({
               {modelAircraft ? MODEL_AIRCRAFT_CATEGORY_NOTE : diagnosis.categoryNote}
             </p>
             <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute" data-testid="diagnosis-did-status">
-              DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
+              DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail, { droneWeightG: diagnosis.droneWeightG })}
             </p>
             {(diagnosis.verificationNotes ?? []).length > 0 ? (
               <ul className="mt-2 flex flex-col gap-1 border-t border-signal-amber/40 pt-2 text-xs leading-relaxed text-signal-amber">

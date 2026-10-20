@@ -138,7 +138,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
     await expect(proc).toContainText("国土交通大臣");
     await expect(proc.getByTestId("verdict-procedure-deadline")).toHaveText("事前に（参照先で確認）");
     await expect(proc.getByTestId("model-aircraft-references").getByRole("link").first()).toHaveAttribute("href", EGOV);
-    await expect(proc.getByRole("link", { name: /参照先：e-Gov 法令検索 航空法/ })).toBeVisible();
+    await expect(proc.getByRole("link", { name: /参照先：e-Gov 法令検索 航空法（航空法第134条の3）/ })).toBeVisible();
     await expect(item(page, "model-aircraft-airport")).toHaveAttribute("data-verdict", "needs_procedure");
     expect(await page.locator("body").innerText()).not.toMatch(RELAX);
 

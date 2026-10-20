@@ -45,8 +45,9 @@ import {
   createHistoryRunId,
   getHistoryServerSnapshot,
   getHistorySnapshot,
+  historyDiagnosisDetail,
   historyVerdictDisplay,
-  markHistoryDiagnosisFailed,
+  clearHistoryDiagnosisVerdict,
   recordHistoryCheck,
   recordHistoryDiagnosis,
   removeHistory,
@@ -327,6 +328,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const [diagnoseError, setDiagnoseError] = useState<string | null>(null);
   // /api/diagnose の応答待ち（画面の結論は診断の判定を使い、届くまで「判定中」とする。未決 5）。
   const [diagPending, setDiagPending] = useState<boolean>(true);
+  // 診断の応答を待っている実行の runId（Sprint 11f B1）。履歴の該当の行を「判定中」と出す。画面の状態だけで、保存しない。
+  const [diagPendingRunId, setDiagPendingRunId] = useState<string | null>(null);
   // 履歴復元中の useEffect 二重発火を抑止するフラグ。
   const isRestoringRef = useRef<boolean>(false);
   // 地点変更ハンドラが空域 state をリセットした直後の診断 effect を 1 回だけ抑止する
@@ -718,6 +721,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     diagAbortRef.current = controller;
     const seq = ++diagSeqRef.current;
     setDiagPending(true);
+    // 待っている間、この実行の履歴に前の入力での判定を残さない（Sprint 11f B1）。保存するのは判定を外した状態だけ。
+    clearHistoryDiagnosisVerdict(runId);
+    setDiagPendingRunId(runId);
 
     try {
       const res = await diagnoseLocation(
@@ -740,6 +746,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       setDiagnosis(res);
       setDiagnoseError(null);
       setDiagPending(false);
+      setDiagPendingRunId(null);
       // 自動検出の空域フラグは state に書き戻さない（表示は diagnosis から導出）。
       const effectiveAirspace = mergeAirspaceFlags({
         derivedFlags: res.derivedAirspaceFlags,
@@ -774,9 +781,10 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     } catch (err) {
       if (isAbortError(err) || seq !== diagSeqRef.current) return;
       setDiagPending(false);
+      setDiagPendingRunId(null);
       setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
       // 履歴に前の診断の判定や地点だけの判定を残さない（判定未確定。差し戻し 2 回目）。
-      markHistoryDiagnosisFailed(runId);
+      clearHistoryDiagnosisVerdict(runId);
     }
   };
 
@@ -1398,7 +1406,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                         : "text-ink"
                     }`}
                   >
-                    {formatDidDetermination(autoDidStatus, diagnosis?.didDetail)}
+                    {formatDidDetermination(autoDidStatus, diagnosis?.didDetail, { droneWeightG: diagnosis?.droneWeightG })}
                   </span>
                   {autoDidStatus === "unverified"
                     ? "（DID データ未整備または判定不能。確認するまで要確認として扱います）"
@@ -1781,7 +1789,12 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           <ul className="flex flex-col divide-y divide-rule">
             {history.slice(0, 10).map((h) => {
               // 判定の表示（Sprint 11d C5）：新形式は 4 段の言葉、旧形式は旧版の値であることを明示する。
-              const vd = historyVerdictDisplay(h);
+              const rowPending = h.runId !== undefined && h.runId === diagPendingRunId;
+              const vd = historyVerdictDisplay(h, { pending: rowPending });
+              // 判定中の行は、前の入力の診断から来た表示（カテゴリー・DID・手続きの件数・診断の証跡 ID）も出さない（Sprint 11f B3）。
+              // 判定未確定の行（診断の失敗・時間切れ、開き直した行）も同じ。判定を外した診断の値（前の入力のもの）は出さない。
+              // 保存値からの導出なので、画面を閉じて開き直しても出ない。旧形式（legacy）の表示は変えない。
+              const ds = historyDiagnosisDetail(h, { pending: rowPending });
               const checkedDate = new Date(h.checkedAt);
               const dateStr = `${String(checkedDate.getMonth() + 1).padStart(2, "0")}/${String(checkedDate.getDate()).padStart(2, "0")} ${String(checkedDate.getHours()).padStart(2, "0")}:${String(checkedDate.getMinutes()).padStart(2, "0")}`;
               const catShort: Record<DiagnosisCategory, string> = {
@@ -1793,7 +1806,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 emergency_no_fly: "飛行不可(緊急用務空域)",
               };
               const completedCount = h.diagnosisInput?.completedProcedureIds?.length ?? 0;
-              const procCount = h.diagnosisSummary?.procedureCount;
+              const procCount = ds?.procedureCount;
               const methodCount = h.diagnosisInput?.methodFlags?.length ?? 0;
               return (
                 <li key={h.runId ?? h.evidenceId} className="flex items-center gap-3 py-2.5" data-testid="history-item">
@@ -1812,6 +1825,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                       <span
                         data-testid="history-verdict"
                         data-legacy={vd.legacy ? "true" : "false"}
+                        {...(vd.pending ? { "data-pending": "true" } : {})}
                         data-level={vd.level ?? ""}
                         className="text-[11px] font-medium text-ink-soft"
                       >
@@ -1828,9 +1842,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
                         {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${PURPOSE_SHORT[h.ctx.purpose] ?? h.ctx.purpose}` : ""}
                         {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · 許可${h.ctx.pilotPermits.length}件` : ""}
-                        {h.diagnosisSummary ? ` · ${catShort[h.diagnosisSummary.category] ?? h.diagnosisSummary.category}` : ""}
-                        {h.diagnosisSummary?.didStatus
-                          ? ` · DID:${formatDidDetermination(h.diagnosisSummary.didStatus, h.diagnosisSummary.didDetail)}`
+                        {ds ? ` · ${catShort[ds.category] ?? ds.category}` : ""}
+                        {ds?.didStatus
+                          ? ` · DID:${formatDidDetermination(ds.didStatus, ds.didDetail, { droneWeightG: h.ctx?.droneWeightG })}`
                           : ""}
                         {procCount !== undefined
                           ? completedCount > 0
@@ -1841,9 +1855,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                         {h.diagnosisInput?.plannedDate ? ` · 予定:${h.diagnosisInput.plannedDate}` : ""}
                         {" · "}
                         {h.evidenceId}
-                        {h.diagnosisSummary?.diagnosisEvidenceId &&
-                        h.diagnosisSummary.diagnosisEvidenceId !== h.evidenceId
-                          ? ` / diag:${h.diagnosisSummary.diagnosisEvidenceId}`
+                        {ds?.diagnosisEvidenceId && ds.diagnosisEvidenceId !== h.evidenceId
+                          ? ` / diag:${ds.diagnosisEvidenceId}`
                           : ""}
                       </span>
                     </span>

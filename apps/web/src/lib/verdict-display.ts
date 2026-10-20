@@ -8,6 +8,12 @@
 import {
   DRONE_THRESHOLD_G,
   BASE_STATUS_LABEL,
+  MODEL_AIRCRAFT_EXEMPT_LABEL,
+  MODEL_AIRCRAFT_DID_DETAIL_LABEL,
+  MODEL_AIRCRAFT_DID_NOTE,
+  DID_NOTE_PERMIT_SENTENCE,
+  type DidDetail,
+  baseStatusDisplay,
   LEGAL_TIER_LABEL,
   VERDICT_LABEL,
   type FlightVerdict,
@@ -17,7 +23,7 @@ import {
   type RegulationStatus,
 } from "@soraban/regulations";
 
-export { BASE_STATUS_LABEL, LEGAL_TIER_LABEL, VERDICT_LABEL };
+export { BASE_STATUS_LABEL, LEGAL_TIER_LABEL, VERDICT_LABEL, baseStatusDisplay };
 
 /** 記号の形（画面の SVG・PDF の Svg・履歴の文字記号で共通）。 */
 export type VerdictShape = "slashed-circle" | "triangle" | "checked-ring" | "filled-circle" | "dashed-square";
@@ -146,6 +152,49 @@ export const CONDITIONAL_NOTE = "条件付き：許可の条件を守ること�
 export const legalTierLabel = (t: LegalTier): string => LEGAL_TIER_LABEL[t];
 
 export const baseStatusLabel = (s: RegulationStatus): string => BASE_STATUS_LABEL[s];
+
+/**
+ * 規制（地点判定）の「元の判定」の表示（Sprint 11f A4）。機体重量の例外（100g 未満）で対象外にした規制は
+ * 「対象外（模型航空機）」、それ以外は BASE_STATUS_LABEL。status の値は変えない。
+ */
+export const regulationBaseLabel = (r: {
+  readonly status: RegulationStatus;
+  readonly statusBeforeExclusion?: "red" | "yellow";
+}): string =>
+  r.status === "green" && r.statusBeforeExclusion !== undefined ? MODEL_AIRCRAFT_EXEMPT_LABEL : BASE_STATUS_LABEL[r.status];
+
+/** 機体重量の例外で対象外にした DID 内の地点か（100g 未満。DID の行・本文を模型航空機の言葉にする）。 */
+export const isModelAircraftDidExcluded = (r: {
+  readonly status: RegulationStatus;
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  readonly didDetail?: DidDetail;
+}): boolean =>
+  r.status === "green" &&
+  r.statusBeforeExclusion !== undefined &&
+  (r.didDetail === "in_did" ||
+    r.didDetail === "in_did_near_industrial_boundary" ||
+    r.didDetail === "in_did_exclusion_unverified");
+
+/** カード・PDF の「この地点」の本文。DID 内で 100g 未満のときだけ「許可・承認なく飛行できません」を置き換える。 */
+export const regulationNoteDisplay = (r: {
+  readonly status: RegulationStatus;
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  readonly didDetail?: DidDetail;
+  readonly note: string;
+}): string =>
+  isModelAircraftDidExcluded(r) && r.note.includes(DID_NOTE_PERMIT_SENTENCE)
+    ? r.note.replace(DID_NOTE_PERMIT_SENTENCE, MODEL_AIRCRAFT_DID_NOTE)
+    : r.note;
+
+export { MODEL_AIRCRAFT_DID_DETAIL_LABEL };
+
+/** 例外の欄の見出し（機体重量の例外のときは模型航空機の趣旨）。 */
+export const EXCLUDED_BY_WEIGHT_HEADING = "対象外にした例外（模型航空機）";
+export const EXCLUDED_HEADING = "対象外にした例外（元の判定を非該当にしました）";
+
+/** 機体重量の例外で対象外にした規制の、例外前の判定の一行。 */
+export const statusBeforeExclusionLine = (before: "red" | "yellow"): string =>
+  `例外前の判定：${BASE_STATUS_LABEL[before]}`;
 
 /**
  * 申請支援の手続き（procedures.json の id）→ 手続き済み（条件付き）の項目。

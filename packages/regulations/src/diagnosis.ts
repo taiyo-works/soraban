@@ -13,6 +13,7 @@
 
 import type { DidDetail } from "./core";
 import { normalizeDatasetKeys } from "./evidence";
+import { MODEL_AIRCRAFT_EXEMPT_LABEL } from "./model-aircraft";
 import proceduresData from "../data/procedures/procedures.json";
 import categoriesData from "../data/categories/categories.json";
 import { subtractBusinessDays } from "./business-days";
@@ -691,7 +692,19 @@ export const deriveDidDetailFromRegulations = (
 export const formatDidDetermination = (
   status: AirspaceDeterminationStatus,
   detail?: DidDetail,
+  opts: { readonly droneWeightG?: number } = {},
 ): string => {
+  // 100g 未満（模型航空機）で DID 内の地点は、機体重量の例外で対象外にしたもの（Sprint 11f A2）。
+  // 重量を条件に入れるのは、0.3.0 以前の履歴の「許可で DID を下げた行」（not_applicable＋in_did＋100g 以上）と区別するため。
+  if (
+    status === "not_applicable" &&
+    (detail === "in_did" || detail === "in_did_near_industrial_boundary" || detail === "in_did_exclusion_unverified") &&
+    typeof opts.droneWeightG === "number" &&
+    Number.isFinite(opts.droneWeightG) &&
+    opts.droneWeightG < DRONE_THRESHOLD_G
+  ) {
+    return MODEL_AIRCRAFT_EXEMPT_LABEL;
+  }
   if (status === "not_applicable" && detail === "industrial_exclusive") {
     return "非該当（工業専用地域）";
   }
