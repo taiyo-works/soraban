@@ -200,6 +200,8 @@ E2E_OPS_DATABASE_URL=postgresql://soraban_app:local_only@localhost:5432/soraban_
 
 **実施の順番は 手順 2（ロール作成）→ 手順 3（マイグレーション適用）→ 手順 1（Vercel の環境変数）。** 番号は内容のまとまりで、実施順ではない。
 
+通しの手順書（試験用ブランチでの予行演習つき）：`docs/runbooks/production-db-prep.md`。この節が正で、手順書はこの節に予行演習を足したもの。
+
 ### 1. Vercel の環境変数（taiyo-works-projects チーム、プロジェクト soraban）
 
 | 変数 | Production | Preview | Development | 値の取り方 |
@@ -256,10 +258,10 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
      # 何も表示されないので、接続文字列を貼り付けて Enter
      ```
   3. `pnpm db:status` で、未適用の版（初回は `0001`〜`0003`）と接続先のホスト名を確認する。
-  4. 必要に応じて、Neon コンソールで既定ブランチから復元用のブランチ（例：`before-0003-20261127`）を作る。Neon の時点復元の保持期間はプランによる（計画時点では未確認）。
+  4. 必要に応じて、Neon コンソールで既定ブランチから復元用のブランチ（例：`before-0003-20261127`）を作る。Neon の履歴保持は、プロジェクト `soraban` で 86400 秒（1 日。2026-10-20 に確認）で、復元できるのは 1 日以内の時点まで。
   5. `pnpm db:migrate --target <手順 3 で表示されたホスト名>` を実行する。
   6. `pnpm db:status` で未適用がないことを確認する。
-  7. Vercel の Production に `DATABASE_URL`（`soraban_app` の Pooled connection）を設定して再デプロイし、本番の `/api/health/db` が `reachable: true`、最新版 `0003`、`hasPendingMigrations: false` を返すことを確認する。
+  7. Vercel の Production に `DATABASE_URL`（`soraban_app` の Pooled connection）を設定して再デプロイし、本番の `/api/health/db` が `reachable: true`、最新版 `0009`、`hasPendingMigrations: false` を返すことを確認する。
   8. 地点判定を 1 回行い、Neon の SQL Editor で `select evidence_id, checked_at from evidence_log order by created_at desc limit 1;` に行があることを確認する（任意）。
   9. 復元用ブランチを作った場合は、確認後に削除する。
   10. `unset DATABASE_URL_UNPOOLED`。
@@ -278,7 +280,7 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
 
 利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0008 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
 
-1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0003 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
+1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0009 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
 2. **マイグレーション 0004〜0009 を本番に適用する**（Sprint 11 の 0007・0008、Sprint 11d の 0009 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
 3. **Neon Auth を有効にする**：Neon コンソール → `soraban` → 既定ブランチ（本番）→ Auth → 有効化。aws-ap-southeast-1 で有効にできることをここで確かめる（できない場合は作業を止め、planner に戻す）。Auth URL を控える。プレビュー用・開発用のブランチでは有効にしない。
 4. **Google ログインを自社の資格情報にする**：Google Cloud コンソールで OAuth クライアント（ウェブアプリケーション）を作り、承認済みのリダイレクト URI に `{Auth URL}/callback/google`（末尾にスラッシュを付けない）を登録する。Neon の Auth の設定 → OAuth providers に Client ID・Secret を入れる。
