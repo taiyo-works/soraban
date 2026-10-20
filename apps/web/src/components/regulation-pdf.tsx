@@ -409,11 +409,11 @@ export const RegulationPdfDocument = ({ result, loc, ctx, verdict: verdictProp }
   const verdict = verdictProp ?? result.verdict;
   const itemById = new Map((verdict?.items ?? []).map((i) => [i.id, i]));
   return (
-    <Document title={`そらばん 飛行可否レポート — ${result.evidenceId}`}>
+    <Document title={`そらばん 飛行判定と手続きのレポート — ${result.evidenceId}`}>
       <Page size="A4" style={styles.page}>
         {/* HEADER */}
         <View>
-          <Text style={styles.h1}>そらばん 飛行可否レポート</Text>
+          <Text style={styles.h1}>そらばん 飛行判定と手続きのレポート</Text>
         </View>
 
         <View style={styles.metaRow}>

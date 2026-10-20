@@ -107,7 +107,8 @@ export type FacilityHit = {
  *     note の末尾に「※適用例外: …」を足す。
  *   - 満たす例外（permit_holder・permit_holder_all・purpose）が当たる：status と note は変えず、
  *     satisfiedBy に記録する（判定は deriveFlightVerdict が手続き済み（条件付き）にする）。
- *   - noFly（飛行不可の区分。空港の敷地内）：満たす例外は当てない。
+ *   - noFly（飛行不可の区分。空港の敷地内）：場所の区分による飛行不可のため、対象外にする例外（機体重量を含む）も
+ *     満たす例外も当てない（緊急用務空域と同じく重量に関係なく飛行不可。Sprint 11d 差し戻し 1 回目 F1）。
  *   - green / unknown：何も当てない。
  */
 export const applyExemptions = (
@@ -125,6 +126,10 @@ export const applyExemptions = (
   if (base.status !== "red" && base.status !== "yellow") {
     return { status: base.status, note: base.note, ...noFly };
   }
+  // 飛行不可の区分は、どの例外よりも先に評価する（重量の例外で非該当にしない）。
+  if (opts.noFly === true) {
+    return { status: base.status, note: base.note, ...noFly };
+  }
   const excluded = findExcludingExceptions(base.clauseGraph, ctx);
   if (excluded.length > 0) {
     const reasons = excluded.map((m) => m.condition).join(" / ");
@@ -133,9 +138,6 @@ export const applyExemptions = (
       note: `${base.note} ※適用例外: ${reasons}`,
       appliedExceptions: excluded,
     };
-  }
-  if (opts.noFly === true) {
-    return { status: base.status, note: base.note, ...noFly };
   }
   const satisfied = findSatisfyingExceptions(base.clauseGraph, ctx);
   return {

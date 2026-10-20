@@ -169,7 +169,8 @@ describe("契約 1：規制ごとの判定の規則", () => {
   it("100g 未満では航空法の status が green に、工業専用地域では DID が green になる", () => {
     const regs = evaluateAll(YONAGO_CITY_HALL, "31202", { droneWeightG: 80 });
     expect(regs.find((r) => r.id === "aviation-law-did")!.status).toBe("green");
-    expect(evaluateAirports(AIRPORT_ON_SITE, [yonagoAirport], { droneWeightG: 80 }).status).toBe("green");
+    // 空港の敷地内は飛行不可の区分のため、100g 未満でも red のまま（差し戻し 1 回目 F1）
+    expect(evaluateAirports(AIRPORT_ON_SITE, [yonagoAirport], { droneWeightG: 80 }).status).toBe("red");
     // 工業専用地域（収録済み・内側）
     const zone = {
       muniCode: "31202",
@@ -250,6 +251,22 @@ describe("契約 3：空港の敷地内と緊急用務空域は、全ての許�
     expect(item(v, "aviation-law-airport").verdict).toBe("no_fly");
     expect(v.level).toBe("no_fly");
     expect(v.noFly.map((n) => n.itemId)).toContain("aviation-law-airport");
+  });
+
+  it("空港の敷地内は 100g 未満・全許可・全目的・150m 以上でも飛行不可（差し戻し 1 回目 F1）", () => {
+    for (const purpose of PURPOSES) {
+      for (const w of [50, 80, 900, undefined]) {
+        const ctx: FlightContext = {
+          ...(w !== undefined ? { droneWeightG: w } : {}),
+          pilotPermits: ALL_PERMIT_VALUES,
+          ...(purpose ? { purpose } : {}),
+        };
+        const regs = evaluateAll(AIRPORT_ON_SITE, "31204", ctx);
+        const v = deriveFlightVerdict({ regulations: regs, ctx, flags: ["airspace_150m"] });
+        expect(item(v, "aviation-law-airport").verdict, `${w} ${purpose}`).toBe("no_fly");
+        expect(v.level).toBe("no_fly");
+      }
+    }
   });
 
   it("緊急用務空域（100g 未満の機体でも）", () => {

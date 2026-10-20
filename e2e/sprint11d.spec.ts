@@ -139,6 +139,34 @@ test.describe("A. 規則（契約 3）", () => {
   });
 });
 
+test.describe("A. 規則（差し戻し 1 回目 F1）", () => {
+  test("3. 空港の敷地内（出雲縁結び空港）は 50g・150m 以上・全ての許可でも飛行不可で、手続き不要にならない", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await gotoLatLng(page, 35.4136, 132.89);
+    await openConditions(page);
+    {
+      const check = waitCheck(page);
+      const diag = waitDiagnose(page);
+      await page.getByPlaceholder(/例: 900／80/).fill("50");
+      await Promise.all([check, diag]);
+      await settled(page);
+    }
+    await toggle(methodBox(page, "150m以上の高さ"), page, true, false);
+    const boxes = conditions(page).getByRole("checkbox");
+    const n = await boxes.count();
+    for (let i = 0; i < n; i++) await toggle(boxes.nth(i), page, true);
+    await expect(level(page)).toHaveText("飛行不可");
+    await expect(summary(page)).toHaveAttribute("data-level", "no_fly");
+    await expect(item(page, "aviation-law-airport")).toHaveAttribute("data-verdict", "no_fly");
+    await expect(page.getByTestId("regulation-card-aviation-law-airport")).toHaveAttribute("data-status", "red");
+    const text = await exportPdf(page);
+    expect(squash(text)).toContain(squash("そらばん 飛行判定と手続きのレポート"));
+    expect(squash(text)).toContain(squash("飛行不可"));
+  });
+});
+
 test.describe("B. 地点と飛び方での結果", () => {
   test("6. 米子市役所：許可なし → 要手続き（DID の許可と期限）。DID の DIPS 許可 → DID は手続き済み（条件付き）", async ({
     page,

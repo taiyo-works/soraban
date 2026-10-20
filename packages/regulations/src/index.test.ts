@@ -286,12 +286,20 @@ describe("evaluateAirports", () => {
     expect(r.note).toContain("空港データを読み込めませんでした");
   });
 
-  it("drops red on airport to green with <100g weight exception", () => {
+  // Sprint 11d 差し戻し 1 回目 F1：空港の敷地内は場所の区分による飛行不可。100g 未満でも重量の例外を当てない。
+  it("keeps red on-airport even with <100g weight (no-fly category, Sprint 11d)", () => {
     const r = evaluateAirports(
       { lat: 35.4133, lng: 132.8897 },
       airports,
       { droneWeightG: 50 },
     );
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.noFlyCategory).toBe(true);
+    expect(r.appliedExceptions).toBeUndefined();
+  });
+
+  it("still drops yellow (around the airport) to green with <100g weight exception", () => {
+    const r = evaluateAirports({ lat: 35.44, lng: 132.89 }, airports, { droneWeightG: 50 });
     expect(r.status).toBe<RegulationStatus>("green");
     expect(r.appliedExceptions?.[0]?.machine?.value).toBe(100);
   });

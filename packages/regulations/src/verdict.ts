@@ -565,6 +565,10 @@ const regulationItem = (r: RegulationWithStatus, ctx: FlightContext | undefined)
   if (r.status === "unknown") {
     return { ...base, verdict: "unknown", appliedPermits: [], reason: `判定不能（データ未整備）。${r.note}` };
   }
+  // 飛行不可の区分（空港の敷地内）は、元の判定や例外より先に評価する（重量・許可・目的で変わらない）。
+  if (r.noFlyCategory === true) {
+    return { ...base, verdict: "no_fly", appliedPermits: [], reason: `該当。${r.note}` };
+  }
   if (r.status === "green") {
     const excluded = (r.appliedExceptions ?? []).map((e) => e.condition).join(" / ");
     return {
@@ -575,9 +579,6 @@ const regulationItem = (r: RegulationWithStatus, ctx: FlightContext | undefined)
     };
   }
   const possibly = r.status === "yellow" ? "該当の可能性（要確認）。" : "該当。";
-  if (r.noFlyCategory === true && r.status === "red") {
-    return { ...base, verdict: "no_fly", appliedPermits: [], reason: `${possibly}${r.note}` };
-  }
   const satisfied = findSatisfyingExceptions(r.clauseGraph, ctx).map(toAppliedPermit);
   if (satisfied.length > 0) {
     return {
