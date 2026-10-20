@@ -58,7 +58,9 @@ soraban.futuretec.jp を Vercel に追加したのは 2026-10-19 17:54 JST で�
 
 Vercel コネクタの注意：チーム ID を付けずに呼ぶ（付けると空の結果が返る）。
 
-### 4.1 調査の結果（2026-10-20、Claude Code）
+### 4.1 調査の経過（2026-10-20、Claude Code。§4.0 の結論より前の記録で、ここに書いた設定変更は不要）
+
+> **この節は経過の記録であり、対応手順ではない。** 下の候補 A〜C は §4.0 の確認ですべて外れた。表の「直し方」は実施しないこと。
 
 Vercel のダッシュボードは見られなかった（作業環境の Vercel コネクタは carta-lab-projects チームだけに権限があり、taiyo-works-projects は 403。soraban.futuretec.jp と vercel.app への接続も作業環境のネットワーク方針で拒否）。GitHub とリポジトリから分かったこと：
 
