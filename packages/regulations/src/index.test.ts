@@ -315,6 +315,7 @@ describe("computeOverall", () => {
   const make = (status: RegulationStatus): RegulationWithStatus => ({
     id: "x",
     source: "国",
+    legalTier: 1,
     authority: "テスト",
     title: "t",
     summary: "s",
@@ -484,11 +485,19 @@ describe("FlightContext exemption application", () => {
     expect(r.appliedExceptions).toBeUndefined();
   });
 
-  it("DID drops to green when MLIT permit holder", () => {
-    const ctx: FlightContext = { pilotPermits: ["mlit"] };
+  // Sprint 11d：許可は満たす例外。status（元の判定）は変えず、satisfiedBy に記録する。
+  it("DID keeps red with MLIT DID permit and records satisfiedBy (Sprint 11d)", () => {
+    const ctx: FlightContext = { pilotPermits: ["mlit:did"] };
     const r = evaluateDid(yonagoCityHall, [yonagoDid], ctx, NO_INDUSTRIAL);
-    expect(r.status).toBe<RegulationStatus>("green");
-    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("mlit");
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.appliedExceptions).toBeUndefined();
+    expect(r.satisfiedBy?.[0]?.machine?.value).toBe("mlit:did");
+  });
+
+  it("legacy mlit is read as the DID permit (Sprint 11d 未決 2)", () => {
+    const r = evaluateDid(yonagoCityHall, [yonagoDid], { pilotPermits: ["mlit"] }, NO_INDUSTRIAL);
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.satisfiedBy?.[0]?.machine?.value).toBe("mlit:did");
   });
 
   it("DID does NOT drop on irrelevant permit", () => {
@@ -503,8 +512,8 @@ describe("FlightContext exemption application", () => {
       yonagoMuni,
       { pilotPermits: ["park_manager"] },
     );
-    expect(r.status).toBe<RegulationStatus>("green");
-    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("park_manager");
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.satisfiedBy?.[0]?.machine?.value).toBe("park_manager");
   });
 
   it("heritage drops to green with emergency purpose", () => {
@@ -513,8 +522,8 @@ describe("FlightContext exemption application", () => {
       yonagoMuni,
       { purpose: "emergency" },
     );
-    expect(r.status).toBe<RegulationStatus>("green");
-    expect(r.appliedExceptions?.[0]?.machine?.value).toBe("emergency");
+    expect(r.status).toBe<RegulationStatus>("red");
+    expect(r.satisfiedBy?.[0]?.machine?.value).toBe("emergency");
   });
 
   it("prefectural nuisance drops to green with facility_manager permit", () => {
@@ -523,14 +532,27 @@ describe("FlightContext exemption application", () => {
       yonagoMuni,
       { pilotPermits: ["facility_manager"] },
     );
-    expect(r.status).toBe<RegulationStatus>("green");
+    expect(r.status).toBe<RegulationStatus>("yellow");
+    expect(r.satisfiedBy?.[0]?.machine?.value).toBe("facility_manager");
   });
 
-  it("MihoBase drops to green for facility_manager + pref_pubsafety", () => {
-    const r = evaluateMihoBase(MIHO_AIRBASE_CENTER, {
-      pilotPermits: ["facility_manager_and_pref_pubsafety"],
+  // Sprint 11d 契約 5：同意と通報の両方で当たる。旧値だけ・どちらか一方では当たらない。status は変えない。
+  it("MihoBase is satisfied only by both consent and notice (Sprint 11d)", () => {
+    const both = evaluateMihoBase(MIHO_AIRBASE_CENTER, {
+      pilotPermits: ["facility_manager", "pref_pubsafety_notice"],
     });
-    expect(r.status).toBe<RegulationStatus>("green");
+    expect(both.status).toBe<RegulationStatus>("red");
+    expect(both.satisfiedBy?.map((e) => e.id)).toEqual(["small-drone-law-ex-consent-notice"]);
+    for (const permits of [
+      ["facility_manager_and_pref_pubsafety"],
+      ["facility_manager"],
+      ["pref_pubsafety_notice"],
+      ["facility_manager", "facility_manager_and_pref_pubsafety"],
+    ]) {
+      const r = evaluateMihoBase(MIHO_AIRBASE_CENTER, { pilotPermits: permits });
+      expect(r.status).toBe<RegulationStatus>("red");
+      expect(r.satisfiedBy).toBeUndefined();
+    }
   });
 
   it("note string includes the exempted reason", () => {

@@ -702,9 +702,11 @@ export const formatDidDetermination = (
 };
 
 // 既存 RegulationCheckResult の空域フラグ（DID・空港）から SpecificFlightFlag を抽出する。
-// 信号機判定の理由を起点に手続きを自動導出する（spec §2.1）ための橋渡し。
-//   - aviation-law-did が red → airspace_did
-//   - aviation-law-airport が red → airspace_airport
+// 地点判定の理由を起点に手続きを自動導出する（spec §2.1）ための橋渡し。
+//   - aviation-law-did が red（該当）→ airspace_did
+//   - aviation-law-airport が red（該当）または yellow（6km の概算で該当の可能性）→ airspace_airport
+//     （Sprint 11d A8：yellow を見落として空港等周辺の飛行許可が手続きに出ない不具合を直した）
+//   status は元の判定（許可を当てる前）なので、許可を入力しても空域フラグは消えない。
 //   - miho-airbase-no-fly は小型無人機等飛行禁止法であり航空法の特定飛行ではないため
 //     ここでは flag 化しない（別系統。手続きは別途案内）。
 export const extractAirspaceFlagsFromRegulations = (
@@ -712,15 +714,17 @@ export const extractAirspaceFlagsFromRegulations = (
 ): readonly SpecificFlightFlag[] => {
   const flags: SpecificFlightFlag[] = [];
   for (const r of regulations) {
-    if (r.status !== "red") continue;
-    if (r.id === "aviation-law-did") flags.push("airspace_did");
-    if (r.id === "aviation-law-airport") flags.push("airspace_airport");
+    if (r.id === "aviation-law-did" && r.status === "red") flags.push("airspace_did");
+    if (r.id === "aviation-law-airport" && (r.status === "red" || r.status === "yellow")) {
+      flags.push("airspace_airport");
+    }
   }
   return flags;
 };
 
-// 地点判定の DID 規制（aviation-law-did）の status を三値に写像する。
+// 地点判定の DID 規制（aviation-law-did）の status（元の判定）を三値に写像する。
 //   red → 該当 / green → 非該当 / yellow・unknown・レコード欠落 → 未確認
+// Sprint 11d：status は許可を当てる前の元の判定なので、DIPS の許可を入力しても該当は非該当にならない。
 export const deriveDidStatusFromRegulations = (
   regulations: readonly { readonly id: string; readonly status: string }[],
 ): AirspaceDeterminationStatus => {
@@ -762,6 +766,13 @@ export type DiagnosisEvidencePayloadInput = {
   readonly didStatus?: AirspaceDeterminationStatus;
   /** 判定に使ったデータセット（ID と確認日）。データ更新で証跡 ID が変わる。 */
   readonly datasets?: readonly { readonly id: string; readonly verifiedAt: string }[];
+  /**
+   * 判定に当てた許可・同意（Sprint 11d）。指定したときだけペイロードに新しいキー（d.pp）で入れる
+   * （並べ替えた配列）。未指定のペイロードは 0.3.0 までと同じ形で、旧版の証跡 ID を再現できる。
+   */
+  readonly permits?: readonly string[];
+  /** 判定に当てた目的（Sprint 11d）。指定したときだけ d.pu に入れる。 */
+  readonly purpose?: string;
 };
 
 /**
@@ -793,6 +804,8 @@ export const buildDiagnosisEvidencePayload = (
       did: input.didStatus ?? null,
       ver: PROCEDURES_VERIFIED_AT || null,
       rev: PROCEDURES_REVISION,
+      ...(input.permits !== undefined ? { pp: [...new Set(input.permits)].sort() } : {}),
+      ...(input.purpose !== undefined ? { pu: input.purpose } : {}),
     },
     ds: normalizeDatasetKeys(input.datasets ?? []),
   });

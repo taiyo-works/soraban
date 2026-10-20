@@ -23,8 +23,11 @@ export const AIRPORT_REGULATION_ID = "aviation-law-airport";
 export const AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE =
   "空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。";
 
+/** DIPS の許可・承認の値か（旧値 mlit と、Sprint 11d の種類ごとの値 mlit:did 等）。 */
+export const isDipsPermitValue = (v: string): boolean => v === "mlit" || v.startsWith("mlit:");
+
 /**
- * 空港等周辺の補足を出すか。DIPS（mlit）を入力し、空港等周辺の規制が red または yellow のとき。
+ * 空港等周辺の補足を出すか。DIPS の許可・承認（種類を問わない）を入力し、空港等周辺の規制が red または yellow のとき。
  */
 export const shouldShowAirportMlitNote = (
   regulation: Pick<RegulationWithStatus, "id" | "status">,
@@ -32,4 +35,4 @@ export const shouldShowAirportMlitNote = (
 ): boolean =>
   regulation.id === AIRPORT_REGULATION_ID &&
   (regulation.status === "red" || regulation.status === "yellow") &&
-  (pilotPermits ?? []).includes("mlit");
+  (pilotPermits ?? []).some(isDipsPermitValue);

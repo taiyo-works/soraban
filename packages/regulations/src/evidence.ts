@@ -7,12 +7,22 @@ import type { DatasetRef } from "./datasets";
 
 /**
  * 判定エンジンの版。証跡 ID の入力に含め、どのロジックで判定したかを同定する。
- * Sprint 7：飛行禁止法 1,000m（敷地境界基準）・DID 令和2年＋工業専用地域の除外・データ出典台帳。
+ * Sprint 7（0.3.0）：飛行禁止法 1,000m（敷地境界基準）・DID 令和2年＋工業専用地域の除外・データ出典台帳。
+ * Sprint 11d（0.4.0）：判定を 4 段（飛行不可／要手続き／手続き済み（条件付き）／手続き不要）＋判定不能に組み直し。
+ *   status は許可・同意を当てる前の元の判定になり、飛行禁止法の例外は同意と通報の両方を要する。
+ *   証跡 ID の正規化（buildCheckEvidencePayload）は変えず、版の文字列だけが変わる。
  */
-export const ENGINE_VERSION = "soraban-0.3.0-regulations-2026-07";
+export const ENGINE_VERSION = "soraban-0.4.0-verdict-2026-10";
 
-/** 過去の版（履歴の互換表示用）。 */
-export const PREVIOUS_ENGINE_VERSIONS: readonly string[] = ["soraban-0.2.0-clausegraph"];
+/**
+ * 過去の版（履歴の互換表示用。新しい順）。旧版の文字列を buildCheckEvidencePayload に渡すと、
+ * 旧版の証跡 ID を再現できる（apps/web/src/server/sprint10a.test.ts）。
+ * evidence_log.overall は 0.3.0 までは許可を当てた後、0.4.0 からは許可を当てる前の元の判定。
+ */
+export const PREVIOUS_ENGINE_VERSIONS: readonly string[] = [
+  "soraban-0.3.0-regulations-2026-07",
+  "soraban-0.2.0-clausegraph",
+];
 
 export type CheckEvidencePayloadInput = {
   readonly engineVersion: string;
