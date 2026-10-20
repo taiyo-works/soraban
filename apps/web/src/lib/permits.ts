@@ -67,3 +67,22 @@ export const permitChecksFromPilotPermits = (
     bunkacho: has(PERMIT_VALUES.bunkacho),
   };
 };
+
+/**
+ * 履歴から復元した ctx の pilotPermits を、現在の規則で組み直す（Sprint 11c）。
+ * 旧形式（facility_manager_and_pref_pubsafety を含む Sprint 6〜11b の履歴）をそのまま送ると、
+ * 通報をしていなくても飛行禁止法の例外が当たってしまうため、チェックの状態に戻してから組み立て直す。
+ * 許可が残らなければ pilotPermits を外し、ctx が空になれば undefined を返す。
+ */
+export const normalizeRestoredCtx = <T extends { readonly pilotPermits?: readonly string[] }>(
+  ctx: T | undefined,
+): T | undefined => {
+  if (!ctx) return undefined;
+  const { pilotPermits, ...rest } = ctx;
+  const rebuilt =
+    pilotPermits !== undefined
+      ? buildPilotPermits(permitChecksFromPilotPermits(pilotPermits))
+      : [];
+  const next = (rebuilt.length > 0 ? { ...rest, pilotPermits: rebuilt } : rest) as T;
+  return Object.keys(next).length > 0 ? next : undefined;
+};

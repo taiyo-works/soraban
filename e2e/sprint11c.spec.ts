@@ -186,3 +186,58 @@ test.describe("B. DIPS の説明", () => {
     await expect(ap.getByTestId("airport-mlit-note")).toHaveCount(0);
   });
 });
+
+test.describe("C. 旧形式の判定履歴の復元（evaluator 差し戻し 1 回目）", () => {
+  const MIHO_LOC = { lat: 35.4936, lng: 133.26604 };
+  const LEGACY: Array<[string, string[]]> = [
+    ["Sprint 11b までの形式", ["facility_manager", "facility_manager_and_pref_pubsafety"]],
+    ["Sprint 6 形式", ["facility_manager_and_pref_pubsafety"]],
+  ];
+
+  for (const [name, permits] of LEGACY) {
+    test(`${name}の履歴を復元しても飛行禁止法は red のままで例外が当たらず、/api/check に両方の値を送らない`, async ({
+      page,
+    }) => {
+      const address = `旧形式の履歴 ${name}`;
+      const entry = {
+        runId: "run_legacy_11c",
+        evidenceId: "ev_11c011c011c011c0",
+        savedAt: "2026-10-18T09:00:00.000Z",
+        loc: MIHO_LOC,
+        ctx: { droneWeightG: 900, pilotPermits: permits },
+        overall: "green",
+        resolvedAddress: address,
+        engineVersion: "soraban-0.3.0-regulations-2026-07",
+        checkedAt: "2026-10-18T09:00:00.000Z",
+        muniCode: "31204",
+      };
+      await page.addInitScript((raw) => {
+        if (sessionStorage.getItem("seeded-11c")) return;
+        sessionStorage.setItem("seeded-11c", "1");
+        localStorage.setItem("soraban:history:v1", raw);
+      }, JSON.stringify([entry]));
+      await openReady(page);
+
+      const item = page.getByTestId("history-item").filter({ hasText: address });
+      await expect(item).toBeVisible();
+      const req = page.waitForRequest((r) => r.url().endsWith("/api/check") && r.method() === "POST");
+      const check = waitCheck(page);
+      const diag = waitDiagnose(page);
+      await item.locator("button").first().click();
+      const body = (await req).postData() ?? "";
+      await Promise.all([check, diag]);
+      expect(body).not.toContain("facility_manager_and_pref_pubsafety");
+
+      const sdl = card(page, "small-drone-law");
+      await expect(sdl).toHaveAttribute("data-status", "red");
+      await expect(sdl).not.toContainText("適用された例外節");
+
+      await openConditions(page);
+      await expect(notice(page)).not.toBeChecked();
+      await expect(consent(page)).toBeChecked({ checked: permits.includes("facility_manager") });
+
+      const text = await exportPdf(page);
+      expect(text).not.toContain("同意＋通報（両方）");
+    });
+  }
+});

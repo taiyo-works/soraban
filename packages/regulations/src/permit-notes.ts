@@ -21,7 +21,7 @@ export const AIRPORT_REGULATION_ID = "aviation-law-airport";
  *   基づく。一次資料で確かめたら本コメントの確認日を更新し、※要再確認を外すこと。
  */
 export const AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE =
-  "空港等周辺は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要です。入力した DIPS の許可は空港等周辺には当てていません。";
+  "空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。";
 
 /**
  * 空港等周辺の補足を出すか。DIPS（mlit）を入力し、空港等周辺の規制が red または yellow のとき。

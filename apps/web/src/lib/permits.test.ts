@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPilotPermits,
   EMPTY_PERMIT_CHECKS,
+  normalizeRestoredCtx,
   permitChecksFromPilotPermits,
   type PermitChecks,
 } from "./permits";
@@ -73,5 +74,44 @@ describe("permitChecksFromPilotPermits（契約 2）", () => {
   it("undefined・未知の値 → すべて未チェック", () => {
     expect(permitChecksFromPilotPermits(undefined)).toEqual(EMPTY_PERMIT_CHECKS);
     expect(permitChecksFromPilotPermits(["unknown_value"])).toEqual(EMPTY_PERMIT_CHECKS);
+  });
+});
+
+describe("normalizeRestoredCtx（旧形式の履歴の復元。evaluator 差し戻し 1 回目）", () => {
+  it("Sprint 6 形式 → facility_manager_and_pref_pubsafety を含まず、許可が残らなければ pilotPermits を外す", () => {
+    const ctx = normalizeRestoredCtx({
+      droneWeightG: 900,
+      pilotPermits: ["facility_manager_and_pref_pubsafety"],
+    });
+    expect(ctx).toEqual({ droneWeightG: 900 });
+    expect(ctx?.pilotPermits ?? []).not.toContain("facility_manager_and_pref_pubsafety");
+  });
+
+  it("Sprint 11b までの形式 → 同意だけ（facility_manager）になり、両方の値を含まない", () => {
+    const ctx = normalizeRestoredCtx({
+      droneWeightG: 900,
+      pilotPermits: ["facility_manager", "facility_manager_and_pref_pubsafety"],
+    });
+    expect(ctx).toEqual({ droneWeightG: 900, pilotPermits: ["facility_manager"] });
+  });
+
+  it("新形式の同意＋通報はそのまま 3 つの値に組み直す", () => {
+    const ctx = normalizeRestoredCtx({
+      pilotPermits: ["facility_manager", "pref_pubsafety_notice", "facility_manager_and_pref_pubsafety"],
+    });
+    expect(ctx?.pilotPermits).toEqual([
+      "facility_manager",
+      "pref_pubsafety_notice",
+      "facility_manager_and_pref_pubsafety",
+    ]);
+  });
+
+  it("許可以外の項目は残し、空になれば undefined", () => {
+    expect(normalizeRestoredCtx({ purpose: "public_duty", pilotPermits: ["mlit"] })).toEqual({
+      purpose: "public_duty",
+      pilotPermits: ["mlit"],
+    });
+    expect(normalizeRestoredCtx({ pilotPermits: ["facility_manager_and_pref_pubsafety"] })).toBeUndefined();
+    expect(normalizeRestoredCtx(undefined)).toBeUndefined();
   });
 });

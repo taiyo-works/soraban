@@ -50,7 +50,11 @@ import {
 } from "@/lib/history";
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
-import { buildPilotPermits, permitChecksFromPilotPermits } from "@/lib/permits";
+import {
+  buildPilotPermits,
+  normalizeRestoredCtx,
+  permitChecksFromPilotPermits,
+} from "@/lib/permits";
 import { RegulationMap, type MapPickMethod } from "./regulation-map";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
@@ -431,11 +435,14 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     isRestoringRef.current = true;
     // 旧形式・旧規制 ID を含むエントリでも例外を出さないよう、純関数で正規化してから戻す（Sprint 7）。
     const plan = buildRestorePlan(entry);
+    // 旧形式の許可（facility_manager_and_pref_pubsafety）をそのまま送らないよう、
+    // 現在の規則で組み直した ctx を判定・表示・履歴の保存に使う（Sprint 11c）。
+    const restoredCtx = normalizeRestoredCtx(plan.ctx);
     const weightStr =
       plan.ctx?.droneWeightG !== undefined ? String(plan.ctx.droneWeightG) : "";
     setDroneWeightInput(weightStr);
     // 旧形式（facility_manager_and_pref_pubsafety）からは通報を済み扱いに戻さない（Sprint 11c）。
-    const permitChecks = permitChecksFromPilotPermits(plan.ctx?.pilotPermits);
+    const permitChecks = permitChecksFromPilotPermits(restoredCtx?.pilotPermits);
     setHasMlitPermit(permitChecks.mlit);
     setHasFacilityConsent(permitChecks.facilityConsent);
     setHasPubsafetyNotice(permitChecks.pubsafetyNotice);
@@ -475,7 +482,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     };
 
     const runId = startNewRun();
-    runCheck(plan.loc, plan.ctx ?? null, restoredDiagInput, runId);
+    runCheck(plan.loc, restoredCtx ?? null, restoredDiagInput, runId);
     void runDiagnose(plan.loc, {
       userAirspaceFlags: nextAirspaceFlags,
       didConfirmedNotApplicable: nextDidConfirmed,
@@ -503,7 +510,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // PDF ダウンロード。@react-pdf/renderer は ~4MB あるので動的 import で
   // 初期バンドルに含めない（ボタン押下時に 1 度だけ取得）。
   const handlePdfExport = async (): Promise<void> => {
-    if (!result) return;
+    // 再判定の応答待ちの間は、画面の入力と食い違う旧い結果で PDF を出さない。
+    if (!result || isChecking) return;
     setPdfBusy(true);
     try {
       const [{ pdf }, { RegulationPdfDocument }] = await Promise.all([
@@ -1531,7 +1539,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             <button
               type="button"
               onClick={() => void handlePdfExport()}
-              disabled={pdfBusy}
+              disabled={pdfBusy || isChecking}
               className="inline-flex h-11 items-center gap-2 self-stretch rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium uppercase tracking-wider text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:opacity-40 sm:self-start"
               title="この判定を A4 1 枚 PDF レポートとして書き出し"
             >
