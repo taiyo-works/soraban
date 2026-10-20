@@ -107,9 +107,9 @@ export function RegulationCard({ regulation, pilotPermits }: Props) {
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p
           data-testid="airport-mlit-note"
-          className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft"
+          className="border-l-2 border-signal-amber bg-signal-amber-soft/45 px-3 py-2 text-xs leading-relaxed text-ink-soft"
         >
-          <span className="eyebrow !text-[11px]">入力した許可について</span>{" "}
+          <span className="eyebrow block !text-[11px]">入力した許可について</span>{" "}
           {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
         </p>
       ) : null}

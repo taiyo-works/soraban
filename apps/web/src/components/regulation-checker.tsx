@@ -1125,8 +1125,12 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             <span className="text-[11px] tracking-wide text-ink-mute">
               取得済みの許可
             </span>
-            <div className="grid grid-cols-1 gap-px overflow-hidden bg-rule sm:grid-cols-2 lg:grid-cols-4">
-              {[
+            {(() => {
+              /* 5 つのチェックを 2 段に組む。
+                 上段：単独で効く許可（DIPS・公園・文化財）の 3 枡。
+                 下段：飛行禁止法では同意と通報が一組で要るため、2 枡を隣り合わせて
+                 左の罫と枡の間の「＋」でひとまとまりに見せる。 */
+              const permitItems = [
                 {
                   state: hasMlitPermit,
                   set: setHasMlitPermit,
@@ -1142,6 +1146,15 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   desc: "都市公園条例",
                 },
                 {
+                  state: hasBunkachoPermit,
+                  set: setHasBunkachoPermit,
+                  key: "bunkacho",
+                  label: "文化庁・教育委員会",
+                  desc: "文化財保護法 125 条",
+                },
+              ];
+              const pairItems = [
+                {
                   state: hasFacilityConsent,
                   set: setHasFacilityConsent,
                   key: "facility-consent",
@@ -1155,14 +1168,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   label: "公安委員会への通報（飛行禁止法）",
                   desc: "飛行の 48 時間前までに通報済み（飛行禁止法の対象施設の周辺だけで使う）",
                 },
-                {
-                  state: hasBunkachoPermit,
-                  set: setHasBunkachoPermit,
-                  key: "bunkacho",
-                  label: "文化庁・教育委員会",
-                  desc: "文化財保護法 125 条",
-                },
-              ].map((p) => (
+              ];
+              const renderPermit = (p: (typeof permitItems)[number]) => (
                 <label
                   key={p.key}
                   className={`flex min-h-[52px] cursor-pointer items-start gap-2 px-3 py-3 transition-colors ${p.state ? "bg-brand-50" : "bg-paper active:bg-paper-soft sm:hover:bg-paper-soft"}`}
@@ -1171,17 +1178,35 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     type="checkbox"
                     checked={p.state}
                     onChange={(e) => p.set(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700"
+                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-700"
                   />
-                  <span className="flex flex-1 flex-col leading-tight">
+                  <span className="flex flex-1 flex-col gap-0.5 leading-tight">
                     <span className="text-sm font-medium text-ink sm:text-xs">{p.label}</span>
-                    <span className="text-[11px] tracking-wide text-ink-mute">
+                    <span className="text-[11px] leading-snug tracking-wide text-ink-mute">
                       {p.desc}
                     </span>
                   </span>
                 </label>
-              ))}
-            </div>
+              );
+              return (
+                <div className="flex flex-col gap-px overflow-hidden bg-rule">
+                  <div className="grid grid-cols-1 gap-px sm:grid-cols-3">
+                    {permitItems.map(renderPermit)}
+                  </div>
+                  <div className="relative border-l-2 border-brand-700 bg-rule">
+                    <div className="grid grid-cols-1 gap-px sm:grid-cols-2">
+                      {pairItems.map(renderPermit)}
+                    </div>
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute left-1/2 top-1/2 hidden h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-rule bg-paper font-mono text-xs leading-none text-brand-700 sm:flex"
+                    >
+                      +
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
           </div>
         </details>
