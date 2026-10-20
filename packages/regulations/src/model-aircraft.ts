@@ -117,7 +117,7 @@ export const MODEL_AIRCRAFT_HIGH_REASON = `100g 未満の機体（模型航空�
 
 /** 100g 未満のとき、飛行の前後に確かめること（段階には影響させない）。 */
 export const MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE = "許可か通報かの確認（管制圏・情報圏・高度変更禁止空域・特別管制空域の内か外か）";
-export const MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL = `このアプリは管制圏・情報圏・高度変更禁止空域・特別管制空域・航空路を収録していません。飛行の前に、飛行場所が内側（許可）か外側（通報）かを、空港事務所・管制機関・空港管理者に確かめてください。内側なら許可を得てから、外側なら事前に通報してから飛行します（${MODEL_AIRCRAFT_LAW}）。`;
+export const MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL = `このアプリは管制圏・情報圏・高度変更禁止空域・特別管制空域・航空路を収録していません。空港等の周辺、または航空路内の地表から 150m 以上・航空路外の 250m 以上を飛ぶ場合は、飛行の前に、飛行場所が内側（許可）か外側（通報）かを、空港事務所・管制機関・空港管理者に確かめてください。内側なら許可を得てから、外側なら事前に通報してから飛行します（${MODEL_AIRCRAFT_LAW}）。これらに当たらない場所・高さなら、この手続きの対象にならない可能性があります（参照先で確認）。`;
 
 /** 重さの欄の補足（100g 未満の入力時）。 */
 export const MODEL_AIRCRAFT_WEIGHT_NOTE = `100g 未満（模型航空機）：航空法の無人航空機の規制（DID・特定飛行・機体登録など）は対象外。空港等の周辺と高い空域では${MODEL_AIRCRAFT_LAW}の${MODEL_AIRCRAFT_PERMIT_OR_NOTICE_SHORT}が要ります。小型無人機等飛行禁止法・条例は重量に関係なく対象です。`;
