@@ -8,7 +8,7 @@ import {
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { PROVISIONAL_ITEM_NOTE, BASE_STATUS_LABEL, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
+import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
 import { TierGauge, VerdictMark } from "./verdict-mark";
 
 type Props = {
@@ -90,7 +90,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           data-testid="regulation-base-status"
           className={`ml-auto inline-flex items-center border px-2 py-0.5 text-[11px] font-semibold ${statusBadgeClass[regulation.status]}`}
         >
-          {BASE_STATUS_LABEL[regulation.status]}
+          {regulationBaseLabel(regulation)}
         </span>
       </div>
       {verdictItem ? (
@@ -98,7 +98,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           data-testid="regulation-verdict-line"
           className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-l-2 border-rule py-1.5 pl-2 text-[11px] text-ink-soft ${provisional ? "border-l-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
         >
-          <span>元の判定 {BASE_STATUS_LABEL[verdictItem.baseStatus]}</span>
+          <span>元の判定 {baseStatusDisplay(verdictItem)}</span>
           <span aria-hidden>→</span>
           <span>
             適用した許可{" "}
@@ -177,8 +177,13 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green"
         >
           <p className="eyebrow !text-[11px] !text-signal-green">
-            対象外にした例外（元の判定を非該当にしました）
+            {regulation.statusBeforeExclusion !== undefined ? EXCLUDED_BY_WEIGHT_HEADING : EXCLUDED_HEADING}
           </p>
+          {regulation.statusBeforeExclusion !== undefined ? (
+            <p data-testid="regulation-status-before-exclusion" className="mt-1 font-medium leading-snug">
+              {statusBeforeExclusionLine(regulation.statusBeforeExclusion)}
+            </p>
+          ) : null}
           <ul className="mt-1 flex flex-col gap-1">
             {regulation.appliedExceptions.map((ex) => (
               <li key={ex.id} className="leading-snug">

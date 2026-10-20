@@ -4,7 +4,7 @@
 // LRU で最大 50 件まで保持、超えたら最古を削除。
 
 import type { LatLng } from "@soraban/geo";
-import { HISTORY_UNDETERMINED_LABEL } from "./verdict-display";
+import { HISTORY_UNDETERMINED_LABEL, VERDICT_PENDING_LABEL } from "./verdict-display";
 import {
   LEGACY_STATUS_LABEL,
   VERDICT_LABEL,
@@ -483,13 +483,23 @@ export type HistoryVerdictDisplay = {
   /** 旧版（verdict なし）の値か。 */
   readonly legacy: boolean;
   readonly unknownCount?: number;
+  /** 診断の応答待ち（Sprint 11f B1。画面の状態から渡したときだけ true。保存はしない）。 */
+  readonly pending?: boolean;
 };
 
 /**
  * 履歴 1 件の判定の表示。新形式は 4 段の言葉、旧形式（verdict なし。0.3.0／0.2.0）は旧版の値であることを
  * 明示した言葉（例：適用外（旧版の判定））。旧版の緑の表示の言葉（飛べると読める語）は新旧とも出さない。
  */
-export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay => {
+export const historyVerdictDisplay = (
+  entry: SavedCheck,
+  opts: { readonly pending?: boolean } = {},
+): HistoryVerdictDisplay => {
+  // 診断の応答を待っている実行は「判定中」（Sprint 11f B1）。前の入力での判定は出さない。
+  // 判定中の印は保存しない：画面を開き直した行は、判定を外した状態から下の「判定未確定」になる。
+  if (opts.pending === true) {
+    return { label: VERDICT_PENDING_LABEL, legacy: false, pending: true };
+  }
   // 飛行の方法を含む診断の判定だけを結論として出す（PR #23 P1）。
   // 地点だけの判定（entry.verdict）しか無い新形式の項目は、診断が未完了または失敗したものとして「判定未確定」と出す
   // （飛行の方法を含まない判定で「手続き不要」と出さない。差し戻し 2 回目）。
@@ -512,10 +522,13 @@ export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay 
 };
 
 /**
- * 申請支援の診断が失敗したとき、その実行（runId）の履歴から診断の判定を外す（差し戻し 2 回目）。
- * 前の診断の判定や地点だけの判定で「手続き不要」と残さず、「判定未確定」と出す。
+ * その実行（runId）の履歴から診断の判定（verdict・verdictUnknownCount）を外す。確定分と保留分の両方。
+ *   - 申請支援の診断を始めるとき（Sprint 11f B1）：待っている間に前の入力での判定を残さない。
+ *     待っている間に画面を閉じても、開き直した行は「判定未確定」になる（手続き不要とは出ない）。
+ *   - 診断が失敗・時間切れになったとき（差し戻し 2 回目）：「判定未確定」と出す。
+ * カテゴリー・DID・手続きの件数・診断の証跡 ID は消さない。
  */
-export const markHistoryDiagnosisFailed = (runId: string): readonly SavedCheck[] => {
+export const clearHistoryDiagnosisVerdict = (runId: string): readonly SavedCheck[] => {
   const strip = (s: SavedDiagnosisSummary | undefined): SavedDiagnosisSummary | undefined => {
     if (!s) return s;
     const { verdict: _v, verdictUnknownCount: _n, ...rest } = s;
@@ -538,3 +551,6 @@ export const markHistoryDiagnosisFailed = (runId: string): readonly SavedCheck[]
   notifyChange();
   return next;
 };
+
+/** 診断が失敗したとき、その実行の判定を外す（clearHistoryDiagnosisVerdict と同じ）。 */
+export const markHistoryDiagnosisFailed = clearHistoryDiagnosisVerdict;

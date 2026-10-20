@@ -478,7 +478,7 @@ export const ApplicationPdfDocument = ({
             {keepSpaces(isModelAircraftDiagnosis(diagnosis) ? MODEL_AIRCRAFT_CATEGORY_NOTE : diagnosis.categoryNote)}
           </Text>
           <Text style={styles.categoryNote}>
-            DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
+            DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail, { droneWeightG: diagnosis.droneWeightG })}
           </Text>
           {(diagnosis.verificationNotes ?? []).map((n) => {
             // 注記の文中の出典 URL は本文から切り分け、注記の下に字下げした「出典:」行として出す。

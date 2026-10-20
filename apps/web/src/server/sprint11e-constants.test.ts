@@ -16,9 +16,10 @@ describe("model-aircraft.ts", () => {
     expect(MODEL_AIRCRAFT_RULES_CHECKED_AT).toBe("2026-10-20");
     expect(src).toContain("※要確認：一次資料未取得");
   });
-  it("参照先 5 件の URL が入っている", () => {
+  it("参照先 6 件の URL が入っている（Sprint 11f で航空法施行規則を分けた）", () => {
     expect(MODEL_AIRCRAFT_REFERENCES.map((r) => r.url)).toEqual([
       "https://laws.e-gov.go.jp/law/327AC0000000231",
+      "https://laws.e-gov.go.jp/law/327M50000800056",
       "https://www.mlit.go.jp/koku/koku_tk1_000048.html",
       "https://www.mlit.go.jp/common/001708524.pdf",
       "https://www.mlit.go.jp/common/002010809.pdf",

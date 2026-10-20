@@ -4,6 +4,7 @@ import {
   clearHistory,
   createHistoryRunId,
   getHistorySnapshot,
+  clearHistoryDiagnosisVerdict,
   historyVerdictDisplay,
   loadHistory,
   markHistoryDiagnosisFailed,
@@ -486,4 +487,62 @@ describe("historyVerdictDisplay（Sprint 11d）", () => {
   });
 
 
+  it("Sprint 11f B1：診断の開始で判定が外れ（確定分と保留分）、判定中として渡した行は「判定中」、渡さない行は「判定未確定」。手続き不要は出ない", () => {
+    const summary = {
+      diagnosisEvidenceId: "ev_d_p",
+      category: "I" as const,
+      isSpecificFlight: false,
+      procedureCount: 1,
+      didStatus: "not_applicable" as const,
+      verdict: "no_procedure" as const,
+      verdictUnknownCount: 0,
+    };
+    // 確定分（地点判定が届いている実行）
+    recordHistoryCheck("run_p", {
+      ...base,
+      evidenceId: "ev_check_p",
+      overall: "green",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    recordHistoryDiagnosis("run_p", { diagnosisSummary: summary });
+    // 保留分（診断が先に届いた実行）
+    recordHistoryDiagnosis("run_q", { diagnosisSummary: { ...summary, diagnosisEvidenceId: "ev_d_q" } });
+
+    clearHistoryDiagnosisVerdict("run_p");
+    clearHistoryDiagnosisVerdict("run_q");
+    const e = loadHistory().find((x) => x.runId === "run_p")!;
+    expect(e.diagnosisSummary?.verdict).toBeUndefined();
+    expect(e.diagnosisSummary?.verdictUnknownCount).toBeUndefined();
+    expect(e.diagnosisSummary?.category).toBe("I"); // 前の値は消さない（表示だけ止める）
+    const pending = historyVerdictDisplay(e, { pending: true });
+    expect(pending).toMatchObject({ label: "判定中", pending: true });
+    expect(pending.level).toBeUndefined();
+    const reopened = historyVerdictDisplay(e);
+    expect(reopened.label).toContain("判定未確定");
+    expect(reopened.pending).toBeUndefined();
+    for (const l of [pending.label, reopened.label]) expect(l).not.toContain("手続き不要");
+    // 判定中の印は保存されない
+    expect(JSON.stringify(loadHistory())).not.toContain("判定中");
+
+    // 保留分も外れていて、地点判定が後から届いても判定は戻らない
+    recordHistoryCheck("run_q", {
+      ...base,
+      evidenceId: "ev_check_q",
+      overall: "green",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    const q = loadHistory().find((x) => x.runId === "run_q")!;
+    expect(historyVerdictDisplay(q).label).toContain("判定未確定");
+    expect(historyVerdictDisplay(q, { pending: true }).label).toBe("判定中");
+
+    // 成功を書くと診断の判定、失敗の後は判定未確定
+    recordHistoryDiagnosis("run_p", { diagnosisSummary: { ...summary, verdict: "needs_procedure" } });
+    expect(historyVerdictDisplay(loadHistory().find((x) => x.runId === "run_p")!)).toMatchObject({
+      level: "needs_procedure",
+    });
+    markHistoryDiagnosisFailed("run_p");
+    expect(historyVerdictDisplay(loadHistory().find((x) => x.runId === "run_p")!).label).toContain("判定未確定");
+  });
 });

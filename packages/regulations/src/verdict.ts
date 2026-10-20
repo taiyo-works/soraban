@@ -36,6 +36,7 @@ import {
   MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL,
   MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE,
   MODEL_AIRCRAFT_DEADLINE_LABEL,
+  MODEL_AIRCRAFT_EXEMPT_LABEL,
   MODEL_AIRCRAFT_EXEMPT_REASON,
   MODEL_AIRCRAFT_HIGH_PROCEDURE_TITLE,
   MODEL_AIRCRAFT_HIGH_REASON,
@@ -203,6 +204,15 @@ export type AppliedPermit = {
   readonly byPurpose: boolean;
 };
 
+/**
+ * 項目の「元の判定」の表示（Sprint 11f）。模型航空機として対象外にした項目は MODEL_AIRCRAFT_EXEMPT_LABEL、
+ * それ以外は BASE_STATUS_LABEL。値（baseStatus）は変えない。
+ */
+export const baseStatusDisplay = (item: {
+  readonly baseStatus: RegulationStatus;
+  readonly baseExcludedAs?: "model_aircraft";
+}): string => (item.baseExcludedAs === "model_aircraft" ? MODEL_AIRCRAFT_EXEMPT_LABEL : BASE_STATUS_LABEL[item.baseStatus]);
+
 /** 規制または飛行の条件ごとの判定。 */
 export type VerdictItem = {
   /** 規制 id、または飛行の条件のフラグ。 */
@@ -216,6 +226,11 @@ export type VerdictItem = {
   readonly legalTier: LegalTier;
   /** 元の判定（許可を当てる前）。飛行の条件は利用者が選んだもの＝該当（red）。 */
   readonly baseStatus: RegulationStatus;
+  /**
+   * 表示用の印（Sprint 11f）：100g 未満（模型航空機）で対象外にした項目。baseStatus（green）の値は変えず、
+   * 「元の判定」の表示だけ MODEL_AIRCRAFT_EXEMPT_LABEL にする。証跡・evidence_log には入れない。
+   */
+  readonly baseExcludedAs?: "model_aircraft";
   readonly verdict: ItemVerdict;
   readonly appliedPermits: readonly AppliedPermit[];
   /** 判定の理由。 */
@@ -590,6 +605,7 @@ const regulationItem = (r: RegulationWithStatus, ctx: FlightContext | undefined)
     // 100g 未満（模型航空機）で航空法の無人航空機の規制が対象外になった（Sprint 11e A3）。
     return {
       ...base,
+      baseExcludedAs: "model_aircraft",
       verdict: "no_procedure",
       appliedPermits: [],
       reason: `${MODEL_AIRCRAFT_EXEMPT_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,
@@ -653,6 +669,7 @@ const flightConditionItem = (
     return {
       ...base,
       baseStatus: "green",
+      baseExcludedAs: "model_aircraft",
       verdict: "no_procedure",
       appliedPermits: [],
       reason: `${MODEL_AIRCRAFT_EXEMPT_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,

@@ -4,6 +4,7 @@
 // 判定の理由（verdict.ts）は、すべてここを参照する。条番号・URL を他のファイルに書かない。
 //
 // ※要確認：一次資料未取得（2026-10-20 時点で作業環境から e-Gov・国交省の本文を取得できず、条文と照合していない）。
+//   航空法施行規則の e-Gov の URL（法令 ID 327M50000800056。昭和27年運輸省令第56号）も、航空法施行規則を指すことを確かめていない。
 //   確かめたら確認日（MODEL_AIRCRAFT_RULES_CHECKED_AT）を更新し、本注記を外す。
 //   特に、許可と通報の対象空域の分け方（空港等の周辺・管制圏・情報圏、航空路内 150m／航空路外 250m）、
 //   出す先（窓口）、期限は、条文と国交省の資料で確かめること。確かめるまでは安全側（要手続き）に倒す。
@@ -26,8 +27,13 @@ export type ModelAircraftReference = {
 export const MODEL_AIRCRAFT_REFERENCES: readonly ModelAircraftReference[] = [
   {
     id: "egov-aviation-act",
-    title: `e-Gov 法令検索 航空法（${MODEL_AIRCRAFT_LAW}。${MODEL_AIRCRAFT_ORDINANCE} は航空法施行規則）`,
+    title: `e-Gov 法令検索 航空法（${MODEL_AIRCRAFT_LAW}）`,
     url: "https://laws.e-gov.go.jp/law/327AC0000000231",
+  },
+  {
+    id: "egov-aviation-regulation",
+    title: `e-Gov 法令検索 航空法施行規則（${MODEL_AIRCRAFT_ORDINANCE}）`,
+    url: "https://laws.e-gov.go.jp/law/327M50000800056",
   },
   {
     id: "mlit-laser-kite",
@@ -53,6 +59,12 @@ export const MODEL_AIRCRAFT_REFERENCES: readonly ModelAircraftReference[] = [
 
 /** 判定の理由・PDF に添える参照先の一行（題名と URL）。 */
 export const MODEL_AIRCRAFT_REFERENCE_LINE = `参照先：${MODEL_AIRCRAFT_REFERENCES.map((r) => `${r.title} ${r.url}`).join(" ／ ")}`;
+
+/**
+ * 100g 未満で、機体重量の例外により対象外にした規制（DID・空港等周辺など）と飛行の方法の「元の判定」の表示（Sprint 11f）。
+ * 表示の言葉だけで、status・baseStatus・証跡の値は変えない。
+ */
+export const MODEL_AIRCRAFT_EXEMPT_LABEL = "対象外（模型航空機）";
 
 /** 100g 未満で航空法の無人航空機の規制が対象外になる理由。 */
 export const MODEL_AIRCRAFT_EXEMPT_REASON =
