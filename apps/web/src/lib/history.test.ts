@@ -6,6 +6,7 @@ import {
   getHistorySnapshot,
   historyVerdictDisplay,
   loadHistory,
+  markHistoryDiagnosisFailed,
   patchHistoryDiagnosis,
   recordHistoryCheck,
   recordHistoryDiagnosis,
@@ -401,16 +402,61 @@ describe("historyVerdictDisplay（Sprint 11d）", () => {
     const bad = historyVerdictDisplay({ ...base, overall: "bogus" as never, engineVersion: "x" });
     expect(bad.label).toBe("判定不能（旧版の判定）");
   });
-  it("新形式は 4 段の言葉と判定不能の件数", () => {
+  it("新形式は診断の判定（4 段の言葉と判定不能の件数）を出す", () => {
     const v = historyVerdictDisplay({
       ...base,
       overall: "red",
-      verdict: "procedure_done",
-      verdictUnknownCount: 0,
+      verdict: "no_procedure",
       engineVersion: "soraban-0.4.0-verdict-2026-10",
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_d",
+        category: "I",
+        isSpecificFlight: false,
+        procedureCount: 1,
+        verdict: "procedure_done",
+        verdictUnknownCount: 0,
+      },
     });
     expect(v).toEqual({ level: "procedure_done", label: "手続き済み（条件付き）", legacy: false, unknownCount: 0 });
   });
+
+  it("地点だけの判定しか無い新形式の項目は判定未確定（手続き不要と出さない。差し戻し 2 回目）", () => {
+    const v = historyVerdictDisplay({
+      ...base,
+      overall: "green",
+      verdict: "no_procedure",
+      verdictUnknownCount: 0,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    });
+    expect(v.level).toBeUndefined();
+    expect(v.label).toContain("判定未確定");
+    expect(v.label).not.toContain("手続き不要");
+  });
+
+  it("診断の失敗で、その実行の診断の判定を外す（前の判定を残さない）", () => {
+    recordHistoryCheck("run_f", {
+      ...base,
+      evidenceId: "ev_check_f",
+      overall: "green",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    recordHistoryDiagnosis("run_f", {
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_d_f",
+        category: "I",
+        isSpecificFlight: false,
+        procedureCount: 1,
+        verdict: "no_procedure",
+        verdictUnknownCount: 0,
+      },
+    });
+    markHistoryDiagnosisFailed("run_f");
+    const e = loadHistory().find((x) => x.runId === "run_f")!;
+    expect(e.diagnosisSummary?.verdict).toBeUndefined();
+    expect(historyVerdictDisplay(e).label).toContain("判定未確定");
+  });
+
   it("診断の判定（飛行の方法を含む）を地点だけの判定より優先し、地点判定が後から届いても上書きしない（PR #23 P1）", () => {
     recordHistoryDiagnosis("run_d", {
       diagnosisSummary: {
@@ -439,16 +485,5 @@ describe("historyVerdictDisplay（Sprint 11d）", () => {
     expect(historyVerdictDisplay(e2).level).toBe("no_procedure");
   });
 
-  it("recordHistoryCheck が verdict を保存し、読み戻せる", () => {
-    recordHistoryCheck("run_v", {
-      ...base,
-      evidenceId: "ev_verdict_1",
-      overall: "red",
-      verdict: "needs_procedure",
-      verdictUnknownCount: 2,
-      engineVersion: "soraban-0.4.0-verdict-2026-10",
-    } as Omit<SavedCheck, "runId">);
-    const e = loadHistory().find((x) => x.runId === "run_v")!;
-    expect(historyVerdictDisplay(e)).toMatchObject({ level: "needs_procedure", unknownCount: 2 });
-  });
+
 });

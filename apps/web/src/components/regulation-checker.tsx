@@ -43,6 +43,7 @@ import {
   getHistoryServerSnapshot,
   getHistorySnapshot,
   historyVerdictDisplay,
+  markHistoryDiagnosisFailed,
   recordHistoryCheck,
   recordHistoryDiagnosis,
   removeHistory,
@@ -343,17 +344,17 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.derivedAirspaceFlags : [];
   const autoDidStatus =
     diagnosis && sameLoc(center, diagnosis) ? diagnosis.autoDidStatus : undefined;
-  // 画面の結論に使う判定（未決 5）：現在地点の診断の判定（飛行の方法を含む）。届くまでは「判定中」。
-  // 診断が失敗したときだけ、地点だけの判定（/api/check）で代える。
+  // 画面の結論に使う判定（未決 5）：現在の入力で成功した診断の判定（飛行の方法を含む）だけを使う。
+  // 届くまでは「判定中」。診断が失敗したときは「判定できません」とし、古い診断の判定も、飛行の方法を含まない
+  // 地点だけの判定（/api/check）も使わない（差し戻し 2 回目。見落としゼロ）。
   const diagnosisIsCurrent = diagnosis !== null && sameLoc(center, diagnosis);
+  const verdictFailed = diagnoseError !== null && !diagPending;
   const screenVerdict =
-    diagnosisIsCurrent && diagnosis.verdict !== undefined
+    diagnosisIsCurrent && !diagPending && !verdictFailed && diagnosis.verdict !== undefined
       ? diagnosis.verdict
-      : diagnoseError !== null
-        ? result?.verdict
-        : undefined;
-  const verdictPending =
-    (diagPending && diagnoseError === null) || isChecking || screenVerdict === undefined;
+      : undefined;
+  const verdictPending = !verdictFailed && (diagPending || isChecking || screenVerdict === undefined);
+  const canExportPdf = screenVerdict !== undefined && !verdictPending && !verdictFailed;
 
   // エンジンの DID 判定が確定（該当・非該当）しているときは、プリセットの curated DID フラグを使わない。
   const effectiveAirspaceFlags: readonly SpecificFlightFlag[] = mergeAirspaceFlags({
@@ -519,8 +520,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // PDF ダウンロード。@react-pdf/renderer は ~4MB あるので動的 import で
   // 初期バンドルに含めない（ボタン押下時に 1 度だけ取得）。
   const handlePdfExport = async (): Promise<void> => {
-    // 再判定の応答待ちの間は、画面の入力と食い違う旧い結果で PDF を出さない。
-    if (!result || isChecking) return;
+    // 再判定の応答待ちの間・診断が失敗した間は、画面の入力と食い違う旧い結果で PDF を出さない。
+    if (!result || isChecking || !canExportPdf || screenVerdict === undefined || diagnosis === null) return;
     setPdfBusy(true);
     try {
       const [{ pdf }, { RegulationPdfDocument }] = await Promise.all([
@@ -531,23 +532,20 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       const ctx = resultCtx;
       // 結論・段取りは画面と同じ判定（診断の判定。飛行の方法を含む）を使い、その診断の証跡 ID で出す
       // （診断だけの入力を変えたとき、内容の違う PDF が同じ ID・同じファイル名にならないように。PR #23 P1）。
-      const diagnosisEvidenceId =
-        diagnosisIsCurrent && diagnosis.verdict !== undefined && screenVerdict === diagnosis.verdict
-          ? diagnosis.evidenceId
-          : undefined;
+      const diagnosisEvidenceId = diagnosis.evidenceId;
       const blob = await pdf(
         <RegulationPdfDocument
           result={result}
           loc={center}
           ctx={ctx}
-          verdict={screenVerdict ?? result.verdict}
+          verdict={screenVerdict}
           diagnosisEvidenceId={diagnosisEvidenceId}
         />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `soraban-${diagnosisEvidenceId ?? result.evidenceId}.pdf`;
+      anchor.download = `soraban-${diagnosisEvidenceId}.pdf`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -733,6 +731,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       if (isAbortError(err) || seq !== diagSeqRef.current) return;
       setDiagPending(false);
       setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
+      // 履歴に前の診断の判定や地点だけの判定を残さない（判定未確定。差し戻し 2 回目）。
+      markHistoryDiagnosisFailed(runId);
     }
   };
 
@@ -1580,6 +1580,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           <VerdictSummary
             verdict={screenVerdict}
             pending={verdictPending}
+            failed={verdictFailed}
+            onRetry={() => void runDiagnose(center)}
             meta={
               <p className="font-mono text-[11px] tnum text-ink-mute">
                 {lat}°N · {lng}°E
@@ -1590,7 +1592,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               <button
                 type="button"
                 onClick={() => void handlePdfExport()}
-                disabled={pdfBusy || isChecking || verdictPending}
+                disabled={pdfBusy || isChecking || !canExportPdf}
                 className="inline-flex h-11 items-center gap-2 self-stretch rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium uppercase tracking-wider text-brand-700 transition-colors hover:bg-brand-50 active:bg-brand-50 disabled:opacity-40 sm:self-start"
                 title="この判定を A4 PDF レポートとして書き出し"
               >

@@ -470,4 +470,63 @@ test.describe("C. 表示・PDF・履歴", () => {
     expect(third.name).toContain(diagJson2.evidenceId);
     expect(squash(third.text)).toContain(diagJson2.evidenceId);
   });
+
+  // 差し戻し 2 回目：診断（/api/diagnose）が失敗したとき、古い判定も地点だけの判定も結論に使わない。
+  const failDiagnose = async (page: Page) =>
+    page.route("**/api/diagnose", (route) => route.fulfill({ status: 500, body: '{"error":"test"}' }));
+  const latestHistory = (page: Page) => page.getByTestId("history-item").first().getByTestId("history-verdict");
+  const expectNoClearVerdict = async (page: Page) => {
+    await expect(page.getByTestId("verdict-failed")).toBeVisible();
+    await expect(summary(page)).toHaveAttribute("data-level", "failed");
+    await expect(level(page)).toHaveCount(0);
+    await expect(summary(page)).not.toContainText("手続き不要");
+    await expect(latestHistory(page)).not.toContainText("手続き不要");
+    await expect(latestHistory(page)).toContainText("判定未確定");
+    await expect(page.getByRole("button", { name: /PDF 出力/ })).toBeDisabled();
+  };
+
+  test("15. C1：区域外で夜間を選んだ後に診断が失敗すると、結論・履歴・PDF のどれにも手続き不要が出ず、再試行で戻る", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    await expect(level(page)).toHaveText("手続き不要");
+    await failDiagnose(page);
+    const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
+    await methodBox(page, "夜間飛行").check();
+    await failed;
+    await expectNoClearVerdict(page);
+
+    await page.unroute("**/api/diagnose");
+    const diag = waitDiagnose(page);
+    await page.getByTestId("verdict-retry").click();
+    await diag;
+    await settled(page);
+    await expect(level(page)).toHaveText("要手続き");
+    await expect(latestHistory(page)).toHaveText(/^要手続き/);
+    await expect(page.getByRole("button", { name: /PDF 出力/ })).toBeEnabled();
+  });
+
+  test("15. C2：夜間を選んだまま新しい地点で判定し、診断が失敗しても、地点だけの判定で手続き不要と出さない", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await toggle(methodBox(page, "夜間飛行"), page, true, false);
+    await failDiagnose(page);
+    await page.getByPlaceholder("35.4278", { exact: true }).fill(String(QUIET.lat));
+    await page.getByPlaceholder("133.3314", { exact: true }).fill(String(QUIET.lng));
+    const check = waitCheck(page);
+    const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
+    await page.getByRole("button", { name: /規制をチェック/ }).click();
+    await Promise.all([check, failed]);
+    await expectNoClearVerdict(page);
+
+    await page.unroute("**/api/diagnose");
+    const diag = waitDiagnose(page);
+    await page.getByTestId("verdict-retry").click();
+    await diag;
+    await settled(page);
+    await expect(level(page)).toHaveText("要手続き");
+    await expect(latestHistory(page)).toHaveText(/^要手続き/);
+  });
 });

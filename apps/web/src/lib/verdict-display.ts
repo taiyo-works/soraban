@@ -158,5 +158,17 @@ export const doneByProcedureId = (
   return m;
 };
 
+/**
+ * 申請支援の診断（/api/diagnose）が失敗したときの結論の表示（差し戻し 2 回目）。段階の言葉は出さない。
+ * 古い診断の判定も、飛行の方法を含まない地点だけの判定も使わない（見落としゼロ。spec §13.9）。
+ */
+export const VERDICT_FAILED_LABEL = "判定できません";
+export const VERDICT_FAILED_NOTE =
+  "申請支援の診断に失敗したため、この入力（飛行の方法・空域・飛行予定日・許可）での判定が出ていません。再試行してください。判定が出るまで PDF は出力できません。";
+export const VERDICT_RETRY_LABEL = "再試行";
+
+/** 履歴で、飛行の方法を含む判定が確定していない項目の表示。 */
+export const HISTORY_UNDETERMINED_LABEL = "判定未確定（申請支援の診断が未完了）";
+
 /** 判定中（/api/diagnose の応答待ち）の表示。 */
 export const VERDICT_PENDING_LABEL = "判定中";

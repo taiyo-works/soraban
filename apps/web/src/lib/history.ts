@@ -4,6 +4,7 @@
 // LRU で最大 50 件まで保持、超えたら最古を削除。
 
 import type { LatLng } from "@soraban/geo";
+import { HISTORY_UNDETERMINED_LABEL } from "./verdict-display";
 import {
   LEGACY_STATUS_LABEL,
   VERDICT_LABEL,
@@ -489,13 +490,17 @@ export type HistoryVerdictDisplay = {
  * 明示した言葉（例：適用外（旧版の判定））。旧版の緑の表示の言葉（飛べると読める語）は新旧とも出さない。
  */
 export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay => {
-  // 飛行の方法を含む診断の判定を優先し、無ければ地点だけの判定を使う（PR #23 P1）。
+  // 飛行の方法を含む診断の判定だけを結論として出す（PR #23 P1）。
+  // 地点だけの判定（entry.verdict）しか無い新形式の項目は、診断が未完了または失敗したものとして「判定未確定」と出す
+  // （飛行の方法を含まない判定で「手続き不要」と出さない。差し戻し 2 回目）。
   const isLevel = (x: unknown): x is VerdictLevel =>
     typeof x === "string" && (VERDICT_LEVELS as readonly string[]).includes(x);
-  const fromDiag = isLevel(entry.diagnosisSummary?.verdict);
-  const v = fromDiag ? entry.diagnosisSummary!.verdict : entry.verdict;
+  const v = entry.diagnosisSummary?.verdict;
+  if (!isLevel(v) && isLevel(entry.verdict)) {
+    return { label: HISTORY_UNDETERMINED_LABEL, legacy: false };
+  }
   if (isLevel(v)) {
-    const rawN = fromDiag ? entry.diagnosisSummary!.verdictUnknownCount : entry.verdictUnknownCount;
+    const rawN = entry.diagnosisSummary!.verdictUnknownCount;
     const n = typeof rawN === "number" ? rawN : undefined;
     return { level: v, label: VERDICT_LABEL[v], legacy: false, ...(n !== undefined ? { unknownCount: n } : {}) };
   }
@@ -504,4 +509,32 @@ export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay 
       ? entry.overall
       : "unknown";
   return { label: LEGACY_STATUS_LABEL[overall], legacy: true };
+};
+
+/**
+ * 申請支援の診断が失敗したとき、その実行（runId）の履歴から診断の判定を外す（差し戻し 2 回目）。
+ * 前の診断の判定や地点だけの判定で「手続き不要」と残さず、「判定未確定」と出す。
+ */
+export const markHistoryDiagnosisFailed = (runId: string): readonly SavedCheck[] => {
+  const strip = (s: SavedDiagnosisSummary | undefined): SavedDiagnosisSummary | undefined => {
+    if (!s) return s;
+    const { verdict: _v, verdictUnknownCount: _n, ...rest } = s;
+    void _v;
+    void _n;
+    return rest;
+  };
+  const pendingAll = readPending();
+  if (pendingAll.some((p) => p.runId === runId)) {
+    writePending(
+      pendingAll.map((p) => (p.runId === runId ? { ...p, diagnosisSummary: strip(p.diagnosisSummary) } : p)),
+    );
+  }
+  const current = safeRead();
+  const idx = current.findIndex((e) => e.runId === runId);
+  if (idx === -1) return current;
+  const next = [...current];
+  next[idx] = { ...current[idx]!, diagnosisSummary: strip(current[idx]!.diagnosisSummary) };
+  safeWrite(next);
+  notifyChange();
+  return next;
 };

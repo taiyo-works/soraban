@@ -15,7 +15,10 @@ import {
   unknownCountLabel,
   VERDICT_EDGE,
   VERDICT_LABEL,
+  VERDICT_FAILED_LABEL,
+  VERDICT_FAILED_NOTE,
   VERDICT_PENDING_LABEL,
+  VERDICT_RETRY_LABEL,
   VERDICT_SCALE,
   VERDICT_SECTION_TITLE,
   VERDICT_TONE,
@@ -27,6 +30,10 @@ type Props = {
   readonly verdict: FlightVerdict | undefined;
   /** 判定の応答待ち（「判定中」を出す）。 */
   readonly pending: boolean;
+  /** 申請支援の診断が失敗した（判定を出さず、再試行を促す）。 */
+  readonly failed?: boolean;
+  /** 再試行（診断をやり直す）。 */
+  readonly onRetry?: () => void;
   /** 結論の行の右に置くもの（PDF 出力のボタンなど）。 */
   readonly actions?: ReactNode;
   /** 結論の下に置く補足（座標・住所など）。 */
@@ -96,12 +103,13 @@ function LevelWords({ label }: { label: string }) {
 // 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1・D2）。
 // 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に必ず行うこと
 //       → 規制ごとの判定（元の判定 → 適用した許可 → 判定）。地点判定の PDF も同じ順・同じ言葉。
-export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
-  const ready = verdict !== undefined && !pending;
+export function VerdictSummary({ verdict, pending, failed, onRetry, actions, meta }: Props) {
+  // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
+  const ready = verdict !== undefined && !pending && !failed;
   return (
     <div
       data-testid="verdict-summary"
-      data-level={ready ? verdict.level : "pending"}
+      data-level={ready ? verdict.level : failed ? "failed" : "pending"}
       className="flex flex-col gap-7"
     >
       {/* 結論（表示板） */}
@@ -152,6 +160,29 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                 </div>
               ) : null}
               <p className="text-sm leading-relaxed text-ink-soft">{VERDICT_HELP[verdict.level]}</p>
+            </div>
+          ) : failed ? (
+            <div
+              data-testid="verdict-failed"
+              role="alert"
+              className="flex flex-col gap-2.5 border border-dashed border-ink/60 border-l-[6px] bg-paper px-4 py-3.5 sm:px-5"
+            >
+              <p className="font-display text-[1.75rem] font-light leading-none tracking-tight text-ink sm:text-[2rem]">
+                {VERDICT_FAILED_LABEL}
+              </p>
+              <p data-testid="verdict-failed-note" className="text-sm leading-relaxed text-ink-soft">
+                {VERDICT_FAILED_NOTE}
+              </p>
+              {onRetry ? (
+                <button
+                  type="button"
+                  data-testid="verdict-retry"
+                  onClick={onRetry}
+                  className="inline-flex h-10 w-fit items-center rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+                >
+                  {VERDICT_RETRY_LABEL}
+                </button>
+              ) : null}
             </div>
           ) : (
             <div className="flex items-center gap-3 border border-dashed border-rule border-l-[6px] bg-paper px-4 py-3.5 sm:px-5">
