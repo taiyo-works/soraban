@@ -224,6 +224,7 @@ export function DiagnosisPanel({
       const manualDraft = buildFlightManualDraft({
         choice: manualChoice,
         flags: diagnosis.flags,
+        ...(diagnosis.droneWeightG !== undefined ? { droneWeightG: diagnosis.droneWeightG } : {}),
       });
       const blob = await pdf(
         <ApplicationPdfDocument
@@ -432,6 +433,7 @@ export function DiagnosisPanel({
         flags={diagnosis.flags}
         choice={manualChoice}
         onChoiceChange={handleManualChoiceChange}
+        droneWeightG={diagnosis.droneWeightG}
       />
 
       {/* 束ね PDF 出力（カテゴリー・チェックリスト・期限・プリフィル・書類ドラフトを 1 PDF に）。

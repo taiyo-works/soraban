@@ -1358,4 +1358,5 @@ export {
   MODEL_AIRCRAFT_SUBMIT_TO,
   MODEL_AIRCRAFT_WEIGHT_NOTE,
   MODEL_AIRCRAFT_WEIGHT_TAG,
+  modelAircraftManualOverride,
 } from "./model-aircraft";

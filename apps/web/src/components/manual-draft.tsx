@@ -15,13 +15,19 @@ type Props = {
   /** 選択（標準／独自）。親（パネル）が PDF にも渡せるよう lift up する。 */
   readonly choice: ManualChoice;
   readonly onChoiceChange: (choice: ManualChoice) => void;
+  /** 機体重量（g）。100g 未満は模型航空機の観点・根拠に置き換える（Sprint 11e）。 */
+  readonly droneWeightG?: number;
 };
 
 // 飛行マニュアルの骨子ドラフト表示 ＋ 標準／独自の選択 UI。
 // - choice="standard": 標準マニュアルを使う旨と参照先のみ（本文は出さない＝著作権配慮）。
 // - choice="custom":   独自マニュアルの基本章 + 該当飛行方法の追記観点（骨子）を表示。
-export function ManualDraft({ flags, choice, onChoiceChange }: Props) {
-  const draft = buildFlightManualDraft({ choice, flags });
+export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Props) {
+  const draft = buildFlightManualDraft({
+    choice,
+    flags,
+    ...(droneWeightG !== undefined ? { droneWeightG } : {}),
+  });
   const [copied, setCopied] = useState<boolean>(false);
 
   // 整形テキストをコピー（独自骨子・標準通知のどちらでも）。

@@ -3,6 +3,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  buildFlightManualDraft,
+  formatManualDraftText,
   DIPS_PERMIT_KINDS,
   dipsPermitValue,
   ENGINE_VERSION,
@@ -202,4 +204,30 @@ describe("8・15. 100g 以上・重量未指定の判定と証跡 ID が Sprint 
       }
     }
   }
+});
+
+// 申請支援の飛行マニュアル骨子：100g 未満では無人航空機の特定飛行の根拠を出さず、模型航空機の扱いを出す。
+describe("飛行マニュアル骨子（100g 未満＝模型航空機）", () => {
+  const flags: SpecificFlightFlag[] = ["airspace_150m", "method_night", "airspace_airport", "airspace_emergency"];
+  it("50g＋150m 以上：第132条の85・第132条の86 を出さず、第134条の3 と参照先・※要確認を出す", () => {
+    const t = formatManualDraftText(buildFlightManualDraft({ choice: "custom", flags, droneWeightG: 50 }));
+    expect(t).not.toMatch(/第132条の85 第1項第1号（150m|第132条の85 第1項第1号（空港|第132条の86/);
+    expect(t).toContain("航空法第134条の3");
+    expect(t).toContain(EGOV);
+    expect(t).toContain("※要確認：一次資料未取得");
+    expect(t).toContain("対象外（模型航空機）");
+    // 緊急用務空域の観点は重量に関係なく従来どおり
+    expect(t).toContain("緊急用務空域");
+  });
+  it("900g・重量未指定・100g ちょうどは従来どおり（第132条の85 が出る）", () => {
+    const base = formatManualDraftText(buildFlightManualDraft({ choice: "custom", flags }));
+    for (const w of [900, 100, undefined]) {
+      const t = formatManualDraftText(
+        buildFlightManualDraft({ choice: "custom", flags, ...(w !== undefined ? { droneWeightG: w } : {}) }),
+      );
+      expect(t).toBe(base);
+      expect(t).toContain("第132条の85 第1項第1号（150m以上の高さの空域）");
+      expect(t).not.toContain("第134条の3");
+    }
+  });
 });

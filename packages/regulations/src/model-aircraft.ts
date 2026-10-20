@@ -83,3 +83,53 @@ export const MODEL_AIRCRAFT_WEIGHT_TAG = "模型航空機として判定";
 /** 申請支援のカテゴリーの表示（100g 未満。category の値 I は証跡に入るため変えず、表示だけを変える）。 */
 export const MODEL_AIRCRAFT_CATEGORY_HEADLINE = "対象外（模型航空機。航空法の無人航空機の区分に当たらない）";
 export const MODEL_AIRCRAFT_CATEGORY_NOTE = `100g 未満の機体は航空法の無人航空機に当たらず、特定飛行の許可・承認、機体登録の対象外です。空港等の周辺と高い空域では ${MODEL_AIRCRAFT_LAW} の許可・通報が要ります（判定の段取りを参照）。小型無人機等飛行禁止法・条例は重量に関係なく対象です。`;
+
+/**
+ * 飛行マニュアル骨子（独自マニュアル）の追記観点を、100g 未満の機体（模型航空機）向けに置き換える内容（Sprint 11e）。
+ * 無人航空機の特定飛行の根拠（航空法第132条の85・第132条の86）は当たらないため出さない。
+ *   - airspace_150m：第134条の3 の通報の観点
+ *   - airspace_airport：第134条の3 の許可の観点
+ *   - airspace_emergency：重量に関係なく従来どおり（null を返し、置き換えない）
+ *   - それ以外（DID・飛行の方法）：対象外（模型航空機）
+ */
+export type ModelAircraftManualOverride = {
+  readonly outline: string;
+  readonly points: readonly string[];
+  readonly legalBasis: string;
+  readonly sourceUrl: string;
+};
+
+const MODEL_AIRCRAFT_PRIMARY_URL = MODEL_AIRCRAFT_REFERENCES[0]!.url;
+const MODEL_AIRCRAFT_UNVERIFIED = "※要確認：一次資料未取得";
+
+export const modelAircraftManualOverride = (flag: string): ModelAircraftManualOverride | null => {
+  if (flag === "airspace_emergency") return null;
+  if (flag === "airspace_150m") {
+    return {
+      outline: "100g 未満の機体（模型航空機）で高い空域を飛ばす場合の観点。",
+      points: [
+        "あらかじめ国土交通大臣へ通報する手順と、通報の内容（日時・場所・高さ）を記録する方法を定める。",
+        "通報の対象は、航空路内は地表・水面から 150m 以上、航空路外は 250m 以上（参照先で確認）。",
+      ],
+      legalBasis: `${MODEL_AIRCRAFT_LAW}・${MODEL_AIRCRAFT_ORDINANCE}（模型航空機の通報）。${MODEL_AIRCRAFT_UNVERIFIED}`,
+      sourceUrl: MODEL_AIRCRAFT_PRIMARY_URL,
+    };
+  }
+  if (flag === "airspace_airport") {
+    return {
+      outline: "100g 未満の機体（模型航空機）で空港等の周辺を飛ばす場合の観点。",
+      points: [
+        "国土交通大臣の許可を事前に得る手順と、許可の条件を守る体制を定める（窓口は参照先で確認）。",
+        "管制圏・情報圏に当たらないかの確認方法を定める。",
+      ],
+      legalBasis: `${MODEL_AIRCRAFT_LAW}・${MODEL_AIRCRAFT_ORDINANCE}（模型航空機の許可）。${MODEL_AIRCRAFT_UNVERIFIED}`,
+      sourceUrl: MODEL_AIRCRAFT_PRIMARY_URL,
+    };
+  }
+  return {
+    outline: MODEL_AIRCRAFT_EXEMPT_REASON,
+    points: [],
+    legalBasis: `対象外（模型航空機）。${MODEL_AIRCRAFT_UNVERIFIED}`,
+    sourceUrl: MODEL_AIRCRAFT_PRIMARY_URL,
+  };
+};

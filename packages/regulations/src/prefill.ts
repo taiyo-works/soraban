@@ -15,10 +15,12 @@
 
 import manualTemplatesData from "../data/manual-templates/manual-templates.json";
 import {
+  DRONE_THRESHOLD_G,
   SPECIFIC_FLIGHT_FLAG_LABEL,
   type AirspaceDeterminationStatus,
   type SpecificFlightFlag,
 } from "./diagnosis";
+import { modelAircraftManualOverride } from "./model-aircraft";
 
 // ── プリフィルの入力先システム（DRS と DIPS 2.0 を別導線として区別）──
 export type PrefillSystem = "DIPS 2.0" | "DRS";
@@ -341,6 +343,11 @@ export type FlightManualDraft = {
 export type BuildManualInput = {
   readonly choice: ManualChoice;
   readonly flags: readonly SpecificFlightFlag[];
+  /**
+   * 機体重量（g）。100g 未満（模型航空機）のときは、追記観点の根拠を無人航空機の特定飛行の条文から
+   * 模型航空機の扱い（model-aircraft.ts）に置き換える（Sprint 11e）。未指定は従来どおり（100g 以上として扱う）。
+   */
+  readonly droneWeightG?: number;
 };
 
 /**
@@ -373,7 +380,16 @@ export const buildFlightManualDraft = (
   const methodSections = order
     .filter((f) => set.has(f))
     .map((f) => MANUAL_METHOD_SECTIONS.get(f))
-    .filter((s): s is ManualMethodSection => s !== undefined);
+    .filter((s): s is ManualMethodSection => s !== undefined)
+    .map((s) => {
+      const model =
+        typeof input.droneWeightG === "number" &&
+        Number.isFinite(input.droneWeightG) &&
+        input.droneWeightG < DRONE_THRESHOLD_G;
+      if (!model) return s;
+      const o = modelAircraftManualOverride(s.flag);
+      return o ? { ...s, ...o } : s;
+    });
 
   return {
     choice: "custom",
