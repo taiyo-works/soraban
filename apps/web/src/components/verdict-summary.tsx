@@ -3,19 +3,24 @@ import {
   PERMIT_SCOPE_NOT_VERIFIED_NOTE,
   VERDICT_HELP,
   type FlightVerdict,
+  type ItemVerdict,
 } from "@soraban/regulations";
 import {
   BASE_STATUS_LABEL,
   CONDITIONAL_NOTE,
+  deadlineCountdown,
+  isConfirmProcedure,
   legalTierLabel,
   PROCEDURE_COLUMNS,
   unknownCountLabel,
+  VERDICT_EDGE,
   VERDICT_LABEL,
   VERDICT_PENDING_LABEL,
+  VERDICT_SCALE,
   VERDICT_SECTION_TITLE,
   VERDICT_TONE,
 } from "@/lib/verdict-display";
-import { VerdictMark } from "./verdict-mark";
+import { TierGauge, VerdictGlyph, VerdictMark } from "./verdict-mark";
 
 type Props = {
   /** 画面の結論に使う判定（/api/diagnose の verdict。飛行の方法を含む。未決 5）。 */
@@ -30,7 +35,61 @@ type Props = {
 
 const DUTY_KIND_LABEL = { premise: "前提", per_flight: "飛行ごと" } as const;
 
-// 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1）。構造だけを作り、見せ方は designer が磨く。
+// ── 見せ方（Sprint 11d D2）──
+// 計器・運航票の語彙：結論は「表示板」（左端の帯＋記号＋段階の言葉＋現在位置を示す目盛り）、
+// 段取りは「運航票」（行ごとに左端の帯、等幅の番号と期限の日付、残り日数、法的な重さの目盛り）。
+// 色は補助。段階は言葉・記号の形・目盛りの位置の三つで読める（グレースケールでも区別できる）。
+
+/** 区切りの見出し（等幅の番号の代わりに、細い罫で区切る）。 */
+function SectionHead({ children, count }: { children: ReactNode; count?: number }) {
+  return (
+    <div className="flex items-baseline gap-3 border-b border-ink/70 pb-1">
+      <p className="eyebrow !text-ink-soft">{children}</p>
+      {count !== undefined ? (
+        <span aria-hidden className="ml-auto font-mono text-[11px] tnum text-ink-mute">
+          {String(count).padStart(2, "0")}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/** 結論の目盛り：重い順に 4 段の記号を並べ、現在の段階の位置に枠と下線を置く（読み上げは段階の言葉が担う）。 */
+function VerdictScale({ level }: { level: ItemVerdict }) {
+  return (
+    <div aria-hidden className="flex items-end gap-1" data-scale-level={level}>
+      {VERDICT_SCALE.map((l) => {
+        const active = l === level;
+        return (
+          <span
+            key={l}
+            className={`flex h-9 w-9 items-center justify-center border-b-2 ${
+              active ? `${VERDICT_TONE[l]} border-current bg-paper` : "border-rule text-ink-mute/55"
+            }`}
+          >
+            <svg width={18} height={18} viewBox="0 0 24 24">
+              <VerdictGlyph level={l} strokeWidth={2} />
+            </svg>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/** 段階の言葉。括弧の中（「条件付き」）は折り返しても一塊で読めるよう、小さく続ける（文字列は変えない）。 */
+function LevelWords({ label }: { label: string }) {
+  const i = label.indexOf("（");
+  if (i < 0) return <>{label}</>;
+  return (
+    <>
+      {label.slice(0, i)}
+      <span className="whitespace-nowrap text-[0.7em] tracking-normal">{label.slice(i)}</span>
+    </>
+  );
+}
+
+// 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1・D2）。
 // 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に必ず行うこと
 //       → 規制ごとの判定（元の判定 → 適用した許可 → 判定）。地点判定の PDF も同じ順・同じ言葉。
 export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
@@ -39,55 +98,72 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
     <div
       data-testid="verdict-summary"
       data-level={ready ? verdict.level : "pending"}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-7"
     >
-      {/* 結論 */}
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start">
-        <div data-testid="verdict-conclusion" className="flex flex-1 flex-col gap-1.5">
+      {/* 結論（表示板） */}
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
+        <div data-testid="verdict-conclusion" className="flex min-w-0 flex-1 flex-col gap-2">
           <p className="eyebrow">
             <span aria-hidden className="bearing-mark" />
             {VERDICT_SECTION_TITLE.conclusion}
           </p>
           {ready ? (
-            <>
-              <div className="flex items-center gap-3">
-                <VerdictMark level={verdict.level} size="lg" decorative />
-                <p
-                  data-testid="verdict-level"
-                  className={`font-display text-3xl font-light tracking-tight ${VERDICT_TONE[verdict.level]}`}
-                >
-                  {VERDICT_LABEL[verdict.level]}
-                </p>
+            <div
+              className={`flex flex-col gap-3 border border-ink/60 border-l-[6px] bg-paper px-4 py-3.5 sm:px-5 ${VERDICT_EDGE[verdict.level]}`}
+            >
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <VerdictMark level={verdict.level} size="lg" decorative />
+                  <p
+                    data-testid="verdict-level"
+                    className={`font-display text-[1.75rem] font-normal leading-none tracking-tight sm:text-[2rem] ${VERDICT_TONE[verdict.level]}`}
+                  >
+                    <LevelWords label={VERDICT_LABEL[verdict.level]} />
+                  </p>
+                </div>
+                <div className="ml-auto">
+                  <VerdictScale level={verdict.level} />
+                </div>
               </div>
-              {verdict.unknownCount > 0 ? (
-                <p
-                  data-testid="verdict-unknown-count"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-ink"
-                >
-                  <VerdictMark level="unknown" size="sm" decorative />
-                  {unknownCountLabel(verdict.unknownCount)}
-                </p>
-              ) : null}
-              {verdict.level === "procedure_done" ? (
-                <p data-testid="verdict-conditional" className="text-sm font-medium text-ink">
-                  {CONDITIONAL_NOTE}
-                  {PERMIT_SCOPE_NOT_VERIFIED_NOTE}
-                </p>
+              {verdict.unknownCount > 0 || verdict.level === "procedure_done" ? (
+                <div className="flex flex-col gap-1.5 border-t border-rule pt-2.5">
+                  {verdict.unknownCount > 0 ? (
+                    <p
+                      data-testid="verdict-unknown-count"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-ink"
+                    >
+                      <VerdictMark level="unknown" size="sm" decorative />
+                      {unknownCountLabel(verdict.unknownCount)}
+                    </p>
+                  ) : null}
+                  {verdict.level === "procedure_done" ? (
+                    <p
+                      data-testid="verdict-conditional"
+                      className="border-l-2 border-dashed border-verdict-done pl-2.5 text-sm font-medium leading-relaxed text-ink"
+                    >
+                      {CONDITIONAL_NOTE}
+                      {PERMIT_SCOPE_NOT_VERIFIED_NOTE}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
               <p className="text-sm leading-relaxed text-ink-soft">{VERDICT_HELP[verdict.level]}</p>
-            </>
+            </div>
           ) : (
-            <p
-              data-testid="verdict-pending"
-              className="font-display text-3xl font-light tracking-tight text-ink-mute"
-              role="status"
-            >
-              {VERDICT_PENDING_LABEL}
-            </p>
+            <div className="flex items-center gap-3 border border-dashed border-rule border-l-[6px] bg-paper px-4 py-3.5 sm:px-5">
+              <span aria-hidden className="h-10 w-10 shrink-0 border border-dashed border-ink-mute/60" />
+              <p
+                data-testid="verdict-pending"
+                className="font-display text-[1.75rem] font-light leading-none tracking-tight text-ink-mute sm:text-[2rem]"
+                role="status"
+              >
+                {VERDICT_PENDING_LABEL}
+              </p>
+            </div>
           )}
           {meta}
         </div>
-        {actions}
+        {actions ? <div className="sm:pt-6">{actions}</div> : null}
       </div>
 
       {ready ? (
@@ -95,19 +171,21 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
           {/* 飛行できない理由 */}
           {verdict.noFly.length > 0 ? (
             <div data-testid="verdict-no-fly" className="flex flex-col gap-2">
-              <p className="eyebrow">{VERDICT_SECTION_TITLE.noFly}</p>
+              <SectionHead count={verdict.noFly.length}>{VERDICT_SECTION_TITLE.noFly}</SectionHead>
               <ul className="flex flex-col gap-1.5">
                 {verdict.noFly.map((n) => (
                   <li
                     key={n.itemId}
                     data-testid="verdict-no-fly-item"
                     data-item-id={n.itemId}
-                    className="flex items-start gap-2 border-l-2 border-signal-red pl-3 text-sm text-ink"
+                    className={`flex items-start gap-2.5 border border-rule border-l-4 bg-paper px-3 py-2 text-sm text-ink ${VERDICT_EDGE.no_fly}`}
                   >
-                    <VerdictMark level="no_fly" size="sm" decorative />
+                    <span className="pt-0.5">
+                      <VerdictMark level="no_fly" size="sm" decorative />
+                    </span>
                     <span>
                       <span className="font-medium">{n.title}</span>
-                      <span className="block text-xs text-ink-soft">{n.reason}</span>
+                      <span className="block text-xs leading-relaxed text-ink-soft">{n.reason}</span>
                     </span>
                   </li>
                 ))}
@@ -115,49 +193,88 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
             </div>
           ) : null}
 
-          {/* 要手続きの手続き（期限順の段取り） */}
+          {/* 要手続きの手続き（期限順の段取り＝運航票） */}
           <div data-testid="verdict-procedures-section" className="flex flex-col gap-2">
-            <p className="eyebrow">
+            <SectionHead>
               {VERDICT_SECTION_TITLE.procedures}（{verdict.procedures.length} 件）
-            </p>
+            </SectionHead>
             {verdict.procedures.length === 0 ? (
               <p className="text-xs text-ink-mute">要手続きの手続きはありません。</p>
             ) : (
               <div className="overflow-x-auto">
-                <table data-testid="verdict-procedures" className="w-full border-collapse text-left text-xs">
+                <table
+                  data-testid="verdict-procedures"
+                  className="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-xs"
+                >
                   <thead>
-                    <tr className="border-b border-rule text-[11px] text-ink-mute">
-                      <th className="py-1.5 pr-2 font-normal">#</th>
-                      {PROCEDURE_COLUMNS.map((c) => (
-                        <th key={c} className="py-1.5 pr-2 font-normal">
+                    <tr className="text-[10px] tracking-[0.08em] text-ink-mute">
+                      <th className="w-12 py-1 pl-3 pr-2 font-medium">#</th>
+                      {PROCEDURE_COLUMNS.map((c, i) => (
+                        <th
+                          key={c}
+                          className={`py-1 pr-3 font-medium ${i === 2 ? "w-[30%]" : ""} ${i === 3 ? "w-24" : ""}`}
+                        >
                           {c}
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {verdict.procedures.map((p, i) => (
-                      <tr
-                        key={p.id}
-                        data-testid="verdict-procedure"
-                        data-procedure-id={p.id}
-                        data-item-id={p.itemId}
-                        data-legal-tier={p.legalTier}
-                        data-deadline-date={p.deadline.date ?? ""}
-                        className="border-b border-rule align-top"
-                      >
-                        <td className="py-2 pr-2 font-mono tnum text-ink-mute">{String(i + 1).padStart(2, "0")}</td>
-                        <td className="py-2 pr-2">
-                          <span className="font-medium text-ink">{p.title}</span>
-                          <span className="block text-[11px] text-ink-mute">{p.reason}</span>
-                        </td>
-                        <td className="py-2 pr-2 text-ink-soft">{p.submitTo}</td>
-                        <td data-testid="verdict-procedure-deadline" className="py-2 pr-2 text-ink">
-                          {p.deadline.label}
-                        </td>
-                        <td className="py-2 pr-2 text-ink-soft">{legalTierLabel(p.legalTier)}</td>
-                      </tr>
-                    ))}
+                    {verdict.procedures.map((p, i) => {
+                      const countdown = deadlineCountdown(p.deadline.date);
+                      const cell = "border-y border-rule bg-paper py-2.5 pr-3 align-top";
+                      return (
+                        <tr
+                          key={p.id}
+                          data-testid="verdict-procedure"
+                          data-procedure-id={p.id}
+                          data-item-id={p.itemId}
+                          data-legal-tier={p.legalTier}
+                          data-deadline-date={p.deadline.date ?? ""}
+                        >
+                          <td
+                            className={`${cell} border-l-4 pl-3 font-mono text-sm font-medium tnum text-ink ${
+                              VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"]
+                            }`}
+                          >
+                            {String(i + 1).padStart(2, "0")}
+                            {isConfirmProcedure(p.id) ? (
+                              <svg aria-hidden width={14} height={14} viewBox="0 0 24 24" className={`mt-1 block ${VERDICT_TONE.unknown}`}>
+                                <VerdictGlyph level="unknown" strokeWidth={2.4} />
+                              </svg>
+                            ) : null}
+                          </td>
+                          <td className={cell}>
+                            <span className="text-[13px] font-medium leading-snug text-ink">{p.title}</span>
+                            <span className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute">{p.reason}</span>
+                          </td>
+                          <td className={`${cell} leading-relaxed text-ink-soft`}>{p.submitTo}</td>
+                          <td data-testid="verdict-procedure-deadline" className={`${cell} text-ink`}>
+                            {p.deadline.date ? (
+                              <span className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                <span className="font-mono text-sm font-medium tnum text-ink">{p.deadline.date}</span>
+                                {countdown ? (
+                                  <span className="border border-ink/50 px-1 font-mono text-[10px] tnum text-ink">
+                                    {countdown}
+                                  </span>
+                                ) : null}
+                              </span>
+                            ) : null}
+                            <span
+                              className={`block leading-relaxed ${p.deadline.date ? "text-[11px] text-ink-mute" : "text-ink"}`}
+                            >
+                              {p.deadline.label}
+                            </span>
+                          </td>
+                          <td className={`${cell} border-r text-ink-soft`}>
+                            <span className="inline-flex items-end gap-1.5">
+                              <TierGauge tier={p.legalTier} />
+                              <span className="leading-none">{legalTierLabel(p.legalTier)}</span>
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -167,27 +284,32 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
           {/* 手続き済み（条件付き） */}
           {verdict.done.length > 0 ? (
             <div data-testid="verdict-done" className="flex flex-col gap-2">
-              <p className="eyebrow">{VERDICT_SECTION_TITLE.done}</p>
-              <ul className="flex flex-col gap-2">
+              <SectionHead count={verdict.done.length}>{VERDICT_SECTION_TITLE.done}</SectionHead>
+              <ul className="flex flex-col gap-1.5">
                 {verdict.done.map((d) => (
                   <li
                     key={d.itemId}
                     data-testid="verdict-done-item"
                     data-item-id={d.itemId}
-                    className="flex flex-col gap-1 border-l-2 border-brand-700 pl-3 text-xs text-ink-soft"
+                    className={`flex flex-col gap-2 border border-rule border-l-4 bg-paper px-3 py-2.5 text-xs text-ink-soft ${VERDICT_EDGE.procedure_done}`}
                   >
-                    <span className="flex items-center gap-2 text-sm font-medium text-ink">
-                      <VerdictMark level="procedure_done" size="sm" decorative />
-                      {d.title}
+                    <span className="flex items-start gap-2 text-[13px] font-medium leading-snug text-ink">
+                      <span className="pt-0.5">
+                        <VerdictMark level="procedure_done" size="sm" decorative />
+                      </span>
+                      <span className="flex-1">{d.title}</span>
+                      <span className="hidden shrink-0 items-end gap-1.5 text-[11px] font-normal text-ink-soft sm:inline-flex">
+                        <TierGauge tier={d.legalTier} />
+                        <span className="leading-none">{legalTierLabel(d.legalTier)}</span>
+                      </span>
                     </span>
-                    <span>
-                      元の判定：<span className="text-ink">{BASE_STATUS_LABEL[d.baseStatus]}</span>
-                    </span>
-                    <span>
-                      適用した許可：
+                    <span className="grid grid-cols-1 gap-x-4 gap-y-0.5 pl-[22px] sm:grid-cols-[auto_1fr]">
+                      <span className="text-ink-mute">元の判定：</span>
+                      <span className="text-ink">{BASE_STATUS_LABEL[d.baseStatus]}</span>
+                      <span className="text-ink-mute">適用した許可：</span>
                       <span className="text-ink">{d.appliedPermits.map((p) => p.label).join(" / ")}</span>
                     </span>
-                    <ul className="flex flex-col gap-0.5">
+                    <ul className="ml-[22px] flex flex-col gap-0.5 border-l-2 border-dashed border-verdict-done pl-2.5 leading-relaxed">
                       {d.conditions.map((c) => (
                         <li key={c} data-testid="verdict-done-condition">
                           ・{c}
@@ -200,23 +322,29 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
             </div>
           ) : null}
 
-          {/* 飛行の前後に必ず行うこと */}
+          {/* 飛行の前後に必ず行うこと（点検表） */}
           <div data-testid="verdict-duties-section" className="flex flex-col gap-2">
-            <p className="eyebrow">{VERDICT_SECTION_TITLE.duties}</p>
-            <ul data-testid="verdict-duties" className="flex flex-col gap-1">
+            <SectionHead count={verdict.perFlightDuties.length}>{VERDICT_SECTION_TITLE.duties}</SectionHead>
+            <ul data-testid="verdict-duties" className="flex flex-col divide-y divide-rule border-b border-rule">
               {verdict.perFlightDuties.map((d) => (
                 <li
                   key={d.id}
                   data-testid="verdict-duty"
                   data-duty-id={d.id}
                   data-kind={d.kind}
-                  className="text-xs text-ink-soft"
+                  className="grid grid-cols-[4.5rem_1fr] items-baseline gap-x-3 py-1.5 text-xs text-ink-soft"
                 >
-                  <span className="mr-1.5 border border-rule px-1 py-px text-[10px] text-ink-mute">
+                  <span
+                    className={`justify-self-start border px-1.5 py-px text-[10px] leading-tight ${
+                      d.kind === "premise" ? "border-rule text-ink-mute" : "border-ink/70 text-ink"
+                    }`}
+                  >
                     {DUTY_KIND_LABEL[d.kind]}
                   </span>
-                  <span className="font-medium text-ink">{d.title}</span>
-                  <span className="block pl-1 text-[11px] text-ink-mute">{d.detail}</span>
+                  <span>
+                    <span className="font-medium text-ink">{d.title}</span>
+                    <span className="block text-[11px] leading-relaxed text-ink-mute">{d.detail}</span>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -224,15 +352,15 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
 
           {/* 規制・飛行の条件ごとの判定 */}
           <div className="flex flex-col gap-2">
-            <p className="eyebrow">{VERDICT_SECTION_TITLE.items}</p>
+            <SectionHead count={verdict.items.length}>{VERDICT_SECTION_TITLE.items}</SectionHead>
             <div className="overflow-x-auto">
-              <table data-testid="verdict-items" className="w-full border-collapse text-left text-xs">
+              <table data-testid="verdict-items" className="w-full min-w-[600px] border-collapse text-left text-xs">
                 <thead>
-                  <tr className="border-b border-rule text-[11px] text-ink-mute">
-                    <th className="py-1.5 pr-2 font-normal">規制・飛行の条件</th>
-                    <th className="py-1.5 pr-2 font-normal">元の判定</th>
-                    <th className="py-1.5 pr-2 font-normal">適用した許可</th>
-                    <th className="py-1.5 pr-2 font-normal">判定</th>
+                  <tr className="border-b border-rule text-[10px] tracking-[0.08em] text-ink-mute">
+                    <th className="py-1 pl-3 pr-3 font-medium">規制・飛行の条件</th>
+                    <th className="py-1 pr-3 font-medium">元の判定</th>
+                    <th className="py-1 pr-3 font-medium">適用した許可</th>
+                    <th className="py-1 pr-2 font-medium">判定</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -245,13 +373,15 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                       data-verdict={it.verdict}
                       className="border-b border-rule align-top"
                     >
-                      <td className="py-1.5 pr-2 text-ink">{it.title}</td>
-                      <td className="py-1.5 pr-2 text-ink-soft">{BASE_STATUS_LABEL[it.baseStatus]}</td>
-                      <td className="py-1.5 pr-2 text-ink-soft">
+                      <td className={`border-l-2 py-1.5 pl-3 pr-3 text-ink ${VERDICT_EDGE[it.verdict]}`}>
+                        {it.title}
+                      </td>
+                      <td className="py-1.5 pr-3 text-ink-soft">{BASE_STATUS_LABEL[it.baseStatus]}</td>
+                      <td className="py-1.5 pr-3 text-ink-soft">
                         {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
                       </td>
-                      <td className="py-1.5 pr-2">
-                        <span className={`inline-flex items-center gap-1.5 ${VERDICT_TONE[it.verdict]}`}>
+                      <td className="whitespace-nowrap py-1.5 pr-2">
+                        <span className={`inline-flex items-center gap-1.5 font-medium ${VERDICT_TONE[it.verdict]}`}>
                           <VerdictMark level={it.verdict} size="sm" decorative />
                           {VERDICT_LABEL[it.verdict]}
                         </span>

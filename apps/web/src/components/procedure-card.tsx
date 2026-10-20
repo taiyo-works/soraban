@@ -111,13 +111,13 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       {satisfied ? (
         <div
           data-testid="procedure-verdict-done"
-          className="flex flex-col gap-1 border-l-2 border-brand-700 bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
+          className="flex flex-col gap-1 border border-rule border-l-4 border-l-verdict-done bg-paper px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
         >
           <p className="flex items-center gap-1.5 font-semibold text-ink">
             <VerdictMark level="procedure_done" size="sm" decorative />
             {VERDICT_LABEL.procedure_done}：{satisfied.appliedPermits.map((p) => p.label).join(" / ")}
           </p>
-          <ul className="flex flex-col gap-0.5">
+          <ul className="ml-[20px] flex flex-col gap-0.5 border-l-2 border-dashed border-verdict-done pl-2.5">
             {satisfied.conditions.map((c) => (
               <li key={c}>・{c}</li>
             ))}

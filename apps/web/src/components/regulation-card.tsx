@@ -8,8 +8,8 @@ import {
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { BASE_STATUS_LABEL, legalTierLabel, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
-import { VerdictMark } from "./verdict-mark";
+import { BASE_STATUS_LABEL, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
+import { TierGauge, VerdictMark } from "./verdict-mark";
 
 type Props = {
   readonly regulation: RegulationWithStatus;
@@ -92,7 +92,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props)
       {verdictItem ? (
         <p
           data-testid="regulation-verdict-line"
-          className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-rule py-1.5 text-[11px] text-ink-soft"
+          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-l-2 border-rule py-1.5 pl-2 text-[11px] text-ink-soft ${VERDICT_EDGE[verdictItem.verdict]}`}
         >
           <span>元の判定 {BASE_STATUS_LABEL[verdictItem.baseStatus]}</span>
           <span aria-hidden>→</span>
@@ -110,7 +110,10 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props)
             <VerdictMark level={verdictItem.verdict} size="sm" decorative />
             {VERDICT_LABEL[verdictItem.verdict]}
           </span>
-          <span className="ml-auto text-ink-mute">{legalTierLabel(regulation.legalTier)}</span>
+          <span className="ml-auto inline-flex items-end gap-1 text-ink-mute">
+            <TierGauge tier={regulation.legalTier} />
+            <span className="leading-none">{legalTierLabel(regulation.legalTier)}</span>
+          </span>
         </p>
       ) : null}
       <h3 className="font-display text-base font-medium leading-snug text-ink">

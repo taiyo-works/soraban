@@ -1,5 +1,11 @@
-import type { ItemVerdict } from "@soraban/regulations";
-import { VERDICT_LABEL, VERDICT_SHAPE, VERDICT_TONE } from "@/lib/verdict-display";
+import type { ItemVerdict, LegalTier } from "@soraban/regulations";
+import {
+  legalTierWeight,
+  VERDICT_GEOMETRY as G,
+  VERDICT_LABEL,
+  VERDICT_SHAPE,
+  VERDICT_TONE,
+} from "@/lib/verdict-display";
 
 type Props = {
   readonly level: ItemVerdict;
@@ -8,10 +14,53 @@ type Props = {
   readonly decorative?: boolean;
 };
 
-const SIZE = { sm: 14, md: 20, lg: 44 } as const;
+const SIZE = { sm: 14, md: 20, lg: 40 } as const;
+// 線の太さ（viewBox 24 の単位）。大きい記号ほど細くし、画面上の線幅を 1.5〜2.2px に揃える。
+const STROKE = { sm: 2.4, md: 2, lg: 1.35 } as const;
 
-// 段階の記号（Sprint 11d D1。信号の 3 灯の置き換え）。形で段階を区別し、色は補助（currentColor）。
-// 形の定義は lib/verdict-display.ts（PDF と共通）。線の太さ・寸法・配色は designer が磨く。
+/** 記号の形だけ（色は currentColor）。結論の目盛りなど、data-testid を付けない場面でも使う。 */
+export function VerdictGlyph({ level, strokeWidth }: { level: ItemVerdict; strokeWidth: number }) {
+  const shape = VERDICT_SHAPE[level];
+  const line = { stroke: "currentColor", strokeWidth, fill: "none", strokeLinecap: "butt", strokeLinejoin: "miter" } as const;
+  return (
+    <>
+      {shape === "slashed-circle" ? (
+        <>
+          <circle {...G.ring} {...line} />
+          <line {...G.slash} {...line} />
+        </>
+      ) : null}
+      {shape === "triangle" ? (
+        <>
+          <polygon points={G.triangle} {...line} />
+          <line {...G.triangleBar} {...line} />
+        </>
+      ) : null}
+      {shape === "checked-ring" ? (
+        <>
+          <circle {...G.ring} {...line} />
+          <polyline points={G.check} {...line} />
+        </>
+      ) : null}
+      {shape === "filled-circle" ? (
+        <>
+          <circle {...G.ring} {...line} />
+          <circle {...G.disc} fill="currentColor" stroke="none" />
+        </>
+      ) : null}
+      {shape === "dashed-square" ? (
+        <>
+          <rect x={G.square.x} y={G.square.y} width={G.square.size} height={G.square.size} {...line} strokeDasharray={G.square.dash} />
+          <path d={G.question} {...line} />
+          <circle {...G.questionDot} fill="currentColor" stroke="none" />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+// 段階の記号（Sprint 11d。信号の 3 灯の置き換え）。形で段階を区別し、色は補助（currentColor）。
+// 形の定義は lib/verdict-display.ts（PDF と共通）。計器の表示に倣い、細い線・切り落とした端で描く。
 export function VerdictMark({ level, size = "md", decorative = false }: Props) {
   const px = SIZE[size];
   const shape = VERDICT_SHAPE[level];
@@ -24,43 +73,27 @@ export function VerdictMark({ level, size = "md", decorative = false }: Props) {
       height={px}
       viewBox="0 0 24 24"
       className={`shrink-0 ${VERDICT_TONE[level]}`}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
       {...(decorative
         ? { "aria-hidden": true }
         : { role: "img", "aria-label": VERDICT_LABEL[level] })}
     >
-      {shape === "slashed-circle" ? (
-        <>
-          <circle cx="12" cy="12" r="9" />
-          <line x1="5.6" y1="18.4" x2="18.4" y2="5.6" />
-        </>
-      ) : null}
-      {shape === "triangle" ? <polygon points="12,3 21.5,20 2.5,20" strokeLinejoin="round" /> : null}
-      {shape === "checked-ring" ? (
-        <>
-          <circle cx="12" cy="12" r="9" />
-          <polyline points="7.5,12.5 10.5,15.5 16.5,8.5" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      ) : null}
-      {shape === "filled-circle" ? <circle cx="12" cy="12" r="8" fill="currentColor" /> : null}
-      {shape === "dashed-square" ? (
-        <>
-          <rect x="3" y="3" width="18" height="18" strokeDasharray="3 2.5" />
-          <text
-            x="12"
-            y="16.5"
-            textAnchor="middle"
-            fontSize="12"
-            fontWeight="700"
-            fill="currentColor"
-            stroke="none"
-          >
-            ?
-          </text>
-        </>
-      ) : null}
+      <VerdictGlyph level={level} strokeWidth={STROKE[size]} />
     </svg>
+  );
+}
+
+/** 法的な重さの目盛り（3 本の棒。国の法律 = 3、条例 = 2、施設管理者の取り決め = 1）。 */
+export function TierGauge({ tier }: { tier: LegalTier }) {
+  const w = legalTierWeight(tier);
+  return (
+    <span aria-hidden className="inline-flex items-end gap-[2px]">
+      {[1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className={`w-[3px] ${i <= w ? "bg-ink" : "bg-rule"}`}
+          style={{ height: `${4 + i * 3}px` }}
+        />
+      ))}
+    </span>
   );
 }

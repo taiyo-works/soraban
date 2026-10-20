@@ -3,8 +3,8 @@
 //
 // 記号の形（色に頼らない。WCAG 2.2 AA 1.4.1）：
 //   飛行不可 = 斜線の丸 / 要手続き = 三角 / 手続き済み（条件付き）= 中抜きの丸にチェック /
-//   手続き不要 = 塗りの丸 / 判定不能 = 破線の四角と「？」
-// 具体の線の太さ・大きさ・配色は designer が磨く（構造と形の区別だけをここで決める）。
+//   手続き不要 = 塗りの丸（外周の輪と中心の塗り） / 判定不能 = 破線の四角と「？」
+// 線・寸法・配色（Sprint 11d D2）：計器の表示に倣い、線は細く端を切り落とし、色は補助に留める。
 import {
   BASE_STATUS_LABEL,
   LEGAL_TIER_LABEL,
@@ -38,22 +38,89 @@ export const VERDICT_GLYPH: Readonly<Record<ItemVerdict, string>> = {
   unknown: "?",
 };
 
-/** 段階の色（画面の Tailwind クラス。補助。意味は言葉と形が担う）。 */
+// ── 色（補助。意味は言葉と形が担う。WCAG 2.2 AA 1.4.1）──
+// 文字に使うため、ライト（紙 #F5F2EA）・ダーク（#0C1320）の両方で 4.5:1 以上になる専用の色を
+// globals.css の --color-verdict-* に置く（信号の amber は紙の上で 3.1:1 のため、判定の文字には使わない）。
+
+/** 段階の色（画面の Tailwind クラス。文字・記号の色）。 */
 export const VERDICT_TONE: Readonly<Record<ItemVerdict, string>> = {
-  no_fly: "text-signal-red",
-  needs_procedure: "text-signal-amber",
-  procedure_done: "text-brand-700",
-  no_procedure: "text-signal-green",
-  unknown: "text-ink-mute",
+  no_fly: "text-verdict-no-fly",
+  needs_procedure: "text-verdict-needs",
+  procedure_done: "text-verdict-done",
+  no_procedure: "text-verdict-clear",
+  unknown: "text-verdict-unknown",
 };
 
-/** 段階の色（PDF の 16 進。トークンのライトの値と合わせる）。 */
+/** 段階の縁（運航票の左端の帯。画面の Tailwind クラス）。 */
+export const VERDICT_EDGE: Readonly<Record<ItemVerdict, string>> = {
+  no_fly: "border-l-verdict-no-fly",
+  needs_procedure: "border-l-verdict-needs",
+  procedure_done: "border-l-verdict-done",
+  no_procedure: "border-l-verdict-clear",
+  unknown: "border-l-verdict-unknown",
+};
+
+/** 段階の色（PDF の 16 進。globals.css のライトの値と同じ）。 */
 export const VERDICT_PDF_COLOR: Readonly<Record<ItemVerdict, string>> = {
-  no_fly: "#B53A3A",
-  needs_procedure: "#B97E1E",
+  no_fly: "#A33232",
+  needs_procedure: "#8A5A0E",
   procedure_done: "#1D3557",
-  no_procedure: "#3A7A4F",
-  unknown: "#5B6170",
+  no_procedure: "#2E6A42",
+  unknown: "#4F5564",
+};
+
+/** 結論の目盛り（重い順。現在の段階の位置を示す。判定不能は件数で別に出す）。 */
+export const VERDICT_SCALE: readonly ItemVerdict[] = [
+  "no_fly",
+  "needs_procedure",
+  "procedure_done",
+  "no_procedure",
+];
+
+/**
+ * 記号の幾何（画面の SVG と PDF の Svg で共通。viewBox 0 0 24 24）。
+ * 形の区別：飛行不可 = 斜線の丸 / 要手続き = 三角 / 手続き済み（条件付き）= 中抜きの丸にチェック /
+ * 手続き不要 = 塗りの丸 / 判定不能 = 破線の四角と「？」。線の端は切り落とし、角は留める（製図の線）。
+ */
+export const VERDICT_GEOMETRY = {
+  ring: { cx: 12, cy: 12, r: 8.75 },
+  slash: { x1: 5.8, y1: 18.2, x2: 18.2, y2: 5.8 },
+  triangle: "12,3.25 21.25,19.75 2.75,19.75",
+  triangleBar: { x1: 12, y1: 9.75, x2: 12, y2: 15.25 },
+  check: "7.75,12.25 10.75,15.25 16.5,9",
+  disc: { cx: 12, cy: 12, r: 5.75 },
+  square: { x: 3.25, y: 3.25, size: 17.5, dash: "2.75 2.25" },
+  question: "M9.35 9.6 C9.35 8.05 10.5 7 12 7 C13.5 7 14.65 8.05 14.65 9.45 C14.65 11.35 12 11.5 12 13.6",
+  questionDot: { cx: 12, cy: 16.6, r: 1.05 },
+} as const;
+
+/** 判定不能の該当を確かめる手続き（verdict.ts の confirmProcedureForUnknown の id）。段取り表で縁と記号を判定不能にする。 */
+export const isConfirmProcedure = (id: string): boolean => id.startsWith("verdict-confirm-");
+
+/** 法的な重さの目盛り（国の法律 = 3 本、条例 = 2 本、施設管理者の取り決め = 1 本）。 */
+export const legalTierWeight = (t: LegalTier): number => 4 - t;
+
+const isoToday = (now: Date): string =>
+  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+const isoToUtcDay = (iso: string): number | null => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 86_400_000 : null;
+};
+
+/**
+ * 期限の日付までの残り（暦日。今日を 0 とする）。画面と PDF の段取り表で同じ言葉を出す。
+ * 日付がない期限（飛行予定日の未入力・管理者の定めによる等）は出さない。
+ */
+export const deadlineCountdown = (date: string | undefined, now: Date = new Date()): string | undefined => {
+  if (date === undefined) return undefined;
+  const a = isoToUtcDay(isoToday(now));
+  const b = isoToUtcDay(date);
+  if (a === null || b === null) return undefined;
+  const n = Math.round(b - a);
+  if (n > 0) return `残り ${n} 日`;
+  if (n === 0) return "期限は本日";
+  return `${-n} 日超過`;
 };
 
 /** 見出し（画面・PDF 共通。この順に並べる）。 */
