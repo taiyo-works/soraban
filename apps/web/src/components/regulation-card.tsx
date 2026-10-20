@@ -6,12 +6,17 @@ import {
   summarizeConfidence,
   type DidDetail,
   type RegulationWithStatus,
+  type VerdictItem,
 } from "@soraban/regulations";
+import { BASE_STATUS_LABEL, legalTierLabel, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
+import { VerdictMark } from "./verdict-mark";
 
 type Props = {
   readonly regulation: RegulationWithStatus;
   /** この判定に使った取得済みの許可（表示の補足を出すかどうかだけに使う）。 */
   readonly pilotPermits?: readonly string[];
+  /** この規制の判定（Sprint 11d。元の判定 → 適用した許可 → 判定）。 */
+  readonly verdictItem?: VerdictItem;
 };
 
 // 確信度のトーン: ブランド藍と信号色のみ使用。zinc/amber/emerald の混入を避ける。
@@ -29,12 +34,8 @@ const statusBadgeClass = {
   unknown: "border-rule text-ink-mute bg-paper-soft",
 } as const;
 
-const statusLabel = {
-  red: "飛行不可",
-  yellow: "要確認",
-  green: "適用外",
-  unknown: "未整備",
-} as const;
+// Sprint 11d：札は元の判定（BASE_STATUS_LABEL：該当／該当の可能性（要確認）／非該当／判定不能（データ未整備））。
+// 判定（4 段）は札の下の「元の判定 → 適用した許可 → 判定」の行に出す。
 
 // 出典バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分ける。
 const sourceTone = {
@@ -63,7 +64,7 @@ const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
   in_did_exclusion_unverified: "border-signal-amber",
 };
 
-export function RegulationCard({ regulation, pilotPermits }: Props) {
+export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
@@ -71,6 +72,7 @@ export function RegulationCard({ regulation, pilotPermits }: Props) {
     <article
       data-testid={`regulation-card-${regulation.id}`}
       data-status={regulation.status}
+      data-verdict={verdictItem?.verdict ?? ""}
       className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40"
     >
       <div className="flex items-center gap-2">
@@ -81,11 +83,36 @@ export function RegulationCard({ regulation, pilotPermits }: Props) {
         </span>
         <span className="text-[11px] text-ink-mute">{regulation.authority}</span>
         <span
+          data-testid="regulation-base-status"
           className={`ml-auto inline-flex items-center border px-2 py-0.5 text-[11px] font-semibold ${statusBadgeClass[regulation.status]}`}
         >
-          {statusLabel[regulation.status]}
+          {BASE_STATUS_LABEL[regulation.status]}
         </span>
       </div>
+      {verdictItem ? (
+        <p
+          data-testid="regulation-verdict-line"
+          className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-rule py-1.5 text-[11px] text-ink-soft"
+        >
+          <span>元の判定 {BASE_STATUS_LABEL[verdictItem.baseStatus]}</span>
+          <span aria-hidden>→</span>
+          <span>
+            適用した許可{" "}
+            {verdictItem.appliedPermits.length > 0
+              ? verdictItem.appliedPermits.map((p) => p.label).join(" / ")
+              : "なし"}
+          </span>
+          <span aria-hidden>→</span>
+          <span
+            data-testid="regulation-verdict"
+            className={`inline-flex items-center gap-1 font-semibold ${VERDICT_TONE[verdictItem.verdict]}`}
+          >
+            <VerdictMark level={verdictItem.verdict} size="sm" decorative />
+            {VERDICT_LABEL[verdictItem.verdict]}
+          </span>
+          <span className="ml-auto text-ink-mute">{legalTierLabel(regulation.legalTier)}</span>
+        </p>
+      ) : null}
       <h3 className="font-display text-base font-medium leading-snug text-ink">
         {regulation.title}
       </h3>
@@ -113,11 +140,31 @@ export function RegulationCard({ regulation, pilotPermits }: Props) {
           {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
         </p>
       ) : null}
+      {verdictItem && verdictItem.appliedPermits.length > 0 ? (
+        <div
+          data-testid="regulation-applied-permits"
+          className="border-l-2 border-brand-700 bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
+        >
+          <p className="eyebrow !text-[11px]">適用した許可・同意・目的（元の判定は変えない）</p>
+          <ul className="mt-1 flex flex-col gap-1">
+            {verdictItem.appliedPermits.map((p) => (
+              <li key={p.id} className="leading-snug">
+                <span>・{p.condition}</span>
+                {p.machine ? (
+                  <span className="block pl-2.5 text-[11px] tracking-wide text-ink-mute">{p.machine}</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
-        <div className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green">
+        <div
+          data-testid="regulation-excluded"
+          className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green"
+        >
           <p className="eyebrow !text-[11px] !text-signal-green">
-            <span aria-hidden>✓ </span>
-            適用された例外節
+            対象外にした例外（元の判定を非該当にしました）
           </p>
           <ul className="mt-1 flex flex-col gap-1">
             {regulation.appliedExceptions.map((ex) => (
@@ -131,9 +178,6 @@ export function RegulationCard({ regulation, pilotPermits }: Props) {
               </li>
             ))}
           </ul>
-          <p className="mt-1 text-[10px] text-ink-mute">
-            このため status を一段降格しました
-          </p>
         </div>
       ) : null}
       {exceptions.length > 0 ? (

@@ -28,6 +28,8 @@ import {
   procedureKindDisplayLabel,
 } from "@/lib/procedure-display";
 import { MonoText } from "./pdf-mono-text";
+import { PdfVerdictConclusion, PdfVerdictMark } from "./pdf-verdict";
+import { doneByProcedureId, VERDICT_LABEL } from "@/lib/verdict-display";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 束ね PDF（申請支援サマリ）。既存 regulation-pdf.tsx の作法に合わせる:
@@ -351,6 +353,8 @@ export const ApplicationPdfDocument = ({
   const deadlineMap = new Map(diagnosis.deadlines.map((d) => [d.procedureId, d]));
   const kindLabel = (p: RequiredProcedure): string => procedureKindDisplayLabel(p);
   const deadlineItems = diagnosis.procedures.filter((p) => deadlineMap.has(p.id));
+  // 手続き済み（条件付き）の印（Sprint 11d）。手続きは消さない。
+  const satisfiedMap = doneByProcedureId(diagnosis.verdict);
 
   return (
     <Document title={`そらばん 申請支援サマリ — ${diagnosis.evidenceId}`}>
@@ -389,6 +393,9 @@ export const ApplicationPdfDocument = ({
             </View>
           ) : null}
         </View>
+
+        {/* 結論（4 段の判定。Sprint 11d D1。画面・地点判定の PDF と同じ言葉・記号） */}
+        {diagnosis.verdict ? <PdfVerdictConclusion verdict={diagnosis.verdict} /> : null}
 
         {/* ① カテゴリー切り分け */}
         <View style={[styles.categoryBanner, { borderLeftColor: accent }]} wrap={false}>
@@ -462,6 +469,22 @@ export const ApplicationPdfDocument = ({
                 </Text>
               </View>
               <Text style={styles.procTitle}>{p.title}</Text>
+              {satisfiedMap.get(p.id) ? (
+                <View style={{ flexDirection: "row", gap: 4, marginTop: 2 }}>
+                  <PdfVerdictMark level="procedure_done" size={9} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.procMeta, { color: COLOR.ink, fontWeight: 700 }]}>
+                      {VERDICT_LABEL.procedure_done}：
+                      {satisfiedMap.get(p.id)!.appliedPermits.map((x) => x.label).join(" / ")}
+                    </Text>
+                    {satisfiedMap.get(p.id)!.conditions.map((c) => (
+                      <Text key={c} style={styles.procMeta}>
+                        ・{keepSpaces(c)}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
               {p.note ? <Text style={styles.procMeta}>{keepSpaces(p.note)}</Text> : null}
               <Text style={styles.procMeta}>法的根拠: {keepSpaces(p.legalBasis)}</Text>
               <View style={styles.procLinks}>

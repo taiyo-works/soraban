@@ -4,6 +4,7 @@ import {
   clearHistory,
   createHistoryRunId,
   getHistorySnapshot,
+  historyVerdictDisplay,
   loadHistory,
   patchHistoryDiagnosis,
   recordHistoryCheck,
@@ -380,5 +381,46 @@ describe("history.ts — Sprint 6 形式の履歴の互換（Sprint 7）", () =>
     const e = loadHistory().find((x) => x.runId === "run_legacy_1");
     expect(e?.diagnosisSummary?.didDetail).toBe("industrial_exclusive");
     expect(e?.engineVersion).toBe("soraban-0.2.0-clausegraph");
+  });
+});
+
+// Sprint 11d 契約 14・C5：旧形式（verdict なし、0.3.0／0.2.0）は旧版の判定であることが分かる表示。
+describe("historyVerdictDisplay（Sprint 11d）", () => {
+  const base = {
+    evidenceId: "ev_x",
+    savedAt: "2026-10-20T00:00:00.000Z",
+    loc: { lat: 35.4, lng: 133.3 },
+    checkedAt: "2026-10-20T00:00:00.000Z",
+  };
+  it("旧形式は旧版の値を明示する（飛べると読める語を出さない）", () => {
+    const g = historyVerdictDisplay({ ...base, overall: "green", engineVersion: "soraban-0.3.0-regulations-2026-07" });
+    expect(g).toEqual({ label: "適用外（旧版の判定）", legacy: true });
+    const r = historyVerdictDisplay({ ...base, overall: "red", engineVersion: "soraban-0.2.0-clausegraph" });
+    expect(r.legacy).toBe(true);
+    expect(r.label).toContain("旧版の判定");
+    const bad = historyVerdictDisplay({ ...base, overall: "bogus" as never, engineVersion: "x" });
+    expect(bad.label).toBe("判定不能（旧版の判定）");
+  });
+  it("新形式は 4 段の言葉と判定不能の件数", () => {
+    const v = historyVerdictDisplay({
+      ...base,
+      overall: "red",
+      verdict: "procedure_done",
+      verdictUnknownCount: 0,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    });
+    expect(v).toEqual({ level: "procedure_done", label: "手続き済み（条件付き）", legacy: false, unknownCount: 0 });
+  });
+  it("recordHistoryCheck が verdict を保存し、読み戻せる", () => {
+    recordHistoryCheck("run_v", {
+      ...base,
+      evidenceId: "ev_verdict_1",
+      overall: "red",
+      verdict: "needs_procedure",
+      verdictUnknownCount: 2,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    const e = loadHistory().find((x) => x.runId === "run_v")!;
+    expect(historyVerdictDisplay(e)).toMatchObject({ level: "needs_procedure", unknownCount: 2 });
   });
 });

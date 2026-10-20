@@ -14,6 +14,7 @@ import {
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { shortUrl, splitInlineSource } from "@/lib/inline-source";
 import { ProcedureCard } from "./procedure-card";
+import { doneByProcedureId } from "@/lib/verdict-display";
 import { DeadlineCalendar } from "./deadline-calendar";
 import { PrefillTable } from "./prefill-table";
 import { ManualDraft } from "./manual-draft";
@@ -199,6 +200,9 @@ export function DiagnosisPanel({
   // 束ね PDF 生成中フラグ。
   const [bundleBusy, setBundleBusy] = useState<boolean>(false);
   const [bundleError, setBundleError] = useState<string | null>(null);
+
+  // 手続き済み（条件付き）の印（Sprint 11d B2）。手続きそのものは消さない。
+  const satisfiedMap = doneByProcedureId(diagnosis.verdict);
 
   const deadlineFor = (id: string): string | undefined =>
     diagnosis.deadlines.find((d) => d.procedureId === id)?.basis;
@@ -399,6 +403,7 @@ export function DiagnosisPanel({
                 done={doneMap[p.id] ?? false}
                 onToggleDone={toggleDone}
                 category={diagnosis.category}
+                satisfied={satisfiedMap.get(p.id)}
               />
             ))}
           </div>

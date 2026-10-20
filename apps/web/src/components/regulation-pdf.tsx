@@ -12,17 +12,21 @@ import type { LatLng } from "@soraban/geo";
 import {
   AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   CONFIDENCE_LABEL,
-  STATUS_LABEL,
   ALL_AMENDMENTS,
+  BASE_STATUS_LABEL,
+  PERMIT_VALUE_LABEL,
+  VERDICT_LABEL,
   formatMachineCondition,
   shouldShowAirportMlitNote,
   shouldWarnConfidence,
   type AmendmentRef,
   type DatasetRef,
   type FlightContext,
+  type FlightVerdict,
   type RegulationCheckResult,
 } from "@soraban/regulations";
 import { MonoText } from "./pdf-mono-text";
+import { PdfVerdictConclusion, PdfVerdictDetails } from "./pdf-verdict";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
@@ -367,17 +371,15 @@ const sourceBorderColor: Record<string, string> = {
   市町村: COLOR.rule,
 };
 
-const STATUS_LABEL_PDF: Record<string, string> = {
-  red: "飛行不可",
-  yellow: "要確認",
-  green: "適用外",
-  unknown: "未整備",
-};
-
 type Props = {
   readonly result: RegulationCheckResult;
   readonly loc: LatLng;
   readonly ctx?: FlightContext;
+  /**
+   * 結論と段取りに使う判定（画面と同じ。/api/diagnose の判定＝飛行の方法を含む）。
+   * 未指定は地点判定の判定（result.verdict）。
+   */
+  readonly verdict?: FlightVerdict;
 };
 
 const PURPOSE_LABEL: Record<string, string> = {
@@ -387,14 +389,8 @@ const PURPOSE_LABEL: Record<string, string> = {
   city_event: "市が主催・後援する行事",
 };
 
-const PERMIT_LABEL: Record<string, string> = {
-  mlit: "国交省 DIPS",
-  park_manager: "公園管理者",
-  facility_manager: "施設管理者の同意",
-  pref_pubsafety_notice: "公安委員会への通報（飛行禁止法）",
-  facility_manager_and_pref_pubsafety: "飛行禁止法の同意＋通報（両方）",
-  bunkacho_or_kyoiku: "文化庁・教育委員会",
-};
+// 許可・同意の表示は画面と共通（@soraban/regulations の PERMIT_VALUE_LABEL。Sprint 11d）。
+const PERMIT_LABEL: Readonly<Record<string, string>> = PERMIT_VALUE_LABEL;
 
 const uniqueDatasets = (result: RegulationCheckResult): readonly DatasetRef[] => {
   const map = new Map<string, DatasetRef>();
@@ -409,8 +405,9 @@ const uniqueAmendments = (result: RegulationCheckResult): readonly AmendmentRef[
   return listed.length > 0 ? listed : ALL_AMENDMENTS;
 };
 
-export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
-  const overallColor = SIGNAL_COLOR[result.overall] ?? COLOR.signalMute;
+export const RegulationPdfDocument = ({ result, loc, ctx, verdict: verdictProp }: Props) => {
+  const verdict = verdictProp ?? result.verdict;
+  const itemById = new Map((verdict?.items ?? []).map((i) => [i.id, i]));
   return (
     <Document title={`そらばん 飛行可否レポート — ${result.evidenceId}`}>
       <Page size="A4" style={styles.page}>
@@ -442,35 +439,18 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         </View>
 
-        {/* OVERALL */}
-        <View style={styles.overallBlock}>
-          <View style={styles.signalBox}>
-            {(["red", "yellow", "green"] as const).map((light) => (
-              <View
-                key={light}
-                style={[
-                  styles.signalDot,
-                  {
-                    backgroundColor:
-                      light === result.overall ? SIGNAL_COLOR[light] : "#1F263A",
-                    borderColor:
-                      light === result.overall ? SIGNAL_COLOR[light] : COLOR.rule,
-                  },
-                ]}
-              />
-            ))}
-          </View>
-          <View style={styles.overallTextBox}>
-            <Text style={styles.eyebrow}>総合判定</Text>
-            <Text style={[styles.overallStatus, { color: overallColor }]}>
-              {STATUS_LABEL[result.overall]}
-            </Text>
-            <MonoText style={styles.locLine}>
-              {loc.lat.toFixed(6)}°N · {loc.lng.toFixed(6)}°E
-              {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
-            </MonoText>
-          </View>
-        </View>
+        {/* 結論（4 段の判定。Sprint 11d D1。画面と同じ言葉・記号） */}
+        {verdict ? (
+          <PdfVerdictConclusion
+            verdict={verdict}
+            locLine={
+              <MonoText style={styles.locLine}>
+                {loc.lat.toFixed(6)}°N · {loc.lng.toFixed(6)}°E
+                {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
+              </MonoText>
+            }
+          />
+        ) : null}
 
         {/* CONFIDENCE WARNING — 確信度が閾値未満のときだけ警告を出す */}
         {shouldWarnConfidence(result.overallConfidence) ? (
@@ -512,9 +492,12 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
           </View>
         ) : null}
 
-        {/* REGULATIONS */}
+        {/* 段取り：要手続きの手続き（期限順）→ 手続き済み → 飛行の前後に必ず行うこと → 規制ごとの判定 */}
+        {verdict ? <PdfVerdictDetails verdict={verdict} /> : null}
+
+        {/* REGULATIONS（規制ごとの詳細） */}
         <Text style={styles.regSectionTitle}>
-          関連条例 ({result.regulations.length} 件)
+          関連条例の詳細 ({result.regulations.length} 件)
         </Text>
         {result.regulations.map((reg) => (
           <View key={reg.id} style={styles.regBlock} wrap={false}>
@@ -537,9 +520,18 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
                   },
                 ]}
               >
-                {STATUS_LABEL_PDF[reg.status] ?? reg.status}
+                {`元の判定 ${BASE_STATUS_LABEL[reg.status] ?? reg.status}`}
               </Text>
             </View>
+            {itemById.get(reg.id) ? (
+              <Text style={styles.regNote}>
+                {keepSpaces(
+                  `元の判定 ${BASE_STATUS_LABEL[reg.status]} → 適用した許可 ${
+                    itemById.get(reg.id)!.appliedPermits.map((p) => p.label).join(" / ") || "なし"
+                  } → 判定 ${VERDICT_LABEL[itemById.get(reg.id)!.verdict]}`,
+                )}
+              </Text>
+            ) : null}
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
             <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
@@ -565,9 +557,22 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
                 </Text>
               ) : null}
             </View>
+            {itemById.get(reg.id)?.appliedPermits.length ? (
+              <View style={[styles.appliedBox, { borderLeftColor: COLOR.brand, backgroundColor: "#E9EDF3" }]}>
+                <Text style={[styles.appliedTitle, { color: COLOR.brand }]}>適用した許可・同意・目的（元の判定は変えない）</Text>
+                {itemById.get(reg.id)!.appliedPermits.map((p) => (
+                  <View key={p.id}>
+                    <Text style={[styles.appliedItem, { color: COLOR.ink }]}>・{p.condition}</Text>
+                    {p.machine ? (
+                      <Text style={[styles.appliedMachine, { color: COLOR.inkMute }]}>{p.machine}</Text>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ) : null}
             {reg.appliedExceptions && reg.appliedExceptions.length > 0 ? (
               <View style={styles.appliedBox}>
-                <Text style={styles.appliedTitle}>✓ 適用された例外節</Text>
+                <Text style={styles.appliedTitle}>対象外にした例外（元の判定を非該当にしました）</Text>
                 {reg.appliedExceptions.map((ex) => (
                   <View key={ex.id}>
                     <Text style={styles.appliedItem}>・{ex.condition}</Text>

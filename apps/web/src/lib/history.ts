@@ -4,14 +4,18 @@
 // LRU で最大 50 件まで保持、超えたら最古を削除。
 
 import type { LatLng } from "@soraban/geo";
-import type {
-  AirspaceDeterminationStatus,
-  DiagnosisCategory,
-  DidDetail,
-  FlightContext,
-  ManualChoice,
-  RegulationStatus,
-  SpecificFlightFlag,
+import {
+  LEGACY_STATUS_LABEL,
+  VERDICT_LABEL,
+  VERDICT_LEVELS,
+  type AirspaceDeterminationStatus,
+  type DiagnosisCategory,
+  type DidDetail,
+  type FlightContext,
+  type ManualChoice,
+  type RegulationStatus,
+  type SpecificFlightFlag,
+  type VerdictLevel,
 } from "@soraban/regulations";
 
 const STORAGE_KEY = "soraban:history:v1";
@@ -68,7 +72,12 @@ export type SavedCheck = {
   readonly savedAt: string; // ISO
   readonly loc: LatLng;
   readonly ctx?: FlightContext;
+  /** 元の判定の集約（0.3.0 までは許可を当てた後の値）。互換のため残す。 */
   readonly overall: RegulationStatus;
+  /** 地点の判定（4 段。/api/check の verdict）。Sprint 11d より前の旧形式エントリには無い。 */
+  readonly verdict?: VerdictLevel;
+  /** 判定不能（データ未整備）の規制の件数。 */
+  readonly verdictUnknownCount?: number;
   readonly resolvedAddress?: string;
   readonly engineVersion: string;
   readonly checkedAt: string; // ISO
@@ -454,4 +463,34 @@ export const buildRestorePlan = (entry: SavedCheck): RestorePlan => {
     manualChoice: pick(input["manualChoice"], ["standard", "custom"] as const, "custom"),
     completedProcedureIds: sanitizeIds(input["completedProcedureIds"]),
   };
+};
+
+// ============================================================
+// 履歴の判定の表示（Sprint 11d C5）
+// ============================================================
+
+export type HistoryVerdictDisplay = {
+  /** 4 段の判定（旧形式は undefined）。 */
+  readonly level?: VerdictLevel;
+  readonly label: string;
+  /** 旧版（verdict なし）の値か。 */
+  readonly legacy: boolean;
+  readonly unknownCount?: number;
+};
+
+/**
+ * 履歴 1 件の判定の表示。新形式は 4 段の言葉、旧形式（verdict なし。0.3.0／0.2.0）は旧版の値であることを
+ * 明示した言葉（例：適用外（旧版の判定））。旧版の緑の表示の言葉（飛べると読める語）は新旧とも出さない。
+ */
+export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay => {
+  const v = entry.verdict;
+  if (typeof v === "string" && (VERDICT_LEVELS as readonly string[]).includes(v)) {
+    const n = typeof entry.verdictUnknownCount === "number" ? entry.verdictUnknownCount : undefined;
+    return { level: v, label: VERDICT_LABEL[v], legacy: false, ...(n !== undefined ? { unknownCount: n } : {}) };
+  }
+  const overall: RegulationStatus =
+    entry.overall === "red" || entry.overall === "yellow" || entry.overall === "green"
+      ? entry.overall
+      : "unknown";
+  return { label: LEGACY_STATUS_LABEL[overall], legacy: true };
 };

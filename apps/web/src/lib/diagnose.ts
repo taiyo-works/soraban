@@ -4,12 +4,15 @@ import type {
   AmendmentRef,
   ApplicationDiagnosis,
   DatasetRef,
+  FlightVerdict,
   PrefillField,
   SpecificFlightFlag,
 } from "@soraban/regulations";
 
 // /api/diagnose のレスポンス。診断本体 + プリフィル表 + 証跡メタ + 判定由来の空域フラグ。
 export type DiagnoseResponse = ApplicationDiagnosis & {
+  /** 判定（4 段。地点の規制と飛行の条件の両方から。Sprint 11d）。画面の結論に使う。 */
+  readonly verdict?: FlightVerdict;
   /** DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値） */
   readonly prefill: readonly PrefillField[];
   /** 申請支援診断（入力条件＋導出結果）を含む決定論的証跡 ID */
@@ -45,6 +48,10 @@ export type DiagnoseInput = {
   readonly bvlosWithObserver?: boolean;
   /** DID 非該当をユーザーが確認済み（自動判定が未確認のときのみ有効）。 */
   readonly didConfirmedNotApplicable?: boolean;
+  /** 取得済みの許可・同意（Sprint 11d B2）。判定に当てる。手続きの一覧は消さない。 */
+  readonly pilotPermits?: readonly string[];
+  /** 運航の目的（通常運航は送らない）。 */
+  readonly purpose?: string;
 };
 
 // 新規 /api/diagnose を叩く。既存 checkLocation（/api/check）とは独立。
@@ -67,6 +74,8 @@ export const diagnoseLocation = async (
       thirdPartyOverflight: input.thirdPartyOverflight,
       bvlosWithObserver: input.bvlosWithObserver,
       didConfirmedNotApplicable: input.didConfirmedNotApplicable === true ? true : undefined,
+      pilotPermits: input.pilotPermits && input.pilotPermits.length > 0 ? input.pilotPermits : undefined,
+      purpose: input.purpose,
     }),
   });
   if (!res.ok) {
