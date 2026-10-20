@@ -1,6 +1,8 @@
 import {
+  AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   CONFIDENCE_LABEL,
   formatMachineCondition,
+  shouldShowAirportMlitNote,
   summarizeConfidence,
   type DidDetail,
   type RegulationWithStatus,
@@ -8,6 +10,8 @@ import {
 
 type Props = {
   readonly regulation: RegulationWithStatus;
+  /** この判定に使った取得済みの許可（表示の補足を出すかどうかだけに使う）。 */
+  readonly pilotPermits?: readonly string[];
 };
 
 // 確信度のトーン: ブランド藍と信号色のみ使用。zinc/amber/emerald の混入を避ける。
@@ -59,7 +63,7 @@ const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
   in_did_exclusion_unverified: "border-signal-amber",
 };
 
-export function RegulationCard({ regulation }: Props) {
+export function RegulationCard({ regulation, pilotPermits }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
@@ -100,6 +104,15 @@ export function RegulationCard({ regulation }: Props) {
         <span className="eyebrow !text-[11px]">この地点</span>{" "}
         <span className="text-ink-soft">{regulation.note}</span>
       </p>
+      {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
+        <p
+          data-testid="airport-mlit-note"
+          className="border-l-2 border-signal-amber bg-signal-amber-soft/45 px-3 py-2 text-xs leading-relaxed text-ink-soft"
+        >
+          <span className="eyebrow block !text-[11px]">入力した許可について</span>{" "}
+          {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
+        </p>
+      ) : null}
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
         <div className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green">
           <p className="eyebrow !text-[11px] !text-signal-green">

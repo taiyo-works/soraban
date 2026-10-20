@@ -10,10 +10,12 @@ import {
 } from "@react-pdf/renderer";
 import type { LatLng } from "@soraban/geo";
 import {
+  AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   CONFIDENCE_LABEL,
   STATUS_LABEL,
   ALL_AMENDMENTS,
   formatMachineCondition,
+  shouldShowAirportMlitNote,
   shouldWarnConfidence,
   type AmendmentRef,
   type DatasetRef,
@@ -388,8 +390,9 @@ const PURPOSE_LABEL: Record<string, string> = {
 const PERMIT_LABEL: Record<string, string> = {
   mlit: "国交省 DIPS",
   park_manager: "公園管理者",
-  facility_manager: "施設管理者",
-  facility_manager_and_pref_pubsafety: "施設管理者+県公安委員会",
+  facility_manager: "施設管理者の同意",
+  pref_pubsafety_notice: "公安委員会への通報（飛行禁止法）",
+  facility_manager_and_pref_pubsafety: "飛行禁止法の同意＋通報（両方）",
   bunkacho_or_kyoiku: "文化庁・教育委員会",
 };
 
@@ -540,6 +543,11 @@ export const RegulationPdfDocument = ({ result, loc, ctx }: Props) => {
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
             <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
+            {shouldShowAirportMlitNote(reg, ctx?.pilotPermits) ? (
+              <Text style={styles.regNote}>
+                {keepSpaces(`入力した許可について：${AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}`)}
+              </Text>
+            ) : null}
             <View style={styles.dataGroup}>
               <Text style={styles.dataLine}>
                 使用データ：

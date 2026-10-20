@@ -1163,6 +1163,13 @@ export {
 export type { CheckEvidencePayloadInput } from "./evidence";
 export { buildCheckEvidencePayload, ENGINE_VERSION, PREVIOUS_ENGINE_VERSIONS } from "./evidence";
 
+// ── 許可の入力に対する表示の補足（Sprint 11c）──
+export {
+  AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
+  AIRPORT_REGULATION_ID,
+  shouldShowAirportMlitNote,
+} from "./permit-notes";
+
 export type {
   ClauseEffect,
   ClauseException,
