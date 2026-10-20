@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  buildCheckEvidencePayload,
   buildDiagnosisEvidencePayload,
   createIndustrialSource,
   deriveDiagnosis,
@@ -61,10 +62,22 @@ describe("公開面の残り指摘：証跡 ID の回帰", () => {
     expect(r.regulations.find((x) => x.id === "aviation-law-did")?.dataYear).toBe(2020);
   });
 
-  it("地点判定の証跡 ID が変わらない（空港の近傍）", async () => {
+  // Sprint 11d：ENGINE_VERSION を 0.4.0 に上げたため現行版の証跡 ID は変わる（正規化は同じ）。
+  // 0.3.0 の値（ev_5722337c7b5f785e）は、旧版の文字列を渡したペイロードで再現できる（sprint10a.test.ts）。
+  it("地点判定の証跡 ID（空港の近傍）：現行版の値と、旧版の文字列での 0.3.0 の値の再現", async () => {
     const r = await runRegulationCheckWith(provider("31204"), AIRPORT_NEAR, { droneWeightG: 900 }, FIXED_NOW);
     expect(r.engineVersion).toBe(ENGINE_VERSION);
-    expect(r.evidenceId).toBe("ev_5722337c7b5f785e");
+    expect(r.evidenceId).toBe("ev_b1b3638077844afd");
+    const old = buildCheckEvidencePayload({
+      engineVersion: "soraban-0.3.0-regulations-2026-07",
+      lat: AIRPORT_NEAR.lat,
+      lng: AIRPORT_NEAR.lng,
+      checkedAt: r.checkedAt,
+      regulationIds: r.regulations.map((x) => x.id),
+      ctx: { droneWeightG: 900 },
+      datasets: collectDatasets(r.regulations),
+    });
+    expect(`ev_${createHash("sha256").update(old).digest("hex").slice(0, 16)}`).toBe("ev_5722337c7b5f785e");
   });
 
   it("申請支援診断の証跡 ID は手続きデータの確認日の更新でだけ変わる（夜間・目視外・DID 未確認）", async () => {
@@ -92,10 +105,15 @@ describe("公開面の残り指摘：証跡 ID の回帰", () => {
     // 制度データの revision（Sprint 11a で追加した d.rev）を除き、確認日を旧値に戻したペイロードは、
     // 修正前の証跡 ID と一致する（ほかの入力は変わっていない）
     const payload = buildDiagnosisEvidencePayload({ ...input, engineVersion: ENGINE_VERSION });
+    // Sprint 11d：ENGINE_VERSION を上げたため、旧版との比較は旧版の文字列を渡したペイロードで行う。
+    const payload03 = buildDiagnosisEvidencePayload({
+      ...input,
+      engineVersion: "soraban-0.3.0-regulations-2026-07",
+    });
     const ver = JSON.stringify(PROCEDURES_VERIFIED_AT);
     expect(payload.split(ver)).toHaveLength(2);
     expect(payload.split(`,"rev":${PROCEDURES_REVISION}`)).toHaveLength(2);
-    const oldPayload = payload
+    const oldPayload = payload03
       .replace(`,"rev":${PROCEDURES_REVISION}`, "")
       .replace(ver, JSON.stringify("2026-06-22T00:00:00+09:00"));
     const sha16 = (s: string) => `ev_${createHash("sha256").update(s).digest("hex").slice(0, 16)}`;

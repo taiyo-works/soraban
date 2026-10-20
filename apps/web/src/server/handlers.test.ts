@@ -135,7 +135,11 @@ describe("/api/diagnose（データ読み込み口を差し替えた統合テス
     expect(json.didStatus).toBe("not_applicable");
     expect(json.didDetail).toBe("industrial_exclusive");
     expect(json.flags).not.toContain("airspace_did");
-    expect(json.category).toBe("I");
+    // Sprint 11d A8：この地点は空港等周辺の概算（6km）に入り yellow（該当の可能性）。以前は空域フラグに入らず
+    // カテゴリー I と出ていた（見落とし）。空港等周辺の飛行許可が手続きに出るため IIA 相当になる。
+    expect(json.flags).toContain("airspace_airport");
+    expect(json.procedures.map((p) => p.id)).toContain("flight-permission-airport");
+    expect(json.category).toBe("II_A");
     expect(json.amendments.map((a) => a.id)).toContain("mlit-kokuji-435");
     expect(json.datasets.map((d) => d.id)).toContain("did-r2");
   });

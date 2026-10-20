@@ -8,14 +8,20 @@ import {
   type DbEnv,
   type EvidenceLogInsert,
 } from "@soraban/db";
-import type { RegulationCheckResult } from "@soraban/regulations";
+import { perRegulationVerdict, type RegulationCheckResult } from "@soraban/regulations";
 import { collectDatasets } from "./check-core";
 
 /** 証跡の書き込み関数（handleCheckPost に渡し、テストで差し替える）。 */
 export type WriteEvidence = (result: RegulationCheckResult, loc: LatLng) => Promise<void>;
 
-/** 判定結果から evidence_log の 1 行を組み立てる。client_user_agent・IP は含めない。 */
-export const toEvidenceLogInsert = (result: RegulationCheckResult, loc: LatLng): EvidenceLogInsert => ({
+/**
+ * 判定結果から evidence_log の 1 行を組み立てる。client_user_agent・IP は含めない。
+ * Sprint 11d：判定（4 段）の列（verdict・verdict_unknown_count・per_regulation_verdict・applied_permits）を埋める。
+ * overall は元の判定（許可を当てる前）から求めた値（computeOverall）。verdict の無い結果（旧版）は判定の列を null にする。
+ */
+export const toEvidenceLogInsert = (result: RegulationCheckResult, loc: LatLng): EvidenceLogInsert => {
+  const verdict = result.verdict;
+  return {
   evidenceId: result.evidenceId,
   engineVersion: result.engineVersion,
   checkedAt: result.checkedAt,
@@ -33,7 +39,12 @@ export const toEvidenceLogInsert = (result: RegulationCheckResult, loc: LatLng):
     baseYear: d.baseYear,
     verifiedAt: d.verifiedAt,
   })),
-});
+  verdict: verdict?.level ?? null,
+  verdictUnknownCount: verdict?.unknownCount ?? null,
+  perRegulationVerdict: verdict ? perRegulationVerdict(verdict) : null,
+  appliedPermits: verdict ? [...verdict.permits] : null,
+  };
+};
 
 /** DATABASE_URL が設定されていれば書き込み関数を返す。未設定なら undefined（接続を試みない）。 */
 export const dbEvidenceWriter = (env: DbEnv = process.env): WriteEvidence | undefined => {

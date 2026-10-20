@@ -52,6 +52,7 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       ["0006", "record_versions"],
       ["0007", "ops_daily_inspections_flights"],
       ["0008", "record_versions_flight_entities"],
+      ["0009", "evidence_log_verdict"],
     ]);
     for (const r of rows) {
       expect(r.checksum).toMatch(/^[0-9a-f]{64}$/);
@@ -100,6 +101,40 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       (await c.query("select to_regclass('public.broken_should_rollback') as t")).rows[0].t,
     );
     expect(exists).toBeNull();
+  });
+
+  // Sprint 11d 契約 16：0009 は 0008 まで適用済みの DB にも適用でき、既存の行は書き換えない（null のまま）。
+  it("0008 まで適用済みで行がある DB に 0009 を適用でき、既存の行の判定の列は null のまま", async () => {
+    const dir = copyMigrations();
+    rmSync(path.join(dir, "0009_evidence_log_verdict.sql"));
+    expect((await migrate(["--dir", dir])).code).toBe(0);
+    expect(await countMigrations(db.url)).toBe(8);
+    await withClient(db.url, (c) =>
+      c.query(
+        `insert into evidence_log (evidence_id, engine_version, checked_at, loc, overall, overall_confidence,
+           regulation_ids, per_regulation_status)
+         values ('ev_before_0009', 'soraban-0.3.0-regulations-2026-07', now(),
+           ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}')`,
+      ),
+    );
+    const r = await migrate();
+    expect(r.code, r.stderr).toBe(0);
+    expect(await countMigrations(db.url)).toBe(N);
+    const row = await withClient(db.url, async (c) =>
+      (
+        await c.query(
+          `select overall, verdict, verdict_unknown_count, per_regulation_verdict, applied_permits
+             from evidence_log where evidence_id = 'ev_before_0009'`,
+        )
+      ).rows[0],
+    );
+    expect(row).toEqual({
+      overall: "green",
+      verdict: null,
+      verdict_unknown_count: null,
+      per_regulation_verdict: null,
+      applied_permits: null,
+    });
   });
 
   it("2 つのランナーを同時に起動しても各ファイルは 1 回だけ適用される", async () => {
@@ -158,8 +193,26 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
              regulation_ids, per_regulation_status)
            values ('ev_role_test', 'e', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}')`,
         );
-        expect((await c.query("select count(*)::int as n from evidence_log")).rows[0].n).toBe(1);
+        // Sprint 11d（0009）：新しい列を含む insert ができる。verdict は 4 段の値だけ。
+        await c.query(
+          `insert into evidence_log (evidence_id, engine_version, checked_at, loc, overall, overall_confidence,
+             regulation_ids, per_regulation_status, verdict, verdict_unknown_count, per_regulation_verdict, applied_permits)
+           values ('ev_role_test_v', 'soraban-0.4.0-verdict-2026-10', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'),
+             'red', 'high', '{aviation-law-did}', '{"aviation-law-did":"red"}', 'procedure_done', 0,
+             '{"aviation-law-did":"procedure_done"}', '{mlit:did}')`,
+        );
+        await expect(
+          c.query(
+            `insert into evidence_log (evidence_id, engine_version, checked_at, loc, overall, overall_confidence,
+               regulation_ids, per_regulation_status, verdict)
+             values ('ev_role_test_bad', 'e', now(), ST_GeogFromText('SRID=4326;POINT(133.33 35.43)'), 'green', 'high', '{}', '{}', 'flyable')`,
+          ),
+        ).rejects.toMatchObject({ code: "23514" });
+        expect((await c.query("select count(*)::int as n from evidence_log")).rows[0].n).toBe(2);
+        const old = (await c.query("select verdict, applied_permits from evidence_log where evidence_id = 'ev_role_test'")).rows[0];
+        expect(old).toEqual({ verdict: null, applied_permits: null });
         expect((await c.query("select count(*)::int as n from schema_migrations")).rows[0].n).toBe(N);
+        await expect(c.query("update evidence_log set verdict = 'no_fly'")).rejects.toMatchObject({ code: "42501" });
         await expect(c.query("update evidence_log set overall = 'red'")).rejects.toMatchObject({ code: "42501" });
         await expect(c.query("delete from evidence_log")).rejects.toMatchObject({ code: "42501" });
         await expect(c.query("insert into regulations (id) values ('x')")).rejects.toMatchObject({ code: "42501" });

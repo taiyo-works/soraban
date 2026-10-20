@@ -8,6 +8,7 @@ import {
   buildPrefillFields,
   deriveDiagnosis,
   deriveDidDetailFromRegulations,
+  deriveFlightVerdict,
   deriveDidStatusFromRegulations,
   extractAirspaceFlagsFromRegulations,
   isSmallDroneLawTriggered,
@@ -17,6 +18,7 @@ import {
   type AmendmentRef,
   type ApplicationDiagnosis,
   type FlightContext,
+  type FlightVerdict,
   type PrefillField,
   type RegulationCheckResult,
   type SpecificFlightFlag,
@@ -105,7 +107,9 @@ const collectAmendments = (result: RegulationCheckResult): readonly AmendmentRef
 
 // 既存 /api/check を壊さず、診断は /api/diagnose に分離する（spec §10-1 推奨）。
 //
-// 入力: { lat, lng, droneWeightG?, flags?, plannedDate?, accessControl?, thirdPartyOverflight? }
+// 入力: { lat, lng, droneWeightG?, flags?, plannedDate?, accessControl?, thirdPartyOverflight?,
+//        pilotPermits?, purpose? }
+//   - pilotPermits・purpose（Sprint 11d B2）は地点判定と判定（verdict）に当てる。手続きの一覧は消さない。
 //   - flags はユーザーが選んだ飛行方法フラグ（夜間・目視外・30m・催し・危険物・投下・150m）と、
 //     ユーザー指定（プリセットの curated 値を含む）の空域フラグ。
 //   - 空域フラグ（DID・空港）はサーバ側で信号機判定から自動導出して合流する。
@@ -162,12 +166,19 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
   // ユーザーが地理院地図等で「DID 非該当」を確認済みと明示した場合のみ true。
   const didConfirmedNotApplicable = obj["didConfirmedNotApplicable"] === true;
 
-  // 信号機判定を実行し、空域フラグ（DID・空港 red）を自動導出してユーザー入力に合流。
-  // ctx には機体重量だけ渡す（例外節適用と evidenceId の一貫性のため）。
-  const checkResult = await runCheck(
-    { lat, lng },
-    droneWeightG !== undefined ? { droneWeightG } : undefined,
-  );
+  // 許可・目的（Sprint 11d B2）。機体重量と合わせて地点判定と判定（verdict）に当てる。
+  // status は元の判定（許可を当てる前）なので、空域フラグ・DID の三値・飛行禁止法の手続きは許可で消えない。
+  const permitCtx = parseFlightContext({
+    pilotPermits: obj["pilotPermits"],
+    purpose: obj["purpose"],
+  });
+  const ctx: FlightContext | undefined =
+    droneWeightG !== undefined || permitCtx !== undefined
+      ? { ...(droneWeightG !== undefined ? { droneWeightG } : {}), ...(permitCtx ?? {}) }
+      : undefined;
+
+  // 地点判定を実行し、空域フラグ（DID の該当、空港等周辺の該当・該当の可能性）を自動導出してユーザー入力に合流。
+  const checkResult = await runCheck({ lat, lng }, ctx);
   const airspaceFlags = extractAirspaceFlagsFromRegulations(checkResult.regulations);
   // DID 該当の三値（該当／非該当／未確認）。データ未整備は「未確認」のまま診断へ渡す。
   // 自動判定が「未確認」のときに限り、ユーザーの「非該当を確認済み」を採用する。
@@ -199,6 +210,14 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
     ...(didDetail !== undefined && didStatusInput === autoDidStatus ? { didDetail } : {}),
     smallDroneLawTriggered,
     ...(bvlosWithObserver !== undefined ? { bvlosWithObserver } : {}),
+  });
+
+  // 判定（4 段。Sprint 11d）：地点の規制と飛行の条件（方法・空域）の両方から求める。
+  const verdict: FlightVerdict = deriveFlightVerdict({
+    regulations: checkResult.regulations,
+    flags: mergedFlags,
+    ctx,
+    plannedDate,
   });
 
   // DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値）。
@@ -234,10 +253,14 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
     procedureIds: diagnosis.procedures.map((p) => p.id),
     didStatus: diagnosis.didStatus,
     datasets,
+    // 判定に当てた許可・目的（Sprint 11d C2。新しいキーで証跡に入れる）
+    permits: verdict.permits,
+    ...(verdict.purpose !== undefined ? { purpose: verdict.purpose } : {}),
   });
 
   return NextResponse.json({
     ...diagnosis,
+    verdict,
     prefill,
     evidenceId: diagnosisEvidenceId,
     checkEvidenceId: checkResult.evidenceId,

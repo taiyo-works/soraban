@@ -11,6 +11,10 @@ export type RegulationCategoryDb =
   | "heritage_protection"
   | "prefectural_nuisance";
 export type ConfidenceLevelDb = "low" | "medium" | "high";
+/** evidence_log.verdict（0009。Sprint 11d）。 */
+export type VerdictLevelDb = "no_fly" | "needs_procedure" | "procedure_done" | "no_procedure";
+/** evidence_log.per_regulation_verdict の値（規制ごとの判定。判定不能を含む）。 */
+export type RegulationVerdictDb = VerdictLevelDb | "unknown";
 export type ZoneKindDb =
   | "park_polygon"
   | "heritage_polygon"
@@ -74,6 +78,11 @@ export type EvidenceLogRow = {
   readonly created_at: string;
   /** 0003 で追加。 */
   readonly datasets: readonly EvidenceDatasetDb[];
+  /** 0009 で追加（Sprint 11d）。0.3.0 までの行は null。 */
+  readonly verdict: VerdictLevelDb | null;
+  readonly verdict_unknown_count: number | null;
+  readonly per_regulation_verdict: Record<string, RegulationVerdictDb> | null;
+  readonly applied_permits: readonly string[] | null;
 };
 
 /** マイグレーションの適用記録（ランナーが作る表。マイグレーションファイルには含まない）。 */
@@ -306,6 +315,10 @@ export const EVIDENCE_LOG_COLUMNS = columns<EvidenceLogRow>()([
   "client_user_agent",
   "created_at",
   "datasets",
+  "verdict",
+  "verdict_unknown_count",
+  "per_regulation_verdict",
+  "applied_permits",
 ]);
 
 export const ORGANIZATION_COLUMNS = columns<OrganizationRow>()(["id", "name", "created_at"]);
