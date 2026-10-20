@@ -48,6 +48,41 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 
 Vercel の Deployments（最新が Production か）と、Domains の soraban.futuretec.jp の割り当てを確認する。DIPS の申請書に URL を書く前に必ず解消する。
 
+### 4.0 結論（2026-10-20、Vercel コネクタで確認）
+
+**Vercel の設定に問題は無い。** 本番ブランチは main（main のデプロイの target が production）、soraban.futuretec.jp はブランチ割り当て無し（gitBranch null）。独自ドメインの alias は最新の main（#20、dcfeddd、`dpl_76hRM9umhVaTwNZb6W7pBQHN9B32`）に付いている。候補 A・B・C はすべて外れ。
+
+soraban.futuretec.jp を Vercel に追加したのは 2026-10-19 17:54 JST で、Sprint 10a の main への反映（#15、19:16 JST）より前。その間に見た画面か、ブラウザに残った古い画面だった可能性が高い。スーパーリロード（またはシークレットウィンドウ）で、トップに「出願準備中」が無く、`X-Robots-Tag: noindex, nofollow` が返ることを目で確かめれば完了。
+
+**解消済み（2026-10-20）**：ユーザーがブラウザで確認し、「出願準備中」は出ていない。DIPS の申請書に soraban.futuretec.jp を書いてよい。
+
+Vercel コネクタの注意：チーム ID を付けずに呼ぶ（付けると空の結果が返る）。
+
+### 4.1 調査の経過（2026-10-20、Claude Code。§4.0 の結論より前の記録で、ここに書いた設定変更は不要）
+
+> **この節は経過の記録であり、対応手順ではない。** 下の候補 A〜C は §4.0 の確認ですべて外れた。表の「直し方」は実施しないこと。
+
+Vercel のダッシュボードは見られなかった（作業環境の Vercel コネクタは carta-lab-projects チームだけに権限があり、taiyo-works-projects は 403。soraban.futuretec.jp と vercel.app への接続も作業環境のネットワーク方針で拒否）。GitHub とリポジトリから分かったこと：
+
+- デプロイ先は taiyo-works-projects のプロジェクト soraban（`prj_rW9rpj8jsKZM2jinw5CD8wgVnBIX`、Root Directory `apps/web`）。main の CI はすべて成功。
+- 報告された古い文言（「出願準備中」「特許コア」「タイヨー通信本社（拠点）」「個人開発・社内検討段階」）は main には無い。main から消えたのは 2026-10-19 17:54〜18:40 JST（Sprint 10a）。
+- 同じ文言が残っているブランチは `private-preview`（最終 2026-06-08「空港データを静的import化しVercel serverlessで配信可能に」＝もとは Vercel に載せるためのブランチ）と `sprint6/reliability`（最終 2026-10-14）。
+- 候補 3（`'use cache'`）は外れ。トップ画面には無く、残るのは `server/regulation-check.ts` の DID データの取得だけ。データのキャッシュが画面の文言（JSX）を古くすることは無い。Service Worker もどのブランチにも無い。
+
+残る候補は、どれも「どのデプロイを独自ドメインに出すか」の設定：
+
+| 候補 | ダッシュボードでの見え方 | 直し方 |
+|---|---|---|
+| A. 本番ブランチが main でない（`private-preview` 等） | Deployments で main のデプロイに「Preview」と付く | Settings → Environments → Production の Branch Tracking を `main` に。最新の main のデプロイを Promote to Production |
+| B. soraban.futuretec.jp がブランチに割り当てられている | Settings → Domains の soraban.futuretec.jp に Git Branch（`private-preview` 等）が出る | 同じ画面の Edit で Production に戻す |
+| C. Instant Rollback や手動の Promote で、本番ドメインの自動割り当てが止まっている | main のデプロイは「Production」だが「Current」が付かない。上部に Rollback の表示 | 最新の main のデプロイを Promote する（Undo Rollback でも可） |
+
+soraban-gules.vercel.app も古ければ A か C、新しければ B。
+
+直ったかの確かめ方：`curl -sI https://soraban.futuretec.jp/ | grep -i x-robots-tag` で `noindex, nofollow` が返ること（noindex は #17 で main にだけ入った。古い版には付かない）と、トップに「出願準備中」が無いこと。古い版は noindex が無いため、検索エンジンに載りうる点でも急ぐ。
+
+`private-preview` と `sprint6/reliability` は 2026-10-20 にユーザーが GitHub の画面で削除した（済み）。
+
 ## 5. ユーザー作業（未完了）
 
 | 作業 | 時期 | 手順の置き場所 |
@@ -60,7 +95,7 @@ Vercel の Deployments（最新が Production か）と、Domains の soraban.fu
 | 用途地域データ A29（令和元年度）の各市区町村の利用条件の確認 | 商用公開の前 | `packages/regulations/data/sources.json` |
 | Neon Auth でメールとパスワードの登録を止められるか確認 | 本番準備時 | — |
 | 機体の 2026-12-31 時点の総飛行時間の入力、操縦者の技能証明の有効期限の入力 | 本番で使い始めるとき | — |
-| 一時ブランチ `data-fetch/*` の削除（作業環境から削除できなかった） | いつでも | GitHub の画面 |
+| ~~一時ブランチ `data-fetch/*` の削除~~（2026-10-20 にユーザーが削除。済み） | — | — |
 
 運用の決めごと（推奨）：共用端末は渡す前に保存かログアウト／スマホの時刻は自動設定。
 

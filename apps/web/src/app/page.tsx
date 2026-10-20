@@ -6,6 +6,7 @@ import {
   SMALL_DRONE_LAW_FACILITIES,
 } from "@soraban/regulations";
 import { addressIndexAvailable } from "@soraban/regulations/address";
+import { HeroLineArt } from "@/components/hero-line-art";
 import { RegulationChecker } from "@/components/regulation-checker";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -126,7 +127,7 @@ export default function Home() {
       {/* ============================ 見出し ============================
           サービス名 → 目的 → できること → 運営者・利用の範囲・対象地域 → 免責 の順に読ませ、
           そのすぐ下に判定の入口（住所・座標の入力と地図）を置く。 */}
-      <header className="flex flex-col">
+      <header className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_14.5rem] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-5">
           <h1 className="flex flex-col gap-1.5 text-ink">
             <span className="text-4xl font-medium leading-tight tracking-[0.06em] sm:text-5xl">
@@ -176,6 +177,16 @@ export default function Home() {
           </p>
         </div>
 
+        {/* ドローンの線画（Sprint 11b、ユーザーが Adobe Firefly で生成した PNG）。PC（lg 以上）では右の列に控えめに置き、
+            本文には重ねない。スマホでは出さない（hidden の間は lazy の画像を読み込まない）。装飾なので読み上げない。
+            線は黒。不透明度をここで下げ、ダークモードでは画像を反転して明るい線にする。 */}
+        <div
+          aria-hidden="true"
+          data-testid="hero-line-art"
+          className="pointer-events-none hidden opacity-50 lg:block dark:opacity-40"
+        >
+          <HeroLineArt className="block h-auto w-full select-none dark:invert" />
+        </div>
       </header>
 
       {/* ============================ 判定 ============================ */}
