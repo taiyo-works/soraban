@@ -32,6 +32,8 @@ type Props = {
   readonly pending: boolean;
   /** 申請支援の診断が失敗した（判定を出さず、再試行を促す）。 */
   readonly failed?: boolean;
+  /** 失敗の説明（未指定は診断の失敗の説明）。 */
+  readonly failedNote?: string;
   /** 再試行（診断をやり直す）。 */
   readonly onRetry?: () => void;
   /** 結論の行の右に置くもの（PDF 出力のボタンなど）。 */
@@ -103,7 +105,7 @@ function LevelWords({ label }: { label: string }) {
 // 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1・D2）。
 // 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に必ず行うこと
 //       → 規制ごとの判定（元の判定 → 適用した許可 → 判定）。地点判定の PDF も同じ順・同じ言葉。
-export function VerdictSummary({ verdict, pending, failed, onRetry, actions, meta }: Props) {
+export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
   return (
@@ -171,7 +173,7 @@ export function VerdictSummary({ verdict, pending, failed, onRetry, actions, met
                 {VERDICT_FAILED_LABEL}
               </p>
               <p data-testid="verdict-failed-note" className="text-sm leading-relaxed text-ink-soft">
-                {VERDICT_FAILED_NOTE}
+                {failedNote ?? VERDICT_FAILED_NOTE}
               </p>
               {onRetry ? (
                 <button

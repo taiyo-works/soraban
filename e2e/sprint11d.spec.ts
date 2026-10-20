@@ -529,4 +529,73 @@ test.describe("C. 表示・PDF・履歴", () => {
     await expect(level(page)).toHaveText("要手続き");
     await expect(latestHistory(page)).toHaveText(/^要手続き/);
   });
+
+  // 差し戻し 3 回目 F3：地点判定（/api/check）だけが失敗したとき、前の地点の結果を画面・PDF に混ぜない。
+  test("16. F3：/api/check が失敗して地点を移すと、古い証跡 ID とカードを出さず、PDF を出さず、再試行で回復する", async ({
+    page,
+  }) => {
+    await openReady(page);
+    const oldId = (await page.getByTestId("evidence-id").innerText()).trim();
+    await expect(page.getByTestId("regulation-card-aviation-law-did")).toBeVisible();
+    await page.route("**/api/check", (route) => route.fulfill({ status: 500, body: '{"error":"test"}' }));
+    await page.getByPlaceholder("35.4278", { exact: true }).fill(String(QUIET.lat));
+    await page.getByPlaceholder("133.3314", { exact: true }).fill(String(QUIET.lng));
+    const failed = page.waitForResponse((r) => r.url().endsWith("/api/check"));
+    const diag = waitDiagnose(page);
+    await page.getByRole("button", { name: /規制をチェック/ }).click();
+    await Promise.all([failed, diag]);
+    await expect(page.getByTestId("verdict-failed")).toBeVisible();
+    await expect(summary(page)).toHaveAttribute("data-level", "failed");
+    await expect(page.getByTestId("verdict-failed-note")).toContainText("地点判定");
+    await expect(page.getByTestId("evidence-id")).toHaveCount(0);
+    // 結論と地点判定の欄に前の地点の証跡 ID を出さない（判定履歴の前の実行の行は、その実行の記録として残る）
+    await expect(page.locator("section[aria-live]").first()).not.toContainText(oldId);
+    await expect(page.locator('[data-testid^="regulation-card-"]')).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /PDF 出力/ })).toBeDisabled();
+
+    await page.unroute("**/api/check");
+    const check = waitCheck(page);
+    const diag2 = waitDiagnose(page);
+    await page.getByTestId("verdict-retry").click();
+    await Promise.all([check, diag2]);
+    await settled(page);
+    await expect(level(page)).toHaveText("手続き不要");
+    await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);
+    await expect(page.getByTestId("evidence-id")).not.toHaveText(oldId);
+    await expect(page.getByTestId("regulation-card-aviation-law-did")).toHaveAttribute("data-status", "green");
+    await expect(page.getByRole("button", { name: /PDF 出力/ })).toBeEnabled();
+  });
+
+  // 結論が確定していない間（判定中・判定できません）は、カードの判定を「地点だけの判定（結論は未確定）」と示す。
+  test("17. 結論が未確定の間、カードに地点だけの判定の札を出さない", async ({ page }) => {
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    await expect(page.getByTestId("regulation-verdict").first()).toBeVisible();
+    await page.route("**/api/diagnose", (route) => route.fulfill({ status: 500, body: "{}" }));
+    const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
+    await methodBox(page, "夜間飛行").check();
+    await failed;
+    await expect(page.getByTestId("verdict-failed")).toBeVisible();
+    const card = page.getByTestId("regulation-card-aviation-law-did");
+    await expect(card.getByTestId("regulation-verdict")).toHaveCount(0);
+    await expect(card.getByTestId("regulation-verdict-provisional")).toContainText("地点だけの判定（結論は未確定）");
+    await expect(card).not.toContainText("手続き不要");
+  });
+
+  // 診断が応答しないときは、時間の上限（20 秒）で失敗として扱う。
+  test("18. 診断が応答しないと、上限の時間で「判定できません」になり、履歴は判定未確定", async ({ page }) => {
+    test.setTimeout(120_000);
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    await page.route("**/api/diagnose", async (route) => {
+      await new Promise((r) => setTimeout(r, 40_000));
+      await route.abort().catch(() => {});
+    });
+    await methodBox(page, "夜間飛行").check();
+    await expect(page.getByTestId("verdict-pending")).toBeVisible();
+    await expect(page.getByTestId("verdict-failed")).toBeVisible({ timeout: 35_000 });
+    const latest = page.getByTestId("history-item").first().getByTestId("history-verdict");
+    await expect(latest).toContainText("判定未確定");
+    await expect(page.getByRole("button", { name: /PDF 出力/ })).toBeDisabled();
+  });
 });

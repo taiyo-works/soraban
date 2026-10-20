@@ -54,6 +54,7 @@ import {
 import { RegulationCard } from "./regulation-card";
 import { VerdictSummary } from "./verdict-summary";
 import { VerdictMark } from "./verdict-mark";
+import { VERDICT_CHECK_FAILED_NOTE } from "@/lib/verdict-display";
 import {
   buildPilotPermits,
   EMPTY_DIPS_CHECKS,
@@ -279,6 +280,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // result を求めたときの ctx（カードの補足・PDF の「取得済み許可」を判定結果と揃えるため）。
   const [resultCtx, setResultCtx] = useState<FlightContext | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  // 地点判定（/api/check）の失敗と、result を求めた地点（差し戻し 3 回目 F3：前の地点の結果を混ぜない）。
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const [resultLoc, setResultLoc] = useState<LatLng | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
   const [pdfBusy, setPdfBusy] = useState<boolean>(false);
@@ -353,8 +357,26 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     diagnosisIsCurrent && !diagPending && !verdictFailed && diagnosis.verdict !== undefined
       ? diagnosis.verdict
       : undefined;
-  const verdictPending = !verdictFailed && (diagPending || isChecking || screenVerdict === undefined);
-  const canExportPdf = screenVerdict !== undefined && !verdictPending && !verdictFailed;
+  // 地点判定の結果が現在の地点のものか。地点判定が失敗している間は、前の地点の規制・証跡 ID を出さない。
+  const resultIsCurrent = result !== null && resultLoc !== null && sameLoc(center, resultLoc);
+  const checkFailed = checkError !== null && !isChecking;
+  const conclusionFailed = verdictFailed || checkFailed;
+  const verdictPending =
+    !conclusionFailed &&
+    (diagPending || isChecking || screenVerdict === undefined || !resultIsCurrent);
+  const canExportPdf =
+    screenVerdict !== undefined && !verdictPending && !conclusionFailed && resultIsCurrent;
+  const showResultDetail = result !== null && resultIsCurrent && !checkFailed;
+  // 再試行：地点判定が失敗していれば地点判定と診断を新しい実行としてやり直し、診断だけの失敗なら診断をやり直す。
+  const retryVerdict = (): void => {
+    if (checkFailed) {
+      const runId = startNewRun();
+      runCheck(center, undefined, undefined, runId);
+      void runDiagnose(center, {}, runId);
+    } else {
+      void runDiagnose(center);
+    }
+  };
 
   // エンジンの DID 判定が確定（該当・非該当）しているときは、プリセットの curated DID フラグを使わない。
   const effectiveAirspaceFlags: readonly SpecificFlightFlag[] = mergeAirspaceFlags({
@@ -521,7 +543,16 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // 初期バンドルに含めない（ボタン押下時に 1 度だけ取得）。
   const handlePdfExport = async (): Promise<void> => {
     // 再判定の応答待ちの間・診断が失敗した間は、画面の入力と食い違う旧い結果で PDF を出さない。
-    if (!result || isChecking || !canExportPdf || screenVerdict === undefined || diagnosis === null) return;
+    if (
+      !result ||
+      isChecking ||
+      !canExportPdf ||
+      !resultIsCurrent ||
+      checkError !== null ||
+      screenVerdict === undefined ||
+      diagnosis === null
+    )
+      return;
     setPdfBusy(true);
     try {
       const [{ pdf }, { RegulationPdfDocument }] = await Promise.all([
@@ -603,6 +634,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         if (seq !== checkSeqRef.current) return; // 古い応答は無視
         setResult(res);
         setResultCtx(ctx);
+        setResultLoc(loc);
+        setCheckError(null);
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
@@ -625,6 +658,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         });
       } catch (err) {
         if (isAbortError(err) || seq !== checkSeqRef.current) return;
+        setCheckError((err as Error).message);
         setError(`判定に失敗しました: ${(err as Error).message}`);
       }
     });
@@ -1571,7 +1605,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       </div>
 
       {/* ─── RESULT ───────────────────────────────── */}
-      {result ? (
+      {result || checkError ? (
         <section
           className="flex flex-col gap-6 border-y border-double border-rule bg-paper-soft/40 p-4 sm:gap-7 sm:p-6"
           aria-live="polite"
@@ -1580,12 +1614,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           <VerdictSummary
             verdict={screenVerdict}
             pending={verdictPending}
-            failed={verdictFailed}
-            onRetry={() => void runDiagnose(center)}
+            failed={conclusionFailed}
+            {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
+            onRetry={retryVerdict}
             meta={
               <p className="font-mono text-[11px] tnum text-ink-mute">
                 {lat}°N · {lng}°E
-                {result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
+                {showResultDetail && result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
             }
             actions={
@@ -1602,6 +1637,17 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             }
           />
 
+          {!showResultDetail ? (
+            <p
+              data-testid="regulations-unavailable"
+              className="border border-dashed border-rule bg-paper px-4 py-3 text-xs leading-relaxed text-ink-soft"
+            >
+              この地点の地点判定の結果がまだありません（判定中、または失敗）。規制ごとの判定と証跡 ID は、地点判定が出てから表示します。
+            </p>
+          ) : null}
+
+          {showResultDetail ? (
+          <>
           {/* 低確信度警告 — 確信度が閾値未満のときだけ警告を出す */}
           {shouldWarnConfidence(result.overallConfidence) ? (
             <div className="border-l-2 border-signal-amber bg-signal-amber-soft px-4 py-3 text-xs leading-relaxed text-ink-soft">
@@ -1633,6 +1679,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   regulation={r}
                   pilotPermits={resultCtx?.pilotPermits}
                   verdictItem={result.verdict?.items.find((i) => i.id === r.id)}
+                  provisional={screenVerdict === undefined || verdictPending || conclusionFailed}
                 />
               ))}
             </div>
@@ -1665,6 +1712,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               </dd>
             </div>
           </dl>
+          </>
+          ) : null}
         </section>
       ) : null}
 

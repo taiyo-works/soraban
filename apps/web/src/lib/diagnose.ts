@@ -1,4 +1,5 @@
 import type { LatLng } from "@soraban/geo";
+import { DIAGNOSE_TIMEOUT_MS } from "./verdict-display";
 import type {
   AirspaceDeterminationStatus,
   AmendmentRef,
@@ -60,10 +61,12 @@ export const diagnoseLocation = async (
   input: DiagnoseInput,
   signal?: AbortSignal,
 ): Promise<DiagnoseResponse> => {
+  // 応答しないまま「判定中」が続かないよう、時間の上限で打ち切る（TimeoutError として呼び出し元で失敗扱い）。
+  const timeout = AbortSignal.timeout(DIAGNOSE_TIMEOUT_MS);
   const res = await fetch("/api/diagnose", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    signal,
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     body: JSON.stringify({
       lat: loc.lat,
       lng: loc.lng,

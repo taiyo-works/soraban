@@ -8,7 +8,7 @@ import {
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { BASE_STATUS_LABEL, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
+import { PROVISIONAL_ITEM_NOTE, BASE_STATUS_LABEL, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
 import { TierGauge, VerdictMark } from "./verdict-mark";
 
 type Props = {
@@ -17,6 +17,10 @@ type Props = {
   readonly pilotPermits?: readonly string[];
   /** この規制の判定（Sprint 11d。元の判定 → 適用した許可 → 判定）。 */
   readonly verdictItem?: VerdictItem;
+  /**
+   * 結論が確定していない（判定中・判定できません）。地点だけの判定の札を出さず、注記を出す（差し戻し 3 回目）。
+   */
+  readonly provisional?: boolean;
 };
 
 // 確信度のトーン: ブランド藍と信号色のみ使用。zinc/amber/emerald の混入を避ける。
@@ -64,7 +68,7 @@ const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
   in_did_exclusion_unverified: "border-signal-amber",
 };
 
-export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props) {
+export function RegulationCard({ regulation, pilotPermits, verdictItem, provisional = false }: Props) {
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
@@ -92,7 +96,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props)
       {verdictItem ? (
         <p
           data-testid="regulation-verdict-line"
-          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-l-2 border-rule py-1.5 pl-2 text-[11px] text-ink-soft ${VERDICT_EDGE[verdictItem.verdict]}`}
+          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-l-2 border-rule py-1.5 pl-2 text-[11px] text-ink-soft ${provisional ? "border-l-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
         >
           <span>元の判定 {BASE_STATUS_LABEL[verdictItem.baseStatus]}</span>
           <span aria-hidden>→</span>
@@ -103,13 +107,19 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem }: Props)
               : "なし"}
           </span>
           <span aria-hidden>→</span>
-          <span
-            data-testid="regulation-verdict"
-            className={`inline-flex items-center gap-1 font-semibold ${VERDICT_TONE[verdictItem.verdict]}`}
-          >
-            <VerdictMark level={verdictItem.verdict} size="sm" decorative />
-            {VERDICT_LABEL[verdictItem.verdict]}
-          </span>
+          {provisional ? (
+            <span data-testid="regulation-verdict-provisional" className="font-medium text-ink-mute">
+              {PROVISIONAL_ITEM_NOTE}
+            </span>
+          ) : (
+            <span
+              data-testid="regulation-verdict"
+              className={`inline-flex items-center gap-1 font-semibold ${VERDICT_TONE[verdictItem.verdict]}`}
+            >
+              <VerdictMark level={verdictItem.verdict} size="sm" decorative />
+              {VERDICT_LABEL[verdictItem.verdict]}
+            </span>
+          )}
           <span className="ml-auto inline-flex items-end gap-1 text-ink-mute">
             <TierGauge tier={regulation.legalTier} />
             <span className="leading-none">{legalTierLabel(regulation.legalTier)}</span>
