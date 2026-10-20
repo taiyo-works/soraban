@@ -407,4 +407,67 @@ test.describe("C. 表示・PDF・履歴", () => {
     await expect(permitBox(page, "国交省 DIPS：夜間飛行の承認")).not.toBeChecked();
     await expect(item(page, "aviation-law-did")).toHaveAttribute("data-verdict", "procedure_done");
   });
+
+  // PR #23 レビュー P1：履歴は飛行の方法を含む判定（/api/diagnose）を保存する。
+  test("14b. 区域外の地点で夜間を選ぶと、履歴の項目も要手続きになり、外すと手続き不要に戻る", async ({ page }) => {
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    const latest = page.getByTestId("history-item").first().getByTestId("history-verdict");
+    await expect(level(page)).toHaveText("手続き不要");
+    await expect(latest).toHaveText(/^手続き不要/);
+    await toggle(methodBox(page, "夜間飛行"), page, true, false);
+    await expect(level(page)).toHaveText("要手続き");
+    await expect(latest).toHaveText(/^要手続き/);
+    await toggle(methodBox(page, "夜間飛行"), page, false, false);
+    await expect(level(page)).toHaveText("手続き不要");
+    await expect(latest).toHaveText(/^手続き不要/);
+  });
+
+  // PR #23 レビュー P1：診断だけの入力を変えた後の PDF は、診断の証跡 ID で出す（ファイル名とヘッダー）。
+  test("13b. 飛行の方法・飛行予定日だけを変えた後の PDF に、その診断の証跡 ID が出て、ファイル名も変わる", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    const download = async () => {
+      const dl = page.waitForEvent("download");
+      await page.getByRole("button", { name: /PDF 出力/ }).click();
+      const d = await dl;
+      return { name: d.suggestedFilename(), text: await pdfText(d) };
+    };
+    const first = await download();
+
+    // 応答を順に記録し、画面に出ている判定（最後に届いた診断）の証跡 ID と照らす。
+    const diagIds: { evidenceId: string }[] = [];
+    page.on("response", async (r) => {
+      if (r.url().endsWith("/api/diagnose") && r.ok()) {
+        diagIds.push((await r.json()) as { evidenceId: string });
+      }
+    });
+    const diagRes = page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+    await methodBox(page, "夜間飛行").check();
+    await diagRes;
+    await settled(page);
+    await expect(level(page)).toHaveText("要手続き");
+    await expect.poll(() => diagIds.length).toBeGreaterThan(0);
+    const diagJson = diagIds.at(-1)!;
+    const second = await download();
+    expect(second.name).toMatch(/^soraban-.+\.pdf$/);
+    expect(second.name).toBe(`soraban-${diagJson.evidenceId}.pdf`);
+    expect(second.name).not.toBe(first.name);
+    expect(squash(second.text)).toContain(diagJson.evidenceId);
+    // 地点判定（/api/check。画面の証跡 ID・evidence_log と同じ）の証跡 ID も、それと分かる言葉で併記する
+    const checkId = (await page.getByTestId("evidence-id").innerText()).trim();
+    expect(squash(second.text)).toContain(squash(`地点判定の証跡 ID${checkId}`));
+
+    const diagRes2 = page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+    await page.locator('input[type="date"]').fill("2026-12-10");
+    await diagRes2;
+    await settled(page);
+    const diagJson2 = diagIds.at(-1)!;
+    const third = await download();
+    expect(diagJson2.evidenceId).not.toBe(diagJson.evidenceId);
+    expect(third.name).toContain(diagJson2.evidenceId);
+    expect(squash(third.text)).toContain(diagJson2.evidenceId);
+  });
 });

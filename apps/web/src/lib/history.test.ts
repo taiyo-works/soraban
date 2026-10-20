@@ -411,6 +411,34 @@ describe("historyVerdictDisplay（Sprint 11d）", () => {
     });
     expect(v).toEqual({ level: "procedure_done", label: "手続き済み（条件付き）", legacy: false, unknownCount: 0 });
   });
+  it("診断の判定（飛行の方法を含む）を地点だけの判定より優先し、地点判定が後から届いても上書きしない（PR #23 P1）", () => {
+    recordHistoryDiagnosis("run_d", {
+      diagnosisSummary: {
+        diagnosisEvidenceId: "ev_diag",
+        category: "II_B_eligible",
+        isSpecificFlight: true,
+        procedureCount: 3,
+        verdict: "needs_procedure",
+        verdictUnknownCount: 0,
+      },
+    });
+    recordHistoryCheck("run_d", {
+      ...base,
+      evidenceId: "ev_check_d",
+      overall: "green",
+      verdict: "no_procedure",
+      verdictUnknownCount: 0,
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    const e = loadHistory().find((x) => x.runId === "run_d")!;
+    expect(historyVerdictDisplay(e)).toMatchObject({ level: "needs_procedure", label: "要手続き" });
+    recordHistoryDiagnosis("run_d", {
+      diagnosisSummary: { ...e.diagnosisSummary!, verdict: "no_procedure" },
+    });
+    const e2 = loadHistory().find((x) => x.runId === "run_d")!;
+    expect(historyVerdictDisplay(e2).level).toBe("no_procedure");
+  });
+
   it("recordHistoryCheck が verdict を保存し、読み戻せる", () => {
     recordHistoryCheck("run_v", {
       ...base,

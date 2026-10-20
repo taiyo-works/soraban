@@ -529,19 +529,25 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       ]);
       // 画面に出ている判定結果を求めたときの ctx を使う（入力の変更と再判定の間でずれないように）。
       const ctx = resultCtx;
-      // 結論・段取りは画面と同じ判定（診断の判定。飛行の方法を含む）を使う。
+      // 結論・段取りは画面と同じ判定（診断の判定。飛行の方法を含む）を使い、その診断の証跡 ID で出す
+      // （診断だけの入力を変えたとき、内容の違う PDF が同じ ID・同じファイル名にならないように。PR #23 P1）。
+      const diagnosisEvidenceId =
+        diagnosisIsCurrent && diagnosis.verdict !== undefined && screenVerdict === diagnosis.verdict
+          ? diagnosis.evidenceId
+          : undefined;
       const blob = await pdf(
         <RegulationPdfDocument
           result={result}
           loc={center}
           ctx={ctx}
           verdict={screenVerdict ?? result.verdict}
+          diagnosisEvidenceId={diagnosisEvidenceId}
         />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `soraban-${result.evidenceId}.pdf`;
+      anchor.download = `soraban-${diagnosisEvidenceId ?? result.evidenceId}.pdf`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -717,6 +723,10 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           procedureCount: res.procedures.length,
           didStatus: res.didStatus,
           ...(res.didDetail !== undefined ? { didDetail: res.didDetail } : {}),
+          // 飛行の方法を含む判定（画面の結論と同じ）。履歴の表示はこれを使う（PR #23 P1）。
+          ...(res.verdict
+            ? { verdict: res.verdict.level, verdictUnknownCount: res.verdict.unknownCount }
+            : {}),
         },
       });
     } catch (err) {

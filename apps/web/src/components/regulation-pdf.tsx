@@ -380,6 +380,11 @@ type Props = {
    * 未指定は地点判定の判定（result.verdict）。
    */
   readonly verdict?: FlightVerdict;
+  /**
+   * verdict を求めた申請支援診断（/api/diagnose）の証跡 ID。結論・段取り（飛行の方法・飛行予定日を含む）の証跡で、
+   * PDF の主の証跡 ID にする。地点判定（/api/check）の証跡 ID は「地点判定の証跡 ID」として併記する。
+   */
+  readonly diagnosisEvidenceId?: string;
 };
 
 const PURPOSE_LABEL: Record<string, string> = {
@@ -405,11 +410,19 @@ const uniqueAmendments = (result: RegulationCheckResult): readonly AmendmentRef[
   return listed.length > 0 ? listed : ALL_AMENDMENTS;
 };
 
-export const RegulationPdfDocument = ({ result, loc, ctx, verdict: verdictProp }: Props) => {
+export const RegulationPdfDocument = ({
+  result,
+  loc,
+  ctx,
+  verdict: verdictProp,
+  diagnosisEvidenceId,
+}: Props) => {
   const verdict = verdictProp ?? result.verdict;
+  // 主の証跡 ID：結論と段取りの出どころ（診断）の ID。診断が無いときは地点判定の ID。
+  const primaryEvidenceId = diagnosisEvidenceId ?? result.evidenceId;
   const itemById = new Map((verdict?.items ?? []).map((i) => [i.id, i]));
   return (
-    <Document title={`そらばん 飛行判定と手続きのレポート — ${result.evidenceId}`}>
+    <Document title={`そらばん 飛行判定と手続きのレポート — ${primaryEvidenceId}`}>
       <Page size="A4" style={styles.page}>
         {/* HEADER */}
         <View>
@@ -418,9 +431,17 @@ export const RegulationPdfDocument = ({ result, loc, ctx, verdict: verdictProp }
 
         <View style={styles.metaRow}>
           <View style={styles.metaCol}>
-            <MonoText style={styles.metaLabel}>証跡 ID</MonoText>
-            <Text style={styles.metaValue}>{result.evidenceId}</Text>
+            <MonoText style={styles.metaLabel}>
+              {diagnosisEvidenceId ? "証跡 ID（判定と手続き）" : "証跡 ID"}
+            </MonoText>
+            <Text style={styles.metaValue}>{primaryEvidenceId}</Text>
           </View>
+          {diagnosisEvidenceId ? (
+            <View style={styles.metaCol}>
+              <MonoText style={styles.metaLabel}>地点判定の証跡 ID</MonoText>
+              <Text style={styles.metaValue}>{result.evidenceId}</Text>
+            </View>
+          ) : null}
           <View style={styles.metaCol}>
             <MonoText style={styles.metaLabel}>判定の版</MonoText>
             <Text style={styles.metaValue}>{result.engineVersion}</Text>

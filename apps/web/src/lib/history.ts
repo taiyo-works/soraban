@@ -60,6 +60,12 @@ export type SavedDiagnosisSummary = {
   readonly didStatus?: AirspaceDeterminationStatus;
   /** DID 判定の詳細（「非該当（工業専用地域）」等の区別。Sprint 7 以降のエントリのみ）。 */
   readonly didDetail?: DidDetail;
+  /**
+   * 飛行の方法を含む判定（/api/diagnose の verdict。画面の結論と同じ。Sprint 11d）。
+   * 地点だけの判定（SavedCheck.verdict）より優先して表示する。旧形式のエントリには無い。
+   */
+  readonly verdict?: VerdictLevel;
+  readonly verdictUnknownCount?: number;
 };
 
 // SavedCheck: 履歴 1 エントリ。完全な RegulationCheckResult ではなく
@@ -483,9 +489,14 @@ export type HistoryVerdictDisplay = {
  * 明示した言葉（例：適用外（旧版の判定））。旧版の緑の表示の言葉（飛べると読める語）は新旧とも出さない。
  */
 export const historyVerdictDisplay = (entry: SavedCheck): HistoryVerdictDisplay => {
-  const v = entry.verdict;
-  if (typeof v === "string" && (VERDICT_LEVELS as readonly string[]).includes(v)) {
-    const n = typeof entry.verdictUnknownCount === "number" ? entry.verdictUnknownCount : undefined;
+  // 飛行の方法を含む診断の判定を優先し、無ければ地点だけの判定を使う（PR #23 P1）。
+  const isLevel = (x: unknown): x is VerdictLevel =>
+    typeof x === "string" && (VERDICT_LEVELS as readonly string[]).includes(x);
+  const fromDiag = isLevel(entry.diagnosisSummary?.verdict);
+  const v = fromDiag ? entry.diagnosisSummary!.verdict : entry.verdict;
+  if (isLevel(v)) {
+    const rawN = fromDiag ? entry.diagnosisSummary!.verdictUnknownCount : entry.verdictUnknownCount;
+    const n = typeof rawN === "number" ? rawN : undefined;
     return { level: v, label: VERDICT_LABEL[v], legacy: false, ...(n !== undefined ? { unknownCount: n } : {}) };
   }
   const overall: RegulationStatus =
