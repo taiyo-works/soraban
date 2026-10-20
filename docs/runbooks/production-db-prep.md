@@ -3,7 +3,7 @@
 対象：Neon プロジェクト `soraban`（id `solitary-silence-51819136`、aws-ap-southeast-1、PostgreSQL 18、PostGIS 導入済み、既定ブランチ `main` = `br-twilight-smoke-b37gx8ke`、データベース `neondb`）。
 実施者：のりさん。自分の Mac のターミナルと Neon コンソールだけで進める。
 
-> **DB を乗り換える場合（国内＝東京の Supabase／AWS など）は、この手順書を差し替える。** 本番 DB の選択は検討中で未決定。この手順書は Neon を前提に書いている。
+> **DB を乗り換える場合（国内＝東京の Supabase／AWS など）は、この手順書を差し替える。** 本番 DB は当面 Neon で確定（2026-10-21 ユーザー決定。国内保管の要件が出たときに東京へ移す。合図と備えは `docs/spec.md` §13.8.1）。この手順書は Neon を前提に書いている。
 
 - 正は `packages/db/README.md`（「DB ロール」「ユーザー作業」）。この手順書は、その手順（ロール作成 → マイグレーション → Vercel の環境変数）の前に**予行演習**を足した通し手順。食い違ったら README を正とし、この手順書を直す。
 - Neon の画面の文言・メニュー名は変わることがある（画面の名称は変わることがある）。見つからないときは公式ドキュメント https://neon.com/docs で探す。

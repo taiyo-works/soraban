@@ -114,14 +114,14 @@ describe("契約 2. 判定の項目の表示用の印（値は変えない）", 
   });
 });
 
-describe("契約 8. 参照先 6 件", () => {
+describe("契約 8. 参照先（6 件＋Sprint 11g で 3 件）", () => {
   it("題名と URL", () => {
-    expect(MODEL_AIRCRAFT_REFERENCES).toHaveLength(6);
+    expect(MODEL_AIRCRAFT_REFERENCES).toHaveLength(9);
     expect(MODEL_AIRCRAFT_REFERENCES[0]!.title).toBe("e-Gov 法令検索 航空法（航空法第134条の3）");
     expect(MODEL_AIRCRAFT_REFERENCES[0]!.url).toBe("https://laws.e-gov.go.jp/law/327AC0000000231");
     expect(MODEL_AIRCRAFT_REFERENCES[1]!.title).toContain("航空法施行規則第239条の2");
     expect(MODEL_AIRCRAFT_REFERENCES[1]!.url).toBe("https://laws.e-gov.go.jp/law/327M50000800056");
-    expect(new Set(MODEL_AIRCRAFT_REFERENCES.map((r) => r.title)).size).toBe(6);
+    expect(new Set(MODEL_AIRCRAFT_REFERENCES.map((r) => r.title)).size).toBe(9);
     const src = readFileSync(
       new URL("../../../../packages/regulations/src/model-aircraft.ts", import.meta.url),
       "utf8",

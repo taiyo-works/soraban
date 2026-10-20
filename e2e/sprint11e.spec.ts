@@ -133,7 +133,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
     await gotoLatLng(page, IZUMO_AROUND.lat, IZUMO_AROUND.lng);
     await setWeight(page, "50");
     await expect(level(page)).toHaveText("要手続き");
-    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の許可" });
+    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の許可または通報（模型航空機・空港等の周辺）" });
     await expect(proc).toHaveCount(1);
     await expect(proc).toContainText("国土交通大臣");
     await expect(proc.getByTestId("verdict-procedure-deadline")).toHaveText("事前に（参照先で確認）");
@@ -144,7 +144,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
 
     const text = await exportPdf(page);
     const t = squash(text);
-    expect(t).toContain(squash("航空法第134条の3 に基づく飛行の許可（模型航空機・空港等の周辺）"));
+    expect(t).toContain(squash("航空法第134条の3 に基づく飛行の許可または通報（模型航空機・空港等の周辺）"));
     expect(t).toContain(squash("国土交通大臣（窓口の空港事務所等は参照先で確認）"));
     expect(t).toContain(squash("事前に（参照先で確認）"));
     expect(t).toContain(EGOV);
@@ -158,7 +158,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
     await setWeight(page, "50");
     await toggle(methodBox(page, "150m以上の高さ"), page, true, false);
     await expect(level(page)).toHaveText("要手続き");
-    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の通報" });
+    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の許可または通報（模型航空機・高い空域）" });
     await expect(proc).toHaveCount(1);
     await expect(proc).toContainText("150m");
     await expect(proc).toContainText("250m");
@@ -174,13 +174,13 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
     const app = await pdfText(await dl);
     expect(squash(app)).toContain(squash("対象外（模型航空機。航空法の無人航空機の区分に当たらない）"));
     expect(app).not.toContain("カテゴリー I（特定飛行に非該当）");
-    expect(squash(app)).toContain(squash("航空法第134条の3 に基づく飛行の通報"));
+    expect(squash(app)).toContain(squash("航空法第134条の3 に基づく飛行の許可または通報"));
     // 飛行マニュアル骨子（独自）の根拠に無人航空機の特定飛行の条文を出さない
     expect(app).not.toContain("第132条の85");
     expect(app).not.toContain("第132条の86");
 
     const reg = await exportPdf(page);
-    expect(squash(reg)).toContain(squash("航空法第134条の3 に基づく飛行の通報（模型航空機・高い空域）"));
+    expect(squash(reg)).toContain(squash("航空法第134条の3 に基づく飛行の許可または通報（模型航空機・高い空域）"));
     expect(squash(reg)).toContain(squash("対象外（模型航空機）"));
     expect(reg).not.toMatch(RELAX);
   });
@@ -191,7 +191,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
     const note = page.getByTestId("model-aircraft-weight-note");
     await expect(note).toContainText("航空法の無人航空機の規制");
     await expect(note).toContainText("対象外");
-    await expect(note).toContainText("第134条の3の許可・通報");
+    await expect(note).toContainText("第134条の3の許可または通報（管制圏等の内側は許可、外側は通報）");
     await expect(note).toContainText("小型無人機等飛行禁止法・条例は重量に関係なく対象");
     await expect(page.getByTestId("model-aircraft-tag")).toHaveText("模型航空機として判定");
     await expect(page.locator("body")).not.toContainText("100g 未満の例外");

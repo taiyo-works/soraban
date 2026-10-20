@@ -16,7 +16,7 @@ describe("model-aircraft.ts", () => {
     expect(MODEL_AIRCRAFT_RULES_CHECKED_AT).toBe("2026-10-20");
     expect(src).toContain("※要確認：一次資料未取得");
   });
-  it("参照先 6 件の URL が入っている（Sprint 11f で航空法施行規則を分けた）", () => {
+  it("参照先 9 件の URL が入っている（Sprint 11f で航空法施行規則を分け、Sprint 11g で国交省の 3 ページを足した）", () => {
     expect(MODEL_AIRCRAFT_REFERENCES.map((r) => r.url)).toEqual([
       "https://laws.e-gov.go.jp/law/327AC0000000231",
       "https://laws.e-gov.go.jp/law/327M50000800056",
@@ -24,6 +24,9 @@ describe("model-aircraft.ts", () => {
       "https://www.mlit.go.jp/common/001708524.pdf",
       "https://www.mlit.go.jp/common/002010809.pdf",
       "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html",
+      "https://www.mlit.go.jp/koku/koku_fr10_000040.html",
+      "https://www.mlit.go.jp/koku/content/001407133.pdf",
+      "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
     ]);
   });
   it("期限は日付を作らない文言。緩和を示す言葉を使わない", () => {
