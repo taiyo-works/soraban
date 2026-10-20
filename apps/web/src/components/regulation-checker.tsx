@@ -50,6 +50,7 @@ import {
 } from "@/lib/history";
 import { SignalLight } from "./signal-light";
 import { RegulationCard } from "./regulation-card";
+import { buildPilotPermits, permitChecksFromPilotPermits } from "@/lib/permits";
 import { RegulationMap, type MapPickMethod } from "./regulation-map";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
@@ -277,6 +278,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // 現在地の候補（端末内の表示だけに使う。「この地点で判定」まで送信・保存しない）
   const [geoCandidate, setGeoCandidate] = useState<CurrentLocationCandidate | null>(null);
   const [result, setResult] = useState<RegulationCheckResult | null>(null);
+  // result を求めたときの ctx（カードの補足・PDF の「取得済み許可」を判定結果と揃えるため）。
+  const [resultCtx, setResultCtx] = useState<FlightContext | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [prefCode, setPrefCode] = useState<string>("31"); // 鳥取県デフォルト
   const [isChecking, startChecking] = useTransition();
@@ -287,7 +290,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   // 数値 < 100 で 100g 未満例外がマッチし、DID/空港 → green に降格（飛行禁止法は 100g 未満も対象）。
   const [droneWeightInput, setDroneWeightInput] = useState<string>("");
   const [hasMlitPermit, setHasMlitPermit] = useState<boolean>(false);
-  const [hasFacilityPermit, setHasFacilityPermit] = useState<boolean>(false);
+  // 施設管理者の同意と公安委員会への通報（飛行禁止法）は別の入力（Sprint 11c）。
+  const [hasFacilityConsent, setHasFacilityConsent] = useState<boolean>(false);
+  const [hasPubsafetyNotice, setHasPubsafetyNotice] = useState<boolean>(false);
   const [hasParkPermit, setHasParkPermit] = useState<boolean>(false);
   const [hasBunkachoPermit, setHasBunkachoPermit] = useState<boolean>(false);
   const [purpose, setPurpose] = useState<"general" | "emergency" | "public_duty" | "city_event">("general");
@@ -429,11 +434,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     const weightStr =
       plan.ctx?.droneWeightG !== undefined ? String(plan.ctx.droneWeightG) : "";
     setDroneWeightInput(weightStr);
-    const permits = plan.ctx?.pilotPermits ?? [];
-    setHasMlitPermit(permits.includes("mlit"));
-    setHasFacilityPermit(permits.includes("facility_manager"));
-    setHasParkPermit(permits.includes("park_manager"));
-    setHasBunkachoPermit(permits.includes("bunkacho_or_kyoiku"));
+    // 旧形式（facility_manager_and_pref_pubsafety）からは通報を済み扱いに戻さない（Sprint 11c）。
+    const permitChecks = permitChecksFromPilotPermits(plan.ctx?.pilotPermits);
+    setHasMlitPermit(permitChecks.mlit);
+    setHasFacilityConsent(permitChecks.facilityConsent);
+    setHasPubsafetyNotice(permitChecks.pubsafetyNotice);
+    setHasParkPermit(permitChecks.park);
+    setHasBunkachoPermit(permitChecks.bunkacho);
     setPurpose((plan.ctx?.purpose as typeof purpose) ?? "general");
 
     const nextMethodFlags = plan.methodFlags;
@@ -503,7 +510,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         import("@react-pdf/renderer"),
         import("./regulation-pdf"),
       ]);
-      const ctx = buildCtx();
+      // 画面に出ている判定結果を求めたときの ctx を使う（入力の変更と再判定の間でずれないように）。
+      const ctx = resultCtx;
       const blob = await pdf(
         <RegulationPdfDocument
           result={result}
@@ -535,14 +543,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     if (droneWeightInput.trim().length > 0 && Number.isFinite(w) && w >= 0) {
       ctx.droneWeightG = w;
     }
-    const permits: string[] = [];
-    if (hasMlitPermit) permits.push("mlit");
-    if (hasFacilityPermit) {
-      permits.push("facility_manager");
-      permits.push("facility_manager_and_pref_pubsafety");
-    }
-    if (hasParkPermit) permits.push("park_manager");
-    if (hasBunkachoPermit) permits.push("bunkacho_or_kyoiku");
+    const permits = buildPilotPermits({
+      mlit: hasMlitPermit,
+      park: hasParkPermit,
+      facilityConsent: hasFacilityConsent,
+      pubsafetyNotice: hasPubsafetyNotice,
+      bunkacho: hasBunkachoPermit,
+    });
     if (permits.length > 0) ctx.pilotPermits = permits;
     if (purpose !== "general") ctx.purpose = purpose;
     return Object.keys(ctx).length > 0 ? ctx : undefined;
@@ -572,6 +579,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         const res = await checkLocation(loc, ctx, controller.signal);
         if (seq !== checkSeqRef.current) return; // 古い応答は無視
         setResult(res);
+        setResultCtx(ctx);
         setError(null);
         const newPref = res.muniCode?.slice(0, 2);
         if (newPref && newPref !== prefCode) setPrefCode(newPref);
@@ -697,7 +705,15 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     runCheck(center, undefined, undefined, runId);
     void runDiagnose(center, {}, runId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [droneWeightInput, hasMlitPermit, hasFacilityPermit, hasParkPermit, hasBunkachoPermit, purpose]);
+  }, [
+    droneWeightInput,
+    hasMlitPermit,
+    hasFacilityConsent,
+    hasPubsafetyNotice,
+    hasParkPermit,
+    hasBunkachoPermit,
+    purpose,
+  ]);
 
   // 申請支援の入力（飛行方法フラグ・飛行予定日・立入管理措置）が変わったら、
   // 信号機判定は変わらないので診断だけを再実行する（無駄な /api/check 呼び出しを避ける）。
@@ -1116,7 +1132,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   set: setHasMlitPermit,
                   key: "mlit",
                   label: "国交省 DIPS",
-                  desc: "航空法 DID / 空港",
+                  desc: "航空法 DID（人口集中地区）の許可",
                 },
                 {
                   state: hasParkPermit,
@@ -1126,11 +1142,18 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   desc: "都市公園条例",
                 },
                 {
-                  state: hasFacilityPermit,
-                  set: setHasFacilityPermit,
-                  key: "facility",
-                  label: "施設管理者",
-                  desc: "県条例 / 飛行禁止法（同意＋公安委員会への通報）",
+                  state: hasFacilityConsent,
+                  set: setHasFacilityConsent,
+                  key: "facility-consent",
+                  label: "施設管理者の同意",
+                  desc: "県条例の事前調整・飛行禁止法の対象施設の同意",
+                },
+                {
+                  state: hasPubsafetyNotice,
+                  set: setHasPubsafetyNotice,
+                  key: "pubsafety-notice",
+                  label: "公安委員会への通報（飛行禁止法）",
+                  desc: "飛行の 48 時間前までに通報済み（飛行禁止法の対象施設の周辺だけで使う）",
                 },
                 {
                   state: hasBunkachoPermit,
@@ -1518,7 +1541,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             </p>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
               {result.regulations.map((r) => (
-                <RegulationCard key={r.id} regulation={r} />
+                <RegulationCard key={r.id} regulation={r} pilotPermits={resultCtx?.pilotPermits} />
               ))}
             </div>
           </div>

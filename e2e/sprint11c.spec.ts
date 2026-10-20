@@ -1,0 +1,188 @@
+import { readFile } from "node:fs/promises";
+import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+
+// Sprint 11c 契約（docs/sprints/sprint-11c.md）の E2E。許可の入力の不具合修正
+// （飛行禁止法の「同意」と「通報」を分ける、「国交省 DIPS」の説明を動きに合わせる）。
+// 本番相当サーバー（baseURL、同梱データ）だけを使う。
+
+const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+const waitDiagnose = (page: Page) =>
+  page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+
+const openReady = async (page: Page): Promise<void> => {
+  const check = waitCheck(page);
+  const diag = waitDiagnose(page);
+  await page.goto("/");
+  await Promise.all([check, diag]);
+  await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);
+};
+
+const card = (page: Page, id: string): Locator => page.getByTestId(`regulation-card-${id}`);
+const preset = (page: Page, name: string) =>
+  page.getByRole("button", { name: new RegExp(name) }).filter({ visible: true }).first();
+
+const selectPreset = async (page: Page, name: string): Promise<void> => {
+  const check = waitCheck(page);
+  const diag = waitDiagnose(page);
+  await preset(page, name).click();
+  await Promise.all([check, diag]);
+};
+
+/** 「05 — 機体・運航条件」を開く（取得済みの許可のチェックはこの中にある）。 */
+const openConditions = async (page: Page): Promise<void> => {
+  const details = conditions(page);
+  if ((await details.getAttribute("open")) === null) {
+    await details.locator("summary").click();
+  }
+  await expect(details).toHaveAttribute("open", "");
+};
+
+// 申請支援の手続きのチェック（「施設管理者の同意 ＋ … を完了にする」）と取り違えないよう、05 の中に限る。
+const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
+const consent = (page: Page) => conditions(page).getByRole("checkbox", { name: "施設管理者の同意" });
+const notice = (page: Page) => conditions(page).getByRole("checkbox", { name: "公安委員会への通報" });
+const dips = (page: Page) => conditions(page).getByRole("checkbox", { name: "国交省 DIPS" });
+
+/** チェックを切り替え、再判定（地点判定・申請支援診断）が終わるのを待つ。 */
+const toggle = async (box: Locator, page: Page, on: boolean): Promise<void> => {
+  const check = waitCheck(page);
+  const diag = waitDiagnose(page);
+  if (on) await box.check();
+  else await box.uncheck();
+  await Promise.all([check, diag]);
+};
+
+const pdfText = async (download: Download): Promise<string> => {
+  const file = await download.path();
+  const data = new Uint8Array(await readFile(file));
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjs.getDocument({ data, useSystemFonts: false }).promise;
+  let text = "";
+  for (let i = 1; i <= doc.numPages; i++) {
+    const p = await doc.getPage(i);
+    const content = await p.getTextContent();
+    text += content.items.map((it) => ("str" in it ? it.str : "")).join("") + "\n";
+  }
+  return text;
+};
+
+const exportPdf = async (page: Page): Promise<string> => {
+  const dl = page.waitForEvent("download");
+  await page.getByRole("button", { name: /PDF 出力/ }).click();
+  return pdfText(await dl);
+};
+
+const MIHO = "美保基地の周辺（境港市）";
+const SDL_EXCEPTION =
+  "対象施設の管理者の同意を得たうえで、飛行の 48 時間前までに都道府県公安委員会へ通報した場合";
+const PROC_TITLE = "施設管理者の同意 ＋ 都道府県公安委員会への事前通報（飛行の 48 時間前まで）";
+const AIRPORT_NOTE_PART = "空港ごとの個別の許可と、空港の設置管理者等との調整が必要";
+
+test.describe("A. 飛行禁止法の同意と通報", () => {
+  test("3. 美保基地の周辺：同意だけ・通報だけでは飛行禁止法のカードが red のままで、例外が当たらない", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await selectPreset(page, MIHO);
+    await openConditions(page);
+    const sdl = card(page, "small-drone-law");
+    await expect(sdl).toHaveAttribute("data-status", "red");
+
+    await toggle(consent(page), page, true);
+    await expect(sdl).toHaveAttribute("data-status", "red");
+    await expect(sdl).not.toContainText("適用された例外節");
+
+    await toggle(consent(page), page, false);
+    await toggle(notice(page), page, true);
+    await expect(sdl).toHaveAttribute("data-status", "red");
+    await expect(sdl).not.toContainText("適用された例外節");
+  });
+
+  test("4・11. 同意と通報の両方で例外が適用と表示され、PDF の取得済み許可に同意と通報が別の語で出る", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await selectPreset(page, MIHO);
+    await openConditions(page);
+    await toggle(consent(page), page, true);
+    await toggle(notice(page), page, true);
+    const sdl = card(page, "small-drone-law");
+    await expect(sdl).toContainText("適用された例外節");
+    await expect(sdl).toContainText(SDL_EXCEPTION);
+    await expect(sdl).toHaveAttribute("data-status", "green");
+
+    const text = await exportPdf(page);
+    expect(text).toContain("施設管理者の同意");
+    expect(text).toContain("公安委員会への通報（飛行禁止法）");
+  });
+
+  test("5. 県条例（迷惑行為等防止条例）は同意だけで従来どおり例外が当たる", async ({ page }) => {
+    // 県条例のエンジンは公衆密集地のバッファ内で yellow を返す（red にはならない）。病院の地点で確かめる。
+    await openReady(page);
+    await selectPreset(page, "鳥取大学医学部附属病院");
+    await openConditions(page);
+    const pref = card(page, "31-pref-nuisance-prevention");
+    await expect(pref).toHaveAttribute("data-status", /^(red|yellow)$/);
+    await expect(pref).not.toContainText("適用された例外節");
+
+    await toggle(consent(page), page, true);
+    await expect(pref).toHaveAttribute("data-status", "green");
+    await expect(pref).toContainText("適用された例外節");
+    await expect(pref).toContainText("施設管理者・自治体担当部署と事前調整し、合意を得た場合");
+  });
+
+  test("6. 申請支援の『同意＋事前通報』は同意・通報のチェックの有無にかかわらず美保基地の周辺で出る", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await selectPreset(page, MIHO);
+    const proc = page.locator("article", { hasText: PROC_TITLE });
+    await expect(proc).toBeVisible();
+    await openConditions(page);
+    await toggle(consent(page), page, true);
+    await expect(proc).toBeVisible();
+    await toggle(notice(page), page, true);
+    await expect(proc).toBeVisible();
+    await toggle(consent(page), page, false);
+    await expect(proc).toBeVisible();
+  });
+});
+
+test.describe("B. DIPS の説明", () => {
+  test("7. 「国交省 DIPS」の説明に「空港」がなく「DID」を含む", async ({ page }) => {
+    await openReady(page);
+    await openConditions(page);
+    const label = conditions(page)
+      .locator("label")
+      .filter({ has: page.getByRole("checkbox", { name: "国交省 DIPS" }) });
+    const text = await label.innerText();
+    const desc = text.replace("国交省 DIPS", "");
+    expect(desc).toContain("DID");
+    expect(desc).not.toContain("空港");
+  });
+
+  test("8. 米子鬼太郎空港：DIPS をチェックしても空港等周辺の状態は変わらず補足が出る。外すと補足は出ない", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await selectPreset(page, "米子鬼太郎空港");
+    await openConditions(page);
+    const ap = card(page, "aviation-law-airport");
+    const before = await ap.getAttribute("data-status");
+    expect(before).toMatch(/^(red|yellow)$/);
+    await expect(ap.getByTestId("airport-mlit-note")).toHaveCount(0);
+
+    await toggle(dips(page), page, true);
+    await expect(ap).toHaveAttribute("data-status", before!);
+    await expect(ap.getByTestId("airport-mlit-note")).toContainText(AIRPORT_NOTE_PART);
+    // 空港等周辺以外のカードには出さない
+    await expect(page.getByTestId("airport-mlit-note")).toHaveCount(1);
+
+    const text = await exportPdf(page);
+    expect(text).toContain(AIRPORT_NOTE_PART);
+
+    await toggle(dips(page), page, false);
+    await expect(ap).toHaveAttribute("data-status", before!);
+    await expect(ap.getByTestId("airport-mlit-note")).toHaveCount(0);
+  });
+});
