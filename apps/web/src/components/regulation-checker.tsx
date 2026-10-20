@@ -45,6 +45,7 @@ import {
   createHistoryRunId,
   getHistoryServerSnapshot,
   getHistorySnapshot,
+  historyDiagnosisDetail,
   historyVerdictDisplay,
   clearHistoryDiagnosisVerdict,
   recordHistoryCheck,
@@ -1791,7 +1792,9 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               const rowPending = h.runId !== undefined && h.runId === diagPendingRunId;
               const vd = historyVerdictDisplay(h, { pending: rowPending });
               // 判定中の行は、前の入力の診断から来た表示（カテゴリー・DID・手続きの件数・診断の証跡 ID）も出さない（Sprint 11f B3）。
-              const ds = rowPending ? undefined : h.diagnosisSummary;
+              // 判定未確定の行（診断の失敗・時間切れ、開き直した行）も同じ。判定を外した診断の値（前の入力のもの）は出さない。
+              // 保存値からの導出なので、画面を閉じて開き直しても出ない。旧形式（legacy）の表示は変えない。
+              const ds = historyDiagnosisDetail(h, { pending: rowPending });
               const checkedDate = new Date(h.checkedAt);
               const dateStr = `${String(checkedDate.getMonth() + 1).padStart(2, "0")}/${String(checkedDate.getDate()).padStart(2, "0")} ${String(checkedDate.getHours()).padStart(2, "0")}:${String(checkedDate.getMinutes()).padStart(2, "0")}`;
               const catShort: Record<DiagnosisCategory, string> = {

@@ -9,6 +9,10 @@ import {
   DRONE_THRESHOLD_G,
   BASE_STATUS_LABEL,
   MODEL_AIRCRAFT_EXEMPT_LABEL,
+  MODEL_AIRCRAFT_DID_DETAIL_LABEL,
+  MODEL_AIRCRAFT_DID_NOTE,
+  DID_NOTE_PERMIT_SENTENCE,
+  type DidDetail,
   baseStatusDisplay,
   LEGAL_TIER_LABEL,
   VERDICT_LABEL,
@@ -158,6 +162,31 @@ export const regulationBaseLabel = (r: {
   readonly statusBeforeExclusion?: "red" | "yellow";
 }): string =>
   r.status === "green" && r.statusBeforeExclusion !== undefined ? MODEL_AIRCRAFT_EXEMPT_LABEL : BASE_STATUS_LABEL[r.status];
+
+/** 機体重量の例外で対象外にした DID 内の地点か（100g 未満。DID の行・本文を模型航空機の言葉にする）。 */
+export const isModelAircraftDidExcluded = (r: {
+  readonly status: RegulationStatus;
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  readonly didDetail?: DidDetail;
+}): boolean =>
+  r.status === "green" &&
+  r.statusBeforeExclusion !== undefined &&
+  (r.didDetail === "in_did" ||
+    r.didDetail === "in_did_near_industrial_boundary" ||
+    r.didDetail === "in_did_exclusion_unverified");
+
+/** カード・PDF の「この地点」の本文。DID 内で 100g 未満のときだけ「許可・承認なく飛行できません」を置き換える。 */
+export const regulationNoteDisplay = (r: {
+  readonly status: RegulationStatus;
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  readonly didDetail?: DidDetail;
+  readonly note: string;
+}): string =>
+  isModelAircraftDidExcluded(r) && r.note.includes(DID_NOTE_PERMIT_SENTENCE)
+    ? r.note.replace(DID_NOTE_PERMIT_SENTENCE, MODEL_AIRCRAFT_DID_NOTE)
+    : r.note;
+
+export { MODEL_AIRCRAFT_DID_DETAIL_LABEL };
 
 /** 例外の欄の見出し（機体重量の例外のときは模型航空機の趣旨）。 */
 export const EXCLUDED_BY_WEIGHT_HEADING = "対象外にした例外（模型航空機）";

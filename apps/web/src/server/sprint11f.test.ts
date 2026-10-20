@@ -15,6 +15,7 @@ import {
   type FlightVerdict,
   type SpecificFlightFlag,
 } from "@soraban/regulations";
+import { isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL } from "@/lib/verdict-display";
 import { runRegulationCheckWith } from "./check-core";
 import { toEvidenceLogInsert } from "./evidence-log";
 import { handleDiagnosePost } from "./handlers";
@@ -188,5 +189,35 @@ describe("契約 14. 証跡", () => {
     const d = await diagnose(l, { droneWeightG: 50 });
     expect(d.didStatus).toBe("not_applicable");
     expect(d.didDetail).toBe("in_did");
+  });
+});
+
+describe("カード・PDF の DID の行と本文（100g 未満は対象外の言葉、それ以外は従来どおり）", () => {
+  const didOf = async (w: number | undefined) => {
+    const l = LOC["米子市役所"];
+    const check = await runRegulationCheckWith(
+      baselineProvider(l.muni),
+      l.loc,
+      w !== undefined ? { droneWeightG: w } : undefined,
+      BASELINE_NOW,
+    );
+    return check.regulations.find((r) => r.id === "aviation-law-did")!;
+  };
+  it("50g：本文の「許可・承認なく飛行できません」を置き換え、DID の行は模型航空機のため対象外。値は変えない", async () => {
+    const r = await didOf(50);
+    expect(isModelAircraftDidExcluded(r)).toBe(true);
+    expect(r.didDetail).toBe("in_did");
+    expect(r.note).toContain("許可・承認なく飛行できません");
+    expect(regulationNoteDisplay(r)).not.toContain("許可・承認なく飛行できません");
+    expect(regulationNoteDisplay(r)).toContain("対象外です");
+    expect(MODEL_AIRCRAFT_DID_DETAIL_LABEL).toBe("DID：該当（模型航空機のため対象外）");
+  });
+  it("900g・未指定は従来どおり", async () => {
+    for (const w of [900, undefined]) {
+      const r = await didOf(w);
+      expect(isModelAircraftDidExcluded(r)).toBe(false);
+      expect(regulationNoteDisplay(r)).toBe(r.note);
+      expect(r.note).toContain("許可・承認なく飛行できません");
+    }
   });
 });

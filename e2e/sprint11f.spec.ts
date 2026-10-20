@@ -239,4 +239,55 @@ test.describe("Sprint 11f", () => {
     expect(squash(reg)).not.toContain(squash("米子市文化財保護条例"));
     expect(squash(reg)).toContain(squash("市町村の文化財保護条例（データ未整備）"));
   });
+
+  test("カード：50g の米子市役所は DID の行を模型航空機のため対象外と出し、許可・承認なく飛行できませんを出さない。900g は従来どおり", async ({
+    page,
+  }) => {
+    await openReady(page);
+    const card = page.getByTestId("regulation-card-aviation-law-did");
+    await expect(card.getByTestId("did-detail")).toHaveText("DID：該当");
+    await expect(card).toContainText("許可・承認なく飛行できません");
+    await setWeight(page, "50");
+    await expect(card.getByTestId("did-detail")).toHaveText("DID：該当（模型航空機のため対象外）");
+    await expect(card.getByTestId("did-detail")).not.toHaveClass(/border-signal-red/);
+    await expect(card).not.toContainText("許可・承認なく飛行できません");
+    await expect(card).toContainText("対象外です");
+    const reg = await exportPdf(page);
+    expect(squash(reg)).not.toContain(squash("許可・承認なく飛行できません"));
+    await setWeight(page, "900");
+    await expect(card.getByTestId("did-detail")).toHaveText("DID：該当");
+    await expect(card).toContainText("許可・承認なく飛行できません");
+  });
+
+  test("診断が失敗した後の履歴は判定未確定で、前の診断のカテゴリー・DID・手続きの件数・診断の証跡 ID を出さない。回復すると戻る", async ({
+    page,
+  }) => {
+    await openReady(page);
+    await gotoLatLng(page, QUIET.lat, QUIET.lng);
+    await expect(latestHistory(page)).toContainText("cat:");
+    await page.route("**/api/diagnose", (route) => route.fulfill({ status: 500, body: '{"error":"test"}' }));
+    const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
+    await methodBox(page, "夜間飛行").check();
+    await failed;
+    await expect(page.getByTestId("verdict-failed")).toBeVisible();
+    const row = latestHistory(page);
+    await expect(row.getByTestId("history-verdict")).toContainText("判定未確定");
+    await expect(row).not.toContainText("cat:");
+    await expect(row).not.toContainText("DID:");
+    await expect(row).not.toContainText("手続き1");
+    await expect(row).not.toContainText("diag:");
+    // 保存値にも前の診断の判定は残らない（開き直した行は判定未確定）
+    const stored = await page.evaluate(() => window.localStorage.getItem("soraban:history:v1") ?? "");
+    const first = JSON.parse(stored)[0] as { diagnosisSummary?: { verdict?: string } };
+    expect(first.diagnosisSummary?.verdict).toBeUndefined();
+    await page.unroute("**/api/diagnose");
+    const diag = waitDiagnose(page);
+    await page.getByTestId("verdict-retry").click();
+    await diag;
+    await settled(page);
+    await expect(level(page)).toHaveText("要手続き");
+    await expect(latestHistory(page).getByTestId("history-verdict")).toHaveText(/^要手続き/);
+    await expect(latestHistory(page)).toContainText("cat:");
+    await expect(latestHistory(page)).toContainText("手続き");
+  });
 });

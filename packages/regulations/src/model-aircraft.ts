@@ -66,6 +66,12 @@ export const MODEL_AIRCRAFT_REFERENCE_LINE = `参照先：${MODEL_AIRCRAFT_REFER
  */
 export const MODEL_AIRCRAFT_EXEMPT_LABEL = "対象外（模型航空機）";
 
+/** DID 内の地点で 100g 未満のとき、カード・PDF の DID の行と本文に出す言葉（Sprint 11f。表示だけで didDetail の値は変えない）。 */
+export const MODEL_AIRCRAFT_DID_DETAIL_LABEL = "DID：該当（模型航空機のため対象外）";
+export const MODEL_AIRCRAFT_DID_NOTE = "100g 未満の機体（模型航空機）は、航空法の無人航空機の規制（DID 上空の飛行許可）の対象外です。";
+/** 評価器の note にある「許可・承認なく飛行できません」の一文（対象外のとき上の言葉に置き換える）。 */
+export const DID_NOTE_PERMIT_SENTENCE = "原則として許可・承認なく飛行できません。";
+
 /** 100g 未満で航空法の無人航空機の規制が対象外になる理由。 */
 export const MODEL_AIRCRAFT_EXEMPT_REASON =
   "対象外（模型航空機）：100g 未満の機体は航空法の無人航空機に当たりません（DID・空港等周辺・150m 以上の許可、飛行の方法の承認、機体登録、飛行計画の通報、飛行日誌の対象外）。";

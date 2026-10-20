@@ -5,6 +5,7 @@ import {
   createHistoryRunId,
   getHistorySnapshot,
   clearHistoryDiagnosisVerdict,
+  historyDiagnosisDetail,
   historyVerdictDisplay,
   loadHistory,
   markHistoryDiagnosisFailed,
@@ -544,5 +545,40 @@ describe("historyVerdictDisplay（Sprint 11d）", () => {
     });
     markHistoryDiagnosisFailed("run_p");
     expect(historyVerdictDisplay(loadHistory().find((x) => x.runId === "run_p")!).label).toContain("判定未確定");
+  });
+  it("Sprint 11f：判定未確定・判定中の行は前の診断の値を出さず、成功で戻り、旧形式は今のまま", () => {
+    const summary = {
+      diagnosisEvidenceId: "ev_d_r",
+      category: "I" as const,
+      isSpecificFlight: false,
+      procedureCount: 1,
+      didStatus: "not_applicable" as const,
+      verdict: "no_procedure" as const,
+      verdictUnknownCount: 0,
+    };
+    recordHistoryCheck("run_r", {
+      ...base,
+      evidenceId: "ev_check_r",
+      overall: "green",
+      verdict: "no_procedure",
+      engineVersion: "soraban-0.4.0-verdict-2026-10",
+    } as Omit<SavedCheck, "runId">);
+    recordHistoryDiagnosis("run_r", { diagnosisSummary: summary });
+    expect(historyDiagnosisDetail(loadHistory().find((x) => x.runId === "run_r")!)?.procedureCount).toBe(1);
+    markHistoryDiagnosisFailed("run_r");
+    const failed = loadHistory().find((x) => x.runId === "run_r")!;
+    expect(historyDiagnosisDetail(failed)).toBeUndefined();
+    expect(historyDiagnosisDetail(failed, { pending: true })).toBeUndefined();
+    recordHistoryDiagnosis("run_r", { diagnosisSummary: { ...summary, procedureCount: 2, verdict: "needs_procedure" } });
+    expect(historyDiagnosisDetail(loadHistory().find((x) => x.runId === "run_r")!)).toMatchObject({
+      procedureCount: 2,
+      category: "I",
+    });
+    // 旧形式（verdict なし）は今のまま
+    const legacy = { ...base, overall: "green", engineVersion: "soraban-0.3.0-regulations-2026-07", diagnosisSummary: summary } as SavedCheck;
+    const { verdict: _v, ...legacyNoVerdict } = legacy;
+    void _v;
+    const legacyEntry = { ...legacyNoVerdict, diagnosisSummary: { ...summary, verdict: undefined } } as SavedCheck;
+    expect(historyDiagnosisDetail(legacyEntry)?.procedureCount).toBe(1);
   });
 });

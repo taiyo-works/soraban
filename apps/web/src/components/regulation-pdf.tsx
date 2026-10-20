@@ -29,6 +29,7 @@ import {
   EXCLUDED_HEADING,
   baseStatusDisplay,
   regulationBaseLabel,
+  regulationNoteDisplay,
   statusBeforeExclusionLine,
 } from "@/lib/verdict-display";
 import { MonoText } from "./pdf-mono-text";
@@ -561,7 +562,7 @@ export const RegulationPdfDocument = ({
             ) : null}
             <Text style={styles.regTitle}>{reg.title}</Text>
             <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
-            <Text style={styles.regNote}>{keepSpaces(reg.note)}</Text>
+            <Text style={styles.regNote}>{keepSpaces(regulationNoteDisplay(reg))}</Text>
             {shouldShowAirportMlitNote(reg, ctx?.pilotPermits) ? (
               <Text style={styles.regNote}>
                 {keepSpaces(`入力した許可について：${AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}`)}

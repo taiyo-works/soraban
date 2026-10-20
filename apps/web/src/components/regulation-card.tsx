@@ -8,7 +8,7 @@ import {
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
+import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
 import { TierGauge, VerdictMark } from "./verdict-mark";
 
 type Props = {
@@ -135,14 +135,14 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {regulation.didDetail ? (
         <p
           data-testid="did-detail"
-          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-ink ${DID_DETAIL_TONE[regulation.didDetail]}`}
+          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-ink ${isModelAircraftDidExcluded(regulation) ? "border-rule" : DID_DETAIL_TONE[regulation.didDetail]}`}
         >
-          {DID_DETAIL_LABEL[regulation.didDetail]}
+          {isModelAircraftDidExcluded(regulation) ? MODEL_AIRCRAFT_DID_DETAIL_LABEL : DID_DETAIL_LABEL[regulation.didDetail]}
         </p>
       ) : null}
       <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
         <span className="eyebrow !text-[11px]">この地点</span>{" "}
-        <span className="text-ink-soft">{regulation.note}</span>
+        <span className="text-ink-soft">{regulationNoteDisplay(regulation)}</span>
       </p>
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p

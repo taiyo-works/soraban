@@ -522,6 +522,21 @@ export const historyVerdictDisplay = (
 };
 
 /**
+ * 履歴の行に出す、診断由来の表示（カテゴリー・DID・手続きの件数・診断の証跡 ID）。
+ * 判定中の行と判定未確定の行（診断の失敗・時間切れ・開き直した行。判定を外した状態）では、前の入力の診断の値を出さない
+ * （Sprint 11f）。保存値からの導出なので、開き直しても出ない。旧形式（legacy）の行は今のまま。
+ */
+export const historyDiagnosisDetail = (
+  entry: SavedCheck,
+  opts: { readonly pending?: boolean } = {},
+): SavedDiagnosisSummary | undefined => {
+  const vd = historyVerdictDisplay(entry, opts);
+  if (vd.pending === true) return undefined;
+  if (!vd.legacy && vd.level === undefined) return undefined;
+  return entry.diagnosisSummary;
+};
+
+/**
  * その実行（runId）の履歴から診断の判定（verdict・verdictUnknownCount）を外す。確定分と保留分の両方。
  *   - 申請支援の診断を始めるとき（Sprint 11f B1）：待っている間に前の入力での判定を残さない。
  *     待っている間に画面を閉じても、開き直した行は「判定未確定」になる（手続き不要とは出ない）。
