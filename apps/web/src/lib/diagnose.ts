@@ -14,6 +14,8 @@ import type {
 export type DiagnoseResponse = ApplicationDiagnosis & {
   /** 判定（4 段。地点の規制と飛行の条件の両方から。Sprint 11d）。画面の結論に使う。 */
   readonly verdict?: FlightVerdict;
+  /** 診断に使った機体重量（g）。未指定は無い。 */
+  readonly droneWeightG?: number;
   /** DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値） */
   readonly prefill: readonly PrefillField[];
   /** 申請支援診断（入力条件＋導出結果）を含む決定論的証跡 ID */

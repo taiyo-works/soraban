@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import {
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_REFERENCES,
+  MODEL_AIRCRAFT_RULES_CHECKED_AT,
   PERMIT_SCOPE_NOT_VERIFIED_NOTE,
   VERDICT_HELP,
   type FlightVerdict,
@@ -105,6 +108,45 @@ function LevelWords({ label }: { label: string }) {
 // 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1・D2）。
 // 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に必ず行うこと
 //       → 規制ごとの判定（元の判定 → 適用した許可 → 判定）。地点判定の PDF も同じ順・同じ言葉。
+/** 理由の末尾の参照先（模型航空機。Sprint 11e）を外し、題名のリンクとして出す。 */
+const hasModelAircraftReferences = (reason: string): boolean => reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE);
+
+function ReasonWithReferences({
+  reason,
+  className,
+  testId,
+}: {
+  readonly reason: string;
+  readonly className: string;
+  readonly testId?: string;
+}) {
+  if (!hasModelAircraftReferences(reason)) {
+    return <span className={className}>{reason}</span>;
+  }
+  const text = reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim();
+  return (
+    <span className={className} {...(testId ? { "data-testid": testId } : {})}>
+      {text}
+      <span data-testid="model-aircraft-references" className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5">
+        <span>参照先：</span>
+        {MODEL_AIRCRAFT_REFERENCES.map((r) => (
+          <a
+            key={r.id}
+            href={r.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`参照先：${r.title}（新しいタブで開く）`}
+            className="text-brand-700 underline underline-offset-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+          >
+            {r.title}
+          </a>
+        ))}
+        <span className="text-ink-mute">（確認日 {MODEL_AIRCRAFT_RULES_CHECKED_AT}）</span>
+      </span>
+    </span>
+  );
+}
+
 export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
@@ -287,7 +329,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                           </td>
                           <td className={`${cell} max-md:col-start-2 max-md:pt-2.5`}>
                             <span className="text-[13px] font-medium leading-snug text-ink">{p.title}</span>
-                            <span className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute">{p.reason}</span>
+                            <ReasonWithReferences reason={p.reason} className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute" />
                           </td>
                           <td data-label={PROCEDURE_COLUMNS[1]} className={`${cell} ${labelled} leading-relaxed text-ink-soft`}>
                             {p.submitTo}
@@ -425,6 +467,13 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     >
                       <td className={`block pb-1 pr-3 text-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}
+                        {hasModelAircraftReferences(it.reason) ? (
+                          <ReasonWithReferences
+                            reason={it.reason}
+                            testId="verdict-item-reason"
+                            className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute"
+                          />
+                        ) : null}
                       </td>
                       <td data-label="元の判定" className={`${ITEM_CELL} text-ink-soft`}>
                         {BASE_STATUS_LABEL[it.baseStatus]}

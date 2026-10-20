@@ -29,6 +29,19 @@ import {
   type SpecificFlightFlag,
 } from "./diagnosis";
 import { AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE } from "./permit-notes";
+import {
+  MODEL_AIRCRAFT_AIRPORT_ITEM_TITLE,
+  MODEL_AIRCRAFT_AIRPORT_PROCEDURE_TITLE,
+  MODEL_AIRCRAFT_AIRPORT_REASON,
+  MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL,
+  MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE,
+  MODEL_AIRCRAFT_DEADLINE_LABEL,
+  MODEL_AIRCRAFT_EXEMPT_REASON,
+  MODEL_AIRCRAFT_HIGH_PROCEDURE_TITLE,
+  MODEL_AIRCRAFT_HIGH_REASON,
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_SUBMIT_TO,
+} from "./model-aircraft";
 
 // ── 段階 ──
 
@@ -194,7 +207,11 @@ export type AppliedPermit = {
 export type VerdictItem = {
   /** 規制 id、または飛行の条件のフラグ。 */
   readonly id: string;
-  readonly kind: "regulation" | "flight_condition";
+  /**
+   * regulation：地点判定の規制。flight_condition：飛行の条件（方法・利用者が選ぶ空域）。
+   * model_aircraft：100g 未満の機体（模型航空機）の模型航空機の手続き（model-aircraft.ts）（Sprint 11e。規制の一覧には足さない）。
+   */
+  readonly kind: "regulation" | "flight_condition" | "model_aircraft";
   readonly title: string;
   readonly legalTier: LegalTier;
   /** 元の判定（許可を当てる前）。飛行の条件は利用者が選んだもの＝該当（red）。 */
@@ -569,6 +586,15 @@ const regulationItem = (r: RegulationWithStatus, ctx: FlightContext | undefined)
   if (r.noFlyCategory === true) {
     return { ...base, verdict: "no_fly", appliedPermits: [], reason: `該当。${r.note}` };
   }
+  if (r.status === "green" && r.statusBeforeExclusion !== undefined) {
+    // 100g 未満（模型航空機）で航空法の無人航空機の規制が対象外になった（Sprint 11e A3）。
+    return {
+      ...base,
+      verdict: "no_procedure",
+      appliedPermits: [],
+      reason: `${MODEL_AIRCRAFT_EXEMPT_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,
+    };
+  }
   if (r.status === "green") {
     const excluded = (r.appliedExceptions ?? []).map((e) => e.condition).join(" / ");
     return {
@@ -615,12 +641,21 @@ const flightConditionItem = (
     return { ...base, verdict: "no_fly", appliedPermits: [], reason: EMERGENCY_NO_FLY_REASON };
   }
   if (!regulated) {
+    if (flag === "airspace_150m") {
+      // 100g 未満でも、高い空域は模型航空機の通報（model-aircraft.ts）（Sprint 11e A5）。DIPS の許可では満たさない（A6）。
+      return {
+        ...base,
+        verdict: "needs_procedure",
+        appliedPermits: [],
+        reason: `${MODEL_AIRCRAFT_HIGH_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,
+      };
+    }
     return {
       ...base,
       baseStatus: "green",
       verdict: "no_procedure",
       appliedPermits: [],
-      reason: "機体重量が 100g 未満のため、航空法の特定飛行に当たりません（非該当）。",
+      reason: `${MODEL_AIRCRAFT_EXEMPT_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,
     };
   }
   if (flag === "airspace_airport") {
@@ -733,10 +768,36 @@ export const deriveFlightVerdict = (input: DeriveFlightVerdictInput): FlightVerd
       const r = regById.get(regId);
       if (r && (r.status === "red" || r.status === "yellow")) continue;
     }
+    // 100g 未満で利用者が選んだ空港等周辺は、下の模型航空機の項目にまとめる（重複させない。Sprint 11e 契約 5）。
+    if (!regulated && f === "airspace_airport") continue;
     flagItems.push(flightConditionItem(f, regulated, permits));
   }
 
-  const items = [...regItems, ...flagItems];
+  // 100g 未満（模型航空機）の空港等の周辺：模型航空機の許可（model-aircraft.ts）（Sprint 11e A4）。判定の項目として足す。
+  const modelItems: VerdictItem[] = [];
+  if (!regulated) {
+    const ap = regById.get("aviation-law-airport");
+    const before = ap?.statusBeforeExclusion;
+    const onSiteNoFly = ap?.noFlyCategory === true;
+    const userAirport = flagSet.has("airspace_airport");
+    if (!onSiteNoFly && (before !== undefined || userAirport)) {
+      const baseStatus: RegulationStatus = before ?? "red";
+      const possibly =
+        before === "yellow" ? "該当の可能性（要確認）。" : before === "red" ? "該当。" : "該当（利用者が選んだ空域）。";
+      modelItems.push({
+        id: "model-aircraft-airport",
+        kind: "model_aircraft",
+        title: MODEL_AIRCRAFT_AIRPORT_ITEM_TITLE,
+        legalTier: 1,
+        baseStatus,
+        verdict: "needs_procedure",
+        appliedPermits: [],
+        reason: `${possibly}${MODEL_AIRCRAFT_AIRPORT_REASON}${MODEL_AIRCRAFT_REFERENCE_LINE}`,
+      });
+    }
+  }
+
+  const items = [...regItems, ...modelItems, ...flagItems];
   const unknownCount = regItems.filter((i) => i.verdict === "unknown").length;
   const level = aggregateVerdictLevel(items);
 
@@ -757,6 +818,18 @@ export const deriveFlightVerdict = (input: DeriveFlightVerdictInput): FlightVerd
     if (it.kind === "regulation") {
       const r = regById.get(it.id)!;
       rawProcedures.push(...proceduresForRegulation(r, plannedDate, it.reason, permits));
+    } else if (it.kind === "model_aircraft" || (!regulated && it.id === "airspace_150m")) {
+      // 模型航空機の許可・通報（model-aircraft.ts）。期限は一次資料で確かめるまで日付を作らない（期限なしとして後ろに並ぶ）。
+      const airport = it.id === "model-aircraft-airport";
+      rawProcedures.push({
+        id: airport ? "verdict-model-aircraft-airport" : "verdict-model-aircraft-high",
+        title: airport ? MODEL_AIRCRAFT_AIRPORT_PROCEDURE_TITLE : MODEL_AIRCRAFT_HIGH_PROCEDURE_TITLE,
+        submitTo: MODEL_AIRCRAFT_SUBMIT_TO,
+        deadline: { label: MODEL_AIRCRAFT_DEADLINE_LABEL, leadDays: null },
+        legalTier: 1,
+        reason: it.reason,
+        itemId: it.id,
+      });
     } else {
       const flag = it.id as SpecificFlightFlag;
       const procId = FLAG_PROCEDURE_ID[flag];
@@ -832,6 +905,15 @@ export const deriveFlightVerdict = (input: DeriveFlightVerdictInput): FlightVerd
         detail: "特定飛行のたびに、飛行・日常点検・点検整備を記録します。",
       },
     );
+  }
+  if (!regulated) {
+    // 100g 未満：管制圏・情報圏・航空路を収録していないため、確かめることとして 1 件出す（段階に影響させない。未決 3）。
+    perFlightDuties.push({
+      id: "model-aircraft-control-zone-check",
+      title: MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_TITLE,
+      kind: "per_flight",
+      detail: MODEL_AIRCRAFT_CONTROL_ZONE_DUTY_DETAIL,
+    });
   }
   perFlightDuties.push({
     id: "emergency-airspace-check",

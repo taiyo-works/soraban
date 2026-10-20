@@ -261,6 +261,8 @@ export const handleDiagnosePost = async (req: Request, runCheck: RunCheck): Prom
   return NextResponse.json({
     ...diagnosis,
     verdict,
+    // 機体重量（Sprint 11e：100g 未満のときカテゴリーの表示を「対象外（模型航空機）」にするため。証跡には入れない）
+    ...(droneWeightG !== undefined ? { droneWeightG } : {}),
     prefill,
     evidenceId: diagnosisEvidenceId,
     checkEvidenceId: checkResult.evidenceId,

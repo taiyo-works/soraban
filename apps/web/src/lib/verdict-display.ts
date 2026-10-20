@@ -6,6 +6,7 @@
 //   手続き不要 = 塗りの丸（外周の輪と中心の塗り） / 判定不能 = 破線の四角と「？」
 // 線・寸法・配色（Sprint 11d D2）：計器の表示に倣い、線は細く端を切り落とし、色は補助に留める。
 import {
+  DRONE_THRESHOLD_G,
   BASE_STATUS_LABEL,
   LEGAL_TIER_LABEL,
   VERDICT_LABEL,
@@ -179,3 +180,13 @@ export const HISTORY_UNDETERMINED_LABEL = "判定未確定（申請支援の診�
 
 /** 判定中（/api/diagnose の応答待ち）の表示。 */
 export const VERDICT_PENDING_LABEL = "判定中";
+
+/**
+ * 100g 未満の機体（模型航空機）としてカテゴリーを表示するか（Sprint 11e B3）。
+ * category の値（I）は証跡に入るため変えず、表示だけを変える。重量未指定・100g ちょうどは無人航空機。
+ */
+export const isModelAircraftDiagnosis = (d: {
+  readonly category: string;
+  readonly droneWeightG?: number;
+}): boolean =>
+  d.category === "I" && typeof d.droneWeightG === "number" && d.droneWeightG < DRONE_THRESHOLD_G;

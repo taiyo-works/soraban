@@ -7,6 +7,9 @@
 import type { ReactNode } from "react";
 import { Circle, Line, Path, Polygon, Polyline, Rect, StyleSheet, Svg, Text, View } from "@react-pdf/renderer";
 import {
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_REFERENCES,
+  MODEL_AIRCRAFT_RULES_CHECKED_AT,
   PERMIT_SCOPE_NOT_VERIFIED_NOTE,
   VERDICT_HELP,
   type FlightVerdict,
@@ -409,7 +412,14 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
     </View>
     {verdict.items.map((it) => (
       <View key={it.id} style={[s.itemRow, { borderLeftColor: VERDICT_PDF_COLOR[it.verdict] }]} wrap={false}>
-        <Text style={s.itemCell}>{keepSpaces(it.title)}</Text>
+        <View style={s.itemCell}>
+          <Text>{keepSpaces(it.title)}</Text>
+          {it.reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE) ? (
+            <Text style={{ fontSize: 6.5, color: "#5B6170", lineHeight: 1.4 }}>
+              {keepSpaces(it.reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim())}
+            </Text>
+          ) : null}
+        </View>
         <Text style={s.itemCellSm}>{BASE_STATUS_LABEL[it.baseStatus]}</Text>
         <Text style={s.itemCellSm}>
           {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
@@ -422,5 +432,17 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
         </View>
       </View>
     ))}
+    {verdict.items.some((it) => it.reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE)) ? (
+      <View style={{ marginTop: 6 }} wrap={false}>
+        <Text style={{ fontSize: 7.5, fontWeight: 700 }}>
+          参照先（100g 未満の機体・模型航空機。確認日 {MODEL_AIRCRAFT_RULES_CHECKED_AT}）
+        </Text>
+        {MODEL_AIRCRAFT_REFERENCES.map((r) => (
+          <Text key={r.id} style={{ fontSize: 7, color: "#2A2F3A", lineHeight: 1.45 }}>
+            ・{keepSpaces(r.title)} {r.url}
+          </Text>
+        ))}
+      </View>
+    ) : null}
   </View>
 );

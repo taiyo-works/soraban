@@ -19,6 +19,7 @@ import {
   type PrefillField,
   type RequiredProcedure,
 } from "@soraban/regulations";
+import { MODEL_AIRCRAFT_CATEGORY_HEADLINE, MODEL_AIRCRAFT_CATEGORY_NOTE } from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { splitInlineSource } from "@/lib/inline-source";
 import {
@@ -29,7 +30,7 @@ import {
 } from "@/lib/procedure-display";
 import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictMark } from "./pdf-verdict";
-import { doneByProcedureId, VERDICT_LABEL } from "@/lib/verdict-display";
+import { doneByProcedureId, isModelAircraftDiagnosis, VERDICT_LABEL } from "@/lib/verdict-display";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 束ね PDF（申請支援サマリ）。既存 regulation-pdf.tsx の作法に合わせる:
@@ -397,13 +398,39 @@ export const ApplicationPdfDocument = ({
         {/* 結論（4 段の判定。Sprint 11d D1。画面・地点判定の PDF と同じ言葉・記号） */}
         {diagnosis.verdict ? <PdfVerdictConclusion verdict={diagnosis.verdict} /> : null}
 
+        {/* 100g 未満の機体（模型航空機）の手続き（Sprint 11e B4）。必要手続きのチェックリスト（DIPS／DRS）とは別に出す。 */}
+        {(() => {
+          const modelProcs = (diagnosis.verdict?.procedures ?? []).filter((p) =>
+            p.id.startsWith("verdict-model-aircraft-"),
+          );
+          if (modelProcs.length === 0) return null;
+          return (
+            <View style={styles.categoryBanner} wrap={false}>
+              <Text style={styles.eyebrow}>模型航空機（100g 未満）の手続き</Text>
+              {modelProcs.map((p) => (
+                <View key={p.id} style={{ marginTop: 3 }}>
+                  <Text style={[styles.categoryNote, { fontWeight: 700, color: COLOR.ink }]}>{p.title}</Text>
+                  <Text style={styles.categoryNote}>
+                    出す先：{keepSpaces(p.submitTo)} ／ 期限：{keepSpaces(p.deadline.label)}
+                  </Text>
+                  <Text style={styles.categoryNote}>{keepSpaces(p.reason)}</Text>
+                </View>
+              ))}
+            </View>
+          );
+        })()}
+
         {/* ① カテゴリー切り分け */}
         <View style={[styles.categoryBanner, { borderLeftColor: accent }]} wrap={false}>
           <Text style={styles.eyebrow}>カテゴリー切り分け</Text>
           <Text style={[styles.categoryHeadline, { color: accent }]}>
-            {CATEGORY_HEADLINE[diagnosis.category]}
+            {isModelAircraftDiagnosis(diagnosis)
+              ? MODEL_AIRCRAFT_CATEGORY_HEADLINE
+              : CATEGORY_HEADLINE[diagnosis.category]}
           </Text>
-          <Text style={styles.categoryNote}>{keepSpaces(diagnosis.categoryNote)}</Text>
+          <Text style={styles.categoryNote}>
+            {keepSpaces(isModelAircraftDiagnosis(diagnosis) ? MODEL_AIRCRAFT_CATEGORY_NOTE : diagnosis.categoryNote)}
+          </Text>
           <Text style={styles.categoryNote}>
             DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail)}
           </Text>

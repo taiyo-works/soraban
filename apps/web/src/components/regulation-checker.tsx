@@ -11,6 +11,9 @@ import {
   CONFIDENCE_LABEL,
   DIPS_PERMIT_KINDS,
   DIPS_PERMIT_LABEL,
+  DRONE_THRESHOLD_G,
+  MODEL_AIRCRAFT_WEIGHT_NOTE,
+  MODEL_AIRCRAFT_WEIGHT_TAG,
   shouldWarnConfidence,
   FLIGHT_METHOD_FLAGS,
   AIRSPACE_FLAGS,
@@ -336,6 +339,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const diagAbortRef = useRef<AbortController | null>(null);
   const checkSeqRef = useRef<number>(0);
   const diagSeqRef = useRef<number>(0);
+
+  // 100g 未満（模型航空機）の入力か（重さの欄の表示用。判定はサーバーが行う）。
+  const isModelAircraftWeight =
+    droneWeightInput.trim().length > 0 &&
+    Number.isFinite(Number(droneWeightInput)) &&
+    Number(droneWeightInput) >= 0 &&
+    Number(droneWeightInput) < DRONE_THRESHOLD_G;
 
   const startNewRun = (): string => {
     const id = createHistoryRunId();
@@ -1163,14 +1173,19 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                   className={`${fieldClass} flex-1 font-mono`}
                   placeholder="例: 900／80（100g 未満の機体）"
                 />
-                {droneWeightInput.trim().length > 0 && Number(droneWeightInput) < 100 ? (
-                  <span className="text-[11px] tracking-wide text-signal-green whitespace-nowrap">
-                    100g 未満の例外
+                {isModelAircraftWeight ? (
+                  <span
+                    data-testid="model-aircraft-tag"
+                    className="whitespace-nowrap border border-rule px-1.5 py-px text-[11px] tracking-wide text-ink-soft"
+                  >
+                    {MODEL_AIRCRAFT_WEIGHT_TAG}
                   </span>
                 ) : null}
               </div>
-              <span className="text-[10px] leading-tight text-ink-mute">
-                100g 未満は航空法上の無人航空機に非該当（DID / 空港が対象外。小型無人機等飛行禁止法は 100g 未満も対象）
+              <span data-testid="model-aircraft-weight-note" className="text-[10px] leading-tight text-ink-mute">
+                {isModelAircraftWeight
+                  ? MODEL_AIRCRAFT_WEIGHT_NOTE
+                  : "100g 未満の機体は模型航空機として判定します（航空法の無人航空機の規制は対象外。空港等の周辺と高い空域の手続き、小型無人機等飛行禁止法・条例は対象）"}
               </span>
             </label>
 

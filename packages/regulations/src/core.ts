@@ -75,6 +75,12 @@ export type RegulationWithStatus = Regulation & {
    */
   readonly appliedExceptions?: readonly ClauseException[];
   /**
+   * 機体重量の対象外の例外（weight_below_g）で green にしたとき、例外を当てる前の判定（red／yellow）。
+   * 100g 未満の機体（模型航空機）の模型航空機の手続き（model-aircraft.ts）を判定に足すために使う（Sprint 11e A2）。
+   * status・appliedExceptions の意味は変えない。工業専用地域（in_zone）では持たない。
+   */
+  readonly statusBeforeExclusion?: "red" | "yellow";
+  /**
    * 満たす例外（許可・同意・目的）で当たった例外節（Sprint 11d）。status は変えない。
    * 判定（verdict）はこれをもとに手続き済み（条件付き）になる。
    */
@@ -121,6 +127,7 @@ export const applyExemptions = (
   appliedExceptions?: readonly ClauseException[];
   satisfiedBy?: readonly ClauseException[];
   noFlyCategory?: boolean;
+  statusBeforeExclusion?: "red" | "yellow";
 } => {
   const noFly = opts.noFly === true ? { noFlyCategory: true } : {};
   if (base.status !== "red" && base.status !== "yellow") {
@@ -133,10 +140,12 @@ export const applyExemptions = (
   const excluded = findExcludingExceptions(base.clauseGraph, ctx);
   if (excluded.length > 0) {
     const reasons = excluded.map((m) => m.condition).join(" / ");
+    const byWeight = excluded.some((e) => e.machine?.type === "weight_below_g");
     return {
       status: "green",
       note: `${base.note} ※適用例外: ${reasons}`,
       appliedExceptions: excluded,
+      ...(byWeight ? { statusBeforeExclusion: base.status } : {}),
     };
   }
   const satisfied = findSatisfyingExceptions(base.clauseGraph, ctx);
