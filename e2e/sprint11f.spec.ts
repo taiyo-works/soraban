@@ -206,7 +206,7 @@ test.describe("Sprint 11f", () => {
     await openReady(page);
     await gotoLatLng(page, IZUMO_AROUND.lat, IZUMO_AROUND.lng);
     await setWeight(page, "50");
-    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の許可" });
+    const proc = procedures(page).filter({ hasText: "航空法第134条の3 に基づく飛行の許可または通報（模型航空機・空港等の周辺）" });
     const refs = proc.getByTestId("model-aircraft-references");
     const law = refs.getByRole("link", { name: "参照先：e-Gov 法令検索 航空法（航空法第134条の3）（新しいタブで開く）", exact: true });
     const ord = refs.getByRole("link", {
@@ -215,7 +215,7 @@ test.describe("Sprint 11f", () => {
     });
     await expect(law).toHaveAttribute("href", EGOV);
     await expect(ord).toHaveAttribute("href", EGOV_ORD);
-    expect(await refs.getByRole("link").count()).toBe(6);
+    expect(await refs.getByRole("link").count()).toBe(9);
     const text = await exportPdf(page);
     expect(squash(text)).toContain(EGOV);
     expect(squash(text)).toContain(EGOV_ORD);

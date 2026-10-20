@@ -85,13 +85,13 @@ describe("A. 規則（100g 未満＝模型航空機）", () => {
     expect(m.legalTier).toBe(1);
     expect(["needs_procedure", "no_fly"]).toContain(verdict.level);
     const proc = verdict.procedures.find((p) => p.itemId === "model-aircraft-airport")!;
-    expect(proc.title).toContain("航空法第134条の3 に基づく飛行の許可");
+    expect(proc.title).toContain("航空法第134条の3 に基づく飛行の許可または通報");
     expect(proc.submitTo).toContain("国土交通大臣");
     expect(proc.deadline.label).toBe(MODEL_AIRCRAFT_DEADLINE_LABEL);
     expect(proc.deadline.date).toBeUndefined();
     expect(proc.legalTier).toBe(1);
     expect(proc.reason).toContain("該当の可能性（要確認）");
-    expect(proc.reason).toContain("管制圏・情報圏を収録していない");
+    expect(proc.reason).toContain("管制圏・情報圏・高度変更禁止空域・特別管制空域を収録していない");
     expect(proc.reason).toContain(EGOV);
   });
 
@@ -122,7 +122,7 @@ describe("A. 規則（100g 未満＝模型航空機）", () => {
     expect(high.verdict).toBe("needs_procedure");
     for (const w of ["150m", "250m", "航空路の地理データを持たない", EGOV]) expect(high.reason).toContain(w);
     const proc = verdict.procedures.find((p) => p.itemId === "airspace_150m")!;
-    expect(proc.title).toContain("航空法第134条の3 に基づく飛行の通報");
+    expect(proc.title).toContain("航空法第134条の3 に基づく飛行の許可または通報");
     for (const id of ["method_night", "method_bvlos"]) {
       expect(item(verdict, id).verdict).toBe("no_procedure");
       expect(item(verdict, id).reason).toContain("対象外（模型航空機）");
@@ -198,7 +198,10 @@ describe("8・15. 100g 以上・重量未指定の判定と証跡 ID が Sprint 
           expect(d.evidenceId).toBe(expected.diagnosisEvidenceId);
           expect(d.category).toBe(expected.category);
           if (w === undefined || w >= 100) {
-            expect(d.verdict).toEqual(expected.verdict);
+            // Sprint 11g：空港の敷地内の note の文言だけが変わった（判定・証跡 ID は同じ）。新旧の置き換えだけを許す。
+            const NEW = "空港の敷地内は飛行できません（安全側の判定。空港の管理者への確認が要り、許可・同意・機体重量を入力しても変わりません）。";
+            const OLD = "空港の敷地内は飛行できません（許可・同意を入力しても変わりません）。";
+            expect(JSON.parse(JSON.stringify(d.verdict).replaceAll(NEW, OLD))).toEqual(expected.verdict);
           }
         });
       }

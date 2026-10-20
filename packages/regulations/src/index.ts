@@ -658,7 +658,7 @@ export const evaluateAirports = (
       ...applyExemptions(
         {
           status: "red",
-          note: `判定地点は ${onAirport.name} の敷地内です。空港の敷地内は飛行できません（許可・同意を入力しても変わりません）。`,
+          note: `判定地点は ${onAirport.name} の敷地内です。空港の敷地内は飛行できません（安全側の判定。空港の管理者への確認が要り、許可・同意・機体重量を入力しても変わりません）。`,
           clauseGraph: AIRPORT_REG.clauseGraph,
         },
         ctx,
@@ -1392,6 +1392,9 @@ export {
   MODEL_AIRCRAFT_HIGH_REASON,
   MODEL_AIRCRAFT_LAW,
   MODEL_AIRCRAFT_ORDINANCE,
+  MODEL_AIRCRAFT_ORDINANCE_NOTICE,
+  MODEL_AIRCRAFT_PERMIT_OR_NOTICE_RULE,
+  MODEL_AIRCRAFT_PERMIT_OR_NOTICE_SHORT,
   MODEL_AIRCRAFT_REFERENCE_LINE,
   MODEL_AIRCRAFT_REFERENCES,
   MODEL_AIRCRAFT_RULES_CHECKED_AT,

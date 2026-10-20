@@ -361,7 +361,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
                 ) : null}
               </View>
               <View style={s.cellTitle}>
-                <Text style={s.title}>{p.title}</Text>
+                <Text style={s.title}>{keepSpaces(p.title)}</Text>
                 <PdfReason reason={p.reason} />
               </View>
               <Text style={s.cellTo}>{keepSpaces(p.submitTo)}</Text>
