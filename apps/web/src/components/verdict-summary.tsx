@@ -77,6 +77,10 @@ function VerdictScale({ level }: { level: ItemVerdict }) {
   );
 }
 
+// 規制ごとの判定の表のセル（狭い幅では「列名 値」の 1 行ずつに積む。列名は data-label を ::before で出す）。
+const ITEM_CELL =
+  "flex gap-2 py-0.5 pr-3 md:table-cell md:py-1.5 max-md:before:w-[5.5rem] max-md:before:shrink-0 max-md:before:text-[10px] max-md:before:leading-5 max-md:before:text-ink-mute max-md:before:content-[attr(data-label)]";
+
 /** 段階の言葉。括弧の中（「条件付き」）は折り返しても一塊で読めるよう、小さく続ける（文字列は変えない）。 */
 function LevelWords({ label }: { label: string }) {
   const i = label.indexOf("（");
@@ -204,9 +208,9 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
               <div className="overflow-x-auto">
                 <table
                   data-testid="verdict-procedures"
-                  className="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-xs"
+                  className="block w-full text-left text-xs md:table md:min-w-[640px] md:border-separate md:border-spacing-y-1"
                 >
-                  <thead>
+                  <thead className="max-md:hidden">
                     <tr className="text-[10px] tracking-[0.08em] text-ink-mute">
                       <th className="w-12 py-1 pl-3 pr-2 font-medium">#</th>
                       {PROCEDURE_COLUMNS.map((c, i) => (
@@ -219,10 +223,15 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                       ))}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="flex flex-col gap-1.5 md:table-row-group">
                     {verdict.procedures.map((p, i) => {
                       const countdown = deadlineCountdown(p.deadline.date);
-                      const cell = "border-y border-rule bg-paper py-2.5 pr-3 align-top";
+                      const edge = VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"];
+                      // 768px 以上は表の行、狭い幅は 1 件ずつの票（左端の帯・番号の列・手続き名 → 出す先 → 期限 → 法的な重さ）。
+                      const cell =
+                        "block bg-paper py-1 pr-3 align-top md:table-cell md:border-y md:border-rule md:py-2.5";
+                      const labelled =
+                        "max-md:col-start-2 max-md:before:mb-0.5 max-md:before:block max-md:before:text-[10px] max-md:before:tracking-[0.08em] max-md:before:text-ink-mute max-md:before:content-[attr(data-label)]";
                       return (
                         <tr
                           key={p.id}
@@ -231,11 +240,10 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                           data-item-id={p.itemId}
                           data-legal-tier={p.legalTier}
                           data-deadline-date={p.deadline.date ?? ""}
+                          className={`grid grid-cols-[2.5rem_minmax(0,1fr)] border border-l-4 border-rule bg-paper pb-1.5 md:table-row md:border-0 md:bg-transparent md:pb-0 ${edge}`}
                         >
                           <td
-                            className={`${cell} border-l-4 pl-3 font-mono text-sm font-medium tnum text-ink ${
-                              VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"]
-                            }`}
+                            className={`${cell} pl-2.5 pt-2.5 font-mono text-sm font-medium tnum text-ink max-md:row-span-4 md:border-l-4 md:pl-3 ${edge}`}
                           >
                             {String(i + 1).padStart(2, "0")}
                             {isConfirmProcedure(p.id) ? (
@@ -244,12 +252,18 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                               </svg>
                             ) : null}
                           </td>
-                          <td className={cell}>
+                          <td className={`${cell} max-md:col-start-2 max-md:pt-2.5`}>
                             <span className="text-[13px] font-medium leading-snug text-ink">{p.title}</span>
                             <span className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute">{p.reason}</span>
                           </td>
-                          <td className={`${cell} leading-relaxed text-ink-soft`}>{p.submitTo}</td>
-                          <td data-testid="verdict-procedure-deadline" className={`${cell} text-ink`}>
+                          <td data-label={PROCEDURE_COLUMNS[1]} className={`${cell} ${labelled} leading-relaxed text-ink-soft`}>
+                            {p.submitTo}
+                          </td>
+                          <td
+                            data-testid="verdict-procedure-deadline"
+                            data-label={PROCEDURE_COLUMNS[2]}
+                            className={`${cell} ${labelled} text-ink`}
+                          >
                             {p.deadline.date ? (
                               <span className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="font-mono text-sm font-medium tnum text-ink">{p.deadline.date}</span>
@@ -266,7 +280,7 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                               {p.deadline.label}
                             </span>
                           </td>
-                          <td className={`${cell} border-r text-ink-soft`}>
+                          <td data-label={PROCEDURE_COLUMNS[3]} className={`${cell} ${labelled} text-ink-soft md:border-r`}>
                             <span className="inline-flex items-end gap-1.5">
                               <TierGauge tier={p.legalTier} />
                               <span className="leading-none">{legalTierLabel(p.legalTier)}</span>
@@ -354,8 +368,11 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
           <div className="flex flex-col gap-2">
             <SectionHead count={verdict.items.length}>{VERDICT_SECTION_TITLE.items}</SectionHead>
             <div className="overflow-x-auto">
-              <table data-testid="verdict-items" className="w-full min-w-[600px] border-collapse text-left text-xs">
-                <thead>
+              <table
+                data-testid="verdict-items"
+                className="block w-full text-left text-xs md:table md:min-w-[600px] md:border-collapse"
+              >
+                <thead className="max-md:hidden">
                   <tr className="border-b border-rule text-[10px] tracking-[0.08em] text-ink-mute">
                     <th className="py-1 pl-3 pr-3 font-medium">規制・飛行の条件</th>
                     <th className="py-1 pr-3 font-medium">元の判定</th>
@@ -363,7 +380,7 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                     <th className="py-1 pr-2 font-medium">判定</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="block border-t border-rule md:table-row-group md:border-t-0">
                   {verdict.items.map((it) => (
                     <tr
                       key={it.id}
@@ -371,16 +388,18 @@ export function VerdictSummary({ verdict, pending, actions, meta }: Props) {
                       data-item-id={it.id}
                       data-base-status={it.baseStatus}
                       data-verdict={it.verdict}
-                      className="border-b border-rule align-top"
+                      className={`block border-b border-l-2 border-rule py-1.5 pl-3 align-top md:table-row md:border-l-0 md:py-0 md:pl-0 ${VERDICT_EDGE[it.verdict]}`}
                     >
-                      <td className={`border-l-2 py-1.5 pl-3 pr-3 text-ink ${VERDICT_EDGE[it.verdict]}`}>
+                      <td className={`block pb-1 pr-3 text-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}
                       </td>
-                      <td className="py-1.5 pr-3 text-ink-soft">{BASE_STATUS_LABEL[it.baseStatus]}</td>
-                      <td className="py-1.5 pr-3 text-ink-soft">
+                      <td data-label="元の判定" className={`${ITEM_CELL} text-ink-soft`}>
+                        {BASE_STATUS_LABEL[it.baseStatus]}
+                      </td>
+                      <td data-label="適用した許可" className={`${ITEM_CELL} text-ink-soft`}>
                         {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
                       </td>
-                      <td className="whitespace-nowrap py-1.5 pr-2">
+                      <td data-label="判定" className={`${ITEM_CELL} whitespace-nowrap md:pr-2`}>
                         <span className={`inline-flex items-center gap-1.5 font-medium ${VERDICT_TONE[it.verdict]}`}>
                           <VerdictMark level={it.verdict} size="sm" decorative />
                           {VERDICT_LABEL[it.verdict]}
