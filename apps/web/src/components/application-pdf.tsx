@@ -19,7 +19,14 @@ import {
   type PrefillField,
   type RequiredProcedure,
 } from "@soraban/regulations";
-import { MODEL_AIRCRAFT_CATEGORY_HEADLINE, MODEL_AIRCRAFT_CATEGORY_NOTE } from "@soraban/regulations";
+import {
+  MODEL_AIRCRAFT_CATEGORY_HEADLINE,
+  MODEL_AIRCRAFT_CATEGORY_NOTE,
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_REFERENCES,
+  MODEL_AIRCRAFT_RULES_CHECKED_AT,
+  MODEL_AIRCRAFT_UNVERIFIED,
+} from "@soraban/regulations";
 import type { DiagnoseResponse } from "@/lib/diagnose";
 import { splitInlineSource } from "@/lib/inline-source";
 import {
@@ -30,7 +37,7 @@ import {
 } from "@/lib/procedure-display";
 import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictMark } from "./pdf-verdict";
-import { doneByProcedureId, isModelAircraftDiagnosis, VERDICT_LABEL } from "@/lib/verdict-display";
+import { doneByProcedureId, isModelAircraftDiagnosis, VERDICT_LABEL, VERDICT_PDF_COLOR } from "@/lib/verdict-display";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 
 // 束ね PDF（申請支援サマリ）。既存 regulation-pdf.tsx の作法に合わせる:
@@ -405,17 +412,56 @@ export const ApplicationPdfDocument = ({
           );
           if (modelProcs.length === 0) return null;
           return (
-            <View style={styles.categoryBanner} wrap={false}>
-              <Text style={styles.eyebrow}>模型航空機（100g 未満）の手続き</Text>
-              {modelProcs.map((p) => (
-                <View key={p.id} style={{ marginTop: 3 }}>
-                  <Text style={[styles.categoryNote, { fontWeight: 700, color: COLOR.ink }]}>{p.title}</Text>
-                  <Text style={styles.categoryNote}>
-                    出す先：{keepSpaces(p.submitTo)} ／ 期限：{keepSpaces(p.deadline.label)}
-                  </Text>
-                  <Text style={styles.categoryNote}>{keepSpaces(p.reason)}</Text>
+            <View style={[styles.categoryBanner, { borderLeftColor: VERDICT_PDF_COLOR.needs_procedure }]} wrap={false}>
+              <Text style={[styles.eyebrow, { textTransform: "none" }]}>模型航空機（100g 未満）の手続き</Text>
+              {modelProcs.map((p, i) => (
+                <View
+                  key={p.id}
+                  style={{ flexDirection: "row", gap: 6, marginTop: 4, paddingTop: 3, borderTopWidth: 0.5, borderTopColor: COLOR.rule }}
+                >
+                  <MonoText style={{ width: 16, fontSize: 9, color: COLOR.ink }}>{String(i + 1).padStart(2, "0")}</MonoText>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.categoryNote, { fontWeight: 700, color: COLOR.ink }]}>{p.title}</Text>
+                    <Text style={styles.categoryNote}>
+                      出す先：{keepSpaces(p.submitTo)} ／ 期限：{keepSpaces(p.deadline.label)}
+                    </Text>
+                    <Text style={styles.categoryNote}>
+                      {keepSpaces(p.reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim())}
+                    </Text>
+                  </View>
                 </View>
               ))}
+              {/* 参照先は手続きごとに繰り返さず、欄の下に一度だけ番号付きで出す（地点判定の PDF と同じ並び・番号）。 */}
+              <View style={{ marginTop: 5, paddingTop: 3, borderTopWidth: 0.5, borderTopColor: COLOR.rule }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                  <Text style={[styles.categoryNote, { fontWeight: 700, color: COLOR.ink }]}>参照先</Text>
+                  <MonoText style={{ fontSize: 7, color: COLOR.inkSoft }}>
+                    {keepSpaces(`確認日 ${MODEL_AIRCRAFT_RULES_CHECKED_AT}`)}
+                  </MonoText>
+                  <Text
+                    style={{
+                      fontSize: 6.5,
+                      fontWeight: 700,
+                      color: VERDICT_PDF_COLOR.needs_procedure,
+                      borderWidth: 0.5,
+                      borderColor: VERDICT_PDF_COLOR.needs_procedure,
+                      borderStyle: "dashed",
+                      paddingHorizontal: 3,
+                    }}
+                  >
+                    {MODEL_AIRCRAFT_UNVERIFIED}
+                  </Text>
+                </View>
+                {MODEL_AIRCRAFT_REFERENCES.map((r, i) => (
+                  <View key={r.id} style={{ flexDirection: "row", gap: 4, marginTop: 1 }}>
+                    <MonoText style={{ width: 16, fontSize: 7, color: COLOR.inkMute }}>{`[${i + 1}]`}</MonoText>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 7.5, color: COLOR.ink }}>{keepSpaces(r.title)}</Text>
+                      <MonoText style={{ fontSize: 6.5, color: COLOR.inkMute }}>{r.url}</MonoText>
+                    </View>
+                  </View>
+                ))}
+              </View>
             </View>
           );
         })()}

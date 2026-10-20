@@ -3,6 +3,7 @@ import {
   MODEL_AIRCRAFT_REFERENCE_LINE,
   MODEL_AIRCRAFT_REFERENCES,
   MODEL_AIRCRAFT_RULES_CHECKED_AT,
+  MODEL_AIRCRAFT_UNVERIFIED,
   PERMIT_SCOPE_NOT_VERIFIED_NOTE,
   VERDICT_HELP,
   type FlightVerdict,
@@ -20,6 +21,7 @@ import {
   VERDICT_LABEL,
   VERDICT_FAILED_LABEL,
   VERDICT_FAILED_NOTE,
+  VERDICT_GEOMETRY as G,
   VERDICT_PENDING_LABEL,
   VERDICT_RETRY_LABEL,
   VERDICT_SCALE,
@@ -111,14 +113,41 @@ function LevelWords({ label }: { label: string }) {
 /** 理由の末尾の参照先（模型航空機。Sprint 11e）を外し、題名のリンクとして出す。 */
 const hasModelAircraftReferences = (reason: string): boolean => reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE);
 
+const REFERENCE_LIST_ID = "model-aircraft-reference-list";
+const refNo = (i: number): string => `[${i + 1}]`;
+
+/** 参照先のリンク（題名。読み上げ名は「参照先：（題名）（新しいタブで開く）」）。 */
+function ReferenceLink({ title, url }: { readonly title: string; readonly url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`参照先：${title}（新しいタブで開く）`}
+      className="text-brand-700 underline decoration-brand-700/40 underline-offset-2 hover:text-ink hover:decoration-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+    >
+      {title}
+      {/* 矢印だけが次の行に送られないよう、語結合子でつなぐ */}
+      <span aria-hidden className="font-mono text-[10px]">{"\u2060\u00a0↗"}</span>
+    </a>
+  );
+}
+
+/**
+ * 理由と参照先（Sprint 11e の見せ方）。
+ * - links：段取り表の行（手続きを済ませる場所）。番号付きの題名のリンクを 1 件 1 行で出す。
+ * - pointer：規制ごとの判定の行。リンクを繰り返さず、表の下の参照先の一覧（1 か所）を指す。
+ */
 function ReasonWithReferences({
   reason,
   className,
   testId,
+  mode,
 }: {
   readonly reason: string;
   readonly className: string;
   readonly testId?: string;
+  readonly mode: "links" | "pointer";
 }) {
   if (!hasModelAircraftReferences(reason)) {
     return <span className={className}>{reason}</span>;
@@ -127,23 +156,62 @@ function ReasonWithReferences({
   return (
     <span className={className} {...(testId ? { "data-testid": testId } : {})}>
       {text}
-      <span data-testid="model-aircraft-references" className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5">
-        <span>参照先：</span>
-        {MODEL_AIRCRAFT_REFERENCES.map((r) => (
+      {mode === "links" ? (
+        <span
+          data-testid="model-aircraft-references"
+          className="mt-1.5 block border-l border-rule pl-2.5"
+        >
+          <span className="block text-[10px] tracking-[0.08em] text-ink-mute">参照先</span>
+          {MODEL_AIRCRAFT_REFERENCES.map((r, i) => (
+            <span key={r.id} className="grid grid-cols-[1.75rem_minmax(0,1fr)] items-baseline">
+              <span aria-hidden className="font-mono text-[10px] tnum text-ink-mute">{refNo(i)}</span>
+              <span>
+                <ReferenceLink title={r.title} url={r.url} />
+              </span>
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span data-testid="model-aircraft-references" className="mt-0.5 block">
+          参照先：
           <a
-            key={r.id}
-            href={r.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`参照先：${r.title}（新しいタブで開く）`}
-            className="text-brand-700 underline underline-offset-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+            href={`#${REFERENCE_LIST_ID}`}
+            className="font-mono text-[10px] tnum text-brand-700 underline decoration-brand-700/40 underline-offset-2 hover:text-ink"
           >
-            {r.title}
+            {refNo(0)}〜{refNo(MODEL_AIRCRAFT_REFERENCES.length - 1)}
           </a>
-        ))}
-        <span className="text-ink-mute">（確認日 {MODEL_AIRCRAFT_RULES_CHECKED_AT}）</span>
-      </span>
+          （表の下の一覧）
+        </span>
+      )}
     </span>
+  );
+}
+
+/** 参照先の一覧（模型航空機。画面に 1 か所だけ。PDF の一覧と同じ並び・同じ番号）。 */
+function ModelAircraftReferenceList() {
+  return (
+    <div id={REFERENCE_LIST_ID} data-testid={REFERENCE_LIST_ID} className="flex scroll-mt-4 flex-col gap-2">
+      <SectionHead count={MODEL_AIRCRAFT_REFERENCES.length}>
+        <span className="normal-case">参照先（100g 未満の機体・模型航空機）</span>
+      </SectionHead>
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink-soft">
+        <span className="font-mono tnum">確認日 {MODEL_AIRCRAFT_RULES_CHECKED_AT}</span>
+        <span className="border border-dashed border-verdict-needs px-1.5 py-px font-medium text-verdict-needs">
+          {MODEL_AIRCRAFT_UNVERIFIED}
+        </span>
+      </p>
+      <ol className="flex flex-col divide-y divide-rule border-y border-rule text-xs">
+        {MODEL_AIRCRAFT_REFERENCES.map((r, i) => (
+          <li key={r.id} className="grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-1 py-1.5">
+            <span aria-hidden className="font-mono text-[11px] tnum text-ink-mute">{refNo(i)}</span>
+            <span className="flex min-w-0 flex-col">
+              <ReferenceLink title={r.title} url={r.url} />
+              <span className="break-all font-mono text-[10px] text-ink-mute">{r.url}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -211,9 +279,26 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
               role="alert"
               className="flex flex-col gap-2.5 border border-dashed border-ink/60 border-l-[6px] bg-paper px-4 py-3.5 sm:px-5"
             >
-              <p className="font-display text-[1.75rem] font-light leading-none tracking-tight text-ink sm:text-[2rem]">
-                {VERDICT_FAILED_LABEL}
-              </p>
+              <div className="flex items-center gap-3">
+                {/* 判定できない記号（破線の四角に「×」）。判定不能（破線の四角に「？」）と同じ枠で、中の記号で区別する。 */}
+                <svg aria-hidden width={40} height={40} viewBox="0 0 24 24" className="shrink-0 text-ink">
+                  <rect
+                    x={G.square.x}
+                    y={G.square.y}
+                    width={G.square.size}
+                    height={G.square.size}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.35}
+                    strokeDasharray={G.square.dash}
+                  />
+                  <line x1={8.5} y1={8.5} x2={15.5} y2={15.5} stroke="currentColor" strokeWidth={1.6} />
+                  <line x1={15.5} y1={8.5} x2={8.5} y2={15.5} stroke="currentColor" strokeWidth={1.6} />
+                </svg>
+                <p className="font-display text-[1.75rem] font-light leading-none tracking-tight text-ink sm:text-[2rem]">
+                  {VERDICT_FAILED_LABEL}
+                </p>
+              </div>
               <p data-testid="verdict-failed-note" className="text-sm leading-relaxed text-ink-soft">
                 {failedNote ?? VERDICT_FAILED_NOTE}
               </p>
@@ -329,7 +414,11 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                           </td>
                           <td className={`${cell} max-md:col-start-2 max-md:pt-2.5`}>
                             <span className="text-[13px] font-medium leading-snug text-ink">{p.title}</span>
-                            <ReasonWithReferences reason={p.reason} className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute" />
+                            <ReasonWithReferences
+                              reason={p.reason}
+                              mode="links"
+                              className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute"
+                            />
                           </td>
                           <td data-label={PROCEDURE_COLUMNS[1]} className={`${cell} ${labelled} leading-relaxed text-ink-soft`}>
                             {p.submitTo}
@@ -471,6 +560,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                           <ReasonWithReferences
                             reason={it.reason}
                             testId="verdict-item-reason"
+                            mode="pointer"
                             className="mt-0.5 block text-[11px] leading-relaxed text-ink-mute"
                           />
                         ) : null}
@@ -493,6 +583,12 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
               </table>
             </div>
           </div>
+
+          {/* 参照先（模型航空機。理由に参照先を持つ項目があるときだけ、1 か所に出す） */}
+          {verdict.items.some((it) => hasModelAircraftReferences(it.reason)) ||
+          verdict.procedures.some((p) => hasModelAircraftReferences(p.reason)) ? (
+            <ModelAircraftReferenceList />
+          ) : null}
         </>
       ) : null}
     </div>

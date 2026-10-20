@@ -1176,13 +1176,20 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 {isModelAircraftWeight ? (
                   <span
                     data-testid="model-aircraft-tag"
-                    className="whitespace-nowrap border border-rule px-1.5 py-px text-[11px] tracking-wide text-ink-soft"
+                    className="whitespace-nowrap border border-ink/60 bg-paper px-1.5 py-px font-medium text-[11px] tracking-wide text-ink"
                   >
                     {MODEL_AIRCRAFT_WEIGHT_TAG}
                   </span>
                 ) : null}
               </div>
-              <span data-testid="model-aircraft-weight-note" className="text-[10px] leading-tight text-ink-mute">
+              <span
+                data-testid="model-aircraft-weight-note"
+                className={
+                  isModelAircraftWeight
+                    ? "border-l-2 border-ink/60 pl-2 text-[11px] leading-relaxed text-ink-soft"
+                    : "text-[10px] leading-tight text-ink-mute"
+                }
+              >
                 {isModelAircraftWeight
                   ? MODEL_AIRCRAFT_WEIGHT_NOTE
                   : "100g 未満の機体は模型航空機として判定します（航空法の無人航空機の規制は対象外。空港等の周辺と高い空域の手続き、小型無人機等飛行禁止法・条例は対象）"}

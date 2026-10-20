@@ -100,7 +100,8 @@ export type ModelAircraftManualOverride = {
 };
 
 const MODEL_AIRCRAFT_PRIMARY_URL = MODEL_AIRCRAFT_REFERENCES[0]!.url;
-const MODEL_AIRCRAFT_UNVERIFIED = "※要確認：一次資料未取得";
+/** 一次資料と照合していないことの注記（画面・PDF の参照先の一覧に添える）。 */
+export const MODEL_AIRCRAFT_UNVERIFIED = "※要確認：一次資料未取得";
 
 export const modelAircraftManualOverride = (flag: string): ModelAircraftManualOverride | null => {
   if (flag === "airspace_emergency") return null;

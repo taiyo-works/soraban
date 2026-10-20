@@ -10,6 +10,7 @@ import {
   MODEL_AIRCRAFT_REFERENCE_LINE,
   MODEL_AIRCRAFT_REFERENCES,
   MODEL_AIRCRAFT_RULES_CHECKED_AT,
+  MODEL_AIRCRAFT_UNVERIFIED,
   PERMIT_SCOPE_NOT_VERIFIED_NOTE,
   VERDICT_HELP,
   type FlightVerdict,
@@ -152,7 +153,20 @@ const s = StyleSheet.create({
   },
   itemCell: { flex: 3, fontSize: 7.5, paddingRight: 4, color: INK },
   itemCellSm: { flex: 2, fontSize: 7.5, color: INK_SOFT, paddingRight: 4 },
-  verdictCell: { flex: 2, flexDirection: "row", alignItems: "center", gap: 3 },
+  unverified: {
+    fontSize: 6.5,
+    fontWeight: 700,
+    color: VERDICT_PDF_COLOR.needs_procedure,
+    borderWidth: 0.5,
+    borderColor: VERDICT_PDF_COLOR.needs_procedure,
+    borderStyle: "dashed",
+    paddingHorizontal: 3,
+    paddingVertical: 0.5,
+  },
+  refRow: { flexDirection: "row", gap: 4, paddingVertical: 2.5, borderBottomWidth: 0.5, borderBottomColor: RULE },
+  refNo: { width: 16, fontFamily: "IBM Plex Mono", fontSize: 7, color: INK_MUTE },
+  refUrl: { fontFamily: "IBM Plex Mono", fontSize: 6.5, color: INK_MUTE },
+  verdictCell: { flex: 2, flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 3 },
 });
 
 /** 段階の記号（画面の verdict-mark.tsx と同じ形・同じ幾何）。 */
@@ -235,6 +249,21 @@ const PdfVerdictScale = ({ level }: { level: ItemVerdict }) => (
     })}
   </View>
 );
+
+const hasRefs = (reason: string): boolean => reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE);
+const refNo = (i: number): string => `[${i + 1}]`;
+
+/** 理由（模型航空機の参照先の一行は外し、番号で参照先の一覧を指す。画面の pointer と同じ考え方）。 */
+const PdfReason = ({ reason }: { reason: string }) =>
+  hasRefs(reason) ? (
+    <Text style={s.reason}>
+      {keepSpaces(reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim())}
+      {"\n"}
+      {keepSpaces(`参照先：${refNo(0)}〜${refNo(MODEL_AIRCRAFT_REFERENCES.length - 1)}（参照先の一覧）`)}
+    </Text>
+  ) : (
+    <Text style={s.reason}>{keepSpaces(reason)}</Text>
+  );
 
 const SectionHead = ({ title, count }: { title: string; count?: number }) => (
   <View style={s.sectionHead} minPresenceAhead={40}>
@@ -332,7 +361,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
               </View>
               <View style={s.cellTitle}>
                 <Text style={s.title}>{p.title}</Text>
-                <Text style={s.reason}>{keepSpaces(p.reason)}</Text>
+                <PdfReason reason={p.reason} />
               </View>
               <Text style={s.cellTo}>{keepSpaces(p.submitTo)}</Text>
               <View style={s.cellDeadline}>
@@ -414,11 +443,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
       <View key={it.id} style={[s.itemRow, { borderLeftColor: VERDICT_PDF_COLOR[it.verdict] }]} wrap={false}>
         <View style={s.itemCell}>
           <Text>{keepSpaces(it.title)}</Text>
-          {it.reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE) ? (
-            <Text style={{ fontSize: 6.5, color: "#5B6170", lineHeight: 1.4 }}>
-              {keepSpaces(it.reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim())}
-            </Text>
-          ) : null}
+          {hasRefs(it.reason) ? <PdfReason reason={it.reason} /> : null}
         </View>
         <Text style={s.itemCellSm}>{BASE_STATUS_LABEL[it.baseStatus]}</Text>
         <Text style={s.itemCellSm}>
@@ -432,15 +457,23 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
         </View>
       </View>
     ))}
-    {verdict.items.some((it) => it.reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE)) ? (
-      <View style={{ marginTop: 6 }} wrap={false}>
-        <Text style={{ fontSize: 7.5, fontWeight: 700 }}>
-          参照先（100g 未満の機体・模型航空機。確認日 {MODEL_AIRCRAFT_RULES_CHECKED_AT}）
-        </Text>
-        {MODEL_AIRCRAFT_REFERENCES.map((r) => (
-          <Text key={r.id} style={{ fontSize: 7, color: "#2A2F3A", lineHeight: 1.45 }}>
-            ・{keepSpaces(r.title)} {r.url}
-          </Text>
+    {verdict.items.some((it) => hasRefs(it.reason)) || verdict.procedures.some((p) => hasRefs(p.reason)) ? (
+      <View wrap={false}>
+        <SectionHead title="参照先（100g 未満の機体・模型航空機）" count={MODEL_AIRCRAFT_REFERENCES.length} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 }}>
+          <MonoText style={{ fontFamily: "IBM Plex Mono", fontSize: 7, color: INK_SOFT }}>
+            {keepSpaces(`確認日 ${MODEL_AIRCRAFT_RULES_CHECKED_AT}`)}
+          </MonoText>
+          <Text style={s.unverified}>{MODEL_AIRCRAFT_UNVERIFIED}</Text>
+        </View>
+        {MODEL_AIRCRAFT_REFERENCES.map((r, i) => (
+          <View key={r.id} style={s.refRow}>
+            <Text style={s.refNo}>{refNo(i)}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 7.5, color: INK }}>{keepSpaces(r.title)}</Text>
+              <Text style={s.refUrl}>{r.url}</Text>
+            </View>
+          </View>
         ))}
       </View>
     ) : null}
