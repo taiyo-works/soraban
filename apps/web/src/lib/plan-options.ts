@@ -1,8 +1,6 @@
 // 飛行計画のフォームの選択肢と、判定画面からの入力の引き継ぎ（Sprint 12a 設計 F・J）。純粋関数・定数だけ。
 // 選択肢の文言は @soraban/regulations の定数を使い、別に書かない。判定画面（regulation-checker）と同じ値を使う。
 import {
-  DIPS_PERMIT_KINDS,
-  dipsPermitValue,
   PERMIT_VALUE_LABEL,
   SPECIFIC_FLIGHT_FLAG_LABEL,
   type SpecificFlightFlag,
@@ -18,9 +16,12 @@ export const PLAN_FLAG_CHOICES: readonly { readonly value: SpecificFlightFlag; r
   .filter((f) => !DERIVED_FLAGS.includes(f))
   .map((value) => ({ value, label: SPECIFIC_FLIGHT_FLAG_LABEL[value] }));
 
-/** 計画に入れられる許可・承認・同意（server/ops/validate-plan.ts の PLAN_PERMIT_VALUES と同じ順）。 */
+/**
+ * 計画に手入力できる同意・通報・公園・文化庁の値（server/ops/validate-plan.ts の PLAN_PERMIT_VALUES と同じ順）。
+ * DIPS の許可・承認（mlit:<種類>）は手入力できない：許可・承認の登録から、計画の許可番号の欄の番号で照合して判定に入る
+ * （Sprint 12d）。判定画面からの引き継ぎでも DIPS の許可は引き継がない。
+ */
 export const PLAN_PERMIT_CHOICES: readonly { readonly value: string; readonly label: string }[] = [
-  ...DIPS_PERMIT_KINDS.map(dipsPermitValue),
   "facility_manager",
   "pref_pubsafety_notice",
   "park_manager",

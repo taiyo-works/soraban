@@ -56,7 +56,8 @@ describe("判定画面からの入力の引き継ぎ", () => {
       lng: "133.3314",
       weightG: "900",
       flags: ["airspace_emergency", "method_night"],
-      permits: ["mlit:night", "facility_manager"],
+      // Sprint 12d：DIPS の許可・承認（mlit:night）は引き継がない
+      permits: ["facility_manager"],
       plannedDate: "2027-01-20",
       purpose: "",
       access: "yes",
@@ -70,7 +71,7 @@ describe("判定画面からの入力の引き継ぎ", () => {
       lng: "133.3314999999",
       weightG: "-1",
       flags: "method_night,airspace_did,unknown",
-      permits: "mlit,mlit:night",
+      permits: "mlit,mlit:night,park_manager,unknown",
       date: "2027/01/20",
       purpose: "nope",
       access: "maybe",
@@ -80,7 +81,8 @@ describe("判定画面からの入力の引き継ぎ", () => {
     expect(back.lng).toBeUndefined();
     expect(back.weightG).toBeUndefined();
     expect(back.flags).toEqual(["method_night"]);
-    expect(back.permits).toEqual(["mlit:night"]);
+    // Sprint 12d：mlit・mlit:night はどちらも引き継がない（DIPS の許可は登録から照合する）
+    expect(back.permits).toEqual(["park_manager"]);
     expect(back.plannedDate).toBeUndefined();
     expect(back).toMatchObject({ purpose: "", access: "", observer: "" });
   });

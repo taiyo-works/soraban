@@ -236,6 +236,8 @@ export type NextActionId =
   | "apply_permit"
   | "notify_police"
   | "consider_report"
+  // Sprint 12d：許可・承認の申請が済みで、判定に許可の手続きが残り、計画の番号に適用できる登録がないときの、結果の登録
+  | "register_permit"
   // Sprint 12c：飛行当日・現場の次にやること（今日の画面。通報とは別に、記録の有無から導出する）
   | "record_landing"
   | "do_inspection"
@@ -268,6 +270,7 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   cancel_report: "通報を取り消す",
   apply_permit: "許可・承認を申請する",
   notify_police: "警察へ通報する",
+  register_permit: "許可・承認の結果を登録する",
   consider_report: "通報を検討する（推奨）",
   record_landing: "着陸を記録する",
   do_inspection: "日常点検をする",

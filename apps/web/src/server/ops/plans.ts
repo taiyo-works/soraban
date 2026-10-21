@@ -20,6 +20,15 @@ import { toEvidenceLogInsert } from "@/server/evidence-log";
 import { can } from "./authz";
 import { runJudge } from "./judge";
 import {
+  EMPTY_PERMIT_MATCH,
+  isDipsPermitValue,
+  summarizePermitMatch,
+  type PermitBasisEntry,
+  type PermitMatchResult,
+  type PlanPermitSummary,
+} from "./permit-logic";
+import { loadPermitMatches, matchInput, planPermitInputOfData } from "./permit-match";
+import {
   currentFingerprintPartsOf,
   emptyExtras,
   loadReportExtras,
@@ -36,6 +45,7 @@ import {
   currentFreshnessContext,
   FRESHNESS_REASON_LABEL,
   PLAN_STATES,
+  permitPartEquals,
   planJudgementChanged,
   snapshotFreshness,
   staleSources,
@@ -180,6 +190,11 @@ export type PlanDto = {
   readonly nextActionCount: number;
   /** 出典・確認日が古い項目（90 日超）。確認の画面に出す。 */
   readonly staleSources: readonly StaleSource[];
+  /**
+   * 許可・承認の照合の要約（Sprint 12d）。計画の許可番号の欄の番号ごとの状態・理由・登録の版。
+   * 登録は利用者の申告。範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのまま。
+   */
+  readonly permits: PlanPermitSummary;
 };
 
 export type PlanDetailDto = PlanDto & {
@@ -202,11 +217,37 @@ export type SnapshotListDto = SnapshotSummaryDto & {
   readonly isCurrent: boolean;
 };
 
+/** スナップショットが根拠にした許可・承認の登録の版（input.permitBasis の要素）と、その版が今も実在して一致するか。 */
+export type PermitBasisDto = PermitBasisEntry & {
+  /** 登録の版が record_versions に存在するか。 */
+  readonly versionExists: boolean;
+  /** 版のハッシュが record_versions の content_hash と一致するか（一致しなければ「版が一致しません」と出す）。 */
+  readonly hashMatches: boolean;
+};
+
 export type SnapshotDetailDto = SnapshotListDto & {
   /** 保存した判定の結果（/api/diagnose の応答と同じ形）。再計算はしない。 */
   readonly result: Record<string, unknown>;
   readonly report: ReportRequirement;
   readonly staleSources: readonly StaleSource[];
+  /**
+   * 根拠にした許可・承認の登録（Sprint 12d）。適用した登録がないスナップショット（12c までを含む）は空で、
+   * 「根拠にした許可の登録はない」と読む。当時の版は /api/ops/permits/[id]/versions から読める。
+   */
+  readonly permitBasis: readonly PermitBasisDto[];
+};
+
+const permitBasisOf = async (ctx: OpsContext, input: Record<string, unknown>): Promise<PermitBasisDto[]> => {
+  const raw = Array.isArray(input["permitBasis"]) ? (input["permitBasis"] as unknown[]) : [];
+  const entries = raw.filter(
+    (e): e is PermitBasisEntry => e !== null && typeof e === "object" && typeof (e as { registrationId?: unknown }).registrationId === "string",
+  );
+  const ids = [...new Set(entries.map((e) => e.registrationId))].filter(isUuid);
+  const versions = await store.listPermitVersionHashes(ctx.db, ctx.member.org_id, ids);
+  return entries.map((e) => {
+    const v = versions.find((x) => x.entity_id === e.registrationId && x.version_no === e.versionNo);
+    return { ...e, versionExists: v !== undefined, hashMatches: v !== undefined && v.content_hash === e.versionHash };
+  });
 };
 
 const confirmationDto = (r: PlanConfirmationRow): ConfirmationDto => {
@@ -266,7 +307,8 @@ const planDto = (
   confirmations: readonly PlanConfirmationRow[],
   mine: PilotRow | null,
   extras: PlanReportExtras = emptyExtras(),
-): PlanDto => planDtoParts(ctx, r, confirmations, mine, extras).dto;
+  permits: PermitMatchResult = EMPTY_PERMIT_MATCH,
+): PlanDto => planDtoParts(ctx, r, confirmations, mine, extras, permits).dto;
 
 /** 計画の DTO と、「次にやること」の全件（12b の導出）。今日の画面は全件が要る（DTO には先頭の 1 件と件数だけ）。 */
 const planDtoParts = (
@@ -275,6 +317,7 @@ const planDtoParts = (
   confirmations: readonly PlanConfirmationRow[],
   mine: PilotRow | null,
   extras: PlanReportExtras = emptyExtras(),
+  permits: PermitMatchResult = EMPTY_PERMIT_MATCH,
 ): { readonly dto: PlanDto; readonly nextActions: readonly NextAction[] } => {
   const start = asDate(r.planned_start_at);
   const confirmationDtos = confirmations.map(confirmationDto);
@@ -293,6 +336,7 @@ const planDtoParts = (
     },
     plan: planFields(r),
     aircraft: aircraftWeight(r),
+    permits,
     now: ctx.freshnessNow ?? currentFreshnessContext(),
   });
   const input = r.snapshot_input as { droneWeightG?: number | null; purpose?: string | null };
@@ -309,6 +353,7 @@ const planDtoParts = (
     requirement,
     extras,
     now: nowOf(ctx),
+    permits,
   });
   const dto: PlanDto = {
     id: r.id,
@@ -365,12 +410,20 @@ const planDtoParts = (
       },
       nowOf(ctx),
     ),
+    permits: summarizePermitMatch(permits),
   };
   return { dto, nextActions: summary.nextActions };
 };
 
 /** 詳細の追加分：次にやることの全件・通報時からの変更点・手続きの記録。 */
-const detailExtras = (ctx: OpsContext, r: PlanWithJoins, dto: PlanDto, mine: PilotRow | null, extras: PlanReportExtras) => {
+const detailExtras = (
+  ctx: OpsContext,
+  r: PlanWithJoins,
+  dto: PlanDto,
+  mine: PilotRow | null,
+  extras: PlanReportExtras,
+  permits: PermitMatchResult,
+) => {
   const summary = summarizePlanReport({
     ctx,
     plan: r,
@@ -380,6 +433,7 @@ const detailExtras = (ctx: OpsContext, r: PlanWithJoins, dto: PlanDto, mine: Pil
     requirement: dto.report,
     extras,
     now: nowOf(ctx),
+    permits,
   });
   const effective = dto.report.status.effectiveId ? extras.rows.find((x) => x.id === dto.report.status.effectiveId) : undefined;
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
@@ -431,7 +485,8 @@ export const listPlans = async (ctx: OpsContext, filter: PlanListFilter = {}): P
   const rows = await store.listPlans(ctx.db, ctx.member.org_id, filter);
   const by = await withConfirmations(ctx, rows);
   const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
-  const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id)));
+  const matches = await loadPermitMatches(ctx.db, ctx.member.org_id, rows);
+  const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id), matches.get(r.id)));
   return filter.state ? dtos.filter((d) => d.state === filter.state) : dtos;
 };
 
@@ -443,9 +498,10 @@ export const loadPlanSummaries = async (
 ): Promise<{ readonly row: PlanWithJoins; readonly dto: PlanDto; readonly nextActions: readonly NextAction[]; readonly extras: PlanReportExtras }[]> => {
   const by = await withConfirmations(ctx, rows);
   const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
+  const matches = await loadPermitMatches(ctx.db, ctx.member.org_id, rows);
   return rows.map((r) => {
     const ex = extras.get(r.id) ?? emptyExtras();
-    return { row: r, extras: ex, ...planDtoParts(ctx, r, by.get(r.id) ?? [], mine, ex) };
+    return { row: r, extras: ex, ...planDtoParts(ctx, r, by.get(r.id) ?? [], mine, ex, matches.get(r.id)) };
   });
 };
 
@@ -462,6 +518,7 @@ const planDtoOf = async (ctx: OpsContext, r: PlanWithJoins, mine: PilotRow | nul
     (await withConfirmations(ctx, [r])).get(r.id) ?? [],
     mine,
     (await loadReportExtras(ctx, [r.id])).get(r.id),
+    (await loadPermitMatches(ctx.db, ctx.member.org_id, [r])).get(r.id),
   );
 
 /** 通報の API が使う、計画の行・要求した利用者の操縦者・計画の DTO・通報の導出に必要な値の組。 */
@@ -473,7 +530,8 @@ export const loadPlanBundle = async (
   const mine = await myPilot(ctx);
   const confirmations = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [plan.id]);
   const extras = (await loadReportExtras(ctx, [plan.id])).get(plan.id) ?? emptyExtras();
-  return { plan, mine, dto: planDto(ctx, plan, confirmations, mine, extras), extras };
+  const permits = (await loadPermitMatches(ctx.db, ctx.member.org_id, [plan])).get(plan.id) ?? EMPTY_PERMIT_MATCH;
+  return { plan, mine, dto: planDto(ctx, plan, confirmations, mine, extras, permits), extras };
 };
 
 export const getPlan = async (ctx: OpsContext, id: string): Promise<PlanDetailDto> => {
@@ -483,8 +541,9 @@ export const getPlan = async (ctx: OpsContext, id: string): Promise<PlanDetailDt
   const confirmations = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [r.id]);
   const flights = await rec.listFlightsForPlan(ctx, r.id);
   const extras = (await loadReportExtras(ctx, [r.id])).get(r.id) ?? emptyExtras();
-  const dto = planDto(ctx, r, confirmations, mine, extras);
-  return { ...dto, confirmations: confirmations.map(confirmationDto), flights, ...detailExtras(ctx, r, dto, mine, extras) };
+  const permits = (await loadPermitMatches(ctx.db, ctx.member.org_id, [r])).get(r.id) ?? EMPTY_PERMIT_MATCH;
+  const dto = planDto(ctx, r, confirmations, mine, extras, permits);
+  return { ...dto, confirmations: confirmations.map(confirmationDto), flights, ...detailExtras(ctx, r, dto, mine, extras, permits) };
 };
 
 export const listPlanVersions = async (ctx: OpsContext, id: string): Promise<VersionDto[]> => {
@@ -545,6 +604,7 @@ export const getSnapshot = async (ctx: OpsContext, planId: string, snapshotId: s
       result: r.result as never,
     }),
     staleSources: staleSources({ datasets: r.datasets, proceduresVerifiedAt: r.procedures_verified_at }, nowOf(ctx)),
+    permitBasis: await permitBasisOf(ctx, r.input),
   };
 };
 
@@ -667,9 +727,10 @@ export const createPlan = async (ctx: OpsContext, body: unknown): Promise<SaveRe
 
   // 保存時にサーバーが判定を実行する（リクエストの判定の値は読まない）。失敗・時間切れは 503 で何も保存しない
   const planId = randomUUID();
-  const judgement = buildJudgementInput(judgementFieldsOf(v.data), {
-    maxTakeoffWeightKg: aircraft.max_takeoff_weight_kg === null ? null : Number(aircraft.max_takeoff_weight_kg),
-  });
+  const weightKg = aircraft.max_takeoff_weight_kg === null ? null : Number(aircraft.max_takeoff_weight_kg);
+  // 許可番号の欄の番号を登録に結びつけ、範囲に収まった DIPS の種類だけを判定の入力に足す（Sprint 12d）
+  const permitMatch = await matchInput(ctx.db, ctx.member.org_id, planPermitInputOfData(v.data, weightKg));
+  const judgement = buildJudgementInput(judgementFieldsOf(v.data), { maxTakeoffWeightKg: weightKg }, permitMatch);
   const run = await judgePlan(ctx, judgement);
   const snapshotId = randomUUID();
   try {
@@ -719,7 +780,11 @@ export const updatePlan = async (ctx: OpsContext, id: string, body: unknown): Pr
     );
   }
   const base = await latestData(ctx, id);
-  const merged = { ...planInputFromData(base), ...pickFields(input, PLAN_FIELDS), aircraftId: current.aircraft_id };
+  const merged: Record<string, unknown> = { ...planInputFromData(base), ...pickFields(input, PLAN_FIELDS), aircraftId: current.aircraft_id };
+  // 12c までの計画に残る DIPS の手入力値は、判定に使わないため、訂正で外す（本文に DIPS の値があれば検査が 400 にする）
+  if (!("pilotPermits" in input) && Array.isArray(merged["pilotPermits"])) {
+    merged["pilotPermits"] = (merged["pilotPermits"] as unknown[]).filter((p) => typeof p !== "string" || !isDipsPermitValue(p));
+  }
   const v = validatePlan(merged);
   if (!meta.ok || !v.ok) return invalid(v, meta.ok ? undefined : { errors: { ...meta.errors }, codes: {} });
   if (current.voided_at !== null) throw new OpsError(409, "voided");
@@ -737,7 +802,13 @@ export const updatePlan = async (ctx: OpsContext, id: string, body: unknown): Pr
     current_snapshot_id: current.current_snapshot_id,
     client_request_id: current.client_request_id,
   };
-  if (!planJudgementChanged(base, { ...base, ...v.data })) {
+  const weightKg = current.aircraft_max_takeoff_weight_kg === null ? null : Number(current.aircraft_max_takeoff_weight_kg);
+  const permitMatch = await matchInput(ctx.db, ctx.member.org_id, planPermitInputOfData(v.data, weightKg));
+  const judgement = buildJudgementInput(judgementFieldsOf(v.data), { maxTakeoffWeightKg: weightKg }, permitMatch);
+  // 判定に関わる項目の変更に加え、照合の結果（許可番号・所要時間・操縦者・登録の変更で変わる pilotPermits・permitBasis）が
+  // 現在のスナップショットと違うときも、新しいスナップショットを作る（設計 D）
+  const permitsChanged = !permitPartEquals(judgement, current.snapshot_input);
+  if (!planJudgementChanged(base, { ...base, ...v.data }) && !permitsChanged) {
     // 判定に関わらない項目の訂正：スナップショットは増やさない
     await store.appendVersion(ctx.db, {
       orgId: ctx.member.org_id,
@@ -751,9 +822,6 @@ export const updatePlan = async (ctx: OpsContext, id: string, body: unknown): Pr
     });
   } else {
     // 判定に関わる項目の訂正：同じトランザクションで、新しい版と新しいスナップショットを作る
-    const judgement = buildJudgementInput(judgementFieldsOf(v.data), {
-      maxTakeoffWeightKg: current.aircraft_max_takeoff_weight_kg === null ? null : Number(current.aircraft_max_takeoff_weight_kg),
-    });
     const run = await judgePlan(ctx, judgement);
     const snapshotId = randomUUID();
     await writeJudged(ctx, {
@@ -819,10 +887,12 @@ export const rejudgePlan = async (ctx: OpsContext, id: string, body: unknown): P
   // 判定の待ち時間（最大 20 秒）の間に入った訂正を上書きしないよう、版の指定がなければ読んだ時点の版を使う。
   const expectedVersion = optionalExpectedVersion(asInput(body ?? {})) ?? current.current_version;
   if (current.voided_at !== null) throw new OpsError(409, "voided");
-  const before = planDto(ctx, current, [], mine).freshness.reasons.map((r) => r.code);
-  const reason: SnapshotReasonDb = before.some((c) => c !== "input_changed") ? "data_updated" : "manual";
+  // 現在の登録で照合し直す（再判定も登録の現在の版に基づく）。入力・許可の登録の変更だけなら manual、根拠のデータ・エンジンの変更なら data_updated
+  const permitMatch = (await loadPermitMatches(ctx.db, ctx.member.org_id, [current])).get(id) ?? EMPTY_PERMIT_MATCH;
+  const before = planDto(ctx, current, [], mine, undefined, permitMatch).freshness.reasons.map((r) => r.code);
+  const reason: SnapshotReasonDb = before.some((c) => c !== "input_changed" && c !== "permits_changed") ? "data_updated" : "manual";
   const base = await latestData(ctx, id);
-  const judgement = buildJudgementInput(planFields(current), aircraftWeight(current));
+  const judgement = buildJudgementInput(planFields(current), aircraftWeight(current), permitMatch);
   const run = await judgePlan(ctx, judgement);
   const snapshotId = randomUUID();
   await writeJudged(ctx, {
@@ -919,6 +989,8 @@ export const confirmPlan = async (ctx: OpsContext, id: string, body: unknown): P
   const all = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [id]);
   const saved = all.find((c) => c.id === confirmationId)!;
   const extras = (await loadReportExtras(ctx, [id])).get(id);
-  return { confirmation: confirmationDto(saved), plan: planDto(ctx, await loadPlan(ctx, id), all, mine, extras) };
+  const planRow = await loadPlan(ctx, id);
+  const permits = (await loadPermitMatches(ctx.db, ctx.member.org_id, [planRow])).get(id);
+  return { confirmation: confirmationDto(saved), plan: planDto(ctx, planRow, all, mine, extras, permits) };
 };
 

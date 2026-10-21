@@ -104,12 +104,23 @@ describe("validatePlan", () => {
     expect(codes({ flags: [1] })["flags"]).toBe("invalid");
   });
 
-  it("許可は重複を除いて並べ替える。旧版の値（mlit）・未知の値は unknown_value", () => {
-    expect(ok({ pilotPermits: ["park_manager", "mlit:did", "mlit:did"] }).pilot_permits).toEqual(["mlit:did", "park_manager"]);
-    expect(codes({ pilotPermits: ["mlit"] })["pilotPermits"]).toBe("unknown_value");
+  it("手入力できる許可・同意は重複を除いて並べ替える。未知の値は unknown_value（Sprint 12d：DIPS の値は別の検査）", () => {
+    expect(ok({ pilotPermits: ["park_manager", "facility_manager", "park_manager"] }).pilot_permits).toEqual(["facility_manager", "park_manager"]);
     expect(codes({ pilotPermits: ["facility_manager_and_pref_pubsafety"] })["pilotPermits"]).toBe("unknown_value");
-    expect(PLAN_PERMIT_VALUES).toContain("mlit:night");
+    // Sprint 12d：DIPS の許可・承認（mlit・mlit:<種類>）は手入力できない。登録の照合から判定に入る
+    expect(PLAN_PERMIT_VALUES).not.toContain("mlit:night");
     expect(PLAN_PERMIT_VALUES).not.toContain("mlit");
+  });
+
+  it("Sprint 12d：DIPS の許可・承認の値は 400 dips_permit_from_registry（理由に「登録から照合します」）", () => {
+    for (const v of ["mlit", "mlit:did", "mlit:night", "mlit:150m", "mlit:unknown"]) {
+      const r = validatePlan({ ...valid, pilotPermits: ["park_manager", v] });
+      expect(r.ok, v).toBe(false);
+      if (!r.ok) {
+        expect(r.codes["pilotPermits"], v).toBe("dips_permit_from_registry");
+        expect(r.errors["pilotPermits"], v).toContain("登録から照合します");
+      }
+    }
   });
 
   it("目的の例外・立入管理措置など", () => {

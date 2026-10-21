@@ -2,8 +2,15 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_VERSION, PROCEDURES_REVISION } from "@soraban/regulations";
 import {
+  EMPTY_PERMIT_APPLICATION,
+  isDipsPermitValue,
+  type PermitApplication,
+  type PermitBasisEntry,
+} from "./permit-logic";
+import {
   buildJudgementInput,
   canonicalJson,
+  permitPartEquals,
   confirmationState,
   currentFreshnessContext,
   FLAG_TO_SPECIFIC_FLIGHT_TYPE,
@@ -60,10 +67,10 @@ describe("buildJudgementInput（設計 A2）", () => {
 
   it("許可は並べ替え済み・重複なし。目的・立入管理・第三者上空・補助者は指定があるときだけ入る", () => {
     const i = buildJudgementInput(
-      { ...PLAN, pilotPermits: ["park_manager", "mlit:did", "mlit:did"], judgementPurpose: "emergency", accessControl: false, thirdPartyOverflight: true, bvlosWithObserver: true },
+      { ...PLAN, pilotPermits: ["park_manager", "facility_manager", "park_manager"], judgementPurpose: "emergency", accessControl: false, thirdPartyOverflight: true, bvlosWithObserver: true },
       { maxTakeoffWeightKg: 1 },
     );
-    expect(i.pilotPermits).toEqual(["mlit:did", "park_manager"]);
+    expect(i.pilotPermits).toEqual(["facility_manager", "park_manager"]);
     expect(i).toMatchObject({ purpose: "emergency", accessControl: false, thirdPartyOverflight: true, bvlosWithObserver: true });
     const j = buildJudgementInput(PLAN, { maxTakeoffWeightKg: 1 });
     expect(Object.keys(j)).toEqual(["lat", "lng", "droneWeightG", "flags", "plannedDate", "pilotPermits"]);
@@ -80,9 +87,9 @@ describe("buildJudgementInput（設計 A2）", () => {
     const r = toDiagnosisRunInput(buildJudgementInput(PLAN, { maxTakeoffWeightKg: null }));
     expect(r).toEqual({ lat: 35.434238, lng: 133.380508, flags: [], plannedDate: "2027-01-14", didConfirmedNotApplicable: false });
     const w = toDiagnosisRunInput(
-      buildJudgementInput({ ...PLAN, pilotPermits: ["mlit:did"], judgementPurpose: "public_duty", accessControl: true }, { maxTakeoffWeightKg: 0.9 }),
+      buildJudgementInput({ ...PLAN, pilotPermits: ["park_manager"], judgementPurpose: "public_duty", accessControl: true }, { maxTakeoffWeightKg: 0.9 }),
     );
-    expect(w).toMatchObject({ droneWeightG: 900, pilotPermits: ["mlit:did"], purpose: "public_duty", accessControl: true });
+    expect(w).toMatchObject({ droneWeightG: 900, pilotPermits: ["park_manager"], purpose: "public_duty", accessControl: true });
   });
 });
 
@@ -301,5 +308,126 @@ describe("specificFlightTypesFromFlags（設計 G：飛行記録への引き継�
     ]);
     expect(specificFlightTypesFromFlags([])).toEqual([]);
     expect(specificFlightTypesFromFlags(["unknown", "airspace_did", "airspace_did"])).toEqual(["did"]);
+  });
+});
+
+// ---- Sprint 12d：許可・承認の登録の照合の適用（設計 D） ---------------------------
+
+const BASIS: PermitBasisEntry = {
+  registrationId: "11111111-1111-4111-8111-111111111111",
+  versionNo: 2,
+  versionHash: "b".repeat(64),
+  permitNumber: "P-001",
+  coverage: "blanket",
+  kinds: ["did", "night"],
+  applied: true,
+  validFrom: "2026-10-01",
+  validTo: "2027-09-30",
+  window: { from: "2027-01-14", to: "2027-01-14" },
+};
+const APPLIED: PermitApplication = { grantedValues: ["mlit:did", "mlit:night"], basis: [BASIS] };
+
+describe("buildJudgementInput：登録の照合の適用（Sprint 12d 設計 D）", () => {
+  it("手入力の DIPS の値（mlit・mlit:*）は判定に使わない。同意・通報・公園・文化庁は従来どおり", () => {
+    const i = buildJudgementInput(
+      { ...PLAN, pilotPermits: ["mlit", "mlit:did", "mlit:night", "park_manager", "facility_manager", "pref_pubsafety_notice", "bunkacho_or_kyoiku"] },
+      { maxTakeoffWeightKg: 1 },
+    );
+    expect(i.pilotPermits).toEqual(["bunkacho_or_kyoiku", "facility_manager", "park_manager", "pref_pubsafety_notice"]);
+    expect(isDipsPermitValue("mlit:150m")).toBe(true);
+    expect(isDipsPermitValue("facility_manager")).toBe(false);
+  });
+
+  it("適用した DIPS の値だけが足される（並べ替え・重複なし）。適用した登録の根拠が permitBasis に入る", () => {
+    const i = buildJudgementInput({ ...PLAN, pilotPermits: ["park_manager", "mlit:night"] }, { maxTakeoffWeightKg: 1 }, APPLIED);
+    expect(i.pilotPermits).toEqual(["mlit:did", "mlit:night", "park_manager"]);
+    expect(i.permitBasis).toEqual([BASIS]);
+    const r = toDiagnosisRunInput(i);
+    expect(r.pilotPermits).toEqual(["mlit:did", "mlit:night", "park_manager"]);
+    // 判定の入力（runDiagnosis）には根拠を渡さない
+    expect(Object.keys(r)).not.toContain("permitBasis");
+  });
+
+  it("適用がない（permitBasis が空・指定なし）入力は、12c までと canonical JSON で一致する（キーを足さない）", () => {
+    const legacy = {
+      lat: 35.434238,
+      lng: 133.380508,
+      droneWeightG: 900,
+      flags: ["method_night"],
+      plannedDate: "2027-01-14",
+      pilotPermits: ["park_manager"],
+      purpose: "emergency",
+      accessControl: true,
+    };
+    const f = { ...PLAN, flags: ["method_night"], pilotPermits: ["park_manager"], judgementPurpose: "emergency", accessControl: true };
+    const a = buildJudgementInput(f, { maxTakeoffWeightKg: 0.9 });
+    const b = buildJudgementInput(f, { maxTakeoffWeightKg: 0.9 }, EMPTY_PERMIT_APPLICATION);
+    expect(canonicalJson(a)).toBe(canonicalJson(legacy));
+    expect(canonicalJson(b)).toBe(canonicalJson(legacy));
+    expect("permitBasis" in a).toBe(false);
+    // 根拠が空でも grantedValues だけがあるという状態は作らない（applied の登録は必ず根拠を持つ）。キーは basis が空でないときだけ
+    expect("permitBasis" in buildJudgementInput(f, { maxTakeoffWeightKg: 0.9 }, { grantedValues: [], basis: [] })).toBe(false);
+  });
+
+  it("permitPartEquals：pilotPermits・permitBasis だけを比べる（保存時の新しいスナップショットの要否）", () => {
+    const a = buildJudgementInput(PLAN, { maxTakeoffWeightKg: 1 }, APPLIED);
+    expect(permitPartEquals(a, JSON.parse(JSON.stringify(a)))).toBe(true);
+    expect(permitPartEquals(a, buildJudgementInput(PLAN, { maxTakeoffWeightKg: 5 }, APPLIED))).toBe(true);
+    expect(permitPartEquals(a, buildJudgementInput(PLAN, { maxTakeoffWeightKg: 1 }))).toBe(false);
+    expect(permitPartEquals(a, buildJudgementInput(PLAN, { maxTakeoffWeightKg: 1 }, { ...APPLIED, basis: [{ ...BASIS, versionNo: 3 }] }))).toBe(false);
+    expect(permitPartEquals(buildJudgementInput(PLAN, { maxTakeoffWeightKg: 1 }), { lat: 1 })).toBe(true);
+  });
+});
+
+describe("snapshotFreshness：permits_changed（Sprint 12d 契約 9）", () => {
+  const now: SnapshotFreshnessInput["now"] = {
+    engineVersion: "e1",
+    datasetVerifiedAt: () => "2026-10-18",
+    proceduresRevision: 3,
+    proceduresVerifiedAt: "2026-10-19",
+  };
+  const mk = (permits: PermitApplication) => ({
+    input: buildJudgementInput(PLAN, { maxTakeoffWeightKg: 0.9 }, permits),
+    engineVersion: "e1",
+    datasets: [{ id: "x", verifiedAt: "2026-10-18" }],
+    proceduresRevision: 3,
+    proceduresVerifiedAt: "2026-10-19",
+  });
+  const run = (snapshotPermits: PermitApplication, currentPermits: PermitApplication, plan: PlanJudgementFields = PLAN) =>
+    snapshotFreshness({ snapshot: mk(snapshotPermits), plan, aircraft: { maxTakeoffWeightKg: 0.9 }, permits: currentPermits, now });
+
+  it("登録の訂正・失効・新規・取消で照合の結果が変わるときだけ permits_changed。同じなら新しい", () => {
+    expect(run(APPLIED, APPLIED)).toEqual({ stale: false, reasons: [] });
+    expect(run(EMPTY_PERMIT_APPLICATION, EMPTY_PERMIT_APPLICATION)).toEqual({ stale: false, reasons: [] });
+    // 登録の訂正（版が上がる）
+    expect(run(APPLIED, { ...APPLIED, basis: [{ ...BASIS, versionNo: 3, versionHash: "c".repeat(64) }] })).toEqual({ stale: true, reasons: ["permits_changed"] });
+    // 失効・取消で適用がなくなる／新規登録で適用が増える
+    expect(run(APPLIED, EMPTY_PERMIT_APPLICATION).reasons).toEqual(["permits_changed"]);
+    expect(run(EMPTY_PERMIT_APPLICATION, APPLIED).reasons).toEqual(["permits_changed"]);
+    // 種類だけが変わる
+    expect(run(APPLIED, { grantedValues: ["mlit:did"], basis: [{ ...BASIS, kinds: ["did"] }] }).reasons).toEqual(["permits_changed"]);
+  });
+
+  it("無関係な登録の変更では変わらない（適用に関わらない登録は入力に入らない）", () => {
+    // 現在の照合の結果が変わらなければ（適用する登録が同じ版）、他の登録を何件変えても新しい
+    expect(run(APPLIED, { grantedValues: [...APPLIED.grantedValues], basis: [{ ...BASIS }] }).stale).toBe(false);
+  });
+
+  it("入力の変更は従来どおり input_changed。入力と許可の両方が変わっても input_changed（permits_changed にしない）", () => {
+    expect(run(APPLIED, APPLIED, { ...PLAN, latitude: 35.5 }).reasons).toEqual(["input_changed"]);
+    expect(run(APPLIED, EMPTY_PERMIT_APPLICATION, { ...PLAN, latitude: 35.5 }).reasons).toEqual(["input_changed"]);
+  });
+
+  it("12c までの計画の DIPS の手入力値は、判定に使わなくなるため permits_changed になる", () => {
+    const legacy = {
+      input: buildJudgementInput({ ...PLAN, pilotPermits: [] }, { maxTakeoffWeightKg: 0.9 }),
+      engineVersion: "e1",
+      datasets: [],
+      proceduresRevision: 3,
+      proceduresVerifiedAt: "2026-10-19",
+    };
+    const legacyInput = { ...legacy.input, pilotPermits: ["mlit:night"] };
+    const r = snapshotFreshness({ snapshot: { ...legacy, input: legacyInput }, plan: { ...PLAN, pilotPermits: ["mlit:night"] }, aircraft: { maxTakeoffWeightKg: 0.9 }, now });
+    expect(r).toEqual({ stale: true, reasons: ["permits_changed"] });
   });
 });

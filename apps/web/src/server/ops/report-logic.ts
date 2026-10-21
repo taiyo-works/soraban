@@ -195,6 +195,11 @@ export type NextActionsInput = {
   /** 種別ごとの最新の手続きの記録（無ければ undefined）。 */
   readonly procedureRecords: Readonly<Partial<Record<ProcedureRecordKind, ProcedureRecordLite>>>;
   readonly can: { readonly update: boolean; readonly confirm: boolean; readonly record: boolean };
+  /**
+   * 許可・承認の登録との関係（Sprint 12d）。指定しないとき（12b の導出だけを使うとき）は「許可・承認の結果を登録する」を出さない。
+   * applied は、計画の許可番号に適用された登録が 1 件以上あること。canRegister は運航管理者だけ。
+   */
+  readonly permits?: { readonly applied: boolean; readonly canRegister: boolean };
 };
 
 const PERMIT_PROCEDURE = /^(flight-permission-|flight-approval-)/;
@@ -225,6 +230,9 @@ export const planHref = (planId: string, id: NextActionId): string => {
     case "apply_permit":
     case "notify_police":
       return `${base}#procedures`;
+    // Sprint 12d：許可・承認の登録の新規入力へ
+    case "register_permit":
+      return "/ops/permits/new";
     // Sprint 12c：飛行当日・現場の次にやること（今日の画面で導出する。経路は lib/ops-field.ts）
     case "record_landing":
       return fieldHref(planId, "flight");
@@ -326,7 +334,21 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
       if (list.length === 0) return;
       const rec = i.procedureRecords[kind];
       const valid = rec !== undefined && rec.action === "done" && rec.snapshotId === i.currentSnapshotId;
-      if (valid) return;
+      if (valid) {
+        // Sprint 12d：申請は済みなのに判定に許可の手続きが残り、適用できる登録がないとき、許可・承認の結果の登録へ促す
+        if (kind === "dips_permit" && i.permits && !i.permits.applied) {
+          const pickDone = pickEarliest(list)!;
+          const late = pickDone.deadlineDate !== null && pickDone.deadlineDate < today;
+          add(
+            "register_permit",
+            late ? 2 : 3,
+            "許可・承認の申請は済みです。許可が下りたら、結果を登録し、許可番号を計画の欄に入れます",
+            i.permits.canRegister,
+            pickDone.deadlineLabel,
+          );
+        }
+        return;
+      }
       const stale = rec !== undefined && rec.action === "done";
       const pick = pickEarliest(list)!;
       const overdue = pick.deadlineDate !== null && pick.deadlineDate < today;

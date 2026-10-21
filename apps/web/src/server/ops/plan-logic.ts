@@ -13,6 +13,7 @@ import {
 } from "@soraban/regulations";
 import { jstDate, parseJstMinute } from "@/lib/ops-time";
 import { SPECIFIC_FLIGHT_TYPES, type SpecificFlightType } from "@/lib/ops-records";
+import { EMPTY_PERMIT_APPLICATION, isDipsPermitValue, type PermitApplication, type PermitBasisEntry } from "./permit-logic";
 import { PLAN_FLAG_ORDER, PLAN_JUDGEMENT_COLUMNS } from "./validate-plan";
 
 type Json = null | boolean | number | string | readonly Json[] | { readonly [k: string]: Json };
@@ -36,6 +37,11 @@ export type JudgementInput = {
   readonly accessControl?: boolean;
   readonly thirdPartyOverflight?: boolean;
   readonly bvlosWithObserver?: boolean;
+  /**
+   * 根拠にした許可・承認の登録の版（Sprint 12d 設計 D）。照合で何も適用しなかった計画はキーごと持たない
+   * （許可番号のない計画の入力は 12c までと一致する）。判定の結果・証跡 ID には入らない。
+   */
+  readonly permitBasis?: readonly PermitBasisEntry[];
 };
 
 /** 判定の入力に関わる計画の項目。 */
@@ -70,21 +76,36 @@ const round6 = (n: number): number => Number(n.toFixed(6));
 export const weightGramsFromKg = (kg: number | null): number | null =>
   kg === null || !Number.isFinite(kg) || kg < 0 ? null : Math.round(kg * 1000);
 
-export const buildJudgementInput = (plan: PlanJudgementFields, aircraft: AircraftWeight): JudgementInput => {
+/** 判定の入力のフラグ：利用者が選んだフラグに、最大高度 150m 以上なら airspace_150m を足し、DID・空港を除き、固定の順に並べる。 */
+export const judgementFlagsOf = (plan: Pick<PlanJudgementFields, "flags" | "maxAltitudeM">): SpecificFlightFlag[] => {
   const chosen = new Set<string>(plan.flags.filter((f) => !DERIVED_AIRSPACE_FLAGS.includes(f)));
   if (plan.maxAltitudeM !== null && plan.maxAltitudeM >= ALTITUDE_150M_THRESHOLD) chosen.add("airspace_150m");
-  const flags = PLAN_FLAG_ORDER.filter((f) => chosen.has(f));
+  return PLAN_FLAG_ORDER.filter((f) => chosen.has(f));
+};
+
+/**
+ * 判定の入力を作る。pilotPermits は、計画の手入力の値から DIPS の値（mlit・mlit:*）を除いたものに、登録の照合で適用した
+ * DIPS の値（permitApplication.grantedValues）を足したもの（Sprint 12d 設計 D）。適用した登録があるときだけ permitBasis を足す。
+ * permitApplication を渡さない・適用がない入力は、12c までと同じ（キーを足さない）。
+ */
+export const buildJudgementInput = (
+  plan: PlanJudgementFields,
+  aircraft: AircraftWeight,
+  permitApplication: PermitApplication = EMPTY_PERMIT_APPLICATION,
+): JudgementInput => {
+  const flags = judgementFlagsOf(plan);
   return {
     lat: round6(plan.latitude),
     lng: round6(plan.longitude),
     droneWeightG: weightGramsFromKg(aircraft.maxTakeoffWeightKg),
     flags,
     plannedDate: plan.plannedDate,
-    pilotPermits: [...new Set(plan.pilotPermits)].sort(),
+    pilotPermits: [...new Set([...plan.pilotPermits.filter((p) => !isDipsPermitValue(p)), ...permitApplication.grantedValues])].sort(),
     ...(plan.judgementPurpose !== null ? { purpose: plan.judgementPurpose } : {}),
     ...(plan.accessControl !== null ? { accessControl: plan.accessControl } : {}),
     ...(plan.thirdPartyOverflight !== null ? { thirdPartyOverflight: plan.thirdPartyOverflight } : {}),
     ...(plan.bvlosWithObserver !== null ? { bvlosWithObserver: plan.bvlosWithObserver } : {}),
+    ...(permitApplication.basis.length > 0 ? { permitBasis: permitApplication.basis } : {}),
   };
 };
 
@@ -149,13 +170,14 @@ export const planJudgementChanged = (
 
 // ---- 鮮度 ----------------------------------------------------
 
-export type FreshnessReason = "input_changed" | "engine_changed" | "data_changed" | "procedures_changed";
+export type FreshnessReason = "input_changed" | "engine_changed" | "data_changed" | "procedures_changed" | "permits_changed";
 
 export const FRESHNESS_REASON_LABEL: Readonly<Record<FreshnessReason, string>> = {
   input_changed: "計画の入力（機体の重量を含む）が、判定した時点から変わっています",
   engine_changed: "判定エンジンの版が変わっています",
   data_changed: "判定に使った根拠のデータの確認日が変わっています",
   procedures_changed: "手続きのデータの版が変わっています",
+  permits_changed: "許可・承認の登録が、判定した時点から変わっています",
 };
 
 /** 「判定が古い」の表示。 */
@@ -171,6 +193,8 @@ export type SnapshotFreshnessInput = {
   };
   readonly plan: PlanJudgementFields;
   readonly aircraft: AircraftWeight;
+  /** 現在の登録で照合し直した、判定に足すもの（Sprint 12d）。省略は適用なし。 */
+  readonly permits?: PermitApplication;
   /** 現在の値（注入できる）。 */
   readonly now: {
     readonly engineVersion: string;
@@ -201,10 +225,31 @@ export const currentFreshnessContext = (): SnapshotFreshnessInput["now"] => ({
   proceduresVerifiedAt: PROCEDURES_VERIFIED_AT,
 });
 
+/** 判定の入力のうち、登録の照合に由来する部分（pilotPermits・permitBasis）が同じか。保存時に、新しいスナップショットが要るかの判断に使う。 */
+export const permitPartEquals = (a: unknown, b: unknown): boolean => {
+  const part = (v: unknown) => {
+    const o = (v !== null && typeof v === "object" ? v : {}) as Record<string, unknown>;
+    return { pilotPermits: o["pilotPermits"] ?? [], permitBasis: o["permitBasis"] ?? null };
+  };
+  return judgementInputEquals(part(a), part(b));
+};
+
+const withoutPermitKeys = (v: unknown): unknown => {
+  if (v === null || typeof v !== "object" || Array.isArray(v)) return v;
+  const { pilotPermits: _p, permitBasis: _b, ...rest } = v as Record<string, unknown>;
+  void _p;
+  void _b;
+  return rest;
+};
+
 /** スナップショットが今も新しいか。1 つでも違えば「判定が古い」と理由を返す。一覧では result を読まずに計算できる。 */
 export const snapshotFreshness = (i: SnapshotFreshnessInput): SnapshotFreshness => {
   const reasons: FreshnessReason[] = [];
-  if (!judgementInputEquals(buildJudgementInput(i.plan, i.aircraft), i.snapshot.input)) reasons.push("input_changed");
+  const current = buildJudgementInput(i.plan, i.aircraft, i.permits);
+  if (!judgementInputEquals(current, i.snapshot.input)) {
+    // pilotPermits・permitBasis だけが違うときは permits_changed、それ以外は従来どおり input_changed
+    reasons.push(judgementInputEquals(withoutPermitKeys(current), withoutPermitKeys(i.snapshot.input)) ? "permits_changed" : "input_changed");
+  }
   if (i.snapshot.engineVersion !== i.now.engineVersion) reasons.push("engine_changed");
   if (i.snapshot.datasets.some((d) => i.now.datasetVerifiedAt(d.id) !== d.verifiedAt)) reasons.push("data_changed");
   const procChanged =
