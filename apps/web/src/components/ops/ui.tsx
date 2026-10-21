@@ -10,9 +10,9 @@ export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
 const toneClass: Record<Tone, string> = {
   neutral: "border-rule text-ink-soft",
   brand: "border-brand-500 text-brand-700",
-  green: "border-signal-green/60 bg-signal-green-soft text-signal-green",
-  amber: "border-signal-amber/60 bg-signal-amber-soft text-signal-amber",
-  red: "border-signal-red/60 bg-signal-red-soft text-signal-red",
+  green: "border-signal-green/60 bg-signal-green-soft text-ink",
+  amber: "border-signal-amber/60 bg-signal-amber-soft text-ink",
+  red: "border-signal-red/60 bg-signal-red-soft text-ink",
   mute: "border-rule bg-paper-soft text-ink-mute",
 };
 

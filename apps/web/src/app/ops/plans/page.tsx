@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, buttonFieldClass, listRowClass, Note, PageHeader } from "@/components/ops/ui";
+import { Badge, buttonFieldClass, Note, PageHeader } from "@/components/ops/ui";
 import { DipsNotice, NextActionItem, PlanStateBadge, ReportBadge, ReportStatusBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
 import { jstDate } from "@/lib/ops-time";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
@@ -17,6 +17,9 @@ type ViewKey = (typeof VIEWS)[number]["key"];
 
 /** `YYYY-MM-DD` の前の日（過去の表示の上限を「今日より前」にするため）。 */
 const prevDate = (d: string): string => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+
+/** 行全体のカード（li の枠）の中で、本体のリンク。次にやることは同じ枠の下半分に置く（リンクの中に入れない）。 */
+const rowLinkClass = "grid grid-cols-1 gap-2 rounded-t-sharp px-3 py-3 text-sm transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft";
 
 const tabClass = (active: boolean) =>
   `inline-flex min-h-11 items-center px-4 text-sm ${active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"}`;
@@ -115,8 +118,8 @@ export default async function PlanListPage({
       ) : (
         <ul className="flex flex-col gap-2" data-testid="plan-list">
           {rows.map((p) => (
-            <li key={p.id} className="flex flex-col gap-1">
-              <Link prefetch={false} href={`/ops/plans/${p.id}`} className={`${listRowClass} sm:grid-cols-1 sm:gap-1.5 sm:rounded-sharp sm:border sm:bg-paper sm:px-3`} data-testid="plan-row">
+            <li key={p.id} className="flex flex-col rounded-sharp border border-rule bg-paper">
+              <Link prefetch={false} href={`/ops/plans/${p.id}`} className={rowLinkClass} data-testid="plan-row">
                 <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="font-mono text-sm tnum text-ink" data-testid="plan-row-start">
                     {p.plannedStartAtJst}
@@ -146,10 +149,10 @@ export default async function PlanListPage({
                 </span>
               </Link>
               {p.nextAction ? (
-                <div className="rounded-sharp border border-rule-soft bg-paper" data-testid="plan-row-next">
+                <div className="border-t border-rule bg-paper-soft/60" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
-                    <p className="px-3 pb-2 pl-12 text-[11px] text-ink-mute" data-testid="plan-row-next-count">
+                    <p className="px-3 pb-2.5 pl-[3.75rem] text-xs text-ink-mute" data-testid="plan-row-next-count">
                       ほか {p.nextActionCount - 1} 件（詳細で確認できます）
                     </p>
                   ) : null}

@@ -283,26 +283,29 @@ const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限
 /** 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。 */
 export function NextActionItem({ action, testId = "next-action" }: { readonly action: NextAction; readonly testId?: string }) {
   const tone = TIER_TONE[action.tier] ?? "neutral";
+  // 段の区別は「記号の札＋段の名前」で伝える（色は札の枠・背景と左の線に添えるだけ）。記号の字は常に ink。
   const body = (
     <>
-      <span aria-hidden className={`w-6 shrink-0 text-center font-mono text-[13px] font-bold ${CHIP_GLYPH[tone]}`}>
+      <span
+        aria-hidden
+        className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[tone]}`}
+      >
         {TIER_GLYPH[action.tier]}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-sm font-medium text-ink" data-testid={`${testId}-label`}>{action.label}</span>
-          <span className="text-[11px] text-ink-mute">［{TIER_TEXT[action.tier]}］</span>
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-medium leading-snug text-ink" data-testid={`${testId}-label`}>{action.label}</span>
+          <span className="rounded-sharp border border-rule px-1.5 text-[11px] leading-5 text-ink-soft">{TIER_TEXT[action.tier]}</span>
         </span>
         <span className="text-xs leading-relaxed text-ink-soft">{action.reason}</span>
-        {action.dueLabel ? <span className="text-xs leading-relaxed text-ink-soft" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
-        {!action.canAct ? <span className="text-xs text-ink-mute">この操作は運航管理者または計画の操縦者本人が行います。</span> : null}
+        {action.dueLabel ? <span className="text-xs leading-relaxed text-ink" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
+        {!action.canAct ? <span className="text-xs leading-relaxed text-ink-mute">この操作は運航管理者または計画の操縦者本人が行います。</span> : null}
       </span>
-      {action.canAct ? <span aria-hidden className="text-ink-mute">→</span> : null}
+      {action.canAct ? <span aria-hidden className="self-center pl-1 text-ink-mute">→</span> : null}
     </>
   );
-  const box = `flex min-h-11 items-center gap-3 border-l-4 px-3 py-2 ${
-    tone === "red" ? "border-l-signal-red" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule"
-  }`;
+  const bar = tone === "red" ? "border-l-signal-red bg-signal-red-soft/40" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule";
+  const box = `flex min-h-11 items-start gap-3 border-l-4 px-3 py-3 ${bar}`;
   return action.canAct ? (
     <a href={action.href} className={`${box} hover:bg-paper-soft`} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}
@@ -318,7 +321,10 @@ export function NextActionItem({ action, testId = "next-action" }: { readonly ac
 export function NextActionsList({ actions }: { readonly actions: readonly NextAction[] }) {
   return (
     <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="next-actions">
-      <h2 className="eyebrow">次にやること</h2>
+      <h2 className="eyebrow">
+        次にやること
+        {actions.length > 0 ? <span className="ml-2 font-mono tnum normal-case tracking-normal">{actions.length} 件</span> : null}
+      </h2>
       {actions.length === 0 ? (
         <p className="rounded-sharp border border-rule bg-paper px-3 py-3 text-sm text-ink-mute" data-testid="next-actions-empty">
           {NEXT_ACTIONS_EMPTY_LABEL}
@@ -339,9 +345,16 @@ export function NextActionsList({ actions }: { readonly actions: readonly NextAc
 const DEADLINE_BAR: Readonly<Record<DeadlineState["state"], string>> = {
   none: "border-l-rule",
   upcoming: "border-l-brand-700",
-  past_guide: "border-l-signal-amber",
-  overdue_started: "border-l-signal-red",
+  past_guide: "border-l-signal-amber bg-signal-amber-soft/40",
+  overdue_started: "border-l-signal-red bg-signal-red-soft/50",
   recommended_open: "border-l-signal-green",
+};
+const DEADLINE_TONE: Readonly<Record<DeadlineState["state"], Tone>> = {
+  none: "neutral",
+  upcoming: "brand",
+  past_guide: "amber",
+  overdue_started: "red",
+  recommended_open: "green",
 };
 const DEADLINE_GLYPH: Readonly<Record<DeadlineState["state"], string>> = {
   none: "－",
@@ -351,36 +364,48 @@ const DEADLINE_GLYPH: Readonly<Record<DeadlineState["state"], string>> = {
   recommended_open: "○",
 };
 
-/** 期限の状態（社内の目安。法定の期限ではない）。通報の記録がない要・要確認のときだけ出る。 */
+/**
+ * 期限の状態（社内の目安。法定の期限ではない）。通報の記録がない要・要確認のときだけ出る。
+ * 上から「いまの状態（記号の札＋文）」「社内の目安の時刻」「注記」の順。飛行開始後は最上位の警告（赤の線と背景＋「!!」）。
+ * 罰則の文言は注記の側に小さく置く（目立たせすぎない。※要確認が付く）。
+ */
 export function DeadlineBox({ deadline }: { readonly deadline: DeadlineState }) {
   if (deadline.state === "none" || !deadline.message) return null;
+  const started = deadline.state === "overdue_started";
   return (
     <div
-      className={`flex flex-col gap-1.5 rounded-sharp border border-l-4 border-rule bg-paper px-3 py-2.5 text-sm ${DEADLINE_BAR[deadline.state]}`}
+      className={`flex flex-col gap-3 rounded-sharp border border-l-4 border-rule px-3 py-3 text-sm sm:px-4 ${DEADLINE_BAR[deadline.state]}`}
       data-testid="plan-report-deadline"
       data-state={deadline.state}
     >
-      <p className="flex items-start gap-2 font-medium text-ink">
-        <span aria-hidden className="w-5 shrink-0 text-center font-mono text-[13px] font-bold">{DEADLINE_GLYPH[deadline.state]}</span>
-        <span data-testid="plan-report-deadline-message">{deadline.message}</span>
+      <p className="flex items-start gap-3 font-medium leading-snug text-ink">
+        <span
+          aria-hidden
+          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
+        >
+          {DEADLINE_GLYPH[deadline.state]}
+        </span>
+        <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
-        <p className="pl-7 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-at">
-          社内の目安の時刻：{deadline.guideAtJst}（日本時間）
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-at">
+          社内の目安の時刻：<span className="font-mono text-sm tnum text-ink">{deadline.guideAtJst}</span>（日本時間）
         </p>
       ) : null}
       {deadline.guideNote ? (
-        <p className="pl-7 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-note">
+        <p className="pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-note">
           {deadline.guideNote}
         </p>
       ) : null}
-      {deadline.penaltyNote ? (
-        <p className="pl-7 text-xs leading-relaxed text-ink" data-testid="plan-report-penalty">
-          {deadline.penaltyNote}
-        </p>
-      ) : null}
-      {deadline.outageNote ? <p className="pl-7 text-xs leading-relaxed text-ink-mute">{deadline.outageNote}</p> : null}
-      <p className="pl-7 text-xs leading-relaxed text-ink-mute">{deadline.smallDroneLawNote}</p>
+      <div className="flex flex-col gap-1.5 border-t border-rule-soft pl-11 pt-2.5">
+        {deadline.penaltyNote ? (
+          <p className="text-[11px] leading-relaxed text-ink-soft" data-testid="plan-report-penalty">
+            {deadline.penaltyNote}
+          </p>
+        ) : null}
+        {deadline.outageNote ? <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.outageNote}</p> : null}
+        <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.smallDroneLawNote}</p>
+      </div>
     </div>
   );
 }
