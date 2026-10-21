@@ -261,3 +261,11 @@ html {
   border-radius: 9999px;
   background: currentColor;
 }
+
+/* Sprint 12c：下メニュー（画面下に固定。幅 768px 未満）の分だけ、本文の末尾に余白を取る。
+ * 下メニューが描かれたとき（運航管理が有効でログイン済み）だけ body に has-bottom-nav が付く。 */
+@media (max-width: 767px) {
+  body.has-bottom-nav {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

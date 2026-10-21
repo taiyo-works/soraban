@@ -1,80 +1,68 @@
 import Link from "next/link";
-import { DraftOwnerGuard, SignOutButton } from "@/components/ops/ops-client";
-import { buttonFieldClass, buttonOutlineBrandClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
+import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
+import { DraftOwnerGuard } from "@/components/ops/ops-client";
+import { TodayCard, TodayEmpty, TodayNextActions, TodayRest } from "@/components/ops/today-ui";
+import { buttonFieldClass, buttonOutlineBrandClass } from "@/components/ops/ui";
 import { planCreateDenied } from "@/server/ops/plan-page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
+import { getToday } from "@/server/ops/today";
 
-// 運航管理のトップ：ログイン中の利用者の表示名と役割、機体・操縦者・利用者（運航管理者のみ）への入口、ログアウト。
+// 「今日」（Sprint 12c 設計 C・G）：今日（なければ次）の飛行を大きなカード 1 枚で出し、その下に動詞で始まる「次にやること」を
+// 急ぐ順に並べる。件数だけのタイルは作らない。メニューとログアウトは「その他」（/ops/more）へ移した。
+// 保存された状態は読まず、記録の有無から毎回導出する（server/ops/today.ts）。判定は目安で、通報・申請は DIPS で行う。
 export default async function OpsHome() {
-  const { me, provider } = await requireOpsMember();
+  const { ctx, me } = await requireOpsMember();
   const role = me.member.role;
   const canEnter = recordCreateDenied(me) === null;
   const canPlan = planCreateDenied(me) === null;
-  const menu = [
-    { href: "/ops/plans", title: "飛行計画", body: "判定つきの計画・運航管理者の確認・判定の根拠" },
-    { href: "/ops/flights", title: "飛行記録", body: "飛行ごとの記録・飛行時間・総飛行時間" },
-    { href: "/ops/inspections", title: "日常点検", body: "飛行前後の 9 項目の点検" },
-    { href: "/ops/aircraft", title: "機体", body: "登録記号・型式・認証・総飛行時間" },
-    { href: "/ops/pilots", title: "操縦者", body: "氏名・技能証明・限定事項" },
-    { href: "/ops/places", title: "よく使う地点", body: "社内拠点などの名称と座標" },
-    ...(role === "manager" ? [{ href: "/ops/members", title: "利用者", body: "招待・役割の変更・利用の停止" }] : []),
-  ];
+  const today = await getToday(ctx);
   return (
-    <main className="flex flex-col gap-8">
+    <main className="flex flex-col gap-8" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
-      <section className="flex flex-col gap-3" aria-label="ログイン中の利用者">
+      <section className="flex flex-col gap-1" aria-label="ログイン中の利用者">
         <p className="eyebrow">{me.org.name}</p>
-        <p className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl" data-testid="ops-me-name">
-          {me.member.displayName}
-        </p>
-        <p className="text-sm font-medium text-brand-700" data-testid="ops-me-role">
-          <span className="font-normal text-ink-mute">役割：</span>
-          {ROLE_LABELS[role]}
-        </p>
-        <p className="max-w-xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft">
-          {ROLE_DESCRIPTIONS[role]}
+        <h1 className="font-display text-2xl font-light leading-tight text-ink" data-testid="today-heading">
+          今日
+          <span className="ml-3 font-mono text-sm tnum text-ink-soft" data-testid="today-date">
+            {today.today}
+          </span>
+        </h1>
+        <p className="flex flex-wrap items-baseline gap-x-3 text-xs text-ink-soft">
+          <span data-testid="ops-me-name">{me.member.displayName}</span>
+          <span data-testid="ops-me-role">
+            <span>役割：</span>
+            {ROLE_LABELS[role]}
+          </span>
         </p>
       </section>
+
+      {today.card ? <TodayCard card={today.card} /> : today.empty ? <TodayEmpty empty={today.empty} /> : null}
+      <TodayRest rows={today.rest} />
+      <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} />
+
       {canEnter || canPlan ? (
-        <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {canPlan ? (
-            <Link href="/ops/plans/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-plan">
+            <Link href="/ops/plans/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-plan">
               飛行計画を作る
             </Link>
           ) : null}
           {canEnter ? (
             <>
-              <Link href="/ops/flights/new" className={buttonFieldClass} data-testid="ops-enter-flight">
+              <Link href="/ops/flights/new" prefetch={false} className={buttonFieldClass} data-testid="ops-enter-flight">
                 飛行記録を入力
               </Link>
-              <Link href="/ops/inspections/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
+              <Link href="/ops/inspections/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
                 日常点検を入力
               </Link>
             </>
           ) : null}
         </nav>
       ) : null}
-      <nav aria-label="運航管理のメニュー">
-        <ul className={`grid grid-cols-1 gap-px overflow-hidden rounded-sharp border border-rule bg-rule sm:grid-cols-3`}>
-          {menu.map((m, i) => (
-            <li key={m.href} className="flex">
-              <Link
-                href={m.href}
-                className="flex w-full flex-col gap-1.5 bg-paper px-4 py-4 transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft"
-              >
-                <span className="font-mono text-[10px] tnum text-ink-mute">{String(i + 1).padStart(2, "0")}</span>
-                <span className="font-display text-lg text-ink">{m.title}</span>
-                <span className="text-xs leading-relaxed text-ink-mute">{m.body}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="flex flex-wrap items-center gap-3 border-t border-rule-soft pt-4">
-        <SignOutButton provider={provider} />
-        <span className="break-all text-xs text-ink-mute">{me.member.email}</span>
-      </div>
+      <p className="max-w-xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="today-disclaimer">
+        {PLAN_JUDGEMENT_DISCLAIMER}そらばんは DIPS に送信しません。
+      </p>
     </main>
   );
 }

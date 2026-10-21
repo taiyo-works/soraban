@@ -24,8 +24,10 @@ import {
   type InspectionResult,
   type InspectionTiming,
 } from "@/lib/ops-records";
+import { JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF, JOURNAL_MISMATCH_REPORT_MISSING } from "@/lib/ops-field";
 import { setChangeFlash } from "./change-notice";
 import { clearDraft, clearOtherUsersDrafts, draftKey, loadDraft, newRequestId, saveDraft } from "./drafts";
+import { flushOutbox, loadPlanOutbox } from "./field-outbox";
 import {
   Field,
   FieldError,
@@ -137,6 +139,10 @@ const WARNING_TEXT = {
   license_expired: "操縦者の技能証明の有効期限が飛行日より前です。",
   aircraft_suspended: "この機体は休止中です。",
   differs_from_plan: "飛行計画と違う機体・操縦者・時間帯で記録されています。",
+  // Sprint 12c：日誌の食い違い（知らせるだけ。保存は成功している）
+  outside_plan_window: "計画の時間帯の外で飛行しています。",
+  report_missing: JOURNAL_MISMATCH_REPORT_MISSING,
+  report_after_takeoff: JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
 } as const;
 
 export type AircraftOption = {
@@ -540,6 +546,19 @@ export type FlightFromPlan = {
   readonly specificFlightTypes: readonly string[];
 };
 
+/**
+ * 現場モードから日誌を記入するとき（Sprint 12c 設計 G）。実際の離陸・着陸の時刻（現場の行）と、飛行前の日常点検を引き継ぐ。
+ * 計画の予定時刻は入れない。離陸の行がまだサーバーに届いていない（resolved が偽）ときは、端末の送信待ちから時刻を取る。
+ */
+export type FlightFromField = {
+  /** 離陸の行の ID、または端末の識別子。保存のとき takeoffEventId として送る。 */
+  readonly takeoffEventId: string;
+  readonly takeoffAt: string | null;
+  readonly landingAt: string | null;
+  readonly inspectionId: string | null;
+  readonly resolved: boolean;
+};
+
 const emptyFlight = (aircraftId: string, pilotId: string, inspectionId: string): FlightState => ({
   clientRequestId: newRequestId(),
   aircraftId,
@@ -561,8 +580,16 @@ const emptyFlight = (aircraftId: string, pilotId: string, inspectionId: string):
   defects: [],
 });
 
-const flightStateFromPlan = (p: FlightFromPlan, fixedPilotId: string | null): FlightState => ({
-  ...emptyFlight(p.aircraftId, fixedPilotId ?? p.pilotId, ""),
+const flightStateFromPlan = (p: FlightFromPlan, fixedPilotId: string | null, f?: FlightFromField): FlightState => ({
+  ...emptyFlight(p.aircraftId, fixedPilotId ?? p.pilotId, f?.inspectionId ?? ""),
+  ...(f?.takeoffAt && f.landingAt
+    ? {
+        takeoffDate: f.takeoffAt.slice(0, 10),
+        takeoffTime: f.takeoffAt.slice(11, 16),
+        landingDate: f.landingAt.slice(0, 10),
+        landingTime: f.landingAt.slice(11, 16),
+      }
+    : {}),
   purpose: p.purpose,
   takeoffPlace: p.placeName,
   takeoffPos: posOf(p.lat, p.lng, null),
@@ -613,6 +640,7 @@ export function FlightForm({
   editing,
   memberId,
   fromPlan,
+  fromField,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
@@ -626,6 +654,8 @@ export function FlightForm({
   readonly editing?: FlightFormInitial;
   /** 飛行計画から作るとき（Sprint 12a 設計 G）。機体・操縦者・目的・場所・特定飛行の形態を引き継ぐ。離着陸の時刻は引き継がない。下書きは使わない。 */
   readonly fromPlan?: FlightFromPlan;
+  /** 現場モードから来たとき（Sprint 12c）。fromPlan と一緒に渡す。実際の離着陸の時刻と飛行前の点検を引き継ぐ。 */
+  readonly fromField?: FlightFromField;
 }) {
   const isEdit = editing !== undefined;
   const usesDraft = !isEdit && fromPlan === undefined;
@@ -633,7 +663,7 @@ export function FlightForm({
     editing
       ? flightStateFrom(editing)
       : fromPlan
-        ? flightStateFromPlan(fromPlan, fixedPilotId)
+        ? flightStateFromPlan(fromPlan, fixedPilotId, fromField)
         : emptyFlight(initialAircraftId ?? "", fixedPilotId ?? "", initialInspectionId ?? ""),
   );
   const [loaded, setLoaded] = useState(!usesDraft);
@@ -686,6 +716,30 @@ export function FlightForm({
   useEffect(() => {
     if (usesDraft && loaded) saveDraft(draftKey("flight", memberId), v);
   }, [v, loaded, usesDraft, memberId]);
+
+  // 現場モードの離着陸が、まだサーバーに届いていない（端末の送信待ちにある）とき、その時刻で入力を始める
+  const [fieldNote, setFieldNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!fromPlan || !fromField || fromField.resolved) return;
+    const t = window.setTimeout(() => {
+      const ob = loadPlanOutbox(fromPlan.planId, memberId);
+      const takeoff = ob.entries.find((e) => e.kind === "takeoff" && e.clientEventId === fromField.takeoffEventId);
+      const landing = takeoff ? ob.entries.find((e) => e.kind === "landing" && e.targetClientEventId === takeoff.clientEventId) : undefined;
+      if (takeoff && landing) {
+        setV((s) => ({
+          ...s,
+          takeoffDate: takeoff.occurredAt.slice(0, 10),
+          takeoffTime: takeoff.occurredAt.slice(11, 16),
+          landingDate: landing.occurredAt.slice(0, 10),
+          landingTime: landing.occurredAt.slice(11, 16),
+        }));
+        setFieldNote("現場の離着陸の記録はまだ送られていません。保存するとき、先に送ります。");
+      }
+    }, 0);
+    return () => window.clearTimeout(t);
+    // 初回だけ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const set = <K extends keyof FlightState>(k: K, value: FlightState[K]) => setV((s) => ({ ...s, [k]: value }));
 
@@ -762,12 +816,15 @@ export function FlightForm({
   const submit = async () => {
     setBusy(true);
     setMessage(null);
+    // 現場の離着陸の行が端末の送信待ちに残っていれば、先に送る（日誌を結び付けるには、サーバーに離着陸の行が要る）
+    if (!isEdit && fromPlan && fromField) await flushOutbox(fromPlan.planId, memberId);
     const r = isEdit
       ? await trySend("PATCH", `/api/ops/flights/${editing.id}`, { ...body(), expectedVersion: editing.version, reason })
       : await trySend("POST", "/api/ops/flights", {
           ...body(),
           clientRequestId: v.clientRequestId,
           ...(fromPlan ? { flightPlanId: fromPlan.planId } : {}),
+          ...(fromField ? { takeoffEventId: fromField.takeoffEventId } : {}),
         });
     setBusy(false);
     if (!r.ok) {
@@ -830,7 +887,16 @@ export function FlightForm({
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={isEdit ? "飛行記録の訂正" : "飛行記録の入力"}>
       {fromPlan ? (
         <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="flight-from-plan">
-          飛行計画「{fromPlan.title}」から作ります。機体・操縦者・目的・場所・特定飛行の形態を引き継ぎました。離陸・着陸の時刻は、実際の時刻を入れてください。
+          飛行計画「{fromPlan.title}」から作ります。機体・操縦者・目的・場所・特定飛行の形態を引き継ぎました。
+          {fromField
+            ? "離陸・着陸の時刻は、現場モードで押した実際の時刻を入れました（計画の予定時刻は入れていません）。直す場合は、ここで直してください。"
+            : "離陸・着陸の時刻は、実際の時刻を入れてください。"}
+        </p>
+      ) : null}
+      {fromField ? (
+        <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="flight-from-field">
+          {fromField.inspectionId ? "飛行前の日常点検を結び付けました。" : "この日の飛行前の日常点検は見つかりませんでした。"}「飛行の安全に影響のあった事項」を確かめて保存してください。
+          {fieldNote ? ` ${fieldNote}` : ""}
         </p>
       ) : null}
       {usesDraft ? (
@@ -1160,6 +1226,8 @@ export function InspectionForm({
   pilots,
   fixedPilotId,
   initialAircraftId,
+  initialPilotId,
+  returnTo,
   editing,
   memberId,
 }: {
@@ -1167,6 +1235,10 @@ export function InspectionForm({
   readonly pilots: readonly PilotOption[];
   readonly fixedPilotId: string | null;
   readonly initialAircraftId?: string;
+  /** 飛行計画から来たとき、実施者の初期値（計画の操縦者。操縦者役割は固定の操縦者が優先）。 */
+  readonly initialPilotId?: string;
+  /** 保存後に戻る画面（現場モードから来たとき。同じオリジンの /ops/ 配下のパスだけ。呼び出し側が検査済みの値を渡す）。 */
+  readonly returnTo?: string;
   readonly editing?: InspectionFormInitial;
   /** ログイン中の利用者の内部 ID（下書きを利用者ごとに分ける）。 */
   readonly memberId: string;
@@ -1189,7 +1261,7 @@ export function InspectionForm({
           >,
           specialNotes: editing.specialNotes ?? "",
         }
-      : emptyInspection(initialAircraftId ?? "", fixedPilotId ?? ""),
+      : emptyInspection(initialAircraftId ?? "", fixedPilotId ?? initialPilotId ?? ""),
   );
   const [loaded, setLoaded] = useState(isEdit);
   const [reason, setReason] = useState("");
@@ -1223,7 +1295,7 @@ export function InspectionForm({
           ...d,
           ...(keepTime ? {} : { date: now.slice(0, 10), time: now.slice(11, 16), timeTouched: false }),
           ...(initialAircraftId ? { aircraftId: initialAircraftId } : {}),
-          ...(fixedPilotId ? { pilotId: fixedPilotId } : {}),
+          ...(fixedPilotId ? { pilotId: fixedPilotId } : initialPilotId ? { pilotId: initialPilotId } : {}),
         });
         setRestored(has || keepTime);
         if (keepTime && d.date !== now.slice(0, 10)) setStaleDt(`${d.date} ${d.time.slice(0, 5)}`);
@@ -1308,6 +1380,11 @@ export function InspectionForm({
     } else {
       clearDraft(draftKey("inspection", memberId));
       const id = String(r.data["id"]);
+      if (returnTo) {
+        // 現場モードから来たときは、保存後に現場モードへ戻る
+        window.location.assign(returnTo);
+        return;
+      }
       setChangeFlash(`/ops/inspections/${id}`, VERSION_NOTICE_TARGET, "日常点検を保存しました。");
       window.location.assign(`/ops/inspections/${id}`);
     }

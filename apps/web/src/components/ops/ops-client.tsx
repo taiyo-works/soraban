@@ -5,6 +5,8 @@
 import { cloneElement, useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
+import { flushOutbox, planIdsWithOutbox } from "./field-outbox";
+import { logoutGuard } from "@/lib/ops-outbox";
 import {
   buttonDangerClass,
   buttonGhostClass,
@@ -858,11 +860,16 @@ export function MemberControls({
 
 // ---- ログイン・ログアウト ------------------------------------
 
-export function SignOutButton({ provider }: { readonly provider: "neon" | "test" }) {
+export function SignOutButton({ provider, memberId }: { readonly provider: "neon" | "test"; readonly memberId?: string }) {
   const [busy, setBusy] = useState(false);
-  const onClick = async () => {
+  // 未送信の現場の記録があるときの警告（黙って消さない。Sprint 12c 設計 F）
+  const [warning, setWarning] = useState<string | null>(null);
+  const [sendFailed, setSendFailed] = useState(false);
+
+  const signOut = async () => {
     setBusy(true);
-    // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）
+    // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）。
+    // 未送信の現場の記録が残っているときは、警告のあとの確認を経たときだけここへ来る（Sprint 12c）。
     clearOpsDrafts();
     try {
       if (provider === "test") {
@@ -875,10 +882,58 @@ export function SignOutButton({ provider }: { readonly provider: "neon" | "test"
       window.location.assign("/ops/sign-in");
     }
   };
+
+  const onClick = async () => {
+    const g = memberId ? logoutGuard(window.localStorage, memberId) : { warn: false, message: null };
+    if (g.warn) {
+      setWarning(g.message);
+      setSendFailed(false);
+      return;
+    }
+    await signOut();
+  };
+
+  // 送ってからログアウトする。すべて送れたときだけログアウトし、送れなかったときは残して知らせる
+  const sendThenSignOut = async () => {
+    if (!memberId) return;
+    setBusy(true);
+    for (const planId of planIdsWithOutbox(memberId)) await flushOutbox(planId, memberId);
+    const g = logoutGuard(window.localStorage, memberId);
+    if (g.warn) {
+      setWarning(g.message);
+      setSendFailed(true);
+      setBusy(false);
+      return;
+    }
+    await signOut();
+  };
+
   return (
-    <button type="button" className={subtleButtonClass} onClick={onClick} disabled={busy}>
-      ログアウト
-    </button>
+    <div className="flex flex-col gap-3">
+      <button type="button" className={subtleButtonClass} onClick={onClick} disabled={busy} data-testid="signout">
+        ログアウト
+      </button>
+      {warning ? (
+        <div role="alert" className="flex flex-col gap-3 rounded-sharp border border-signal-amber bg-signal-amber-soft px-3 py-3 text-sm text-ink" data-testid="signout-warning">
+          <p>
+            <span aria-hidden>！ </span>
+            {warning}
+            {sendFailed ? "。送れませんでした。通信を確かめてください。" : ""}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" className={buttonClass} onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
+              送ってからログアウト
+            </button>
+            <button type="button" className={buttonDangerClass} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
+              送らずにログアウト（記録を捨てる）
+            </button>
+            <button type="button" className={subtleButtonClass} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
+              やめる
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

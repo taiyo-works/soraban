@@ -3,6 +3,7 @@ import { RecordFilter } from "@/components/ops/record-filter";
 import { Badge, buttonFieldClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
 import { JudgementMissing } from "@/components/ops/plan-ui";
+import { MismatchBadges } from "@/components/ops/journal-ui";
 import { JUDGEMENT_LINK_MISSING_LABEL, listFlights, parseRecordFilter } from "@/server/ops/records";
 import { listAircraft, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
@@ -80,6 +81,11 @@ export default async function FlightListPage({
                     <CellLabel>総飛行時間</CellLabel>
                     {f.totalFlightMinutes === null ? <Badge tone="red">取消済み</Badge> : formatHm(f.totalFlightMinutes)}
                   </span>
+                  {f.mismatches.length > 0 ? (
+                    <span className="col-span-3 col-start-1 row-start-5 sm:col-span-6 sm:row-auto">
+                      <MismatchBadges mismatches={f.mismatches} />
+                    </span>
+                  ) : null}
                   {f.judgementLink === "missing" ? (
                     <span className="col-span-3 col-start-1 row-start-4 sm:col-span-6 sm:row-auto" data-testid="flight-judgement-missing">
                       <JudgementMissing label={JUDGEMENT_LINK_MISSING_LABEL} />

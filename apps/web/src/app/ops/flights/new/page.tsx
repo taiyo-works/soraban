@@ -1,19 +1,22 @@
-import { FlightForm, type FlightFromPlan } from "@/components/ops/records-client";
+import { FlightForm, type FlightFromField, type FlightFromPlan } from "@/components/ops/records-client";
 import { Forbidden } from "@/components/ops/versions";
 import { PageHeader } from "@/components/ops/ui";
 import { isUuid, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { specificFlightTypesFromFlags } from "@/server/ops/plan-logic";
+import { getFieldView } from "@/server/ops/field";
 import { getPlan, getSnapshot } from "@/server/ops/plans";
 import { recordCreateDenied, recordFormOptions } from "@/server/ops/record-page";
 
 // 飛行記録の入力（Sprint 11 設計 E）。現場のスマートフォンで、離陸・着陸の時刻を「今」で入れる。
 // ?aircraftId=…&inspectionId=… で、日常点検の詳細から機体と点検を候補に入れた状態で開く。
 // ?planId=… で、飛行計画から作る（Sprint 12a 設計 G）：機体・操縦者・目的・場所・特定飛行の形態を引き継ぐ。離着陸の時刻は引き継がない。
+// ?planId=…&takeoffEventId=… で、現場モードから作る（Sprint 12c 設計 G）：現場で押した実際の離着陸の時刻と、飛行前の日常点検を引き継ぐ。
+// 計画の予定時刻は、どちらの場合も離着陸の時刻に入れない。
 export default async function FlightNewPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ aircraftId?: string; inspectionId?: string; planId?: string }>;
+  readonly searchParams: Promise<{ aircraftId?: string; inspectionId?: string; planId?: string; takeoffEventId?: string }>;
 }) {
   const { ctx, me } = await requireOpsMember();
   const denied = recordCreateDenied(me);
@@ -24,11 +27,13 @@ export default async function FlightNewPage({
   const inspectionId = sp.inspectionId && isUuid(sp.inspectionId) ? sp.inspectionId.toLowerCase() : undefined;
 
   let fromPlan: FlightFromPlan | undefined;
+  let fromField: FlightFromField | undefined;
   let planProblem: string | null = null;
   if (sp.planId) {
     try {
       const plan = await getPlan(ctx, sp.planId);
-      if (plan.voided) {
+      const takeoffRef = sp.takeoffEventId && isUuid(sp.takeoffEventId) ? sp.takeoffEventId.toLowerCase() : null;
+      if (plan.voided && takeoffRef === null) {
         planProblem = "中止した計画からは飛行記録を作れません。";
       } else {
         const snapshot = await getSnapshot(ctx, plan.id, plan.currentSnapshotId);
@@ -44,6 +49,18 @@ export default async function FlightNewPage({
           lng: plan.longitude,
           specificFlightTypes: specificFlightTypesFromFlags(flags),
         };
+        if (takeoffRef) {
+          // 現場モードの離陸の行（ID か端末の識別子）から、実際の離着陸の時刻と飛行前の点検を引き継ぐ。まだ届いていなければ端末の送信待ちから取る。
+          const view = await getFieldView(ctx, plan.id);
+          const flight = view.flights.find((x) => x.takeoffEventId === takeoffRef || x.takeoffClientEventId === takeoffRef);
+          fromField = {
+            takeoffEventId: takeoffRef,
+            takeoffAt: flight?.takeoffAt ?? null,
+            landingAt: flight?.landingAt ?? null,
+            inspectionId: view.items.find((x) => x.item === "inspection")?.inspectionId ?? null,
+            resolved: flight !== undefined,
+          };
+        }
       }
     } catch (e) {
       if (!(e instanceof OpsError && e.status === 404)) throw e;
@@ -66,6 +83,7 @@ export default async function FlightNewPage({
         initialAircraftId={aircraftId}
         initialInspectionId={inspectionId}
         {...(fromPlan ? { fromPlan } : {})}
+        {...(fromField ? { fromField } : {})}
       />
     </main>
   );

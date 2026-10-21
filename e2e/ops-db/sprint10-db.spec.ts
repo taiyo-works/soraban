@@ -316,7 +316,7 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     await pageAs(page, seeded("a-manager"));
     for (const path of ["/ops/aircraft", "/ops/aircraft/new", "/ops", "/ops/pilots"]) {
       await page.goto(path);
-      await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name"))).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name")).first()).toBeVisible();
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,
