@@ -1,6 +1,9 @@
 import type React from "react";
+import type { FingerprintChange, ReportStatusCode, ReportStatusResult } from "@soraban/dips";
+import { REPORT_STATUS_MARK, REPORT_STATUS_SHORT_LABEL, NEXT_ACTIONS_EMPTY_LABEL } from "@soraban/dips";
 import type { ItemVerdict, ReportRequirement } from "@soraban/regulations";
 import { REPORT_FIXED_NOTE } from "@soraban/regulations";
+import type { DeadlineState, NextAction } from "@/server/ops/report-logic";
 import { VERDICT_LABEL, unknownCountLabel } from "@/lib/verdict-display";
 import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
 import { VerdictMark } from "../verdict-mark";
@@ -243,3 +246,197 @@ export const SNAPSHOT_REASON_LABEL: Readonly<Record<string, string>> = {
   data_updated: "根拠のデータ・エンジンの版の更新による再判定",
   manual: "手動の再判定",
 };
+
+// ---- Sprint 12b：通報の状況・期限・次にやること ------------------------------------------
+
+const STATUS_TONE: Readonly<Record<ReportStatusCode, Tone>> = {
+  not_applicable_model: "neutral",
+  no_record: "amber",
+  reported: "green",
+  change_review: "amber",
+  cancel_needed: "red",
+  cancelled: "mute",
+  unknown: "amber",
+  failed: "red",
+  sending: "mute",
+};
+
+/** 通報の状況（導出）の札。記録が無いうちは「通報済み」を出さない（状況の語は記録の有無から導出されたもの）。 */
+export function ReportStatusBadge({ status, bare }: { readonly status: Pick<ReportStatusResult, "code">; readonly bare?: boolean }) {
+  const code = status.code;
+  return (
+    <Chip
+      tone={STATUS_TONE[code]}
+      glyph={REPORT_STATUS_MARK[code]}
+      data-testid={bare ? undefined : "plan-report-status-badge"}
+      data-code={bare ? undefined : code}
+    >
+      {REPORT_STATUS_SHORT_LABEL[code]}
+    </Chip>
+  );
+}
+
+const TIER_TONE: Readonly<Record<number, Tone>> = { 1: "red", 2: "amber", 3: "brand", 4: "neutral", 5: "mute" };
+const TIER_GLYPH: Readonly<Record<number, string>> = { 1: "!!", 2: "!", 3: "●", 4: "○", 5: "－" };
+const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限超過", 3: "未了", 4: "確認・変更", 5: "推奨" };
+
+/** 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。 */
+export function NextActionItem({ action, testId = "next-action" }: { readonly action: NextAction; readonly testId?: string }) {
+  const tone = TIER_TONE[action.tier] ?? "neutral";
+  // 段の区別は「記号の札＋段の名前」で伝える（色は札の枠・背景と左の線に添えるだけ）。記号の字は常に ink。
+  const body = (
+    <>
+      <span
+        aria-hidden
+        className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[tone]}`}
+      >
+        {TIER_GLYPH[action.tier]}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-medium leading-snug text-ink" data-testid={`${testId}-label`}>{action.label}</span>
+          <span className="rounded-sharp border border-rule px-1.5 text-[11px] leading-5 text-ink-soft">{TIER_TEXT[action.tier]}</span>
+        </span>
+        <span className="text-xs leading-relaxed text-ink-soft">{action.reason}</span>
+        {action.dueLabel ? <span className="text-xs leading-relaxed text-ink" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
+        {!action.canAct ? <span className="text-xs leading-relaxed text-ink-mute">この操作は運航管理者または計画の操縦者本人が行います。</span> : null}
+      </span>
+      {action.canAct ? <span aria-hidden className="self-center pl-1 text-ink-mute">→</span> : null}
+    </>
+  );
+  const bar = tone === "red" ? "border-l-signal-red bg-signal-red-soft/40" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule";
+  const box = `flex min-h-11 items-start gap-3 border-l-4 px-3 py-3 ${bar}`;
+  return action.canAct ? (
+    <a href={action.href} className={`${box} hover:bg-paper-soft`} data-testid={`${testId}-link`} data-action-id={action.id}>
+      {body}
+    </a>
+  ) : (
+    <div className={box} data-testid={`${testId}-link`} data-action-id={action.id}>
+      {body}
+    </div>
+  );
+}
+
+/** 計画の詳細の「次にやること」。保存した状態ではなく、毎回導出した一覧。 */
+export function NextActionsList({ actions }: { readonly actions: readonly NextAction[] }) {
+  return (
+    <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="next-actions">
+      <h2 className="eyebrow">
+        次にやること
+        {actions.length > 0 ? <span className="ml-2 font-mono tnum normal-case tracking-normal">{actions.length} 件</span> : null}
+      </h2>
+      {actions.length === 0 ? (
+        <p className="rounded-sharp border border-rule bg-paper px-3 py-3 text-sm text-ink-mute" data-testid="next-actions-empty">
+          {NEXT_ACTIONS_EMPTY_LABEL}
+        </p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-rule-soft rounded-sharp border border-rule bg-paper">
+          {actions.map((a) => (
+            <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
+              <NextActionItem action={a} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+const DEADLINE_BAR: Readonly<Record<DeadlineState["state"], string>> = {
+  none: "border-l-rule",
+  upcoming: "border-l-brand-700",
+  past_guide: "border-l-signal-amber bg-signal-amber-soft/40",
+  overdue_started: "border-l-signal-red bg-signal-red-soft/50",
+  recommended_open: "border-l-signal-green",
+};
+const DEADLINE_TONE: Readonly<Record<DeadlineState["state"], Tone>> = {
+  none: "neutral",
+  upcoming: "brand",
+  past_guide: "amber",
+  overdue_started: "red",
+  recommended_open: "green",
+};
+const DEADLINE_GLYPH: Readonly<Record<DeadlineState["state"], string>> = {
+  none: "－",
+  upcoming: "○",
+  past_guide: "!",
+  overdue_started: "!!",
+  recommended_open: "○",
+};
+
+/**
+ * 期限の状態（社内の目安。法定の期限ではない）。通報の記録がない要・要確認のときだけ出る。
+ * 上から「いまの状態（記号の札＋文）」「社内の目安の時刻」「注記」の順。飛行開始後は最上位の警告（赤の線と背景＋「!!」）。
+ * 罰則の文言は注記の側に小さく置く（目立たせすぎない。※要確認が付く）。
+ */
+export function DeadlineBox({ deadline }: { readonly deadline: DeadlineState }) {
+  if (deadline.state === "none" || !deadline.message) return null;
+  const started = deadline.state === "overdue_started";
+  return (
+    <div
+      className={`flex flex-col gap-3 rounded-sharp border border-l-4 border-rule px-3 py-3 text-sm sm:px-4 ${DEADLINE_BAR[deadline.state]}`}
+      data-testid="plan-report-deadline"
+      data-state={deadline.state}
+    >
+      <p className="flex items-start gap-3 font-medium leading-snug text-ink">
+        <span
+          aria-hidden
+          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
+        >
+          {DEADLINE_GLYPH[deadline.state]}
+        </span>
+        <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
+      </p>
+      {deadline.guideAtJst ? (
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-at">
+          社内の目安の時刻：<span className="font-mono text-sm tnum text-ink">{deadline.guideAtJst}</span>（日本時間）
+        </p>
+      ) : null}
+      {deadline.guideNote ? (
+        <p className="pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-note">
+          {deadline.guideNote}
+        </p>
+      ) : null}
+      <div className="flex flex-col gap-1.5 border-t border-rule-soft pl-11 pt-2.5">
+        {deadline.penaltyNote ? (
+          <p className="text-[11px] leading-relaxed text-ink-soft" data-testid="plan-report-penalty">
+            {deadline.penaltyNote}
+          </p>
+        ) : null}
+        {deadline.outageNote ? <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.outageNote}</p> : null}
+        <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.smallDroneLawNote}</p>
+      </div>
+    </div>
+  );
+}
+
+/** 通報の状況（導出）と変更点。記録の有無から毎回導出した状況で、記録が無いうちは「通報済み」と出ない。 */
+export function ReportStatusBox({ status, changes }: { readonly status: ReportStatusResult; readonly changes: readonly FingerprintChange[] }) {
+  const tone = STATUS_TONE[status.code];
+  return (
+    <div className="flex flex-col gap-2" data-testid="plan-report-status" data-code={status.code}>
+      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-ink">
+        <span
+          aria-hidden
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sharp border font-mono text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
+        >
+          {status.mark}
+        </span>
+        <span className="pt-0.5" data-testid="plan-report-status-label">{status.label}</span>
+      </p>
+      {status.detail && status.code !== "reported" ? <p className="pl-10 font-mono text-xs tnum text-ink-soft">{status.detail}</p> : null}
+      {changes.length > 0 ? (
+        <div className="ml-10 flex flex-col gap-1 border-l-2 border-signal-amber pl-3" data-testid="plan-report-changes">
+          <p className="text-xs font-medium text-ink">通報時から変わった点</p>
+          <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-ink-soft">
+            {changes.map((c) => (
+              <li key={c.key} data-testid="plan-report-change-row" data-key={c.key}>
+                {c.label}：<span className="font-mono tnum">{c.before}</span> → <span className="font-mono tnum">{c.after}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -1422,4 +1422,5 @@ export {
   reportFlightReason,
   reportRequirement,
   reportRequirementText,
+  reportUnknownCountReason,
 } from "./report-requirement";

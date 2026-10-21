@@ -34,7 +34,7 @@ export function RecordFilter({
         <input type="date" name="to" defaultValue={value.to ?? ""} className={`${input} tnum`} />
       </label>
       <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 sm:col-span-1 sm:justify-start">
-        <label className="flex min-h-10 items-center gap-2 text-xs text-ink-soft">
+        <label className="flex min-h-11 items-center gap-2 text-xs text-ink-soft">
           <input type="checkbox" name="includeVoided" value="1" defaultChecked={value.includeVoided} className="h-4 w-4 accent-brand-700" />
           取消済みも含める
         </label>

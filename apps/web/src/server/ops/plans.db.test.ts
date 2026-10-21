@@ -972,9 +972,17 @@ describe.skipIf(!ADMIN_URL)("飛行計画・判定スナップショット・確
     const night = await newPlan({ flags: ["method_night"] });
     expect(night.report.label).toBe("通報：要");
     expect(night.report.reasons).toContain("夜間飛行に当たるため");
-    const none = await newPlan({ latitude: 35.0, longitude: 133.0 });
+    // 12b 契約 1：特定飛行に当たらなくても、判定不能の項目がある地点は「要確認（要として扱います）」。判定不能が無い地点は推奨のまま
+    // （米子市のようにデータが揃った市町村では判定不能が 0 件。日吉津村など未整備の市町村では判定不能が出る）
+    const none = (await plans.createPlan(mgr({ judge: judgeWith("31202") }), planInput(aircraftW, pilotB.id, { latitude: 35.0, longitude: 133.0 }))).record;
     expect(none.judgement.category).toBe("I");
+    expect(none.judgement.verdictUnknownCount).toBe(0);
     expect(none.report.label).toBe("通報：義務ではないが推奨");
+    const unknownOnly = await newPlan({ latitude: 35.0, longitude: 133.0 });
+    expect(unknownOnly.judgement.category).toBe("I");
+    expect(unknownOnly.judgement.verdictUnknownCount).toBeGreaterThan(0);
+    expect(unknownOnly.report.label).toBe("通報：要確認（要として扱います）");
+    expect(unknownOnly.report.reasons).toEqual([`判定不能の項目が ${unknownOnly.judgement.verdictUnknownCount} 件あるため、要として扱う`]);
     const noWeight = await newPlan({ flags: ["method_night"] }, { aircraftId: aircraftNoWeight });
     expect(noWeight.report.label).toBe("通報：要確認（要として扱います）");
     expect(noWeight.report.reasons).toEqual(["機体の重量が分からないため"]);
@@ -990,12 +998,22 @@ describe.skipIf(!ADMIN_URL)("飛行計画・判定スナップショット・確
     expect(ex.report.label).toBe("通報：要");
     expect(ex.report.exceptionNote).toContain("例外に当たる可能性があります（※要確認）");
     // 禁止語はどの応答にも出ない
-    for (const r of [night, none, noWeight, unknownMuni, ex]) {
+    for (const r of [night, none, unknownOnly, noWeight, unknownMuni, ex]) {
       expect(JSON.stringify(r.report)).not.toMatch(/通報不要|通報は不要|通報の必要はありません|通報しなくて/);
     }
     // 一覧でも同じ
     const list = await plans.listPlans(mgr());
     expect(list.find((x) => x.id === noWeight.id)!.report.label).toBe("通報：要確認（要として扱います）");
+    // 一覧（snapshot_result_slim）と詳細・スナップショットの画面で、判定不能がある計画の要否が同じ
+    expect(list.find((x) => x.id === unknownOnly.id)!.report).toEqual(unknownOnly.report);
+    expect(list.find((x) => x.id === none.id)!.report).toEqual(none.report);
+    expect((await plans.getPlan(mgr(), unknownOnly.id)).report).toEqual(unknownOnly.report);
+    const snapReport = (await plans.getSnapshot(mgr(), unknownOnly.id, unknownOnly.currentSnapshotId)).report;
+    expect({ kind: snapReport.kind, label: snapReport.label, reasons: snapReport.reasons }).toEqual({
+      kind: unknownOnly.report.kind,
+      label: unknownOnly.report.label,
+      reasons: unknownOnly.report.reasons,
+    });
   });
 
   it("確認の画面に出す、判定不能の件数と出典・確認日が古い項目（90 日超）", async () => {

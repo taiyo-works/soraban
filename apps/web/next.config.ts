@@ -12,7 +12,7 @@ const repoRoot = path.join(
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  transpilePackages: ["@soraban/db", "@soraban/regulations", "@soraban/geo"],
+  transpilePackages: ["@soraban/db", "@soraban/dips", "@soraban/regulations", "@soraban/geo"],
 
   // 規制データ (airports / parks) は @soraban/regulations で静的 import して
   // バンドルに同梱する方針 (Turbopack ビルドは outputFileTracingIncludes を

@@ -108,7 +108,8 @@ export type RecordEntityTypeDb =
   | "daily_inspection"
   | "flight_record"
   | "flight_plan"
-  | "saved_place";
+  | "saved_place"
+  | "flight_report";
 export type RecordOpDb = "create" | "update" | "void";
 export type RecordActorKindDb = "member" | "system";
 
@@ -350,6 +351,99 @@ export type PlanConfirmationRow = {
   readonly confirmer_member_id: string;
   readonly confirmer_name: string;
   readonly self_confirmation: boolean;
+  readonly created_at: string;
+  readonly content_hash: string;
+};
+
+// ---- 通報（Sprint 12b。0012・0013） ----
+
+/** flight_reports.kind。新規・変更・取消（取消は元の通報を指す別の行）。 */
+export type ReportKindDb = "new" | "change" | "cancel";
+/** flight_reports.channel。api は 12b では使わない。 */
+export type ReportChannelDb = "manual" | "mock" | "api";
+/** flight_reports.status。copied は保存せず監査に残す。取消は種別 cancel の別の行。 */
+export type ReportStatusDb = "prepared" | "reported_manual" | "submitted_api" | "failed" | "unknown" | "retracted";
+export type ReportAttemptOperationDb =
+  | "copy"
+  | "submit"
+  | "status"
+  | "cancel"
+  | "manual_record"
+  | "correct"
+  | "retract"
+  | "resolve";
+export type ReportAttemptResultDb = "success" | "failure" | "unknown";
+export type ProcedureRecordKindDb = "dips_permit" | "small_drone_law";
+export type ProcedureRecordActionDb = "done" | "retract";
+
+export type FlightReportRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly kind: ReportKindDb;
+  readonly base_report_id: string | null;
+  readonly snapshot_id: string;
+  readonly plan_version: number;
+  readonly fingerprint: string;
+  readonly fingerprint_parts: Record<string, unknown>;
+  readonly map_revision: number;
+  readonly channel: ReportChannelDb;
+  readonly status: ReportStatusDb;
+  readonly idempotency_key: string;
+  /** timestamptz（日本時間の分）。 */
+  readonly reported_at: string | null;
+  readonly dips_number: string | null;
+  readonly number_unavailable: boolean;
+  readonly confirmed_dips_done: boolean;
+  readonly confirmed_matches_latest: boolean;
+  /** 整えた通報内容の写し。技能証明書番号・氏名は入れない。 */
+  readonly content: Record<string, unknown>;
+  readonly memo: string | null;
+  readonly error_kind: string | null;
+  readonly external_ref: Record<string, unknown> | null;
+  readonly external_status: Record<string, unknown> | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+};
+
+export type FlightReportAttemptRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly report_id: string | null;
+  readonly operation: ReportAttemptOperationDb;
+  readonly member_id: string;
+  readonly member_name: string;
+  readonly member_role: MemberRoleDb;
+  readonly adapter: ReportChannelDb;
+  readonly idempotency_key: string | null;
+  readonly payload_hash: string | null;
+  readonly summary: string | null;
+  readonly map_revision: number | null;
+  readonly check_evidence_id: string | null;
+  readonly diagnosis_evidence_id: string | null;
+  readonly result: ReportAttemptResultDb;
+  readonly http_status: number | null;
+  readonly error_kind: string | null;
+  readonly dips_number: string | null;
+  readonly created_at: string;
+};
+
+export type PlanProcedureRecordRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly kind: ProcedureRecordKindDb;
+  readonly action: ProcedureRecordActionDb;
+  readonly done_at: string | null;
+  readonly reference: string | null;
+  readonly checks: Record<string, boolean>;
+  readonly snapshot_id: string;
+  readonly plan_version: number;
+  readonly recorded_by_member_id: string;
+  readonly recorded_by_name: string;
+  readonly reason: string | null;
   readonly created_at: string;
   readonly content_hash: string;
 };
@@ -653,6 +747,76 @@ export const PLAN_CONFIRMATION_COLUMNS = columns<PlanConfirmationRow>()([
   "content_hash",
 ]);
 
+export const FLIGHT_REPORT_COLUMNS = columns<FlightReportRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "kind",
+  "base_report_id",
+  "snapshot_id",
+  "plan_version",
+  "fingerprint",
+  "fingerprint_parts",
+  "map_revision",
+  "channel",
+  "status",
+  "idempotency_key",
+  "reported_at",
+  "dips_number",
+  "number_unavailable",
+  "confirmed_dips_done",
+  "confirmed_matches_latest",
+  "content",
+  "memo",
+  "error_kind",
+  "external_ref",
+  "external_status",
+  "current_version",
+  "created_at",
+  "updated_at",
+]);
+
+export const FLIGHT_REPORT_ATTEMPT_COLUMNS = columns<FlightReportAttemptRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "report_id",
+  "operation",
+  "member_id",
+  "member_name",
+  "member_role",
+  "adapter",
+  "idempotency_key",
+  "payload_hash",
+  "summary",
+  "map_revision",
+  "check_evidence_id",
+  "diagnosis_evidence_id",
+  "result",
+  "http_status",
+  "error_kind",
+  "dips_number",
+  "created_at",
+]);
+
+export const PLAN_PROCEDURE_RECORD_COLUMNS = columns<PlanProcedureRecordRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "kind",
+  "action",
+  "done_at",
+  "reference",
+  "checks",
+  "snapshot_id",
+  "plan_version",
+  "recorded_by_member_id",
+  "recorded_by_name",
+  "reason",
+  "created_at",
+  "content_hash",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -669,9 +833,12 @@ export const TABLE_COLUMNS = {
   flight_plans: FLIGHT_PLAN_COLUMNS,
   judgement_snapshots: JUDGEMENT_SNAPSHOT_COLUMNS,
   plan_confirmations: PLAN_CONFIRMATION_COLUMNS,
+  flight_reports: FLIGHT_REPORT_COLUMNS,
+  flight_report_attempts: FLIGHT_REPORT_ATTEMPT_COLUMNS,
+  plan_procedure_records: PLAN_PROCEDURE_RECORD_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10・11・12a）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+/** 運航管理の表（Sprint 10・11・12a・12b）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
 export const OPS_TABLES = [
   "organizations",
   "members",
@@ -684,4 +851,7 @@ export const OPS_TABLES = [
   "flight_plans",
   "judgement_snapshots",
   "plan_confirmations",
+  "flight_reports",
+  "flight_report_attempts",
+  "plan_procedure_records",
 ] as const;

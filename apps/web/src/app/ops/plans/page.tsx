@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Badge, buttonFieldClass, listRowClass, Note, PageHeader } from "@/components/ops/ui";
-import { DipsNotice, PlanStateBadge, ReportBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
+import { Badge, buttonFieldClass, Note, PageHeader } from "@/components/ops/ui";
+import { DipsNotice, NextActionItem, PlanStateBadge, ReportBadge, ReportStatusBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
 import { jstDate } from "@/lib/ops-time";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { requireOpsMember } from "@/server/ops/page";
@@ -18,6 +18,9 @@ type ViewKey = (typeof VIEWS)[number]["key"];
 /** `YYYY-MM-DD` の前の日（過去の表示の上限を「今日より前」にするため）。 */
 const prevDate = (d: string): string => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
 
+/** 行全体のカード（li の枠）の中で、本体のリンク。次にやることは同じ枠の下半分に置く（リンクの中に入れない）。 */
+const rowLinkClass = "grid grid-cols-1 gap-2 rounded-t-sharp px-3 py-3 text-sm transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft";
+
 const tabClass = (active: boolean) =>
   `inline-flex min-h-11 items-center px-4 text-sm ${active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"}`;
 
@@ -33,6 +36,8 @@ export default async function PlanListPage({
   const view: ViewKey = VIEWS.some((v) => v.key === sp["view"]) ? (sp["view"] as ViewKey) : "upcoming";
   const manager = me.member.role === "manager";
   const pendingOnly = manager && sp["state"] === "pending";
+  // 「対応が必要」：次にやることのうち、確認・再判定・通報・許可・警察など（推奨だけのものは含めない）がある計画
+  const attentionOnly = sp["attention"] === "1";
   const today = jstDate(nowOf(ctx));
   // 表示ごとの絞り込み（日付・中止）は、500 件の上限の前に DB で行う。
   const stateFilter = pendingOnly ? { state: "pending" as const } : {};
@@ -43,14 +48,16 @@ export default async function PlanListPage({
         ? { to: prevDate(today) }
         : { from: today, oldestFirst: true };
   const all = await listPlans(ctx, { ...viewFilter, ...stateFilter });
-  const rows: PlanDto[] =
+  const byView: PlanDto[] =
     view === "voided"
       ? all.filter((p) => p.voided)
       : view === "past"
         ? all.filter((p) => !p.voided && p.plannedDate < today)
         : all.filter((p) => !p.voided && p.plannedDate >= today);
+  const rows: PlanDto[] = attentionOnly ? byView.filter((p) => p.nextAction !== null && p.nextAction.tier <= 4) : byView;
   const denied = planCreateDenied(me);
-  const href = (v: ViewKey, pending: boolean) => `/ops/plans?view=${v}${pending ? "&state=pending" : ""}`;
+  const href = (v: ViewKey, pending: boolean, attention: boolean = attentionOnly) =>
+    `/ops/plans?view=${v}${pending ? "&state=pending" : ""}${attention ? "&attention=1" : ""}`;
   return (
     <main className="flex flex-col gap-6">
       <PageHeader
@@ -82,6 +89,15 @@ export default async function PlanListPage({
             </Link>
           ))}
         </nav>
+        <Link
+          href={href(view, pendingOnly, !attentionOnly)}
+          prefetch={false}
+          className="inline-flex min-h-11 items-center rounded-sharp border border-rule px-4 text-sm text-ink-soft hover:bg-paper-soft aria-[current=true]:border-brand-700 aria-[current=true]:text-brand-700"
+          aria-current={attentionOnly ? "true" : undefined}
+          data-testid="plan-filter-attention"
+        >
+          {attentionOnly ? "✓ 対応が必要なものだけ（解除する）" : "対応が必要なものだけ表示"}
+        </Link>
         {manager ? (
           <Link
             href={href(view, !pendingOnly)}
@@ -102,8 +118,8 @@ export default async function PlanListPage({
       ) : (
         <ul className="flex flex-col gap-2" data-testid="plan-list">
           {rows.map((p) => (
-            <li key={p.id}>
-              <Link prefetch={false} href={`/ops/plans/${p.id}`} className={`${listRowClass} sm:grid-cols-1 sm:gap-1.5 sm:rounded-sharp sm:border sm:bg-paper sm:px-3`} data-testid="plan-row">
+            <li key={p.id} className="flex flex-col rounded-sharp border border-rule bg-paper">
+              <Link prefetch={false} href={`/ops/plans/${p.id}`} className={rowLinkClass} data-testid="plan-row">
                 <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="font-mono text-sm tnum text-ink" data-testid="plan-row-start">
                     {p.plannedStartAtJst}
@@ -127,10 +143,21 @@ export default async function PlanListPage({
                   </span>
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <ReportBadge report={p.report} />
+                    <ReportStatusBadge status={p.report.status} />
                     <VerdictBadge level={p.judgement.verdictLevel} unknownCount={p.judgement.verdictUnknownCount} />
                   </span>
                 </span>
               </Link>
+              {p.nextAction ? (
+                <div className="border-t border-rule bg-paper-soft/60" data-testid="plan-row-next">
+                  <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
+                  {p.nextActionCount > 1 ? (
+                    <p className="px-3 pb-2.5 pl-[3.75rem] text-xs text-ink-mute" data-testid="plan-row-next-count">
+                      ほか {p.nextActionCount - 1} 件（詳細で確認できます）
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -12,6 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@soraban/db": pkg("db"),
+      "@soraban/dips": pkg("dips"),
       "@soraban/geo": pkg("geo"),
       "@soraban/regulations": pkg("regulations"),
       "@": fileURLToPath(new URL("./apps/web/src", import.meta.url)),

@@ -10,9 +10,9 @@ export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
 const toneClass: Record<Tone, string> = {
   neutral: "border-rule text-ink-soft",
   brand: "border-brand-500 text-brand-700",
-  green: "border-signal-green/60 bg-signal-green-soft text-signal-green",
-  amber: "border-signal-amber/60 bg-signal-amber-soft text-signal-amber",
-  red: "border-signal-red/60 bg-signal-red-soft text-signal-red",
+  green: "border-signal-green/60 bg-signal-green-soft text-ink",
+  amber: "border-signal-amber/60 bg-signal-amber-soft text-ink",
+  red: "border-signal-red/60 bg-signal-red-soft text-ink",
   mute: "border-rule bg-paper-soft text-ink-mute",
 };
 
@@ -147,7 +147,7 @@ export function DetailList({
 /** 一覧の「取消していないもの／取消済みも含める」の切り替え。 */
 export function VoidedToggle({ basePath, includeVoided }: { readonly basePath: string; readonly includeVoided: boolean }) {
   const item = (active: boolean) =>
-    `inline-flex min-h-10 items-center px-3 text-xs ${
+    `inline-flex min-h-11 items-center px-3 text-xs ${
       active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"
     }`;
   return (

@@ -4,7 +4,9 @@ import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
 import * as places from "./places";
 import * as plans from "./plans";
+import * as procedureRecords from "./procedure-records";
 import * as rec from "./records";
+import * as reports from "./reports";
 import * as svc from "./service";
 
 const includeVoided = (req: Request): boolean => new URL(req.url).searchParams.get("includeVoided") === "1";
@@ -192,6 +194,72 @@ export const planSnapshotGet = opsHandler("GET /api/ops/plans/[id]/snapshots/[si
 );
 export const planVersions = opsHandler("GET /api/ops/plans/[id]/versions", async ({ ctx, params }) =>
   json(200, { versions: await plans.listPlanVersions(ctx, params["id"] ?? "") }),
+);
+
+// ---- 通報の記録・手続きの「済み」の記録（Sprint 12b） ----
+// そらばんは DIPS に送信しない。記録は利用者の申告（手動）か、開発用の模擬の送信。記録が無いうちは「通報済み」にならない。
+// サーバーが決めるもの（指紋・冪等性キー・対応表の版・状態・計画の版・スナップショット・送信元）は本文から読まない。
+// 設定（DIPS_REPORT_ADAPTER）が誤りなら 503 adapter_unavailable。
+
+const reportKindParam = (req: Request): reports.PlanReportViewKind => {
+  const k = new URL(req.url).searchParams.get("kind");
+  if (k === null) return undefined;
+  if (k !== "new" && k !== "change" && k !== "cancel") {
+    throw new svc.OpsError(400, "invalid_input", { kind: "種別は new・change・cancel のいずれかです" }, { kind: "invalid" });
+  }
+  return k;
+};
+
+export const planReportGet = opsHandler("GET /api/ops/plans/[id]/report", async ({ ctx, params, req }) => {
+  const kind = reportKindParam(req);
+  return json(200, await reports.getPlanReport(ctx, params["id"] ?? "", kind ? { kind } : {}));
+});
+export const planReportPreview = opsHandler("POST /api/ops/plans/[id]/report", async ({ ctx, params, body }) =>
+  json(200, await reports.previewPlanReport(ctx, params["id"] ?? "", await body())),
+);
+export const reportCreate = opsHandler(
+  "POST /api/ops/plans/[id]/reports",
+  async ({ ctx, params, body }) => {
+    const r = await reports.createReport(ctx, params["id"] ?? "", await body());
+    return json(r.created ? 201 : 200, r);
+  },
+  { mutating: true },
+);
+export const reportCorrect = opsHandler(
+  "PATCH /api/ops/plans/[id]/reports/[rid]",
+  async ({ ctx, params, body }) => json(200, await reports.correctReport(ctx, params["id"] ?? "", params["rid"] ?? "", await body())),
+  { mutating: true },
+);
+export const reportRetract = opsHandler(
+  "POST /api/ops/plans/[id]/reports/[rid]/retract",
+  async ({ ctx, params, body }) => json(200, await reports.retractReport(ctx, params["id"] ?? "", params["rid"] ?? "", await body())),
+  { mutating: true },
+);
+export const reportResolve = opsHandler(
+  "POST /api/ops/plans/[id]/reports/[rid]/resolve",
+  async ({ ctx, params, body }) => json(200, await reports.resolveReport(ctx, params["id"] ?? "", params["rid"] ?? "", await body())),
+  { mutating: true },
+);
+export const reportRetry = opsHandler(
+  "POST /api/ops/plans/[id]/reports/[rid]/retry",
+  async ({ ctx, params, body }) => json(200, await reports.retryReport(ctx, params["id"] ?? "", params["rid"] ?? "", await body())),
+  { mutating: true },
+);
+export const reportVersions = opsHandler("GET /api/ops/plans/[id]/reports/[rid]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await reports.listReportVersions(ctx, params["id"] ?? "", params["rid"] ?? "") }),
+);
+export const reportCopyAudit = opsHandler(
+  "POST /api/ops/plans/[id]/reports/audit",
+  async ({ ctx, params, body }) => json(201, await reports.recordCopyAudit(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const procedureRecordList = opsHandler("GET /api/ops/plans/[id]/procedure-records", async ({ ctx, params }) =>
+  json(200, await procedureRecords.listProcedureRecords(ctx, params["id"] ?? "")),
+);
+export const procedureRecordCreate = opsHandler(
+  "POST /api/ops/plans/[id]/procedure-records",
+  async ({ ctx, params, body }) => json(201, await procedureRecords.createProcedureRecord(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
 );
 
 // ---- よく使う地点（Sprint 12a） ----

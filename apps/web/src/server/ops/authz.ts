@@ -35,13 +35,22 @@ export type OpsAction =
   | "place.read"
   | "place.create"
   | "place.update"
-  | "place.void";
+  | "place.void"
+  // Sprint 12b：通報の記録・手続きの「済み」の記録
+  | "report.read"
+  | "report.record"
+  | "report.correct"
+  | "report.retract"
+  | "report.resolve"
+  | "report.copyAudit"
+  | "procedure.record";
 
 export type AuthzContext = {
   /**
    * 対象の操縦者が、操作する利用者自身に結び付いているか（pilot.update・pilot.readLicenseNumber で使う）。
    * 飛行記録・日常点検では、記録の操縦者（実施者）の行が自分に結び付いているか（Sprint 11 設計 D「自分の分」）。
    * 飛行計画（plan.create・plan.update・plan.cancel）では、計画の操縦者の行が自分に結び付いているか（Sprint 12a 設計 D）。
+   * 通報・手続きの記録（report.record 等・procedure.record）も、計画の操縦者の行が自分に結び付いているか（Sprint 12b 設計 F）。
    * 操縦者の行に結び付いていない操縦者役割の利用者は、常に isSelf=false になる。
    */
   readonly isSelf?: boolean;
@@ -80,6 +89,13 @@ export const OPS_ACTIONS: readonly OpsAction[] = [
   "place.create",
   "place.update",
   "place.void",
+  "report.read",
+  "report.record",
+  "report.correct",
+  "report.retract",
+  "report.resolve",
+  "report.copyAudit",
+  "procedure.record",
 ];
 
 export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {}): boolean => {
@@ -91,6 +107,8 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "plan.read":
     case "snapshot.read":
     case "place.read":
+    // 通報内容・履歴・状況の閲覧は全役割（技能証明書番号の全桁は flight.readLicenseNumber と同じ規則で運航管理者と本人だけ）
+    case "report.read":
       return true;
     case "pilot.update":
     case "pilot.readLicenseNumber":
@@ -102,6 +120,14 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "plan.create":
     case "plan.update":
     case "plan.cancel":
+    // Sprint 12b：通報の記録・訂正・取り下げ・結果不明の確定・コピーの監査、手続きの「済み」の記録は、
+    // 運航管理者は全員分、操縦者は自分が操縦者の計画だけ、閲覧者は不可
+    case "report.record":
+    case "report.correct":
+    case "report.retract":
+    case "report.resolve":
+    case "report.copyAudit":
+    case "procedure.record":
       return role === "manager" || (role === "pilot" && ctx.isSelf === true);
     case "aircraft.create":
     case "aircraft.update":

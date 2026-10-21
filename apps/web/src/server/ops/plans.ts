@@ -9,13 +9,27 @@ import {
   PROCEDURES_REVISION,
   PROCEDURES_VERIFIED_AT,
   reportRequirement,
+  SPECIFIC_FLIGHT_FLAG_LABEL,
   type ReportRequirement,
+  type SpecificFlightFlag,
 } from "@soraban/regulations";
+import { diffFingerprintParts, type FingerprintChange } from "@soraban/dips";
 import { formatJst, jstDate, parseJstMinute, toJstInput } from "@/lib/ops-time";
 import type { DiagnosisRun } from "@/server/diagnose-core";
 import { toEvidenceLogInsert } from "@/server/evidence-log";
 import { can } from "./authz";
 import { runJudge } from "./judge";
+import {
+  currentFingerprintPartsOf,
+  emptyExtras,
+  loadReportExtras,
+  summarizePlanReport,
+  summarizeProcedureRecords,
+  type PlanReportDto,
+  type PlanReportExtras,
+  type ProcedureRecordSummaryDto,
+} from "./report-dto";
+import type { NextAction } from "./report-logic";
 import {
   buildJudgementInput,
   confirmationState,
@@ -156,8 +170,14 @@ export type PlanDto = {
   readonly judgement: SnapshotSummaryDto;
   /** 判定が古いか（機体の重量の変更・エンジンの版・データの確認日・手続きデータの版）。 */
   readonly freshness: FreshnessDto;
-  /** 通報の要否（記録は 12b）。 */
-  readonly report: ReportRequirement;
+  /**
+   * 通報の要否（ReportRequirement）に、導出の状況（status）と期限（deadline）を足したもの（Sprint 12b）。
+   * 記録（reported_manual・submitted_api）が無いうちは「通報済み」にならない。保存した状態は読まず、毎回導出する。
+   */
+  readonly report: PlanReportDto;
+  /** 計画ごとの「次にやること」の先頭の 1 件（無ければ null）と件数（一覧用。Sprint 12b）。 */
+  readonly nextAction: NextAction | null;
+  readonly nextActionCount: number;
   /** 出典・確認日が古い項目（90 日超）。確認の画面に出す。 */
   readonly staleSources: readonly StaleSource[];
 };
@@ -166,6 +186,12 @@ export type PlanDetailDto = PlanDto & {
   readonly confirmations: readonly ConfirmationDto[];
   /** この計画に結びついた飛行記録。 */
   readonly flights: readonly rec.FlightDto[];
+  /** 「次にやること」の全件（tier、飛行開始までの時間の順。Sprint 12b）。 */
+  readonly nextActions: readonly NextAction[];
+  /** 有効な通報があり、通報時から計画が変わっているとき、変わった項目（変更点の表示）。 */
+  readonly reportChanges: readonly FingerprintChange[];
+  /** 手続きの「済み」の記録の要約（許可・承認の申請、飛行禁止法の同意・通報。Sprint 12b）。 */
+  readonly procedureRecords: readonly ProcedureRecordSummaryDto[];
 };
 
 export type SnapshotListDto = SnapshotSummaryDto & {
@@ -234,7 +260,13 @@ const snapshotSummary = (r: PlanWithJoins): SnapshotSummaryDto => ({
   createdAt: asDate(r.snapshot_created_at).toISOString(),
 });
 
-const planDto = (ctx: OpsContext, r: PlanWithJoins, confirmations: readonly PlanConfirmationRow[], mine: PilotRow | null): PlanDto => {
+const planDto = (
+  ctx: OpsContext,
+  r: PlanWithJoins,
+  confirmations: readonly PlanConfirmationRow[],
+  mine: PilotRow | null,
+  extras: PlanReportExtras = emptyExtras(),
+): PlanDto => {
   const start = asDate(r.planned_start_at);
   const confirmationDtos = confirmations.map(confirmationDto);
   const state = confirmationState(
@@ -255,6 +287,20 @@ const planDto = (ctx: OpsContext, r: PlanWithJoins, confirmations: readonly Plan
     now: ctx.freshnessNow ?? currentFreshnessContext(),
   });
   const input = r.snapshot_input as { droneWeightG?: number | null; purpose?: string | null };
+  const requirement = reportRequirement({
+    input: { droneWeightG: input.droneWeightG ?? null, purpose: input.purpose ?? null },
+    result: r.snapshot_result_slim,
+  });
+  const summary = summarizePlanReport({
+    ctx,
+    plan: r,
+    isSelf: mine !== null && mine.id === r.pilot_id,
+    planState: state.state,
+    judgementStale: freshness.stale,
+    requirement,
+    extras,
+    now: nowOf(ctx),
+  });
   return {
     id: r.id,
     title: r.title,
@@ -300,10 +346,9 @@ const planDto = (ctx: OpsContext, r: PlanWithJoins, confirmations: readonly Plan
       stale: freshness.stale,
       reasons: freshness.reasons.map((code) => ({ code, label: FRESHNESS_REASON_LABEL[code] })),
     },
-    report: reportRequirement({
-      input: { droneWeightG: input.droneWeightG ?? null, purpose: input.purpose ?? null },
-      result: r.snapshot_result_slim,
-    }),
+    report: summary.report,
+    nextAction: summary.nextActions[0] ?? null,
+    nextActionCount: summary.nextActions.length,
     staleSources: staleSources(
       {
         datasets: r.snapshot_datasets,
@@ -311,6 +356,29 @@ const planDto = (ctx: OpsContext, r: PlanWithJoins, confirmations: readonly Plan
       },
       nowOf(ctx),
     ),
+  };
+};
+
+/** 詳細の追加分：次にやることの全件・通報時からの変更点・手続きの記録。 */
+const detailExtras = (ctx: OpsContext, r: PlanWithJoins, dto: PlanDto, mine: PilotRow | null, extras: PlanReportExtras) => {
+  const summary = summarizePlanReport({
+    ctx,
+    plan: r,
+    isSelf: mine !== null && mine.id === r.pilot_id,
+    planState: dto.state,
+    judgementStale: dto.freshness.stale,
+    requirement: dto.report,
+    extras,
+    now: nowOf(ctx),
+  });
+  const effective = dto.report.status.effectiveId ? extras.rows.find((x) => x.id === dto.report.status.effectiveId) : undefined;
+  const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
+  return {
+    nextActions: summary.nextActions,
+    reportChanges: effective
+      ? diffFingerprintParts(effective.fingerprint_parts as never, currentFingerprintPartsOf(r), { flagLabel })
+      : [],
+    procedureRecords: summarizeProcedureRecords(extras.records, r),
   };
 };
 
@@ -352,18 +420,37 @@ export const listPlans = async (ctx: OpsContext, filter: PlanListFilter = {}): P
   const mine = await myPilot(ctx);
   const rows = await store.listPlans(ctx.db, ctx.member.org_id, filter);
   const by = await withConfirmations(ctx, rows);
-  const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine));
+  const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
+  const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id)));
   return filter.state ? dtos.filter((d) => d.state === filter.state) : dtos;
 };
 
-const loadPlan = async (ctx: OpsContext, id: string): Promise<PlanWithJoins> => {
+export const loadPlan = async (ctx: OpsContext, id: string): Promise<PlanWithJoins> => {
   const r = isUuid(id) ? await store.getPlan(ctx.db, ctx.member.org_id, id) : null;
   if (!r) throw new OpsError(404, "not_found");
   return r;
 };
 
 const planDtoOf = async (ctx: OpsContext, r: PlanWithJoins, mine: PilotRow | null): Promise<PlanDto> =>
-  planDto(ctx, r, (await withConfirmations(ctx, [r])).get(r.id) ?? [], mine);
+  planDto(
+    ctx,
+    r,
+    (await withConfirmations(ctx, [r])).get(r.id) ?? [],
+    mine,
+    (await loadReportExtras(ctx, [r.id])).get(r.id),
+  );
+
+/** 通報の API が使う、計画の行・要求した利用者の操縦者・計画の DTO・通報の導出に必要な値の組。 */
+export const loadPlanBundle = async (
+  ctx: OpsContext,
+  id: string,
+): Promise<{ plan: PlanWithJoins; mine: PilotRow | null; dto: PlanDto; extras: PlanReportExtras }> => {
+  const plan = await loadPlan(ctx, id);
+  const mine = await myPilot(ctx);
+  const confirmations = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [plan.id]);
+  const extras = (await loadReportExtras(ctx, [plan.id])).get(plan.id) ?? emptyExtras();
+  return { plan, mine, dto: planDto(ctx, plan, confirmations, mine, extras), extras };
+};
 
 export const getPlan = async (ctx: OpsContext, id: string): Promise<PlanDetailDto> => {
   assertCan(ctx, "plan.read");
@@ -371,7 +458,9 @@ export const getPlan = async (ctx: OpsContext, id: string): Promise<PlanDetailDt
   const mine = await myPilot(ctx);
   const confirmations = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [r.id]);
   const flights = await rec.listFlightsForPlan(ctx, r.id);
-  return { ...planDto(ctx, r, confirmations, mine), confirmations: confirmations.map(confirmationDto), flights };
+  const extras = (await loadReportExtras(ctx, [r.id])).get(r.id) ?? emptyExtras();
+  const dto = planDto(ctx, r, confirmations, mine, extras);
+  return { ...dto, confirmations: confirmations.map(confirmationDto), flights, ...detailExtras(ctx, r, dto, mine, extras) };
 };
 
 export const listPlanVersions = async (ctx: OpsContext, id: string): Promise<VersionDto[]> => {
@@ -805,6 +894,7 @@ export const confirmPlan = async (ctx: OpsContext, id: string, body: unknown): P
   const mine = await myPilot(ctx);
   const all = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [id]);
   const saved = all.find((c) => c.id === confirmationId)!;
-  return { confirmation: confirmationDto(saved), plan: planDto(ctx, await loadPlan(ctx, id), all, mine) };
+  const extras = (await loadReportExtras(ctx, [id])).get(id);
+  return { confirmation: confirmationDto(saved), plan: planDto(ctx, await loadPlan(ctx, id), all, mine, extras) };
 };
 

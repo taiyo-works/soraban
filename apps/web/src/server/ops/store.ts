@@ -8,11 +8,14 @@ import type {
   EvidenceLogInsert,
   FlightPlanRow,
   FlightRecordRow,
+  FlightReportAttemptRow,
+  FlightReportRow,
   JudgementSnapshotRow,
   MemberRow,
   OrganizationRow,
   PilotRow,
   PlanConfirmationRow,
+  PlanProcedureRecordRow,
   RecordEntityTypeDb,
   RecordOpDb,
   RecordVersionRow,
@@ -458,13 +461,28 @@ export type PlanWithJoins = FlightPlanRow & {
   readonly procedures_revision: number;
   readonly procedures_verified_at: string;
   readonly snapshot_created_at: string | Date;
-  /** 通報の要否の判定に使う結果の一部（droneWeightG・category・flags・verdict.purpose）。 */
+  /**
+   * 通報の要否・次にやることの判定に使う結果の一部（droneWeightG・category・flags・verdict.purpose・verdict.unknownCount、
+   * 手続きの procedureId と期限）。result の全体は読まない（一覧で重くしない）。
+   */
   readonly snapshot_result_slim: {
     readonly droneWeightG: number | null;
     readonly category: string | null;
     readonly flags: readonly SpecificFlightFlag[] | null;
-    readonly verdict: { readonly purpose: string | null };
+    readonly verdict: {
+      readonly purpose: string | null;
+      readonly unknownCount: number | null;
+      readonly procedures: readonly SlimProcedure[];
+    };
   };
+};
+
+/** 判定の結論の手続きのうち、procedureId があるもの（次にやることの「許可・承認を申請する」「警察へ通報する」に使う）。 */
+export type SlimProcedure = {
+  readonly procedureId: string;
+  readonly deadlineLabel: string | null;
+  /** 期限の日付（YYYY-MM-DD）。決まらないときは null。 */
+  readonly deadlineDate: string | null;
 };
 
 const PLAN_SELECT = `select p.*, to_char(p.planned_date, 'YYYY-MM-DD') as planned_date_text,
@@ -479,7 +497,20 @@ const PLAN_SELECT = `select p.*, to_char(p.planned_date, 'YYYY-MM-DD') as planne
           'droneWeightG', s.result->'droneWeightG',
           'category', s.result->'category',
           'flags', s.result->'flags',
-          'verdict', jsonb_build_object('purpose', s.result->'verdict'->'purpose')
+          'verdict', jsonb_build_object(
+            'purpose', s.result->'verdict'->'purpose',
+            'unknownCount', s.result->'verdict'->'unknownCount',
+            'procedures', coalesce((
+              select jsonb_agg(jsonb_build_object(
+                       'procedureId', x->'procedureId',
+                       'deadlineLabel', x->'deadline'->'label',
+                       'deadlineDate', x->'deadline'->'date'))
+                from jsonb_array_elements(
+                       case when jsonb_typeof(s.result->'verdict'->'procedures') = 'array'
+                            then s.result->'verdict'->'procedures' else '[]'::jsonb end) x
+               where x ? 'procedureId'
+            ), '[]'::jsonb)
+          )
         ) as snapshot_result_slim
    from flight_plans p
    join aircraft a on a.id = p.aircraft_id
@@ -614,3 +645,174 @@ export const listFlightsByPlan = async (db: OpsDb, orgId: string, planId: string
       [orgId, planId],
     )
   ).rows;
+
+// ---- 通報の記録・試行の監査・手続きの「済み」の記録（Sprint 12b） ----------------
+
+/** 通報の行に、並べ替え用のマイクロ秒つきの時刻と、通報日時の JST の分を付けたもの。 */
+export type ReportRowWithTimes = FlightReportRow & {
+  /** UTC・小数 6 桁の ISO 文字列（作成・更新）。ミリ秒の Date では同じ時刻になりうるため、順序の判定にはこちらを使う。 */
+  readonly created_at_us: string;
+  readonly updated_at_us: string;
+  /** 通報日時（JST の `YYYY-MM-DDTHH:MM`）。 */
+  readonly reported_at_jst: string | null;
+  /** 通報の対象のスナップショットの通し番号と証跡 ID（judgement_snapshots から引く）。 */
+  readonly snapshot_seq: number;
+  readonly check_evidence_id: string;
+  readonly diagnosis_evidence_id: string;
+};
+
+const REPORT_SELECT = `select r.*,
+        to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as created_at_us,
+        to_char(r.updated_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as updated_at_us,
+        ops_timestamptz_to_jst_minute(r.reported_at) as reported_at_jst,
+        s.seq as snapshot_seq, s.check_evidence_id, s.diagnosis_evidence_id
+   from flight_reports r
+   join judgement_snapshots s on s.id = r.snapshot_id`;
+
+/** 計画の通報の行（古い順）。plan_ids は同じ組織の計画。 */
+export const listReportsFor = async (db: OpsDb, orgId: string, planIds: readonly string[]): Promise<ReportRowWithTimes[]> => {
+  if (planIds.length === 0) return [];
+  return (
+    await db.query<ReportRowWithTimes>(
+      `${REPORT_SELECT} where r.org_id = $1 and r.plan_id = any($2::uuid[]) order by r.created_at, r.id`,
+      [orgId, [...planIds]],
+    )
+  ).rows;
+};
+
+/** 通報の行 1 件。他の計画・他の組織のものは null。 */
+export const getReport = async (db: OpsDb, orgId: string, planId: string, id: string): Promise<ReportRowWithTimes | null> =>
+  (await db.query<ReportRowWithTimes>(`${REPORT_SELECT} where r.org_id = $1 and r.plan_id = $2 and r.id = $3`, [orgId, planId, id]))
+    .rows[0] ?? null;
+
+/** 冪等性キーの通報の行（組織の中で一意）。 */
+export const findReportByKey = async (db: OpsDb, orgId: string, key: string): Promise<ReportRowWithTimes | null> =>
+  (await db.query<ReportRowWithTimes>(`${REPORT_SELECT} where r.org_id = $1 and r.idempotency_key = $2`, [orgId, key])).rows[0] ?? null;
+
+export type AttemptInsert = {
+  readonly orgId: string;
+  readonly planId: string;
+  readonly reportId: string | null;
+  readonly operation: FlightReportAttemptRow["operation"];
+  readonly memberId: string;
+  readonly adapter: FlightReportAttemptRow["adapter"];
+  readonly idempotencyKey: string | null;
+  readonly payloadHash: string | null;
+  readonly summary: string | null;
+  readonly mapRevision: number | null;
+  readonly checkEvidenceId: string | null;
+  readonly diagnosisEvidenceId: string | null;
+  readonly result: FlightReportAttemptRow["result"];
+  readonly httpStatus: number | null;
+  readonly errorKind: string | null;
+  readonly dipsNumber: string | null;
+};
+
+/** 試行の監査を 1 行追加する（呼び出し側のトランザクションの中で）。member_name・member_role・created_at は DB が決める。 */
+export const insertAttemptOn = async (c: OpsTx, a: AttemptInsert): Promise<void> => {
+  await c.query(
+    `insert into flight_report_attempts (org_id, plan_id, report_id, operation, member_id, member_name, member_role, adapter,
+       idempotency_key, payload_hash, summary, map_revision, check_evidence_id, diagnosis_evidence_id, result, http_status,
+       error_kind, dips_number, created_at)
+     values ($1, $2, $3, $4, $5, '-', 'viewer', $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, now())`,
+    [
+      a.orgId,
+      a.planId,
+      a.reportId,
+      a.operation,
+      a.memberId,
+      a.adapter,
+      a.idempotencyKey,
+      a.payloadHash,
+      a.summary,
+      a.mapRevision,
+      a.checkEvidenceId,
+      a.diagnosisEvidenceId,
+      a.result,
+      a.httpStatus,
+      a.errorKind,
+      a.dipsNumber,
+    ],
+  );
+};
+
+/** 試行の監査を、1 つのトランザクションで追加する。 */
+export const insertAttempts = (db: OpsDb, list: readonly AttemptInsert[]): Promise<void> =>
+  withTransaction(db, async (c) => {
+    for (const a of list) await insertAttemptOn(c, a);
+  });
+
+/** 計画の試行の監査（新しい順）。 */
+export const listAttempts = async (db: OpsDb, orgId: string, planId: string, limit = 50): Promise<FlightReportAttemptRow[]> =>
+  (
+    await db.query<FlightReportAttemptRow>(
+      `select * from flight_report_attempts where org_id = $1 and plan_id = $2 order by created_at desc, id desc limit $3`,
+      [orgId, planId, limit],
+    )
+  ).rows;
+
+/**
+ * 通報内容のコピーの監査が、その計画の最後の通報の行（取り下げを含む）より後にある計画の ID。
+ * 「通報内容を開いて記録がない場合の入口」（次にやること）に使う。
+ */
+export const plansCopiedSinceLastReport = async (db: OpsDb, orgId: string, planIds: readonly string[]): Promise<Set<string>> => {
+  if (planIds.length === 0) return new Set();
+  const r = await db.query<{ plan_id: string }>(
+    `select distinct a.plan_id
+       from flight_report_attempts a
+      where a.org_id = $1 and a.plan_id = any($2::uuid[]) and a.operation = 'copy'
+        and a.created_at > coalesce((select max(r.created_at) from flight_reports r where r.plan_id = a.plan_id), '-infinity'::timestamptz)`,
+    [orgId, [...planIds]],
+  );
+  return new Set(r.rows.map((x) => x.plan_id));
+};
+
+/** 計画の手続きの記録（古い順）。plan_ids は同じ組織の計画。 */
+export const listProcedureRecordsFor = async (
+  db: OpsDb,
+  orgId: string,
+  planIds: readonly string[],
+): Promise<(PlanProcedureRecordRow & { readonly created_at_us: string; readonly done_at_jst: string | null })[]> => {
+  if (planIds.length === 0) return [];
+  return (
+    await db.query<PlanProcedureRecordRow & { created_at_us: string; done_at_jst: string | null }>(
+      `select r.*,
+              to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as created_at_us,
+              ops_timestamptz_to_jst_minute(r.done_at) as done_at_jst
+         from plan_procedure_records r
+        where r.org_id = $1 and r.plan_id = any($2::uuid[]) order by r.created_at, r.id`,
+      [orgId, [...planIds]],
+    )
+  ).rows;
+};
+
+export type ProcedureRecordInsert = {
+  readonly orgId: string;
+  readonly planId: string;
+  readonly kind: PlanProcedureRecordRow["kind"];
+  readonly action: PlanProcedureRecordRow["action"];
+  /** JST の `YYYY-MM-DDTHH:MM`（done のとき）。 */
+  readonly doneAtJst: string | null;
+  readonly reference: string | null;
+  readonly checks: Readonly<Record<string, boolean>>;
+  readonly snapshotId: string;
+  readonly planVersion: number;
+  readonly recordedByMemberId: string;
+  readonly reason: string | null;
+};
+
+/**
+ * 手続きの記録を 1 件追加する。recorded_by_name・created_at・content_hash は DB が決める（送らない）。
+ * 計画の状態・スナップショット・版の検証も DB が行う（SB404／SB409）。
+ */
+export const insertProcedureRecord = async (db: OpsDb, i: ProcedureRecordInsert): Promise<string> =>
+  withTransaction(db, async (c) => {
+    const r = await c.query<{ id: string }>(
+      `insert into plan_procedure_records (org_id, plan_id, kind, action, done_at, reference, checks, snapshot_id, plan_version,
+         recorded_by_member_id, recorded_by_name, reason, created_at, content_hash)
+       values ($1, $2, $3, $4, ops_jst_minute_to_timestamptz($5), $6, $7::jsonb, $8, $9, $10, '-', $11, now(), '-')
+       returning id`,
+      [i.orgId, i.planId, i.kind, i.action, i.doneAtJst, i.reference, JSON.stringify(i.checks), i.snapshotId, i.planVersion, i.recordedByMemberId, i.reason],
+    );
+    return r.rows[0]!.id;
+  });

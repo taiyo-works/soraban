@@ -91,6 +91,19 @@ export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   not_requested: "確認を依頼していない計画（下書き）は、確認できません。",
   already_requested: "既に確認を依頼しています。",
   plan_cancelled: "中止した計画には記録を結べません。",
+  // Sprint 12b：通報の記録・手続きの記録
+  already_reported: "この計画には、有効な通報の記録が既にあります。変更する場合は「変更」を選んでください。",
+  no_active_report: "有効な通報の記録がありません。",
+  base_changed: "元の通報が他の操作で変わりました。画面を読み込み直してから、もう一度操作してください。",
+  manual_report_exists: "この計画には、利用者の申告による有効な通報の記録が既にあります。",
+  adapter_unavailable: "通報の送信元の設定が正しくないため、通報の機能を使えません。管理者に連絡してください。",
+  not_correctable: "この状態の記録は訂正できません。",
+  invalid_transition: "この状態では、その操作はできません。画面を読み込み直してください。",
+  not_latest: "取り下げられるのは、取り下げていない最新の記録だけです。",
+  not_retryable: "失敗した送信だけが再送できます。",
+  result_not_recorded: "送信の結果を記録できませんでした。登録されたか分かりません。画面を読み込み直して、結果不明として扱ってください。",
+  cancel_not_supported: "この送信元は取消を送れません。DIPS の画面で取り消した結果を記録してください。",
+  already_recorded: "同じ判定に対する記録が既にあります。画面を読み込み直してください。",
 };
 
 export const messageFor = (r: ApiResult): string => {

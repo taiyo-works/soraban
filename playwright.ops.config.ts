@@ -12,6 +12,9 @@ const NEON_PORT = Number(process.env.E2E_OPS_NEON_PORT ?? 3301);
 const MOCK_NEON_PORT = Number(process.env.E2E_MOCK_NEON_PORT ?? 3299);
 // Sprint 12a：国土地理院の逆ジオコーダの模擬サーバー（e2e/mock-gsi-server.mjs。通常の E2E と同じもの）。計画の保存時にサーバーが
 // 地点判定（市町村の特定）を実行するため、結果が外部サービスに左右されないよう、両方のアプリサーバーの呼び出し先をここに向ける。
+// Sprint 12b：通報ゲートウェイの模擬アダプター用の 2 台目（DIPS_REPORT_ADAPTER=mock。別ポート、同じ DB）。1 台目は未設定（= 手動）。
+// 模擬は同じプロセスの中の結果を返すだけで、DIPS へは何も送らない（ネットワーク呼び出しを持たない）。本番・プレビューでは設定が拒否する。
+const MOCK_ADAPTER_PORT = Number(process.env.E2E_OPS_MOCK_ADAPTER_PORT ?? 3302);
 const MOCK_GSI_PORT = Number(process.env.E2E_OPS_MOCK_GSI_PORT ?? 3198);
 const MOCK_REVERSE_GEOCODER = `http://127.0.0.1:${MOCK_GSI_PORT}/reverse-geocoder/LonLatToAddress`;
 const DATABASE_URL = process.env.E2E_OPS_DATABASE_URL ?? "";
@@ -67,6 +70,28 @@ export default defineConfig({
         GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         NEON_AUTH_BASE_URL: "",
         NEON_AUTH_COOKIE_SECRET: "",
+        DIPS_REPORT_ADAPTER: "",
+        VERCEL_ENV: "",
+        NEXT_DIST_DIR: "",
+      },
+    },
+    {
+      command: process.env.E2E_OPS_MOCK_ADAPTER_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${MOCK_ADAPTER_PORT} -H 127.0.0.1`,
+      url: `http://127.0.0.1:${MOCK_ADAPTER_PORT}/api/health/db`,
+      reuseExistingServer: false,
+      timeout: 180_000,
+      env: {
+        TZ: "UTC",
+        OPS_TEST_NOW: "2027-01-05T12:00:00+09:00",
+        OPS_ENABLED: "1",
+        AUTH_PROVIDER: "test",
+        AUTH_TEST_SECRET: "e2e-only-not-a-secret",
+        DATABASE_URL,
+        EVIDENCE_LOG: "off",
+        GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
+        NEON_AUTH_BASE_URL: "",
+        NEON_AUTH_COOKIE_SECRET: "",
+        DIPS_REPORT_ADAPTER: "mock",
         VERCEL_ENV: "",
         NEXT_DIST_DIR: "",
       },

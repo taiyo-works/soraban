@@ -267,21 +267,35 @@ export function PlanForm({
         <Field label="計画名" required error={errors["title"]} hint="100 文字以内">
           <input className={`${inputClass} min-h-12`} value={v.title} onChange={(e) => set("title", e.target.value)} data-testid="plan-title" />
         </Field>
-        <Field
-          label="機体"
-          required
-          error={errors["aircraftId"]}
-          hint={isEdit ? "機体は訂正で変えられません。誤った場合は中止して作り直してください。" : "判定には、この機体の最大離陸重量を使います（画面で書き換えられません）。"}
-        >
-          <select className={selectClass} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)} data-testid="plan-aircraft">
-            <option value="">選んでください</option>
-            {aircraft.map((a) => (
-              <option key={a.id} value={a.id}>
-                {withAircraftWeight(a)}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {isEdit ? (
+          // 機体は訂正で変えられない。無効化した select は 375px で表示が切れるため、読み取り専用の文（折り返す）で示す
+          <div className="flex min-w-0 flex-col gap-1.5 text-sm text-ink" data-testid="plan-aircraft-readonly">
+            <span className="flex items-center gap-2">
+              <span>機体</span>
+            </span>
+            <p className="break-words rounded-sharp border border-rule-soft bg-paper-soft px-3 py-2.5 text-base leading-snug text-ink sm:text-sm" data-testid="plan-aircraft-text">
+              <span className="font-mono">{selectedAircraft?.registrationMark ?? ""}</span>
+              <span>（{selectedAircraft?.modelName ?? ""}）</span>
+            </p>
+            <span className="text-xs leading-relaxed text-ink-mute">機体は訂正で変えられません。誤った場合は中止して作り直してください。</span>
+          </div>
+        ) : (
+          <Field
+            label="機体"
+            required
+            error={errors["aircraftId"]}
+            hint="判定には、この機体の最大離陸重量を使います（画面で書き換えられません）。"
+          >
+            <select className={`${selectClass} max-w-full truncate`} value={v.aircraftId} onChange={(e) => set("aircraftId", e.target.value)} data-testid="plan-aircraft">
+              <option value="">選んでください</option>
+              {aircraft.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {withAircraftWeight(a)}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
         {selectedAircraft && selectedAircraft.maxTakeoffWeightKg === null ? (
           <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-weight-unknown">
             この機体は最大離陸重量が登録されていないため、通報の要否は「要確認」になります。機体の登録を訂正すると、判定を最新にできます。
