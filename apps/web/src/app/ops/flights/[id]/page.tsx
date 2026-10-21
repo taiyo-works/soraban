@@ -5,7 +5,7 @@ import { VersionList } from "@/components/ops/versions";
 import { Badge, buttonGhostClass, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
 import { SPECIFIC_FLIGHT_TYPE_LABELS } from "@/lib/ops-records";
-import { getFlight, listFlightVersions } from "@/server/ops/records";
+import { getFlight, JUDGEMENT_LINK_MISSING_LABEL, listFlightVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { canCorrectRecord, recordFormOptions } from "@/server/ops/record-page";
@@ -102,6 +102,32 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
             </li>
           ))}
         </ul>
+      ),
+    ],
+    [
+      "飛行計画・判定の根拠",
+      f.flightPlanId ? (
+        <span key="pl" className="flex flex-col items-start gap-1" data-testid="flight-plan-link-box">
+          <a href={`/ops/plans/${f.flightPlanId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2" data-testid="flight-plan-link">
+            飛行計画を見る
+          </a>
+          {f.snapshotId ? (
+            <a
+              href={`/ops/plans/${f.flightPlanId}/snapshots/${f.snapshotId}`}
+              className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2"
+              data-testid="flight-basis-link"
+            >
+              判定の根拠を見る（証跡 ID・エンジンの版・データセットの版）
+            </a>
+          ) : null}
+        </span>
+      ) : f.judgementLink === "missing" ? (
+        <Badge key="pm" tone="amber" data-testid="flight-judgement-missing">
+          <span aria-hidden className="mr-1">!</span>
+          {JUDGEMENT_LINK_MISSING_LABEL}
+        </Badge>
+      ) : (
+        "計画なし（特定飛行の形態なし）"
       ),
     ],
     ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],

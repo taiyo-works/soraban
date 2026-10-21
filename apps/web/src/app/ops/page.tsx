@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DraftOwnerGuard, SignOutButton } from "@/components/ops/ops-client";
 import { buttonFieldClass, buttonOutlineBrandClass, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
+import { planCreateDenied } from "@/server/ops/plan-page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
@@ -9,11 +10,14 @@ export default async function OpsHome() {
   const { me, provider } = await requireOpsMember();
   const role = me.member.role;
   const canEnter = recordCreateDenied(me) === null;
+  const canPlan = planCreateDenied(me) === null;
   const menu = [
+    { href: "/ops/plans", title: "飛行計画", body: "判定つきの計画・運航管理者の確認・判定の根拠" },
     { href: "/ops/flights", title: "飛行記録", body: "飛行ごとの記録・飛行時間・総飛行時間" },
     { href: "/ops/inspections", title: "日常点検", body: "飛行前後の 9 項目の点検" },
     { href: "/ops/aircraft", title: "機体", body: "登録記号・型式・認証・総飛行時間" },
     { href: "/ops/pilots", title: "操縦者", body: "氏名・技能証明・限定事項" },
+    { href: "/ops/places", title: "よく使う地点", body: "社内拠点などの名称と座標" },
     ...(role === "manager" ? [{ href: "/ops/members", title: "利用者", body: "招待・役割の変更・利用の停止" }] : []),
   ];
   return (
@@ -32,14 +36,23 @@ export default async function OpsHome() {
           {ROLE_DESCRIPTIONS[role]}
         </p>
       </section>
-      {canEnter ? (
+      {canEnter || canPlan ? (
         <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Link href="/ops/flights/new" className={buttonFieldClass} data-testid="ops-enter-flight">
-            飛行記録を入力
-          </Link>
-          <Link href="/ops/inspections/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
-            日常点検を入力
-          </Link>
+          {canPlan ? (
+            <Link href="/ops/plans/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-plan">
+              飛行計画を作る
+            </Link>
+          ) : null}
+          {canEnter ? (
+            <>
+              <Link href="/ops/flights/new" className={buttonFieldClass} data-testid="ops-enter-flight">
+                飛行記録を入力
+              </Link>
+              <Link href="/ops/inspections/new" className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
+                日常点検を入力
+              </Link>
+            </>
+          ) : null}
         </nav>
       ) : null}
       <nav aria-label="運航管理のメニュー">

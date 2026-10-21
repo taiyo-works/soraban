@@ -86,6 +86,11 @@ export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   aircraft_unavailable: "取消済み・抹消の機体には記録を作れません。",
   duplicate_request: "同じ内容が既に保存されています。一覧を確かめてください。",
   request_conflict: "この下書きの送信の識別子は別の利用者の記録に使われています。識別子を作り直したので、内容を確かめてもう一度保存してください。",
+  // Sprint 12a
+  judgement_failed: "判定を実行できませんでした（時間切れまたは失敗）。何も保存していません。入力は残してあります。少し待ってからもう一度保存してください。",
+  not_requested: "確認を依頼していない計画（下書き）は、確認できません。",
+  already_requested: "既に確認を依頼しています。",
+  plan_cancelled: "中止した計画には記録を結べません。",
 };
 
 export const messageFor = (r: ApiResult): string => {
