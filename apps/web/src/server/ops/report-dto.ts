@@ -1,5 +1,6 @@
 // 計画の応答に載せる通報の状況・期限・次にやること（Sprint 12b 設計 E・G）。plans.ts（計画の DTO）と reports.ts（通報の API）が使う。
 // 状態は保存せず、通報の行（flight_reports）・手続きの記録（plan_procedure_records）・コピーの監査から毎回導出する。
+import type { PermitMatchResult } from "./permit-logic";
 import type { PlanProcedureRecordRow } from "@soraban/db";
 import {
   fingerprintPartsOf,
@@ -117,6 +118,8 @@ export type SummarizeInput = {
   readonly requirement: ReportRequirement;
   readonly extras: PlanReportExtras;
   readonly now: Date;
+  /** 許可・承認の登録の照合（Sprint 12d）。指定しないときは「許可・承認の結果を登録する」を出さない。 */
+  readonly permits?: PermitMatchResult;
 };
 
 /** 要否・通報の行・手続きの記録・時刻から、通報の状況・期限・次にやることを導出する（保存した状態は読まない）。 */
@@ -158,6 +161,9 @@ export const summarizePlanReport = (i: SummarizeInput): PlanReportSummary => {
       confirm: can(role, "plan.confirm"),
       record: can(role, "report.record", { isSelf: i.isSelf }),
     },
+    ...(i.permits
+      ? { permits: { applied: i.permits.numbers.some((n) => n.status === "applied"), canRegister: can(role, "permit.create") } }
+      : {}),
   });
   return { report: { ...i.requirement, status, deadline }, nextActions, currentFingerprint };
 };

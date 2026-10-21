@@ -64,6 +64,16 @@ export type PlanForReport = {
   /** 立入管理措置（計画の accessControl）。 */
   readonly accessControl: boolean | null;
   readonly permitNumbers: string | null;
+  /**
+   * 計画の許可番号に結びつき、範囲に収まって適用された許可・承認の登録（ちょうど 1 件のときだけ。Sprint 12d）。
+   * 許可書発行日・許可期間（FPR No.76〜78）の元。無い・複数のときは null で、DIPS で入力する。登録は利用者の申告。
+   */
+  readonly permitRegistration?: {
+    readonly permitNumber: string;
+    readonly issuedOn: string;
+    readonly validFrom: string;
+    readonly validTo: string;
+  } | null;
   readonly aircraftId: string;
   readonly aircraft: {
     readonly registrationMark: string;

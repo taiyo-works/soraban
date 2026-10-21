@@ -97,6 +97,13 @@ const TABLE: readonly Row[] = [
   // 飛行前の確認・離陸・着陸・取り消す（運航管理者は全員分＝代理入力、操縦者は自分が操縦者の計画だけ、閲覧者は不可）
   { action: "field.record", isSelf: true, manager: true, pilot: true, viewer: false },
   { action: "field.record", isSelf: false, manager: true, pilot: false, viewer: false },
+
+  // Sprint 12d 契約 3：docs/sprints/sprint-12d.md 設計 F。許可・承認の登録の閲覧は全役割、書き込みは運航管理者だけ
+  { action: "permit.read", manager: true, pilot: true, viewer: true },
+  { action: "permit.create", manager: true, pilot: false, viewer: false },
+  { action: "permit.update", manager: true, pilot: false, viewer: false },
+  { action: "permit.revoke", manager: true, pilot: false, viewer: false },
+  { action: "permit.void", manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {
@@ -152,6 +159,18 @@ describe("can（役割 × 操作）", () => {
     expect(can("viewer", "field.record")).toBe(false);
     for (const r of ["manager", "pilot", "viewer"] as const) expect(can(r, "field.read")).toBe(true);
     for (const a of ["field.read", "field.record"] as const) expect(OPS_ACTIONS).toContain(a);
+  });
+
+  it("Sprint 12d：許可・承認の登録は、isSelf の値に依らず、運航管理者だけが書ける（操縦者は自分の計画の操縦者でも書けない）", () => {
+    for (const a of ["permit.create", "permit.update", "permit.revoke", "permit.void"] as const) {
+      expect(OPS_ACTIONS).toContain(a);
+      for (const isSelf of [undefined, true, false]) {
+        expect(can("manager", a, { isSelf }), a).toBe(true);
+        expect(can("pilot", a, { isSelf }), a).toBe(false);
+        expect(can("viewer", a, { isSelf }), a).toBe(false);
+      }
+    }
+    for (const r of ["manager", "pilot", "viewer"] as const) expect(can(r, "permit.read")).toBe(true);
   });
 
   it("閲覧者は自分の操縦者であっても訂正・全桁表示ができない", () => {

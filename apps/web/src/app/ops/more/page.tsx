@@ -12,6 +12,7 @@ export default async function OpsMorePage() {
     { href: "/ops/aircraft", title: "機体", body: "登録記号・型式・認証・総飛行時間", id: "aircraft" },
     { href: "/ops/pilots", title: "操縦者", body: "氏名・技能証明・限定事項", id: "pilots" },
     { href: "/ops/places", title: "よく使う地点", body: "社内拠点などの名称と座標", id: "places" },
+    { href: "/ops/permits", title: "許可・承認", body: "許可・承認の登録（利用者の申告）と、計画への照合", id: "permits" },
     ...(role === "manager" ? [{ href: "/ops/members", title: "利用者", body: "招待・役割の変更・利用の停止", id: "members" }] : []),
   ];
   return (

@@ -4,6 +4,8 @@
 // - 2 組織、各役割の利用者（テスト用の本人確認 test に結び付け済み）、招待中の利用者、操縦者・機体を作る。
 // - Sprint 11：組織 A に既存の総飛行時間が 0 と 0 以外（600 分）の機体、操縦者の行に結び付いていない操縦者役割の利用者を加える。
 // - Sprint 12a：組織 A に最大離陸重量 0.9kg の機体（重量が分かる機体）と、よく使う地点「フューチャーテック株式会社 本社」を加える。
+// - Sprint 12d：組織 A に許可・承認の登録を 6 件加える（OPS_TEST_PERMITS）。サーバーの時計 OPS_TEST_NOW（JST 2027-01-05 12:00）に対し、
+//   ①包括・全国・有効 ②個別・円・目視外・機体を限定 ③期限切れ ④失効 ⑤空港等周辺の個別（円） ⑥場所が文章のみ。
 // - 既に同じ名前の組織があれば何もしない。
 import pg from "pg";
 import { describeConnection } from "./config";
@@ -21,6 +23,20 @@ export const OPS_TEST_PLACE = {
   addressText: "鳥取県西伯郡日吉津村日吉津45番地3",
   latitude: 35.434238,
   longitude: 133.380508,
+} as const;
+
+/**
+ * 組織 A の許可・承認の登録の番号（Sprint 12d）。内容は seedOpsTestData を参照（①包括・全国・DID と夜間・機体と操縦者は限定なし、
+ * ②個別・円（本社の周囲 1km）・目視外・補助者が条件・機体を限定、③期限切れ、④失効、⑤空港等周辺の個別（円）、⑥場所が文章のみ）。
+ * 有効期間は OPS_TEST_NOW（JST 2027-01-05 12:00）を基準に決めている。
+ */
+export const OPS_TEST_PERMITS = {
+  blanket: "TEST-PERMIT-BLANKET-001",
+  individual: "TEST-PERMIT-INDIV-002",
+  expired: "TEST-PERMIT-EXPIRED-003",
+  revoked: "TEST-PERMIT-REVOKED-004",
+  airport: "TEST-PERMIT-AIRPORT-005",
+  textOnly: "TEST-PERMIT-TEXT-006",
 } as const;
 
 type SeedMember = {
@@ -61,13 +77,46 @@ export const assertLocalTarget = (connectionString: string | undefined): string 
 
 type Q = Pick<pg.Client, "query">;
 
-const addVersion = async (c: Q, orgId: string, entityType: string, entityId: string, data: object): Promise<void> => {
+const addVersion = async (
+  c: Q,
+  orgId: string,
+  entityType: string,
+  entityId: string,
+  data: object,
+  op: "create" | "update" = "create",
+  reason: string | null = null,
+): Promise<void> => {
   await c.query(
-    `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind)
-     values ($1, $2, $3, 'create', $4::jsonb, 'system')`,
-    [orgId, entityType, entityId, JSON.stringify(data)],
+    `insert into record_versions (org_id, entity_type, entity_id, op, data, reason, actor_kind)
+     values ($1, $2, $3, $4, $5::jsonb, $6, 'system')`,
+    [orgId, entityType, entityId, op, JSON.stringify(data), reason],
   );
 };
+
+/** 許可・承認の登録の版の data の既定値（12d。version の data は snake_case）。 */
+const permitData = (permitNumber: string, over: Record<string, unknown>): Record<string, unknown> => ({
+  permit_number: permitNumber,
+  permit_number_key: permitNumber.normalize("NFKC").replace(/\s+/g, "").toUpperCase(),
+  coverage: "blanket",
+  kinds: ["did"],
+  airport_names: [],
+  issued_on: "2026-09-25",
+  valid_from: "2026-10-01",
+  valid_to: "2027-09-30",
+  status: "active",
+  revoked_on: null,
+  place_scope: { type: "nationwide" },
+  aircraft_scope: { type: "any" },
+  pilot_scope: { type: "any" },
+  max_altitude_m: null,
+  max_weight_kg: null,
+  requires_observer: false,
+  requires_access_control: false,
+  conditions_text: null,
+  source: "manual",
+  external_ref: {},
+  ...over,
+});
 
 export type SeedResult = { readonly created: boolean; readonly orgIds: Readonly<Record<"a" | "b", string>> };
 
@@ -121,7 +170,7 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
     serial: string,
     initialFlightMinutes: number,
     maxTakeoffWeightKg: number | null = null,
-  ) => {
+  ): Promise<string> => {
     const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
     await addVersion(c, orgIds[org], "aircraft", id, {
       registration_mark: mark,
@@ -138,13 +187,14 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
       initial_flight_minutes: initialFlightMinutes,
       status: "active",
     });
+    return id;
   };
   await aircraft("b", "JUORGB0001", "組織Bの機体", "B-0001", 0);
   // Sprint 11：既存の総飛行時間が 0 と 0 以外の機体
   await aircraft("a", OPS_TEST_AIRCRAFT.zero, "点検機（既存 0 分）", "A-0001", 0);
   await aircraft("a", OPS_TEST_AIRCRAFT.initial600, "空撮機（既存 600 分）", "A-0002", 600);
   // Sprint 12a：最大離陸重量が分かる機体（飛行計画の判定は、登録機体の最大離陸重量を機体重量として使う）
-  await aircraft("a", OPS_TEST_AIRCRAFT.weighted, "計画機（最大離陸重量 0.9kg）", "A-0003", 0, 0.9);
+  const weightedId = await aircraft("a", OPS_TEST_AIRCRAFT.weighted, "計画機（最大離陸重量 0.9kg）", "A-0003", 0, 0.9);
   // Sprint 12a：よく使う地点
   await addVersion(c, orgIds.a, "saved_place", (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id, {
     name: OPS_TEST_PLACE.name,
@@ -153,5 +203,36 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
     longitude: OPS_TEST_PLACE.longitude,
     note: null,
   });
+  // Sprint 12d：許可・承認の登録（組織 A）。円の中心は本社の座標（OPS_TEST_PLACE）
+  const permit = async (number: string, over: Record<string, unknown>, revokedOn?: string) => {
+    const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+    const data = permitData(number, over);
+    await addVersion(c, orgIds.a, "permit_registration", id, data);
+    if (revokedOn) {
+      await addVersion(c, orgIds.a, "permit_registration", id, { ...data, status: "revoked", revoked_on: revokedOn }, "update", "許可の失効（テスト用）");
+    }
+  };
+  const here = { lat: OPS_TEST_PLACE.latitude, lng: OPS_TEST_PLACE.longitude };
+  await permit(OPS_TEST_PERMITS.blanket, { kinds: ["did", "night"], conditions_text: "飛行マニュアルに従う（テスト用）" });
+  await permit(OPS_TEST_PERMITS.individual, {
+    coverage: "individual",
+    kinds: ["bvlos"],
+    valid_from: "2026-12-01",
+    valid_to: "2027-03-31",
+    place_scope: { type: "circles", circles: [{ name: "本社の周囲", ...here, radiusM: 1000 }] },
+    aircraft_scope: { type: "listed", ids: [weightedId] },
+    requires_observer: true,
+  });
+  await permit(OPS_TEST_PERMITS.expired, { kinds: ["did"], valid_from: "2025-04-01", valid_to: "2026-03-31", issued_on: "2025-03-20" });
+  await permit(OPS_TEST_PERMITS.revoked, { kinds: ["night"] }, "2026-12-15");
+  await permit(OPS_TEST_PERMITS.airport, {
+    coverage: "individual",
+    kinds: ["airport"],
+    airport_names: ["テスト空港"],
+    valid_from: "2026-12-01",
+    valid_to: "2027-06-30",
+    place_scope: { type: "circles", circles: [{ name: "空港の周辺", ...here, radiusM: 3000 }] },
+  });
+  await permit(OPS_TEST_PERMITS.textOnly, { kinds: ["150m"], place_scope: { type: "text", text: "許可書の別紙に記載の区域（テスト用）" } });
   return { created: true, orgIds };
 };

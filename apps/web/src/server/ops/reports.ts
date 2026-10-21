@@ -66,6 +66,7 @@ import { formatJst, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { currentFingerprintPartsOf, rowLite, summarizePlanReport, type PlanReportExtras } from "./report-dto";
 import type { DeadlineState } from "./report-logic";
+import { matchInput, planPermitInputOfRow } from "./permit-match";
 import { loadPlan, loadPlanBundle } from "./plans";
 import type { PlanState } from "./plan-logic";
 import { asDate, nowOf } from "./records";
@@ -299,6 +300,9 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
   if (!aircraft || !pilot) throw new OpsError(404, "not_found");
   const reveal = can(ctx.member.role, "flight.readLicenseNumber", { isSelf: b.isSelf });
   const licenseNumber = pilot.license_number === null ? null : reveal ? pilot.license_number : maskLicenseNumber(pilot.license_number);
+  // 許可書発行日・許可期間（FPR No.76〜78）：計画の許可番号に結びつき、範囲に収まって適用された登録がちょうど 1 件のときだけ出す
+  const applied = (await matchInput(ctx.db, org, planPermitInputOfRow(plan))).numbers.filter((n) => n.status === "applied" && n.registration);
+  const registration = applied.length === 1 ? applied[0]!.registration! : null;
   return {
     planId: plan.id,
     title: plan.title,
@@ -311,6 +315,10 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
     maxAltitudeM: plan.max_altitude_m,
     accessControl: plan.access_control,
     permitNumbers: plan.permit_numbers,
+    permitRegistration:
+      registration === null
+        ? null
+        : { permitNumber: registration.permitNumber, issuedOn: registration.issuedOn, validFrom: registration.validFrom, validTo: registration.validTo },
     aircraftId: plan.aircraft_id,
     aircraft: {
       registrationMark: aircraft.registration_mark,

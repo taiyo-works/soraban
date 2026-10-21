@@ -58,6 +58,7 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       ["0012", "flight_reports"],
       ["0013", "report_attempts_procedure_records"],
       ["0014", "flight_field_events"],
+      ["0015", "permit_registrations"],
     ]);
     for (const r of rows) {
       expect(r.checksum).toMatch(/^[0-9a-f]{64}$/);
@@ -111,7 +112,7 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
   // Sprint 11d 契約 16：0009 は 0008 まで適用済みの DB にも適用でき、既存の行は書き換えない（null のまま）。
   it("0008 まで適用済みで行がある DB に 0009 を適用でき、既存の行の判定の列は null のまま", async () => {
     const dir = copyMigrations();
-    // 0009 以降（0010〜0014 は 0009 の後の追記）を外して 0008 まで適用する
+    // 0009 以降（0010〜0015 は 0009 の後の追記）を外して 0008 まで適用する
     for (const f of [
       "0009_evidence_log_verdict.sql",
       "0010_flight_plans_snapshots.sql",
@@ -119,6 +120,7 @@ describe.skipIf(!ADMIN_URL)("pnpm db:migrate（DB）", () => {
       "0012_flight_reports.sql",
       "0013_report_attempts_procedure_records.sql",
       "0014_flight_field_events.sql",
+      "0015_permit_registrations.sql",
     ]) {
       rmSync(path.join(dir, f));
     }

@@ -42,6 +42,8 @@ describe("下メニュー（Sprint 12c 設計 I）", () => {
       ["/ops/aircraft", "more"],
       ["/ops/pilots/new", "more"],
       ["/ops/places", "more"],
+      ["/ops/permits", "more"],
+      ["/ops/permits/new", "more"],
       ["/ops/members", "more"],
       ["/somewhere-else", null],
     ];

@@ -144,6 +144,8 @@ export const PREPARE_WARNING_MESSAGE = {
   speed_invalid: "飛行速度は 1〜999 km/h の整数です",
   assistants_invalid: "補助者の人数は 0 以上の整数です",
   permit_number_missing: "判定に許可・承認の手続きがありますが、許可・承認番号が空です",
+  permit_dates_format_unconfirmed:
+    "※要確認：許可書発行日・許可期間の日付の形式は、ガイドラインに指定がありません。登録は利用者の入力です。DIPS の入力画面で形式と内容を許可書と照らして確かめてください",
   purpose_text_missing: "その他の理由を入力してください",
   onsite_control_missing: "立入管理措置が未入力です",
   license_masked: "技能証明書番号は伏せ字です（運航管理者と本人だけが全桁を見られます）",
@@ -236,6 +238,8 @@ export type NextActionId =
   | "apply_permit"
   | "notify_police"
   | "consider_report"
+  // Sprint 12d：許可・承認の申請が済みで、判定に許可の手続きが残り、計画の番号に適用できる登録がないときの、結果の登録
+  | "register_permit"
   // Sprint 12c：飛行当日・現場の次にやること（今日の画面。通報とは別に、記録の有無から導出する）
   | "record_landing"
   | "do_inspection"
@@ -268,6 +272,7 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   cancel_report: "通報を取り消す",
   apply_permit: "許可・承認を申請する",
   notify_police: "警察へ通報する",
+  register_permit: "許可・承認の結果を登録する",
   consider_report: "通報を検討する（推奨）",
   record_landing: "着陸を記録する",
   do_inspection: "日常点検をする",

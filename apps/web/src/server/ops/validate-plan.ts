@@ -2,8 +2,9 @@
 // API の本文（camelCase）を検査し、版の data（ヘッド表の列名＝snake_case）を作る。誤りは項目ごとに理由コードと文言で返す。
 // 判定の結果らしき値（verdict・result・snapshot・evidenceId など）はここでも読まない（保存時にサーバーが判定を実行する）。
 // 予定日（planned_date）・機体重量の写し（drone_weight_g）・状態・現在のスナップショットはサービス層と DB が決める（受け取らない）。
-import { DIPS_PERMIT_KINDS, dipsPermitValue, SPECIFIC_FLIGHT_FLAG_LABEL, type SpecificFlightFlag } from "@soraban/regulations";
+import { SPECIFIC_FLIGHT_FLAG_LABEL, type SpecificFlightFlag } from "@soraban/regulations";
 import { parseJstMinute, TIME_ERROR_MESSAGES, checkCoordinate } from "@/lib/ops-time";
+import { DIPS_PERMIT_FROM_REGISTRY_MESSAGE, isDipsPermitValue } from "./permit-logic";
 import { COORD_MESSAGES, collector, present, type RecordValidated } from "./validate-records";
 
 type Input = Readonly<Record<string, unknown>>;
@@ -23,9 +24,11 @@ export type JudgementPurpose = (typeof JUDGEMENT_PURPOSES)[number];
 /** 飛行の方法・空域のフラグの定義順（固定の順に並べる）。 */
 export const PLAN_FLAG_ORDER = Object.keys(SPECIFIC_FLIGHT_FLAG_LABEL) as SpecificFlightFlag[];
 
-/** 計画に入れられる許可・承認・同意の値。旧版の値（mlit・合成値）は入れられない。 */
+/**
+ * 計画に手入力できる同意・通報・公園・文化庁の値。旧版の値（mlit・合成値）は入れられない。
+ * DIPS の許可・承認（mlit・mlit:<種類>）は手入力できない（400 dips_permit_from_registry）。登録の照合から判定に入る（Sprint 12d）。
+ */
 export const PLAN_PERMIT_VALUES: readonly string[] = [
-  ...DIPS_PERMIT_KINDS.map(dipsPermitValue),
   "facility_manager",
   "pref_pubsafety_notice",
   "park_manager",
@@ -214,6 +217,8 @@ export const validatePlan = (input: Input): RecordValidated<PlanInputData> => {
   if (rawPermits !== undefined && rawPermits !== null) {
     if (!Array.isArray(rawPermits) || rawPermits.some((p) => typeof p !== "string")) {
       c.fail("pilotPermits", "invalid", "許可・承認の種類の形が正しくありません");
+    } else if (rawPermits.some((p) => isDipsPermitValue(p as string))) {
+      c.fail("pilotPermits", "dips_permit_from_registry", DIPS_PERMIT_FROM_REGISTRY_MESSAGE);
     } else if (rawPermits.some((p) => !PLAN_PERMIT_VALUES.includes(p as string))) {
       c.fail("pilotPermits", "unknown_value", "許可・承認の種類に選択肢にない値があります");
     } else {

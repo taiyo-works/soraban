@@ -24,3 +24,11 @@ describe("テスト用の初期データの内容（Sprint 12a）", () => {
     expect(OPS_TEST_AIRCRAFT.weighted).toBe("JUSEEDA0900");
   });
 });
+
+describe("テスト用の初期データの内容（Sprint 12d）", () => {
+  it("組織 A の許可・承認の登録の番号が 6 件ある（包括・個別・期限切れ・失効・空港等周辺・場所が文章のみ）", async () => {
+    const { OPS_TEST_PERMITS } = await import("./ops-seed");
+    expect(Object.keys(OPS_TEST_PERMITS)).toEqual(["blanket", "individual", "expired", "revoked", "airport", "textOnly"]);
+    expect(new Set(Object.values(OPS_TEST_PERMITS)).size).toBe(6);
+  });
+});

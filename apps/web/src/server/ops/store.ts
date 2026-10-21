@@ -16,6 +16,7 @@ import type {
   OrganizationRow,
   PilotRow,
   PlanConfirmationRow,
+  PermitRegistrationRow,
   PlanProcedureRecordRow,
   RecordEntityTypeDb,
   RecordOpDb,
@@ -66,6 +67,7 @@ export const mapDbError = (e: unknown): never => {
       const c = typeof o.constraint === "string" ? o.constraint : "";
       if (c.endsWith("_request")) throw new OpsError(409, "duplicate_request");
       if (c.includes("saved_places_name")) throw new OpsError(409, "duplicate_name");
+      if (c.includes("permit_regs_number")) throw new OpsError(409, "duplicate_number");
       throw new OpsError(409, c.includes("registration") ? "duplicate_registration" : c.includes("email") ? "duplicate_email" : c.includes("pilots_member") ? "member_already_linked" : "duplicate");
     }
     case "23503":
@@ -1023,3 +1025,108 @@ export const getFieldEventByRef = async (db: Queryable, orgId: string, ref: stri
       [orgId, ref],
     )
   ).rows[0] ?? null;
+
+// ---- 許可・承認の登録（Sprint 12d） ----------------------------------------------------
+
+/** 許可・承認の登録の行に、現在の版の content_hash（版のハッシュ）を付けたもの。日付は YYYY-MM-DD の文字列。 */
+export type PermitRow = PermitRegistrationRow & { readonly version_hash: string };
+
+const PERMIT_SELECT = `select p.id, p.org_id, p.permit_number, p.permit_number_key, p.coverage, p.kinds, p.airport_names,
+        to_char(p.issued_on, 'YYYY-MM-DD') as issued_on, to_char(p.valid_from, 'YYYY-MM-DD') as valid_from,
+        to_char(p.valid_to, 'YYYY-MM-DD') as valid_to, p.status, to_char(p.revoked_on, 'YYYY-MM-DD') as revoked_on,
+        p.place_scope, p.aircraft_scope, p.pilot_scope, p.max_altitude_m, p.max_weight_kg, p.requires_observer,
+        p.requires_access_control, p.conditions_text, p.source, p.external_ref, p.current_version, p.created_at,
+        p.updated_at, p.voided_at, v.content_hash as version_hash
+   from permit_registrations p
+   join record_versions v on v.entity_type = 'permit_registration' and v.entity_id = p.id and v.version_no = p.current_version`;
+
+export const getPermit = async (db: Queryable, orgId: string, id: string): Promise<PermitRow | null> =>
+  (await db.query<PermitRow>(`${PERMIT_SELECT} where p.org_id = $1 and p.id = $2`, [orgId, id])).rows[0] ?? null;
+
+/** 許可・承認の登録の一覧（取消は includeVoided のときだけ。有効期間の終わりが遅い順、番号の順）。 */
+export const listPermits = async (db: Queryable, orgId: string, includeVoided: boolean): Promise<PermitRow[]> =>
+  (
+    await db.query<PermitRow>(
+      `${PERMIT_SELECT} where p.org_id = $1 ${includeVoided ? "" : "and p.voided_at is null"}
+        order by p.voided_at nulls first, p.valid_to desc, p.permit_number, p.id limit ${LIST_LIMIT}`,
+      [orgId],
+    )
+  ).rows;
+
+/** 番号の鍵で結びついた登録（取消済みも含む。照合が取消を判断する）。1 回のクエリで、計画の件数に依らない。 */
+export const listPermitsByKeys = async (db: Queryable, orgId: string, keys: readonly string[]): Promise<PermitRow[]> => {
+  if (keys.length === 0) return [];
+  return (
+    await db.query<PermitRow>(`${PERMIT_SELECT} where p.org_id = $1 and p.permit_number_key = any($2::text[])`, [orgId, [...keys]])
+  ).rows;
+};
+
+export type PlanBasisRow = {
+  readonly id: string;
+  readonly title: string;
+  readonly planned_date_text: string;
+  readonly current_snapshot_id: string;
+  readonly snapshot_seq: number;
+  readonly permit_basis: unknown;
+};
+
+/** この登録を根拠にしている計画（現在のスナップショットの permitBasis から。中止した計画は除く）。 */
+export const listPlansBasedOnPermit = async (db: Queryable, orgId: string, registrationId: string): Promise<PlanBasisRow[]> =>
+  (
+    await db.query<PlanBasisRow>(
+      `select p.id, p.title, to_char(p.planned_date, 'YYYY-MM-DD') as planned_date_text, p.current_snapshot_id,
+              s.seq as snapshot_seq, s.input->'permitBasis' as permit_basis
+         from flight_plans p join judgement_snapshots s on s.id = p.current_snapshot_id
+        where p.org_id = $1 and p.voided_at is null
+          and s.input->'permitBasis' @> jsonb_build_array(jsonb_build_object('registrationId', $2::text))
+        order by p.planned_start_at desc, p.id limit ${LIST_LIMIT}`,
+      [orgId, registrationId],
+    )
+  ).rows;
+
+/** 許可番号の欄に文字がある計画（中止した計画は除く）。登録の変更が影響する計画の数に使う。 */
+export const listPlanPermitNumberFields = async (
+  db: Queryable,
+  orgId: string,
+): Promise<{ readonly id: string; readonly permit_numbers: string }[]> =>
+  (
+    await db.query<{ id: string; permit_numbers: string }>(
+      `select id, permit_numbers from flight_plans
+        where org_id = $1 and voided_at is null and permit_numbers is not null and btrim(permit_numbers) <> ''
+        order by planned_start_at desc, id limit ${LIST_LIMIT}`,
+      [orgId],
+    )
+  ).rows;
+
+/** 登録の版（ID・版番号・ハッシュ）。スナップショットの permitBasis が指す版が実在し、ハッシュが一致するかの確認に使う。 */
+export const listPermitVersionHashes = async (
+  db: Queryable,
+  orgId: string,
+  registrationIds: readonly string[],
+): Promise<{ readonly entity_id: string; readonly version_no: number; readonly content_hash: string }[]> => {
+  if (registrationIds.length === 0) return [];
+  return (
+    await db.query<{ entity_id: string; version_no: number; content_hash: string }>(
+      `select entity_id, version_no, content_hash from record_versions
+        where org_id = $1 and entity_type = 'permit_registration' and entity_id = any($2::uuid[])`,
+      [orgId, [...registrationIds]],
+    )
+  ).rows;
+};
+
+/** 機体の登録記号・操縦者の氏名（許可の範囲の表示用）。同じ組織のものだけ。 */
+export const listAircraftMarks = async (db: Queryable, orgId: string, ids: readonly string[]): Promise<{ readonly id: string; readonly label: string }[]> =>
+  ids.length === 0
+    ? []
+    : (
+        await db.query<{ id: string; label: string }>(
+          "select id, registration_mark as label from aircraft where org_id = $1 and id = any($2::uuid[])",
+          [orgId, [...ids]],
+        )
+      ).rows;
+
+export const listPilotNames = async (db: Queryable, orgId: string, ids: readonly string[]): Promise<{ readonly id: string; readonly label: string }[]> =>
+  ids.length === 0
+    ? []
+    : (await db.query<{ id: string; label: string }>("select id, full_name as label from pilots where org_id = $1 and id = any($2::uuid[])", [orgId, [...ids]]))
+        .rows;

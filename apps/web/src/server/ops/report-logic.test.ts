@@ -321,6 +321,40 @@ describe("planNextActions：許可・承認の申請と警察への通報", () =
   });
 });
 
+describe("planNextActions：許可・承認の結果の登録（Sprint 12d 契約 15）", () => {
+  const permit: SnapshotProcedureLite = { procedureId: "flight-approval-night", deadlineLabel: "2027-01-27 まで（10 開庁日以上前）", deadlineDate: "2027-01-27" };
+  const done = { dips_permit: { action: "done" as const, snapshotId: SNAP } };
+  const base = { kind: "not_applicable_model" as const };
+  const withPermits = (applied: boolean, canRegister: boolean, b: Build = {}) => {
+    const built = build({ ...base, ...b });
+    return planNextActions({ ...built.input, permits: { applied, canRegister } });
+  };
+
+  it("申請済みの記録があり、判定に許可の手続きが残り、適用された登録がないとき出る（運航管理者だけ canAct）。申請の次にやることは出ない", () => {
+    const list = withPermits(false, true, { procedures: [permit], records: done });
+    expect(list.map((a) => a.id)).toEqual(["register_permit"]);
+    expect(list[0]).toMatchObject({ label: "許可・承認の結果を登録する", tier: 3, canAct: true, href: "/ops/permits/new", dueLabel: permit.deadlineLabel });
+    expect(list[0]!.reason).toContain("申請は済み");
+    // 運航管理者以外は依頼（canAct false）
+    expect(withPermits(false, false, { procedures: [permit], records: done })[0]).toMatchObject({ id: "register_permit", canAct: false });
+  });
+
+  it("適用された登録があれば出ない（判定の手続きが消えるため申請も出ない）。手続きがなければ出ない。申請の記録がなければ申請が出る", () => {
+    expect(withPermits(true, true, { procedures: [permit], records: done }).map((a) => a.id)).toEqual([]);
+    expect(withPermits(false, true, { procedures: [], records: done }).map((a) => a.id)).toEqual([]);
+    expect(withPermits(false, true, { procedures: [permit] }).map((a) => a.id)).toEqual(["apply_permit"]);
+    // 取り下げ・前の判定に対する記録のときは、登録ではなく申請に戻る
+    expect(withPermits(false, true, { procedures: [permit], records: { dips_permit: { action: "retract", snapshotId: SNAP } } }).map((a) => a.id)).toEqual(["apply_permit"]);
+    expect(withPermits(false, true, { procedures: [permit], records: { dips_permit: { action: "done", snapshotId: "other" } } }).map((a) => a.id)).toEqual(["apply_permit"]);
+  });
+
+  it("permits を渡さない導出（12b のまま）では出ない。期限が過ぎていれば tier 2", () => {
+    expect(ids({ ...base, procedures: [permit], records: done })).toEqual([]);
+    const late = build({ ...base, procedures: [permit], records: done, nowMs: Date.parse("2027-01-28T03:00:00Z") });
+    expect(planNextActions({ ...late.input, permits: { applied: false, canRegister: true } })[0]).toMatchObject({ id: "register_permit", tier: 2 });
+  });
+});
+
 describe("planNextActions：並びと形", () => {
   it("tier の順、同じなら飛行開始までの時間が短い順。動詞で始まる 1 行の表示名、押すと移る先", () => {
     const rows = [row(1, "new", "reported_manual")];

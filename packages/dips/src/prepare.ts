@@ -273,6 +273,15 @@ const draftFor = (field: ReportField, { plan, fields }: Ctx): Draft | null => {
       if (plan.snapshot.permitProcedureIds.length > 0) return absent(field, [warn("permit_number_missing")], true);
       return notApplicable();
     }
+    case "permit_date":
+    case "permit_start":
+    case "permit_finish": {
+      // 結びついた登録がちょうど 1 件のときだけ、許可書発行日・許可期間を出す（登録は利用者の申告。形式は未確認）
+      const r = plan.permitRegistration;
+      if (!r) return null;
+      const v = field.key === "permit_date" ? r.issuedOn : field.key === "permit_start" ? r.validFrom : r.validTo;
+      return filled(v, v.replaceAll("-", ""), { warnings: [warn("permit_dates_format_unconfirmed")] });
+    }
     default:
       return null;
   }

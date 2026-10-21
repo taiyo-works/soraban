@@ -5,6 +5,7 @@ import { Forbidden } from "@/components/ops/versions";
 import { Note, PageHeader } from "@/components/ops/ui";
 import { parsePlanHandoff } from "@/lib/plan-options";
 import { requireOpsMember } from "@/server/ops/page";
+import { permitHelperFor } from "@/server/ops/permit-page";
 import { initialFromHandoff, planCreateDenied, planFormOptions } from "@/server/ops/plan-page";
 
 // 飛行計画の入力。判定画面の「この判定で飛行計画を作る」から来たときは、判定の入力（地点・飛行の方法・許可・予定日）だけを引き継ぐ。
@@ -19,6 +20,7 @@ export default async function PlanNewPage({
   if (denied) return <Forbidden message={denied} />;
   const handoff = parsePlanHandoff(await searchParams);
   const { aircraft, pilots, fixedPilotId, places } = await planFormOptions(ctx, me);
+  const permitHelper = await permitHelperFor(ctx, null);
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="飛行計画の入力" back={{ href: "/ops/plans", label: "飛行計画の一覧" }}>
@@ -31,6 +33,7 @@ export default async function PlanNewPage({
         fixedPilotId={fixedPilotId}
         places={places}
         initial={initialFromHandoff(handoff)}
+        permitHelper={permitHelper}
         {...(handoff.weightG ? { handoffWeightG: handoff.weightG } : {})}
       />
     </main>

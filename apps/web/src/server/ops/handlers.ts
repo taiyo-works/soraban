@@ -2,6 +2,8 @@
 import { availabilityResponse, isSameOrigin, json, opsHandler } from "./http";
 import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
+import * as permits from "./permits";
+import { PERMIT_DECLARATION_NOTE, PERMIT_NO_DIPS_NOTE } from "./permit-logic";
 import * as places from "./places";
 import * as field from "./field";
 import * as plans from "./plans";
@@ -308,6 +310,50 @@ export const placeVoid = opsHandler(
 );
 export const placeVersions = opsHandler("GET /api/ops/places/[id]/versions", async ({ ctx, params }) =>
   json(200, { versions: await places.listPlaceVersions(ctx, params["id"] ?? "") }),
+);
+
+// ---- 許可・承認の登録（Sprint 12d） ----
+// 登録は利用者の申告。そらばんは許可書そのものを確認できず、DIPS にも接続しない。書き込みは運航管理者のみ。
+// 同じ clientRequestId の登録が既にあれば、新しい登録を作らずに既存の登録を 200 で返す。
+// 番号の重複（正規化後）は 409 duplicate_number、取消・失効した登録の訂正は 409 voided・revoked。
+export const permitList = opsHandler("GET /api/ops/permits", async ({ ctx, req }) =>
+  json(200, {
+    permits: await permits.listPermits(ctx, permits.parsePermitFilter(new URL(req.url).searchParams)),
+    declaration: PERMIT_DECLARATION_NOTE,
+    noDipsNote: PERMIT_NO_DIPS_NOTE,
+  }),
+);
+export const permitCreate = opsHandler(
+  "POST /api/ops/permits",
+  async ({ ctx, body }) => {
+    const r = await permits.createPermit(ctx, await body());
+    return json(r.created ? 201 : 200, r.record);
+  },
+  { mutating: true },
+);
+export const permitGet = opsHandler("GET /api/ops/permits/[id]", async ({ ctx, params }) =>
+  json(200, await permits.getPermit(ctx, params["id"] ?? "")),
+);
+export const permitUpdate = opsHandler(
+  "PATCH /api/ops/permits/[id]",
+  async ({ ctx, params, body }) => json(200, await permits.updatePermit(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const permitRevoke = opsHandler(
+  "POST /api/ops/permits/[id]/revoke",
+  async ({ ctx, params, body }) => json(200, await permits.revokePermit(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const permitVoid = opsHandler(
+  "POST /api/ops/permits/[id]/void",
+  async ({ ctx, params, body }) => json(200, await permits.voidPermit(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const permitVersions = opsHandler("GET /api/ops/permits/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await permits.listPermitVersions(ctx, params["id"] ?? "") }),
+);
+export const planPermits = opsHandler("GET /api/ops/plans/[id]/permits", async ({ ctx, params }) =>
+  json(200, await permits.getPlanPermits(ctx, params["id"] ?? "")),
 );
 
 // ---- テスト用の本人確認（AUTH_PROVIDER=test のときだけ。本番では 404） ----

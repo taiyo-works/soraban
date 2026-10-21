@@ -630,7 +630,8 @@ describe.skipIf(!ADMIN_URL)("飛行計画・判定スナップショット・確
       { name: "予定日", patch: { plannedStartAt: "2027-01-20T09:00" } },
       { name: "飛行の方法・空域", patch: { flags: ["method_night", "method_bvlos"] } },
       { name: "最大高度", patch: { maxAltitudeM: 150 } },
-      { name: "許可", patch: { pilotPermits: ["mlit:night"] } },
+      // Sprint 12d：DIPS の許可（mlit:night）は手入力できない。手入力できる同意・通報・公園・文化庁の値で、判定に関わる項目の訂正を確かめる
+      { name: "許可", patch: { pilotPermits: ["park_manager"] } },
       { name: "目的の例外", patch: { judgementPurpose: "emergency" } },
       { name: "立入管理措置", patch: { accessControl: true } },
       { name: "第三者上空", patch: { thirdPartyOverflight: false } },
@@ -664,7 +665,7 @@ describe.skipIf(!ADMIN_URL)("飛行計画・判定スナップショット・確
     // 許可・目的の例外・最大高度が判定の入力に入っている
     const last = rows[rows.length - 1];
     expect(last.input).toMatchObject({
-      pilotPermits: ["mlit:night"],
+      pilotPermits: ["park_manager"],
       purpose: "emergency",
       accessControl: true,
       thirdPartyOverflight: false,

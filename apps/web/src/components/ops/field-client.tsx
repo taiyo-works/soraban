@@ -470,6 +470,16 @@ export function FieldClient({ initial, memberId }: { readonly initial: FieldView
                   <p data-testid="field-permits">
                     {plan.permitNumbers ? `許可・承認の番号：${plan.permitNumbers}` : "許可・承認の番号の登録はありません。"}
                   </p>
+                  {plan.permitStates.length > 0 ? (
+                    <ul className="flex flex-col gap-3 border-l-4 border-ink-soft pl-3 text-lg" data-testid="field-permit-states">
+                      {plan.permitStates.map((n) => (
+                        <li key={n.numberText} data-testid="field-permit-state" data-status={n.status}>
+                          <span className="break-all font-mono">{n.numberText}</span>：{n.statusLabel}
+                        </li>
+                      ))}
+                      <li className="text-base text-ink-soft">登録は利用者の入力です。許可書を携行し、書かれた条件を確認してください。</li>
+                    </ul>
+                  ) : null}
                   {!c.done && view.canRecord && !cancelled ? (
                     <button type="button" className={BTN_PRIMARY} data-testid="field-carry-submit" onClick={() => onCheck("carry")}>
                       {FIELD_CHECK_ACTION_LABEL.carry}

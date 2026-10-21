@@ -47,7 +47,13 @@ export type OpsAction =
   // Sprint 12c：現場モード（飛行前の確認・離着陸・取り消す）と「今日」。閲覧は全役割。記録は運航管理者は全員分（代理入力）、
   // 操縦者は自分が操縦者の計画だけ、閲覧者は不可
   | "field.read"
-  | "field.record";
+  | "field.record"
+  // Sprint 12d：許可・承認の登録。閲覧は全役割、書き込み（登録・訂正・失効・取消）は運航管理者のみ
+  | "permit.read"
+  | "permit.create"
+  | "permit.update"
+  | "permit.revoke"
+  | "permit.void";
 
 export type AuthzContext = {
   /**
@@ -102,6 +108,11 @@ export const OPS_ACTIONS: readonly OpsAction[] = [
   "procedure.record",
   "field.read",
   "field.record",
+  "permit.read",
+  "permit.create",
+  "permit.update",
+  "permit.revoke",
+  "permit.void",
 ];
 
 export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {}): boolean => {
@@ -117,6 +128,8 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "report.read":
     // 現場モードの状態・今日の画面の閲覧は全役割
     case "field.read":
+    // 許可・承認の登録の閲覧は全役割
+    case "permit.read":
       return true;
     case "pilot.update":
     case "pilot.readLicenseNumber":
@@ -153,6 +166,11 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "place.create":
     case "place.update":
     case "place.void":
+    // Sprint 12d：許可・承認の登録は判定を左右する組織の資産。書き込みは運航管理者だけ
+    case "permit.create":
+    case "permit.update":
+    case "permit.revoke":
+    case "permit.void":
       return role === "manager";
   }
 };

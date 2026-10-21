@@ -262,6 +262,42 @@ describe("未入力の必須項目", () => {
   });
 });
 
+describe("許可書発行日・許可期間（Sprint 12d。結びついた登録があるときだけ）", () => {
+  const reg = { permitNumber: "国空無機第123号", issuedOn: "2026-10-01", validFrom: "2026-10-05", validTo: "2027-10-04" };
+  const DATE_KEYS = ["permit_date", "permit_start", "permit_finish"];
+
+  it("結びついた登録がなければ、従来どおり「そらばんは保持しません」（DIPS で入力）", () => {
+    for (const p of [basePlan(), basePlan({ permitRegistration: null })]) {
+      const r = prepareReport(p, "new");
+      for (const k of DATE_KEYS) {
+        expect(item(r, k).status, k).toBe("dips_only");
+        expect(item(r, k).value, k).toContain("そらばんは保持しません");
+        expect(item(r, k).copyable, k).toBe(false);
+      }
+    }
+  });
+
+  it("結びついた登録があれば、発行日と期間（自・至）が項目として出る。形式は未確認（※要確認）の警告つき。必須の未入力には数えない", () => {
+    const r = prepareReport(basePlan({ permitRegistration: reg }), "new");
+    expect(item(r, "permit_date")).toMatchObject({ status: "filled", value: "2026-10-01", apiValue: "20261001", copyable: true });
+    expect(item(r, "permit_start")).toMatchObject({ status: "filled", value: "2026-10-05", apiValue: "20261005" });
+    expect(item(r, "permit_finish")).toMatchObject({ status: "filled", value: "2027-10-04", apiValue: "20271004" });
+    for (const k of DATE_KEYS) {
+      expect(codes(item(r, k)), k).toEqual(["permit_dates_format_unconfirmed"]);
+      expect(item(r, k).warnings[0]!.message, k).toContain("※要確認");
+      expect(item(r, k).screenStatus, k).toBe("unconfirmed");
+    }
+    expect(r.missingRequiredCount).toBe(0);
+    // 通報の許可・承認の番号は計画の欄の文字のまま（変えない）
+    expect(item(prepareReport(basePlan({ permitRegistration: reg, permitNumbers: "国空無機第123号" }), "new"), "permit_number").value).toBe("国空無機第123号");
+  });
+
+  it("対応表の版を上げた（2）。確認していない行は unconfirmed のまま", () => {
+    expect(REPORT_FIELDS.revision).toBe(2);
+    expect(prepareReport(basePlan(), "new").mapRevision).toBe(2);
+  });
+});
+
 describe("操縦者・機体", () => {
   it("技能証明の区分は 1／0、機体認証は機体の区分から", () => {
     const first = prepareReport(

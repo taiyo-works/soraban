@@ -46,6 +46,15 @@ type Props = {
   readonly actions?: ReactNode;
   /** 結論の下に置く補足（座標・住所など）。 */
   readonly meta?: ReactNode;
+  /**
+   * 運航管理の計画の画面だけが渡す、許可・承認の登録に基づく「表示だけの置き換え」（Sprint 12d）。
+   * applied：登録が根拠の項目の id → 「照合していません」の代わりの文。item：項目の id → 項目に添える文（判定の段は変えない）。
+   * 判定の結論・段は常に verdict のものをそのまま使い、ここでは文だけを差し替える。未指定（判定画面 `/` など）は従来どおり。
+   */
+  readonly permitNotes?: {
+    readonly applied: Readonly<Record<string, string>>;
+    readonly item: Readonly<Record<string, string>>;
+  };
 };
 
 const DUTY_KIND_LABEL = { premise: "前提", per_flight: "飛行ごと" } as const;
@@ -216,7 +225,7 @@ function ModelAircraftReferenceList() {
   );
 }
 
-export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta }: Props) {
+export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
   return (
@@ -267,7 +276,9 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       className="border-l-2 border-dashed border-verdict-done pl-2.5 text-sm font-medium leading-relaxed text-ink"
                     >
                       {CONDITIONAL_NOTE}
-                      {PERMIT_SCOPE_NOT_VERIFIED_NOTE}
+                      {permitNotes && verdict.done.length > 0 && verdict.done.every((d) => permitNotes.applied[d.itemId] !== undefined)
+                        ? [...new Set(verdict.done.map((d) => permitNotes.applied[d.itemId]))].join("")
+                        : PERMIT_SCOPE_NOT_VERIFIED_NOTE}
                     </p>
                   ) : null}
                 </div>
@@ -489,11 +500,14 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       <span className="text-ink">{d.appliedPermits.map((p) => p.label).join(" / ")}</span>
                     </span>
                     <ul className="ml-[22px] flex flex-col gap-0.5 border-l-2 border-dashed border-verdict-done pl-2.5 leading-relaxed">
-                      {d.conditions.map((c) => (
-                        <li key={c} data-testid="verdict-done-condition">
-                          ・{c}
-                        </li>
-                      ))}
+                      {d.conditions.map((c) => {
+                        const replaced = c === PERMIT_SCOPE_NOT_VERIFIED_NOTE ? permitNotes?.applied[d.itemId] : undefined;
+                        return (
+                          <li key={c} data-testid="verdict-done-condition" {...(replaced ? { "data-permit-registry": "true" } : {})}>
+                            ・{replaced ?? c}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </li>
                 ))}
@@ -557,6 +571,11 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     >
                       <td className={`block pb-1 pr-3 text-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}
+                        {permitNotes?.item[it.id] ? (
+                          <span data-testid="verdict-item-permit-note" className="mt-0.5 block text-[11px] leading-relaxed text-ink-soft">
+                            {permitNotes.item[it.id]}
+                          </span>
+                        ) : null}
                         {hasModelAircraftReferences(it.reason) ? (
                           <ReasonWithReferences
                             reason={it.reason}
