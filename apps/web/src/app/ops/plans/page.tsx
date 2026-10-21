@@ -109,11 +109,15 @@ export default async function PlanListPage({
                   </span>
                   {p.pilotName}
                 </span>
-                <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                  <PlanStateBadge state={p.state} label={p.stateLabel} />
-                  <ReportBadge report={p.report} />
-                  <VerdictBadge level={p.judgement.verdictLevel} unknownCount={p.judgement.verdictUnknownCount} />
-                  {p.freshness.stale ? <StaleBadge /> : null}
+                <span className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <PlanStateBadge state={p.state} label={p.stateLabel} />
+                    {p.freshness.stale ? <StaleBadge /> : null}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <ReportBadge report={p.report} />
+                    <VerdictBadge level={p.judgement.verdictLevel} unknownCount={p.judgement.verdictUnknownCount} />
+                  </span>
                 </span>
               </Link>
             </li>

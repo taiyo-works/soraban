@@ -26,12 +26,12 @@ export async function OpsHomeEntry() {
   return (
     <>
       <OpsEntryFlag />
-      <p className="text-xs">
+      <p className="text-sm">
         <Link
           href="/ops"
           prefetch={false}
           data-testid="home-ops-link"
-          className="-my-3 inline-flex min-h-11 items-center gap-1.5 text-brand-700 underline underline-offset-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-sharp border border-brand-700 bg-paper px-4 font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
           運航管理へ
           <span aria-hidden>→</span>

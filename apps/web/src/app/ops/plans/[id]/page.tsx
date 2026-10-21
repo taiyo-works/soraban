@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PLAN_JUDGEMENT_DISCLAIMER, PERMIT_VALUE_LABEL, PURPOSE_VALUE_LABEL, SPECIFIC_FLIGHT_FLAG_LABEL, type FlightVerdict, type SpecificFlightFlag } from "@soraban/regulations";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { VoidForm } from "@/components/ops/ops-client";
-import { PlanStateBadge, ReportBox, StaleBadge } from "@/components/ops/plan-ui";
+import { PlanDigest, PlanStateBadge, ReportBox, StaleBadge } from "@/components/ops/plan-ui";
 import { ConfirmPanel, RejudgeButton, RequestConfirmationButton } from "@/components/ops/plans-client";
 import { Badge, buttonOutlineBrandClass, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
 import { VersionList } from "@/components/ops/versions";
@@ -88,6 +88,14 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         >
           {PLAN_JUDGEMENT_DISCLAIMER}
         </p>
+        <PlanDigest
+          verdictLevel={j.verdictLevel}
+          unknownCount={j.verdictUnknownCount}
+          report={plan.report}
+          state={plan.state}
+          stateLabel={plan.stateLabel}
+          stale={plan.freshness.stale}
+        />
         {updatable ? (
           <div className="flex flex-wrap gap-3">
             <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={buttonOutlineBrandClass} data-testid="plan-edit-link">
@@ -101,48 +109,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         <DetailList rows={overview} data-testid="plan-overview" />
       </Section>
 
-      <Section
-        title="判定の要約"
-        aria-label="判定の要約"
-        description="計画を保存したときに、サーバーが実行した判定です（現在のスナップショット）。"
-      >
-        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} />
-        <DetailList
-          data-testid="plan-judgement"
-          rows={[
-            ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-            ["判定の日時", <time key="t" dateTime={j.checkedAt} className="font-mono text-xs tnum">{j.checkedAt}</time>],
-            ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
-            ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
-            ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
-          ]}
-        />
-        {plan.freshness.stale ? (
-          <div className="flex flex-col gap-2 border-l-2 border-signal-amber pl-3" data-testid="plan-stale-box">
-            <p className="text-sm font-medium text-ink">判定が古くなっています</p>
-            <ul className="list-disc pl-5 text-sm text-ink-soft" data-testid="plan-stale-reasons">
-              {plan.freshness.reasons.map((r) => (
-                <li key={r.code}>{r.label}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-3">
-          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
-            判定の根拠を見る
-          </Link>
-          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-brand-700 underline underline-offset-2" data-testid="plan-snapshots-link">
-            判定の履歴を見る
-          </Link>
-        </div>
-        {updatable ? <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} /> : null}
-      </Section>
-
-      <Section title="通報の要否" aria-label="通報の要否" description="通報そのものは DIPS 2.0 で行います。そらばんは送信しません。">
+      <Section id="sec-report" title="通報の要否" aria-label="通報の要否" description="通報そのものは DIPS 2.0 で行います。そらばんは送信しません。">
         <ReportBox report={plan.report} />
       </Section>
 
-      <Section title="確認の状況" aria-label="確認の状況" description="運航管理者が、計画と判定を確認します。確認は、確認した版に対するものです。">
+      <Section id="sec-confirm" title="確認の状況" aria-label="確認の状況" description="運航管理者が、計画と判定を確認します。確認は、確認した版に対するものです。">
         <ChangeNotice target="confirmations" />
         <div className="flex flex-wrap items-center gap-3" data-testid="plan-confirmation-status">
           <PlanStateBadge state={plan.state} label={plan.stateLabel} />
@@ -182,7 +153,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         ) : (
           <ol className="flex flex-col border-t border-rule" data-testid="plan-confirmations">
             {[...plan.confirmations].reverse().map((c) => (
-              <li key={c.id} className="flex flex-col gap-1 border-b border-rule-soft py-3 text-sm" data-testid="plan-confirmation-row">
+              <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-rule-soft py-3 pl-3 text-sm ${c.decision === "approved" ? "border-l-signal-green" : "border-l-signal-red"}`} data-testid="plan-confirmation-row">
                 <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <Badge tone={c.decision === "approved" ? "green" : "red"} data-testid="plan-confirmation-decision">
                     <span aria-hidden className="mr-1">{c.decision === "approved" ? "✓" : "↩"}</span>
@@ -200,6 +171,44 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         )}
         {canConfirm ? <ConfirmPanel planId={plan.id} version={plan.version} stale={plan.freshness.stale} /> : null}
         {!manager && plan.status === "active" && !plan.voided ? <Note>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
+      </Section>
+
+      <Section
+        id="sec-verdict"
+        title="判定の要約"
+        aria-label="判定の要約"
+        description="結論と、判定の根拠です。計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。"
+      >
+        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} />
+        <DetailList
+          data-testid="plan-judgement"
+          rows={[
+            ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
+            ["判定の日時", <time key="t" dateTime={j.checkedAt} className="font-mono text-xs tnum">{j.checkedAt}</time>],
+            ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
+            ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
+            ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
+          ]}
+        />
+        {plan.freshness.stale ? (
+          <div className="flex flex-col gap-2 border-l-2 border-signal-amber pl-3" data-testid="plan-stale-box">
+            <p className="text-sm font-medium text-ink">判定が古くなっています</p>
+            <ul className="list-disc pl-5 text-sm text-ink-soft" data-testid="plan-stale-reasons">
+              {plan.freshness.reasons.map((r) => (
+                <li key={r.code}>{r.label}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-3">
+          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
+            判定の根拠を見る
+          </Link>
+          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-brand-700 underline underline-offset-2" data-testid="plan-snapshots-link">
+            判定の履歴を見る
+          </Link>
+        </div>
+        {updatable ? <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} /> : null}
       </Section>
 
       <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">

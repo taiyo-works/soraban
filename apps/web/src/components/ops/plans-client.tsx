@@ -27,8 +27,7 @@ import {
 import { setChangeFlash } from "./change-notice";
 import { newRequestId } from "./drafts";
 import {
-  checkRowClass,
-  checkboxClass,
+    checkboxClass,
   Field,
   fieldErrorsOf,
   FormError,
@@ -90,6 +89,10 @@ const geoReasonSnapshot = (): string => {
 const round6 = (n: number): string => String(roundCoordinate(n));
 const toggle = (list: readonly string[], v: string): string[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
+// 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
+const planCheckRow =
+  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sharp border border-rule-soft bg-paper px-3 py-2.5 text-sm leading-snug text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
+const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
 const selectClass = `${inputClass} min-h-12`;
 
 export function PlanForm({
@@ -311,7 +314,7 @@ export function PlanForm({
       </section>
 
       <fieldset className="flex min-w-0 flex-col gap-4" data-testid="plan-place-section">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">場所</legend>
+        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">場所</legend>
         {places.length > 0 ? (
           <Field label="よく使う地点から選ぶ" required={false} hint="選ぶと、名称と座標が入ります。座標は計画に写しとして残ります。">
             <select className={selectClass} value={v.savedPlaceId} onChange={(e) => pickPlace(e.target.value)} data-testid="plan-saved-place">
@@ -348,7 +351,8 @@ export function PlanForm({
           </Field>
         </div>
 
-        <div className="flex flex-col gap-3 border-l-2 border-rule pl-3" data-testid="plan-place-helper">
+        <div className="flex flex-col gap-4 rounded-sharp border border-rule-soft bg-paper-soft px-3 py-3" data-testid="plan-place-helper">
+          <p className="text-xs leading-relaxed text-ink-mute">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
               現在地を取得する
@@ -366,7 +370,7 @@ export function PlanForm({
             </label>
             <div className="flex gap-2">
               <input id="plan-address-q" className={`${inputClass} min-h-12`} value={q} onChange={(e) => setQ(e.target.value)} placeholder="例：米子市加茂町" data-testid="plan-address-q" />
-              <button type="button" className={buttonGhostClass} onClick={() => void search()} disabled={searching || q.trim() === ""} data-testid="plan-address-search">
+              <button type="button" className={`${buttonGhostClass} shrink-0 whitespace-nowrap`} onClick={() => void search()} disabled={searching || q.trim() === ""} data-testid="plan-address-search">
                 検索
               </button>
             </div>
@@ -422,7 +426,7 @@ export function PlanForm({
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <Field label="範囲の半径（m）" required={false} error={errors["radiusM"]} hint="1〜10000 m。点と半径で表します。">
             <input inputMode="numeric" className={`${inputClass} min-h-12 font-mono tnum`} value={v.radius} onChange={(e) => set("radius", e.target.value)} data-testid="plan-radius" />
           </Field>
@@ -433,12 +437,12 @@ export function PlanForm({
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-flags">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">飛行の方法・空域</legend>
+        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">飛行の方法・空域</legend>
         <p className="text-xs leading-relaxed text-ink-mute">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
-        <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_FLAG_CHOICES.map((c) => (
-            <label key={c.value} className={checkRowClass}>
-              <input type="checkbox" className={checkboxClass} checked={v.flags.includes(c.value)} onChange={() => set("flags", toggle(v.flags, c.value))} data-testid={`plan-flag-${c.value}`} />
+            <label key={c.value} className={planCheckRow}>
+              <input type="checkbox" className={planCheckbox} checked={v.flags.includes(c.value)} onChange={() => set("flags", toggle(v.flags, c.value))} data-testid={`plan-flag-${c.value}`} />
               {SPECIFIC_FLIGHT_FLAG_LABEL[c.value as SpecificFlightFlag]}
             </label>
           ))}
@@ -447,11 +451,11 @@ export function PlanForm({
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-permits">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">取得済みの許可・承認・同意</legend>
-        <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">取得済みの許可・承認・同意</legend>
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_PERMIT_CHOICES.map((c) => (
-            <label key={c.value} className={checkRowClass}>
-              <input type="checkbox" className={checkboxClass} checked={v.permits.includes(c.value)} onChange={() => set("permits", toggle(v.permits, c.value))} data-testid={`plan-permit-${c.value}`} />
+            <label key={c.value} className={planCheckRow}>
+              <input type="checkbox" className={planCheckbox} checked={v.permits.includes(c.value)} onChange={() => set("permits", toggle(v.permits, c.value))} data-testid={`plan-permit-${c.value}`} />
               {c.label}
             </label>
           ))}
@@ -612,7 +616,7 @@ export function ConfirmPanel({ planId, version, stale }: { readonly planId: stri
     <form
       ref={formRef}
       onSubmit={(e) => e.preventDefault()}
-      className="flex flex-col gap-3 rounded-sharp border border-rule px-3 py-3 sm:px-4"
+      className="flex flex-col gap-3 rounded-sharp border border-brand-500 bg-paper px-3 py-3 sm:px-4"
       aria-label="確認・差し戻し"
       data-testid="plan-confirm-panel"
     >
@@ -625,7 +629,7 @@ export function ConfirmPanel({ planId, version, stale }: { readonly planId: stri
         <textarea className={inputClass} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="plan-confirm-reason" />
       </Field>
       <FormError message={message} />
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
         <button type="button" className={buttonPrimaryClass} disabled={busy} onClick={() => void submit("approved")} data-testid="plan-confirm-approve">
           確認する
         </button>

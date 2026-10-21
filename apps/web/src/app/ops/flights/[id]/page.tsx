@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import { VoidForm } from "@/components/ops/ops-client";
 import { FlightForm } from "@/components/ops/records-client";
 import { VersionList } from "@/components/ops/versions";
-import { Badge, buttonGhostClass, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
+import { Badge, buttonGhostClass, buttonOutlineBrandClass, DetailList, LicenseNumber, Note, PageHeader, Section } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
 import { SPECIFIC_FLIGHT_TYPE_LABELS } from "@/lib/ops-records";
+import { JudgementMissing } from "@/components/ops/plan-ui";
 import { getFlight, JUDGEMENT_LINK_MISSING_LABEL, listFlightVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
@@ -107,14 +108,14 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     [
       "飛行計画・判定の根拠",
       f.flightPlanId ? (
-        <span key="pl" className="flex flex-col items-start gap-1" data-testid="flight-plan-link-box">
-          <a href={`/ops/plans/${f.flightPlanId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2" data-testid="flight-plan-link">
+        <span key="pl" className="flex flex-col items-start gap-2" data-testid="flight-plan-link-box">
+          <a href={`/ops/plans/${f.flightPlanId}`} className={buttonOutlineBrandClass} data-testid="flight-plan-link">
             飛行計画を見る
           </a>
           {f.snapshotId ? (
             <a
               href={`/ops/plans/${f.flightPlanId}/snapshots/${f.snapshotId}`}
-              className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2"
+              className={buttonOutlineBrandClass}
               data-testid="flight-basis-link"
             >
               判定の根拠を見る（証跡 ID・エンジンの版・データセットの版）
@@ -122,10 +123,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           ) : null}
         </span>
       ) : f.judgementLink === "missing" ? (
-        <Badge key="pm" tone="amber" data-testid="flight-judgement-missing">
-          <span aria-hidden className="mr-1">!</span>
-          {JUDGEMENT_LINK_MISSING_LABEL}
-        </Badge>
+        <JudgementMissing key="pm" testId="flight-judgement-missing" label={JUDGEMENT_LINK_MISSING_LABEL} />
       ) : (
         "計画なし（特定飛行の形態なし）"
       ),

@@ -88,15 +88,17 @@ export function Section({
   description,
   children,
   tone = "default",
+  id,
   ...rest
 }: {
+  readonly id?: string;
   readonly title: string;
   readonly description?: ReactNode;
   readonly children: ReactNode;
   readonly tone?: "default" | "danger";
 } & Record<`aria-${string}`, string>) {
   return (
-    <section {...rest} className="flex flex-col gap-4">
+    <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4">
       <div className={`flex flex-col gap-1 border-b pb-2 ${tone === "danger" ? "border-signal-red/50" : "border-rule"}`}>
         <h2 className="font-display text-lg font-light text-ink sm:text-xl">
           <span aria-hidden className="bearing-mark" />
