@@ -12,6 +12,7 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { jstDate, parseJstMinute } from "@/lib/ops-time";
+import { SPECIFIC_FLIGHT_TYPES, type SpecificFlightType } from "@/lib/ops-records";
 import { PLAN_FLAG_ORDER, PLAN_JUDGEMENT_COLUMNS } from "./validate-plan";
 
 type Json = null | boolean | number | string | readonly Json[] | { readonly [k: string]: Json };
@@ -349,4 +350,33 @@ export const staleSources = (
     if (age > days) out.push({ ...it, ageDays: age });
   }
   return out;
+};
+
+// ---- 飛行記録への引き継ぎ（設計 G） ----------------------------
+
+/** 判定のフラグ → 飛行記録の特定飛行の形態。 */
+export const FLAG_TO_SPECIFIC_FLIGHT_TYPE: Readonly<Record<SpecificFlightFlag, SpecificFlightType>> = {
+  airspace_airport: "airport_vicinity",
+  airspace_150m: "above_150m",
+  airspace_did: "did",
+  airspace_emergency: "emergency_airspace",
+  method_night: "night",
+  method_bvlos: "bvlos",
+  method_30m: "within_30m",
+  method_event: "event",
+  method_dangerous: "dangerous_goods",
+  method_drop: "dropping",
+};
+
+/**
+ * スナップショットの結果の flags（DID・空港の導出を含む最終のフラグ）を、既存の SPECIFIC_FLIGHT_TYPES の順に並べた
+ * 特定飛行の形態にする。「飛行記録を作る」で引き継ぐ。離着陸の時刻は引き継がない。
+ */
+export const specificFlightTypesFromFlags = (flags: readonly string[]): SpecificFlightType[] => {
+  const have = new Set<SpecificFlightType>();
+  for (const f of flags) {
+    const t = FLAG_TO_SPECIFIC_FLIGHT_TYPE[f as SpecificFlightFlag];
+    if (t) have.add(t);
+  }
+  return SPECIFIC_FLIGHT_TYPES.map((t) => t.key).filter((k) => have.has(k));
 };

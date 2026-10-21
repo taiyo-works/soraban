@@ -6,6 +6,8 @@ import {
   canonicalJson,
   confirmationState,
   currentFreshnessContext,
+  FLAG_TO_SPECIFIC_FLIGHT_TYPE,
+  specificFlightTypesFromFlags,
   PLAN_STATE_LABEL,
   PLAN_STATES,
   planJudgementChanged,
@@ -273,5 +275,31 @@ describe("staleSources（出典・確認日が古い項目＝90 日超）", () =
     expect(staleSources({ datasets: [], proceduresVerifiedAt: "2026-01-01" }, new Date("2026-10-21T00:00:00Z")).map((s) => s.id)).toEqual(["procedures"]);
     const r = staleSources({ datasets: [{ id: "x", name: "不明", verifiedAt: "?" }], proceduresVerifiedAt: "2026-10-19" }, new Date("2026-10-21T00:00:00Z"));
     expect(r).toEqual([{ id: "x", name: "不明", verifiedAt: "?", ageDays: null }]);
+  });
+});
+
+describe("specificFlightTypesFromFlags（設計 G：飛行記録への引き継ぎ）", () => {
+  it("設計 G の対応表どおりに写し、SPECIFIC_FLIGHT_TYPES の順に並べる", () => {
+    expect(FLAG_TO_SPECIFIC_FLIGHT_TYPE).toEqual({
+      airspace_airport: "airport_vicinity",
+      airspace_150m: "above_150m",
+      airspace_did: "did",
+      airspace_emergency: "emergency_airspace",
+      method_night: "night",
+      method_bvlos: "bvlos",
+      method_30m: "within_30m",
+      method_event: "event",
+      method_dangerous: "dangerous_goods",
+      method_drop: "dropping",
+    });
+    expect(specificFlightTypesFromFlags(["method_drop", "airspace_did", "method_night", "airspace_airport", "airspace_150m"])).toEqual([
+      "airport_vicinity",
+      "above_150m",
+      "did",
+      "night",
+      "dropping",
+    ]);
+    expect(specificFlightTypesFromFlags([])).toEqual([]);
+    expect(specificFlightTypesFromFlags(["unknown", "airspace_did", "airspace_did"])).toEqual(["did"]);
   });
 });
