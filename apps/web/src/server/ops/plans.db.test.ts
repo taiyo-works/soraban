@@ -454,6 +454,23 @@ describe.skipIf(!ADMIN_URL)("飛行計画・判定スナップショット・確
 
   // ---- 契約 6：原子性 ------------------------------------------------
 
+  it("6b. 判定の待ち時間に別の訂正が入っても、版の指定がない判定のやり直しは上書きせず 409 version_conflict にする", async () => {
+    const p = await newPlan();
+    // 判定の最中に、別の人が計画を訂正する（メモの追記。版が上がる）。
+    const racing: Judge = async (input, now) => {
+      await plans.updatePlan(mgr(), p.id, { expectedVersion: p.version, reason: "判定中の訂正", notes: "同時に入った訂正" });
+      return judgeWith(undefined)(input, now);
+    };
+    const before = await counts();
+    await expectOpsError(plans.rejudgePlan(mgr({ judge: racing }), p.id, {}), 409, "version_conflict");
+    const after = await counts();
+    expect(after.snapshots).toBe(before.snapshots);
+    const now = await plans.getPlan(mgr(), p.id);
+    expect(now.version).toBe(p.version + 1);
+    expect(now.notes).toBe("同時に入った訂正");
+  });
+
+
   it("6. 判定の失敗・時間切れでは 503 judgement_failed を返し、record_versions・judgement_snapshots・evidence_log のどれにも行が残らない", async () => {
     const before = await counts();
     const failing: Judge = async () => {

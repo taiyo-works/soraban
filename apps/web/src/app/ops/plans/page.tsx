@@ -15,6 +15,9 @@ const VIEWS = [
 ] as const;
 type ViewKey = (typeof VIEWS)[number]["key"];
 
+/** `YYYY-MM-DD` の前の日（過去の表示の上限を「今日より前」にするため）。 */
+const prevDate = (d: string): string => new Date(Date.parse(`${d}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+
 const tabClass = (active: boolean) =>
   `inline-flex min-h-11 items-center px-4 text-sm ${active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"}`;
 
@@ -30,14 +33,22 @@ export default async function PlanListPage({
   const view: ViewKey = VIEWS.some((v) => v.key === sp["view"]) ? (sp["view"] as ViewKey) : "upcoming";
   const manager = me.member.role === "manager";
   const pendingOnly = manager && sp["state"] === "pending";
-  const all = await listPlans(ctx, { includeVoided: true, ...(pendingOnly ? { state: "pending" as const } : {}) });
   const today = jstDate(nowOf(ctx));
+  // 表示ごとの絞り込み（日付・中止）は、500 件の上限の前に DB で行う。
+  const stateFilter = pendingOnly ? { state: "pending" as const } : {};
+  const viewFilter =
+    view === "voided"
+      ? { voidedOnly: true }
+      : view === "past"
+        ? { to: prevDate(today) }
+        : { from: today, oldestFirst: true };
+  const all = await listPlans(ctx, { ...viewFilter, ...stateFilter });
   const rows: PlanDto[] =
     view === "voided"
       ? all.filter((p) => p.voided)
       : view === "past"
         ? all.filter((p) => !p.voided && p.plannedDate < today)
-        : all.filter((p) => !p.voided && p.plannedDate >= today).reverse();
+        : all.filter((p) => !p.voided && p.plannedDate >= today);
   const denied = planCreateDenied(me);
   const href = (v: ViewKey, pending: boolean) => `/ops/plans?view=${v}${pending ? "&state=pending" : ""}`;
   return (

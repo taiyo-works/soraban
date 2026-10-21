@@ -322,6 +322,10 @@ export type PlanListFilter = {
   readonly from?: string;
   readonly to?: string;
   readonly includeVoided?: boolean;
+  /** 中止した計画だけ（一覧の「中止」の表示用。上限の前に絞る）。 */
+  readonly voidedOnly?: boolean;
+  /** 予定開始の古い順に返す（既定は新しい順。「これから」の表示用）。 */
+  readonly oldestFirst?: boolean;
   /** 導出の状態での絞り込み（例：確認待ち pending）。 */
   readonly state?: PlanState;
 };
@@ -673,7 +677,8 @@ export const requestConfirmation = async (ctx: OpsContext, id: string, body: unk
   const current = await loadPlan(ctx, id);
   const mine = await myPilot(ctx);
   assertCan(ctx, "plan.update", mine !== null && mine.id === current.pilot_id);
-  const expectedVersion = optionalExpectedVersion(asInput(body ?? {}));
+  // 版の指定がなければ、読んだ時点の版を使う（読んでから書くまでの間に入った訂正を上書きしない）。
+  const expectedVersion = optionalExpectedVersion(asInput(body ?? {})) ?? current.current_version;
   if (current.voided_at !== null) throw new OpsError(409, "voided");
   if (current.status === "active") throw new OpsError(409, "already_requested");
   const base = await latestData(ctx, id);
@@ -685,7 +690,7 @@ export const requestConfirmation = async (ctx: OpsContext, id: string, body: unk
     data: { ...base, status: "active" },
     reason: "確認を依頼",
     actorMemberId: ctx.member.id,
-    ...(expectedVersion !== undefined ? { expectedVersion } : {}),
+    expectedVersion,
   });
   return planDtoOf(ctx, await loadPlan(ctx, id), mine);
 };
@@ -698,7 +703,8 @@ export const rejudgePlan = async (ctx: OpsContext, id: string, body: unknown): P
   const current = await loadPlan(ctx, id);
   const mine = await myPilot(ctx);
   assertCan(ctx, "plan.update", mine !== null && mine.id === current.pilot_id);
-  const expectedVersion = optionalExpectedVersion(asInput(body ?? {}));
+  // 判定の待ち時間（最大 20 秒）の間に入った訂正を上書きしないよう、版の指定がなければ読んだ時点の版を使う。
+  const expectedVersion = optionalExpectedVersion(asInput(body ?? {})) ?? current.current_version;
   if (current.voided_at !== null) throw new OpsError(409, "voided");
   const before = planDto(ctx, current, [], mine).freshness.reasons.map((r) => r.code);
   const reason: SnapshotReasonDb = before.some((c) => c !== "input_changed") ? "data_updated" : "manual";
@@ -716,7 +722,7 @@ export const rejudgePlan = async (ctx: OpsContext, id: string, body: unknown): P
       op: "update",
       data: { ...base, drone_weight_g: judgement.droneWeightG, current_snapshot_id: snapshotId },
       reason: "判定をやり直し",
-      ...(expectedVersion !== undefined ? { expectedVersion } : {}),
+      expectedVersion,
     },
   });
   return planDtoOf(ctx, await loadPlan(ctx, id), mine);

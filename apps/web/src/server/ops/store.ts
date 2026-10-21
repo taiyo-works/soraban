@@ -496,9 +496,11 @@ export type PlanFilter = {
   readonly from?: string;
   readonly to?: string;
   readonly includeVoided?: boolean;
+  readonly voidedOnly?: boolean;
+  readonly oldestFirst?: boolean;
 };
 
-/** 計画の一覧（予定開始の新しい順、最大 500 件）。 */
+/** 計画の一覧（予定開始の新しい順、最大 500 件。oldestFirst なら古い順）。 */
 export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promise<PlanWithJoins[]> => {
   const where = ["p.org_id = $1"];
   const params: unknown[] = [orgId];
@@ -506,10 +508,12 @@ export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promis
   if (f.pilotId) where.push(`p.pilot_id = $${params.push(f.pilotId)}`);
   if (f.from) where.push(`p.planned_date >= $${params.push(f.from)}::date`);
   if (f.to) where.push(`p.planned_date <= $${params.push(f.to)}::date`);
-  if (!f.includeVoided) where.push("p.voided_at is null");
+  if (f.voidedOnly) where.push("p.voided_at is not null");
+  else if (!f.includeVoided) where.push("p.voided_at is null");
+  const dir = f.oldestFirst ? "asc" : "desc";
   return (
     await db.query<PlanWithJoins>(
-      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at desc, p.id desc limit ${LIST_LIMIT}`,
+      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT}`,
       params,
     )
   ).rows;
