@@ -235,7 +235,27 @@ export type NextActionId =
   | "cancel_report"
   | "apply_permit"
   | "notify_police"
-  | "consider_report";
+  | "consider_report"
+  // Sprint 12c：飛行当日・現場の次にやること（今日の画面。通報とは別に、記録の有無から導出する）
+  | "record_landing"
+  | "do_inspection"
+  | "check_emergency_airspace"
+  | "write_journal"
+  | "review_journal_mismatch"
+  | "renew_license";
+
+/** Sprint 12c で足した、計画の通報・確認の導出（planNextActions）には含まれない次にやること。 */
+export const FIELD_NEXT_ACTION_IDS = [
+  "record_landing",
+  "do_inspection",
+  "check_emergency_airspace",
+  "write_journal",
+  "review_journal_mismatch",
+  "renew_license",
+] as const;
+export type FieldNextActionId = (typeof FIELD_NEXT_ACTION_IDS)[number];
+/** 12b までの、計画の通報・確認の導出の次にやること。 */
+export type PlanNextActionId = Exclude<NextActionId, FieldNextActionId>;
 
 export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   request_confirmation: "確認を依頼する",
@@ -249,6 +269,12 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   apply_permit: "許可・承認を申請する",
   notify_police: "警察へ通報する",
   consider_report: "通報を検討する（推奨）",
+  record_landing: "着陸を記録する",
+  do_inspection: "日常点検をする",
+  check_emergency_airspace: "緊急用務空域を確認する",
+  write_journal: "日誌を記入する",
+  review_journal_mismatch: "日誌の食い違いを確認する",
+  renew_license: "技能証明を更新する",
 };
 
 export const NEXT_ACTIONS_EMPTY_LABEL = "いまやることはありません";

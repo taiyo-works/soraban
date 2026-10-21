@@ -102,7 +102,8 @@ create table flight_field_events (
 );
 
 create index idx_flight_field_events_plan on flight_field_events (org_id, plan_id, recorded_at, id);
-create index idx_flight_field_events_recorded on flight_field_events (org_id, recorded_at);
+-- 今日の画面が、飛行中・日誌待ちの計画を拾うために離陸の行をさかのぼる（事実の時刻で数える）
+create index idx_flight_field_events_takeoff on flight_field_events (org_id, occurred_at) where kind = 'takeoff';
 create index idx_flight_field_events_flight_record on flight_field_events (org_id, flight_record_id) where flight_record_id is not null;
 -- 同じ行を 2 回取り消せない（二重の undo を DB も拒む）
 create unique index uq_flight_field_events_undo_target on flight_field_events (target_event_id) where kind = 'undo';
