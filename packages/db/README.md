@@ -67,6 +67,8 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0009 | 判定の 4 段（Sprint 11d）：`evidence_log` に `verdict`（check 制約つき）・`verdict_unknown_count`・`per_regulation_verdict`・`applied_permits` を追加（いずれも null 可。既存の行は null のまま）。`overall`・`per_regulation_status` の列のコメントに、意味を `engine_version` で読み分けること（0.3.0 までは許可を当てた後、0.4.0 からは許可を当てる前の元の判定）を記録。アプリ用ロールの権限は変えない（表単位の insert で新しい列にも追加できる） |
 | 0010 | 運航管理（Sprint 12a）：`saved_places`（よく使う地点）・`flight_plans`（飛行計画）のヘッド表、`judgement_snapshots`（判定スナップショット。追記専用）、更新・削除・TRUNCATE を拒むトリガー（`reject_append_only_change`）、`judgement_snapshot_hash`・`verify_judgement_snapshots`、計画 ↔ スナップショットの遅延可能な複合外部キー、`flight_records.flight_plan_id`・`snapshot_id` の外部キー、アプリ用ロールへの権限付与 |
 | 0011 | 運航管理（Sprint 12a）：`record_versions.entity_type` に `flight_plan`・`saved_place` を追加、追加前・追加後のトリガーと `verify_record_chain` の置き換え、`plan_confirmations`（運航管理者の確認・差し戻し。追記専用）・`plan_confirmation_hash`、アプリ用ロールへの権限付与 |
+| 0012 | 運航管理（Sprint 12b）：`record_versions.entity_type` に `flight_report` を追加、ヘッド表 `flight_reports`（通報の記録）、有効な通報の関数 `flight_report_effective_id`、追加前・追加後のトリガーと `verify_record_chain` の置き換え（0011 の分岐は文字どおり写し、`flight_report` の分岐だけを足す）、アプリ用ロールへの権限付与（参照だけ） |
+| 0013 | 運航管理（Sprint 12b）：`flight_report_attempts`（通報の試行・監査。追記専用）、`plan_procedure_records`（手続きの「済み」の記録。追記専用）・`plan_procedure_record_hash`、更新・削除・TRUNCATE を拒むトリガー、アプリ用ロールへの権限付与（参照と追加だけ） |
 
 ### ランナー
 
@@ -102,9 +104,9 @@ pnpm db:migrate --target <ホスト名>    # 未適用を番号順に適用（lo
 | ロール | 用途 | 権限 |
 |---|---|---|
 | 既定のオーナーロール（Neon の `neondb_owner` 等） | マイグレーション（`DATABASE_URL_UNPOOLED`） | 表の作成・変更 |
-| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。運航管理（0007）：`daily_inspections`・`flight_records` と総飛行時間のビューは参照のみ。運航管理（0010・0011）：`judgement_snapshots`・`plan_confirmations` は参照と追加のみ（更新・削除・TRUNCATE は不可）、`flight_plans`・`saved_places` は参照のみ。`ops_bootstrap`・`verify_record_chain`・`verify_judgement_snapshots` は実行できない |
+| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。運航管理（0007）：`daily_inspections`・`flight_records` と総飛行時間のビューは参照のみ。運航管理（0010・0011）：`judgement_snapshots`・`plan_confirmations` は参照と追加のみ（更新・削除・TRUNCATE は不可）、`flight_plans`・`saved_places` は参照のみ。運航管理（0012・0013）：`flight_report_attempts`・`plan_procedure_records` は参照と追加のみ、`flight_reports` は参照のみ。`ops_bootstrap`・`verify_record_chain`・`verify_judgement_snapshots`・`flight_report_effective_id` は実行できない |
 
-- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006・0007・0010・0011 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006・0007・0010・0011 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
+- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006・0007・0010・0011・0012・0013 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006・0007・0010〜0013 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
 
 ```sql
 grant usage on schema public to soraban_app;
@@ -120,6 +122,9 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
 -- 0010・0011 を適用済みの場合
 grant select, insert on judgement_snapshots, plan_confirmations to soraban_app;
 grant select on flight_plans, saved_places to soraban_app;
+-- 0012・0013 を適用済みの場合
+grant select, insert on flight_report_attempts, plan_procedure_records to soraban_app;
+grant select on flight_reports to soraban_app;
 ```
 
 - Neon のコンソール・API・CLI で作ったロールには `neon_superuser` が付くため、最小権限にならない。SQL の `create role` で作ったロールには付かない（出典：https://neon.com/docs/manage/database-access 、2026-10-19 確認）。そのため `soraban_app` は SQL Editor から作る。SQL で作ったロールを Connect 画面で選べるかは文書に記載がなく、実施時に確認する。
@@ -194,6 +199,34 @@ grant select on flight_plans, saved_places to soraban_app;
   `plan_confirmations` は `plan_confirmation_hash`（`soraban-confirmation-v1`）。要素は `id`・`org_id`・`plan_id`・`plan_version`・`snapshot_id`・`decision`・`reason`・`confirmer_member_id`・`confirmer_name`・`self_confirmation`・`created_at`（前に規則の版の文字列）。連鎖（`prev_hash`）は持たない。
 - **検証**：`select * from verify_judgement_snapshots('<plan_id>');`（オーナーロール）。改変がなければ 0 行。次の問題を返す（計画に関する問題は最後の `seq`、無ければ 0）：連番の欠け（`missing_seq`）、`prev_hash` のつながりの不一致（`prev_hash_mismatch`）、`content_hash` の再計算の不一致（`content_hash_mismatch`）、計画の `current_snapshot_id` のスナップショットが無い（`head_snapshot_missing`）、計画の `current_snapshot_id` が最新のスナップショットでない（`head_snapshot_not_latest`）。計画の版の連鎖は `verify_record_chain('flight_plan', '<plan_id>')`（`flight_plan`・`saved_place` を 0011 で追加）。DB 移行（`docs/spec.md` §13.8.1）の前後に、すべての計画で実行して 0 行を確かめる。限界は `record_versions` と同じ（オーナーロールが後ろを全部作り直した改変は DB の中だけでは検出できない）。
 - **個人情報**：計画・スナップショットに技能証明書番号・操縦者の氏名・メールアドレスを入れない（操縦者は ID だけ。画面で名前を引く）。確認者の表示名の写しは持つ。
+
+## 通報の記録・試行の監査・手続きの「済み」の記録（Sprint 12b、0012・0013）
+
+そらばんは DIPS に送信しない。利用者が DIPS 2.0 で通報した結果（通報日時・番号）を手で記録し（利用者の申告）、開発用に同じプロセスの中の模擬の送信も同じ表・同じ状態で残す。記録するまで「通報済み」にならない。
+
+- **`flight_reports`（通報の記録。ヘッド表）**：`record_versions`（`entity_type = flight_report`）から DB が作る。状態の変更・訂正は版として追記し、物理削除も取消（`void`）もしない（`void` の版は `SB409` `not_voidable`）。取消は種別 `cancel` の別の行、記録の誤りは状態 `retracted` の版で表す。`(plan_id, org_id)`・`(base_report_id, plan_id, org_id)`（同じ表）・`(snapshot_id, plan_id, org_id)` は複合外部キー（別の計画のスナップショット・通報を指せない）。`(org_id, idempotency_key)` は一意（`uq_flight_reports_idem_request`）。CHECK：`kind = new` のとき元の通報なし、手動の送信元の状態は `reported_manual`・`retracted` だけ、完了した状態は `reported_at` が必須、`reported_manual` は二つの確認が揃い、番号か「番号なし」の宣言のどちらか一方があり、宣言のときはメモが必須。
+- **追加前のトリガー**（`flight_report` の作成）：計画ごとに `pg_advisory_xact_lock` で直列化。計画が同じ組織にない（`SB404`）、同じ冪等性キーがある（`23505` `uq_flight_reports_idem_request`）。新規・変更は計画が取消されておらず（`voided`）、確認を依頼済み（`not_requested`）で、最新の版（`version_conflict`）であること。取消は取消された計画でも作れる。有効な通報がある計画への新規は `already_reported`、有効な通報がない計画への変更・取消は `no_active_report`、元の通報が現在の有効な通報でなければ `base_changed`、有効な手動の通報がある計画への模擬・API の新規・変更は `manual_report_exists`（いずれも `SB409`）。**状態の遷移の許可は DB でなくアプリの遷移表（`packages/dips/src/transitions.ts`）が決める。** 追加後のトリガーは、作成時に決まる列（計画・種別・元の通報・スナップショット・指紋・送信元・冪等性キー・内容）の更新を `23514`（`report_immutable`）で拒む。
+- **有効な通報**：関数 `flight_report_effective_id(plan_id)`。種別が `new`／`change`、状態が `reported_manual`／`submitted_api` で、それより後に完了した `cancel`（同じ状態）が無い最新の 1 件（作成の新しい順、同時刻は ID）。アプリの `effectiveReport`（`packages/dips/src/status.ts`）と同じ規則で、`reports.db.test.ts` が乱数の操作の列で一致を確かめる。保存しない。
+- **`flight_report_attempts`（試行・監査。追記専用）**：ゲートウェイの操作 1 回ごとに 1 行（`copy`・`submit`・`status`・`cancel`・`manual_record`・`correct`・`retract`・`resolve`）。利用者の ID と、その時点の表示名・役割の写し（`member_name`・`member_role`。追加前のトリガーが利用者の行から写す）、`created_at`（DB の時刻）、アダプター、冪等性キー、内容の SHA-256 と短い要約、対応表の版、スナップショットの証跡 ID、結果、HTTP の状態、失敗の種類、DIPS の番号を残す。**秘密・トークン・技能証明書番号・氏名・内容の全文は入れない。** 模擬の送信は、外部の呼び出しの前（結果 `unknown`）と後（結果）の 2 行を残す。
+- **`plan_procedure_records`（手続きの「済み」の記録。追記専用）**：許可・承認の申請（`dips_permit`）と、小型無人機等飛行禁止法の同意・通報（`small_drone_law`）。`done` はすべての確認が真のときだけ（CHECK）。取り下げ（`retract`）も理由つきの行として残る。有効な記録は、計画ごと・種別ごとの最新の行が `done` のもの。追加前のトリガーが、取消された計画への `done`（`voided`）、計画の現在のスナップショット・最新の版と違う `done`（`snapshot_mismatch`・`version_conflict`）、有効な記録がない `retract`（`nothing_to_retract`）を `SB409` で拒む。
+- **追記専用**：`flight_report_attempts`・`plan_procedure_records` の更新・削除・TRUNCATE は、権限を持つオーナーロールでも拒む（`reject_append_only_change`。`SB409`、detail `immutable`）。`soraban_app` は両方とも参照と追加だけ、`flight_reports` は参照だけ（書くのは `record_versions` への追加→トリガー）。
+- **`content_hash` の計算規則（`soraban-procedure-record-v1`）**：次の 15 要素をこの順に並べた jsonb の配列を `::text` で文字列にし、UTF-8 のバイト列の SHA-256 を 16 進小文字で表したもの（関数 `plan_procedure_record_hash`）。時刻は UTC の `YYYY-MM-DDTHH:MI:SS.ffffffZ`（`done_at` が無ければ `null`）。
+
+  | 順 | 要素 |
+  |---|---|
+  | 1 | `"soraban-procedure-record-v1"`（規則の版） |
+  | 2〜4 | `id`・`org_id`・`plan_id`（UUID の小文字表記の文字列） |
+  | 5・6 | `kind`・`action` |
+  | 7 | `done_at`（UTC の文字列または `null`） |
+  | 8・9 | `reference`・`checks`（jsonb） |
+  | 10 | `snapshot_id`（文字列） |
+  | 11 | `plan_version`（数値） |
+  | 12・13 | `recorded_by_member_id`（文字列）・`recorded_by_name` |
+  | 14 | `reason` |
+  | 15 | `created_at`（UTC の文字列） |
+
+- **検証**：通報の記録の版の連鎖は `select * from verify_record_chain('flight_report', '<report_id>');`（オーナーロール。改変がなければ 0 行。通報日時は日本時間の `YYYY-MM-DDTHH:MM` にして版の `data` と比べる）。DB 移行（`docs/spec.md` §13.8.1）の前後に、すべての通報の記録で実行して 0 行を確かめる。限界は `record_versions` と同じ。
+- **個人情報**：通報の記録の写し（`content`）・試行の監査に、技能証明書番号・操縦者の氏名・メールアドレスを入れない（通報内容の画面には、運航管理者と本人にだけ技能証明書番号の全桁を表示する）。
 
 ## ローカル開発・テスト
 
