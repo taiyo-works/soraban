@@ -69,6 +69,9 @@ export type PlanForReport = {
    * 許可書発行日・許可期間（FPR No.76〜78）の元。無い・複数のときは null で、DIPS で入力する。登録は利用者の申告。
    */
   readonly permitRegistration?: {
+    /** 登録の ID と版番号：指紋の元（登録を訂正・失効したら、通報の状態が変更を検知する）。 */
+    readonly registrationId: string;
+    readonly versionNo: number;
     readonly permitNumber: string;
     readonly issuedOn: string;
     readonly validFrom: string;
@@ -165,6 +168,17 @@ export type FingerprintParts = {
   readonly aircraftId: string;
   readonly pilotId: string;
   readonly flags: readonly string[];
+  /**
+   * 通報に許可書発行日・許可期間を出す登録（適用された登録がちょうど 1 件のときだけ。無ければ省く。Sprint 12d の指摘）。
+   * 無いときは指紋の元に入れず、従来の指紋と一致する。
+   */
+  readonly permit?: {
+    readonly registrationId: string;
+    readonly versionNo: number;
+    readonly issuedOn: string;
+    readonly validFrom: string;
+    readonly validTo: string;
+  };
 };
 
 export type PreparedReport = {

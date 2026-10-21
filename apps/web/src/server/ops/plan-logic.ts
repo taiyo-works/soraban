@@ -234,6 +234,23 @@ export const permitPartEquals = (a: unknown, b: unknown): boolean => {
   return judgementInputEquals(part(a), part(b));
 };
 
+/**
+ * スナップショットの許可の入力（DIPS の値と根拠の版）が、現在の登録の照合と同じか（違えば「判定が古い」）。
+ * 手入力の同意・通報などの値は pilotPermits に混ざるため、DIPS の値だけを比べる。旧版の総称の mlit も DIPS の値として数える
+ * （現在の照合は mlit:<種類> だけを足すので、旧形式のスナップショットは必ず「古い」になる）。
+ */
+export const snapshotPermitInputUpToDate = (
+  snapshotInput: { readonly permitBasis?: readonly unknown[]; readonly pilotPermits?: readonly unknown[] },
+  match: { readonly grantedValues: readonly string[]; readonly basis: readonly unknown[] },
+): boolean => {
+  const basis = snapshotInput.permitBasis ?? [];
+  const snapshotDips = (snapshotInput.pilotPermits ?? []).filter((x): x is string => typeof x === "string" && isDipsPermitValue(x)).sort();
+  return (
+    judgementInputEquals(snapshotDips, [...match.grantedValues]) &&
+    judgementInputEquals(basis.length > 0 ? basis : null, match.basis.length > 0 ? match.basis : null)
+  );
+};
+
 const withoutPermitKeys = (v: unknown): unknown => {
   if (v === null || typeof v !== "object" || Array.isArray(v)) return v;
   const { pilotPermits: _p, permitBasis: _b, ...rest } = v as Record<string, unknown>;

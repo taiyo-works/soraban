@@ -1,6 +1,7 @@
 // Sprint 12b 契約 3・6：冪等性キー、指紋の差分。
 import { describe, expect, it } from "vitest";
-import { computeIdempotencyKey, diffFingerprintParts, normalizeFlags } from "./fingerprint";
+import { computeFingerprint, computeIdempotencyKey, diffFingerprintParts, FINGERPRINT_VERSION, fingerprintPartsOf, normalizeFlags } from "./fingerprint";
+import { sha256Hex } from "./sha256";
 import { prepareReport } from "./prepare";
 import { basePlan, ORG_ID, PLAN_ID } from "./test-fixtures";
 
@@ -76,5 +77,59 @@ describe("指紋の差分（変更点の表示）", () => {
       "method_drop",
       "x_unknown",
     ]);
+  });
+});
+
+describe("指紋と許可・承認の登録（Sprint 12d の指摘）", () => {
+  const reg = { registrationId: "11111111-1111-4111-8111-111111111111", versionNo: 1, issuedOn: "2026-10-01", validFrom: "2026-10-05", validTo: "2027-10-04" };
+  const fp = (permitRegistration: typeof reg | null | undefined) => prepareReport(basePlan({ permitRegistration: permitRegistration as never }), "new").fingerprint;
+
+  it("登録が適用されない通報の指紋は従来と一致する（FINGERPRINT_VERSION は同じ。登録の項目を持たない）", () => {
+    const p = fingerprintPartsOf({ ...basePlan(), permitRegistration: null });
+    expect(p).not.toHaveProperty("permit");
+    const legacy = sha256Hex(
+      JSON.stringify([FINGERPRINT_VERSION, p.startAt, p.durationMinutes, p.lat, p.lng, p.radiusM, p.maxAltitudeM, p.aircraftId, p.pilotId, normalizeFlags(p.flags)]),
+    );
+    expect(FINGERPRINT_VERSION).toBe("soraban-report-fp-v1");
+    expect(computeFingerprint(p)).toBe(legacy);
+    expect(fp(null)).toBe(legacy);
+    expect(fp(undefined)).toBe(legacy);
+  });
+
+  it("登録があるときは指紋が変わり、登録の ID・版・発行日・期間のどれが変わっても変わる", () => {
+    const base = fp(reg);
+    expect(base).not.toBe(fp(null));
+    expect(base).toBe(fp({ ...reg }));
+    expect(base).toBe(fp({ ...reg, registrationId: reg.registrationId.toUpperCase() }));
+    const others = [
+      fp({ ...reg, registrationId: "22222222-2222-4222-8222-222222222222" }),
+      fp({ ...reg, versionNo: 2 }),
+      fp({ ...reg, issuedOn: "2026-10-02" }),
+      fp({ ...reg, validFrom: "2026-10-06" }),
+      fp({ ...reg, validTo: "2027-10-05" }),
+    ];
+    for (const o of others) expect(o).not.toBe(base);
+    expect(new Set([base, ...others]).size).toBe(others.length + 1);
+  });
+
+  it("差分に「許可・承認の登録」が出る。登録の無い通報（従来の保存値）との比較でも落ちない", () => {
+    const none = prepareReport(basePlan(), "new").fingerprintParts;
+    const one = prepareReport(basePlan({ permitRegistration: reg as never }), "new").fingerprintParts;
+    const v2 = prepareReport(basePlan({ permitRegistration: { ...reg, versionNo: 2 } as never }), "new").fingerprintParts;
+    expect(diffFingerprintParts(none, none)).toEqual([]);
+    expect(diffFingerprintParts(one, one)).toEqual([]);
+    expect(diffFingerprintParts(none, one).map((c) => c.key)).toEqual(["permit"]);
+    expect(diffFingerprintParts(none, one)[0]).toMatchObject({ label: "許可・承認の登録", before: "なし" });
+    expect(diffFingerprintParts(one, none)[0]!.after).toBe("なし");
+    const d = diffFingerprintParts(one, v2);
+    expect(d.map((c) => c.key)).toEqual(["permit"]);
+    expect(d[0]!.before).toContain("版 1");
+    expect(d[0]!.after).toContain("版 2");
+    // jsonb はキーの順を変えて返す：同じ値なら差分なし
+    const reordered = { ...one, permit: { versionNo: 1, validTo: one.permit!.validTo, validFrom: one.permit!.validFrom, registrationId: one.permit!.registrationId, issuedOn: one.permit!.issuedOn } };
+    expect(diffFingerprintParts(reordered, one)).toEqual([]);
+    // DB の jsonb に permit が無い（従来の保存値）
+    const { permit: _p, ...legacy } = none as Record<string, unknown>;
+    expect(diffFingerprintParts(legacy as never, none)).toEqual([]);
   });
 });
