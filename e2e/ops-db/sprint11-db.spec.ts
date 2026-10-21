@@ -424,7 +424,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await signIn(page.request, seeded("a-manager"));
       for (const path of ["/ops/flights", "/ops/flights/new", `/ops/flights/${created.id}`, "/ops/inspections/new", "/ops/inspections", "/ops"]) {
         await page.goto(path);
-        await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name"))).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name")).first()).toBeVisible();
         await noHorizontalScroll(page, path);
       }
       const minHeight = async (path: string, names: readonly string[]) => {
@@ -592,7 +592,8 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto(`/ops/inspections/new`);
       await page.getByRole("form", { name: "日常点検の入力" }).getByRole("textbox", { name: "実施場所", exact: true }).fill("点検の下書き");
       await expect.poll(() => draftText(page, "inspection")).toContain("点検の下書き");
-      await page.goto("/ops");
+      // Sprint 12c：メニューとログアウトは「その他」へ移した
+      await page.goto("/ops/more");
       await page.getByRole("button", { name: "ログアウト" }).click();
       await expect(page).toHaveURL(/\/ops\/sign-in$/);
       const left = await page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("soraban:ops-draft:")));

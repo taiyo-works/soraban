@@ -5,9 +5,13 @@
 import { cloneElement, useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
+import { flushOutbox, planIdsWithOutbox, unsavedUnsentCountForMember } from "./field-outbox";
+import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import {
   buttonDangerClass,
+  buttonFieldClass,
   buttonGhostClass,
+  buttonOutlineBrandClass,
   buttonPrimaryClass,
   MEMBER_INVITE_NOTICE_TARGET,
   memberNoticeTarget,
@@ -858,11 +862,16 @@ export function MemberControls({
 
 // ---- ログイン・ログアウト ------------------------------------
 
-export function SignOutButton({ provider }: { readonly provider: "neon" | "test" }) {
+export function SignOutButton({ provider, memberId }: { readonly provider: "neon" | "test"; readonly memberId?: string }) {
   const [busy, setBusy] = useState(false);
-  const onClick = async () => {
+  // 未送信の現場の記録があるときの警告（黙って消さない。Sprint 12c 設計 F）
+  const [warning, setWarning] = useState<string | null>(null);
+  const [sendFailed, setSendFailed] = useState(false);
+
+  const signOut = async () => {
     setBusy(true);
-    // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）
+    // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）。
+    // 未送信の現場の記録が残っているときは、警告のあとの確認を経たときだけここへ来る（Sprint 12c）。
     clearOpsDrafts();
     try {
       if (provider === "test") {
@@ -875,10 +884,82 @@ export function SignOutButton({ provider }: { readonly provider: "neon" | "test"
       window.location.assign("/ops/sign-in");
     }
   };
+
+  // 端末に保存できていない未送信（メモリだけにある分）も数に入れる
+  const guardNow = (): { warn: boolean; message: string | null } => {
+    if (!memberId) return { warn: false, message: null };
+    const g = logoutGuard(window.localStorage, memberId);
+    const count = g.count + unsavedUnsentCountForMember(memberId);
+    return { warn: count > 0, message: count > 0 ? LOGOUT_UNSENT_WARNING(count) : null };
+  };
+
+  const onClick = async () => {
+    const g = guardNow();
+    if (g.warn) {
+      setWarning(g.message);
+      setSendFailed(false);
+      return;
+    }
+    await signOut();
+  };
+
+  // 送ってからログアウトする。すべて送れたときだけログアウトし、送れなかったときは残して知らせる
+  const sendThenSignOut = async () => {
+    if (!memberId) return;
+    setBusy(true);
+    for (const planId of planIdsWithOutbox(memberId)) await flushOutbox(planId, memberId);
+    const g = guardNow();
+    if (g.warn) {
+      setWarning(g.message);
+      setSendFailed(true);
+      setBusy(false);
+      return;
+    }
+    await signOut();
+  };
+
   return (
-    <button type="button" className={subtleButtonClass} onClick={onClick} disabled={busy}>
-      ログアウト
-    </button>
+    <div className="flex flex-col gap-3">
+      <button type="button" className={subtleButtonClass} onClick={onClick} disabled={busy} data-testid="signout">
+        ログアウト
+      </button>
+      {warning ? (
+        <div role="alert" className="flex flex-col gap-4 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft px-4 py-4 text-base text-ink" data-testid="signout-warning">
+          <p className="flex gap-2 font-medium leading-relaxed">
+            <span aria-hidden className="font-bold">！</span>
+            <span>
+              {warning}
+              {sendFailed ? "。送れませんでした。通信を確かめてください。" : ""}
+            </span>
+          </p>
+          {/* 3 択：安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く */}
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              className={`${buttonFieldClass} w-full !text-base`}
+              onClick={() => void sendThenSignOut()}
+              disabled={busy}
+              data-testid="signout-send"
+            >
+              送ってからログアウト
+            </button>
+            <button type="button" className={`${buttonOutlineBrandClass.replace("min-h-11", "min-h-14")} w-full !text-base`} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
+              やめる
+            </button>
+            <button
+              type="button"
+              className="mt-2 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp border-2 border-dashed border-signal-red bg-paper px-4 text-base font-medium text-ink transition-colors hover:bg-signal-red-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-red focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40"
+              onClick={() => void signOut()}
+              disabled={busy}
+              data-testid="signout-discard"
+            >
+              <span aria-hidden>！</span>
+              送らずにログアウト（記録を捨てる）
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

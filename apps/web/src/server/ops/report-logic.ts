@@ -18,11 +18,13 @@ import {
   PROCEDURE_RECORD_STALE_LABEL,
   REPORT_POLICY,
   type NextActionId,
+  type PlanNextActionId,
   type ProcedureRecordKind,
   type ReportPolicy,
   type ReportStatusResult,
   type RequirementKind,
 } from "@soraban/dips";
+import { fieldHref, inspectionNewHref, journalNewHref } from "@/lib/ops-field";
 import { jstDate } from "@/lib/ops-time";
 
 // ---- 期限 ----------------------------------------------------------
@@ -223,6 +225,18 @@ export const planHref = (planId: string, id: NextActionId): string => {
     case "apply_permit":
     case "notify_police":
       return `${base}#procedures`;
+    // Sprint 12c：飛行当日・現場の次にやること（今日の画面で導出する。経路は lib/ops-field.ts）
+    case "record_landing":
+      return fieldHref(planId, "flight");
+    case "do_inspection":
+      return inspectionNewHref(planId);
+    case "check_emergency_airspace":
+      return fieldHref(planId, "preflight");
+    case "write_journal":
+      return journalNewHref(planId);
+    case "review_journal_mismatch":
+    case "renew_license":
+      return base;
   }
 };
 
@@ -241,7 +255,7 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
   const out: NextAction[] = [];
   const voided = i.planState === "voided";
   const startsInMinutes = Math.floor((i.plannedStartAt.getTime() - i.now.getTime()) / 60_000);
-  const add = (id: NextActionId, tier: NextActionTier, reason: string, canAct: boolean, dueLabel: string | null = null): void => {
+  const add = (id: PlanNextActionId, tier: NextActionTier, reason: string, canAct: boolean, dueLabel: string | null = null): void => {
     out.push({ id, label: NEXT_ACTION_LABEL[id], reason, href: planHref(i.planId, id), tier, dueLabel, canAct, startsInMinutes });
   };
 

@@ -7,6 +7,7 @@ import type {
   DailyInspectionRow,
   EvidenceLogInsert,
   FlightPlanRow,
+  FlightFieldEventRow,
   FlightRecordRow,
   FlightReportAttemptRow,
   FlightReportRow,
@@ -33,6 +34,9 @@ export type OpsDb = {
     release: () => void;
   }>;
 };
+
+/** 読み出しだけに使う最小のインターフェース（pool でもトランザクションの接続でもよい）。 */
+export type Queryable = Pick<OpsDb, "query">;
 
 /** 業務上の誤り（状態コードと機械可読のコード）。 */
 export class OpsError extends Error {
@@ -517,7 +521,7 @@ const PLAN_SELECT = `select p.*, to_char(p.planned_date, 'YYYY-MM-DD') as planne
    join pilots pl on pl.id = p.pilot_id
    join judgement_snapshots s on s.id = p.current_snapshot_id`;
 
-export const getPlan = async (db: OpsDb, orgId: string, id: string): Promise<PlanWithJoins | null> =>
+export const getPlan = async (db: Queryable, orgId: string, id: string): Promise<PlanWithJoins | null> =>
   (await db.query<PlanWithJoins>(`${PLAN_SELECT} where p.org_id = $1 and p.id = $2`, [orgId, id])).rows[0] ?? null;
 
 export type PlanFilter = {
@@ -670,7 +674,7 @@ const REPORT_SELECT = `select r.*,
    join judgement_snapshots s on s.id = r.snapshot_id`;
 
 /** 計画の通報の行（古い順）。plan_ids は同じ組織の計画。 */
-export const listReportsFor = async (db: OpsDb, orgId: string, planIds: readonly string[]): Promise<ReportRowWithTimes[]> => {
+export const listReportsFor = async (db: Queryable, orgId: string, planIds: readonly string[]): Promise<ReportRowWithTimes[]> => {
   if (planIds.length === 0) return [];
   return (
     await db.query<ReportRowWithTimes>(
@@ -816,3 +820,206 @@ export const insertProcedureRecord = async (db: OpsDb, i: ProcedureRecordInsert)
     );
     return r.rows[0]!.id;
   });
+
+// ---- 現場の事実の記録（Sprint 12c。flight_field_events。追記専用） ----------------------
+
+/** 現場の事実の行に、並べ替え用のマイクロ秒つきの時刻と、事実の時刻の JST の分を付けたもの。 */
+export type FieldEventRowWithTimes = FlightFieldEventRow & {
+  /** 記録の順の鍵（UTC・小数 6 桁の ISO 文字列）。ミリ秒の Date では同じ時刻になりうるため、順序の判定にはこちらを使う。 */
+  readonly recorded_key: string;
+  /** 事実の時刻（JST の `YYYY-MM-DDTHH:MM`）。 */
+  readonly occurred_at_jst: string;
+};
+
+const FIELD_EVENT_SELECT = `select e.*,
+        to_char(e.recorded_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as recorded_key,
+        ops_timestamptz_to_jst_minute(e.occurred_at) as occurred_at_jst
+   from flight_field_events e`;
+
+/** 計画の現場の事実の行（記録の古い順）。plan_ids は同じ組織の計画。 */
+export const listFieldEventsFor = async (
+  db: Queryable,
+  orgId: string,
+  planIds: readonly string[],
+): Promise<FieldEventRowWithTimes[]> => {
+  if (planIds.length === 0) return [];
+  return (
+    await db.query<FieldEventRowWithTimes>(
+      `${FIELD_EVENT_SELECT} where e.org_id = $1 and e.plan_id = any($2::uuid[]) order by e.recorded_at, e.id`,
+      [orgId, [...planIds]],
+    )
+  ).rows;
+};
+
+/** 端末の識別子（clientEventId）の行。組織の中で一意。 */
+export const findFieldEventByClientId = async (
+  db: Queryable,
+  orgId: string,
+  clientEventId: string,
+): Promise<FieldEventRowWithTimes | null> =>
+  (await db.query<FieldEventRowWithTimes>(`${FIELD_EVENT_SELECT} where e.org_id = $1 and e.client_event_id = $2`, [orgId, clientEventId]))
+    .rows[0] ?? null;
+
+export type FieldEventInsert = {
+  readonly orgId: string;
+  readonly planId: string;
+  readonly kind: FlightFieldEventRow["kind"];
+  readonly item: FlightFieldEventRow["item"];
+  readonly result: FlightFieldEventRow["result"];
+  readonly source: string | null;
+  readonly targetEventId: string | null;
+  readonly flightRecordId: string | null;
+  readonly inspectionId: string | null;
+  readonly reportId: string | null;
+  /** 事実の時刻（JST の `YYYY-MM-DDTHH:MM`）。 */
+  readonly occurredAtJst: string;
+  readonly gaps: readonly { readonly item: string; readonly state: string }[] | null;
+  readonly note: string | null;
+  readonly queued: boolean;
+  readonly clientEventId: string;
+  readonly recordedByMemberId: string;
+};
+
+/**
+ * 現場の事実の行を 1 件追加する（呼び出し側が開いたトランザクションの中で）。snapshot_id・plan_version・recorded_by_name・
+ * recorded_by_role・recorded_at・content_hash は DB が決める（送らない）。
+ */
+export const insertFieldEventOn = async (c: OpsTx, i: FieldEventInsert): Promise<string> => {
+  const r = await c.query<{ id: string }>(
+    `insert into flight_field_events (org_id, plan_id, kind, item, result, source, target_event_id, flight_record_id, inspection_id,
+       report_id, occurred_at, gaps, note, queued, client_event_id, recorded_by_member_id)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, ops_jst_minute_to_timestamptz($11), $12::jsonb, $13, $14, $15, $16)
+     returning id`,
+    [
+      i.orgId,
+      i.planId,
+      i.kind,
+      i.item,
+      i.result,
+      i.source,
+      i.targetEventId,
+      i.flightRecordId,
+      i.inspectionId,
+      i.reportId,
+      i.occurredAtJst,
+      i.gaps === null ? null : JSON.stringify(i.gaps),
+      i.note,
+      i.queued,
+      i.clientEventId,
+      i.recordedByMemberId,
+    ],
+  );
+  return r.rows[0]!.id;
+};
+
+/** 計画ごとの排他（現場の記録・計画の版・確認と同じ鍵。DB の追加前のトリガーも同じ鍵を取る）。トランザクションの中で呼ぶ。 */
+export const lockPlanOn = async (c: OpsTx, planId: string): Promise<void> => {
+  await c.query("select pg_advisory_xact_lock(hashtextextended('record_versions:flight_plan:' || $1::text, 0))", [planId]);
+};
+
+/**
+ * 指定の時刻以降に離陸した計画の ID（飛行中・日誌待ちの計画を日付に関わらず拾う）。
+ * 事実の時刻（occurred_at）で数える（記録の時刻 recorded_at は DB の実時刻で、テスト用に固定したサーバーの時計と合わない）。
+ */
+export const listPlanIdsWithTakeoffSince = async (db: Queryable, orgId: string, since: Date): Promise<string[]> =>
+  (
+    await db.query<{ plan_id: string }>(
+      `select distinct plan_id from flight_field_events where org_id = $1 and kind = 'takeoff' and occurred_at >= $2`,
+      [orgId, since],
+    )
+  ).rows.map((r) => r.plan_id);
+
+/** 機体の、ある JST の日付の（取消していない）飛行前の日常点検。 */
+export const listPreflightInspections = async (
+  db: Queryable,
+  orgId: string,
+  aircraftIds: readonly string[],
+  date: string,
+): Promise<{ id: string; aircraft_id: string; inspected_at: Date | string; has_abnormal: boolean }[]> => {
+  if (aircraftIds.length === 0) return [];
+  return (
+    await db.query<{ id: string; aircraft_id: string; inspected_at: Date | string; has_abnormal: boolean }>(
+      `select id, aircraft_id, inspected_at, has_abnormal from daily_inspections
+        where org_id = $1 and aircraft_id = any($2::uuid[]) and voided_at is null and timing = 'pre_flight' and inspected_date = $3::date
+        order by inspected_at, id`,
+      [orgId, [...aircraftIds], date],
+    )
+  ).rows;
+};
+
+/** 飛行記録の取消の有無（日誌待ちへの復帰の判定に使う）。 */
+export const listFlightRecordVoidState = async (
+  db: Queryable,
+  orgId: string,
+  ids: readonly string[],
+): Promise<{ id: string; voided: boolean }[]> => {
+  if (ids.length === 0) return [];
+  return (
+    await db.query<{ id: string; voided: boolean }>(
+      `select id, (voided_at is not null) as voided from flight_records where org_id = $1 and id = any($2::uuid[])`,
+      [orgId, [...ids]],
+    )
+  ).rows;
+};
+
+/** 計画に結び付いた飛行記録の、取消していないものがある計画の ID。 */
+export const plansWithFlightRecords = async (db: Queryable, orgId: string, planIds: readonly string[]): Promise<Set<string>> => {
+  if (planIds.length === 0) return new Set();
+  const r = await db.query<{ flight_plan_id: string }>(
+    `select distinct flight_plan_id from flight_records
+      where org_id = $1 and flight_plan_id = any($2::uuid[]) and voided_at is null`,
+    [orgId, [...planIds]],
+  );
+  return new Set(r.rows.map((x) => x.flight_plan_id));
+};
+
+/** ID の集合で計画をまとめて読む（食い違いの導出で、飛行記録ごとに計画を引かないため）。 */
+export const listPlansByIds = async (db: Queryable, orgId: string, ids: readonly string[]): Promise<PlanWithJoins[]> => {
+  if (ids.length === 0) return [];
+  return (
+    await db.query<PlanWithJoins>(`${PLAN_SELECT} where p.org_id = $1 and p.id = any($2::uuid[]) order by p.planned_start_at, p.id`, [
+      orgId,
+      [...ids],
+    ])
+  ).rows;
+};
+
+/** 離陸が指定の時刻以降の（取消していない）飛行記録（直近の食い違いの確認に使う）。 */
+export const listFlightsSince = async (db: Queryable, orgId: string, since: Date): Promise<FlightWithTotal[]> =>
+  (
+    await db.query<FlightWithTotal>(
+      `${FLIGHT_SELECT} where f.org_id = $1 and f.voided_at is null and f.takeoff_at >= $2
+        order by f.takeoff_at desc, f.id desc limit ${LIST_LIMIT}`,
+      [orgId, since],
+    )
+  ).rows;
+
+/** 飛行記録と結び付いた離陸の行（日誌との結び付き）。離陸の行の未了事項の写しも返す。 */
+export type JournalLinkRow = {
+  readonly flight_record_id: string;
+  readonly takeoff_event_id: string;
+  readonly takeoff_gaps: readonly { readonly item: string; readonly state: string }[] | null;
+};
+
+export const listJournalLinksFor = async (db: Queryable, orgId: string, flightRecordIds: readonly string[]): Promise<JournalLinkRow[]> => {
+  if (flightRecordIds.length === 0) return [];
+  return (
+    await db.query<JournalLinkRow>(
+      `select j.flight_record_id, t.id as takeoff_event_id, t.gaps as takeoff_gaps
+         from flight_field_events j
+         join flight_field_events t on t.id = j.target_event_id and t.org_id = j.org_id
+        where j.org_id = $1 and j.kind = 'journal_linked' and j.flight_record_id = any($2::uuid[])
+        order by j.recorded_at, j.id`,
+      [orgId, [...flightRecordIds]],
+    )
+  ).rows;
+};
+
+/** 現場の事実の行 1 件を、ID か端末の識別子で引く（同じ組織の行だけ）。 */
+export const getFieldEventByRef = async (db: Queryable, orgId: string, ref: string): Promise<FieldEventRowWithTimes | null> =>
+  (
+    await db.query<FieldEventRowWithTimes>(
+      `${FIELD_EVENT_SELECT} where e.org_id = $1 and (e.id = $2::uuid or e.client_event_id = $2::uuid) limit 1`,
+      [orgId, ref],
+    )
+  ).rows[0] ?? null;

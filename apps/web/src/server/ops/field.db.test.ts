@@ -1,0 +1,1133 @@
+// Sprint 12c 契約 1・3・4・5・6 の DB テスト（pnpm test:db）。
+// 使い捨てのデータベースにマイグレーションを適用し、アプリ用ロール soraban_app に切り替えた接続でサービス層を動かす。
+// 判定は本物の runDiagnosis に、同梱の規制データと市町村コード固定の読み込み口を渡して実行する（国土地理院へ接続しない）。
+// DIPS へは送信しない（ネットワーク呼び出しを持たない）。
+import { randomUUID } from "node:crypto";
+import pg from "pg";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import type { MemberRow, PilotRow } from "@soraban/db";
+import { INSPECTION_ITEMS } from "@/lib/ops-records";
+import { createTempDatabase, runCli, withClient, type TempDatabase } from "../../../../../packages/db/src/test-db-helpers";
+import { resolveTestDatabaseUrl } from "../../../../../packages/db/src/test-db-env";
+import { runRegulationCheckWith } from "../check-core";
+import { runDiagnosis } from "../diagnose-core";
+import { baselineProvider } from "../sprint11e-baseline";
+import * as field from "./field";
+import type { Judge } from "./judge";
+import { toDiagnosisRunInput } from "./plan-logic";
+import * as plans from "./plans";
+import * as rec from "./records";
+import * as reports from "./reports";
+import * as svc from "./service";
+import { OpsError, type OpsContext } from "./service";
+import type { OpsDb } from "./store";
+import * as today from "./today";
+
+const ADMIN_URL = resolveTestDatabaseUrl();
+/** サーバーの現在時刻（JST 2027-01-05 12:00）。 */
+const NOW = new Date("2027-01-05T03:00:00Z");
+const SRC = "mlit-emergency-airspace-qa";
+const LICENSE = "TEST-12345678";
+const PILOT_NAME = "秘匿 太郎";
+
+const judgeWith =
+  (muni: string | undefined): Judge =>
+  (input, now) =>
+    runDiagnosis(
+      toDiagnosisRunInput(input),
+      (loc, ctx, n) =>
+        runRegulationCheckWith(
+          { ...baselineProvider("31202"), reverseGeocode: async () => (muni ? { muniCode: muni } : {}) },
+          loc,
+          ctx,
+          n,
+        ),
+      now,
+    );
+
+const HQ = { latitude: 35.434238, longitude: 133.380508 };
+const ITEMS = Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal" }]));
+
+type Org = {
+  readonly id: string;
+  readonly manager: MemberRow;
+  readonly pilotMember: MemberRow;
+  readonly pilotMember2: MemberRow;
+  readonly viewer: MemberRow;
+  /** pilotMember に結び付いた操縦者。 */
+  readonly pilotLinked: PilotRow;
+  /** どの利用者にも結び付かない操縦者（氏名・技能証明書番号の秘匿の検査に使う）。 */
+  readonly pilotFree: PilotRow;
+  readonly aircraft: string;
+};
+
+describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）の DB", () => {
+  let db: TempDatabase;
+  let createdRole = false;
+  let owner: pg.Pool;
+  let app: pg.Pool;
+  let A: Org;
+  let B: Org;
+  let seq = 0;
+  /** 発行した SQL を数える・記録する口（アプリ用ロールの接続）。 */
+  const log: { sql: string[] } = { sql: [] };
+  const countingDb = (): OpsDb => ({
+    query: ((sql: string, params?: unknown[]) => {
+      log.sql.push(sql);
+      return app.query(sql, params);
+    }) as OpsDb["query"],
+    connect: (async () => {
+      const c = await app.connect();
+      const q = c.query.bind(c) as unknown as OpsDb["query"];
+      return {
+        query: ((sql: string, params?: unknown[]) => {
+          log.sql.push(sql);
+          return q(sql, params);
+        }) as OpsDb["query"],
+        release: () => c.release(),
+      };
+    }) as OpsDb["connect"],
+  });
+
+  const addVersion = async (orgId: string, entityType: string, data: object): Promise<string> => {
+    const id = randomUUID();
+    await owner.query(
+      `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind) values ($1, $2, $3, 'create', $4::jsonb, 'system')`,
+      [orgId, entityType, id, JSON.stringify(data)],
+    );
+    return id;
+  };
+  const addMember = async (orgId: string, role: MemberRow["role"], label: string): Promise<MemberRow> => {
+    const id = await addVersion(orgId, "member", {
+      email: `${label.toLowerCase()}@example.test`,
+      display_name: label,
+      role,
+      status: "active",
+      auth_provider: "test",
+      auth_user_id: label,
+    });
+    return (await owner.query<MemberRow>("select * from members where id = $1", [id])).rows[0]!;
+  };
+  const addPilot = async (orgId: string, fullName: string, memberId: string | null, expires: string | null = null): Promise<PilotRow> => {
+    const id = await addVersion(orgId, "pilot", {
+      full_name: fullName,
+      has_license: true,
+      license_class: "second",
+      license_number: LICENSE,
+      license_expires_on: expires,
+      member_id: memberId,
+    });
+    return (await owner.query<PilotRow>("select * from pilots where id = $1", [id])).rows[0]!;
+  };
+
+  const judge = judgeWith("31384");
+  const ctxOf = (member: MemberRow, over: Partial<OpsContext> = {}): OpsContext => ({
+    db: app as unknown as OpsDb,
+    member,
+    now: () => NOW,
+    judge,
+    env: {},
+    ...over,
+  });
+  const mgr = (o: Org = A, over: Partial<OpsContext> = {}) => ctxOf(o.manager, over);
+
+  const makeOrg = async (label: string, weightKg = 0.9, licenseExpires: string | null = null): Promise<Org> => {
+    const id = (await owner.query("insert into organizations (name) values ($1) returning id", [`組織 ${label}`])).rows[0].id as string;
+    const manager = await addMember(id, "manager", `${label}-mgr`);
+    const pilotMember = await addMember(id, "pilot", `${label}-pilot`);
+    const pilotMember2 = await addMember(id, "pilot", `${label}-pilot2`);
+    const viewer = await addMember(id, "viewer", `${label}-viewer`);
+    const pilotLinked = await addPilot(id, `${label} 一郎`, pilotMember.id, licenseExpires);
+    const pilotFree = await addPilot(id, `${PILOT_NAME}${label}`, null);
+    await addPilot(id, `${label} 三郎`, pilotMember2.id);
+    const aircraft = (
+      await svc.createAircraft(ctxOf(manager), {
+        registrationMark: `JU12C${(seq++).toString().padStart(4, "0")}`,
+        modelName: "Matrice 350 RTK",
+        manufacturer: "DJI",
+        serialNumber: `SN-${seq}`,
+        typeCertified: false,
+        initialFlightMinutes: 0,
+        maxTakeoffWeightKg: weightKg,
+      })
+    ).id;
+    return { id, manager, pilotMember, pilotMember2, viewer, pilotLinked, pilotFree, aircraft };
+  };
+
+  const expectOpsError = async (p: Promise<unknown>, status: number, code?: string) => {
+    const e = await p.then(
+      () => null,
+      (x: unknown) => x,
+    );
+    expect(e, "OpsError が投げられていない").toBeInstanceOf(OpsError);
+    expect((e as OpsError).status).toBe(status);
+    if (code) expect((e as OpsError).code).toBe(code);
+    return e as OpsError;
+  };
+  const count = async (table: string, where = "true", params: unknown[] = []): Promise<number> =>
+    Number((await owner.query(`select count(*)::int as n from ${table} where ${where}`, params)).rows[0].n);
+  const eventRows = async (planId: string) =>
+    (await owner.query("select * from flight_field_events where plan_id = $1 order by recorded_at, id", [planId])).rows;
+
+  /** 夜間飛行の計画（通報は要）。既定は今日 13:00〜14:00、操縦者は利用者に結び付かない操縦者。 */
+  const planInput = (o: Org, extra: Record<string, unknown> = {}) => ({
+    title: `現場の計画 ${++seq}`,
+    aircraftId: o.aircraft,
+    pilotId: o.pilotFree.id,
+    plannedStartAt: "2027-01-05T13:00",
+    durationMinutes: 60,
+    purpose: "空撮",
+    placeName: "フューチャーテック株式会社 本社",
+    ...HQ,
+    radiusM: 100,
+    maxAltitudeM: 50,
+    accessControl: true,
+    flags: ["method_night"],
+    ...extra,
+  });
+  const newPlan = async (o: Org = A, extra: Record<string, unknown> = {}, ctx?: OpsContext) =>
+    (await plans.createPlan(ctx ?? mgr(o), planInput(o, extra))).record;
+  /** 確認を依頼して確認した計画（確認済み）。 */
+  const approvedPlan = async (o: Org = A, extra: Record<string, unknown> = {}) => {
+    const p = await newPlan(o, extra);
+    const r = await plans.requestConfirmation(mgr(o), p.id, { expectedVersion: p.version });
+    return (await plans.confirmPlan(mgr(o), p.id, { decision: "approved", expectedVersion: r.version })).plan;
+  };
+  const cid = () => randomUUID();
+  const body = (kind: string, extra: Record<string, unknown> = {}) => ({ kind, clientEventId: cid(), occurredAt: "2027-01-05T12:00", ...extra });
+  const post = (o: Org, planId: string, b: Record<string, unknown>, ctx?: OpsContext) => field.recordFieldEvent(ctx ?? mgr(o), planId, b);
+  const checkBody = (item: string, extra: Record<string, unknown> = {}) =>
+    body("check", { item, ...(item === "emergency_airspace" ? { result: "not_designated", source: SRC } : {}), ...extra });
+  const flightInput = (o: Org, takeoffAt: string, landingAt: string, extra: Record<string, unknown> = {}) => ({
+    aircraftId: o.aircraft,
+    pilotId: o.pilotFree.id,
+    purpose: "空撮",
+    takeoffPlace: "米子市日吉津 本社",
+    landingPlace: "米子市日吉津 本社",
+    takeoffAt,
+    landingAt,
+    safetyIssue: false,
+    ...extra,
+  });
+  const inspect = (o: Org, at: string, extra: Record<string, unknown> = {}) =>
+    rec.createInspection(mgr(o), { aircraftId: o.aircraft, pilotId: o.pilotFree.id, inspectedAt: at, placeName: "本社", items: ITEMS, ...extra });
+  const reportNew = (o: Org, plan: { id: string; version: number }, reportedAt: string) =>
+    reports.createReport(mgr(o), plan.id, {
+      kind: "new",
+      expectedPlanVersion: plan.version,
+      manual: { reportedAt, dipsNumber: "FP-0001", confirmedDipsDone: true, confirmedMatchesLatest: true },
+      inputs: { flightPurposes: [1], assistantsNumber: 1, plannedMaxTime: 30, flightSpeed: 10, onsiteControlL3: "1", onsiteControlL35: "0", onsiteControl2: "1", mooring: "0" },
+    });
+
+  beforeAll(async () => {
+    createdRole = await withClient(ADMIN_URL!, async (c) => {
+      const exists = (await c.query("select 1 from pg_roles where rolname = 'soraban_app'")).rowCount === 1;
+      if (!exists) await c.query("create role soraban_app nologin");
+      return !exists;
+    });
+    db = await createTempDatabase(ADMIN_URL!);
+    const r = await runCli(["migrate"], { DATABASE_URL_UNPOOLED: db.url });
+    expect(r.code, r.stderr).toBe(0);
+    owner = new pg.Pool({ connectionString: db.url, max: 6 });
+    app = new pg.Pool({ connectionString: db.url, max: 10, options: "-c role=soraban_app" });
+    A = await makeOrg("A");
+    B = await makeOrg("B");
+  });
+
+  afterAll(async () => {
+    await app?.end();
+    await owner?.end();
+    await db?.drop();
+    if (createdRole) await withClient(ADMIN_URL!, (c) => c.query("drop role if exists soraban_app"));
+  });
+
+  // ---- 契約 1：テーブル・権限・トリガー・CHECK・外部キー ----------------------------------
+
+  let O: Org;
+  beforeEach(async () => {
+    O = await makeOrg(`o${++seq}`);
+  });
+
+  describe("1. 追記専用のテーブル", () => {
+    /** オーナーで 1 行を直接入れる（アプリを通さない。列の制約の検査用）。 */
+    const raw = async (planId: string, org: Org, cols: Record<string, unknown>, client: pg.Pool = owner) => {
+      const all: Record<string, unknown> = {
+        org_id: org.id,
+        plan_id: planId,
+        kind: "check",
+        item: "carry",
+        result: "done",
+        occurred_at: "2027-01-05T03:00:00Z",
+        client_event_id: cid(),
+        recorded_by_member_id: org.manager.id,
+        ...cols,
+      };
+      const keys = Object.keys(all);
+      const sql = `insert into flight_field_events (${keys.join(", ")}) values (${keys.map((_, i) => `$${i + 1}`).join(", ")}) returning *`;
+      return (await client.query(sql, keys.map((k) => (k === "gaps" && all[k] !== null ? JSON.stringify(all[k]) : all[k])))).rows[0];
+    };
+    const sqlState = async (p: Promise<unknown>): Promise<{ code: string; detail?: string; constraint?: string }> => {
+      const e = await p.then(
+        () => null,
+        (x: unknown) => x as { code: string; detail?: string; constraint?: string },
+      );
+      expect(e, "拒否されていない").not.toBeNull();
+      return e as { code: string; detail?: string; constraint?: string };
+    };
+
+    it("soraban_app は参照と追加だけ。更新・削除・TRUNCATE は権限エラー（42501）。オーナーロールでもトリガーが拒む（SB409 immutable）", async () => {
+      const p = await newPlan(O);
+      const row = await raw(p.id, O, {});
+      for (const [priv, want] of [["SELECT", true], ["INSERT", true], ["UPDATE", false], ["DELETE", false], ["TRUNCATE", false]] as const) {
+        const r = await owner.query("select has_table_privilege('soraban_app', 'flight_field_events', $1) as ok", [priv]);
+        expect(r.rows[0].ok, priv).toBe(want);
+      }
+      expect((await sqlState(app.query("update flight_field_events set note = 'x' where id = $1", [row.id]))).code).toBe("42501");
+      expect((await sqlState(app.query("delete from flight_field_events where id = $1", [row.id]))).code).toBe("42501");
+      expect((await sqlState(app.query("truncate flight_field_events"))).code).toBe("42501");
+      for (const stmt of ["update flight_field_events set note = 'x'", "delete from flight_field_events", "truncate flight_field_events"]) {
+        const e = await sqlState(owner.query(stmt));
+        expect(e.code, stmt).toBe("SB409");
+        expect(e.detail, stmt).toBe("immutable");
+      }
+      expect(await count("flight_field_events", "id = $1", [row.id])).toBe(1);
+    });
+
+    it("recorded_at・content_hash・snapshot_id・plan_version・記録者の写しは DB が決める（INSERT で偽の値を渡しても上書きされる）", async () => {
+      const p = await newPlan(O);
+      const row = await raw(p.id, O, {
+        recorded_at: "2000-01-01T00:00:00Z",
+        content_hash: "fake",
+        snapshot_id: randomUUID(),
+        plan_version: 99,
+        recorded_by_name: "偽の名前",
+        recorded_by_role: "viewer",
+      });
+      expect(new Date(row.recorded_at).getFullYear()).toBeGreaterThan(2020);
+      expect(row.content_hash).toMatch(/^[0-9a-f]{64}$/);
+      expect(row.content_hash).not.toBe("fake");
+      expect(row.snapshot_id).toBe(p.currentSnapshotId);
+      expect(row.plan_version).toBe(p.version);
+      expect(row.recorded_by_name).toBe(O.manager.display_name);
+      expect(row.recorded_by_role).toBe("manager");
+      // 再計算は SQL の中で行う（JS の Date はマイクロ秒を持てない）
+      const h = await owner.query(
+        `select flight_field_event_hash(e.id, e.org_id, e.plan_id, e.kind, e.item, e.result, e.source, e.target_event_id,
+                e.flight_record_id, e.inspection_id, e.report_id, e.occurred_at, e.snapshot_id, e.plan_version, e.gaps, e.note,
+                e.queued, e.client_event_id, e.recorded_by_member_id, e.recorded_by_name, e.recorded_by_role, e.recorded_at) as h
+           from flight_field_events e where e.id = $1`,
+        [row.id],
+      );
+      expect(h.rows[0].h).toBe(row.content_hash);
+    });
+
+    it("CHECK が種別ごとの必須の列を守る", async () => {
+      const p = await newPlan(O);
+      const t = await raw(p.id, O, { kind: "takeoff", item: null, result: null, gaps: [] });
+      const bad: [string, Record<string, unknown>][] = [
+        ["種別が不正", { kind: "dance" }],
+        ["check に項目がない", { item: null }],
+        ["check に結果がない", { result: null }],
+        ["緊急用務空域に情報源がない", { item: "emergency_airspace", result: "not_designated" }],
+        ["緊急用務空域の情報源が空白", { item: "emergency_airspace", result: "designated", source: "  " }],
+        ["緊急用務空域の結果が done", { item: "emergency_airspace", result: "done", source: SRC }],
+        ["携行品の結果が designated", { item: "carry", result: "designated" }],
+        ["項目が不正", { item: "other" }],
+        ["情報源が 101 文字", { item: "emergency_airspace", result: "designated", source: "あ".repeat(101) }],
+        ["離陸に gaps がない", { kind: "takeoff", item: null, result: null }],
+        ["check に gaps がある", { gaps: [] }],
+        ["gaps が配列でない", { kind: "takeoff", item: null, result: null, gaps: { a: 1 } }],
+        ["離陸に項目がある", { kind: "takeoff", gaps: [] }],
+        ["着陸に target がない", { kind: "landing", item: null, result: null }],
+        ["離陸に target がある", { kind: "takeoff", item: null, result: null, gaps: [], target_event_id: t.id }],
+        ["取り消すに target がない", { kind: "undo", item: null, result: null }],
+        ["日誌との結び付きに飛行記録がない", { kind: "journal_linked", item: null, result: null, target_event_id: t.id }],
+        ["日誌でないのに飛行記録がある", { flight_record_id: randomUUID() }],
+        ["携行品に inspection_id がある", { inspection_id: randomUUID() }],
+        ["携行品に report_id がある", { report_id: randomUUID() }],
+        ["時刻が分単位でない", { occurred_at: "2027-01-05T03:00:30Z" }],
+        ["メモが 301 文字", { note: "あ".repeat(301) }],
+      ];
+      for (const [label, cols] of bad) {
+        const e = await sqlState(raw(p.id, O, cols));
+        expect(e.code, label).toBe("23514");
+      }
+      // 通る組合せ
+      await raw(p.id, O, { item: "emergency_airspace", result: "designated", source: SRC });
+      await raw(p.id, O, { item: "inspection", result: "done" });
+      await raw(p.id, O, { note: "あ".repeat(300) });
+    });
+
+    it("別の計画・組織の行を指す target_event_id・flight_record_id・inspection_id・report_id を拒む。指す行の種別も検査する", async () => {
+      const p1 = await newPlan(O);
+      const p2 = await newPlan(O);
+      const pB = await newPlan(B);
+      const t1 = await raw(p1.id, O, { kind: "takeoff", item: null, result: null, gaps: [] });
+      const c1 = await raw(p1.id, O, {});
+      const tB = await raw(pB.id, B, { kind: "takeoff", item: null, result: null, gaps: [] }, owner);
+      const landing = (planId: string, org: Org, target: string) => raw(planId, org, { kind: "landing", item: null, result: null, target_event_id: target });
+      // 他の計画の離陸を指す着陸
+      expect(["23503", "SB404"]).toContain((await sqlState(landing(p2.id, O, t1.id))).code);
+      // 他の組織の離陸を指す着陸（同じ組織の計画から）
+      expect(["23503", "SB404"]).toContain((await sqlState(landing(p1.id, O, tB.id))).code);
+      // 存在しない行
+      expect(["23503", "SB404"]).toContain((await sqlState(landing(p1.id, O, randomUUID()))).code);
+      // 正しい着陸は通る
+      const l1 = await landing(p1.id, O, t1.id);
+      // 離陸でない行を指す着陸・日誌との結び付き
+      expect((await sqlState(landing(p1.id, O, c1.id))).detail).toBe("invalid_target");
+      expect((await sqlState(landing(p1.id, O, l1.id))).detail).toBe("invalid_target");
+      const fr = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:00", "2027-01-05T11:30", { flightPlanId: p1.id }));
+      const frOther = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:40", "2027-01-05T11:50", { flightPlanId: p2.id }));
+      const frB = await rec.createFlight(
+        mgr(B),
+        { ...flightInput(B, "2027-01-05T11:00", "2027-01-05T11:30"), flightPlanId: pB.id },
+      );
+      const journal = (planId: string, org: Org, target: string, record: string) =>
+        raw(planId, org, { kind: "journal_linked", item: null, result: null, target_event_id: target, flight_record_id: record });
+      expect((await sqlState(journal(p1.id, O, l1.id, fr.record.id))).detail).toBe("invalid_target");
+      // 他の計画の飛行記録・他の組織の飛行記録・計画なしの飛行記録
+      expect((await sqlState(journal(p1.id, O, t1.id, frOther.record.id))).code).toBe("23503");
+      expect((await sqlState(journal(p1.id, O, t1.id, frB.record.id))).code).toBe("23503");
+      const noPlan = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T09:00", "2027-01-05T09:30"));
+      expect((await sqlState(journal(p1.id, O, t1.id, noPlan.record.id))).code).toBe("23503");
+      // 正しい結び付きは通る
+      await journal(p1.id, O, t1.id, fr.record.id);
+      // 日常点検・通報の行
+      const insA = await inspect(O, "2027-01-05T10:00");
+      const insB = await rec.createInspection(mgr(B), { aircraftId: B.aircraft, pilotId: B.pilotFree.id, inspectedAt: "2027-01-05T10:00", placeName: "本社", items: ITEMS });
+      expect((await sqlState(raw(p1.id, O, { item: "inspection", inspection_id: insB.record.id }))).code).toBe("23503");
+      await raw(p1.id, O, { item: "inspection", inspection_id: insA.record.id });
+      expect((await sqlState(raw(p1.id, O, { item: "report_recheck", report_id: randomUUID() }))).code).toBe("23503");
+      // undo の対象
+      const u = (target: string) => raw(p1.id, O, { kind: "undo", item: null, result: null, target_event_id: target });
+      expect((await sqlState(u(randomUUID()))).code).toMatch(/23503|SB404/);
+      await u(c1.id);
+      expect((await sqlState(u(c1.id))).code, "二重の undo").toBe("23505");
+      const j = (await owner.query("select id from flight_field_events where plan_id = $1 and kind = 'journal_linked'", [p1.id])).rows[0].id;
+      expect((await sqlState(u(j))).detail, "journal_linked は取り消せない").toBe("invalid_target");
+    });
+
+    it("(org_id, client_event_id) は一意。計画・利用者が同じ組織にないと拒む（SB404）。取消した計画への check・takeoff は拒む（SB409 plan_cancelled）", async () => {
+      const p = await newPlan(O);
+      const id = cid();
+      await raw(p.id, O, { client_event_id: id });
+      expect((await sqlState(raw(p.id, O, { client_event_id: id }))).code).toBe("23505");
+      const pB = await newPlan(B);
+      // 組織 B の計画に組織 A の利用者の記録（org_id が計画と違う）
+      expect((await sqlState(raw(pB.id, A, {}))).code).toMatch(/SB404|23503/);
+      // 組織 A の計画に、組織 B の利用者を記録者にする
+      expect((await sqlState(raw(p.id, O, { recorded_by_member_id: B.manager.id }))).code).toBe("SB404");
+      // 取消した計画
+      const v = await newPlan(O);
+      const t = await raw(v.id, O, { kind: "takeoff", item: null, result: null, gaps: [] });
+      await plans.voidPlan(mgr(O), v.id, { expectedVersion: v.version, reason: "中止" });
+      expect((await sqlState(raw(v.id, O, {}))).detail).toBe("plan_cancelled");
+      expect((await sqlState(raw(v.id, O, { kind: "takeoff", item: null, result: null, gaps: [] }))).detail).toBe("plan_cancelled");
+      // 開いている離陸の着陸・取り消すは記録できる
+      const l = await raw(v.id, O, { kind: "landing", item: null, result: null, target_event_id: t.id });
+      await raw(v.id, O, { kind: "undo", item: null, result: null, target_event_id: l.id });
+    });
+  });
+
+  // ---- 契約 3：POST /api/ops/plans/[id]/field-events ----------------------------------
+
+  describe("3. 現場の記録（field-events）", () => {
+    it("離陸は未了事項があっても 201 で記録され、応答と離陸の行に gaps の写しが残る。gaps・snapshotId・planVersion はサーバーが決める", async () => {
+      const p = await newPlan(O);
+      const fake = { snapshotId: randomUUID(), planVersion: 99, gaps: [], recordedAt: "2000-01-01T00:00:00Z", contentHash: "x", recordedByName: "偽" };
+      const r = await post(O, p.id, body("takeoff", fake));
+      expect(r.created).toBe(true);
+      const e = r.event;
+      expect(e.kind).toBe("takeoff");
+      expect(e.gaps!.map((g) => [g.item, g.state])).toEqual([
+        ["inspection", "none"],
+        ["emergency_airspace", "none"],
+        ["report", "none"],
+        ["confirmation", "draft"],
+        ["carry", "none"],
+      ]);
+      expect(e.gaps![0]!.label).toBe("日常点検（記録なし）");
+      expect(e.snapshotId).toBe(p.currentSnapshotId);
+      expect(e.planVersion).toBe(p.version);
+      expect(e.recordedByName).toBe(O.manager.display_name);
+      expect(e.contentHash).not.toBe("x");
+      const rows = await eventRows(p.id);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].gaps).toEqual(e.gaps!.map((g) => ({ item: g.item, state: g.state })));
+      expect(rows[0].snapshot_id).toBe(p.currentSnapshotId);
+      expect(rows[0].queued).toBe(false);
+    });
+
+    it("すべて済ませてから離陸すると、未了事項は空", async () => {
+      const p = await approvedPlan(O);
+      await inspect(O, "2027-01-05T10:00");
+      await reportNew(O, p, "2027-01-05T11:00");
+      await post(O, p.id, checkBody("emergency_airspace"));
+      await post(O, p.id, checkBody("carry"));
+      const r = await post(O, p.id, body("takeoff"));
+      expect(r.event.gaps).toEqual([]);
+      expect((await eventRows(p.id)).at(-1).gaps).toEqual([]);
+    });
+
+    it("未了事項：異常あり・指定されている・通報の記録が離陸より後・判定が古い・前の版への確認", async () => {
+      const p = await approvedPlan(O);
+      await inspect(O, "2027-01-05T10:00", { items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
+      await post(O, p.id, checkBody("emergency_airspace", { result: "designated" }));
+      await post(O, p.id, checkBody("carry"));
+      // 通報を 11:58 に記録し、離陸は 11:55（記録が離陸より後）
+      await reportNew(O, p, "2027-01-05T11:58");
+      const t = await post(O, p.id, body("takeoff", { occurredAt: "2027-01-05T11:55", queued: true }));
+      const states = Object.fromEntries(t.event.gaps!.map((g) => [g.item, g.state]));
+      expect(states["inspection"]).toBe("abnormal");
+      expect(states["emergency_airspace"]).toBe("designated");
+      expect(states["report"]).toBe("after_takeoff");
+      expect(states["confirmation"]).toBeUndefined();
+      expect(t.created).toBe(true);
+    });
+
+    it("飛行中の離陸があるときの離陸は 409 already_in_flight。開いた離陸がない着陸は 409 no_open_flight。着陸すれば次の離陸ができる", async () => {
+      const p = await newPlan(O);
+      await expectOpsError(post(O, p.id, body("landing")), 409, "no_open_flight");
+      const t = await post(O, p.id, body("takeoff"));
+      await expectOpsError(post(O, p.id, body("takeoff")), 409, "already_in_flight");
+      const l = await post(O, p.id, body("landing", { occurredAt: "2027-01-05T12:03" }));
+      expect(l.event.targetEventId).toBe(t.event.id);
+      await expectOpsError(post(O, p.id, body("landing")), 409, "no_open_flight");
+      const t2 = await post(O, p.id, body("takeoff", { occurredAt: "2027-01-05T12:04" }));
+      expect(t2.created).toBe(true);
+      expect(await count("flight_field_events", "plan_id = $1 and kind = 'takeoff'", [p.id])).toBe(2);
+    });
+
+    it("並行の離陸（異なる識別子）は、ちょうど 1 件だけ記録される（計画ごとの排他）", async () => {
+      const p = await newPlan(O);
+      const results = await Promise.allSettled([1, 2, 3, 4].map(() => post(O, p.id, body("takeoff"))));
+      const ok = results.filter((r) => r.status === "fulfilled");
+      const ng = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+      expect(ok).toHaveLength(1);
+      expect(ng).toHaveLength(3);
+      for (const r of ng) expect((r.reason as OpsError).code).toBe("already_in_flight");
+      expect(await count("flight_field_events", "plan_id = $1 and kind = 'takeoff'", [p.id])).toBe(1);
+    });
+
+    it("中止した計画：新しい確認・離陸は 409 plan_cancelled。開いている離陸の着陸と、取り消すは記録できる", async () => {
+      const p = await newPlan(O);
+      const c = await post(O, p.id, checkBody("carry"));
+      const t = await post(O, p.id, body("takeoff"));
+      await plans.voidPlan(mgr(O), p.id, { expectedVersion: p.version, reason: "天候のため中止" });
+      await expectOpsError(post(O, p.id, checkBody("carry")), 409, "plan_cancelled");
+      await expectOpsError(post(O, p.id, body("takeoff")), 409, "plan_cancelled");
+      const l = await post(O, p.id, body("landing", { occurredAt: "2027-01-05T12:02" }));
+      expect(l.created).toBe(true);
+      const u = await post(O, p.id, body("undo", { targetEventId: c.event.id }));
+      expect(u.event.targetEventId).toBe(c.event.id);
+      // 着陸を取り消す → 離陸を取り消す（どちらも中止後に記録できる）
+      await post(O, p.id, body("undo", { targetEventId: l.event.id }));
+      await post(O, p.id, body("undo", { targetEventId: t.event.id }));
+    });
+
+    it("同じ clientEventId の再送：逐次も並行も新しい行を作らず、既存を 200 で返す。内容が違えば 409 request_conflict", async () => {
+      const p = await newPlan(O);
+      const b = body("takeoff");
+      const first = await post(O, p.id, b);
+      expect(first.created).toBe(true);
+      const again = await post(O, p.id, { ...b, queued: true });
+      expect(again.created).toBe(false);
+      expect(again.event.id).toBe(first.event.id);
+      expect(again.event.duplicate).toBe(true);
+      expect(await count("flight_field_events", "plan_id = $1", [p.id])).toBe(1);
+      // 内容が違う（時刻・種別・別の利用者・別の計画）
+      await expectOpsError(post(O, p.id, { ...b, occurredAt: "2027-01-05T12:01" }), 409, "request_conflict");
+      await expectOpsError(post(O, p.id, { ...b, kind: "check", item: "carry" }), 409, "request_conflict");
+      const p2 = await newPlan(O);
+      await expectOpsError(post(O, p2.id, b), 409, "request_conflict");
+      // 並行の 2 リクエスト
+      const q = await newPlan(O);
+      const c = checkBody("carry");
+      const both = await Promise.all([post(O, q.id, c), post(O, q.id, c), post(O, q.id, c)]);
+      expect(both.filter((x) => x.created)).toHaveLength(1);
+      expect(new Set(both.map((x) => x.event.id)).size).toBe(1);
+      expect(await count("flight_field_events", "plan_id = $1", [q.id])).toBe(1);
+      // 応答を落とした再試行（古い送信待ちの再送は、時刻の検査より先に既存を返す）
+      const late = ctxOf(O.manager, { now: () => new Date(NOW.getTime() + 100 * 3600_000) });
+      const replay = await post(O, q.id, c, late);
+      expect(replay.created).toBe(false);
+    });
+
+    it("時刻の検査：未来 5 分超は 400 future_time、その場の送信で ±5 分超は 400 clock_skew、送信待ちは 72 時間まで（超えると 400 too_old）", async () => {
+      const p = await newPlan(O);
+      const rows = async () => count("flight_field_events", "plan_id = $1", [p.id]);
+      const e1 = await expectOpsError(post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05T12:06" })), 400, "future_time");
+      expect(e1.fieldCodes).toEqual({ occurredAt: "future_time" });
+      await expectOpsError(post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05T12:06", queued: true })), 400, "future_time");
+      const e2 = await expectOpsError(post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05T11:54" })), 400, "clock_skew");
+      expect(e2.fieldErrors!["occurredAt"]).toBe("端末の時刻がずれています。時刻の設定（自動）を確かめてください。");
+      expect(await rows()).toBe(0);
+      await post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05T11:55" }));
+      await post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05T12:05" }));
+      // 送信待ち
+      await post(O, p.id, checkBody("report_recheck", { occurredAt: "2027-01-03T12:00", queued: true }));
+      await post(O, p.id, checkBody("report_recheck", { occurredAt: "2027-01-02T12:00", queued: true }));
+      await expectOpsError(post(O, p.id, checkBody("report_recheck", { occurredAt: "2027-01-02T11:59", queued: true })), 400, "too_old");
+      // 送信待ちでなければ 1 時間前でも clock_skew
+      await expectOpsError(post(O, p.id, checkBody("report_recheck", { occurredAt: "2027-01-05T11:00" })), 400, "clock_skew");
+      // 形が違う
+      await expectOpsError(post(O, p.id, checkBody("carry", { occurredAt: "2027-01-05 12:00" })), 400, "invalid_input");
+      expect(await rows()).toBe(4);
+    });
+
+    it("緊急用務空域は情報源と結果が必須（400）。「指定されている」を選んでも記録は残る。日常点検の確認の行は作れない", async () => {
+      const p = await newPlan(O);
+      const e = await expectOpsError(post(O, p.id, body("check", { item: "emergency_airspace" })), 400, "invalid_input");
+      expect(e.fieldCodes).toEqual({ result: "required", source: "required" });
+      await expectOpsError(post(O, p.id, body("check", { item: "emergency_airspace", result: "designated", source: "自由入力" })), 400, "invalid_input");
+      const d = await post(O, p.id, checkBody("emergency_airspace", { result: "designated" }));
+      expect(d.created).toBe(true);
+      expect(d.event).toMatchObject({ item: "emergency_airspace", result: "designated", source: SRC });
+      const e2 = await expectOpsError(post(O, p.id, body("check", { item: "inspection" })), 400, "invalid_input");
+      expect(e2.fieldCodes).toEqual({ item: "derived" });
+      expect(await count("flight_field_events", "plan_id = $1", [p.id])).toBe(1);
+    });
+
+    it("取り消すの規則：着陸がある離陸は 409 landing_exists、日誌済みの着陸は 409 journal_exists、二重は already_undone、journal_linked は取り消せない", async () => {
+      const p = await newPlan(O);
+      const t = await post(O, p.id, body("takeoff"));
+      const l = await post(O, p.id, body("landing", { occurredAt: "2027-01-05T12:02" }));
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: t.event.id })), 409, "landing_exists");
+      // 日誌に結び付ける
+      const f = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T12:00", "2027-01-05T12:02", { takeoffEventId: t.event.id }));
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: l.event.id })), 409, "journal_exists");
+      const j = (await eventRows(p.id)).find((r) => r.kind === "journal_linked");
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: j.id })), 409, "not_undoable");
+      // 飛行記録を取消すと日誌待ちに戻り、着陸を取り消せる
+      await rec.voidFlight(mgr(O), f.record.id, { expectedVersion: 1, reason: "誤り" });
+      const u = await post(O, p.id, body("undo", { targetEventId: l.event.id }));
+      expect(u.created).toBe(true);
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: l.event.id })), 409, "already_undone");
+      // 取り消された着陸のあとは再び飛行中。離陸は取り消せる
+      await expectOpsError(post(O, p.id, body("takeoff")), 409, "already_in_flight");
+      await post(O, p.id, body("undo", { targetEventId: t.event.id }));
+      const t2 = await post(O, p.id, body("takeoff"));
+      expect(t2.created).toBe(true);
+      // 存在しない行
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: randomUUID() })), 409, "invalid_target");
+    });
+
+    it("端末の識別子で指す（送信待ちの着陸・取り消す）：targetClientEventId で離陸・確認を指せる", async () => {
+      const p = await newPlan(O);
+      const tb = body("takeoff");
+      await post(O, p.id, tb);
+      const l = await post(O, p.id, body("landing", { occurredAt: "2027-01-05T12:03", targetClientEventId: tb["clientEventId"], queued: true }));
+      expect(l.event.targetEventId).toBeTruthy();
+      const cb = checkBody("carry");
+      const c = await post(O, p.id, cb);
+      const u = await post(O, p.id, body("undo", { targetClientEventId: cb["clientEventId"] }));
+      expect(u.event.targetEventId).toBe(c.event.id);
+    });
+
+    it("認可：他の組織の計画は 404、閲覧者は 403、操縦者は自分が操縦者の計画だけ、運航管理者は全員分", async () => {
+      const own = await newPlan(O, { pilotId: O.pilotLinked.id });
+      const other = await newPlan(O);
+      const pilotCtx = ctxOf(O.pilotMember);
+      expect((await post(O, own.id, body("takeoff"), pilotCtx)).created).toBe(true);
+      await expectOpsError(post(O, other.id, body("takeoff"), pilotCtx), 403, "forbidden");
+      // 操縦者の行に結び付いていない操縦者役割
+      await expectOpsError(post(O, own.id, body("takeoff"), ctxOf(O.pilotMember2)), 403, "forbidden");
+      await expectOpsError(post(O, own.id, body("takeoff"), ctxOf(O.viewer)), 403, "forbidden");
+      await expectOpsError(post(O, own.id, body("takeoff"), ctxOf(B.manager)), 404, "not_found");
+      await expectOpsError(field.getFieldView(ctxOf(B.manager), own.id), 404, "not_found");
+      await expectOpsError(field.listFieldEvents(ctxOf(B.manager), own.id), 404, "not_found");
+      expect((await post(O, other.id, body("takeoff"))).created).toBe(true);
+      // 閲覧は全役割
+      for (const m of [O.viewer, O.pilotMember, O.pilotMember2, O.manager]) {
+        const v = await field.getFieldView(ctxOf(m), other.id);
+        expect(v.plan.id).toBe(other.id);
+      }
+      expect((await field.getFieldView(ctxOf(O.viewer), other.id)).canRecord).toBe(false);
+      expect((await field.getFieldView(ctxOf(O.pilotMember), own.id)).canRecord).toBe(true);
+      expect((await field.getFieldView(ctxOf(O.pilotMember), other.id)).canRecord).toBe(false);
+      // 本文の値：不正な本文
+      await expectOpsError(field.recordFieldEvent(mgr(O), own.id, []), 400, "invalid_body");
+      await expectOpsError(field.recordFieldEvent(mgr(O), "not-a-uuid", body("takeoff")), 404, "not_found");
+    });
+
+    it("行に技能証明書番号・操縦者の氏名が入らない（応答にも）", async () => {
+      const p = await newPlan(O);
+      const t = await post(O, p.id, body("takeoff", { note: "確認" }));
+      await post(O, p.id, checkBody("emergency_airspace"));
+      const rows = await eventRows(p.id);
+      const text = JSON.stringify(rows) + JSON.stringify(t.event);
+      expect(text).not.toContain(LICENSE);
+      expect(text).not.toContain(PILOT_NAME);
+      // テーブルに氏名・番号の列がない
+      const cols = (await owner.query("select column_name from information_schema.columns where table_name = 'flight_field_events'")).rows.map((r) => r.column_name as string);
+      expect(cols.some((c) => /license|pilot_name|full_name/.test(c))).toBe(false);
+    });
+
+    it("現場モードの状態：確認項目・飛行の組・未了事項の予告・通報の状況・同日の計画", async () => {
+      const p = await newPlan(O, { title: "状態の確認" });
+      const sibling = await newPlan(O, { plannedStartAt: "2027-01-05T16:00" });
+      let v = await field.getFieldView(mgr(O), p.id);
+      expect(v.items.map((i) => [i.item, i.stateLabel])).toEqual([
+        ["inspection", "未"],
+        ["emergency_airspace", "未"],
+        ["report_recheck", "未"],
+        ["carry", "未"],
+      ]);
+      expect(v.report).toMatchObject({ requirementKind: "required", statusCode: "no_record", canRecheck: false });
+      expect(v.report.warning).toContain("通報の記録がありません");
+      expect(v.takeoffPreview.length).toBeGreaterThan(0);
+      expect(v.sameDayPlans.map((x) => x.id)).toEqual(expect.arrayContaining([p.id, sibling.id]));
+      expect(v.sameDayPlans.find((x) => x.id === p.id)!.isCurrent).toBe(true);
+      expect(v.emergencySources.map((s) => s.id)).toEqual([SRC]);
+      expect(v.today).toBe("2027-01-05");
+      expect(v.serverNowJst).toBe("2027-01-05T12:00");
+      // 日常点検は実際の点検の記録から導出する
+      await inspect(O, "2027-01-05T09:30", { items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
+      v = await field.getFieldView(mgr(O), p.id);
+      expect(v.items[0]).toMatchObject({ done: true, stateLabel: "異常あり", abnormal: true, time: "09:30" });
+      expect(v.items[0]!.warning).toContain("飛行を止めて不具合を確認");
+      // 緊急用務空域：指定されている
+      const e = await post(O, p.id, checkBody("emergency_airspace", { result: "designated" }));
+      v = await field.getFieldView(mgr(O), p.id);
+      expect(v.items[1]).toMatchObject({ done: true, stateLabel: "済", designated: true, eventId: e.event.id, undoable: true, sourceTitle: expect.stringContaining("緊急用務空域") });
+      expect(v.items[1]!.warning).toContain("飛行できません");
+      // 離陸 → 飛行中
+      const t = await post(O, p.id, body("takeoff"));
+      v = await field.getFieldView(mgr(O), p.id);
+      expect(v.openFlightEventId).toBe(t.event.id);
+      expect(v.flights[0]).toMatchObject({ phase: "in_flight", phaseLabel: "飛行中", takeoffTime: "12:00" });
+      // stateInput から端末で同じ状態を導出できる（個人情報を含まない）
+      expect(JSON.stringify(v.stateInput)).not.toContain(LICENSE);
+      expect(v.stateInput.day).toBe("2027-01-05");
+    });
+
+    it("通報の再掲の文言（推奨の計画なら「通報の記録を必須としません」と出し、未了事項に数えない。要・要確認なら出さない）", async () => {
+      const O = await makeOrg("rec", 0.5);
+      // 100g 以上で特定飛行に当たらない計画（推奨）か、判定不能で要確認になる。種別に応じて検査する
+      const p = await newPlan(O, { flags: [], accessControl: undefined, maxAltitudeM: 30 }, mgr(O));
+      const v = await field.getFieldView(mgr(O), p.id);
+      if (v.report.requirementKind === "recommended") {
+        expect(v.report.notRequiredNote).toBe("この飛行は通報の記録を必須としません（推奨）。");
+        const t = await post(O, p.id, body("takeoff"), mgr(O));
+        expect(t.event.gaps!.map((g) => g.item)).not.toContain("report");
+      } else {
+        expect(["required", "confirm"]).toContain(v.report.requirementKind);
+        expect(v.report.notRequiredNote).toBeNull();
+      }
+      expect(JSON.stringify(v)).not.toMatch(/通報不要|通報は不要|通報の必要はありません|通報しなくて/);
+    });
+  });
+
+  // ---- 契約 4：日誌への引き継ぎ ----------------------------------------------------------
+
+  describe("4. POST /api/ops/flights の takeoffEventId", () => {
+    const landed = async (o: Org = O, p?: Awaited<ReturnType<typeof newPlan>>) => {
+      const plan = p ?? (await newPlan(o));
+      const t = await post(o, plan.id, body("takeoff", { occurredAt: "2027-01-05T11:58" }));
+      const l = await post(o, plan.id, body("landing", { occurredAt: "2027-01-05T12:02" }));
+      return { plan, t: t.event, l: l.event };
+    };
+
+    it("飛行記録の作成と journal_linked の追記が同じトランザクションでできる。利用者が直した時刻は飛行記録に、離着陸の行は元の時刻のまま", async () => {
+      const { plan, t } = await landed();
+      const before = { v: await count("record_versions"), r: await count("flight_records") };
+      const f = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:50", "2027-01-05T12:10", { takeoffEventId: t.id }));
+      expect(f.created).toBe(true);
+      expect(f.record).toMatchObject({ flightPlanId: plan.id, takeoffAt: "2027-01-05T11:50", landingAt: "2027-01-05T12:10", takeoffEventId: t.id });
+      expect(f.record.snapshotId).toBe(plan.currentSnapshotId);
+      expect(await count("record_versions")).toBe(before.v + 1);
+      expect(await count("flight_records")).toBe(before.r + 1);
+      const links = (await eventRows(plan.id)).filter((r) => r.kind === "journal_linked");
+      expect(links).toHaveLength(1);
+      expect(links[0]).toMatchObject({ flight_record_id: f.record.id, target_event_id: t.id, plan_id: plan.id });
+      // 離着陸の行は元の時刻のまま
+      const ev = await owner.query("select ops_timestamptz_to_jst_minute(occurred_at) as at, kind from flight_field_events where plan_id = $1 and kind in ('takeoff','landing') order by occurred_at", [plan.id]);
+      expect(ev.rows.map((r) => r.at)).toEqual(["2027-01-05T11:58", "2027-01-05T12:02"]);
+      // 現場の状態は日誌済み
+      const v = await field.getFieldView(mgr(O), plan.id);
+      expect(v.flights[0]).toMatchObject({ phase: "journaled", flightRecordId: f.record.id });
+      expect(v.pendingJournalTakeoffEventIds).toEqual([]);
+      // 計画の画面の記録に並ぶ（計画 → スナップショット → 証跡 ID への辿り）
+      const detail = await plans.getPlan(mgr(O), plan.id);
+      expect(detail.flights.map((x) => x.id)).toEqual([f.record.id]);
+      expect(detail.flights[0]!.takeoffGaps!.length).toBeGreaterThan(0);
+      expect(detail.flights[0]!.snapshotId).toBe(plan.currentSnapshotId);
+      // 離陸時の未了事項の写しが飛行記録の詳細に出る
+      const got = await rec.getFlight(mgr(O), f.record.id);
+      expect(got.takeoffGaps).toEqual((await eventRows(plan.id))[0].gaps.map((g: { item: string; state: string }) => expect.objectContaining(g)));
+      expect(got.takeoffEventId).toBe(t.id);
+    });
+
+    it("片方が失敗すれば両方残らない（journal_linked の追記が失敗すると、飛行記録の版も残らない）", async () => {
+      const { plan, t } = await landed();
+      await owner.query(`create function g1_fail_journal() returns trigger language plpgsql as $$ begin raise exception 'forced failure' using errcode = 'P0001'; end $$`);
+      await owner.query("create trigger g1_fail_journal before insert on flight_field_events for each row when (new.kind = 'journal_linked') execute function g1_fail_journal()");
+      const before = { v: await count("record_versions"), r: await count("flight_records") };
+      try {
+        await expect(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }))).rejects.toBeTruthy();
+      } finally {
+        await owner.query("drop trigger g1_fail_journal on flight_field_events");
+        await owner.query("drop function g1_fail_journal()");
+      }
+      expect(await count("record_versions")).toBe(before.v);
+      expect(await count("flight_records")).toBe(before.r);
+      expect((await eventRows(plan.id)).filter((r) => r.kind === "journal_linked")).toHaveLength(0);
+      // その後は正常に保存できる
+      expect((await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }))).created).toBe(true);
+    });
+
+    it("着陸していない離陸・取り消された離陸・他の計画の離陸・他の組織の離陸は 400。すでに日誌済みの離陸は 409 already_journaled", async () => {
+      const p = await newPlan(O);
+      const open = await post(O, p.id, body("takeoff"));
+      const e1 = await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: open.event.id })), 400, "invalid_input");
+      expect(e1.fieldCodes).toEqual({ takeoffEventId: "no_landing" });
+      const { t: undoneT } = await landed();
+      const l = (await eventRows(undoneT.planId)).find((r) => r.kind === "landing");
+      await post(O, undoneT.planId, body("undo", { targetEventId: l.id }));
+      await post(O, undoneT.planId, body("undo", { targetEventId: undoneT.id }));
+      const e2 = await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: undoneT.id })), 400, "invalid_input");
+      expect(e2.fieldCodes).toEqual({ takeoffEventId: "invalid_target" });
+      // 他の計画：flightPlanId が離陸の計画と違う
+      const { t: tx, plan: planX } = await landed();
+      const other = await newPlan(O);
+      const e3 = await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: tx.id, flightPlanId: other.id })), 400, "invalid_input");
+      expect(e3.fieldCodes).toEqual({ flightPlanId: "plan_mismatch" });
+      // 他の組織の離陸
+      const { t: tb } = await landed(B);
+      await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: tb.id })), 400, "invalid_input");
+      // 離陸でない行
+      await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: l.id })), 400, "invalid_input");
+      await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: "xyz" })), 400, "invalid_input");
+      // 日誌済み
+      await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: tx.id }));
+      await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: tx.id })), 409, "already_journaled");
+      expect(await count("flight_records", "flight_plan_id = $1", [planX.id])).toBe(1);
+    });
+
+    it("並行する 2 回の保存は 1 件だけ（もう一方は already_journaled）", async () => {
+      const { plan, t } = await landed();
+      const rs = await Promise.allSettled([1, 2, 3].map(() => rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }))));
+      expect(rs.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+      for (const r of rs.filter((x): x is PromiseRejectedResult => x.status === "rejected")) expect((r.reason as OpsError).code).toBe("already_journaled");
+      expect(await count("flight_records", "flight_plan_id = $1", [plan.id])).toBe(1);
+      expect((await eventRows(plan.id)).filter((r) => r.kind === "journal_linked")).toHaveLength(1);
+    });
+
+    it("同じ clientRequestId の再送は 1 件のまま（200・既存の記録）", async () => {
+      const { plan, t } = await landed();
+      const crid = randomUUID();
+      const first = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id, clientRequestId: crid }));
+      const again = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id, clientRequestId: crid }));
+      expect(first.created).toBe(true);
+      expect(again.created).toBe(false);
+      expect(again.record.id).toBe(first.record.id);
+      expect(await count("flight_records", "flight_plan_id = $1", [plan.id])).toBe(1);
+      expect((await eventRows(plan.id)).filter((r) => r.kind === "journal_linked")).toHaveLength(1);
+    });
+
+    it("飛行記録を取消すと、その飛行は「日誌待ち」に戻り、もう一度日誌に結び付けられる", async () => {
+      const { plan, t } = await landed();
+      const f = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }));
+      expect((await field.getFieldView(mgr(O), plan.id)).flights[0]!.phase).toBe("journaled");
+      await rec.voidFlight(mgr(O), f.record.id, { expectedVersion: 1, reason: "誤り" });
+      const v = await field.getFieldView(mgr(O), plan.id);
+      expect(v.flights[0]!.phase).toBe("journal_pending");
+      expect(v.pendingJournalTakeoffEventIds).toEqual([t.id]);
+      const f2 = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }));
+      expect(f2.created).toBe(true);
+      expect((await field.getFieldView(mgr(O), plan.id)).flights[0]).toMatchObject({ phase: "journaled", flightRecordId: f2.record.id });
+    });
+
+    it("中止した計画でも、すでに離陸した飛行の日誌は残せる", async () => {
+      const { plan, t } = await landed();
+      await plans.voidPlan(mgr(O), plan.id, { expectedVersion: plan.version, reason: "中止" });
+      const f = await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { takeoffEventId: t.id }));
+      expect(f.created).toBe(true);
+      // 従来の flightPlanId だけの保存は、中止した計画では 409 のまま
+      await expectOpsError(rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02", { flightPlanId: plan.id })), 409, "plan_cancelled");
+    });
+
+    it("操縦者は自分の飛行の分だけ。計画の予定時刻が飛行記録の時刻に入る経路がない（時刻が無ければ 400。入力どおりに保存）", async () => {
+      const own = await newPlan(O, { pilotId: O.pilotLinked.id });
+      // flightPlanId だけで時刻が無い保存は、予定時刻で補わず 400
+      const noTimes = await expectOpsError(
+        rec.createFlight(mgr(O), { aircraftId: O.aircraft, pilotId: O.pilotLinked.id, purpose: "空撮", takeoffPlace: "本社", landingPlace: "本社", safetyIssue: false, flightPlanId: own.id }),
+        400,
+        "invalid_input",
+      );
+      expect(Object.keys(noTimes.fieldErrors ?? {})).toEqual(expect.arrayContaining(["takeoffAt", "landingAt"]));
+      // 計画の予定（13:00〜14:00）と違う時刻は、入力どおりに保存される
+      const f = await rec.createFlight(mgr(O), { ...flightInput(O, "2027-01-05T09:00", "2027-01-05T09:20"), pilotId: O.pilotLinked.id, flightPlanId: own.id });
+      expect(f.record.takeoffAt).toBe("2027-01-05T09:00");
+      expect(f.record.landingAt).toBe("2027-01-05T09:20");
+      // takeoffEventId がない保存では、現場の行は増えない
+      expect((await eventRows(own.id)).filter((r) => r.kind === "journal_linked")).toHaveLength(0);
+      // 他人の分は 403
+      const t = await post(O, (await newPlan(O, { pilotId: O.pilotLinked.id })).id, body("takeoff"));
+      await post(O, t.event.planId, body("landing", { occurredAt: "2027-01-05T12:02" }));
+      await expectOpsError(rec.createFlight(ctxOf(O.pilotMember2), { ...flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02"), pilotId: O.pilotLinked.id, takeoffEventId: t.event.id }), 403, "forbidden");
+      expect((await rec.createFlight(ctxOf(O.pilotMember), { ...flightInput(O, "2027-01-05T11:58", "2027-01-05T12:02"), pilotId: O.pilotLinked.id, takeoffEventId: t.event.id })).created).toBe(true);
+    });
+  });
+
+  // ---- 契約 5：食い違い -------------------------------------------------------------------
+
+  describe("5. 日誌の食い違い（保存は止めない）", () => {
+    /** 夜の時刻（19:00）。離陸が現在より後の飛行は記録できないため、計画の時間帯のあとに記録する。 */
+    const evening = () => ctxOf(O.manager, { now: () => new Date("2027-01-05T10:00:00Z") });
+    it("時間帯の外：警告と FlightDto.mismatches（一覧・詳細）に出る。保存は 201。既存の differs_from_plan は変わらない", async () => {
+      const p = await approvedPlan(O);
+      await reportNew(O, p, "2027-01-05T10:00");
+      // 計画 13:00〜14:00。離陸が 12 分早く、着陸が 8 分遅い
+      const f = await rec.createFlight(evening(), flightInput(O, "2027-01-05T12:48", "2027-01-05T14:08", { flightPlanId: p.id }));
+      expect(f.created).toBe(true);
+      expect(f.warnings).toEqual(expect.arrayContaining(["outside_plan_window", "differs_from_plan"]));
+      expect(f.warnings).not.toContain("report_missing");
+      expect(f.record.mismatches).toEqual([
+        { code: "outside_plan_window", label: "計画の時間帯の外で飛行しています（離陸が 12 分早い／着陸が 8 分遅い）。", earlyMinutes: 12, lateMinutes: 8 },
+      ]);
+      expect((await rec.getFlight(evening(), f.record.id)).mismatches).toHaveLength(1);
+      expect((await rec.listFlights(evening(), {})).find((x) => x.id === f.record.id)!.mismatches).toHaveLength(1);
+      // 時間帯の中なら出ない（先の記録は取消して、機体の飛行時間が重ならないようにする）
+      await rec.voidFlight(evening(), f.record.id, { expectedVersion: 1, reason: "確認用" });
+      const g = await rec.createFlight(evening(), flightInput(O, "2027-01-05T13:05", "2027-01-05T13:40", { flightPlanId: p.id }));
+      expect(g.record.mismatches).toEqual([]);
+      expect(g.warnings).not.toContain("outside_plan_window");
+      expect(g.warnings).not.toContain("differs_from_plan");
+      // 訂正の応答にも警告が出る
+      const upd = await rec.updateFlight(evening(), g.record.id, { expectedVersion: 1, reason: "訂正", takeoffAt: "2027-01-05T12:30" });
+      expect(upd.warnings).toEqual(expect.arrayContaining(["outside_plan_window", "differs_from_plan"]));
+    });
+
+    it("通報の記録：離陸の時点に無ければ report_missing、離陸より後なら report_after_takeoff も。離陸より前の通報があれば出ない", async () => {
+      const p = await approvedPlan(O);
+      const none = await rec.createFlight(evening(), flightInput(O, "2027-01-05T13:10", "2027-01-05T13:40", { flightPlanId: p.id }));
+      expect(none.created).toBe(true);
+      expect(none.warnings).toContain("report_missing");
+      expect(none.record.mismatches.map((m) => m.code)).toEqual(["report_missing"]);
+      expect(none.record.mismatches[0]!.label).toBe("特定飛行ですが、離陸の時点で DIPS の通報の記録がありません。");
+      // 通報を 11:00 に記録（離陸 13:10 より前）
+      await reportNew(O, p, "2027-01-05T11:00");
+      const before = await rec.getFlight(evening(), none.record.id);
+      expect(before.mismatches).toEqual([]);
+      // 離陸より後の通報
+      const q = await approvedPlan(O);
+      const early = await rec.createFlight(evening(), flightInput(O, "2027-01-05T09:00", "2027-01-05T09:30", { flightPlanId: q.id }));
+      await reportNew(O, q, "2027-01-05T11:30");
+      const after = await rec.getFlight(evening(), early.record.id);
+      expect(after.mismatches.map((m) => m.code)).toEqual(expect.arrayContaining(["report_missing", "report_after_takeoff"]));
+      expect(after.mismatches.find((m) => m.code === "report_after_takeoff")!.label).toBe("通報の記録が離陸より後です。事前の通報として数えません。");
+    });
+
+    it("計画なしの飛行記録には食い違いが出ない（判定の根拠が紐づいていません、は従来どおり）", async () => {
+      const f = await rec.createFlight(evening(), flightInput(O, "2027-01-05T09:00", "2027-01-05T09:30", { specificFlightTypes: ["night"] }));
+      expect(f.record.mismatches).toEqual([]);
+      expect(f.record.judgementLink).toBe("missing");
+      expect(f.warnings.filter((w) => ["outside_plan_window", "report_missing", "report_after_takeoff"].includes(w))).toEqual([]);
+    });
+
+    it("一覧の食い違いの導出に必要なクエリ数が、飛行記録の件数に比例しない（5 件と 50 件で同じ）", async () => {
+      const make = async (n: number) => {
+        const O = await makeOrg(`cnt${n}`);
+        const p = await approvedPlan(O);
+        const base = Date.parse("2027-01-03T00:00:00+09:00");
+        for (let i = 0; i < n; i++) {
+          // 30 分おきに 20 分の飛行（機体の飛行時間が重ならない）。計画（1/5 13:00〜）の時間帯の外
+          const at = (ms: number) => new Date(ms + 9 * 3600_000).toISOString().slice(0, 16);
+          await rec.createFlight(ctxOf(O.manager, { now: () => new Date("2027-01-05T10:00:00Z") }), flightInput(O, at(base + i * 30 * 60_000), at(base + (i * 30 + 20) * 60_000), { flightPlanId: p.id }));
+        }
+        return O;
+      };
+      const O5 = await make(5);
+      const O50 = await make(50);
+      const run = async (O: Org) => {
+        log.sql = [];
+        const list = await rec.listFlights({ db: countingDb(), member: O.manager, now: () => NOW }, {});
+        return { n: log.sql.length, list };
+      };
+      const r5 = await run(O5);
+      const r50 = await run(O50);
+      expect(r5.list).toHaveLength(5);
+      expect(r50.list).toHaveLength(50);
+      expect(r50.n).toBe(r5.n);
+      expect(r50.n).toBeLessThanOrEqual(6);
+      for (const f of r50.list) expect(f.mismatches.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ---- 契約 6：今日 --------------------------------------------------------------------
+
+  describe("6. GET /api/ops/today", () => {
+    const ids = (t: today.TodayDto) => t.nextActions.map((a) => a.id);
+    const all = (c: OpsContext) => today.getToday(c, { limit: 100 });
+
+    it("今日のカード・残りの計画・次にやること（保存された状態は読まず、記録を足すだけで変わる）", async () => {
+      const O = await makeOrg("today1");
+      const empty = await today.getToday(mgr(O));
+      expect(empty.card).toBeNull();
+      expect(empty.rest).toEqual([]);
+      expect(empty.empty!.message).toBe("予定されている飛行計画はありません。");
+      expect(empty.empty!.actions.map((a) => a.href)).toEqual(["/ops/plans/new", "/"]);
+
+      const p1 = await approvedPlan(O, { title: "午後の飛行", plannedStartAt: "2027-01-05T13:00" });
+      const p2 = await newPlan(O, { title: "夕方の飛行", plannedStartAt: "2027-01-05T16:00" });
+      let t = await all(mgr(O));
+      expect(t.today).toBe("2027-01-05");
+      expect(t.card).toMatchObject({
+        planId: p1.id,
+        reason: "today",
+        title: "午後の飛行",
+        timeLabel: "13:00〜14:00",
+        verdictLevel: "needs_procedure",
+        primary: { kind: "field", label: "現場モードを開く", href: `/ops/plans/${p1.id}/field` },
+        confirmation: { state: "approved" },
+        report: { requirementKind: "required", statusCode: "no_record" },
+      });
+      expect(t.card!.registrationMark).toMatch(/^JU12C/);
+      expect(t.card!.verdictLabel).toBeTruthy();
+      expect(t.rest.map((r) => r.planId)).toEqual([p2.id]);
+      // 次にやること：通報・日常点検・緊急用務空域（飛行当日）が出る
+      expect(ids(t)).toEqual(expect.arrayContaining(["report", "do_inspection", "check_emergency_airspace", "request_confirmation"]));
+      expect(t.nextActions.every((a, i, arr) => i === 0 || arr[i - 1]!.tier <= a.tier)).toBe(true);
+      for (const a of t.nextActions) expect(a.label).toMatch(/する$|直す$/);
+      // 記録を足すだけで一覧が変わる
+      await inspect(O, "2027-01-05T09:00");
+      await post(O, p1.id, checkBody("emergency_airspace"), mgr(O));
+      t = await today.getToday(mgr(O));
+      expect(t.nextActions.filter((a) => a.planId === p1.id).map((a) => a.id)).not.toContain("do_inspection");
+      expect(t.nextActions.filter((a) => a.planId === p1.id).map((a) => a.id)).not.toContain("check_emergency_airspace");
+      // 離陸 → 飛行中：着陸を記録する（tier 1）が先頭、カードは飛行中
+      await post(O, p1.id, body("takeoff"), mgr(O));
+      t = await today.getToday(mgr(O));
+      expect(t.card).toMatchObject({ planId: p1.id, reason: "in_flight", badge: { code: "in_flight" } });
+      expect(t.nextActions[0]).toMatchObject({ id: "record_landing", tier: 1, planId: p1.id, href: `/ops/plans/${p1.id}/field#flight`, canAct: true });
+      // 着陸 → 日誌待ち：日誌を記入する
+      await post(O, p1.id, body("landing", { occurredAt: "2027-01-05T12:03" }), mgr(O));
+      t = await today.getToday(mgr(O));
+      const w = t.nextActions.find((a) => a.id === "write_journal")!;
+      expect(w).toMatchObject({ tier: 3, planId: p1.id });
+      expect(w.href).toMatch(new RegExp(`^/ops/flights/new\\?planId=${p1.id}&takeoffEventId=`));
+      expect(t.card!.reason).not.toBe("in_flight");
+      // 日誌済みになれば消える
+      const takeoffId = w.href.split("takeoffEventId=")[1]!;
+      await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T12:00", "2027-01-05T12:03", { takeoffEventId: takeoffId }));
+      t = await today.getToday(mgr(O));
+      expect(ids(t)).not.toContain("write_journal");
+    });
+
+    it("今日の計画が無ければ次の計画、中止した計画は対象外、操縦者役割は自分の飛行を先に", async () => {
+      const O = await makeOrg("today2");
+      const far = await newPlan(O, { plannedStartAt: "2027-01-08T09:00" });
+      const near = await newPlan(O, { plannedStartAt: "2027-01-06T09:00" });
+      const cancelled = await newPlan(O, { plannedStartAt: "2027-01-05T18:00" });
+      await plans.voidPlan(mgr(O), cancelled.id, { expectedVersion: cancelled.version, reason: "中止" });
+      let t = await today.getToday(mgr(O));
+      expect(t.card).toMatchObject({ planId: near.id, reason: "next", primary: { kind: "plan", label: "計画を開く" } });
+      expect(t.rest).toEqual([]);
+      expect(t.card!.reasonLabel).toBe("次の飛行");
+      expect(far.id).not.toBe(t.card!.planId);
+      // 操縦者役割：自分が操縦者の飛行を先に
+      const other = await newPlan(O, { plannedStartAt: "2027-01-05T12:30" });
+      const mine = await newPlan(O, { plannedStartAt: "2027-01-05T15:00", pilotId: O.pilotLinked.id });
+      t = await today.getToday(ctxOf(O.pilotMember));
+      expect(t.card!.planId).toBe(mine.id);
+      expect(t.rest.map((r) => r.planId)).toEqual([other.id]);
+      t = await today.getToday(mgr(O));
+      expect(t.card!.planId).toBe(other.id);
+    });
+
+    it("認可：全役割が閲覧でき、canAct は役割と自分の飛行で決まる。他の組織の計画・記録は出ない", async () => {
+      const O = await makeOrg("today3");
+      const Z = await makeOrg("today3b");
+      const own = await newPlan(O, { plannedStartAt: "2027-01-05T13:00", pilotId: O.pilotLinked.id });
+      const other = await newPlan(O, { plannedStartAt: "2027-01-05T15:00" });
+      await newPlan(Z, { plannedStartAt: "2027-01-05T13:00" });
+      const act = (t: today.TodayDto, planId: string, id: string) => t.nextActions.find((a) => a.planId === planId && a.id === id)!;
+      const asManager = await all(mgr(O));
+      const asPilot = await all(ctxOf(O.pilotMember));
+      const asPilot2 = await all(ctxOf(O.pilotMember2));
+      const asViewer = await all(ctxOf(O.viewer));
+      for (const t of [asManager, asPilot, asPilot2, asViewer]) {
+        expect(t.nextActions.every((a) => a.planId === null || [own.id, other.id].includes(a.planId))).toBe(true);
+        expect(t.card).not.toBeNull();
+      }
+      expect(act(asManager, own.id, "do_inspection").canAct).toBe(true);
+      expect(act(asManager, other.id, "do_inspection").canAct).toBe(true);
+      expect(act(asPilot, own.id, "do_inspection").canAct).toBe(true);
+      expect(act(asPilot, other.id, "do_inspection").canAct).toBe(false);
+      expect(act(asPilot2, own.id, "check_emergency_airspace").canAct).toBe(false);
+      expect(act(asViewer, own.id, "check_emergency_airspace").canAct).toBe(false);
+      expect(act(asViewer, own.id, "request_confirmation").canAct).toBe(false);
+      expect(act(asPilot, own.id, "request_confirmation").canAct).toBe(true);
+      // 他の組織の計画は 404（現場モードの状態でも）
+      await expectOpsError(field.getFieldView(mgr(Z), own.id), 404);
+    });
+
+    it("日誌の食い違いを確認する（直近 3 日間だけ）と、技能証明を更新する（60 日前・期限切れ）", async () => {
+      const O = await makeOrg("today4", 0.9, "2027-02-20");
+      const p = await approvedPlan(O, { plannedStartAt: "2027-01-05T13:00", pilotId: O.pilotLinked.id });
+      const f = await rec.createFlight(mgr(O), { ...flightInput(O, "2027-01-04T10:00", "2027-01-04T10:30"), pilotId: O.pilotLinked.id, flightPlanId: p.id });
+      let t = await today.getToday(mgr(O));
+      const m = t.nextActions.find((a) => a.id === "review_journal_mismatch")!;
+      expect(m).toMatchObject({ tier: 4, href: `/ops/flights/${f.record.id}`, canAct: true });
+      const lic = t.nextActions.find((a) => a.id === "renew_license")!;
+      expect(lic).toMatchObject({ tier: 5, href: `/ops/pilots/${O.pilotLinked.id}` });
+      expect(lic.reason).toContain("2027-02-20");
+      // 時間で消える：4 日後には出ない
+      t = await today.getToday(ctxOf(O.manager, { now: () => new Date(NOW.getTime() + 3.5 * 24 * 3600_000) }));
+      expect(ids(t)).not.toContain("review_journal_mismatch");
+      // 期限切れは tier 3
+      const E = await makeOrg("today5", 0.9, "2027-01-04");
+      await newPlan(E, { plannedStartAt: "2027-01-05T13:00", pilotId: E.pilotLinked.id });
+      const te = await today.getToday(mgr(E));
+      expect(te.nextActions.find((a) => a.id === "renew_license")).toMatchObject({ tier: 3 });
+      // 61 日後（2027-03-07）は出ない
+      const F = await makeOrg("today6", 0.9, "2027-03-07");
+      await newPlan(F, { plannedStartAt: "2027-01-05T13:00", pilotId: F.pilotLinked.id });
+      expect(ids(await today.getToday(mgr(F)))).not.toContain("renew_license");
+    });
+
+    it("予定終了から 60 分を過ぎても飛行記録も離陸の行も無い計画に、日誌を記入する（計画を中止する旨を添える）", async () => {
+      const O = await makeOrg("today7");
+      const p = await newPlan(O, { plannedStartAt: "2027-01-05T09:00", durationMinutes: 60 });
+      const at = (hm: string) => ctxOf(O.manager, { now: () => new Date(`2027-01-05T${hm}:00+09:00`) });
+      expect(ids(await today.getToday(at("10:59")))).not.toContain("write_journal");
+      const t = await today.getToday(at("11:00"));
+      const w = t.nextActions.find((a) => a.id === "write_journal")!;
+      expect(w).toMatchObject({ planId: p.id, tier: 3, href: `/ops/flights/new?planId=${p.id}` });
+      expect(w.reason).toContain("計画を中止");
+      // 飛行記録が入れば消える
+      await rec.createFlight(mgr(O), { ...flightInput(O, "2027-01-05T09:10", "2027-01-05T09:40"), flightPlanId: p.id });
+      expect(ids(await today.getToday(at("11:30")))).not.toContain("write_journal");
+    });
+
+    it("result 全体を読まない（判定スナップショットの result は一部の項目だけを取る）。クエリ数は計画の件数に比例しない", async () => {
+      const queries = async (n: number) => {
+        const O = await makeOrg(`q${n}`);
+        for (let i = 0; i < n; i++) await newPlan(O, { plannedStartAt: `2027-01-0${5 + (i % 3)}T${String(8 + (i % 10)).padStart(2, "0")}:00` });
+        log.sql = [];
+        await today.getToday({ db: countingDb(), member: O.manager, now: () => NOW, env: {} });
+        return [...log.sql];
+      };
+      const q2 = await queries(2);
+      const q9 = await queries(9);
+      expect(q9.length).toBe(q2.length);
+      for (const sql of q9) {
+        expect(sql).not.toMatch(/\bs\.result(?!\s*->)/);
+        expect(sql).not.toMatch(/select\s+s\.\*/i);
+      }
+    });
+
+    it("中止した計画でも飛行中の離陸があればカードに出て、着陸を記録するが出る。「通報不要」などの禁止語が出ない", async () => {
+      const O = await makeOrg("today8");
+      const p = await newPlan(O);
+      await post(O, p.id, body("takeoff"), mgr(O));
+      await plans.voidPlan(mgr(O), p.id, { expectedVersion: p.version, reason: "天候" });
+      const t = await today.getToday(mgr(O));
+      expect(t.card).toMatchObject({ planId: p.id, reason: "in_flight" });
+      expect(t.nextActions[0]).toMatchObject({ id: "record_landing", tier: 1 });
+      expect(JSON.stringify(t)).not.toMatch(/通報不要|通報は不要|通報の必要はありません|通報しなくて|特許|出願/);
+    });
+  });
+});

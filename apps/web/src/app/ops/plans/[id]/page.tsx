@@ -104,6 +104,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           stale={plan.freshness.stale}
         />
         <NextActionsList actions={plan.nextActions} />
+        <div className="flex flex-wrap gap-3">
+          <Link prefetch={false} href={`/ops/plans/${plan.id}/field`} className={buttonOutlineBrandClass} data-testid="plan-field-link">
+            現場モードを開く
+          </Link>
+        </div>
         {updatable ? (
           <div className="flex flex-wrap gap-3">
             <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={buttonOutlineBrandClass} data-testid="plan-edit-link">

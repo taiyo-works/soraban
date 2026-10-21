@@ -6,6 +6,8 @@ import { Badge, buttonGhostClass, buttonOutlineBrandClass, DetailList, LicenseNu
 import { formatHm } from "@/lib/ops-time";
 import { SPECIFIC_FLIGHT_TYPE_LABELS } from "@/lib/ops-records";
 import { JudgementMissing } from "@/components/ops/plan-ui";
+import { MismatchBadges, TakeoffGaps } from "@/components/ops/journal-ui";
+import { fieldHref } from "@/lib/ops-field";
 import { getFlight, JUDGEMENT_LINK_MISSING_LABEL, listFlightVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
@@ -128,6 +130,24 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
         "計画なし（特定飛行の形態なし）"
       ),
     ],
+    ...(f.mismatches.length > 0
+      ? ([["計画との食い違い", <MismatchBadges key="mm" mismatches={f.mismatches} />]] as [string, React.ReactNode][])
+      : []),
+    ...(f.takeoffEventId
+      ? ([
+          [
+            "離陸時の未了事項（現場モードの記録）",
+            <span key="tg" className="flex flex-col items-start gap-2" data-testid="flight-takeoff-gaps-box">
+              <TakeoffGaps gaps={f.takeoffGaps} />
+              {f.flightPlanId ? (
+                <a href={fieldHref(f.flightPlanId)} className={buttonOutlineBrandClass} data-testid="flight-field-link">
+                  現場モードを開く
+                </a>
+              ) : null}
+            </span>,
+          ],
+        ] as [string, React.ReactNode][])
+      : []),
     ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
   ];
   return (

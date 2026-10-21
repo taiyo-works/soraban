@@ -170,6 +170,14 @@ jobs:
             test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_reports', '$p')")" = "f"
           done
           test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_function_privilege('soraban_app', 'flight_report_effective_id(uuid)', 'EXECUTE')")" = "f"
+      # Sprint 12c：現場の事実の記録（離陸・着陸・確認・取り消す・日誌との結び付き）は追加だけ（追記専用）。
+      - name: soraban_app の権限（現場の事実の記録は追加だけ）
+        run: |
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'SELECT')")" = "t"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'INSERT')")" = "t"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'UPDATE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'DELETE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'TRUNCATE')")" = "f"
       - name: REQUIRE_DB_TESTS=1 で TEST_DATABASE_URL が無いと失敗することを確認
         run: |
           if env -u TEST_DATABASE_URL pnpm test:db; then

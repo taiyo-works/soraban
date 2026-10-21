@@ -448,6 +448,43 @@ export type PlanProcedureRecordRow = {
   readonly content_hash: string;
 };
 
+// ---- 現場の事実の記録（Sprint 12c。0014） ----
+
+/** flight_field_events.kind。check＝飛行前の確認／takeoff＝離陸／landing＝着陸／undo＝取り消す／journal_linked＝日誌との結び付き。 */
+export type FieldEventKindDb = "check" | "takeoff" | "landing" | "undo" | "journal_linked";
+/** flight_field_events.item（check のとき）。inspection＝日常点検／emergency_airspace＝緊急用務空域／report_recheck＝通報済みの再確認／carry＝携行品。 */
+export type FieldCheckItemDb = "inspection" | "emergency_airspace" | "report_recheck" | "carry";
+export type FieldCheckResultDb = "done" | "not_designated" | "designated";
+/** takeoff の gaps（離陸の時点の未了事項の写し）の 1 要素。 */
+export type FieldGapDb = { readonly item: string; readonly state: string };
+
+export type FlightFieldEventRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly kind: FieldEventKindDb;
+  readonly item: FieldCheckItemDb | null;
+  readonly result: FieldCheckResultDb | null;
+  readonly source: string | null;
+  readonly target_event_id: string | null;
+  readonly flight_record_id: string | null;
+  readonly inspection_id: string | null;
+  readonly report_id: string | null;
+  /** timestamptz（1 分単位）。事実の時刻。 */
+  readonly occurred_at: string;
+  readonly snapshot_id: string;
+  readonly plan_version: number;
+  readonly gaps: readonly FieldGapDb[] | null;
+  readonly note: string | null;
+  readonly queued: boolean;
+  readonly client_event_id: string;
+  readonly recorded_by_member_id: string;
+  readonly recorded_by_name: string;
+  readonly recorded_by_role: MemberRoleDb;
+  readonly recorded_at: string;
+  readonly content_hash: string;
+};
+
 export type RecordVersionRow = {
   readonly id: string;
   readonly org_id: string;
@@ -817,6 +854,32 @@ export const PLAN_PROCEDURE_RECORD_COLUMNS = columns<PlanProcedureRecordRow>()([
   "content_hash",
 ]);
 
+export const FLIGHT_FIELD_EVENT_COLUMNS = columns<FlightFieldEventRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "kind",
+  "item",
+  "result",
+  "source",
+  "target_event_id",
+  "flight_record_id",
+  "inspection_id",
+  "report_id",
+  "occurred_at",
+  "snapshot_id",
+  "plan_version",
+  "gaps",
+  "note",
+  "queued",
+  "client_event_id",
+  "recorded_by_member_id",
+  "recorded_by_name",
+  "recorded_by_role",
+  "recorded_at",
+  "content_hash",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -836,9 +899,10 @@ export const TABLE_COLUMNS = {
   flight_reports: FLIGHT_REPORT_COLUMNS,
   flight_report_attempts: FLIGHT_REPORT_ATTEMPT_COLUMNS,
   plan_procedure_records: PLAN_PROCEDURE_RECORD_COLUMNS,
+  flight_field_events: FLIGHT_FIELD_EVENT_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10・11・12a・12b）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+/** 運航管理の表（Sprint 10・11・12a・12b・12c）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
 export const OPS_TABLES = [
   "organizations",
   "members",
@@ -854,4 +918,5 @@ export const OPS_TABLES = [
   "flight_reports",
   "flight_report_attempts",
   "plan_procedure_records",
+  "flight_field_events",
 ] as const;

@@ -266,7 +266,16 @@ const planDto = (
   confirmations: readonly PlanConfirmationRow[],
   mine: PilotRow | null,
   extras: PlanReportExtras = emptyExtras(),
-): PlanDto => {
+): PlanDto => planDtoParts(ctx, r, confirmations, mine, extras).dto;
+
+/** 計画の DTO と、「次にやること」の全件（12b の導出）。今日の画面は全件が要る（DTO には先頭の 1 件と件数だけ）。 */
+const planDtoParts = (
+  ctx: OpsContext,
+  r: PlanWithJoins,
+  confirmations: readonly PlanConfirmationRow[],
+  mine: PilotRow | null,
+  extras: PlanReportExtras = emptyExtras(),
+): { readonly dto: PlanDto; readonly nextActions: readonly NextAction[] } => {
   const start = asDate(r.planned_start_at);
   const confirmationDtos = confirmations.map(confirmationDto);
   const state = confirmationState(
@@ -301,7 +310,7 @@ const planDto = (
     extras,
     now: nowOf(ctx),
   });
-  return {
+  const dto: PlanDto = {
     id: r.id,
     title: r.title,
     aircraftId: r.aircraft_id,
@@ -357,6 +366,7 @@ const planDto = (
       nowOf(ctx),
     ),
   };
+  return { dto, nextActions: summary.nextActions };
 };
 
 /** 詳細の追加分：次にやることの全件・通報時からの変更点・手続きの記録。 */
@@ -423,6 +433,20 @@ export const listPlans = async (ctx: OpsContext, filter: PlanListFilter = {}): P
   const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
   const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id)));
   return filter.state ? dtos.filter((d) => d.state === filter.state) : dtos;
+};
+
+/** 計画の行のまとまりの DTO と次にやることの全件（確認・通報の行は件数に依らずまとめて引く）。今日の画面が使う。 */
+export const loadPlanSummaries = async (
+  ctx: OpsContext,
+  rows: readonly PlanWithJoins[],
+  mine: PilotRow | null,
+): Promise<{ readonly row: PlanWithJoins; readonly dto: PlanDto; readonly nextActions: readonly NextAction[]; readonly extras: PlanReportExtras }[]> => {
+  const by = await withConfirmations(ctx, rows);
+  const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
+  return rows.map((r) => {
+    const ex = extras.get(r.id) ?? emptyExtras();
+    return { row: r, extras: ex, ...planDtoParts(ctx, r, by.get(r.id) ?? [], mine, ex) };
+  });
 };
 
 export const loadPlan = async (ctx: OpsContext, id: string): Promise<PlanWithJoins> => {
