@@ -597,8 +597,8 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     // 未ログイン：リンクもボタンもない
     await page.goto("/");
     await expect(page.getByTestId("site-ops-note")).toBeVisible();
-    await page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok()).catch(() => undefined);
-    await expect(page.getByTestId("verdict-level")).toBeVisible();
+    // 応答を待つ waitForResponse は、goto の後に張ると応答が先に届いた場合に待ち続ける（CI で起きた）。画面に結論が出るまで待つ。
+    await expect(page.getByTestId("verdict-level")).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId("home-ops-link")).toHaveCount(0);
     await expect(page.getByTestId("create-plan-from-verdict")).toHaveCount(0);
 
