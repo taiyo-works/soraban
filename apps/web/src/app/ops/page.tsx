@@ -42,22 +42,27 @@ export default async function OpsHome() {
       <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} />
 
       {canEnter || canPlan ? (
-        <nav aria-label="記録の入力" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {canPlan ? (
-            <Link href="/ops/plans/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-plan">
-              飛行計画を作る
-            </Link>
-          ) : null}
-          {canEnter ? (
-            <>
-              <Link href="/ops/flights/new" prefetch={false} className={buttonFieldClass} data-testid="ops-enter-flight">
-                飛行記録を入力
+        <nav aria-label="記録の入力" className="flex flex-col gap-3 border-t border-rule pt-5">
+          <p className="eyebrow" aria-hidden>
+            記録を入力
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {canPlan ? (
+              <Link href="/ops/plans/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-plan">
+                飛行計画を作る
               </Link>
-              <Link href="/ops/inspections/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
-                日常点検を入力
-              </Link>
-            </>
-          ) : null}
+            ) : null}
+            {canEnter ? (
+              <>
+                <Link href="/ops/flights/new" prefetch={false} className={buttonFieldClass} data-testid="ops-enter-flight">
+                  飛行記録を入力
+                </Link>
+                <Link href="/ops/inspections/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="ops-enter-inspection">
+                  日常点検を入力
+                </Link>
+              </>
+            ) : null}
+          </div>
         </nav>
       ) : null}
       <p className="max-w-xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="today-disclaimer">

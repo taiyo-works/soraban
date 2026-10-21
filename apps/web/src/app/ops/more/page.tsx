@@ -26,22 +26,28 @@ export default async function OpsMorePage() {
                 href={m.href}
                 prefetch={false}
                 data-testid={`more-link-${m.id}`}
-                className="flex min-h-14 w-full flex-col gap-1.5 bg-paper px-4 py-4 transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft"
+                className="flex min-h-16 w-full items-center gap-3 bg-paper px-4 py-4 transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-700"
               >
-                <span className="font-display text-lg text-ink">{m.title}</span>
-                <span className="text-xs leading-relaxed text-ink-soft">{m.body}</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <span className="font-display text-xl text-ink">{m.title}</span>
+                  <span className="text-xs leading-relaxed text-ink-soft">{m.body}</span>
+                </span>
+                <span aria-hidden className="text-lg text-ink-mute">
+                  →
+                </span>
               </Link>
             </li>
           ))}
         </ul>
       </nav>
-      <section className="flex flex-col gap-3 border-t border-rule-soft pt-4" aria-label="ログイン中の利用者">
-        <p className="text-sm text-ink" data-testid="more-me">
-          <span data-testid="more-me-name">{me.member.displayName}</span>
-          <span className="text-ink-mute">（{ROLE_LABELS[role]}）</span>
+      <section className="flex flex-col gap-3 border-t-2 border-ink-mute pt-5" aria-label="ログイン中の利用者">
+        <h2 className="eyebrow">ログイン中</h2>
+        <p className="text-base text-ink" data-testid="more-me">
+          <span className="font-medium" data-testid="more-me-name">{me.member.displayName}</span>
+          <span className="text-ink-soft">（{ROLE_LABELS[role]}）</span>
         </p>
         <p className="max-w-xl border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft">{ROLE_DESCRIPTIONS[role]}</p>
-        <span className="break-all text-xs text-ink-mute">{me.member.email}</span>
+        <span className="break-all font-mono text-xs text-ink-soft">{me.member.email}</span>
         <SignOutButton provider={provider} memberId={me.member.id} />
       </section>
     </main>

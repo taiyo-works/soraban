@@ -18,6 +18,19 @@ const TABS: readonly (readonly [Tab, string])[] = [
   ["inspections", "日常点検"],
 ];
 
+/** 種別の札：飛行記録は藍の塗り（▶）、日常点検は枠だけ（✓）。色に頼らず、記号と文字で見分ける。 */
+function KindTag({ kind }: { readonly kind: "flight" | "inspection" }) {
+  return kind === "flight" ? (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-sharp border-2 border-brand-700 bg-brand-700 px-2 py-px text-xs font-bold leading-5 text-paper">
+      <span aria-hidden>▶</span>飛行記録
+    </span>
+  ) : (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-sharp border-2 border-ink-mute bg-paper px-2 py-px text-xs font-bold leading-5 text-ink">
+      <span aria-hidden>✓</span>日常点検
+    </span>
+  );
+}
+
 type Row =
   | { readonly kind: "flight"; readonly at: string; readonly f: FlightDto }
   | { readonly kind: "inspection"; readonly at: string; readonly i: InspectionDto };
@@ -54,7 +67,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
       ) : (
         <Note>{recordCreateDenied(me)}</Note>
       )}
-      <nav aria-label="表示する記録" className="inline-flex self-start overflow-hidden rounded-sharp border border-rule" data-testid="journal-tabs">
+      <nav aria-label="表示する記録" className="grid grid-cols-3 overflow-hidden rounded-sharp border-2 border-brand-700 sm:inline-grid sm:self-start" data-testid="journal-tabs">
         {TABS.map(([key, label]) => (
           <Link
             key={key}
@@ -62,7 +75,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
             prefetch={false}
             aria-current={tab === key ? "page" : undefined}
             data-testid={`journal-tab-${key}`}
-            className={`inline-flex min-h-11 items-center gap-1 border-l border-rule px-4 text-sm first:border-l-0 ${tab === key ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"}`}
+            className={`inline-flex min-h-12 items-center justify-center gap-1.5 whitespace-nowrap border-l-2 border-brand-700 px-3 text-sm first:border-l-0 sm:px-6 ${tab === key ? "bg-brand-700 font-bold text-paper" : "bg-paper text-brand-700 hover:bg-brand-50"}`}
           >
             {tab === key ? <span aria-hidden>●</span> : null}
             {label}
@@ -81,14 +94,12 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           {rows.map((r) =>
             r.kind === "flight" ? (
               <li key={`f-${r.f.id}`} data-testid="journal-row" data-kind="flight">
-                <Link prefetch={false} href={`/ops/flights/${r.f.id}`} className="flex min-h-14 flex-col gap-1.5 px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
-                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <Badge tone="brand">
-                      <span aria-hidden>▶ </span>飛行記録
-                    </Badge>
+                <Link prefetch={false} href={`/ops/flights/${r.f.id}`} className="flex min-h-14 flex-col gap-2 border-l-4 border-brand-700 px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <KindTag kind="flight" />
                     {r.f.voided ? <Badge tone="red">取消済み</Badge> : null}
-                    <span className="font-mono tnum text-ink">{r.f.flightDate}</span>
-                    <span className="font-mono text-ink">
+                    <span className="font-mono text-base tnum text-ink">{r.f.flightDate}</span>
+                    <span className="font-mono text-base text-ink">
                       {r.f.takeoffAtJst.slice(11)}–{r.f.landingAtJst}
                     </span>
                     <span className="font-mono tnum text-ink-soft">{formatHm(r.f.flightMinutes)}</span>
@@ -101,13 +112,11 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
               </li>
             ) : (
               <li key={`i-${r.i.id}`} data-testid="journal-row" data-kind="inspection">
-                <Link prefetch={false} href={`/ops/inspections/${r.i.id}`} className="flex min-h-14 flex-col gap-1.5 px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
-                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <Badge tone="neutral">
-                      <span aria-hidden>✓ </span>日常点検
-                    </Badge>
+                <Link prefetch={false} href={`/ops/inspections/${r.i.id}`} className="flex min-h-14 flex-col gap-2 border-l-4 border-ink-mute px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <KindTag kind="inspection" />
                     {r.i.voided ? <Badge tone="red">取消済み</Badge> : null}
-                    <span className="font-mono tnum text-ink">{r.i.inspectedAtJst}</span>
+                    <span className="font-mono text-base tnum text-ink">{r.i.inspectedAtJst}</span>
                     <span className="text-ink-soft">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
                     {r.i.hasAbnormal ? (
                       <Badge tone="red">

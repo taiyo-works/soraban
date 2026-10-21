@@ -9,7 +9,9 @@ import { flushOutbox, planIdsWithOutbox } from "./field-outbox";
 import { logoutGuard } from "@/lib/ops-outbox";
 import {
   buttonDangerClass,
+  buttonFieldClass,
   buttonGhostClass,
+  buttonOutlineBrandClass,
   buttonPrimaryClass,
   MEMBER_INVITE_NOTICE_TARGET,
   memberNoticeTarget,
@@ -914,21 +916,37 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
         ログアウト
       </button>
       {warning ? (
-        <div role="alert" className="flex flex-col gap-3 rounded-sharp border border-signal-amber bg-signal-amber-soft px-3 py-3 text-sm text-ink" data-testid="signout-warning">
-          <p>
-            <span aria-hidden>！ </span>
-            {warning}
-            {sendFailed ? "。送れませんでした。通信を確かめてください。" : ""}
+        <div role="alert" className="flex flex-col gap-4 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft px-4 py-4 text-base text-ink" data-testid="signout-warning">
+          <p className="flex gap-2 font-medium leading-relaxed">
+            <span aria-hidden className="font-bold">！</span>
+            <span>
+              {warning}
+              {sendFailed ? "。送れませんでした。通信を確かめてください。" : ""}
+            </span>
           </p>
-          <div className="flex flex-wrap gap-3">
-            <button type="button" className={buttonClass} onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
+          {/* 3 択：安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く */}
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              className={`${buttonFieldClass} w-full !text-base`}
+              onClick={() => void sendThenSignOut()}
+              disabled={busy}
+              data-testid="signout-send"
+            >
               送ってからログアウト
             </button>
-            <button type="button" className={buttonDangerClass} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
-              送らずにログアウト（記録を捨てる）
-            </button>
-            <button type="button" className={subtleButtonClass} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
+            <button type="button" className={`${buttonOutlineBrandClass.replace("min-h-11", "min-h-14")} w-full !text-base`} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
               やめる
+            </button>
+            <button
+              type="button"
+              className="mt-2 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp border-2 border-dashed border-signal-red bg-paper px-4 text-base font-medium text-ink transition-colors hover:bg-signal-red-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-red focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40"
+              onClick={() => void signOut()}
+              disabled={busy}
+              data-testid="signout-discard"
+            >
+              <span aria-hidden>！</span>
+              送らずにログアウト（記録を捨てる）
             </button>
           </div>
         </div>

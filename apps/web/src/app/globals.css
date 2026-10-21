@@ -264,8 +264,12 @@ html {
 
 /* Sprint 12c：下メニュー（画面下に固定。幅 768px 未満）の分だけ、本文の末尾に余白を取る。
  * 下メニューが描かれたとき（運航管理が有効でログイン済み）だけ body に has-bottom-nav が付く。 */
+/* 運航管理の画面は、スクロールを滑らかにしない（下までのスクロールが即座に終わり、末尾が下メニューに隠れないことを確かめやすい） */
+html:has(body.has-bottom-nav) {
+  scroll-behavior: auto;
+}
 @media (max-width: 767px) {
   body.has-bottom-nav {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 }

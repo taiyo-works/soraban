@@ -23,10 +23,10 @@ export async function OpsHomeEntry() {
     <>
       <OpsEntryFlag />
       {band ? (
-        <section aria-label="今日" className="flex flex-col gap-3 rounded-sharp border border-rule bg-paper px-4 py-4 text-sm" data-testid="home-today-band">
-          <h2 className="eyebrow">今日</h2>
+        <section aria-label="今日" className="flex flex-col gap-2 border-l-2 border-brand-700 pl-3 text-sm" data-testid="home-today-band">
+          <h2 className="eyebrow !text-[10px]">今日</h2>
           {band.card ? (
-            <a href={band.card.primary.href} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 text-ink hover:bg-paper-soft" data-testid="home-today-flight">
+            <a href={band.card.primary.href} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule-soft pb-2 text-ink hover:bg-paper-soft" data-testid="home-today-flight">
               <span className="font-mono tnum">{band.card.timeLabel}</span>
               <span className="min-w-0 flex-1 break-words">{band.card.title}</span>
               <TodayBadge badge={band.card.badge} />
