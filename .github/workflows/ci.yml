@@ -155,6 +155,21 @@ jobs:
             test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'TRUNCATE')")" = "f"
           done
           test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_function_privilege('soraban_app', 'verify_judgement_snapshots(uuid)', 'EXECUTE')")" = "f"
+      # Sprint 12b：通報の試行・監査と手続きの「済み」の記録は追加だけ（追記専用）。通報の記録はヘッド表（参照だけ。書くのは record_versions への追加→トリガー）。
+      - name: soraban_app の権限（通報の試行・手続きの記録は追加だけ。通報の記録は参照だけ）
+        run: |
+          for t in flight_report_attempts plan_procedure_records; do
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'SELECT')")" = "t"
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'INSERT')")" = "t"
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'UPDATE')")" = "f"
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'DELETE')")" = "f"
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', '$t', 'TRUNCATE')")" = "f"
+          done
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_reports', 'SELECT')")" = "t"
+          for p in INSERT UPDATE DELETE TRUNCATE; do
+            test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_reports', '$p')")" = "f"
+          done
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_function_privilege('soraban_app', 'flight_report_effective_id(uuid)', 'EXECUTE')")" = "f"
       - name: REQUIRE_DB_TESTS=1 で TEST_DATABASE_URL が無いと失敗することを確認
         run: |
           if env -u TEST_DATABASE_URL pnpm test:db; then
