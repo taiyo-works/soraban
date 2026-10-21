@@ -1420,6 +1420,9 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       // 二度押しは新しい行を作らない
       await expectOpsError(record(mgr(), plan.id, permitDone), 409, "already_recorded");
       expect(await count("plan_procedure_records", "plan_id = $1", [plan.id])).toBe(2);
+      // アプリの事前の確認をすり抜けた並行の挿入も、DB のトリガーが止める（同じ種別・同じスナップショットの二重の done）
+      await expect(rawInsert({ applicationCompleted: true })).rejects.toMatchObject({ code: "SB409", detail: "already_recorded" });
+      expect(await count("plan_procedure_records", "plan_id = $1", [plan.id])).toBe(2);
     });
 
     it("追記専用：取り下げ（retract）も理由つきの行として残り、有効な記録は最新の行で決まる。記録が無い種別の取り下げは 409", async () => {

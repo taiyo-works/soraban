@@ -191,6 +191,7 @@ declare
   p flight_plans%rowtype;
   m members%rowtype;
   v_latest_action text;
+  v_latest_snapshot uuid;
 begin
   -- 計画の版の追加と、同じ計画の記録を直列化する
   perform pg_advisory_xact_lock(hashtextextended('record_versions:flight_plan:' || new.plan_id::text, 0));
@@ -213,6 +214,16 @@ begin
     end if;
     if new.plan_version <> p.current_version then
       raise exception 'version conflict' using errcode = 'SB409', detail = 'version_conflict';
+    end if;
+    -- 同じ種別の最新の記録が、同じスナップショットに対する done なら、二重の記録（二度押し・並行リクエスト）として拒む。
+    -- 計画ごとの排他の下で調べるため、アプリの事前の確認をすり抜けた並行の挿入も、ここで止まる。
+    select r.action, r.snapshot_id into v_latest_action, v_latest_snapshot
+      from plan_procedure_records r
+     where r.plan_id = new.plan_id and r.org_id = new.org_id and r.kind = new.kind
+     order by r.created_at desc, r.id desc
+     limit 1;
+    if v_latest_action = 'done' and v_latest_snapshot is not distinct from new.snapshot_id then
+      raise exception 'already recorded' using errcode = 'SB409', detail = 'already_recorded';
     end if;
   else
     select r.action into v_latest_action
