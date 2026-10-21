@@ -101,7 +101,14 @@ export type MemberStatusDb = "invited" | "active" | "disabled";
 export type AuthProviderDb = "neon" | "test";
 export type AircraftStatusDb = "active" | "suspended" | "deregistered";
 export type CertClassDb = "first" | "second";
-export type RecordEntityTypeDb = "member" | "aircraft" | "pilot" | "daily_inspection" | "flight_record";
+export type RecordEntityTypeDb =
+  | "member"
+  | "aircraft"
+  | "pilot"
+  | "daily_inspection"
+  | "flight_record"
+  | "flight_plan"
+  | "saved_place";
 export type RecordOpDb = "create" | "update" | "void";
 export type RecordActorKindDb = "member" | "system";
 
@@ -241,6 +248,110 @@ export type FlightRecordRow = {
   readonly created_at: string;
   readonly updated_at: string;
   readonly voided_at: string | null;
+};
+
+// ---- 運航管理（Sprint 12a。0010・0011） ----
+
+/** flight_plans.status。保存する状態は下書きと依頼済みだけ（確認待ち・確認済みなどは読み出しのたびに導出する）。取消は voided_at。 */
+export type PlanStatusDb = "draft" | "active";
+/** 判定に当てる目的の例外（flight_plans.judgement_purpose）。 */
+export type JudgementPurposeDb = "emergency" | "public_duty" | "city_event";
+/** judgement_snapshots.reason。 */
+export type SnapshotReasonDb = "initial" | "input_changed" | "data_updated" | "manual";
+/** judgement_snapshots.category（DiagnosisCategory と同じ値）。 */
+export type SnapshotCategoryDb = "I" | "needs_verification" | "II_A" | "II_B_eligible" | "III_level4" | "emergency_no_fly";
+export type ConfirmationDecisionDb = "approved" | "returned";
+
+export type SavedPlaceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly name: string;
+  readonly address_text: string | null;
+  /** numeric(9,6)。pg は文字列で返す。 */
+  readonly latitude: string;
+  readonly longitude: string;
+  readonly note: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type FlightPlanRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly title: string;
+  readonly aircraft_id: string;
+  readonly pilot_id: string;
+  readonly planned_start_at: string;
+  readonly duration_minutes: number;
+  /** date。DB が planned_start_at の JST の日付から決める。 */
+  readonly planned_date: string;
+  readonly purpose: string;
+  readonly place_name: string;
+  /** numeric(9,6)。pg は文字列で返す。 */
+  readonly latitude: string;
+  readonly longitude: string;
+  readonly radius_m: number | null;
+  readonly saved_place_id: string | null;
+  readonly max_altitude_m: number | null;
+  /** 利用者が選んだ飛行の方法・空域のフラグ（SpecificFlightFlag の配列）。 */
+  readonly flags: readonly string[];
+  readonly pilot_permits: readonly string[];
+  readonly judgement_purpose: JudgementPurposeDb | null;
+  readonly access_control: boolean | null;
+  readonly third_party_overflight: boolean | null;
+  readonly bvlos_with_observer: boolean | null;
+  readonly drone_weight_g: number | null;
+  readonly permit_numbers: string | null;
+  readonly notes: string | null;
+  readonly status: PlanStatusDb;
+  readonly current_snapshot_id: string;
+  readonly client_request_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+export type JudgementSnapshotRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly seq: number;
+  readonly reason: SnapshotReasonDb;
+  readonly input: Record<string, unknown>;
+  /** runDiagnosis の応答そのもの。 */
+  readonly result: Record<string, unknown>;
+  readonly verdict_level: VerdictLevelDb;
+  readonly verdict_unknown_count: number;
+  readonly category: SnapshotCategoryDb;
+  readonly engine_version: string;
+  readonly checked_at: string;
+  readonly check_evidence_id: string;
+  readonly diagnosis_evidence_id: string;
+  readonly datasets: readonly EvidenceDatasetDb[];
+  readonly procedures_revision: number;
+  readonly procedures_verified_at: string;
+  readonly created_by_member_id: string;
+  readonly created_at: string;
+  readonly prev_hash: string;
+  readonly content_hash: string;
+};
+
+export type PlanConfirmationRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_id: string;
+  readonly plan_version: number;
+  readonly snapshot_id: string;
+  readonly decision: ConfirmationDecisionDb;
+  readonly reason: string | null;
+  readonly confirmer_member_id: string;
+  readonly confirmer_name: string;
+  readonly self_confirmation: boolean;
+  readonly created_at: string;
+  readonly content_hash: string;
 };
 
 export type RecordVersionRow = {
@@ -455,6 +566,93 @@ export const FLIGHT_RECORD_COLUMNS = columns<FlightRecordRow>()([
   "voided_at",
 ]);
 
+export const SAVED_PLACE_COLUMNS = columns<SavedPlaceRow>()([
+  "id",
+  "org_id",
+  "name",
+  "address_text",
+  "latitude",
+  "longitude",
+  "note",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const FLIGHT_PLAN_COLUMNS = columns<FlightPlanRow>()([
+  "id",
+  "org_id",
+  "title",
+  "aircraft_id",
+  "pilot_id",
+  "planned_start_at",
+  "duration_minutes",
+  "planned_date",
+  "purpose",
+  "place_name",
+  "latitude",
+  "longitude",
+  "radius_m",
+  "saved_place_id",
+  "max_altitude_m",
+  "flags",
+  "pilot_permits",
+  "judgement_purpose",
+  "access_control",
+  "third_party_overflight",
+  "bvlos_with_observer",
+  "drone_weight_g",
+  "permit_numbers",
+  "notes",
+  "status",
+  "current_snapshot_id",
+  "client_request_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const JUDGEMENT_SNAPSHOT_COLUMNS = columns<JudgementSnapshotRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "seq",
+  "reason",
+  "input",
+  "result",
+  "verdict_level",
+  "verdict_unknown_count",
+  "category",
+  "engine_version",
+  "checked_at",
+  "check_evidence_id",
+  "diagnosis_evidence_id",
+  "datasets",
+  "procedures_revision",
+  "procedures_verified_at",
+  "created_by_member_id",
+  "created_at",
+  "prev_hash",
+  "content_hash",
+]);
+
+export const PLAN_CONFIRMATION_COLUMNS = columns<PlanConfirmationRow>()([
+  "id",
+  "org_id",
+  "plan_id",
+  "plan_version",
+  "snapshot_id",
+  "decision",
+  "reason",
+  "confirmer_member_id",
+  "confirmer_name",
+  "self_confirmation",
+  "created_at",
+  "content_hash",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -467,9 +665,13 @@ export const TABLE_COLUMNS = {
   record_versions: RECORD_VERSION_COLUMNS,
   daily_inspections: DAILY_INSPECTION_COLUMNS,
   flight_records: FLIGHT_RECORD_COLUMNS,
+  saved_places: SAVED_PLACE_COLUMNS,
+  flight_plans: FLIGHT_PLAN_COLUMNS,
+  judgement_snapshots: JUDGEMENT_SNAPSHOT_COLUMNS,
+  plan_confirmations: PLAN_CONFIRMATION_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10・11）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+/** 運航管理の表（Sprint 10・11・12a）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
 export const OPS_TABLES = [
   "organizations",
   "members",
@@ -478,4 +680,8 @@ export const OPS_TABLES = [
   "record_versions",
   "daily_inspections",
   "flight_records",
+  "saved_places",
+  "flight_plans",
+  "judgement_snapshots",
+  "plan_confirmations",
 ] as const;
