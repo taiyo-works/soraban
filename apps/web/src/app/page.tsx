@@ -6,7 +6,9 @@ import {
   SMALL_DRONE_LAW_FACILITIES,
 } from "@soraban/regulations";
 import { addressIndexAvailable } from "@soraban/regulations/address";
+import { Suspense } from "react";
 import { HeroLineArt } from "@/components/hero-line-art";
+import { OpsHomeEntry } from "@/components/ops-home-entry";
 import { RegulationChecker } from "@/components/regulation-checker";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -155,6 +157,11 @@ export default function Home() {
             >
               運航管理（飛行計画・通報・飛行日誌）は、社内で試験運用しながら整えています。
             </p>
+            {/* 運航管理が有効でログイン済みの利用者にだけ出す入口（Sprint 12a J）。動的な部分は Suspense の内側に閉じ込め、
+                `/` の静的なシェルは変えない。無効のとき（本番）は何も描かず、追加の通信もしない。 */}
+            <Suspense fallback={null}>
+              <OpsHomeEntry />
+            </Suspense>
           </div>
 
           <dl

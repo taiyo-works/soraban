@@ -56,4 +56,5 @@ const defaultProvider = async (): Promise<RegulationDataProvider> => ({
 export const runRegulationCheck = async (
   loc: LatLng,
   ctx?: FlightContext,
-): Promise<RegulationCheckResult> => runRegulationCheckWith(await defaultProvider(), loc, ctx);
+  now?: () => Date,
+): Promise<RegulationCheckResult> => runRegulationCheckWith(await defaultProvider(), loc, ctx, now);

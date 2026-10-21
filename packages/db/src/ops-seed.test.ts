@@ -11,3 +11,16 @@ describe("テスト用の初期データの接続先の制限", () => {
     expect(() => assertLocalTarget("postgresql://o:pw@localhost/x?host=db.example.com")).toThrow();
   });
 });
+
+describe("テスト用の初期データの内容（Sprint 12a）", () => {
+  it("組織 A のよく使う地点は本社の住所と座標。重量の分かる機体がある", async () => {
+    const { OPS_TEST_AIRCRAFT, OPS_TEST_PLACE } = await import("./ops-seed");
+    expect(OPS_TEST_PLACE).toEqual({
+      name: "フューチャーテック株式会社 本社",
+      addressText: "鳥取県西伯郡日吉津村日吉津45番地3",
+      latitude: 35.434238,
+      longitude: 133.380508,
+    });
+    expect(OPS_TEST_AIRCRAFT.weighted).toBe("JUSEEDA0900");
+  });
+});

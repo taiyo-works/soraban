@@ -4,8 +4,11 @@ import { randomUUID } from "node:crypto";
 import type { MemberRoleDb, MemberRow, PilotRow, RecordEntityTypeDb } from "@soraban/db";
 import type { Identity } from "./auth/identity";
 import { can, type OpsAction } from "./authz";
+import type { Judge } from "./judge";
+import type { SnapshotFreshnessInput } from "./plan-logic";
 import * as store from "./store";
 import { OpsError, type AircraftWithTotal, type OpsDb, type PilotWithTotal } from "./store";
+import { PLACE_FIELD_LABELS, PLAN_FIELD_LABELS } from "./validate-plan";
 import { FLIGHT_FIELD_LABELS, INSPECTION_FIELD_LABELS } from "./validate-records";
 import {
   AIRCRAFT_FIELD_LABELS,
@@ -29,6 +32,12 @@ export type OpsContext = {
   readonly member: MemberRow;
   /** 現在時刻（離陸が未来でないかの判定に使う）。省略時は実時刻。テスト用の時計は availability.ts の opsNow。 */
   readonly now?: () => Date;
+  /** 計画の保存時に判定を実行する口（Sprint 12a）。省略時は本番の判定（regulation-check）。テストで差し替える。 */
+  readonly judge?: Judge;
+  /** 判定の実行の上限（ミリ秒）。省略時は 20 秒。 */
+  readonly judgeTimeoutMs?: number;
+  /** 鮮度の判定に使う現在のエンジンの版・データ台帳・手続きデータの版（Sprint 12a）。省略時は本番の値。テストで差し替える。 */
+  readonly freshnessNow?: SnapshotFreshnessInput["now"];
 };
 
 type Input = Readonly<Record<string, unknown>>;
@@ -143,6 +152,8 @@ const LABELS: Record<RecordEntityTypeDb, Readonly<Record<string, string>>> = {
   member: MEMBER_FIELD_LABELS,
   flight_record: FLIGHT_FIELD_LABELS,
   daily_inspection: INSPECTION_FIELD_LABELS,
+  flight_plan: PLAN_FIELD_LABELS,
+  saved_place: PLACE_FIELD_LABELS,
 };
 
 /** 2 つの版の data で値が違う項目の名前（表示名）を返す。 */

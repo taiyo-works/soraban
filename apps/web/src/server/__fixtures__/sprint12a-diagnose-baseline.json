@@ -1,0 +1,4550 @@
+{
+ "baseline": {
+  "米子市役所|900|なし": "ef6c5533465adeede2fac7a8cf4a5ac73e0131d7bcd455cddcbeafcaf43c27e7",
+  "米子市役所|900|airspace_150m": "a4e0cb18519db0be2f37f5c4c027b6fd3444fddfd10df74c0dd82c2080a53526",
+  "米子市役所|900|method_night": "b78ec217146754be9d4c22fdd85029b35c0a58ae2fd1ce99b11bb6b50f678fa7",
+  "米子市役所|未指定|なし": "e44ef50514d9e2bfe79fbc33f60139dd57659952b0520c5110629a906c0e51ad",
+  "米子市役所|未指定|airspace_150m": "8348bc2637b1947bec28a638e71b6b7cd37274b296ef79671f0a20812cef5ab0",
+  "米子市役所|未指定|method_night": "631e4ab2fb7cb616228203eb13c3e2cb14c0d772467c7a8b24f92a77e30b79e2",
+  "米子市役所|100|なし": "a6e134a31fab14571bb0b9ace4f9d7ba8ad2fa40cd0799d9de93481e77105e75",
+  "米子市役所|100|airspace_150m": "13a0d69d1cc9edf9615b099cc2451ddae672c2b656d2cf01d3873fdba05cef45",
+  "米子市役所|100|method_night": "93d7d5a81b2bad87f5b74f197504898ea677114807555cf83a77fdb1f8da9a43",
+  "米子市役所|50|なし": "1df1c5c8b029f82a510c1cb5485f6076829a42dcd81fe95781e8ff76ee0b73bc",
+  "米子市役所|50|airspace_150m": "c216711039ae78551d526c574d2f0539df220ca55e50d9db4612d28491ada20c",
+  "米子市役所|50|method_night": "5b8fe2e97a18fac761a795204418cf4d5e813828e90cb6105a983bbf9324185d",
+  "美保基地の周辺|900|なし": "b9081af396ec050d7c1adf9ec2d352eb146eb287a211841b30b40aa51ff79866",
+  "美保基地の周辺|900|airspace_150m": "63adcd04420b86293fce4aa8568c483bc3aa42e69cd9617f346be2e56bf72de3",
+  "美保基地の周辺|900|method_night": "42349cdfff420cbca456837f2f43c60ea17b54cf41d209d70675805752fd3975",
+  "美保基地の周辺|未指定|なし": "4552f3c1b18048271d9682ce5e80702115712ac215d78d4e7e9ef772a6338c42",
+  "美保基地の周辺|未指定|airspace_150m": "041869a67a8d852b2f64367dc3392184c55de99db03bc99c4432d0ccda2b9e12",
+  "美保基地の周辺|未指定|method_night": "1bd62b686ff356b6753f878bb76f27e3b6ba5200f6f38e69a76c71e94c6ba939",
+  "美保基地の周辺|100|なし": "972ff26774696b26b134c25c92c05f1eb3aa16aeec36e3876bce0c403f13dbdf",
+  "美保基地の周辺|100|airspace_150m": "46f225410dbf177029d1f22fced0c83141a2164623d5bf2d9199eb8b29fc247e",
+  "美保基地の周辺|100|method_night": "a27caf5c5dfb6d63683d039e4d665c43962c89e6bb46bb6e1f0c6fbf5a191059",
+  "美保基地の周辺|50|なし": "1a6681eec57496b2289151fcefda9d42c7c14742522e82a1d0599527bb014714",
+  "美保基地の周辺|50|airspace_150m": "ced668f830c55d1b003475b61f000055fed81a7d9a9c41d15d2c0301a12ec667",
+  "美保基地の周辺|50|method_night": "d6e4178ca10fd76de316d9060197d9ebc90b2c8811a1ede259c9b42cca836952",
+  "出雲縁結び空港の周辺|900|なし": "a9a759c61ea3fa00ce2cb644b9679475f14d55c3633bcf3647ec4dc18f0f6096",
+  "出雲縁結び空港の周辺|900|airspace_150m": "10321f9fdc079f66f8ddec6f07d8df3c44d0ca83dd6bf00fd7770b6dbde7bf4a",
+  "出雲縁結び空港の周辺|900|method_night": "7c4a5d92ec4851a1dee045c8b52dfd6165e06f41fe1fb82f1da923693f36b764",
+  "出雲縁結び空港の周辺|未指定|なし": "e835785d0d303a54d584b4f72582c66314f9f695fae835f20c33c512906595fb",
+  "出雲縁結び空港の周辺|未指定|airspace_150m": "43579d3e3069fcf16c24da382643a437f52cadc10ce43cbd336d1aff28ccf6f5",
+  "出雲縁結び空港の周辺|未指定|method_night": "a2cd25d62be19a7ba0025d8e006f36ccdfbc0742b3523d77f144868d839f787d",
+  "出雲縁結び空港の周辺|100|なし": "c2b8aabffa8e30def44c60408df161b73668ed4fd6e44f63810f436aea04537b",
+  "出雲縁結び空港の周辺|100|airspace_150m": "7a8edae97b120e8f31ea2c9c3e8e00a153916dc28bdecb43fae639e73559c91b",
+  "出雲縁結び空港の周辺|100|method_night": "2f55839244a9a76dd8208a1ea72eb7142d713b2de1b1983ba6b9c721f6aa8a71",
+  "出雲縁結び空港の周辺|50|なし": "33bb038751b279adbfb0cac62f660b9919286715b3ef7fca76fb564518c49c85",
+  "出雲縁結び空港の周辺|50|airspace_150m": "3e3093aba6f29526c812fede52e2a2d975965ab40d328401aa76d39b46895b9a",
+  "出雲縁結び空港の周辺|50|method_night": "7331bbb2b147aef625bae78a57a0772be39039184a3bb6577c88f97a21def96d",
+  "出雲縁結び空港の敷地内|900|なし": "4a3ee57839f0f0459381d9f546dfc1de8ba42533a90d54b17470740c64dace6a",
+  "出雲縁結び空港の敷地内|900|airspace_150m": "c53aff4e479be980e4a192a3a3da9361453771deaa361684591c6bc384b5c0d4",
+  "出雲縁結び空港の敷地内|900|method_night": "4773d252c42693196c56d6717f3ce828846051fbbede880f506fe641f3623072",
+  "出雲縁結び空港の敷地内|未指定|なし": "8d4918fa6f231d5900cecd0e873467ff9b62e80d798f9836bb47910b6aa4b96f",
+  "出雲縁結び空港の敷地内|未指定|airspace_150m": "491592ae79d5d4aaedc9765acd7785c2f079bd4c8995520140b49cdf12df16fb",
+  "出雲縁結び空港の敷地内|未指定|method_night": "ff8e40655e6d7616be0f609ccc23884fa6426589080bfa5345207f3f0b50c4af",
+  "出雲縁結び空港の敷地内|100|なし": "15040d105a336e50bc7de4f81359c00253fa3f3159e0968dd8e88a3dd4e5970b",
+  "出雲縁結び空港の敷地内|100|airspace_150m": "6879e86d6e5b78d8f9a177dbba98a476747299b8a999f010a76bf40928a9df5b",
+  "出雲縁結び空港の敷地内|100|method_night": "e556ddd834fdbadee8f31ec15d383e0510d4bc7dcda948f65029c17aec9ad6a0",
+  "出雲縁結び空港の敷地内|50|なし": "633061731b72da6abfb1ffa1ec5f1c242fd1e8d52d665ffcd6820c9b44adb259",
+  "出雲縁結び空港の敷地内|50|airspace_150m": "584baef4f0f218743f84439abe228509249afd31152fc4dbd52b2a8685c3e42b",
+  "出雲縁結び空港の敷地内|50|method_night": "95f77cf12dfb9ff20d3a2530f40218669aa6bd1581895510b33f771186f8a2ac",
+  "鳥取市の工業専用地域|900|なし": "5d3cadcf878b8eb126f4d7d621f3909c6734700f4fb191cadff6a58820253504",
+  "鳥取市の工業専用地域|900|airspace_150m": "f59f377d8f460910191d34212f43a049c22cc55c723a214a66910b6b9511d92c",
+  "鳥取市の工業専用地域|900|method_night": "281c66e8055caa0e0ee96fa6c2ea322a3b257b9d7575b2c17b06536d72cb45de",
+  "鳥取市の工業専用地域|未指定|なし": "eacb807b4893df8cdb05c548f23a40f3ebabae6500c1004113f57266da63a731",
+  "鳥取市の工業専用地域|未指定|airspace_150m": "8a72198c9ceef48ed2dca882cd501a9b95e7a56512c537908ea0e3b4ff3dcf18",
+  "鳥取市の工業専用地域|未指定|method_night": "2d9bffc68c0fdfaa299651a71d5d190119a319976163b2edad5d6b93d826af7d",
+  "鳥取市の工業専用地域|100|なし": "2de6b0714f88c960cfdbef8f6311f08fd87112d128a74430686ff77f70baae91",
+  "鳥取市の工業専用地域|100|airspace_150m": "9b16bd4f8c7f32f6a062963fb52bd13d465be43c14dc4f8abc3b6be80d7ed6c4",
+  "鳥取市の工業専用地域|100|method_night": "8d2e4cae1147188ecdc03976af8baaf8bae455fd6febe5ab009c60bbb0b00150",
+  "鳥取市の工業専用地域|50|なし": "fae39c1d4edf7da4fa9f7bf308e8add997d247cf2d08e42a90027a47a4acd2da",
+  "鳥取市の工業専用地域|50|airspace_150m": "a92a655e5eb6da0849e9d48d4b18b72ff0721ac38c3940f4848c60987623b1bd",
+  "鳥取市の工業専用地域|50|method_night": "5ab83da6dd893ef94cd088467acbec5bcf05d529d407ae43d04d64bd3d4fd894"
+ },
+ "extras": {
+  "夜間（米子市役所・DID 内）": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "flags": [
+     "method_night"
+    ],
+    "plannedDate": "2027-01-14"
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-approval-night",
+      "kind": "flight_approval",
+      "title": "飛行承認（夜間飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第1号（夜間における飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     },
+     {
+      "procedureId": "flight-approval-night",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "method_night",
+       "kind": "flight_condition",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "2026-12-29 まで（飛行予定日 2027-01-14 の 10 開庁日以上前。土日・国民の祝日を除く）",
+        "date": "2026-12-29",
+        "leadDays": 16
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "id": "verdict-method_night",
+       "title": "飛行承認（夜間飛行）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "2026-12-29 まで（飛行予定日 2027-01-14 の 10 開庁日以上前。土日・国民の祝日を除く）",
+        "date": "2026-12-29",
+        "leadDays": 16
+       },
+       "legalTier": 1,
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。",
+       "itemId": "method_night",
+       "procedureId": "flight-approval-night"
+      },
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空、夜間飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "2027-01-14",
+      "source": "入力（飛行予定日）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_0c29d70a1230c620",
+    "checkEvidenceId": "ev_abc756e5728b2848",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "method_night"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "DID 内・重量なし": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "未指定（100g 以上として扱い登録対象）",
+      "source": "既定（フェイルセーフ＝厳しい側）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_bda11d4d36c5137b",
+    "checkEvidenceId": "ev_7ff3d4a146f6f647",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "空港周辺（出雲縁結び空港）": {
+   "request": {
+    "lat": 35.44,
+    "lng": 132.89,
+    "droneWeightG": 1500,
+    "plannedDate": "2027-01-14"
+   },
+   "muni": "32203",
+   "response": {
+    "category": "II_A",
+    "categoryNote": "特定飛行に該当し、立入管理措置を講じる（第三者の上空で飛行させない）運用ですが、IIB 条件で不要化できない区分を含むため、飛行許可・承認の申請が必要です。",
+    "procedures": [
+     {
+      "id": "flight-permission-airport",
+      "kind": "flight_permission",
+      "title": "飛行許可（空港等周辺）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（空港等の周辺の空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-airport",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "not_applicable",
+    "didDetail": "outside_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。最寄りの 出雲縁結び空港 までおよそ 3.0 km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。 空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32203-park-ordinance",
+       "kind": "regulation",
+       "title": "出雲市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32203-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 出雲市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "島根県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当の可能性（要確認）。最寄りの 出雲縁結び空港 までおよそ 3.0 km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。 空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。",
+       "itemId": "aviation-law-airport",
+       "id": "verdict-airport-permit",
+       "title": "飛行許可（空港等周辺）",
+       "submitTo": "国土交通省（DIPS 2.0）・空港の設置管理者等との調整",
+       "deadline": {
+        "label": "2026-12-29 まで（飛行予定日 2027-01-14 の 10 開庁日以上前。土日・国民の祝日を除く）",
+        "date": "2026-12-29",
+        "leadDays": 16
+       },
+       "procedureId": "flight-permission-airport"
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 1500,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "1500 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.440000",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "132.890000",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.440000 / 経度 132.890000 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "空港等周辺",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "2027-01-14",
+      "source": "入力（飛行予定日）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_2f12b55f74269c62",
+    "checkEvidenceId": "ev_868a551a8d83189b",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "32203",
+    "lat": 35.44,
+    "lng": 132.89,
+    "derivedAirspaceFlags": [
+     "airspace_airport"
+    ],
+    "autoDidStatus": "not_applicable",
+    "flags": [
+     "airspace_airport"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "空港の敷地内": {
+   "request": {
+    "lat": 35.4136,
+    "lng": 132.89,
+    "droneWeightG": 1500
+   },
+   "muni": "32203",
+   "response": {
+    "category": "II_A",
+    "categoryNote": "特定飛行に該当し、立入管理措置を講じる（第三者の上空で飛行させない）運用ですが、IIB 条件で不要化できない区分を含むため、飛行許可・承認の申請が必要です。",
+    "procedures": [
+     {
+      "id": "flight-permission-airport",
+      "kind": "flight_permission",
+      "title": "飛行許可（空港等周辺）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（空港等の周辺の空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-airport",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "not_applicable",
+    "didDetail": "outside_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "no_fly",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "no_fly",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 出雲縁結び空港 の敷地内です。空港の敷地内は飛行できません（安全側の判定。空港の管理者への確認が要り、許可・同意・機体重量を入力しても変わりません）。"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32203-park-ordinance",
+       "kind": "regulation",
+       "title": "出雲市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32203-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 出雲市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "32-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "島根県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      }
+     ],
+     "noFly": [
+      {
+       "itemId": "aviation-law-airport",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "reason": "該当。判定地点は 出雲縁結び空港 の敷地内です。空港の敷地内は飛行できません（安全側の判定。空港の管理者への確認が要り、許可・同意・機体重量を入力しても変わりません）。"
+      }
+     ],
+     "procedures": [],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 1500,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "1500 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.413600",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "132.890000",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.413600 / 経度 132.890000 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "空港等周辺",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_2bf6f79c0ddd1fcb",
+    "checkEvidenceId": "ev_12e807bae2ac77f1",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "32203",
+    "lat": 35.4136,
+    "lng": 132.89,
+    "derivedAirspaceFlags": [
+     "airspace_airport"
+    ],
+    "autoDidStatus": "not_applicable",
+    "flags": [
+     "airspace_airport"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "基地の周辺（飛行禁止法）": {
+   "request": {
+    "lat": 35.4936,
+    "lng": 133.26604,
+    "droneWeightG": 900,
+    "plannedDate": "2027-01-14"
+   },
+   "muni": "31204",
+   "response": {
+    "category": "II_A",
+    "categoryNote": "特定飛行に該当し、立入管理措置を講じる（第三者の上空で飛行させない）運用ですが、IIB 条件で不要化できない区分を含むため、飛行許可・承認の申請が必要です。",
+    "procedures": [
+     {
+      "id": "flight-permission-airport",
+      "kind": "flight_permission",
+      "title": "飛行許可（空港等周辺）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（空港等の周辺の空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "空港等周辺は IIB 条件による不要化ができない区分（IIA 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "small-drone-law-consent-notice",
+      "kind": "facility_consent_notice",
+      "title": "施設管理者の同意 ＋ 都道府県公安委員会への事前通報（飛行の 48 時間前まで）",
+      "system": "都道府県公安委員会",
+      "systemUrl": "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
+      "legalBasis": "重要施設の周辺地域の上空における小型無人機等の飛行の禁止に関する法律（平成28年法律第9号。令和8年法律第47号による改正後）第10条 — 対象施設の管理者の同意を得た飛行と、都道府県公安委員会への事前通報（項・号の番号は要再確認）",
+      "sourceUrl": "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "対象施設の周辺地域（敷地及びその周囲おおむね 1,000m）で飛行する場合、施設管理者の同意を得て、飛行開始の 48 時間前までに管轄警察署を経由して都道府県公安委員会へ通報します（同意を証明する書面の写しを添付）。海域では管区海上保安本部長への通報も必要です。期限は時間で数え、開庁日計算の対象ではありません。100g 未満の機体も対象です。",
+      "needsReverify": true,
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-airport",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "not_applicable",
+    "didDetail": "outside_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 1,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。最寄りの 米子鬼太郎空港（美保基地共用） までおよそ 2.7 km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。 空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は「航空自衛隊美保基地」の敷地境界からおよそ 711m（敷地形状未収録のため概算）です。対象施設の敷地又は周辺地域（おおむね 1,000m）に含まれ、施設管理者の同意と都道府県公安委員会への事前通報（飛行の 48 時間前まで）なしには飛行できません。"
+      },
+      {
+       "id": "31204-park-ordinance",
+       "kind": "regulation",
+       "title": "境港市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 市町村の文化財保護条例（データ未整備）— 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "unknown",
+       "verdict": "unknown",
+       "appliedPermits": [],
+       "reason": "判定不能（データ未整備）。判定地点はカバレッジ対象自治体（鳥取市・米子市・倉吉市・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市）外です。当該市町村の指定文化財データは未整備のため判定できません。"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当の可能性（要確認）。最寄りの 米子鬼太郎空港（美保基地共用） までおよそ 2.7 km。空港等周辺の進入表面・水平表面（半径6km の概算）に該当する可能性があります。 空港等周辺の飛行は、空港ごとの個別の許可と、空港の設置管理者等との調整が必要とされています。入力した DIPS の許可は空港等周辺には当てていません。",
+       "itemId": "aviation-law-airport",
+       "id": "verdict-airport-permit",
+       "title": "飛行許可（空港等周辺）",
+       "submitTo": "国土交通省（DIPS 2.0）・空港の設置管理者等との調整",
+       "deadline": {
+        "label": "2026-12-29 まで（飛行予定日 2027-01-14 の 10 開庁日以上前。土日・国民の祝日を除く）",
+        "date": "2026-12-29",
+        "leadDays": 16
+       },
+       "procedureId": "flight-permission-airport"
+      },
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は「航空自衛隊美保基地」の敷地境界からおよそ 711m（敷地形状未収録のため概算）です。対象施設の敷地又は周辺地域（おおむね 1,000m）に含まれ、施設管理者の同意と都道府県公安委員会への事前通報（飛行の 48 時間前まで）なしには飛行できません。",
+       "itemId": "small-drone-law",
+       "id": "verdict-small-drone-consent",
+       "title": "対象施設の管理者の同意",
+       "submitTo": "対象施設の管理者",
+       "deadline": {
+        "label": "通報より前（法定の期限なし。通報に同意の書面の写しを添えるため、先に済ませる）",
+        "leadDays": 2.5
+       },
+       "procedureId": "small-drone-law-consent-notice"
+      },
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は「航空自衛隊美保基地」の敷地境界からおよそ 711m（敷地形状未収録のため概算）です。対象施設の敷地又は周辺地域（おおむね 1,000m）に含まれ、施設管理者の同意と都道府県公安委員会への事前通報（飛行の 48 時間前まで）なしには飛行できません。",
+       "itemId": "small-drone-law",
+       "id": "verdict-small-drone-notice",
+       "title": "都道府県公安委員会への通報（飛行禁止法）",
+       "submitTo": "都道府県公安委員会（管轄の警察署経由）",
+       "deadline": {
+        "label": "2027-01-12（飛行予定日 2027-01-14 の 2 日前）の、飛行開始と同じ時刻まで（飛行開始の 48 時間前まで）",
+        "date": "2027-01-12",
+        "leadDays": 2
+       },
+       "procedureId": "small-drone-law-consent-notice"
+      },
+      {
+       "id": "verdict-confirm-31202-heritage-protection",
+       "title": "史跡・文化財（文化財保護法・文化財保護条例）の該当を確認（データ未整備）",
+       "submitTo": "地点の市町村の教育委員会・文化庁",
+       "deadline": {
+        "label": "飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）",
+        "leadDays": null
+       },
+       "legalTier": 1,
+       "reason": "判定不能（データ未整備）：判定地点はカバレッジ対象自治体（鳥取市・米子市・倉吉市・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市）外です。当該市町村の指定文化財データは未整備のため判定できません。",
+       "itemId": "31202-heritage-protection"
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.493600",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.266040",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.493600 / 経度 133.266040 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "空港等周辺",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "2027-01-14",
+      "source": "入力（飛行予定日）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_bdfd993e8673ea59",
+    "checkEvidenceId": "ev_245cc41280fdd6f6",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31204",
+    "lat": 35.4936,
+    "lng": 133.26604,
+    "derivedAirspaceFlags": [
+     "airspace_airport"
+    ],
+    "autoDidStatus": "not_applicable",
+    "flags": [
+     "airspace_airport"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": true
+   }
+  },
+  "緊急用務空域": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "flags": [
+     "airspace_emergency"
+    ]
+   },
+   "muni": "31202",
+   "response": {
+    "category": "emergency_no_fly",
+    "categoryNote": "緊急用務空域に指定されている間は、原則として飛行できません。空港等周辺・150m 以上・人口集中地区の飛行許可があっても飛行できません（例外は、指定の解除を待たずに飛行させることが真に必要と認められる場合の個別の許可に限られます：審査要領（カテゴリーⅡ飛行）5-1(2)c)）。指定は国土交通省がその都度行い、ホームページと X で公示されます。飛行の直前に指定の有無を確認してください。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-permission-emergency-airspace",
+      "kind": "flight_permission",
+      "title": "緊急用務空域の指定の確認（指定中は飛行不可）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（緊急用務空域）／無人航空機の飛行の安全に関する教則 第5版 3.1.2(2)1)b)／審査要領（カテゴリーⅡ飛行）5-1(2)c)・3-3（例外の許可）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "緊急用務空域に指定されている間は、原則として飛行できません（例外は、災害時等の報道取材やインフラ点検・保守など、指定の変更・解除を待たずに飛行させることが真に必要と認められる場合の個別の許可に限られます：審査要領（カテゴリーⅡ飛行）5-1(2)c)）。空港等周辺・150m 以上・人口集中地区の飛行許可があっても、それだけでは飛行できません。指定は国土交通省がその都度行い、ホームページと X で公示されます。飛行の直前に指定の有無を確認し、指定中は飛行しないでください（100g 未満の機体も対象）。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [
+     "下の機体登録・飛行計画の通報・飛行日誌などの手続きは、緊急用務空域の指定が解除された後に飛行する場合に必要になるものです（飛行しないなら不要です）。"
+    ],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "no_fly",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "airspace_emergency",
+       "kind": "flight_condition",
+       "title": "緊急用務空域",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "no_fly",
+       "appliedPermits": [],
+       "reason": "緊急用務空域は、指定中は飛行できません（他の飛行許可があっても不可。機体の重量を問いません）。飛行の直前に指定の有無を確認してください。"
+      }
+     ],
+     "noFly": [
+      {
+       "itemId": "airspace_emergency",
+       "title": "緊急用務空域",
+       "reason": "緊急用務空域は、指定中は飛行できません（他の飛行許可があっても不可。機体の重量を問いません）。飛行の直前に指定の有無を確認してください。"
+      }
+     ],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空、緊急用務空域（指定中は飛行不可）",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_d2b0badfc4bb80ea",
+    "checkEvidenceId": "ev_abc756e5728b2848",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "airspace_emergency"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "許可入力（DID・夜間）": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "flags": [
+     "method_night",
+     "airspace_150m"
+    ],
+    "pilotPermits": [
+     "mlit:did",
+     "mlit:night",
+     "mlit:150m"
+    ],
+    "plannedDate": "2027-01-14"
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_A",
+    "categoryNote": "特定飛行に該当し、立入管理措置を講じる（第三者の上空で飛行させない）運用ですが、IIB 条件で不要化できない区分を含むため、飛行許可・承認の申請が必要です。",
+    "procedures": [
+     {
+      "id": "flight-permission-150m",
+      "kind": "flight_permission",
+      "title": "飛行許可（150m以上の高さ）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第1号（150m以上の高さの空域）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 10,
+      "note": "地表または水面から150m以上の高さの飛行は IIA 相当の許可が必要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-approval-night",
+      "kind": "flight_approval",
+      "title": "飛行承認（夜間飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第1号（夜間における飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-150m",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     },
+     {
+      "procedureId": "flight-permission-did",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     },
+     {
+      "procedureId": "flight-approval-night",
+      "submitBy": "2026-12-29",
+      "basis": "飛行予定日（2027-01-14）の 10 開庁日以上前までに提出（土日・国民の祝日を除く）。提出期限の目安は 2026-12-29。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "procedure_done",
+       "appliedPermits": [
+        {
+         "id": "did-ex-permit",
+         "label": "国交省 DIPS：DID 上空の飛行許可",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:did",
+         "byPurpose": false
+        }
+       ],
+       "reason": "該当。入力した許可・同意・目的で満たしています。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "airspace_150m",
+       "kind": "flight_condition",
+       "title": "150m以上の高さ",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "procedure_done",
+       "appliedPermits": [
+        {
+         "id": "dips:airspace_150m",
+         "label": "国交省 DIPS：150m 以上の飛行許可",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:150m",
+         "byPurpose": false
+        }
+       ],
+       "reason": "該当（利用者が選んだ飛行の条件）。入力した DIPS の許可・承認で満たしています。"
+      },
+      {
+       "id": "method_night",
+       "kind": "flight_condition",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "procedure_done",
+       "appliedPermits": [
+        {
+         "id": "dips:method_night",
+         "label": "国交省 DIPS：夜間飛行の承認",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:night",
+         "byPurpose": false
+        }
+       ],
+       "reason": "該当（利用者が選んだ飛行の条件）。入力した DIPS の許可・承認で満たしています。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [
+      {
+       "itemId": "aviation-law-did",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "appliedPermits": [
+        {
+         "id": "did-ex-permit",
+         "label": "国交省 DIPS：DID 上空の飛行許可",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:did",
+         "byPurpose": false
+        }
+       ],
+       "conditions": [
+        "許可書・同意書に書かれた飛行の条件（場所・期間・飛行の方法・機体・操縦者）と飛行マニュアルを守ってください。",
+        "許可の範囲と有効期間は照合していません。許可書で確認してください。"
+       ],
+       "procedureIds": [
+        "flight-permission-did"
+       ]
+      },
+      {
+       "itemId": "airspace_150m",
+       "title": "150m以上の高さ",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "appliedPermits": [
+        {
+         "id": "dips:airspace_150m",
+         "label": "国交省 DIPS：150m 以上の飛行許可",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:150m",
+         "byPurpose": false
+        }
+       ],
+       "conditions": [
+        "許可書・同意書に書かれた飛行の条件（場所・期間・飛行の方法・機体・操縦者）と飛行マニュアルを守ってください。",
+        "許可の範囲と有効期間は照合していません。許可書で確認してください。"
+       ],
+       "procedureIds": [
+        "flight-permission-150m"
+       ]
+      },
+      {
+       "itemId": "method_night",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "appliedPermits": [
+        {
+         "id": "dips:method_night",
+         "label": "国交省 DIPS：夜間飛行の承認",
+         "condition": "国土交通大臣の許可・承認を取得している場合",
+         "machine": "permit_holder == mlit:night",
+         "byPurpose": false
+        }
+       ],
+       "conditions": [
+        "許可書・同意書に書かれた飛行の条件（場所・期間・飛行の方法・機体・操縦者）と飛行マニュアルを守ってください。",
+        "許可の範囲と有効期間は照合していません。許可書で確認してください。"
+       ],
+       "procedureIds": [
+        "flight-approval-night"
+       ]
+      }
+     ],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": [
+      "mlit:150m",
+      "mlit:did",
+      "mlit:night"
+     ]
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "150m以上の高さ、DID（人口集中地区）上空、夜間飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "2027-01-14",
+      "source": "入力（飛行予定日）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_46a027998f8f41c9",
+    "checkEvidenceId": "ev_19e0a8018abdd2cc",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "method_night",
+     "airspace_150m"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "目的の例外（緊急）": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "purpose": "emergency",
+    "flags": [
+     "method_night"
+    ]
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-approval-night",
+      "kind": "flight_approval",
+      "title": "飛行承認（夜間飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第1号（夜間における飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     },
+     {
+      "procedureId": "flight-approval-night",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "method_night",
+       "kind": "flight_condition",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "id": "verdict-method_night",
+       "title": "飛行承認（夜間飛行）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "legalTier": 1,
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。",
+       "itemId": "method_night",
+       "procedureId": "flight-approval-night"
+      },
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": [],
+     "purpose": "emergency"
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空、夜間飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_35775a93e734d9d2",
+    "checkEvidenceId": "ev_edf473ebd8494183",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "method_night"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "目的の例外（公務）": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "purpose": "public_duty",
+    "flags": [
+     "method_bvlos"
+    ],
+    "bvlosWithObserver": true
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-approval-bvlos",
+      "kind": "flight_approval",
+      "title": "飛行承認（目視外飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第2号（目視の範囲外での飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "目視外飛行は IIB 条件で不要化できる区分（IIB 相当）です。補助者の有無により運航条件が変わる場合があります（補助者なしはより上位の要件。人口集中地区の上空を飛行経路に含める場合は十分な安全確保措置が求められます：審査要領（カテゴリーⅡ飛行）5-4(3)c)ア）。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     },
+     {
+      "procedureId": "flight-approval-bvlos",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "procedure_done",
+       "appliedPermits": [
+        {
+         "id": "31-nuisance-ex-public",
+         "label": "目的：公務（警察・消防・自治体）",
+         "condition": "警察・消防・自治体等の公務として行う飛行",
+         "machine": "purpose == public_duty",
+         "byPurpose": true
+        }
+       ],
+       "reason": "該当の可能性（要確認）。入力した許可・同意・目的で満たしています。"
+      },
+      {
+       "id": "method_bvlos",
+       "kind": "flight_condition",
+       "title": "目視外飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "id": "verdict-method_bvlos",
+       "title": "飛行承認（目視外飛行）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "legalTier": 1,
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。",
+       "itemId": "method_bvlos",
+       "procedureId": "flight-approval-bvlos"
+      }
+     ],
+     "done": [
+      {
+       "itemId": "31-pref-nuisance-prevention",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "appliedPermits": [
+        {
+         "id": "31-nuisance-ex-public",
+         "label": "目的：公務（警察・消防・自治体）",
+         "condition": "警察・消防・自治体等の公務として行う飛行",
+         "machine": "purpose == public_duty",
+         "byPurpose": true
+        }
+       ],
+       "conditions": [
+        "目的の例外に当たることを、根拠となる依頼・後援の書面で確かめてください（自己申告のため、手続き不要とはしません）。",
+        "許可の範囲と有効期間は照合していません。許可書で確認してください。"
+       ],
+       "procedureIds": []
+      }
+     ],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": [],
+     "purpose": "public_duty"
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空、目視外飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "目視外飛行の補助者配置",
+      "value": "補助者あり",
+      "source": "入力（運航条件）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_c158f4349d081768",
+    "checkEvidenceId": "ev_e19e1a38ac157ebd",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "method_bvlos"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "立入管理・第三者上空": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 900,
+    "flags": [
+     "method_bvlos"
+    ],
+    "accessControl": true,
+    "thirdPartyOverflight": false
+   },
+   "muni": "31202",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-permission-did",
+      "kind": "flight_permission",
+      "title": "飛行許可（DID上空）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の85 第1項第2号（人口集中地区(DID)の上空）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "DID上空は、技能証明＋機体認証＋飛行マニュアル等の IIB 条件を満たせば申請を不要化できる区分（IIB 相当）です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "flight-approval-bvlos",
+      "kind": "flight_approval",
+      "title": "飛行承認（目視外飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第2号（目視の範囲外での飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "目視外飛行は IIB 条件で不要化できる区分（IIB 相当）です。補助者の有無により運航条件が変わる場合があります（補助者なしはより上位の要件。人口集中地区の上空を飛行経路に含める場合は十分な安全確保措置が求められます：審査要領（カテゴリーⅡ飛行）5-4(3)c)ア）。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-permission-did",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     },
+     {
+      "procedureId": "flight-approval-bvlos",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "method_bvlos",
+       "kind": "flight_condition",
+       "title": "目視外飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 1,
+       "reason": "該当。判定地点は 米子市 の DID（人口集中地区、令和2年国勢調査）内です。収録済みの工業専用地域（米子市 を含む）のいずれにも含まれません。原則として許可・承認なく飛行できません。",
+       "itemId": "aviation-law-did",
+       "id": "verdict-did-permit",
+       "title": "飛行許可（DID上空）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "procedureId": "flight-permission-did"
+      },
+      {
+       "id": "verdict-method_bvlos",
+       "title": "飛行承認（目視外飛行）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "legalTier": 1,
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。",
+       "itemId": "method_bvlos",
+       "procedureId": "flight-approval-bvlos"
+      },
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "DID（人口集中地区）上空、目視外飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "目視外飛行の補助者配置",
+      "value": "未選択（補助者の有無を確認してください）",
+      "source": "入力（運航条件）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "立入管理措置あり（第三者の上空で飛行させない）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_62c9993dac6df330",
+    "checkEvidenceId": "ev_abc756e5728b2848",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [
+     "airspace_did"
+    ],
+    "autoDidStatus": "applicable",
+    "flags": [
+     "airspace_did",
+     "method_bvlos"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "DID 非該当を確認済み（未収録の市町村）": {
+   "request": {
+    "lat": 35.434238,
+    "lng": 133.380508,
+    "droneWeightG": 900,
+    "didConfirmedNotApplicable": true
+   },
+   "muni": "31390",
+   "response": {
+    "category": "I",
+    "categoryNote": "航空法上の特定飛行（許可が必要な空域・承認が必要な方法）のいずれにも該当しません。航空法に基づく飛行許可・承認の手続きは不要です（条例等の他法令は別途確認が必要です）。",
+    "procedures": [
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [],
+    "isSpecificFlight": false,
+    "didStatus": "not_applicable",
+    "didDetail": "outside_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 2,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "市町村の都市公園条例（データ未整備）— 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "unknown",
+       "verdict": "unknown",
+       "appliedPermits": [],
+       "reason": "判定不能（データ未整備）。判定地点はカバレッジ対象自治体外です。現在の収録範囲は 鳥取市・米子市・倉吉市・境港市・八頭町・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市。当該市町村の都市公園条例データは未整備のため判定できません。"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 市町村の文化財保護条例（データ未整備）— 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "unknown",
+       "verdict": "unknown",
+       "appliedPermits": [],
+       "reason": "判定不能（データ未整備）。判定地点はカバレッジ対象自治体（鳥取市・米子市・倉吉市・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市）外です。当該市町村の指定文化財データは未整備のため判定できません。"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "id": "verdict-confirm-31202-heritage-protection",
+       "title": "史跡・文化財（文化財保護法・文化財保護条例）の該当を確認（データ未整備）",
+       "submitTo": "地点の市町村の教育委員会・文化庁",
+       "deadline": {
+        "label": "飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）",
+        "leadDays": null
+       },
+       "legalTier": 1,
+       "reason": "判定不能（データ未整備）：判定地点はカバレッジ対象自治体（鳥取市・米子市・倉吉市・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市）外です。当該市町村の指定文化財データは未整備のため判定できません。",
+       "itemId": "31202-heritage-protection"
+      },
+      {
+       "id": "verdict-confirm-31202-park-ordinance",
+       "title": "都市公園（都市公園条例）の該当を確認（データ未整備）",
+       "submitTo": "地点の市町村の公園の管理者",
+       "deadline": {
+        "label": "飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）",
+        "leadDays": null
+       },
+       "legalTier": 2,
+       "reason": "判定不能（データ未整備）：判定地点はカバレッジ対象自治体外です。現在の収録範囲は 鳥取市・米子市・倉吉市・境港市・八頭町・三朝町・湯梨浜町・松江市・出雲市・大田市・安来市・雲南市。当該市町村の都市公園条例データは未整備のため判定できません。",
+       "itemId": "31202-park-ordinance"
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.434238",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.380508",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.434238 / 経度 133.380508 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "特定飛行に非該当（許可・承認の対象なし）",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_1d1c7944a22b761e",
+    "checkEvidenceId": "ev_2b8ef7260dde71ba",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31390",
+    "lat": 35.434238,
+    "lng": 133.380508,
+    "derivedAirspaceFlags": [],
+    "autoDidStatus": "not_applicable",
+    "flags": [],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "工業専用地域": {
+   "request": {
+    "lat": 35.474926,
+    "lng": 134.222963,
+    "droneWeightG": 900,
+    "flags": [
+     "method_night"
+    ]
+   },
+   "muni": "31201",
+   "response": {
+    "category": "II_B_eligible",
+    "categoryNote": "特定飛行に該当しますが、該当する区分がすべて IIB で不要化可能（DID／夜間／目視外／30m 等）です。技能証明＋機体認証＋飛行マニュアル等の条件を満たせば、飛行許可・承認の申請を不要化できる可能性があります（総重量 25kg 未満が前提。25kg 以上は IIA 相当で許可・承認が必要）。",
+    "procedures": [
+     {
+      "id": "flight-approval-night",
+      "kind": "flight_approval",
+      "title": "飛行承認（夜間飛行）",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の86 第2項第1号（夜間における飛行）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": true,
+      "leadTimeBusinessDays": 10,
+      "note": "夜間飛行は、IIB 条件（技能証明＋機体認証＋飛行マニュアル等）を満たせば申請を不要化できる区分（IIB 相当）です。なお、農薬等の空中散布で、航空法施行規則第236条の82第1項第2号の要件（国空無機第338898号）を満たす場合は、この承認は不要です。",
+      "verifiedAt": "2026-10-19T00:00:00+09:00"
+     },
+     {
+      "id": "drone-registration",
+      "kind": "drone_registration",
+      "title": "機体登録（DRS）＋リモートID",
+      "system": "DRS",
+      "systemUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "legalBasis": "航空法 第131条の3〜第131条の8（無人航空機の登録）",
+      "sourceUrl": "https://www.dips-reg.mlit.go.jp/drs/",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "100g 以上の無人航空機は登録が義務。原則リモートID搭載義務、有効期間3年、手数料900円〜。飛行許可・承認（DIPS 2.0）とは別ドメインの独立系統です。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-plan-report",
+      "kind": "flight_plan_report",
+      "title": "飛行計画の通報",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の88（飛行計画の通報）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行前に飛行計画を通報する義務があります（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     },
+     {
+      "id": "flight-logbook",
+      "kind": "flight_logbook",
+      "title": "飛行日誌の作成・記録",
+      "system": "DIPS 2.0",
+      "systemUrl": "https://www.ossportal.dips.mlit.go.jp/",
+      "legalBasis": "航空法 第132条の89（飛行日誌）",
+      "sourceUrl": "https://www.mlit.go.jp/koku/koku_fr10_000042.html",
+      "waivableByIIB": false,
+      "leadTimeBusinessDays": 0,
+      "note": "特定飛行を行う場合は、飛行日誌（飛行記録・点検整備記録等）の作成・記録が義務です（横断手続き）。",
+      "verifiedAt": "2026-06-22T00:00:00+09:00"
+     }
+    ],
+    "deadlines": [
+     {
+      "procedureId": "flight-approval-night",
+      "basis": "飛行開始の 10 開庁日以上前までに提出（土日・国民の祝日を除く。飛行予定日を入力すると具体的な期限日を算出します）。"
+     }
+    ],
+    "isSpecificFlight": true,
+    "didStatus": "not_applicable",
+    "didDetail": "industrial_exclusive",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31201-park-ordinance",
+       "kind": "regulation",
+       "title": "鳥取市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31201-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 鳥取市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "method_night",
+       "kind": "flight_condition",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "red",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "id": "verdict-method_night",
+       "title": "飛行承認（夜間飛行）",
+       "submitTo": "国土交通省（DIPS 2.0）",
+       "deadline": {
+        "label": "飛行開始の 10 開庁日以上前まで（土日・国民の祝日を除く。飛行予定日を入れると日付を出します）",
+        "leadDays": 14
+       },
+       "legalTier": 1,
+       "reason": "該当（利用者が選んだ飛行の条件）。DIPS で許可・承認を受ける必要があります。",
+       "itemId": "method_night",
+       "procedureId": "flight-approval-night"
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "drone-registration",
+       "title": "機体登録（DRS）＋リモートID",
+       "kind": "premise",
+       "detail": "100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。"
+      },
+      {
+       "id": "flight-plan-report",
+       "title": "飛行計画の通報",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。"
+      },
+      {
+       "id": "flight-logbook",
+       "title": "飛行日誌の作成・記録",
+       "kind": "per_flight",
+       "detail": "特定飛行のたびに、飛行・日常点検・点検整備を記録します。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 900,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "900 g（100g 以上 → 登録対象）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "原則搭載義務（特定区分の例外を除く）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.474926",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "134.222963",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.474926 / 経度 134.222963 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "夜間飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_8045ba7716c79749",
+    "checkEvidenceId": "ev_a5266d8a8dbdc4bb",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31201",
+    "lat": 35.474926,
+    "lng": 134.222963,
+    "derivedAirspaceFlags": [],
+    "autoDidStatus": "not_applicable",
+    "flags": [
+     "method_night"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  },
+  "100g 未満": {
+   "request": {
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "droneWeightG": 50,
+    "flags": [
+     "method_night"
+    ]
+   },
+   "muni": "31202",
+   "response": {
+    "category": "I",
+    "categoryNote": "航空法上の特定飛行（許可が必要な空域・承認が必要な方法）のいずれにも該当しません。航空法に基づく飛行許可・承認の手続きは不要です（条例等の他法令は別途確認が必要です）。",
+    "procedures": [],
+    "deadlines": [],
+    "isSpecificFlight": false,
+    "didStatus": "not_applicable",
+    "didDetail": "in_did",
+    "verificationNotes": [],
+    "disclaimer": "本診断は補助情報であり、必要な手続きを最終的に保証するものではありません。最終確認は必ず DIPS（飛行許可・承認）／DRS（機体登録）／航空局および各管理者で行ってください。法令・制度は改正される場合があります。",
+    "verdict": {
+     "level": "needs_procedure",
+     "unknownCount": 0,
+     "items": [
+      {
+       "id": "aviation-law-did",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "baseExcludedAs": "model_aircraft",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "対象外（模型航空機）：100g 未満の機体は航空法の無人航空機に当たりません（DID・空港等周辺・150m 以上の許可、飛行の方法の承認、機体登録、飛行計画の通報、飛行日誌の対象外）。参照先：e-Gov 法令検索 航空法（航空法第134条の3） https://laws.e-gov.go.jp/law/327AC0000000231 ／ e-Gov 法令検索 航空法施行規則（航空法施行規則第239条の2） https://laws.e-gov.go.jp/law/327M50000800056 ／ 国土交通省「レーザー照射や凧揚げの規制について」 https://www.mlit.go.jp/koku/koku_tk1_000048.html ／ 国土交通省「航空機の飛行に影響を及ぼすおそれのある行為（気球、花火、凧揚げ等）」 https://www.mlit.go.jp/common/001708524.pdf ／ 国土交通省「無人航空機の飛行の安全に関する教則」第5版 https://www.mlit.go.jp/common/002010809.pdf ／ 警察庁「小型無人機等飛行禁止法関係」 https://www.npa.go.jp/bureau/security/kogatamujinki/index.html ／ 国土交通省「無人航空機の飛行ルール」（100g 未満の機体・空港等の周辺の記述） https://www.mlit.go.jp/koku/koku_fr10_000040.html ／ 国土交通省「緊急用務空域の Q&A」 https://www.mlit.go.jp/koku/content/001407133.pdf ／ 国土交通省「無人航空機の飛行許可・承認手続」 https://www.mlit.go.jp/koku/koku_fr10_000042.html"
+      },
+      {
+       "id": "aviation-law-airport",
+       "kind": "regulation",
+       "title": "航空法第132条の85第1項第1号 — 空港等の周辺における飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "small-drone-law",
+       "kind": "regulation",
+       "title": "小型無人機等飛行禁止法 — 対象施設の周辺地域（おおむね 1,000m）",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-park-ordinance",
+       "kind": "regulation",
+       "title": "米子市都市公園条例 — 都市公園内での無人航空機の使用",
+       "legalTier": 2,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31202-heritage-protection",
+       "kind": "regulation",
+       "title": "文化財保護法第125条 / 米子市文化財保護条例 — 史跡内の現状変更",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "非該当"
+      },
+      {
+       "id": "31-pref-nuisance-prevention",
+       "kind": "regulation",
+       "title": "鳥取県迷惑行為等防止条例 — 公衆密集地周辺での迷惑行為",
+       "legalTier": 2,
+       "baseStatus": "yellow",
+       "verdict": "needs_procedure",
+       "appliedPermits": [],
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。"
+      },
+      {
+       "id": "method_night",
+       "kind": "flight_condition",
+       "title": "夜間飛行",
+       "legalTier": 1,
+       "baseStatus": "green",
+       "baseExcludedAs": "model_aircraft",
+       "verdict": "no_procedure",
+       "appliedPermits": [],
+       "reason": "対象外（模型航空機）：100g 未満の機体は航空法の無人航空機に当たりません（DID・空港等周辺・150m 以上の許可、飛行の方法の承認、機体登録、飛行計画の通報、飛行日誌の対象外）。参照先：e-Gov 法令検索 航空法（航空法第134条の3） https://laws.e-gov.go.jp/law/327AC0000000231 ／ e-Gov 法令検索 航空法施行規則（航空法施行規則第239条の2） https://laws.e-gov.go.jp/law/327M50000800056 ／ 国土交通省「レーザー照射や凧揚げの規制について」 https://www.mlit.go.jp/koku/koku_tk1_000048.html ／ 国土交通省「航空機の飛行に影響を及ぼすおそれのある行為（気球、花火、凧揚げ等）」 https://www.mlit.go.jp/common/001708524.pdf ／ 国土交通省「無人航空機の飛行の安全に関する教則」第5版 https://www.mlit.go.jp/common/002010809.pdf ／ 警察庁「小型無人機等飛行禁止法関係」 https://www.npa.go.jp/bureau/security/kogatamujinki/index.html ／ 国土交通省「無人航空機の飛行ルール」（100g 未満の機体・空港等の周辺の記述） https://www.mlit.go.jp/koku/koku_fr10_000040.html ／ 国土交通省「緊急用務空域の Q&A」 https://www.mlit.go.jp/koku/content/001407133.pdf ／ 国土交通省「無人航空機の飛行許可・承認手続」 https://www.mlit.go.jp/koku/koku_fr10_000042.html"
+      }
+     ],
+     "noFly": [],
+     "procedures": [
+      {
+       "legalTier": 2,
+       "reason": "該当の可能性（要確認）。判定地点は 庁舎「米子市役所」からおよそ 0 m。鳥取県迷惑行為等防止条例の運用上、施設管理者との事前調整が推奨されます。",
+       "itemId": "31-pref-nuisance-prevention",
+       "id": "verdict-31-pref-nuisance-prevention",
+       "title": "施設管理者との事前調整（県条例）",
+       "submitTo": "周辺の施設の管理者・自治体の担当部署",
+       "deadline": {
+        "label": "管理者の定めによる（未収録）。早めに管理者へ確認してください",
+        "leadDays": null
+       }
+      }
+     ],
+     "done": [],
+     "perFlightDuties": [
+      {
+       "id": "model-aircraft-control-zone-check",
+       "title": "許可か通報かの確認（管制圏・情報圏・高度変更禁止空域・特別管制空域の内か外か）",
+       "kind": "per_flight",
+       "detail": "このアプリは管制圏・情報圏・高度変更禁止空域・特別管制空域・航空路を収録していません。空港等の周辺、または航空路内の地表から 150m 以上・航空路外の 250m 以上を飛ぶ場合は、飛行の前に、飛行場所が内側（許可）か外側（通報）かを、空港事務所・管制機関・空港管理者に確かめてください。内側なら許可を得てから、外側なら事前に通報してから飛行します（航空法第134条の3）。これらに当たらない場所・高さなら、この手続きの対象にならない可能性があります（参照先で確認）。"
+      },
+      {
+       "id": "emergency-airspace-check",
+       "title": "緊急用務空域の指定の確認",
+       "kind": "per_flight",
+       "detail": "飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+      }
+     ],
+     "permits": []
+    },
+    "droneWeightG": 50,
+    "prefill": [
+     {
+      "dipsFieldLabel": "機体の重量区分（DRS 登録要否）",
+      "value": "50 g（100g 未満 → 航空法上の無人航空機に非該当）",
+      "source": "入力（機体重量）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "リモートID 搭載（DRS）",
+      "value": "対象外（100g 未満）",
+      "source": "既定（制度上の原則）",
+      "system": "DRS"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の緯度（十進度）",
+      "value": "35.427800",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲の経度（十進度）",
+      "value": "133.331400",
+      "source": "入力（判定地点）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行範囲（住所・地名）",
+      "value": "緯度 35.427800 / 経度 133.331400 付近（住所未解決）",
+      "source": "入力（座標から補完）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行の種類（特定飛行の区分）",
+      "value": "夜間飛行",
+      "source": "入力／判定（飛行方法・空域フラグ）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "立入管理措置（第三者上空の別）",
+      "value": "未選択（カテゴリー切り分けのため選択してください）",
+      "source": "入力（立入管理措置）",
+      "system": "DIPS 2.0"
+     },
+     {
+      "dipsFieldLabel": "飛行予定日（飛行期間の開始日）",
+      "value": "未入力（飛行予定日を入力してください）",
+      "source": "既定（未入力）",
+      "system": "DIPS 2.0"
+     }
+    ],
+    "evidenceId": "ev_1804b6d4330a18e5",
+    "checkEvidenceId": "ev_c6caabcb31636569",
+    "engineVersion": "soraban-0.4.0-verdict-2026-10",
+    "checkedAt": "2026-10-20T00:00:00.000Z",
+    "muniCode": "31202",
+    "lat": 35.4278,
+    "lng": 133.3314,
+    "derivedAirspaceFlags": [],
+    "autoDidStatus": "not_applicable",
+    "flags": [
+     "method_night"
+    ],
+    "datasets": [
+     {
+      "id": "airports-seed",
+      "name": "空港（山陰・但馬の供用中空港）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-05-14"
+     },
+     {
+      "id": "did-r2",
+      "name": "国土数値情報 人口集中地区データ（A16）令和2年",
+      "baseYear": 2020,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "heritage-seed",
+      "name": "指定史跡（10 市町）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "industrial-exclusive",
+      "name": "工業専用地域（用途地域）— 市町村単位の収録",
+      "baseYear": 2019,
+      "verifiedAt": "2026-10-18"
+     },
+     {
+      "id": "parks-osm-seed",
+      "name": "都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap",
+      "baseYear": null,
+      "verifiedAt": "2026-05-19"
+     },
+     {
+      "id": "sensitive-facilities-seed",
+      "name": "県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算",
+      "baseYear": null,
+      "verifiedAt": "2026-04-30"
+     },
+     {
+      "id": "small-drone-law-facilities",
+      "name": "小型無人機等飛行禁止法 対象施設（鳥取県・島根県）",
+      "baseYear": 2026,
+      "verifiedAt": "2026-10-19"
+     }
+    ],
+    "amendments": [
+     {
+      "id": "mlit-kokuji-435",
+      "title": "国土交通省告示第435号（令和8年3月31日）— 工業専用地域内の区域を DID の飛行許可の対象から除く（航空法施行規則第236条の72）",
+      "effectiveDate": "2026-07-01",
+      "url": "https://www.mlit.go.jp/koku/koku_fr10_000041.html"
+     },
+     {
+      "id": "small-drone-law-2026",
+      "title": "改正小型無人機等飛行禁止法（令和8年法律第47号）— 周辺地域をおおむね 1,000m に拡大、周辺地域での飛行に罰則",
+      "effectiveDate": "2026-07-14",
+      "url": "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html"
+     }
+    ],
+    "smallDroneLawTriggered": false
+   }
+  }
+ }
+}

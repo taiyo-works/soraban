@@ -24,12 +24,24 @@ export type OpsAction =
   | "inspection.read"
   | "inspection.create"
   | "inspection.update"
-  | "inspection.void";
+  | "inspection.void"
+  // Sprint 12a：飛行計画・判定スナップショット・運航管理者の確認・よく使う地点
+  | "plan.read"
+  | "plan.create"
+  | "plan.update"
+  | "plan.cancel"
+  | "plan.confirm"
+  | "snapshot.read"
+  | "place.read"
+  | "place.create"
+  | "place.update"
+  | "place.void";
 
 export type AuthzContext = {
   /**
    * 対象の操縦者が、操作する利用者自身に結び付いているか（pilot.update・pilot.readLicenseNumber で使う）。
    * 飛行記録・日常点検では、記録の操縦者（実施者）の行が自分に結び付いているか（Sprint 11 設計 D「自分の分」）。
+   * 飛行計画（plan.create・plan.update・plan.cancel）では、計画の操縦者の行が自分に結び付いているか（Sprint 12a 設計 D）。
    * 操縦者の行に結び付いていない操縦者役割の利用者は、常に isSelf=false になる。
    */
   readonly isSelf?: boolean;
@@ -58,6 +70,16 @@ export const OPS_ACTIONS: readonly OpsAction[] = [
   "inspection.create",
   "inspection.update",
   "inspection.void",
+  "plan.read",
+  "plan.create",
+  "plan.update",
+  "plan.cancel",
+  "plan.confirm",
+  "snapshot.read",
+  "place.read",
+  "place.create",
+  "place.update",
+  "place.void",
 ];
 
 export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {}): boolean => {
@@ -66,6 +88,9 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "pilot.read":
     case "flight.read":
     case "inspection.read":
+    case "plan.read":
+    case "snapshot.read":
+    case "place.read":
       return true;
     case "pilot.update":
     case "pilot.readLicenseNumber":
@@ -74,6 +99,9 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "flight.readLicenseNumber":
     case "inspection.create":
     case "inspection.update":
+    case "plan.create":
+    case "plan.update":
+    case "plan.cancel":
       return role === "manager" || (role === "pilot" && ctx.isSelf === true);
     case "aircraft.create":
     case "aircraft.update":
@@ -86,6 +114,10 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "member.update":
     case "flight.void":
     case "inspection.void":
+    case "plan.confirm":
+    case "place.create":
+    case "place.update":
+    case "place.void":
       return role === "manager";
   }
 };

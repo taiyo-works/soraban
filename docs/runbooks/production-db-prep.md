@@ -40,7 +40,7 @@
   pnpm install
   ls packages/db/migrations
   ```
-  期待：`git remote -v` が `taiyo-works/soraban` を指す。`ls` に `0001_…sql` 〜 `0009_…sql` の 9 本が並ぶ。
+  期待：`git remote -v` が `taiyo-works/soraban` を指す。`ls` に `0001_…sql` 〜 `0011_…sql` の 11 本が並ぶ。
 - Neon コンソール（https://console.neon.tech）に入れること。Vercel（taiyo-works-projects チーム）に入れること（本番の章で使う）。
 
 ### 秘密の扱い（原則）
@@ -144,13 +144,13 @@ psql "$DATABASE_URL_UNPOOLED" -c "select rolname, rolsuper, rolcreatedb, rolcrea
    ```sh
    pnpm db:status
    ```
-   期待：`接続先 host=<ホスト名> … database=neondb`、`0001`〜`0009` がすべて「未適用」、`適用済み 0 件、未適用 9 件`。
+   期待：`接続先 host=<ホスト名> … database=neondb`、`0001`〜`0011` がすべて「未適用」、`適用済み 0 件、未適用 11 件`。
    **ここで表示された host が §1.2 の `<ホスト名>`（試験用ブランチ）であることを必ず確かめる。**
 2. 適用：
    ```sh
    pnpm db:migrate --target <ホスト名>
    ```
-   期待：`適用予定: 0001, …, 0009` のあと、`適用 0001_…sql（… ms）` から `適用 0009_…sql` まで 9 行。終了コード 0。
+   期待：`適用予定: 0001, …, 0011` のあと、`適用 0001_…sql（… ms）` から `適用 0011_…sql` まで 11 行。終了コード 0。
 3. **2 回目**を実行する：
    ```sh
    pnpm db:migrate --target <ホスト名>
@@ -160,7 +160,7 @@ psql "$DATABASE_URL_UNPOOLED" -c "select rolname, rolsuper, rolcreatedb, rolcrea
    ```sh
    pnpm db:status
    ```
-   期待：`適用済み 9 件、未適用 0 件`。「不一致」の行が出ない。
+   期待：`適用済み 11 件、未適用 0 件`。「不一致」の行が出ない。
 
 ランナーの動作（`packages/db/src/migrate.ts` を読んで確認）：
 - ホスト名に `-pooler` を含む接続文字列、`--target` 無し、`--target` と接続先の不一致は、**DB に接続する前に**中止する。
@@ -187,9 +187,22 @@ select 'record_versions UPDATE', has_table_privilege('soraban_app','record_versi
 select 'aircraft INSERT', has_table_privilege('soraban_app','aircraft','INSERT');
 select 'members SELECT', has_table_privilege('soraban_app','members','SELECT');
 select 'flight_records INSERT', has_table_privilege('soraban_app','flight_records','INSERT');
+select 'judgement_snapshots INSERT', has_table_privilege('soraban_app','judgement_snapshots','INSERT');
+select 'judgement_snapshots UPDATE', has_table_privilege('soraban_app','judgement_snapshots','UPDATE');
+select 'judgement_snapshots DELETE', has_table_privilege('soraban_app','judgement_snapshots','DELETE');
+select 'judgement_snapshots TRUNCATE', has_table_privilege('soraban_app','judgement_snapshots','TRUNCATE');
+select 'plan_confirmations INSERT', has_table_privilege('soraban_app','plan_confirmations','INSERT');
+select 'plan_confirmations UPDATE', has_table_privilege('soraban_app','plan_confirmations','UPDATE');
+select 'plan_confirmations DELETE', has_table_privilege('soraban_app','plan_confirmations','DELETE');
+select 'plan_confirmations TRUNCATE', has_table_privilege('soraban_app','plan_confirmations','TRUNCATE');
+select 'flight_plans INSERT', has_table_privilege('soraban_app','flight_plans','INSERT');
+select 'flight_plans UPDATE', has_table_privilege('soraban_app','flight_plans','UPDATE');
+select 'saved_places INSERT', has_table_privilege('soraban_app','saved_places','INSERT');
+select 'saved_places UPDATE', has_table_privilege('soraban_app','saved_places','UPDATE');
 select 'schema_migrations SELECT', has_table_privilege('soraban_app','schema_migrations','SELECT');
 select 'ops_bootstrap EXECUTE', has_function_privilege('soraban_app','ops_bootstrap(text,text,text)','EXECUTE');
 select 'verify_record_chain EXECUTE', has_function_privilege('soraban_app','verify_record_chain(text,uuid)','EXECUTE');
+select 'verify_judgement_snapshots EXECUTE', has_function_privilege('soraban_app','verify_judgement_snapshots(uuid)','EXECUTE');
 select 'neon_superuser member', pg_has_role('soraban_app','neon_superuser','member');
 SQL
 ```
@@ -207,9 +220,16 @@ SQL
 | aircraft INSERT（ヘッド表を直接書けない） | `f` |
 | members SELECT | `t` |
 | flight_records INSERT | `f` |
+| judgement_snapshots INSERT（追記専用） | `t` |
+| judgement_snapshots UPDATE・DELETE・TRUNCATE | `f`（3 行とも） |
+| plan_confirmations INSERT（追記専用） | `t` |
+| plan_confirmations UPDATE・DELETE・TRUNCATE | `f`（3 行とも） |
+| flight_plans INSERT・UPDATE（ヘッド表を直接書けない） | `f`（2 行とも） |
+| saved_places INSERT・UPDATE（ヘッド表を直接書けない） | `f`（2 行とも） |
 | schema_migrations SELECT | `t` |
 | ops_bootstrap EXECUTE | `f` |
 | verify_record_chain EXECUTE | `f` |
+| verify_judgement_snapshots EXECUTE | `f` |
 | neon_superuser member | `f` |
 
 #### B. `soraban_app` 自身で、実際に拒否されることを確かめる
@@ -248,7 +268,7 @@ psql "$REHEARSAL_APP_URL" -c "select * from verify_record_chain('member','000000
    ```sh
    curl -s http://localhost:3100/api/health/db
    ```
-   期待：`"configured":true`、`"reachable":true`、`"postgresMajorVersion":18`、`postgisVersion` が出る、`"latestAppliedMigration":"0009"`、`"hasPendingMigrations":false`。接続文字列やホスト名は返らない。
+   期待：`"configured":true`、`"reachable":true`、`"postgresMajorVersion":18`、`postgisVersion` が出る、`"latestAppliedMigration":"0011"`、`"hasPendingMigrations":false`。接続文字列やホスト名は返らない。
 3. 判定を 1 回行う：ブラウザで `http://localhost:3100` を開き、地点判定を 1 回実行する（判定の結果が出ること）。数秒後、オーナーで：
    ```sh
    psql "$DATABASE_URL_UNPOOLED" -c "select count(*), max(engine_version) from evidence_log"
@@ -296,8 +316,8 @@ psql "$REHEARSAL_APP_URL" -c "select * from verify_record_chain('member','000000
 | 1 | ブランチ | 対象ブランチが存在し、予行演習では親が `main`。`main` が既定ブランチのまま |
 | 2 | ロール | `neondb_owner` と `soraban_app`。`soraban_app` が `neon_superuser` に属さず、`rolsuper` などが偽 |
 | 3 | 拡張 | `postgis` が入っている（PostGIS 3.6 系） |
-| 4 | テーブル | そらばんの表（`regulations`、`regulation_zones`、`evidence_log`、`organizations`、`members`、`aircraft`、`pilots`、`daily_inspections`、`flight_records`、`record_versions`、`schema_migrations`）が `public` にある |
-| 5 | `schema_migrations` | 9 件（`0001`〜`0009`）。チェックサムはリポジトリのファイルと一致（エージェントが `sha256` を計算して突き合わせる） |
+| 4 | テーブル | そらばんの表（`regulations`、`regulation_zones`、`evidence_log`、`organizations`、`members`、`aircraft`、`pilots`、`daily_inspections`、`flight_records`、`saved_places`、`flight_plans`、`judgement_snapshots`、`plan_confirmations`、`record_versions`、`schema_migrations`）が `public` にある |
+| 5 | `schema_migrations` | 11 件（`0001`〜`0011`）。チェックサムはリポジトリのファイルと一致（エージェントが `sha256` を計算して突き合わせる） |
 | 6 | 権限 | §1.5 A の表のとおり |
 | 7 | トリガー | `record_versions` に追加前・追加後のトリガーがある。ヘッド表にもトリガーがある |
 | 8 | 判定証跡 | 判定 1 回のあと `evidence_log` が 1 行（本番確認の後）。個人情報（IP・User-Agent）が入っていない（`client_user_agent` が null） |
@@ -318,7 +338,7 @@ select extname, extversion from pg_extension order by extname;
 select table_name, table_type from information_schema.tables
 where table_schema = 'public' order by table_type, table_name;
 
--- 5. 適用記録（件数 9 とチェックサム）
+-- 5. 適用記録（件数 11 とチェックサム）
 select count(*) as n from schema_migrations;
 select version, name, checksum, applied_at, duration_ms from schema_migrations order by version;
 
@@ -398,7 +418,7 @@ select schema_name from information_schema.schemata where schema_name = 'neon_au
    ```sh
    pnpm db:status
    ```
-   期待：`適用済み 0 件、未適用 9 件`、host が本番。
+   期待：`適用済み 0 件、未適用 11 件`、host が本番。
 3. 適用：
    ```sh
    pnpm db:migrate --target <本番のホスト名>
@@ -409,7 +429,7 @@ select schema_name from information_schema.schemata where schema_name = 'neon_au
    pnpm db:migrate --target <本番のホスト名>
    pnpm db:status
    ```
-   期待：`未適用のマイグレーションはありません。`、`適用済み 9 件、未適用 0 件`。
+   期待：`未適用のマイグレーションはありません。`、`適用済み 11 件、未適用 0 件`。
 5. エージェントに依頼（第 2 章）：「本番の `main` ブランチを、読み取りだけで確認してください」。§2 のチェックリストの 1〜7 が OK（8 は判定の後）。
 6. `unset DATABASE_URL_UNPOOLED`。
 
@@ -435,7 +455,7 @@ README「ユーザー作業」手順 1 のとおり。
    ```sh
    curl -s https://soraban.futuretec.jp/api/health/db
    ```
-   期待：`"configured":true`、`"reachable":true`、`"latestAppliedMigration":"0009"`、`"hasPendingMigrations":false`。
+   期待：`"configured":true`、`"reachable":true`、`"latestAppliedMigration":"0011"`、`"hasPendingMigrations":false`。
    定期監視には使わない（呼ぶたびに計算資源が起動して従量課金が増える）。確認のために数回だけ。
 3. 本番で地点判定を 1 回実行する。エージェントに依頼：「本番の `main` の `evidence_log` が 1 行になったか、読み取りだけで確認してください」。期待：1 行（`engine_version` が `soraban-0.4.0-verdict-2026-10`、`client_user_agent` が null）。`EVIDENCE_LOG` は通常設定しない。
 
@@ -450,7 +470,7 @@ README「ユーザー作業」手順 1 のとおり。
 
 **DB 準備（第 3 章）が先。済んでいなければ始めない。** 詳細は `packages/db/README.md`「運航管理（Sprint 10）の本番準備」と `docs/sprints/sprint-10.md`「ユーザー作業」。ここには順序の要点だけを書く。
 
-1. 第 3 章が完了していること（`soraban_app` 作成、0001〜0009 の適用、`DATABASE_URL`）。0004〜0009 は第 3 章で同時に適用済み。
+1. 第 3 章が完了していること（`soraban_app` 作成、0001〜0011 の適用、`DATABASE_URL`）。0004〜0011 は第 3 章で同時に適用済み。
 2. Neon Auth の有効化（`main`。aws-ap-southeast-1 で有効にできるか確かめる。できなければ止めて planner に戻す）。Auth URL を控える。
 3. Google OAuth クライアント（Google Cloud）。リダイレクト URI は `{Auth URL}/callback/google`。
 4. Neon Auth の本番設定（信頼するドメイン、アプリ名、Allow Localhost を無効）。
@@ -523,4 +543,4 @@ README「ユーザー作業」手順 1 のとおり。
 
 ### この手順書の更新
 
-DB を乗り換える、マイグレーションが増える（`0009` → `00NN`）、Neon の画面が変わったときは、この手順書の期待値（件数 9、最新版 `0009`）と画面の名称を直す。
+DB を乗り換える、マイグレーションが増える（`0011` → `00NN`）、Neon の画面が変わったときは、この手順書の期待値（件数 11、最新版 `0011`）と画面の名称を直す。

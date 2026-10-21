@@ -30,26 +30,26 @@ import {
 
 type Input = Readonly<Record<string, unknown>>;
 
-const nowOf = (ctx: OpsContext): Date => (ctx.now ? ctx.now() : new Date());
+export const nowOf = (ctx: OpsContext): Date => (ctx.now ? ctx.now() : new Date());
 
-const invalid = <T>(v: RecordValidated<T>, extra?: { errors: Record<string, string>; codes: Record<string, string> }): never => {
+export const invalid = <T>(v: RecordValidated<T>, extra?: { errors: Record<string, string>; codes: Record<string, string> }): never => {
   const errors = { ...(extra?.errors ?? {}), ...(v.ok ? {} : v.errors) };
   const codes = { ...(extra?.codes ?? {}), ...(v.ok ? {} : v.codes) };
   throw new OpsError(400, "invalid_input", errors, codes);
 };
 
-const fieldError = (key: string, code: string, message: string): never => {
+export const fieldError = (key: string, code: string, message: string): never => {
   throw new OpsError(400, "invalid_input", { [key]: message }, { [key]: code });
 };
 
-const pickFields = (input: Input, fields: Readonly<Record<string, string>>): Record<string, unknown> => {
+export const pickFields = (input: Input, fields: Readonly<Record<string, string>>): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
   for (const k of Object.keys(fields)) if (k in input) out[k] = input[k];
   return out;
 };
 
 /** 利用者に結び付いた（取消していない）操縦者の行。無ければ null。 */
-const myPilot = async (ctx: OpsContext): Promise<PilotRow | null> =>
+export const myPilot = async (ctx: OpsContext): Promise<PilotRow | null> =>
   store.findPilotByMember(ctx.db, ctx.member.org_id, ctx.member.id);
 
 /**
@@ -64,14 +64,14 @@ const assertMayCreate = async (ctx: OpsContext, action: "flight.create" | "inspe
   return mine;
 };
 
-const loadAircraftForRecord = async (ctx: OpsContext, aircraftId: string, creating: boolean) => {
+export const loadAircraftForRecord = async (ctx: OpsContext, aircraftId: string, creating: boolean) => {
   const a = await store.getAircraft(ctx.db, ctx.member.org_id, aircraftId);
   if (!a) throw new OpsError(404, "not_found");
   if (creating && (a.voided_at !== null || a.status === "deregistered")) throw new OpsError(409, "aircraft_unavailable");
   return a;
 };
 
-const loadPilotForRecord = async (ctx: OpsContext, pilotId: string, key: string, unchanged: boolean) => {
+export const loadPilotForRecord = async (ctx: OpsContext, pilotId: string, key: string, unchanged: boolean) => {
   const p = await store.getPilot(ctx.db, ctx.member.org_id, pilotId);
   if (!p) throw new OpsError(404, "not_found");
   if (p.voided_at !== null && !unchanged) fieldError(key, "pilot_voided", "取消された操縦者は選べません");
@@ -87,6 +87,14 @@ export type DefectDto = {
   readonly action: string | null;
   readonly confirmerName: string | null;
 };
+
+export type JudgementLink = "linked" | "not_required" | "missing";
+
+/** 「判定の根拠が紐づいていません」（judgementLink が missing のとき、一覧と詳細に出す）。 */
+export const JUDGEMENT_LINK_MISSING_LABEL = "判定の根拠が紐づいていません";
+
+export const judgementLinkOf = (planId: string | null, specificFlightTypes: readonly string[]): JudgementLink =>
+  planId !== null ? "linked" : specificFlightTypes.length > 0 ? "missing" : "not_required";
 
 export type FlightDto = {
   readonly id: string;
@@ -104,6 +112,11 @@ export type FlightDto = {
   readonly dailyInspectionId: string | null;
   readonly flightPlanId: string | null;
   readonly snapshotId: string | null;
+  /**
+   * 判定の根拠との紐付け（Sprint 12a）。linked＝計画あり／not_required＝特定飛行の形態なし・計画なし／
+   * missing＝特定飛行の形態があるのに計画なし（「判定の根拠が紐づいていません」と表示する）。
+   */
+  readonly judgementLink: JudgementLink;
   readonly purpose: string;
   readonly waypoints: string | null;
   readonly specificFlightTypes: readonly string[];
@@ -135,8 +148,8 @@ export type FlightDto = {
   readonly updatedAt: string | null;
 };
 
-const num = (v: string | number | null): number | null => (v === null ? null : Number(v));
-const asDate = (v: unknown): Date => (v instanceof Date ? v : new Date(String(v)));
+export const num = (v: string | number | null): number | null => (v === null ? null : Number(v));
+export const asDate = (v: unknown): Date => (v instanceof Date ? v : new Date(String(v)));
 
 const defectDto = (d: DefectData): DefectDto => ({
   occurredOn: d.occurred_on,
@@ -164,6 +177,7 @@ const flightDto = (r: FlightWithTotal, mine: PilotRow | null, ctx: OpsContext, r
     dailyInspectionId: r.daily_inspection_id,
     flightPlanId: r.flight_plan_id,
     snapshotId: r.snapshot_id,
+    judgementLink: judgementLinkOf(r.flight_plan_id, r.specific_flight_types),
     purpose: r.purpose,
     waypoints: r.waypoints,
     specificFlightTypes: r.specific_flight_types,
@@ -243,13 +257,19 @@ export const getFlight = async (ctx: OpsContext, id: string): Promise<FlightDto>
 };
 
 /** 保存は止めない警告（設計 E）。 */
-export type RecordWarning = "no_inspection_on_day" | "recent_inspection_abnormal" | "license_expired" | "aircraft_suspended";
+export type RecordWarning =
+  | "no_inspection_on_day"
+  | "recent_inspection_abnormal"
+  | "license_expired"
+  | "aircraft_suspended"
+  | "differs_from_plan";
 
 export const WARNING_MESSAGES: Readonly<Record<RecordWarning, string>> = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
   recent_inspection_abnormal: "この機体の直近の日常点検に「異常」があります。",
   license_expired: "操縦者の技能証明の有効期限が飛行日より前です。",
   aircraft_suspended: "この機体は休止中です。",
+  differs_from_plan: "飛行計画と違う機体・操縦者・時間帯で記録されています。",
 };
 
 const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<RecordWarning[]> => {
@@ -264,7 +284,46 @@ const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<Reco
   const expires = p ? dateOnly(p.license_expires_on) : null;
   if (expires && expires < f.flight_date_text) out.push("license_expired");
   if (a?.status === "suspended") out.push("aircraft_suspended");
+  // 計画と違う機体・操縦者・時間帯のとき（現場の差し替えがありうるため、保存は止めない）
+  if (f.flight_plan_id) {
+    const plan = await store.getPlan(ctx.db, ctx.member.org_id, f.flight_plan_id);
+    if (plan) {
+      const start = asDate(plan.planned_start_at).getTime();
+      const end = start + plan.duration_minutes * 60_000;
+      if (
+        plan.aircraft_id !== f.aircraft_id ||
+        plan.pilot_id !== f.pilot_id ||
+        asDate(f.takeoff_at).getTime() < start ||
+        asDate(f.landing_at).getTime() > end
+      ) {
+        out.push("differs_from_plan");
+      }
+    }
+  }
   return out;
+};
+
+/**
+ * 飛行計画との紐付けを確かめる（Sprint 12a 設計 G）。他の組織の計画は 404、中止した計画は 409（plan_cancelled）。
+ * snapshot_id は計画の現在のスナップショットをサーバーが入れる（リクエストの snapshotId は読まない）。
+ */
+const resolvePlanLink = async (
+  ctx: OpsContext,
+  raw: unknown,
+): Promise<{ readonly planId: string; readonly snapshotId: string } | null> => {
+  if (raw === undefined || raw === null || raw === "") return null;
+  if (typeof raw !== "string" || !isUuid(raw)) fieldError("flightPlanId", "invalid", "飛行計画が正しくありません");
+  const plan = await store.getPlan(ctx.db, ctx.member.org_id, (raw as string).toLowerCase());
+  if (!plan) throw new OpsError(404, "not_found");
+  if (plan.voided_at !== null) throw new OpsError(409, "plan_cancelled");
+  return { planId: plan.id, snapshotId: plan.current_snapshot_id };
+};
+
+/** この計画に結びついた（取消していない）飛行記録。 */
+export const listFlightsForPlan = async (ctx: OpsContext, planId: string): Promise<FlightDto[]> => {
+  assertCan(ctx, "flight.read");
+  const mine = await myPilot(ctx);
+  return (await store.listFlightsByPlan(ctx.db, ctx.member.org_id, planId)).map((r) => flightDto(r, mine, ctx, false));
 };
 
 /**
@@ -272,9 +331,9 @@ const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<Reco
  * 別の利用者の作成なら 409（request_conflict）。共用の端末で前の利用者の下書きの識別子が残っていた場合などに、
  * 他人の記録を返さないため。
  */
-const existingRequest = async (
+export const existingRequest = async (
   ctx: OpsContext,
-  entityType: "flight_record" | "daily_inspection",
+  entityType: "flight_record" | "daily_inspection" | "flight_plan",
   requestId: string,
 ): Promise<string | null> => {
   const owner = await store.findRequestOwner(ctx.db, ctx.member.org_id, entityType, requestId);
@@ -284,7 +343,7 @@ const existingRequest = async (
 };
 
 /** API の UUID の比較用（大文字・小文字を区別しない）。 */
-const normId = (v: unknown): unknown => (typeof v === "string" ? v.toLowerCase() : v);
+export const normId = (v: unknown): unknown => (typeof v === "string" ? v.toLowerCase() : v);
 
 export type SaveResult<T> = { readonly created: boolean; readonly record: T; readonly warnings: readonly RecordWarning[] };
 
@@ -315,6 +374,7 @@ export const createFlight = async (ctx: OpsContext, body: unknown): Promise<Save
   await loadAircraftForRecord(ctx, v.data.aircraft_id, true);
   const pilot = await loadPilotForRecord(ctx, v.data.pilot_id, "pilotId", false);
   await checkInspectionLink(ctx, v.data.daily_inspection_id, v.data.aircraft_id);
+  const link = await resolvePlanLink(ctx, input["flightPlanId"]);
   const id = randomUUID();
   try {
     await store.appendVersion(ctx.db, {
@@ -324,8 +384,8 @@ export const createFlight = async (ctx: OpsContext, body: unknown): Promise<Save
       op: "create",
       data: {
         ...v.data,
-        flight_plan_id: null,
-        snapshot_id: null,
+        flight_plan_id: link?.planId ?? null,
+        snapshot_id: link?.snapshotId ?? null,
         // 作成時点の写し（画面から送らせない。設計 B）
         pilot_name: pilot.full_name,
         pilot_license_number: pilot.license_number,
@@ -372,6 +432,24 @@ export const updateFlight = async (ctx: OpsContext, id: string, body: unknown): 
   }
   const pilot = await loadPilotForRecord(ctx, v.data.pilot_id, "pilotId", !pilotChanged);
   await checkInspectionLink(ctx, v.data.daily_inspection_id, v.data.aircraft_id);
+  // 飛行計画の紐付け：NULL のときだけ後から設定できる。設定した後の付け替え・解除はできない（誤りは取消して作り直す）
+  let planId = (base["flight_plan_id"] as string | null | undefined) ?? null;
+  let snapshotId = (base["snapshot_id"] as string | null | undefined) ?? null;
+  if ("flightPlanId" in input) {
+    const raw = input["flightPlanId"];
+    const requested =
+      raw === undefined || raw === null || raw === "" ? null : typeof raw === "string" && isUuid(raw) ? raw.toLowerCase() : "invalid";
+    if (requested === "invalid") fieldError("flightPlanId", "invalid", "飛行計画が正しくありません");
+    if (planId !== null) {
+      if (requested !== planId) {
+        fieldError("flightPlanId", "plan_immutable", "飛行計画は後から付け替え・解除できません。誤りは取り消して作り直してください");
+      }
+    } else if (requested !== null) {
+      const link = await resolvePlanLink(ctx, requested);
+      planId = link?.planId ?? null;
+      snapshotId = link?.snapshotId ?? null;
+    }
+  }
   await store.appendVersion(ctx.db, {
     orgId: ctx.member.org_id,
     entityType: "flight_record",
@@ -379,8 +457,8 @@ export const updateFlight = async (ctx: OpsContext, id: string, body: unknown): 
     op: "update",
     data: {
       ...v.data,
-      flight_plan_id: base["flight_plan_id"] ?? null,
-      snapshot_id: base["snapshot_id"] ?? null,
+      flight_plan_id: planId,
+      snapshot_id: snapshotId,
       // 操縦者を変えない訂正では、記載した時点の写しを保つ。変えた場合は訂正の時点の写しにする
       pilot_name: pilotChanged ? pilot.full_name : current.pilot_name,
       pilot_license_number: pilotChanged ? pilot.license_number : current.pilot_license_number,

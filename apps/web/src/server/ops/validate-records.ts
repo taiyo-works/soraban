@@ -32,8 +32,8 @@ export type RecordValidated<T> =
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (v: unknown): v is string => typeof v === "string" && UUID.test(v);
-const str = (v: unknown): string | null => (typeof v === "string" && v.trim() !== "" ? v.trim() : null);
-const present = (v: unknown): boolean => v !== undefined && v !== null && v !== "";
+export const str = (v: unknown): string | null => (typeof v === "string" && v.trim() !== "" ? v.trim() : null);
+export const present = (v: unknown): boolean => v !== undefined && v !== null && v !== "";
 
 const isDate = (v: string): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
@@ -41,7 +41,7 @@ const isDate = (v: string): boolean => {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
 };
 
-const COORD_MESSAGES: Readonly<Record<CoordinateErrorCode | "coordinate_pair", string>> = {
+export const COORD_MESSAGES: Readonly<Record<CoordinateErrorCode | "coordinate_pair", string>> = {
   coordinate_format: "数値（10 進度）で入力してください",
   coordinate_range: "緯度は −90〜90、経度は −180〜180 の範囲です",
   coordinate_precision: "小数は 6 桁までです",
@@ -49,7 +49,7 @@ const COORD_MESSAGES: Readonly<Record<CoordinateErrorCode | "coordinate_pair", s
 };
 
 /** 誤りを集める小さな道具。 */
-const collector = () => {
+export const collector = () => {
   const errors: Record<string, string> = {};
   const codes: Record<string, string> = {};
   const fail = (key: string, code: string, message: string): void => {

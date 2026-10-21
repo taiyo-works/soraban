@@ -5,14 +5,22 @@
 import type {
   AircraftRow,
   DailyInspectionRow,
+  EvidenceLogInsert,
+  FlightPlanRow,
   FlightRecordRow,
+  JudgementSnapshotRow,
   MemberRow,
   OrganizationRow,
   PilotRow,
+  PlanConfirmationRow,
   RecordEntityTypeDb,
   RecordOpDb,
   RecordVersionRow,
+  SavedPlaceRow,
+  SnapshotReasonDb,
 } from "@soraban/db";
+import type { SpecificFlightFlag } from "@soraban/regulations";
+import { evidenceLogParams, INSERT_EVIDENCE_LOG_SQL } from "@soraban/db";
 
 /** pg.Pool が満たす最小インターフェース。 */
 export type OpsDb = {
@@ -50,6 +58,7 @@ export const mapDbError = (e: unknown): never => {
     case "23505": {
       const c = typeof o.constraint === "string" ? o.constraint : "";
       if (c.endsWith("_request")) throw new OpsError(409, "duplicate_request");
+      if (c.includes("saved_places_name")) throw new OpsError(409, "duplicate_name");
       throw new OpsError(409, c.includes("registration") ? "duplicate_registration" : c.includes("email") ? "duplicate_email" : c.includes("pilots_member") ? "member_already_linked" : "duplicate");
     }
     case "23503":
@@ -85,38 +94,60 @@ export type AppendVersion = {
   readonly expectedVersion?: number;
 };
 
-/** 版を 1 つ追加する。version_no・created_at・prev_hash・content_hash は DB が決める。 */
-export const appendVersion = async (db: OpsDb, v: AppendVersion): Promise<number> => {
+/** トランザクションの中で使う接続（pg.PoolClient が満たす最小インターフェース）。 */
+export type OpsTx = {
+  query: <R = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<{ rows: R[]; rowCount: number | null }>;
+};
+
+/**
+ * 版を 1 つ追加する（呼び出し側が開いたトランザクションの中で）。version_no・created_at・prev_hash・content_hash は DB が決める。
+ * 失敗しても rollback はしない（呼び出し側の withTransaction が行う）。
+ */
+export const appendVersionOn = async (c: OpsTx, v: AppendVersion): Promise<number> => {
+  if (v.expectedVersion !== undefined) {
+    await c.query("select set_config('soraban.expected_version', $1, true)", [String(v.expectedVersion)]);
+  }
+  const r = await c.query<{ version_no: number }>(
+    `insert into record_versions (org_id, entity_type, entity_id, op, data, reason, actor_kind, actor_member_id)
+     values ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
+     returning version_no`,
+    [
+      v.orgId,
+      v.entityType,
+      v.entityId,
+      v.op,
+      JSON.stringify(v.data),
+      v.reason,
+      v.actorMemberId ? "member" : "system",
+      v.actorMemberId,
+    ],
+  );
+  return r.rows[0]!.version_no;
+};
+
+/**
+ * 1 つのトランザクションで処理する。どれかが失敗したら全部取り消す（コミット時に検査される遅延可能な外部キーの失敗も含む）。
+ * DB の例外は OpsError に写す。OpsError はそのまま投げる。
+ */
+export const withTransaction = async <T,>(db: OpsDb, fn: (c: OpsTx) => Promise<T>): Promise<T> => {
   const c = await db.connect();
   try {
     await c.query("begin");
-    if (v.expectedVersion !== undefined) {
-      await c.query("select set_config('soraban.expected_version', $1, true)", [String(v.expectedVersion)]);
-    }
-    const r = await c.query<{ version_no: number }>(
-      `insert into record_versions (org_id, entity_type, entity_id, op, data, reason, actor_kind, actor_member_id)
-       values ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
-       returning version_no`,
-      [
-        v.orgId,
-        v.entityType,
-        v.entityId,
-        v.op,
-        JSON.stringify(v.data),
-        v.reason,
-        v.actorMemberId ? "member" : "system",
-        v.actorMemberId,
-      ],
-    );
+    const r = await fn(c);
     await c.query("commit");
-    return r.rows[0]!.version_no;
+    return r;
   } catch (e) {
     await c.query("rollback").catch(() => undefined);
+    if (e instanceof OpsError) throw e;
     return mapDbError(e);
   } finally {
     c.release();
   }
 };
+
+/** 版を 1 つ追加する。version_no・created_at・prev_hash・content_hash は DB が決める。 */
+export const appendVersion = (db: OpsDb, v: AppendVersion): Promise<number> =>
+  withTransaction(db, (c) => appendVersionOn(c, v));
 
 // ---- 読み出し ------------------------------------------------
 
@@ -331,10 +362,11 @@ export const countInspectionsOn = async (db: OpsDb, orgId: string, aircraftId: s
 export const findRequestOwner = async (
   db: OpsDb,
   orgId: string,
-  entityType: "flight_record" | "daily_inspection",
+  entityType: "flight_record" | "daily_inspection" | "flight_plan",
   requestId: string,
 ): Promise<{ readonly id: string; readonly actor_member_id: string | null } | null> => {
-  const table = entityType === "flight_record" ? "flight_records" : "daily_inspections";
+  const table =
+    entityType === "flight_record" ? "flight_records" : entityType === "flight_plan" ? "flight_plans" : "daily_inspections";
   return (
     (
       await db.query<{ id: string; actor_member_id: string | null }>(
@@ -347,3 +379,238 @@ export const findRequestOwner = async (
     ).rows[0] ?? null
   );
 };
+
+// ---- 飛行計画・判定スナップショット・確認・よく使う地点（Sprint 12a） --------
+
+/** 地点判定の証跡を evidence_log に書く（同じトランザクションの中で。EVIDENCE_LOG の設定に関係なく。同じ ID は無視する）。 */
+export const insertEvidenceOn = async (c: OpsTx, row: EvidenceLogInsert): Promise<void> => {
+  await c.query(INSERT_EVIDENCE_LOG_SQL, evidenceLogParams(row) as unknown[]);
+};
+
+export type SnapshotInsert = {
+  readonly id: string;
+  readonly orgId: string;
+  readonly planId: string;
+  readonly reason: SnapshotReasonDb;
+  readonly input: unknown;
+  readonly result: unknown;
+  readonly verdictLevel: string;
+  readonly verdictUnknownCount: number;
+  readonly category: string;
+  readonly engineVersion: string;
+  readonly checkedAt: string;
+  readonly checkEvidenceId: string;
+  readonly diagnosisEvidenceId: string;
+  readonly datasets: unknown;
+  readonly proceduresRevision: number;
+  readonly proceduresVerifiedAt: string;
+  readonly createdByMemberId: string;
+};
+
+/** スナップショットを 1 件追加する。seq・prev_hash・content_hash・created_at は DB が決める（送らない）。 */
+export const insertSnapshotOn = async (c: OpsTx, s: SnapshotInsert): Promise<void> => {
+  await c.query(
+    `insert into judgement_snapshots (id, org_id, plan_id, reason, input, result, verdict_level, verdict_unknown_count,
+       category, engine_version, checked_at, check_evidence_id, diagnosis_evidence_id, datasets,
+       procedures_revision, procedures_verified_at, created_by_member_id)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17)`,
+    [
+      s.id,
+      s.orgId,
+      s.planId,
+      s.reason,
+      JSON.stringify(s.input),
+      JSON.stringify(s.result),
+      s.verdictLevel,
+      s.verdictUnknownCount,
+      s.category,
+      s.engineVersion,
+      s.checkedAt,
+      s.checkEvidenceId,
+      s.diagnosisEvidenceId,
+      JSON.stringify(s.datasets),
+      s.proceduresRevision,
+      s.proceduresVerifiedAt,
+      s.createdByMemberId,
+    ],
+  );
+};
+
+/** 計画の行に、機体・操縦者・現在のスナップショットの要約を付けたもの。result の全文は読まない（一覧で重くしない）。 */
+export type PlanWithJoins = FlightPlanRow & {
+  readonly planned_date_text: string;
+  readonly registration_mark: string;
+  readonly model_name: string;
+  readonly aircraft_max_takeoff_weight_kg: string | null;
+  readonly pilot_name: string;
+  readonly pilot_member_id: string | null;
+  readonly snapshot_seq: number;
+  readonly snapshot_reason: SnapshotReasonDb;
+  readonly snapshot_input: Record<string, unknown>;
+  readonly verdict_level: JudgementSnapshotRow["verdict_level"];
+  readonly verdict_unknown_count: number;
+  readonly category: JudgementSnapshotRow["category"];
+  readonly engine_version: string;
+  readonly snapshot_checked_at: string | Date;
+  readonly check_evidence_id: string;
+  readonly diagnosis_evidence_id: string;
+  readonly snapshot_datasets: JudgementSnapshotRow["datasets"];
+  readonly procedures_revision: number;
+  readonly procedures_verified_at: string;
+  readonly snapshot_created_at: string | Date;
+  /** 通報の要否の判定に使う結果の一部（droneWeightG・category・flags・verdict.purpose）。 */
+  readonly snapshot_result_slim: {
+    readonly droneWeightG: number | null;
+    readonly category: string | null;
+    readonly flags: readonly SpecificFlightFlag[] | null;
+    readonly verdict: { readonly purpose: string | null };
+  };
+};
+
+const PLAN_SELECT = `select p.*, to_char(p.planned_date, 'YYYY-MM-DD') as planned_date_text,
+        a.registration_mark, a.model_name, a.max_takeoff_weight_kg as aircraft_max_takeoff_weight_kg,
+        pl.full_name as pilot_name, pl.member_id as pilot_member_id,
+        s.seq as snapshot_seq, s.reason as snapshot_reason, s.input as snapshot_input,
+        s.verdict_level, s.verdict_unknown_count, s.category, s.engine_version,
+        s.checked_at as snapshot_checked_at, s.check_evidence_id, s.diagnosis_evidence_id,
+        s.datasets as snapshot_datasets, s.procedures_revision, s.procedures_verified_at,
+        s.created_at as snapshot_created_at,
+        jsonb_build_object(
+          'droneWeightG', s.result->'droneWeightG',
+          'category', s.result->'category',
+          'flags', s.result->'flags',
+          'verdict', jsonb_build_object('purpose', s.result->'verdict'->'purpose')
+        ) as snapshot_result_slim
+   from flight_plans p
+   join aircraft a on a.id = p.aircraft_id
+   join pilots pl on pl.id = p.pilot_id
+   join judgement_snapshots s on s.id = p.current_snapshot_id`;
+
+export const getPlan = async (db: OpsDb, orgId: string, id: string): Promise<PlanWithJoins | null> =>
+  (await db.query<PlanWithJoins>(`${PLAN_SELECT} where p.org_id = $1 and p.id = $2`, [orgId, id])).rows[0] ?? null;
+
+export type PlanFilter = {
+  readonly aircraftId?: string;
+  readonly pilotId?: string;
+  /** 予定日（JST の日付）。両端を含む。 */
+  readonly from?: string;
+  readonly to?: string;
+  readonly includeVoided?: boolean;
+  readonly voidedOnly?: boolean;
+  readonly oldestFirst?: boolean;
+};
+
+/** 計画の一覧（予定開始の新しい順、最大 500 件。oldestFirst なら古い順）。 */
+export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promise<PlanWithJoins[]> => {
+  const where = ["p.org_id = $1"];
+  const params: unknown[] = [orgId];
+  if (f.aircraftId) where.push(`p.aircraft_id = $${params.push(f.aircraftId)}`);
+  if (f.pilotId) where.push(`p.pilot_id = $${params.push(f.pilotId)}`);
+  if (f.from) where.push(`p.planned_date >= $${params.push(f.from)}::date`);
+  if (f.to) where.push(`p.planned_date <= $${params.push(f.to)}::date`);
+  if (f.voidedOnly) where.push("p.voided_at is not null");
+  else if (!f.includeVoided) where.push("p.voided_at is null");
+  const dir = f.oldestFirst ? "asc" : "desc";
+  return (
+    await db.query<PlanWithJoins>(
+      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT}`,
+      params,
+    )
+  ).rows;
+};
+
+/** 計画の確認の記録（古い順）。plan_ids は同じ組織の計画。 */
+export const listConfirmationsFor = async (
+  db: OpsDb,
+  orgId: string,
+  planIds: readonly string[],
+): Promise<PlanConfirmationRow[]> => {
+  if (planIds.length === 0) return [];
+  return (
+    await db.query<PlanConfirmationRow>(
+      `select * from plan_confirmations where org_id = $1 and plan_id = any($2::uuid[]) order by created_at, id`,
+      [orgId, [...planIds]],
+    )
+  ).rows;
+};
+
+export type SnapshotListRow = Omit<JudgementSnapshotRow, "result"> & { readonly created_by_name: string | null };
+export type SnapshotFullRow = JudgementSnapshotRow & { readonly created_by_name: string | null };
+
+const SNAPSHOT_LIST_COLUMNS = `s.id, s.org_id, s.plan_id, s.seq, s.reason, s.input, s.verdict_level, s.verdict_unknown_count,
+        s.category, s.engine_version, s.checked_at, s.check_evidence_id, s.diagnosis_evidence_id, s.datasets,
+        s.procedures_revision, s.procedures_verified_at, s.created_by_member_id, s.created_at, s.prev_hash, s.content_hash,
+        m.display_name as created_by_name`;
+
+/** 計画のスナップショットの一覧（result を除く。通し番号の順）。 */
+export const listSnapshots = async (db: OpsDb, orgId: string, planId: string): Promise<SnapshotListRow[]> =>
+  (
+    await db.query<SnapshotListRow>(
+      `select ${SNAPSHOT_LIST_COLUMNS}
+         from judgement_snapshots s left join members m on m.id = s.created_by_member_id
+        where s.org_id = $1 and s.plan_id = $2 order by s.seq`,
+      [orgId, planId],
+    )
+  ).rows;
+
+/** スナップショット 1 件（result を含む）。他の計画・他の組織のものは null。 */
+export const getSnapshot = async (
+  db: OpsDb,
+  orgId: string,
+  planId: string,
+  snapshotId: string,
+): Promise<SnapshotFullRow | null> =>
+  (
+    await db.query<SnapshotFullRow>(
+      `select s.*, m.display_name as created_by_name
+         from judgement_snapshots s left join members m on m.id = s.created_by_member_id
+        where s.org_id = $1 and s.plan_id = $2 and s.id = $3`,
+      [orgId, planId, snapshotId],
+    )
+  ).rows[0] ?? null;
+
+export type ConfirmationInsert = {
+  readonly orgId: string;
+  readonly planId: string;
+  readonly planVersion: number;
+  readonly snapshotId: string;
+  readonly decision: "approved" | "returned";
+  readonly reason: string | null;
+  readonly confirmerMemberId: string;
+};
+
+/**
+ * 確認を 1 件追加する。confirmer_name・self_confirmation・created_at・content_hash は DB が決める（送らない）。
+ * 計画の状態・版・スナップショットの検証も DB が行う（SB404／SB409）。
+ */
+export const insertConfirmation = async (db: OpsDb, i: ConfirmationInsert): Promise<string> =>
+  withTransaction(db, async (c) => {
+    const r = await c.query<{ id: string }>(
+      `insert into plan_confirmations (org_id, plan_id, plan_version, snapshot_id, decision, reason, confirmer_member_id)
+       values ($1, $2, $3, $4, $5, $6, $7) returning id`,
+      [i.orgId, i.planId, i.planVersion, i.snapshotId, i.decision, i.reason, i.confirmerMemberId],
+    );
+    return r.rows[0]!.id;
+  });
+
+export const getSavedPlace = async (db: OpsDb, orgId: string, id: string): Promise<SavedPlaceRow | null> =>
+  (await db.query<SavedPlaceRow>("select * from saved_places where org_id = $1 and id = $2", [orgId, id])).rows[0] ?? null;
+
+export const listSavedPlaces = async (db: OpsDb, orgId: string, includeVoided: boolean): Promise<SavedPlaceRow[]> =>
+  (
+    await db.query<SavedPlaceRow>(
+      `select * from saved_places where org_id = $1 ${includeVoided ? "" : "and voided_at is null"}
+        order by voided_at nulls first, name, id`,
+      [orgId],
+    )
+  ).rows;
+
+/** この計画に結びついた（取消していない）飛行記録。離陸の新しい順。 */
+export const listFlightsByPlan = async (db: OpsDb, orgId: string, planId: string): Promise<FlightWithTotal[]> =>
+  (
+    await db.query<FlightWithTotal>(
+      `${FLIGHT_SELECT} where f.org_id = $1 and f.flight_plan_id = $2 and f.voided_at is null
+        order by f.takeoff_at desc, f.id desc limit ${LIST_LIMIT}`,
+      [orgId, planId],
+    )
+  ).rows;

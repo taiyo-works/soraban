@@ -1404,3 +1404,22 @@ export {
   MODEL_AIRCRAFT_WEIGHT_TAG,
   modelAircraftManualOverride,
 } from "./model-aircraft";
+
+// ── 通報の要否の表示（Sprint 12a）──
+export type {
+  ReportRequirement,
+  ReportRequirementKind,
+  ReportRequirementSnapshot,
+} from "./report-requirement";
+export {
+  PLAN_JUDGEMENT_DISCLAIMER,
+  REPORT_EXCEPTION_PURPOSES,
+  REPORT_FIXED_NOTE,
+  REPORT_PURPOSE_EXCEPTION_NOTE,
+  REPORT_REASON,
+  REPORT_REQUIREMENT_KINDS,
+  REPORT_REQUIREMENT_LABEL,
+  reportFlightReason,
+  reportRequirement,
+  reportRequirementText,
+} from "./report-requirement";

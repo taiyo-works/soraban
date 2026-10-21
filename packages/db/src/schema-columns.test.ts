@@ -85,18 +85,27 @@ describe("行型とマイグレーションの列名", () => {
   // Sprint 10 契約 19：運航管理の表に、保存しない個人情報（生年月日・住所・電話・画像・マイナンバー）に当たる列がない。
   // 判定の証跡（evidence_log.resolved_address：判定地点の住所）は利用者の個人情報ではないため対象外。
   // Sprint 11 契約 20：加えて、位置の連続した軌跡（track）・端末の識別子（device）に当たる列もない。
+  // Sprint 12a：よく使う地点（saved_places）の address_text だけは、事業所などの所在地（個人の住所ではない。運航管理者が
+  // 社内拠点として登録する）のため許す。表と列を固定して例外にし、他の表・列には広げない。
   it("運航管理の表に、生年月日・住所・電話・画像・マイナンバー・軌跡・端末の識別子に当たる列がない", () => {
     const forbidden = /birth|address|phone|tel|image|photo|avatar|my_?number|track|device/i;
+    const siteAddress: Readonly<Record<string, readonly string[]>> = { saved_places: ["address_text"] };
     for (const table of OPS_TABLES) {
       const cols = fromSql.get(table);
       expect(cols, table).toBeDefined();
-      for (const c of cols ?? []) expect(c, `${table}.${c}`).not.toMatch(forbidden);
+      for (const c of cols ?? []) {
+        if (siteAddress[table]?.includes(c)) continue;
+        expect(c, `${table}.${c}`).not.toMatch(forbidden);
+      }
     }
+    expect(fromSql.get("saved_places")).toContain("address_text");
     // 運航管理のマイグレーション（0004 以降）の本文全体にも、禁止語の列を作る記述がない。
     const opsSql = readdirSync(MIGRATIONS)
       .filter((f) => f.endsWith(".sql") && Number(f.slice(0, 4)) >= 4)
       .map((f) => stripComments(readFileSync(path.join(MIGRATIONS, f), "utf8")))
-      .join("\n");
+      .join("\n")
+      // 事業所の所在地の列（上の例外）だけを検査から外す
+      .replace(/\baddress_text\s+text\b/g, "site_location_text text");
     expect(opsSql).not.toMatch(
       /\b\w*(birth|address|phone|image|photo|avatar|my_?number|track|device)\w*\s+(text|date|bytea|varchar|integer|jsonb|numeric|uuid|boolean|timestamptz)/i,
     );

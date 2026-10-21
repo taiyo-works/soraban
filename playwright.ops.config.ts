@@ -10,6 +10,10 @@ const PORT = Number(process.env.E2E_OPS_PORT ?? 3300);
 // __Secure- で始まる Cookie を http で扱えるよう、neon のサーバーは localhost（ブラウザが安全な接続とみなす）で開く。
 const NEON_PORT = Number(process.env.E2E_OPS_NEON_PORT ?? 3301);
 const MOCK_NEON_PORT = Number(process.env.E2E_MOCK_NEON_PORT ?? 3299);
+// Sprint 12a：国土地理院の逆ジオコーダの模擬サーバー（e2e/mock-gsi-server.mjs。通常の E2E と同じもの）。計画の保存時にサーバーが
+// 地点判定（市町村の特定）を実行するため、結果が外部サービスに左右されないよう、両方のアプリサーバーの呼び出し先をここに向ける。
+const MOCK_GSI_PORT = Number(process.env.E2E_OPS_MOCK_GSI_PORT ?? 3198);
+const MOCK_REVERSE_GEOCODER = `http://127.0.0.1:${MOCK_GSI_PORT}/reverse-geocoder/LonLatToAddress`;
 const DATABASE_URL = process.env.E2E_OPS_DATABASE_URL ?? "";
 if (!DATABASE_URL) {
   throw new Error("E2E_OPS_DATABASE_URL（soraban_app で接続する DB の接続文字列）を設定してください。");
@@ -39,6 +43,12 @@ export default defineConfig({
   },
   webServer: [
     {
+      command: `node e2e/mock-gsi-server.mjs ${MOCK_GSI_PORT}`,
+      url: `http://127.0.0.1:${MOCK_GSI_PORT}/health`,
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
+    {
       command: process.env.E2E_OPS_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${PORT} -H 127.0.0.1`,
       url: `http://127.0.0.1:${PORT}/api/health/db`,
       reuseExistingServer: false,
@@ -54,6 +64,7 @@ export default defineConfig({
         AUTH_TEST_SECRET: "e2e-only-not-a-secret",
         DATABASE_URL,
         EVIDENCE_LOG: "off",
+        GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         NEON_AUTH_BASE_URL: "",
         NEON_AUTH_COOKIE_SECRET: "",
         VERCEL_ENV: "",
@@ -79,6 +90,7 @@ export default defineConfig({
         AUTH_TEST_SECRET: "",
         DATABASE_URL,
         EVIDENCE_LOG: "off",
+        GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         VERCEL_ENV: "",
         NEXT_DIST_DIR: "",
       },

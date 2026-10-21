@@ -136,6 +136,7 @@ const WARNING_TEXT = {
   recent_inspection_abnormal: "この機体の直近の日常点検に「異常」があります。",
   license_expired: "操縦者の技能証明の有効期限が飛行日より前です。",
   aircraft_suspended: "この機体は休止中です。",
+  differs_from_plan: "飛行計画と違う機体・操縦者・時間帯で記録されています。",
 } as const;
 
 export type AircraftOption = {
@@ -525,6 +526,20 @@ export type FlightFormInitial = {
   }[];
 };
 
+/** 飛行計画から引き継ぐ値（サーバーが計画とスナップショットから作る）。 */
+export type FlightFromPlan = {
+  readonly planId: string;
+  readonly title: string;
+  readonly aircraftId: string;
+  readonly pilotId: string;
+  readonly purpose: string;
+  readonly placeName: string;
+  readonly lat: number;
+  readonly lng: number;
+  /** スナップショットの結果の flags（DID・空港の導出を含む）から写した特定飛行の形態。 */
+  readonly specificFlightTypes: readonly string[];
+};
+
 const emptyFlight = (aircraftId: string, pilotId: string, inspectionId: string): FlightState => ({
   clientRequestId: newRequestId(),
   aircraftId,
@@ -544,6 +559,16 @@ const emptyFlight = (aircraftId: string, pilotId: string, inspectionId: string):
   safetyIssue: "",
   safetyIssueDetail: "",
   defects: [],
+});
+
+const flightStateFromPlan = (p: FlightFromPlan, fixedPilotId: string | null): FlightState => ({
+  ...emptyFlight(p.aircraftId, fixedPilotId ?? p.pilotId, ""),
+  purpose: p.purpose,
+  takeoffPlace: p.placeName,
+  takeoffPos: posOf(p.lat, p.lng, null),
+  landingPlace: p.placeName,
+  landingPos: posOf(p.lat, p.lng, null),
+  specificFlightTypes: [...p.specificFlightTypes],
 });
 
 const flightStateFrom = (f: FlightFormInitial): FlightState => ({
@@ -587,6 +612,7 @@ export function FlightForm({
   initialInspectionId,
   editing,
   memberId,
+  fromPlan,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
@@ -598,12 +624,19 @@ export function FlightForm({
   readonly initialInspectionId?: string;
   /** 訂正のときの現在の内容（下書きは使わない）。 */
   readonly editing?: FlightFormInitial;
+  /** 飛行計画から作るとき（Sprint 12a 設計 G）。機体・操縦者・目的・場所・特定飛行の形態を引き継ぐ。離着陸の時刻は引き継がない。下書きは使わない。 */
+  readonly fromPlan?: FlightFromPlan;
 }) {
   const isEdit = editing !== undefined;
+  const usesDraft = !isEdit && fromPlan === undefined;
   const [v, setV] = useState<FlightState>(() =>
-    editing ? flightStateFrom(editing) : emptyFlight(initialAircraftId ?? "", fixedPilotId ?? "", initialInspectionId ?? ""),
+    editing
+      ? flightStateFrom(editing)
+      : fromPlan
+        ? flightStateFromPlan(fromPlan, fixedPilotId)
+        : emptyFlight(initialAircraftId ?? "", fixedPilotId ?? "", initialInspectionId ?? ""),
   );
-  const [loaded, setLoaded] = useState(isEdit);
+  const [loaded, setLoaded] = useState(!usesDraft);
   const [reason, setReason] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -624,7 +657,7 @@ export function FlightForm({
   // 下書きの読み込み（新規のときだけ）。点検の画面から来た場合は、その機体・点検を優先する。
   // localStorage はサーバーの描画では読めないため、描画の後に読む（次の処理単位で反映する）。
   useEffect(() => {
-    if (isEdit) return;
+    if (!usesDraft) return;
     const t = window.setTimeout(() => {
       // 共用の端末で、前の利用者の下書きを読まない・残さない
       clearOtherUsersDrafts(memberId);
@@ -651,8 +684,8 @@ export function FlightForm({
 
   // 下書きの保存（読み込みの後だけ。読み込み前の空の状態で上書きしない）
   useEffect(() => {
-    if (!isEdit && loaded) saveDraft(draftKey("flight", memberId), v);
-  }, [v, loaded, isEdit, memberId]);
+    if (usesDraft && loaded) saveDraft(draftKey("flight", memberId), v);
+  }, [v, loaded, usesDraft, memberId]);
 
   const set = <K extends keyof FlightState>(k: K, value: FlightState[K]) => setV((s) => ({ ...s, [k]: value }));
 
@@ -731,7 +764,11 @@ export function FlightForm({
     setMessage(null);
     const r = isEdit
       ? await trySend("PATCH", `/api/ops/flights/${editing.id}`, { ...body(), expectedVersion: editing.version, reason })
-      : await trySend("POST", "/api/ops/flights", { ...body(), clientRequestId: v.clientRequestId });
+      : await trySend("POST", "/api/ops/flights", {
+          ...body(),
+          clientRequestId: v.clientRequestId,
+          ...(fromPlan ? { flightPlanId: fromPlan.planId } : {}),
+        });
     setBusy(false);
     if (!r.ok) {
       if (r.status === 0 || r.status === 503 || r.status >= 500) {
@@ -755,7 +792,7 @@ export function FlightForm({
       setReason("");
       reloadAfterChange({ target: VERSION_NOTICE_TARGET, message: `${versionOf(r)}訂正しました。${note}` });
     } else {
-      clearDraft(draftKey("flight", memberId));
+      if (usesDraft) clearDraft(draftKey("flight", memberId));
       const id = String(r.data["id"]);
       setChangeFlash(`/ops/flights/${id}`, VERSION_NOTICE_TARGET, `飛行記録を保存しました。${note}`);
       window.location.assign(`/ops/flights/${id}`);
@@ -791,7 +828,12 @@ export function FlightForm({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={isEdit ? "飛行記録の訂正" : "飛行記録の入力"}>
-      {!isEdit ? (
+      {fromPlan ? (
+        <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="flight-from-plan">
+          飛行計画「{fromPlan.title}」から作ります。機体・操縦者・目的・場所・特定飛行の形態を引き継ぎました。離陸・着陸の時刻は、実際の時刻を入れてください。
+        </p>
+      ) : null}
+      {usesDraft ? (
         <DraftBar
           restored={restored}
           canDiscard={restored || flightHasInput(v)}

@@ -66,6 +66,8 @@ import {
   permitChecksFromPilotPermits,
   type DipsPermitChecks,
 } from "@/lib/permits";
+import { buildPlanHandoffHref } from "@/lib/plan-options";
+import { useOpsEntryAvailable } from "@/lib/ops-entry";
 import { RegulationMap, type MapPickMethod } from "./regulation-map";
 import { DiagnosisPanel } from "./diagnosis-panel";
 
@@ -265,6 +267,8 @@ type RegulationCheckerProps = {
 };
 
 export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
+  // 運航管理が有効でログイン済みのときだけ「この判定で飛行計画を作る」を出す（Sprint 12a J。無効のときは何も出さず通信もしない）。
+  const opsEntryAvailable = useOpsEntryAvailable();
   const [lat, setLat] = useState<string>(String(INITIAL_LOCATION.lat));
   const [lng, setLng] = useState<string>(String(INITIAL_LOCATION.lng));
   const [center, setCenter] = useState<LatLng>(INITIAL_LOCATION);
@@ -1654,6 +1658,27 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               </p>
             }
             actions={
+              <div className="flex flex-col gap-2 self-stretch sm:flex-row sm:self-start">
+              {opsEntryAvailable && canExportPdf ? (
+                // 判定の入力（座標・機体の重さ・フラグ・許可・予定日）だけを計画のフォームに引き継ぐ。結果は引き継がない（保存でサーバーが再実行する）。
+                <a
+                  href={buildPlanHandoffHref({
+                    lat,
+                    lng,
+                    weightG: droneWeightInput,
+                    flags: [...methodFlags, ...userAirspaceFlags],
+                    permits: buildCtx()?.pilotPermits ?? [],
+                    plannedDate,
+                    purpose,
+                    access: accessMode,
+                    observer: methodFlags.includes("method_bvlos") ? bvlosObserver : "",
+                  })}
+                  data-testid="create-plan-from-verdict"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-sharp bg-brand-700 px-4 text-xs font-medium text-paper transition-colors hover:bg-brand-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                >
+                  この判定で飛行計画を作る
+                </a>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void handlePdfExport()}
@@ -1664,6 +1689,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 <span aria-hidden className="font-mono text-[10px] tracking-[0.2em] opacity-70">▾</span>
                 {pdfBusy ? "PDF 生成中…" : "PDF 出力"}
               </button>
+              </div>
             }
           />
 

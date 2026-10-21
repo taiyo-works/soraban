@@ -3,13 +3,25 @@
 // - localhost・127.0.0.1 以外の接続先では実行を拒否する（本番に投入しない）。
 // - 2 組織、各役割の利用者（テスト用の本人確認 test に結び付け済み）、招待中の利用者、操縦者・機体を作る。
 // - Sprint 11：組織 A に既存の総飛行時間が 0 と 0 以外（600 分）の機体、操縦者の行に結び付いていない操縦者役割の利用者を加える。
+// - Sprint 12a：組織 A に最大離陸重量 0.9kg の機体（重量が分かる機体）と、よく使う地点「フューチャーテック株式会社 本社」を加える。
 // - 既に同じ名前の組織があれば何もしない。
 import pg from "pg";
 import { describeConnection } from "./config";
 
 export const OPS_TEST_ORGS = { a: "テスト組織A", b: "テスト組織B" } as const;
 /** 組織 A の機体の登録記号（Sprint 11）。 */
-export const OPS_TEST_AIRCRAFT = { zero: "JUSEEDA0001", initial600: "JUSEEDA0600" } as const;
+export const OPS_TEST_AIRCRAFT = { zero: "JUSEEDA0001", initial600: "JUSEEDA0600", weighted: "JUSEEDA0900" } as const;
+
+/**
+ * 組織 A のよく使う地点（Sprint 12a）。住所は鳥取県西伯郡日吉津村日吉津45番地3、座標は緯度 35.434238・経度 133.380508
+ * （リポジトリ内の値は一貫している。本番では運航管理者が地図で確かめてから /ops/places で登録する。コードには直書きしない）。
+ */
+export const OPS_TEST_PLACE = {
+  name: "フューチャーテック株式会社 本社",
+  addressText: "鳥取県西伯郡日吉津村日吉津45番地3",
+  latitude: 35.434238,
+  longitude: 133.380508,
+} as const;
 
 type SeedMember = {
   readonly key: string;
@@ -102,7 +114,14 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
   await pilot("a", "操縦 一郎", "a-pilot", "TEST-11112222");
   await pilot("a", "操縦 二郎", "a-pilot2", "TEST-33334444");
   await pilot("b", "組織B 操縦者", "b-pilot", "TEST-55556666");
-  const aircraft = async (org: "a" | "b", mark: string, modelName: string, serial: string, initialFlightMinutes: number) => {
+  const aircraft = async (
+    org: "a" | "b",
+    mark: string,
+    modelName: string,
+    serial: string,
+    initialFlightMinutes: number,
+    maxTakeoffWeightKg: number | null = null,
+  ) => {
     const id = (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
     await addVersion(c, orgIds[org], "aircraft", id, {
       registration_mark: mark,
@@ -115,7 +134,7 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
       type_cert_number: null,
       airworthiness_class: null,
       airworthiness_cert_number: null,
-      max_takeoff_weight_kg: null,
+      max_takeoff_weight_kg: maxTakeoffWeightKg,
       initial_flight_minutes: initialFlightMinutes,
       status: "active",
     });
@@ -124,5 +143,15 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
   // Sprint 11：既存の総飛行時間が 0 と 0 以外の機体
   await aircraft("a", OPS_TEST_AIRCRAFT.zero, "点検機（既存 0 分）", "A-0001", 0);
   await aircraft("a", OPS_TEST_AIRCRAFT.initial600, "空撮機（既存 600 分）", "A-0002", 600);
+  // Sprint 12a：最大離陸重量が分かる機体（飛行計画の判定は、登録機体の最大離陸重量を機体重量として使う）
+  await aircraft("a", OPS_TEST_AIRCRAFT.weighted, "計画機（最大離陸重量 0.9kg）", "A-0003", 0, 0.9);
+  // Sprint 12a：よく使う地点
+  await addVersion(c, orgIds.a, "saved_place", (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id, {
+    name: OPS_TEST_PLACE.name,
+    address_text: OPS_TEST_PLACE.addressText,
+    latitude: OPS_TEST_PLACE.latitude,
+    longitude: OPS_TEST_PLACE.longitude,
+    note: null,
+  });
   return { created: true, orgIds };
 };

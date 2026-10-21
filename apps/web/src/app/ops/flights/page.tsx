@@ -2,7 +2,8 @@ import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
 import { Badge, buttonFieldClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
 import { formatHm } from "@/lib/ops-time";
-import { listFlights, parseRecordFilter } from "@/server/ops/records";
+import { JudgementMissing } from "@/components/ops/plan-ui";
+import { JUDGEMENT_LINK_MISSING_LABEL, listFlights, parseRecordFilter } from "@/server/ops/records";
 import { listAircraft, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
@@ -54,7 +55,7 @@ export default async function FlightListPage({
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="flight-list">
             {rows.map((f) => (
               <li key={f.id}>
-                <Link href={`/ops/flights/${f.id}`} className={`${CARD} ${GRID} ${f.voided ? "text-ink-mute" : ""}`}>
+                <Link prefetch={false} href={`/ops/flights/${f.id}`} className={`${CARD} ${GRID} ${f.voided ? "text-ink-mute" : ""}`}>
                   <span className="col-start-1 row-start-1 font-mono tnum text-ink sm:col-auto sm:row-auto">
                     <span className="sr-only">飛行年月日</span>
                     {f.flightDate}
@@ -79,6 +80,11 @@ export default async function FlightListPage({
                     <CellLabel>総飛行時間</CellLabel>
                     {f.totalFlightMinutes === null ? <Badge tone="red">取消済み</Badge> : formatHm(f.totalFlightMinutes)}
                   </span>
+                  {f.judgementLink === "missing" ? (
+                    <span className="col-span-3 col-start-1 row-start-4 sm:col-span-6 sm:row-auto" data-testid="flight-judgement-missing">
+                      <JudgementMissing label={JUDGEMENT_LINK_MISSING_LABEL} />
+                    </span>
+                  ) : null}
                 </Link>
               </li>
             ))}
