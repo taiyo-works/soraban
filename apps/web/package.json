@@ -13,6 +13,7 @@
     "@neondatabase/auth": "0.6.0-beta",
     "@react-pdf/renderer": "^4.5.1",
     "@soraban/db": "workspace:*",
+    "@soraban/dips": "workspace:*",
     "@soraban/geo": "workspace:*",
     "@soraban/regulations": "workspace:*",
     "maplibre-gl": "^5.24.0",

@@ -16,6 +16,7 @@ const sorabanAlias = {
     new URL("./packages/regulations/src/address/index.ts", import.meta.url),
   ),
   "@soraban/db": pkg("db"),
+  "@soraban/dips": pkg("dips"),
   "@soraban/geo": pkg("geo"),
   "@soraban/regulations": pkg("regulations"),
 };
@@ -41,6 +42,14 @@ export default defineConfig({
         test: {
           name: "geo",
           include: ["packages/geo/src/**/*.test.ts"],
+          globals: true,
+        },
+      },
+      {
+        resolve: { alias: sorabanAlias },
+        test: {
+          name: "dips",
+          include: ["packages/dips/src/**/*.test.ts"],
           globals: true,
         },
       },

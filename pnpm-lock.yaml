@@ -51,6 +51,9 @@ importers:
       '@soraban/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@soraban/dips':
+        specifier: workspace:*
+        version: link:../../packages/dips
       '@soraban/geo':
         specifier: workspace:*
         version: link:../../packages/geo
@@ -113,6 +116,15 @@ importers:
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/dips:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.39
       typescript:
         specifier: ^5
         version: 5.9.3
