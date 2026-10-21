@@ -147,7 +147,7 @@ export function DetailList({
 /** 一覧の「取消していないもの／取消済みも含める」の切り替え。 */
 export function VoidedToggle({ basePath, includeVoided }: { readonly basePath: string; readonly includeVoided: boolean }) {
   const item = (active: boolean) =>
-    `inline-flex min-h-10 items-center px-3 text-xs ${
+    `inline-flex min-h-11 items-center px-3 text-xs ${
       active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"
     }`;
   return (

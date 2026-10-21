@@ -3,16 +3,19 @@ import { notFound } from "next/navigation";
 import { PLAN_JUDGEMENT_DISCLAIMER, PERMIT_VALUE_LABEL, PURPOSE_VALUE_LABEL, SPECIFIC_FLIGHT_FLAG_LABEL, type FlightVerdict, type SpecificFlightFlag } from "@soraban/regulations";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { VoidForm } from "@/components/ops/ops-client";
-import { PlanDigest, PlanStateBadge, ReportBox, StaleBadge } from "@/components/ops/plan-ui";
+import { DeadlineBox, NextActionsList, PlanDigest, PlanStateBadge, ReportBox, ReportStatusBox, StaleBadge } from "@/components/ops/plan-ui";
+import { ProcedureRecordsPanel } from "@/components/ops/procedure-client";
 import { ConfirmPanel, RejudgeButton, RequestConfirmationButton } from "@/components/ops/plans-client";
 import { Badge, buttonOutlineBrandClass, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
 import { VersionList } from "@/components/ops/versions";
 import { VerdictSummary } from "@/components/verdict-summary";
+import { formatJst } from "@/lib/ops-time";
 import { unknownCountLabel } from "@/lib/verdict-display";
 import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { SELF_CONFIRMATION_LABEL } from "@/server/ops/plan-logic";
 import { canUpdatePlan } from "@/server/ops/plan-page";
+import { listProcedureRecords } from "@/server/ops/procedure-records";
 import { getPlan, getSnapshot, listPlanVersions } from "@/server/ops/plans";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { OpsError } from "@/server/ops/service";
@@ -32,7 +35,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
     if (e instanceof OpsError && e.status === 404) notFound();
     throw e;
   }
-  const [snapshot, versions] = await Promise.all([getSnapshot(ctx, id, plan.currentSnapshotId), listPlanVersions(ctx, id)]);
+  const [snapshot, versions, procedureView] = await Promise.all([
+    getSnapshot(ctx, id, plan.currentSnapshotId),
+    listPlanVersions(ctx, id),
+    listProcedureRecords(ctx, id),
+  ]);
   const verdict = (snapshot.result as { verdict?: FlightVerdict }).verdict;
   const updatable = !plan.voided && canUpdatePlan(me, plan.isSelf);
   const manager = me.member.role === "manager";
@@ -96,6 +103,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           stateLabel={plan.stateLabel}
           stale={plan.freshness.stale}
         />
+        <NextActionsList actions={plan.nextActions} />
         {updatable ? (
           <div className="flex flex-wrap gap-3">
             <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={buttonOutlineBrandClass} data-testid="plan-edit-link">
@@ -111,6 +119,31 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
 
       <Section id="sec-report" title="通報の要否" aria-label="通報の要否" description="通報そのものは DIPS 2.0 で行います。そらばんは送信しません。">
         <ReportBox report={plan.report} />
+        <ChangeNotice target="report" />
+        <ReportStatusBox status={plan.report.status} changes={plan.reportChanges} />
+        <DeadlineBox deadline={plan.report.deadline} />
+        <div className="flex flex-wrap items-center gap-3">
+          <a href={`/ops/plans/${plan.id}/report`} className={buttonOutlineBrandClass} data-testid="plan-report-link">
+            通報の内容を見る・結果を記録する
+          </a>
+        </div>
+      </Section>
+
+      <Section
+        id="procedures"
+        title="手続きの記録"
+        aria-label="手続きの記録"
+        description="許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。"
+      >
+        <ChangeNotice target="procedures" />
+        <ProcedureRecordsPanel
+          planId={plan.id}
+          planVersion={plan.version}
+          summary={procedureView.summary}
+          records={procedureView.records}
+          canRecord={procedureView.canRecord}
+          voided={plan.voided}
+        />
       </Section>
 
       <Section id="sec-confirm" title="確認の状況" aria-label="確認の状況" description="運航管理者が、計画と判定を確認します。確認は、確認した版に対するものです。">
@@ -143,7 +176,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           </div>
         </dl>
         {plan.state === "draft" ? (
-          <div className="flex flex-col gap-2">
+          <div id="request-confirmation" className="flex scroll-mt-4 flex-col gap-2">
             <Note>下書きです。確認を依頼すると、運航管理者が確認できます。</Note>
             {updatable ? <RequestConfirmationButton planId={plan.id} version={plan.version} /> : null}
           </div>
@@ -169,7 +202,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             ))}
           </ol>
         )}
-        {canConfirm ? <ConfirmPanel planId={plan.id} version={plan.version} stale={plan.freshness.stale} /> : null}
+        {canConfirm ? (
+          <div id="confirm" className="scroll-mt-4">
+            <ConfirmPanel planId={plan.id} version={plan.version} stale={plan.freshness.stale} />
+          </div>
+        ) : null}
         {!manager && plan.status === "active" && !plan.voided ? <Note>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
       </Section>
 
@@ -184,7 +221,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           data-testid="plan-judgement"
           rows={[
             ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-            ["判定の日時", <time key="t" dateTime={j.checkedAt} className="font-mono text-xs tnum">{j.checkedAt}</time>],
+            ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="font-mono text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
             ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
             ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
             ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
@@ -208,7 +245,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             判定の履歴を見る
           </Link>
         </div>
-        {updatable ? <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} /> : null}
+        {updatable ? (
+          <div id="rejudge" className="scroll-mt-4">
+            <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} />
+          </div>
+        ) : null}
       </Section>
 
       <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">

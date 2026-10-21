@@ -44,7 +44,7 @@ export default async function MembersPage() {
             </div>
             <ChangeNotice target={memberNoticeTarget(m.id)} />
             <details className="group">
-              <summary className="inline-flex min-h-10 cursor-pointer select-none items-center text-xs text-brand-700 underline-offset-2 hover:underline">
+              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-xs text-brand-700 underline-offset-2 hover:underline">
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
                 役割・利用を変更する
               </summary>

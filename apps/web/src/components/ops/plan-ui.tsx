@@ -1,6 +1,9 @@
 import type React from "react";
+import type { FingerprintChange, ReportStatusCode, ReportStatusResult } from "@soraban/dips";
+import { REPORT_STATUS_MARK, REPORT_STATUS_SHORT_LABEL, NEXT_ACTIONS_EMPTY_LABEL } from "@soraban/dips";
 import type { ItemVerdict, ReportRequirement } from "@soraban/regulations";
 import { REPORT_FIXED_NOTE } from "@soraban/regulations";
+import type { DeadlineState, NextAction } from "@/server/ops/report-logic";
 import { VERDICT_LABEL, unknownCountLabel } from "@/lib/verdict-display";
 import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
 import { VerdictMark } from "../verdict-mark";
@@ -243,3 +246,172 @@ export const SNAPSHOT_REASON_LABEL: Readonly<Record<string, string>> = {
   data_updated: "根拠のデータ・エンジンの版の更新による再判定",
   manual: "手動の再判定",
 };
+
+// ---- Sprint 12b：通報の状況・期限・次にやること ------------------------------------------
+
+const STATUS_TONE: Readonly<Record<ReportStatusCode, Tone>> = {
+  not_applicable_model: "neutral",
+  no_record: "amber",
+  reported: "green",
+  change_review: "amber",
+  cancel_needed: "red",
+  cancelled: "mute",
+  unknown: "amber",
+  failed: "red",
+  sending: "mute",
+};
+
+/** 通報の状況（導出）の札。記録が無いうちは「通報済み」を出さない（状況の語は記録の有無から導出されたもの）。 */
+export function ReportStatusBadge({ status, bare }: { readonly status: Pick<ReportStatusResult, "code">; readonly bare?: boolean }) {
+  const code = status.code;
+  return (
+    <Chip
+      tone={STATUS_TONE[code]}
+      glyph={REPORT_STATUS_MARK[code]}
+      data-testid={bare ? undefined : "plan-report-status-badge"}
+      data-code={bare ? undefined : code}
+    >
+      {REPORT_STATUS_SHORT_LABEL[code]}
+    </Chip>
+  );
+}
+
+const TIER_TONE: Readonly<Record<number, Tone>> = { 1: "red", 2: "amber", 3: "brand", 4: "neutral", 5: "mute" };
+const TIER_GLYPH: Readonly<Record<number, string>> = { 1: "!!", 2: "!", 3: "●", 4: "○", 5: "－" };
+const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限超過", 3: "未了", 4: "確認・変更", 5: "推奨" };
+
+/** 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。 */
+export function NextActionItem({ action, testId = "next-action" }: { readonly action: NextAction; readonly testId?: string }) {
+  const tone = TIER_TONE[action.tier] ?? "neutral";
+  const body = (
+    <>
+      <span aria-hidden className={`w-6 shrink-0 text-center font-mono text-[13px] font-bold ${CHIP_GLYPH[tone]}`}>
+        {TIER_GLYPH[action.tier]}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex flex-wrap items-baseline gap-x-2">
+          <span className="text-sm font-medium text-ink" data-testid={`${testId}-label`}>{action.label}</span>
+          <span className="text-[11px] text-ink-mute">［{TIER_TEXT[action.tier]}］</span>
+        </span>
+        <span className="text-xs leading-relaxed text-ink-soft">{action.reason}</span>
+        {action.dueLabel ? <span className="text-xs leading-relaxed text-ink-soft" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
+        {!action.canAct ? <span className="text-xs text-ink-mute">この操作は運航管理者または計画の操縦者本人が行います。</span> : null}
+      </span>
+      {action.canAct ? <span aria-hidden className="text-ink-mute">→</span> : null}
+    </>
+  );
+  const box = `flex min-h-11 items-center gap-3 border-l-4 px-3 py-2 ${
+    tone === "red" ? "border-l-signal-red" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule"
+  }`;
+  return action.canAct ? (
+    <a href={action.href} className={`${box} hover:bg-paper-soft`} data-testid={`${testId}-link`} data-action-id={action.id}>
+      {body}
+    </a>
+  ) : (
+    <div className={box} data-testid={`${testId}-link`} data-action-id={action.id}>
+      {body}
+    </div>
+  );
+}
+
+/** 計画の詳細の「次にやること」。保存した状態ではなく、毎回導出した一覧。 */
+export function NextActionsList({ actions }: { readonly actions: readonly NextAction[] }) {
+  return (
+    <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="next-actions">
+      <h2 className="eyebrow">次にやること</h2>
+      {actions.length === 0 ? (
+        <p className="rounded-sharp border border-rule bg-paper px-3 py-3 text-sm text-ink-mute" data-testid="next-actions-empty">
+          {NEXT_ACTIONS_EMPTY_LABEL}
+        </p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-rule-soft rounded-sharp border border-rule bg-paper">
+          {actions.map((a) => (
+            <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
+              <NextActionItem action={a} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+const DEADLINE_BAR: Readonly<Record<DeadlineState["state"], string>> = {
+  none: "border-l-rule",
+  upcoming: "border-l-brand-700",
+  past_guide: "border-l-signal-amber",
+  overdue_started: "border-l-signal-red",
+  recommended_open: "border-l-signal-green",
+};
+const DEADLINE_GLYPH: Readonly<Record<DeadlineState["state"], string>> = {
+  none: "－",
+  upcoming: "○",
+  past_guide: "!",
+  overdue_started: "!!",
+  recommended_open: "○",
+};
+
+/** 期限の状態（社内の目安。法定の期限ではない）。通報の記録がない要・要確認のときだけ出る。 */
+export function DeadlineBox({ deadline }: { readonly deadline: DeadlineState }) {
+  if (deadline.state === "none" || !deadline.message) return null;
+  return (
+    <div
+      className={`flex flex-col gap-1.5 rounded-sharp border border-l-4 border-rule bg-paper px-3 py-2.5 text-sm ${DEADLINE_BAR[deadline.state]}`}
+      data-testid="plan-report-deadline"
+      data-state={deadline.state}
+    >
+      <p className="flex items-start gap-2 font-medium text-ink">
+        <span aria-hidden className="w-5 shrink-0 text-center font-mono text-[13px] font-bold">{DEADLINE_GLYPH[deadline.state]}</span>
+        <span data-testid="plan-report-deadline-message">{deadline.message}</span>
+      </p>
+      {deadline.guideAtJst ? (
+        <p className="pl-7 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-at">
+          社内の目安の時刻：{deadline.guideAtJst}（日本時間）
+        </p>
+      ) : null}
+      {deadline.guideNote ? (
+        <p className="pl-7 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-note">
+          {deadline.guideNote}
+        </p>
+      ) : null}
+      {deadline.penaltyNote ? (
+        <p className="pl-7 text-xs leading-relaxed text-ink" data-testid="plan-report-penalty">
+          {deadline.penaltyNote}
+        </p>
+      ) : null}
+      {deadline.outageNote ? <p className="pl-7 text-xs leading-relaxed text-ink-mute">{deadline.outageNote}</p> : null}
+      <p className="pl-7 text-xs leading-relaxed text-ink-mute">{deadline.smallDroneLawNote}</p>
+    </div>
+  );
+}
+
+/** 通報の状況（導出）と変更点。記録の有無から毎回導出した状況で、記録が無いうちは「通報済み」と出ない。 */
+export function ReportStatusBox({ status, changes }: { readonly status: ReportStatusResult; readonly changes: readonly FingerprintChange[] }) {
+  const tone = STATUS_TONE[status.code];
+  return (
+    <div className="flex flex-col gap-2" data-testid="plan-report-status" data-code={status.code}>
+      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-ink">
+        <span
+          aria-hidden
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sharp border font-mono text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
+        >
+          {status.mark}
+        </span>
+        <span className="pt-0.5" data-testid="plan-report-status-label">{status.label}</span>
+      </p>
+      {status.detail && status.code !== "reported" ? <p className="pl-10 font-mono text-xs tnum text-ink-soft">{status.detail}</p> : null}
+      {changes.length > 0 ? (
+        <div className="ml-10 flex flex-col gap-1 border-l-2 border-signal-amber pl-3" data-testid="plan-report-changes">
+          <p className="text-xs font-medium text-ink">通報時から変わった点</p>
+          <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-ink-soft">
+            {changes.map((c) => (
+              <li key={c.key} data-testid="plan-report-change-row" data-key={c.key}>
+                {c.label}：<span className="font-mono tnum">{c.before}</span> → <span className="font-mono tnum">{c.after}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}

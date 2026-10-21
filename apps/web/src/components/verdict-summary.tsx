@@ -308,7 +308,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   type="button"
                   data-testid="verdict-retry"
                   onClick={onRetry}
-                  className="inline-flex h-10 w-fit items-center rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+                  className="inline-flex h-11 w-fit items-center rounded-sharp border border-brand-700 bg-paper px-4 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
                 >
                   {VERDICT_RETRY_LABEL}
                 </button>

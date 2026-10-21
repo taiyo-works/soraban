@@ -12,6 +12,12 @@ export type DraftKind = "flight" | "inspection";
  */
 export const draftKey = (kind: DraftKind, memberId: string): string => `${PREFIX}${kind}:${memberId}`;
 
+/**
+ * 通報の画面の入力の下書き（Sprint 12b）。計画ごと・利用者ごと。末尾が利用者の ID なので、他の利用者の下書きは
+ * clearOtherUsersDrafts が消す。例：soraban:ops-draft:report-<計画の ID>:<利用者の ID>
+ */
+export const reportDraftKey = (planId: string, memberId: string): string => `${PREFIX}report-${planId}:${memberId}`;
+
 /** ある利用者のものでない下書き（他の利用者・利用者を区別していなかった旧形式）を消す。ログイン後の画面で呼ぶ。 */
 export const clearOtherUsersDrafts = (memberId: string): void => {
   try {
