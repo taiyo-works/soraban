@@ -72,6 +72,24 @@ const TABLE: readonly Row[] = [
   { action: "place.create", manager: true, pilot: false, viewer: false },
   { action: "place.update", manager: true, pilot: false, viewer: false },
   { action: "place.void", manager: true, pilot: false, viewer: false },
+
+  // Sprint 12b 契約 19：docs/sprints/sprint-12b.md 設計 F の表
+  // 通報内容・履歴・状況の閲覧（全役割）
+  { action: "report.read", manager: true, pilot: true, viewer: true },
+  // 通報の記録・訂正・取り下げ・結果不明の確定、コピーの監査、手続きの「済み」の記録
+  // （運航管理者は全員分、操縦者は自分が操縦者の計画だけ、閲覧者は不可）
+  { action: "report.record", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "report.record", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "report.correct", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "report.correct", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "report.retract", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "report.retract", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "report.resolve", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "report.resolve", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "report.copyAudit", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "report.copyAudit", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "procedure.record", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "procedure.record", isSelf: false, manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {
@@ -105,6 +123,19 @@ describe("can（役割 × 操作）", () => {
     for (const a of ["plan.create", "plan.update", "plan.cancel", "plan.confirm"] as const) {
       expect(can("viewer", a, { isSelf: true })).toBe(false);
     }
+  });
+
+  it("Sprint 12b：操縦者の行に結び付いていない操縦者役割（isSelf を渡さない）は、通報・手続きの記録ができない。閲覧者は自分の計画でもできない", () => {
+    const writes = ["report.record", "report.correct", "report.retract", "report.resolve", "report.copyAudit", "procedure.record"] as const;
+    for (const a of writes) {
+      expect(can("pilot", a), a).toBe(false);
+      expect(can("pilot", a, { isSelf: false }), a).toBe(false);
+      expect(can("viewer", a, { isSelf: true }), a).toBe(false);
+      expect(can("viewer", a), a).toBe(false);
+    }
+    // 閲覧（report.read）は全役割。書き込みはすべて OPS_ACTIONS に入っている
+    for (const r of ["manager", "pilot", "viewer"] as const) expect(can(r, "report.read")).toBe(true);
+    for (const a of [...writes, "report.read"] as const) expect(OPS_ACTIONS).toContain(a);
   });
 
   it("閲覧者は自分の操縦者であっても訂正・全桁表示ができない", () => {

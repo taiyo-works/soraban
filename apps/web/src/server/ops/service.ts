@@ -2,13 +2,16 @@
 // 認可は authz.ts の can() だけで判断し、DB の読み書きは store.ts（org_id 必須）だけで行う。
 import { randomUUID } from "node:crypto";
 import type { MemberRoleDb, MemberRow, PilotRow, RecordEntityTypeDb } from "@soraban/db";
+import type { NotificationGateway } from "@soraban/dips";
 import type { Identity } from "./auth/identity";
 import { can, type OpsAction } from "./authz";
 import type { Judge } from "./judge";
 import type { SnapshotFreshnessInput } from "./plan-logic";
 import * as store from "./store";
 import { OpsError, type AircraftWithTotal, type OpsDb, type PilotWithTotal } from "./store";
+import type { OpsEnv } from "./availability";
 import { PLACE_FIELD_LABELS, PLAN_FIELD_LABELS } from "./validate-plan";
+import { REPORT_FIELD_LABELS } from "./validate-report";
 import { FLIGHT_FIELD_LABELS, INSPECTION_FIELD_LABELS } from "./validate-records";
 import {
   AIRCRAFT_FIELD_LABELS,
@@ -38,6 +41,22 @@ export type OpsContext = {
   readonly judgeTimeoutMs?: number;
   /** 鮮度の判定に使う現在のエンジンの版・データ台帳・手続きデータの版（Sprint 12a）。省略時は本番の値。テストで差し替える。 */
   readonly freshnessNow?: SnapshotFreshnessInput["now"];
+  /** 環境変数（Sprint 12b。DIPS_REPORT_ADAPTER の解決に使う）。省略時は process.env。テストで差し替える。 */
+  readonly env?: OpsEnv;
+  /** 通報ゲートウェイの差し込み口（Sprint 12b）。省略時は設定（DIPS_REPORT_ADAPTER）から選ぶ。テストで差し替える。 */
+  readonly dips?: DipsTestHooks;
+};
+
+/** 通報ゲートウェイのテスト用の差し込み口（本番の経路では使わない）。 */
+export type DipsTestHooks = {
+  /** 外部の呼び出しの上限（ミリ秒）。省略時は 10 秒。 */
+  readonly timeoutMs?: number;
+  /** ①prepared の行を書いた後、②アダプターを呼ぶ前。トランザクションが開いていないこと・prepared の行が見えることの確認に使う。 */
+  readonly afterBegin?: (info: { readonly reportId: string }) => void | Promise<void>;
+  /** ③結果を書く直前。投げると、③の失敗を再現できる（行は prepared のまま結果不明として扱う）。 */
+  readonly beforeResultWrite?: (info: { readonly reportId: string }) => void | Promise<void>;
+  /** ゲートウェイそのものの差し替え（時間切れ・例外の再現）。省略時は設定から選ぶ。設定の検査（503）は先に行う。 */
+  readonly gateway?: NotificationGateway;
 };
 
 type Input = Readonly<Record<string, unknown>>;
@@ -154,6 +173,7 @@ const LABELS: Record<RecordEntityTypeDb, Readonly<Record<string, string>>> = {
   daily_inspection: INSPECTION_FIELD_LABELS,
   flight_plan: PLAN_FIELD_LABELS,
   saved_place: PLACE_FIELD_LABELS,
+  flight_report: REPORT_FIELD_LABELS,
 };
 
 /** 2 つの版の data で値が違う項目の名前（表示名）を返す。 */

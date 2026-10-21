@@ -94,7 +94,12 @@ export const opsHandler =
       if (!db) return json(503, { error: "ops_unavailable", reason: "database_url_missing" });
       const r = await resolveMember(db, identity);
       if (r.kind !== "member") return json(403, { error: "no_access" });
-      return await fn({ ctx: { db, member: r.member, now: () => opsNow(d.env) }, req, params, body: () => readJson(req) });
+      return await fn({
+        ctx: { db, member: r.member, now: () => opsNow(d.env), env: d.env },
+        req,
+        params,
+        body: () => readJson(req),
+      });
     } catch (e) {
       if (e instanceof OpsError) {
         return json(e.status, {
