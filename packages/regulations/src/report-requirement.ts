@@ -1,25 +1,27 @@
-// 通報の要否の表示（Sprint 12a 設計 H）。純粋関数。判定のスナップショットの入力と結果から、
-// 飛行計画の通報（DIPS 2.0。飛行の前に行う）が要るかを、根拠つきで 4 種のどれかに分けて返す。
-// そらばんは DIPS に送信しない。通報の記録・期限・漏れの警告は Sprint 12b で扱う。
+// 通報の要否の表示（Sprint 12a 設計 H。Sprint 12b 設計 A で判定不能の扱いを安全側に変更）。純粋関数。判定のスナップショットの入力と
+// 結果から、飛行計画の通報（DIPS 2.0。飛行の前に行う）が要るかを、根拠つきで 4 種のどれかに分けて返す。
+// そらばんは DIPS に送信しない。通報の記録・期限・漏れの警告は Sprint 12b（packages/dips と apps/web）で扱う。
 //
 // 守ること（不可侵）：
 //   - 「通報が要らない」と読める言葉は、どの入力でも、どの文言にも出さない（禁止語の一覧と検査は report-requirement.test.ts）。
 //   - 通報の要を打ち消す上書きを設けない。迷えば「要」「要確認」に倒す。
 //   - 目的の例外（緊急・公務）のときも表示は変えず、要として扱う（例外に当たる可能性は※要確認で添えるだけ）。
 //   - 100g 未満は 12a では計画を作れない（機体を登録できない）が、分岐は持ち単体テストで網羅する。
+//   - 12b：category が I でも、判定の結論に判定不能（verdict.unknownCount）が 1 件以上あるとき、または件数が分からないときは、
+//     「推奨」でなく「要確認（要として扱う）」にする（分からないときは厳しい側。North Star §0.1.9）。
 
 import { DRONE_THRESHOLD_G, SPECIFIC_FLIGHT_FLAG_LABEL, type DiagnosisCategory, type SpecificFlightFlag } from "./diagnosis";
 import { MODEL_AIRCRAFT_LAW } from "./model-aircraft";
 
 /** 通報の要否の種類（上から順に判定する）。 */
 export type ReportRequirementKind =
-  /** 重量が不明、または結果が成立していない。要として扱う。 */
+  /** 重量が不明、結果が成立していない、または判定不能の項目がある（12b）。要として扱う。 */
   | "confirm"
   /** 100g 未満（模型航空機）。DIPS の飛行計画の通報は対象外。 */
   | "not_applicable_model"
   /** 100g 以上で、特定飛行に当たる（category が I 以外）。 */
   | "required"
-  /** 100g 以上で、特定飛行に当たる項目がない（category が I）。 */
+  /** 100g 以上で、特定飛行に当たる項目がなく（category が I）、判定不能も 0 件。 */
   | "recommended";
 
 export const REPORT_REQUIREMENT_KINDS: readonly ReportRequirementKind[] = [
@@ -44,6 +46,8 @@ export const REPORT_REASON = {
   modelAircraft: "100g 未満の機体は、航空法の無人航空機の規制の対象外のため",
   modelAircraftOtherProcedures: `${MODEL_AIRCRAFT_LAW}の許可・通報は別の手続きです。判定の段取りに並ぶ内容を確認してください。`,
   needsVerification: "DID の該当を確認できない（判定不能）ため、要として扱う",
+  /** 12b：判定の結論に判定不能があるときの根拠は reportUnknownCountReason(件数)。件数が欠けているとき。 */
+  unknownCountMissing: "判定不能の件数を確認できないため、要として扱う",
   emergencyNoFly: "緊急用務空域のため飛行できない判定です（通報は要として扱います）",
   specificFlightFallback: "特定飛行に当たる区分のため",
   noSpecificFlight: "特定飛行に当たる項目がないため",
@@ -53,6 +57,9 @@ export const REPORT_REASON = {
 export const reportFlightReason = (flag: SpecificFlightFlag): string =>
   `${SPECIFIC_FLIGHT_FLAG_LABEL[flag]}に当たるため`;
 
+/** 12b：判定不能の項目があるため、要として扱う。 */
+export const reportUnknownCountReason = (n: number): string => `判定不能の項目が ${n} 件あるため、要として扱う`;
+
 /** 目的の例外（緊急・公務）のときだけ添える。表示は変えず、要として扱う。 */
 export const REPORT_PURPOSE_EXCEPTION_NOTE =
   "国・地方公共団体などの捜索・救助等の飛行は、通報の対象から外れる例外に当たる可能性があります（※要確認）。この表示は変えず、要として扱います。";
@@ -60,9 +67,12 @@ export const REPORT_PURPOSE_EXCEPTION_NOTE =
 /** 表示を変えない例外の目的。 */
 export const REPORT_EXCEPTION_PURPOSES: readonly string[] = ["emergency", "public_duty"];
 
-/** どの通報の要否の表示にも添える固定の文言。 */
+/**
+ * どの通報の要否の表示にも添える固定の文言。12b で「記録の機能は次の版で追加します」を、記録の案内に改めた。
+ * 記録があるまで、そらばんは通報を行ったものとして扱わない（「済み」の表示は記録があるときだけ）。
+ */
 export const REPORT_FIXED_NOTE =
-  "そらばんは DIPS に送信しません。通報は DIPS 2.0 で行ってください。申請・通報は DIPS 2.0 などの公式の手続きで行ってください。通報の記録の機能は次の版で追加します。";
+  "そらばんは DIPS に送信しません。通報は DIPS 2.0 で行い、通報した日時と番号を計画の「通報」で記録してください。記録があるまで、そらばんは通報を行ったものとして扱いません。申請・通報は DIPS 2.0 などの公式の手続きで行ってください。";
 
 /** 計画の詳細・フォームの目立つ位置に出す固定の文言。 */
 export const PLAN_JUDGEMENT_DISCLAIMER =
@@ -78,7 +88,11 @@ export type ReportRequirementSnapshot = {
     readonly droneWeightG?: number | null;
     readonly category?: DiagnosisCategory | string | null;
     readonly flags?: readonly SpecificFlightFlag[] | null;
-    readonly verdict?: { readonly purpose?: string | null } | null;
+    /**
+     * purpose：判定に当てた目的。unknownCount：判定不能の件数（12b。category が I のときの要否に使う）。
+     * 欠けているとき（undefined・null・数値でない）は、0 とみなさず「不明」として要確認に倒す。
+     */
+    readonly verdict?: { readonly purpose?: string | null; readonly unknownCount?: number | null } | null;
   } | null;
 };
 
@@ -107,7 +121,7 @@ const resultEstablished = (s: ReportRequirementSnapshot): boolean => {
   return !!r && typeof r.category === "string" && r.category.length > 0 && Array.isArray(r.flags);
 };
 
-/** 通報の要否を求める。上から順に判定する（重量不明・結果なし → 100g 未満 → category が I 以外 → I）。 */
+/** 通報の要否を求める。上から順に判定する（重量不明・結果なし → 100g 未満 → category が I 以外 → I（判定不能の件数で分ける））。 */
 export const reportRequirement = (snapshot: ReportRequirementSnapshot): ReportRequirement => {
   const make = (kind: ReportRequirementKind, reasons: readonly string[], purposeNote: boolean): ReportRequirement => ({
     kind,
@@ -138,6 +152,12 @@ export const reportRequirement = (snapshot: ReportRequirementSnapshot): ReportRe
     if (reasons.length === 0) reasons.push(REPORT_REASON.specificFlightFallback);
     return make("required", reasons, exception);
   }
+  // category が I：判定不能の項目が 1 件以上、または件数が分からないときは「要確認（要として扱う）」。0 件なら「推奨」
+  const unknown = result.verdict?.unknownCount;
+  if (typeof unknown !== "number" || !Number.isFinite(unknown) || unknown < 0) {
+    return make("confirm", [REPORT_REASON.unknownCountMissing], exception);
+  }
+  if (unknown >= 1) return make("confirm", [reportUnknownCountReason(Math.trunc(unknown))], exception);
   return make("recommended", [REPORT_REASON.noSpecificFlight], false);
 };
 
