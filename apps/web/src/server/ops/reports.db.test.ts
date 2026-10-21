@@ -14,6 +14,7 @@ import { runDiagnosis } from "../diagnose-core";
 import { baselineProvider } from "../sprint11e-baseline";
 import type { Judge } from "./judge";
 import { toDiagnosisRunInput } from "./plan-logic";
+import * as permits from "./permits";
 import * as plans from "./plans";
 import * as procs from "./procedure-records";
 import { rowLite } from "./report-dto";
@@ -721,14 +722,14 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       expect(row.fingerprint).toMatch(/^[0-9a-f]{64}$/);
       expect(row.fingerprint_parts).toMatchObject({ startAt: "2027-01-14T09:00", durationMinutes: 62, aircraftId: aircraftW, pilotId: pilotFree.id });
       expect(row.fingerprint_parts.flags).toContain("method_night");
-      expect(row.map_revision).toBe(1);
+      expect(row.map_revision).toBe(2);
       expect(row.channel).toBe("manual");
       const ev = (await owner.query("select check_evidence_id, diagnosis_evidence_id from judgement_snapshots where id = $1", [row.snapshot_id])).rows[0];
       expect(a.report).toMatchObject({
         checkEvidenceId: ev.check_evidence_id,
         diagnosisEvidenceId: ev.diagnosis_evidence_id,
         planVersion: plan.version,
-        mapRevision: 1,
+        mapRevision: 2,
         channel: "manual",
         fingerprint: row.fingerprint,
         snapshotSeq: 1,
@@ -788,7 +789,7 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       await recordNew(mgr(), plan);
       const view = await reports.getPlanReport(mgr(), plan.id);
       const r = view.reports[0]!;
-      expect(r).toMatchObject({ channelLabel: "手動（利用者の申告）", mapRevision: 1, planVersion: plan.version, snapshotSeq: 1 });
+      expect(r).toMatchObject({ channelLabel: "手動（利用者の申告）", mapRevision: 2, planVersion: plan.version, snapshotSeq: 1 });
       expect(r.checkEvidenceId).toMatch(/\S/);
       expect(r.diagnosisEvidenceId).toMatch(/\S/);
       expect(view.snapshot.checkEvidenceId).toBe(r.checkEvidenceId);
@@ -890,7 +891,7 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
         expect(r).toMatchObject({ org_id: orgA, plan_id: plan.id, member_id: manager.id, member_name: "s12b-mgr", member_role: "manager", adapter: "manual", result: "success" });
         expect(r.created_at).toBeInstanceOf(Date);
         // 何を（対応表の版・証跡 ID）
-        expect(r.map_revision).toBe(1);
+        expect(r.map_revision).toBe(2);
         expect(r.check_evidence_id).toBe(evidence.check_evidence_id);
         expect(r.diagnosis_evidence_id).toBe(evidence.diagnosis_evidence_id);
         expect(r.summary.length).toBeLessThanOrEqual(500);
@@ -1018,7 +1019,7 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
           expect(a.report.checkEvidenceId).toBeTruthy();
           expect(a.report.diagnosisEvidenceId).toBeTruthy();
           expect(a.report.fingerprint).toMatch(/^[0-9a-f]{64}$/);
-          expect(a.report.mapRevision).toBe(1);
+          expect(a.report.mapRevision).toBe(2);
           expect(a.report.snapshotId).toBe(plan.currentSnapshotId);
           const b = await record(plan, {}, { gateway: spy });
           expect(b.created).toBe(false);
@@ -1509,13 +1510,38 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
   describe("通報内容の表示（GET …/report）と認可", () => {
     const item = (view: Awaited<ReturnType<typeof reports.getPlanReport>>, key: string) => view.prepared.items.find((i) => i.key === key)!;
 
+    it("Sprint 12d：結びついた登録が適用されたときだけ、許可書発行日・許可期間が項目に出る（形式は未確認の警告つき）。適用がなければ「DIPS で入力」のまま", async () => {
+      const number = `REPORT-PERMIT-${randomUUID().slice(0, 8)}`;
+      await permits.createPermit(mgr(), {
+        permitNumber: number,
+        coverage: "blanket",
+        kinds: ["night"],
+        issuedOn: "2026-10-01",
+        validFrom: "2026-10-05",
+        validTo: "2027-10-04",
+        placeScope: { type: "nationwide" },
+        aircraftScope: { type: "any" },
+        pilotScope: { type: "any" },
+      });
+      const without = await reports.getPlanReport(mgr(), (await activePlan()).id);
+      for (const k of ["permit_date", "permit_start", "permit_finish"]) expect(item(without, k).status, k).toBe("dips_only");
+      const plan = await activePlan({ permitNumbers: number });
+      const view = await reports.getPlanReport(mgr(), plan.id);
+      expect(item(view, "permit_date")).toMatchObject({ status: "filled", value: "2026-10-01" });
+      expect(item(view, "permit_start")).toMatchObject({ status: "filled", value: "2026-10-05" });
+      expect(item(view, "permit_finish")).toMatchObject({ status: "filled", value: "2027-10-04" });
+      expect(item(view, "permit_date").warnings.map((w) => w.code)).toEqual(["permit_dates_format_unconfirmed"]);
+      // 許可・承認の番号は計画の欄の文字のまま
+      expect(item(view, "permit_number").value).toBe(number);
+    });
+
     it("DIPS の入力順（対応表の order）に項目が並び、まとまりごとに「※要確認」の印をデータから出す。経路は座標で、コピー対象でない", async () => {
       const plan = await activePlan({ radiusM: 150 });
       const view = await reports.getPlanReport(mgr(), plan.id);
       const orders = view.prepared.items.map((i) => i.order);
       expect([...orders].sort((a, b) => a - b)).toEqual(orders);
       expect(view.prepared.groups.every((g) => g.needsConfirmation)).toBe(true);
-      expect(view.prepared.mapRevision).toBe(1);
+      expect(view.prepared.mapRevision).toBe(2);
       expect(view.prepared.mapVerifiedAt).toMatch(/^2026-10-21/);
       const route = item(view, "route");
       expect(route.copyable).toBe(false);

@@ -299,7 +299,11 @@ export function NextActionItem({ action, testId = "next-action" }: { readonly ac
         </span>
         <span className="text-xs leading-relaxed text-ink-soft">{action.reason}</span>
         {action.dueLabel ? <span className="text-xs leading-relaxed text-ink" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
-        {!action.canAct ? <span className="text-xs leading-relaxed text-ink-mute">この操作は運航管理者または計画の操縦者本人が行います。</span> : null}
+        {!action.canAct ? (
+          <span className="text-xs leading-relaxed text-ink-mute" data-testid={`${testId}-cannot`}>
+            {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
+          </span>
+        ) : null}
       </span>
       {action.canAct ? <span aria-hidden className="self-center pl-1 text-ink-mute">→</span> : null}
     </>

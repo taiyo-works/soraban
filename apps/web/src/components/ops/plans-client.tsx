@@ -24,6 +24,8 @@ import {
   PLAN_PURPOSE_CHOICES,
   type PlanFormValues,
 } from "@/lib/plan-options";
+import { normalizePermitNumber, PERMIT_DECLARATION_NOTE, PERMIT_UNREGISTERED_WARNING, splitPermitNumbers } from "@/server/ops/permit-logic";
+import type { PermitHelper } from "@/server/ops/permit-page";
 import { setChangeFlash } from "./change-notice";
 import { newRequestId } from "./drafts";
 import {
@@ -95,6 +97,84 @@ const planCheckRow =
 const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
 const selectClass = `${inputClass} min-h-12`;
 
+/** 欄に番号を足す（既にある番号は足さない）。 */
+const appendNumber = (current: string, number: string): string => {
+  const key = normalizePermitNumber(number);
+  if (splitPermitNumbers(current).some((t) => t.key === key)) return current;
+  return current.trim() === "" ? number : `${current.trim().replace(/[,，、;；]+$/, "")}, ${number}`;
+};
+
+/**
+ * 許可番号の欄の下の案内。入力中の番号が登録にあるか（なければ「登録にありません。判定には使いません。」）、
+ * 保存済みの計画の照合の結果（訂正のとき）、範囲に収まる登録の候補（「番号を入れる」。欄に足すだけで、保存は利用者が行う）。
+ * 登録は利用者の申告で、許可の有無で飛行の可否が決まるという意味ではない。
+ */
+function PermitNumberHelper({
+  value,
+  helper,
+  isEdit,
+  onInsert,
+}: {
+  readonly value: string;
+  readonly helper: PermitHelper | undefined;
+  readonly isEdit: boolean;
+  readonly onInsert: (permitNumber: string) => void;
+}) {
+  const tokens = splitPermitNumbers(value);
+  const registered = new Set((helper?.registeredNumbers ?? []).map(normalizePermitNumber));
+  const savedByKey = new Map((helper?.saved ?? []).map((s) => [normalizePermitNumber(s.numberText), s]));
+  const present = new Set(tokens.map((t) => t.key));
+  const candidates = (helper?.candidates ?? []).filter((c) => !present.has(normalizePermitNumber(c.permitNumber)));
+  return (
+    <div className="flex flex-col gap-3" data-testid="plan-permit-helper">
+      {tokens.length > 0 ? (
+        <ul className="flex flex-col gap-1.5" data-testid="plan-permit-input-states">
+          {tokens.map((t) => {
+            const known = registered.has(t.key);
+            const saved = isEdit ? savedByKey.get(t.key) : undefined;
+            return (
+              <li key={t.key} className="flex flex-col gap-0.5 border-l-2 border-rule pl-3 text-xs leading-relaxed" data-testid="plan-permit-input-state" data-registered={String(known)}>
+                <span className="break-all font-mono text-[13px] text-ink">{t.text}</span>
+                {known ? (
+                  <span className="text-ink-soft">
+                    登録があります。{saved ? `保存済みの照合：${saved.statusLabel}${saved.reasons.length > 0 ? `（${saved.reasons.join("／")}）` : ""}。` : ""}
+                    範囲に収まるかは、保存したときに計画の日時・場所・機体・操縦者で照合します。
+                  </span>
+                ) : (
+                  <span className="text-signal-red" data-testid="plan-permit-unregistered">
+                    <span aria-hidden>? </span>
+                    {PERMIT_UNREGISTERED_WARNING}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+      {candidates.length > 0 ? (
+        <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
+          <p className="text-xs font-medium text-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
+          <p className="text-xs leading-relaxed text-ink-mute">{helper?.candidatesNote}</p>
+          <ul className="flex flex-col gap-1.5">
+            {candidates.map((c) => (
+              <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sharp border border-rule-soft bg-paper px-3 py-2" data-testid="plan-permit-candidate">
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="break-all font-mono text-[13px] text-ink">{c.permitNumber}</span>
+                  <span className="text-xs text-ink-soft">{c.summary}</span>
+                </span>
+                <button type="button" className={buttonGhostClass} onClick={() => onInsert(c.permitNumber)} data-testid="plan-permit-insert">
+                  番号を入れる
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <p className="text-xs leading-relaxed text-ink-mute">{PERMIT_DECLARATION_NOTE}</p>
+    </div>
+  );
+}
+
 export function PlanForm({
   aircraft,
   pilots,
@@ -103,6 +183,7 @@ export function PlanForm({
   initial,
   editing,
   handoffWeightG,
+  permitHelper,
 }: {
   readonly aircraft: readonly PlanAircraftOption[];
   readonly pilots: readonly PilotOption[];
@@ -113,6 +194,8 @@ export function PlanForm({
   readonly editing?: { readonly id: string; readonly version: number };
   /** 判定画面から引き継いだ機体の重さ（g）。参考表示だけ。 */
   readonly handoffWeightG?: string;
+  /** 許可番号の欄の案内（番号ごとの保存済みの照合の結果と、「番号を入れる」の候補）。 */
+  readonly permitHelper?: PermitHelper;
 }) {
   const isEdit = editing !== undefined;
   const [v, setV] = useState<PlanFormValues>({ ...initial, pilotId: fixedPilotId ?? initial.pilotId });
@@ -465,7 +548,11 @@ export function PlanForm({
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-permits">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">取得済みの許可・承認・同意</legend>
+        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
+        <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-permit-registry-note">
+          国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
+          計画の日時・場所・機体・操縦者が範囲に収まるものが判定に使われます。許可・承認は登録から照合します。
+        </p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_PERMIT_CHOICES.map((c) => (
             <label key={c.value} className={planCheckRow}>
@@ -475,7 +562,7 @@ export function PlanForm({
           ))}
         </div>
         <FormErrorLine message={errors["pilotPermits"]} />
-        <p className="text-xs leading-relaxed text-ink-mute">許可の範囲と有効期間は照合していません。許可書で確認してください。</p>
+        <p className="text-xs leading-relaxed text-ink-mute">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
       </fieldset>
 
       <section className="flex flex-col gap-4" aria-label="判定の条件">
@@ -510,9 +597,10 @@ export function PlanForm({
             </select>
           </Field>
         ) : null}
-        <Field label="許可・承認の番号" required={false} error={errors["permitNumbers"]} hint="手入力の文字（200 文字以内）。">
+        <Field label="許可・承認の番号" required={false} error={errors["permitNumbers"]} hint="登録した許可の番号。複数は「,」「、」「;」か改行で区切ります（200 文字以内）。">
           <input className={`${inputClass} min-h-12`} value={v.permitNumbers} onChange={(e) => set("permitNumbers", e.target.value)} data-testid="plan-permit-numbers" />
         </Field>
+        <PermitNumberHelper value={v.permitNumbers} helper={permitHelper} isEdit={isEdit} onInsert={(n) => set("permitNumbers", appendNumber(v.permitNumbers, n))} />
         <Field label="メモ" required={false} error={errors["notes"]} hint="500 文字以内">
           <textarea className={inputClass} rows={3} value={v.notes} onChange={(e) => set("notes", e.target.value)} data-testid="plan-notes" />
         </Field>

@@ -3,6 +3,7 @@ import type { PilotOption } from "@/components/ops/records-client";
 import type { PlanAircraftOption, PlacePick } from "@/components/ops/plans-client";
 import { EMPTY_PLAN_VALUES, type PlanFormValues, type PlanHandoff } from "@/lib/plan-options";
 import { can } from "./authz";
+import { isDipsPermitValue } from "./permit-logic";
 import { listPlaces } from "./places";
 import type { PlanDto } from "./plans";
 import { listAircraft, listPilots, type MeDto, type OpsContext } from "./service";
@@ -75,7 +76,8 @@ export const initialFromPlan = (p: PlanDto): PlanFormValues => ({
   radius: p.radiusM === null ? "" : String(p.radiusM),
   altitude: p.maxAltitudeM === null ? "" : String(p.maxAltitudeM),
   flags: p.flags,
-  permits: p.pilotPermits,
+  // 12c までの計画に残る DIPS の手入力値は、判定に使わない（登録の照合だけから入る）ため、訂正フォームに引き継がない
+  permits: p.pilotPermits.filter((x) => !isDipsPermitValue(x)),
   judgementPurpose: p.judgementPurpose ?? "",
   access: p.thirdPartyOverflight === true ? "no_third_party" : p.accessControl === true ? "yes" : "",
   observer: p.bvlosWithObserver === null ? "" : p.bvlosWithObserver ? "with" : "without",

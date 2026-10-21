@@ -8,10 +8,12 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { Badge, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
+import { PermitBasisSection } from "@/components/ops/permit-ui";
 import { DipsNotice, ReportBox, SNAPSHOT_REASON_LABEL } from "@/components/ops/plan-ui";
 import { VerdictSummary } from "@/components/verdict-summary";
 import { formatJst } from "@/lib/ops-time";
 import { requireOpsMember } from "@/server/ops/page";
+import { verdictPermitNotesFromBasis } from "@/server/ops/permit-page";
 import { getPlan, getSnapshot } from "@/server/ops/plans";
 import { OpsError } from "@/server/ops/service";
 
@@ -56,7 +58,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
       </PageHeader>
 
       <Section title="判定の結果" aria-label="判定の結果" description="計画を保存したときにサーバーが実行して保存した結果です。ここでは再計算しません。">
-        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} />
+        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={verdictPermitNotesFromBasis(s.permitBasis)} />
       </Section>
 
       <Section title="根拠の記録" aria-label="根拠の記録">
@@ -110,10 +112,12 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
             ["機体重量", input.droneWeightG === null || input.droneWeightG === undefined ? "未登録（重量が分からない）" : `${input.droneWeightG} g`],
             ["予定日", input.plannedDate ?? "—"],
             ["飛行の方法・空域（選択）", (input.flags ?? []).length === 0 ? "なし" : (input.flags ?? []).map((f) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f).join("、")],
-            ["許可・承認・同意", (input.pilotPermits ?? []).length === 0 ? "なし" : (input.pilotPermits ?? []).map((p) => PERMIT_VALUE_LABEL[p] ?? p).join("、")],
+            ["許可・承認・同意（登録の照合で足した DIPS の値を含む）", (input.pilotPermits ?? []).length === 0 ? "なし" : (input.pilotPermits ?? []).map((p) => PERMIT_VALUE_LABEL[p] ?? p).join("、")],
           ]}
         />
       </Section>
+
+      <PermitBasisSection basis={s.permitBasis} />
 
       <Section title="通報の要否" aria-label="通報の要否" description="この判定から求めた通報の要否です。">
         <ReportBox report={s.report} />

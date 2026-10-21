@@ -74,7 +74,7 @@ export const currentNavKey = (pathname: string): string | null => {
   if (pathname === "/ops") return "today";
   if (pathname.startsWith("/ops/plans")) return "plans";
   if (pathname.startsWith("/ops/flights") || pathname.startsWith("/ops/inspections") || pathname.startsWith("/ops/journal")) return "journal";
-  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|members)/.test(pathname)) return "more";
+  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members)/.test(pathname)) return "more";
   return null;
 };
 

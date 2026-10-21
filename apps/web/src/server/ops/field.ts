@@ -208,6 +208,8 @@ export type FieldViewDto = {
     readonly placeName: string;
     readonly purpose: string;
     readonly permitNumbers: string | null;
+    /** 許可番号ごとの照合の状態（Sprint 12d。読み取りだけ。判定の結論は変えない）。 */
+    readonly permitStates: readonly { readonly numberText: string; readonly status: string; readonly statusLabel: string }[];
     readonly voided: boolean;
     readonly state: string;
     readonly stateLabel: string;
@@ -417,6 +419,7 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       placeName: plan.place_name,
       purpose: plan.purpose,
       permitNumbers: plan.permit_numbers,
+      permitStates: dto.permits.numbers.map((n) => ({ numberText: n.numberText, status: n.status, statusLabel: n.statusLabel })),
       voided: plan.voided_at !== null,
       state: dto.state,
       stateLabel: dto.stateLabel,

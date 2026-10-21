@@ -1,6 +1,6 @@
 {
   "$comment": "通報内容の項目の対応表。原本は DIPS2.0 API（飛行計画通報）接続システム向けガイドライン 1.10 版（2026-08-26）p46〜52 の通報受付 API のリクエスト項目（項番 1〜88）。apiNo は原本の項番。order の初期値は原本の項目の並びで、DIPS の通報画面の入力順は未照合（U4）。dipsScreenLabel・requirementRef（通報要領 4(3) の a〜n との対応。U3）は未確認の間 null。画面の入力順・項目名・通報要領との対応は、このファイルの更新だけで直す（型・画面は変えない）。screenStatus を confirmed にした行だけからなるまとまりでは「※要確認」が消える。",
-  "revision": 1,
+  "revision": 2,
   "verifiedAt": "2026-10-21T00:00:00+09:00",
   "source": {
     "title": "DIPS2.0 API（飛行計画通報）接続システム向けガイドライン 1.10 版（2026年8月26日）国土交通省 航空局 安全部",
@@ -1816,7 +1816,7 @@
       "dipsScreenLabel": null,
       "order": 76,
       "group": "permit",
-      "source": "dips_only",
+      "source": "plan",
       "apiType": "string",
       "apiRequired": "conditional",
       "range": null,
@@ -1828,7 +1828,7 @@
       "apiStatus": "guideline_1_10",
       "screenStatus": "unconfirmed",
       "requirementRef": null,
-      "note": null
+      "note": "Sprint 12d：許可・承認の登録（結びついた登録が 1 件のとき）から出す。日付の形式は FPR に指定がなく未確認（※要確認）"
     },
     {
       "apiNo": 77,
@@ -1838,7 +1838,7 @@
       "dipsScreenLabel": null,
       "order": 77,
       "group": "permit",
-      "source": "dips_only",
+      "source": "plan",
       "apiType": "string",
       "apiRequired": "conditional",
       "range": null,
@@ -1850,7 +1850,7 @@
       "apiStatus": "guideline_1_10",
       "screenStatus": "unconfirmed",
       "requirementRef": null,
-      "note": null
+      "note": "Sprint 12d：許可・承認の登録（結びついた登録が 1 件のとき）から出す。日付の形式は FPR に指定がなく未確認（※要確認）"
     },
     {
       "apiNo": 78,
@@ -1860,7 +1860,7 @@
       "dipsScreenLabel": null,
       "order": 78,
       "group": "permit",
-      "source": "dips_only",
+      "source": "plan",
       "apiType": "string",
       "apiRequired": "conditional",
       "range": null,
@@ -1872,7 +1872,7 @@
       "apiStatus": "guideline_1_10",
       "screenStatus": "unconfirmed",
       "requirementRef": null,
-      "note": null
+      "note": "Sprint 12d：許可・承認の登録（結びついた登録が 1 件のとき）から出す。日付の形式は FPR に指定がなく未確認（※要確認）"
     },
     {
       "apiNo": 79,

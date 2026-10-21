@@ -5,6 +5,7 @@ import { PlanForm } from "@/components/ops/plans-client";
 import { Forbidden } from "@/components/ops/versions";
 import { Note, PageHeader } from "@/components/ops/ui";
 import { requireOpsMember } from "@/server/ops/page";
+import { permitHelperFor } from "@/server/ops/permit-page";
 import { canUpdatePlan, initialFromPlan, planFormOptions } from "@/server/ops/plan-page";
 import { getPlan } from "@/server/ops/plans";
 import { OpsError } from "@/server/ops/service";
@@ -23,6 +24,7 @@ export default async function PlanEditPage({ params }: { readonly params: Promis
   if (plan.voided) return <Forbidden message="中止した計画は訂正できません。" />;
   if (!canUpdatePlan(me, plan.isSelf)) return <Forbidden message="計画の訂正は運航管理者と、計画の操縦者本人だけが行えます。" />;
   const options = await planFormOptions(ctx, me);
+  const permitHelper = await permitHelperFor(ctx, plan.id);
   const { pilots, fixedPilotId, places } = options;
   // 機体は訂正で変えられない。抹消した機体でも、選択肢に残して表示する
   const aircraft = options.aircraft.some((a) => a.id === plan.aircraftId)
@@ -51,6 +53,7 @@ export default async function PlanEditPage({ params }: { readonly params: Promis
         places={places}
         initial={initialFromPlan(plan)}
         editing={{ id: plan.id, version: plan.version }}
+        permitHelper={permitHelper}
       />
     </main>
   );
