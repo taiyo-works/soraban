@@ -52,6 +52,26 @@ const TABLE: readonly Row[] = [
   // 技能証明書番号（飛行記録の写し）の全桁（操縦者は自分の分だけ。閲覧者は不可）
   { action: "flight.readLicenseNumber", isSelf: true, manager: true, pilot: true, viewer: false },
   { action: "flight.readLicenseNumber", isSelf: false, manager: true, pilot: false, viewer: false },
+
+  // Sprint 12a 契約 19：docs/sprints/sprint-12a.md 設計 D の表
+  // 計画・スナップショット・よく使う地点の閲覧（全役割が全件）
+  { action: "plan.read", manager: true, pilot: true, viewer: true },
+  { action: "snapshot.read", manager: true, pilot: true, viewer: true },
+  { action: "place.read", manager: true, pilot: true, viewer: true },
+  // 計画の作成・訂正（再判定・確認依頼を含む）・中止（運航管理者は全員分、操縦者は自分が操縦者の計画だけ、閲覧者は不可）
+  { action: "plan.create", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "plan.create", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "plan.update", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "plan.update", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "plan.cancel", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "plan.cancel", isSelf: false, manager: true, pilot: false, viewer: false },
+  // 確認・差し戻し（運航管理者だけ。自分の計画でも可。操縦者は自分の計画でも不可）
+  { action: "plan.confirm", isSelf: true, manager: true, pilot: false, viewer: false },
+  { action: "plan.confirm", isSelf: false, manager: true, pilot: false, viewer: false },
+  // よく使う地点の登録・訂正・取消（運航管理者だけ）
+  { action: "place.create", manager: true, pilot: false, viewer: false },
+  { action: "place.update", manager: true, pilot: false, viewer: false },
+  { action: "place.void", manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {
@@ -71,6 +91,19 @@ describe("can（役割 × 操作）", () => {
     for (const a of ["flight.create", "flight.update", "inspection.create", "inspection.update", "flight.readLicenseNumber"] as const) {
       expect(can("pilot", a)).toBe(false);
       expect(can("pilot", a, { isSelf: false })).toBe(false);
+    }
+  });
+
+  it("操縦者の行に結び付いていない操縦者役割の利用者（isSelf を渡さない）は、飛行計画を作れない・訂正できない・中止できない", () => {
+    for (const a of ["plan.create", "plan.update", "plan.cancel"] as const) {
+      expect(can("pilot", a)).toBe(false);
+      expect(can("pilot", a, { isSelf: false })).toBe(false);
+    }
+  });
+
+  it("閲覧者は自分の計画であっても、計画の作成・訂正・中止・確認ができない", () => {
+    for (const a of ["plan.create", "plan.update", "plan.cancel", "plan.confirm"] as const) {
+      expect(can("viewer", a, { isSelf: true })).toBe(false);
     }
   });
 

@@ -2,6 +2,8 @@
 import { availabilityResponse, isSameOrigin, json, opsHandler } from "./http";
 import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
+import * as places from "./places";
+import * as plans from "./plans";
 import * as rec from "./records";
 import * as svc from "./service";
 
@@ -136,6 +138,86 @@ export const inspectionVoid = opsHandler(
 );
 export const inspectionVersions = opsHandler("GET /api/ops/inspections/[id]/versions", async ({ ctx, params }) =>
   json(200, { versions: await rec.listInspectionVersions(ctx, params["id"] ?? "") }),
+);
+
+// ---- 飛行計画・判定スナップショット・運航管理者の確認（Sprint 12a） ----
+// 作成は 201。同じ clientRequestId の作成が既にあれば、新しい計画を作らずに既存の計画を 200 で返す。
+// 保存時の判定はサーバーが実行する（本文の verdict・result・snapshot・evidenceId などは読まない）。失敗・時間切れは 503 judgement_failed。
+const savedPlan = (r: rec.SaveResult<plans.PlanDto>): Response => json(r.created ? 201 : 200, r.record);
+
+export const planList = opsHandler("GET /api/ops/plans", async ({ ctx, req }) =>
+  json(200, { plans: await plans.listPlans(ctx, plans.parsePlanFilter(new URL(req.url).searchParams)) }),
+);
+export const planCreate = opsHandler(
+  "POST /api/ops/plans",
+  async ({ ctx, body }) => savedPlan(await plans.createPlan(ctx, await body())),
+  { mutating: true },
+);
+export const planGet = opsHandler("GET /api/ops/plans/[id]", async ({ ctx, params }) =>
+  json(200, await plans.getPlan(ctx, params["id"] ?? "")),
+);
+export const planUpdate = opsHandler(
+  "PATCH /api/ops/plans/[id]",
+  async ({ ctx, params, body }) => json(200, (await plans.updatePlan(ctx, params["id"] ?? "", await body())).record),
+  { mutating: true },
+);
+export const planVoid = opsHandler(
+  "POST /api/ops/plans/[id]/void",
+  async ({ ctx, params, body }) => json(200, await plans.voidPlan(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const planRequestConfirmation = opsHandler(
+  "POST /api/ops/plans/[id]/request-confirmation",
+  async ({ ctx, params, body }) => json(200, await plans.requestConfirmation(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const planRejudge = opsHandler(
+  "POST /api/ops/plans/[id]/rejudge",
+  async ({ ctx, params, body }) => json(200, await plans.rejudgePlan(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const planConfirmations = opsHandler("GET /api/ops/plans/[id]/confirmations", async ({ ctx, params }) =>
+  json(200, { confirmations: await plans.listPlanConfirmations(ctx, params["id"] ?? "") }),
+);
+export const planConfirm = opsHandler(
+  "POST /api/ops/plans/[id]/confirmations",
+  async ({ ctx, params, body }) => json(201, await plans.confirmPlan(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const planSnapshots = opsHandler("GET /api/ops/plans/[id]/snapshots", async ({ ctx, params }) =>
+  json(200, { snapshots: await plans.listSnapshots(ctx, params["id"] ?? "") }),
+);
+export const planSnapshotGet = opsHandler("GET /api/ops/plans/[id]/snapshots/[sid]", async ({ ctx, params }) =>
+  json(200, await plans.getSnapshot(ctx, params["id"] ?? "", params["sid"] ?? "")),
+);
+export const planVersions = opsHandler("GET /api/ops/plans/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await plans.listPlanVersions(ctx, params["id"] ?? "") }),
+);
+
+// ---- よく使う地点（Sprint 12a） ----
+export const placeList = opsHandler("GET /api/ops/places", async ({ ctx, req }) =>
+  json(200, { places: await places.listPlaces(ctx, includeVoided(req)) }),
+);
+export const placeCreate = opsHandler(
+  "POST /api/ops/places",
+  async ({ ctx, body }) => json(201, await places.createPlace(ctx, await body())),
+  { mutating: true },
+);
+export const placeGet = opsHandler("GET /api/ops/places/[id]", async ({ ctx, params }) =>
+  json(200, await places.getPlace(ctx, params["id"] ?? "")),
+);
+export const placeUpdate = opsHandler(
+  "PATCH /api/ops/places/[id]",
+  async ({ ctx, params, body }) => json(200, await places.updatePlace(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const placeVoid = opsHandler(
+  "POST /api/ops/places/[id]/void",
+  async ({ ctx, params, body }) => json(200, await places.voidPlace(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const placeVersions = opsHandler("GET /api/ops/places/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await places.listPlaceVersions(ctx, params["id"] ?? "") }),
 );
 
 // ---- テスト用の本人確認（AUTH_PROVIDER=test のときだけ。本番では 404） ----
