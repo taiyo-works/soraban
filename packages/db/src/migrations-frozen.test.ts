@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-// 適用済みのマイグレーション 0001〜0011 は書き換えない（Sprint 12b の契約 20）。
+// 適用済みのマイグレーション 0001〜0013 は書き換えない（Sprint 12b の契約 20。12c の契約 17 で 0012・0013 も固定）。
 // 変更が必要なら新しい番号のマイグレーションで行う。
 const FROZEN: Record<string, string> = {
   "0001_initial_schema.sql":
@@ -28,6 +28,10 @@ const FROZEN: Record<string, string> = {
     "feb342c630cde6aca17cdf2ed0d7c9bd8e8d663cb36aa5f4a2cf4dae34a45965",
   "0011_plan_versions_confirmations.sql":
     "b931328364e191c52d49b261bf2275806ea6bcb7640ddbab64c8ccd94ac500dd",
+  "0012_flight_reports.sql":
+    "fced8fde9eac1e8dfa998748a855bcf12f99e57d7ce350c2e2f4fe46b8c27ff7",
+  "0013_report_attempts_procedure_records.sql":
+    "c96ec464cd1ec1763c1496f702f69d012079e18e516be8fd96a4f23a9f70500c",
 };
 
 describe("適用済みマイグレーションの凍結", () => {
