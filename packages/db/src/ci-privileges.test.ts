@@ -19,6 +19,12 @@ describe("CI の権限の確認", () => {
     for (const p of ["UPDATE", "DELETE", "TRUNCATE"]) expect(expectOf("flight_field_events", p), p).toBe("f");
   });
 
+  it("Sprint 12d：permit_registrations は参照だけ（SELECT = t、INSERT・UPDATE・DELETE・TRUNCATE = f）。根拠の検査のトリガーの確認もある", () => {
+    expect(expectOf("permit_registrations", "SELECT")).toBe("t");
+    for (const p of ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]) expect(expectOf("permit_registrations", p), p).toBe("f");
+    expect(CI).toContain("judgement_snapshots_permit_basis");
+  });
+
   it("12a・12b の追記専用の表の確認も残っている", () => {
     for (const t of ["judgement_snapshots", "plan_confirmations", "flight_report_attempts", "plan_procedure_records"]) {
       expect(CI, t).toContain(t);

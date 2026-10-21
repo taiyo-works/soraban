@@ -178,6 +178,15 @@ jobs:
           test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'UPDATE')")" = "f"
           test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'DELETE')")" = "f"
           test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'flight_field_events', 'TRUNCATE')")" = "f"
+      # Sprint 12d：許可・承認の登録はヘッド表（参照だけ。書くのは record_versions への追加→トリガー）。判定スナップショットの根拠の検査は新規のトリガー。
+      - name: soraban_app の権限（許可・承認の登録は参照だけ）
+        run: |
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'permit_registrations', 'SELECT')")" = "t"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'permit_registrations', 'INSERT')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'permit_registrations', 'UPDATE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'permit_registrations', 'DELETE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select has_table_privilege('soraban_app', 'permit_registrations', 'TRUNCATE')")" = "f"
+          test "$(psql "$DATABASE_URL_UNPOOLED" -tAc "select count(*) from pg_trigger where tgname = 'judgement_snapshots_permit_basis' and tgrelid = 'judgement_snapshots'::regclass")" = "1"
       - name: REQUIRE_DB_TESTS=1 で TEST_DATABASE_URL が無いと失敗することを確認
         run: |
           if env -u TEST_DATABASE_URL pnpm test:db; then

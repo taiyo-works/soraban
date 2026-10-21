@@ -109,7 +109,8 @@ export type RecordEntityTypeDb =
   | "flight_record"
   | "flight_plan"
   | "saved_place"
-  | "flight_report";
+  | "flight_report"
+  | "permit_registration";
 export type RecordOpDb = "create" | "update" | "void";
 export type RecordActorKindDb = "member" | "system";
 
@@ -483,6 +484,64 @@ export type FlightFieldEventRow = {
   readonly recorded_by_role: MemberRoleDb;
   readonly recorded_at: string;
   readonly content_hash: string;
+};
+
+// ---- 許可・承認の登録（Sprint 12d。0015） ----
+
+/** permit_registrations.coverage。包括許可・個別許可。 */
+export type PermitCoverageDb = "blanket" | "individual";
+/** permit_registrations.kinds の要素。DIPS の許可・承認の 8 種と airport（空港等周辺の個別許可）。 */
+export type PermitKindDb = "did" | "150m" | "night" | "bvlos" | "30m" | "event" | "dangerous" | "drop" | "airport";
+export type PermitStatusDb = "active" | "revoked";
+export type PermitSourceDb = "manual" | "dips_fpa";
+
+export type PermitCircleDb = {
+  readonly name?: string;
+  readonly lat: number;
+  readonly lng: number;
+  readonly radiusM: number;
+};
+
+/** 場所の範囲。nationwide は包括のみ。text は文章のみ（照合できない）。 */
+export type PermitPlaceScopeDb =
+  | { readonly type: "nationwide" }
+  | { readonly type: "circles"; readonly circles: readonly PermitCircleDb[] }
+  | { readonly type: "text"; readonly text: string };
+
+/** 機体・操縦者の範囲。listed は運航管理の機体・操縦者の ID（同じ組織）。any は許可書に限定がない。 */
+export type PermitListedScopeDb = { readonly type: "any" } | { readonly type: "listed"; readonly ids: readonly string[] };
+
+export type PermitRegistrationRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly permit_number: string;
+  /** 照合の鍵（normalizePermitNumber の結果。アプリが決めて版の data に入れる）。 */
+  readonly permit_number_key: string;
+  readonly coverage: PermitCoverageDb;
+  readonly kinds: readonly PermitKindDb[];
+  readonly airport_names: readonly string[];
+  /** date（JST の日付）。ストアは YYYY-MM-DD の文字列で返す。 */
+  readonly issued_on: string;
+  readonly valid_from: string;
+  readonly valid_to: string;
+  readonly status: PermitStatusDb;
+  /** 失効・取消された日（この日以降は使えない）。active は null。 */
+  readonly revoked_on: string | null;
+  readonly place_scope: PermitPlaceScopeDb;
+  readonly aircraft_scope: PermitListedScopeDb;
+  readonly pilot_scope: PermitListedScopeDb;
+  readonly max_altitude_m: number | null;
+  /** numeric(5,2)。pg は文字列で返す。 */
+  readonly max_weight_kg: string | null;
+  readonly requires_observer: boolean;
+  readonly requires_access_control: boolean;
+  readonly conditions_text: string | null;
+  readonly source: PermitSourceDb;
+  readonly external_ref: Record<string, unknown>;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
 };
 
 export type RecordVersionRow = {
@@ -880,6 +939,35 @@ export const FLIGHT_FIELD_EVENT_COLUMNS = columns<FlightFieldEventRow>()([
   "content_hash",
 ]);
 
+export const PERMIT_REGISTRATION_COLUMNS = columns<PermitRegistrationRow>()([
+  "id",
+  "org_id",
+  "permit_number",
+  "permit_number_key",
+  "coverage",
+  "kinds",
+  "airport_names",
+  "issued_on",
+  "valid_from",
+  "valid_to",
+  "status",
+  "revoked_on",
+  "place_scope",
+  "aircraft_scope",
+  "pilot_scope",
+  "max_altitude_m",
+  "max_weight_kg",
+  "requires_observer",
+  "requires_access_control",
+  "conditions_text",
+  "source",
+  "external_ref",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -900,9 +988,10 @@ export const TABLE_COLUMNS = {
   flight_report_attempts: FLIGHT_REPORT_ATTEMPT_COLUMNS,
   plan_procedure_records: PLAN_PROCEDURE_RECORD_COLUMNS,
   flight_field_events: FLIGHT_FIELD_EVENT_COLUMNS,
+  permit_registrations: PERMIT_REGISTRATION_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10・11・12a・12b・12c）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+/** 運航管理の表（Sprint 10・11・12a・12b・12c・12d）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
 export const OPS_TABLES = [
   "organizations",
   "members",
@@ -919,4 +1008,5 @@ export const OPS_TABLES = [
   "flight_report_attempts",
   "plan_procedure_records",
   "flight_field_events",
+  "permit_registrations",
 ] as const;
