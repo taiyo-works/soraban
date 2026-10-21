@@ -293,7 +293,10 @@ const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> 
   return { plan, mine, isSelf: dto.isSelf, planState: dto.state, stale: dto.freshness.stale, requirement, extras };
 };
 
-const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs): Promise<PlanForReport> => {
+type PermitMatch = Awaited<ReturnType<typeof matchInput>>;
+
+/** `matched` を渡すと許可の照合を再び読まず、その結果を使う（同じ画面の中で登録の版をそろえるため）。 */
+const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs, matched?: PermitMatch): Promise<PlanForReport> => {
   const { plan } = b;
   const org = ctx.member.org_id;
   const aircraft = await store.getAircraft(ctx.db, org, plan.aircraft_id);
@@ -302,7 +305,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
   const reveal = can(ctx.member.role, "flight.readLicenseNumber", { isSelf: b.isSelf });
   const licenseNumber = pilot.license_number === null ? null : reveal ? pilot.license_number : maskLicenseNumber(pilot.license_number);
   // 許可書発行日・許可期間（FPR No.76〜78）：計画の許可番号に結びつき、範囲に収まって適用された登録がちょうど 1 件のときだけ出す
-  const registration = reportRegistrationOf(await matchInput(ctx.db, org, planPermitInputOfRow(plan)));
+  const registration = reportRegistrationOf(matched ?? (await matchInput(ctx.db, org, planPermitInputOfRow(plan))));
   return {
     planId: plan.id,
     title: plan.title,
@@ -489,7 +492,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
     }
   }
 
-  const planForReport = await buildPlanForReport(ctx, b, inputs);
+  const planForReport = await buildPlanForReport(ctx, b, inputs, permits);
   const prepared = selected.gateway.prepare(planForReport, kind);
   const caps = selected.gateway.capabilities();
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
