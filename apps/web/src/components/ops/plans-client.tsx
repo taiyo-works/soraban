@@ -133,7 +133,7 @@ function PermitNumberHelper({
             const known = registered.has(t.key);
             const saved = isEdit ? savedByKey.get(t.key) : undefined;
             return (
-              <li key={t.key} className="flex flex-col gap-0.5 border-l-2 border-rule pl-3 text-xs leading-relaxed" data-testid="plan-permit-input-state" data-registered={String(known)}>
+              <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 text-xs leading-relaxed ${known ? "border-signal-green" : "border-signal-amber"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
                 <span className="break-all font-mono text-[13px] text-ink">{t.text}</span>
                 {known ? (
                   <span className="text-ink-soft">
@@ -141,7 +141,7 @@ function PermitNumberHelper({
                     範囲に収まるかは、保存したときに計画の日時・場所・機体・操縦者で照合します。
                   </span>
                 ) : (
-                  <span className="text-signal-red" data-testid="plan-permit-unregistered">
+                  <span className="font-medium text-ink" data-testid="plan-permit-unregistered">
                     <span aria-hidden>? </span>
                     {PERMIT_UNREGISTERED_WARNING}
                   </span>
@@ -154,10 +154,10 @@ function PermitNumberHelper({
       {candidates.length > 0 ? (
         <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
           <p className="text-xs font-medium text-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
-          <p className="text-xs leading-relaxed text-ink-mute">{helper?.candidatesNote}</p>
+          <p className="text-xs leading-relaxed text-ink-soft">{helper?.candidatesNote}</p>
           <ul className="flex flex-col gap-1.5">
             {candidates.map((c) => (
-              <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sharp border border-rule-soft bg-paper px-3 py-2" data-testid="plan-permit-candidate">
+              <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sharp border border-l-2 border-rule border-l-brand-500 bg-paper px-3 py-2" data-testid="plan-permit-candidate">
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="break-all font-mono text-[13px] text-ink">{c.permitNumber}</span>
                   <span className="text-xs text-ink-soft">{c.summary}</span>
@@ -170,7 +170,7 @@ function PermitNumberHelper({
           </ul>
         </div>
       ) : null}
-      <p className="text-xs leading-relaxed text-ink-mute">{PERMIT_DECLARATION_NOTE}</p>
+      <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft">{PERMIT_DECLARATION_NOTE}</p>
     </div>
   );
 }

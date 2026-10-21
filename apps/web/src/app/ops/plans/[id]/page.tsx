@@ -277,11 +277,11 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         description="計画の許可番号の欄に入れた番号を、登録した許可・承認に結びつけ、計画の日時・場所・飛行の方法・機体・操縦者が範囲に収まるものだけを判定に使います。"
       >
         <PermitDeclaration declaration={planPermits.declaration} noDipsNote={planPermits.noDipsNote} />
-        <Note>
+        <Note tone="red">
           範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
           空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
         </Note>
-        <p className="text-xs leading-relaxed text-ink-mute" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         {planPermits.permits.window ? (
           <p className="font-mono text-xs tnum text-ink-soft" data-testid="plan-permit-window">
             照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}
@@ -296,10 +296,10 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         {planPermits.candidates.length > 0 ? (
           <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
             <p className="text-sm font-medium text-ink">範囲に収まる登録済みの許可・承認（候補）</p>
-            <p className="text-xs leading-relaxed text-ink-mute">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
+            <p className="text-xs leading-relaxed text-ink-soft">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
             <ul className="flex flex-col border-t border-rule">
               {planPermits.candidates.map((c) => (
-                <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-rule-soft py-2.5 text-sm" data-testid="plan-permit-candidate">
+                <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-rule-soft border-l-brand-500 py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
                   <span className="break-all font-mono text-[13px] text-ink">{c.permitNumber}</span>
                   <span className="text-xs text-ink-soft">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
                 </li>

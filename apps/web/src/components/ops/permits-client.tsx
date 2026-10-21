@@ -255,7 +255,7 @@ export function PermitForm({
         {v.placeType === "circles" ? (
           <div className="flex flex-col gap-3" data-testid="permit-circles">
             {v.circles.map((c, i) => (
-              <div key={i} className="grid grid-cols-1 gap-3 border-l-2 border-rule pl-3 sm:grid-cols-4" data-testid="permit-circle">
+              <div key={i} className="grid grid-cols-1 gap-3 border-l-4 border-brand-500 bg-paper-soft py-3 pl-3 pr-3 sm:grid-cols-4" data-testid="permit-circle">
                 <Field label={`円 ${i + 1} の名称（任意）`}>
                   <input className={inputClass} value={c.name} onChange={(e) => setCircle(i, { name: e.target.value })} data-testid="permit-circle-name" />
                 </Field>

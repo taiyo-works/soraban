@@ -39,7 +39,7 @@ export default async function PermitListPage({
       >
         <PermitDeclaration declaration={PERMIT_DECLARATION_NOTE} noDipsNote={PERMIT_NO_DIPS_NOTE} />
         <Note>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
-        <p className="text-xs leading-relaxed text-ink-mute" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         {manager ? null : <Note>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
       </PageHeader>
 
@@ -83,7 +83,7 @@ export default async function PermitListPage({
                     <span data-testid="permit-row-kinds">
                       {p.coverageLabel}：{p.kinds.map((k) => k.label).join("、")}
                     </span>
-                    <span className="text-xs text-ink-mute" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
+                    <span className="text-xs text-ink-soft" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
                   </span>
                   <span className="font-mono text-xs tnum text-ink-soft" data-testid="permit-row-period">
                     {p.validFrom} 〜 {p.validTo}
