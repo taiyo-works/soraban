@@ -29,6 +29,7 @@ import {
   INSPECTION_ABNORMAL_GUIDANCE,
   LANDING_OUTSIDE_PLAN_WINDOW,
   OUTBOX_RETRY_INTERVAL_MS,
+  OUTBOX_UNSAVED_NOTE,
   fieldGapLabel,
   fieldHref,
   formatElapsed,
@@ -54,7 +55,7 @@ import { WakeLockController, wakeLockNote, type WakeLockStatus } from "@/lib/wak
 import { fieldState, outboxAsEvents, type FieldFlight } from "@/server/ops/field-logic";
 import type { FieldViewDto } from "@/server/ops/field";
 import { newRequestId } from "./drafts";
-import { flushOutbox, loadPlanOutbox, updatePlanOutbox } from "./field-outbox";
+import { flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
 
 const BTN =
   "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp px-5 py-2 text-lg font-bold touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
@@ -710,6 +711,11 @@ export function FieldClient({ initial, memberId }: { readonly initial: FieldView
           <span className={unsent > 0 ? "text-2xl font-bold" : "font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
           {unsent > 0 ? <span>電波が戻ると自動で送ります。</span> : null}
         </p>
+        {planOutboxUnsaved(planId, memberId) ? (
+          <p className={BOX_WARN} role="alert" data-testid="field-outbox-unsaved">
+            {OUTBOX_UNSAVED_NOTE}
+          </p>
+        ) : null}
         {cancelled ? (
           <p className={BOX_WARN} role="alert" data-testid="field-cancelled">
             <span className="text-xl font-bold">！ この計画は中止されています</span>

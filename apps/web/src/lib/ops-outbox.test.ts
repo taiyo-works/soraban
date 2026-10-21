@@ -15,6 +15,7 @@ import {
   nextToSend,
   outboxKey,
   parseOutbox,
+  recoverFlightFromOutbox,
   rejectedCount,
   saveOutbox,
   serializeOutbox,
@@ -281,5 +282,36 @@ describe("ログアウトの警告・他の利用者の保存", () => {
     }
     expect(st.getItem(outboxKey("p1", "m1"))).not.toBeNull();
     expect(st.getItem(outboxKey("p1", "m2"))).toBeNull();
+  });
+});
+
+describe("recoverFlightFromOutbox：日誌の入力を送信待ちの離着陸から始める", () => {
+  const T = "11111111-1111-4111-8111-111111111111";
+  const SERVER_T = "99999999-9999-4999-8999-999999999999";
+  const take = (over: Partial<OutboxEntry> = {}): OutboxEntry => ({ clientEventId: T, kind: "takeoff", occurredAt: "2027-01-05T12:00", status: "pending", attempts: 0, ...over });
+  const land = (over: Partial<OutboxEntry> = {}): OutboxEntry => ({
+    clientEventId: "22222222-2222-4222-8222-222222222222",
+    kind: "landing",
+    occurredAt: "2027-01-05T12:10",
+    status: "pending",
+    attempts: 0,
+    ...over,
+  });
+  const st = (...entries: OutboxEntry[]): OutboxState => ({ v: 1, entries });
+
+  it("離着陸とも送信待ち：端末の識別子で結び付く", () => {
+    expect(recoverFlightFromOutbox(st(take(), land({ targetClientEventId: T })), [T], null)).toEqual({ takeoffAt: "2027-01-05T12:00", landingAt: "2027-01-05T12:10" });
+  });
+  it("離陸は届き着陸だけ送信待ち：サーバーの離陸の ID を指す着陸でも回復し、離陸の時刻はサーバーのもの", () => {
+    const r = recoverFlightFromOutbox(st(land({ targetEventId: SERVER_T })), [SERVER_T, T], "2027-01-05T11:59");
+    expect(r).toEqual({ takeoffAt: "2027-01-05T11:59", landingAt: "2027-01-05T12:10" });
+  });
+  it("端末の識別子を指す着陸も、離陸が届いていれば回復する（refs に両方を渡す）", () => {
+    expect(recoverFlightFromOutbox(st(land({ targetClientEventId: T })), [SERVER_T, T], "2027-01-05T11:59")?.landingAt).toBe("2027-01-05T12:10");
+  });
+  it("別の離陸を指す着陸・送れなかった着陸・離陸の時刻がないときは回復しない", () => {
+    expect(recoverFlightFromOutbox(st(land({ targetEventId: "33333333-3333-4333-8333-333333333333" })), [SERVER_T], "2027-01-05T11:59")).toBeNull();
+    expect(recoverFlightFromOutbox(st(land({ targetEventId: SERVER_T, status: "rejected" })), [SERVER_T], "2027-01-05T11:59")).toBeNull();
+    expect(recoverFlightFromOutbox(st(land({ targetEventId: SERVER_T })), [SERVER_T], null)).toBeNull();
   });
 });

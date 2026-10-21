@@ -9,8 +9,10 @@ import {
   loadOutbox,
   nextToSend,
   outboxKey,
+  rejectedCount,
   saveOutbox,
   toRequestBody,
+  unsentCount,
   type OutboxEntry,
   type OutboxState,
   type StorageLike,
@@ -32,20 +34,44 @@ const storage = (): StorageLike | null => {
   }
 };
 
-/** 計画ごとの送信待ちを読む（保存できない環境では空）。 */
+/**
+ * 端末に保存できなかった（保存先がない・容量超過・無効化）計画の送信待ち。キーは outboxKey。
+ * 画面を閉じるまではここに残し、通信できれば送る。保存できたらここから消す。
+ */
+const memory = new Map<string, OutboxState>();
+
+/** 計画ごとの送信待ちを読む（保存できなかった分があればそれを優先する）。 */
 export const loadPlanOutbox = (planId: string, memberId: string): OutboxState => {
+  const key = outboxKey(planId, memberId);
+  const mem = memory.get(key);
+  if (mem) return mem;
   const st = storage();
-  return st ? loadOutbox(st, outboxKey(planId, memberId)) : { v: 1, entries: [] };
+  return st ? loadOutbox(st, key) : { v: 1, entries: [] };
 };
 
-/** 変更をかけてから保存する（最新を読み直してから変更する。画面の状態を直接書き戻さない）。 */
+/**
+ * 変更をかけてから保存する（最新を読み直してから変更する。画面の状態を直接書き戻さない）。
+ * 保存できなければメモリに置く（黙って失わない）。保存できたらメモリから消す。
+ */
 export const updatePlanOutbox = (planId: string, memberId: string, fn: (s: OutboxState) => OutboxState): OutboxState => {
-  const st = storage();
-  if (!st) return fn({ v: 1, entries: [] });
   const key = outboxKey(planId, memberId);
-  const next = fn(loadOutbox(st, key));
-  saveOutbox(st, key, next);
+  const next = fn(loadPlanOutbox(planId, memberId));
+  const st = storage();
+  if (st && saveOutbox(st, key, next)) memory.delete(key);
+  else if (next.entries.length > 0) memory.set(key, next);
+  else memory.delete(key);
   return next;
+};
+
+/** 端末に保存できていない送信待ちの行がある（送信されるまで画面を閉じられない）。 */
+export const planOutboxUnsaved = (planId: string, memberId: string): boolean =>
+  (memory.get(outboxKey(planId, memberId))?.entries.length ?? 0) > 0;
+
+/** 端末に保存できていない、ある利用者の未送信・送れなかった行の数（ログアウトの警告に足す）。 */
+export const unsavedUnsentCountForMember = (memberId: string): number => {
+  let n = 0;
+  for (const [k, s] of memory) if (k.endsWith(`:${memberId}`)) n += unsentCount(s) + rejectedCount(s);
+  return n;
 };
 
 /**
@@ -132,18 +158,26 @@ export const flushOutbox = (planId: string, memberId: string, onSent?: (info: Se
 
 /** ある利用者の、すべての計画の送信待ちの計画 ID（ログアウトの前に送る対象）。 */
 export const planIdsWithOutbox = (memberId: string): string[] => {
+  const ids = new Set<string>();
+  const add = (k: string): void => {
+    if (!isOutboxKey(k) || !k.endsWith(`:${memberId}`)) return;
+    const m = /^soraban:ops-draft:field-([0-9a-f-]{36}):/i.exec(k);
+    if (m?.[1]) ids.add(m[1].toLowerCase());
+  };
+  for (const k of memory.keys()) add(k);
   const st = storage();
-  if (!st) return [];
-  const ids: string[] = [];
-  try {
-    for (let i = 0; i < st.length; i++) {
-      const k = st.key(i);
-      if (!k || !isOutboxKey(k) || !k.endsWith(`:${memberId}`)) continue;
-      const m = /^soraban:ops-draft:field-([0-9a-f-]{36}):/i.exec(k);
-      if (m?.[1]) ids.push(m[1].toLowerCase());
+  if (st) {
+    try {
+      for (let i = 0; i < st.length; i++) {
+        const k = st.key(i);
+        if (k) add(k);
+      }
+    } catch {
+      // 何もしない
     }
-  } catch {
-    // 何もしない
   }
-  return ids;
+  return [...ids];
 };
+
+/** テスト用：メモリの保持を空にする。 */
+export const resetUnsavedOutboxForTest = (): void => memory.clear();

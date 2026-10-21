@@ -25,6 +25,7 @@ import {
   type InspectionTiming,
 } from "@/lib/ops-records";
 import { JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF, JOURNAL_MISMATCH_REPORT_MISSING } from "@/lib/ops-field";
+import { recoverFlightFromOutbox } from "@/lib/ops-outbox";
 import { setChangeFlash } from "./change-notice";
 import { clearDraft, clearOtherUsersDrafts, draftKey, loadDraft, newRequestId, saveDraft } from "./drafts";
 import { flushOutbox, loadPlanOutbox } from "./field-outbox";
@@ -556,7 +557,10 @@ export type FlightFromField = {
   readonly takeoffAt: string | null;
   readonly landingAt: string | null;
   readonly inspectionId: string | null;
+  /** 両方の時刻（離陸・着陸）がサーバーの記録から決まった。false なら端末の送信待ちから回復を試みる。 */
   readonly resolved: boolean;
+  /** この離陸を指す識別子（サーバーの離陸の ID・端末の識別子）。送信待ちの着陸を探すのに使う。 */
+  readonly takeoffRefs?: readonly string[];
 };
 
 const emptyFlight = (aircraftId: string, pilotId: string, inspectionId: string): FlightState => ({
@@ -723,15 +727,14 @@ export function FlightForm({
     if (!fromPlan || !fromField || fromField.resolved) return;
     const t = window.setTimeout(() => {
       const ob = loadPlanOutbox(fromPlan.planId, memberId);
-      const takeoff = ob.entries.find((e) => e.kind === "takeoff" && e.clientEventId === fromField.takeoffEventId);
-      const landing = takeoff ? ob.entries.find((e) => e.kind === "landing" && e.targetClientEventId === takeoff.clientEventId) : undefined;
-      if (takeoff && landing) {
+      const rec = recoverFlightFromOutbox(ob, fromField.takeoffRefs ?? [fromField.takeoffEventId], fromField.takeoffAt);
+      if (rec) {
         setV((s) => ({
           ...s,
-          takeoffDate: takeoff.occurredAt.slice(0, 10),
-          takeoffTime: takeoff.occurredAt.slice(11, 16),
-          landingDate: landing.occurredAt.slice(0, 10),
-          landingTime: landing.occurredAt.slice(11, 16),
+          takeoffDate: rec.takeoffAt.slice(0, 10),
+          takeoffTime: rec.takeoffAt.slice(11, 16),
+          landingDate: rec.landingAt.slice(0, 10),
+          landingTime: rec.landingAt.slice(11, 16),
         }));
         setFieldNote("現場の離着陸の記録はまだ送られていません。保存するとき、先に送ります。");
       }

@@ -5,8 +5,8 @@
 import { cloneElement, useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactElement, type ReactNode } from "react";
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
-import { flushOutbox, planIdsWithOutbox } from "./field-outbox";
-import { logoutGuard } from "@/lib/ops-outbox";
+import { flushOutbox, planIdsWithOutbox, unsavedUnsentCountForMember } from "./field-outbox";
+import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import {
   buttonDangerClass,
   buttonFieldClass,
@@ -885,8 +885,16 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     }
   };
 
+  // 端末に保存できていない未送信（メモリだけにある分）も数に入れる
+  const guardNow = (): { warn: boolean; message: string | null } => {
+    if (!memberId) return { warn: false, message: null };
+    const g = logoutGuard(window.localStorage, memberId);
+    const count = g.count + unsavedUnsentCountForMember(memberId);
+    return { warn: count > 0, message: count > 0 ? LOGOUT_UNSENT_WARNING(count) : null };
+  };
+
   const onClick = async () => {
-    const g = memberId ? logoutGuard(window.localStorage, memberId) : { warn: false, message: null };
+    const g = guardNow();
     if (g.warn) {
       setWarning(g.message);
       setSendFailed(false);
@@ -900,7 +908,7 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     if (!memberId) return;
     setBusy(true);
     for (const planId of planIdsWithOutbox(memberId)) await flushOutbox(planId, memberId);
-    const g = logoutGuard(window.localStorage, memberId);
+    const g = guardNow();
     if (g.warn) {
       setWarning(g.message);
       setSendFailed(true);

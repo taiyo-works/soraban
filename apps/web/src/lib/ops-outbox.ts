@@ -278,6 +278,27 @@ export const countUnsentForMember = (storage: StorageLike, memberId: string): { 
   return { pending, rejected };
 };
 
+/**
+ * 日誌の入力を、端末の送信待ちの離着陸から始める（現場の記録がまだ全部は届いていないとき）。
+ * refs は、その離陸を指す識別子（サーバーの離陸の ID・端末の識別子）。離陸の時刻は、サーバーに届いていればそれ、
+ * なければ送信待ちの離陸の行から取る。着陸は、送信待ちの着陸のうち targetEventId・targetClientEventId のどちらかが
+ * その離陸を指すもの。両方の時刻が決まらなければ null。
+ */
+export const recoverFlightFromOutbox = (
+  s: OutboxState,
+  refs: readonly string[],
+  serverTakeoffAt: string | null,
+): { readonly takeoffAt: string; readonly landingAt: string } | null => {
+  const set = new Set(refs.map((r) => r.toLowerCase()));
+  const takeoffAt = serverTakeoffAt ?? pendingEntries(s).find((e) => e.kind === "takeoff" && set.has(e.clientEventId.toLowerCase()))?.occurredAt;
+  if (!takeoffAt) return null;
+  const pointsHere = (e: OutboxEntry): boolean =>
+    (e.targetEventId !== undefined && set.has(e.targetEventId.toLowerCase())) ||
+    (e.targetClientEventId !== undefined && set.has(e.targetClientEventId.toLowerCase()));
+  const landing = pendingEntries(s).find((e) => e.kind === "landing" && pointsHere(e));
+  return landing ? { takeoffAt, landingAt: landing.occurredAt } : null;
+};
+
 export const LOGOUT_UNSENT_WARNING = (n: number): string => `未送信 ${n} 件があります。送ってからログアウトしますか`;
 
 /**

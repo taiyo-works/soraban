@@ -934,6 +934,32 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await manager.dispose();
   });
 
+  test("13b. 端末に送信待ちを保存できなくても、押した離陸は失われない：注記が出て、サーバーに 1 件だけ記録され、注記は消える", async ({ page }) => {
+    const manager = await apiAs(seeded("a-manager"));
+    const selfPilot = await pilotIdOf(seeded("a-pilot"));
+    const aircraft = await createAircraft(manager);
+    const plan = await createPlan(manager, planBody(aircraft.id, selfPilot));
+    await signIn(page.request, seeded("a-pilot"));
+    // 送信待ちの保存だけを失敗させる（容量超過・無効化の再現）
+    await page.addInitScript(() => {
+      const orig = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k: string, v: string) {
+        if (String(k).startsWith("soraban:ops-draft:field-")) throw new DOMException("quota", "QuotaExceededError");
+        return orig.call(this, k, v);
+      };
+    });
+    await fixClock(page, "12:00:10");
+    await openField(page, plan.id);
+    const btn = page.getByTestId("field-flight-button");
+    await btn.click();
+    // 送信は自動で成功するので、押した結果が出て、サーバーに 1 件だけ記録され、注記は最後に消える
+    await expect(btn).toHaveText("着陸", { timeout: 15_000 });
+    await expect(page.getByTestId("field-outbox-unsaved")).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.getByTestId("field-unsent")).toContainText("送信済み");
+    const events = await getEvents(manager, plan.id);
+    expect(events.filter((e) => e.kind === "takeoff")).toHaveLength(1);
+  });
+
   test("14. 画面の消灯の防止：飛行中だけ取得し、着陸で解放する。非対応の端末では注記だけ", async ({ page, browser }) => {
     const manager = await apiAs(seeded("a-manager"));
     const selfPilot = await pilotIdOf(seeded("a-pilot"));

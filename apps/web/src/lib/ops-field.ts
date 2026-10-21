@@ -287,3 +287,6 @@ export const TODAY_EMPTY_ACTIONS: readonly { readonly label: string; readonly hr
   { label: "飛行計画を作る", href: "/ops/plans/new" },
   { label: "地点を判定する", href: "/" },
 ];
+
+/** 端末に送信待ちを保存できないとき（保存先がない・容量超過）の注記。送信されるまで画面を閉じさせない。 */
+export const OUTBOX_UNSAVED_NOTE = "この端末では送信待ちを保存できません。電波が戻って送信されるまで、この画面を閉じないでください。";
