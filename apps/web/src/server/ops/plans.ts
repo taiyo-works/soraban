@@ -526,13 +526,13 @@ const planDtoOf = async (ctx: OpsContext, r: PlanWithJoins, mine: PilotRow | nul
 export const loadPlanBundle = async (
   ctx: OpsContext,
   id: string,
-): Promise<{ plan: PlanWithJoins; mine: PilotRow | null; dto: PlanDto; extras: PlanReportExtras }> => {
+): Promise<{ plan: PlanWithJoins; mine: PilotRow | null; dto: PlanDto; extras: PlanReportExtras; permits: PermitMatchResult }> => {
   const plan = await loadPlan(ctx, id);
   const mine = await myPilot(ctx);
   const confirmations = await store.listConfirmationsFor(ctx.db, ctx.member.org_id, [plan.id]);
   const extras = (await loadReportExtras(ctx, [plan.id])).get(plan.id) ?? emptyExtras();
   const permits = (await loadPermitMatches(ctx.db, ctx.member.org_id, [plan])).get(plan.id) ?? EMPTY_PERMIT_MATCH;
-  return { plan, mine, dto: planDto(ctx, plan, confirmations, mine, extras, permits), extras };
+  return { plan, mine, dto: planDto(ctx, plan, confirmations, mine, extras, permits), extras, permits };
 };
 
 export const getPlan = async (ctx: OpsContext, id: string): Promise<PlanDetailDto> => {

@@ -67,7 +67,7 @@ import { can } from "./authz";
 import { currentFingerprintPartsOf, rowLite, summarizePlanReport, type PlanReportExtras } from "./report-dto";
 import type { DeadlineState } from "./report-logic";
 import { reportRegistrationOf } from "./permit-logic";
-import { matchInput, planPermitInputOfRow } from "./permit-match";
+import type { PermitMatchResult } from "./permit-logic";
 import { loadPlan, loadPlanBundle } from "./plans";
 import type { PlanState } from "./plan-logic";
 import { asDate, nowOf } from "./records";
@@ -279,10 +279,12 @@ type PlanBundle = {
   readonly stale: boolean;
   readonly requirement: ReportRequirement;
   readonly extras: PlanReportExtras;
+  /** loadPlanBundle が読んだ許可の照合。状態・差分・通報内容は、すべてこの 1 回の読み取りから作る。 */
+  readonly permits: PermitMatchResult;
 };
 
 const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> => {
-  const { plan, mine, dto, extras } = await loadPlanBundle(ctx, planId);
+  const { plan, mine, dto, extras, permits } = await loadPlanBundle(ctx, planId);
   const requirement: ReportRequirement = {
     kind: dto.report.kind,
     label: dto.report.label,
@@ -290,13 +292,10 @@ const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> 
     exceptionNote: dto.report.exceptionNote,
     note: dto.report.note,
   };
-  return { plan, mine, isSelf: dto.isSelf, planState: dto.state, stale: dto.freshness.stale, requirement, extras };
+  return { plan, mine, isSelf: dto.isSelf, planState: dto.state, stale: dto.freshness.stale, requirement, extras, permits };
 };
 
-type PermitMatch = Awaited<ReturnType<typeof matchInput>>;
-
-/** `matched` を渡すと許可の照合を再び読まず、その結果を使う（同じ画面の中で登録の版をそろえるため）。 */
-const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs, matched?: PermitMatch): Promise<PlanForReport> => {
+const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs): Promise<PlanForReport> => {
   const { plan } = b;
   const org = ctx.member.org_id;
   const aircraft = await store.getAircraft(ctx.db, org, plan.aircraft_id);
@@ -305,7 +304,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
   const reveal = can(ctx.member.role, "flight.readLicenseNumber", { isSelf: b.isSelf });
   const licenseNumber = pilot.license_number === null ? null : reveal ? pilot.license_number : maskLicenseNumber(pilot.license_number);
   // 許可書発行日・許可期間（FPR No.76〜78）：計画の許可番号に結びつき、範囲に収まって適用された登録がちょうど 1 件のときだけ出す
-  const registration = reportRegistrationOf(matched ?? (await matchInput(ctx.db, org, planPermitInputOfRow(plan))));
+  const registration = reportRegistrationOf(b.permits);
   return {
     planId: plan.id,
     title: plan.title,
@@ -458,7 +457,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
   const { plan, extras } = b;
   const rows = extras.rows;
   const lites = rows.map(rowLite);
-  const permits = await matchInput(ctx.db, ctx.member.org_id, planPermitInputOfRow(plan));
+  const permits = b.permits;
   const summary = summarizePlanReport({
     ctx,
     plan,
@@ -492,7 +491,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
     }
   }
 
-  const planForReport = await buildPlanForReport(ctx, b, inputs, permits);
+  const planForReport = await buildPlanForReport(ctx, b, inputs);
   const prepared = selected.gateway.prepare(planForReport, kind);
   const caps = selected.gateway.capabilities();
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
