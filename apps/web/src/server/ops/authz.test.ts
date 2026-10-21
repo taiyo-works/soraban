@@ -90,6 +90,13 @@ const TABLE: readonly Row[] = [
   { action: "report.copyAudit", isSelf: false, manager: true, pilot: false, viewer: false },
   { action: "procedure.record", isSelf: true, manager: true, pilot: true, viewer: false },
   { action: "procedure.record", isSelf: false, manager: true, pilot: false, viewer: false },
+
+  // Sprint 12c 契約 6：docs/sprints/sprint-12c.md 設計 B・E
+  // 現場モードの状態・今日の画面の閲覧（全役割）
+  { action: "field.read", manager: true, pilot: true, viewer: true },
+  // 飛行前の確認・離陸・着陸・取り消す（運航管理者は全員分＝代理入力、操縦者は自分が操縦者の計画だけ、閲覧者は不可）
+  { action: "field.record", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "field.record", isSelf: false, manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {
@@ -136,6 +143,15 @@ describe("can（役割 × 操作）", () => {
     // 閲覧（report.read）は全役割。書き込みはすべて OPS_ACTIONS に入っている
     for (const r of ["manager", "pilot", "viewer"] as const) expect(can(r, "report.read")).toBe(true);
     for (const a of [...writes, "report.read"] as const) expect(OPS_ACTIONS).toContain(a);
+  });
+
+  it("Sprint 12c：操縦者の行に結び付いていない操縦者役割（isSelf を渡さない）は、現場の記録ができない。閲覧者は自分の計画でもできない", () => {
+    expect(can("pilot", "field.record")).toBe(false);
+    expect(can("pilot", "field.record", { isSelf: false })).toBe(false);
+    expect(can("viewer", "field.record", { isSelf: true })).toBe(false);
+    expect(can("viewer", "field.record")).toBe(false);
+    for (const r of ["manager", "pilot", "viewer"] as const) expect(can(r, "field.read")).toBe(true);
+    for (const a of ["field.read", "field.record"] as const) expect(OPS_ACTIONS).toContain(a);
   });
 
   it("閲覧者は自分の操縦者であっても訂正・全桁表示ができない", () => {

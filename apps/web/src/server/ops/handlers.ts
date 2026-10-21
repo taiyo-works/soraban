@@ -3,11 +3,13 @@ import { availabilityResponse, isSameOrigin, json, opsHandler } from "./http";
 import { getOpsAvailability, type OpsEnv } from "./availability";
 import { parseTestSignIn, signTestAuthCookie, TEST_AUTH_COOKIE, TEST_AUTH_MAX_AGE } from "./auth/test-auth";
 import * as places from "./places";
+import * as field from "./field";
 import * as plans from "./plans";
 import * as procedureRecords from "./procedure-records";
 import * as rec from "./records";
 import * as reports from "./reports";
 import * as svc from "./service";
+import * as today from "./today";
 
 const includeVoided = (req: Request): boolean => new URL(req.url).searchParams.get("includeVoided") === "1";
 
@@ -259,6 +261,26 @@ export const procedureRecordList = opsHandler("GET /api/ops/plans/[id]/procedure
 export const procedureRecordCreate = opsHandler(
   "POST /api/ops/plans/[id]/procedure-records",
   async ({ ctx, params, body }) => json(201, await procedureRecords.createProcedureRecord(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+
+// ---- 今日・現場モード（Sprint 12c） ----
+// 「今日」は一覧の要約の値だけを使う（判定の result 全体は読まない）。現場の記録は DIPS へ送信しない（自分の DB だけ）。
+// 離陸は未了事項があっても 201（応答の gaps に未了事項）。同じ clientEventId の再送は 200 で既存の行を返す。
+// サーバーが決めるもの（snapshotId・planVersion・gaps・記録者・記録時刻・ハッシュ）は本文から読まない。
+export const todayGet = opsHandler("GET /api/ops/today", async ({ ctx }) => json(200, await today.getToday(ctx)));
+export const planFieldGet = opsHandler("GET /api/ops/plans/[id]/field", async ({ ctx, params }) =>
+  json(200, await field.getFieldView(ctx, params["id"] ?? "")),
+);
+export const planFieldEventsList = opsHandler("GET /api/ops/plans/[id]/field-events", async ({ ctx, params }) =>
+  json(200, await field.listFieldEvents(ctx, params["id"] ?? "")),
+);
+export const planFieldEventCreate = opsHandler(
+  "POST /api/ops/plans/[id]/field-events",
+  async ({ ctx, params, body }) => {
+    const r = await field.recordFieldEvent(ctx, params["id"] ?? "", await body());
+    return json(r.created ? 201 : 200, r.event);
+  },
   { mutating: true },
 );
 

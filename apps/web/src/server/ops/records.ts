@@ -2,9 +2,17 @@
 // 認可は authz.ts の can()、DB の読み書きは store.ts（org_id 必須）だけで行う。版の仕組みは Sprint 10 と同じ。
 import { randomUUID } from "node:crypto";
 import type { PilotRow } from "@soraban/db";
-import { formatJst, formatLanding, jstDate, parseJstMinute, toJstInput } from "@/lib/ops-time";
+import { floorToMinute, formatJst, formatLanding, jstDate, parseJstMinute, toJstInput } from "@/lib/ops-time";
 import { INSPECTION_ITEMS, type InspectionItemKey, type InspectionResult, type InspectionTiming } from "@/lib/ops-records";
+import {
+  JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
+  JOURNAL_MISMATCH_REPORT_MISSING,
+} from "@/lib/ops-field";
 import { can } from "./authz";
+import { checkJournalLink } from "./field-logic";
+import { loadFieldState } from "./field-rows";
+import { emptyFlightExtra, enrichFlights, type FlightExtra, type GapDto } from "./flight-extras";
+import type { JournalMismatch } from "./journal-logic";
 import {
   asInput,
   assertCan,
@@ -141,6 +149,15 @@ export type FlightDto = {
   readonly safetyIssue: boolean;
   readonly safetyIssueDetail: string | null;
   readonly defects: readonly DefectDto[];
+  /**
+   * 日誌の食い違い（Sprint 12c）：計画の時間帯の外・特定飛行で離陸の時点に通報の記録がない・通報の記録が離陸より後。
+   * 保存した値ではなく、毎回導出する。保存は止めない。計画なしは空。
+   */
+  readonly mismatches: readonly JournalMismatch[];
+  /** 結び付いた離陸の行の、離陸時の未了事項の写し（現場モードを経由しなければ null）。 */
+  readonly takeoffGaps: readonly GapDto[] | null;
+  /** 結び付いた離陸の行の ID（現場モードを経由しなければ null）。 */
+  readonly takeoffEventId: string | null;
   readonly version: number;
   readonly voided: boolean;
   readonly voidedAt: string | null;
@@ -159,7 +176,13 @@ const defectDto = (d: DefectData): DefectDto => ({
   confirmerName: d.confirmer_name,
 });
 
-const flightDto = (r: FlightWithTotal, mine: PilotRow | null, ctx: OpsContext, revealLicense: boolean): FlightDto => {
+const flightDto = (
+  r: FlightWithTotal,
+  mine: PilotRow | null,
+  ctx: OpsContext,
+  revealLicense: boolean,
+  extra: FlightExtra = emptyFlightExtra(),
+): FlightDto => {
   const isSelf = mine !== null && mine.id === r.pilot_id;
   const reveal = revealLicense && can(ctx.member.role, "flight.readLicenseNumber", { isSelf });
   const takeoff = asDate(r.takeoff_at);
@@ -199,6 +222,9 @@ const flightDto = (r: FlightWithTotal, mine: PilotRow | null, ctx: OpsContext, r
     safetyIssue: r.safety_issue,
     safetyIssueDetail: r.safety_issue_detail,
     defects: (r.defects ?? []).map(defectDto),
+    mismatches: extra.mismatches,
+    takeoffGaps: extra.takeoffGaps,
+    takeoffEventId: extra.takeoffEventId,
     version: r.current_version,
     voided: r.voided_at !== null,
     voidedAt: iso(r.voided_at),
@@ -242,7 +268,10 @@ export const listFlights = async (ctx: OpsContext, filter: RecordFilter = {}): P
   assertCan(ctx, "flight.read");
   const mine = await myPilot(ctx);
   // 一覧では技能証明書番号を常に伏せる（設計 G）
-  return (await store.listFlights(ctx.db, ctx.member.org_id, filter)).map((r) => flightDto(r, mine, ctx, false));
+  const rows = await store.listFlights(ctx.db, ctx.member.org_id, filter);
+  // 食い違いは飛行記録の ID の集合でまとめて引く（件数に比例してクエリが増えない）
+  const extras = await enrichFlights(ctx.db, ctx.member.org_id, rows);
+  return rows.map((r) => flightDto(r, mine, ctx, false, extras.get(r.id)));
 };
 
 const loadFlight = async (ctx: OpsContext, id: string): Promise<FlightWithTotal> => {
@@ -253,7 +282,9 @@ const loadFlight = async (ctx: OpsContext, id: string): Promise<FlightWithTotal>
 
 export const getFlight = async (ctx: OpsContext, id: string): Promise<FlightDto> => {
   assertCan(ctx, "flight.read");
-  return flightDto(await loadFlight(ctx, id), await myPilot(ctx), ctx, true);
+  const row = await loadFlight(ctx, id);
+  const extra = (await enrichFlights(ctx.db, ctx.member.org_id, [row])).get(row.id);
+  return flightDto(row, await myPilot(ctx), ctx, true, extra);
 };
 
 /** 保存は止めない警告（設計 E）。 */
@@ -262,7 +293,11 @@ export type RecordWarning =
   | "recent_inspection_abnormal"
   | "license_expired"
   | "aircraft_suspended"
-  | "differs_from_plan";
+  | "differs_from_plan"
+  // Sprint 12c：日誌の食い違い（知らせるだけ。保存は止めない）
+  | "outside_plan_window"
+  | "report_missing"
+  | "report_after_takeoff";
 
 export const WARNING_MESSAGES: Readonly<Record<RecordWarning, string>> = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
@@ -270,6 +305,9 @@ export const WARNING_MESSAGES: Readonly<Record<RecordWarning, string>> = {
   license_expired: "操縦者の技能証明の有効期限が飛行日より前です。",
   aircraft_suspended: "この機体は休止中です。",
   differs_from_plan: "飛行計画と違う機体・操縦者・時間帯で記録されています。",
+  outside_plan_window: "計画の時間帯の外で飛行しています。",
+  report_missing: JOURNAL_MISMATCH_REPORT_MISSING,
+  report_after_takeoff: JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
 };
 
 const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<RecordWarning[]> => {
@@ -323,7 +361,9 @@ const resolvePlanLink = async (
 export const listFlightsForPlan = async (ctx: OpsContext, planId: string): Promise<FlightDto[]> => {
   assertCan(ctx, "flight.read");
   const mine = await myPilot(ctx);
-  return (await store.listFlightsByPlan(ctx.db, ctx.member.org_id, planId)).map((r) => flightDto(r, mine, ctx, false));
+  const rows = await store.listFlightsByPlan(ctx.db, ctx.member.org_id, planId);
+  const extras = await enrichFlights(ctx.db, ctx.member.org_id, rows);
+  return rows.map((r) => flightDto(r, mine, ctx, false, extras.get(r.id)));
 };
 
 /**
@@ -356,6 +396,54 @@ const checkInspectionLink = async (ctx: OpsContext, inspectionId: string | null,
   if (i.voided_at !== null) fieldError("dailyInspectionId", "inspection_voided", "取消された日常点検は選べません");
 };
 
+/** 飛行記録の応答（保存直後）：警告に日誌の食い違いのコードを足す。食い違いがあっても保存は成功している。 */
+const savedFlightOut = async (
+  ctx: OpsContext,
+  saved: FlightWithTotal,
+  mine: PilotRow | null,
+): Promise<{ readonly record: FlightDto; readonly warnings: RecordWarning[] }> => {
+  const extra = (await enrichFlights(ctx.db, ctx.member.org_id, [saved])).get(saved.id) ?? emptyFlightExtra();
+  const warnings = [...(await flightWarnings(ctx, saved)), ...extra.mismatches.map((m): RecordWarning => m.code)];
+  return { record: flightDto(saved, mine, ctx, true, extra), warnings };
+};
+
+/** 同じ送信の識別子の既存の記録を返す（新しい記録を作らない）。 */
+const replayFlight = async (ctx: OpsContext, existingId: string, mine: PilotRow | null): Promise<SaveResult<FlightDto>> => {
+  const row = await loadFlight(ctx, existingId);
+  const extra = (await enrichFlights(ctx.db, ctx.member.org_id, [row])).get(row.id);
+  return { created: false, record: flightDto(row, mine, ctx, true, extra), warnings: [] };
+};
+
+/**
+ * 日誌に結び付ける離陸の行（takeoffEventId。離陸の行の ID か端末の識別子）を確かめる（Sprint 12c）。
+ * 着陸していない離陸・取り消された離陸・他の計画の離陸は 400、すでに日誌済みの離陸は 409 already_journaled。
+ * 計画は離陸の行の計画。中止した計画でも、すでに離陸した飛行の日誌は残せる。
+ */
+const resolveTakeoffLink = async (
+  ctx: OpsContext,
+  input: Input,
+): Promise<{ readonly planId: string; readonly snapshotId: string; readonly takeoffEventId: string } | null> => {
+  const raw = input["takeoffEventId"];
+  if (raw === undefined || raw === null || raw === "") return null;
+  if (typeof raw !== "string" || !isUuid(raw)) fieldError("takeoffEventId", "invalid", "離陸の記録が正しくありません");
+  const ev = await store.getFieldEventByRef(ctx.db, ctx.member.org_id, raw as string);
+  if (!ev || ev.kind !== "takeoff") fieldError("takeoffEventId", "invalid_target", "結び付ける離陸の記録が見つかりません");
+  const takeoff = ev!;
+  const given = input["flightPlanId"];
+  if (given !== undefined && given !== null && given !== "" && normId(given) !== takeoff.plan_id) {
+    fieldError("flightPlanId", "plan_mismatch", "離陸の記録の計画と、飛行計画が違います");
+  }
+  const plan = await store.getPlan(ctx.db, ctx.member.org_id, takeoff.plan_id);
+  if (!plan) throw new OpsError(404, "not_found");
+  const { state } = await loadFieldState(ctx.db, ctx.member.org_id, plan, null);
+  const chk = checkJournalLink(state, takeoff.id);
+  if (!chk.ok) {
+    if (chk.status === 409) throw new OpsError(409, chk.code);
+    fieldError("takeoffEventId", chk.code, chk.code === "no_landing" ? "着陸が記録されていない離陸には日誌を結び付けられません" : "結び付ける離陸の記録が正しくありません");
+  }
+  return { planId: plan.id, snapshotId: plan.current_snapshot_id, takeoffEventId: takeoff.id };
+};
+
 export const createFlight = async (ctx: OpsContext, body: unknown): Promise<SaveResult<FlightDto>> => {
   const mine = await assertMayCreate(ctx, "flight.create");
   const input = asInput(body);
@@ -367,43 +455,80 @@ export const createFlight = async (ctx: OpsContext, body: unknown): Promise<Save
   // 二重送信：同じ組織で同じ識別子の作成が既にあれば、新しい記録を作らずに既存の記録を返す
   if (req.value) {
     const existingId = await existingRequest(ctx, "flight_record", req.value);
-    if (existingId) return { created: false, record: flightDto(await loadFlight(ctx, existingId), mine, ctx, true), warnings: [] };
+    if (existingId) return replayFlight(ctx, existingId, mine);
   }
   const isSelf = mine !== null && mine.id === v.data.pilot_id;
   if (!can(ctx.member.role, "flight.create", { isSelf })) throw new OpsError(403, "forbidden");
   await loadAircraftForRecord(ctx, v.data.aircraft_id, true);
   const pilot = await loadPilotForRecord(ctx, v.data.pilot_id, "pilotId", false);
   await checkInspectionLink(ctx, v.data.daily_inspection_id, v.data.aircraft_id);
-  const link = await resolvePlanLink(ctx, input["flightPlanId"]);
+  // 現場モードの離陸の行（takeoffEventId）があれば、その計画に結び付ける（中止した計画でも可）。なければ従来の flightPlanId。
+  const takeoffLink = await resolveTakeoffLink(ctx, input);
+  const link = takeoffLink ?? (await resolvePlanLink(ctx, input["flightPlanId"]));
   const id = randomUUID();
+  const version = {
+    orgId: ctx.member.org_id,
+    entityType: "flight_record" as const,
+    entityId: id,
+    op: "create" as const,
+    data: {
+      ...v.data,
+      flight_plan_id: link?.planId ?? null,
+      snapshot_id: link?.snapshotId ?? null,
+      // 作成時点の写し（画面から送らせない。設計 B）
+      pilot_name: pilot.full_name,
+      pilot_license_number: pilot.license_number,
+      pilot_version: pilot.current_version,
+      client_request_id: req.value,
+    },
+    reason: null,
+    actorMemberId: ctx.member.id,
+  };
   try {
-    await store.appendVersion(ctx.db, {
-      orgId: ctx.member.org_id,
-      entityType: "flight_record",
-      entityId: id,
-      op: "create",
-      data: {
-        ...v.data,
-        flight_plan_id: link?.planId ?? null,
-        snapshot_id: link?.snapshotId ?? null,
-        // 作成時点の写し（画面から送らせない。設計 B）
-        pilot_name: pilot.full_name,
-        pilot_license_number: pilot.license_number,
-        pilot_version: pilot.current_version,
-        client_request_id: req.value,
-      },
-      reason: null,
-      actorMemberId: ctx.member.id,
-    });
+    if (takeoffLink) {
+      // 飛行記録の作成と journal_linked の追記は、同じトランザクション（どちらかが失敗すれば両方残らない）
+      await store.withTransaction(ctx.db, async (c) => {
+        await store.lockPlanOn(c, takeoffLink.planId);
+        const plan = await store.getPlan(c, ctx.member.org_id, takeoffLink.planId);
+        if (!plan) throw new OpsError(404, "not_found");
+        const { state } = await loadFieldState(c, ctx.member.org_id, plan, null);
+        const chk = checkJournalLink(state, takeoffLink.takeoffEventId);
+        if (!chk.ok) {
+          if (chk.status === 409) throw new OpsError(409, chk.code);
+          throw new OpsError(400, "invalid_input", { takeoffEventId: "結び付ける離陸の記録が正しくありません" }, { takeoffEventId: chk.code });
+        }
+        await store.appendVersionOn(c, { ...version, data: { ...version.data, snapshot_id: plan.current_snapshot_id } });
+        await store.insertFieldEventOn(c, {
+          orgId: ctx.member.org_id,
+          planId: plan.id,
+          kind: "journal_linked",
+          item: null,
+          result: null,
+          source: null,
+          targetEventId: takeoffLink.takeoffEventId,
+          flightRecordId: id,
+          inspectionId: null,
+          reportId: null,
+          occurredAtJst: toJstInput(floorToMinute(nowOf(ctx))),
+          gaps: null,
+          note: null,
+          queued: false,
+          clientEventId: randomUUID(),
+          recordedByMemberId: ctx.member.id,
+        });
+      });
+    } else {
+      await store.appendVersion(ctx.db, version);
+    }
   } catch (e) {
     if (e instanceof OpsError && e.code === "duplicate_request" && req.value) {
       const existingId = await existingRequest(ctx, "flight_record", req.value);
-      if (existingId) return { created: false, record: flightDto(await loadFlight(ctx, existingId), mine, ctx, true), warnings: [] };
+      if (existingId) return replayFlight(ctx, existingId, mine);
     }
     throw e;
   }
   const saved = await loadFlight(ctx, id);
-  return { created: true, record: flightDto(saved, mine, ctx, true), warnings: await flightWarnings(ctx, saved) };
+  return { created: true, ...(await savedFlightOut(ctx, saved, mine)) };
 };
 
 export const updateFlight = async (ctx: OpsContext, id: string, body: unknown): Promise<SaveResult<FlightDto>> => {
@@ -470,7 +595,7 @@ export const updateFlight = async (ctx: OpsContext, id: string, body: unknown): 
     expectedVersion: meta.data.expectedVersion,
   });
   const saved = await loadFlight(ctx, id);
-  return { created: false, record: flightDto(saved, mine, ctx, true), warnings: await flightWarnings(ctx, saved) };
+  return { created: false, ...(await savedFlightOut(ctx, saved, mine)) };
 };
 
 export const voidFlight = async (ctx: OpsContext, id: string, body: unknown): Promise<FlightDto> => {
