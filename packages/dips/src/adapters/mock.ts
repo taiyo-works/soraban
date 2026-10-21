@@ -15,6 +15,7 @@
 //   unknown_status submitted_api   未知の外部状況（生の値 "XYZ"）を externalStatus に入れて返す。状態は増やさない
 import { REPORT_FIELDS, type ReportFieldsData } from "../fields";
 import { traceOf, UNSUPPORTED_STATUS, type NotificationGateway } from "../gateway";
+import { REPORT_ERROR_KIND_LABEL } from "../messages";
 import { prepareReport } from "../prepare";
 import { sha256Hex } from "../sha256";
 import type {
@@ -33,10 +34,10 @@ import type {
 } from "../types";
 import { toJstMinuteString } from "../validate";
 
-export const MOCK_UNAUTHORIZED_MESSAGE = "DIPS と再度連携してください（模擬：トークン切れ）";
-export const MOCK_REJECTED_MESSAGE = "リクエストのパラメータが正しくありません（模擬：HTTP 400 相当）";
-export const MOCK_SERVER_ERROR_MESSAGE = "DIPS 側でエラーが起きました。登録されたか分かりません（模擬：HTTP 500 相当）";
-export const MOCK_TIMEOUT_MESSAGE = "応答がありませんでした。登録されたか分かりません（模擬：時間切れ）";
+export const MOCK_UNAUTHORIZED_MESSAGE = REPORT_ERROR_KIND_LABEL["unauthorized"]!;
+export const MOCK_REJECTED_MESSAGE = REPORT_ERROR_KIND_LABEL["rejected"]!;
+export const MOCK_SERVER_ERROR_MESSAGE = REPORT_ERROR_KIND_LABEL["server_error"]!;
+export const MOCK_TIMEOUT_MESSAGE = REPORT_ERROR_KIND_LABEL["timeout"]!;
 export const MOCK_UNKNOWN_STATUS_RAW = "XYZ";
 
 /** 受付日時の形式 yyyy/MM/dd HH:mm（FPR の応答 flightPlanRegistrationDatetime と同じ）。 */

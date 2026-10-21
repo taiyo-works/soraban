@@ -1,5 +1,6 @@
 // 画面・API の表示用の文言（Sprint 12b 設計 H）。画面は定数だけを使う。
 // 禁止語（通報が要らないと読める言い回しなど）を含めない（messages.test.ts が全文を検査する）。
+import type { ReportPolicy } from "./policy";
 import type { ProcedureRecordKind, ReportChannel, ReportKind, ReportState } from "./types";
 
 export const NEEDS_CONFIRMATION_MARK = "※要確認";
@@ -81,6 +82,35 @@ export const cancelStateLabel = (state: ReportState, stale = false): string => {
     case "unknown":
       return "取消の結果が不明です。DIPS の画面で確かめてください";
   }
+};
+
+/** 失敗・結果不明の種類（error_kind）の表示。 */
+export const REPORT_ERROR_KIND_LABEL: Readonly<Record<string, string>> = {
+  rejected: "リクエストのパラメータが正しくありません（模擬：HTTP 400 相当）",
+  unauthorized: "DIPS と再度連携してください（模擬：トークン切れ）",
+  server_error: "DIPS 側でエラーが起きました。登録されたか分かりません（模擬：HTTP 500 相当）",
+  timeout: "応答がありませんでした。登録されたか分かりません（模擬：時間切れ）",
+  adapter_error: "送信中にエラーが起きました。登録されたか分かりません",
+  result_not_recorded: "送信の結果を記録できませんでした。登録されたか分かりません",
+  confirmed_not_registered: "DIPS の画面で、通報されていないことを確認しました",
+};
+
+/** 試行の監査の操作の表示。 */
+export const ATTEMPT_OPERATION_LABEL: Readonly<Record<string, string>> = {
+  copy: "コピー",
+  submit: "送信",
+  status: "状況の確認",
+  cancel: "取消の記録",
+  manual_record: "手動の記録",
+  correct: "訂正",
+  retract: "取り下げ",
+  resolve: "結果不明の確定",
+};
+
+export const ATTEMPT_RESULT_LABEL: Readonly<Record<string, string>> = {
+  success: "成功",
+  failure: "失敗",
+  unknown: "結果不明",
 };
 
 /** 未知の外部状況。状態は増やさず、生の値を示す。 */
@@ -187,6 +217,10 @@ export const DEADLINE_PAST_GUIDE_MESSAGE = "社内の目安（飛行開始の 24
 export const DEADLINE_OVERDUE_STARTED_MESSAGE = "飛行開始の時刻を過ぎていますが、通報の記録がありません";
 export const DEADLINE_RECOMMENDED_MESSAGE = "通報を行うことを推奨します";
 export const deadlineUpcomingMessage = (hours: number): string => `目安まであと ${hours} 時間`;
+
+/** 飛行開始の後に通報の記録がないときの罰則の注記。条文は一次資料で未照合のため「※要確認」を付け、金額は出さない。 */
+export const deadlinePenaltyNote = (policy: ReportPolicy): string =>
+  `通報せずに特定飛行を行うと罰則の対象になりえます（${policy.penalty.lawName}${policy.penalty.article}。${policy.penalty.uncheckedNote}）`;
 
 // ---- 次にやること --------------------------------------------------
 

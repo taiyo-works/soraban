@@ -152,7 +152,10 @@ export type IdempotencyInput = {
   readonly planId: string;
   readonly kind: ReportKind;
   readonly fingerprint: string;
-  /** 新規：その計画の完了した取消の件数（世代）。変更・取消：元の通報の ID。 */
+  /**
+   * 新規：その計画の完了した取消の件数（世代）。変更・取消：元の通報の ID。
+   * サービス層は、取り下げた行の件数を世代に足す（取り下げのあと、同じ内容を記録し直せるように）。
+   */
   readonly basis: number | string;
 };
 
