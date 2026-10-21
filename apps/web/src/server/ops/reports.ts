@@ -66,6 +66,7 @@ import { formatJst, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { currentFingerprintPartsOf, rowLite, summarizePlanReport, type PlanReportExtras } from "./report-dto";
 import type { DeadlineState } from "./report-logic";
+import { reportRegistrationOf } from "./permit-logic";
 import { matchInput, planPermitInputOfRow } from "./permit-match";
 import { loadPlan, loadPlanBundle } from "./plans";
 import type { PlanState } from "./plan-logic";
@@ -301,8 +302,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
   const reveal = can(ctx.member.role, "flight.readLicenseNumber", { isSelf: b.isSelf });
   const licenseNumber = pilot.license_number === null ? null : reveal ? pilot.license_number : maskLicenseNumber(pilot.license_number);
   // 許可書発行日・許可期間（FPR No.76〜78）：計画の許可番号に結びつき、範囲に収まって適用された登録がちょうど 1 件のときだけ出す
-  const applied = (await matchInput(ctx.db, org, planPermitInputOfRow(plan))).numbers.filter((n) => n.status === "applied" && n.registration);
-  const registration = applied.length === 1 ? applied[0]!.registration! : null;
+  const registration = reportRegistrationOf(await matchInput(ctx.db, org, planPermitInputOfRow(plan)));
   return {
     planId: plan.id,
     title: plan.title,
@@ -318,7 +318,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
     permitRegistration:
       registration === null
         ? null
-        : { permitNumber: registration.permitNumber, issuedOn: registration.issuedOn, validFrom: registration.validFrom, validTo: registration.validTo },
+        : { registrationId: registration.id, versionNo: registration.versionNo, permitNumber: registration.permitNumber, issuedOn: registration.issuedOn, validFrom: registration.validFrom, validTo: registration.validTo },
     aircraftId: plan.aircraft_id,
     aircraft: {
       registrationMark: aircraft.registration_mark,
@@ -455,6 +455,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
   const { plan, extras } = b;
   const rows = extras.rows;
   const lites = rows.map(rowLite);
+  const permits = await matchInput(ctx.db, ctx.member.org_id, planPermitInputOfRow(plan));
   const summary = summarizePlanReport({
     ctx,
     plan,
@@ -464,6 +465,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
     requirement: b.requirement,
     extras,
     now: nowOf(ctx),
+    permits,
   });
   const status = summary.report.status;
   const eff = effectiveReport(lites);
@@ -492,7 +494,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
   const caps = selected.gateway.capabilities();
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
   const fingerprintChanges = effRow
-    ? diffFingerprintParts(effRow.fingerprint_parts as never, currentFingerprintPartsOf(plan), { flagLabel })
+    ? diffFingerprintParts(effRow.fingerprint_parts as never, currentFingerprintPartsOf(plan, reportRegistrationOf(permits)), { flagLabel })
     : [];
 
   const warnings: ReportWarningDto[] = [];

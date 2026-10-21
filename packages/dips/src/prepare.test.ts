@@ -263,7 +263,7 @@ describe("未入力の必須項目", () => {
 });
 
 describe("許可書発行日・許可期間（Sprint 12d。結びついた登録があるときだけ）", () => {
-  const reg = { permitNumber: "国空無機第123号", issuedOn: "2026-10-01", validFrom: "2026-10-05", validTo: "2027-10-04" };
+  const reg = { registrationId: "11111111-1111-4111-8111-111111111111", versionNo: 1, permitNumber: "国空無機第123号", issuedOn: "2026-10-01", validFrom: "2026-10-05", validTo: "2027-10-04" };
   const DATE_KEYS = ["permit_date", "permit_start", "permit_finish"];
 
   it("結びついた登録がなければ、従来どおり「そらばんは保持しません」（DIPS で入力）", () => {

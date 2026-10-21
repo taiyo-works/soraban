@@ -523,3 +523,9 @@ export const summarizePermitMatch = (m: PermitMatchResult): PlanPermitSummary =>
   unregisteredCount: m.numbers.filter((n) => n.status === "unregistered").length,
   note: PERMIT_DECLARATION_NOTE,
 });
+
+/** 通報に許可書発行日・許可期間を出す登録：適用された登録がちょうど 1 件のときだけ（無い・複数なら null）。 */
+export const reportRegistrationOf = (m: Pick<PermitMatchResult, "numbers">): PermitRegistration | null => {
+  const applied = m.numbers.filter((n) => n.status === "applied" && n.registration !== null);
+  return applied.length === 1 ? applied[0]!.registration : null;
+};

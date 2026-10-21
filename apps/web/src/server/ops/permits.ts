@@ -25,7 +25,7 @@ import {
 } from "./permit-logic";
 import { matchWithCandidates, planPermitInputOfRow } from "./permit-match";
 import { loadPlan } from "./plans";
-import { judgementInputEquals } from "./plan-logic";
+import { snapshotPermitInputUpToDate } from "./plan-logic";
 import { fieldError, invalid, nowOf, pickFields } from "./records";
 import { asInput, assertCan, formatJstMinute, isUuid, type OpsContext, type VersionDto } from "./service";
 import * as store from "./store";
@@ -554,11 +554,7 @@ export const getPlanPermits = async (ctx: OpsContext, planId: string): Promise<P
   const match = await matchWithCandidates(ctx.db, ctx.member.org_id, planPermitInputOfRow(plan));
   const snapshotInput = plan.snapshot_input as { permitBasis?: unknown[]; pilotPermits?: unknown[] };
   const basis = snapshotInput.permitBasis ?? [];
-  // 手入力の同意・通報などの値は pilotPermits に混ざるため、DIPS の値（登録の照合だけから入る）と根拠の版だけを比べる
-  const snapshotDips = (snapshotInput.pilotPermits ?? []).filter((x): x is string => typeof x === "string" && x.startsWith("mlit:")).sort();
-  const upToDate =
-    judgementInputEquals(snapshotDips, [...match.grantedValues]) &&
-    judgementInputEquals(basis.length > 0 ? basis : null, match.basis.length > 0 ? match.basis : null);
+  const upToDate = snapshotPermitInputUpToDate(snapshotInput, match);
   return {
     planId: plan.id,
     planVersion: plan.current_version,

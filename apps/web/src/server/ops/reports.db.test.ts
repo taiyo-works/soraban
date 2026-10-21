@@ -1254,6 +1254,62 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       await expectOpsError(reports.retryReport(mockCtx(), p2.id, m.report.id, { confirmSend: true }), 409);
     });
 
+    it("Sprint 12d の指摘：通報のあとに登録を訂正・失効すると、指紋の変化として変更が検知される。再送は別の許可の日付を同じ行・同じキーで送らない", async () => {
+      const mkPermit = async () => {
+        const number = `FP-PERMIT-${randomUUID().slice(0, 8)}`;
+        const p = await permits.createPermit(mgr(), {
+          permitNumber: number,
+          coverage: "blanket",
+          kinds: ["night"],
+          issuedOn: "2026-10-01",
+          validFrom: "2026-10-05",
+          validTo: "2027-10-04",
+          placeScope: { type: "nationwide" },
+          aircraftScope: { type: "any" },
+          pilotScope: { type: "any" },
+        });
+        return { number, id: p.record.id };
+      };
+      // 失敗した通報の再送：訂正のあとは 409、同じ行・同じキーのまま、送信は増えない
+      {
+        const { number, id } = await mkPermit();
+        const plan = await activePlan({ permitNumbers: number });
+        const spy = new SpyMock();
+        const r = await send(mockCtx({ gateway: spy }), plan, { mockScenario: "rejected" });
+        expect(r.report.status).toBe("failed");
+        const key = r.report.idempotencyKey;
+        await permits.updatePermit(mgr(), id, { expectedVersion: 1, reason: "発行日の訂正", issuedOn: "2026-10-02" });
+        await expectOpsError(reports.retryReport(mockCtx({ gateway: spy }), plan.id, r.report.id, { confirmSend: true }), 409, "version_conflict");
+        expect(spy.calls).toBe(1);
+        const rows = await reportRows(plan.id);
+        expect(rows).toHaveLength(1);
+        expect(rows[0].idempotency_key).toBe(key);
+        // 新しい内容は別のキー・別の行で送る（発行日が訂正後の値）
+        const fresh = await send(mockCtx({ gateway: spy }), plan, { mockScenario: "ok" });
+        expect(fresh.created).toBe(true);
+        expect(fresh.report.idempotencyKey).not.toBe(key);
+        expect(await reportRows(plan.id)).toHaveLength(2);
+      }
+      // 通報済みの計画：訂正で変更点と「通報を変更する」が出る。失効でも同じ
+      for (const how of ["correct", "revoke"] as const) {
+        const { number, id } = await mkPermit();
+        const plan = await activePlan({ permitNumbers: number });
+        await recordNew(mgr(), plan);
+        const same = await plans.getPlan(mgr(), plan.id);
+        expect(same.report.status.code).toBe("reported");
+        expect(same.reportChanges).toEqual([]);
+        if (how === "correct") await permits.updatePermit(mgr(), id, { expectedVersion: 1, reason: "期間の訂正", validTo: "2027-10-05" });
+        else await permits.revokePermit(mgr(), id, { expectedVersion: 1, reason: "失効", revokedOn: "2027-01-14" });
+        const d = await plans.getPlan(mgr(), plan.id);
+        expect(d.report.status.code, how).toBe("change_review");
+        expect(d.nextActions.map((x) => x.id), how).toContain("change_report");
+        expect(d.reportChanges.map((c) => c.key), how).toEqual(["permit"]);
+        expect(d.reportChanges[0]!.label).toBe("許可・承認の登録");
+        const view = await reports.getPlanReport(mgr(), plan.id);
+        expect(view.fingerprintChanges.map((c) => c.key), how).toEqual(["permit"]);
+      }
+    });
+
     it("unknown_status：未知の外部状況は external_status に保存され、状態は増えない。「状況：不明（生の値）」と出る", async () => {
       const plan = await activePlan();
       const r = await send(mockCtx(), plan, { mockScenario: "unknown_status" });

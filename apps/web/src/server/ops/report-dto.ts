@@ -1,6 +1,6 @@
 // 計画の応答に載せる通報の状況・期限・次にやること（Sprint 12b 設計 E・G）。plans.ts（計画の DTO）と reports.ts（通報の API）が使う。
 // 状態は保存せず、通報の行（flight_reports）・手続きの記録（plan_procedure_records）・コピーの監査から毎回導出する。
-import type { PermitMatchResult } from "./permit-logic";
+import { reportRegistrationOf, type PermitMatchResult, type PermitRegistration } from "./permit-logic";
 import type { PlanProcedureRecordRow } from "@soraban/db";
 import {
   fingerprintPartsOf,
@@ -81,7 +81,7 @@ export const latestProcedureRecords = (
 };
 
 /** 現在の計画の指紋の元の値。判定の最終の flags はスナップショットの結果から。 */
-export const currentFingerprintPartsOf = (r: PlanWithJoins): FingerprintParts =>
+export const currentFingerprintPartsOf = (r: PlanWithJoins, registration: PermitRegistration | null): FingerprintParts =>
   fingerprintPartsOf({
     startAt: toJstInput(asDate(r.planned_start_at)),
     durationMinutes: r.duration_minutes,
@@ -92,10 +92,14 @@ export const currentFingerprintPartsOf = (r: PlanWithJoins): FingerprintParts =>
     aircraftId: r.aircraft_id,
     pilotId: r.pilot_id,
     snapshot: { flags: r.snapshot_result_slim.flags ?? [] },
+    permitRegistration: registration
+      ? { registrationId: registration.id, versionNo: registration.versionNo, issuedOn: registration.issuedOn, validFrom: registration.validFrom, validTo: registration.validTo }
+      : null,
   });
 
 /** 現在の計画の指紋（通報時の指紋と比べる）。 */
-export const currentFingerprintOf = (r: PlanWithJoins): string => computeFingerprint(currentFingerprintPartsOf(r));
+export const currentFingerprintOf = (r: PlanWithJoins, registration: PermitRegistration | null): string =>
+  computeFingerprint(currentFingerprintPartsOf(r, registration));
 
 /** 通報の要否の応答に足す、導出の状況と期限（ReportRequirement の項目はそのまま）。 */
 export type PlanReportDto = ReportRequirement & {
@@ -118,14 +122,14 @@ export type SummarizeInput = {
   readonly requirement: ReportRequirement;
   readonly extras: PlanReportExtras;
   readonly now: Date;
-  /** 許可・承認の登録の照合（Sprint 12d）。指定しないときは「許可・承認の結果を登録する」を出さない。 */
-  readonly permits?: PermitMatchResult;
+  /** 許可・承認の登録の照合（Sprint 12d）。通報の指紋（適用された登録の識別と値）と「許可・承認の結果を登録する」の次にやることに使う。 */
+  readonly permits: PermitMatchResult;
 };
 
 /** 要否・通報の行・手続きの記録・時刻から、通報の状況・期限・次にやることを導出する（保存した状態は読まない）。 */
 export const summarizePlanReport = (i: SummarizeInput): PlanReportSummary => {
   const lites = i.extras.rows.map(rowLite);
-  const currentFingerprint = currentFingerprintOf(i.plan);
+  const currentFingerprint = currentFingerprintOf(i.plan, reportRegistrationOf(i.permits));
   const voided = i.plan.voided_at !== null;
   const requirementKind = i.requirement.kind as RequirementKind;
   const status = reportStatus({ requirementKind, rows: lites, currentFingerprint, planVoided: voided, now: i.now });
@@ -161,9 +165,7 @@ export const summarizePlanReport = (i: SummarizeInput): PlanReportSummary => {
       confirm: can(role, "plan.confirm"),
       record: can(role, "report.record", { isSelf: i.isSelf }),
     },
-    ...(i.permits
-      ? { permits: { applied: i.permits.numbers.some((n) => n.status === "applied"), canRegister: can(role, "permit.create") } }
-      : {}),
+    permits: { applied: i.permits.numbers.some((n) => n.status === "applied"), canRegister: can(role, "permit.create") },
   });
   return { report: { ...i.requirement, status, deadline }, nextActions, currentFingerprint };
 };

@@ -37,7 +37,13 @@ export const fingerprintPartsOf = (
   plan: Pick<
     PlanForReport,
     "startAt" | "durationMinutes" | "latitude" | "longitude" | "radiusM" | "maxAltitudeM" | "aircraftId" | "pilotId"
-  > & { readonly snapshot: { readonly flags: readonly string[] } },
+  > & {
+    readonly snapshot: { readonly flags: readonly string[] };
+    readonly permitRegistration?: Pick<
+      NonNullable<PlanForReport["permitRegistration"]>,
+      "registrationId" | "versionNo" | "issuedOn" | "validFrom" | "validTo"
+    > | null;
+  },
 ): FingerprintParts => ({
   startAt: plan.startAt,
   durationMinutes: plan.durationMinutes,
@@ -48,6 +54,18 @@ export const fingerprintPartsOf = (
   aircraftId: plan.aircraftId.toLowerCase(),
   pilotId: plan.pilotId.toLowerCase(),
   flags: normalizeFlags(plan.snapshot.flags),
+  // 登録があるときだけ足す（無い通報の指紋・冪等性キーは従来と一致する）
+  ...(plan.permitRegistration
+    ? {
+        permit: {
+          registrationId: plan.permitRegistration.registrationId.toLowerCase(),
+          versionNo: plan.permitRegistration.versionNo,
+          issuedOn: plan.permitRegistration.issuedOn,
+          validFrom: plan.permitRegistration.validFrom,
+          validTo: plan.permitRegistration.validTo,
+        },
+      }
+    : {}),
 });
 
 /** 元の値から指紋（SHA-256、16 進小文字 64 桁）を求める。 */
@@ -64,6 +82,8 @@ export const computeFingerprint = (p: FingerprintParts): string =>
       p.aircraftId,
       p.pilotId,
       normalizeFlags(p.flags),
+      // 登録があるときだけ末尾に足す（FINGERPRINT_VERSION は上げない：登録の無い指紋は従来の値のまま）
+      ...(p.permit ? [[p.permit.registrationId.toLowerCase(), p.permit.versionNo, p.permit.issuedOn, p.permit.validFrom, p.permit.validTo]] : []),
     ]),
   );
 
@@ -86,6 +106,7 @@ export const FINGERPRINT_PART_LABEL: Readonly<Record<keyof FingerprintParts, str
   aircraftId: "機体",
   pilotId: "操縦者",
   flags: "飛行の方法・空域",
+  permit: "許可・承認の登録",
 };
 
 const PART_KEYS: readonly (keyof FingerprintParts)[] = [
@@ -98,6 +119,7 @@ const PART_KEYS: readonly (keyof FingerprintParts)[] = [
   "aircraftId",
   "pilotId",
   "flags",
+  "permit",
 ];
 
 const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: string) => string): string => {
@@ -118,9 +140,21 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
       return "（変更前の機体）";
     case "pilotId":
       return "（変更前の操縦者）";
+    case "permit":
+      return p.permit ? `登録の版 ${p.permit.versionNo}（発行日 ${p.permit.issuedOn}・期間 ${p.permit.validFrom}〜${p.permit.validTo}）` : "なし";
     case "flags":
       return p.flags.length === 0 ? "なし" : p.flags.map(flagLabel).join("・");
   }
+};
+
+/** 比べる値（flags は順を揃え、permit は jsonb でキーの順が変わっても同じになるよう固定の並びにする）。 */
+const comparable = (key: keyof FingerprintParts, p: FingerprintParts): string => {
+  if (key === "flags") return JSON.stringify(normalizeFlags(p.flags));
+  if (key === "permit") {
+    const q = p.permit;
+    return JSON.stringify(q ? [q.registrationId.toLowerCase(), q.versionNo, q.issuedOn, q.validFrom, q.validTo] : null);
+  }
+  return JSON.stringify(p[key]);
 };
 
 /**
@@ -135,8 +169,8 @@ export const diffFingerprintParts = (
   const flagLabel = opts.flagLabel ?? ((f: string) => f);
   const out: FingerprintChange[] = [];
   for (const key of PART_KEYS) {
-    const a = key === "flags" ? JSON.stringify(normalizeFlags(before.flags)) : JSON.stringify(before[key]);
-    const b = key === "flags" ? JSON.stringify(normalizeFlags(after.flags)) : JSON.stringify(after[key]);
+    const a = comparable(key, before);
+    const b = comparable(key, after);
     if (a === b) continue;
     const afterText =
       key === "aircraftId" ? "（変更後の機体）" : key === "pilotId" ? "（変更後の操縦者）" : show(key, after, flagLabel);

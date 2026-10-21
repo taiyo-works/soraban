@@ -22,6 +22,7 @@ import { runJudge } from "./judge";
 import {
   EMPTY_PERMIT_MATCH,
   isDipsPermitValue,
+  reportRegistrationOf,
   summarizePermitMatch,
   type PermitBasisEntry,
   type PermitMatchResult,
@@ -440,7 +441,7 @@ const detailExtras = (
   return {
     nextActions: summary.nextActions,
     reportChanges: effective
-      ? diffFingerprintParts(effective.fingerprint_parts as never, currentFingerprintPartsOf(r), { flagLabel })
+      ? diffFingerprintParts(effective.fingerprint_parts as never, currentFingerprintPartsOf(r, reportRegistrationOf(permits)), { flagLabel })
       : [],
     procedureRecords: summarizeProcedureRecords(extras.records, r),
   };

@@ -8,6 +8,7 @@ import {
   type PermitBasisEntry,
 } from "./permit-logic";
 import {
+  snapshotPermitInputUpToDate,
   buildJudgementInput,
   canonicalJson,
   permitPartEquals,
@@ -429,5 +430,21 @@ describe("snapshotFreshness：permits_changed（Sprint 12d 契約 9）", () => {
     const legacyInput = { ...legacy.input, pilotPermits: ["mlit:night"] };
     const r = snapshotFreshness({ snapshot: { ...legacy, input: legacyInput }, plan: { ...PLAN, pilotPermits: ["mlit:night"] }, aircraft: { maxTakeoffWeightKg: 0.9 }, now });
     expect(r).toEqual({ stale: true, reasons: ["permits_changed"] });
+  });
+});
+
+describe("snapshotPermitInputUpToDate（Sprint 12d の指摘：旧形式の mlit）", () => {
+  const match = { grantedValues: ["mlit:night"], basis: [{ registrationId: "r", versionNo: 1 }] };
+  it("DIPS の値と根拠の版が現在の照合と同じなら最新。手入力の値（同意・通報）が混ざっていても影響しない", () => {
+    expect(snapshotPermitInputUpToDate({ pilotPermits: ["mlit:night", "park_manager"], permitBasis: match.basis }, match)).toBe(true);
+    expect(snapshotPermitInputUpToDate({ pilotPermits: [] }, { grantedValues: [], basis: [] })).toBe(true);
+  });
+  it("旧形式の総称 mlit を持つスナップショット（permitBasis なし）は、登録が適用されなくても「古い」になる", () => {
+    expect(snapshotPermitInputUpToDate({ pilotPermits: ["mlit"] }, { grantedValues: [], basis: [] })).toBe(false);
+    expect(snapshotPermitInputUpToDate({ pilotPermits: ["mlit", "park_manager"] }, { grantedValues: [], basis: [] })).toBe(false);
+    expect(snapshotPermitInputUpToDate({ pilotPermits: ["mlit"] }, match)).toBe(false);
+  });
+  it("mlit:<種類> の値が違えば古い", () => {
+    expect(snapshotPermitInputUpToDate({ pilotPermits: ["mlit:did"], permitBasis: match.basis }, match)).toBe(false);
   });
 });
