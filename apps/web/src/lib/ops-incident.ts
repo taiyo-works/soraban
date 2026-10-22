@@ -191,7 +191,7 @@ export const INCIDENT_GUIDANCE_REVISION_1: IncidentGuidanceRevisionData = {
       key: "death_or_serious_injury",
       label: "人の死傷（重傷以上）",
       description:
-        "操縦者や関係者のけがも含みます。悪天候など、操縦者に過失がない場合も含みます。けがの重さが分からないときは、この類型か『人の負傷（軽傷）』のうち重い方を選んでください。",
+        "操縦者や関係者のけがも含みます。悪天候などの外的な要因によるけがも含みます。けがの重さが分からないときは、この類型か『人の負傷（軽傷）』のうち重い方を選んでください。",
       guidance: "possible",
       reference: "accident_3_1_a",
     },

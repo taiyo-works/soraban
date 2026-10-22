@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { NEXT_ACTION_LABEL } from "@soraban/dips";
 import { EVENT_TYPE_NONE, EVENT_TYPE_UNKNOWN, INCIDENT_CHANGED_SINCE_REPORT } from "@/lib/ops-incident";
-import { INCIDENT_FORBIDDEN, INCIDENT_NO_FAULT_PHRASE, NUMERIC_DEADLINE } from "@/lib/incident-words.test-helpers";
+import { INCIDENT_FORBIDDEN, NUMERIC_DEADLINE } from "@/lib/incident-words.test-helpers";
 import { can, OPS_ACTIONS } from "./authz";
 import {
   checkEventTypes,
@@ -341,8 +341,7 @@ describe("文言と範囲（12e の新しいソース）", () => {
     for (const f of INCIDENT_SOURCES) {
       const text = readFileSync(f, "utf8");
       const rel = path.relative(WEB_SRC, f);
-      // 契約の説明文の「操縦者に過失がない場合も含みます」（対象の範囲を示す文）だけを除く
-      for (const w of INCIDENT_FORBIDDEN) expect(text.replaceAll(INCIDENT_NO_FAULT_PHRASE, ""), `${rel}: ${w}`).not.toContain(w);
+      for (const w of INCIDENT_FORBIDDEN) expect(text, `${rel}: ${w}`).not.toContain(w);
       expect(text, rel).not.toMatch(NUMERIC_DEADLINE);
       expect(text, rel).not.toMatch(/https?:\/\//);
       expect(text, rel).not.toMatch(/第[0-9０-９一二三四五六七八九十百]+条/);

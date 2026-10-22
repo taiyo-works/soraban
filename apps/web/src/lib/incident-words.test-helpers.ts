@@ -26,8 +26,3 @@ export const INCIDENT_FORBIDDEN = [
 /** 数値の期限の表現（全角・半角の数字）。 */
 export const NUMERIC_DEADLINE = /[0-9０-９]+\s*(日以内|時間以内|営業日|開庁日)/;
 
-/**
- * 契約（sprint-12e.md 設計 C）の類型の説明文にある句。「過失」の語を含むが、非難ではなく対象の範囲（過失がない場合も含む）を示す文のため、
- * 禁止語の検査ではこの句だけを除く。
- */
-export const INCIDENT_NO_FAULT_PHRASE = ["操縦者に過", "失がない場合も含みます"].join("");

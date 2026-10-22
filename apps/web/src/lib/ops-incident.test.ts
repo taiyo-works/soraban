@@ -19,7 +19,7 @@ import {
   incidentGuidanceNote,
   type IncidentGuidanceRevisionData,
 } from "./ops-incident";
-import { INCIDENT_FORBIDDEN, INCIDENT_NO_FAULT_PHRASE, NUMERIC_DEADLINE } from "./incident-words.test-helpers";
+import { INCIDENT_FORBIDDEN, NUMERIC_DEADLINE } from "./incident-words.test-helpers";
 
 const strings = (o: unknown, out: string[] = []): string[] => {
   if (typeof o === "string") out.push(o);
@@ -62,7 +62,7 @@ describe("事象の類型のデータ（版 1）", () => {
     const expected: Record<string, [string, string]> = {
       death_or_serious_injury: [
         "人の死傷（重傷以上）",
-        "操縦者や関係者のけがも含みます。悪天候など、操縦者に過失がない場合も含みます。けがの重さが分からないときは、この類型か『人の負傷（軽傷）』のうち重い方を選んでください。",
+        "操縦者や関係者のけがも含みます。悪天候などの外的な要因によるけがも含みます。けがの重さが分からないときは、この類型か『人の負傷（軽傷）』のうち重い方を選んでください。",
       ],
       minor_injury: ["人の負傷（軽傷）", "重傷以上を除くけがです。地上で待機・移動しているときのけが（回転中のプロペラに触れたなど）も含みます。"],
       property_damage: [
@@ -226,8 +226,7 @@ describe("固定の文言（設計 A）", () => {
       incidentGuidance([EVENT_TYPE_NONE]).text,
       ...Object.keys(m.INCIDENT_ERROR_MESSAGE).map((k) => m.incidentErrorMessage(k)),
     ];
-    // 契約の説明文（人の死傷）にある「操縦者に過失がない場合も含みます」は、非難ではなく対象の範囲を示す文のため除く（契約の文のまま）
-    const joined = all.join("\n").replaceAll(INCIDENT_NO_FAULT_PHRASE, "");
+    const joined = all.join("\n");
     for (const w of INCIDENT_FORBIDDEN) expect(joined, w).not.toContain(w);
     expect(joined).not.toMatch(NUMERIC_DEADLINE);
     expect(all.filter((s) => s.includes("責任"))).toEqual([m.INCIDENT_FACT_NOTICE]);
