@@ -14,7 +14,8 @@ const REPORT_STATE_FILTER_LABEL: Readonly<Record<(typeof REPORT_STATES)[number],
   consulted: INCIDENT_REPORT_STATE_LABEL.consulted.label,
   changed: "記録のあとで内容が変わった",
 };
-const selectClass = "min-h-11 rounded-sharp border border-rule bg-paper px-3 text-base text-ink sm:text-sm";
+const selectClass =
+  "min-h-11 w-full min-w-0 rounded-sharp border border-rule bg-paper px-3 py-2 text-base text-ink outline-none focus:border-brand-700 focus:ring-2 focus:ring-brand-700 sm:text-sm";
 
 // 事故・ヒヤリハットの一覧（Sprint 12e 設計 E）。全役割が見られる。記録は運航管理者と操縦者。取消は既定で出さない（?includeVoided=1）。
 // N1（事実の記録の注意）・N2（公式の手続き）を常に出す。目安・報告の状態・簡易記録の印・取消は文字と記号で示す。
@@ -55,11 +56,16 @@ export default async function IncidentListPage({
       >
         <IncidentFactNotice />
         <IncidentOfficialNotice />
-        {canCreate ? null : <p className="text-xs leading-relaxed text-ink-soft">閲覧者は記録を見ることだけができます。</p>}
+        {canCreate ? null : <p className="text-xs leading-relaxed text-ink-mute">閲覧者は記録を見ることだけができます。</p>}
       </PageHeader>
 
-      <form method="get" className="flex flex-wrap items-end gap-3" data-testid="incident-filter" aria-label="事故・ヒヤリハットの絞り込み">
-        <label className="flex flex-col gap-1 text-xs text-ink-mute">
+      <form
+        method="get"
+        className="grid grid-cols-2 gap-x-3 gap-y-2.5 rounded-sharp border border-rule-soft p-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_auto] sm:items-end"
+        data-testid="incident-filter"
+        aria-label="事故・ヒヤリハットの絞り込み"
+      >
+        <label className="flex min-w-0 flex-col gap-1 text-xs text-ink-mute">
           区分
           <select name="kind" defaultValue={kind ?? ""} className={selectClass} data-testid="incident-filter-kind">
             <option value="">すべて</option>
@@ -70,7 +76,7 @@ export default async function IncidentListPage({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-mute">
+        <label className="flex min-w-0 flex-col gap-1 text-xs text-ink-mute">
           報告の状態
           <select name="reportState" defaultValue={reportState ?? ""} className={selectClass} data-testid="incident-filter-report">
             <option value="">すべて</option>
@@ -81,7 +87,7 @@ export default async function IncidentListPage({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-mute">
+        <label className="col-span-2 flex min-w-0 flex-col gap-1 text-xs text-ink-mute sm:col-span-1">
           対応の状況
           <select name="followUp" defaultValue={followUp ?? ""} className={selectClass} data-testid="incident-filter-follow-up">
             <option value="">すべて</option>
@@ -92,18 +98,20 @@ export default async function IncidentListPage({
             ))}
           </select>
         </label>
-        <label className="flex min-h-11 items-center gap-2 text-sm text-ink">
-          <input type="checkbox" name="detailPending" value="1" defaultChecked={sp.detailPending === "1"} className="h-5 w-5 accent-brand-700" data-testid="incident-filter-pending" />
-          詳細が未記入のものだけ
-        </label>
-        {sp.includeVoided === "1" ? <input type="hidden" name="includeVoided" value="1" /> : null}
-        <button type="submit" className={buttonGhostClass} data-testid="incident-filter-submit">
-          絞り込む
-        </button>
+        <div className="col-span-2 flex flex-wrap items-center justify-between gap-x-3 sm:col-span-1 sm:justify-start">
+          <label className="flex min-h-11 items-center gap-2 text-xs text-ink-soft">
+            <input type="checkbox" name="detailPending" value="1" defaultChecked={sp.detailPending === "1"} className="h-4 w-4 accent-brand-700" data-testid="incident-filter-pending" />
+            詳細が未記入のものだけ
+          </label>
+          {sp.includeVoided === "1" ? <input type="hidden" name="includeVoided" value="1" /> : null}
+          <button type="submit" className={buttonGhostClass} data-testid="incident-filter-submit">
+            絞り込む
+          </button>
+        </div>
       </form>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/incidents" includeVoided={sp.includeVoided === "1"} />
-        <p className="font-mono text-[11px] tnum text-ink-mute" data-testid="incident-count">
+        <p className="font-mono text-xs tnum text-ink-soft" data-testid="incident-count">
           {rows.length} 件
         </p>
       </div>

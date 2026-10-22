@@ -52,7 +52,8 @@ import { buttonPrimaryClass, buttonDangerClass, VERSION_NOTICE_TARGET } from "./
 const radioRowClass =
   "flex min-h-11 cursor-pointer items-center gap-3 rounded-sharp border border-rule bg-paper px-3 py-2 text-sm text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
 const radioClass = "h-5 w-5 shrink-0 cursor-pointer accent-brand-700";
-const legendClass = "mb-1 flex items-center gap-2 text-sm font-medium text-ink";
+// 項目のまとまりの見出し（12a・12d のフォームと同じ、下に罫線を引いた小見出し）
+const legendClass = "mb-1 flex w-full items-center gap-2 border-b border-rule pb-1.5 text-sm font-medium text-ink";
 
 /** 誤りの文言（項目ごとの誤りがあれば入力欄の下に、無ければ送信ボタンの上に）。 */
 const messageOf = (r: ApiResult): string => {
@@ -199,7 +200,7 @@ export function IncidentForm({
 
   const typeOption = (o: (typeof options)[number]) => (
     <li key={o.key}>
-      <label className={`${radioRowClass} items-start !py-3`} data-testid="incident-event-type" data-key={o.key}>
+      <label className={`${radioRowClass} items-start !py-3 ${o.exclusive ? "border-dashed" : ""}`} data-testid="incident-event-type" data-key={o.key}>
         <input
           type="checkbox"
           className={`${radioClass} mt-0.5`}
@@ -208,7 +209,7 @@ export function IncidentForm({
           data-testid={`incident-event-type-${o.key}`}
         />
         <span className="flex min-w-0 flex-col gap-1.5">
-          <span className="font-medium" data-testid={`incident-event-type-label-${o.key}`}>
+          <span className="text-[15px] font-medium leading-snug" data-testid={`incident-event-type-label-${o.key}`}>
             {o.label}
           </span>
           {o.description ? (
@@ -267,7 +268,7 @@ export function IncidentForm({
   };
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6" aria-label={mode === "create" ? "事故・ヒヤリハットの記録" : "事故・ヒヤリハットの訂正"} data-testid="incident-form" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={mode === "create" ? "事故・ヒヤリハットの記録" : "事故・ヒヤリハットの訂正"} data-testid="incident-form" noValidate>
       {/* 区分（利用者が選ぶ。法令上の区分ではない） */}
       <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["kind"] ? true : undefined}>
         <legend className={legendClass}>
@@ -345,16 +346,18 @@ export function IncidentForm({
           起きた事象の類型
           <span aria-hidden className="rounded-sharp border border-brand-500 px-1 text-[10px] leading-4 text-brand-700">必須</span>
         </legend>
-        <p className="text-sm leading-relaxed text-ink" data-testid="incident-event-type-notice">
+        <p className="text-sm leading-relaxed text-ink-soft" data-testid="incident-event-type-notice">
           {INCIDENT_EVENT_TYPE_NOTICE}
         </p>
         <ul className="flex flex-col gap-2" data-testid="incident-event-types-possible">
           {possibleOpts.map(typeOption)}
         </ul>
-        <ul className="mt-4 flex flex-col gap-2 border-t border-rule pt-4" data-testid="incident-event-types-fact-only">
+        {/* 事実の類型（目安には効かない）。点線の区切りで目安に効く 7 類型から離す（「当たらない」の意味に見えないよう、選択肢の形は同じ） */}
+        <ul className="mt-3 flex flex-col gap-2 border-t border-dashed border-rule pt-5" data-testid="incident-event-types-fact-only">
           {factOnlyOpts.map(typeOption)}
         </ul>
-        <ul className="mt-4 flex flex-col gap-2 border-t border-rule pt-4" data-testid="incident-event-types-exclusive">
+        {/* 排他の 2 つ（同時に選べない）。実線の区切りでさらに離し、選択肢の枠を破線にして形でも区別する */}
+        <ul className="mt-5 flex flex-col gap-2 border-t border-rule pt-5" data-testid="incident-event-types-exclusive">
           {exclusiveOpts.map(typeOption)}
         </ul>
         <ErrorText message={errors["eventTypes"]} testId="incident-event-types-error" />
@@ -367,7 +370,7 @@ export function IncidentForm({
           testId="incident-live-guidance"
         />
       ) : (
-        <p className="rounded-sharp border border-dashed border-rule p-3 text-sm text-ink-soft" data-testid="incident-live-guidance-empty">
+        <p className="rounded-sharp border border-dashed border-rule px-4 py-3.5 text-sm leading-relaxed text-ink-soft" data-testid="incident-live-guidance-empty">
           事象の類型を選ぶと、報告の対象になる可能性の目安がここに出ます。
         </p>
       )}
@@ -401,7 +404,7 @@ export function IncidentForm({
 
       <fieldset className="flex min-w-0 flex-col gap-4">
         <legend className={legendClass}>起きたこと</legend>
-        <p className="border-l-4 border-ink-soft pl-3 text-sm leading-relaxed text-ink" data-testid="incident-personal-notice">
+        <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft" data-testid="incident-personal-notice">
           {INCIDENT_PERSONAL_INFO_NOTICE}
         </p>
         <Field label="何が起きたか" required error={errors["summary"]} hint={`${INCIDENT_LIMITS.summary} 文字まで`}>

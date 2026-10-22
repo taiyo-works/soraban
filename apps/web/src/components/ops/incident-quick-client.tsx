@@ -33,6 +33,8 @@ const BTN =
 const BTN_PRIMARY = `${BTN} border-2 border-brand-700 bg-brand-700 text-paper`;
 const BTN_OUTLINE = `${BTN} border-2 border-brand-700 bg-paper text-brand-700`;
 const BTN_WARN = `${BTN} border-2 border-signal-red bg-paper text-ink`;
+// 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく（置き換えで作り、クラスの競合を避ける）
+const BTN_RECORD = BTN_PRIMARY.replace("min-h-14", "min-h-16").replace("text-lg", "text-xl");
 const BOX_NOTE = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft p-3 text-ink";
 const BOX_WARN = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-red bg-signal-red-soft p-3 text-ink";
 const BOX_OK = "flex flex-col gap-3 rounded-sharp border-2 border-l-8 border-signal-green bg-signal-green-soft p-3 text-ink";
@@ -198,22 +200,28 @@ export function IncidentQuickClient({
             {choice(PEOPLE_INJURY_LABEL, YES_NO_UNKNOWN, (v) => YES_NO_UNKNOWN_LABEL[v], injury, setInjury, "incident-quick-injury")}
           </section>
           {/* ⑤ 類型はあとで入力できる旨 */}
-          <p className="border-l-4 border-ink-soft pl-3" data-testid="incident-quick-later">
+          <p className="border-l-4 border-ink-soft pl-3 text-ink" data-testid="incident-quick-later">
             {INCIDENT_QUICK_LATER_NOTICE}
           </p>
-          <p data-testid="incident-quick-time">時刻：いま（押した時刻で記録します）</p>
+          <p className="pl-4 text-ink-soft" data-testid="incident-quick-time">
+            時刻：いま（押した時刻で記録します）
+          </p>
           {/* ⑥ 記録する */}
-          <button type="button" className={BTN_PRIMARY} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
+          <button type="button" className={`${BTN_RECORD} tracking-[0.2em]`} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
             記録する
           </button>
-          {!ready ? <p data-testid="incident-quick-hint">区分とけがの有無を選ぶと記録できます。</p> : null}
+          {!ready ? (
+            <p className="-mt-3 text-center text-ink-soft" data-testid="incident-quick-hint">
+              区分とけがの有無を選ぶと記録できます。
+            </p>
+          ) : null}
         </>
       )}
 
       {/* 送信の状況（常に出す） */}
       <section aria-label="送信の状況" className="flex flex-col gap-3">
-        <p className={unsent > 0 ? BOX_NOTE : "flex items-center gap-2 px-1"} role="status" data-testid="incident-quick-unsent" data-count={unsent}>
-          <span className={unsent > 0 ? "text-2xl font-bold" : "text-xl font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
+        <p className={unsent > 0 ? `${BOX_NOTE} text-xl` : "flex items-center gap-2 px-1 text-xl"} role="status" data-testid="incident-quick-unsent" data-count={unsent}>
+          <span className={unsent > 0 ? "text-2xl font-bold" : "font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
           {unsent > 0 ? <span>電波が戻ると自動で送ります。</span> : null}
         </p>
         {planIncidentOutboxUnsaved(planId, memberId) ? (
