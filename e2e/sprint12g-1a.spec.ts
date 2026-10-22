@@ -717,3 +717,124 @@ test.describe("J. 既存の画面の見た目が変わらない（1a-8）", () =
     await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
   });
 });
+
+test.describe("K. Codex レビューの指摘（最大化中のトグル・color-scheme・画面下端の浮きもの）", () => {
+  test("35. 地図の最大化中に端のトグル・[ ] キーを押すと、最大化を戻して要求したペインを開く（効かないままにならない）", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, "screen=workspace");
+    const left = page.getByTestId("workspace-input");
+    const right = page.getByTestId("workspace-result");
+    const maximize = page.getByTestId("workspace-maximize");
+    const widthOf = async (l: Locator): Promise<number> => (await l.boundingBox())?.width ?? 0;
+    await maximize.click();
+    await expect(maximize).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(() => widthOf(left)).toBeLessThan(2);
+    // the edge toggle says "open" and works: it ends the maximized state and shows the left pane
+    const toggleLeft = page.getByTestId("workspace-toggle-left");
+    await expect(toggleLeft).toHaveAttribute("aria-expanded", "false");
+    await toggleLeft.click();
+    await expect(maximize).toHaveAttribute("aria-pressed", "false");
+    await expect(toggleLeft).toHaveAttribute("aria-expanded", "true");
+    await expect.poll(() => widthOf(left)).toBeGreaterThan(300);
+    await expect.poll(() => widthOf(right)).toBeGreaterThan(300);
+    // the same with the "]" key, when the right pane had been closed before maximizing
+    await page.keyboard.press("]");
+    await expect.poll(() => widthOf(right)).toBeLessThan(2);
+    await maximize.click();
+    await expect(maximize).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("]");
+    await expect(maximize).toHaveAttribute("aria-pressed", "false");
+    await expect.poll(() => widthOf(right)).toBeGreaterThan(300);
+    await expect.poll(() => widthOf(left)).toBeGreaterThan(300);
+    // a pane closed before maximizing and not asked for stays closed
+    await page.keyboard.press("[");
+    await expect.poll(() => widthOf(left)).toBeLessThan(2);
+    await maximize.click();
+    await page.getByTestId("workspace-toggle-right").click();
+    await expect(maximize).toHaveAttribute("aria-pressed", "false");
+    await expect.poll(() => widthOf(right)).toBeGreaterThan(300);
+    expect(await widthOf(left)).toBeLessThan(2);
+  });
+
+  test("36. 強制したテーマでは color-scheme が単一の値（ブラウザ描画の部品も同じ配色）。自動のときは light dark", async ({ page }) => {
+    const schemeOf = (sel: string): Promise<string> => page.locator(sel).first().evaluate((el) => getComputedStyle(el).colorScheme);
+    for (const os of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: os });
+      await open(page, "theme=light");
+      expect(await schemeOf("html")).toBe("light");
+      expect(await schemeOf("[data-testid=design-catalog]")).toBe("light");
+      expect(await schemeOf("[data-testid=design-catalog] select")).toBe("light");
+      await open(page, "theme=dark");
+      expect(await schemeOf("html")).toBe("dark");
+      expect(await schemeOf("[data-testid=design-catalog]")).toBe("dark");
+      expect(await schemeOf("[data-testid=design-catalog] select")).toBe("dark");
+      await open(page);
+      expect(await schemeOf("[data-testid=design-catalog]")).toBe("light dark");
+    }
+    // field mode follows the theme as well (it has a light and a dark set)
+    await page.emulateMedia({ colorScheme: "light" });
+    await open(page, "theme=dark&field=1");
+    expect(await schemeOf(".field")).toBe("dark");
+  });
+
+  test("37. 画面の下端近く（375×667）で開いたコンテキストメニューとⓘは、全項目・全文が画面内に収まる", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await open(page);
+    const vh = 667;
+    const lowerTo = async (testId: string, bottomGap: number): Promise<void> => {
+      await page.getByTestId(testId).evaluate((el, gap) => {
+        el.scrollIntoView({ block: "center" });
+        window.scrollBy(0, el.getBoundingClientRect().bottom - (window.innerHeight - gap));
+      }, bottomGap);
+    };
+    const inside = async (l: Locator, label: string): Promise<void> => {
+      const b = await l.boundingBox();
+      expect(b, label).not.toBeNull();
+      expect(b!.y, `${label} top`).toBeGreaterThanOrEqual(0);
+      expect(b!.y + b!.height, `${label} bottom`).toBeLessThanOrEqual(vh);
+    };
+    // "..." button near the bottom edge
+    await lowerTo("demo-context", 4);
+    const wrap = page.getByTestId("demo-context");
+    await wrap.getByRole("button", { name: "行の操作" }).click();
+    const menu = page.getByRole("menu", { name: "行の操作" });
+    await expect(menu).toBeVisible();
+    const items = menu.getByRole("menuitem");
+    const n = await items.count();
+    expect(n).toBeGreaterThan(1);
+    await inside(menu, "menu (button)");
+    for (let i = 0; i < n; i++) await inside(items.nth(i), `item ${i} (button)`);
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    // a right click at the bottom edge of the viewport
+    await lowerTo("demo-context", 4);
+    // wait until the scroll has settled (two equal readings in a row), then press inside the wrapper's last 2px of height
+    let last = Number.NaN;
+    await expect
+      .poll(async () => {
+        const y = (await wrap.boundingBox())?.y ?? Number.NaN;
+        const settled = y === last;
+        last = y;
+        return settled;
+      })
+      .toBe(true);
+    const box = (await wrap.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(vh);
+    await page.mouse.click(box.x + 20, box.y + box.height - 2, { button: "right" });
+    await expect(menu).toBeVisible();
+    await inside(menu, "menu (right click)");
+    for (let i = 0; i < n; i++) await inside(items.nth(i), `item ${i} (right click)`);
+    // the last item can be chosen
+    await items.nth(n - 1).click();
+    await expect(menu).toBeHidden();
+    // (i) near the bottom edge opens upward and stays inside the viewport
+    await lowerTo("demo-info", 4);
+    await page.getByTestId("demo-info").click();
+    const note = page.getByRole("note").filter({ hasText: "ボタンを押すか" });
+    await expect(note).toBeVisible();
+    await inside(note, "info panel");
+    const nb = (await note.boundingBox())!;
+    expect(nb.x).toBeGreaterThanOrEqual(0);
+    expect(nb.x + nb.width).toBeLessThanOrEqual(375);
+  });
+});

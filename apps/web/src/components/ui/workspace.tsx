@@ -58,13 +58,26 @@ export function Workspace({
   const showLeft = leftOpen && !maximized;
   const showRight = rightOpen && !maximized;
 
+  // While the map is maximized both panes are hidden, so a toggle (edge button or "[" / "]") that only flipped its own
+  // flag would look pressed and do nothing. Instead it leaves the maximized state and opens the requested pane.
+  const togglePane = useCallback(
+    (side: "left" | "right") => {
+      const set = side === "left" ? setLeftOpen : setRightOpen;
+      if (maximized) {
+        set(true);
+        setMaximized(false);
+      } else set((v) => !v);
+    },
+    [maximized],
+  );
+
   const keys = useCallback(
     (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "[") setLeftOpen((v) => !v);
-      else if (e.key === "]") setRightOpen((v) => !v);
+      if (e.key === "[") togglePane("left");
+      else if (e.key === "]") togglePane("right");
     },
-    [],
+    [togglePane],
   );
   useKeydown(keys, { enabled: hotkeys && desktop, ignoreEditable: true, ignoreModal: true });
 
@@ -115,8 +128,8 @@ export function Workspace({
         >
           <Icon name={maximized ? "minimize" : "maximize"} size={18} />
         </button>
-        <EdgeToggle side="left" open={showLeft} onClick={() => setLeftOpen((v) => !v)} controls={leftId} label={inputTitle} />
-        <EdgeToggle side="right" open={showRight} onClick={() => setRightOpen((v) => !v)} controls={rightId} label={resultTitle} />
+        <EdgeToggle side="left" open={showLeft} onClick={() => togglePane("left")} controls={leftId} label={inputTitle} />
+        <EdgeToggle side="right" open={showRight} onClick={() => togglePane("right")} controls={rightId} label={resultTitle} />
       </div>
 
       {/* dim the map only at the full sheet height (< 1024px) */}

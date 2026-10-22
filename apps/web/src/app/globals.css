@@ -682,6 +682,9 @@ html:has(body.has-bottom-nav) {
  * `.ds` — the scope in which the new system applies.
  * ---------------------------------------------------------- */
 .ds {
+  /* Automatic: browser-drawn parts (select popups, scrollbars, form controls) follow the OS. A forced theme
+   * (html[data-theme]) sets a single value right below, so they match the page. Field mode follows the theme too
+   * (it has a light and a dark set above). */
   color-scheme: light dark;
   --ds-font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
     "Yu Gothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
@@ -706,6 +709,15 @@ html:has(body.has-bottom-nav) {
   line-height: 1.6;
   font-feature-settings: normal;
   -webkit-text-size-adjust: 100%;
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] .ds {
+  color-scheme: light;
+}
+:root[data-theme="dark"],
+:root[data-theme="dark"] .ds {
+  color-scheme: dark;
 }
 
 /* Old token names resolve to the new values under `.ds` (removed in stage 5). Re-declared on nested

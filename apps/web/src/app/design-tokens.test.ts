@@ -227,6 +227,30 @@ describe("1a-1 トークンの構造", () => {
     expect(resolve({ theme: "light", palette: 1, field: true })["--accent"]).toBe("#1f4a99");
   });
 
+  it("color-scheme：自動のときだけ `light dark`。強制したテーマ（明・暗）では単一の値（現場モードも同じ）", () => {
+    const block = (selector: string): string => {
+      const i = CSS.indexOf(`${selector} {`);
+      expect(i, selector).toBeGreaterThanOrEqual(0);
+      return CSS.slice(i, CSS.indexOf("}", i));
+    };
+    expect(block(".ds")).toMatch(/color-scheme:\s*light dark;/);
+    for (const theme of ["light", "dark"] as const) {
+      const sel = `:root[data-theme="${theme}"] .ds`;
+      expect(block(sel), theme).toMatch(new RegExp(`color-scheme:\\s*${theme};`));
+      // the html element follows too (root scrollbars / canvas)
+      expect(CSS).toMatch(new RegExp(`:root\\[data-theme="${theme}"\\],\\s*:root\\[data-theme="${theme}"\\] \\.ds \\{`));
+    }
+    // field mode never sets its own color-scheme, so it inherits the single value above (and `light dark` in auto)
+    expect(CSS).not.toMatch(/\.field[^{}]*\{[^}]*color-scheme/);
+    // nothing outside `.ds` / a forced theme declares one
+    const all = [...CSS.matchAll(/([^{}]+)\{[^}]*color-scheme/g)].map((m) => m[1]!.trim().replace(/\s+/g, " "));
+    expect(all.sort()).toEqual([
+      ".ds",
+      ':root[data-theme="dark"], :root[data-theme="dark"] .ds',
+      ':root[data-theme="light"], :root[data-theme="light"] .ds',
+    ]);
+  });
+
   it("`.ds` は color-scheme: light dark を宣言し、旧名のトークンは `.ds` の下でだけ新しい値へ写像される", () => {
     expect(CSS).toMatch(/\.ds\s*\{[^}]*color-scheme:\s*light dark/);
     const ds = RULES.find((r) => r.selector === ".ds, .ds .field, .ds [data-palette]")!;

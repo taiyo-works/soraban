@@ -183,6 +183,7 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const [shift, setShift] = useState(0);
+  const [above, setAbove] = useState(false);
   const root = useRef<HTMLSpanElement>(null);
   const panel = useRef<HTMLSpanElement>(null);
   const id = useId();
@@ -205,6 +206,10 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
     if (left < 16) dx = 16 - left;
     else if (right > w - 16) dx = w - 16 - right;
     setShift(dx);
+    // Vertical: open upward when the panel would run off the bottom and there is room above the button.
+    const r = root.current.getBoundingClientRect();
+    const h = panel.current.offsetHeight;
+    setAbove(r.bottom + h > window.innerHeight - 8 && r.top - h >= 8);
   }, [open]);
 
   return (
@@ -228,7 +233,10 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
         role="note"
         hidden={!open}
         style={{ translate: `${shift}px 0` }}
-        className="ds-pop absolute left-1/2 top-full z-30 -ml-[9rem] mt-0 w-[18rem] max-w-[calc(100vw-2rem)] rounded-card bg-surface p-3 text-table leading-relaxed text-fg-soft shadow-float"
+        className={cx(
+          "ds-pop absolute left-1/2 z-30 -ml-[9rem] mt-0 w-[18rem] max-w-[calc(100vw-2rem)] rounded-card bg-surface p-3 text-table leading-relaxed text-fg-soft shadow-float",
+          above ? "bottom-full" : "top-full",
+        )}
       >
         {children}
       </span>
@@ -314,7 +322,10 @@ export function ContextMenu({
   readonly children: ReactNode;
   readonly "data-testid"?: string;
 }) {
-  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  // `y` is where the menu's top edge would go; `above` (the trigger's top edge, when opened from the button) is where its
+  // bottom edge goes instead if the menu does not fit below.
+  const [at, setAt] = useState<{ x: number; y: number; above?: number } | null>(null);
+  const [top, setTop] = useState<number | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -329,6 +340,20 @@ export function ContextMenu({
   useEffect(() => {
     if (open) menu.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
   }, [open]);
+
+  // Keep the whole menu inside the viewport (an 8px gutter): measure its height, flip above the trigger when it does not
+  // fit below, otherwise slide it up. A menu taller than the viewport scrolls (max-h on the element). Runs before paint.
+  useLayoutEffect(() => {
+    if (!at || !menu.current) {
+      setTop(null);
+      return;
+    }
+    const h = menu.current.offsetHeight;
+    const vh = window.innerHeight;
+    let y = at.y;
+    if (y + h > vh - 8) y = at.above !== undefined && at.above - h >= 8 ? at.above - h : vh - 8 - h;
+    setTop(Math.max(8, y));
+  }, [at]);
 
   const onMenuKey = (e: ReactKeyboardEvent<HTMLDivElement>): void => {
     const els = [...(menu.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
@@ -360,7 +385,7 @@ export function ContextMenu({
         if ((e.shiftKey && e.key === "F10") || e.key === "ContextMenu") {
           e.preventDefault();
           const r = button.current?.getBoundingClientRect();
-          setAt({ x: r ? r.left : 16, y: r ? r.bottom : 16 });
+          setAt({ x: r ? r.left : 16, y: r ? r.bottom : 16, above: r?.top });
         }
       }}
       onTouchStart={(e) => {
@@ -380,7 +405,7 @@ export function ContextMenu({
         aria-expanded={open}
         onClick={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
-          setAt(open ? null : { x: r.right, y: r.bottom });
+          setAt(open ? null : { x: r.right, y: r.bottom, above: r.top });
         }}
         className="relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken"
       >
@@ -392,8 +417,8 @@ export function ContextMenu({
           role="menu"
           aria-label={label}
           onKeyDown={onMenuKey}
-          style={{ left: Math.min(at.x, (typeof window === "undefined" ? 0 : window.innerWidth) - 224), top: at.y }}
-          className="glass ds-pop fixed z-50 flex w-56 flex-col rounded-card p-1 shadow-float"
+          style={{ left: Math.min(at.x, (typeof window === "undefined" ? 0 : window.innerWidth) - 224), top: top ?? at.y }}
+          className="glass ds-pop fixed z-50 flex max-h-[calc(100dvh-1rem)] w-56 flex-col overflow-y-auto rounded-card p-1 shadow-float"
         >
           {items.map((it) => (
             <button
