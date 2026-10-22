@@ -4,7 +4,7 @@ import { useCallback, useId, useRef, useState, type CSSProperties, type PointerE
 import { cx, type DataAttrs } from "./cx";
 import { useKeydown, useMediaQuery } from "./hooks";
 import { Icon } from "./icons";
-import { BottomTabs, panelId } from "./tabs";
+import { BottomTabs, panelId, tabId } from "./tabs";
 
 // Workspace (Sprint 12g stage 1a): the layout for screens built around a map (stage 4 uses it for `/` and /ops/places).
 //   >= 1024px : [input pane | map | result pane], each pane collapsible from a toggle on its edge ("[" and "]"), plus a
@@ -50,9 +50,10 @@ export function Workspace({
   const [tab, setTab] = useState<TabId>("map");
   const [stage, setStage] = useState<SheetStage>("peek");
   const desktop = useMediaQuery("(min-width: 1024px)");
-  const leftId = useId();
-  const rightId = useId();
   const prefix = useId();
+  // One set of ids for both widths: the bottom tabs (< 1024px) control these panels, and so do the edge toggles (>= 1024px).
+  const leftId = panelId(prefix, "input");
+  const rightId = panelId(prefix, "result");
   const dragY = useRef<number | null>(null);
 
   const showLeft = leftOpen && !maximized;
@@ -115,7 +116,7 @@ export function Workspace({
       className="relative isolate overflow-hidden rounded-sheet bg-sunken shadow-lift lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
     >
       {/* map layer */}
-      <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} role="tabpanel" aria-label="地図">
+      <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} {...(desktop ? { role: "region", "aria-label": "地図" } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "map") })}>
         {map}
         {floating ? <div className="absolute left-3 top-3 z-10 max-w-64 max-lg:hidden">{floating}</div> : null}
         <button
@@ -171,7 +172,7 @@ export function Workspace({
         <div className="contents">
           <aside
             id={leftId}
-            aria-label={inputTitle}
+            {...(desktop ? { "aria-label": inputTitle } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "input") })}
             data-testid="workspace-input"
             inert={desktop && !showLeft}
             className={cx(
@@ -183,7 +184,7 @@ export function Workspace({
           </aside>
           <aside
             id={rightId}
-            aria-label={resultTitle}
+            {...(desktop ? { "aria-label": resultTitle } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "result") })}
             data-testid="workspace-result"
             inert={desktop && !showRight}
             className={cx(

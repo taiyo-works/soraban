@@ -904,4 +904,101 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
     expect(plain).not.toContain("dataset.theme");
     await context.close();
   });
+
+  const ariaProblems = (page: Page): Promise<string[]> =>
+    page.evaluate(() => {
+      const out: string[] = [];
+      const seen = new Map<string, number>();
+      for (const el of document.querySelectorAll("[id]")) seen.set(el.id, (seen.get(el.id) ?? 0) + 1);
+      for (const [id, n] of seen) if (n > 1) out.push(`duplicate id "${id}" x${n}`);
+      for (const attr of ["aria-controls", "aria-labelledby", "aria-describedby", "aria-owns", "aria-activedescendant", "aria-details", "aria-errormessage"]) {
+        for (const el of document.querySelectorAll(`[${attr}]`)) {
+          for (const ref of (el.getAttribute(attr) ?? "").split(/\s+/).filter(Boolean)) {
+            if (!document.getElementById(ref)) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? el.getAttribute("role") ?? ""}] ${attr} -> "${ref}" missing`);
+          }
+        }
+      }
+      return out;
+    });
+
+  test("41. ワークスペースのタブ／トグルの aria-controls は実在するペインを指す。狭い幅では tabpanel（aria-labelledby がタブ）、広い幅ではトグルが同じ ID を指す", async ({ page }) => {
+    // 375px: bottom tabs control tabpanels
+    await page.setViewportSize({ width: 375, height: 800 });
+    await open(page, "screen=workspace");
+    const tabs = page.getByTestId("workspace-tabs").getByRole("tab");
+    expect(await tabs.count()).toBe(3);
+    for (let i = 0; i < 3; i++) {
+      const tab = tabs.nth(i);
+      await tab.click();
+      await expect(tab).toHaveAttribute("aria-selected", "true");
+      const info = await tab.evaluate((el) => {
+        const panel = document.getElementById(el.getAttribute("aria-controls") ?? "");
+        const visible = (n: Element | null): boolean => !!n && getComputedStyle(n).display !== "none";
+        // the map layer stays visible behind the sheet at every tab, so only the two sheet panes are counted
+        const all = [...document.querySelectorAll("[data-testid=workspace-input],[data-testid=workspace-result]")];
+        return {
+          exists: !!panel,
+          role: panel?.getAttribute("role") ?? null,
+          labelledby: panel?.getAttribute("aria-labelledby") ?? null,
+          tabId: el.id,
+          panelVisible: visible(panel),
+          visibleCount: all.filter(visible).length,
+        };
+      });
+      expect(info.exists).toBe(true);
+      expect(info.role).toBe("tabpanel");
+      expect(info.labelledby).toBe(info.tabId);
+      expect(info.panelVisible).toBe(true);
+      // the selected tab and the shown panel agree: input / result show exactly their own pane, map shows neither
+      expect(info.visibleCount).toBe(i === 2 ? 0 : 1);
+    }
+    expect(await ariaProblems(page)).toEqual([]);
+    // 1280px: the edge toggles control the panes (landmarks with a name, not tabpanels)
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(page.getByTestId("workspace-input")).not.toHaveAttribute("role", "tabpanel");
+    for (const side of ["left", "right"] as const) {
+      const ids = await page.getByTestId(`workspace-toggle-${side}`).evaluate((el) => {
+        const t = document.getElementById(el.getAttribute("aria-controls") ?? "");
+        return { exists: !!t, testid: t?.getAttribute("data-testid") ?? null, role: t?.getAttribute("role") ?? null, name: t?.getAttribute("aria-label") ?? null };
+      });
+      expect(ids.exists).toBe(true);
+      expect(ids.testid).toBe(side === "left" ? "workspace-input" : "workspace-result");
+      expect(ids.role).toBeNull();
+      expect(ids.name).toBeTruthy();
+    }
+    expect(await ariaProblems(page)).toEqual([]);
+  });
+
+  test("42. 見本ページ全体：aria-controls・aria-labelledby・aria-describedby などの参照先が DOM にあり、id が一意（幅 375・1280 × 6 つの画面 × 明・暗・現場）", async ({ page }) => {
+    for (const width of [375, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const screen of ["today", "list", "form", "workspace", "field", "legend"]) {
+        for (const extra of ["", "&theme=dark", "&field=1"]) {
+          await open(page, `screen=${screen}${extra}`);
+          expect(await ariaProblems(page), `${width}px ${screen}${extra}`).toEqual([]);
+        }
+      }
+    }
+    // opened states: (i), context menu, command palette, shortcut sheet
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page);
+    await page.getByTestId("demo-info").click();
+    await expect(page.getByRole("note").filter({ hasText: "ボタンを押すか" })).toBeVisible();
+    expect(await ariaProblems(page), "info open").toEqual([]);
+    await page.keyboard.press("Escape");
+    await page.getByTestId("demo-context").getByRole("button", { name: "行の操作" }).click();
+    await expect(page.getByRole("menu", { name: "行の操作" })).toBeVisible();
+    expect(await ariaProblems(page), "menu open").toEqual([]);
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Control+k");
+    await expect(page.getByRole("dialog").getByRole("combobox")).toBeVisible();
+    expect(await ariaProblems(page), "palette open").toEqual([]);
+    await page.keyboard.type("テーマ");
+    expect(await ariaProblems(page), "palette filtered").toEqual([]);
+    await page.keyboard.press("Escape");
+    await page.locator("body").click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press("?");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    expect(await ariaProblems(page), "shortcuts open").toEqual([]);
+  });
 });
