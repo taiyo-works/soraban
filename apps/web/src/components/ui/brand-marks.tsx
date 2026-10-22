@@ -40,56 +40,69 @@ function Mark({ size = 180, className, label, children }: MarkProps & { readonly
 }
 
 const line = { fill: "none", stroke: FG, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+const solid = { fill: FG, stroke: "none" } as const;
 
-/** Proposal 1: seen from straight above, centred; the flight path runs along the bottom. */
+/** One quadcopter seen from above, centred on (0, 0). `arm` is the distance from the body to each rotor on both axes. */
+function QuadTop({ arm, rotor, body, stroke }: { readonly arm: number; readonly rotor: number; readonly body: number; readonly stroke: number }) {
+  const hub = arm - rotor * 0.72; // arms stop at the rotor's rim, so the line never crosses the ring
+  const k = body / 2 + 1;
+  return (
+    <>
+      <g {...line} strokeWidth={stroke}>
+        <path d={`M${-k} ${-k}L${-hub} ${-hub}M${k} ${-k}L${hub} ${-hub}M${-k} ${k}L${-hub} ${hub}M${k} ${k}L${hub} ${hub}`} />
+        <circle cx={-arm} cy={-arm} r={rotor} />
+        <circle cx={arm} cy={-arm} r={rotor} />
+        <circle cx={-arm} cy={arm} r={rotor} />
+        <circle cx={arm} cy={arm} r={rotor} />
+      </g>
+      <rect x={-body / 2} y={-body / 2} width={body} height={body} rx={body * 0.32} {...solid} />
+    </>
+  );
+}
+
+/** Proposal A: seen from straight above and centred; a single flight path ends in a dot below. Calm and symmetric. */
 export function AppIconTopView(props: MarkProps) {
   return (
     <Mark {...props}>
-      <g {...line} strokeWidth={4.5}>
-        <rect x="51" y="43" width="18" height="18" rx="5" />
-        <path d="M54 46L41 33M66 46l13-13M54 58L41 71M66 58l13 13" />
-        <circle cx="32" cy="24" r="12" />
-        <circle cx="88" cy="24" r="12" />
-        <circle cx="32" cy="80" r="12" />
-        <circle cx="88" cy="80" r="12" />
+      <g transform="translate(60 51)">
+        <QuadTop arm={27} rotor={13} body={17} stroke={4.4} />
       </g>
-      <path d="M16 103C34 109 46 96 62 100S90 107 104 98" {...line} strokeWidth={3} opacity={0.85} />
+      <path d="M17 104C33 109 44 98 60 100.5S88 106 100 99" {...line} strokeWidth={3.8} opacity={0.9} />
+      <circle cx="103" cy="97.5" r="4.2" {...solid} />
     </Mark>
   );
 }
 
-/** Proposal 2: a small drone banking at the upper right, with a long path sweeping in from the lower left corner. */
+/** Proposal B: the drone banks at the upper right, a long trail sweeps up from the lower left corner and thins out. */
 export function AppIconSweep(props: MarkProps) {
   return (
     <Mark {...props}>
-      <path d="M-4 118C28 116 24 90 46 78S58 62 62 56" {...line} strokeWidth={3.2} opacity={0.9} />
-      <path d="M6 128C42 124 36 98 58 86" {...line} strokeWidth={2.6} opacity={0.5} />
-      <g transform="translate(78 42) rotate(-15) scale(0.66)" {...line} strokeWidth={6.5}>
-        <rect x="-8" y="-8" width="16" height="16" rx="5" />
-        <path d="M-6-6L-20-20M6-6l14-14M-6 6L-20 20M6 6l14 14" />
-        <circle cx="-26" cy="-26" r="8.5" />
-        <circle cx="26" cy="-26" r="8.5" />
-        <circle cx="-26" cy="26" r="8.5" />
-        <circle cx="26" cy="26" r="8.5" />
+      <path d="M-6 112C22 112 30 92 46 79S60 64 63 58" {...line} strokeWidth={4} opacity={0.95} />
+      <path d="M-6 130C26 128 38 106 54 94" {...line} strokeWidth={3.6} opacity={0.5} />
+      <path d="M12 140C38 138 52 118 66 108" {...line} strokeWidth={3.2} opacity={0.26} />
+      <g transform="translate(77 44) rotate(-16)">
+        <QuadTop arm={21} rotor={10} body={13} stroke={4.2} />
       </g>
     </Mark>
   );
 }
 
-/** Proposal 3: a side view of the drone, ringed by a thin orbit path above and below. */
+/**
+ * Proposal C: a side view of the drone hovering inside a thin geofence ring. The ring is cut open at the lower right
+ * and ends in a dot, so it reads as a path that goes around the area.
+ */
 export function AppIconOrbit(props: MarkProps) {
   return (
     <Mark {...props}>
-      <g {...line} strokeWidth={4.5}>
-        <rect x="43" y="52" width="34" height="15" rx="7" />
-        <path d="M43 58H30M77 58h13M30 58V45M90 58V45M18 45h24M78 45h24" />
-        <path d="M60 67v6" />
-        <circle cx="60" cy="76" r="4" />
-        <path d="M49 67l-6 15M71 67l6 15M36 83h15M69 83h15" />
-      </g>
-      <g {...line} strokeWidth={3}>
-        <path d="M16 94C34 112 86 112 104 92" opacity={0.9} />
-        <path d="M24 32C42 14 78 14 96 32" opacity={0.55} />
+      <path d="M97.6 87.4A42 42 0 1 1 104 74" {...line} strokeWidth={3.8} opacity={0.9} />
+      <circle cx="100.5" cy="82" r="4.2" {...solid} />
+      <g transform="translate(60 61) scale(1.22) translate(-60 -61)">
+        <g {...line} strokeWidth={3.6}>
+          <rect x="46" y="55" width="28" height="12" rx="6" />
+          <path d="M46 61H36M74 61h10M36 61v-8M84 61v-8M26 53h20M74 53h20" />
+          <path d="M60 67v4M51 74h18" />
+        </g>
+        <circle cx="60" cy="76.5" r="3" {...solid} />
       </g>
     </Mark>
   );
@@ -109,20 +122,22 @@ export function DroneLineArt({ className, width = 160 }: { readonly className?: 
   const s = { fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" } as const;
   return (
     <svg viewBox="0 0 200 140" width={width} height={(width * 140) / 200} aria-hidden="true" focusable="false" className={cx("shrink-0", className)}>
-      {/* flight path */}
-      <path d="M12 126C46 126 54 108 80 104" {...s} strokeDasharray="1 6" />
-      {/* arms run to the rotor hubs */}
-      <path d="M88 62L52 42M112 62l36-20M90 74L64 94M110 74l26 20" {...s} />
-      {/* rotor discs (perspective ellipses) with a hub each */}
-      <ellipse cx="50" cy="40" rx="24" ry="7" {...s} />
-      <ellipse cx="150" cy="40" rx="24" ry="7" {...s} />
-      <ellipse cx="62" cy="96" rx="24" ry="7" {...s} />
-      <ellipse cx="138" cy="96" rx="24" ry="7" {...s} />
-      <path d="M50 38v4M150 38v4M62 94v4M138 94v4" {...s} />
-      {/* body and camera */}
-      <path d="M86 58h28a6 6 0 0 1 6 6v8a6 6 0 0 1-6 6H86a6 6 0 0 1-6-6v-8a6 6 0 0 1 6-6z" {...s} />
-      <circle cx="100" cy="88" r="5" {...s} />
-      <path d="M100 78v5" {...s} />
+      {/* ground shadow and the flight path trailing behind */}
+      <ellipse cx="100" cy="122" rx="34" ry="5" {...s} opacity={0.35} />
+      <path d="M8 118C34 118 46 106 66 104" {...s} strokeDasharray="0.5 6" opacity={0.8} />
+      {/* arms run from the body to each rotor hub (the far pair sits higher, the near pair lower and larger) */}
+      <path d="M85 59L57 38M115 59l28-21M85 71L52 87M115 71l33 16" {...s} />
+      {/* rotor discs (perspective ellipses) with a blade line and a hub post each */}
+      <ellipse cx="52" cy="34" rx="24" ry="6.5" {...s} />
+      <ellipse cx="148" cy="34" rx="24" ry="6.5" {...s} />
+      <ellipse cx="44" cy="84" rx="27" ry="7.5" {...s} />
+      <ellipse cx="156" cy="84" rx="27" ry="7.5" {...s} />
+      <path d="M34 32.5l36 3M130 35.5l36-3M24 82l40 4M136 86l40-4" {...s} opacity={0.45} />
+      <path d="M52 34v5M148 34v5M44 84v5M156 84v5" {...s} />
+      {/* body and camera gimbal */}
+      <rect x="82" y="54" width="36" height="22" rx="8" {...s} />
+      <path d="M100 76v6" {...s} />
+      <circle cx="100" cy="87" r="5" {...s} />
     </svg>
   );
 }

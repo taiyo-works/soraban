@@ -171,7 +171,7 @@ export function DataTable<T>({
                           className={cx(
                             "px-4 md:h-11 md:py-1.5 compact:md:h-9 compact:md:py-1 max-md:px-0 max-md:py-1",
                             c.align === "right" && "md:text-right",
-                            c.mono && "font-mono tabular-nums",
+                            c.mono && "tabular-nums",
                             c.primary && "font-medium text-fg",
                           )}
                         >

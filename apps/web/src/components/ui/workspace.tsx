@@ -99,7 +99,7 @@ export function Workspace({
       {...rest}
       style={style}
       data-sheet-stage={stage}
-      className="relative isolate overflow-hidden rounded-card bg-sunken shadow-card lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
+      className="relative isolate overflow-hidden rounded-sheet bg-sunken shadow-lift lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
     >
       {/* map layer */}
       <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} role="tabpanel" aria-label="地図">
@@ -219,22 +219,57 @@ function EdgeToggle({ side, open, onClick, controls, label }: { readonly side: "
   );
 }
 
-/** A stand-in for the map (stage 4 puts the real map here). Drawn with tokens only; no data. */
+/**
+ * A stand-in for the map (stage 4 puts the real map here). Drawn with tokens only; no data: contour lines, a river, a
+ * park, a few blocks and two roads, in quiet tones so a floating panel or a pane reads clearly on top of it.
+ */
 export function MapPlaceholder({ label = "地図の場所（見本）" }: { readonly label?: string }) {
   return (
     <div className="relative h-full w-full overflow-hidden bg-sunken" role="img" aria-label={label}>
-      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full text-line-strong" fill="none" aria-hidden="true">
-        <path d="M-10 210C70 190 120 230 200 200S330 150 410 175" stroke="currentColor" strokeWidth="10" opacity=".25" strokeLinecap="round" />
-        <path d="M60 -10C80 60 130 90 140 150S190 260 230 310" stroke="currentColor" strokeWidth="6" opacity=".3" strokeLinecap="round" />
-        <path d="M-10 90C80 100 160 70 260 95S360 60 410 70" stroke="currentColor" strokeWidth="4" opacity=".3" strokeLinecap="round" />
-        <path d="M250 -10C260 40 310 70 320 130S300 230 340 310" stroke="currentColor" strokeWidth="4" opacity=".3" strokeLinecap="round" />
-        <circle cx="205" cy="150" r="46" stroke="var(--accent)" strokeWidth="1.5" opacity=".7" />
-        <circle cx="205" cy="150" r="46" fill="var(--accent)" opacity=".08" />
+      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+        {/* park */}
+        <path d="M262 196c14-18 46-22 62-8s14 40-6 52-50 8-58-8 -6-26 2-36z" fill="var(--ok-line)" opacity=".1" />
+        {/* contour lines around two rises */}
+        <g stroke="var(--line-strong)" strokeWidth="0.8" opacity=".3" strokeLinejoin="round">
+          <path d="M296 30c26-6 54 6 62 30s-12 50-42 56-62-6-66-32 20-48 46-54z" />
+          <path d="M300 44c20-4 40 5 46 22s-9 36-31 40-45-5-48-24 14-34 33-38z" />
+          <path d="M304 58c14-2 27 4 30 15s-7 24-22 26-31-3-32-16 10-23 24-25z" />
+          <path d="M-10 214c30-26 82-30 110-8s26 66-6 84-86 12-104-18z" />
+          <path d="M6 222c24-18 62-20 82-4s18 48-6 62-64 8-76-14z" />
+          <path d="M26 234c16-10 40-10 52 0s10 30-6 38-40 4-46-10z" />
+        </g>
+        {/* river */}
+        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-line)" strokeWidth="14" opacity=".13" strokeLinecap="round" />
+        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-line)" strokeWidth="1" opacity=".3" strokeLinecap="round" />
+        {/* city blocks */}
+        <g fill="var(--line)" opacity=".5">
+          <rect x="132" y="108" width="26" height="18" rx="3" />
+          <rect x="164" y="112" width="18" height="26" rx="3" />
+          <rect x="128" y="188" width="30" height="20" rx="3" />
+          <rect x="166" y="196" width="20" height="30" rx="3" />
+          <rect x="236" y="104" width="22" height="22" rx="3" />
+          <rect x="266" y="112" width="30" height="16" rx="3" />
+          <rect x="226" y="168" width="22" height="18" rx="3" />
+          <rect x="70" y="120" width="28" height="22" rx="3" />
+          <rect x="60" y="168" width="22" height="26" rx="3" />
+        </g>
+        {/* roads: an edge line first, then the lighter surface line on top */}
+        <g strokeLinecap="round" fill="none">
+          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--line-strong)" strokeWidth="13" opacity=".3" />
+          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--line-strong)" strokeWidth="10" opacity=".3" />
+          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--line-strong)" strokeWidth="8" opacity=".26" />
+          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--bg-surface)" strokeWidth="11" opacity=".95" />
+          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--bg-surface)" strokeWidth="8" opacity=".95" />
+          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--bg-surface)" strokeWidth="6" opacity=".95" />
+          <path d="M-10 258C70 244 150 270 230 250S370 232 410 244" stroke="var(--bg-surface)" strokeWidth="4" opacity=".8" />
+        </g>
+        {/* the sample site: a flight area with a pulse and a pin */}
+        <circle cx="205" cy="150" r="52" fill="var(--accent)" opacity=".1" />
+        <circle cx="205" cy="150" r="52" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 5" opacity=".8" />
+        <circle cx="205" cy="150" r="14" fill="var(--accent)" className="ds-ping" />
+        <circle cx="205" cy="150" r="7" fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth="3" />
       </svg>
-      <span className="absolute left-1/2 top-1/2 -ml-3 -mt-8 text-accent">
-        <Icon name="place" size={28} />
-      </span>
-      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-pill bg-surface px-3 py-1 text-aux text-fg-mute shadow-card max-lg:hidden">{label}</span>
+      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-pill bg-glass px-3 py-1 text-aux text-fg-mute shadow-card [backdrop-filter:var(--glass-filter)] max-lg:hidden">{label}</span>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { cx } from "../cx";
 import { CommandPalette, ShortcutSheet, usePaletteHotkey, type Command, type ShortcutGroup } from "../command-palette";
 import { Toggle } from "../forms";
 import { useKeydown } from "../hooks";
-import { Icon } from "../icons";
+import { Icon, type IconName } from "../icons";
 import { ToastProvider } from "../overlays";
 import { Button, NoticeBar, PageHeader, StatusPill } from "../primitives";
 import { Segmented, TabPanel, Tabs } from "../tabs";
@@ -18,11 +18,12 @@ import { FieldScreen, FormScreen, LegendScreen, ListScreen, TodayScreen, Workspa
 //   ?theme=auto|light|dark  &palette=1|2|3  &field=1  &density=standard|compact  &screen=today|list|form|workspace|field|legend
 // The page (server) reads the query string and passes it in as `initial`, so there is no effect-driven setup.
 
+// The sample screens come first: they are what the choice of palette, density and translucency is judged on.
 const SECTIONS = [
+  { id: "screens", label: "画面の構成" },
   { id: "tokens", label: "トークン" },
   { id: "icons", label: "アイコン" },
   { id: "parts", label: "部品と状態" },
-  { id: "screens", label: "画面の構成" },
 ] as const;
 
 const SHORTCUTS: readonly ShortcutGroup[] = [
@@ -187,7 +188,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
             </NoticeBar>
             <nav aria-label="見本の目次" className="flex flex-wrap gap-2">
               {SECTIONS.map((s) => (
-                <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-pill bg-sunken px-4 text-table text-fg-soft hov:bg-accent-soft hov:text-accent">
+                <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-pill bg-sunken px-4 text-table font-medium text-fg-soft transition-colors duration-[var(--dur-fast)] hov:bg-accent-soft hov:text-accent">
                   {s.label}
                   <Icon name="chevron-down" size={14} />
                 </a>
@@ -195,15 +196,6 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
             </nav>
           </div>
 
-          <Block id="tokens" title="トークン（色・文字・コントラスト）">
-            <TokensSection context={context} />
-          </Block>
-          <Block id="icons" title="アイコンとアプリのアイコン案">
-            <IconsSection />
-          </Block>
-          <Block id="parts" title="部品と状態">
-            <PartsSection density={density} />
-          </Block>
           <Block id="screens" title="画面の構成（6 種）">
             <div className="flex flex-col gap-4">
               <Tabs
@@ -214,6 +206,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
                 tabs={SCREENS.map((s) => ({ id: s.id, label: s.label, icon: s.icon }))}
                 data-testid="ctl-screen"
               />
+              <AppFrame screen={screen}>
               <TabPanel idPrefix="screen" id="today" active={screen === "today"}>
                 {screen === "today" ? <TodayScreen /> : null}
               </TabPanel>
@@ -232,7 +225,18 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
               <TabPanel idPrefix="screen" id="legend" active={screen === "legend"}>
                 {screen === "legend" ? <LegendScreen /> : null}
               </TabPanel>
+              </AppFrame>
             </div>
+          </Block>
+
+          <Block id="tokens" title="トークン（色・文字・コントラスト）">
+            <TokensSection context={context} />
+          </Block>
+          <Block id="icons" title="アイコンとアプリのアイコン案">
+            <IconsSection />
+          </Block>
+          <Block id="parts" title="部品と状態">
+            <PartsSection density={density} />
           </Block>
         </div>
 
@@ -243,10 +247,49 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
   );
 }
 
+const RAIL: Readonly<Record<string, IconName>> = { today: "today", list: "plan", form: "place", workspace: "map", field: "flight", legend: "more" };
+const RAIL_ITEMS: readonly IconName[] = ["today", "plan", "journal", "aircraft", "place", "more"];
+
+/**
+ * The app shell the sample screens would sit in (a rail and a slim top bar). Decorative only: it is the shape stage 1b
+ * builds, shown here so a screen is judged in context. Hidden below 1024px, where the shell is a bottom bar instead.
+ */
+function AppFrame({ screen, children }: { readonly screen: string; readonly children: React.ReactNode }) {
+  const active = RAIL[screen] ?? "today";
+  return (
+    <div className="overflow-clip bg-app lg:grid lg:grid-cols-[3.5rem_minmax(0,1fr)] lg:rounded-sheet lg:shadow-lift">
+      <div aria-hidden="true" className="hidden flex-col items-center gap-1.5 border-r border-line bg-surface py-3 lg:flex">
+        <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-accent text-accent-fg">
+          <Icon name="flight" size={18} />
+        </span>
+        {RAIL_ITEMS.map((n) => (
+          <span key={n} className={cx("inline-flex h-10 w-10 items-center justify-center rounded-[10px]", n === active ? "bg-accent-soft text-accent" : "text-fg-mute")}>
+            <Icon name={n} size={20} />
+          </span>
+        ))}
+      </div>
+      <div className="min-w-0">
+        <div aria-hidden="true" className="glass hidden items-center justify-between gap-3 border-b border-line px-6 py-2.5 lg:flex">
+          <span className="inline-flex min-h-9 w-72 items-center gap-2 rounded-[10px] bg-sunken px-3 text-table text-fg-mute">
+            <Icon name="search" size={16} />
+            計画・機体・地点を検索
+            <span className="ml-auto text-aux">Ctrl K</span>
+          </span>
+          <span className="inline-flex items-center gap-3 text-aux text-fg-mute">
+            見本のシェル
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-pill bg-accent-soft font-semibold text-accent">見</span>
+          </span>
+        </div>
+        <div className="lg:p-6">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 function Block({ id, title, children }: { readonly id: string; readonly title: string; readonly children: React.ReactNode }) {
   return (
     <section id={id} aria-labelledby={`${id}-h`} className="flex scroll-mt-16 flex-col gap-5">
-      <h2 id={`${id}-h`} className="text-h2 font-semibold text-fg">
+      <h2 id={`${id}-h`} className="border-b border-line pb-3 text-h2 font-semibold text-fg">
         {title}
       </h2>
       {children}

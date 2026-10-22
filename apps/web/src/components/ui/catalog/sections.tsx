@@ -122,7 +122,7 @@ export function TokensSection({ context }: { readonly context: string }) {
             return (
               <li key={r.label} className="flex min-h-11 items-center justify-between gap-3 rounded-ctl bg-sunken px-3 py-1.5">
                 <span className="min-w-0 text-table text-fg">{r.label}</span>
-                <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-table tabular-nums text-fg-soft">
+                <span className="inline-flex shrink-0 items-center gap-1.5 text-table tabular-nums text-fg-soft">
                   {r.r === null ? "—" : `${r.r.toFixed(2)}:1`}
                   <StatusPill meaning={ok ? "ok" : "danger"}>{ok ? `${r.min} 以上` : "不足"}</StatusPill>
                 </span>
@@ -139,7 +139,7 @@ export function TokensSection({ context }: { readonly context: string }) {
           <p className="text-body">本文です。系統の違う書体を混ぜず、システムフォントのまま太さで階層を作ります。</p>
           <p className="text-table">表・一覧の文字です。</p>
           <p className="text-aux text-fg-mute">補助の文字（凡例・注記）です。</p>
-          <p className="font-mono text-stat font-semibold tabular-nums">1,234.5 <span className="text-aux font-normal text-fg-mute">統計の数値（等幅）</span></p>
+          <p className="text-stat font-semibold tabular-nums tracking-tight">1,234.5 <span className="text-aux font-normal text-fg-mute">統計の数値（等幅）</span></p>
         </div>
       </Sub>
     </div>

@@ -56,7 +56,7 @@ export function FormField({
 
 const CONTROL =
   "block w-full min-w-0 rounded-ctl border bg-surface px-3 text-[16px] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur-fast)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
-  "border-line-strong hov:border-fg-mute foc:border-accent disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
+  "border-line-strong shadow-[inset_0_1px_1px_var(--sh-drop)] hov:border-fg-mute foc:border-accent foc:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_16%,transparent)] disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
 const CONTROL_ERROR = "!border-danger-line";
 
 export type TextInputProps = InputHTMLAttributes<HTMLInputElement> & { readonly invalid?: boolean; readonly loading?: boolean };
@@ -177,7 +177,7 @@ export function Toggle({
 export function FormGroup({ title, footer, children, ...rest }: { readonly title?: string; readonly footer?: ReactNode; readonly children: ReactNode } & DataAttrs) {
   return (
     <section {...rest} className="flex flex-col gap-2">
-      {title ? <h3 className="px-1 text-aux font-medium text-fg-mute">{title}</h3> : null}
+      {title ? <h3 className="px-1 text-aux font-semibold tracking-wide text-fg-mute">{title}</h3> : null}
       <div className="flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card [&>*]:py-3">{children}</div>
       {footer ? <p className="px-1 text-aux text-fg-mute">{footer}</p> : null}
     </section>

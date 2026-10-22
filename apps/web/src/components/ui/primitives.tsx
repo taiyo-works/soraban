@@ -53,7 +53,7 @@ export function StatusPill({
       {...rest}
       data-meaning={meaning}
       className={cx(
-        "inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-pill px-2 text-aux font-medium field:min-h-8 field:px-3 field:text-state field:font-bold",
+        "inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-pill px-2.5 text-aux font-medium shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--pill-line)_26%,transparent)] field:min-h-8 field:px-3 field:text-state field:font-bold",
         PILL[meaning],
         className,
       )}
@@ -69,13 +69,13 @@ export function StatusPill({
 type Variant = "primary" | "secondary" | "quiet" | "danger";
 
 const BUTTON_BASE =
-  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl text-body font-medium touch-manipulation transition-[background-color,border-color,transform] duration-[var(--dur-fast)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:active:scale-100 disabled:cursor-not-allowed disabled:active:scale-100";
+  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl text-body font-medium touch-manipulation transition-[background-color,border-color,transform,box-shadow] duration-[var(--dur-fast)] ease-[var(--ease)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:active:scale-100 disabled:cursor-not-allowed disabled:active:scale-100";
 
 const BUTTON_VARIANT: Readonly<Record<Variant, string>> = {
   primary:
-    "bg-accent text-accent-fg hov:bg-accent-hover disabled:bg-sunken disabled:text-fg-mute aria-disabled:bg-sunken aria-disabled:text-fg-mute",
+    "bg-accent text-accent-fg font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.16)] hov:bg-accent-hover disabled:shadow-none disabled:bg-sunken disabled:text-fg-mute aria-disabled:shadow-none aria-disabled:bg-sunken aria-disabled:text-fg-mute",
   secondary:
-    "border border-line-strong bg-surface text-fg hov:bg-sunken disabled:text-fg-mute disabled:bg-sunken aria-disabled:text-fg-mute aria-disabled:bg-sunken",
+    "border border-line-strong bg-surface text-fg shadow-[0_1px_1px_var(--sh-drop)] hov:bg-sunken disabled:text-fg-mute disabled:bg-sunken aria-disabled:text-fg-mute aria-disabled:bg-sunken",
   quiet: "text-accent hov:bg-accent-soft disabled:text-fg-mute aria-disabled:text-fg-mute",
   danger:
     "border border-danger-line bg-danger-bg text-danger-fg hov:brightness-95 disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:bg-sunken aria-disabled:text-fg-mute",
@@ -170,7 +170,7 @@ export function Card({
       data-card={variant}
       className={cx(
         "min-w-0 rounded-card",
-        variant === "primary" && "bg-surface p-5 shadow-card sm:p-6",
+        variant === "primary" && "bg-surface p-5 shadow-lift sm:p-6",
         variant === "standard" && "bg-surface p-4 shadow-card",
         variant === "inset" && "bg-sunken p-4",
         className,
@@ -203,10 +203,10 @@ export function StatTile({
 } & DataAttrs) {
   const body = (
     <>
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-aux text-fg-mute">{label}</span>
         <span className="flex items-baseline gap-1">
-          <span className={cx("font-mono font-semibold tabular-nums text-fg", size === "lead" ? "text-stat" : "text-h2")}>{value}</span>
+          <span className={cx("font-semibold tabular-nums tracking-tight text-fg", size === "lead" ? "text-stat" : "text-h2")}>{value}</span>
           {unit ? <span className="text-aux text-fg-mute">{unit}</span> : null}
         </span>
       </span>
@@ -216,7 +216,7 @@ export function StatTile({
   );
   const cls = cx(
     "flex items-center justify-between gap-3 rounded-card",
-    size === "lead" ? "bg-surface p-5 shadow-card" : "bg-sunken px-4 py-3",
+    size === "lead" ? "bg-surface p-5 shadow-card" : "bg-surface px-4 py-3 shadow-card",
     href && "min-h-11 transition-colors hov:bg-accent-soft",
   );
   return href ? (
@@ -280,7 +280,7 @@ export function NoticeBar({
       {...rest}
       role="note"
       data-meaning={meaning}
-      className={cx("flex items-start gap-3 rounded-card px-4 py-3 text-table", BAR[meaning])}
+      className={cx("flex items-start gap-3 rounded-card px-4 py-3 text-table shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--bar-line)_22%,transparent)]", BAR[meaning])}
     >
       <Icon name={icon ?? MEANING_ICON[meaning]} size={18} className="mt-0.5 text-[color:var(--bar-line)]" />
       <div className="min-w-0 flex-1">
@@ -308,7 +308,13 @@ export function EmptyState({
 } & DataAttrs) {
   return (
     <div {...rest} className="flex flex-col items-center gap-3 rounded-card bg-sunken px-6 py-10 text-center">
-      <span className="text-fg-mute">{art ?? <Icon name={icon} size={32} />}</span>
+      {art ? (
+        <span className="text-fg-mute">{art}</span>
+      ) : (
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-pill bg-surface text-fg-mute shadow-card">
+          <Icon name={icon} size={24} />
+        </span>
+      )}
       <p className="text-h3 font-semibold text-fg">{title}</p>
       {children ? <p className="max-w-[40ch] text-table text-fg-soft">{children}</p> : null}
       {action ? <div className="mt-1">{action}</div> : null}
