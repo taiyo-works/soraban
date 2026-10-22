@@ -10,6 +10,7 @@ import { can } from "./authz";
 import { fieldState, type FieldEventLite, type FieldFlightRecordLite, type FieldState } from "./field-logic";
 import { inspectionLites, toLite } from "./field-rows";
 import { enrichFlights } from "./flight-extras";
+import { incidentTodayActions } from "./incidents";
 import { loadPlanSummaries } from "./plans";
 import { asDate, myPilot, nowOf } from "./records";
 import type { NextAction } from "./report-logic";
@@ -355,6 +356,9 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
       ),
     );
   }
+
+  // Sprint 12e：事故・ヒヤリハット（報告の要否を確認する・詳細を記入する）。計画に結び付かない記録の分も出る
+  actions.push(...(await incidentTodayActions(ctx)));
 
   const limit = opts.limit ?? TODAY_NEXT_ACTION_LIMIT;
   const ranked = rankNextActions(actions, limit);

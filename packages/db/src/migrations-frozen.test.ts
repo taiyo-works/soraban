@@ -42,3 +42,18 @@ describe("適用済みマイグレーションの凍結", () => {
     });
   }
 });
+
+// Sprint 12e 契約 1：0016 は追記だけで、0014・0015 も書き換えない（12c・12d で適用済み）。
+const FROZEN_12E: Record<string, string> = {
+  "0014_flight_field_events.sql": "86a4ad8372ad71dacf7bce56baaa749b3f5ef75860fb1970ca4fd65912f6aab2",
+  "0015_permit_registrations.sql": "a3f7d79e5e753feee3c2956c83fdaa5a1cdd29d1597acd2a5a36b6fa8fa3f753",
+};
+
+describe("適用済みマイグレーションの凍結（Sprint 12e）", () => {
+  for (const [file, hash] of Object.entries(FROZEN_12E)) {
+    it(`${file} は変更されていない`, () => {
+      const body = readFileSync(join(__dirname, "..", "migrations", file));
+      expect(createHash("sha256").update(body).digest("hex")).toBe(hash);
+    });
+  }
+});

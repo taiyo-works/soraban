@@ -473,6 +473,42 @@ describe.skipIf(!ADMIN_URL)("許可・承認の登録・計画への適用・ス
       expect(valid.declaration).toContain("許可書で確認してください");
       expect(valid.noDipsNote).toContain("DIPS に接続しません");
     });
+
+    it("一覧の上限（500 件）を超える組織でも、有効性・番号の検索は上限の前の古い一致する登録に届く（ページを順に読んで絞る）", async () => {
+      const org = (await owner.query("insert into organizations (name) values ('組織P') returning id")).rows[0].id;
+      const m = await addMember(org, "manager", "s12d-mgr-p");
+      const c = ctxOf(m);
+      const data = {
+        coverage: "blanket",
+        kinds: ["did"],
+        airport_names: [],
+        issued_on: "2026-10-01",
+        valid_from: "2026-10-01",
+        status: "active",
+        revoked_on: null,
+        place_scope: { type: "nationwide" },
+        aircraft_scope: { type: "any" },
+        pilot_scope: { type: "any" },
+        source: "manual",
+        external_ref: {},
+      };
+      // 有効期間の終わりが最も早い（一覧の最後）期限切れの登録と、それより後ろまで 520 件の有効な登録を SQL で入れる
+      await owner.query(
+        `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind)
+         select $1, 'permit_registration', gen_random_uuid(), 'create',
+                $2::jsonb || jsonb_build_object('permit_number', 'BULK-' || g, 'permit_number_key', 'BULK' || g, 'valid_to', '2027-12-31'), 'system'
+           from generate_series(1, 520) g`,
+        [org, JSON.stringify(data)],
+      );
+      await owner.query(
+        `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind) values ($1, 'permit_registration', gen_random_uuid(), 'create', $2::jsonb, 'system')`,
+        [org, JSON.stringify({ ...data, permit_number: "OLDEST-1", permit_number_key: "OLDEST1", valid_from: "2025-01-01", valid_to: "2025-12-31" })],
+      );
+      expect(await permits.listPermits(c)).toHaveLength(500);
+      expect((await permits.listPermits(c, { validity: "expired" })).map((x) => x.permitNumber)).toEqual(["OLDEST-1"]);
+      expect((await permits.listPermits(c, { q: "oldest-1" })).map((x) => x.permitNumber)).toEqual(["OLDEST-1"]);
+      expect((await permits.listPermits(c, { validity: "valid" })).length).toBe(500);
+    });
   });
 
   // ================================================================

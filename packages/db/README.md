@@ -71,6 +71,7 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0013 | 運航管理（Sprint 12b）：`flight_report_attempts`（通報の試行・監査。追記専用）、`plan_procedure_records`（手続きの「済み」の記録。追記専用）・`plan_procedure_record_hash`、更新・削除・TRUNCATE を拒むトリガー、アプリ用ロールへの権限付与（参照と追加だけ） |
 | 0014 | 運航管理（Sprint 12c）：`flight_field_events`（現場の事実の記録＝飛行前の確認・離陸・着陸・取り消す・日誌との結び付き。追記専用）・`flight_field_event_hash`、更新・削除・TRUNCATE を拒むトリガー、追加前のトリガー（計画・利用者の検査、`snapshot_id`・`plan_version`・記録者の写し・`recorded_at`・`content_hash` の決定）、複合外部キーの受け皿として `daily_inspections`・`flight_records` に一意制約（列は変えない）、アプリ用ロールへの権限付与（参照と追加だけ） |
 | 0015 | 運航管理（Sprint 12d）：`permit_registrations`（許可・承認の登録のヘッド表。`record_versions` の `entity_type = permit_registration` から DB が作る。登録は利用者の申告）、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0012 の定義に `permit_registration` の分岐を足す）、`judgement_snapshots` への追加前のトリガー `judgement_snapshots_permit_basis`（`input.permitBasis` の各要素が同じ組織の実在の版とハッシュに一致すること。`SB409` `permit_basis_invalid`）、アプリ用ロールへの権限付与（参照だけ） |
+| 0016 | 運航管理（Sprint 12e）：`incident_records`（事故・ヒヤリハットの記録のヘッド表。`record_versions` の `entity_type = incident_record` から DB が作る）、`incident_report_records`（国への報告の記録。追記専用。利用者の申告）・`incident_report_record_hash`・`verify_incident_report_records`、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0015 の定義に `incident_record` の分岐を足す）、アプリ用ロールへの権限付与（`incident_records` は参照だけ、`incident_report_records` は参照と追加だけ） |
 
 ### ランナー
 
@@ -106,9 +107,9 @@ pnpm db:migrate --target <ホスト名>    # 未適用を番号順に適用（lo
 | ロール | 用途 | 権限 |
 |---|---|---|
 | 既定のオーナーロール（Neon の `neondb_owner` 等） | マイグレーション（`DATABASE_URL_UNPOOLED`） | 表の作成・変更 |
-| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。運航管理（0007）：`daily_inspections`・`flight_records` と総飛行時間のビューは参照のみ。運航管理（0010・0011）：`judgement_snapshots`・`plan_confirmations` は参照と追加のみ（更新・削除・TRUNCATE は不可）、`flight_plans`・`saved_places` は参照のみ。運航管理（0012・0013）：`flight_report_attempts`・`plan_procedure_records` は参照と追加のみ、`flight_reports` は参照のみ。運航管理（0014）：`flight_field_events` は参照と追加のみ（更新・削除・TRUNCATE は不可）。運航管理（0015）：`permit_registrations` は参照のみ。`ops_bootstrap`・`verify_record_chain`・`verify_judgement_snapshots`・`flight_report_effective_id` は実行できない |
+| `soraban_app` | アプリ（`DATABASE_URL`） | `regulations`・`regulation_zones`・`schema_migrations` の参照、`evidence_log` の参照と追加のみ（更新・削除は不可）。運航管理（0006）：`record_versions` の参照と追加のみ、`organizations`・`members`・`aircraft`・`pilots` は参照のみ。運航管理（0007）：`daily_inspections`・`flight_records` と総飛行時間のビューは参照のみ。運航管理（0010・0011）：`judgement_snapshots`・`plan_confirmations` は参照と追加のみ（更新・削除・TRUNCATE は不可）、`flight_plans`・`saved_places` は参照のみ。運航管理（0012・0013）：`flight_report_attempts`・`plan_procedure_records` は参照と追加のみ、`flight_reports` は参照のみ。運航管理（0014）：`flight_field_events` は参照と追加のみ（更新・削除・TRUNCATE は不可）。運航管理（0015）：`permit_registrations` は参照のみ。運航管理（0016）：`incident_records` は参照のみ、`incident_report_records` は参照と追加のみ（更新・削除・TRUNCATE は不可）。`ops_bootstrap`・`verify_record_chain`・`verify_judgement_snapshots`・`flight_report_effective_id`・`verify_incident_report_records` は実行できない |
 
-- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006・0007・0010・0011・0012・0013・0014・0015 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006・0007・0010〜0015 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
+- ロールの作成はマイグレーションの外で行う（下記「ユーザー作業」手順 2）。権限付与は 0003・0006・0007・0010・0011・0012・0013・0014・0015・0016 に含めており、**`soraban_app` が存在する場合に限り**付与する。ロールを作る前に 0003・0006・0007・0010〜0016 を適用した場合は、次の SQL をオーナーロールで 1 回実行する。
 
 ```sql
 grant usage on schema public to soraban_app;
@@ -131,6 +132,9 @@ grant select on flight_reports to soraban_app;
 grant select, insert on flight_field_events to soraban_app;
 -- 0015 を適用済みの場合
 grant select on permit_registrations to soraban_app;
+-- 0016 を適用済みの場合
+grant select on incident_records to soraban_app;
+grant select, insert on incident_report_records to soraban_app;
 ```
 
 - Neon のコンソール・API・CLI で作ったロールには `neon_superuser` が付くため、最小権限にならない。SQL の `create role` で作ったロールには付かない（出典：https://neon.com/docs/manage/database-access 、2026-10-19 確認）。そのため `soraban_app` は SQL Editor から作る。SQL で作ったロールを Connect 画面で選べるかは文書に記載がなく、実施時に確認する。
@@ -253,6 +257,16 @@ grant select on permit_registrations to soraban_app;
 - **`judgement_snapshots_permit_basis`（新規の追加前のトリガー）**：`input->'permitBasis'` があるとき、各要素の `(registrationId, versionNo, versionHash)` が、同じ組織の `record_versions`（`permit_registration`、`entity_id`・`version_no`・`content_hash`）に存在することを確かめ、無ければ `SB409`（detail `permit_basis_invalid`）で拒む。`permitBasis` が無い入力では何もしない。スナップショットのハッシュ関数・既存のトリガー・既存の行は変えない。
 - **`verify_record_chain`**：`permit_registration` を検査する（版の連鎖・ヘッド表との一致）。
 
+## 事故・ヒヤリハット（Sprint 12e、0016）
+
+- **`incident_records`（ヘッド表）**：起きた事故・ヒヤリハット 1 件 = 1 行。`record_versions`（`entity_type = incident_record`）の版から DB が作る。訂正・取消はすべて版として追記する（理由は必須。物理削除はしない）。`soraban_app` は参照だけ。**記録は事実の記録**であり、法的な報告の完了も責任の判断も意味しない。そらばんは国・DIPS へ報告を送信しない。
+- **列**：`kind`（利用者が選ぶ区分。`accident`・`near_miss`・`undetermined`。法令上の区分ではない）・`occurred_at`（1 分単位）・`phase`・`place_name`・`latitude`・`longitude`（対）・`plan_id`・`snapshot_id`・`flight_record_id`・`aircraft_id`・`pilot_id`（すべて任意。操縦者は ID だけで氏名の写しを持たない）・`event_types`（事象の類型のキーの配列。値の一覧はアプリの版つきのデータが正で、DB は配列で空でないことだけを守る）・`people_injury`・`aircraft_damage`（`yes`・`no`・`unknown`）・`injured_count`（0〜999。けががあるときだけ）・`contacts_made`（連絡した先の選択肢）・`summary`（1〜200 文字。簡易記録で詳細が未記入のときだけ NULL）・`details`・`factors_note`・`actions_taken`・`prevention_note`・`detail_pending`・`source`（`office`・`field_quick`）・`follow_up_status`・`follow_up_on`（`done` ⇔ 日付あり）・`guidance_level`・`guidance_revision`（保存時にアプリのサーバーが計算した目安と類型のデータの版）・`client_request_id`（`(org_id, client_request_id)` は NULL でないものの中で一意）。個人を特定する情報（氏名・連絡先・住所・病状・写真・端末の識別子・軌跡）の列は作らない。
+- **追加前のトリガー**（0015 の `record_versions_before_insert` を置き換え）：計画・飛行記録・機体・操縦者が同じ組織にあること、計画と飛行記録が同じ計画であること（`SB404`）。`snapshot_id` は DB が決める（計画を結んだ版でその時点の計画の現在のスナップショット。同じ計画のままの訂正では前の版の値を引き継ぐ。計画がなければ NULL。アプリが送った値は使わない）。`(plan_id, org_id)`・`(snapshot_id, plan_id, org_id)` は複合外部キー。
+- **`incident_report_records`（国への報告の記録。追記専用）**：`action`（`reported`＝DIPS 2.0 等で報告した／`consulted`＝報告の要否を確かめた／`retract`＝取り下げ）ごとの必須の列を CHECK が守る（`reported` は日時・送り先（`dips`・`other`。`other` は補足が必須）・番号か「番号が表示されなかった」のどちらか一方・`checks = {"reportCompleted": true}`、`consulted` は日時・`note`・`checks = {"consultationDone": true}`、`retract` は `target_record_id`・`reason`・`checks = {}`）。`(incident_id, org_id)` と `(target_record_id, incident_id, org_id)` は複合外部キー、同じ行の二重の取り下げは部分一意索引で拒む。追加前のトリガーが、記録・利用者が同じ組織にないこと（`SB404`）、取消した記録への `reported`・`consulted`（`SB409` `voided`）、`retract` が `reported`・`consulted` 以外を指すこと（`SB409` `invalid_target`）を拒み、`incident_version`（記録した時点の記録の版）・`recorded_by_name`・`recorded_by_role`・`created_at`・`content_hash` を決める（アプリが送った値は使わない）。`facts_fingerprint`（事象の類型・区分・けがの有無・人数の指紋）はアプリのサーバーが、記録ごとの `pg_advisory_xact_lock`（`record_versions:incident_record:<記録の ID>`）の下で決める。更新・削除・TRUNCATE はオーナーロールでも拒む（`SB409` `immutable`）。有効な報告の記録は、取り下げられていない `reported`・`consulted` の行（状態は保存せず、行から毎回導出する）。
+- **`content_hash` の計算規則（`soraban-incident-report-record-v1`）**：`id`・`org_id`・`incident_id`・`action`・`done_at`・`channel`・`channel_note`・`reference`・`reference_absent`・`note`・`checks`・`target_record_id`・`incident_version`・`facts_fingerprint`・`reason`・`recorded_by_member_id`・`recorded_by_name`・`recorded_by_role`・`created_at` の 19 要素を、先頭に規則名を付けてこの順に並べた jsonb の配列を `::text` で文字列にし、UTF-8 のバイト列の SHA-256 を 16 進小文字で表したもの（関数 `incident_report_record_hash`）。時刻は UTC の `YYYY-MM-DDTHH:MI:SS.ffffffZ`（`done_at` が無ければ `null`）。
+- **`verify_incident_report_records(p_incident_id)`**：記録の報告の記録のハッシュを再計算し、改変（`content_hash_mismatch`）と、取り下げの対象の不整合（`invalid_target`）を返す。改変がなければ 0 行。`soraban_app` は実行できない。DB 移行の前後の検証にも使う（`docs/spec.md` §13.8.1）。
+- **`verify_record_chain`**：`incident_record` を検査する（版の連鎖・ヘッド表との一致。起きた日時は版の data と同じ日本時間の `YYYY-MM-DDTHH:MM` で比べる）。
+
 ## ローカル開発・テスト
 
 CI と同じイメージ（`postgis/postgis:18-3.6`）をローカルで起動する例：
@@ -357,7 +371,7 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
   4. 必要に応じて、Neon コンソールで既定ブランチから復元用のブランチ（例：`before-0003-20261127`）を作る。Neon の履歴保持は、プロジェクト `soraban` で 86400 秒（1 日。2026-10-20 に確認）で、復元できるのは 1 日以内の時点まで。
   5. `pnpm db:migrate --target <手順 3 で表示されたホスト名>` を実行する。
   6. `pnpm db:status` で未適用がないことを確認する。
-  7. Vercel の Production に `DATABASE_URL`（`soraban_app` の Pooled connection）を設定して再デプロイし、本番の `/api/health/db` が `reachable: true`、最新版 `0015`、`hasPendingMigrations: false` を返すことを確認する。
+  7. Vercel の Production に `DATABASE_URL`（`soraban_app` の Pooled connection）を設定して再デプロイし、本番の `/api/health/db` が `reachable: true`、最新版 `0016`、`hasPendingMigrations: false` を返すことを確認する。
   8. 地点判定を 1 回行い、Neon の SQL Editor で `select evidence_id, checked_at from evidence_log order by created_at desc limit 1;` に行があることを確認する（任意）。
   9. 復元用ブランチを作った場合は、確認後に削除する。
   10. `unset DATABASE_URL_UNPOOLED`。
@@ -376,8 +390,8 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
 
 利用者機能（`/ops`）は機能フラグ `OPS_ENABLED` が既定で無効のため、マイグレーション 0004〜0008 を含む PR をマージしても本番の画面・動作は変わらない（判定・申請支援だけ）。以下は退院後、PC が使えるときに行う（目安：Sprint 11 の成果を本番で使い始める前、2027-01 の記録開始の前）。**順番を守る。** 手順 1〜2 は PC（手元のシェル）が要る。手順 3〜7 は Neon・Google Cloud・Vercel のコンソールで、スマートフォンのブラウザでもできるが、PC を勧める。出典：`docs/sprints/sprint-10.md`「ユーザー作業」。
 
-1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0015 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
-2. **マイグレーション 0004〜0015 を本番に適用する**（Sprint 11 の 0007・0008、Sprint 11d の 0009、Sprint 12a の 0010・0011、Sprint 12b の 0012・0013、Sprint 12c の 0014、Sprint 12d の 0015 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
+1. **Sprint 8 の本番準備が済んでいるか確かめる**（`soraban_app` の作成 → 0001〜0016 の適用 → Vercel の `DATABASE_URL`）。未実施なら上記「ユーザー作業」の手順 2 → 3 → 1 で先に行う。
+2. **マイグレーション 0004〜0016 を本番に適用する**（Sprint 11 の 0007・0008、Sprint 11d の 0009、Sprint 12a の 0010・0011、Sprint 12b の 0012・0013、Sprint 12c の 0014、Sprint 12d の 0015、Sprint 12e の 0016 も同時に適用される）：上記「3. 本番 DB へのマイグレーション適用」と同じ（`pnpm db:status` → `pnpm db:migrate --target <ホスト名>` → `pnpm db:status`）。適用だけでは本番の動作は変わらない（フラグが無効のため）。`soraban_app` を作る前に適用した場合は「DB ロール」の復旧の SQL を実行する。
 3. **Neon Auth を有効にする**：Neon コンソール → `soraban` → 既定ブランチ（本番）→ Auth → 有効化。aws-ap-southeast-1 で有効にできることをここで確かめる（できない場合は作業を止め、planner に戻す）。Auth URL を控える。プレビュー用・開発用のブランチでは有効にしない。
 4. **Google ログインを自社の資格情報にする**：Google Cloud コンソールで OAuth クライアント（ウェブアプリケーション）を作り、承認済みのリダイレクト URI に `{Auth URL}/callback/google`（末尾にスラッシュを付けない）を登録する。Neon の Auth の設定 → OAuth providers に Client ID・Secret を入れる。
 5. **Neon Auth の本番設定**：信頼するドメインに本番のドメインを追加、アプリ名を「そらばん」に、「Allow Localhost」を無効に。メールとパスワードによる登録を止められる場合は止める（止められなくても、アプリは確認済みのメールアドレスの招待者しか通さない）。

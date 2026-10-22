@@ -245,6 +245,10 @@ export const planHref = (planId: string, id: NextActionId): string => {
     case "review_journal_mismatch":
     case "renew_license":
       return base;
+    // Sprint 12e：事故・ヒヤリハット（記録の画面へ。今日の画面では記録ごとの経路を使う）
+    case "confirm_incident_report":
+    case "complete_incident_detail":
+      return "/ops/incidents";
   }
 };
 

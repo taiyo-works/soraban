@@ -4,7 +4,7 @@ import { PageHeader, ROLE_DESCRIPTIONS } from "@/components/ops/ui";
 import { requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
 
 // 「その他」（Sprint 12c 設計 G）：旧トップのメニュー（機体・操縦者・よく使う地点・利用者）とログアウトの移設先。
-// 事故・ヒヤリハット（12e）と期限一覧（12f）の枠は作らない。
+// Sprint 12e：事故・ヒヤリハット（more-link-incidents）を足した。期限一覧（12f）の枠は作らない。
 export default async function OpsMorePage() {
   const { me, provider } = await requireOpsMember();
   const role = me.member.role;
@@ -13,6 +13,7 @@ export default async function OpsMorePage() {
     { href: "/ops/pilots", title: "操縦者", body: "氏名・技能証明・限定事項", id: "pilots" },
     { href: "/ops/places", title: "よく使う地点", body: "社内拠点などの名称と座標", id: "places" },
     { href: "/ops/permits", title: "許可・承認", body: "許可・承認の登録（利用者の申告）と、計画への照合", id: "permits" },
+    { href: "/ops/incidents", title: "事故・ヒヤリハット", body: "起きたことの記録と、国への報告の記録（利用者の申告）", id: "incidents" },
     ...(role === "manager" ? [{ href: "/ops/members", title: "利用者", body: "招待・役割の変更・利用の停止", id: "members" }] : []),
   ];
   return (

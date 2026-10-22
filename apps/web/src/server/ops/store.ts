@@ -11,6 +11,8 @@ import type {
   FlightRecordRow,
   FlightReportAttemptRow,
   FlightReportRow,
+  IncidentRecordRow,
+  IncidentReportRecordRow,
   JudgementSnapshotRow,
   MemberRow,
   OrganizationRow,
@@ -290,7 +292,8 @@ export type RecordFilter = {
   readonly includeVoided?: boolean;
 };
 
-const LIST_LIMIT = 500;
+/** 一覧の 1 回の上限。導出の絞り込み（SQL にできないもの）は、この単位でページを順に読んで絞る。 */
+export const LIST_LIMIT = 500;
 
 /** 飛行記録の一覧（新しい順、最大 500 件）。 */
 export const listFlights = async (db: OpsDb, orgId: string, f: RecordFilter): Promise<FlightWithTotal[]> => {
@@ -538,7 +541,7 @@ export type PlanFilter = {
 };
 
 /** 計画の一覧（予定開始の新しい順、最大 500 件。oldestFirst なら古い順）。 */
-export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promise<PlanWithJoins[]> => {
+export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter, offset = 0): Promise<PlanWithJoins[]> => {
   const where = ["p.org_id = $1"];
   const params: unknown[] = [orgId];
   if (f.aircraftId) where.push(`p.aircraft_id = $${params.push(f.aircraftId)}`);
@@ -550,7 +553,7 @@ export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promis
   const dir = f.oldestFirst ? "asc" : "desc";
   return (
     await db.query<PlanWithJoins>(
-      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT}`,
+      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT} offset ${Math.max(0, Math.trunc(offset))}`,
       params,
     )
   ).rows;
@@ -1044,11 +1047,11 @@ export const getPermit = async (db: Queryable, orgId: string, id: string): Promi
   (await db.query<PermitRow>(`${PERMIT_SELECT} where p.org_id = $1 and p.id = $2`, [orgId, id])).rows[0] ?? null;
 
 /** 許可・承認の登録の一覧（取消は includeVoided のときだけ。有効期間の終わりが遅い順、番号の順）。 */
-export const listPermits = async (db: Queryable, orgId: string, includeVoided: boolean): Promise<PermitRow[]> =>
+export const listPermits = async (db: Queryable, orgId: string, includeVoided: boolean, offset = 0): Promise<PermitRow[]> =>
   (
     await db.query<PermitRow>(
       `${PERMIT_SELECT} where p.org_id = $1 ${includeVoided ? "" : "and p.voided_at is null"}
-        order by p.voided_at nulls first, p.valid_to desc, p.permit_number, p.id limit ${LIST_LIMIT}`,
+        order by p.voided_at nulls first, p.valid_to desc, p.permit_number, p.id limit ${LIST_LIMIT} offset ${Math.max(0, Math.trunc(offset))}`,
       [orgId],
     )
   ).rows;
@@ -1130,3 +1133,227 @@ export const listPilotNames = async (db: Queryable, orgId: string, ids: readonly
     ? []
     : (await db.query<{ id: string; label: string }>("select id, full_name as label from pilots where org_id = $1 and id = any($2::uuid[])", [orgId, [...ids]]))
         .rows;
+
+// ---- 事故・ヒヤリハット（Sprint 12e） --------------------------------------------------------
+
+/**
+ * 事故・ヒヤリハットの記録の行に、起きた日時の JST の分、計画の題名、機体の登録記号、操縦者の氏名（表示のたびに引く。写しは持たない）、
+ * 記録を作った利用者（版 1 の actor）を付けたもの。follow_up_on は YYYY-MM-DD の文字列。
+ */
+export type IncidentRowWithJoins = IncidentRecordRow & {
+  readonly occurred_at_jst: string;
+  readonly plan_title: string | null;
+  readonly plan_voided_at: string | Date | null;
+  readonly snapshot_seq: number | null;
+  readonly registration_mark: string | null;
+  readonly pilot_name: string | null;
+  readonly pilot_member_id: string | null;
+  readonly created_by_member_id: string | null;
+  readonly created_by_name: string | null;
+};
+
+const INCIDENT_SELECT = `select i.id, i.org_id, i.kind, i.occurred_at, ops_timestamptz_to_jst_minute(i.occurred_at) as occurred_at_jst,
+        i.phase, i.place_name, i.latitude, i.longitude, i.plan_id, i.snapshot_id, i.flight_record_id, i.aircraft_id, i.pilot_id,
+        i.event_types, i.people_injury, i.aircraft_damage, i.injured_count, i.contacts_made, i.summary, i.details, i.factors_note,
+        i.actions_taken, i.prevention_note, i.detail_pending, i.source, i.follow_up_status,
+        to_char(i.follow_up_on, 'YYYY-MM-DD') as follow_up_on, i.guidance_level, i.guidance_revision, i.client_request_id,
+        i.current_version, i.created_at, i.updated_at, i.voided_at,
+        p.title as plan_title, p.voided_at as plan_voided_at, s.seq as snapshot_seq, a.registration_mark,
+        pl.full_name as pilot_name, pl.member_id as pilot_member_id,
+        v1.actor_member_id as created_by_member_id, m.display_name as created_by_name
+   from incident_records i
+   join record_versions v1 on v1.entity_type = 'incident_record' and v1.entity_id = i.id and v1.version_no = 1
+   left join members m on m.id = v1.actor_member_id
+   left join flight_plans p on p.id = i.plan_id
+   left join judgement_snapshots s on s.id = i.snapshot_id
+   left join aircraft a on a.id = i.aircraft_id
+   left join pilots pl on pl.id = i.pilot_id`;
+
+export const getIncident = async (db: Queryable, orgId: string, id: string): Promise<IncidentRowWithJoins | null> =>
+  (await db.query<IncidentRowWithJoins>(`${INCIDENT_SELECT} where i.org_id = $1 and i.id = $2`, [orgId, id])).rows[0] ?? null;
+
+export type IncidentFilter = {
+  readonly includeVoided?: boolean;
+  readonly kind?: IncidentRecordRow["kind"];
+  readonly followUp?: IncidentRecordRow["follow_up_status"];
+  readonly planId?: string;
+  readonly flightRecordId?: string;
+  /** 現場の簡易記録で詳細が未記入のものだけ。 */
+  readonly detailPending?: boolean;
+  /** 報告の状態（導出）：none・reported・consulted、または changed（記録のあとで事実が変わった）。上限（LIMIT）の前にかける。 */
+  readonly reportState?: "none" | "reported" | "consulted" | "changed";
+};
+
+/**
+ * 報告の記録のまとめ（記録ごとの結合。上限や絞り込みの前に、SQL の中で報告の状態を導出するのに使う）。
+ *   active_n     有効な（取り下げられていない）reported・consulted の数
+ *   has_reported 有効な reported がある
+ *   any_match    有効な記録のうち、記録した時点の版の事実（区分・類型の組・けがの有無・人数）がいまと同じものがある
+ *                （アプリの「指紋が同じ」と同じ条件。指紋は、記録した時点の事実から作られる）
+ * 報告の状態：reported ＞ consulted ＞ none。changed は active_n > 0 で any_match でないとき。
+ */
+const INCIDENT_REPORT_LATERAL = `
+   left join lateral (
+     select count(*)::int as active_n,
+            coalesce(bool_or(r.action = 'reported'), false) as has_reported,
+            coalesce(bool_or(rv.data->>'kind' = i.kind
+                             and rv.data->>'people_injury' = i.people_injury
+                             and (rv.data->>'injured_count')::integer is not distinct from i.injured_count
+                             and (rv.data->'event_types') <@ i.event_types and i.event_types <@ (rv.data->'event_types')), false) as any_match
+       from incident_report_records r
+       left join record_versions rv on rv.org_id = r.org_id and rv.entity_type = 'incident_record'
+                                   and rv.entity_id = r.incident_id and rv.version_no = r.incident_version
+      where r.org_id = i.org_id and r.incident_id = i.id and r.action in ('reported', 'consulted')
+        and not exists (select 1 from incident_report_records t
+                         where t.org_id = r.org_id and t.incident_id = r.incident_id
+                           and t.action = 'retract' and t.target_record_id = r.id)
+   ) rs on true`;
+
+const REPORT_STATE_SQL: Readonly<Record<NonNullable<IncidentFilter["reportState"]>, string>> = {
+  none: "rs.active_n = 0",
+  reported: "rs.has_reported",
+  consulted: "rs.active_n > 0 and not rs.has_reported",
+  changed: "rs.active_n > 0 and not rs.any_match",
+};
+
+/** 事故・ヒヤリハットの一覧（起きた日時の新しい順、最大 500 件）。絞り込みはすべて上限の前にかける。1 回のクエリで、件数に依らない。 */
+export const listIncidents = async (db: Queryable, orgId: string, f: IncidentFilter = {}): Promise<IncidentRowWithJoins[]> => {
+  const where = ["i.org_id = $1"];
+  const params: unknown[] = [orgId];
+  if (f.kind) where.push(`i.kind = $${params.push(f.kind)}`);
+  if (f.followUp) where.push(`i.follow_up_status = $${params.push(f.followUp)}`);
+  if (f.planId) where.push(`i.plan_id = $${params.push(f.planId)}`);
+  if (f.flightRecordId) where.push(`i.flight_record_id = $${params.push(f.flightRecordId)}`);
+  if (!f.includeVoided) where.push("i.voided_at is null");
+  if (f.detailPending) where.push("i.detail_pending");
+  if (f.reportState) where.push(`(${REPORT_STATE_SQL[f.reportState]})`);
+  return (
+    await db.query<IncidentRowWithJoins>(
+      `${INCIDENT_SELECT}${f.reportState ? INCIDENT_REPORT_LATERAL : ""} where ${where.join(" and ")} order by i.occurred_at desc, i.id desc limit ${LIST_LIMIT}`,
+      params,
+    )
+  ).rows;
+};
+
+/**
+ * 「今日」の次にやることの候補（取消していない記録のうち、未解決のものだけ）。一覧の上限（LIMIT）をかけない。1 回のクエリで、件数に依らない。
+ *   - 目安が possible で、有効な（取り下げられていない）報告・要否の確認の記録のうち、記録した時点の版の事実（区分・類型・けがの有無・人数）が
+ *     いまの事実と同じものが無い（記録が無い、または記録のあとで事実が変わった。指紋の比較と同じ条件）。
+ *   - 詳細の記入待ち（detail_pending）で、起きた日（JST）が detailSince（YYYY-MM-DD）以後。
+ * 報告の状態の最終の判定は、サービス層が報告の記録から導出する（ここは候補を絞るだけ）。
+ */
+export const listIncidentTodayCandidates = async (db: Queryable, orgId: string, detailSince: string): Promise<IncidentRowWithJoins[]> =>
+  (
+    await db.query<IncidentRowWithJoins>(
+      `${INCIDENT_SELECT}${INCIDENT_REPORT_LATERAL}
+        where i.org_id = $1 and i.voided_at is null
+          and ((i.guidance_level = 'possible' and (rs.active_n = 0 or not rs.any_match))
+               or (i.detail_pending and ops_timestamptz_to_jst_minute(i.occurred_at) >= $2))
+        order by i.occurred_at desc, i.id desc`,
+      [orgId, detailSince],
+    )
+  ).rows;
+
+/** 報告の記録の行に、並べ替え用のマイクロ秒つきの時刻と、日時の JST の分を付けたもの。 */
+export type IncidentReportRowWithTimes = IncidentReportRecordRow & {
+  readonly created_at_us: string;
+  readonly done_at_jst: string | null;
+};
+
+/** 記録の報告の記録（古い順）。incident_ids は同じ組織の記録。1 回のクエリで、記録の件数に依らない。 */
+export const listIncidentReportRecordsFor = async (
+  db: Queryable,
+  orgId: string,
+  incidentIds: readonly string[],
+): Promise<IncidentReportRowWithTimes[]> => {
+  if (incidentIds.length === 0) return [];
+  return (
+    await db.query<IncidentReportRowWithTimes>(
+      `select r.*,
+              to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as created_at_us,
+              ops_timestamptz_to_jst_minute(r.done_at) as done_at_jst
+         from incident_report_records r
+        where r.org_id = $1 and r.incident_id = any($2::uuid[]) order by r.created_at, r.id`,
+      [orgId, [...incidentIds]],
+    )
+  ).rows;
+};
+
+export type IncidentReportInsert = {
+  readonly orgId: string;
+  readonly incidentId: string;
+  readonly action: IncidentReportRecordRow["action"];
+  /** JST の `YYYY-MM-DDTHH:MM`（reported・consulted）。 */
+  readonly doneAtJst: string | null;
+  readonly channel: IncidentReportRecordRow["channel"];
+  readonly channelNote: string | null;
+  readonly reference: string | null;
+  readonly referenceAbsent: boolean;
+  readonly note: string | null;
+  readonly checks: Readonly<Record<string, boolean>>;
+  readonly targetRecordId: string | null;
+  readonly factsFingerprint: string;
+  readonly reason: string | null;
+  readonly recordedByMemberId: string;
+};
+
+/**
+ * 報告の記録を 1 件追加する（呼び出し側が開いたトランザクションの中で）。incident_version・recorded_by_name・recorded_by_role・
+ * created_at・content_hash は DB が決める（仮の値を送り、追加前のトリガーが上書きする）。
+ */
+export const insertIncidentReportOn = async (c: OpsTx, i: IncidentReportInsert): Promise<string> => {
+  const r = await c.query<{ id: string }>(
+    `insert into incident_report_records (org_id, incident_id, action, done_at, channel, channel_note, reference, reference_absent, note,
+       checks, target_record_id, incident_version, facts_fingerprint, reason, recorded_by_member_id, recorded_by_name, recorded_by_role,
+       created_at, content_hash)
+     values ($1, $2, $3, ops_jst_minute_to_timestamptz($4), $5, $6, $7, $8, $9, $10::jsonb, $11, 1, $12, $13, $14, '-', 'viewer', now(), '-')
+     returning id`,
+    [
+      i.orgId,
+      i.incidentId,
+      i.action,
+      i.doneAtJst,
+      i.channel,
+      i.channelNote,
+      i.reference,
+      i.referenceAbsent,
+      i.note,
+      JSON.stringify(i.checks),
+      i.targetRecordId,
+      i.factsFingerprint,
+      i.reason,
+      i.recordedByMemberId,
+    ],
+  );
+  return r.rows[0]!.id;
+};
+
+/**
+ * 操縦者に結び付いた利用者（pilots.member_id）を、確定した最新の値で読み、そのトランザクションの終わりまで変わらないようにする。
+ * 操縦者の版の追加（updatePilot・voidPilot）が取る排他の鍵（record_versions:pilot:<ID>）を共有で取る。操縦者の更新はこの鍵の解放を待つので、
+ * 認可の確認から書き込みまでの間に結び付きは変わらない。取る順は「記録の鍵 → 操縦者の共有の鍵」で、操縦者の更新側は操縦者の鍵しか取らない。
+ */
+export const lockPilotMemberOn = async (c: OpsTx, orgId: string, pilotId: string): Promise<string | null> => {
+  await c.query("select pg_advisory_xact_lock_shared(hashtextextended('record_versions:pilot:' || $1::text, 0))", [pilotId]);
+  const r = await c.query<{ member_id: string | null }>("select member_id from pilots where org_id = $1 and id = $2", [orgId, pilotId]);
+  return r.rows[0]?.member_id ?? null;
+};
+
+/** 記録ごとの排他（版の追加・報告の記録と同じ鍵。DB の追加前のトリガーも同じ鍵を取る）。トランザクションの中で呼ぶ。 */
+export const lockIncidentOn = async (c: OpsTx, incidentId: string): Promise<void> => {
+  await c.query("select pg_advisory_xact_lock(hashtextextended('record_versions:incident_record:' || $1::text, 0))", [incidentId]);
+};
+
+/** 実体の版 1 の data と作成者（二重送信の判定に使う）。 */
+export const firstVersionOf = async (
+  db: Queryable,
+  orgId: string,
+  entityType: RecordEntityTypeDb,
+  entityId: string,
+): Promise<{ readonly data: Record<string, unknown>; readonly actor_member_id: string | null } | null> =>
+  (
+    await db.query<{ data: Record<string, unknown>; actor_member_id: string | null }>(
+      `select data, actor_member_id from record_versions where org_id = $1 and entity_type = $2 and entity_id = $3 and version_no = 1`,
+      [orgId, entityType, entityId],
+    )
+  ).rows[0] ?? null;

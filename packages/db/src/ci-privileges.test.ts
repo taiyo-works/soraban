@@ -25,6 +25,15 @@ describe("CI の権限の確認", () => {
     expect(CI).toContain("judgement_snapshots_permit_basis");
   });
 
+  it("Sprint 12e：incident_records は参照だけ、incident_report_records は参照と追加だけ。verify_incident_report_records は実行できない", () => {
+    expect(expectOf("incident_records", "SELECT")).toBe("t");
+    for (const p of ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]) expect(expectOf("incident_records", p), p).toBe("f");
+    expect(expectOf("incident_report_records", "SELECT")).toBe("t");
+    expect(expectOf("incident_report_records", "INSERT")).toBe("t");
+    for (const p of ["UPDATE", "DELETE", "TRUNCATE"]) expect(expectOf("incident_report_records", p), p).toBe("f");
+    expect(CI).toMatch(/has_function_privilege\('soraban_app', 'verify_incident_report_records\(uuid\)', 'EXECUTE'\)"\)" = "f"/);
+  });
+
   it("12a・12b の追記専用の表の確認も残っている", () => {
     for (const t of ["judgement_snapshots", "plan_confirmations", "flight_report_attempts", "plan_procedure_records"]) {
       expect(CI, t).toContain(t);

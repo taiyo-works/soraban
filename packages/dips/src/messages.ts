@@ -246,7 +246,10 @@ export type NextActionId =
   | "check_emergency_airspace"
   | "write_journal"
   | "review_journal_mismatch"
-  | "renew_license";
+  | "renew_license"
+  // Sprint 12e：事故・ヒヤリハット（記録の有無から導出する。計画に結び付かない記録にも出る）
+  | "confirm_incident_report"
+  | "complete_incident_detail";
 
 /** Sprint 12c で足した、計画の通報・確認の導出（planNextActions）には含まれない次にやること。 */
 export const FIELD_NEXT_ACTION_IDS = [
@@ -258,8 +261,11 @@ export const FIELD_NEXT_ACTION_IDS = [
   "renew_license",
 ] as const;
 export type FieldNextActionId = (typeof FIELD_NEXT_ACTION_IDS)[number];
+/** Sprint 12e で足した、事故・ヒヤリハットの次にやること（計画の通報・確認の導出には含まれない）。 */
+export const INCIDENT_NEXT_ACTION_IDS = ["confirm_incident_report", "complete_incident_detail"] as const;
+export type IncidentNextActionId = (typeof INCIDENT_NEXT_ACTION_IDS)[number];
 /** 12b までの、計画の通報・確認の導出の次にやること。 */
-export type PlanNextActionId = Exclude<NextActionId, FieldNextActionId>;
+export type PlanNextActionId = Exclude<NextActionId, FieldNextActionId | IncidentNextActionId>;
 
 export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   request_confirmation: "確認を依頼する",
@@ -280,6 +286,8 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   write_journal: "日誌を記入する",
   review_journal_mismatch: "日誌の食い違いを確認する",
   renew_license: "技能証明を更新する",
+  confirm_incident_report: "事故・ヒヤリハットの報告の要否を確認する",
+  complete_incident_detail: "事故・ヒヤリハットの詳細を記入する",
 };
 
 export const NEXT_ACTIONS_EMPTY_LABEL = "いまやることはありません";

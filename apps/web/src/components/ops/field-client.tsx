@@ -64,6 +64,10 @@ const BTN_OUTLINE = `${BTN} border-2 border-brand-700 bg-paper text-brand-700`;
 const BTN_WARN = `${BTN} border-2 border-signal-red bg-paper text-ink`;
 const BTN_FLIGHT =
   "inline-flex min-h-24 w-full items-center justify-center rounded-sharp border-2 border-brand-700 bg-brand-700 px-5 text-4xl font-bold tracking-[0.2em] text-paper touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
+// Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い紙の地・左寄せ・
+// 太字にしない帯にする（高さ 56px・全幅・文字 18px は保つ）。行き先は右端の矢印で示す。
+const BAND_INCIDENT =
+  "flex min-h-14 w-full items-center gap-3 rounded-sharp border-2 border-rule bg-paper-soft px-3 py-2 text-left text-lg font-medium text-ink touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
 // 札（枠）。意味は枠の太さ・左の太線・記号と文字が担い、色は補助。済は実線、未は破線。
 const BOX = "flex flex-col gap-3 rounded-sharp border-2 border-rule bg-paper p-3";
 const BOX_TODO = "flex flex-col gap-3 rounded-sharp border-2 border-dashed border-ink-mute bg-paper p-3";
@@ -93,7 +97,16 @@ const KIND_LABEL: Readonly<Record<OutboxEntry["kind"], string>> = {
   undo: "取り消し",
 };
 
-export function FieldClient({ initial, memberId }: { readonly initial: FieldViewDto; readonly memberId: string }) {
+export function FieldClient({
+  initial,
+  memberId,
+  incidentHref = null,
+}: {
+  readonly initial: FieldViewDto;
+  readonly memberId: string;
+  /** Sprint 12e：現場の簡易記録（事故・ヒヤリハット）への経路。記録できない利用者には渡さない（帯を出さない）。 */
+  readonly incidentHref?: string | null;
+}) {
   const planId = initial.plan.id;
   const [view, setView] = useState<FieldViewDto>(initial);
   const [outbox, setOutbox] = useState<OutboxState>(emptyOutbox());
@@ -696,6 +709,19 @@ export function FieldClient({ initial, memberId }: { readonly initial: FieldView
             </nav>
           ) : null}
         </div>
+        {/* Sprint 12e：事故・ヒヤリハットの簡易記録への帯。常に見える小さめの帯（大きなボタンにしない）。離陸・着陸のボタンの隣・直上・直下に置かない
+            （ヘッダーの中に置き、段階・送信の状況を挟んで 24px 以上離す）。押すと簡易記録の画面へ移るだけで、その場では記録しない */}
+        {incidentHref ? (
+          <a href={incidentHref} className={BAND_INCIDENT} data-testid="field-incident-link">
+            <span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-sharp border-2 border-ink-soft leading-none">
+              ＋
+            </span>
+            <span className="min-w-0 flex-1">事故・ヒヤリハットを記録する</span>
+            <span aria-hidden className="shrink-0 text-ink-soft">
+              →
+            </span>
+          </a>
+        ) : null}
       </header>
 
       {/* 段階：いまの位置は ▶ と塗りと下線、済みは ✓、これからは ○ */}

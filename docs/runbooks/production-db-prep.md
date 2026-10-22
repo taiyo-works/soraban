@@ -40,7 +40,7 @@
   pnpm install
   ls packages/db/migrations
   ```
-  期待：`git remote -v` が `taiyo-works/soraban` を指す。`ls` に `0001_…sql` 〜 `0015_…sql` の 15 本が並ぶ。
+  期待：`git remote -v` が `taiyo-works/soraban` を指す。`ls` に `0001_…sql` 〜 `0016_…sql` の 16 本が並ぶ。
 - Neon コンソール（https://console.neon.tech）に入れること。Vercel（taiyo-works-projects チーム）に入れること（本番の章で使う）。
 
 ### 秘密の扱い（原則）
@@ -144,13 +144,13 @@ psql "$DATABASE_URL_UNPOOLED" -c "select rolname, rolsuper, rolcreatedb, rolcrea
    ```sh
    pnpm db:status
    ```
-   期待：`接続先 host=<ホスト名> … database=neondb`、`0001`〜`0015` がすべて「未適用」、`適用済み 0 件、未適用 15 件`。
+   期待：`接続先 host=<ホスト名> … database=neondb`、`0001`〜`0016` がすべて「未適用」、`適用済み 0 件、未適用 16 件`。
    **ここで表示された host が §1.2 の `<ホスト名>`（試験用ブランチ）であることを必ず確かめる。**
 2. 適用：
    ```sh
    pnpm db:migrate --target <ホスト名>
    ```
-   期待：`適用予定: 0001, …, 0015` のあと、`適用 0001_…sql（… ms）` から `適用 0015_…sql` まで 15 行。終了コード 0。
+   期待：`適用予定: 0001, …, 0016` のあと、`適用 0001_…sql（… ms）` から `適用 0016_…sql` まで 16 行。終了コード 0。
 3. **2 回目**を実行する：
    ```sh
    pnpm db:migrate --target <ホスト名>
@@ -160,7 +160,7 @@ psql "$DATABASE_URL_UNPOOLED" -c "select rolname, rolsuper, rolcreatedb, rolcrea
    ```sh
    pnpm db:status
    ```
-   期待：`適用済み 15 件、未適用 0 件`。「不一致」の行が出ない。
+   期待：`適用済み 16 件、未適用 0 件`。「不一致」の行が出ない。
 
 ランナーの動作（`packages/db/src/migrate.ts` を読んで確認）：
 - ホスト名に `-pooler` を含む接続文字列、`--target` 無し、`--target` と接続先の不一致は、**DB に接続する前に**中止する。
@@ -268,7 +268,7 @@ psql "$REHEARSAL_APP_URL" -c "select * from verify_record_chain('member','000000
    ```sh
    curl -s http://localhost:3100/api/health/db
    ```
-   期待：`"configured":true`、`"reachable":true`、`"postgresMajorVersion":18`、`postgisVersion` が出る、`"latestAppliedMigration":"0015"`、`"hasPendingMigrations":false`。接続文字列やホスト名は返らない。
+   期待：`"configured":true`、`"reachable":true`、`"postgresMajorVersion":18`、`postgisVersion` が出る、`"latestAppliedMigration":"0016"`、`"hasPendingMigrations":false`。接続文字列やホスト名は返らない。
 3. 判定を 1 回行う：ブラウザで `http://localhost:3100` を開き、地点判定を 1 回実行する（判定の結果が出ること）。数秒後、オーナーで：
    ```sh
    psql "$DATABASE_URL_UNPOOLED" -c "select count(*), max(engine_version) from evidence_log"
@@ -317,7 +317,7 @@ psql "$REHEARSAL_APP_URL" -c "select * from verify_record_chain('member','000000
 | 2 | ロール | `neondb_owner` と `soraban_app`。`soraban_app` が `neon_superuser` に属さず、`rolsuper` などが偽 |
 | 3 | 拡張 | `postgis` が入っている（PostGIS 3.6 系） |
 | 4 | テーブル | そらばんの表（`regulations`、`regulation_zones`、`evidence_log`、`organizations`、`members`、`aircraft`、`pilots`、`daily_inspections`、`flight_records`、`saved_places`、`flight_plans`、`judgement_snapshots`、`plan_confirmations`、`record_versions`、`schema_migrations`）が `public` にある |
-| 5 | `schema_migrations` | 15 件（`0001`〜`0015`）。チェックサムはリポジトリのファイルと一致（エージェントが `sha256` を計算して突き合わせる） |
+| 5 | `schema_migrations` | 16 件（`0001`〜`0016`）。チェックサムはリポジトリのファイルと一致（エージェントが `sha256` を計算して突き合わせる） |
 | 6 | 権限 | §1.5 A の表のとおり |
 | 7 | トリガー | `record_versions` に追加前・追加後のトリガーがある。ヘッド表にもトリガーがある |
 | 8 | 判定証跡 | 判定 1 回のあと `evidence_log` が 1 行（本番確認の後）。個人情報（IP・User-Agent）が入っていない（`client_user_agent` が null） |
@@ -338,7 +338,7 @@ select extname, extversion from pg_extension order by extname;
 select table_name, table_type from information_schema.tables
 where table_schema = 'public' order by table_type, table_name;
 
--- 5. 適用記録（件数 15 とチェックサム）
+-- 5. 適用記録（件数 16 とチェックサム）
 select count(*) as n from schema_migrations;
 select version, name, checksum, applied_at, duration_ms from schema_migrations order by version;
 
@@ -418,7 +418,7 @@ select schema_name from information_schema.schemata where schema_name = 'neon_au
    ```sh
    pnpm db:status
    ```
-   期待：`適用済み 0 件、未適用 15 件`、host が本番。
+   期待：`適用済み 0 件、未適用 16 件`、host が本番。
 3. 適用：
    ```sh
    pnpm db:migrate --target <本番のホスト名>
@@ -429,7 +429,7 @@ select schema_name from information_schema.schemata where schema_name = 'neon_au
    pnpm db:migrate --target <本番のホスト名>
    pnpm db:status
    ```
-   期待：`未適用のマイグレーションはありません。`、`適用済み 15 件、未適用 0 件`。
+   期待：`未適用のマイグレーションはありません。`、`適用済み 16 件、未適用 0 件`。
 5. エージェントに依頼（第 2 章）：「本番の `main` ブランチを、読み取りだけで確認してください」。§2 のチェックリストの 1〜7 が OK（8 は判定の後）。
 6. `unset DATABASE_URL_UNPOOLED`。
 
@@ -455,7 +455,7 @@ README「ユーザー作業」手順 1 のとおり。
    ```sh
    curl -s https://soraban.futuretec.jp/api/health/db
    ```
-   期待：`"configured":true`、`"reachable":true`、`"latestAppliedMigration":"0015"`、`"hasPendingMigrations":false`。
+   期待：`"configured":true`、`"reachable":true`、`"latestAppliedMigration":"0016"`、`"hasPendingMigrations":false`。
    定期監視には使わない（呼ぶたびに計算資源が起動して従量課金が増える）。確認のために数回だけ。
 3. 本番で地点判定を 1 回実行する。エージェントに依頼：「本番の `main` の `evidence_log` が 1 行になったか、読み取りだけで確認してください」。期待：1 行（`engine_version` が `soraban-0.4.0-verdict-2026-10`、`client_user_agent` が null）。`EVIDENCE_LOG` は通常設定しない。
 
@@ -470,7 +470,7 @@ README「ユーザー作業」手順 1 のとおり。
 
 **DB 準備（第 3 章）が先。済んでいなければ始めない。** 詳細は `packages/db/README.md`「運航管理（Sprint 10）の本番準備」と `docs/sprints/sprint-10.md`「ユーザー作業」。ここには順序の要点だけを書く。
 
-1. 第 3 章が完了していること（`soraban_app` 作成、0001〜0015 の適用、`DATABASE_URL`）。0004〜0015 は第 3 章で同時に適用済み。
+1. 第 3 章が完了していること（`soraban_app` 作成、0001〜0016 の適用、`DATABASE_URL`）。0004〜0016 は第 3 章で同時に適用済み。
 2. Neon Auth の有効化（`main`。aws-ap-southeast-1 で有効にできるか確かめる。できなければ止めて planner に戻す）。Auth URL を控える。
 3. Google OAuth クライアント（Google Cloud）。リダイレクト URI は `{Auth URL}/callback/google`。
 4. Neon Auth の本番設定（信頼するドメイン、アプリ名、Allow Localhost を無効）。
@@ -543,4 +543,4 @@ README「ユーザー作業」手順 1 のとおり。
 
 ### この手順書の更新
 
-DB を乗り換える、マイグレーションが増える（`0015` → `00NN`）、Neon の画面が変わったときは、この手順書の期待値（件数 15、最新版 `0015`）と画面の名称を直す。
+DB を乗り換える、マイグレーションが増える（`0016` → `00NN`）、Neon の画面が変わったときは、この手順書の期待値（件数 16、最新版 `0016`）と画面の名称を直す。
