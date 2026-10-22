@@ -897,6 +897,102 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       expect((e6 as OpsError).code).toBe("voided");
     });
 
+    it("認可の根拠（記録の操縦者に結び付いた利用者）も書き込みまで保持される：操縦者の結び付きを外す更新が先に確定すると 403 で記録は増えない。操縦者の更新との逆順の並行でもデッドロックしない", async () => {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const m3 = await addMember(orgA, "pilot", "s12e-pilot3");
+      const pilot3 = await addPilot(orgA, "競合 三郎", m3.id);
+      const p3 = ctxOf(m3);
+      const consult = { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } };
+      const reportCount = async (id: string) => (await owner.query("select count(*)::int as n from incident_report_records where incident_id = $1", [id])).rows[0].n as number;
+      const versionCount = async (id: string) => (await owner.query("select count(*)::int as n from record_versions where entity_type = 'incident_record' and entity_id = $1", [id])).rows[0].n as number;
+      const pilotData = async () => (await store.latestVersionData(app as unknown as OpsDb, orgA, "pilot", pilot3.id))!;
+      const pilotVersion = async () => (await owner.query("select current_version from pilots where id = $1", [pilot3.id])).rows[0].current_version as number;
+      const waitBlocked = async () => {
+        for (let i = 0; ; i++) {
+          if ((await owner.query("select count(*)::int as n from pg_locks where locktype = 'advisory' and not granted")).rows[0].n >= 1) return;
+          if (i > 250) throw new Error("要求がロック待ちにならなかった");
+          await sleep(20);
+        }
+      };
+      const rebind = async (memberId: string | null) => {
+        await svc.updatePilot(mgr(), pilot3.id, { expectedVersion: await pilotVersion(), reason: "結び付きの変更", memberId });
+      };
+      /** 接続 1 が updatePilot 相当（操縦者の結び付きの更新）を未確定のまま持ち、要求を待たせてから確定する。 */
+      const raceWithPilotUpdate = async (memberId: string | null, request: () => Promise<unknown>): Promise<unknown> => {
+        const c1 = await app.connect();
+        try {
+          await c1.query("begin");
+          await store.appendVersionOn(c1 as unknown as store.OpsTx, {
+            orgId: orgA,
+            entityType: "pilot",
+            entityId: pilot3.id,
+            op: "update",
+            data: { ...(await pilotData()), member_id: memberId },
+            reason: "結び付きの変更",
+            actorMemberId: manager.id,
+            expectedVersion: await pilotVersion(),
+          });
+          const pending = request().then(
+            () => null,
+            (e: unknown) => e,
+          );
+          await waitBlocked();
+          await c1.query("commit");
+          return await pending;
+        } catch (e) {
+          await c1.query("rollback").catch(() => undefined);
+          throw e;
+        } finally {
+          c1.release();
+        }
+      };
+
+      // (1) 追記：結び付きを外す更新が先に確定 → 403・記録は増えない。結び付けを戻すと再び追記できる
+      const a = await newIncident({ pilotId: pilot3.id });
+      expect((await incidents.getIncident(p3, a.id)).canReport).toBe(true);
+      const e1 = await raceWithPilotUpdate(null, () => incidents.createIncidentReport(p3, a.id, consult));
+      expect((e1 as OpsError).status).toBe(403);
+      expect(await reportCount(a.id)).toBe(0);
+      expect((await owner.query("select member_id from pilots where id = $1", [pilot3.id])).rows[0].member_id).toBeNull();
+      await expectOpsError(incidents.createIncidentReport(p3, a.id, consult), 403, "forbidden");
+      // 別の利用者へ付け替えた場合も同じ（元の利用者は 403）
+      await rebind(m3.id);
+      expect((await incidents.getIncident(p3, a.id)).canReport).toBe(true);
+      const m4 = await addMember(orgA, "pilot", "s12e-pilot4");
+      const e1b = await raceWithPilotUpdate(m4.id, () => incidents.createIncidentReport(p3, a.id, consult));
+      expect((e1b as OpsError).status).toBe(403);
+      expect(await reportCount(a.id)).toBe(0);
+
+      // (2) 訂正（対応状況の更新を含む）も同じ
+      await rebind(m3.id);
+      const b = await newIncident({ pilotId: pilot3.id });
+      const e2 = await raceWithPilotUpdate(null, () => incidents.updateIncident(p3, b.id, { expectedVersion: 1, reason: "対応済み", followUpStatus: "done", followUpOn: "2027-01-05" }));
+      expect((e2 as OpsError).status).toBe(403);
+      expect(await versionCount(b.id)).toBe(1);
+
+      // (3) 逆順の並行でもデッドロックしない：操縦者の結び付きの更新（実サービス）と、その操縦者の記録への追記・訂正を同時に何度も回す
+      await rebind(m3.id);
+      const ids = [];
+      for (let i = 0; i < 6; i++) ids.push((await newIncident({ pilotId: pilot3.id, summary: `並行 ${i}` })).id);
+      for (let round = 0; round < 6; round++) {
+        const cur = await pilotVersion();
+        const toggle = round % 2 === 0 ? null : m3.id;
+        const settled = await Promise.allSettled([
+          svc.updatePilot(mgr(), pilot3.id, { expectedVersion: cur, reason: "結び付きの切り替え", memberId: toggle }),
+          ...ids.map((id, k) => (k % 2 === 0 ? incidents.createIncidentReport(p3, id, consult) : incidents.updateIncident(p3, id, { expectedVersion: 1 + Math.floor(round / 2), reason: "並行", details: `r${round}` }))),
+        ]);
+        for (const r of settled) {
+          if (r.status === "rejected") {
+            // 許される失敗は、権限を失った（403）・版の競合（409）だけ。デッドロック（DB のエラー）は許さない
+            expect(r.reason, String(r.reason)).toBeInstanceOf(OpsError);
+            expect([403, 409]).toContain((r.reason as OpsError).status);
+          }
+        }
+        // 結び付きを戻して次の回へ
+        if (toggle === null) await svc.updatePilot(mgr(), pilot3.id, { expectedVersion: await pilotVersion(), reason: "戻す", memberId: m3.id });
+      }
+    }, 60_000);
+
     it("一覧の取得に必要なクエリ数が、記録の件数に比例しない（5 件と 50 件で同じ）。絞り込みが効く", async () => {
       const countFor = async (ctx: OpsContext, fn: (c: OpsContext) => Promise<unknown>) => {
         let n = 0;

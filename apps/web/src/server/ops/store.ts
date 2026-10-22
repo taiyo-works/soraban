@@ -1328,6 +1328,17 @@ export const insertIncidentReportOn = async (c: OpsTx, i: IncidentReportInsert):
   return r.rows[0]!.id;
 };
 
+/**
+ * 操縦者に結び付いた利用者（pilots.member_id）を、確定した最新の値で読み、そのトランザクションの終わりまで変わらないようにする。
+ * 操縦者の版の追加（updatePilot・voidPilot）が取る排他の鍵（record_versions:pilot:<ID>）を共有で取る。操縦者の更新はこの鍵の解放を待つので、
+ * 認可の確認から書き込みまでの間に結び付きは変わらない。取る順は「記録の鍵 → 操縦者の共有の鍵」で、操縦者の更新側は操縦者の鍵しか取らない。
+ */
+export const lockPilotMemberOn = async (c: OpsTx, orgId: string, pilotId: string): Promise<string | null> => {
+  await c.query("select pg_advisory_xact_lock_shared(hashtextextended('record_versions:pilot:' || $1::text, 0))", [pilotId]);
+  const r = await c.query<{ member_id: string | null }>("select member_id from pilots where org_id = $1 and id = $2", [orgId, pilotId]);
+  return r.rows[0]?.member_id ?? null;
+};
+
 /** 記録ごとの排他（版の追加・報告の記録と同じ鍵。DB の追加前のトリガーも同じ鍵を取る）。トランザクションの中で呼ぶ。 */
 export const lockIncidentOn = async (c: OpsTx, incidentId: string): Promise<void> => {
   await c.query("select pg_advisory_xact_lock(hashtextextended('record_versions:incident_record:' || $1::text, 0))", [incidentId]);

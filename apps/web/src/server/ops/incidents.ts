@@ -778,7 +778,8 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
 
 /**
  * ロックを取ってから、記録を読み直して認可を確かめる（変更系の共通の入口）。呼び出し側が開いたトランザクションの中で呼び、
- * ロックはトランザクションの終わりまで保持される。
+ * ロックはトランザクションの終わりまで保持される。記録の操縦者に結び付いた利用者（pilots.member_id）も、操縦者の鍵を共有で取って
+ * 読み直す（認可の根拠が書き込みまで変わらない。ロックの取得順は 記録の鍵 → 操縦者の鍵 の一方向）。
  * 最初の認可（ロックの前）のあとで、運航管理者が担当の操縦者を付け替えたり、取消したりできる。ロックの後の最新の記録で
  * 認可（isSelf＝いまの担当の操縦者か、運航管理者のみ など）をやり直し、権限がなければ 403 にする。
  * 取消済みなら 409 voided（allowVoided のとき以外）。baseVersion を渡すと、読み直した版が違えば 409 version_conflict
@@ -792,8 +793,10 @@ const lockAndReauthorize = async (
   opts: { readonly allowVoided?: boolean; readonly baseVersion?: number } = {},
 ): Promise<IncidentRowWithJoins> => {
   await store.lockIncidentOn(c, incidentId);
-  const fresh = await store.getIncident(c, ctx.member.org_id, incidentId);
-  if (!fresh) throw new OpsError(404, "not_found");
+  const row = await store.getIncident(c, ctx.member.org_id, incidentId);
+  if (!row) throw new OpsError(404, "not_found");
+  // 記録の操縦者に結び付いた利用者も、確定した最新の値を、書き込みまで変わらない形で読む（操縦者の更新の割り込みを受けない）
+  const fresh = row.pilot_id ? { ...row, pilot_member_id: await store.lockPilotMemberOn(c, ctx.member.org_id, row.pilot_id) } : row;
   assertCan(ctx, action, isSelfOf(ctx, fresh));
   if (!opts.allowVoided && fresh.voided_at !== null) throw new OpsError(409, "voided");
   if (opts.baseVersion !== undefined && fresh.current_version !== opts.baseVersion) throw new OpsError(409, "version_conflict");
