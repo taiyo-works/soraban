@@ -58,12 +58,21 @@ export function useKeydown(
   }, [handler, enabled, ignoreEditable, ignoreModal]);
 }
 
-/** Calls `onOutside` for a pointer press outside `ref`'s element, and on Escape. */
-export function useDismiss(ref: { readonly current: HTMLElement | null }, open: boolean, onDismiss: () => void): void {
+/**
+ * Calls `onDismiss` for a pointer press outside `ref`'s element, and on Escape. A press inside `also` (the opener) is not
+ * outside: the opener's own click toggles, so closing here first would let that click reopen it.
+ */
+export function useDismiss(
+  ref: { readonly current: HTMLElement | null },
+  open: boolean,
+  onDismiss: () => void,
+  also?: { readonly current: HTMLElement | null },
+): void {
   useEffect(() => {
     if (!open) return;
     const down = (e: PointerEvent): void => {
-      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) onDismiss();
+      if (!ref.current || !(e.target instanceof Node)) return;
+      if (!ref.current.contains(e.target) && !also?.current?.contains(e.target)) onDismiss();
     };
     const key = (e: KeyboardEvent): void => {
       if (e.key === "Escape") onDismiss();
@@ -74,5 +83,5 @@ export function useDismiss(ref: { readonly current: HTMLElement | null }, open: 
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("keydown", key);
     };
-  }, [ref, open, onDismiss]);
+  }, [ref, also, open, onDismiss]);
 }

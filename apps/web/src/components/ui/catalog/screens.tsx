@@ -439,7 +439,7 @@ function PaneTitle({ icon, children }: { readonly icon: IconName; readonly child
   );
 }
 
-export function WorkspaceScreen() {
+export function WorkspaceScreen({ hotkeys = true }: { readonly hotkeys?: boolean }) {
   const [verdict, setVerdict] = useState<ItemVerdict>("needs_procedure");
   const [purpose, setPurpose] = useState("photo");
   const toast = useToast();
@@ -451,6 +451,7 @@ export function WorkspaceScreen() {
       </p>
       <Workspace
         height="min(40rem, calc(100dvh - 12rem))"
+        hotkeys={hotkeys}
         input={
           <div className="flex flex-col gap-5">
             <PaneTitle icon="sliders">条件</PaneTitle>

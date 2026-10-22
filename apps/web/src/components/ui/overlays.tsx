@@ -335,7 +335,7 @@ export function ContextMenu({
     setAt(null);
     if (restore) button.current?.focus({ preventScroll: true });
   }, []);
-  useDismiss(menu, open, () => close(false));
+  useDismiss(menu, open, () => close(false), button);
 
   useEffect(() => {
     if (open) menu.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();

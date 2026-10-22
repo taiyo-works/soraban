@@ -217,7 +217,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
                 {screen === "form" ? <FormScreen /> : null}
               </TabPanel>
               <TabPanel idPrefix="screen" id="workspace" active={screen === "workspace"}>
-                {screen === "workspace" ? <WorkspaceScreen /> : null}
+                {screen === "workspace" ? <WorkspaceScreen hotkeys={!field} /> : null}
               </TabPanel>
               <TabPanel idPrefix="screen" id="field" active={screen === "field"}>
                 {screen === "field" ? <FieldScreen /> : null}

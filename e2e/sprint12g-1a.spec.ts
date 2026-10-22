@@ -549,8 +549,9 @@ test.describe("G. ワークスペース（1a-5・1a-6：phase-atlas の作法）
     await page.keyboard.press("ArrowUp");
     await expect(frame).toHaveAttribute("data-sheet-stage", "full");
     await expect(peek).toBeVisible();
+    // measured after the height transition has finished
+    await expect.poll(async () => (await sheet.boundingBox())!.height).toBeGreaterThan(frameBox.height * 0.8);
     const fullH = (await sheet.boundingBox())!.height;
-    expect(fullH).toBeGreaterThan(frameBox.height * 0.8);
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("ArrowDown");
     await expect(frame).toHaveAttribute("data-sheet-stage", "peek");
@@ -836,5 +837,71 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
     const nb = (await note.boundingBox())!;
     expect(nb.x).toBeGreaterThanOrEqual(0);
     expect(nb.x + nb.width).toBeLessThanOrEqual(375);
+  });
+
+  test("38. コンテキストメニュー：同じトリガーをもう一度押すと閉じる（再び開かない）。外を押すと閉じる。Esc で閉じてトリガーにフォーカスが戻る。右クリックで開いたものも外で閉じる", async ({ page }) => {
+    await open(page);
+    const wrap = page.getByTestId("demo-context");
+    const btn = wrap.getByRole("button", { name: "行の操作" });
+    const menu = page.getByRole("menu", { name: "行の操作" });
+    await btn.click();
+    await expect(menu).toBeVisible();
+    await btn.click();
+    await expect(menu).toBeHidden();
+    await expect(btn).toHaveAttribute("aria-expanded", "false");
+    // it can be opened again afterwards
+    await btn.click();
+    await expect(menu).toBeVisible();
+    // outside press
+    await page.getByRole("heading", { level: 1, name: "デザイン見本" }).click();
+    await expect(menu).toBeHidden();
+    // Escape returns focus to the trigger
+    await btn.click();
+    await expect(menu).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(btn).toBeFocused();
+    // opened by a right click (no trigger involved): an outside press closes it
+    await wrap.click({ button: "right" });
+    await expect(menu).toBeVisible();
+    await page.getByRole("heading", { level: 1, name: "デザイン見本" }).click();
+    await expect(menu).toBeHidden();
+  });
+
+  test("39. 現場モードでは [ ] キーが効かない（⌘K・? と同じ）。通常のときは効く", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, "screen=workspace&field=1");
+    const toggle = page.getByTestId("workspace-toggle-left");
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await page.locator("body").click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press("[");
+    await page.keyboard.press("]");
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByTestId("workspace-toggle-right")).toHaveAttribute("aria-expanded", "true");
+    // switching field mode off in the page turns the keys on
+    await page.getByTestId("ctl-field").click();
+    await expect(root(page)).toHaveAttribute("data-catalog-field", "0");
+    await page.locator("body").click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press("[");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("40. 共有 URL（?theme=dark&palette=3）を OS が明るい端末で開くと、JS（水和）より前の最初の描画から暗・案 3", async ({ browser }) => {
+    const context = await browser.newContext({ colorScheme: "light" });
+    const page = await context.newPage();
+    // block every script file so that only the inline script in the HTML can have run (= before hydration)
+    await page.route(/\/_next\/static\/.*\.js/, (r) => r.abort());
+    await page.goto(`${CATALOG}/ops/design?theme=dark&palette=3`);
+    await expect(root(page)).toBeVisible();
+    await expect(root(page)).toHaveAttribute("data-hydrated", "0");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    const v = await root(page).evaluate((el) => ({ scheme: getComputedStyle(el).colorScheme, bg: getComputedStyle(el).backgroundColor, p: el.getAttribute("data-palette") }));
+    expect(v.scheme).toBe("dark");
+    expect(v.p).toBe("3");
+    expect(v.bg).not.toBe("rgb(245, 245, 247)");
+    // auto and light emit no theme script
+    const plain = await (await page.request.get(`${CATALOG}/ops/design`)).text();
+    expect(plain).not.toContain("dataset.theme");
+    await context.close();
   });
 });

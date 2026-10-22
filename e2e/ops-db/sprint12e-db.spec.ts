@@ -601,7 +601,9 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await tid(page, "incident-quick-injury-no").click();
     await tid(page, "incident-quick-submit").click();
     await expect(tid(page, "incident-quick-unsent")).toContainText("未送信 1 件");
-    expect(await listForPlan(bm, plan.id)).toHaveLength(2);
+    // "unsent 1" is shown from the device's own state as soon as the button is pressed; the server has the row only once the
+    // (dropped-response) POST has been committed, so wait for it instead of reading once
+    await expect.poll(async () => (await listForPlan(bm, plan.id)).length).toBe(2);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
     await expect(tid(page, "incident-quick-unsent")).toContainText("送信済み");
     expect(await listForPlan(bm, plan.id)).toHaveLength(2);

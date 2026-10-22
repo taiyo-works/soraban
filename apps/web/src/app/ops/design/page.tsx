@@ -17,5 +17,14 @@ export default async function DesignCatalogPage({ searchParams }: { readonly sea
   await connection();
   if (!isDesignCatalogEnabled(process.env)) notFound();
   // The configuration (theme, palette, field mode, density, screen) comes from the query string so a view can be shared as a link.
-  return <DesignCatalog initial={parseConfig(await searchParams)} />;
+  const initial = parseConfig(await searchParams);
+  // A forced theme must be on <html> before the first paint (html[data-theme] drives the tokens and color-scheme). The
+  // client effect only handles later changes. This inline script runs while the document is parsed, before the
+  // stylesheet-dependent content paints; its value is one of two fixed words (the parsed enum), never the raw query.
+  return (
+    <>
+      {initial.theme === "auto" ? null : <script dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme="${initial.theme}"` }} />}
+      <DesignCatalog initial={initial} />
+    </>
+  );
 }

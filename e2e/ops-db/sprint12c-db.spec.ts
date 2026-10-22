@@ -869,7 +869,8 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await btn.click();
     await expect(btn).toHaveText("着陸");
     await expect(page.getByTestId("field-unsent")).toContainText("未送信 1 件");
-    expect((await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff")).toHaveLength(2);
+    // the label comes from the device's own state; the server has the row once the dropped-response POST is committed
+    await expect.poll(async () => (await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff").length).toBe(2);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
     await expect(page.getByTestId("field-unsent")).toContainText("送信済み");
     expect((await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff")).toHaveLength(2);
