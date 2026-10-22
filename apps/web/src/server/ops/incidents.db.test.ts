@@ -51,7 +51,6 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
   let pilotMember2: MemberRow;
   let viewer: MemberRow;
   let pilotA: PilotRow;
-  let pilotB: PilotRow;
   let pilotOrgB: PilotRow;
   let aircraftW: string;
   let aircraftOrgB: string;
@@ -203,7 +202,8 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
     viewer = await addMember(orgA, "viewer", "s12e-viewer");
     managerB = await addMember(orgB, "manager", "s12e-mgr-b");
     pilotA = await addPilot(orgA, "操縦 一郎", pilotMember.id);
-    pilotB = await addPilot(orgA, "操縦 二郎", pilotMember2.id);
+    // pilotMember2 に結び付いた操縦者（「自分の分」の判定で、別の操縦者として使う）
+    await addPilot(orgA, "操縦 二郎", pilotMember2.id);
     pilotOrgB = await addPilot(orgB, "組織B 操縦者", null);
     const mk = async (ctx: OpsContext) =>
       (
