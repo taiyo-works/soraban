@@ -20,6 +20,7 @@ import * as plans from "./plans";
 import * as rec from "./records";
 import * as svc from "./service";
 import { OpsError, type OpsContext } from "./service";
+import * as store from "./store";
 import type { OpsDb } from "./store";
 import * as today from "./today";
 
@@ -537,6 +538,47 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       expect(late.created).toBe(false);
     });
 
+    it("再送で、最初の要求が明示した引き継ぎの項目を null・空で消すと 409 request_conflict。省略（引き継ぎ待ち）は比べない。最初も空で引き継いだ値なら同じ要求", async () => {
+      const p = await newPlan();
+      const body = { ...FULL, planId: p.id, placeName: "倉庫の前", clientRequestId: randomUUID() };
+      const first = (await incidents.createIncident(mgr(), body)).record;
+      expect(first).toMatchObject({ placeName: "倉庫の前", planId: p.id, aircraftId: aircraftW });
+      await expectOpsError(incidents.createIncident(mgr(), { ...body, placeName: null }), 409, "request_conflict");
+      await expectOpsError(incidents.createIncident(mgr(), { ...body, placeName: "" }), 409, "request_conflict");
+      await expectOpsError(incidents.createIncident(mgr(), { ...body, planId: null }), 409, "request_conflict");
+      // 省略（undefined）は引き継ぎ待ちとして比べない
+      const { placeName: _p, ...omitted } = body;
+      void _p;
+      const again = await incidents.createIncident(mgr(), omitted);
+      expect(again).toMatchObject({ created: false, record: { id: first.id, placeName: "倉庫の前" } });
+      // 事務所の入力画面の形（空の項目を null で送る）：最初も空で計画から引き継いだので、同じ本文の再送は同じ要求（200）
+      const form = { ...FULL, planId: p.id, aircraftId: null, pilotId: null, placeName: null, latitude: null, longitude: null, clientRequestId: randomUUID() };
+      const f1 = (await incidents.createIncident(mgr(), form)).record;
+      expect(f1).toMatchObject({ placeName: "フューチャーテック株式会社 本社", aircraftId: aircraftW, pilotId: pilotA.id, latitude: HQ.latitude });
+      expect(await incidents.createIncident(mgr(), form)).toMatchObject({ created: false, record: { id: f1.id } });
+      // 最初に明示した機体を再送が null で消すと、計画から引き継ぐ機体と違えば 409
+      const aircraft2 = (
+        await svc.createAircraft(mgr(), {
+          registrationMark: `JU12E${(seq++).toString().padStart(4, "0")}`,
+          modelName: "Mavic 3",
+          manufacturer: "DJI",
+          serialNumber: `SN-${seq}`,
+          typeCertified: false,
+          initialFlightMinutes: 0,
+          maxTakeoffWeightKg: 0.9,
+        })
+      ).id;
+      const withAircraft = { ...form, aircraftId: aircraft2, clientRequestId: randomUUID() };
+      expect((await incidents.createIncident(mgr(), withAircraft)).record.aircraftId).toBe(aircraft2);
+      await expectOpsError(incidents.createIncident(mgr(), { ...withAircraft, aircraftId: null }), 409, "request_conflict");
+      // 簡易記録：計画の ID を null で消すと 409。読まない項目（場所・座標など）は比べない
+      const q = quick({ planId: p.id });
+      const q1 = (await incidents.createIncident(mgr(), q)).record;
+      expect(q1.placeName).toBe("フューチャーテック株式会社 本社");
+      expect(await incidents.createIncident(mgr(), { ...q, placeName: null, latitude: null, longitude: null })).toMatchObject({ created: false, record: { id: q1.id } });
+      await expectOpsError(incidents.createIncident(mgr(), { ...q, planId: null }), 409, "request_conflict");
+    });
+
     it("訂正は reason と expectedVersion が必須（違えば 409 version_conflict）。訂正前の値は版の履歴に残り、類型・区分の変更で目安が再計算される（本文の目安は読まない）", async () => {
       const a = await newIncident();
       await expectOpsError(incidents.updateIncident(mgr(), a.id, { details: "x" }), 400, "invalid_input");
@@ -800,6 +842,55 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       // 取消すと消える
       await incidents.voidIncident(c, q.id, { expectedVersion: 1, reason: "誤登録" });
       expect(await ids(c)).toEqual([]);
+    });
+
+    it("一覧の上限（500 件）を超える組織でも、最も古い未解決の記録に「報告の要否を確認する」が出る。候補は未解決のものだけ（報告済みで事実が同じものは引かない）", async () => {
+      const org = (await owner.query("insert into organizations (name) values ('組織E') returning id")).rows[0].id;
+      const m = await addMember(org, "manager", "s12e-mgr-e");
+      const c = ctxOf(m);
+      const oldest = (await incidents.createIncident(c, { ...FULL, occurredAt: "2024-04-01T09:00", summary: "最も古い未解決の記録" })).record;
+      // 報告の要否を確かめた記録（事実が同じ）→ 候補に入らない。対応状況だけの訂正（版は上がる・事実は同じ）でも入らない
+      const consulted = (await incidents.createIncident(c, { ...FULL, occurredAt: "2024-05-01T09:00", summary: "確かめ済み" })).record;
+      await incidents.createIncidentReport(c, consulted.id, { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } });
+      await incidents.updateIncident(c, consulted.id, { expectedVersion: 1, reason: "対応済み", followUpStatus: "done", followUpOn: "2027-01-05" });
+      // 報告の記録のあとで事実が変わった記録 → 候補に入る（「内容が変わりました」）
+      const changed = (await incidents.createIncident(c, { ...FULL, occurredAt: "2024-06-01T09:00", summary: "あとで変わった" })).record;
+      await incidents.createIncidentReport(c, changed.id, { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } });
+      await incidents.updateIncident(c, changed.id, { expectedVersion: 1, reason: "類型の追加", eventTypes: ["minor_injury", "property_damage"] });
+      // それより新しい記録を SQL でまとめて 520 件入れる（目安が none_selected。一覧の上限を超える）
+      await owner.query(
+        `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind)
+         select $1, 'incident_record', gen_random_uuid(), 'create', $2::jsonb || jsonb_build_object('summary', '一括 ' || g), 'system'
+           from generate_series(1, 520) g`,
+        [org, JSON.stringify(rawData({ kind: "near_miss", occurred_at: "2026-12-01T10:00", event_types: ["none"], people_injury: "no", guidance_level: "none_selected" }))],
+      );
+      const list = await incidents.listIncidents(c);
+      expect(list).toHaveLength(500);
+      expect(list.some((x) => x.id === oldest.id)).toBe(false);
+      const actions = await incidents.incidentTodayActions(c);
+      expect(actions.filter((x) => x.id === "confirm_incident_report").map((x) => x.href).sort()).toEqual(
+        [`/ops/incidents/${oldest.id}#report`, `/ops/incidents/${changed.id}#report`].sort(),
+      );
+      expect(actions.find((x) => x.href === `/ops/incidents/${changed.id}#report`)!.reason).toContain("内容が変わりました");
+      expect((await store.listIncidentTodayCandidates(app as unknown as OpsDb, org, "2026-12-22")).map((r) => r.id).sort()).toEqual([oldest.id, changed.id].sort());
+      // 「今日」の画面（上位の件数の中）にも出る
+      expect((await today.getToday(c, { limit: 100 })).nextActions.some((x) => x.href === `/ops/incidents/${oldest.id}#report`)).toBe(true);
+      // 確かめた記録を取り下げると、再び候補に入る
+      const rec1 = (await incidents.getIncident(c, consulted.id)).reportRecords[0]!;
+      await incidents.createIncidentReport(c, consulted.id, { action: "retract", targetRecordId: rec1.id, reason: "誤り" });
+      expect((await incidents.incidentTodayActions(c)).some((x) => x.href === `/ops/incidents/${consulted.id}#report`)).toBe(true);
+      // 詳細の記入待ちは、起きた日から 14 日目までの分だけを候補に引く（報告の要否を確かめたあとでも詳細の記入は出る）
+      const q10 = (await incidents.createIncident(ctxOf(m, { now: () => new Date(NOW.getTime() - 10 * DAY) }), quick({ occurredAt: "2026-12-26T11:58" }))).record;
+      const q20 = (await incidents.createIncident(ctxOf(m, { now: () => new Date(NOW.getTime() - 20 * DAY) }), quick({ occurredAt: "2026-12-16T11:58" }))).record;
+      for (const q of [q10, q20]) {
+        await incidents.createIncidentReport(c, q.id, { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } });
+      }
+      const ids = (await store.listIncidentTodayCandidates(app as unknown as OpsDb, org, "2026-12-22")).map((r) => r.id);
+      expect(ids).toContain(q10.id);
+      expect(ids).not.toContain(q20.id);
+      const after = await incidents.incidentTodayActions(c);
+      expect(after.some((x) => x.id === "complete_incident_detail" && x.href === `/ops/incidents/${q10.id}#correct`)).toBe(true);
+      expect(after.some((x) => x.href.includes(q20.id))).toBe(false);
     });
 
     it("計画・日誌に結び付いた記録の要約。日誌の「安全に影響のあった事項」は記録を自動で作らず、入力画面への経路だけを返す", async () => {

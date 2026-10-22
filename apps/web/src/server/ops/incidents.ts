@@ -25,6 +25,7 @@ import {
   INCIDENT_CHANGED_SINCE_REPORT,
   INCIDENT_CONTACT_LABEL,
   INCIDENT_DETAIL_PENDING_LABEL,
+  INCIDENT_DETAIL_DUE_DAYS,
   INCIDENT_DETAIL_PENDING_MARK,
   INCIDENT_EVENT_TYPE_NOTICE,
   INCIDENT_FACT_NOTICE,
@@ -71,6 +72,7 @@ import {
   incidentNextActions,
   incidentReportState,
   validateIncident,
+  validateIncidentCorrection,
   validateIncidentReport,
   type IncidentData,
   type IncidentFacts,
@@ -629,9 +631,16 @@ const checkTime = (ctx: OpsContext, mode: IncidentMode, at: Date, queued: boolea
   }
 };
 
-/** サーバーが決める項目を足した版の data。snapshot_id は DB が決める（送った値は使われない）。 */
-const versionData = (d: IncidentData, extra: { readonly clientRequestId: string | null; readonly source: string }): Record<string, unknown> => {
-  const g = incidentGuidance(d.event_types);
+/**
+ * サーバーが決める項目を足した版の data。snapshot_id は DB が決める（送った値は使われない）。
+ * 目安は revision（既定は現在の版。訂正で類型を変えないときは保存済みの版）のデータで計算する。
+ */
+const versionData = (
+  d: IncidentData,
+  extra: { readonly clientRequestId: string | null; readonly source: string },
+  revision: number = INCIDENT_GUIDANCE_REVISION,
+): Record<string, unknown> => {
+  const g = incidentGuidance(d.event_types, revision);
   return {
     ...d,
     source: extra.source,
@@ -642,14 +651,45 @@ const versionData = (d: IncidentData, extra: { readonly clientRequestId: string 
   };
 };
 
-/** 同じ clientRequestId の再送が、最初の作成と同じ内容か（入力が空で引き継いだ項目は比べない。作成者も同じであること）。 */
-const sameRequest = (ctx: OpsContext, first: { data: Record<string, unknown>; actor_member_id: string | null }, d: IncidentData): boolean => {
+/** 引き継ぐ項目の、版の data のキー → API の入力のキー。 */
+const INHERITED_INPUT: Readonly<Record<(typeof INHERITED)[number], string>> = {
+  plan_id: "planId",
+  aircraft_id: "aircraftId",
+  pilot_id: "pilotId",
+  place_name: "placeName",
+  latitude: "latitude",
+  longitude: "longitude",
+};
+
+const sameValue = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+/**
+ * 同じ clientRequestId の再送が、最初の作成と同じ内容か（作成者も同じであること）。
+ * 引き継ぐ項目が空のとき：
+ *   - 入力で省略した（undefined。簡易記録が読まない項目を含む）なら、引き継ぎ待ちとして比べない。
+ *   - 明示的に空にした（null・空文字）なら、引き継いだ結果で比べる。最初の要求が明示した値を再送が消した場合は、
+ *     引き継ぎで同じ値にならない限り内容が違う（409）。最初の要求も空で引き継いだ値なら同じになる。
+ */
+const sameRequest = async (
+  ctx: OpsContext,
+  first: { data: Record<string, unknown>; actor_member_id: string | null },
+  d: IncidentData,
+  raw: Readonly<Record<string, unknown>>,
+  mode: IncidentMode,
+): Promise<boolean> => {
   if (first.actor_member_id !== ctx.member.id) return false;
+  const cleared: string[] = [];
   for (const [k, v] of Object.entries(d)) {
-    if (v === null && (INHERITED as readonly string[]).includes(k)) continue;
-    if (JSON.stringify(first.data[k] ?? null) !== JSON.stringify(v)) return false;
+    if (v === null && (INHERITED as readonly string[]).includes(k)) {
+      const omitted = raw[INHERITED_INPUT[k as keyof typeof INHERITED_INPUT]] === undefined || (mode === "quick" && k !== "plan_id");
+      if (!omitted && !sameValue(first.data[k], null)) cleared.push(k);
+      continue;
+    }
+    if (!sameValue(first.data[k], v)) return false;
   }
-  return true;
+  if (cleared.length === 0) return true;
+  const resolved = await resolveLinks(ctx, d);
+  return cleared.every((k) => sameValue(first.data[k], resolved[k as keyof IncidentData]));
 };
 
 export type IncidentSaveResult = { readonly created: boolean; readonly record: IncidentDetailDto };
@@ -682,7 +722,7 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
   if (requestId) {
     const first = await store.firstVersionOf(ctx.db, ctx.member.org_id, "incident_record", id);
     if (first) {
-      if (!sameRequest(ctx, first, v.data)) throw new OpsError(409, "request_conflict");
+      if (!(await sameRequest(ctx, first, v.data, rest, mode))) throw new OpsError(409, "request_conflict");
       return { created: false, record: await getIncident(ctx, id) };
     }
   }
@@ -702,7 +742,7 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
     // 並行の再送：先に作られた記録と比べる
     if (e instanceof OpsError && (e.code === "already_exists" || e.code === "duplicate_request") && requestId) {
       const first = await store.firstVersionOf(ctx.db, ctx.member.org_id, "incident_record", id);
-      if (first && sameRequest(ctx, first, v.data)) return { created: false, record: await getIncident(ctx, id) };
+      if (first && (await sameRequest(ctx, first, v.data, rest, mode))) return { created: false, record: await getIncident(ctx, id) };
       throw new OpsError(409, "request_conflict");
     }
     throw e;
@@ -727,7 +767,11 @@ export const updateIncident = async (ctx: OpsContext, id: string, body: unknown)
   const input = asInput(body);
   const meta = validateChangeMeta(input);
   const base = (await store.latestVersionData(ctx.db, ctx.member.org_id, "incident_record", current.id)) ?? {};
-  const v = validateIncident({ ...inputFromData(base), ...pickFields(input, INCIDENT_FIELDS) }, "full");
+  // 事象の類型を変えないなら保存済みの版で検査する（変えない値を現在の版で拒まない）。変えるなら現在の版で検査し、目安を再計算する
+  const { v, revision } = validateIncidentCorrection({ ...inputFromData(base), ...pickFields(input, INCIDENT_FIELDS) }, input, {
+    eventTypes: current.event_types,
+    revision: current.guidance_revision,
+  });
   if (!meta.ok || !v.ok) return invalid(v, meta.ok ? undefined : { errors: { ...meta.errors }, codes: {} });
   if (current.voided_at !== null) throw new OpsError(409, "voided");
   checkTime(ctx, "full", v.occurredAtDate, false);
@@ -737,10 +781,14 @@ export const updateIncident = async (ctx: OpsContext, id: string, body: unknown)
     entityType: "incident_record",
     entityId: current.id,
     op: "update",
-    data: versionData(data, {
-      clientRequestId: typeof base["client_request_id"] === "string" ? base["client_request_id"] : null,
-      source: typeof base["source"] === "string" ? base["source"] : "office",
-    }),
+    data: versionData(
+      data,
+      {
+        clientRequestId: typeof base["client_request_id"] === "string" ? base["client_request_id"] : null,
+        source: typeof base["source"] === "string" ? base["source"] : "office",
+      },
+      revision,
+    ),
     reason: meta.data.reason,
     actorMemberId: ctx.member.id,
     expectedVersion: meta.data.expectedVersion,
@@ -900,16 +948,21 @@ export const listFlightIncidents = async (ctx: OpsContext, flightId: string): Pr
 
 // ---- 「今日」の次にやること ------------------------------------------------------------------------
 
+/** YYYY-MM-DD の日付から days 日前の日付。 */
+const daysBefore = (date: string, days: number): string => {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, m - 1, d) - days * 86_400_000).toISOString().slice(0, 10);
+};
+
 /**
- * 事故・ヒヤリハットの次にやること（記録の有無から毎回導出する。保存しない）。取消していない記録と報告の記録をまとめて引く（2 クエリ）。
- * 計画に結び付かない記録の分も出る。
+ * 事故・ヒヤリハットの次にやること（記録の有無から毎回導出する。保存しない）。未解決の候補と、その報告の記録をまとめて引く（2 クエリ）。
+ * 候補は一覧の上限なしで引く（報告の要否の確認は、確認が済むまで日数・件数に関係なく出し続ける）。計画に結び付かない記録の分も出る。
  */
 export const incidentTodayActions = async (ctx: OpsContext): Promise<TodayNextAction[]> => {
   if (!can(ctx.member.role, "incident.read")) return [];
   const now = nowOf(ctx);
   const today = jstDate(now);
-  const rows = await store.listIncidents(ctx.db, ctx.member.org_id, {});
-  const candidates = rows.filter((r) => r.guidance_level === "possible" || r.detail_pending);
+  const candidates = await store.listIncidentTodayCandidates(ctx.db, ctx.member.org_id, daysBefore(today, INCIDENT_DETAIL_DUE_DAYS));
   const reports = groupReports(await store.listIncidentReportRecordsFor(ctx.db, ctx.member.org_id, candidates.map((r) => r.id)));
   return incidentNextActions(
     candidates.map((r) => {

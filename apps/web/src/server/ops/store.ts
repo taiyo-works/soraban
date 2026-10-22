@@ -1196,6 +1196,37 @@ export const listIncidents = async (db: Queryable, orgId: string, f: IncidentFil
   ).rows;
 };
 
+/**
+ * 「今日」の次にやることの候補（取消していない記録のうち、未解決のものだけ）。一覧の上限（LIMIT）をかけない。1 回のクエリで、件数に依らない。
+ *   - 目安が possible で、有効な（取り下げられていない）報告・要否の確認の記録のうち、記録した時点の版の事実（区分・類型・けがの有無・人数）が
+ *     いまの事実と同じものが無い（記録が無い、または記録のあとで事実が変わった。指紋の比較と同じ条件）。
+ *   - 詳細の記入待ち（detail_pending）で、起きた日（JST）が detailSince（YYYY-MM-DD）以後。
+ * 報告の状態の最終の判定は、サービス層が報告の記録から導出する（ここは候補を絞るだけ）。
+ */
+export const listIncidentTodayCandidates = async (db: Queryable, orgId: string, detailSince: string): Promise<IncidentRowWithJoins[]> =>
+  (
+    await db.query<IncidentRowWithJoins>(
+      `${INCIDENT_SELECT}
+        where i.org_id = $1 and i.voided_at is null
+          and ((i.guidance_level = 'possible' and not exists (
+                 select 1 from incident_report_records r
+                   join record_versions rv on rv.org_id = r.org_id and rv.entity_type = 'incident_record'
+                                          and rv.entity_id = r.incident_id and rv.version_no = r.incident_version
+                  where r.org_id = i.org_id and r.incident_id = i.id and r.action in ('reported', 'consulted')
+                    and not exists (select 1 from incident_report_records t
+                                     where t.org_id = r.org_id and t.incident_id = r.incident_id
+                                       and t.action = 'retract' and t.target_record_id = r.id)
+                    and rv.data->>'kind' = i.kind
+                    and rv.data->>'people_injury' = i.people_injury
+                    and (rv.data->>'injured_count')::integer is not distinct from i.injured_count
+                    and (select array_agg(x order by x collate "C") from jsonb_array_elements_text(rv.data->'event_types') x)
+                        = (select array_agg(x order by x collate "C") from jsonb_array_elements_text(i.event_types) x)))
+               or (i.detail_pending and ops_timestamptz_to_jst_minute(i.occurred_at) >= $2))
+        order by i.occurred_at desc, i.id desc`,
+      [orgId, detailSince],
+    )
+  ).rows;
+
 /** 報告の記録の行に、並べ替え用のマイクロ秒つきの時刻と、日時の JST の分を付けたもの。 */
 export type IncidentReportRowWithTimes = IncidentReportRecordRow & {
   readonly created_at_us: string;

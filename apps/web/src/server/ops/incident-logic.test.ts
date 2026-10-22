@@ -4,17 +4,27 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { NEXT_ACTION_LABEL } from "@soraban/dips";
-import { EVENT_TYPE_NONE, EVENT_TYPE_UNKNOWN, INCIDENT_CHANGED_SINCE_REPORT } from "@/lib/ops-incident";
+import {
+  EVENT_TYPE_NONE,
+  EVENT_TYPE_UNKNOWN,
+  INCIDENT_CHANGED_SINCE_REPORT,
+  INCIDENT_GUIDANCE_REVISION_1,
+  INCIDENT_GUIDANCE_REVISIONS,
+  incidentGuidance,
+  type IncidentGuidanceRevisionData,
+} from "@/lib/ops-incident";
 import { INCIDENT_FORBIDDEN, NUMERIC_DEADLINE } from "@/lib/incident-words.test-helpers";
 import { can, OPS_ACTIONS } from "./authz";
 import {
   checkEventTypes,
+  correctionRevision,
   INCIDENT_FIELD_LABELS,
   INCIDENT_VALIDATION_MESSAGE,
   incidentFactsSource,
   incidentNextActions,
   incidentReportState,
   validateIncident,
+  validateIncidentCorrection,
   validateIncidentReport,
   type IncidentActionInput,
   type IncidentReportRecordLite,
@@ -129,6 +139,64 @@ describe("validateIncident（full）", () => {
     const r = validateIncident({ ...rest, detailPending: true }, "full");
     expect(r.ok && r.data).toMatchObject({ summary: null, detail_pending: true });
     expect(codesOf(validateIncident({ ...rest, detailPending: false }, "full"))["summary"]).toBe("required");
+  });
+});
+
+describe("validateIncidentCorrection（訂正。類型のデータの版）", () => {
+  // テスト用の版 2：版 1 の loss_by_operation を廃止し、property_damage を damage_to_property に改名した（いまの版を 2 とする）
+  const rev2: IncidentGuidanceRevisionData = {
+    ...INCIDENT_GUIDANCE_REVISION_1,
+    revision: 2,
+    status: "unconfirmed",
+    source: "テスト用の出典（原本照合前）",
+    confirmedOn: null,
+    confirmedBy: null,
+    eventTypes: INCIDENT_GUIDANCE_REVISION_1.eventTypes
+      .filter((t) => t.key !== "loss_by_operation")
+      .map((t) => (t.key === "property_damage" ? { ...t, key: "damage_to_property" } : t)),
+  };
+  const table = [...INCIDENT_GUIDANCE_REVISIONS, rev2];
+  /** 版 1 で保存した記録（版 1 にしかないキーを持つ）。 */
+  const stored = { eventTypes: ["loss_by_operation", "property_damage"], revision: 1 };
+  const base = { ...FULL, kind: "near_miss", peopleInjury: "no", aircraftDamage: "yes", eventTypes: stored.eventTypes, followUpStatus: "open", followUpOn: null };
+  const correct = (input: Record<string, unknown>) => validateIncidentCorrection({ ...base, ...input }, input, stored, 2, table);
+
+  it("前提：版 1 にしかないキーは、いまの版 2 で検査すると unknown_event_type になる", () => {
+    expect(codesOf(validateIncident(base, "full", 2, table))["eventTypes"]).toBe("unknown_event_type");
+  });
+
+  it("類型を変えない訂正（対応状況だけ・概要の訂正・同じ組を並べ替えて送る）は保存済みの版 1 で検査して通り、目安も版 1 で計算する", () => {
+    const status = correct({ followUpStatus: "done", followUpOn: "2027-01-05" });
+    expect(status.revision).toBe(1);
+    expect(status.v.ok && status.v.data).toMatchObject({ follow_up_status: "done", follow_up_on: "2027-01-05", event_types: stored.eventTypes });
+    const summary = correct({ summary: "倉庫の壁に機体が接触した（訂正）", eventTypes: ["property_damage", "loss_by_operation"] });
+    expect(summary.revision).toBe(1);
+    expect(summary.v.ok && summary.v.data).toMatchObject({ summary: "倉庫の壁に機体が接触した（訂正）" });
+    if (!summary.v.ok) return;
+    expect(incidentGuidance(summary.v.data.event_types, summary.revision, table)).toMatchObject({ level: "possible", revision: 1, reasons: ["property_damage"] });
+  });
+
+  it("類型を変える訂正は、いまの版 2 で検査し（版 1 にしかないキーは 400）、版 2 で目安を再計算する", () => {
+    const old = correct({ eventTypes: ["loss_by_operation"] });
+    expect(old.revision).toBe(2);
+    expect(codesOf(old.v)["eventTypes"]).toBe("unknown_event_type");
+    const renamed = correct({ eventTypes: ["damage_to_property"] });
+    expect(renamed.revision).toBe(2);
+    expect(renamed.v.ok).toBe(true);
+    if (!renamed.v.ok) return;
+    expect(incidentGuidance(renamed.v.data.event_types, renamed.revision, table)).toMatchObject({ level: "possible", revision: 2, reasons: ["damage_to_property"] });
+    // 重複・配列でない値は「変える」として、いまの版の検査が理由を返す
+    expect(codesOf(correct({ eventTypes: ["property_damage", "property_damage", "loss_by_operation"] }).v)["eventTypes"]).toBe("duplicate");
+    expect(codesOf(correct({ eventTypes: null }).v)["eventTypes"]).toBe("event_types_required");
+  });
+
+  it("correctionRevision：入力に無い・同じ組なら保存済みの版、違う組・配列でなければいまの版", () => {
+    expect(correctionRevision(undefined, stored, 2)).toBe(1);
+    expect(correctionRevision(["property_damage", "loss_by_operation"], stored, 2)).toBe(1);
+    expect(correctionRevision(["property_damage"], stored, 2)).toBe(2);
+    expect(correctionRevision("property_damage", stored, 2)).toBe(2);
+    // 版 1 しかない現在は、どちらでも版 1（いまの挙動のまま）
+    expect(correctionRevision(["none"], { eventTypes: ["minor_injury"], revision: 1 })).toBe(1);
   });
 });
 

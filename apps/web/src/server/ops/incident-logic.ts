@@ -425,6 +425,38 @@ export const validateIncident = (
   };
 };
 
+/**
+ * 訂正で使う類型のデータの版。事象の類型を変えない（入力に無い、または保存済みと同じ組）なら保存済みの版（guidance_revision）で
+ * 検査し、目安もその版で計算する（後の版で類型のキーが廃止・改名されても、変えない値を現在の版で拒まない）。
+ * 類型を変えるなら現在の版で検査し、版を上げて目安を再計算する。
+ */
+export const correctionRevision = (
+  inputEventTypes: unknown,
+  stored: { readonly eventTypes: readonly string[]; readonly revision: number },
+  current: number = INCIDENT_GUIDANCE_REVISION,
+): number => {
+  if (inputEventTypes === undefined) return stored.revision;
+  if (!Array.isArray(inputEventTypes) || inputEventTypes.some((x) => typeof x !== "string")) return current;
+  const a = [...(inputEventTypes as string[])].sort();
+  const b = [...stored.eventTypes].sort();
+  return a.length === b.length && a.every((x, i) => x === b[i]) ? stored.revision : current;
+};
+
+/**
+ * 訂正の入力検査（full）。merged は保存済みの値に入力を重ねたもの、input は訂正の入力そのもの（事象の類型を変えるかを見る）。
+ * 返す revision は、目安の計算と版の data に入れる類型のデータの版。
+ */
+export const validateIncidentCorrection = (
+  merged: Input,
+  input: Input,
+  stored: { readonly eventTypes: readonly string[]; readonly revision: number },
+  current: number = INCIDENT_GUIDANCE_REVISION,
+  table: GuidanceTable = INCIDENT_GUIDANCE_REVISIONS,
+): { readonly v: IncidentValidated; readonly revision: number } => {
+  const revision = correctionRevision("eventTypes" in input ? input["eventTypes"] : undefined, stored, current);
+  return { v: validateIncident(merged, "full", revision, table), revision };
+};
+
 // ---- 国への報告の記録 --------------------------------------------------------------------------
 
 export type IncidentReportData = {
