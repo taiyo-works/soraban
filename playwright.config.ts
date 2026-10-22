@@ -83,6 +83,8 @@ export default defineConfig({
         GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         NEXT_DIST_DIR: ".next-e2e-fixture",
         DATABASE_URL: "",
+        // Sprint 12g：デザイン見本（/ops/design）を表示するのはこの 2 台目だけ（1 台目は無効＝404 の確認用）。静的なページで、他の設定に依らない。
+        DESIGN_CATALOG: "1",
       },
     },
   ],

@@ -273,3 +273,655 @@ html:has(body.has-bottom-nav) {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ============================================================
+ * Sprint 12g stage 1a — new design system tokens
+ * ----------------------------------------------------------
+ * Direction: docs/design/ui-direction.md (calm tonal surfaces, one accent, five semantic colors).
+ * Scope: these tokens are only *used* under `.ds` (the design catalog root today; the ops shell from stage 1b).
+ * Nothing outside `.ds` reads them, so existing screens keep their current look.
+ *
+ * Structure (the cascade order below is relied on by design-tokens.test.ts):
+ *   1. :root                                  light base (neutral, accent, semantic, verdict)
+ *   2. :root [data-palette="2|3"]             light palette overrides (accent; palette 3 also neutrals)
+ *   3. :root .field                           field mode (light), fixed accent, 7:1 body
+ *   4. @media dark  :root:not([data-theme="light"]) ...   dark (OS preference unless forced light)
+ *   5. :root[data-theme="dark"] ...           dark (forced). Same declarations as 4 (a test compares them)
+ * Palettes: 1 = blue (recommended), 2 = indigo (current brand), 3 = charcoal + teal.
+ * ============================================================ */
+
+/* 1. light base */
+:root {
+  --bg-app: #f5f5f7;
+  --bg-surface: #ffffff;
+  --bg-sunken: #efeff4;
+  --fg: #1d1d1f;
+  --fg-soft: #424245;
+  --fg-mute: #636366;
+  --line: #d2d2d7;
+  --line-strong: #8e8e93;
+
+  --accent: #0a5fd0;
+  --accent-hover: #084fae;
+  --accent-fg: #ffffff;
+  --accent-soft: #e8f0fd;
+
+  --ok-fg: #1a6b3a;
+  --ok-bg: #e6f4ea;
+  --ok-line: #2e8b57;
+  --warn-fg: #7a4a06;
+  --warn-bg: #fdf1dc;
+  --warn-line: #a86a0e;
+  --danger-fg: #b3261e;
+  --danger-bg: #fdeceb;
+  --danger-line: #d14343;
+  --info-fg: #0a5fd0;
+  --info-bg: #e8f0fd;
+  --info-line: #2f78e0;
+  --neutral-fg: #48484a;
+  --neutral-bg: #efeff4;
+  --neutral-line: #77777c;
+
+  /* Verdict (4 steps + unknown). Re-measured on the new surfaces (see design-tokens.test.ts). */
+  --verdict-no-fly: #a33232;
+  --verdict-needs: #8a5a0e;
+  --verdict-done: #1d3557;
+  --verdict-clear: #2e6a42;
+  --verdict-unknown: #4f5564;
+
+  /* Shape, depth, motion (same in every theme except where overridden below) */
+  --r-ctl: 8px;
+  --r-card: 12px;
+  --r-sheet: 16px;
+  --r-pill: 999px;
+  /* Shadows are built from plain values (width, colour with alpha, a mix amount); the theme utilities below put
+   * var(--line) in at the element that uses them, so a palette that changes --line is followed. */
+  --sh-ring: 0.5px;
+  --sh-drop: rgb(0 0 0 / 0.04);
+  --sh-float-drop: rgb(0 0 0 / 0.12);
+  --sh-float-mix: 100%;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 200ms;
+  --dur-fast: 120ms;
+  --dur-sheet: 240ms;
+
+  /* Translucency: fixed bars, sheets and menus only (never body content). Opaque fallbacks below. */
+  --glass-alpha: 82%;
+  --glass-filter: saturate(1.6) blur(20px);
+  --scrim: rgb(0 0 0 / 0.4);
+}
+
+/* 2. light palettes */
+:root [data-palette="2"] {
+  --accent: #1f4a99;
+  --accent-hover: #183b7c;
+  --accent-fg: #ffffff;
+  --accent-soft: #e7ecf7;
+}
+:root [data-palette="3"] {
+  --bg-app: #f4f6f8;
+  --bg-surface: #ffffff;
+  --bg-sunken: #ecf0f3;
+  --fg: #14181d;
+  --fg-soft: #3d444d;
+  --fg-mute: #5f6772;
+  --line: #d5dae0;
+  --line-strong: #8a919c;
+  --accent: #0b6f6a;
+  --accent-hover: #095b57;
+  --accent-fg: #ffffff;
+  --accent-soft: #e3f2f0;
+}
+
+/* 3. field mode (light). Own system: 7:1 body, fixed deep-indigo accent, no translucency. */
+:root .field {
+  --bg-app: #f3f4f6;
+  --bg-surface: #ffffff;
+  --bg-sunken: #e9ebef;
+  --fg: #0e1421;
+  --fg-soft: #232a36;
+  --fg-mute: #424a59;
+  --line: #c4c9d2;
+  --line-strong: #5c6573;
+  --accent: #1f4a99;
+  --accent-hover: #183b7c;
+  --accent-fg: #ffffff;
+  --accent-soft: #e7ecf7;
+  --ok-fg: #174c2c;
+  --ok-bg: #e4f3ea;
+  --ok-line: #174c2c;
+  --warn-fg: #6b4004;
+  --warn-bg: #fbf0d9;
+  --warn-line: #6b4004;
+  --danger-fg: #862020;
+  --danger-bg: #fbe6e6;
+  --danger-line: #862020;
+  --info-fg: #17376f;
+  --info-bg: #e6edfa;
+  --info-line: #17376f;
+  --neutral-fg: #2f3542;
+  --neutral-bg: #e9ebef;
+  --neutral-line: #2f3542;
+  --glass-alpha: 100%;
+  --glass-filter: none;
+}
+
+/* 4. dark (OS preference, unless the user forced light) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-app: #000000;
+    --bg-surface: #1c1c1e;
+    --bg-sunken: #2c2c2e;
+    --fg: #f5f5f7;
+    --fg-soft: #d1d1d6;
+    --fg-mute: #a1a1a6;
+    --line: #38383a;
+    --line-strong: #8e8e93;
+
+    --accent: #6aa8ff;
+    --accent-hover: #8dbbff;
+    --accent-fg: #0b0d10;
+    --accent-soft: #12263f;
+
+    --ok-fg: #6fd38f;
+    --ok-bg: #10261a;
+    --ok-line: #3fa564;
+    --warn-fg: #f0c060;
+    --warn-bg: #2b200a;
+    --warn-line: #c18f2a;
+    --danger-fg: #ff9f98;
+    --danger-bg: #321412;
+    --danger-line: #e5645b;
+    --info-fg: #8cb8ff;
+    --info-bg: #0f1d36;
+    --info-line: #4e8fe8;
+    --neutral-fg: #d1d1d6;
+    --neutral-bg: #2c2c2e;
+    --neutral-line: #8e8e93;
+
+    --verdict-no-fly: #e27a72;
+    --verdict-needs: #dcaa4e;
+    --verdict-done: #a9bedc;
+    --verdict-clear: #74b98a;
+    --verdict-unknown: #a3a39c;
+
+    --sh-ring: 1px;
+    --sh-drop: rgb(0 0 0 / 0);
+    --sh-float-drop: rgb(0 0 0 / 0.5);
+    --sh-float-mix: 0%;
+    --scrim: rgb(0 0 0 / 0.6);
+  }
+  :root:not([data-theme="light"]) [data-palette="2"] {
+    --accent: #8fb0f0;
+    --accent-hover: #a6c0f4;
+    --accent-fg: #0b0d10;
+    --accent-soft: #16213a;
+  }
+  :root:not([data-theme="light"]) [data-palette="3"] {
+    --bg-app: #0b0d10;
+    --bg-surface: #14171c;
+    --bg-sunken: #1c2026;
+    --fg: #eef0f3;
+    --fg-soft: #c9ced6;
+    --fg-mute: #98a0ad;
+    --line: #262b33;
+    --line-strong: #7d8694;
+    --accent: #5fc7ba;
+    --accent-hover: #7dd6cb;
+    --accent-fg: #0b0d10;
+    --accent-soft: #10292b;
+  }
+  :root:not([data-theme="light"]) .field {
+    --bg-app: #000000;
+    --bg-surface: #1c1c1e;
+    --bg-sunken: #2c2c2e;
+    --fg: #ffffff;
+    --fg-soft: #e5e5ea;
+    --fg-mute: #b8b8be;
+    --line: #48484a;
+    --line-strong: #a1a1a6;
+    --accent: #a6c0f4;
+    --accent-hover: #bccff7;
+    --accent-fg: #0b0d10;
+    --accent-soft: #16213a;
+    --ok-fg: #6fd38f;
+    --ok-bg: #10261a;
+    --ok-line: #6fd38f;
+    --warn-fg: #f0c060;
+    --warn-bg: #2b200a;
+    --warn-line: #f0c060;
+    --danger-fg: #ff9f98;
+    --danger-bg: #321412;
+    --danger-line: #ff9f98;
+    --info-fg: #8cb8ff;
+    --info-bg: #0f1d36;
+    --info-line: #8cb8ff;
+    --neutral-fg: #e5e5ea;
+    --neutral-bg: #2c2c2e;
+    --neutral-line: #e5e5ea;
+    --glass-alpha: 100%;
+    --glass-filter: none;
+  }
+}
+
+/* 5. dark (forced). Keep identical to block 4. */
+:root[data-theme="dark"] {
+  --bg-app: #000000;
+  --bg-surface: #1c1c1e;
+  --bg-sunken: #2c2c2e;
+  --fg: #f5f5f7;
+  --fg-soft: #d1d1d6;
+  --fg-mute: #a1a1a6;
+  --line: #38383a;
+  --line-strong: #8e8e93;
+
+  --accent: #6aa8ff;
+  --accent-hover: #8dbbff;
+  --accent-fg: #0b0d10;
+  --accent-soft: #12263f;
+
+  --ok-fg: #6fd38f;
+  --ok-bg: #10261a;
+  --ok-line: #3fa564;
+  --warn-fg: #f0c060;
+  --warn-bg: #2b200a;
+  --warn-line: #c18f2a;
+  --danger-fg: #ff9f98;
+  --danger-bg: #321412;
+  --danger-line: #e5645b;
+  --info-fg: #8cb8ff;
+  --info-bg: #0f1d36;
+  --info-line: #4e8fe8;
+  --neutral-fg: #d1d1d6;
+  --neutral-bg: #2c2c2e;
+  --neutral-line: #8e8e93;
+
+  --verdict-no-fly: #e27a72;
+  --verdict-needs: #dcaa4e;
+  --verdict-done: #a9bedc;
+  --verdict-clear: #74b98a;
+  --verdict-unknown: #a3a39c;
+
+  --sh-ring: 1px;
+  --sh-drop: rgb(0 0 0 / 0);
+  --sh-float-drop: rgb(0 0 0 / 0.5);
+  --sh-float-mix: 0%;
+  --scrim: rgb(0 0 0 / 0.6);
+}
+:root[data-theme="dark"] [data-palette="2"] {
+  --accent: #8fb0f0;
+  --accent-hover: #a6c0f4;
+  --accent-fg: #0b0d10;
+  --accent-soft: #16213a;
+}
+:root[data-theme="dark"] [data-palette="3"] {
+  --bg-app: #0b0d10;
+  --bg-surface: #14171c;
+  --bg-sunken: #1c2026;
+  --fg: #eef0f3;
+  --fg-soft: #c9ced6;
+  --fg-mute: #98a0ad;
+  --line: #262b33;
+  --line-strong: #7d8694;
+  --accent: #5fc7ba;
+  --accent-hover: #7dd6cb;
+  --accent-fg: #0b0d10;
+  --accent-soft: #10292b;
+}
+:root[data-theme="dark"] .field {
+  --bg-app: #000000;
+  --bg-surface: #1c1c1e;
+  --bg-sunken: #2c2c2e;
+  --fg: #ffffff;
+  --fg-soft: #e5e5ea;
+  --fg-mute: #b8b8be;
+  --line: #48484a;
+  --line-strong: #a1a1a6;
+  --accent: #a6c0f4;
+  --accent-hover: #bccff7;
+  --accent-fg: #0b0d10;
+  --accent-soft: #16213a;
+  --ok-fg: #6fd38f;
+  --ok-bg: #10261a;
+  --ok-line: #6fd38f;
+  --warn-fg: #f0c060;
+  --warn-bg: #2b200a;
+  --warn-line: #f0c060;
+  --danger-fg: #ff9f98;
+  --danger-bg: #321412;
+  --danger-line: #ff9f98;
+  --info-fg: #8cb8ff;
+  --info-bg: #0f1d36;
+  --info-line: #8cb8ff;
+  --neutral-fg: #e5e5ea;
+  --neutral-bg: #2c2c2e;
+  --neutral-line: #e5e5ea;
+  --glass-alpha: 100%;
+  --glass-filter: none;
+}
+
+/* Opaque fallbacks for translucency (no backdrop-filter, reduced transparency, more contrast). */
+@supports not (backdrop-filter: blur(1px)) {
+  :root {
+    --glass-alpha: 100%;
+    --glass-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root {
+    --glass-alpha: 100%;
+    --glass-filter: none;
+  }
+}
+
+/* Tailwind names for the new tokens (bg-surface, text-fg-mute, border-line-strong, bg-ok-bg, ...). */
+@theme inline {
+  --color-app: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-sunken: var(--bg-sunken);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-fg-mute: var(--fg-mute);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok-fg: var(--ok-fg);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-line: var(--ok-line);
+  --color-warn-fg: var(--warn-fg);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-line: var(--warn-line);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-line: var(--danger-line);
+  --color-info-fg: var(--info-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-line: var(--info-line);
+  --color-neutral-fg: var(--neutral-fg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-line: var(--neutral-line);
+  --color-glass: color-mix(in srgb, var(--bg-surface) var(--glass-alpha), transparent);
+  --radius-ctl: var(--r-ctl);
+  --radius-card: var(--r-card);
+  --radius-sheet: var(--r-sheet);
+  --radius-pill: var(--r-pill);
+  --shadow-card: 0 0 0 var(--sh-ring) var(--line), 0 1px 2px var(--sh-drop);
+  --shadow-float: 0 8px 30px var(--sh-float-drop), 0 0 0 0.5px color-mix(in srgb, var(--line) var(--sh-float-mix), var(--line-strong));
+  --text-h1: var(--fs-h1);
+  --text-h1--line-height: 1.3;
+  --text-h2: var(--fs-h2);
+  --text-h2--line-height: 1.35;
+  --text-h3: var(--fs-h3);
+  --text-h3--line-height: 1.4;
+  --text-body: var(--fs-body);
+  --text-body--line-height: 1.5;
+  --text-table: var(--fs-table);
+  --text-table--line-height: 1.45;
+  --text-aux: var(--fs-aux);
+  --text-aux--line-height: 1.5;
+  --text-stat: var(--fs-stat);
+  --text-stat--line-height: 1.1;
+  --text-state: var(--fs-state);
+  --text-state--line-height: 1.3;
+}
+
+/* Variants: force a state in the catalog (data-force="hover focus") and key off field mode / density. */
+@custom-variant hov (&:is(:hover, [data-force~="hover"]));
+@custom-variant foc (&:is(:focus-visible, [data-force~="focus"]));
+@custom-variant field (&:where(.field, .field *));
+@custom-variant compact (&:where([data-density="compact"], [data-density="compact"] *));
+
+/* ------------------------------------------------------------
+ * `.ds` — the scope in which the new system applies.
+ * ---------------------------------------------------------- */
+.ds {
+  color-scheme: light dark;
+  --ds-font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
+    "Yu Gothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+  --ds-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace;
+
+  /* type scale (docs/design/ui-direction.md 3.2) */
+  --fs-h1: 22px;
+  --fs-h2: 17px;
+  --fs-h3: 15px;
+  --fs-body: 15px;
+  --fs-table: 14px;
+  --fs-aux: 12px;
+  --fs-stat: 30px;
+  --fs-state: 14px;
+  --tap: 44px;
+
+  background: var(--bg-app);
+  color: var(--fg);
+  font-family: var(--ds-font-sans);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: 1.6;
+  font-feature-settings: normal;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Old token names resolve to the new values under `.ds` (removed in stage 5). Re-declared on nested
+ * scopes because a custom property holding var() is resolved where it is declared. */
+.ds,
+.ds .field,
+.ds [data-palette] {
+  --color-paper: var(--bg-surface);
+  --color-paper-soft: var(--bg-sunken);
+  --color-paper-deep: var(--bg-sunken);
+  --color-ink: var(--fg);
+  --color-ink-soft: var(--fg-soft);
+  --color-ink-mute: var(--fg-mute);
+  --color-rule: var(--line);
+  --color-rule-soft: var(--line);
+  --color-indigo-50: var(--accent-soft);
+  --color-indigo-100: var(--accent-soft);
+  --color-indigo-300: var(--accent);
+  --color-indigo-500: var(--accent);
+  --color-indigo-700: var(--accent);
+  --color-indigo-900: var(--fg);
+  --color-signal-red: var(--danger-line);
+  --color-signal-red-soft: var(--danger-bg);
+  --color-signal-amber: var(--warn-line);
+  --color-signal-amber-soft: var(--warn-bg);
+  --color-signal-green: var(--ok-line);
+  --color-signal-green-soft: var(--ok-bg);
+  --color-signal-mute: var(--neutral-line);
+  --color-signal-mute-soft: var(--neutral-bg);
+  --color-verdict-no-fly: var(--verdict-no-fly);
+  --color-verdict-needs: var(--verdict-needs);
+  --color-verdict-done: var(--verdict-done);
+  --color-verdict-clear: var(--verdict-clear);
+  --color-verdict-unknown: var(--verdict-unknown);
+  --radius-sharp: var(--r-ctl);
+  --radius-soft: var(--r-ctl);
+  /* App icon proposals: the accent (a placeholder blue) and the text-on-accent colour of the chosen palette. */
+  --appicon-bg: var(--accent);
+  --appicon-fg: var(--accent-fg);
+  --font-sans: var(--ds-font-sans);
+  --font-display: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
+}
+@media (min-width: 1024px) {
+  .ds {
+    --fs-h1: 24px;
+    --fs-h2: 18px;
+    --fs-body: 14px;
+    --fs-table: 13px;
+  }
+}
+.ds.field,
+.ds .field {
+  --fs-h1: 26px;
+  --fs-h2: 22px;
+  --fs-h3: 20px;
+  --fs-body: 18px;
+  --fs-table: 18px;
+  --fs-aux: 14px;
+  --fs-state: 20px;
+  --tap: 56px;
+  font-size: var(--fs-body);
+}
+.ds .field {
+  background: var(--bg-app);
+  color: var(--fg);
+}
+
+/* The catalog root paints the whole page (the global paper grid stays behind it). */
+html:has(.ds-page) {
+  background: var(--bg-app);
+}
+.ds-page {
+  min-height: 100dvh;
+}
+.ds .tnum,
+.ds .num {
+  font-variant-numeric: tabular-nums;
+}
+.ds :is(h1, h2, h3, .palt) {
+  font-feature-settings: "palt" 1;
+}
+
+/* Focus: 2px accent ring, visible on every interactive element (never removed). */
+.ds :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
+.ds [data-force~="focus"] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ds :is(input, select, textarea):focus-visible {
+  outline-offset: 0;
+}
+.ds ::selection {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  color: inherit;
+}
+
+/* Translucent bars and sheets (fixed chrome only). */
+.ds .glass {
+  background: color-mix(in srgb, var(--bg-surface) var(--glass-alpha), transparent);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+/* Native <dialog> as dialog / bottom sheet / drawer. */
+.ds dialog.ds-dialog {
+  /* The dialog element is the full-viewport transparent layer (a click on it, outside the panel, closes);
+   * the panel inside is positioned as a centred dialog, a bottom sheet or a drawer. */
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+}
+.ds-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.ds dialog.ds-dialog[open] > .ds-dialog-panel {
+  animation: ds-rise var(--dur-sheet) var(--ease);
+}
+.ds dialog.ds-dialog[open]::backdrop {
+  animation: ds-fade var(--dur) var(--ease);
+}
+@keyframes ds-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ds-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ds-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ds-skeleton {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.ds .ds-pop {
+  animation: ds-pop var(--dur) var(--ease);
+}
+.ds .ds-skeleton {
+  animation: ds-skeleton 1.4s ease-in-out infinite;
+}
+
+/* Data table: row-wide link, and stacked layout below 768px (no horizontal scroll). */
+.ds .ds-table tbody tr {
+  position: relative;
+}
+.ds .ds-table-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+@media (max-width: 767px) {
+  .ds .ds-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .ds .ds-table,
+  .ds .ds-table tbody,
+  .ds .ds-table tr,
+  .ds .ds-table td {
+    display: block;
+  }
+  .ds .ds-table td[data-label]:not([data-primary])::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--fg-mute);
+    font-size: var(--fs-aux);
+    line-height: 1.4;
+  }
+}
+
+/* Bottom sheet stages (workspace, below 1024px). Heights are fractions of the workspace frame. */
+.ds [data-sheet-stage="peek"] {
+  --sheet-h: 76px;
+}
+.ds [data-sheet-stage="half"] {
+  --sheet-h: 52%;
+}
+.ds [data-sheet-stage="full"] {
+  --sheet-h: 92%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .ds-pop,
+  .ds .ds-skeleton,
+  .ds dialog.ds-dialog[open] > .ds-dialog-panel,
+  .ds dialog.ds-dialog[open]::backdrop {
+    animation: none;
+  }
+}
