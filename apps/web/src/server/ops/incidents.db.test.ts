@@ -791,6 +791,112 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       await expectOpsError(incidents.createIncidentReport(ctxOf(managerB), a.id, { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } }), 404);
     });
 
+    it("認可のやり直し：最初の認可のあと、ロックを取る前に運航管理者が担当の操縦者を付け替えると、追記・訂正は拒否される（403）。記録は増えない。取消との競合は 409 voided", async () => {
+      const pilot2 = (await owner.query<PilotRow>("select * from pilots where member_id = $1", [pilotMember2.id])).rows[0]!;
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      /**
+       * 2 つの接続で競合させる。接続 1 が記録のロックを持ったまま、要求（接続 2）を始め、要求が最初の認可を済ませてロック待ちになるのを確かめてから、
+       * 接続 1 で mutate（担当の付け替え・取消）を確定する。そのあとで要求が再開する。
+       */
+      const race = async (id: string, mutate: (c: store.OpsTx) => Promise<void>, request: () => Promise<unknown>): Promise<unknown> => {
+        const c1 = await app.connect();
+        try {
+          await c1.query("begin");
+          await store.lockIncidentOn(c1 as unknown as store.OpsTx, id);
+          const pending = request().then(
+            () => null,
+            (e: unknown) => e,
+          );
+          for (let i = 0; ; i++) {
+            const n = (await owner.query("select count(*)::int as n from pg_locks where locktype = 'advisory' and not granted")).rows[0].n;
+            if (n >= 1) break;
+            if (i > 250) throw new Error("要求がロック待ちにならなかった");
+            await sleep(20);
+          }
+          await mutate(c1 as unknown as store.OpsTx);
+          await c1.query("commit");
+          return await pending;
+        } catch (e) {
+          await c1.query("rollback").catch(() => undefined);
+          throw e;
+        } finally {
+          c1.release();
+        }
+      };
+      const reassign = (id: string) => async (c: store.OpsTx) => {
+        const base = (await store.latestVersionData(c as unknown as OpsDb, orgA, "incident_record", id))!;
+        await store.appendVersionOn(c, {
+          orgId: orgA,
+          entityType: "incident_record",
+          entityId: id,
+          op: "update",
+          data: { ...base, pilot_id: pilot2.id },
+          reason: "担当の操縦者の付け替え",
+          actorMemberId: manager.id,
+          expectedVersion: 1,
+        });
+      };
+      const reportCount = async (id: string) => (await owner.query("select count(*)::int as n from incident_report_records where incident_id = $1", [id])).rows[0].n as number;
+      const versionCount = async (id: string) => (await owner.query("select count(*)::int as n from record_versions where entity_type = 'incident_record' and entity_id = $1", [id])).rows[0].n as number;
+      const p1 = ctxOf(pilotMember);
+      const consult = { action: "consulted", doneAt: "2027-01-05T11:40", note: "x", checks: { consultationDone: true } };
+
+      // (1) 担当の操縦者が報告（要否の確認）を追記する要求と、運航管理者の付け替えが競合：付け替えが先に確定 → 403・記録は増えない
+      const a = await newIncident({ pilotId: pilotA.id });
+      expect((await incidents.getIncident(p1, a.id)).canReport).toBe(true);
+      const e1 = await race(a.id, reassign(a.id), () => incidents.createIncidentReport(p1, a.id, consult));
+      expect(e1).toBeInstanceOf(OpsError);
+      expect((e1 as OpsError).status).toBe(403);
+      expect(await reportCount(a.id)).toBe(0);
+      expect((await incidents.getIncident(mgr(), a.id)).pilotId).toBe(pilot2.id);
+      // 付け替えのあとは、最初の認可の段階でも 403（従来どおり）。運航管理者は追記できる
+      await expectOpsError(incidents.createIncidentReport(p1, a.id, consult), 403, "forbidden");
+      await incidents.createIncidentReport(mgr(), a.id, consult);
+      expect(await reportCount(a.id)).toBe(1);
+
+      // (2) 訂正（対応状況の更新を含む）も同じ。付け替えの後の版を指定しても（最初の認可は通っているため）ロックの後で 403
+      const b = await newIncident({ pilotId: pilotA.id });
+      const e2 = await race(b.id, reassign(b.id), () => incidents.updateIncident(p1, b.id, { expectedVersion: 2, reason: "対応済み", followUpStatus: "done", followUpOn: "2027-01-05" }));
+      expect((e2 as OpsError).status).toBe(403);
+      expect(await versionCount(b.id)).toBe(2);
+      expect((await incidents.getIncident(mgr(), b.id)).followUpStatus).toBe("open");
+
+      // (3) 取り下げ（retract）も同じ：自分の分の追記が付いた記録で、付け替えのあとに取り下げを送ると 403
+      const c = await newIncident({ pilotId: pilotA.id });
+      const rec = (await incidents.createIncidentReport(p1, c.id, consult)).record;
+      const e3 = await race(c.id, reassign(c.id), () => incidents.createIncidentReport(p1, c.id, { action: "retract", targetRecordId: rec.id, reason: "取り下げ" }));
+      expect((e3 as OpsError).status).toBe(403);
+      expect(await reportCount(c.id)).toBe(1);
+
+      // (4) 取消との競合：報告の追記は 409 voided（記録は増えない）。取り下げは取消済みの記録にもできる（従来どおり）
+      const d = await newIncident({ pilotId: pilotA.id });
+      const voidIt = (id: string) => async (cc: store.OpsTx) => {
+        const base = (await store.latestVersionData(cc as unknown as OpsDb, orgA, "incident_record", id))!;
+        await store.appendVersionOn(cc, { orgId: orgA, entityType: "incident_record", entityId: id, op: "void", data: base, reason: "誤登録", actorMemberId: manager.id, expectedVersion: 1 });
+      };
+      const e4 = await race(d.id, voidIt(d.id), () => incidents.createIncidentReport(p1, d.id, consult));
+      expect((e4 as OpsError).status).toBe(409);
+      expect((e4 as OpsError).code).toBe("voided");
+      expect(await reportCount(d.id)).toBe(0);
+
+      // (5) 訂正の途中で別の訂正が入ったとき（ロックの前に読んだ記録をもとにした内容を、新しい版へ上書きしない）：409 version_conflict
+      const f = await newIncident({ pilotId: pilotA.id });
+      const touch = (id: string) => async (cc: store.OpsTx) => {
+        const base = (await store.latestVersionData(cc as unknown as OpsDb, orgA, "incident_record", id))!;
+        await store.appendVersionOn(cc, { orgId: orgA, entityType: "incident_record", entityId: id, op: "update", data: { ...base, details: "別の訂正" }, reason: "別の訂正", actorMemberId: manager.id, expectedVersion: 1 });
+      };
+      const e5 = await race(f.id, touch(f.id), () => incidents.updateIncident(p1, f.id, { expectedVersion: 2, reason: "訂正", summary: "上書きされる内容" }));
+      expect((e5 as OpsError).status).toBe(409);
+      expect((e5 as OpsError).code).toBe("version_conflict");
+      expect((await incidents.getIncident(mgr(), f.id)).details).toBe("別の訂正");
+
+      // (6) 取消の競合：二重の取消は 409 voided（既存）。運航管理者の取消は付け替えとは無関係に通る
+      const g = await newIncident({ pilotId: pilotA.id });
+      const e6 = await race(g.id, voidIt(g.id), () => incidents.voidIncident(mgr(), g.id, { expectedVersion: 1, reason: "二重" }));
+      expect((e6 as OpsError).status).toBe(409);
+      expect((e6 as OpsError).code).toBe("voided");
+    });
+
     it("一覧の取得に必要なクエリ数が、記録の件数に比例しない（5 件と 50 件で同じ）。絞り込みが効く", async () => {
       const countFor = async (ctx: OpsContext, fn: (c: OpsContext) => Promise<unknown>) => {
         let n = 0;

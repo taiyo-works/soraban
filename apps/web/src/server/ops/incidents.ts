@@ -64,7 +64,7 @@ import {
   type YesNoUnknown,
 } from "@/lib/ops-incident";
 import { jstDate } from "@/lib/ops-time";
-import { can } from "./authz";
+import { can, type OpsAction } from "./authz";
 import {
   INCIDENT_FIELD_LABELS,
   INCIDENT_FIELDS,
@@ -776,6 +776,30 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
   return { created: true, record: await getIncident(ctx, id) };
 };
 
+/**
+ * ロックを取ってから、記録を読み直して認可を確かめる（変更系の共通の入口）。呼び出し側が開いたトランザクションの中で呼び、
+ * ロックはトランザクションの終わりまで保持される。
+ * 最初の認可（ロックの前）のあとで、運航管理者が担当の操縦者を付け替えたり、取消したりできる。ロックの後の最新の記録で
+ * 認可（isSelf＝いまの担当の操縦者か、運航管理者のみ など）をやり直し、権限がなければ 403 にする。
+ * 取消済みなら 409 voided（allowVoided のとき以外）。baseVersion を渡すと、読み直した版が違えば 409 version_conflict
+ * （ロックの前に読んだ記録をもとに作った内容を、新しい版へ上書きしない）。
+ */
+const lockAndReauthorize = async (
+  ctx: OpsContext,
+  c: store.OpsTx,
+  incidentId: string,
+  action: OpsAction,
+  opts: { readonly allowVoided?: boolean; readonly baseVersion?: number } = {},
+): Promise<IncidentRowWithJoins> => {
+  await store.lockIncidentOn(c, incidentId);
+  const fresh = await store.getIncident(c, ctx.member.org_id, incidentId);
+  if (!fresh) throw new OpsError(404, "not_found");
+  assertCan(ctx, action, isSelfOf(ctx, fresh));
+  if (!opts.allowVoided && fresh.voided_at !== null) throw new OpsError(409, "voided");
+  if (opts.baseVersion !== undefined && fresh.current_version !== opts.baseVersion) throw new OpsError(409, "version_conflict");
+  return fresh;
+};
+
 /** 版の data（snake_case）を API の入力の形（camelCase）にする（訂正の合成用）。 */
 const inputFromData = (d: Readonly<Record<string, unknown>>): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
@@ -802,22 +826,26 @@ export const updateIncident = async (ctx: OpsContext, id: string, body: unknown)
   if (current.voided_at !== null) throw new OpsError(409, "voided");
   checkTime(ctx, "full", v.occurredAtDate, false);
   const data = await resolveLinks(ctx, v.data);
-  await store.appendVersion(ctx.db, {
-    orgId: ctx.member.org_id,
-    entityType: "incident_record",
-    entityId: current.id,
-    op: "update",
-    data: versionData(
-      data,
-      {
-        clientRequestId: typeof base["client_request_id"] === "string" ? base["client_request_id"] : null,
-        source: typeof base["source"] === "string" ? base["source"] : "office",
-      },
-      revision,
-    ),
-    reason: meta.data.reason,
-    actorMemberId: ctx.member.id,
-    expectedVersion: meta.data.expectedVersion,
+  await store.withTransaction(ctx.db, async (c) => {
+    // ロックの後の最新の記録で認可をやり直す（担当の操縦者が付け替えられていたら 403）
+    await lockAndReauthorize(ctx, c, current.id, "incident.update", { baseVersion: current.current_version });
+    await store.appendVersionOn(c, {
+      orgId: ctx.member.org_id,
+      entityType: "incident_record",
+      entityId: current.id,
+      op: "update",
+      data: versionData(
+        data,
+        {
+          clientRequestId: typeof base["client_request_id"] === "string" ? base["client_request_id"] : null,
+          source: typeof base["source"] === "string" ? base["source"] : "office",
+        },
+        revision,
+      ),
+      reason: meta.data.reason,
+      actorMemberId: ctx.member.id,
+      expectedVersion: meta.data.expectedVersion,
+    });
   });
   return getIncident(ctx, current.id);
 };
@@ -830,15 +858,18 @@ export const voidIncident = async (ctx: OpsContext, id: string, body: unknown): 
   if (!meta.ok) throw new OpsError(400, "invalid_input", meta.errors);
   if (current.voided_at !== null) throw new OpsError(409, "voided");
   const base = (await store.latestVersionData(ctx.db, ctx.member.org_id, "incident_record", current.id)) ?? {};
-  await store.appendVersion(ctx.db, {
-    orgId: ctx.member.org_id,
-    entityType: "incident_record",
-    entityId: current.id,
-    op: "void",
-    data: base,
-    reason: meta.data.reason,
-    actorMemberId: ctx.member.id,
-    expectedVersion: meta.data.expectedVersion,
+  await store.withTransaction(ctx.db, async (c) => {
+    await lockAndReauthorize(ctx, c, current.id, "incident.void", { baseVersion: current.current_version });
+    await store.appendVersionOn(c, {
+      orgId: ctx.member.org_id,
+      entityType: "incident_record",
+      entityId: current.id,
+      op: "void",
+      data: base,
+      reason: meta.data.reason,
+      actorMemberId: ctx.member.id,
+      expectedVersion: meta.data.expectedVersion,
+    });
   });
   return getIncident(ctx, current.id);
 };
@@ -866,10 +897,9 @@ export const createIncidentReport = async (ctx: OpsContext, id: string, body: un
   if (d.action !== "retract" && current.voided_at !== null) throw new OpsError(409, "voided");
   const org = ctx.member.org_id;
   const newId = await store.withTransaction(ctx.db, async (c) => {
-    await store.lockIncidentOn(c, current.id);
-    // 排他の下で、最新の事実を読み直して指紋を決める
-    const fresh = await store.getIncident(c, org, current.id);
-    if (!fresh) throw new OpsError(404, "not_found");
+    // 排他の下で、最新の記録を読み直して認可をやり直し（担当の操縦者の付け替え・取消のあとの要求を入れない）、指紋を決める。
+    // 取り下げは取消済みの記録にもできる（従来どおり）
+    const fresh = await lockAndReauthorize(ctx, c, current.id, "incident.report", { allowVoided: d.action === "retract" });
     if (d.action === "retract") {
       const rows = await store.listIncidentReportRecordsFor(c, org, [current.id]);
       const target = rows.find((x) => x.id === d.target_record_id);
