@@ -110,7 +110,8 @@ export type RecordEntityTypeDb =
   | "flight_plan"
   | "saved_place"
   | "flight_report"
-  | "permit_registration";
+  | "permit_registration"
+  | "incident_record";
 export type RecordOpDb = "create" | "update" | "void";
 export type RecordActorKindDb = "member" | "system";
 
@@ -544,6 +545,86 @@ export type PermitRegistrationRow = {
   readonly voided_at: string | null;
 };
 
+// ---- 事故・ヒヤリハット（Sprint 12e。0016） ----
+
+/** incident_records.kind。利用者が選ぶ区分（記録の整理のため。法令上の区分ではない）。 */
+export type IncidentKindDb = "accident" | "near_miss" | "undetermined";
+export type IncidentPhaseDb = "preparation" | "takeoff" | "in_flight" | "landing" | "after_flight" | "other";
+export type YesNoUnknownDb = "yes" | "no" | "unknown";
+export type IncidentContactDb = "emergency_119" | "police_110" | "site_manager" | "client" | "internal_manager";
+export type IncidentSourceDb = "office" | "field_quick";
+export type IncidentFollowUpDb = "open" | "done";
+/** 保存時にサーバーが計算した目安（2 段）。報告の要否を決めるものではない。 */
+export type IncidentGuidanceLevelDb = "possible" | "none_selected";
+
+export type IncidentRecordRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly kind: IncidentKindDb;
+  /** timestamptz（1 分単位）。 */
+  readonly occurred_at: string;
+  readonly phase: IncidentPhaseDb | null;
+  readonly place_name: string | null;
+  /** numeric(9,6)。pg は文字列で返す。 */
+  readonly latitude: string | null;
+  readonly longitude: string | null;
+  readonly plan_id: string | null;
+  readonly snapshot_id: string | null;
+  readonly flight_record_id: string | null;
+  readonly aircraft_id: string | null;
+  readonly pilot_id: string | null;
+  /** 事象の類型のキー（版つきのデータが正。特別な値 none・unknown を含む）。 */
+  readonly event_types: readonly string[];
+  readonly people_injury: YesNoUnknownDb;
+  readonly aircraft_damage: YesNoUnknownDb;
+  readonly injured_count: number | null;
+  readonly contacts_made: readonly IncidentContactDb[];
+  readonly summary: string | null;
+  readonly details: string | null;
+  readonly factors_note: string | null;
+  readonly actions_taken: string | null;
+  readonly prevention_note: string | null;
+  readonly detail_pending: boolean;
+  readonly source: IncidentSourceDb;
+  readonly follow_up_status: IncidentFollowUpDb;
+  /** date（YYYY-MM-DD）。 */
+  readonly follow_up_on: string | null;
+  readonly guidance_level: IncidentGuidanceLevelDb;
+  readonly guidance_revision: number;
+  readonly client_request_id: string | null;
+  readonly current_version: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly voided_at: string | null;
+};
+
+/** incident_report_records.action。reported：DIPS 2.0 等で報告した／consulted：報告の要否を確かめた／retract：取り下げ。 */
+export type IncidentReportActionDb = "reported" | "consulted" | "retract";
+export type IncidentReportChannelDb = "dips" | "other";
+
+export type IncidentReportRecordRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly incident_id: string;
+  readonly action: IncidentReportActionDb;
+  readonly done_at: string | null;
+  readonly channel: IncidentReportChannelDb | null;
+  readonly channel_note: string | null;
+  readonly reference: string | null;
+  readonly reference_absent: boolean;
+  readonly note: string | null;
+  readonly checks: Record<string, boolean>;
+  readonly target_record_id: string | null;
+  readonly incident_version: number;
+  readonly facts_fingerprint: string;
+  readonly reason: string | null;
+  readonly recorded_by_member_id: string;
+  readonly recorded_by_name: string;
+  readonly recorded_by_role: MemberRoleDb;
+  readonly created_at: string;
+  readonly content_hash: string;
+};
+
 export type RecordVersionRow = {
   readonly id: string;
   readonly org_id: string;
@@ -968,6 +1049,66 @@ export const PERMIT_REGISTRATION_COLUMNS = columns<PermitRegistrationRow>()([
   "voided_at",
 ]);
 
+export const INCIDENT_RECORD_COLUMNS = columns<IncidentRecordRow>()([
+  "id",
+  "org_id",
+  "kind",
+  "occurred_at",
+  "phase",
+  "place_name",
+  "latitude",
+  "longitude",
+  "plan_id",
+  "snapshot_id",
+  "flight_record_id",
+  "aircraft_id",
+  "pilot_id",
+  "event_types",
+  "people_injury",
+  "aircraft_damage",
+  "injured_count",
+  "contacts_made",
+  "summary",
+  "details",
+  "factors_note",
+  "actions_taken",
+  "prevention_note",
+  "detail_pending",
+  "source",
+  "follow_up_status",
+  "follow_up_on",
+  "guidance_level",
+  "guidance_revision",
+  "client_request_id",
+  "current_version",
+  "created_at",
+  "updated_at",
+  "voided_at",
+]);
+
+export const INCIDENT_REPORT_RECORD_COLUMNS = columns<IncidentReportRecordRow>()([
+  "id",
+  "org_id",
+  "incident_id",
+  "action",
+  "done_at",
+  "channel",
+  "channel_note",
+  "reference",
+  "reference_absent",
+  "note",
+  "checks",
+  "target_record_id",
+  "incident_version",
+  "facts_fingerprint",
+  "reason",
+  "recorded_by_member_id",
+  "recorded_by_name",
+  "recorded_by_role",
+  "created_at",
+  "content_hash",
+]);
+
 /** 表名 → 列名の一覧（schema-columns.test.ts で SQL と突き合わせる）。 */
 export const TABLE_COLUMNS = {
   regulations: REGULATION_COLUMNS,
@@ -989,9 +1130,11 @@ export const TABLE_COLUMNS = {
   plan_procedure_records: PLAN_PROCEDURE_RECORD_COLUMNS,
   flight_field_events: FLIGHT_FIELD_EVENT_COLUMNS,
   permit_registrations: PERMIT_REGISTRATION_COLUMNS,
+  incident_records: INCIDENT_RECORD_COLUMNS,
+  incident_report_records: INCIDENT_REPORT_RECORD_COLUMNS,
 } as const;
 
-/** 運航管理の表（Sprint 10・11・12a・12b・12c・12d）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
+/** 運航管理の表（Sprint 10・11・12a・12b・12c・12d・12e）。個人情報の禁止列の検査（schema-columns.test.ts）の対象。 */
 export const OPS_TABLES = [
   "organizations",
   "members",
@@ -1009,4 +1152,6 @@ export const OPS_TABLES = [
   "plan_procedure_records",
   "flight_field_events",
   "permit_registrations",
+  "incident_records",
+  "incident_report_records",
 ] as const;

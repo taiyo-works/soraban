@@ -104,6 +104,17 @@ const TABLE: readonly Row[] = [
   { action: "permit.update", manager: true, pilot: false, viewer: false },
   { action: "permit.revoke", manager: true, pilot: false, viewer: false },
   { action: "permit.void", manager: true, pilot: false, viewer: false },
+
+  // Sprint 12e 契約 8：docs/sprints/sprint-12e.md 設計 D の表（全役割 × isSelf）
+  { action: "incident.read", manager: true, pilot: true, viewer: true },
+  { action: "incident.create", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "incident.create", isSelf: false, manager: true, pilot: true, viewer: false },
+  { action: "incident.update", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "incident.update", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "incident.report", isSelf: true, manager: true, pilot: true, viewer: false },
+  { action: "incident.report", isSelf: false, manager: true, pilot: false, viewer: false },
+  { action: "incident.void", isSelf: true, manager: true, pilot: false, viewer: false },
+  { action: "incident.void", isSelf: false, manager: true, pilot: false, viewer: false },
 ];
 
 describe("can（役割 × 操作）", () => {

@@ -53,7 +53,14 @@ export type OpsAction =
   | "permit.create"
   | "permit.update"
   | "permit.revoke"
-  | "permit.void";
+  | "permit.void"
+  // Sprint 12e：事故・ヒヤリハット。閲覧は全役割。作成は運航管理者と操縦者（誰の飛行でも事実を記録できる）。訂正・報告の記録は
+  // 運航管理者と「自分の分」（記録を作った本人か、記録の操縦者が自分）。取消（誤登録）は運航管理者のみ。閲覧者は読むだけ
+  | "incident.read"
+  | "incident.create"
+  | "incident.update"
+  | "incident.report"
+  | "incident.void";
 
 export type AuthzContext = {
   /**
@@ -61,7 +68,8 @@ export type AuthzContext = {
    * 飛行記録・日常点検では、記録の操縦者（実施者）の行が自分に結び付いているか（Sprint 11 設計 D「自分の分」）。
    * 飛行計画（plan.create・plan.update・plan.cancel）では、計画の操縦者の行が自分に結び付いているか（Sprint 12a 設計 D）。
    * 現場の記録（field.record）も同じ。通報・手続きの記録（report.record 等・procedure.record）も、計画の操縦者の行が自分に結び付いているか（Sprint 12b 設計 F）。
-   * 操縦者の行に結び付いていない操縦者役割の利用者は、常に isSelf=false になる。
+   * 事故・ヒヤリハット（incident.update・incident.report）では、記録を作った本人か、記録の操縦者の行が自分に結び付いているか（Sprint 12e 設計 D）。
+   * 操縦者の行に結び付いていない操縦者役割の利用者は、常に isSelf=false になる（事故・ヒヤリハットでは、記録を作った本人なら真）。
    */
   readonly isSelf?: boolean;
 };
@@ -113,6 +121,11 @@ export const OPS_ACTIONS: readonly OpsAction[] = [
   "permit.update",
   "permit.revoke",
   "permit.void",
+  "incident.read",
+  "incident.create",
+  "incident.update",
+  "incident.report",
+  "incident.void",
 ];
 
 export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {}): boolean => {
@@ -130,7 +143,12 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "field.read":
     // 許可・承認の登録の閲覧は全役割
     case "permit.read":
+    // 事故・ヒヤリハットの閲覧は全役割
+    case "incident.read":
       return true;
+    // Sprint 12e：事実の記録を「自分の飛行でないから」と妨げない（操縦者は誰の飛行でも作成できる）
+    case "incident.create":
+      return role === "manager" || role === "pilot";
     case "pilot.update":
     case "pilot.readLicenseNumber":
     case "flight.create":
@@ -150,6 +168,9 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "report.copyAudit":
     case "procedure.record":
     case "field.record":
+    // Sprint 12e：事故・ヒヤリハットの訂正・報告の記録（操縦者は自分の分だけ）
+    case "incident.update":
+    case "incident.report":
       return role === "manager" || (role === "pilot" && ctx.isSelf === true);
     case "aircraft.create":
     case "aircraft.update":
@@ -171,6 +192,8 @@ export const can = (role: MemberRoleDb, action: OpsAction, ctx: AuthzContext = {
     case "permit.update":
     case "permit.revoke":
     case "permit.void":
+    // Sprint 12e：取消は記録が消えたように見えるため運航管理者に限る（自分の分でも操縦者は不可）
+    case "incident.void":
       return role === "manager";
   }
 };

@@ -12,6 +12,7 @@ import { OpsError, type AircraftWithTotal, type OpsDb, type PilotWithTotal } fro
 import type { OpsEnv } from "./availability";
 import { PLACE_FIELD_LABELS, PLAN_FIELD_LABELS } from "./validate-plan";
 import { PERMIT_FIELD_LABELS } from "./validate-permit";
+import { INCIDENT_FIELD_LABELS } from "./incident-logic";
 import { REPORT_FIELD_LABELS } from "./validate-report";
 import { FLIGHT_FIELD_LABELS, INSPECTION_FIELD_LABELS } from "./validate-records";
 import {
@@ -176,6 +177,7 @@ const LABELS: Record<RecordEntityTypeDb, Readonly<Record<string, string>>> = {
   saved_place: PLACE_FIELD_LABELS,
   flight_report: REPORT_FIELD_LABELS,
   permit_registration: PERMIT_FIELD_LABELS,
+  incident_record: INCIDENT_FIELD_LABELS,
 };
 
 /** 2 つの版の data で値が違う項目の名前（表示名）を返す。 */

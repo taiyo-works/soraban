@@ -6,6 +6,7 @@ import * as permits from "./permits";
 import { PERMIT_DECLARATION_NOTE, PERMIT_NO_DIPS_NOTE } from "./permit-logic";
 import * as places from "./places";
 import * as field from "./field";
+import * as incidents from "./incidents";
 import * as plans from "./plans";
 import * as procedureRecords from "./procedure-records";
 import * as rec from "./records";
@@ -354,6 +355,52 @@ export const permitVersions = opsHandler("GET /api/ops/permits/[id]/versions", a
 );
 export const planPermits = opsHandler("GET /api/ops/plans/[id]/permits", async ({ ctx, params }) =>
   json(200, await permits.getPlanPermits(ctx, params["id"] ?? "")),
+);
+
+// ---- 事故・ヒヤリハット（Sprint 12e） ----
+// 記録は事実の記録で、法的な報告の完了も責任の判断も意味しない。そらばんは国・DIPS へ何も送信しない。
+// 同じ clientRequestId の作成が既にあれば、内容が同じなら新しい記録を作らずに既存の記録を 200 で返す（違えば 409 request_conflict）。
+// サーバーが決めるもの（目安・スナップショット・detail_pending・source・記録者・指紋・記録した時点の版）は本文から読まない。
+export const incidentList = opsHandler("GET /api/ops/incidents", async ({ ctx, req }) =>
+  json(200, {
+    incidents: await incidents.listIncidents(ctx, incidents.parseIncidentFilter(new URL(req.url).searchParams)),
+    notices: incidents.incidentNotices(),
+  }),
+);
+export const incidentCreate = opsHandler(
+  "POST /api/ops/incidents",
+  async ({ ctx, body }) => {
+    const r = await incidents.createIncident(ctx, await body());
+    return json(r.created ? 201 : 200, r.record);
+  },
+  { mutating: true },
+);
+export const incidentGet = opsHandler("GET /api/ops/incidents/[id]", async ({ ctx, params }) =>
+  json(200, await incidents.getIncident(ctx, params["id"] ?? "")),
+);
+export const incidentUpdate = opsHandler(
+  "PATCH /api/ops/incidents/[id]",
+  async ({ ctx, params, body }) => json(200, await incidents.updateIncident(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const incidentVoid = opsHandler(
+  "POST /api/ops/incidents/[id]/void",
+  async ({ ctx, params, body }) => json(200, await incidents.voidIncident(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const incidentVersions = opsHandler("GET /api/ops/incidents/[id]/versions", async ({ ctx, params }) =>
+  json(200, { versions: await incidents.listIncidentVersions(ctx, params["id"] ?? "") }),
+);
+export const incidentReportCreate = opsHandler(
+  "POST /api/ops/incidents/[id]/reports",
+  async ({ ctx, params, body }) => json(201, await incidents.createIncidentReport(ctx, params["id"] ?? "", await body())),
+  { mutating: true },
+);
+export const planIncidents = opsHandler("GET /api/ops/plans/[id]/incidents", async ({ ctx, params }) =>
+  json(200, await incidents.listPlanIncidents(ctx, params["id"] ?? "")),
+);
+export const flightIncidents = opsHandler("GET /api/ops/flights/[id]/incidents", async ({ ctx, params }) =>
+  json(200, await incidents.listFlightIncidents(ctx, params["id"] ?? "")),
 );
 
 // ---- テスト用の本人確認（AUTH_PROVIDER=test のときだけ。本番では 404） ----
