@@ -28,6 +28,7 @@ import { loadPlan } from "./plans";
 import { snapshotPermitInputUpToDate } from "./plan-logic";
 import { fieldError, invalid, nowOf, pickFields } from "./records";
 import { asInput, assertCan, formatJstMinute, isUuid, type OpsContext, type VersionDto } from "./service";
+import { collectMatching } from "./paging";
 import * as store from "./store";
 import { OpsError, type PermitRow } from "./store";
 import { validateChangeMeta } from "./validate";
@@ -265,18 +266,23 @@ export const parsePermitFilter = (q: URLSearchParams): PermitListFilter => {
 export const listPermits = async (ctx: OpsContext, filter: PermitListFilter = {}): Promise<PermitDto[]> => {
   assertCan(ctx, "permit.read");
   // 取消を絞り込みたいとき（validity=voided）は取消も読む
-  const rows = await store.listPermits(ctx.db, ctx.member.org_id, filter.includeVoided === true || filter.validity === "voided");
-  const labels = await loadLabels(ctx, rows);
+  const includeVoided = filter.includeVoided === true || filter.validity === "voided";
   const t = today(ctx);
-  let out = rows.map((r) => permitDto(r, t, labels));
-  if (filter.validity) out = out.filter((d) => d.validity === filter.validity);
-  if (filter.q) {
-    const key = normalizePermitNumber(filter.q);
-    out = out.filter(
-      (d) => normalizePermitNumber(d.permitNumber).includes(key) || d.airportNames.some((n) => normalizePermitNumber(n).includes(key)),
-    );
-  }
-  return out;
+  const key = filter.q ? normalizePermitNumber(filter.q) : null;
+  const keep = (d: PermitDto): boolean =>
+    (!filter.validity || d.validity === filter.validity) &&
+    (key === null || normalizePermitNumber(d.permitNumber).includes(key) || d.airportNames.some((n) => normalizePermitNumber(n).includes(key)));
+  const dtosOf = async (rows: readonly PermitRow[]): Promise<PermitDto[]> => {
+    const labels = await loadLabels(ctx, rows);
+    return rows.map((r) => permitDto(r, t, labels));
+  };
+  if (!filter.validity && key === null) return dtosOf(await store.listPermits(ctx.db, ctx.member.org_id, includeVoided));
+  // 有効性・番号の検索は日付や正規化から導出する。上限の後で絞ると古い一致する登録が漏れるため、ページを順に読んで一致するものを集める
+  return collectMatching(
+    (offset) => store.listPermits(ctx.db, ctx.member.org_id, includeVoided, offset),
+    async (rows) => (await dtosOf(rows)).filter(keep),
+    store.LIST_LIMIT,
+  );
 };
 
 const loadPermit = async (ctx: OpsContext, id: string): Promise<PermitRow> => {

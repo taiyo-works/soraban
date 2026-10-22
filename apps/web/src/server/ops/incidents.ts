@@ -482,11 +482,14 @@ export const listIncidents = async (ctx: OpsContext, filter: IncidentListFilter 
     ...(filter.kind ? { kind: filter.kind } : {}),
     ...(filter.followUp ? { followUp: filter.followUp } : {}),
     ...(filter.planId ? { planId: filter.planId } : {}),
+    // 導出の絞り込みも上限（LIMIT 500）の前に SQL でかける（古い一致する記録が漏れない）
+    ...(filter.reportState ? { reportState: filter.reportState } : {}),
+    ...(filter.detailPending ? { detailPending: true } : {}),
   });
+  // 表示の導出（報告の記録から）との一致を確かめる。SQL の絞り込みと同じ結果になる（食い違えば表示側が正）
   let out = await loadDtos(ctx, rows);
   if (filter.reportState === "changed") out = out.filter((d) => d.reportState.changedSinceReport);
   else if (filter.reportState) out = out.filter((d) => d.reportState.code === filter.reportState);
-  if (filter.detailPending) out = out.filter((d) => d.detailPending);
   return out;
 };
 
@@ -552,7 +555,7 @@ export const listIncidentVersions = async (ctx: OpsContext, id: string): Promise
     const prev = i > 0 ? rows[i - 1]!.data : null;
     const changed =
       prev && v.op === "update"
-        ? Object.keys({ ...prev, ...v.data }).filter((k) => JSON.stringify(prev[k] ?? null) !== JSON.stringify(v.data[k] ?? null))
+        ? Object.keys({ ...prev, ...v.data }).filter((k) => k !== REQUEST_INTENT_KEY && JSON.stringify(prev[k] ?? null) !== JSON.stringify(v.data[k] ?? null))
         : [];
     return {
       versionNo: v.version_no,
@@ -661,35 +664,58 @@ const INHERITED_INPUT: Readonly<Record<(typeof INHERITED)[number], string>> = {
   longitude: "longitude",
 };
 
+/** 引き継ぐ項目の、最初の要求の意図：省略（引き継ぎ待ち）・明示的に空（null・空文字）・値あり。 */
+type InheritedIntent = "omitted" | "null" | "value";
+/** 最初の版の data に残す、要求の意図（引き継ぎ先の計画などが後で変わっても、再送との比較に使える）。 */
+export const REQUEST_INTENT_KEY = "client_request_intent";
+
+/**
+ * 要求の意図を正規化する。入力で省略した（undefined。簡易記録が読まない項目を含む）なら omitted、
+ * 検査後に空なら null（明示的に空）、値があれば value。キーごとの対応なので、入力の順序に依らない。
+ */
+const requestIntent = (d: IncidentData, raw: Readonly<Record<string, unknown>>, mode: IncidentMode): Record<string, InheritedIntent> => {
+  const out: Record<string, InheritedIntent> = {};
+  for (const k of INHERITED) {
+    const omitted = raw[INHERITED_INPUT[k]] === undefined || (mode === "quick" && k !== "plan_id");
+    out[k] = omitted ? "omitted" : d[k] === null ? "null" : "value";
+  }
+  return out;
+};
+
 const sameValue = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 /**
- * 同じ clientRequestId の再送が、最初の作成と同じ内容か（作成者も同じであること）。
- * 引き継ぐ項目が空のとき：
- *   - 入力で省略した（undefined。簡易記録が読まない項目を含む）なら、引き継ぎ待ちとして比べない。
- *   - 明示的に空にした（null・空文字）なら、引き継いだ結果で比べる。最初の要求が明示した値を再送が消した場合は、
- *     引き継ぎで同じ値にならない限り内容が違う（409）。最初の要求も空で引き継いだ値なら同じになる。
+ * 同じ clientRequestId の再送が、最初の作成と同じ内容か（作成者も同じであること）。比べるのは最初の要求の意図で、
+ * 計画などから引き継いだ現在の値を再び解決して比べない（最初の応答が失われたあとに計画が更新されても、同じ本文の再送は成功する）。
+ * 引き継ぐ項目は、再送の側が：
+ *   - 省略 → 引き継ぎ待ちとして比べない。
+ *   - 明示的に空 → 最初の要求が値を明示していたら内容が違う（消した）。最初が省略・空なら同じ。
+ *   - 値あり → 最初に保存した値と比べる（引き継ぎで入った値と同じでも同じ要求）。
+ * 最初の版に意図が残っていない記録（この修正より前・seed）は、空の項目を比べない。
  */
-const sameRequest = async (
+const sameRequest = (
   ctx: OpsContext,
   first: { data: Record<string, unknown>; actor_member_id: string | null },
   d: IncidentData,
   raw: Readonly<Record<string, unknown>>,
   mode: IncidentMode,
-): Promise<boolean> => {
+): boolean => {
   if (first.actor_member_id !== ctx.member.id) return false;
-  const cleared: string[] = [];
+  const stored = first.data[REQUEST_INTENT_KEY];
+  const firstIntent = stored !== null && typeof stored === "object" && !Array.isArray(stored) ? (stored as Record<string, unknown>) : {};
+  const again = requestIntent(d, raw, mode);
   for (const [k, v] of Object.entries(d)) {
-    if (v === null && (INHERITED as readonly string[]).includes(k)) {
-      const omitted = raw[INHERITED_INPUT[k as keyof typeof INHERITED_INPUT]] === undefined || (mode === "quick" && k !== "plan_id");
-      if (!omitted && !sameValue(first.data[k], null)) cleared.push(k);
-      continue;
+    if ((INHERITED as readonly string[]).includes(k)) {
+      const intent = again[k]!;
+      if (intent === "omitted") continue;
+      if (intent === "null") {
+        if (firstIntent[k] === "value") return false;
+        continue;
+      }
     }
     if (!sameValue(first.data[k], v)) return false;
   }
-  if (cleared.length === 0) return true;
-  const resolved = await resolveLinks(ctx, d);
-  return cleared.every((k) => sameValue(first.data[k], resolved[k as keyof IncidentData]));
+  return true;
 };
 
 export type IncidentSaveResult = { readonly created: boolean; readonly record: IncidentDetailDto };
@@ -722,7 +748,7 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
   if (requestId) {
     const first = await store.firstVersionOf(ctx.db, ctx.member.org_id, "incident_record", id);
     if (first) {
-      if (!(await sameRequest(ctx, first, v.data, rest, mode))) throw new OpsError(409, "request_conflict");
+      if (!sameRequest(ctx, first, v.data, rest, mode)) throw new OpsError(409, "request_conflict");
       return { created: false, record: await getIncident(ctx, id) };
     }
   }
@@ -734,7 +760,7 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
       entityType: "incident_record",
       entityId: id,
       op: "create",
-      data: versionData(data, { clientRequestId: requestId, source: data.source }),
+      data: { ...versionData(data, { clientRequestId: requestId, source: data.source }), [REQUEST_INTENT_KEY]: requestIntent(v.data, rest, mode) },
       reason: null,
       actorMemberId: ctx.member.id,
     });
@@ -742,7 +768,7 @@ export const createIncident = async (ctx: OpsContext, body: unknown): Promise<In
     // 並行の再送：先に作られた記録と比べる
     if (e instanceof OpsError && (e.code === "already_exists" || e.code === "duplicate_request") && requestId) {
       const first = await store.firstVersionOf(ctx.db, ctx.member.org_id, "incident_record", id);
-      if (first && (await sameRequest(ctx, first, v.data, rest, mode))) return { created: false, record: await getIncident(ctx, id) };
+      if (first && sameRequest(ctx, first, v.data, rest, mode)) return { created: false, record: await getIncident(ctx, id) };
       throw new OpsError(409, "request_conflict");
     }
     throw e;

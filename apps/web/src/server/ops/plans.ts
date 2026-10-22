@@ -79,6 +79,7 @@ import {
   type OpsContext,
   type VersionDto,
 } from "./service";
+import { collectMatching } from "./paging";
 import * as store from "./store";
 import { OpsError, type PlanWithJoins, type SnapshotFullRow, type SnapshotListRow } from "./store";
 import { PLAN_FIELDS, validatePlan, type PlanInputData } from "./validate-plan";
@@ -483,12 +484,19 @@ const withConfirmations = async (ctx: OpsContext, rows: readonly PlanWithJoins[]
 export const listPlans = async (ctx: OpsContext, filter: PlanListFilter = {}): Promise<PlanDto[]> => {
   assertCan(ctx, "plan.read");
   const mine = await myPilot(ctx);
-  const rows = await store.listPlans(ctx.db, ctx.member.org_id, filter);
-  const by = await withConfirmations(ctx, rows);
-  const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
-  const matches = await loadPermitMatches(ctx.db, ctx.member.org_id, rows);
-  const dtos = rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id), matches.get(r.id)));
-  return filter.state ? dtos.filter((d) => d.state === filter.state) : dtos;
+  const dtosOf = async (rows: readonly PlanWithJoins[]): Promise<PlanDto[]> => {
+    const by = await withConfirmations(ctx, rows);
+    const extras = await loadReportExtras(ctx, rows.map((r) => r.id));
+    const matches = await loadPermitMatches(ctx.db, ctx.member.org_id, rows);
+    return rows.map((r) => planDto(ctx, r, by.get(r.id) ?? [], mine, extras.get(r.id), matches.get(r.id)));
+  };
+  if (!filter.state) return dtosOf(await store.listPlans(ctx.db, ctx.member.org_id, filter));
+  // 状態は確認・判定から導出する（SQL にできない）。上限の後で絞ると古い一致する計画が漏れるため、ページを順に読んで一致するものを集める
+  return collectMatching(
+    (offset) => store.listPlans(ctx.db, ctx.member.org_id, filter, offset),
+    async (rows) => (await dtosOf(rows)).filter((d) => d.state === filter.state),
+    store.LIST_LIMIT,
+  );
 };
 
 /** 計画の行のまとまりの DTO と次にやることの全件（確認・通報の行は件数に依らずまとめて引く）。今日の画面が使う。 */

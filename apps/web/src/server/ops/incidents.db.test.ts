@@ -579,6 +579,34 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       await expectOpsError(incidents.createIncident(mgr(), { ...q, planId: null }), 409, "request_conflict");
     });
 
+    it("最初の応答が失われたあとに計画が更新されても、同じ clientRequestId・同じ本文（空の項目を null）の再送は 200。最初に残すのは要求の意図で、引き継いだ現在の値は比べない", async () => {
+      const p = await newPlan();
+      const form = { ...FULL, planId: p.id, aircraftId: null, pilotId: null, placeName: null, latitude: null, longitude: null, clientRequestId: randomUUID() };
+      const first = (await incidents.createIncident(mgr(), form)).record;
+      expect(first).toMatchObject({ placeName: "フューチャーテック株式会社 本社", aircraftId: aircraftW, pilotId: pilotA.id });
+      // 最初の版に残る要求の意図（省略・null・値を区別する。引き継ぎの結果とは別）
+      const v1 = (await owner.query("select data from record_versions where entity_type = 'incident_record' and entity_id = $1 and version_no = 1", [first.id])).rows[0].data;
+      expect(v1.client_request_intent).toEqual({ plan_id: "value", aircraft_id: "null", pilot_id: "null", place_name: "null", latitude: "null", longitude: "null" });
+      // 計画が更新される（場所・時間が変わる）。引き継いだ現在の値は変わるが、再送の本文は同じ
+      await plans.updatePlan(mgr(), p.id, { expectedVersion: p.version, reason: "場所と時間の変更", placeName: "別の場所", durationMinutes: 45 });
+      expect((await plans.getPlan(mgr(), p.id)).placeName).toBe("別の場所");
+      const again = await incidents.createIncident(mgr(), { ...form, queued: true });
+      expect(again).toMatchObject({ created: false, record: { id: first.id, placeName: "フューチャーテック株式会社 本社" } });
+      // 訂正のあとの再送も 200（最初の版の意図で比べる）。版の履歴の「変わった項目」に意図の欄は出ない
+      await incidents.updateIncident(mgr(), first.id, { expectedVersion: 1, reason: "訂正", details: "経過" });
+      expect(await incidents.createIncident(mgr(), form)).toMatchObject({ created: false, record: { id: first.id } });
+      const vs = await incidents.listIncidentVersions(mgr(), first.id);
+      expect(vs[1]!.changedFields).toContain("経過");
+      expect(vs[1]!.changedFields.some((x) => x.includes("intent") || x.includes("意図"))).toBe(false);
+      // 明示した値を消す再送・内容の違う再送は、計画が更新されたあとでも 409
+      await expectOpsError(incidents.createIncident(mgr(), { ...form, planId: null }), 409, "request_conflict");
+      await expectOpsError(incidents.createIncident(mgr(), { ...form, summary: "別の要約" }), 409, "request_conflict");
+      // 最初に場所を省略（undefined）した要求の、null で送る再送は同じ要求として扱う（どちらも引き継ぎを任せている）
+      const omitted = { ...FULL, planId: p.id, clientRequestId: randomUUID() };
+      const o1 = (await incidents.createIncident(mgr(), omitted)).record;
+      expect(await incidents.createIncident(mgr(), { ...omitted, placeName: null, aircraftId: null })).toMatchObject({ created: false, record: { id: o1.id } });
+    });
+
     it("訂正は reason と expectedVersion が必須（違えば 409 version_conflict）。訂正前の値は版の履歴に残り、類型・区分の変更で目安が再計算される（本文の目安は読まない）", async () => {
       const a = await newIncident();
       await expectOpsError(incidents.updateIncident(mgr(), a.id, { details: "x" }), 400, "invalid_input");
@@ -875,6 +903,31 @@ describe.skipIf(!ADMIN_URL)("事故・ヒヤリハットの記録・報告の記
       expect((await store.listIncidentTodayCandidates(app as unknown as OpsDb, org, "2026-12-22")).map((r) => r.id).sort()).toEqual([oldest.id, changed.id].sort());
       // 「今日」の画面（上位の件数の中）にも出る
       expect((await today.getToday(c, { limit: 100 })).nextActions.some((x) => x.href === `/ops/incidents/${oldest.id}#report`)).toBe(true);
+
+      // 派生の絞り込み（報告の状態・詳細の未記入）は上限（500 件）の前にかかる。古い一致する記録が漏れない
+      const oldPending = (
+        await owner.query(
+          `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind) values ($1, 'incident_record', gen_random_uuid(), 'create', $2::jsonb, 'system') returning entity_id`,
+          [org, JSON.stringify(rawData({ occurred_at: "2024-03-01T09:00", summary: null, detail_pending: true, source: "field_quick", event_types: ["unknown"], people_injury: "no", kind: "near_miss" }))],
+        )
+      ).rows[0].entity_id as string;
+      const idsOf = async (f: incidents.IncidentListFilter) => (await incidents.listIncidents(c, f)).map((x) => x.id);
+      expect(await idsOf({ detailPending: true })).toEqual([oldPending]);
+      expect(await idsOf({ reportState: "changed" })).toEqual([changed.id]);
+      expect((await idsOf({ reportState: "consulted" })).sort()).toEqual([consulted.id, changed.id].sort());
+      expect(await idsOf({ reportState: "reported" })).toEqual([]);
+      const none = await idsOf({ reportState: "none" });
+      expect(none).toHaveLength(500);
+      expect(none).not.toContain(consulted.id);
+      expect(await idsOf({ reportState: "none", detailPending: true })).toEqual([oldPending]);
+      // 区分・対応の状況の絞り込みも、上限の前（古い記録に届く）
+      expect(await idsOf({ kind: "accident" })).toEqual([oldest.id, consulted.id, changed.id].reverse());
+      expect(await idsOf({ followUp: "done" })).toEqual([consulted.id]);
+      // クエリの数は件数に比例しない（絞り込みの有無で同じ）
+      let n = 0;
+      const counting = { query: (sql: string, params?: unknown[]) => (n++, app.query(sql, params as unknown[])), connect: () => app.connect() } as unknown as OpsDb;
+      await incidents.listIncidents({ ...c, db: counting }, { reportState: "changed" });
+      expect(n).toBeLessThanOrEqual(2);
       // 確かめた記録を取り下げると、再び候補に入る
       const rec1 = (await incidents.getIncident(c, consulted.id)).reportRecords[0]!;
       await incidents.createIncidentReport(c, consulted.id, { action: "retract", targetRecordId: rec1.id, reason: "誤り" });

@@ -292,7 +292,8 @@ export type RecordFilter = {
   readonly includeVoided?: boolean;
 };
 
-const LIST_LIMIT = 500;
+/** 一覧の 1 回の上限。導出の絞り込み（SQL にできないもの）は、この単位でページを順に読んで絞る。 */
+export const LIST_LIMIT = 500;
 
 /** 飛行記録の一覧（新しい順、最大 500 件）。 */
 export const listFlights = async (db: OpsDb, orgId: string, f: RecordFilter): Promise<FlightWithTotal[]> => {
@@ -540,7 +541,7 @@ export type PlanFilter = {
 };
 
 /** 計画の一覧（予定開始の新しい順、最大 500 件。oldestFirst なら古い順）。 */
-export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promise<PlanWithJoins[]> => {
+export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter, offset = 0): Promise<PlanWithJoins[]> => {
   const where = ["p.org_id = $1"];
   const params: unknown[] = [orgId];
   if (f.aircraftId) where.push(`p.aircraft_id = $${params.push(f.aircraftId)}`);
@@ -552,7 +553,7 @@ export const listPlans = async (db: OpsDb, orgId: string, f: PlanFilter): Promis
   const dir = f.oldestFirst ? "asc" : "desc";
   return (
     await db.query<PlanWithJoins>(
-      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT}`,
+      `${PLAN_SELECT} where ${where.join(" and ")} order by p.planned_start_at ${dir}, p.id ${dir} limit ${LIST_LIMIT} offset ${Math.max(0, Math.trunc(offset))}`,
       params,
     )
   ).rows;
@@ -1046,11 +1047,11 @@ export const getPermit = async (db: Queryable, orgId: string, id: string): Promi
   (await db.query<PermitRow>(`${PERMIT_SELECT} where p.org_id = $1 and p.id = $2`, [orgId, id])).rows[0] ?? null;
 
 /** 許可・承認の登録の一覧（取消は includeVoided のときだけ。有効期間の終わりが遅い順、番号の順）。 */
-export const listPermits = async (db: Queryable, orgId: string, includeVoided: boolean): Promise<PermitRow[]> =>
+export const listPermits = async (db: Queryable, orgId: string, includeVoided: boolean, offset = 0): Promise<PermitRow[]> =>
   (
     await db.query<PermitRow>(
       `${PERMIT_SELECT} where p.org_id = $1 ${includeVoided ? "" : "and p.voided_at is null"}
-        order by p.voided_at nulls first, p.valid_to desc, p.permit_number, p.id limit ${LIST_LIMIT}`,
+        order by p.voided_at nulls first, p.valid_to desc, p.permit_number, p.id limit ${LIST_LIMIT} offset ${Math.max(0, Math.trunc(offset))}`,
       [orgId],
     )
   ).rows;
@@ -1177,9 +1178,45 @@ export type IncidentFilter = {
   readonly followUp?: IncidentRecordRow["follow_up_status"];
   readonly planId?: string;
   readonly flightRecordId?: string;
+  /** 現場の簡易記録で詳細が未記入のものだけ。 */
+  readonly detailPending?: boolean;
+  /** 報告の状態（導出）：none・reported・consulted、または changed（記録のあとで事実が変わった）。上限（LIMIT）の前にかける。 */
+  readonly reportState?: "none" | "reported" | "consulted" | "changed";
 };
 
-/** 事故・ヒヤリハットの一覧（起きた日時の新しい順、最大 500 件）。1 回のクエリで、件数に依らない。 */
+/**
+ * 報告の記録のまとめ（記録ごとの結合。上限や絞り込みの前に、SQL の中で報告の状態を導出するのに使う）。
+ *   active_n     有効な（取り下げられていない）reported・consulted の数
+ *   has_reported 有効な reported がある
+ *   any_match    有効な記録のうち、記録した時点の版の事実（区分・類型の組・けがの有無・人数）がいまと同じものがある
+ *                （アプリの「指紋が同じ」と同じ条件。指紋は、記録した時点の事実から作られる）
+ * 報告の状態：reported ＞ consulted ＞ none。changed は active_n > 0 で any_match でないとき。
+ */
+const INCIDENT_REPORT_LATERAL = `
+   left join lateral (
+     select count(*)::int as active_n,
+            coalesce(bool_or(r.action = 'reported'), false) as has_reported,
+            coalesce(bool_or(rv.data->>'kind' = i.kind
+                             and rv.data->>'people_injury' = i.people_injury
+                             and (rv.data->>'injured_count')::integer is not distinct from i.injured_count
+                             and (rv.data->'event_types') <@ i.event_types and i.event_types <@ (rv.data->'event_types')), false) as any_match
+       from incident_report_records r
+       left join record_versions rv on rv.org_id = r.org_id and rv.entity_type = 'incident_record'
+                                   and rv.entity_id = r.incident_id and rv.version_no = r.incident_version
+      where r.org_id = i.org_id and r.incident_id = i.id and r.action in ('reported', 'consulted')
+        and not exists (select 1 from incident_report_records t
+                         where t.org_id = r.org_id and t.incident_id = r.incident_id
+                           and t.action = 'retract' and t.target_record_id = r.id)
+   ) rs on true`;
+
+const REPORT_STATE_SQL: Readonly<Record<NonNullable<IncidentFilter["reportState"]>, string>> = {
+  none: "rs.active_n = 0",
+  reported: "rs.has_reported",
+  consulted: "rs.active_n > 0 and not rs.has_reported",
+  changed: "rs.active_n > 0 and not rs.any_match",
+};
+
+/** 事故・ヒヤリハットの一覧（起きた日時の新しい順、最大 500 件）。絞り込みはすべて上限の前にかける。1 回のクエリで、件数に依らない。 */
 export const listIncidents = async (db: Queryable, orgId: string, f: IncidentFilter = {}): Promise<IncidentRowWithJoins[]> => {
   const where = ["i.org_id = $1"];
   const params: unknown[] = [orgId];
@@ -1188,9 +1225,11 @@ export const listIncidents = async (db: Queryable, orgId: string, f: IncidentFil
   if (f.planId) where.push(`i.plan_id = $${params.push(f.planId)}`);
   if (f.flightRecordId) where.push(`i.flight_record_id = $${params.push(f.flightRecordId)}`);
   if (!f.includeVoided) where.push("i.voided_at is null");
+  if (f.detailPending) where.push("i.detail_pending");
+  if (f.reportState) where.push(`(${REPORT_STATE_SQL[f.reportState]})`);
   return (
     await db.query<IncidentRowWithJoins>(
-      `${INCIDENT_SELECT} where ${where.join(" and ")} order by i.occurred_at desc, i.id desc limit ${LIST_LIMIT}`,
+      `${INCIDENT_SELECT}${f.reportState ? INCIDENT_REPORT_LATERAL : ""} where ${where.join(" and ")} order by i.occurred_at desc, i.id desc limit ${LIST_LIMIT}`,
       params,
     )
   ).rows;
@@ -1206,21 +1245,9 @@ export const listIncidents = async (db: Queryable, orgId: string, f: IncidentFil
 export const listIncidentTodayCandidates = async (db: Queryable, orgId: string, detailSince: string): Promise<IncidentRowWithJoins[]> =>
   (
     await db.query<IncidentRowWithJoins>(
-      `${INCIDENT_SELECT}
+      `${INCIDENT_SELECT}${INCIDENT_REPORT_LATERAL}
         where i.org_id = $1 and i.voided_at is null
-          and ((i.guidance_level = 'possible' and not exists (
-                 select 1 from incident_report_records r
-                   join record_versions rv on rv.org_id = r.org_id and rv.entity_type = 'incident_record'
-                                          and rv.entity_id = r.incident_id and rv.version_no = r.incident_version
-                  where r.org_id = i.org_id and r.incident_id = i.id and r.action in ('reported', 'consulted')
-                    and not exists (select 1 from incident_report_records t
-                                     where t.org_id = r.org_id and t.incident_id = r.incident_id
-                                       and t.action = 'retract' and t.target_record_id = r.id)
-                    and rv.data->>'kind' = i.kind
-                    and rv.data->>'people_injury' = i.people_injury
-                    and (rv.data->>'injured_count')::integer is not distinct from i.injured_count
-                    and (select array_agg(x order by x collate "C") from jsonb_array_elements_text(rv.data->'event_types') x)
-                        = (select array_agg(x order by x collate "C") from jsonb_array_elements_text(i.event_types) x)))
+          and ((i.guidance_level = 'possible' and (rs.active_n = 0 or not rs.any_match))
                or (i.detail_pending and ops_timestamptz_to_jst_minute(i.occurred_at) >= $2))
         order by i.occurred_at desc, i.id desc`,
       [orgId, detailSince],

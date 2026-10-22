@@ -91,7 +91,12 @@ export const resolveMember = async (db: OpsDb, identity: Identity): Promise<Memb
   if (!identity.emailVerified) return { kind: "no_access" };
   const invited = await store.findInvitedByEmail(db, identity.email);
   // 第1段階は 1 人 1 組織。複数の組織に招待されている場合は結び付けない。
-  if (invited.length !== 1) return { kind: "no_access" };
+  if (invited.length !== 1) {
+    // 同時の初回ログイン：先に結び付いた要求が確定した後に招待を探すと、招待中の行はもう無い。結び付き済みの利用者を探し直す
+    // （最初の探索は確定の前だった）。探し直しで見つかるのは、最初の探索と同じ本人確認の ID（提供元と ID の組）の利用者だけ
+    const raced = invited.length === 0 ? await store.findMemberByAuth(db, identity.provider, identity.authUserId) : null;
+    return raced && raced.status === "active" ? { kind: "member", member: raced } : { kind: "no_access" };
+  }
   const m = invited[0]!;
   try {
     await store.appendVersion(db, {

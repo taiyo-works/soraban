@@ -316,6 +316,31 @@ describe.skipIf(!ADMIN_URL)("運航管理の DB（版の履歴・権限・組織
     expect((await svc.createAircraft(ctxOf(managerB), { ...AIRCRAFT, registrationMark: "JU15DUP" })).registrationMark).toBe("JU15DUP");
   });
 
+  it("同時の初回ログイン：招待中の同じ利用者を 3 つの要求が同時に結び付けても、すべて member を返す（先に結び付いた要求の後で招待を探した要求が no_access にならない）。版は 1 つだけ増える", async () => {
+    const org = (await owner.query("insert into organizations (name) values ('同時ログイン') returning id")).rows[0].id;
+    const ids: string[] = [];
+    for (let i = 0; i < 40; i++) {
+      const id = randomUUID();
+      await owner.query(
+        `insert into record_versions (org_id, entity_type, entity_id, op, data, actor_kind) values ($1, 'member', $2, 'create', $3::jsonb, 'system')`,
+        [org, id, JSON.stringify({ email: `race${i}@example.test`, display_name: `同時 ${i}`, role: "viewer", status: "invited", auth_provider: null, auth_user_id: null })],
+      );
+      ids.push(id);
+    }
+    for (const [i, id] of ids.entries()) {
+      const identity = { provider: "test" as const, authUserId: `race-auth-${i}`, email: `race${i}@example.test`, emailVerified: true, name: `同時 ${i}` };
+      // 要求の開始を少しずつずらす（遅れた要求が、先に結び付いた要求の確定の直後に招待を探す形を含める）
+      const results = await Promise.all(
+        [0, 1, 2].map(async (k) => {
+          await new Promise((r) => setTimeout(r, k * 4 + Math.floor(Math.random() * 6)));
+          return svc.resolveMember(app as unknown as OpsDb, identity);
+        }),
+      );
+      expect(results.map((r) => r.kind), `利用者 ${i}`).toEqual(["member", "member", "member"]);
+      expect(await versionCount(id)).toBe(2);
+    }
+  });
+
   it("ops_bootstrap：組織と招待中の運航管理者を作り、運航管理者がいる組織では何もしない", async () => {
     const org = (await owner.query("select ops_bootstrap('フューチャーテック株式会社', ' Boss@Example.COM ', '奥田') as id")).rows[0].id;
     const ms = (await owner.query<MemberRow>("select * from members where org_id = $1", [org])).rows;
