@@ -6,7 +6,14 @@
 // - Sprint 12a：組織 A に最大離陸重量 0.9kg の機体（重量が分かる機体）と、よく使う地点「フューチャーテック株式会社 本社」を加える。
 // - Sprint 12d：組織 A に許可・承認の登録を 6 件加える（OPS_TEST_PERMITS）。サーバーの時計 OPS_TEST_NOW（JST 2027-01-05 12:00）に対し、
 //   ①包括・全国・有効 ②個別・円・目視外・機体を限定 ③期限切れ ④失効 ⑤空港等周辺の個別（円） ⑥場所が文章のみ。
+// - Sprint 12e：組織 A に事故・ヒヤリハットの記録を 7 件（OPS_TEST_INCIDENTS）、組織 B に 1 件（分離の確認用）を加える。
+//   ①事故・けがあり・報告の記録なし ②ヒヤリハット・類型「どれにも当たらない」・対応済み ③現場の簡易記録（詳細が未記入）
+//   ④報告の記録あり（DIPS 2.0・番号あり） ⑤報告の記録のあとで事実が変わった ⑥取消済み ⑦日誌（飛行記録）に結び付いた記録。
+//   日誌は、組織 A の既存 0 分の機体で 2026-11-10 の飛行記録を 1 件作る（「安全に影響のあった事項」あり。計画には結び付けない）。
+//   飛行計画に結び付いた記録は作らない（計画は判定スナップショットを伴い、判定エンジンを持たないこのパッケージでは作れないため。
+//   E2E は API で計画を作ってから記録する）。
 // - 既に同じ名前の組織があれば何もしない。
+import { createHash } from "node:crypto";
 import pg from "pg";
 import { describeConnection } from "./config";
 
@@ -38,6 +45,29 @@ export const OPS_TEST_PERMITS = {
   airport: "TEST-PERMIT-AIRPORT-005",
   textOnly: "TEST-PERMIT-TEXT-006",
 } as const;
+
+/** 事故・ヒヤリハットの記録（Sprint 12e）の要約。E2E が記録を見分けるのに使う（ID は投入のたびに変わる）。 */
+export const OPS_TEST_INCIDENTS = {
+  accidentNoReport: "テスト事故：着陸のときにプロペラが手に当たった",
+  nearMissDone: "テストヒヤリハット：鳥が近づいたため飛行を中断した",
+  quickPending: null,
+  reported: "テスト事故：倉庫の壁に機体が接触した",
+  changedAfterReport: "テスト事故：駐車場の車に部品が落ちた",
+  voided: "テスト：誤って登録した記録",
+  journalLinked: "テストヒヤリハット：風にあおられて着陸地点がずれた",
+  orgB: "組織Bのテストヒヤリハット",
+} as const;
+
+/** 報告の記録の事実の指紋（アプリの incidentFactsSource と同じ規則。apps/web の DB テストが一致を確かめる）。 */
+export const incidentFactsFingerprint = (f: {
+  readonly kind: string;
+  readonly event_types: readonly string[];
+  readonly people_injury: string;
+  readonly injured_count: number | null;
+}): string =>
+  createHash("sha256")
+    .update(JSON.stringify(["soraban-incident-facts-v1", f.kind, [...f.event_types].sort(), f.people_injury, f.injured_count ?? null]), "utf8")
+    .digest("hex");
 
 type SeedMember = {
   readonly key: string;
@@ -83,7 +113,7 @@ const addVersion = async (
   entityType: string,
   entityId: string,
   data: object,
-  op: "create" | "update" = "create",
+  op: "create" | "update" | "void" = "create",
   reason: string | null = null,
 ): Promise<void> => {
   await c.query(
@@ -115,6 +145,39 @@ const permitData = (permitNumber: string, over: Record<string, unknown>): Record
   conditions_text: null,
   source: "manual",
   external_ref: {},
+  ...over,
+});
+
+/** 事故・ヒヤリハットの版の data の既定値（12e。version の data は snake_case。目安は版 1 の類型のデータで決めた値）。 */
+const incidentData = (over: Record<string, unknown>): Record<string, unknown> => ({
+  kind: "accident",
+  occurred_at: "2027-01-04T10:00",
+  phase: null,
+  place_name: OPS_TEST_PLACE.name,
+  latitude: OPS_TEST_PLACE.latitude,
+  longitude: OPS_TEST_PLACE.longitude,
+  plan_id: null,
+  snapshot_id: null,
+  flight_record_id: null,
+  aircraft_id: null,
+  pilot_id: null,
+  event_types: ["minor_injury"],
+  people_injury: "yes",
+  aircraft_damage: "no",
+  injured_count: null,
+  contacts_made: [],
+  summary: null,
+  details: null,
+  factors_note: null,
+  actions_taken: null,
+  prevention_note: null,
+  detail_pending: false,
+  source: "office",
+  follow_up_status: "open",
+  follow_up_on: null,
+  guidance_level: "possible",
+  guidance_revision: 1,
+  client_request_id: null,
   ...over,
 });
 
@@ -234,5 +297,158 @@ export const seedOpsTestData = async (c: Q): Promise<SeedResult> => {
     place_scope: { type: "circles", circles: [{ name: "空港の周辺", ...here, radiusM: 3000 }] },
   });
   await permit(OPS_TEST_PERMITS.textOnly, { kinds: ["150m"], place_scope: { type: "text", text: "許可書の別紙に記載の区域（テスト用）" } });
+
+  // Sprint 12e：事故・ヒヤリハット（組織 A に 7 件、組織 B に 1 件）
+  const newId = async () => (await c.query<{ id: string }>("select gen_random_uuid() as id")).rows[0]!.id;
+  const pilotA = (await c.query<{ id: string }>("select id from pilots where org_id = $1 and full_name = '操縦 一郎'", [orgIds.a])).rows[0]!.id;
+  const zeroAircraft = (await c.query<{ id: string }>("select id from aircraft where org_id = $1 and registration_mark = $2", [orgIds.a, OPS_TEST_AIRCRAFT.zero])).rows[0]!.id;
+  const managerA = memberIds.get("a-manager")!;
+  const incident = async (org: "a" | "b", over: Record<string, unknown>): Promise<{ id: string; data: Record<string, unknown> }> => {
+    const id = await newId();
+    const data = incidentData(over);
+    await addVersion(c, orgIds[org], "incident_record", id, data);
+    return { id, data };
+  };
+  const report = async (incidentId: string, facts: Record<string, unknown>, over: Record<string, unknown>) => {
+    await c.query(
+      `insert into incident_report_records (org_id, incident_id, action, done_at, channel, channel_note, reference, reference_absent, note,
+         checks, target_record_id, incident_version, facts_fingerprint, reason, recorded_by_member_id, recorded_by_name, recorded_by_role,
+         created_at, content_hash)
+       values ($1, $2, $3, ops_jst_minute_to_timestamptz($4), $5, null, $6, false, $7, $8::jsonb, null, 1, $9, null, $10, '-', 'viewer', now(), '-')`,
+      [
+        orgIds.a,
+        incidentId,
+        over["action"],
+        over["done_at"],
+        over["channel"] ?? null,
+        over["reference"] ?? null,
+        over["note"] ?? null,
+        JSON.stringify(over["checks"]),
+        incidentFactsFingerprint(facts as never),
+        managerA,
+      ],
+    );
+  };
+  // ① 事故・けがあり（軽傷 1 名）・報告の記録なし（目安は possible。「今日」に報告の要否の確認が出る）
+  await incident("a", {
+    occurred_at: "2027-01-04T10:00",
+    phase: "landing",
+    pilot_id: pilotA,
+    event_types: ["minor_injury"],
+    injured_count: 1,
+    contacts_made: ["internal_manager"],
+    summary: OPS_TEST_INCIDENTS.accidentNoReport,
+    details: "着陸のあと、回転が止まる前に機体に近づいた（テスト用）",
+  });
+  // ② ヒヤリハット・どれにも当たらない・対応済み（目安は none_selected）
+  await incident("a", {
+    kind: "near_miss",
+    occurred_at: "2027-01-02T14:30",
+    phase: "in_flight",
+    event_types: ["none"],
+    people_injury: "no",
+    summary: OPS_TEST_INCIDENTS.nearMissDone,
+    prevention_note: "鳥の多い時間帯を避ける（テスト用）",
+    follow_up_status: "done",
+    follow_up_on: "2027-01-03",
+    guidance_level: "none_selected",
+  });
+  // ③ 現場の簡易記録（詳細が未記入。類型は「まだ分からない」、機体の損傷は「わからない」。座標・自由記述は持たない）
+  await incident("a", {
+    kind: "undetermined",
+    occurred_at: "2027-01-05T09:00",
+    place_name: null,
+    latitude: null,
+    longitude: null,
+    event_types: ["unknown"],
+    people_injury: "no",
+    aircraft_damage: "unknown",
+    detail_pending: true,
+    source: "field_quick",
+    client_request_id: await newId(),
+  });
+  // ④ 報告の記録あり（DIPS 2.0・番号あり）
+  const r4 = await incident("a", {
+    occurred_at: "2026-12-20T11:00",
+    event_types: ["property_damage"],
+    people_injury: "no",
+    aircraft_damage: "yes",
+    summary: OPS_TEST_INCIDENTS.reported,
+  });
+  await report(r4.id, r4.data, { action: "reported", done_at: "2026-12-20T15:00", channel: "dips", reference: "TEST-REPORT-0001", checks: { reportCompleted: true } });
+  // ⑤ 報告の記録のあとで事実が変わった（類型に軽傷を足し、けがありに訂正）
+  const r5 = await incident("a", {
+    occurred_at: "2026-12-25T10:30",
+    event_types: ["property_damage"],
+    people_injury: "no",
+    aircraft_damage: "no",
+    summary: OPS_TEST_INCIDENTS.changedAfterReport,
+  });
+  await report(r5.id, r5.data, { action: "reported", done_at: "2026-12-25T16:00", channel: "dips", reference: "TEST-REPORT-0002", checks: { reportCompleted: true } });
+  await addVersion(
+    c,
+    orgIds.a,
+    "incident_record",
+    r5.id,
+    { ...r5.data, event_types: ["property_damage", "minor_injury"], people_injury: "yes", injured_count: 1 },
+    "update",
+    "けがをした人がいたことが分かった（テスト用）",
+  );
+  // ⑥ 取消済み
+  const r6 = await incident("a", { kind: "near_miss", occurred_at: "2026-12-28T09:00", event_types: ["none"], people_injury: "no", summary: OPS_TEST_INCIDENTS.voided, guidance_level: "none_selected" });
+  await addVersion(c, orgIds.a, "incident_record", r6.id, r6.data, "void", "誤って登録した（テスト用）");
+  // ⑦ 日誌（飛行記録）に結び付いた記録（操縦ミスなどによる操縦不能の事実だけ。目安は none_selected）
+  const flightId = await newId();
+  await addVersion(c, orgIds.a, "flight_record", flightId, {
+    aircraft_id: zeroAircraft,
+    pilot_id: pilotA,
+    daily_inspection_id: null,
+    flight_plan_id: null,
+    snapshot_id: null,
+    purpose: "点検",
+    waypoints: null,
+    specific_flight_types: [],
+    takeoff_place: OPS_TEST_PLACE.name,
+    takeoff_lat: null,
+    takeoff_lng: null,
+    takeoff_accuracy_m: null,
+    landing_place: OPS_TEST_PLACE.name,
+    landing_lat: null,
+    landing_lng: null,
+    landing_accuracy_m: null,
+    takeoff_at: "2026-11-10T10:00",
+    landing_at: "2026-11-10T10:20",
+    safety_issue: true,
+    safety_issue_detail: "風にあおられて着陸地点が 3m ずれた（テスト用）",
+    defects: [],
+    pilot_name: "操縦 一郎",
+    pilot_license_number: "TEST-11112222",
+    pilot_version: 1,
+    client_request_id: null,
+  });
+  await incident("a", {
+    kind: "near_miss",
+    occurred_at: "2026-11-10T10:15",
+    phase: "landing",
+    flight_record_id: flightId,
+    aircraft_id: zeroAircraft,
+    pilot_id: pilotA,
+    event_types: ["loss_by_operation"],
+    people_injury: "no",
+    summary: OPS_TEST_INCIDENTS.journalLinked,
+    guidance_level: "none_selected",
+  });
+  // 組織 B（分離の確認用）
+  await incident("b", {
+    kind: "near_miss",
+    occurred_at: "2027-01-03T13:00",
+    place_name: "組織Bの現場",
+    latitude: null,
+    longitude: null,
+    event_types: ["none"],
+    people_injury: "no",
+    summary: OPS_TEST_INCIDENTS.orgB,
+    guidance_level: "none_selected",
+  });
   return { created: true, orgIds };
 };
