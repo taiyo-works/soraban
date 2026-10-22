@@ -49,4 +49,14 @@ describe("下メニュー（Sprint 12c 設計 I）", () => {
     ];
     for (const [p, key] of cases) expect(currentNavKey(p), p).toBe(key);
   });
+
+  it("Sprint 12e：現場の簡易記録では出さない。事故・ヒヤリハットの画面は「その他」が現在地", () => {
+    expect(navHiddenOn(`/ops/plans/${PLAN}/field/incident`)).toBe(true);
+    expect(navHiddenOn(`/ops/plans/${PLAN}/field/incident/`)).toBe(true);
+    expect(navHiddenOn(`/ops/plans/${PLAN}/field/other`)).toBe(false);
+    for (const p of ["/ops/incidents", "/ops/incidents/new", `/ops/incidents/${PLAN}`]) {
+      expect(navHiddenOn(p), p).toBe(false);
+      expect(currentNavKey(p), p).toBe("more");
+    }
+  });
 });

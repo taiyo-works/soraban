@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { FieldClient } from "@/components/ops/field-client";
+import { incidentQuickHref } from "@/lib/ops-incident";
+import { can } from "@/server/ops/authz";
 import { getFieldView } from "@/server/ops/field";
 import { requireOpsMember } from "@/server/ops/page";
 import { OpsError } from "@/server/ops/service";
@@ -20,7 +22,7 @@ export default async function PlanFieldPage({ params }: { readonly params: Promi
   return (
     <>
       <DraftOwnerGuard memberId={me.member.id} />
-      <FieldClient initial={view} memberId={me.member.id} />
+      <FieldClient initial={view} memberId={me.member.id} incidentHref={can(me.member.role, "incident.create") ? incidentQuickHref(view.plan.id) : null} />
     </>
   );
 }

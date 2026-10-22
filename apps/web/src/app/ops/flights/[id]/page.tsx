@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { LinkedIncidentsSection } from "@/components/ops/incident-ui";
 import { VoidForm } from "@/components/ops/ops-client";
 import { FlightForm } from "@/components/ops/records-client";
 import { VersionList } from "@/components/ops/versions";
@@ -8,6 +9,7 @@ import { SPECIFIC_FLIGHT_TYPE_LABELS } from "@/lib/ops-records";
 import { JudgementMissing } from "@/components/ops/plan-ui";
 import { MismatchBadges, TakeoffGaps } from "@/components/ops/journal-ui";
 import { fieldHref } from "@/lib/ops-field";
+import { listFlightIncidents } from "@/server/ops/incidents";
 import { getFlight, JUDGEMENT_LINK_MISSING_LABEL, listFlightVersions } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
@@ -27,7 +29,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     if (e instanceof OpsError && e.status === 404) notFound();
     throw e;
   }
-  const versions = await listFlightVersions(ctx, id);
+  const [versions, flightIncidents] = await Promise.all([listFlightVersions(ctx, id), listFlightIncidents(ctx, id)]);
   const manager = me.member.role === "manager";
   const correctable = !f.voided && canCorrectRecord(me, f.isSelf);
   const options = correctable ? await recordFormOptions(ctx, me) : null;
@@ -213,6 +215,8 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           </details>
         </Section>
       ) : null}
+      <LinkedIncidentsSection dto={flightIncidents} />
+
       <VersionList versions={versions} />
       {manager && !f.voided ? (
         <Section

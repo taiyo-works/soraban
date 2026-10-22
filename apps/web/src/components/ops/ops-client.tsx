@@ -6,6 +6,7 @@ import { cloneElement, useCallback, useEffect, useId, useRef, useState, type For
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
 import { flushOutbox, planIdsWithOutbox, unsavedUnsentCountForMember } from "./field-outbox";
+import { flushIncidentOutbox, incidentUnsentTotalForMember, planIdsWithIncidentOutbox } from "./incident-outbox";
 import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import {
   buttonDangerClass,
@@ -885,11 +886,11 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     }
   };
 
-  // 端末に保存できていない未送信（メモリだけにある分）も数に入れる
+  // 端末に保存できていない未送信（メモリだけにある分）も数に入れる。Sprint 12e：現場の簡易記録（事故・ヒヤリハット）の未送信も数える
   const guardNow = (): { warn: boolean; message: string | null } => {
     if (!memberId) return { warn: false, message: null };
     const g = logoutGuard(window.localStorage, memberId);
-    const count = g.count + unsavedUnsentCountForMember(memberId);
+    const count = g.count + unsavedUnsentCountForMember(memberId) + incidentUnsentTotalForMember(memberId);
     return { warn: count > 0, message: count > 0 ? LOGOUT_UNSENT_WARNING(count) : null };
   };
 
@@ -908,6 +909,7 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     if (!memberId) return;
     setBusy(true);
     for (const planId of planIdsWithOutbox(memberId)) await flushOutbox(planId, memberId);
+    for (const planId of planIdsWithIncidentOutbox(memberId)) await flushIncidentOutbox(planId, memberId);
     const g = guardNow();
     if (g.warn) {
       setWarning(g.message);

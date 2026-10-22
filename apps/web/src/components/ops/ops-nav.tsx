@@ -64,9 +64,12 @@ function NavIcon({ id }: { readonly id: string }) {
   );
 }
 
-/** 下メニューを出さない画面：現場モード・サインイン・アクセス権なし。 */
+/** 現場モードと、その中の現場の簡易記録（Sprint 12e）。ヘッダーも下メニューも出さない。 */
+const FIELD_PATH = /^\/ops\/plans\/[^/]+\/field(\/incident)?\/?$/;
+
+/** 下メニューを出さない画面：現場モード（現場の簡易記録を含む）・サインイン・アクセス権なし。 */
 export const navHiddenOn = (pathname: string): boolean =>
-  /^\/ops\/plans\/[^/]+\/field\/?$/.test(pathname) || pathname === "/ops/sign-in" || pathname === "/ops/no-access";
+  FIELD_PATH.test(pathname) || pathname === "/ops/sign-in" || pathname === "/ops/no-access";
 
 /** どの項目が現在地か。日誌は /ops/flights*・/ops/inspections*・/ops/journal。計画は /ops/plans*（現場モードを除く）。 */
 export const currentNavKey = (pathname: string): string | null => {
@@ -74,7 +77,7 @@ export const currentNavKey = (pathname: string): string | null => {
   if (pathname === "/ops") return "today";
   if (pathname.startsWith("/ops/plans")) return "plans";
   if (pathname.startsWith("/ops/flights") || pathname.startsWith("/ops/inspections") || pathname.startsWith("/ops/journal")) return "journal";
-  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members)/.test(pathname)) return "more";
+  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members|incidents)/.test(pathname)) return "more";
   return null;
 };
 
@@ -131,7 +134,7 @@ export function OpsBottomNav() {
 /** 共通のヘッダー。現場モードでは出さない（上部は現場モード自身の「今日へ戻る」だけ）。 */
 export function OpsHeader() {
   const pathname = usePathname() ?? "";
-  if (/^\/ops\/plans\/[^/]+\/field\/?$/.test(pathname)) return null;
+  if (FIELD_PATH.test(pathname)) return null;
   return (
     <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-rule pb-3" data-testid="ops-header">
       <Link href="/ops" prefetch={false} className="flex min-h-11 flex-col justify-center gap-0.5 text-ink">

@@ -93,7 +93,16 @@ const KIND_LABEL: Readonly<Record<OutboxEntry["kind"], string>> = {
   undo: "取り消し",
 };
 
-export function FieldClient({ initial, memberId }: { readonly initial: FieldViewDto; readonly memberId: string }) {
+export function FieldClient({
+  initial,
+  memberId,
+  incidentHref = null,
+}: {
+  readonly initial: FieldViewDto;
+  readonly memberId: string;
+  /** Sprint 12e：現場の簡易記録（事故・ヒヤリハット）への経路。記録できない利用者には渡さない（帯を出さない）。 */
+  readonly incidentHref?: string | null;
+}) {
   const planId = initial.plan.id;
   const [view, setView] = useState<FieldViewDto>(initial);
   const [outbox, setOutbox] = useState<OutboxState>(emptyOutbox());
@@ -696,6 +705,14 @@ export function FieldClient({ initial, memberId }: { readonly initial: FieldView
             </nav>
           ) : null}
         </div>
+        {/* Sprint 12e：事故・ヒヤリハットの簡易記録への帯。常に見える小さめの帯（大きなボタンにしない）。離陸・着陸のボタンの隣・直上・直下に置かない
+            （ヘッダーの中に置き、段階・送信の状況を挟んで 24px 以上離す）。押すと簡易記録の画面へ移るだけで、その場では記録しない */}
+        {incidentHref ? (
+          <a href={incidentHref} className={`${BTN_OUTLINE} !justify-start`} data-testid="field-incident-link">
+            <span aria-hidden>＋</span>
+            事故・ヒヤリハットを記録する
+          </a>
+        ) : null}
       </header>
 
       {/* 段階：いまの位置は ▶ と塗りと下線、済みは ✓、これからは ○ */}

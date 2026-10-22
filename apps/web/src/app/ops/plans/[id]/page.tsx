@@ -4,6 +4,7 @@ import { PLAN_JUDGEMENT_DISCLAIMER, PERMIT_VALUE_LABEL, PURPOSE_VALUE_LABEL, SPE
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { VoidForm } from "@/components/ops/ops-client";
 import { DeadlineBox, NextActionsList, PlanDigest, PlanStateBadge, ReportBox, ReportStatusBox, StaleBadge } from "@/components/ops/plan-ui";
+import { LinkedIncidentsSection } from "@/components/ops/incident-ui";
 import { ProcedureRecordsPanel } from "@/components/ops/procedure-client";
 import { PermitDeclaration, PlanPermitList } from "@/components/ops/permit-ui";
 import { ConfirmPanel, RejudgeButton, RequestConfirmationButton } from "@/components/ops/plans-client";
@@ -15,6 +16,7 @@ import { unknownCountLabel } from "@/lib/verdict-display";
 import { can } from "@/server/ops/authz";
 import { PERMIT_FORMAT_UNVERIFIED_NOTE, isDipsPermitValue } from "@/server/ops/permit-logic";
 import { verdictPermitNotes } from "@/server/ops/permit-page";
+import { listPlanIncidents } from "@/server/ops/incidents";
 import { getPlanPermits } from "@/server/ops/permits";
 import { requireOpsMember } from "@/server/ops/page";
 import { SELF_CONFIRMATION_LABEL } from "@/server/ops/plan-logic";
@@ -39,11 +41,12 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
     if (e instanceof OpsError && e.status === 404) notFound();
     throw e;
   }
-  const [snapshot, versions, procedureView, planPermits] = await Promise.all([
+  const [snapshot, versions, procedureView, planPermits, planIncidents] = await Promise.all([
     getSnapshot(ctx, id, plan.currentSnapshotId),
     listPlanVersions(ctx, id),
     listProcedureRecords(ctx, id),
     getPlanPermits(ctx, id),
+    listPlanIncidents(ctx, id),
   ]);
   // 判定の項目への表示の置き換えは、保存した判定（現在のスナップショット）が根拠にした登録だけに限る（登録が変わって古い判定には出さない）
   const permitNotes = planPermits.judgementUpToDate ? verdictPermitNotes(planPermits.permits) : { applied: {}, item: {} };
@@ -351,6 +354,8 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
         ) : null}
         <p className="text-xs text-ink-mute">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
       </Section>
+
+      <LinkedIncidentsSection dto={planIncidents} />
 
       <VersionList versions={versions} />
 
