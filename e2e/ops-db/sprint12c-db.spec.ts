@@ -903,8 +903,12 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await context.setOffline(false);
     await page.route("**/field-events", (route) => (route.request().method() === "POST" ? route.fulfill({ status: 503, body: "{}" }) : route.continue()));
     await page.goto("/ops/more");
-    await page.getByTestId("signout").click();
-    await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります");
+    // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
+    // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
+    await expect(async () => {
+      await page.getByTestId("signout").click();
+      await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります", { timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
     expect(new URL(page.url()).pathname).toBe("/ops/more");
     expect(await page.evaluate((k) => window.localStorage.getItem(k), storageKey)).not.toBeNull();
     await page.getByTestId("signout-cancel").click();
