@@ -4,8 +4,10 @@
 // - 有効（neon）：/ops 以下で Neon Auth の SDK のミドルウェア処理（verifier の交換・Cookie の更新・未ログインの転送）を通す
 //   （server/ops/neon-proxy.ts）。有効（test）：そのまま通す。
 // - /api/test-auth は test 方式で有効なとき以外は常に 404。
+// - /ops/design（デザイン見本。Sprint 12g）：上のどれにも関与せず、DESIGN_CATALOG=1 かつ本番でないときだけ通す（それ以外は 404）。
 // matcher 以外のパス（地点判定・申請支援）には関与しない。
 import { NextResponse, type NextRequest } from "next/server";
+import { DESIGN_CATALOG_HEADER, DESIGN_CATALOG_PATH, isDesignCatalogEnabled } from "@/lib/design-catalog";
 import { getOpsAvailability } from "@/server/ops/availability";
 import { runNeonAuthProxy } from "@/server/ops/neon-proxy";
 
@@ -30,6 +32,16 @@ export async function proxy(request: NextRequest) {
   const a = getOpsAvailability(process.env);
   const pathname = request.nextUrl.pathname;
   const isApi = pathname.startsWith("/api/");
+  // Sprint 12g：デザイン見本（/ops/design）。運航管理の機能フラグ・認証に関わらない静的なページで、
+  // DESIGN_CATALOG=1 かつ本番のデプロイでないときだけ通す。それ以外は 404（ここで 404 を返すので、状態コードが確実に 404 になる）。
+  if (pathname === DESIGN_CATALOG_PATH) {
+    if (!isDesignCatalogEnabled(process.env)) {
+      return new NextResponse("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+    }
+    const forwarded = new Headers(request.headers);
+    forwarded.set(DESIGN_CATALOG_HEADER, "1");
+    return NextResponse.next({ request: { headers: forwarded } });
+  }
   // テスト用の本人確認は、test 方式で有効なとき以外は常に 404（設定不足・本番でも 503 ではなく 404）。
   if (pathname.startsWith("/api/test-auth/") && !(a.state === "enabled" && a.provider === "test")) {
     return NextResponse.json({ error: "not_found" }, { status: 404, headers: { "cache-control": "no-store" } });

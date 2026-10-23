@@ -869,7 +869,8 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await btn.click();
     await expect(btn).toHaveText("着陸");
     await expect(page.getByTestId("field-unsent")).toContainText("未送信 1 件");
-    expect((await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff")).toHaveLength(2);
+    // the label comes from the device's own state; the server has the row once the dropped-response POST is committed
+    await expect.poll(async () => (await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff").length).toBe(2);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
     await expect(page.getByTestId("field-unsent")).toContainText("送信済み");
     expect((await getEvents(manager, plan.id)).filter((e) => e.kind === "takeoff")).toHaveLength(2);
@@ -902,8 +903,12 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await context.setOffline(false);
     await page.route("**/field-events", (route) => (route.request().method() === "POST" ? route.fulfill({ status: 503, body: "{}" }) : route.continue()));
     await page.goto("/ops/more");
-    await page.getByTestId("signout").click();
-    await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります");
+    // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
+    // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
+    await expect(async () => {
+      await page.getByTestId("signout").click();
+      await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります", { timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
     expect(new URL(page.url()).pathname).toBe("/ops/more");
     expect(await page.evaluate((k) => window.localStorage.getItem(k), storageKey)).not.toBeNull();
     await page.getByTestId("signout-cancel").click();

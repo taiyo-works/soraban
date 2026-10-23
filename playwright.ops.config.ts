@@ -73,6 +73,8 @@ export default defineConfig({
         DIPS_REPORT_ADAPTER: "",
         VERCEL_ENV: "",
         NEXT_DIST_DIR: "",
+        // Sprint 12g：デザイン見本（/ops/design）を表示する（認証・DB を使わないことの確認用）。模擬アダプターの 2 台目は未設定（404 の確認用）。
+        DESIGN_CATALOG: "1",
       },
     },
     {
@@ -118,6 +120,7 @@ export default defineConfig({
         GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
         VERCEL_ENV: "",
         NEXT_DIST_DIR: "",
+        DESIGN_CATALOG: "1",
       },
     },
   ],

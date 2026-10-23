@@ -438,8 +438,11 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
 
     // 運航管理者が取消（理由が要る）。取消は既定の一覧に出ない
     await page.goto(`/ops/incidents/${id}`);
-    await page.getByRole("button", { name: "この記録を取り消す" }).click();
-    await expect(page.locator("[data-form-error]:visible")).toBeVisible();
+    // pressed again until the client has taken over (before that the click does not run the form's check)
+    await expect(async () => {
+      await page.getByRole("button", { name: "この記録を取り消す" }).click();
+      await expect(page.locator("[data-form-error]:visible")).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
     await page.getByLabel("取消の理由").fill("試験の記録");
     await page.getByRole("button", { name: "この記録を取り消す" }).click();
     await expect(tid(page, "incident-voided")).toBeVisible();
@@ -601,7 +604,9 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await tid(page, "incident-quick-injury-no").click();
     await tid(page, "incident-quick-submit").click();
     await expect(tid(page, "incident-quick-unsent")).toContainText("未送信 1 件");
-    expect(await listForPlan(bm, plan.id)).toHaveLength(2);
+    // "unsent 1" is shown from the device's own state as soon as the button is pressed; the server has the row only once the
+    // (dropped-response) POST has been committed, so wait for it instead of reading once
+    await expect.poll(async () => (await listForPlan(bm, plan.id)).length).toBe(2);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
     await expect(tid(page, "incident-quick-unsent")).toContainText("送信済み");
     expect(await listForPlan(bm, plan.id)).toHaveLength(2);
@@ -652,8 +657,12 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await context.setOffline(false);
     await page.route("**/api/ops/incidents", (route) => (route.request().method() === "POST" ? route.fulfill({ status: 503, body: "{}" }) : route.continue()));
     await page.goto("/ops/more");
-    await page.getByTestId("signout").click();
-    await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります");
+    // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
+    // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
+    await expect(async () => {
+      await page.getByTestId("signout").click();
+      await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります", { timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
     expect(await page.evaluate((k) => window.localStorage.getItem(k), storageKey)).not.toBeNull();
     await page.getByTestId("signout-send").click();
     await expect(page.getByTestId("signout-warning")).toContainText("送れませんでした");
