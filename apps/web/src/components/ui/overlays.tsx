@@ -220,7 +220,10 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
         aria-label={`説明：${label}`}
         aria-expanded={open}
         aria-controls={id}
-        onClick={() => setPinned((p) => !p)}
+        // State: hover / focus only preview; a click (or Enter / Space) pins it. The next press closes it for real, which means
+        // clearing the preview sources too (the pointer is still over the button and focus stays on it), or `open`
+        // would stay true and the button could never toggle.
+        onClick={() => (pinned ? close() : setPinned(true))}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
         className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-pill text-fg-mute hov:text-accent"
@@ -379,6 +382,8 @@ export function ContextMenu({
       className="relative flex items-center gap-1"
       onContextMenu={(e) => {
         e.preventDefault();
+        // a right click on the open menu itself must not move it
+        if (menu.current?.contains(e.target as Node)) return;
         setAt({ x: e.clientX, y: e.clientY });
       }}
       onKeyDown={(e) => {

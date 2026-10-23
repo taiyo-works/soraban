@@ -1001,4 +1001,121 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
     await expect(page.getByRole("dialog")).toBeVisible();
     expect(await ariaProblems(page), "shortcuts open").toEqual([]);
   });
+
+  test("43. ⓘ の状態遷移：ホバー／フォーカスで見える、クリックで固定、もう一度押すと本当に閉じる（aria-expanded も false）。Esc でも閉じる。Enter でも同じ", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page);
+    const info = page.getByTestId("demo-info");
+    const note = page.getByRole("note").filter({ hasText: "ボタンを押すか" });
+    // hover previews, leaving closes
+    await info.hover();
+    await expect(note).toBeVisible();
+    await expect(info).toHaveAttribute("aria-expanded", "true");
+    // click pins (the pointer is still over it and the button is focused); the next click closes it for real
+    await info.click();
+    await expect(note).toBeVisible();
+    await page.mouse.move(5, 5);
+    await expect(note).toBeVisible();
+    await info.click();
+    await expect(note).toBeHidden();
+    await expect(info).toHaveAttribute("aria-expanded", "false");
+    // and opens again
+    await info.click();
+    await expect(note).toBeVisible();
+    // Escape closes
+    await page.keyboard.press("Escape");
+    await expect(note).toBeHidden();
+    await expect(info).toHaveAttribute("aria-expanded", "false");
+    // keyboard: focus previews, Enter pins, Enter again closes, Space pins again, Esc closes
+    await page.mouse.move(5, 5);
+    await info.evaluate((el) => (el as HTMLElement).blur());
+    await info.focus();
+    await expect(note).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(note).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(note).toBeHidden();
+    await expect(info).toHaveAttribute("aria-expanded", "false");
+    await expect(info).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(note).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(note).toBeHidden();
+    await expect(info).toBeFocused();
+    // an outside press closes a pinned one
+    await info.click();
+    await expect(note).toBeVisible();
+    await page.getByRole("heading", { level: 1, name: "デザイン見本" }).click();
+    await expect(note).toBeHidden();
+  });
+
+  test("44. 幅 375px：入力／結果のタブを選んでいる間、地図は背景として残るがアクセシビリティツリーから外れる（inert）。地図のタブでは tabpanel として操作できる", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await open(page, "screen=workspace");
+    const tabs = page.getByTestId("workspace-tabs");
+    const map = page.getByTestId("workspace-map");
+    await expect(tabs.getByRole("tab", { name: "地図" })).toHaveAttribute("aria-selected", "true");
+    await expect(map).toBeVisible();
+    await expect(map).not.toHaveAttribute("inert", /.*/);
+    await expect(page.getByRole("tabpanel", { name: "地図" })).toHaveCount(1);
+    for (const name of ["入力", "結果"]) {
+      await tabs.getByRole("tab", { name }).click();
+      // visually still there, but not exposed and not reachable
+      await expect(map).toBeVisible();
+      await expect(map).toHaveAttribute("inert", "");
+      await expect(page.getByRole("tabpanel", { name: "地図" })).toHaveCount(0);
+      // exactly one tabpanel of the workspace is exposed: the selected tab's
+      const exposed = page.getByTestId("sample-workspace").getByRole("tabpanel");
+      await expect(exposed).toHaveCount(1);
+      await expect(exposed).toHaveAttribute("aria-labelledby", (await tabs.getByRole("tab", { name }).getAttribute("id"))!);
+      await expect(page.getByTestId("workspace-maximize")).toBeHidden();
+    }
+    await tabs.getByRole("tab", { name: "地図" }).click();
+    await expect(map).not.toHaveAttribute("inert", /.*/);
+    await expect(page.getByTestId("sample-workspace").getByRole("tabpanel")).toHaveCount(1);
+    await expect(page.getByRole("tabpanel", { name: "地図" })).toBeVisible();
+    await expect(page.getByTestId("workspace-sheet").getByRole("tabpanel")).toHaveCount(0);
+    // at 1280px the map is a plain region and never inert
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(map).not.toHaveAttribute("inert", /.*/);
+    await expect(page.getByRole("region", { name: "地図" })).toHaveCount(1);
+  });
+
+  test("45. 隠れているはずのものは、アクセシビリティツリーに出ない（閉じたⓘ・メニュー・ダイアログ・畳んだペイン・非選択のタブのパネル・開いたダイアログの背景）", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, "screen=workspace");
+    // closed overlays
+    await expect(page.getByRole("note").filter({ hasText: "ボタンを押すか" })).toHaveCount(0);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    // collapsed workspace pane: gone from the tree, and not focusable
+    await expect(page.getByRole("complementary", { name: "入力" })).toHaveCount(1);
+    await page.getByTestId("workspace-toggle-left").click();
+    await expect(page.getByRole("complementary", { name: "入力" })).toHaveCount(0);
+    await expect(page.getByRole("complementary", { name: "結果" })).toHaveCount(1);
+    await page.getByTestId("workspace-toggle-left").click();
+    await expect(page.getByRole("complementary", { name: "入力" })).toHaveCount(1);
+    // maximize: both panes leave the tree, the map stays
+    await page.getByTestId("workspace-maximize").click();
+    await expect(page.getByRole("complementary")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "地図" })).toHaveCount(1);
+    await page.getByTestId("workspace-maximize").click();
+    // tabs on the parts section: only the selected tab's panel is exposed
+    const demoPanels = page.locator("[id^='demo-tabs-panel-']");
+    expect(await demoPanels.count()).toBe(3);
+    await expect(page.getByRole("tabpanel", { name: /概要|履歴|設定/ })).toHaveCount(1);
+    // an open dialog is the native modal (the browser makes the page behind it inert; Tab stays inside — see test 9)
+    await page.getByTestId("ctl-command").click();
+    const dlg = page.getByRole("dialog");
+    await expect(dlg).toBeVisible();
+    expect(await page.locator("dialog[open]:modal").count()).toBe(1);
+    await page.keyboard.press("Escape");
+    await expect(dlg).toHaveCount(0);
+    // a closed disclosure's content is not exposed; opening exposes it
+    const text = page.getByText("3 文以上の説明や、選択肢ごとの長い説明はここに置きます");
+    await expect(text).toBeHidden();
+    await page.getByText("説明（折りたたみ）").click();
+    await expect(text).toBeVisible();
+  });
 });

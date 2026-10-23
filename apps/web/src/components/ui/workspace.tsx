@@ -116,7 +116,7 @@ export function Workspace({
       className="relative isolate overflow-hidden rounded-sheet bg-sunken shadow-lift lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
     >
       {/* map layer */}
-      <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} {...(desktop ? { role: "region", "aria-label": "地図" } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "map") })}>
+      <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} inert={!desktop && tab !== "map"} aria-hidden={!desktop && tab !== "map" ? true : undefined} {...(desktop ? { role: "region", "aria-label": "地図" } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "map") })}>
         {map}
         {floating ? <div className="absolute left-3 top-3 z-10 max-w-64 max-lg:hidden">{floating}</div> : null}
         <button
@@ -175,6 +175,7 @@ export function Workspace({
             {...(desktop ? { "aria-label": inputTitle } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "input") })}
             data-testid="workspace-input"
             inert={desktop && !showLeft}
+            aria-hidden={desktop && !showLeft ? true : undefined}
             className={cx(
               "min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:col-start-1 lg:row-start-1 lg:flex-none lg:overflow-x-hidden lg:overflow-y-auto lg:border-r lg:border-line lg:bg-surface lg:p-0",
               tab !== "input" && "max-lg:hidden",
@@ -187,6 +188,7 @@ export function Workspace({
             {...(desktop ? { "aria-label": resultTitle } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "result") })}
             data-testid="workspace-result"
             inert={desktop && !showRight}
+            aria-hidden={desktop && !showRight ? true : undefined}
             className={cx(
               "min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:col-start-3 lg:row-start-1 lg:flex-none lg:overflow-x-hidden lg:overflow-y-auto lg:border-l lg:border-line lg:bg-surface lg:p-0",
               tab !== "result" && "max-lg:hidden",

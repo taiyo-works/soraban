@@ -156,7 +156,7 @@ export function DataTable<T>({
                     <tr
                       key={key}
                       data-testid={rowTestId?.(row)}
-                      aria-selected={selectedKey !== undefined ? selected : undefined}
+                      aria-current={selected ? "true" : undefined}
                       className={cx(
                         "transition-colors duration-[var(--dur-fast)] max-md:rounded-card max-md:bg-surface max-md:p-3 max-md:shadow-card md:border-t md:border-line",
                         href && "hov:bg-accent-soft md:cursor-pointer",
