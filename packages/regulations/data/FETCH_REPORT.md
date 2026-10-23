@@ -1,6 +1,6 @@
 # 地図データ取得レポート（fetch-regulation-data）
 
-- 実行: https://github.com/taiyo-works/soraban/actions/runs/39168417203
+- 実行: https://github.com/carta-lab/soraban/actions/runs/39168417203
 - ブランチ: data-fetch/run-4（49ca4030d426435bfdd2aa6814b75448274c36b3）
 - 実行日時（UTC）: 2026-10-18T21:35:14Z
 - typecheck・test: success

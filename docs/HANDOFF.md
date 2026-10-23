@@ -13,8 +13,8 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 
 | 項目 | 内容 |
 |---|---|
-| リポジトリ | `taiyo-works/soraban`（GitHub 組織 taiyo-works。taiyo-works-admin が所有する Pro） |
-| Mac の手元のクローン | 接続先がまだ旧リポジトリのまま。`git remote set-url origin https://github.com/taiyo-works/soraban.git` が必要 |
+| リポジトリ | `carta-lab/soraban`（GitHub 組織 carta-lab。2026-10-23 に taiyo-works から転送。下の「carta-lab への転送の経緯」） |
+| Mac の手元のクローン | 接続先がまだ旧リポジトリのまま。`git remote set-url origin https://github.com/carta-lab/soraban.git` が必要 |
 | Vercel | チーム **taiyo-works-projects**（Pro）、プロジェクト soraban。関数リージョン sin1（設定済み）。Root Directory `apps/web` |
 | 公開 URL | `https://soraban.futuretec.jp`（Xserver ドメインの DNS に CNAME 追加済み、Valid）、`soraban-gules.vercel.app` |
 | 検索エンジン | 全ページに `X-Robots-Tag: noindex, nofollow`（試験運用中。本格公開時に外す） |
@@ -22,6 +22,13 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 | 認証 | Neon Auth（Google ログインのみ）を予定。本番は未設定 |
 | 機能フラグ | `OPS_ENABLED`（運航管理）。本番では未設定＝無効。無効の間 `/ops` 等は 404 |
 | CI | GitHub Actions：verify（typecheck/lint/test/build）、e2e、db（PostGIS サービスコンテナ）、smoke（外部疎通、失敗しても止めない） |
+
+### carta-lab への転送の経緯（2026-10-23）
+
+- リポジトリは taiyo-works から carta-lab に転送した。**開発は carta-lab 側で続け、完成後に会社側（taiyo-works）へ戻す予定**。
+- GitHub Actions（verify・e2e・db・smoke）は carta-lab のプランの枠を使う。実行環境が起動しないときは、まず Billing の枠を疑う。
+- Vercel はチーム taiyo-works-projects のまま。Git 連携の接続先が carta-lab/soraban になっているかは、Settings → Git で確認する。
+- 戻すときは、この節と上の表の「リポジトリ」、Mac のクローンの接続先（`git remote set-url`）、`docs/runbooks/production-db-prep.md` の接続先を、あわせて直す。
 
 ### DB の方針（2026-10-21 ユーザー決定。正は `docs/spec.md` §13.8.1）
 
@@ -52,7 +59,7 @@ Claude（クラウドの作業環境）から Claude Code へ作業を引き継�
 | 12b | 通報の準備・記録・期限、通報ゲートウェイ（手動・模擬のアダプター。DIPS には送信しない。0012・0013） | #27 |
 | 12c | トップの「今日」・下メニュー・現場モード・点検と日誌の統合（端末の送信待ち。0014） | #28 |
 | 12d | 許可・承認の登録と包括許可の照合（0015）。Codex の指摘の修正（通報の指紋に許可の登録、旧形式の mlit） | #29、#30 |
-| 12e | 事故・ヒヤリハットの記録（追記専用。0016）。現場の簡易記録、報告の可能性の目安（2 段）、報告の結果の記録（利用者の申告）。制度は一次資料で照合済み（`docs/references/accident-report-primary-sources.md`）。DIPS・国へは送信しない | （本 PR） |
+| 12e | 事故・ヒヤリハットの記録（追記専用。0016）。現場の簡易記録、報告の可能性の目安（2 段）、報告の結果の記録（利用者の申告）。制度は一次資料で照合済み（`docs/references/accident-report-primary-sources.md`）。DIPS・国へは送信しない | #31 |
 | — | North Star：特許の扱い（§0.1.8）、最終目標（§0.1.1a） | #8、#16 |
 | — | noindex | #17 |
 
