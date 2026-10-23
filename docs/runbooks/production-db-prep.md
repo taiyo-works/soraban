@@ -34,13 +34,13 @@
 - リポジトリのクローンが最新の `main`。Mac の手元のクローンは接続先が旧リポジトリのままなので、**最初に**直す：
   ```sh
   cd <クローンのフォルダ>
-  git remote set-url origin https://github.com/taiyo-works/soraban.git
+  git remote set-url origin https://github.com/carta-lab/soraban.git
   git remote -v
   git checkout main && git pull
   pnpm install
   ls packages/db/migrations
   ```
-  期待：`git remote -v` が `taiyo-works/soraban` を指す。`ls` に `0001_…sql` 〜 `0016_…sql` の 16 本が並ぶ。
+  期待：`git remote -v` が `carta-lab/soraban` を指す。`ls` に `0001_…sql` 〜 `0016_…sql` の 16 本が並ぶ。
 - Neon コンソール（https://console.neon.tech）に入れること。Vercel（taiyo-works-projects チーム）に入れること（本番の章で使う）。
 
 ### 秘密の扱い（原則）
