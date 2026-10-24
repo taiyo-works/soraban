@@ -8,6 +8,7 @@ import { JUDGEMENT_LINK_MISSING_LABEL, listFlights, parseRecordFilter } from "@/
 import { listAircraft, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // 狭い画面のカード：1 行目に飛行年月日と機体、2 行目に離着陸時刻と飛行時間、3 行目に操縦者と総飛行時間。
 // 広い画面では表の 1 行（列の順は見出しのとおり）。
@@ -35,7 +36,7 @@ export default async function FlightListPage({
     <main className="flex flex-col gap-6">
       <PageHeader
         title="飛行記録"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
+        back={BACK_TO.journal}
         aside={
           canCreate ? (
             <Link href="/ops/flights/new" className={buttonFieldClass}>

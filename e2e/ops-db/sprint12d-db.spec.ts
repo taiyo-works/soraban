@@ -153,7 +153,7 @@ test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, timezoneId: "America/Los_Angeles" });
 
 test.describe("Sprint 12d E2E-DB：許可・承認の登録（契約 12）", () => {
-  test("12-1. 「その他」から一覧へ：初期データの 6 件が文字と記号つきの有効性で区別され、固定の文言が出る。絞り込みが効く。375px で横スクロールなし", async ({ page }) => {
+  test("12-1. 「登録」から一覧へ：初期データの 6 件が文字と記号つきの有効性で区別され、固定の文言が出る。絞り込みが効く。375px で横スクロールなし", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
     await page.goto("/ops/more");

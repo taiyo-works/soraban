@@ -1,86 +1,109 @@
 "use client";
 
-// 下メニュー・共通のヘッダー（Sprint 12c 設計 I・H）。
-//   - 5 項目：今日（/ops）／判定（/）／計画（/ops/plans）／日誌（/ops/journal）／その他（/ops/more）。現在地は文字・形（上の太い線と ●）・aria-current で示す。
-//   - スマホ（幅 768px 未満）は画面下に固定。高さ 56px 以上、1 項目は幅の 1/5。768px 以上は同じ 5 つを横に並べる（配置は designer）。
+// 運航管理のメニュー（Sprint 12g-1b 段階 A）。名称は ホーム／判定／計画／日誌／登録 の 5 つだけ。ハンバーガーは使わない。
+//   - PC（幅 1024px 以上）：左メニュー。上から ホーム／「調べる」＝判定／「飛ばす」＝計画・日誌／登録（機体・操縦者・許可・承認・地点）。
+//   - スマホ（幅 1024px 未満）：画面下に固定の 5 タブ（高さ 56px 以上）。上に薄いトップバー（画面名・利用者メニュー）。
+//   - 右上の利用者メニュー（PC・スマホ共通）：名前・役割・ログアウト。ログアウトの挙動（未送信の警告・下書きの消去）は SignOutButton のまま。
+//   - 現在地は文字の太さ・面の塗り・アイコン・aria-current で示す（色だけに頼らない）。
 //   - 現場モード・サインイン・アクセス権なしでは出さない（現場モードは親指の届く下半分を離着陸のボタンに使う）。
 //   - 出す条件（運航管理が有効でログイン済み）は、サーバーの OpsNavGate が決めてからこの部品を描く。
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { cx } from "@/components/ui/cx";
+import { useDismiss } from "@/components/ui/hooks";
+import { Icon, type IconName } from "@/components/ui/icons";
+import { InfoPopover } from "@/components/ui/overlays";
+import type { MemberRoleDb } from "@soraban/db";
+import { SignOutButton } from "./ops-client";
+import { currentChildKey, currentNavKey, NAV_GROUPS, NAV_ITEM, NAV_ITEMS, navHiddenOn, visibleNavChildren } from "./ops-nav-model";
 
-type Item = { readonly key: string; readonly label: string; readonly href: string };
-
-export const NAV_ITEMS: readonly Item[] = [
-  { key: "today", label: "今日", href: "/ops" },
-  { key: "verdict", label: "判定", href: "/" },
-  { key: "plans", label: "計画", href: "/ops/plans" },
-  { key: "journal", label: "日誌", href: "/ops/journal" },
-  { key: "more", label: "その他", href: "/ops/more" },
-];
-
-// 記号は意味の通る線画（currentColor。装飾なので読み上げない）。意味は常に隣の文字ラベルが担う。
-//   今日＝日付の入った暦／判定＝地点のピン／計画＝チェック欄つきの書類／日誌＝開いた帳面／その他＝三つの点
-const ICON_PATHS: Readonly<Record<string, ReactNode>> = {
-  today: (
-    <>
-      <rect x="3.5" y="5" width="17" height="15" rx="1" />
-      <path d="M3.5 10h17M8 3v4M16 3v4" />
-      <rect x="8" y="13" width="3" height="3" fill="currentColor" stroke="none" />
-    </>
-  ),
-  verdict: (
-    <>
-      <path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z" />
-      <circle cx="12" cy="10" r="2.2" />
-    </>
-  ),
-  plans: (
-    <>
-      <path d="M6 3.5h12a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z" />
-      <path d="M8.5 9l1.5 1.5 2.5-3M8.5 15l1.5 1.5 2.5-3M14.5 9.5H16.5M14.5 15.5H16.5" />
-    </>
-  ),
-  journal: (
-    <>
-      <path d="M12 6c-2-1.5-4.5-2-8-2v14c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V4c-3.5 0-6 .5-8 2z" />
-      <path d="M12 6v14" />
-    </>
-  ),
-  more: (
-    <>
-      <circle cx="5.5" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="18.5" cy="12" r="1.6" fill="currentColor" />
-    </>
-  ),
+export type OpsNavUser = {
+  readonly memberId: string;
+  readonly name: string;
+  readonly email: string;
+  readonly role: MemberRoleDb;
+  readonly roleLabel: string;
+  readonly roleDescription: string;
+  readonly provider: "neon" | "test";
 };
 
-function NavIcon({ id }: { readonly id: string }) {
+const LINK_BASE = "flex min-h-11 w-full items-center gap-3 rounded-ctl px-3 text-table touch-manipulation transition-colors duration-[var(--dur)]";
+
+function SideLink({
+  href,
+  label,
+  icon,
+  testId,
+  active,
+  ancestor = false,
+  sub = false,
+}: {
+  readonly href: string;
+  readonly label: string;
+  readonly icon: IconName;
+  readonly testId: string;
+  readonly active: boolean;
+  readonly ancestor?: boolean;
+  readonly sub?: boolean;
+}) {
   return (
-    <svg aria-hidden focusable="false" viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {ICON_PATHS[id]}
-    </svg>
+    <Link
+      href={href}
+      prefetch={false}
+      aria-current={active ? "page" : undefined}
+      data-testid={testId}
+      data-active={active ? "true" : "false"}
+      {...(ancestor ? { "data-ancestor": "true" } : {})}
+      className={cx(LINK_BASE, sub && "pl-9", active ? "bg-accent-soft font-semibold text-accent" : ancestor ? "font-semibold text-fg hov:bg-sunken" : "text-fg-soft hov:bg-sunken hov:text-fg")}
+    >
+      <Icon name={icon} size={18} />
+      <span className="min-w-0">{label}</span>
+    </Link>
   );
 }
 
-/** 現場モードと、その中の現場の簡易記録（Sprint 12e）。ヘッダーも下メニューも出さない。 */
-const FIELD_PATH = /^\/ops\/plans\/[^/]+\/field(\/incident)?\/?$/;
+/** PC の左メニュー。1024px 未満では出さない（下の 5 タブが代わりになる）。 */
+export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
+  const pathname = usePathname() ?? "";
+  if (navHiddenOn(pathname)) return null;
+  const current = currentNavKey(pathname);
+  const child = currentChildKey(pathname);
+  return (
+    <nav
+      aria-label="運航管理のメニュー（左）"
+      data-testid="ops-sidebar"
+      className="hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-[13.5rem] lg:shrink-0 lg:flex-col lg:gap-0.5 lg:self-start lg:overflow-y-auto lg:border-r lg:border-line lg:bg-surface lg:p-3"
+    >
+      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理" className="mb-2 flex min-h-11 flex-col justify-center rounded-ctl px-3 hov:bg-sunken" data-testid="ops-logo">
+        <span className="text-h2 font-semibold leading-tight text-fg">そらばん</span>
+        <span className="text-aux text-fg-mute">運航管理</span>
+      </Link>
+      {NAV_GROUPS.map((g) => (
+        <div key={g.keys.join("-")} className="flex flex-col gap-0.5">
+          {g.heading ? <p className="px-3 pb-1 pt-4 text-aux text-fg-mute">{g.heading}</p> : g.keys[0] === "more" ? <div className="pt-3" /> : null}
+          {g.keys.map((k) => {
+            const item = NAV_ITEM[k];
+            const hasChild = k === "more" && child !== null;
+            return (
+              <div key={k} className="flex flex-col gap-0.5">
+                <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
+                {k === "more"
+                  ? visibleNavChildren(role).map((c) => <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />)
+                  : null}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
 
-/** 下メニューを出さない画面：現場モード（現場の簡易記録を含む）・サインイン・アクセス権なし。 */
-export const navHiddenOn = (pathname: string): boolean =>
-  FIELD_PATH.test(pathname) || pathname === "/ops/sign-in" || pathname === "/ops/no-access";
-
-/** どの項目が現在地か。日誌は /ops/flights*・/ops/inspections*・/ops/journal。計画は /ops/plans*（現場モードを除く）。 */
-export const currentNavKey = (pathname: string): string | null => {
-  if (pathname === "/") return "verdict";
-  if (pathname === "/ops") return "today";
-  if (pathname.startsWith("/ops/plans")) return "plans";
-  if (pathname.startsWith("/ops/flights") || pathname.startsWith("/ops/inspections") || pathname.startsWith("/ops/journal")) return "journal";
-  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members|incidents)/.test(pathname)) return "more";
-  return null;
-};
-
+/**
+ * スマホの下メニュー（5 タブ）。1024px 以上では出さない。`/`（判定画面）にも置く（ログイン済みのとき）。
+ * `.ds` の外（`/`）でも新しいトークンで描けるよう、外側に `ds` を付け、地は内側の面が塗る。
+ */
 export function OpsBottomNav() {
   const pathname = usePathname() ?? "";
   const hidden = navHiddenOn(pathname);
@@ -93,35 +116,25 @@ export function OpsBottomNav() {
   if (hidden) return null;
   const current = currentNavKey(pathname);
   return (
-    <nav
-      aria-label="運航管理のメニュー"
-      data-testid="ops-bottom-nav"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink-mute bg-paper pb-[env(safe-area-inset-bottom)] md:static md:z-auto md:-mt-7 md:border-t-0 md:pb-0"
-    >
-      <ul className="mx-auto grid max-w-4xl grid-cols-5 md:flex md:gap-1 md:px-0">
+    <nav aria-label="運航管理のメニュー（下）" data-testid="ops-bottom-nav" className="ds fixed inset-x-0 bottom-0 z-40 lg:hidden">
+      <ul className="mx-auto grid grid-cols-5 border-t border-line-strong bg-surface pb-[env(safe-area-inset-bottom)]">
         {NAV_ITEMS.map((it) => {
           const active = current === it.key;
           return (
-            <li key={it.key} className="min-w-0 md:flex-none">
+            <li key={it.key} className="min-w-0">
               <Link
                 href={it.href}
                 prefetch={false}
                 aria-current={active ? "page" : undefined}
                 data-testid={`nav-${it.key}`}
                 data-active={active ? "true" : "false"}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-4 px-1 text-[13px] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-700 md:min-h-11 md:flex-row md:gap-2 md:border-t-0 md:border-b-4 md:px-4 md:text-sm ${
-                  active ? "border-brand-700 bg-brand-50 font-bold text-brand-700" : "border-transparent text-ink-soft hover:bg-paper-soft"
-                }`}
+                className={cx(
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 px-1 text-aux touch-manipulation",
+                  active ? "border-accent bg-accent-soft font-bold text-accent" : "border-transparent text-fg-soft hov:bg-sunken",
+                )}
               >
-                <NavIcon id={it.key} />
-                <span className={active ? "underline underline-offset-4" : ""}>
-                  {active ? (
-                    <span aria-hidden className="mr-1 text-[0.7em] align-middle">
-                      ●
-                    </span>
-                  ) : null}
-                  {it.label}
-                </span>
+                <Icon name={it.icon} size={22} />
+                <span>{it.label}</span>
               </Link>
             </li>
           );
@@ -131,18 +144,84 @@ export function OpsBottomNav() {
   );
 }
 
-/** 共通のヘッダー。現場モードでは出さない（上部は現場モード自身の「今日へ戻る」だけ）。 */
-export function OpsHeader() {
-  const pathname = usePathname() ?? "";
-  if (FIELD_PATH.test(pathname)) return null;
+/** 右上の利用者メニュー。名前・役割（ⓘに説明）・メールアドレス・ログアウト。 */
+function UserMenu({ user }: { readonly user: OpsNavUser }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const root = useRef<HTMLDivElement>(null);
+  useDismiss(root, open, () => setOpen(false));
   return (
-    <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-rule pb-3" data-testid="ops-header">
-      <Link href="/ops" prefetch={false} className="flex min-h-11 flex-col justify-center gap-0.5 text-ink">
-        <span className="eyebrow !text-[9px]">Soraban — Flight operations</span>
-        <span className="font-display text-xl font-light leading-none">そらばん 運航管理</span>
-      </Link>
-      <Link href="/" prefetch={false} className="-my-3 inline-flex min-h-11 items-center text-xs text-ink-mute underline-offset-2 hover:text-brand-700 hover:underline">
-        地点判定へ
+    <div ref={root} className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        aria-label="利用者のメニュー"
+        onClick={() => setOpen((o) => !o)}
+        data-testid="user-menu-button"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-ctl border border-line-strong bg-surface px-2.5 text-table text-fg hov:bg-sunken"
+      >
+        <Icon name="pilot" size={18} />
+        <span className="hidden max-w-[12rem] truncate lg:inline">{user.name}</span>
+        <Icon name="chevron-down" size={14} className="text-fg-mute" />
+      </button>
+      {open ? (
+        <div
+          id={id}
+          role="group"
+          aria-label="利用者"
+          data-testid="user-menu"
+          className="ds-pop absolute right-0 top-full z-50 mt-1 flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-3 rounded-ctl border border-line-strong bg-surface p-4 text-table"
+        >
+          <div className="flex flex-col gap-1">
+            <p className="break-words font-semibold text-fg" data-testid="ops-me-name">
+              {user.name}
+            </p>
+            <div className="flex items-center gap-1">
+              <p className="text-fg-soft" data-testid="ops-me-role">
+                <span>役割：</span>
+                {user.roleLabel}
+              </p>
+              <InfoPopover label="役割でできること">{user.roleDescription}</InfoPopover>
+            </div>
+            <p className="break-all text-aux text-fg-mute" data-testid="ops-me-email">
+              {user.email}
+            </p>
+          </div>
+          <SignOutButton provider={user.provider} memberId={user.memberId} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * 上の薄いバー。右に利用者メニュー。スマホでは左に画面名（いまの項目）。PC では左メニューと本文の上に、利用者メニューだけが右に出る。
+ * 現場モード・サインイン・アクセス権なしでは出さない。
+ */
+export function OpsTopBar({ user }: { readonly user: OpsNavUser }) {
+  const pathname = usePathname() ?? "";
+  if (navHiddenOn(pathname)) return null;
+  const key = currentNavKey(pathname);
+  return (
+    <header data-testid="ops-header" className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-4 lg:px-8">
+      <p className="min-w-0 truncate text-h2 font-semibold text-fg lg:invisible" data-testid="ops-screen-name">
+        {key ? NAV_ITEM[key].label : "運航管理"}
+      </p>
+      <UserMenu user={user} />
+    </header>
+  );
+}
+
+/** サインイン・アクセス権なしの画面の上に出す、名前だけのヘッダー（メニューも利用者メニューも出さない）。 */
+export function OpsBrandHeader() {
+  const pathname = usePathname() ?? "";
+  if (pathname !== "/ops/sign-in" && pathname !== "/ops/no-access") return null;
+  return (
+    <header className="flex items-center border-b border-line pb-3" data-testid="ops-brand">
+      <Link href="/" prefetch={false} aria-label="そらばん 運航管理" className="flex min-h-11 flex-col justify-center text-fg">
+        <span className="text-h2 font-semibold leading-tight">そらばん</span>
+        <span className="text-aux text-fg-mute">運航管理</span>
       </Link>
     </header>
   );

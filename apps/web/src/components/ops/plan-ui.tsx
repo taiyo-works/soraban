@@ -281,7 +281,7 @@ const TIER_GLYPH: Readonly<Record<number, string>> = { 1: "!!", 2: "!", 3: "●"
 const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限超過", 3: "未了", 4: "確認・変更", 5: "推奨" };
 
 /** 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。 */
-export function NextActionItem({ action, testId = "next-action" }: { readonly action: NextAction; readonly testId?: string }) {
+export function NextActionItem({ action, testId = "next-action", tall = false }: { readonly action: NextAction; readonly testId?: string; /** 屋外で押しやすい高さ（56px）にする（ホーム）。 */ readonly tall?: boolean }) {
   const tone = TIER_TONE[action.tier] ?? "neutral";
   // 段の区別は「記号の札＋段の名前」で伝える（色は札の枠・背景と左の線に添えるだけ）。記号の字は常に ink。
   const body = (
@@ -309,7 +309,7 @@ export function NextActionItem({ action, testId = "next-action" }: { readonly ac
     </>
   );
   const bar = tone === "red" ? "border-l-signal-red bg-signal-red-soft/40" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule";
-  const box = `flex min-h-11 items-start gap-3 border-l-4 px-3 py-3 ${bar}`;
+  const box = `flex ${tall ? "min-h-14" : "min-h-11"} items-start gap-3 border-l-4 px-3 py-3 ${bar}`;
   return action.canAct ? (
     <a href={action.href} className={`${box} hover:bg-paper-soft`} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}

@@ -6,6 +6,7 @@ import { INCIDENT_FOLLOW_UP_LABEL, INCIDENT_FOLLOW_UPS, INCIDENT_KIND_LABEL, INC
 import { can } from "@/server/ops/authz";
 import { listIncidents, type IncidentListFilter } from "@/server/ops/incidents";
 import { requireOpsMember } from "@/server/ops/page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 const REPORT_STATES = ["none", "reported", "consulted", "changed"] as const;
 const REPORT_STATE_FILTER_LABEL: Readonly<Record<(typeof REPORT_STATES)[number], string>> = {
@@ -45,7 +46,7 @@ export default async function IncidentListPage({
       <PageHeader
         title="事故・ヒヤリハット"
         eyebrow="起きたことの記録"
-        back={{ href: "/ops/more", label: "その他" }}
+        back={BACK_TO.journal}
         aside={
           canCreate ? (
             <Link prefetch={false} href="/ops/incidents/new" className={buttonPrimaryClass} data-testid="incident-new-link">

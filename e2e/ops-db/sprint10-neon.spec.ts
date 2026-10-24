@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openUserMenu } from "../ops-menu";
 
 // Sprint 10 差し戻し A：AUTH_PROVIDER=neon で Google ログインが完了すること（Neon Auth の上流は模擬サーバー）。
 //   (a) Google から戻ったとき（?neon_auth_session_verifier=… と challenge Cookie）に session_token が設定され、/ops が表示される
@@ -31,6 +32,7 @@ test.describe("Sprint 10 E2E-DB：Neon Auth（模擬の上流）", () => {
     await page.goto(`${NEON}/ops?neon_auth_session_verifier=v-neon`);
     // verifier を取り除いた /ops に移り、サインイン画面に戻されない
     await expect(page).toHaveURL(`${NEON}/ops`);
+    await openUserMenu(page);
     await expect(page.getByTestId("ops-me-name")).toHaveText("ネオン 太郎");
     await expect(page.getByTestId("ops-me-role")).toContainText("操縦者");
     const jar = await context.cookies(NEON);
@@ -46,6 +48,7 @@ test.describe("Sprint 10 E2E-DB：Neon Auth（模擬の上流）", () => {
     await context.addCookies([cookie("session_token", "tok-neon2")]);
     await page.goto(`${NEON}/ops`);
     await expect(page).toHaveURL(`${NEON}/ops`);
+    await openUserMenu(page);
     await expect(page.getByTestId("ops-me-name")).toHaveText("ネオン 花子");
     let jar = await context.cookies(NEON);
     const data1 = jar.find((c) => c.name === `${PREFIX}.local.session_data`)?.value;

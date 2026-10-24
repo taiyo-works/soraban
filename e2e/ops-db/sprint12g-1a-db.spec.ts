@@ -42,41 +42,53 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
     await expect(page.getByTestId("ops-header")).toHaveCount(0);
   });
 
-  test("4. ログイン済みの運航管理の画面は、従来の枠・見た目のまま（紙・インク・藍、幅 896px の列、ヘッダー、下メニュー）。`.ds` を使わない", async ({ page }) => {
+  test("4. ログイン済みの運航管理の画面は、紙面のトークン（.ds）で描かれ、PC は左メニューと右上の利用者メニュー、スマホは下の 5 タブ。公開の判定画面 `/` は .ds を使わない", async ({ page }) => {
     const r = await page.request.post(`${BASE}/api/test-auth/sign-in`, {
       data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" },
     });
     expect(r.status()).toBe(200);
     await page.emulateMedia({ colorScheme: "light" });
-    for (const path of ["/ops", "/ops/more", "/ops/plans"]) {
+    for (const path of ["/ops", "/ops/more", "/ops/plans", "/ops/journal"]) {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(`${BASE}${path}`);
+      await expect(page.getByTestId("ops-root")).toBeVisible();
+      await expect(page.getByTestId("ops-sidebar")).toBeVisible();
       await expect(page.getByTestId("ops-header")).toBeVisible();
-      await expect(page.locator(".ds")).toHaveCount(0);
-      const frame = page.locator(".max-w-4xl").first();
-      const box = await frame.boundingBox();
-      expect(Math.round(box?.width ?? 0), path).toBe(896);
+      await expect(page.getByTestId("ops-bottom-nav")).toBeHidden();
+      await expect(page.locator(".ds").first()).toBeVisible();
+      // 本文の列は最大 1024px（左メニューの右に 1 本）
+      const box = await page.locator(".max-w-5xl").first().boundingBox();
+      expect(Math.round(box?.width ?? 0), path).toBeLessThanOrEqual(1024);
+      expect(Math.round(box?.width ?? 0), path).toBeGreaterThan(900);
       const v = await page.evaluate(() => {
         const b = getComputedStyle(document.body);
         const h = getComputedStyle(document.querySelector('[data-testid="ops-header"]')!);
-        return { bg: b.backgroundColor, fg: b.color, family: b.fontFamily, headerBorder: h.borderBottomWidth, scheme: getComputedStyle(document.documentElement).colorScheme };
+        return { bg: b.backgroundColor, fg: b.color, headerBorder: h.borderBottomWidth, grid: b.backgroundImage };
       });
-      expect(v.bg, path).toBe("rgb(245, 242, 234)");
-      expect(v.fg, path).toBe("rgb(14, 20, 33)");
-      expect(v.family, path).toMatch(/IBM[ _]Plex[ _]Sans[ _]JP/);
+      // 新しいトークン（明）：紙の地 #f1ede1、墨の字 #171b22。旧い方眼は出ない
+      expect(v.bg, path).toBe("rgb(241, 237, 225)");
+      expect(v.fg, path).toBe("rgb(23, 27, 34)");
+      expect(v.grid, path).toBe("none");
       expect(v.headerBorder, path).toBe("1px");
-      expect(v.scheme, path).toBe("normal");
     }
-    // the bottom menu is still shown below 768px, and it is still the 12c one
+    // 1024px 未満は下の 5 タブ（左メニューは出ない）
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(`${BASE}/ops`);
     await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
     await expect(page.getByTestId("ops-bottom-nav").locator("a")).toHaveCount(5);
+    await expect(page.getByTestId("ops-sidebar")).toBeHidden();
+    // 公開の判定画面 `/` は .ds を使わず、旧い紙・インクのまま（下メニューの部品だけが自前の .ds を持つ）
+    await page.goto(`${BASE}/`);
+    await expect(page.getByTestId("site-ops-note")).toBeVisible();
+    await expect(page.locator(".ds:not([data-testid='ops-bottom-nav'])")).toHaveCount(0);
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(245, 242, 234)");
     // while signed in, the catalog still has no ops chrome and does not look the user up
     await page.goto(`${BASE}/ops/design`);
     await expect(page.getByTestId("design-catalog")).toBeVisible();
     await expect(page.getByTestId("ops-bottom-nav")).toHaveCount(0);
+    await expect(page.getByTestId("ops-sidebar")).toHaveCount(0);
     await expect(page.getByTestId("ops-header")).toHaveCount(0);
+    await expect(page.getByTestId("ops-root")).toHaveCount(0);
     // and the body class that adds room for the bottom menu is not left behind
     await expect(page.locator("body.has-bottom-nav")).toHaveCount(0);
   });

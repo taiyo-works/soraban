@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 
 // Sprint 12c の E2E-DB（契約 7〜13・15・16 の画面・通しの部分）。
@@ -175,8 +176,8 @@ const unsentCount = async (page: Page): Promise<number> => Number(await page.get
 test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, timezoneId: "America/Los_Angeles" });
 
-test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他", () => {
-  test("7. /ops は「今日」：空の状態 → 大きなカード 1 枚と次にやること（急ぐ順）。飛行中・日誌待ち・点検なし・食い違いの各状況", async ({ page }) => {
+test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", () => {
+  test("7. /ops は「ホーム」：空の状態 → 大きなカード 1 枚と次にやること（急ぐ順）。飛行中・日誌待ち・点検なし・食い違いの各状況", async ({ page }) => {
     const bm = await apiAs(seeded("b-manager"));
     await signIn(page.request, seeded("b-manager"));
     await fixClock(page, "12:00:10");
@@ -192,13 +193,19 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
       await expect(page.getByTestId("today-empty-action").first()).toHaveText("飛行計画を作る");
       await expect(page.getByTestId("today-card")).toHaveCount(0);
     }
-    // ログイン中の利用者と役割、入力ボタンは残り、メニューとログアウトは「その他」にある
-    await expect(page.getByTestId("ops-me-name")).toHaveText("組織B 管理者");
-    await expect(page.getByTestId("ops-me-role")).toHaveText("役割：運航管理者");
+    // 入力ボタンは残り、ログイン中の利用者と役割・ログアウトは右上の利用者メニュー（開いてから見える）にある
     await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
     await expect(page.getByTestId("ops-enter-flight")).toBeVisible();
     await expect(page.getByTestId("ops-enter-inspection")).toBeVisible();
+    await expect(page.getByTestId("today-heading")).toHaveText("ホーム");
+    await expect(page.getByTestId("ops-me-name")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "ログアウト" })).toHaveCount(0);
+    await openUserMenu(page);
+    await expect(page.getByTestId("ops-me-name")).toHaveText("組織B 管理者");
+    await expect(page.getByTestId("ops-me-role")).toHaveText("役割：運航管理者");
+    await expect(page.getByRole("button", { name: "ログアウト" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("user-menu")).toHaveCount(0);
     await expect(page.locator('main a[href="/ops/aircraft"]')).toHaveCount(0);
 
     // 今日の計画を作る → 大きなカード 1 枚
@@ -278,7 +285,7 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await bm.dispose();
   });
 
-  test("8・16. 下メニュー：5 項目の行き先と現在地、375px で折り返さない・高さ 56px 以上・末尾が隠れない。現場モード・サインインでは出ない。768px 以上でも移れる", async ({ page, browser }) => {
+  test("8・16. メニュー：スマホ（1024px 未満）は下の 5 タブ、PC は左メニュー。5 項目の行き先と現在地、375px で折り返さない・高さ 56px 以上・末尾が隠れない。現場モード・サインインでは出ない", async ({ page, browser }) => {
     const manager = await apiAs(seeded("a-manager"));
     const aircraft = await createAircraft(manager);
     const plan = await createPlan(manager, planBody(aircraft.id, await pilotIdOf(seeded("a-pilot"))));
@@ -288,15 +295,17 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await page.goto("/ops");
     const nav = page.getByTestId("ops-bottom-nav");
     await expect(nav).toBeVisible();
+    // 1024px 未満では左メニューは出ない（DOM にはあっても見えない）
+    await expect(page.getByTestId("ops-sidebar")).toBeHidden();
     const items = [
-      ["today", "今日", "/ops"],
+      ["today", "ホーム", "/ops"],
       ["verdict", "判定", "/"],
       ["plans", "計画", "/ops/plans"],
       ["journal", "日誌", "/ops/journal"],
-      ["more", "その他", "/ops/more"],
+      ["more", "登録", "/ops/more"],
     ] as const;
     for (const [key, label, href] of items) {
-      const link = page.getByTestId(`nav-${key}`);
+      const link = nav.getByTestId(`nav-${key}`);
       await expect(link).toHaveAttribute("href", href);
       await expect(link).toContainText(label);
       const box = (await link.boundingBox())!;
@@ -305,14 +314,32 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
       const labelBox = (await link.locator("span").last().boundingBox())!;
       expect(labelBox.height, `${label} のラベルが折り返している`).toBeLessThan(24);
     }
-    const widths = await Promise.all(items.map(async ([key]) => (await page.getByTestId(`nav-${key}`).boundingBox())!.width));
+    // 古い名称は出ない
+    await expect(nav).not.toContainText("今日");
+    await expect(nav).not.toContainText("その他");
+    const widths = await Promise.all(items.map(async ([key]) => (await nav.getByTestId(`nav-${key}`).boundingBox())!.width));
     for (const w of widths) expect(Math.abs(w - 375 / 5)).toBeLessThan(2);
     await expectNoHorizontalScroll(page, "下メニュー");
-    // 現在地は文字（太字・下線）と形（●）と aria-current で示す
-    await expect(page.getByTestId("nav-today")).toHaveAttribute("aria-current", "page");
-    await expect(page.getByTestId("nav-today")).toContainText("●");
+    // 現在地は 4 つの手がかり（aria-current・data-active・太字・面の塗り）とアイコンで示す
+    const here = nav.getByTestId("nav-today");
+    const other = nav.getByTestId("nav-plans");
+    await expect(here).toHaveAttribute("aria-current", "page");
+    await expect(here).toHaveAttribute("data-active", "true");
+    await expect(other).not.toHaveAttribute("aria-current", "page");
+    const look = (loc: Locator) => loc.evaluate((el) => ({ weight: Number(getComputedStyle(el).fontWeight), bg: getComputedStyle(el).backgroundColor, icon: el.querySelectorAll("svg").length }));
+    const [hereLook, otherLook] = [await look(here), await look(other)];
+    expect(hereLook.weight).toBeGreaterThanOrEqual(600);
+    expect(otherLook.weight).toBeLessThan(600);
+    expect(hereLook.bg).not.toBe("rgba(0, 0, 0, 0)");
+    expect(hereLook.bg).not.toBe(otherLook.bg);
+    expect(hereLook.icon).toBeGreaterThanOrEqual(1);
+    // ハンバーガーは使わない（メニューを開く・閉じるボタンがない）
+    await expect(page.getByRole("button", { name: /メニューを開く|ハンバーガー/ })).toHaveCount(0);
+    // 上の薄いバー：画面名と利用者メニュー
+    await expect(page.getByTestId("ops-header")).toBeVisible();
+    await expect(page.getByTestId("ops-screen-name")).toHaveText("ホーム");
 
-    // 現在地：日誌は /ops/flights*・/ops/inspections*・/ops/journal、計画は /ops/plans*、その他は /ops/more ほか
+    // 現在地：日誌は /ops/flights*・/ops/inspections*・/ops/journal・/ops/incidents*、計画は /ops/plans*、登録は /ops/more ほか
     const current: [string, string][] = [
       ["/ops/plans", "plans"],
       [`/ops/plans/${plan.id}`, "plans"],
@@ -320,18 +347,20 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
       ["/ops/flights/new", "journal"],
       ["/ops/inspections", "journal"],
       ["/ops/journal", "journal"],
+      ["/ops/incidents", "journal"],
+      ["/ops/incidents/new", "journal"],
       ["/ops/more", "more"],
       ["/ops/aircraft", "more"],
     ];
     for (const [url, key] of current) {
       await page.goto(url);
-      await expect(page.getByTestId(`nav-${key}`), url).toHaveAttribute("data-active", "true");
-      await expect(page.locator('[data-testid^="nav-"][data-active="true"]'), url).toHaveCount(1);
+      await expect(nav.getByTestId(`nav-${key}`), url).toHaveAttribute("data-active", "true");
+      await expect(nav.locator('[data-active="true"]'), url).toHaveCount(1);
     }
 
     // 末尾が隠れない：一番下までスクロールしたとき、本文の末尾が下メニューの上にある
     await page.goto("/ops/more");
-    await expect(page.getByTestId("more-me")).toBeVisible();
+    await expect(page.getByTestId("ops-more")).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const mainBottom = await page.evaluate(() => document.querySelector("main")!.getBoundingClientRect().bottom);
     const navTop = (await nav.boundingBox())!.y;
@@ -339,35 +368,72 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
 
     // 押すと行き先へ移る
     await page.goto("/ops");
-    await tapAndWait(page, page.getByTestId("nav-plans"), /\/ops\/plans$/);
-    await tapAndWait(page, page.getByTestId("nav-journal"), /\/ops\/journal$/);
-    await tapAndWait(page, page.getByTestId("nav-more"), /\/ops\/more$/);
-    await tapAndWait(page, page.getByTestId("nav-today"), /\/ops$/);
-    await tapAndWait(page, page.getByTestId("nav-verdict"), new RegExp(`^${BASE.replace(/[.]/g, "\\.")}/$`));
+    await tapAndWait(page, nav.getByTestId("nav-plans"), /\/ops\/plans$/);
+    await tapAndWait(page, nav.getByTestId("nav-journal"), /\/ops\/journal$/);
+    await tapAndWait(page, nav.getByTestId("nav-more"), /\/ops\/more$/);
+    await tapAndWait(page, nav.getByTestId("nav-today"), /\/ops$/);
+    await tapAndWait(page, nav.getByTestId("nav-verdict"), new RegExp(`^${BASE.replace(/[.]/g, "\\.")}/$`));
     // Next のクライアント遷移は、前の画面を隠して残す（Activity）。同じ data-testid が重ならないよう、読み直してから確かめる
     await page.reload();
 
-    // ログイン済みの `/`：下メニューと「今日」の帯と運航管理へのリンク。自動では転送されない
-    await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
-    await expect(page.getByTestId("nav-verdict")).toHaveAttribute("aria-current", "page");
+    // ログイン済みの `/`：下メニューと「ホーム」の帯と、ホームへのリンク。自動では転送されない
+    await expect(nav).toBeVisible();
+    await expect(nav.getByTestId("nav-verdict")).toHaveAttribute("aria-current", "page");
     await expect(page.getByTestId("home-today-band")).toBeVisible();
     await expect(page.getByTestId("home-ops-link")).toBeVisible();
+    await expect(page.getByTestId("home-ops-link")).toContainText("ホームへ");
     await expect(page.getByTestId("home-today-band").getByTestId("today-next-action")).not.toHaveCount(0);
     expect(await page.getByTestId("home-today-band").getByTestId("today-next-action").count()).toBeLessThanOrEqual(3);
     await page.waitForTimeout(1500);
     expect(new URL(page.url()).pathname).toBe("/");
 
-    // 現場モードでは下メニューもヘッダーも出さない
+    // 現場モードでは、メニューも上のバー（利用者メニュー）も出さない
     await openField(page, plan.id);
     await expect(page.getByTestId("ops-bottom-nav")).toHaveCount(0);
+    await expect(page.getByTestId("ops-sidebar")).toHaveCount(0);
     await expect(page.getByTestId("ops-header")).toHaveCount(0);
+    await expect(page.getByTestId("user-menu-button")).toHaveCount(0);
+    // 現場モードの退路は「ホームへ戻る」（押せる範囲 56px 以上）
+    await expect(page.getByTestId("field-back")).toContainText("ホームへ戻る");
+    expect((await page.getByTestId("field-back").boundingBox())!.height).toBeGreaterThanOrEqual(56);
 
-    // 768px 以上でも同じ 5 つの行き先に移れる
+    // 768px・900px（1024px 未満）でも同じ 5 つの行き先に移れる
     await page.setViewportSize({ width: 900, height: 800 });
     await page.goto("/ops");
-    await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
-    for (const [key, , href] of items) await expect(page.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
-    await tapAndWait(page, page.getByTestId("nav-journal"), /\/ops\/journal$/);
+    await expect(nav).toBeVisible();
+    for (const [key, , href] of items) await expect(nav.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
+    await tapAndWait(page, nav.getByTestId("nav-journal"), /\/ops\/journal$/);
+
+    // PC（1280px）は左メニュー：上から ホーム／調べる＝判定／飛ばす＝計画・日誌／登録（機体・操縦者・許可・承認・地点）
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/ops");
+    const side = page.getByTestId("ops-sidebar");
+    await expect(side).toBeVisible();
+    await expect(nav).toBeHidden();
+    expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "判定", "計画", "日誌", "登録", "機体", "操縦者", "許可・承認", "地点"]);
+    await expect(side).toContainText("調べる");
+    await expect(side).toContainText("飛ばす");
+    for (const [key, , href] of items) await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
+    for (const [key, href] of [["aircraft", "/ops/aircraft"], ["pilots", "/ops/pilots"], ["permits", "/ops/permits"], ["places", "/ops/places"]] as const) {
+      await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
+    }
+    for (const a of await side.locator('a[data-testid^="nav-"]').all()) expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // 現在地（子項目は子が現在地、親の「登録」は太字だけの祖先）
+    await expect(side.getByTestId("nav-today")).toHaveAttribute("aria-current", "page");
+    await page.goto("/ops/aircraft");
+    await expect(side.getByTestId("nav-aircraft")).toHaveAttribute("data-active", "true");
+    await expect(side.getByTestId("nav-aircraft")).toHaveAttribute("aria-current", "page");
+    await expect(side.getByTestId("nav-more")).toHaveAttribute("data-active", "false");
+    await expect(side.getByTestId("nav-more")).toHaveAttribute("data-ancestor", "true");
+    await expect(side.locator('[data-active="true"]')).toHaveCount(1);
+    await page.goto("/ops/incidents");
+    await expect(side.getByTestId("nav-journal")).toHaveAttribute("data-active", "true");
+    // 利用者メニューは PC でも右上にある
+    await expect(page.getByTestId("user-menu-button")).toBeVisible();
+    await page.goto("/ops");
+    await tapAndWait(page, side.getByTestId("nav-journal"), /\/ops\/journal$/);
+    await tapAndWait(page, side.getByTestId("nav-more"), /\/ops\/more$/);
+    await tapAndWait(page, side.getByTestId("nav-pilots"), /\/ops\/pilots$/);
 
     // サインイン画面（未ログイン）には出ない
     const anon = await browser.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
@@ -375,12 +441,14 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await ap.goto("/ops/sign-in");
     await expect(ap.locator("main").first()).toBeVisible();
     await expect(ap.getByTestId("ops-bottom-nav")).toHaveCount(0);
+    await expect(ap.getByTestId("ops-sidebar")).toHaveCount(0);
+    await expect(ap.getByTestId("user-menu-button")).toHaveCount(0);
     await anon.close();
     await settle(manager, plan.id);
     await manager.dispose();
   });
 
-  test("16. ログインしていない `/` には下メニューも「今日」の帯もなく、運航管理への追加の通信もない", async ({ browser }) => {
+  test("16. ログインしていない `/` には下メニューも「ホーム」の帯もなく、運航管理への追加の通信もない", async ({ browser }) => {
     const ctx = await browser.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
     const page = await ctx.newPage();
     const requested: string[] = [];
@@ -473,12 +541,27 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await expect(page.getByTestId("flight-plan-link")).toBeVisible();
     await expect(page.getByTestId("flight-basis-link")).toBeVisible();
 
-    // その他：機体・操縦者・よく使う地点・利用者（運航管理者のみ）・ログアウト
+    // 登録：機体・操縦者・許可・承認・よく使う地点（件数つき）、管理の下に利用者（運航管理者のみ）。ログアウトは利用者メニューにある
     await page.goto("/ops/more");
     await expect(page.getByTestId("ops-more")).toBeVisible();
-    for (const k of ["aircraft", "pilots", "places", "members"]) await expect(page.getByTestId(`more-link-${k}`)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^登録/);
+    for (const k of ["aircraft", "pilots", "permits", "places", "members"]) await expect(page.getByTestId(`more-link-${k}`)).toBeVisible();
+    await expect(page.getByTestId("more-link-incidents")).toHaveCount(0);
+    await expect(page.getByTestId("more-admin").getByTestId("more-link-members")).toBeVisible();
+    await expect(page.getByTestId("more-count-aircraft")).toContainText(/^\d+ 機$/);
+    await expect(page.getByTestId("dips-note")).toContainText("未接続");
+    await expect(page.getByTestId("dips-note").getByRole("button")).toHaveCount(0);
+    await expect(page.getByTestId("signout")).toHaveCount(0);
+    await openUserMenu(page);
     await expect(page.getByTestId("signout")).toBeVisible();
     for (const b of await page.getByTestId("more-menu").locator("a").all()) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(56);
+    await expect(page.getByTestId("more-link-members")).toBeVisible();
+    expect((await page.getByTestId("more-link-members").boundingBox())!.height).toBeGreaterThanOrEqual(56);
+    // 日誌の中に事故・ヒヤリハット（4 つ目の種類と、入力の入口）
+    await page.goto("/ops/journal");
+    await expect(page.getByTestId("journal-tab-incidents")).toHaveAttribute("href", "/ops/incidents");
+    await expect(page.getByTestId("journal-new-incident")).toHaveAttribute("href", "/ops/incidents/new");
+    expect((await page.getByTestId("journal-new-incident").boundingBox())!.height).toBeGreaterThanOrEqual(56);
     const pilotPage = await page.context().browser()!.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
     await signIn(pilotPage.request, seeded("a-pilot"));
     const pp = await pilotPage.newPage();
@@ -903,9 +986,10 @@ test.describe("Sprint 12c E2E-DB：今日・下メニュー・日誌・その他
     await context.setOffline(false);
     await page.route("**/field-events", (route) => (route.request().method() === "POST" ? route.fulfill({ status: 503, body: "{}" }) : route.continue()));
     await page.goto("/ops/more");
-    // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
+    // ログアウトは右上の利用者メニューの中。a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
     // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
     await expect(async () => {
+      await openUserMenu(page);
       await page.getByTestId("signout").click();
       await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります", { timeout: 2000 });
     }).toPass({ timeout: 20_000 });

@@ -262,13 +262,13 @@ html {
   background: currentColor;
 }
 
-/* Sprint 12c：下メニュー（画面下に固定。幅 768px 未満）の分だけ、本文の末尾に余白を取る。
+/* Sprint 12c：下メニュー（画面下に固定。Sprint 12g-1b から幅 1024px 未満。PC は左メニュー）の分だけ、本文の末尾に余白を取る。
  * 下メニューが描かれたとき（運航管理が有効でログイン済み）だけ body に has-bottom-nav が付く。 */
 /* 運航管理の画面は、スクロールを滑らかにしない（下までのスクロールが即座に終わり、末尾が下メニューに隠れないことを確かめやすい） */
 html:has(body.has-bottom-nav) {
   scroll-behavior: auto;
 }
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   body.has-bottom-nav {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
@@ -695,6 +695,12 @@ html:has(.ds-page) {
 }
 .ds-page {
   min-height: 100dvh;
+}
+/* The old paper grid belongs to the old screens. Under the new ground it would show through the room kept for the bottom menu. */
+html:has(.ds-page) body {
+  background: var(--bg-app);
+  background-image: none;
+  color: var(--fg);
 }
 .ds .tnum,
 .ds .num {
