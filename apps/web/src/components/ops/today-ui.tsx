@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 import type { IconName } from "@/components/ui/icons";
 import { Icon } from "@/components/ui/icons";
 import { JourneyLine } from "@/components/ui/journey-line";
+import { formatDay, formatDaysIn } from "@/lib/ops-day";
+import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
 import { buttonClass, Card, SectionTitle, StatusPill, type Meaning } from "@/components/ui/primitives";
 import type { DeadlineDto } from "@/server/ops/deadlines-logic";
 import type { TodayBadgeDto, TodayCardDto, TodayDto, TodayRowDto, TodayUpcomingDto } from "@/server/ops/today";
 import type { TodayNextAction } from "@/server/ops/today-logic";
-import { NextActionItem } from "./plan-ui";
+import { MoreRows } from "./more-rows";
 import { Badge, type Tone } from "./ui";
 
 // ホームの部品（Sprint 12c 設計 C・G。Sprint 12g-1b で新しい部品（components/ui）に作り直した）。
@@ -64,7 +66,7 @@ function Fact({ label, children }: { readonly label: string; readonly children: 
  * 行程の 1 行と 3 つの行は同じ「判定・確認・通報」を指すが、行程は進み具合（済／次／未）、行は中身（判定の段階・通報の要否と状況・確認の状態の文言）を
  * 担う。機体・操縦者は行程にない情報なので、行から外して名称の下に置いた（5 行を 3 行にし、罫線も減らした）。
  */
-export function TodayCard({ card }: { readonly card: TodayCardDto }) {
+export function TodayCard({ card, today }: { readonly card: TodayCardDto; readonly today: string }) {
   return (
     <Card
       as="section"
@@ -87,7 +89,7 @@ export function TodayCard({ card }: { readonly card: TodayCardDto }) {
             {card.timeLabel}
           </p>
           <p className="text-table tabular-nums text-fg-mute" data-testid="today-card-date">
-            {card.plannedDate}
+            <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>
           </p>
         </div>
         <h2 className="mt-1.5 text-h2 font-semibold text-fg [text-wrap:balance]" data-testid="today-card-title">
@@ -153,15 +155,19 @@ export function TodayRest({ rows }: { readonly rows: readonly TodayRowDto[] }) {
   );
 }
 
+const PLAN_NEW_HREF = "/ops/plans/new";
+
 /** 空の状態：何がないかと、次にできること（件数だけのタイルは作らない）。 */
-export function TodayEmpty({ empty }: { readonly empty: NonNullable<TodayDto["empty"]> }) {
+export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNullable<TodayDto["empty"]>; readonly canPlan?: boolean }) {
+  // 計画を作れない役割（閲覧者・操縦者の行に結び付いていない操縦者）には「飛行計画を作る」を出さない（押しても作れない）。サーバーの文言・経路は変えない
+  const actions = canPlan ? empty.actions : empty.actions.filter((a) => a.href !== PLAN_NEW_HREF);
   return (
     <Card as="section" variant="primary" aria-label="今日の飛行" className="flex flex-col gap-4" data-testid="today-empty">
       <p className="text-h2 font-semibold text-fg" data-testid="today-empty-message">
         {empty.message}
       </p>
       <div className="flex flex-col gap-2 sm:flex-row">
-        {empty.actions.map((a, i) => (
+        {actions.map((a, i) => (
           <a key={a.href} href={a.href} className={buttonClass(i === 0 ? "primary" : "secondary", "md", "min-h-14 sm:min-h-11")} data-testid="today-empty-action">
             {a.label}
           </a>
@@ -171,18 +177,107 @@ export function TodayEmpty({ empty }: { readonly empty: NonNullable<TodayDto["em
   );
 }
 
-/** 次にやること（動詞で始まる 1 行、押すとその作業へ直接）。どの計画の作業かを添える。 */
+/** 次にやること：最初の画面に出す件数（残りは「ほか N 件を見る」で開く。近づく期限などが最初の画面から落ちないようにする）。 */
+export const NEXT_ACTIONS_INITIAL = 3;
+
+// 期限の札（見本の「近づく期限」と同じ StatusPill）。状態は札の文字と印で伝え、色は補助。
+const TIER_PILL: Readonly<Record<number, { readonly meaning: Meaning; readonly icon: IconName; readonly text: string }>> = {
+  1: { meaning: "danger", icon: "alert", text: "最優先" },
+  2: { meaning: "warn", icon: "clock", text: "期限超過" },
+  3: { meaning: "neutral", icon: "dot", text: "未了" },
+  4: { meaning: "info", icon: "info", text: "確認・変更" },
+  5: { meaning: "neutral", icon: "dot", text: "推奨" },
+};
+
+/**
+ * 期限の文（dueLabel）は、サーバーが「期限の状態」と「社内の目安の注記」を空白 1 つで連結している（句点がなく、2 文が続いて見える）。
+ * 文言は変えず、注記（DEADLINE_GUIDE_DISCLAIMER）で終わるときだけ、2 つの行に分けて描く。
+ */
+export const splitDueLabel = (due: string): { readonly head: string; readonly note: string | null } => {
+  if (due.endsWith(DEADLINE_GUIDE_DISCLAIMER)) {
+    const head = due.slice(0, due.length - DEADLINE_GUIDE_DISCLAIMER.length).trimEnd();
+    if (head !== "") return { head, note: DEADLINE_GUIDE_DISCLAIMER };
+  }
+  return { head: due, note: null };
+};
+
+/**
+ * ホームの「次にやること」の 1 行。上から 札（急ぎ度）・計画名 → 動詞で始まる作業名 → 理由 → 期限（状態を 1 行、注記を小さく別の行）。
+ * 押すとその作業の画面へ直接移る（canAct が偽なら押せず、理由を文で示す）。日付は読みやすい形（1/5（火））にする。
+ */
+function HomeActionRow({ action, today }: { readonly action: TodayNextAction; readonly today: string | undefined }) {
+  const pill = TIER_PILL[action.tier] ?? TIER_PILL[5]!;
+  const day = (t: string): string => (today ? formatDaysIn(t, today) : t);
+  const due = action.dueLabel ? splitDueLabel(action.dueLabel) : null;
+  const body = (
+    <>
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <StatusPill meaning={pill.meaning} icon={pill.icon}>
+            {pill.text}
+          </StatusPill>
+          {action.planTitle ? (
+            <span className="min-w-0 text-aux text-fg-mute" data-testid="today-next-action-plan">
+              {action.planTitle}
+            </span>
+          ) : null}
+        </span>
+        <span className="text-body font-medium leading-snug text-fg" data-testid="today-next-action-label">
+          {action.label}
+        </span>
+        <span className="text-table text-fg-soft [text-wrap:pretty]">{day(action.reason)}</span>
+        {due ? (
+          <span className="flex flex-col gap-0.5" data-testid="today-next-action-due">
+            <span className="text-table text-fg [text-wrap:pretty]">{day(due.head)}</span>
+            {due.note ? <span className="text-aux text-fg-mute [text-wrap:pretty]">{due.note}</span> : null}
+          </span>
+        ) : null}
+        {!action.canAct ? (
+          <span className="text-table text-fg-mute" data-testid="today-next-action-cannot">
+            {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
+          </span>
+        ) : null}
+      </span>
+      {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-fg-mute" /> : null}
+    </>
+  );
+  const box = "flex min-h-14 items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]";
+  return action.canAct ? (
+    <a href={action.href} className={`${box} hov:bg-accent-soft`} data-testid="today-next-action-link" data-action-id={action.id}>
+      {body}
+    </a>
+  ) : (
+    <div className={box} data-testid="today-next-action-link" data-action-id={action.id}>
+      {body}
+    </div>
+  );
+}
+
+/**
+ * 次にやること（動詞で始まる行、押すとその作業へ直接）。最初は上位 NEXT_ACTIONS_INITIAL 件だけ出し、残りは「ほか N 件を見る」で開く。
+ * 総数（total）は見出しの横に出し続ける。`/` の帯（上位 3 件）は開閉の対象にならない（3 件以下）。
+ */
 export function TodayNextActions({
   actions,
   total,
   plansHref,
+  today,
   heading = true,
 }: {
   readonly actions: readonly TodayNextAction[];
   readonly total?: number;
   readonly plansHref?: string;
+  /** 今日（YYYY-MM-DD）。渡すと、行の中の日付を「1/5（火）」にする。 */
+  readonly today?: string;
   readonly heading?: boolean;
 }) {
+  const row = (a: TodayNextAction, i: number) => (
+    <li key={`${a.id}-${a.planId ?? ""}-${i}`} data-testid="today-next-action" data-action-id={a.id} data-tier={String(a.tier)} data-plan-id={a.planId ?? ""}>
+      <HomeActionRow action={a} today={today} />
+    </li>
+  );
+  const head = actions.slice(0, NEXT_ACTIONS_INITIAL);
+  const tail = actions.slice(NEXT_ACTIONS_INITIAL);
   return (
     <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="today-next-actions">
       {heading ? <SectionTitle aside={total ? <span className="text-table tabular-nums text-fg-mute">{total} 件</span> : undefined}>次にやること</SectionTitle> : null}
@@ -192,18 +287,10 @@ export function TodayNextActions({
           いま、やることはありません。
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-line border-y border-line">
-          {actions.map((a, i) => (
-            <li key={`${a.id}-${a.planId ?? ""}-${i}`} data-testid="today-next-action" data-action-id={a.id} data-tier={String(a.tier)} data-plan-id={a.planId ?? ""}>
-              {a.planTitle ? (
-                <p className="pt-3 text-aux text-fg-mute" data-testid="today-next-action-plan">
-                  {a.planTitle}
-                </p>
-              ) : null}
-              <NextActionItem action={a} testId="today-next-action" tall flush />
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col border-y border-line">
+          <ul className="flex flex-col divide-y divide-line">{head.map((a, i) => row(a, i))}</ul>
+          {tail.length > 0 ? <MoreRows count={tail.length} data-testid="today-next-more">{tail.map((a, i) => row(a, head.length + i))}</MoreRows> : null}
+        </div>
       )}
       {plansHref ? (
         <a href={plansHref} className="inline-flex min-h-11 items-center self-start text-table text-accent underline underline-offset-2" data-testid="today-plans-link">
@@ -215,7 +302,7 @@ export function TodayNextActions({
 }
 
 /** 近づく期限（技能証明の有効期限と、許可・承認の有効な最終日。60 日以内、最大 5 件）。機体の期限は記録する場所が無いため出ない。 */
-export function TodayDeadlines({ deadlines }: { readonly deadlines: readonly DeadlineDto[] }) {
+export function TodayDeadlines({ deadlines, today }: { readonly deadlines: readonly DeadlineDto[]; readonly today: string }) {
   return (
     <section aria-label="近づく期限" data-testid="home-deadlines" className="flex flex-col gap-2">
       <SectionTitle>近づく期限</SectionTitle>
@@ -236,7 +323,9 @@ export function TodayDeadlines({ deadlines }: { readonly deadlines: readonly Dea
                   </span>
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-0.5">
-                  <span className="text-table tabular-nums text-fg">{d.date}</span>
+                  <span className="text-table tabular-nums text-fg">
+                    <time dateTime={d.date}>{formatDay(d.date, today)}</time>
+                  </span>
                   {d.overdue || d.daysLeft <= 30 ? (
                     <StatusPill meaning={d.overdue ? "danger" : "warn"} icon={d.overdue ? "alert" : "clock"}>
                       {d.leftLabel}
@@ -258,7 +347,7 @@ export function TodayDeadlines({ deadlines }: { readonly deadlines: readonly Dea
 }
 
 /** 直近の飛行（今日より先の日に始まる計画）。行程の 1 行つき。 */
-export function TodayUpcoming({ flights }: { readonly flights: readonly TodayUpcomingDto[] }) {
+export function TodayUpcoming({ flights, today }: { readonly flights: readonly TodayUpcomingDto[]; readonly today: string }) {
   return (
     <section aria-label="直近の飛行" data-testid="home-upcoming" className="flex flex-col gap-2">
       <SectionTitle>直近の飛行</SectionTitle>
@@ -273,7 +362,10 @@ export function TodayUpcoming({ flights }: { readonly flights: readonly TodayUpc
               <a href={f.href} className="flex flex-col gap-2 py-3 transition-colors hov:bg-accent-soft" data-testid="upcoming-link">
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3">
                   <span className="min-w-0 text-body font-medium text-fg">
-                    <span className="tabular-nums">{f.plannedDate}</span> {f.title}
+                    <span className="tabular-nums">
+                      <time dateTime={f.plannedDate}>{formatDay(f.plannedDate, today)}</time>
+                    </span>{" "}
+                    {f.title}
                   </span>
                   <span className="text-aux text-fg-mute">あと {f.daysLeft} 日</span>
                 </span>

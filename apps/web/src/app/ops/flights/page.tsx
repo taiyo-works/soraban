@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
 import { Badge, buttonFieldClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
@@ -16,6 +17,8 @@ const GRID = "grid-cols-[auto_minmax(0,1fr)_auto] gap-x-3 sm:grid-cols-[6.5rem_m
 const CARD = listRowClass.replace("grid-cols-1 ", "");
 
 // 飛行記録の一覧（新しい順。機体・期間で絞り込み）。各行に飛行年月日・機体・操縦者・離着陸時刻・飛行時間・総飛行時間。
+export const metadata: Metadata = { title: "飛行記録" };
+
 export default async function FlightListPage({
   searchParams,
 }: {

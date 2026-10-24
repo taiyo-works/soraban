@@ -145,3 +145,10 @@ describe("名称の統一（A5）：古い呼び名が画面のコードに残�
     }
   });
 });
+
+describe("アイコンの重複（M-6）", () => {
+  it("メニューの 5 項目と登録の子項目は、すべて別のアイコン（判定と地点、操縦者と利用者を取り違えない）", () => {
+    const icons = [...NAV_ITEMS.map((i) => i.icon), ...NAV_CHILDREN.map((c) => c.icon)];
+    expect(new Set(icons).size).toBe(icons.length);
+  });
+});

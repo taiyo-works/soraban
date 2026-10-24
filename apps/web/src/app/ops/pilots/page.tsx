@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Badge,
@@ -19,6 +20,8 @@ import { BACK_TO } from "@/components/ops/ops-nav-model";
 const GRID = "sm:grid-cols-[minmax(0,1fr)_minmax(0,10.5rem)_minmax(0,12rem)_minmax(0,6rem)]";
 
 // 操縦者の一覧。技能証明書番号は常に末尾 4 桁以外を伏せる（伏せた値は API の応答の時点で伏せてある）。
+export const metadata: Metadata = { title: "操縦者" };
+
 export default async function PilotListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
   const { ctx, me } = await requireOpsMember();
   const includeVoided = (await searchParams).includeVoided === "1";

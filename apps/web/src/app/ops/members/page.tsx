@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { MemberControls, MemberInviteForm } from "@/components/ops/ops-client";
 import { Forbidden } from "@/components/ops/versions";
 import { ChangeNotice } from "@/components/ops/change-notice";
@@ -16,6 +17,8 @@ import { MEMBER_STATUS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/op
 import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // 利用者の招待・役割の変更・停止・再開（運航管理者のみ）。
+export const metadata: Metadata = { title: "利用者" };
+
 export default async function MembersPage() {
   const { ctx, me } = await requireOpsMember();
   if (me.member.role !== "manager") return <Forbidden />;

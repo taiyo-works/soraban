@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, buttonPrimaryClass, listRowClass, Note, PageHeader, VoidedToggle } from "@/components/ops/ui";
 import { requireOpsMember } from "@/server/ops/page";
@@ -5,6 +6,8 @@ import { listPlaces } from "@/server/ops/places";
 import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // よく使う地点（社内拠点など）の一覧。全役割が見られる。登録・訂正・取消は運航管理者だけ。
+export const metadata: Metadata = { title: "よく使う地点" };
+
 export default async function PlaceListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
   const { ctx, me } = await requireOpsMember();
   const includeVoided = (await searchParams).includeVoided === "1";

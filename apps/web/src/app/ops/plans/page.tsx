@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, buttonFieldClass, Note, PageHeader } from "@/components/ops/ui";
 import { DipsNotice, NextActionItem, PlanStateBadge, ReportBadge, ReportStatusBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
@@ -26,6 +27,8 @@ const tabClass = (active: boolean) =>
 
 // 飛行計画の一覧（これから／過去／中止）。各行に予定日時・計画名・機体・操縦者・導出の状態・通報の要否・判定の結論・「判定が古い」の印。
 // 運航管理者には「確認待ち」の絞り込みを出す。
+export const metadata: Metadata = { title: "計画" };
+
 export default async function PlanListPage({
   searchParams,
 }: {

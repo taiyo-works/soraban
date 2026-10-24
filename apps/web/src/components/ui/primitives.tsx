@@ -261,7 +261,7 @@ export function PageHeader({
   return (
     <header {...rest} className="flex flex-col gap-1">
       {back ? (
-        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-11 items-center gap-1 self-start text-aux text-accent hov:underline field:min-h-14">
+        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-11 min-w-11 items-center gap-1 self-start text-aux text-accent hov:underline field:min-h-14">
           <Icon name="chevron-left" size={16} />
           {back.label}
         </Link>

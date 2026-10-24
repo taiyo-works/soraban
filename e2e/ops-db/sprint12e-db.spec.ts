@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { openUserMenu } from "../ops-menu";
+import { expandNextActions, openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 import {
   eventTypeOptions,
@@ -528,6 +528,7 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await expect(row.getByTestId("incident-row-pending")).toContainText("詳細は未記入");
     // 「今日」の次にやること（詳細を記入する・報告の要否を確認する）
     await page.goto("/ops");
+    await expandNextActions(page);
     await expect(page.locator(`[data-testid="today-next-action-link"][href="/ops/incidents/${rec.id}#correct"]:visible`)).toHaveCount(1);
     await expect(page.locator(`[data-testid="today-next-action-link"][href="/ops/incidents/${rec.id}#correct"]:visible`)).toContainText("事故・ヒヤリハットの詳細を記入する");
     await expect(page.locator(`[data-testid="today-next-action-link"][href="/ops/incidents/${rec.id}#report"]:visible`)).toContainText("事故・ヒヤリハットの報告の要否を確認する");
@@ -769,6 +770,7 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     const confirmLink = (id: string) => page.locator(`[data-testid="today-next-action-link"][href="/ops/incidents/${id}#report"]:visible`);
     await page.goto("/ops");
     await expect(page.getByTestId("ops-today")).toBeVisible();
+    await expandNextActions(page);
     await expect(confirmLink(old35.id)).toHaveCount(1);
     await expect(confirmLink(old365.id)).toHaveCount(1);
     await expect(confirmLink(old35.id)).toContainText("事故・ヒヤリハットの報告の要否を確認する");

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { IncidentFactNotice, IncidentList, IncidentOfficialNotice } from "@/components/ops/incident-ui";
@@ -20,6 +21,8 @@ const selectClass =
 
 // 事故・ヒヤリハットの一覧（Sprint 12e 設計 E）。全役割が見られる。記録は運航管理者と操縦者。取消は既定で出さない（?includeVoided=1）。
 // N1（事実の記録の注意）・N2（公式の手続き）を常に出す。目安・報告の状態・簡易記録の印・取消は文字と記号で示す。
+export const metadata: Metadata = { title: "事故・ヒヤリハット" };
+
 export default async function IncidentListPage({
   searchParams,
 }: {
