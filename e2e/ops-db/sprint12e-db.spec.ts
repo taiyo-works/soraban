@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 import {
   eventTypeOptions,
@@ -659,7 +660,9 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await page.goto("/ops/more");
     // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
     // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
+    // ログアウトは右上の利用者メニューの中
     await expect(async () => {
+      await openUserMenu(page);
       await page.getByTestId("signout").click();
       await expect(page.getByTestId("signout-warning")).toContainText("未送信 1 件があります", { timeout: 2000 });
     }).toPass({ timeout: 20_000 });
@@ -686,7 +689,7 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await bm.dispose();
   });
 
-  test("13. 連携：計画・日誌の画面に「この飛行の事故・ヒヤリハット」。日誌の安全に影響のあった事項から入力画面へ（要約が初期値、自動で作らない）。その他から入れる。「今日」の報告の要否の確認は日数が経っても出続け、確認の記録で消える", async ({ page }) => {
+  test("13. 連携：計画・日誌の画面に「この飛行の事故・ヒヤリハット」。日誌の安全に影響のあった事項から入力画面へ（要約が初期値、自動で作らない）。日誌から入れる。「ホーム」の報告の要否の確認は日数が経っても出続け、確認の記録で消える", async ({ page }) => {
     const bm = await apiAs(seeded("b-manager"));
     const bPilot = await meOf(seeded("b-pilot"));
     const aircraft = await createAircraft(bm);
@@ -748,14 +751,19 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await page.goto(`/ops/flights/${flightId}`);
     await expect(tid(page, "incident-linked-count")).toHaveAttribute("data-count", "1");
 
-    // 「その他」から入れ、下メニューの「その他」が現在地
+    // 日誌から入れ（登録からは外れた）、下メニューの「日誌」が現在地。一覧の戻り先は日誌
     await page.goto("/ops/more");
-    await tapAndWait(page, tid(page, "more-link-incidents"), /\/ops\/incidents$/);
+    await expect(tid(page, "more-link-incidents")).toHaveCount(0);
+    await page.goto("/ops/journal");
+    await tapAndWait(page, tid(page, "journal-tab-incidents"), /\/ops\/incidents$/);
     await expect(tid(page, "incident-list-page")).toBeVisible();
-    await expect(page.getByTestId("nav-more")).toHaveAttribute("data-active", "true");
-    await expect(page.getByTestId("nav-more")).toHaveAttribute("aria-current", "page");
+    const bottom = page.getByTestId("ops-bottom-nav");
+    await expect(bottom.getByTestId("nav-journal")).toHaveAttribute("data-active", "true");
+    await expect(bottom.getByTestId("nav-journal")).toHaveAttribute("aria-current", "page");
+    await expect(bottom.getByTestId("nav-more")).toHaveAttribute("data-active", "false");
+    await expect(page.getByTestId("incident-list-page").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
 
-    // 「今日」：目安が possible で報告・確認の記録がない記録は、日数が経っても出続ける（起きてから 35 日・365 日）
+    // 「ホーム」：目安が possible で報告・確認の記録がない記録は、日数が経っても出続ける（起きてから 35 日・365 日）
     const old35 = await createIncident(bm, fullBody({ kind: "accident", occurredAt: "2026-12-01T09:00", eventTypes: ["property_damage"], summary: `35 日前 ${stamp}` }));
     const old365 = await createIncident(bm, fullBody({ kind: "accident", occurredAt: "2026-01-05T09:00", eventTypes: ["minor_injury"], peopleInjury: "yes", summary: `365 日前 ${stamp}` }));
     const confirmLink = (id: string) => page.locator(`[data-testid="today-next-action-link"][href="/ops/incidents/${id}#report"]:visible`);

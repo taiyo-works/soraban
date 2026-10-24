@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { openUserMenu } from "../ops-menu";
 
 // Sprint 11 の E2E-DB（契約 7・15〜20）。DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与え、TZ=UTC で起動した next start に対して実行する。
 // サーバーの現在時刻は OPS_TEST_NOW（playwright.ops.config.ts、JST 2027-01-05 12:00）に固定している（離陸が未来でないかの判定用）。
@@ -424,7 +425,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await signIn(page.request, seeded("a-manager"));
       for (const path of ["/ops/flights", "/ops/flights/new", `/ops/flights/${created.id}`, "/ops/inspections/new", "/ops/inspections", "/ops"]) {
         await page.goto(path);
-        await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name")).first()).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-header")).first()).toBeVisible();
         await noHorizontalScroll(page, path);
       }
       const minHeight = async (path: string, names: readonly string[]) => {
@@ -568,16 +569,21 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
     test("差し戻し 1：「← 一覧」などのリンクの押せる範囲が高さ 44px 以上", async ({ page }) => {
       await signIn(page.request, seeded("a-manager"));
       for (const [path, name] of [
-        ["/ops/flights", "運航管理のトップ"],
+        ["/ops/flights", "日誌"],
         ["/ops/flights/new", "飛行記録の一覧"],
         ["/ops/inspections/new", "日常点検の一覧"],
       ] as const) {
         await page.goto(path);
-        const box = await page.getByRole("link", { name, exact: false }).first().boundingBox();
+        const box = await page.locator("main").getByRole("link", { name, exact: false }).first().boundingBox();
         expect(box, `${path} ${name}`).not.toBeNull();
         expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(44);
       }
-      const home = await page.getByRole("link", { name: "地点判定へ" }).boundingBox();
+      // メニューは新しい部品（Sprint 12g-1b）：スマホは下の 5 タブ（56px 以上）、PC は左メニューの判定の項目とロゴが 44px 以上
+      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-verdict").boundingBox();
+      expect(tab!.height).toBeGreaterThanOrEqual(56);
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto("/ops/flights");
+      const home = await page.getByTestId("ops-sidebar").getByTestId("nav-verdict").boundingBox();
       expect(home!.height).toBeGreaterThanOrEqual(44);
       const logo = await page.getByRole("link", { name: /そらばん 運航管理/ }).boundingBox();
       expect(logo!.height).toBeGreaterThanOrEqual(44);
@@ -592,8 +598,9 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto(`/ops/inspections/new`);
       await page.getByRole("form", { name: "日常点検の入力" }).getByRole("textbox", { name: "実施場所", exact: true }).fill("点検の下書き");
       await expect.poll(() => draftText(page, "inspection")).toContain("点検の下書き");
-      // Sprint 12c：メニューとログアウトは「その他」へ移した
+      // Sprint 12g-1b：ログアウトは右上の利用者メニューの中
       await page.goto("/ops/more");
+      await openUserMenu(page);
       await page.getByRole("button", { name: "ログアウト" }).click();
       await expect(page).toHaveURL(/\/ops\/sign-in$/);
       const left = await page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("soraban:ops-draft:")));

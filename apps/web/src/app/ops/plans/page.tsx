@@ -62,7 +62,6 @@ export default async function PlanListPage({
     <main className="flex flex-col gap-6">
       <PageHeader
         title="飛行計画"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
         aside={
           denied === null ? (
             <Link prefetch={false} href="/ops/plans/new" className={buttonFieldClass} data-testid="plan-new-link">

@@ -14,6 +14,7 @@ import { LicenseRenewalNotice } from "@/components/ops/license-renewal";
 import { todayJst } from "@/server/ops/license";
 import { listPilots } from "@/server/ops/service";
 import { LICENSE_CLASS_LABELS, requireOpsMember } from "@/server/ops/page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 const GRID = "sm:grid-cols-[minmax(0,1fr)_minmax(0,10.5rem)_minmax(0,12rem)_minmax(0,6rem)]";
 
@@ -28,7 +29,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
     <main className="flex flex-col gap-6">
       <PageHeader
         title="操縦者"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
+        back={BACK_TO.register}
         aside={
           manager ? (
             <Link href="/ops/pilots/new" className={buttonPrimaryClass}>

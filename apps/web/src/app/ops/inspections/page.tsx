@@ -6,6 +6,7 @@ import { listInspections, parseRecordFilter } from "@/server/ops/records";
 import { listAircraft, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // 狭い画面のカード：1 行目に実施日時と結果、2 行目に機体と区分、3 行目に実施者。広い画面では表の 1 行。
 const GRID = "grid-cols-[minmax(0,1fr)_auto] gap-x-3 sm:grid-cols-[9rem_minmax(0,8rem)_minmax(0,1fr)_4rem_9rem] sm:gap-x-4";
@@ -32,7 +33,7 @@ export default async function InspectionListPage({
     <main className="flex flex-col gap-6">
       <PageHeader
         title="日常点検"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
+        back={BACK_TO.journal}
         aside={
           canCreate ? (
             <Link href="/ops/inspections/new" className={buttonFieldClass}>

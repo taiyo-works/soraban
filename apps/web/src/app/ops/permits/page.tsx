@@ -5,6 +5,7 @@ import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { PERMIT_DECLARATION_NOTE, PERMIT_FORMAT_UNVERIFIED_NOTE, PERMIT_NO_DIPS_NOTE, PERMIT_VALIDITY_LABEL, type PermitValidity } from "@/server/ops/permit-logic";
 import { listPermits } from "@/server/ops/permits";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 const GRID = "sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)]";
 const VALIDITIES = Object.keys(PERMIT_VALIDITY_LABEL) as PermitValidity[];
@@ -28,7 +29,7 @@ export default async function PermitListPage({
       <PageHeader
         title="許可・承認"
         eyebrow="登録（利用者の申告）"
-        back={{ href: "/ops/more", label: "その他" }}
+        back={BACK_TO.register}
         aside={
           manager ? (
             <Link prefetch={false} href="/ops/permits/new" className={buttonPrimaryClass} data-testid="permit-new-link">

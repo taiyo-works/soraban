@@ -608,6 +608,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await login(page, seeded("a-manager"));
     await page.goto("/");
     await expect(page.getByTestId("home-ops-link")).toBeVisible();
+    await expect(page.getByTestId("home-ops-link")).toContainText("ホームへ");
     await tapSize(page, "home-ops-link");
     await expect(page.getByTestId("verdict-level")).toBeVisible();
     // 入力を変える：夜間飛行・機体の重さ・予定日

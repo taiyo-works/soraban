@@ -56,6 +56,7 @@ import { fieldState, outboxAsEvents, type FieldFlight } from "@/server/ops/field
 import type { FieldViewDto } from "@/server/ops/field";
 import { newRequestId } from "./drafts";
 import { flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
+import { FIELD_BACK } from "./ops-nav-model";
 
 const BTN =
   "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp px-5 py-2 text-lg font-bold touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
@@ -672,7 +673,7 @@ export function FieldClient({
         </p>
       ) : null}
 
-      {/* 上部：計画の要点（運航票の見出し）と「今日へ戻る」 */}
+      {/* 上部：計画の要点（運航票の見出し）と「ホームへ戻る」 */}
       <header className="flex flex-col gap-3 border-b-2 border-ink-mute pb-4">
         <div className="flex flex-col gap-1 border-l-8 border-brand-700 pl-3">
           <h1 className="text-2xl font-bold leading-snug" data-testid="field-plan-title">
@@ -686,8 +687,8 @@ export function FieldClient({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <a href="/ops" className={`${BTN_OUTLINE} !w-auto shrink-0`} data-testid="field-back">
-            <span aria-hidden>←</span> 今日へ戻る
+          <a href={FIELD_BACK.href} className={`${BTN_OUTLINE} !w-auto shrink-0`} data-testid="field-back">
+            <span aria-hidden>←</span> {FIELD_BACK.label}
           </a>
           {view.sameDayPlans.length > 1 ? (
             <nav aria-label="同じ日の計画" className="flex min-w-0 flex-[1_1_100%] flex-wrap gap-3" data-testid="field-same-day">

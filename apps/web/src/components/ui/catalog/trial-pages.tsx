@@ -5,6 +5,7 @@ import { cx } from "../cx";
 import type { DayKind, JudgeForm } from "./config";
 import { Checkbox, FormField, Select, TextInput, Textarea } from "../forms";
 import { Icon, type IconName } from "../icons";
+import { JourneyLine, stagesFromDone } from "../journey-line";
 import { Button, NoticeBar, StatusPill, type Meaning } from "../primitives";
 import { VerdictStamp } from "../verdict-stamp";
 import { MapPlaceholder } from "../workspace";
@@ -97,28 +98,9 @@ export function Head({ ctx, page, meta, actions }: { readonly ctx: PageCtx; read
   );
 }
 
-/** The seven stages of a flight as one ruled line. State is the word and the mark; the rule colour only supports them. */
+/** The seven stages of a flight as one ruled line (the part itself lives in ../journey-line). */
 export function Route({ done, nextLabel = "次", compact = false }: { readonly done: number; readonly nextLabel?: string; readonly compact?: boolean }) {
-  return (
-    <ol aria-label="行程" data-testid="route" className={cx("grid grid-cols-7", compact ? "gap-1" : "gap-1.5")}>
-      {STAGES.map((stage, i) => {
-        const state = i < done ? "done" : i === done ? "next" : "todo";
-        return (
-          <li
-            key={stage}
-            data-stage-state={state}
-            className={cx("flex min-w-0 flex-col gap-0.5 border-t-2 pt-1.5", state === "done" && "border-fg-soft", state === "next" && "border-accent", state === "todo" && "border-line")}
-          >
-            <span className={cx("whitespace-nowrap text-table", state === "next" ? "font-semibold text-accent" : state === "done" ? "font-medium text-fg" : "text-fg-mute")}>{stage}</span>
-            <span className={cx("inline-flex items-center gap-0.5 whitespace-nowrap text-aux", state === "next" ? "font-semibold text-accent" : state === "done" ? "text-fg-soft" : "text-fg-mute")}>
-              {state === "done" ? <Icon name="check" size={12} /> : state === "next" ? <Icon name="chevron-right" size={12} /> : <span aria-hidden="true" className="inline-block w-3" />}
-              {state === "done" ? "済" : state === "next" ? nextLabel : "未"}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
+  return <JourneyLine stages={stagesFromDone(STAGES, done, nextLabel)} compact={compact} />;
 }
 
 function FlightFacts({ flight }: { readonly flight: Flight }) {

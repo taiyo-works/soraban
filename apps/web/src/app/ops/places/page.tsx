@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge, buttonPrimaryClass, listRowClass, Note, PageHeader, VoidedToggle } from "@/components/ops/ui";
 import { requireOpsMember } from "@/server/ops/page";
 import { listPlaces } from "@/server/ops/places";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // よく使う地点（社内拠点など）の一覧。全役割が見られる。登録・訂正・取消は運航管理者だけ。
 export default async function PlaceListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
@@ -13,7 +14,7 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
     <main className="flex flex-col gap-6">
       <PageHeader
         title="よく使う地点"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
+        back={BACK_TO.register}
         aside={
           manager ? (
             <Link prefetch={false} href="/ops/places/new" className={buttonPrimaryClass} data-testid="place-new-link">

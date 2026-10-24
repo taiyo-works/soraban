@@ -1,17 +1,22 @@
-// 「今日」のサービス層（Sprint 12c 設計 C）。GET /api/ops/today と、`/` の「今日」の帯・`/ops` が使う。
+// 「ホーム」（旧「今日」）のサービス層（Sprint 12c 設計 C）。GET /api/ops/today と、`/` の「ホーム」の帯・`/ops` が使う。
 //   - 今日（なければ次）の飛行の大きなカード 1 枚と、今日の残りの計画、動詞で始まる「次にやること」（上位 8 件）を返す。
 //   - 一覧の要約の値だけを使う（判定の result 全体は読まない）。保存された状態は読まず、記録の有無から毎回導出する。
 //   - 対象は、今日から 7 日以内に始まる計画と、飛行中・日誌待ちの計画（離陸の行から 30 日さかのぼる）。
 //   - クエリ数は計画の件数に比例しない（計画・確認・通報・現場の行・日常点検・飛行記録をまとめて引く）。
+//   - Sprint 12g-1b：行程の 1 行（card.journey・upcoming[].journey）と近づく期限（deadlines）を足した。どちらも読み取りだけで、
+//     行程は読み込み済みの計画から導出する。期限のために、操縦者と許可・承認の行を全員分 1 回ずつ読む（追加は許可・承認の 1 問い合わせ。
+//     操縦者は従来、7 日以内の計画に操縦者がいるときだけ読んでいたが、期限のため毎回 1 回読む）。
 import { VERDICT_LABEL } from "@soraban/regulations";
 import { fieldHref, TODAY_EMPTY_ACTIONS, TODAY_EMPTY_NONE, TODAY_EMPTY_TODAY } from "@/lib/ops-field";
 import { jstDate, jstTime, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { fieldState, type FieldEventLite, type FieldFlightRecordLite, type FieldState } from "./field-logic";
+import { deadlines as deadlinesOf, type DeadlineDto } from "./deadlines-logic";
 import { inspectionLites, toLite } from "./field-rows";
 import { enrichFlights } from "./flight-extras";
 import { incidentTodayActions } from "./incidents";
-import { loadPlanSummaries } from "./plans";
+import { journeyStages, type JourneyStageDto } from "./journey-logic";
+import { loadPlanSummaries, type PlanDto } from "./plans";
 import { asDate, myPilot, nowOf } from "./records";
 import type { NextAction } from "./report-logic";
 import { assertCan, dateOnly, type OpsContext } from "./service";
@@ -19,6 +24,7 @@ import * as store from "./store";
 import type { PlanWithJoins } from "./store";
 import {
   addDays,
+  daysBetween,
   fieldNextActions,
   HOME_BAND_NEXT_ACTION_LIMIT,
   licenseNextActions,
@@ -88,6 +94,8 @@ export type TodayCardDto = {
   /** 確認の状況（運航管理者の確認。既存の導出と文言）。 */
   readonly confirmation: { readonly state: string; readonly label: string };
   readonly badge: TodayBadgeDto;
+  /** 行程の 7 段（判定→計画→確認→通報→点検→飛行→日誌。記録の有無から毎回導出する）。 */
+  readonly journey: readonly JourneyStageDto[];
   /** 主ボタン 1 つ：当日の計画は「現場モードを開く」、それ以外は「計画を開く」。 */
   readonly primary: { readonly kind: "field" | "plan"; readonly label: string; readonly href: string };
 };
@@ -106,6 +114,21 @@ export type TodayRowDto = {
   readonly href: string;
 };
 
+/** 直近の飛行（今日より先の日に始まる計画。行程つき）。 */
+export type TodayUpcomingDto = {
+  readonly planId: string;
+  readonly title: string;
+  readonly plannedDate: string;
+  readonly timeLabel: string;
+  /** 今日から計画の日までの日数（明日＝1）。 */
+  readonly daysLeft: number;
+  readonly href: string;
+  readonly journey: readonly JourneyStageDto[];
+};
+
+/** ホームの「直近の飛行」に出す件数。 */
+export const UPCOMING_LIMIT = 3;
+
 export type TodayEmptyDto = {
   /** 何がないか。 */
   readonly message: string;
@@ -121,6 +144,10 @@ export type TodayDto = {
   readonly card: TodayCardDto | null;
   /** カードの下に 1 行ずつ出す、今日の残りの計画。 */
   readonly rest: readonly TodayRowDto[];
+  /** 直近の飛行（今日より先の日に始まる計画。計画の窓の中から作る。行程つき）。 */
+  readonly upcoming: readonly TodayUpcomingDto[];
+  /** 近づく期限（技能証明の有効期限と、許可・承認の有効な最終日。60 日以内、最大 5 件）。 */
+  readonly deadlines: readonly DeadlineDto[];
   /** 動詞で始まる「次にやること」（急ぐ順の上位 8 件）。 */
   readonly nextActions: readonly TodayNextAction[];
   /** 次にやることの総数（上位 8 件に収まらない分を「計画の一覧へ」で案内する）。 */
@@ -155,6 +182,20 @@ const badgeOf = (now: Date, r: PlanWithJoins, state: FieldState | undefined): To
   const end = asDate(r.planned_start_at).getTime() + r.duration_minutes * MINUTE_MS;
   return end <= now.getTime() ? BADGE.ended : BADGE.planned;
 };
+
+const journeyOf = (r: PlanWithJoins, dto: PlanDto, state: FieldState | undefined, hasFlightRecord: boolean, today: string): JourneyStageDto[] =>
+  journeyStages({
+    hasSnapshot: dto.currentSnapshotId !== "",
+    judgementStale: dto.freshness.stale,
+    planState: dto.state,
+    reportStatus: dto.report.status.code,
+    // 日常点検は飛行当日の記録。先の日の計画では、まだ数えない
+    inspectionDone: r.planned_date_text === today && (state?.checks.inspection.done ?? false),
+    hasLandedFlight: (state?.flights ?? []).some((f) => f.landingEventId !== null),
+    inFlight: state?.openFlight != null,
+    journalPending: (state?.pendingJournal.length ?? 0) > 0,
+    hasFlightRecord,
+  });
 
 const REASON_LABEL: Readonly<Record<TodayCardReason, string>> = {
   in_flight: "飛行中",
@@ -259,6 +300,7 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
       },
       confirmation: { state: dto.state, label: dto.stateLabel },
       badge: badgeOf(now, r, stateBy.get(r.id)),
+      journey: journeyOf(r, dto, stateBy.get(r.id), flightRecordPlanIds.has(r.id), today),
       primary:
         isToday || inFlight
           ? { kind: "field", label: "現場モードを開く", href: fieldHref(r.id) }
@@ -284,6 +326,23 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
       };
     })
     .filter((x): x is TodayRowDto => x !== null);
+
+  // 直近の飛行：今日より先の日に始まる、中止していない計画（すでに読み込んだ窓の中から作る。追加の問い合わせはしない）
+  const upcoming = summaries
+    .filter((s) => s.row.voided_at === null && s.row.planned_date_text > today)
+    .sort((a, b) => asDate(a.row.planned_start_at).getTime() - asDate(b.row.planned_start_at).getTime() || (a.row.id < b.row.id ? -1 : 1))
+    .slice(0, UPCOMING_LIMIT)
+    .map(
+      (s): TodayUpcomingDto => ({
+        planId: s.row.id,
+        title: s.row.title,
+        plannedDate: s.row.planned_date_text,
+        timeLabel: timeLabelOf(s.row),
+        daysLeft: daysBetween(today, s.row.planned_date_text),
+        href: `/ops/plans/${s.row.id}`,
+        journey: journeyOf(s.row, s.dto, stateBy.get(s.row.id), flightRecordPlanIds.has(s.row.id), today),
+      }),
+    );
 
   // 次にやること：12b の導出（planNextActions）＋ 飛行当日・現場の導出 ＋ 食い違い ＋ 技能証明
   const actions: TodayNextAction[] = [];
@@ -339,23 +398,39 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
     ),
   );
 
-  // 技能証明の有効期限（今日から 7 日以内に始まる計画の操縦者。既存の列だけ。期限一覧は 12f）
+  // 技能証明の有効期限（今日から 7 日以内に始まる計画の操縦者。既存の列だけ。期限一覧は 12f）と、ホームの「近づく期限」の材料。
+  // 操縦者と許可・承認の行は、組織の全員分を 1 回ずつ読む（閲覧は全役割。authz.ts の pilot.read・permit.read）
+  const [allPilots, permitRows] = await Promise.all([store.listPilots(ctx.db, org, false), store.listPermits(ctx.db, org, false)]);
   const pilotIds = new Set(rows.filter((r) => r.voided_at === null && inWindow(r)).map((r) => r.pilot_id));
   if (pilotIds.size > 0) {
-    const pilots = (await store.listPilots(ctx.db, org, false)).filter((p) => pilotIds.has(p.id));
     actions.push(
       ...licenseNextActions(
-        pilots.map((p) => ({
-          pilotId: p.id,
-          pilotName: p.full_name,
-          expiresOn: dateOnly(p.license_expires_on),
-          today,
-          startsInMinutes: startOf.get(p.id) ?? 0,
-          canAct: can(role, "pilot.update", { isSelf: p.member_id === ctx.member.id }),
-        })),
+        allPilots
+          .filter((p) => pilotIds.has(p.id))
+          .map((p) => ({
+            pilotId: p.id,
+            pilotName: p.full_name,
+            expiresOn: dateOnly(p.license_expires_on),
+            today,
+            startsInMinutes: startOf.get(p.id) ?? 0,
+            canAct: can(role, "pilot.update", { isSelf: p.member_id === ctx.member.id }),
+          })),
       ),
     );
   }
+  const deadlines = deadlinesOf({
+    today,
+    pilots: allPilots.map((p) => ({ id: p.id, name: p.full_name, licenseExpiresOn: dateOnly(p.license_expires_on), voided: p.voided_at !== null })),
+    permits: permitRows.map((r) => ({
+      id: r.id,
+      permitNumber: r.permit_number,
+      coverage: r.coverage,
+      validTo: r.valid_to,
+      revokedOn: r.revoked_on,
+      status: r.status,
+      voided: r.voided_at !== null,
+    })),
+  });
 
   // Sprint 12e：事故・ヒヤリハット（報告の要否を確認する・詳細を記入する）。計画に結び付かない記録の分も出る
   actions.push(...(await incidentTodayActions(ctx)));
@@ -368,6 +443,8 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
     today,
     card,
     rest,
+    upcoming,
+    deadlines,
     nextActions: ranked,
     nextActionTotal: actions.length,
     plansHref: "/ops/plans",

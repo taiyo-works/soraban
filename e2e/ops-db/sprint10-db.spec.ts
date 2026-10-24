@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { openUserMenu } from "../ops-menu";
 
 // Sprint 10 の E2E-DB（契約 6・8・14・17・18・20）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与えた next start に対して実行する（playwright.ops.config.ts）。
@@ -48,6 +49,7 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
   test("6. 招待済み・確認済みのメールアドレスで初回ログインすると結び付き、/ops に表示名と役割が出る", async ({ page }) => {
     await pageAs(page, { authUserId: "auth-invited-1", email: "A-Invited@Example.test", emailVerified: true, name: "招待さん" });
     await page.goto("/ops");
+    await openUserMenu(page);
     await expect(page.getByTestId("ops-me-name")).toHaveText("招待 三郎");
     await expect(page.getByTestId("ops-me-role")).toHaveText("役割：操縦者");
     const me = await page.request.get("/api/ops/me");
@@ -316,7 +318,7 @@ test.describe("Sprint 10 E2E-DB：運航管理", () => {
     await pageAs(page, seeded("a-manager"));
     for (const path of ["/ops/aircraft", "/ops/aircraft/new", "/ops", "/ops/pilots"]) {
       await page.goto(path);
-      await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-me-name")).first()).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 }).or(page.getByTestId("ops-header")).first()).toBeVisible();
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,

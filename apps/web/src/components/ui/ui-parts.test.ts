@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { APP_ICON_PROPOSALS, DroneLineArt } from "./brand-marks";
 import { DataTable } from "./data";
+import { JourneyLine, stagesFromDone } from "./journey-line";
 import { FormField, Toggle, TextInput } from "./forms";
 import { Button, Card, Disclosure, EmptyState, NoticeBar, StatusPill, StatTile } from "./primitives";
 import { Segmented, Tabs } from "./tabs";
@@ -230,5 +231,36 @@ describe("アプリのアイコン案とドローンの線画（要望 2026-10-2
     expect(out).toContain('aria-hidden="true"');
     expect(out).toContain('vector-effect="non-scaling-stroke"');
     expect(out).not.toMatch(/Gradient|<image/);
+  });
+});
+
+describe("行程の 1 行（Sprint 12g-1b A8）", () => {
+  const stages = [
+    { label: "判定", state: "done" },
+    { label: "計画", state: "next" },
+    { label: "確認", state: "todo" },
+    { label: "通報", state: "skip", stateLabel: "対象外" },
+  ] as const;
+
+  it("各段は文字（名前と 済／次／未／対象外）と印で示し、色（罫線）は補助。段の数だけ列を作る", () => {
+    const out = html(h(JourneyLine, { stages }));
+    expect(out).toContain('data-testid="route"');
+    expect(out).toContain('aria-label="行程"');
+    expect(out.match(/data-stage-state="/g)).toHaveLength(4);
+    for (const t of ["判定", "計画", "確認", "通報", "済", "次", "未", "対象外"]) expect(out).toContain(t);
+    // 済は check、次は chevron の印。未は空きだけ（文字が伝える）
+    expect(out.match(/<svg/g)).toHaveLength(2);
+    expect(out).toContain("grid-template-columns:repeat(4, minmax(0, 1fr))");
+  });
+
+  it("段の名前と状態は折り返さず、12px 未満の文字を使わない（text-aux = 12px、text-table = 13px 以上）", () => {
+    const out = html(h(JourneyLine, { stages, compact: true }));
+    expect(out).toContain("whitespace-nowrap");
+    expect(out).not.toMatch(/text-\[(9|10|11)px\]|text-xs/);
+  });
+
+  it("見本用：済の段数から作る（済の次が「次」、先は「未」）。「次」の文言を変えられる", () => {
+    expect(stagesFromDone(["a", "b", "c"], 1).map((s) => s.state)).toEqual(["done", "next", "todo"]);
+    expect(stagesFromDone(["a", "b", "c"], 1, "いま")[1]?.stateLabel).toBe("いま");
   });
 });

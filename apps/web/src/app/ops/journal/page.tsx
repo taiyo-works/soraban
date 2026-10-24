@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { MismatchBadges } from "@/components/ops/journal-ui";
-import { Badge, buttonFieldClass, buttonOutlineBrandClass, Note, PageHeader } from "@/components/ops/ui";
+import { Note } from "@/components/ops/ui";
+import { cx } from "@/components/ui/cx";
+import { Icon } from "@/components/ui/icons";
+import { buttonClass, PageHeader, StatusPill } from "@/components/ui/primitives";
 import { INSPECTION_TIMING_LABELS } from "@/lib/ops-records";
 import { formatHm, jstDate } from "@/lib/ops-time";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
+import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { listFlights, listInspections, nowOf, type FlightDto, type InspectionDto } from "@/server/ops/records";
@@ -12,22 +16,24 @@ const RECENT_DAYS = 14;
 const DAY_MS = 24 * 3600 * 1000;
 
 type Tab = "all" | "flights" | "inspections";
-const TABS: readonly (readonly [Tab, string])[] = [
-  ["all", "すべて"],
-  ["flights", "飛行記録"],
-  ["inspections", "日常点検"],
+/** 事故・ヒヤリハット（incidents）は一覧が別の画面（/ops/incidents。URL は変えない）なので、切り替えではなくそこへの入口。 */
+const TABS: readonly (readonly [Tab | "incidents", string, string])[] = [
+  ["all", "すべて", "/ops/journal"],
+  ["flights", "飛行記録", "/ops/journal?tab=flights"],
+  ["inspections", "日常点検", "/ops/journal?tab=inspections"],
+  ["incidents", "事故・ヒヤリハット", "/ops/incidents"],
 ];
 
-/** 種別の札：飛行記録は藍の塗り（▶）、日常点検は枠だけ（✓）。色に頼らず、記号と文字で見分ける。 */
+/** 種別の札：記号（アイコン）と文字で見分ける。 */
 function KindTag({ kind }: { readonly kind: "flight" | "inspection" }) {
   return kind === "flight" ? (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-sharp border-2 border-brand-700 bg-brand-700 px-2 py-px text-xs font-bold leading-5 text-paper">
-      <span aria-hidden>▶</span>飛行記録
-    </span>
+    <StatusPill meaning="info" icon="flight">
+      飛行記録
+    </StatusPill>
   ) : (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-sharp border-2 border-ink-mute bg-paper px-2 py-px text-xs font-bold leading-5 text-ink">
-      <span aria-hidden>✓</span>日常点検
-    </span>
+    <StatusPill meaning="neutral" icon="inspection">
+      日常点検
+    </StatusPill>
   );
 }
 
@@ -37,6 +43,7 @@ type Row =
 
 // 「日誌」（Sprint 12c 設計 G）：飛行記録と日常点検の入口と、最近 14 日の合算の一覧（日付順。食い違いの札つき）。
 // 既存の /ops/flights・/ops/inspections の経路・機能は変えず、入口と見せ方でまとめる。
+// Sprint 12g-1b：事故・ヒヤリハットも日誌の中へ（4 つ目の種類と、入力の入口「事故・ヒヤリハットを記録」）。新しい部品に置き換えた。
 export default async function OpsJournalPage({ searchParams }: { readonly searchParams: Promise<Record<string, string | undefined>> }) {
   const { ctx, me } = await requireOpsMember();
   const sp = await searchParams;
@@ -51,85 +58,113 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
     ...(tab !== "flights" ? inspections.map((i): Row => ({ kind: "inspection", at: i.inspectedAt, i })) : []),
   ].sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
 
+  const denied = recordCreateDenied(me);
+  const canIncident = can(me.member.role, "incident.create");
+  const entryClass = buttonClass("secondary", "md", "min-h-14 w-full sm:w-auto");
   return (
     <main className="flex flex-col gap-6" data-testid="ops-journal">
       <DraftOwnerGuard memberId={me.member.id} />
-      <PageHeader title="日誌" eyebrow="飛行記録と日常点検" />
-      {canCreate ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Link href="/ops/flights/new" prefetch={false} className={buttonFieldClass} data-testid="journal-new-flight">
-            飛行記録を入力
-          </Link>
-          <Link href="/ops/inspections/new" prefetch={false} className={buttonOutlineBrandClass.replace("min-h-11", "min-h-14").replace("text-sm", "text-base")} data-testid="journal-new-inspection">
-            日常点検を入力
-          </Link>
+      <PageHeader title="日誌" meta="飛行記録・日常点検・事故・ヒヤリハット" />
+      {canCreate || canIncident ? (
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {canCreate ? (
+            <>
+              <Link href="/ops/flights/new" prefetch={false} className={buttonClass("primary", "md", "min-h-14 w-full sm:w-auto")} data-testid="journal-new-flight">
+                <Icon name="flight" size={18} />
+                飛行記録を入力
+              </Link>
+              <Link href="/ops/inspections/new" prefetch={false} className={entryClass} data-testid="journal-new-inspection">
+                <Icon name="inspection" size={18} />
+                日常点検を入力
+              </Link>
+            </>
+          ) : null}
+          {canIncident ? (
+            <Link href="/ops/incidents/new" prefetch={false} className={entryClass} data-testid="journal-new-incident">
+              <Icon name="incident" size={18} />
+              事故・ヒヤリハットを記録
+            </Link>
+          ) : null}
         </div>
-      ) : (
-        <Note>{recordCreateDenied(me)}</Note>
-      )}
-      <nav aria-label="表示する記録" className="grid grid-cols-3 overflow-hidden rounded-sharp border-2 border-brand-700 sm:inline-grid sm:self-start" data-testid="journal-tabs">
-        {TABS.map(([key, label]) => (
-          <Link
-            key={key}
-            href={key === "all" ? "/ops/journal" : `/ops/journal?tab=${key}`}
-            prefetch={false}
-            aria-current={tab === key ? "page" : undefined}
-            data-testid={`journal-tab-${key}`}
-            className={`inline-flex min-h-12 items-center justify-center gap-1.5 whitespace-nowrap border-l-2 border-brand-700 px-3 text-sm first:border-l-0 sm:px-6 ${tab === key ? "bg-brand-700 font-bold text-paper" : "bg-paper text-brand-700 hover:bg-brand-50"}`}
-          >
-            {tab === key ? <span aria-hidden>●</span> : null}
-            {label}
-          </Link>
-        ))}
+      ) : null}
+      {denied ? <Note>{denied}</Note> : null}
+      <nav aria-label="表示する記録" className="flex flex-wrap gap-2" data-testid="journal-tabs">
+        {TABS.map(([key, label, href]) => {
+          const active = tab === key;
+          return (
+            <Link
+              key={key}
+              href={href}
+              prefetch={false}
+              aria-current={active ? "page" : undefined}
+              data-testid={`journal-tab-${key}`}
+              className={cx(
+                "inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-colors duration-[var(--dur)]",
+                active ? "border-accent bg-surface font-semibold text-accent" : "border-line-strong text-fg-soft hov:bg-sunken",
+              )}
+            >
+              {active ? <Icon name="check" size={14} /> : null}
+              {label}
+            </Link>
+          );
+        })}
       </nav>
-      <p className="font-mono text-[11px] tnum text-ink-soft" data-testid="journal-range">
+      <p className="text-table tabular-nums text-fg-mute" data-testid="journal-range">
         最近 {RECENT_DAYS} 日（{from}〜{to}）　{rows.length} 件
       </p>
       {rows.length === 0 ? (
-        <p className="border-y border-rule py-6 text-center text-sm text-ink-soft" data-testid="journal-empty">
+        <p className="border-y border-line py-6 text-table text-fg-soft" data-testid="journal-empty">
           最近 {RECENT_DAYS} 日の記録はありません。
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-rule-soft rounded-sharp border border-rule bg-paper" data-testid="journal-list">
+        <ul className="flex flex-col divide-y divide-line border-y border-line" data-testid="journal-list">
           {rows.map((r) =>
             r.kind === "flight" ? (
               <li key={`f-${r.f.id}`} data-testid="journal-row" data-kind="flight">
-                <Link prefetch={false} href={`/ops/flights/${r.f.id}`} className="flex min-h-14 flex-col gap-2 border-l-4 border-brand-700 px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
+                <Link prefetch={false} href={`/ops/flights/${r.f.id}`} className="flex min-h-14 flex-col gap-2 py-3 text-table transition-colors hov:bg-accent-soft" data-testid="journal-row-link">
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <KindTag kind="flight" />
-                    {r.f.voided ? <Badge tone="red">取消済み</Badge> : null}
-                    <span className="font-mono text-base tnum text-ink">{r.f.flightDate}</span>
-                    <span className="font-mono text-base text-ink">
+                    {r.f.voided ? (
+                      <StatusPill meaning="danger" icon="ban">
+                        取消済み
+                      </StatusPill>
+                    ) : null}
+                    <span className="text-body tabular-nums text-fg">{r.f.flightDate}</span>
+                    <span className="text-body tabular-nums text-fg">
                       {r.f.takeoffAtJst.slice(11)}–{r.f.landingAtJst}
                     </span>
-                    <span className="font-mono tnum text-ink-soft">{formatHm(r.f.flightMinutes)}</span>
+                    <span className="tabular-nums text-fg-soft">{formatHm(r.f.flightMinutes)}</span>
                   </span>
-                  <span className="text-ink-soft">
-                    <span className="font-mono">{r.f.registrationMark}</span>／{r.f.pilotName}
+                  <span className="text-fg-soft">
+                    <span className="tabular-nums">{r.f.registrationMark}</span>／{r.f.pilotName}
                   </span>
                   <MismatchBadges mismatches={r.f.mismatches} />
                 </Link>
               </li>
             ) : (
               <li key={`i-${r.i.id}`} data-testid="journal-row" data-kind="inspection">
-                <Link prefetch={false} href={`/ops/inspections/${r.i.id}`} className="flex min-h-14 flex-col gap-2 border-l-4 border-ink-mute px-3 py-3 text-sm hover:bg-paper-soft" data-testid="journal-row-link">
+                <Link prefetch={false} href={`/ops/inspections/${r.i.id}`} className="flex min-h-14 flex-col gap-2 py-3 text-table transition-colors hov:bg-accent-soft" data-testid="journal-row-link">
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <KindTag kind="inspection" />
-                    {r.i.voided ? <Badge tone="red">取消済み</Badge> : null}
-                    <span className="font-mono text-base tnum text-ink">{r.i.inspectedAtJst}</span>
-                    <span className="text-ink-soft">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
+                    {r.i.voided ? (
+                      <StatusPill meaning="danger" icon="ban">
+                        取消済み
+                      </StatusPill>
+                    ) : null}
+                    <span className="text-body tabular-nums text-fg">{r.i.inspectedAtJst}</span>
+                    <span className="text-fg-soft">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
                     {r.i.hasAbnormal ? (
-                      <Badge tone="red">
-                        <span aria-hidden>！ </span>異常あり
-                      </Badge>
+                      <StatusPill meaning="danger" icon="alert">
+                        異常あり
+                      </StatusPill>
                     ) : (
-                      <Badge tone="green">
-                        <span aria-hidden>✓ </span>異常なし
-                      </Badge>
+                      <StatusPill meaning="ok" icon="check-circle">
+                        異常なし
+                      </StatusPill>
                     )}
                   </span>
-                  <span className="text-ink-soft">
-                    <span className="font-mono">{r.i.registrationMark}</span>／{r.i.inspectorName}
+                  <span className="text-fg-soft">
+                    <span className="tabular-nums">{r.i.registrationMark}</span>／{r.i.inspectorName}
                   </span>
                 </Link>
               </li>
@@ -137,11 +172,11 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           )}
         </ul>
       )}
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/ops/flights" prefetch={false} className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2" data-testid="journal-flights-link">
+      <div className="flex flex-wrap gap-4 text-table">
+        <Link href="/ops/flights" prefetch={false} className="inline-flex min-h-11 items-center text-accent underline underline-offset-2" data-testid="journal-flights-link">
           飛行記録の一覧へ
         </Link>
-        <Link href="/ops/inspections" prefetch={false} className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2" data-testid="journal-inspections-link">
+        <Link href="/ops/inspections" prefetch={false} className="inline-flex min-h-11 items-center text-accent underline underline-offset-2" data-testid="journal-inspections-link">
           日常点検の一覧へ
         </Link>
       </div>

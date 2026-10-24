@@ -13,6 +13,7 @@ import {
 } from "@/components/ops/ui";
 import { listMembers } from "@/server/ops/service";
 import { MEMBER_STATUS_LABELS, requireOpsMember, ROLE_LABELS } from "@/server/ops/page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 // 利用者の招待・役割の変更・停止・再開（運航管理者のみ）。
 export default async function MembersPage() {
@@ -21,7 +22,7 @@ export default async function MembersPage() {
   const members = await listMembers(ctx);
   return (
     <main className="flex flex-col gap-10">
-      <PageHeader title="利用者" back={{ href: "/ops", label: "運航管理のトップ" }}>
+      <PageHeader title="利用者" back={BACK_TO.register}>
         <p className="text-xs leading-relaxed text-ink-mute">
           {me.org.name}の利用者です。役割の変更と利用の停止は、次にその人が操作したときから反映されます。
         </p>

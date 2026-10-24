@@ -12,6 +12,7 @@ import {
 } from "@/components/ops/ui";
 import { listAircraft } from "@/server/ops/service";
 import { AIRCRAFT_STATUS_LABELS, formatMinutes, requireOpsMember } from "@/server/ops/page";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 
 const GRID = "sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_6rem_minmax(0,9rem)]";
 
@@ -25,7 +26,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
     <main className="flex flex-col gap-6">
       <PageHeader
         title="機体"
-        back={{ href: "/ops", label: "運航管理のトップ" }}
+        back={BACK_TO.register}
         aside={
           manager ? (
             <Link href="/ops/aircraft/new" className={buttonPrimaryClass}>
