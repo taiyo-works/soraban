@@ -35,18 +35,18 @@ export function FormField({
     <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={id} className="flex items-center gap-2 text-table font-medium text-fg">
         {label}
-        {required ? <span className="rounded-pill bg-sunken px-1.5 text-aux font-medium text-fg-soft">必須</span> : null}
+        {required ? <span className="rounded-pill bg-sunken px-1.5 text-aux font-medium text-fg-soft jr:rounded-ctl jr:border jr:border-line-strong jr:bg-transparent">必須</span> : null}
         {optional ? <span className="text-aux font-normal text-fg-mute">任意</span> : null}
       </label>
       {children}
       {hint ? (
-        <p id={controlId(id, "hint")} className="text-aux text-fg-mute">
+        <p id={controlId(id, "hint")} className="text-aux text-fg-mute jr:leading-[1.7]">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={controlId(id, "error")} className="flex items-start gap-1.5 text-aux font-medium text-danger-fg">
-          <Icon name="ban" size={14} className="mt-0.5 text-danger-line" />
+        <p id={controlId(id, "error")} className="flex items-start gap-1.5 text-aux font-medium text-danger-fg jr:leading-[1.7]">
+          <Icon name="ban" size={14} className="mt-0.5 shrink-0 text-danger-line jr:mt-1" />
           {error}
         </p>
       ) : null}
@@ -56,7 +56,9 @@ export function FormField({
 
 const CONTROL =
   "block w-full min-w-0 rounded-ctl border bg-surface px-3 text-[16px] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur-fast)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
-  "border-line-strong shadow-[inset_0_1px_1px_var(--sh-drop)] hov:border-fg-mute foc:border-accent foc:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_16%,transparent)] disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
+  "border-line-strong shadow-[inset_0_1px_1px_var(--sh-drop)] hov:border-fg-mute foc:border-accent foc:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_16%,transparent)] disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute " +
+  // journal paper: a ruled entry cell. No inner shadow and no glow; focus is the 2px outline from globals.css plus an accent rule.
+  "jr:shadow-none jr:hov:border-fg jr:foc:border-accent jr:foc:shadow-none";
 const CONTROL_ERROR = "!border-danger-line";
 
 export type TextInputProps = InputHTMLAttributes<HTMLInputElement> & { readonly invalid?: boolean; readonly loading?: boolean };
@@ -86,7 +88,7 @@ export function Select({ invalid, className, children, ...rest }: SelectHTMLAttr
 }
 
 export function Textarea({ invalid, className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { readonly invalid?: boolean }) {
-  return <textarea {...rest} aria-invalid={invalid || undefined} className={cx(CONTROL, "min-h-24 py-2.5 leading-relaxed", invalid && CONTROL_ERROR, className)} />;
+  return <textarea {...rest} aria-invalid={invalid || undefined} className={cx(CONTROL, "min-h-24 py-2.5 leading-relaxed jr:leading-[1.7]", invalid && CONTROL_ERROR, className)} />;
 }
 
 /** Search field with a leading icon. */

@@ -68,22 +68,30 @@ export function StatusPill({
 
 type Variant = "primary" | "secondary" | "quiet" | "danger";
 
+// `jr:` is the journal-paper trial (see `.jr` in globals.css): the label wraps inside the frame instead of overflowing,
+// the pressed state is a darker fill and a 1px shift (no scale), and nothing casts a shadow.
 const BUTTON_BASE =
-  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl text-body font-medium touch-manipulation transition-[background-color,border-color,transform,box-shadow] duration-[var(--dur-fast)] ease-[var(--ease)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:active:scale-100 disabled:cursor-not-allowed disabled:active:scale-100";
+  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl text-body font-medium touch-manipulation transition-[background-color,border-color,transform,box-shadow] duration-[var(--dur-fast)] ease-[var(--ease)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:active:scale-100 disabled:cursor-not-allowed disabled:active:scale-100 " +
+  "jr:max-w-full jr:whitespace-normal jr:py-2 jr:text-center jr:leading-snug jr:[text-wrap:balance] jr:[word-break:auto-phrase] jr:active:scale-100 jr:act:translate-y-px jr:shadow-none";
 
 const BUTTON_VARIANT: Readonly<Record<Variant, string>> = {
   primary:
-    "bg-accent text-accent-fg font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.16)] hov:bg-accent-hover disabled:shadow-none disabled:bg-sunken disabled:text-fg-mute aria-disabled:shadow-none aria-disabled:bg-sunken aria-disabled:text-fg-mute",
+    "bg-accent text-accent-fg font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.16)] hov:bg-accent-hover disabled:shadow-none disabled:bg-sunken disabled:text-fg-mute aria-disabled:shadow-none aria-disabled:bg-sunken aria-disabled:text-fg-mute " +
+    "jr:border jr:border-transparent jr:act:bg-[color-mix(in_srgb,var(--accent-hover)_82%,#000)] jr:disabled:border-line jr:aria-disabled:border-line",
   secondary:
-    "border border-line-strong bg-surface text-fg shadow-[0_1px_1px_var(--sh-drop)] hov:bg-sunken disabled:text-fg-mute disabled:bg-sunken aria-disabled:text-fg-mute aria-disabled:bg-sunken",
-  quiet: "text-accent hov:bg-accent-soft disabled:text-fg-mute aria-disabled:text-fg-mute",
+    "border border-line-strong bg-surface text-fg shadow-[0_1px_1px_var(--sh-drop)] hov:bg-sunken disabled:text-fg-mute disabled:bg-sunken aria-disabled:text-fg-mute aria-disabled:bg-sunken " +
+    "jr:hov:border-fg jr:act:border-fg jr:act:bg-sunken jr:disabled:border-line jr:aria-disabled:border-line",
+  quiet:
+    "text-accent hov:bg-accent-soft disabled:text-fg-mute aria-disabled:text-fg-mute " +
+    "jr:border jr:border-transparent jr:hov:underline jr:act:bg-accent-soft",
   danger:
-    "border border-danger-line bg-danger-bg text-danger-fg hov:brightness-95 disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:bg-sunken aria-disabled:text-fg-mute",
+    "border border-danger-line bg-danger-bg text-danger-fg hov:brightness-95 disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:bg-sunken aria-disabled:text-fg-mute " +
+    "jr:act:brightness-90",
 };
 
 const BUTTON_SIZE = {
-  md: "min-h-11 px-4 field:min-h-14 field:px-5 field:text-[1.125rem]",
-  sm: "min-h-11 px-3 field:min-h-14",
+  md: "min-h-11 px-4 field:min-h-14 field:px-5 field:text-[1.125rem] jr:min-w-28",
+  sm: "min-h-11 px-3 field:min-h-14 jr:min-w-20",
   icon: "min-h-11 min-w-11 field:min-h-14 field:min-w-14",
 } as const;
 
@@ -130,7 +138,7 @@ export function Button({ variant = "secondary", size = "md", icon, loading, clas
       onClick={loading ? (e) => e.preventDefault() : onClick}
       className={buttonClass(variant, size, className)}
     >
-      {loading ? <Spinner size={16} /> : icon ? <Icon name={icon} size={18} /> : null}
+      {loading ? <Spinner size={16} /> : icon ? <Icon name={icon} size={18} className="shrink-0" /> : null}
       {children}
     </button>
   );

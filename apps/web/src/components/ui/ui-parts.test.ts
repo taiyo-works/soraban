@@ -38,6 +38,28 @@ describe("ボタン", () => {
     expect(out).toContain('data-testid="b"');
     expect(out).toContain('type="button"');
   });
+  it("航空日誌の紙面（jr）では、ラベルが枠の中で折り返し、最小の幅を持ち、ピル型・影・拡大を使わない", () => {
+    for (const size of ["md", "sm"] as const) {
+      const cls = html(h(Button, { size }, "長いラベル")).match(/class="([^"]*)"/)![1]!.split(/\s+/);
+      expect(cls, size).toEqual(expect.arrayContaining(["jr:whitespace-normal", "jr:max-w-full", "jr:[text-wrap:balance]", "jr:shadow-none", "jr:active:scale-100"]));
+      expect(cls.some((c) => c.startsWith("jr:min-w-")), size).toBe(true);
+      expect(cls, size).not.toContain("rounded-pill");
+    }
+    // the icon-only size is not stretched to the label minimum
+    expect(html(h(Button, { size: "icon" }, "x"))).not.toContain("jr:min-w-");
+  });
+});
+
+describe("入力欄", () => {
+  it("航空日誌の紙面（jr）では内側の影と発光する枠を使わず、ピル型にしない。ラベルは欄の前にある", () => {
+    const out = html(h(FormField, { id: "f", label: "機体の登録記号", required: true, error: "形式が違います" }, h(TextInput, { id: "f", invalid: true })));
+    expect(out.indexOf("機体の登録記号")).toBeLessThan(out.indexOf("<input"));
+    const input = out.match(/<input[^>]*class="([^"]*)"/)![1]!;
+    expect(input).toContain("jr:shadow-none");
+    expect(input).toContain("jr:foc:shadow-none");
+    expect(input).not.toContain("rounded-pill");
+    expect(input).toContain("rounded-ctl");
+  });
 });
 
 describe("注意バー・折りたたみ・空の状態", () => {

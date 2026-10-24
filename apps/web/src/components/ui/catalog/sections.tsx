@@ -232,36 +232,10 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
 
   return (
     <div className="flex flex-col gap-10">
-      <Sub title="ボタン" note="既定・ホバー・フォーカス・無効・読み込み中（ホバーとフォーカスは固定表示）。">
-        <div className="flex flex-col gap-4 rounded-card bg-surface p-4 shadow-card">
-          {(["primary", "secondary", "quiet", "danger"] as const).map((v) => (
-            <div key={v} className="flex flex-wrap items-end gap-4" data-testid={`buttons-${v}`}>
-              <State label={`${v}：既定`}><Button variant={v}>保存</Button></State>
-              <State label="ホバー"><Button variant={v} data-force="hover">保存</Button></State>
-              <State label="フォーカス"><Button variant={v} data-force="focus">保存</Button></State>
-              <State label="無効"><Button variant={v} disabled>保存</Button></State>
-              <State label="読み込み中"><Button variant={v} loading>保存</Button></State>
-              <State label="アイコン付き"><Button variant={v} icon="plus">追加</Button></State>
-            </div>
-          ))}
-        </div>
-      </Sub>
+      <JournalControls />
 
-      <Sub title="フォーム部品" note="既定・ホバー・フォーカス・無効・エラー・読み込み中。入力欄は 16px 以上、境界は 3:1 以上。">
+      <Sub title="選択部品（チェック・ラジオ・トグル）" note="従来の見た目のまま（航空日誌の紙面は、ボタンと入力欄の試作のみ）。">
         <div className="grid gap-4 rounded-card bg-surface p-4 shadow-card sm:grid-cols-2 lg:grid-cols-3">
-          <State label="既定"><div className="w-full"><TextInput aria-label="既定" placeholder="入力してください" /></div></State>
-          <State label="ホバー"><div className="w-full"><TextInput aria-label="ホバー" data-force="hover" placeholder="入力してください" /></div></State>
-          <State label="フォーカス"><div className="w-full"><TextInput aria-label="フォーカス" data-force="focus" defaultValue="入力中" /></div></State>
-          <State label="無効"><div className="w-full"><TextInput aria-label="無効" disabled defaultValue="変更できません" /></div></State>
-          <State label="読み込み中"><div className="w-full"><TextInput aria-label="読み込み中" loading defaultValue="確認しています" /></div></State>
-          <div className="w-full">
-            <FormField id="demo-err" label="名称" required error="名称を入力してください">
-              <TextInput id="demo-err" invalid aria-describedby={describedBy("demo-err", { error: true })} />
-            </FormField>
-          </div>
-          <State label="選択"><div className="w-full"><Select aria-label="選択"><option>標準</option><option>コンパクト</option></Select></div></State>
-          <State label="検索"><div className="w-full"><SearchInput aria-label="検索" placeholder="検索" /></div></State>
-          <State label="複数行"><div className="w-full"><Textarea aria-label="複数行" placeholder="メモ" /></div></State>
           <State label="チェック"><div className="flex flex-col"><Checkbox label="既定" /><Checkbox label="選択済み" defaultChecked /><Checkbox label="無効" disabled /></div></State>
           <State label="ラジオ"><div className="flex flex-col"><Radio name="r-demo" label="一つ目" defaultChecked /><Radio name="r-demo" label="二つ目" /><Radio name="r-demo" label="無効" disabled /></div></State>
           <State label="トグル（スイッチ）">
@@ -272,7 +246,6 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
             </div>
           </State>
         </div>
-        <ErrorSummary errors={[{ id: "demo-err", message: "名称を入力してください" }]} />
       </Sub>
 
       <Sub title="状態のピル・注意バー" note="5 つの意味は、アイコン（形）＋文言＋色で示します。">
@@ -389,6 +362,150 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
         </Dialog>
         <ReasonDialog open={dialog === "reason"} onClose={() => setDialog(null)} title="記録を取り消す（見本）" confirmLabel="取り消す" onConfirm={(r) => { setLastReason(r); setDialog(null); toast.show("取り消しました（見本）", "warn"); }} />
       </Sub>
+    </div>
+  );
+}
+
+// ── 航空日誌の紙面（試作）：ボタンと入力欄 ───────────────────────────────────
+
+const JOURNAL_BUTTONS = [
+  { variant: "primary", name: "主", label: "飛行計画を保存", busy: "保存中" },
+  { variant: "secondary", name: "副", label: "下書きに戻す", busy: "戻し中" },
+  { variant: "quiet", name: "控えめ", label: "あとで確認する", busy: "確認中" },
+  { variant: "danger", name: "取り消し", label: "記録を取り消す", busy: "取消中" },
+] as const;
+
+/**
+ * Trial of the "journal paper" direction for buttons and entry fields only. `.jr` scopes the paper colours, the single
+ * corner radius and the no-shadow rule (globals.css); the parts carry `jr:` classes that do nothing outside it.
+ * Everything else in the catalog keeps the previous look until this is approved.
+ */
+function JournalControls() {
+  return (
+    <div id="journal" className="scroll-mt-16" data-testid="journal-controls">
+      <div className="jr flex flex-col gap-8 rounded-card border border-line p-4 sm:p-6 [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-8">
+        <div className="flex flex-col gap-1.5">
+          <h3 className="text-h3 font-semibold text-fg">ボタンと入力欄（航空日誌の紙面・試作）</h3>
+          <p className="text-table leading-[1.7] text-fg-soft">
+            紙色の地に墨色の文字、アクセントは藍 1 色です。角丸は 1 種類、影と半透明はありません。この枠の中だけが新しい方針で、配色案の切り替えには従わず、現場モードでは現場用の色（7:1）に切り替わります。
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-5" data-testid="journal-buttons">
+          <div className="flex flex-col gap-0.5">
+            <h4 className="text-body font-semibold text-fg">ボタン</h4>
+            <p className="text-aux leading-[1.7] text-fg-mute">通常・ホバー・フォーカス・押下・無効・読み込み中。ホバー・フォーカス・押下は固定表示です。</p>
+          </div>
+          {JOURNAL_BUTTONS.map((b) => (
+            <div key={b.variant} className="grid grid-cols-2 gap-x-4 gap-y-4 field:max-sm:grid-cols-1 sm:grid-cols-3 lg:grid-cols-6" data-testid={`journal-buttons-${b.variant}`}>
+              <State label={`${b.name}：通常`}><Button variant={b.variant}>{b.label}</Button></State>
+              <State label="ホバー"><Button variant={b.variant} data-force="hover">{b.label}</Button></State>
+              <State label="フォーカス"><Button variant={b.variant} data-force="focus">{b.label}</Button></State>
+              <State label="押下"><Button variant={b.variant} data-force="active">{b.label}</Button></State>
+              <State label="無効"><Button variant={b.variant} disabled>{b.label}</Button></State>
+              <State label="読み込み中"><Button variant={b.variant} loading>{b.busy}</Button></State>
+            </div>
+          ))}
+          <div className="flex flex-col gap-3">
+            <p className="text-aux leading-[1.7] text-fg-mute">長い文言：幅に合わせて伸び、収まらなければ枠の中で折り返します（文字は枠から出ません）。</p>
+            <div className="flex flex-wrap items-start gap-3" data-testid="journal-buttons-long">
+              <Button variant="primary" icon="check-circle">日常点検の記録を確認して、運航管理者へ提出する</Button>
+              <div className="w-48"><Button variant="secondary" className="w-full">飛行前の確認項目をすべて見直してから、もう一度送信する</Button></div>
+              <Button variant="danger" icon="ban">確定した記録を取り消す</Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-5" data-testid="journal-fields">
+          <div className="flex flex-col gap-0.5">
+            <h4 className="text-body font-semibold text-fg">入力欄</h4>
+            <p className="text-aux leading-[1.7] text-fg-mute">ラベルは常に欄の上に出します。時刻・座標・飛行時間は等幅の数字です。</p>
+          </div>
+          <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            <State label="通常">
+              <div className="w-full">
+                <FormField id="jr-reg" label="機体の登録記号" hint="機体に貼ってあるラベルの記号を入力します。">
+                  <TextInput id="jr-reg" aria-describedby={describedBy("jr-reg", { hint: true })} placeholder="JU から始まる 12 文字" />
+                </FormField>
+              </div>
+            </State>
+            <State label="ホバー">
+              <div className="w-full">
+                <FormField id="jr-pilot" label="操縦者の氏名">
+                  <TextInput id="jr-pilot" data-force="hover" placeholder="例：米子 太郎" />
+                </FormField>
+              </div>
+            </State>
+            <State label="フォーカス">
+              <div className="w-full">
+                <FormField id="jr-place" label="離陸地点の名称">
+                  <TextInput id="jr-place" data-force="focus" defaultValue="弓ヶ浜公園 河川敷" />
+                </FormField>
+              </div>
+            </State>
+            <State label="無効">
+              <div className="w-full">
+                <FormField id="jr-no" label="確定した記録の番号" hint="確定した記録は書き換えられません。訂正は新しい版として追記します。">
+                  <TextInput id="jr-no" disabled defaultValue="R-2026-0412" className="tabular-nums" aria-describedby={describedBy("jr-no", { hint: true })} />
+                </FormField>
+              </div>
+            </State>
+            <State label="読み込み中">
+              <div className="w-full">
+                <FormField id="jr-addr" label="離陸地点の住所" hint="座標から住所を調べています。">
+                  <TextInput id="jr-addr" loading defaultValue="35.4821, 133.3190" className="tabular-nums" aria-describedby={describedBy("jr-addr", { hint: true })} />
+                </FormField>
+              </div>
+            </State>
+            <State label="エラー">
+              <div className="w-full">
+                <FormField id="demo-err" label="機体の登録記号" required error="登録記号の形式が違います。機体のラベルを見て、英数字 12 文字で入力してください。">
+                  <TextInput id="demo-err" invalid defaultValue="JU12-34" aria-describedby={describedBy("demo-err", { error: true })} />
+                </FormField>
+              </div>
+            </State>
+            <State label="数字（等幅・右寄せ）">
+              <div className="w-full">
+                <FormField id="jr-min" label="飛行時間" hint="離陸から着陸までの時間です。">
+                  <div className="flex items-center gap-2">
+                    <div className="w-28"><TextInput id="jr-min" inputMode="numeric" defaultValue="25" className="text-right tabular-nums" aria-describedby={describedBy("jr-min", { hint: true })} /></div>
+                    <span className="text-body text-fg-soft">分</span>
+                  </div>
+                </FormField>
+              </div>
+            </State>
+            <State label="数字（座標）">
+              <div className="w-full">
+                <FormField id="jr-lat" label="離陸地点の緯度" optional>
+                  <TextInput id="jr-lat" inputMode="decimal" defaultValue="35.482100" className="tabular-nums" />
+                </FormField>
+              </div>
+            </State>
+            <State label="選択">
+              <div className="w-full">
+                <FormField id="jr-kind" label="飛行の区分">
+                  <Select id="jr-kind"><option>訓練</option><option>業務</option><option>点検</option></Select>
+                </FormField>
+              </div>
+            </State>
+            <State label="検索">
+              <div className="w-full">
+                <FormField id="jr-find" label="計画を探す">
+                  <SearchInput id="jr-find" placeholder="地点名・機体名" />
+                </FormField>
+              </div>
+            </State>
+            <State label="複数行">
+              <div className="w-full sm:col-span-2 lg:col-span-1">
+                <FormField id="jr-memo" label="気づいたこと" optional>
+                  <Textarea id="jr-memo" placeholder="風の強さや、周りの様子を書き留めます。" />
+                </FormField>
+              </div>
+            </State>
+          </div>
+          <ErrorSummary errors={[{ id: "demo-err", message: "登録記号の形式が違います" }]} />
+        </div>
+      </div>
     </div>
   );
 }
