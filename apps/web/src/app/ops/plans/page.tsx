@@ -151,7 +151,7 @@ export default async function PlanListPage({
                 <div className="border-t border-rule bg-paper-soft/60" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
-                    <p className="px-3 pb-2.5 pl-[3.75rem] text-xs text-ink-mute" data-testid="plan-row-next-count">
+                    <p className="px-3 pb-2.5 pl-[2.625rem] text-xs text-ink-mute" data-testid="plan-row-next-count">
                       ほか {p.nextActionCount - 1} 件（詳細で確認できます）
                     </p>
                   ) : null}

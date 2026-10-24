@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { MismatchBadges } from "@/components/ops/journal-ui";
-import { Note } from "@/components/ops/ui";
 import { cx } from "@/components/ui/cx";
 import { Icon } from "@/components/ui/icons";
-import { buttonClass, PageHeader, StatusPill } from "@/components/ui/primitives";
+import { buttonClass, NoticeBar, PageHeader, StatusPill } from "@/components/ui/primitives";
 import { INSPECTION_TIMING_LABELS } from "@/lib/ops-records";
 import { formatHm, jstDate } from "@/lib/ops-time";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
@@ -87,8 +86,12 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           ) : null}
         </div>
       ) : null}
-      {denied ? <Note>{denied}</Note> : null}
-      <nav aria-label="表示する記録" className="flex flex-wrap gap-2" data-testid="journal-tabs">
+      {denied ? (
+        <NoticeBar meaning="neutral" icon="info">
+          {denied}
+        </NoticeBar>
+      ) : null}
+      <nav aria-label="表示する記録" className="grid grid-cols-2 gap-1 rounded-ctl bg-sunken p-1 sm:inline-flex sm:self-start" data-testid="journal-tabs">
         {TABS.map(([key, label, href]) => {
           const active = tab === key;
           return (
@@ -99,8 +102,8 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
               aria-current={active ? "page" : undefined}
               data-testid={`journal-tab-${key}`}
               className={cx(
-                "inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-colors duration-[var(--dur)]",
-                active ? "border-accent bg-surface font-semibold text-accent" : "border-line-strong text-fg-soft hov:bg-sunken",
+                "inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-colors duration-[var(--dur)]",
+                active ? "border-line-strong bg-surface font-semibold text-accent" : "border-transparent text-fg-soft hov:bg-surface hov:text-fg",
               )}
             >
               {active ? <Icon name="check" size={14} /> : null}

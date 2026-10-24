@@ -28,7 +28,7 @@ export type OpsNavUser = {
   readonly provider: "neon" | "test";
 };
 
-const LINK_BASE = "flex min-h-11 w-full items-center gap-3 rounded-ctl px-3 text-table touch-manipulation transition-colors duration-[var(--dur)]";
+const LINK_BASE = "flex min-h-11 w-full items-center rounded-ctl text-table touch-manipulation transition-colors duration-[var(--dur)]";
 
 function SideLink({
   href,
@@ -55,9 +55,9 @@ function SideLink({
       data-testid={testId}
       data-active={active ? "true" : "false"}
       {...(ancestor ? { "data-ancestor": "true" } : {})}
-      className={cx(LINK_BASE, sub && "pl-9", active ? "bg-accent-soft font-semibold text-accent" : ancestor ? "font-semibold text-fg hov:bg-sunken" : "text-fg-soft hov:bg-sunken hov:text-fg")}
+      className={cx(LINK_BASE, sub ? "gap-2.5 px-2.5" : "gap-3 px-3", active ? "bg-accent-soft font-semibold text-accent" : ancestor ? "font-semibold text-fg hov:bg-sunken" : "text-fg-soft hov:bg-sunken hov:text-fg")}
     >
-      <Icon name={icon} size={18} />
+      <Icon name={icon} size={sub ? 16 : 18} className={cx("shrink-0", !active && "text-fg-mute")} />
       <span className="min-w-0">{label}</span>
     </Link>
   );
@@ -79,18 +79,23 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
         <span className="text-h2 font-semibold leading-tight text-fg">そらばん</span>
         <span className="text-aux text-fg-mute">運航管理</span>
       </Link>
+      {/* 見出し（調べる・飛ばす）は項目の左端（アイコンの左）にそろえ、グループの間は余白で切る。登録（と子項目）の前だけ罫を 1 本引く */}
       {NAV_GROUPS.map((g) => (
-        <div key={g.keys.join("-")} className="flex flex-col gap-0.5">
-          {g.heading ? <p className="px-3 pb-1 pt-4 text-aux text-fg-mute">{g.heading}</p> : g.keys[0] === "more" ? <div className="pt-3" /> : null}
+        <div key={g.keys.join("-")} className={cx("flex flex-col gap-0.5", g.keys[0] === "more" ? "mt-3 border-t border-line pt-3" : g.heading ? "mt-3" : "")}>
+          {g.heading ? <p className="px-3 pb-1 text-aux font-medium text-fg-mute">{g.heading}</p> : null}
           {g.keys.map((k) => {
             const item = NAV_ITEM[k];
             const hasChild = k === "more" && child !== null;
             return (
               <div key={k} className="flex flex-col gap-0.5">
                 <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
-                {k === "more"
-                  ? visibleNavChildren(role).map((c) => <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />)
-                  : null}
+                {k === "more" ? (
+                  <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-line pl-1.5">
+                    {visibleNavChildren(role).map((c) => (
+                      <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             );
           })}

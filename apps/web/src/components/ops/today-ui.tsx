@@ -51,16 +51,18 @@ export function TodayStatus({ badge }: { readonly badge: TodayBadgeDto }) {
 /** 運航票の 1 行（項目名＋値）。 */
 function Fact({ label, children }: { readonly label: string; readonly children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-x-3 py-2">
+    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1">
       <dt className="text-aux text-fg-mute">{label}</dt>
-      <dd className="min-w-0 break-words text-table text-fg">{children}</dd>
+      <dd className="min-w-0 text-table text-fg [text-wrap:pretty]">{children}</dd>
     </div>
   );
 }
 
 /**
  * 今日（なければ次）の飛行の大きなカード 1 枚。主ボタンは 1 つだけ（当日は「現場モードを開く」）。
- * 読む順は、時刻と名称 → 行程の 1 行 → 判定の段階・通報・確認 → 機体・操縦者。
+ * 読む順：時刻と名称 → 機体・操縦者（何を・誰が） → 行程の 1 行（どこまで進んだか） → 判定・通報・確認（その中身） → 主ボタン。
+ * 行程の 1 行と 3 つの行は同じ「判定・確認・通報」を指すが、行程は進み具合（済／次／未）、行は中身（判定の段階・通報の要否と状況・確認の状態の文言）を
+ * 担う。機体・操縦者は行程にない情報なので、行から外して名称の下に置いた（5 行を 3 行にし、罫線も減らした）。
  */
 export function TodayCard({ card }: { readonly card: TodayCardDto }) {
   return (
@@ -80,20 +82,34 @@ export function TodayCard({ card }: { readonly card: TodayCardDto }) {
         <TodayStatus badge={card.badge} />
       </div>
       <div className="flex flex-col gap-1">
-        <p className="text-stat font-semibold leading-none tabular-nums text-fg" data-testid="today-card-time">
-          {card.timeLabel}
-        </p>
-        <p className="text-table tabular-nums text-fg-mute" data-testid="today-card-date">
-          {card.plannedDate}
-        </p>
-        <h2 className="mt-1 text-h2 font-semibold text-fg" data-testid="today-card-title">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <p className="text-stat font-semibold leading-none tabular-nums text-fg" data-testid="today-card-time">
+            {card.timeLabel}
+          </p>
+          <p className="text-table tabular-nums text-fg-mute" data-testid="today-card-date">
+            {card.plannedDate}
+          </p>
+        </div>
+        <h2 className="mt-1.5 text-h2 font-semibold text-fg [text-wrap:balance]" data-testid="today-card-title">
           {card.title}
         </h2>
+        <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-table text-fg-soft">
+          <span>
+            <span className="text-aux text-fg-mute">機体 </span>
+            <span data-testid="today-card-aircraft">
+              <span className="tabular-nums">{card.registrationMark}</span>（{card.modelName}）
+            </span>
+          </span>
+          <span>
+            <span className="text-aux text-fg-mute">操縦者 </span>
+            <span data-testid="today-card-pilot">{card.pilotName}</span>
+          </span>
+        </p>
       </div>
       <JourneyLine stages={card.journey} />
-      <dl className="flex flex-col divide-y divide-line border-y border-line">
+      <dl className="flex flex-col border-t border-line pt-2">
         <Fact label="判定の段階">
-          <span className="font-medium" data-testid="today-card-verdict">
+          <span className="font-semibold" data-testid="today-card-verdict">
             {card.verdictLabel}
             {card.judgementStale ? "（判定が古い）" : ""}
           </span>
@@ -106,14 +122,6 @@ export function TodayCard({ card }: { readonly card: TodayCardDto }) {
         </Fact>
         <Fact label="確認の状況">
           <span data-testid="today-card-confirmation">{card.confirmation.label}</span>
-        </Fact>
-        <Fact label="機体">
-          <span data-testid="today-card-aircraft">
-            <span className="tabular-nums">{card.registrationMark}</span>（{card.modelName}）
-          </span>
-        </Fact>
-        <Fact label="操縦者">
-          <span data-testid="today-card-pilot">{card.pilotName}</span>
         </Fact>
       </dl>
       <a href={card.primary.href} className={buttonClass("primary", "md", "min-h-14 w-full sm:w-auto sm:self-start")} data-testid="today-card-primary" data-kind={card.primary.kind}>
@@ -180,7 +188,7 @@ export function TodayNextActions({
       {heading ? <SectionTitle aside={total ? <span className="text-table tabular-nums text-fg-mute">{total} 件</span> : undefined}>次にやること</SectionTitle> : null}
       {actions.length === 0 ? (
         <p className="flex items-center gap-2 border-y border-line py-4 text-table text-fg-soft" data-testid="today-next-actions-empty">
-          <Icon name="check-circle" size={18} className="text-fg-mute" />
+          <Icon name="check-circle" size={18} className="shrink-0 text-fg-mute" />
           いま、やることはありません。
         </p>
       ) : (
@@ -188,11 +196,11 @@ export function TodayNextActions({
           {actions.map((a, i) => (
             <li key={`${a.id}-${a.planId ?? ""}-${i}`} data-testid="today-next-action" data-action-id={a.id} data-tier={String(a.tier)} data-plan-id={a.planId ?? ""}>
               {a.planTitle ? (
-                <p className="border-l-4 border-transparent px-3 pt-3 text-aux text-fg-soft" data-testid="today-next-action-plan">
+                <p className="pt-3 text-aux text-fg-mute" data-testid="today-next-action-plan">
                   {a.planTitle}
                 </p>
               ) : null}
-              <NextActionItem action={a} testId="today-next-action" tall />
+              <NextActionItem action={a} testId="today-next-action" tall flush />
             </li>
           ))}
         </ul>
@@ -229,9 +237,13 @@ export function TodayDeadlines({ deadlines }: { readonly deadlines: readonly Dea
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-0.5">
                   <span className="text-table tabular-nums text-fg">{d.date}</span>
-                  <StatusPill meaning={d.overdue ? "danger" : d.daysLeft <= 30 ? "warn" : "neutral"} icon={d.overdue ? "alert" : "clock"}>
-                    {d.leftLabel}
-                  </StatusPill>
+                  {d.overdue || d.daysLeft <= 30 ? (
+                    <StatusPill meaning={d.overdue ? "danger" : "warn"} icon={d.overdue ? "alert" : "clock"}>
+                      {d.leftLabel}
+                    </StatusPill>
+                  ) : (
+                    <span className="text-aux text-fg-mute">{d.leftLabel}</span>
+                  )}
                 </span>
               </a>
             </li>

@@ -31,8 +31,9 @@ export default async function OpsHome() {
             {today.today}
           </span>
         </div>
-        {canPlan ? (
-          <Link href="/ops/plans/new" prefetch={false} className={buttonClass("primary", "md", "min-h-11")} data-testid="ops-enter-plan">
+        {/* 予定のない日は、先頭のカードに「飛行計画を作る」がある。同じ画面に同じ操作を 2 つ置かない */}
+        {canPlan && today.card ? (
+          <Link href="/ops/plans/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-plan">
             <Icon name="plus" size={18} />
             飛行計画を作る
           </Link>
@@ -66,7 +67,7 @@ export default async function OpsHome() {
           </div>
         </nav>
       ) : null}
-      <NoticeBar meaning="info" data-testid="today-disclaimer">
+      <NoticeBar meaning="neutral" icon="info" data-testid="today-disclaimer">
         {PLAN_JUDGEMENT_DISCLAIMER}そらばんは DIPS に送信しません。
       </NoticeBar>
     </main>

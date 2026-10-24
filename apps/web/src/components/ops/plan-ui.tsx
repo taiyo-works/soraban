@@ -7,6 +7,8 @@ import type { DeadlineState, NextAction } from "@/server/ops/report-logic";
 import { VERDICT_LABEL, unknownCountLabel } from "@/lib/verdict-display";
 import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
 import { VerdictMark } from "../verdict-mark";
+import { cx } from "@/components/ui/cx";
+import { Icon, type IconName } from "@/components/ui/icons";
 import { type Tone } from "./ui";
 
 // 飛行計画の画面で共通に使う小さな部品（サーバー・クライアントのどちらからも使える）。
@@ -276,42 +278,81 @@ export function ReportStatusBadge({ status, bare }: { readonly status: Pick<Repo
   );
 }
 
-const TIER_TONE: Readonly<Record<number, Tone>> = { 1: "red", 2: "amber", 3: "brand", 4: "neutral", 5: "mute" };
-const TIER_GLYPH: Readonly<Record<number, string>> = { 1: "!!", 2: "!", 3: "●", 4: "○", 5: "－" };
+// 次にやること：段（最優先〜推奨）は「印＋段の名前」で示す。色を使うのは最優先（危険）と期限超過（注意）の 2 段だけで、
+// 札・左の太い線・行の塗りは使わない。残りの段は墨色の印と補助の文字（色がなくても段の名前で区別できる）。
+const TIER_MARK: Readonly<Record<number, { readonly icon: IconName; readonly tone: string; readonly text: string }>> = {
+  1: { icon: "alert", tone: "text-danger-fg", text: "text-danger-fg font-semibold" },
+  2: { icon: "clock", tone: "text-warn-fg", text: "text-warn-fg font-semibold" },
+  3: { icon: "dot", tone: "text-fg-soft", text: "text-fg-mute" },
+  4: { icon: "info", tone: "text-fg-mute", text: "text-fg-mute" },
+  5: { icon: "chevron-right", tone: "text-fg-mute", text: "text-fg-mute" },
+};
 const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限超過", 3: "未了", 4: "確認・変更", 5: "推奨" };
 
-/** 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。 */
-export function NextActionItem({ action, testId = "next-action", tall = false }: { readonly action: NextAction; readonly testId?: string; /** 屋外で押しやすい高さ（56px）にする（ホーム）。 */ readonly tall?: boolean }) {
-  const tone = TIER_TONE[action.tier] ?? "neutral";
-  // 段の区別は「記号の札＋段の名前」で伝える（色は札の枠・背景と左の線に添えるだけ）。記号の字は常に ink。
+/** 日付（2027-01-05）がハイフンの位置で折り返されないよう、日付だけ 1 かたまりにする（文字は変えない）。 */
+function KeepDates({ text }: { readonly text: string }) {
+  return (
+    <>
+      {text.split(/(\d{4}-\d{2}-\d{2})/).map((part, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className="whitespace-nowrap">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/**
+ * 次にやることの 1 行（動詞で始まる）。押すと該当の画面へ移る。canAct が偽なら、押せないことを文で示す。
+ * flush：左右の余白を取らない（ホームの一覧。ほかの一覧と文字の左端をそろえる）。
+ */
+export function NextActionItem({
+  action,
+  testId = "next-action",
+  tall = false,
+  flush = false,
+}: {
+  readonly action: NextAction;
+  readonly testId?: string;
+  /** 屋外で押しやすい高さ（56px）にする（ホーム）。 */
+  readonly tall?: boolean;
+  readonly flush?: boolean;
+}) {
+  const mark = TIER_MARK[action.tier] ?? TIER_MARK[5]!;
   const body = (
     <>
-      <span
-        aria-hidden
-        className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[tone]}`}
-      >
-        {TIER_GLYPH[action.tier]}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-sm font-medium leading-snug text-ink" data-testid={`${testId}-label`}>{action.label}</span>
-          <span className="rounded-sharp border border-rule px-1.5 text-[11px] leading-5 text-ink-soft">{TIER_TEXT[action.tier]}</span>
+      <Icon name={mark.icon} size={18} className={cx("mt-1 shrink-0", mark.tone)} />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="text-body font-medium leading-snug text-fg" data-testid={`${testId}-label`}>
+            {action.label}
+          </span>
+          <span className={cx("whitespace-nowrap text-aux", mark.text)}>{TIER_TEXT[action.tier]}</span>
         </span>
-        <span className="text-xs leading-relaxed text-ink-soft">{action.reason}</span>
-        {action.dueLabel ? <span className="text-xs leading-relaxed text-ink" data-testid={`${testId}-due`}>{action.dueLabel}</span> : null}
+        <span className="text-table text-fg-soft [text-wrap:pretty]">
+          <KeepDates text={action.reason} />
+        </span>
+        {action.dueLabel ? (
+          <span className="text-table text-fg [text-wrap:pretty]" data-testid={`${testId}-due`}>
+            <KeepDates text={action.dueLabel} />
+          </span>
+        ) : null}
         {!action.canAct ? (
-          <span className="text-xs leading-relaxed text-ink-mute" data-testid={`${testId}-cannot`}>
+          <span className="text-table text-fg-mute" data-testid={`${testId}-cannot`}>
             {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
           </span>
         ) : null}
       </span>
-      {action.canAct ? <span aria-hidden className="self-center pl-1 text-ink-mute">→</span> : null}
+      {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-fg-mute" /> : null}
     </>
   );
-  const bar = tone === "red" ? "border-l-signal-red bg-signal-red-soft/40" : tone === "amber" ? "border-l-signal-amber" : tone === "brand" ? "border-l-brand-700" : "border-l-rule";
-  const box = `flex ${tall ? "min-h-14" : "min-h-11"} items-start gap-3 border-l-4 px-3 py-3 ${bar}`;
+  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-11", flush ? "" : "px-3");
   return action.canAct ? (
-    <a href={action.href} className={`${box} hover:bg-paper-soft`} data-testid={`${testId}-link`} data-action-id={action.id}>
+    <a href={action.href} className={cx(box, "hov:bg-accent-soft")} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}
     </a>
   ) : (

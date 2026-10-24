@@ -8,11 +8,11 @@ import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
 import { flushOutbox, planIdsWithOutbox, unsavedUnsentCountForMember } from "./field-outbox";
 import { flushIncidentOutbox, incidentUnsentTotalForMember, planIdsWithIncidentOutbox } from "./incident-outbox";
 import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
+import { Icon } from "@/components/ui/icons";
+import { buttonClass as dsButtonClass } from "@/components/ui/primitives";
 import {
   buttonDangerClass,
-  buttonFieldClass,
   buttonGhostClass,
-  buttonOutlineBrandClass,
   buttonPrimaryClass,
   MEMBER_INVITE_NOTICE_TARGET,
   memberNoticeTarget,
@@ -920,43 +920,33 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     await signOut();
   };
 
+  // 紙面の部品（ui/primitives）で描く。3 択は安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く。
+  // 警告の面は注意の色 1 つ。左の太い線・二重の枠・「！」の文字は使わない（印はアイコン、意味は文）。
   return (
     <div className="flex flex-col gap-3">
-      <button type="button" className={subtleButtonClass} onClick={onClick} disabled={busy} data-testid="signout">
+      <button type="button" className={dsButtonClass("secondary", "md", "w-full")} onClick={onClick} disabled={busy} data-testid="signout">
+        <Icon name="sign-out" size={18} />
         ログアウト
       </button>
       {warning ? (
-        <div role="alert" className="flex flex-col gap-4 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft px-4 py-4 text-base text-ink" data-testid="signout-warning">
-          <p className="flex gap-2 font-medium leading-relaxed">
-            <span aria-hidden className="font-bold">！</span>
-            <span>
+        <div role="alert" className="flex flex-col gap-3 rounded-ctl border border-warn-line bg-warn-bg p-3 text-table text-warn-fg" data-testid="signout-warning">
+          <p className="flex items-start gap-2 font-medium [text-wrap:pretty]">
+            <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
+            <span className="min-w-0">
               {warning}
               {sendFailed ? "。送れませんでした。通信を確かめてください。" : ""}
             </span>
           </p>
-          {/* 3 択：安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く */}
-          <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              className={`${buttonFieldClass} w-full !text-base`}
-              onClick={() => void sendThenSignOut()}
-              disabled={busy}
-              data-testid="signout-send"
-            >
+          <div className="flex flex-col gap-2">
+            <button type="button" className={dsButtonClass("primary", "md", "min-h-14 w-full")} onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
               送ってからログアウト
             </button>
-            <button type="button" className={`${buttonOutlineBrandClass.replace("min-h-11", "min-h-14")} w-full !text-base`} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
+            <button type="button" className={dsButtonClass("secondary", "md", "min-h-14 w-full")} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
               やめる
             </button>
-            <button
-              type="button"
-              className="mt-2 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp border-2 border-dashed border-signal-red bg-paper px-4 text-base font-medium text-ink transition-colors hover:bg-signal-red-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-red focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40"
-              onClick={() => void signOut()}
-              disabled={busy}
-              data-testid="signout-discard"
-            >
-              <span aria-hidden>！</span>
-              送らずにログアウト（記録を捨てる）
+            <button type="button" className={dsButtonClass("danger", "md", "mt-2 min-h-14 w-full flex-col gap-0 py-1.5")} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
+              <span>送らずにログアウト</span>
+              <span className="text-aux font-normal">（記録を捨てる）</span>
             </button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/ui/icons";
 import type { JournalMismatch } from "@/server/ops/journal-logic";
 import { fieldGapLabel, type FieldGapLike } from "@/lib/ops-field";
 
@@ -6,19 +7,18 @@ import { fieldGapLabel, type FieldGapLike } from "@/lib/ops-field";
 
 export function MismatchBadges({ mismatches }: { readonly mismatches: readonly JournalMismatch[] }) {
   if (mismatches.length === 0) return null;
+  // 注意の印（ui/primitives の StatusPill と同じ作り）。折り返す文なので札の高さは固定せず、アイコンは先頭に揃える。
   return (
     <span className="flex flex-col items-stretch gap-1.5" data-testid="flight-mismatches">
       {mismatches.map((m) => (
         <span
           key={m.code}
-          className="flex items-start gap-2 rounded-sharp border-2 border-signal-amber bg-signal-amber-soft px-2 py-1.5 text-sm leading-snug text-ink"
+          className="flex items-start gap-2 rounded-ctl border border-[color-mix(in_srgb,var(--warn-line)_45%,var(--bg-surface))] bg-warn-bg px-2.5 py-1.5 text-table leading-snug text-warn-fg [text-wrap:pretty]"
           data-testid="flight-mismatch"
           data-code={m.code}
         >
-          <span aria-hidden className="font-bold">
-            ！
-          </span>
-          <span>{m.label}</span>
+          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-[color:var(--warn-line)]" />
+          <span className="min-w-0">{m.label}</span>
         </span>
       ))}
     </span>
@@ -33,7 +33,7 @@ export function TakeoffGaps({ gaps }: { readonly gaps: readonly FieldGapLike[] |
     <ul className="flex flex-col gap-1" data-testid="flight-takeoff-gaps">
       {gaps.map((g) => (
         <li key={g.item} className="flex items-start gap-2" data-testid="flight-takeoff-gap" data-item={g.item}>
-          <span aria-hidden>！</span>
+          <Icon name="alert" size={16} className="mt-1 shrink-0 text-warn-fg" />
           <span>{fieldGapLabel(g)}</span>
         </li>
       ))}
