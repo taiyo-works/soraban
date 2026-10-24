@@ -1,9 +1,16 @@
 name: CI
 
+# 文書だけの変更では動かさない（Actions の消費を抑える）。ワークフロー自身の変更は対象に含める。
 on:
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -40,7 +47,20 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Playwright のバージョンを取得
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Playwright のブラウザのキャッシュ
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      # ブラウザ本体はキャッシュから戻す。OS の依存パッケージ（apt）はキャッシュされないので、毎回入れる。
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e
         env:
@@ -215,7 +235,20 @@ jobs:
           test "$(psql "$TEST_DATABASE_URL" -tAc "select count(*) from pg_database where datname like 'soraban_t_%'")" = "0"
       - name: テスト用の初期データ（運航管理。localhost だけに投入できる）
         run: pnpm db:seed:ops-test
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Playwright のバージョンを取得
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Playwright のブラウザのキャッシュ
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      # ブラウザ本体はキャッシュから戻す。OS の依存パッケージ（apt）はキャッシュされないので、毎回入れる。
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
       - name: E2E-DB（運航管理。AUTH_PROVIDER=test・OPS_ENABLED=1・soraban_app で接続した next start）
         run: pnpm test:e2e:ops
         env:
