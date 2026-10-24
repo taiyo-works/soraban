@@ -60,13 +60,13 @@ test.describe("A. 表示と 404（契約 1a-6・1a-7）", () => {
 });
 
 test.describe("B. 横スクロールなし（C3）", () => {
-  for (const width of [375, 768, 1280]) {
-    test(`4. 幅 ${width}px：明・暗 × 配色案 1〜3 × 通常・現場 で、ページ全体と 6 つの画面の見本に横スクロールがない`, async ({ page }) => {
+  for (const width of [320, 375, 768, 1280]) {
+    test(`4. 幅 ${width}px：明・暗 × 通常・現場 で、ページ全体と 6 つの画面の見本に横スクロールがない`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       for (const theme of ["light", "dark"]) {
-        for (const palette of ["1", "2", "3"]) {
-          await open(page, `theme=${theme}&palette=${palette}`);
-          await expectNoHorizontalScroll(page, `${width}px ${theme} 案${palette}`);
+        for (const field of ["", "&field=1"]) {
+          await open(page, `theme=${theme}${field}`);
+          await expectNoHorizontalScroll(page, `${width}px ${theme}${field ? " 現場" : ""}`);
         }
       }
       for (const field of [false, true]) {
@@ -85,41 +85,39 @@ test.describe("B. 横スクロールなし（C3）", () => {
 });
 
 test.describe("C. トークンと切り替え（1a-1・1a-2・1a-6）", () => {
-  test("5. 配色案（1〜3）・テーマ（明・暗）・現場モードの切り替えが色に効く。URL に反映される", async ({ page }) => {
+  test("5. テーマ（明・暗）・現場モード・密度の切り替えが色に効く。URL に反映される。配色案の切り替えはない（藍 1 色）", async ({ page }) => {
     await open(page, "theme=light");
-    expect(await accentOf(page)).toBe("#0a5fd0");
-    await page.getByTestId("ctl-palette").getByRole("radio", { name: /案 2/ }).click();
     expect(await accentOf(page)).toBe("#1f4a99");
-    await page.getByTestId("ctl-palette").getByRole("radio", { name: /案 3/ }).click();
-    expect(await accentOf(page)).toBe("#0b6f6a");
-    await expect(root(page)).toHaveAttribute("data-palette", "3");
+    await expect(page.getByTestId("ctl-palette")).toHaveCount(0);
+    await expect(root(page)).not.toHaveAttribute("data-palette", /.+/);
     await page.getByTestId("ctl-theme").getByRole("radio", { name: "暗" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    expect(await accentOf(page)).toBe("#5fc7ba");
+    expect(await accentOf(page)).toBe("#8fb0f0");
     await page.getByTestId("ctl-theme").getByRole("radio", { name: "自動" }).click();
     await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
     await page.getByTestId("ctl-theme").getByRole("radio", { name: "明" }).click();
     await page.getByTestId("ctl-field").click();
     await expect(root(page)).toHaveClass(/\bfield\b/);
-    expect(await accentOf(page)).toBe("#1f4a99"); // field mode: fixed deep indigo, whichever palette
-    await expect.poll(() => page.url()).toContain("palette=3");
-    expect(page.url()).toContain("field=1");
+    expect(await accentOf(page)).toBe("#1f4a99"); // field mode: the deep indigo
+    await expect.poll(() => page.url()).toContain("field=1");
     expect(page.url()).toContain("theme=light");
+    expect(page.url()).not.toContain("palette");
     //密度
     await page.getByTestId("ctl-density").getByRole("radio", { name: "コンパクト" }).click();
     await expect(root(page)).toHaveAttribute("data-density", "compact");
+    // an old shared link that still carries palette= is ignored
+    await open(page, "palette=3&theme=light");
+    expect(await accentOf(page)).toBe("#1f4a99");
   });
 
-  test("6. 実測のコントラスト表示に「不足」がない（明・暗 × 配色案 × 現場）", async ({ page }) => {
+  test("6. 実測のコントラスト表示に「不足」がない（明・暗 × 現場）", async ({ page }) => {
     for (const theme of ["light", "dark"]) {
-      for (const palette of ["1", "2", "3"]) {
-        for (const field of ["", "&field=1"]) {
-          await open(page, `theme=${theme}&palette=${palette}${field}`);
-          const out = page.getByTestId("contrast-readout");
-          await expect(out.locator("li")).toHaveCount(9);
-          await expect(out).not.toContainText("不足");
-          await expect(out).not.toContainText("—");
-        }
+      for (const field of ["", "&field=1"]) {
+        await open(page, `theme=${theme}${field}`);
+        const out = page.getByTestId("contrast-readout");
+        await expect(out.locator("li")).toHaveCount(10);
+        await expect(out).not.toContainText("不足");
+        await expect(out).not.toContainText("—");
       }
     }
   });
@@ -127,9 +125,9 @@ test.describe("C. トークンと切り替え（1a-1・1a-2・1a-6）", () => {
   test("7. OS の暗い配色の設定に自動で従い、「明」を選ぶと明るくなる", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await open(page);
-    expect(await accentOf(page)).toBe("#6aa8ff");
+    expect(await accentOf(page)).toBe("#8fb0f0");
     await page.getByTestId("ctl-theme").getByRole("radio", { name: "明" }).click();
-    expect(await accentOf(page)).toBe("#0a5fd0");
+    expect(await accentOf(page)).toBe("#1f4a99");
   });
 
   test("8. prefers-reduced-motion では動き（骨組みの明滅・ダイアログの出入り）が止まる", async ({ page }) => {
@@ -600,11 +598,11 @@ test.describe("H. アイコン案・線画（追加の要望 2026-10-22）", () 
         }
       }
     }
-    // the proposals follow the chosen palette (the placeholder blue is the accent)
+    // the proposals follow the theme (the placeholder blue is the accent fill)
     const fillOf = (): Promise<string> => page.getByTestId("appicon-top-view-raw").locator("rect").first().evaluate((el) => getComputedStyle(el).fill);
-    const p1 = await fillOf();
-    await page.getByTestId("ctl-palette").getByRole("radio", { name: /案 3/ }).click();
-    expect(await fillOf()).not.toBe(p1);
+    const light = await fillOf();
+    await page.getByTestId("ctl-theme").getByRole("radio", { name: "暗" }).click();
+    expect(await fillOf()).not.toBe(light);
   });
 
   test("29. ドローンの線画：線 1.75px・currentColor。拡大・縮小しても太さが変わらない", async ({ page }) => {
@@ -652,15 +650,18 @@ test.describe("I. 現場モードの基準（C4・C6）：7:1・56px・大きな
     });
   }
 
-  test("31. 通常モードのコントラスト：4.5:1 以上（明・暗 × 配色案 1〜3。無効の部品を除く）", async ({ page }) => {
+  test("31. 通常モードのコントラスト：4.5:1 以上（明・暗。無効の部品を除く）。判定の印・ボタンと入力欄の節も", async ({ page }) => {
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
-      for (const palette of ["1", "2", "3"]) {
-        await open(page, `theme=${theme}&palette=${palette}&screen=legend`);
-        await expectContrast(page, '[data-testid="sample-legend"]', 4.5, `凡例 ${theme} 案${palette}`);
-        await screenTab(page, "今日").click();
-        await expectContrast(page, '[data-testid="sample-today"]', 4.5, `今日 ${theme} 案${palette}`);
-      }
+      await open(page, `theme=${theme}&screen=legend`);
+      await expectContrast(page, '[data-testid="sample-legend"]', 4.5, `凡例 ${theme}`);
+      await screenTab(page, "今日").click();
+      await expectContrast(page, '[data-testid="sample-today"]', 4.5, `今日 ${theme}`);
+      await screenTab(page, "一覧").click();
+      await expectContrast(page, '[data-testid="sample-list"]', 4.5, `一覧 ${theme}`);
+      await screenTab(page, "フォーム").click();
+      await expectContrast(page, '[data-testid="sample-form"]', 4.5, `フォーム ${theme}`);
+      await expectContrast(page, '[data-testid="controls-section"]', 4.5, `ボタンと入力欄 ${theme}`);
     }
   });
 
@@ -886,19 +887,18 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("40. 共有 URL（?theme=dark&palette=3）を OS が明るい端末で開くと、JS（水和）より前の最初の描画から暗・案 3", async ({ browser }) => {
+  test("40. 共有 URL（?theme=dark）を OS が明るい端末で開くと、JS（水和）より前の最初の描画から暗", async ({ browser }) => {
     const context = await browser.newContext({ colorScheme: "light" });
     const page = await context.newPage();
     // block every script file so that only the inline script in the HTML can have run (= before hydration)
     await page.route(/\/_next\/static\/.*\.js/, (r) => r.abort());
-    await page.goto(`${CATALOG}/ops/design?theme=dark&palette=3`);
+    await page.goto(`${CATALOG}/ops/design?theme=dark`);
     await expect(root(page)).toBeVisible();
     await expect(root(page)).toHaveAttribute("data-hydrated", "0");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    const v = await root(page).evaluate((el) => ({ scheme: getComputedStyle(el).colorScheme, bg: getComputedStyle(el).backgroundColor, p: el.getAttribute("data-palette") }));
+    const v = await root(page).evaluate((el) => ({ scheme: getComputedStyle(el).colorScheme, bg: getComputedStyle(el).backgroundColor }));
     expect(v.scheme).toBe("dark");
-    expect(v.p).toBe("3");
-    expect(v.bg).not.toBe("rgb(245, 245, 247)");
+    expect(v.bg).toBe("rgb(13, 17, 24)");
     // auto and light emit no theme script
     const plain = await (await page.request.get(`${CATALOG}/ops/design`)).text();
     expect(plain).not.toContain("dataset.theme");
@@ -1120,48 +1120,35 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
   });
 });
 
-// 航空日誌の紙面（試作）：ボタンと入力欄の節（#journal）だけが新しい方針。ほかの節・画面は変わらない。
-test.describe("L. 航空日誌の紙面（試作：ボタンと入力欄）", () => {
-  const J = "#journal";
+// 航空日誌の紙面：見本の部品全体（.ds の中）の既定。角丸は 1 種類、影・半透明なし、タップ領域、はみ出さない、状態、判定の印。
+test.describe("L. 航空日誌の紙面（見本の全体）", () => {
+  const C = "#controls";
 
-  /** 節の中のボタン・入力欄で、文字が枠からはみ出しているもの（子の矩形が親の外、または scrollWidth が超過）。 */
+  /** 節の中のボタン・入力欄で、文字が枠からはみ出しているもの。 */
   const overflowing = (page: Page): Promise<string[]> =>
     page.evaluate((sel) => {
       const out: string[] = [];
+      const frame = document.querySelector(sel)!.getBoundingClientRect();
+      const limit = Math.min(frame.right, document.documentElement.clientWidth) + 0.5;
       for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} button, ${sel} input, ${sel} select, ${sel} textarea`))) {
         const r = el.getBoundingClientRect();
         if (r.width === 0) continue;
         const name = (el.textContent?.trim() || el.getAttribute("aria-label") || el.id).slice(0, 20);
         if (el.scrollWidth > el.clientWidth + 1) out.push(`${name}: scrollWidth ${el.scrollWidth} > ${el.clientWidth}`);
+        if (r.right > limit) out.push(`${name}: 節の外へ出る`);
         if (el.tagName === "BUTTON") {
           const range = document.createRange();
           range.selectNodeContents(el);
           for (const t of Array.from(range.getClientRects())) {
             if (t.left < r.left - 0.5 || t.right > r.right + 0.5 || t.top < r.top - 0.5 || t.bottom > r.bottom + 0.5) out.push(`${name}: 文字が枠の外`);
           }
-          const parent = el.parentElement!.getBoundingClientRect();
-          if (r.right > parent.right + 0.5) out.push(`${name}: 親の幅を超える`);
         }
       }
       return out;
-    }, J);
-
-  const outsideFrame = (page: Page): Promise<string[]> =>
-    page.evaluate((sel) => {
-      const frame = document.querySelector(`${sel} .jr`)!.getBoundingClientRect();
-      const limit = Math.min(frame.right, document.documentElement.clientWidth) + 0.5;
-      const out: string[] = [];
-      for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} .jr *`))) {
-        const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.right > limit) out.push(`${el.tagName} ${(el.textContent ?? "").trim().slice(0, 12)} ${r.right.toFixed(0)} > ${limit.toFixed(0)}`);
-      }
-      return out;
-    }, J);
-  /** 見える影があるか（Tailwind の ring の層は透明・0px で残るため、それは影に数えない）。 */
-  const visibleShadow = (v: string): string => v.replace(/rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(, )?/g, "").replace(/^none$/, "").trim();
+    }, C);
 
   for (const width of [320, 375, 768, 1280]) {
-    test(`46. 幅 ${width}px：ボタン・入力欄の文字が枠から出ない（明・暗・現場 × 通常・拡大した文字）。節の外へ出ない`, async ({ page }) => {
+    test(`46. 幅 ${width}px：ボタン・入力欄の文字が枠から出ない（明・暗・現場 × 通常・拡大した文字）`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       for (const [theme, field] of [["light", false], ["dark", false], ["light", true]] as const) {
         await page.emulateMedia({ colorScheme: theme });
@@ -1172,71 +1159,111 @@ test.describe("L. 航空日誌の紙面（試作：ボタンと入力欄）", ()
             if (s) ds.style.setProperty("--fs-body", s);
             else ds.style.removeProperty("--fs-body");
           }, size);
-          const label = `幅 ${width} ${theme}${field ? " 現場" : ""} 文字 ${size ?? "既定"}`;
-          expect(await overflowing(page), label).toEqual([]);
-          // 節の中のどの要素も、節の枠（と画面の幅）の外へ出ない。ページ全体の横スクロールは節の外（画面の見本のタブなど）の要因があるため、節の中で見る。
-          expect(await outsideFrame(page), label).toEqual([]);
+          expect(await overflowing(page), `幅 ${width} ${theme}${field ? " 現場" : ""} 文字 ${size ?? "既定"}`).toEqual([]);
         }
       }
     });
   }
 
-  test("47. 角丸は 1 種類（5px）・影なし・半透明なし・ピル型なし。ほかの節の部品は従来のまま（8px・影あり）", async ({ page }) => {
-    await open(page);
-    const m = await page.evaluate((sel) => {
+  /** 見える影があるか（Tailwind の ring の層は透明・0px で残るため、それは影に数えない）。 */
+  const visibleShadow = (v: string): string => v.replace(/rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(, )?/g, "").replace(/^none$/, "").trim();
+
+  /** 画面に出ている要素の角丸・影・ぼかし・半透明の地を集める。 */
+  const surfaceFacts = (page: Page): Promise<{ radii: string[]; shadows: string[]; filters: string[]; pills: string[]; translucent: string[] }> =>
+    page.evaluate(() => {
       const radii = new Set<string>();
       const shadows: string[] = [];
       const filters: string[] = [];
       const pills: string[] = [];
-      for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} *`))) {
+      const translucent: string[] = [];
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(".ds *, dialog *"))) {
+        if (el.closest("svg") && el.tagName !== "svg") continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        // the app-icon proposals preview the rounded shape an OS adds; they are artwork, not interface
+        if (el.closest('[data-testid^="appicon-"]')) continue;
         const cs = getComputedStyle(el);
-        if (el.getBoundingClientRect().width === 0) continue;
         for (const c of ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius"] as const) {
           const v = cs[c];
-          if (v !== "0px") radii.add(v);
-          if (parseFloat(v) >= 100) pills.push(`${el.tagName}.${el.className.toString().slice(0, 30)}`);
+          if (v === "0px") continue;
+          if (parseFloat(v) >= 100) {
+            // a pill is allowed only on a small count
+            if (!/^\d{1,3}$/.test((el.textContent ?? "").trim())) pills.push(`${el.tagName} ${(el.textContent ?? "").trim().slice(0, 12)}`);
+          } else radii.add(v);
         }
         shadows.push(cs.boxShadow);
-        if (cs.backdropFilter !== "none" && cs.backdropFilter !== "") filters.push(el.tagName);
+        if (cs.backdropFilter && cs.backdropFilter !== "none") filters.push(el.tagName);
+        const bg = cs.backgroundColor;
+        const alpha = /\/\s*([\d.]+)\)$/.exec(bg)?.[1] ?? /^rgba\([^)]*,\s*([\d.]+)\)$/.exec(bg)?.[1];
+        if (alpha !== undefined && parseFloat(alpha) > 0 && parseFloat(alpha) < 1) translucent.push(`${el.tagName} ${bg}`);
       }
-      const panel = getComputedStyle(document.querySelector(`${sel} .jr`) ?? document.querySelector(sel)!);
-      return { radii: [...radii], shadows, filters, pills, panelBg: panel.backgroundColor };
-    }, J);
-    expect(m.radii).toEqual(["5px"]);
-    expect(m.shadows.map(visibleShadow).filter(Boolean)).toEqual([]);
-    expect(m.filters).toEqual([]);
-    expect(m.pills).toEqual([]);
-    expect(m.panelBg).not.toMatch(/rgba\(.*,\s*0?\.\d+\)/); // opaque
-    // outside the journal: the previous look is unchanged
-    const other = await page.getByTestId("open-dialog").evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return { r: cs.borderTopLeftRadius, shadow: cs.boxShadow };
+      return { radii: [...radii], shadows, filters, pills, translucent };
     });
-    expect(other.r).toBe("8px");
-    expect(await page.getByTestId("ctl-command").evaluate((el) => getComputedStyle(el).whiteSpace)).toBe("nowrap");
+
+  test("47. 角丸は 1 種類（5px）・影なし・ぼかしなし・半透明の地なし・ピルは件数だけ。6 つの画面・部品・開いたダイアログとトースト（明・暗・現場）", async ({ page }) => {
+    for (const [theme, field] of [["light", false], ["dark", false], ["light", true]] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      for (const screen of ["today", "list", "form", "workspace", "field", "legend"]) {
+        await open(page, `theme=${theme}&screen=${screen}${field ? "&field=1" : ""}`);
+        if (screen === "workspace") await page.setViewportSize({ width: 1280, height: 900 });
+        const m = await surfaceFacts(page);
+        const label = `${theme}${field ? " 現場" : ""} ${screen}`;
+        expect(m.radii, label).toEqual(["5px"]);
+        expect(m.shadows.map(visibleShadow).filter(Boolean), label).toEqual([]);
+        expect(m.filters, label).toEqual([]);
+        expect(m.pills, label).toEqual([]);
+        expect(m.translucent, label).toEqual([]);
+      }
+    }
+    // opened overlays: dialog, toast, context menu, (i)
+    await open(page);
+    await page.getByTestId("open-dialog").scrollIntoViewIfNeeded();
+    await page.getByTestId("open-dialog").click();
+    const d = await surfaceFacts(page);
+    expect(d.shadows.map(visibleShadow).filter(Boolean)).toEqual([]);
+    expect(d.radii).toEqual(["5px"]);
+    await page.keyboard.press("Escape");
+    await page.getByTestId("open-toast").click();
+    await expect(page.getByTestId("toast").first()).toBeVisible();
+    const t = await surfaceFacts(page);
+    expect(t.shadows.map(visibleShadow).filter(Boolean)).toEqual([]);
+    expect(t.translucent).toEqual([]);
+    await page.getByTestId("demo-context").getByRole("button", { name: "行の操作" }).click();
+    const menu = await surfaceFacts(page);
+    expect(menu.shadows.map(visibleShadow).filter(Boolean)).toEqual([]);
+    expect(menu.translucent).toEqual([]);
   });
 
-  test("48. タップ領域は 44px 以上（現場モードは 56px）。状態（押下・フォーカス・無効・読み込み中）が見える", async ({ page }) => {
+  /** 押す部品（ボタン・リンク・入力・タブ・スイッチ・メニュー項目）の高さ・幅の不足。行全体がリンクの表の中の文字リンクなどは除く。 */
+  const smallTargets = (page: Page, min: number): Promise<string[]> =>
+    page.evaluate((lim) => {
+      const out: string[] = [];
+      const sel = 'button, a[href], select, input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea, summary, [role="tab"], [role="switch"], [role="menuitem"], [role="radio"], label:has(input[type="checkbox"]), label:has(input[type="radio"])';
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(sel))) {
+        if (el.closest("[inert], [hidden], dialog:not([open])")) continue;
+        if (el.matches(".ds-table-link")) continue; // the whole row is the target
+        if (el.closest(".sr-only")) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        if (r.height < lim - 0.5 || r.width < lim - 0.5) out.push(`${(el.textContent?.trim() || el.getAttribute("aria-label") || el.id || el.tagName).slice(0, 18)} ${r.width.toFixed(0)}x${r.height.toFixed(0)}`);
+      }
+      return out;
+    }, min);
+
+  test("48. 押す部品は 44px 以上（現場モードは 56px）。6 つの画面と部品の節（標準の密度）", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 900 });
     for (const field of [false, true]) {
-      await open(page, field ? "field=1" : "");
-      const min = field ? 56 : 44;
-      const small = await page.evaluate(
-        ([sel, lim]) => {
-          const out: string[] = [];
-          for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} button, ${sel} input, ${sel} select, ${sel} textarea`))) {
-            const r = el.getBoundingClientRect();
-            if (r.width === 0) continue;
-            if (r.height < (lim as number) - 0.5) out.push(`${(el.textContent?.trim() || el.id).slice(0, 16)} ${r.height.toFixed(1)}`);
-          }
-          return out;
-        },
-        [J, min] as const,
-      );
-      expect(small, field ? "現場" : "通常").toEqual([]);
+      for (const screen of ["today", "list", "form", "workspace", "field", "legend"]) {
+        await open(page, `screen=${screen}${field ? "&field=1" : ""}`);
+        const bad = await smallTargets(page, field ? 56 : 44);
+        expect(bad, `${field ? "現場" : "通常"} ${screen}`).toEqual([]);
+      }
     }
+  });
+
+  test("49. ボタンの状態（ホバー・押下・無効・読み込み中）が見え、無効の控えめボタンには破線の罫がある。フォーカスは 2px の輪郭", async ({ page }) => {
     await open(page);
-    const row = page.getByTestId("journal-buttons-primary");
+    const row = page.getByTestId("buttons-primary");
     const bg = (i: number): Promise<string> => row.locator("button").nth(i).evaluate((el) => getComputedStyle(el).backgroundColor);
     const normal = await bg(0);
     expect(await bg(1), "ホバー").not.toBe(normal);
@@ -1245,18 +1272,56 @@ test.describe("L. 航空日誌の紙面（試作：ボタンと入力欄）", ()
     expect(await bg(4), "無効").not.toBe(normal);
     await expect(row.locator("button").nth(4)).toBeDisabled();
     await expect(row.locator("button").nth(5)).toHaveAttribute("aria-busy", "true");
-    // the forced focus has a visible 2px outline; real keyboard focus too
+    // a disabled button does not respond to the pointer
+    const disabled = row.locator("button").nth(4);
+    const before = await disabled.evaluate((el) => getComputedStyle(el).backgroundColor);
+    await disabled.hover({ force: true });
+    expect(await disabled.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(before);
+    // quiet + disabled: a dashed rule marks it
+    const quietDisabled = page.getByTestId("buttons-quiet").locator("button").nth(4);
+    expect(await quietDisabled.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe("dashed");
+    expect(await page.getByTestId("buttons-quiet").locator("button").nth(0).evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe("solid");
+    // pressing does not scale: transform is none and the 1px shift is the translate property
+    const pressed = row.locator("button").nth(3);
+    expect(await pressed.evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    expect(await pressed.evaluate((el) => getComputedStyle(el).translate)).toBe("0px 1px");
+    // the forced focus has a visible 2px outline; real keyboard focus too, with no glow around an input
     expect(await row.locator("button").nth(2).evaluate((el) => getComputedStyle(el).outlineWidth)).toBe("2px");
-    await page.locator("#jr-reg").focus();
+    await page.locator("#ctl-reg").focus();
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Tab");
-    const ring = await page.locator("#jr-reg").evaluate((el) => ({ w: getComputedStyle(el).outlineWidth, s: getComputedStyle(el).outlineStyle, sh: getComputedStyle(el).boxShadow }));
-    expect({ ...ring, sh: visibleShadow(ring.sh) }).toEqual({ w: "2px", s: "solid", sh: "" });
+    const ring = await page.locator("#ctl-reg").evaluate((el) => ({ w: getComputedStyle(el).outlineWidth, s: getComputedStyle(el).outlineStyle, sh: getComputedStyle(el).boxShadow }));
+    expect(ring.w).toBe("2px");
+    expect(ring.s).toBe("solid");
+    expect(visibleShadow(ring.sh)).toBe("");
   });
 
-  test("49. 入力欄：ラベルが常に欄の上にあり、エラーは「何が起きたか・どうすればよいか」を欄のすぐ下に出す。数字は等幅", async ({ page }) => {
+  test("50. 暗の主ボタン：文字と地が 4.5:1 以上。ボタンの縁（地）が面と 3:1 以上", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await open(page, "theme=dark");
+    const r = await page.getByTestId("buttons-primary").locator("button").first().evaluate((el) => {
+      const rgb = (c: string): [number, number, number] => {
+        const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(c.trim());
+        if (hex) return [parseInt(hex[1]!, 16), parseInt(hex[2]!, 16), parseInt(hex[3]!, 16)];
+        return (c.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number) as [number, number, number];
+      };
+      const f = (v: number): number => {
+        const s = v / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      const lum = (c: [number, number, number]): number => 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+      const ratio = (a: string, b: string): number => (Math.max(lum(rgb(a)), lum(rgb(b))) + 0.05) / (Math.min(lum(rgb(a)), lum(rgb(b))) + 0.05);
+      const cs = getComputedStyle(el);
+      const surface = getComputedStyle(el.parentElement!).getPropertyValue("--bg-surface");
+      return { text: ratio(cs.color, cs.backgroundColor), edge: ratio(cs.backgroundColor, surface) };
+    });
+    expect(r.text).toBeGreaterThanOrEqual(4.5);
+    expect(r.edge).toBeGreaterThanOrEqual(3);
+  });
+
+  test("51. 入力欄：ラベルが常に欄の上。エラーは「何が起きたか・どうすればよいか」を欄のすぐ下。数字は等幅。本文の行間は 1.7 以上", async ({ page }) => {
     await open(page);
-    for (const id of ["jr-reg", "jr-pilot", "jr-place", "jr-min", "jr-lat", "jr-kind", "jr-memo", "demo-err"]) {
+    for (const id of ["ctl-reg", "ctl-pilot", "ctl-place", "ctl-min", "ctl-lat", "ctl-kind", "ctl-memo", "demo-err"]) {
       const label = page.locator(`label[for="${id}"]`);
       await expect(label).toBeVisible();
       const [lb, ib] = await Promise.all([label.boundingBox(), page.locator(`#${id}`).boundingBox()]);
@@ -1265,9 +1330,35 @@ test.describe("L. 航空日誌の紙面（試作：ボタンと入力欄）", ()
     await expect(page.locator("#demo-err")).toHaveAttribute("aria-invalid", "true");
     await expect(page.locator("#demo-err-error")).toContainText("形式が違います");
     await expect(page.locator("#demo-err-error")).toContainText("入力してください");
-    expect(await page.locator("#jr-min").evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toContain("tabular-nums");
-    // body text in the journal has a line height of at least 1.7
-    const lh = await page.locator(`${J} p`).first().evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
+    expect(await page.locator("#ctl-min").evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toContain("tabular-nums");
+    const lh = await page.locator(`${C} p`).first().evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
     expect(lh).toBeGreaterThanOrEqual(1.7 - 0.01);
+    // the empty, loading and error states are shown with real wording
+    await expect(page.getByText("飛行の記録はまだありません")).toBeVisible();
+    await expect(page.getByTestId("demo-error")).toContainText("もう一度");
+  });
+
+  test("52. 判定の印：4 段と判定不能のすべてに記号と言葉。色だけで区別しない。回転・影なし", async ({ page }) => {
+    await open(page, "screen=legend");
+    const shapes = new Set<string>();
+    for (const [level, label] of [["no_fly", "飛行不可"], ["needs_procedure", "要手続き"], ["procedure_done", "手続き済み（条件付き）"], ["no_procedure", "手続き不要"], ["unknown", "判定不能（データ未整備）"]] as const) {
+      const li = page.getByTestId(`sample-verdict-${level}`);
+      await expect(li).toBeVisible();
+      const stamp = li.locator(`[data-level="${level}"]`).first();
+      await expect(stamp).toContainText(label);
+      shapes.add((await stamp.locator("svg").getAttribute("data-shape"))!);
+      const s = await stamp.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { transform: cs.transform, shadow: cs.boxShadow, border: cs.borderTopStyle, radius: cs.borderTopLeftRadius };
+      });
+      expect(s.transform).toBe("none");
+      expect(visibleShadow(s.shadow)).toBe("");
+      expect(s.border).toBe("solid");
+      expect(s.radius).toBe("5px");
+    }
+    expect(shapes.size).toBe(5);
+    // the same wording and shape appear in the workspace result
+    await screenTab(page, "ワークスペース").click();
+    await expect(page.getByTestId("sample-verdict-label")).toBeVisible();
   });
 });

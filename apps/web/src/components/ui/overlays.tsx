@@ -21,7 +21,8 @@ import { Button } from "./primitives";
 
 // Overlays (Sprint 12g stage 1a): dialog / bottom sheet / drawer on the native <dialog>, the (i) popover, toasts, and a
 // context menu. <dialog>.showModal() gives focus containment, Escape and an inert background; focus is returned to the
-// opener on close. Motion is 200-240ms and is switched off by prefers-reduced-motion (globals.css).
+// opener on close. Motion is 200-240ms and is switched off by prefers-reduced-motion (globals.css). Surfaces are opaque
+// and separated by a 1px rule; there are no shadows (the modal ones also dim the page behind them).
 
 // ── Dialog / sheet / drawer ──────────────────────────────────────────────────
 
@@ -30,12 +31,12 @@ type DialogKind = "dialog" | "drawer" | "sheet";
 const PANEL: Readonly<Record<DialogKind, string>> = {
   // centred from 768px, a bottom sheet below
   dialog:
-    "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-sheet md:static md:mx-auto md:my-[8vh] md:max-h-[84dvh] md:w-[min(32rem,calc(100vw-3rem))] md:rounded-sheet",
+    "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-ctl md:static md:mx-auto md:my-[8vh] md:max-h-[84dvh] md:w-[min(32rem,calc(100vw-3rem))] md:rounded-ctl",
   // right side from 768px (360-420px), a bottom sheet below
   drawer:
-    "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-sheet md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[min(26rem,100vw)] md:rounded-l-sheet md:rounded-tr-none",
+    "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-ctl md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[min(26rem,100vw)] md:rounded-l-ctl md:rounded-tr-none",
   // always a bottom sheet
-  sheet: "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-sheet md:mx-auto md:max-w-[40rem]",
+  sheet: "fixed inset-x-0 bottom-0 m-0 max-h-[92dvh] w-full rounded-t-ctl md:mx-auto md:max-w-[40rem]",
 };
 
 export function Dialog({
@@ -137,7 +138,7 @@ export function Dialog({
       }}
     >
       <div
-        className={cx("ds-dialog-panel flex flex-col overflow-hidden bg-surface text-fg shadow-float", PANEL[kind])}
+        className={cx("ds-dialog-panel flex flex-col overflow-hidden border border-line-strong bg-surface text-fg", PANEL[kind])}
         style={offset ? { transform: `translateY(${offset}px)`, transition: "none" } : undefined}
       >
         <div
@@ -148,7 +149,7 @@ export function Dialog({
           onPointerCancel={onHandleUp}
           aria-hidden="true"
         >
-          <span className="h-1 w-9 rounded-pill bg-line-strong" />
+          <span className="h-1 w-9 rounded-ctl bg-line-strong" />
         </div>
         <div className="flex shrink-0 items-center justify-between gap-3 px-5 pb-2 pt-2 md:pt-4">
           <h2 id={titleId} className="min-w-0 text-h2 font-semibold">
@@ -226,7 +227,7 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
         onClick={() => (pinned ? close() : setPinned(true))}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-pill text-fg-mute hov:text-accent"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-mute hov:text-accent field:min-h-14 field:min-w-14"
       >
         <Icon name="info" size={18} />
       </button>
@@ -237,7 +238,7 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
         hidden={!open}
         style={{ translate: `${shift}px 0` }}
         className={cx(
-          "ds-pop absolute left-1/2 z-30 -ml-[9rem] mt-0 w-[18rem] max-w-[calc(100vw-2rem)] rounded-card bg-surface p-3 text-table leading-relaxed text-fg-soft shadow-float",
+          "ds-pop absolute left-1/2 z-30 -ml-[9rem] mt-0 w-[18rem] max-w-[calc(100vw-2rem)] rounded-ctl border border-line-strong bg-surface p-3 text-table text-fg-soft",
           above ? "bottom-full" : "top-full",
         )}
       >
@@ -277,14 +278,14 @@ export function ToastProvider({ children }: { readonly children: ReactNode }) {
         className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-center gap-2 px-4"
       >
         {items.map((t) => (
-          <div key={t.id} data-testid="toast" className="ds-pop pointer-events-auto flex min-h-11 max-w-[28rem] items-center gap-2 rounded-card bg-fg px-4 py-2 text-table shadow-float" style={{ color: "var(--bg-surface)" }}>
-            <Icon name={t.meaning === "ok" ? "check-circle" : t.meaning === "warn" ? "alert" : "info"} size={18} />
-            <span>{t.message}</span>
+          <div key={t.id} data-testid="toast" className="ds-pop pointer-events-auto flex min-h-11 max-w-[28rem] items-center gap-2 rounded-ctl border border-line-strong bg-surface py-1 pl-4 pr-1 text-table text-fg field:min-h-14">
+            <Icon name={t.meaning === "ok" ? "check-circle" : t.meaning === "warn" ? "alert" : "info"} size={18} className={t.meaning === "ok" ? "text-ok-fg" : t.meaning === "warn" ? "text-warn-fg" : "text-info-fg"} />
+            <span className="min-w-0 flex-1">{t.message}</span>
             <button
               type="button"
               aria-label="通知を閉じる"
               onClick={() => setItems((cur) => cur.filter((x) => x.id !== t.id))}
-              className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl hov:bg-white/10"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
             >
               <Icon name="x" size={16} />
             </button>
@@ -412,7 +413,7 @@ export function ContextMenu({
           const r = e.currentTarget.getBoundingClientRect();
           setAt(open ? null : { x: r.right, y: r.bottom, above: r.top });
         }}
-        className="relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken"
+        className="relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken field:min-h-14 field:min-w-14"
       >
         <Icon name="more" size={20} />
       </button>
@@ -423,7 +424,7 @@ export function ContextMenu({
           aria-label={label}
           onKeyDown={onMenuKey}
           style={{ left: Math.min(at.x, (typeof window === "undefined" ? 0 : window.innerWidth) - 224), top: top ?? at.y }}
-          className="glass ds-pop fixed z-50 flex max-h-[calc(100dvh-1rem)] w-56 flex-col overflow-y-auto rounded-card p-1 shadow-float"
+          className="ds-pop fixed z-50 flex max-h-[calc(100dvh-1rem)] w-56 flex-col overflow-y-auto rounded-ctl border border-line-strong bg-surface p-1"
         >
           {items.map((it) => (
             <button
@@ -434,7 +435,7 @@ export function ContextMenu({
                 close();
                 it.onSelect();
               }}
-              className="flex min-h-11 items-center gap-2 rounded-ctl px-3 text-left text-body text-fg hov:bg-accent-soft focus-visible:bg-accent-soft"
+              className="flex min-h-11 items-center gap-2 rounded-ctl px-3 text-left text-body text-fg hov:bg-accent-soft focus-visible:bg-accent-soft field:min-h-14"
             >
               {it.icon ? <Icon name={it.icon} size={18} className="text-fg-mute" /> : null}
               {it.label}
@@ -493,13 +494,13 @@ export function ReasonDialog({
     >
       <label htmlFor={id} className="mb-1.5 flex items-center gap-2 text-table font-medium">
         理由
-        <span className="rounded-pill bg-sunken px-1.5 text-aux text-fg-soft">必須</span>
+        <span className="rounded-ctl border border-line-strong px-1.5 text-aux text-fg-soft">必須</span>
       </label>
       <textarea
         id={id}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        className="min-h-24 w-full rounded-ctl border border-line-strong bg-surface px-3 py-2.5 text-[16px] leading-relaxed text-fg placeholder:text-fg-mute"
+        className="min-h-24 w-full rounded-ctl border border-line-strong bg-surface px-3 py-2.5 text-[16px] leading-[1.7] text-fg placeholder:text-fg-mute hov:border-fg"
         placeholder="記録に残す理由を入力します"
       />
     </Dialog>

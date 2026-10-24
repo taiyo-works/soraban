@@ -275,36 +275,40 @@ html:has(body.has-bottom-nav) {
 }
 
 /* ============================================================
- * Sprint 12g stage 1a — new design system tokens
+ * Sprint 12g stage 1a — new design system tokens: 「航空日誌の紙面」
  * ----------------------------------------------------------
- * Direction: docs/design/ui-direction.md (calm tonal surfaces, one accent, five semantic colors).
+ * Direction: docs/design/ui-direction.md (paper ground, ink text, one indigo accent, five semantic colors).
  * Scope: these tokens are only *used* under `.ds` (the design catalog root today; the ops shell from stage 1b).
  * Nothing outside `.ds` reads them, so existing screens keep their current look.
  *
+ * Shape: one corner radius (--r-journal), no shadows, no translucency. Layers are told apart by a 1px rule and
+ * a step of ground colour. The pill (--r-pill) is only for small counts.
+ *
  * Structure (the cascade order below is relied on by design-tokens.test.ts):
- *   1. :root                                  light base (neutral, accent, semantic, verdict)
- *   2. :root [data-palette="2|3"]             light palette overrides (accent; palette 3 also neutrals)
- *   3. :root .field                           field mode (light), fixed accent, 7:1 body
- *   4. @media dark  :root:not([data-theme="light"]) ...   dark (OS preference unless forced light)
- *   5. :root[data-theme="dark"] ...           dark (forced). Same declarations as 4 (a test compares them)
- * Palettes: 1 = blue (recommended), 2 = indigo (current brand), 3 = charcoal + teal.
+ *   1. :root                                  light (paper, ink, indigo, meanings, verdict)
+ *   2. :root .field                           field mode (light), 7:1 body
+ *   3. @media dark  :root:not([data-theme="light"]) ...   dark (OS preference unless forced light)
+ *   4. :root[data-theme="dark"] ...           dark (forced). Same declarations as 3 (a test compares them)
+ * Dark is its own set (a deep blue-black ground, paper-white text dimmed), not the light set inverted.
  * ============================================================ */
 
-/* 1. light base */
+/* 1. light */
 :root {
-  --bg-app: #f5f5f7;
-  --bg-surface: #ffffff;
-  --bg-sunken: #efeff4;
-  --fg: #1d1d1f;
-  --fg-soft: #424245;
-  --fg-mute: #636366;
-  --line: #d2d2d7;
-  --line-strong: #8e8e93;
+  --bg-app: #f1ede1;
+  --bg-surface: #fbf9f3;
+  --bg-sunken: #ebe6d7;
+  --fg: #171b22;
+  --fg-soft: #3b3f47;
+  --fg-mute: #5c5f66;
+  --line: #d8d1bd;
+  --line-strong: #857f6c;
 
-  --accent: #0a5fd0;
-  --accent-hover: #084fae;
+  /* Indigo. `accent` is for text, links and the focus ring; `accent-solid` is the fill of a primary button. */
+  --accent: #1f4a99;
+  --accent-soft: #e7ecf7;
+  --accent-solid: #1f4a99;
+  --accent-solid-hover: #183b7c;
   --accent-fg: #ffffff;
-  --accent-soft: #e8f0fd;
 
   --ok-fg: #1a6b3a;
   --ok-bg: #e6f4ea;
@@ -315,66 +319,30 @@ html:has(body.has-bottom-nav) {
   --danger-fg: #b3261e;
   --danger-bg: #fdeceb;
   --danger-line: #d14343;
-  --info-fg: #0a5fd0;
-  --info-bg: #e8f0fd;
-  --info-line: #2f78e0;
+  --info-fg: #1f4a99;
+  --info-bg: #e7ecf7;
+  --info-line: #2f5fb8;
   --neutral-fg: #48484a;
   --neutral-bg: #efeff4;
   --neutral-line: #77777c;
 
-  /* Verdict (4 steps + unknown). Re-measured on the new surfaces (see design-tokens.test.ts). */
+  /* Verdict (4 steps + unknown). Re-measured on the paper surfaces (see design-tokens.test.ts). */
   --verdict-no-fly: #a33232;
   --verdict-needs: #8a5a0e;
   --verdict-done: #1d3557;
   --verdict-clear: #2e6a42;
   --verdict-unknown: #4f5564;
 
-  /* Shape, depth, motion (same in every theme except where overridden below) */
-  --r-ctl: 8px;
-  --r-card: 14px;
-  --r-sheet: 20px;
+  /* Shape and motion. The one radius lives here; `rounded-ctl` is the only radius utility (see @theme below). */
+  --r-journal: 5px;
   --r-pill: 999px;
-  /* Shadows are built from plain values (width, colour with alpha, a mix amount); the theme utilities below put
-   * var(--line) in at the element that uses them, so a palette that changes --line is followed. */
-  --sh-ring: 0.5px;
-  --sh-drop: rgb(0 0 0 / 0.04);
-  --sh-drop2: rgb(0 0 0 / 0.07);
-  --sh-float-drop: rgb(0 0 0 / 0.12);
-  --sh-float-mix: 100%;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --dur: 200ms;
-  --dur-fast: 120ms;
   --dur-sheet: 240ms;
-
-  /* Translucency: fixed bars, sheets and menus only (never body content). Opaque fallbacks below. */
-  --glass-alpha: 82%;
-  --glass-filter: saturate(1.6) blur(20px);
   --scrim: rgb(0 0 0 / 0.4);
 }
 
-/* 2. light palettes */
-:root [data-palette="2"] {
-  --accent: #1f4a99;
-  --accent-hover: #183b7c;
-  --accent-fg: #ffffff;
-  --accent-soft: #e7ecf7;
-}
-:root [data-palette="3"] {
-  --bg-app: #f4f6f8;
-  --bg-surface: #ffffff;
-  --bg-sunken: #ecf0f3;
-  --fg: #14181d;
-  --fg-soft: #3d444d;
-  --fg-mute: #5f6772;
-  --line: #d5dae0;
-  --line-strong: #8a919c;
-  --accent: #0b6f6a;
-  --accent-hover: #095b57;
-  --accent-fg: #ffffff;
-  --accent-soft: #e3f2f0;
-}
-
-/* 3. field mode (light). Own system: 7:1 body, fixed deep-indigo accent, no translucency. */
+/* 2. field mode (light). Own system: 7:1 body, fixed deep-indigo accent. */
 :root .field {
   --bg-app: #f3f4f6;
   --bg-surface: #ffffff;
@@ -385,9 +353,10 @@ html:has(body.has-bottom-nav) {
   --line: #c4c9d2;
   --line-strong: #5c6573;
   --accent: #1f4a99;
-  --accent-hover: #183b7c;
-  --accent-fg: #ffffff;
   --accent-soft: #e7ecf7;
+  --accent-solid: #1f4a99;
+  --accent-solid-hover: #183b7c;
+  --accent-fg: #ffffff;
   --ok-fg: #174c2c;
   --ok-bg: #e4f3ea;
   --ok-line: #174c2c;
@@ -403,26 +372,25 @@ html:has(body.has-bottom-nav) {
   --neutral-fg: #2f3542;
   --neutral-bg: #e9ebef;
   --neutral-line: #2f3542;
-  --glass-alpha: 100%;
-  --glass-filter: none;
 }
 
-/* 4. dark (OS preference, unless the user forced light) */
+/* 3. dark (OS preference, unless the user forced light) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-app: #000000;
-    --bg-surface: #1c1c1e;
-    --bg-sunken: #2c2c2e;
-    --fg: #f5f5f7;
-    --fg-soft: #d1d1d6;
-    --fg-mute: #a1a1a6;
-    --line: #38383a;
-    --line-strong: #8e8e93;
+    --bg-app: #0d1118;
+    --bg-surface: #151b25;
+    --bg-sunken: #1f2733;
+    --fg: #ebe7da;
+    --fg-soft: #cfcbbf;
+    --fg-mute: #9ea3ad;
+    --line: #2b3444;
+    --line-strong: #7e8aa0;
 
-    --accent: #6aa8ff;
-    --accent-hover: #8dbbff;
-    --accent-fg: #0b0d10;
-    --accent-soft: #12263f;
+    --accent: #8fb0f0;
+    --accent-soft: #16213a;
+    --accent-solid: #4a72c4;
+    --accent-solid-hover: #3f66b8;
+    --accent-fg: #ffffff;
 
     --ok-fg: #6fd38f;
     --ok-bg: #10261a;
@@ -446,32 +414,7 @@ html:has(body.has-bottom-nav) {
     --verdict-clear: #74b98a;
     --verdict-unknown: #a3a39c;
 
-    --sh-ring: 1px;
-    --sh-drop: rgb(0 0 0 / 0);
-    --sh-drop2: rgb(0 0 0 / 0);
-    --sh-float-drop: rgb(0 0 0 / 0.5);
-    --sh-float-mix: 0%;
     --scrim: rgb(0 0 0 / 0.6);
-  }
-  :root:not([data-theme="light"]) [data-palette="2"] {
-    --accent: #8fb0f0;
-    --accent-hover: #a6c0f4;
-    --accent-fg: #0b0d10;
-    --accent-soft: #16213a;
-  }
-  :root:not([data-theme="light"]) [data-palette="3"] {
-    --bg-app: #0b0d10;
-    --bg-surface: #14171c;
-    --bg-sunken: #1c2026;
-    --fg: #eef0f3;
-    --fg-soft: #c9ced6;
-    --fg-mute: #98a0ad;
-    --line: #262b33;
-    --line-strong: #7d8694;
-    --accent: #5fc7ba;
-    --accent-hover: #7dd6cb;
-    --accent-fg: #0b0d10;
-    --accent-soft: #10292b;
   }
   :root:not([data-theme="light"]) .field {
     --bg-app: #000000;
@@ -483,9 +426,10 @@ html:has(body.has-bottom-nav) {
     --line: #48484a;
     --line-strong: #a1a1a6;
     --accent: #a6c0f4;
-    --accent-hover: #bccff7;
-    --accent-fg: #0b0d10;
     --accent-soft: #16213a;
+    --accent-solid: #a6c0f4;
+    --accent-solid-hover: #bccff7;
+    --accent-fg: #0b0d10;
     --ok-fg: #6fd38f;
     --ok-bg: #10261a;
     --ok-line: #6fd38f;
@@ -501,26 +445,25 @@ html:has(body.has-bottom-nav) {
     --neutral-fg: #e5e5ea;
     --neutral-bg: #2c2c2e;
     --neutral-line: #e5e5ea;
-    --glass-alpha: 100%;
-    --glass-filter: none;
   }
 }
 
-/* 5. dark (forced). Keep identical to block 4. */
+/* 4. dark (forced). Keep identical to block 3. */
 :root[data-theme="dark"] {
-  --bg-app: #000000;
-  --bg-surface: #1c1c1e;
-  --bg-sunken: #2c2c2e;
-  --fg: #f5f5f7;
-  --fg-soft: #d1d1d6;
-  --fg-mute: #a1a1a6;
-  --line: #38383a;
-  --line-strong: #8e8e93;
+  --bg-app: #0d1118;
+  --bg-surface: #151b25;
+  --bg-sunken: #1f2733;
+  --fg: #ebe7da;
+  --fg-soft: #cfcbbf;
+  --fg-mute: #9ea3ad;
+  --line: #2b3444;
+  --line-strong: #7e8aa0;
 
-  --accent: #6aa8ff;
-  --accent-hover: #8dbbff;
-  --accent-fg: #0b0d10;
-  --accent-soft: #12263f;
+  --accent: #8fb0f0;
+  --accent-soft: #16213a;
+  --accent-solid: #4a72c4;
+  --accent-solid-hover: #3f66b8;
+  --accent-fg: #ffffff;
 
   --ok-fg: #6fd38f;
   --ok-bg: #10261a;
@@ -544,32 +487,7 @@ html:has(body.has-bottom-nav) {
   --verdict-clear: #74b98a;
   --verdict-unknown: #a3a39c;
 
-  --sh-ring: 1px;
-  --sh-drop: rgb(0 0 0 / 0);
-  --sh-drop2: rgb(0 0 0 / 0);
-  --sh-float-drop: rgb(0 0 0 / 0.5);
-  --sh-float-mix: 0%;
   --scrim: rgb(0 0 0 / 0.6);
-}
-:root[data-theme="dark"] [data-palette="2"] {
-  --accent: #8fb0f0;
-  --accent-hover: #a6c0f4;
-  --accent-fg: #0b0d10;
-  --accent-soft: #16213a;
-}
-:root[data-theme="dark"] [data-palette="3"] {
-  --bg-app: #0b0d10;
-  --bg-surface: #14171c;
-  --bg-sunken: #1c2026;
-  --fg: #eef0f3;
-  --fg-soft: #c9ced6;
-  --fg-mute: #98a0ad;
-  --line: #262b33;
-  --line-strong: #7d8694;
-  --accent: #5fc7ba;
-  --accent-hover: #7dd6cb;
-  --accent-fg: #0b0d10;
-  --accent-soft: #10292b;
 }
 :root[data-theme="dark"] .field {
   --bg-app: #000000;
@@ -581,9 +499,10 @@ html:has(body.has-bottom-nav) {
   --line: #48484a;
   --line-strong: #a1a1a6;
   --accent: #a6c0f4;
-  --accent-hover: #bccff7;
-  --accent-fg: #0b0d10;
   --accent-soft: #16213a;
+  --accent-solid: #a6c0f4;
+  --accent-solid-hover: #bccff7;
+  --accent-fg: #0b0d10;
   --ok-fg: #6fd38f;
   --ok-bg: #10261a;
   --ok-line: #6fd38f;
@@ -599,22 +518,6 @@ html:has(body.has-bottom-nav) {
   --neutral-fg: #e5e5ea;
   --neutral-bg: #2c2c2e;
   --neutral-line: #e5e5ea;
-  --glass-alpha: 100%;
-  --glass-filter: none;
-}
-
-/* Opaque fallbacks for translucency (no backdrop-filter, reduced transparency, more contrast). */
-@supports not (backdrop-filter: blur(1px)) {
-  :root {
-    --glass-alpha: 100%;
-    --glass-filter: none;
-  }
-}
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  :root {
-    --glass-alpha: 100%;
-    --glass-filter: none;
-  }
 }
 
 /* Tailwind names for the new tokens (bg-surface, text-fg-mute, border-line-strong, bg-ok-bg, ...). */
@@ -628,9 +531,10 @@ html:has(body.has-bottom-nav) {
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-solid: var(--accent-solid);
+  --color-accent-solid-hover: var(--accent-solid-hover);
+  --color-accent-fg: var(--accent-fg);
   --color-ok-fg: var(--ok-fg);
   --color-ok-bg: var(--ok-bg);
   --color-ok-line: var(--ok-line);
@@ -646,41 +550,33 @@ html:has(body.has-bottom-nav) {
   --color-neutral-fg: var(--neutral-fg);
   --color-neutral-bg: var(--neutral-bg);
   --color-neutral-line: var(--neutral-line);
-  --color-glass: color-mix(in srgb, var(--bg-surface) var(--glass-alpha), transparent);
-  --radius-ctl: var(--r-ctl);
-  --radius-card: var(--r-card);
-  --radius-sheet: var(--r-sheet);
+  --radius-ctl: var(--r-journal);
   --radius-pill: var(--r-pill);
-  --shadow-card: 0 0 0 var(--sh-ring) var(--line), 0 1px 2px var(--sh-drop), 0 10px 24px -14px var(--sh-drop2);
-  --shadow-lift: 0 0 0 var(--sh-ring) var(--line), 0 2px 4px var(--sh-drop), 0 24px 48px -24px var(--sh-float-drop);
-  --shadow-float: 0 12px 36px -6px var(--sh-float-drop), 0 0 0 0.5px color-mix(in srgb, var(--line) var(--sh-float-mix), var(--line-strong));
   --text-h1: var(--fs-h1);
-  --text-h1--line-height: 1.3;
+  --text-h1--line-height: 1.4;
   --text-h2: var(--fs-h2);
-  --text-h2--line-height: 1.35;
+  --text-h2--line-height: 1.45;
   --text-h3: var(--fs-h3);
-  --text-h3--line-height: 1.4;
+  --text-h3--line-height: 1.5;
   --text-body: var(--fs-body);
-  --text-body--line-height: 1.5;
+  --text-body--line-height: 1.7;
   --text-table: var(--fs-table);
-  --text-table--line-height: 1.45;
+  --text-table--line-height: 1.7;
   --text-aux: var(--fs-aux);
-  --text-aux--line-height: 1.5;
+  --text-aux--line-height: 1.7;
   --text-stat: var(--fs-stat);
   --text-stat--line-height: 1.1;
   --text-state: var(--fs-state);
-  --text-state--line-height: 1.3;
+  --text-state--line-height: 1.4;
 }
 
-/* Variants: force a state in the catalog (data-force="hover focus") and key off field mode / density. */
+/* Variants: force a state in the catalog (data-force="hover focus active") and key off field mode / density. */
 @custom-variant hov (&:is(:hover, [data-force~="hover"]));
 @custom-variant foc (&:is(:focus-visible, [data-force~="focus"]));
+/* Pressed; declared after `hov` so it wins when both apply. */
+@custom-variant act (&:is(:active, [data-force~="active"]));
 @custom-variant field (&:where(.field, .field *));
 @custom-variant compact (&:where([data-density="compact"], [data-density="compact"] *));
-/* Pressed state (forced in the catalog with data-force="active"); declared after `hov` so it wins when both apply. */
-@custom-variant act (&:is(:active, [data-force~="active"]));
-/* 航空日誌の紙面（試作）。`.jr` の中だけで効く。ほかの節・画面はこの variant の指定を読まない。 */
-@custom-variant jr (&:where(.jr, .jr *));
 
 /* ------------------------------------------------------------
  * `.ds` — the scope in which the new system applies.
@@ -710,9 +606,13 @@ html:has(body.has-bottom-nav) {
   font-family: var(--ds-font-sans);
   font-size: var(--fs-body);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.7;
   font-feature-settings: normal;
   -webkit-text-size-adjust: 100%;
+  /* Japanese typesetting: no small kana or punctuation at the start of a line; a long unbroken string wraps. */
+  line-break: strict;
+  word-break: auto-phrase;
+  overflow-wrap: break-word;
 }
 
 :root[data-theme="light"],
@@ -724,11 +624,10 @@ html:has(body.has-bottom-nav) {
   color-scheme: dark;
 }
 
-/* Old token names resolve to the new values under `.ds` (removed in stage 5). Re-declared on nested
- * scopes because a custom property holding var() is resolved where it is declared. */
+/* Old token names resolve to the new values under `.ds` (removed in stage 5). Re-declared on the field scope
+ * because a custom property holding var() is resolved where it is declared. */
 .ds,
-.ds .field,
-.ds [data-palette] {
+.ds .field {
   --color-paper: var(--bg-surface);
   --color-paper-soft: var(--bg-sunken);
   --color-paper-deep: var(--bg-sunken);
@@ -756,10 +655,10 @@ html:has(body.has-bottom-nav) {
   --color-verdict-done: var(--verdict-done);
   --color-verdict-clear: var(--verdict-clear);
   --color-verdict-unknown: var(--verdict-unknown);
-  --radius-sharp: var(--r-ctl);
-  --radius-soft: var(--r-ctl);
-  /* App icon proposals: the accent (a placeholder blue) and the text-on-accent colour of the chosen palette. */
-  --appicon-bg: var(--accent);
+  --radius-sharp: var(--r-journal);
+  --radius-soft: var(--r-journal);
+  /* App icon proposals: the accent fill (a placeholder) and the text-on-accent colour. */
+  --appicon-bg: var(--accent-solid);
   --appicon-fg: var(--accent-fg);
   --font-sans: var(--ds-font-sans);
   --font-display: var(--ds-font-sans);
@@ -809,79 +708,14 @@ html:has(.ds-page) {
 .ds :is(h1, h2, h3, .palt) {
   font-feature-settings: "palt" 1;
   letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+/* Paragraphs avoid a one-character last line. */
+.ds :is(p, li, dd) {
+  text-wrap: pretty;
 }
 .ds :is(.tnum, .num, time, td, [data-num]) {
   font-variant-numeric: tabular-nums;
-}
-
-/* ------------------------------------------------------------
- * `.jr` — 「航空日誌の紙面」の試作（Sprint 12g の見本のうち、ボタンと入力欄の節だけ）。
- * 紙色の地・墨色の文字・藍 1 色。角丸は 1 種類（--r-journal）、影なし、半透明なし。
- * 色は通常モードだけ置き換える（現場モードは 7:1 の専用の組をそのまま使う）。暗は紙の反転ではなく、
- * 夜間の機内灯のような青みの濃い地に、紙の白を少し落とした文字を置く別の組。
- * ---------------------------------------------------------- */
-.jr {
-  /* 角丸の値はここ 1 か所。ボタン・入力欄・面はすべてこれを通る。 */
-  --r-journal: 5px;
-  --r-ctl: var(--r-journal);
-  --r-card: var(--r-journal);
-  --sh-ring: 0px;
-  --sh-drop: transparent;
-  --sh-drop2: transparent;
-  --dur-fast: 200ms;
-  --glass-alpha: 100%;
-  --glass-filter: none;
-}
-.ds:not(.field) .jr {
-  --bg-app: #f1ede1;
-  --bg-surface: #fbf9f3;
-  --bg-sunken: #ebe6d7;
-  --fg: #171b22;
-  --fg-soft: #3b3f47;
-  --fg-mute: #5c5f66;
-  --line: #d8d1bd;
-  --line-strong: #857f6c;
-  --accent: #1f4a99;
-  --accent-hover: #183b7c;
-  --accent-fg: #ffffff;
-  --accent-soft: #e7ecf7;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .ds:not(.field) .jr {
-    --bg-app: #0d1118;
-    --bg-surface: #151b25;
-    --bg-sunken: #1f2733;
-    --fg: #ebe7da;
-    --fg-soft: #cfcbbf;
-    --fg-mute: #9ea3ad;
-    --line: #2b3444;
-    --line-strong: #7e8aa0;
-    --accent: #8fb0f0;
-    --accent-hover: #a6c0f4;
-    --accent-fg: #0b0d10;
-    --accent-soft: #16213a;
-  }
-}
-:root[data-theme="dark"] .ds:not(.field) .jr {
-  --bg-app: #0d1118;
-  --bg-surface: #151b25;
-  --bg-sunken: #1f2733;
-  --fg: #ebe7da;
-  --fg-soft: #cfcbbf;
-  --fg-mute: #9ea3ad;
-  --line: #2b3444;
-  --line-strong: #7e8aa0;
-  --accent: #8fb0f0;
-  --accent-hover: #a6c0f4;
-  --accent-fg: #0b0d10;
-  --accent-soft: #16213a;
-}
-.jr {
-  background: var(--bg-app);
-  color: var(--fg);
-  /* 日本語の組版：行頭に小書きの仮名や句読点を置かない。長い語は枠の中で折り返す。 */
-  line-break: strict;
-  overflow-wrap: anywhere;
 }
 
 /* Focus: 2px accent ring, visible on every interactive element (never removed). */
@@ -896,13 +730,6 @@ html:has(.ds-page) {
 .ds ::selection {
   background: color-mix(in srgb, var(--accent) 24%, transparent);
   color: inherit;
-}
-
-/* Translucent bars and sheets (fixed chrome only). */
-.ds .glass {
-  background: color-mix(in srgb, var(--bg-surface) var(--glass-alpha), transparent);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
 }
 
 /* Native <dialog> as dialog / bottom sheet / drawer. */
@@ -921,7 +748,7 @@ html:has(.ds-page) {
   overflow: visible;
 }
 .ds-dialog::backdrop {
-  background: rgb(0 0 0 / 0.45);
+  background: var(--scrim);
 }
 .ds dialog.ds-dialog[open] > .ds-dialog-panel {
   animation: ds-rise var(--dur-sheet) var(--ease);
@@ -950,22 +777,11 @@ html:has(.ds-page) {
 @keyframes ds-pop {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.98);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@keyframes ds-ping {
-  0% {
-    opacity: 0.5;
-    transform: scale(0.6);
-  }
-  80%,
-  100% {
-    opacity: 0;
-    transform: scale(1.5);
   }
 }
 @keyframes ds-skeleton {
@@ -979,11 +795,6 @@ html:has(.ds-page) {
 }
 .ds .ds-pop {
   animation: ds-pop var(--dur) var(--ease);
-}
-.ds .ds-ping {
-  animation: ds-ping 2.4s var(--ease) infinite;
-  transform-origin: center;
-  transform-box: fill-box;
 }
 .ds .ds-skeleton {
   animation: ds-skeleton 1.4s ease-in-out infinite;
@@ -1035,7 +846,6 @@ html:has(.ds-page) {
 @media (prefers-reduced-motion: reduce) {
   .ds .ds-pop,
   .ds .ds-skeleton,
-  .ds .ds-ping,
   .ds dialog.ds-dialog[open] > .ds-dialog-panel,
   .ds dialog.ds-dialog[open]::backdrop {
     animation: none;

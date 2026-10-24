@@ -35,7 +35,7 @@ const BAR: Readonly<Record<Meaning, string>> = {
 
 // ── Status pill ──────────────────────────────────────────────────────────────
 
-/** A status in a pill: one of five meanings, always icon + text. */
+/** A status as a small ruled mark: one of five meanings, always icon + text. */
 export function StatusPill({
   meaning = "neutral",
   icon,
@@ -53,7 +53,7 @@ export function StatusPill({
       {...rest}
       data-meaning={meaning}
       className={cx(
-        "inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-pill px-2.5 text-aux font-medium shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--pill-line)_26%,transparent)] field:min-h-8 field:px-3 field:text-state field:font-bold",
+        "inline-flex min-h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-ctl border border-[color-mix(in_srgb,var(--pill-line)_45%,var(--bg-surface))] px-2 text-aux font-medium field:min-h-8 field:px-3 field:text-state field:font-bold",
         PILL[meaning],
         className,
       )}
@@ -68,31 +68,32 @@ export function StatusPill({
 
 type Variant = "primary" | "secondary" | "quiet" | "danger";
 
-// `jr:` is the journal-paper trial (see `.jr` in globals.css): the label wraps inside the frame instead of overflowing,
-// the pressed state is a darker fill and a 1px shift (no scale), and nothing casts a shadow.
+// The label wraps inside the frame instead of overflowing (min-width, max-width:100%, balanced lines, phrase breaks for
+// Japanese). A pressed button gets a darker fill and a 1px shift, never a scale. Nothing casts a shadow.
 const BUTTON_BASE =
-  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-ctl text-body font-medium touch-manipulation transition-[background-color,border-color,transform,box-shadow] duration-[var(--dur-fast)] ease-[var(--ease)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:active:scale-100 disabled:cursor-not-allowed disabled:active:scale-100 " +
-  "jr:max-w-full jr:whitespace-normal jr:py-2 jr:text-center jr:leading-snug jr:[text-wrap:balance] jr:[word-break:auto-phrase] jr:active:scale-100 jr:act:translate-y-px jr:shadow-none";
+  "inline-flex max-w-full select-none items-center justify-center gap-2 rounded-ctl border py-2 text-center text-body font-medium leading-snug touch-manipulation [text-wrap:balance] [word-break:auto-phrase] [overflow-wrap:anywhere] " +
+  "transition-[background-color,border-color,color] duration-[var(--dur)] ease-[var(--ease)] enabled:act:translate-y-px aria-disabled:cursor-not-allowed disabled:cursor-not-allowed";
 
 const BUTTON_VARIANT: Readonly<Record<Variant, string>> = {
   primary:
-    "bg-accent text-accent-fg font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.16)] hov:bg-accent-hover disabled:shadow-none disabled:bg-sunken disabled:text-fg-mute aria-disabled:shadow-none aria-disabled:bg-sunken aria-disabled:text-fg-mute " +
-    "jr:border jr:border-transparent jr:act:bg-[color-mix(in_srgb,var(--accent-hover)_82%,#000)] jr:disabled:border-line jr:aria-disabled:border-line",
+    "border-transparent bg-accent-solid font-semibold text-accent-fg enabled:hov:bg-accent-solid-hover enabled:act:bg-[color-mix(in_srgb,var(--accent-solid-hover)_82%,#000)] " +
+    "disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:border-line aria-disabled:bg-sunken aria-disabled:text-fg-mute",
   secondary:
-    "border border-line-strong bg-surface text-fg shadow-[0_1px_1px_var(--sh-drop)] hov:bg-sunken disabled:text-fg-mute disabled:bg-sunken aria-disabled:text-fg-mute aria-disabled:bg-sunken " +
-    "jr:hov:border-fg jr:act:border-fg jr:act:bg-sunken jr:disabled:border-line jr:aria-disabled:border-line",
+    "border-line-strong bg-surface text-fg enabled:hov:border-fg enabled:hov:bg-sunken enabled:act:border-fg enabled:act:bg-sunken " +
+    "disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:border-line aria-disabled:bg-sunken aria-disabled:text-fg-mute",
+  // The disabled quiet button has no fill to lose, so a dashed rule marks it as present but unavailable.
   quiet:
-    "text-accent hov:bg-accent-soft disabled:text-fg-mute aria-disabled:text-fg-mute " +
-    "jr:border jr:border-transparent jr:hov:underline jr:act:bg-accent-soft",
+    "border-transparent text-accent enabled:hov:bg-accent-soft enabled:hov:underline enabled:act:bg-accent-soft " +
+    "disabled:border-dashed disabled:border-line disabled:text-fg-mute aria-disabled:border-dashed aria-disabled:border-line aria-disabled:text-fg-mute",
   danger:
-    "border border-danger-line bg-danger-bg text-danger-fg hov:brightness-95 disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:bg-sunken aria-disabled:text-fg-mute " +
-    "jr:act:brightness-90",
+    "border-danger-line bg-danger-bg text-danger-fg enabled:hov:brightness-95 enabled:act:brightness-90 " +
+    "disabled:border-line disabled:bg-sunken disabled:text-fg-mute aria-disabled:border-line aria-disabled:bg-sunken aria-disabled:text-fg-mute",
 };
 
 const BUTTON_SIZE = {
-  md: "min-h-11 px-4 field:min-h-14 field:px-5 field:text-[1.125rem] jr:min-w-28",
-  sm: "min-h-11 px-3 field:min-h-14 jr:min-w-20",
-  icon: "min-h-11 min-w-11 field:min-h-14 field:min-w-14",
+  md: "min-h-11 min-w-28 px-4 field:min-h-14 field:px-5 field:text-[1.125rem]",
+  sm: "min-h-11 min-w-20 px-3 field:min-h-14",
+  icon: "min-h-11 min-w-11 px-0 field:min-h-14 field:min-w-14",
 } as const;
 
 export function buttonClass(variant: Variant = "secondary", size: keyof typeof BUTTON_SIZE = "md", extra?: string): string {
@@ -114,7 +115,7 @@ export function Spinner({ size = 18, label }: { readonly size?: number; readonly
       aria-label={label}
       aria-hidden={label ? undefined : true}
     >
-      <circle cx="12" cy="12" r="9" opacity={0.25} />
+      <circle cx="12" cy="12" r="9" stroke="var(--line-strong)" />
       <path d="M21 12a9 9 0 0 0-9-9" />
     </svg>
   );
@@ -156,7 +157,7 @@ export function ButtonLink({
 }: Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & { readonly href: string; readonly variant?: Variant; readonly size?: keyof typeof BUTTON_SIZE; readonly icon?: IconName }) {
   return (
     <Link {...rest} href={href} prefetch={false} className={buttonClass(variant, size, className)}>
-      {icon ? <Icon name={icon} size={18} /> : null}
+      {icon ? <Icon name={icon} size={18} className="shrink-0" /> : null}
       {children}
     </Link>
   );
@@ -164,7 +165,7 @@ export function ButtonLink({
 
 // ── Cards ────────────────────────────────────────────────────────────────────
 
-/** Three card shapes: primary (large, one per screen), standard, inset (a tonal step only, no border). */
+/** Three card shapes: primary (large, one per screen), standard (a thin rule), inset (a ground step only, no border). */
 export function Card({
   variant = "standard",
   as: Tag = "div",
@@ -177,9 +178,9 @@ export function Card({
       {...rest}
       data-card={variant}
       className={cx(
-        "min-w-0 rounded-card",
-        variant === "primary" && "bg-surface p-5 shadow-lift sm:p-6",
-        variant === "standard" && "bg-surface p-4 shadow-card",
+        "min-w-0 rounded-ctl",
+        variant === "primary" && "border border-line-strong bg-surface p-5 sm:p-6",
+        variant === "standard" && "border border-line bg-surface p-4",
         variant === "inset" && "bg-sunken p-4",
         className,
       )}
@@ -222,10 +223,11 @@ export function StatTile({
       {href ? <Icon name="chevron-right" size={18} className="text-fg-mute" /> : null}
     </>
   );
+  // The lead tile has a rule around it; the compact rows have none and are separated by the list that holds them.
   const cls = cx(
-    "flex items-center justify-between gap-3 rounded-card",
-    size === "lead" ? "bg-surface p-5 shadow-card" : "bg-surface px-4 py-3 shadow-card",
-    href && "min-h-11 transition-colors hov:bg-accent-soft",
+    "flex items-center justify-between gap-3",
+    size === "lead" ? "rounded-ctl border border-line-strong bg-surface p-5" : "py-3",
+    href && "min-h-11 transition-colors hov:bg-accent-soft field:min-h-14",
   );
   return href ? (
     <Link {...rest} href={href} prefetch={false} className={cls}>
@@ -259,7 +261,7 @@ export function PageHeader({
   return (
     <header {...rest} className="flex flex-col gap-1">
       {back ? (
-        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-11 items-center gap-1 self-start text-aux text-accent hov:underline">
+        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-11 items-center gap-1 self-start text-aux text-accent hov:underline field:min-h-14">
           <Icon name="chevron-left" size={16} />
           {back.label}
         </Link>
@@ -288,12 +290,12 @@ export function NoticeBar({
       {...rest}
       role="note"
       data-meaning={meaning}
-      className={cx("flex items-start gap-3 rounded-card px-4 py-3 text-table shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--bar-line)_22%,transparent)]", BAR[meaning])}
+      className={cx("flex items-start gap-3 rounded-ctl border border-[color-mix(in_srgb,var(--bar-line)_40%,var(--bg-surface))] px-4 py-3 text-table", BAR[meaning])}
     >
       <Icon name={icon ?? MEANING_ICON[meaning]} size={18} className="mt-0.5 text-[color:var(--bar-line)]" />
       <div className="min-w-0 flex-1">
         {title ? <p className="font-semibold">{title}</p> : null}
-        <div className="leading-relaxed">{children}</div>
+        <div>{children}</div>
       </div>
     </div>
   );
@@ -315,16 +317,16 @@ export function EmptyState({
   readonly action?: ReactNode;
 } & DataAttrs) {
   return (
-    <div {...rest} className="flex flex-col items-center gap-3 rounded-card bg-sunken px-6 py-10 text-center">
+    <div {...rest} className="flex flex-col items-center gap-3 rounded-ctl bg-sunken px-6 py-10 text-center">
       {art ? (
         <span className="text-fg-mute">{art}</span>
       ) : (
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-pill bg-surface text-fg-mute shadow-card">
-          <Icon name={icon} size={24} />
+        <span className="text-fg-mute">
+          <Icon name={icon} size={28} />
         </span>
       )}
       <p className="text-h3 font-semibold text-fg">{title}</p>
-      {children ? <p className="max-w-[40ch] text-table text-fg-soft">{children}</p> : null}
+      {children ? <p className="max-w-[36ch] text-table text-fg-soft">{children}</p> : null}
       {action ? <div className="mt-1">{action}</div> : null}
     </div>
   );
@@ -338,7 +340,7 @@ export function Skeleton({ className }: { readonly className?: string }) {
 /** A keyboard key cap. */
 export function Kbd({ children }: { readonly children: ReactNode }) {
   return (
-    <kbd className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-[6px] border border-line bg-surface px-1.5 font-mono text-aux text-fg-soft shadow-[0_1px_0_var(--line)]">
+    <kbd className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-ctl border border-line-strong bg-surface px-1.5 font-mono text-aux text-fg-soft">
       {children}
     </kbd>
   );
@@ -353,13 +355,13 @@ export function Disclosure({
   ...rest
 }: { readonly summary: ReactNode; readonly icon?: IconName; readonly defaultOpen?: boolean; readonly children: ReactNode } & DataAttrs) {
   return (
-    <details {...rest} open={defaultOpen || undefined} className="group rounded-card bg-sunken">
-      <summary className="flex min-h-11 field:min-h-14 field:text-body cursor-pointer list-none items-center gap-2 rounded-card px-4 text-table font-medium text-fg-soft hov:text-fg [&::-webkit-details-marker]:hidden">
+    <details {...rest} open={defaultOpen || undefined} className="group rounded-ctl bg-sunken">
+      <summary className="flex min-h-11 field:min-h-14 field:text-body cursor-pointer list-none items-center gap-2 rounded-ctl px-4 text-table font-medium text-fg-soft hov:text-fg [&::-webkit-details-marker]:hidden">
         <Icon name={icon} size={16} className="text-fg-mute" />
         <span className="min-w-0 flex-1">{summary}</span>
         <Icon name="chevron-down" size={16} className="text-fg-mute transition-transform duration-[var(--dur)] group-open:rotate-180" />
       </summary>
-      <div className="px-4 pb-4 text-table leading-relaxed text-fg-soft">{children}</div>
+      <div className="px-4 pb-4 text-table text-fg-soft">{children}</div>
     </details>
   );
 }

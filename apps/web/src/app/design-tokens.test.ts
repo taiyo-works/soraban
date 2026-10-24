@@ -1,6 +1,6 @@
 // Sprint 12g stage 1a (contract 1a-1, 1a-2): the new design tokens in globals.css.
-// Reads the CSS, resolves the tokens for every context (light/dark x palette 1-3, plus field mode) the way the cascade
-// does, and checks the contrast ratios listed in docs/design/ui-direction.md 3.1:
+// Reads the CSS, resolves the tokens for every context (light / dark, normal / field mode) the way the cascade does,
+// and checks the contrast ratios listed in docs/design/ui-direction.md 3.1:
 //   normal text 4.5:1, non-text meaning (input/button borders, icons) 3:1, field-mode body text and primary buttons 7:1.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -51,7 +51,7 @@ function parseRules(css: string): Rule[] {
 
 const RULES = parseRules(CSS);
 
-type Ctx = { readonly theme: "light" | "dark"; readonly palette: 1 | 2 | 3; readonly field: boolean };
+type Ctx = { readonly theme: "light" | "dark"; readonly field: boolean };
 type DarkVariant = "media" | "attr";
 
 /** Resolve token values for a context by applying matching rules in source order. */
@@ -62,16 +62,12 @@ function resolve(ctx: Ctx, variant: DarkVariant = "media"): Record<string, strin
     const sel = r.selector;
     let applies = false;
     if (!r.inDarkMedia && sel === ":root") applies = true;
-    else if (!r.inDarkMedia && sel === ':root [data-palette="2"]') applies = ctx.palette === 2;
-    else if (!r.inDarkMedia && sel === ':root [data-palette="3"]') applies = ctx.palette === 3;
     else if (!r.inDarkMedia && sel === ":root .field") applies = ctx.field;
     else if (ctx.theme === "dark") {
       const fromMedia = r.inDarkMedia && variant === "media";
       const fromAttr = !r.inDarkMedia && variant === "attr";
       if (fromMedia || fromAttr) {
         if (sel === darkRoot) applies = true;
-        else if (sel === `${darkRoot} [data-palette="2"]`) applies = ctx.palette === 2;
-        else if (sel === `${darkRoot} [data-palette="3"]`) applies = ctx.palette === 3;
         else if (sel === `${darkRoot} .field`) applies = ctx.field;
       }
     }
@@ -100,12 +96,8 @@ const MEANINGS = ["ok", "warn", "danger", "info", "neutral"] as const;
 const VERDICTS = ["no-fly", "needs", "done", "clear", "unknown"] as const;
 const SURFACES = ["bg-surface", "bg-app", "bg-sunken"] as const;
 
-const CONTEXTS: readonly [string, Ctx][] = (["light", "dark"] as const).flatMap((theme) =>
-  ([1, 2, 3] as const).map((palette): [string, Ctx] => [`${theme} / palette ${palette}`, { theme, palette, field: false }]),
-);
-const FIELD_CONTEXTS: readonly [string, Ctx][] = (["light", "dark"] as const).flatMap((theme) =>
-  ([1, 2, 3] as const).map((palette): [string, Ctx] => [`field ${theme} / palette ${palette}`, { theme, palette, field: true }]),
-);
+const CONTEXTS: readonly [string, Ctx][] = (["light", "dark"] as const).map((theme): [string, Ctx] => [theme, { theme, field: false }]);
+const FIELD_CONTEXTS: readonly [string, Ctx][] = (["light", "dark"] as const).map((theme): [string, Ctx] => [`field ${theme}`, { theme, field: true }]);
 
 const get = (t: Record<string, string>, name: string): string => {
   const v = t[`--${name}`];
@@ -129,12 +121,15 @@ function pairs(t: Record<string, string>, field: boolean): Check[] {
     add(`accent (text/link) on ${s}`, "accent", s, body);
   }
   add("accent on accent-soft", "accent", "accent-soft", body);
-  add("accent-fg on accent (primary button)", "accent-fg", "accent", body);
-  add("accent-fg on accent-hover", "accent-fg", "accent-hover", body);
+  add("accent-fg on accent-solid (primary button)", "accent-fg", "accent-solid", body);
+  add("accent-fg on accent-solid-hover", "accent-fg", "accent-solid-hover", body);
   add("line-strong on bg-surface (input/button border)", "line-strong", "bg-surface", 3);
+  add("line-strong on bg-sunken (disabled field, segmented)", "line-strong", "bg-sunken", 3);
   add("accent on bg-surface (focus ring, non-text)", "accent", "bg-surface", 3);
+  add("accent-solid on bg-surface (button edge)", "accent-solid", "bg-surface", 3);
+  add("accent-solid-hover on bg-surface (button edge)", "accent-solid-hover", "bg-surface", 3);
   for (const m of MEANINGS) {
-    add(`${m}-fg on ${m}-bg (pill text)`, `${m}-fg`, `${m}-bg`, body);
+    add(`${m}-fg on ${m}-bg (mark text)`, `${m}-fg`, `${m}-bg`, body);
     add(`${m}-fg on bg-surface`, `${m}-fg`, "bg-surface", body);
     add(`${m}-line on ${m}-bg (icon)`, `${m}-line`, `${m}-bg`, 3);
     add(`${m}-line on bg-surface (icon)`, `${m}-line`, "bg-surface", 3);
@@ -144,24 +139,20 @@ function pairs(t: Record<string, string>, field: boolean): Check[] {
 }
 
 describe("1a-1 トークンの構造", () => {
-  it("明・暗・現場の 3 組と、配色案 2・3 の規則がある。暗は OS 設定の版と data-theme の版の両方", () => {
+  it("明・現場（明）・暗・現場（暗）の規則がある。暗は OS 設定の版と data-theme の版の両方。配色案の規則はない", () => {
     const sels = RULES.map((r) => `${r.inDarkMedia ? "@dark " : ""}${r.selector}`);
     for (const s of [
       ":root",
-      ':root [data-palette="2"]',
-      ':root [data-palette="3"]',
       ":root .field",
       '@dark :root:not([data-theme="light"])',
-      '@dark :root:not([data-theme="light"]) [data-palette="2"]',
-      '@dark :root:not([data-theme="light"]) [data-palette="3"]',
       '@dark :root:not([data-theme="light"]) .field',
       ':root[data-theme="dark"]',
-      ':root[data-theme="dark"] [data-palette="2"]',
-      ':root[data-theme="dark"] [data-palette="3"]',
       ':root[data-theme="dark"] .field',
     ]) {
       expect(sels, s).toContain(s);
     }
+    expect(sels.filter((x) => x.includes("data-palette"))).toEqual([]);
+    expect(CSS).not.toMatch(/data-palette/);
   });
 
   it("暗の 2 つの版（prefers-color-scheme と data-theme=dark）は、同じ宣言を持つ", () => {
@@ -170,61 +161,60 @@ describe("1a-1 トークンの構造", () => {
     }
   });
 
-  it("配色案と現場モードの規則は、基本の規則と同じトークンの組をすべて上書きする（下の層の値が漏れない）", () => {
-    const keysOf = (sel: string, dark: boolean): string[] =>
-      Object.keys(RULES.find((r) => r.selector === sel && r.inDarkMedia === dark)!.vars).sort();
-    const paletteKeys = ["--accent", "--accent-fg", "--accent-hover", "--accent-soft"];
+  it("暗は明の反転ではない別の組：地は紙色の逆の暗い青黒、文字は紙の白を落とした色、アクセントの塗りは明と別の値", () => {
+    const light = resolve({ theme: "light", field: false });
+    const dark = resolve({ theme: "dark", field: false });
+    for (const k of ["--bg-app", "--bg-surface", "--bg-sunken", "--fg", "--accent", "--accent-solid"]) expect(dark[k], k).not.toBe(light[k]);
+    // not a mechanical inversion: the dark text is not the light ground and the dark ground is not the light text
+    expect(dark["--fg"]).not.toBe(light["--bg-surface"]);
+    expect(dark["--bg-surface"]).not.toBe(light["--fg"]);
+    // the ground is a deep blue-black, the text a dimmed paper white (warm), both measured
+    expect(luminance(dark["--bg-surface"]!)).toBeLessThan(0.02);
+    expect(luminance(dark["--fg"]!)).toBeGreaterThan(0.6);
+  });
+
+  it("現場モードの規則は、基本の規則と同じトークンの組をすべて上書きする（下の層の値が漏れない）", () => {
+    const keysOf = (sel: string, dark: boolean): string[] => Object.keys(RULES.find((r) => r.selector === sel && r.inDarkMedia === dark)!.vars).sort();
+    const need = ["--bg-app", "--bg-surface", "--bg-sunken", "--fg", "--fg-soft", "--fg-mute", "--line", "--line-strong", "--accent", "--accent-soft", "--accent-solid", "--accent-solid-hover", "--accent-fg", ...MEANINGS.flatMap((m) => [`--${m}-fg`, `--${m}-bg`, `--${m}-line`])];
     for (const dark of [false, true]) {
-      const root = dark ? ':root:not([data-theme="light"])' : ":root";
-      const pal = (n: number): string => (dark ? `${root} [data-palette="${n}"]` : `:root [data-palette="${n}"]`);
-      const field = dark ? `${root} .field` : ":root .field";
-      expect(keysOf(pal(2), dark)).toEqual(paletteKeys);
-      // palette 3 changes neutrals as well; it must define every neutral and accent token
-      const k3 = keysOf(pal(3), dark);
-      for (const k of ["--bg-app", "--bg-surface", "--bg-sunken", "--fg", "--fg-soft", "--fg-mute", "--line", "--line-strong", ...paletteKeys]) {
-        expect(k3, `${dark ? "dark" : "light"} palette 3 ${k}`).toContain(k);
-      }
-      // field mode redefines neutrals, accent and all semantic colours itself
+      const field = dark ? ':root:not([data-theme="light"]) .field' : ":root .field";
       const kf = keysOf(field, dark);
-      for (const k of [...k3, ...MEANINGS.flatMap((m) => [`--${m}-fg`, `--${m}-bg`, `--${m}-line`]), "--glass-alpha", "--glass-filter"]) {
-        expect(kf, `${dark ? "dark" : "light"} field ${k}`).toContain(k);
-      }
+      for (const k of need) expect(kf, `${dark ? "dark" : "light"} field ${k}`).toContain(k);
     }
   });
 
-  it("現場モードは半透明を使わない（地の不透明度 100%＝surface のまま、ぼかしなし）。通常は 80% 以上", () => {
-    for (const [name, ctx] of FIELD_CONTEXTS) {
-      const t = resolve(ctx);
-      expect(t["--glass-alpha"], name).toBe("100%");
-      expect(t["--glass-filter"], name).toBe("none");
-    }
-    for (const [name, ctx] of CONTEXTS) {
-      const alpha = parseInt(resolve(ctx)["--glass-alpha"]!, 10);
-      expect(alpha, name).toBeGreaterThanOrEqual(80);
-      expect(resolve(ctx)["--glass-filter"], name).toMatch(/blur/);
-    }
-    // opaque fallbacks: no backdrop-filter support, reduced transparency, more contrast
-    expect(CSS).toMatch(/@supports not \(backdrop-filter: blur\(1px\)\)[\s\S]*?--glass-alpha: 100%/);
-    expect(CSS).toMatch(/@media \(prefers-reduced-transparency: reduce\), \(prefers-contrast: more\)[\s\S]*?--glass-alpha: 100%/);
+  it("半透明（ガラス）・影のトークンを持たない。角丸は 1 か所の値だけで、ピルは別に 1 つ", () => {
+    expect(CSS).not.toMatch(/--glass|backdrop-filter|--sh-|--shadow-|\.glass/);
+    const base = RULES.find((r) => r.selector === ":root" && "--r-journal" in r.vars)!;
+    const px = parseFloat(base.vars["--r-journal"]!);
+    expect(base.vars["--r-journal"]).toMatch(/^\d+px$/);
+    expect(px).toBeGreaterThanOrEqual(4);
+    expect(px).toBeLessThanOrEqual(6);
+    expect(Object.keys(base.vars).filter((k) => k.startsWith("--r-")).sort()).toEqual(["--r-journal", "--r-pill"]);
+    // every radius utility resolves to that one token
+    expect(CSS).toMatch(/--radius-ctl:\s*var\(--r-journal\)/);
+    expect(CSS).not.toMatch(/--radius-(card|sheet)\b/);
+    // motion is 200-300ms
+    const dur = (n: string): number => parseInt(base.vars[n]!, 10);
+    expect(dur("--dur")).toBeGreaterThanOrEqual(200);
+    expect(dur("--dur-sheet")).toBeLessThanOrEqual(300);
   });
 
   it("派生のトークン（影・半透明）は要素側で解決される：var() を持つ値を :root に置かない", () => {
     const rootRules = RULES.filter((r) => r.selector === ":root" || r.selector.startsWith(":root:not") || r.selector.startsWith(":root[data-theme"));
     for (const r of rootRules) {
       for (const [k, v] of Object.entries(r.vars)) {
-        if (/^--(bg|fg|line|accent|ok|warn|danger|info|neutral|verdict|sh|glass|scrim|r|dur|ease)/.test(k)) {
+        if (/^--(bg|fg|line|accent|ok|warn|danger|info|neutral|verdict|scrim|r|dur|ease)/.test(k)) {
           expect(v, `${r.selector} ${k}`).not.toMatch(/var\(/);
         }
       }
     }
   });
 
-  it("現場モードのアクセントは、3 案とも同じ（明は濃い藍 #1f4a99 に固定）", () => {
-    for (const theme of ["light", "dark"] as const) {
-      const accents = ([1, 2, 3] as const).map((palette) => resolve({ theme, palette, field: true })["--accent"]);
-      expect(new Set(accents).size, theme).toBe(1);
-    }
-    expect(resolve({ theme: "light", palette: 1, field: true })["--accent"]).toBe("#1f4a99");
+  it("現場モードのアクセント（塗り）は明では濃い藍 #1f4a99、暗では淡い藍（暗い文字を載せる）", () => {
+    expect(resolve({ theme: "light", field: true })["--accent-solid"]).toBe("#1f4a99");
+    expect(resolve({ theme: "light", field: true })["--accent"]).toBe("#1f4a99");
+    expect(resolve({ theme: "dark", field: true })["--accent-solid"]).toBe("#a6c0f4");
   });
 
   it("color-scheme：自動のときだけ `light dark`。強制したテーマ（明・暗）では単一の値（現場モードも同じ）", () => {
@@ -253,7 +243,7 @@ describe("1a-1 トークンの構造", () => {
 
   it("`.ds` は color-scheme: light dark を宣言し、旧名のトークンは `.ds` の下でだけ新しい値へ写像される", () => {
     expect(CSS).toMatch(/\.ds\s*\{[^}]*color-scheme:\s*light dark/);
-    const ds = RULES.find((r) => r.selector === ".ds, .ds .field, .ds [data-palette]")!;
+    const ds = RULES.find((r) => r.selector === ".ds, .ds .field")!;
     expect(ds.vars["--color-paper"]).toBe("var(--bg-surface)");
     expect(ds.vars["--color-ink"]).toBe("var(--fg)");
     expect(ds.vars["--color-verdict-no-fly"]).toBe("var(--verdict-no-fly)");
@@ -262,14 +252,17 @@ describe("1a-1 トークンの構造", () => {
     expect(root.vars["--color-paper"]).toBe("#f5f2ea");
     // And no rule other than the `.ds` family remaps them.
     const remap = RULES.filter((r) => r.vars["--color-paper"]?.startsWith("var(--bg-")).map((r) => r.selector);
-    expect(remap).toEqual([".ds, .ds .field, .ds [data-palette]"]);
+    expect(remap).toEqual([".ds, .ds .field"]);
   });
 
-  it("システムフォントのスタックと、等幅のスタックを `.ds` に置く。Web フォントの名前を持ち込まない", () => {
+  it("システムフォントのスタックと、等幅のスタックを `.ds` に置く。Web フォントの名前を持ち込まない。本文の行間は 1.7 以上", () => {
     const ds = RULES.find((r) => r.selector === ".ds")!;
     expect(ds.vars["--ds-font-sans"]).toMatch(/-apple-system[\s\S]*Hiragino Sans[\s\S]*Yu Gothic UI[\s\S]*Noto Sans JP/);
     expect(ds.vars["--ds-font-mono"]).toMatch(/ui-monospace/);
     expect(ds.vars["--ds-font-sans"]).not.toMatch(/Plex|Fraunces/);
+    expect(CSS).toMatch(/--text-body--line-height:\s*1\.7;/);
+    expect(CSS).toMatch(/\.ds\s*\{[^}]*line-height:\s*1\.7;/);
+    expect(CSS).toMatch(/\.ds\s*\{[^}]*line-break:\s*strict;/);
   });
 });
 
@@ -295,64 +288,13 @@ describe("1a-2 コントラスト（ui-direction.md 3.1 の組）", () => {
     });
   }
 
-  it("実測の記録：ui-direction.md に書かれた主な値と一致する（白文字 / アクセント / 暗の surface）", () => {
+  it("実測の記録：紙・墨・藍の主な値（明・暗）", () => {
     const r = (a: string, b: string): number => Math.round(contrast(a, b) * 100) / 100;
-    expect(r("#1d1d1f", "#ffffff")).toBe(16.83);
-    expect(r("#636366", "#ffffff")).toBe(5.99);
-    expect(r("#0a5fd0", "#ffffff")).toBe(5.9);
-    expect(r("#6aa8ff", "#1c1c1e")).toBe(7.01);
-    expect(r("#5fc7ba", "#14171c")).toBe(8.87);
-  });
-});
-
-// 航空日誌の紙面（試作）：`.jr` の紙・墨・藍の組。通常モードだけ置き換え（現場モードは現場用の組のまま）、暗は別の組。
-describe("航空日誌の紙面（.jr）", () => {
-  const SEL = ".ds:not(.field) .jr";
-  const light = RULES.find((r) => r.selector === SEL && !r.inDarkMedia)!;
-  const darkMedia = RULES.find((r) => r.selector === `:root:not([data-theme="light"]) ${SEL}` && r.inDarkMedia)!;
-  const darkAttr = RULES.find((r) => r.selector === `:root[data-theme="dark"] ${SEL}` && !r.inDarkMedia)!;
-  const shape = RULES.find((r) => r.selector === ".jr" && "--r-journal" in r.vars)!;
-
-  it("暗の 2 つの版（OS 設定と data-theme）は同じ宣言。明と暗は同じ名前のトークンを持つ", () => {
-    expect(darkMedia.vars).toEqual(darkAttr.vars);
-    expect(Object.keys(darkAttr.vars).sort()).toEqual(Object.keys(light.vars).sort());
-    expect(darkAttr.vars["--bg-surface"]).not.toBe(light.vars["--bg-surface"]);
-  });
-
-  it("角丸は 1 種類（4〜6px）で、1 か所の値（--r-journal）から引く。影・ガラスは持たない", () => {
-    const px = parseFloat(shape.vars["--r-journal"]!);
-    expect(shape.vars["--r-journal"]).toMatch(/^\d+px$/);
-    expect(px).toBeGreaterThanOrEqual(4);
-    expect(px).toBeLessThanOrEqual(6);
-    expect(shape.vars["--r-ctl"]).toBe("var(--r-journal)");
-    expect(shape.vars["--r-card"]).toBe("var(--r-journal)");
-    expect(shape.vars["--sh-drop"]).toBe("transparent");
-    expect(shape.vars["--glass-alpha"]).toBe("100%");
-    expect(shape.vars["--glass-filter"]).toBe("none");
-    // 動きは 200〜300ms
-    expect(parseInt(shape.vars["--dur-fast"]!, 10)).toBeGreaterThanOrEqual(200);
-  });
-
-  for (const [name, t] of [["明", light.vars], ["暗", darkAttr.vars]] as const) {
-    it(`コントラスト（${name}）：文字 4.5:1、境界 3:1、ボタンの文字 4.5:1`, () => {
-      const bad: string[] = [];
-      const chk = (label: string, fg: string, bg: string, min: number): void => {
-        const r = contrast(get(t, fg), get(t, bg));
-        if (r < min) bad.push(`${label} ${r.toFixed(2)} (< ${min})`);
-      };
-      for (const s of SURFACES) for (const f of ["fg", "fg-soft", "fg-mute", "accent"]) chk(`${f} on ${s}`, f, s, 4.5);
-      chk("accent-fg on accent", "accent-fg", "accent", 4.5);
-      chk("accent-fg on accent-hover", "accent-fg", "accent-hover", 4.5);
-      chk("accent on accent-soft", "accent", "accent-soft", 4.5);
-      chk("line-strong on bg-surface", "line-strong", "bg-surface", 3);
-      chk("line-strong on bg-sunken (disabled field)", "line-strong", "bg-sunken", 3);
-      chk("accent on bg-surface (focus ring)", "accent", "bg-surface", 3);
-      expect(bad).toEqual([]);
-    });
-  }
-
-  it("`jr` の variant は `.jr` の中だけに効く（:where で詳細度 0）。現場モードの色は置き換えない", () => {
-    expect(readFileSync(new URL("./globals.css", import.meta.url), "utf8")).toMatch(/@custom-variant jr \(&:where\(\.jr, \.jr \*\)\);/);
-    for (const r of RULES.filter((x) => x.selector.includes(".jr"))) expect(r.selector, r.selector).not.toMatch(/\.field \.jr/);
+    expect(r("#171b22", "#fbf9f3")).toBe(16.4);
+    expect(r("#5c5f66", "#fbf9f3")).toBe(6.07);
+    expect(r("#1f4a99", "#ffffff")).toBe(8.41);
+    expect(r("#ebe7da", "#151b25")).toBe(13.97);
+    expect(r("#8fb0f0", "#151b25")).toBe(7.93);
+    expect(r("#ffffff", "#4a72c4")).toBe(4.67);
   });
 });
