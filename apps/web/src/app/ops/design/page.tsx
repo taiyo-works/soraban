@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function DesignCatalogPage({ searchParams }: { readonly searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await connection();
   if (!isDesignCatalogEnabled(process.env)) notFound();
-  // The configuration (theme, palette, field mode, density, screen) comes from the query string so a view can be shared as a link.
+  // The configuration (theme, field mode, density, screen) comes from the query string so a view can be shared as a link.
   const initial = parseConfig(await searchParams);
   // A forced theme must be on <html> before the first paint (html[data-theme] drives the tokens and color-scheme). The
   // client effect only handles later changes. This inline script runs while the document is parsed, before the

@@ -4,7 +4,8 @@ import { Icon } from "./icons";
 import { Spinner } from "./primitives";
 
 // Form parts (Sprint 12g stage 1a). Labels sit above the control; "必須" is text; errors sit right under the control.
-// Inputs are 16px or larger (no zoom on iOS), 44px tall (56px in field mode), with a 1px line-strong border (3:1).
+// Inputs are 16px or larger (no zoom on iOS), 44px tall (56px in field mode), with a 1px line-strong rule (3:1) on a
+// lighter paper cell. No inner shadow and no glow: focus is the 2px outline from globals.css plus an accent rule.
 
 export const controlId = (base: string, part: "hint" | "error"): string => `${base}-${part}`;
 
@@ -35,18 +36,18 @@ export function FormField({
     <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={id} className="flex items-center gap-2 text-table font-medium text-fg">
         {label}
-        {required ? <span className="rounded-pill bg-sunken px-1.5 text-aux font-medium text-fg-soft jr:rounded-ctl jr:border jr:border-line-strong jr:bg-transparent">必須</span> : null}
+        {required ? <span className="rounded-ctl border border-line-strong px-1.5 text-aux font-medium text-fg-soft">必須</span> : null}
         {optional ? <span className="text-aux font-normal text-fg-mute">任意</span> : null}
       </label>
       {children}
       {hint ? (
-        <p id={controlId(id, "hint")} className="text-aux text-fg-mute jr:leading-[1.7]">
+        <p id={controlId(id, "hint")} className="text-aux text-fg-mute">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={controlId(id, "error")} className="flex items-start gap-1.5 text-aux font-medium text-danger-fg jr:leading-[1.7]">
-          <Icon name="ban" size={14} className="mt-0.5 shrink-0 text-danger-line jr:mt-1" />
+        <p id={controlId(id, "error")} className="flex items-start gap-1.5 text-aux font-medium text-danger-fg">
+          <Icon name="ban" size={14} className="mt-1 shrink-0 text-danger-line" />
           {error}
         </p>
       ) : null}
@@ -55,10 +56,8 @@ export function FormField({
 }
 
 const CONTROL =
-  "block w-full min-w-0 rounded-ctl border bg-surface px-3 text-[16px] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur-fast)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
-  "border-line-strong shadow-[inset_0_1px_1px_var(--sh-drop)] hov:border-fg-mute foc:border-accent foc:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_16%,transparent)] disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute " +
-  // journal paper: a ruled entry cell. No inner shadow and no glow; focus is the 2px outline from globals.css plus an accent rule.
-  "jr:shadow-none jr:hov:border-fg jr:foc:border-accent jr:foc:shadow-none";
+  "block w-full min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[16px] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
+  "hov:border-fg foc:border-accent disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
 const CONTROL_ERROR = "!border-danger-line";
 
 export type TextInputProps = InputHTMLAttributes<HTMLInputElement> & { readonly invalid?: boolean; readonly loading?: boolean };
@@ -88,7 +87,7 @@ export function Select({ invalid, className, children, ...rest }: SelectHTMLAttr
 }
 
 export function Textarea({ invalid, className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { readonly invalid?: boolean }) {
-  return <textarea {...rest} aria-invalid={invalid || undefined} className={cx(CONTROL, "min-h-24 py-2.5 leading-relaxed jr:leading-[1.7]", invalid && CONTROL_ERROR, className)} />;
+  return <textarea {...rest} aria-invalid={invalid || undefined} className={cx(CONTROL, "min-h-24 py-2.5 leading-[1.7]", invalid && CONTROL_ERROR, className)} />;
 }
 
 /** Search field with a leading icon. */
@@ -129,7 +128,7 @@ export function Radio({ label, hint, className, ...rest }: Omit<InputHTMLAttribu
   );
 }
 
-/** iOS-style switch. Controlled: pass `checked` and `onChange`. role="switch". */
+/** Switch. Controlled: pass `checked` and `onChange`. role="switch". A square-cornered track; the thumb slides, and the state is also in the label next to it. */
 export function Toggle({
   checked,
   onChange,
@@ -154,20 +153,20 @@ export function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange?.(!checked)}
-      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-pill field:min-h-14 disabled:cursor-not-allowed"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl field:min-h-14 field:min-w-14 disabled:cursor-not-allowed"
     >
       <span
         aria-hidden="true"
         className={cx(
-          "relative inline-flex h-[30px] w-[50px] shrink-0 items-center rounded-pill transition-colors duration-[var(--dur)]",
-          checked ? "bg-accent" : "bg-line-strong",
-          disabled && "opacity-50",
+          "relative inline-flex h-7 w-[50px] shrink-0 items-center rounded-ctl border transition-colors duration-[var(--dur)]",
+          disabled ? "border-line bg-sunken" : checked ? "border-accent-solid bg-accent-solid" : "border-line-strong bg-sunken",
         )}
       >
         <span
           className={cx(
-            "absolute left-[2px] h-[26px] w-[26px] rounded-pill bg-white shadow-[0_1px_3px_rgb(0_0_0/0.3)] transition-transform duration-[var(--dur)] ease-[var(--ease)]",
-            checked && "translate-x-5",
+            "absolute left-[3px] h-5 w-5 rounded-ctl transition-transform duration-[var(--dur)] ease-[var(--ease)]",
+            checked && "translate-x-[22px]",
+            disabled ? "bg-line-strong" : checked ? "bg-accent-fg" : "bg-fg-mute",
           )}
         />
       </span>
@@ -179,8 +178,8 @@ export function Toggle({
 export function FormGroup({ title, footer, children, ...rest }: { readonly title?: string; readonly footer?: ReactNode; readonly children: ReactNode } & DataAttrs) {
   return (
     <section {...rest} className="flex flex-col gap-2">
-      {title ? <h3 className="px-1 text-aux font-semibold tracking-wide text-fg-mute">{title}</h3> : null}
-      <div className="flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card [&>*]:py-3">{children}</div>
+      {title ? <h3 className="px-1 text-aux font-semibold text-fg-mute">{title}</h3> : null}
+      <div className="flex flex-col divide-y divide-line rounded-ctl border border-line bg-surface px-4 [&>*]:py-3">{children}</div>
       {footer ? <p className="px-1 text-aux text-fg-mute">{footer}</p> : null}
     </section>
   );
@@ -202,7 +201,7 @@ export function FormRow({ label, children, htmlFor }: { readonly label: string; 
 export function ErrorSummary({ errors, ...rest }: { readonly errors: readonly { readonly id: string; readonly message: string }[] } & DataAttrs) {
   if (errors.length === 0) return null;
   return (
-    <div {...rest} role="alert" className="rounded-card bg-danger-bg px-4 py-3 text-table text-danger-fg">
+    <div {...rest} role="alert" className="rounded-ctl border border-danger-line bg-danger-bg px-4 py-3 text-table text-danger-fg">
       <p className="flex items-center gap-2 font-semibold">
         <Icon name="ban" size={16} className="text-danger-line" />
         入力を確かめてください（{errors.length} 件）
@@ -210,7 +209,7 @@ export function ErrorSummary({ errors, ...rest }: { readonly errors: readonly { 
       <ul className="mt-1 list-disc pl-9">
         {errors.map((e) => (
           <li key={e.id}>
-            <a href={`#${e.id}`} className="underline underline-offset-2">
+            <a href={`#${e.id}`} className="inline-flex min-h-11 items-center underline underline-offset-2 field:min-h-14">
               {e.message}
             </a>
           </li>
@@ -220,10 +219,10 @@ export function ErrorSummary({ errors, ...rest }: { readonly errors: readonly { 
   );
 }
 
-/** A bar fixed to the bottom of a long form (translucent: fixed chrome only). */
+/** A bar fixed to the bottom of a long form (opaque). */
 export function SaveBar({ children, status, ...rest }: { readonly children: ReactNode; readonly status?: ReactNode } & DataAttrs) {
   return (
-    <div {...rest} className="glass sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-0 sm:rounded-card sm:border sm:px-4">
+    <div {...rest} className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-0 sm:rounded-ctl sm:border sm:px-4">
       <div className="min-w-0 text-table text-fg-soft">{status}</div>
       <div className="flex flex-wrap items-center gap-2">{children}</div>
     </div>

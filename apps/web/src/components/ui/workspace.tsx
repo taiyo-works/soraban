@@ -113,7 +113,7 @@ export function Workspace({
       {...rest}
       style={style}
       data-sheet-stage={stage}
-      className="relative isolate overflow-hidden rounded-sheet bg-sunken shadow-lift lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
+      className="relative isolate overflow-hidden rounded-ctl border border-line-strong bg-sunken lg:grid lg:transition-[grid-template-columns] lg:duration-[var(--dur-sheet)] lg:ease-[var(--ease)] lg:[grid-template-columns:var(--ws-cols)]"
     >
       {/* map layer */}
       <div className="absolute inset-0 min-w-0 lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1" data-testid="workspace-map" id={panelId(prefix, "map")} inert={!desktop && tab !== "map"} aria-hidden={!desktop && tab !== "map" ? true : undefined} {...(desktop ? { role: "region", "aria-label": "地図" } : { role: "tabpanel", "aria-labelledby": tabId(prefix, "map") })}>
@@ -125,7 +125,7 @@ export function Workspace({
           aria-pressed={maximized}
           aria-label={maximized ? "地図の最大化を戻す" : "地図を最大化"}
           data-testid="workspace-maximize"
-          className="glass absolute right-3 top-3 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg shadow-float hov:bg-sunken max-lg:hidden"
+          className="absolute right-3 top-3 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl border border-line-strong bg-surface text-fg hov:bg-sunken field:min-h-14 field:min-w-14 max-lg:hidden"
         >
           <Icon name={maximized ? "minimize" : "maximize"} size={18} />
         </button>
@@ -134,12 +134,12 @@ export function Workspace({
       </div>
 
       {/* dim the map only at the full sheet height (< 1024px) */}
-      {stage === "full" ? <button type="button" aria-label="シートを半分に戻す" tabIndex={-1} onClick={() => setStage("half")} className="absolute inset-0 z-10 bg-black/40 lg:hidden" /> : null}
+      {stage === "full" ? <button type="button" aria-label="シートを半分に戻す" tabIndex={-1} onClick={() => setStage("half")} className="absolute inset-0 z-10 bg-[var(--scrim)] lg:hidden" /> : null}
 
       {/* sheet (< 1024px) / contents (>= 1024px) */}
       <div
         data-testid="workspace-sheet"
-        className="absolute inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-20 flex max-h-[calc(100%-4.5rem)] flex-col rounded-t-sheet bg-glass shadow-float transition-[height] duration-[var(--dur-sheet)] ease-[var(--ease)] max-lg:h-[var(--sheet-h)] max-lg:[backdrop-filter:var(--glass-filter)] lg:contents"
+        className="absolute inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-20 flex max-h-[calc(100%-4.5rem)] flex-col rounded-t-ctl border-t border-line-strong bg-surface transition-[height] duration-[var(--dur-sheet)] ease-[var(--ease)] max-lg:h-[var(--sheet-h)] lg:contents"
       >
         <div className="flex shrink-0 flex-col lg:hidden">
           <button
@@ -160,9 +160,9 @@ export function Workspace({
                 cycle();
               }
             }}
-            className="flex min-h-11 w-full touch-none cursor-grab items-center justify-center rounded-t-sheet"
+            className="flex min-h-11 w-full touch-none cursor-grab items-center justify-center rounded-t-ctl field:min-h-14"
           >
-            <span className="h-1 w-9 rounded-pill bg-line-strong" />
+            <span className="h-1 w-9 rounded-ctl bg-line-strong" />
           </button>
           <div data-testid="workspace-peek" className="truncate px-4 pb-2 text-table text-fg">
             {peek}
@@ -226,8 +226,8 @@ function EdgeToggle({ side, open, onClick, controls, label }: { readonly side: "
       aria-label={`${label}のペインを${open ? "閉じる" : "開く"}（${side === "left" ? "[" : "]"} キー）`}
       data-testid={`workspace-toggle-${side}`}
       className={cx(
-        "glass absolute top-1/2 z-10 inline-flex min-h-14 min-w-11 -translate-y-1/2 items-center justify-center text-fg-soft shadow-float hov:text-fg max-lg:hidden",
-        side === "left" ? "left-0 rounded-r-ctl" : "right-0 rounded-l-ctl",
+        "absolute top-1/2 z-10 inline-flex min-h-14 min-w-11 -translate-y-1/2 items-center justify-center border border-line-strong bg-surface text-fg-soft hov:text-fg field:min-w-14 max-lg:hidden",
+        side === "left" ? "left-0 rounded-r-ctl border-l-0" : "right-0 rounded-l-ctl border-r-0",
       )}
     >
       <Icon name={side === "left" ? (open ? "chevron-left" : "chevron-right") : open ? "chevron-right" : "chevron-left"} size={18} />
@@ -244,9 +244,9 @@ export function MapPlaceholder({ label = "地図の場所（見本）" }: { read
     <div className="relative h-full w-full overflow-hidden bg-sunken" role="img" aria-label={label}>
       <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
         {/* park */}
-        <path d="M262 196c14-18 46-22 62-8s14 40-6 52-50 8-58-8 -6-26 2-36z" fill="var(--ok-line)" opacity=".1" />
+        <path d="M262 196c14-18 46-22 62-8s14 40-6 52-50 8-58-8 -6-26 2-36z" fill="var(--ok-bg)" />
         {/* contour lines around two rises */}
-        <g stroke="var(--line-strong)" strokeWidth="0.8" opacity=".3" strokeLinejoin="round">
+        <g stroke="var(--line)" strokeWidth="0.8" strokeLinejoin="round">
           <path d="M296 30c26-6 54 6 62 30s-12 50-42 56-62-6-66-32 20-48 46-54z" />
           <path d="M300 44c20-4 40 5 46 22s-9 36-31 40-45-5-48-24 14-34 33-38z" />
           <path d="M304 58c14-2 27 4 30 15s-7 24-22 26-31-3-32-16 10-23 24-25z" />
@@ -255,10 +255,10 @@ export function MapPlaceholder({ label = "地図の場所（見本）" }: { read
           <path d="M26 234c16-10 40-10 52 0s10 30-6 38-40 4-46-10z" />
         </g>
         {/* river */}
-        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-line)" strokeWidth="14" opacity=".13" strokeLinecap="round" />
-        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-line)" strokeWidth="1" opacity=".3" strokeLinecap="round" />
+        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-bg)" strokeWidth="14" strokeLinecap="round" />
+        <path d="M-10 70C40 64 74 96 120 98S190 64 236 80s54 52 100 52 60-26 84-40" stroke="var(--info-line)" strokeWidth="1" strokeLinecap="round" />
         {/* city blocks */}
-        <g fill="var(--line)" opacity=".5">
+        <g fill="var(--line)">
           <rect x="132" y="108" width="26" height="18" rx="3" />
           <rect x="164" y="112" width="18" height="26" rx="3" />
           <rect x="128" y="188" width="30" height="20" rx="3" />
@@ -271,21 +271,20 @@ export function MapPlaceholder({ label = "地図の場所（見本）" }: { read
         </g>
         {/* roads: an edge line first, then the lighter surface line on top */}
         <g strokeLinecap="round" fill="none">
-          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--line-strong)" strokeWidth="13" opacity=".3" />
-          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--line-strong)" strokeWidth="10" opacity=".3" />
-          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--line-strong)" strokeWidth="8" opacity=".26" />
-          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--bg-surface)" strokeWidth="11" opacity=".95" />
-          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--bg-surface)" strokeWidth="8" opacity=".95" />
-          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--bg-surface)" strokeWidth="6" opacity=".95" />
-          <path d="M-10 258C70 244 150 270 230 250S370 232 410 244" stroke="var(--bg-surface)" strokeWidth="4" opacity=".8" />
+          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--line)" strokeWidth="13" />
+          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--line)" strokeWidth="10" />
+          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--line)" strokeWidth="8" />
+          <path d="M-10 168C60 150 112 176 200 156S330 112 410 134" stroke="var(--bg-surface)" strokeWidth="11" />
+          <path d="M60 -10C74 54 112 84 128 140S172 238 204 310" stroke="var(--bg-surface)" strokeWidth="8" />
+          <path d="M250 -10C256 36 292 62 304 112S292 214 324 310" stroke="var(--bg-surface)" strokeWidth="6" />
+          <path d="M-10 258C70 244 150 270 230 250S370 232 410 244" stroke="var(--bg-surface)" strokeWidth="4" />
         </g>
-        {/* the sample site: a flight area with a pulse and a pin */}
-        <circle cx="205" cy="150" r="52" fill="var(--accent)" opacity=".1" />
-        <circle cx="205" cy="150" r="52" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 5" opacity=".8" />
-        <circle cx="205" cy="150" r="14" fill="var(--accent)" className="ds-ping" />
+        {/* the sample site: a flight area and a pin */}
+        <circle cx="205" cy="150" r="52" fill="var(--accent-soft)" />
+        <circle cx="205" cy="150" r="52" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 5" />
         <circle cx="205" cy="150" r="7" fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth="3" />
       </svg>
-      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-pill bg-glass px-3 py-1 text-aux text-fg-mute shadow-card [backdrop-filter:var(--glass-filter)] max-lg:hidden">{label}</span>
+      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-ctl border border-line bg-surface px-3 py-1 text-aux text-fg-mute max-lg:hidden">{label}</span>
     </div>
   );
 }

@@ -10,15 +10,15 @@ import { ToastProvider } from "../overlays";
 import { Button, NoticeBar, PageHeader, StatusPill } from "../primitives";
 import { Segmented, TabPanel, Tabs } from "../tabs";
 import { IconsSection, PartsSection, TokensSection } from "./sections";
-import { DEFAULT_CONFIG, SCREENS, type CatalogConfig, type Density, type Palette, type ScreenId, type Theme } from "./config";
+import { DEFAULT_CONFIG, SCREENS, type CatalogConfig, type Density, type ScreenId, type Theme } from "./config";
 import { FieldScreen, FormScreen, LegendScreen, ListScreen, TodayScreen, WorkspaceScreen } from "./screens";
 
 // Design catalog (Sprint 12g stage 1a). A static page: no auth, no DB, no network. State lives in the page and in the
 // query string (so a configuration can be shared as a link and screenshots are reproducible):
-//   ?theme=auto|light|dark  &palette=1|2|3  &field=1  &density=standard|compact  &screen=today|list|form|workspace|field|legend
+//   ?theme=auto|light|dark  &field=1  &density=standard|compact  &screen=today|list|form|workspace|field|legend
 // The page (server) reads the query string and passes it in as `initial`, so there is no effect-driven setup.
 
-// The sample screens come first: they are what the choice of palette, density and translucency is judged on.
+// The sample screens come first: they are what the look (paper, ink, one indigo accent), density and field mode are judged on.
 const SECTIONS = [
   { id: "screens", label: "画面の構成" },
   { id: "tokens", label: "トークン" },
@@ -45,7 +45,6 @@ const SHORTCUTS: readonly ShortcutGroup[] = [
 
 export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?: CatalogConfig }) {
   const [theme, setTheme] = useState<Theme>(initial.theme);
-  const [palette, setPalette] = useState<Palette>(initial.palette);
   const [field, setField] = useState(initial.field);
   const [density, setDensity] = useState<Density>(initial.density);
   const [screen, setScreen] = useState<ScreenId>(initial.screen);
@@ -72,13 +71,12 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
   useEffect(() => {
     const q = new URLSearchParams();
     if (theme !== "auto") q.set("theme", theme);
-    if (palette !== "1") q.set("palette", palette);
     if (field) q.set("field", "1");
     if (density !== "standard") q.set("density", density);
     if (screen !== "today") q.set("screen", screen);
     const s = q.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${s ? `?${s}` : ""}${window.location.hash}`);
-  }, [theme, palette, field, density, screen]);
+  }, [theme, field, density, screen]);
 
   const togglePalette = useCallback(() => setPaletteOpen((v) => !v), []);
   usePaletteHotkey(togglePalette, !field);
@@ -115,20 +113,19 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
     [field],
   );
 
-  const context = `${theme}-${palette}-${field ? "field" : "normal"}`;
+  const context = `${theme}-${field ? "field" : "normal"}`;
 
   return (
     <ToastProvider>
       <div
         className={cx("ds ds-page min-h-dvh", field && "field")}
-        data-palette={palette}
         data-density={density}
         data-testid="design-catalog"
         data-hydrated={hydrated ? "1" : "0"}
         data-catalog-theme={theme}
         data-catalog-field={field ? "1" : "0"}
       >
-        <div className="glass sticky top-0 z-30 border-b border-line max-md:static">
+        <div className="sticky top-0 z-30 border-b border-line bg-surface max-md:static">
           <div className="mx-auto flex max-w-[80rem] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
             <Segmented
               label="テーマ"
@@ -140,17 +137,6 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
                 { id: "dark", label: "暗", icon: "moon" },
               ]}
               data-testid="ctl-theme"
-            />
-            <Segmented
-              label="配色案"
-              value={palette}
-              onChange={(v) => setPalette(v as Palette)}
-              options={[
-                { id: "1", label: "案 1 ブルー" },
-                { id: "2", label: "案 2 藍" },
-                { id: "3", label: "案 3 チャコール" },
-              ]}
-              data-testid="ctl-palette"
             />
             <Segmented
               label="密度"
@@ -188,7 +174,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
             </NoticeBar>
             <nav aria-label="見本の目次" className="flex flex-wrap gap-2">
               {SECTIONS.map((s) => (
-                <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-pill bg-sunken px-4 text-table font-medium text-fg-soft transition-colors duration-[var(--dur-fast)] hov:bg-accent-soft hov:text-accent">
+                <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-ctl border border-line-strong px-4 text-table font-medium text-fg-soft transition-colors duration-[var(--dur)] hov:bg-accent-soft hov:text-accent field:min-h-14">
                   {s.label}
                   <Icon name="chevron-down" size={14} />
                 </a>
@@ -257,27 +243,27 @@ const RAIL_ITEMS: readonly IconName[] = ["today", "plan", "journal", "aircraft",
 function AppFrame({ screen, children }: { readonly screen: string; readonly children: React.ReactNode }) {
   const active = RAIL[screen] ?? "today";
   return (
-    <div className="overflow-clip bg-app lg:grid lg:grid-cols-[3.5rem_minmax(0,1fr)] lg:rounded-sheet lg:shadow-lift">
+    <div className="overflow-clip bg-app lg:grid lg:grid-cols-[3.5rem_minmax(0,1fr)] lg:rounded-ctl lg:border lg:border-line-strong">
       <div aria-hidden="true" className="hidden flex-col items-center gap-1.5 border-r border-line bg-surface py-3 lg:flex">
-        <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-accent text-accent-fg">
+        <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-ctl bg-accent-solid text-accent-fg">
           <Icon name="flight" size={18} />
         </span>
         {RAIL_ITEMS.map((n) => (
-          <span key={n} className={cx("inline-flex h-10 w-10 items-center justify-center rounded-[10px]", n === active ? "bg-accent-soft text-accent" : "text-fg-mute")}>
+          <span key={n} className={cx("inline-flex h-10 w-10 items-center justify-center rounded-ctl", n === active ? "bg-accent-soft text-accent" : "text-fg-mute")}>
             <Icon name={n} size={20} />
           </span>
         ))}
       </div>
       <div className="min-w-0">
-        <div aria-hidden="true" className="glass hidden items-center justify-between gap-3 border-b border-line px-6 py-2.5 lg:flex">
-          <span className="inline-flex min-h-9 w-72 items-center gap-2 rounded-[10px] bg-sunken px-3 text-table text-fg-mute">
+        <div aria-hidden="true" className="hidden items-center bg-surface justify-between gap-3 border-b border-line px-6 py-2.5 lg:flex">
+          <span className="inline-flex min-h-9 w-72 items-center gap-2 rounded-ctl bg-sunken px-3 text-table text-fg-mute">
             <Icon name="search" size={16} />
             計画・機体・地点を検索
             <span className="ml-auto text-aux">Ctrl K</span>
           </span>
           <span className="inline-flex items-center gap-3 text-aux text-fg-mute">
             見本のシェル
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-pill bg-accent-soft font-semibold text-accent">見</span>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-ctl bg-accent-soft font-semibold text-accent">見</span>
           </span>
         </div>
         <div className="lg:p-6">{children}</div>

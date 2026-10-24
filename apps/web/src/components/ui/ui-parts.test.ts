@@ -38,27 +38,57 @@ describe("ボタン", () => {
     expect(out).toContain('data-testid="b"');
     expect(out).toContain('type="button"');
   });
-  it("航空日誌の紙面（jr）では、ラベルが枠の中で折り返し、最小の幅を持ち、ピル型・影・拡大を使わない", () => {
+  it("ラベルが枠の中で折り返し、最小の幅を持ち、ピル型・影・拡大を使わない", () => {
     for (const size of ["md", "sm"] as const) {
       const cls = html(h(Button, { size }, "長いラベル")).match(/class="([^"]*)"/)![1]!.split(/\s+/);
-      expect(cls, size).toEqual(expect.arrayContaining(["jr:whitespace-normal", "jr:max-w-full", "jr:[text-wrap:balance]", "jr:shadow-none", "jr:active:scale-100"]));
-      expect(cls.some((c) => c.startsWith("jr:min-w-")), size).toBe(true);
-      expect(cls, size).not.toContain("rounded-pill");
+      expect(cls, size).toEqual(expect.arrayContaining(["max-w-full", "[text-wrap:balance]", "[overflow-wrap:anywhere]", "leading-snug"]));
+      expect(cls, size).not.toContain("whitespace-nowrap");
+      expect(cls.some((c) => c.startsWith("min-w-")), size).toBe(true);
+      expect(cls.some((c) => c.startsWith("shadow") || c.includes("scale") || c.includes("rounded-pill")), size).toBe(false);
     }
     // the icon-only size is not stretched to the label minimum
-    expect(html(h(Button, { size: "icon" }, "x"))).not.toContain("jr:min-w-");
+    expect(html(h(Button, { size: "icon" }, "x"))).not.toMatch(/min-w-(20|28)/);
+  });
+  it("押下は拡大でなく濃い地と 1px のずれ。無効の控えめボタンには破線の罫がある", () => {
+    const primary = html(h(Button, { variant: "primary" }, "保存"));
+    expect(primary).toContain("enabled:act:translate-y-px");
+    expect(primary).toContain("enabled:act:bg-[");
+    const quiet = html(h(Button, { variant: "quiet" }, "あとで"));
+    expect(quiet).toContain("disabled:border-dashed");
+    expect(quiet).toContain("aria-disabled:border-dashed");
   });
 });
 
 describe("入力欄", () => {
-  it("航空日誌の紙面（jr）では内側の影と発光する枠を使わず、ピル型にしない。ラベルは欄の前にある", () => {
+  it("内側の影と発光する枠を使わず、ピル型にしない。ラベルは欄の前にある。必須は文字の印", () => {
     const out = html(h(FormField, { id: "f", label: "機体の登録記号", required: true, error: "形式が違います" }, h(TextInput, { id: "f", invalid: true })));
     expect(out.indexOf("機体の登録記号")).toBeLessThan(out.indexOf("<input"));
+    expect(out).toContain("必須");
     const input = out.match(/<input[^>]*class="([^"]*)"/)![1]!;
-    expect(input).toContain("jr:shadow-none");
-    expect(input).toContain("jr:foc:shadow-none");
-    expect(input).not.toContain("rounded-pill");
+    expect(input).not.toMatch(/shadow|rounded-pill/);
     expect(input).toContain("rounded-ctl");
+    expect(input).toContain("border-line-strong");
+    expect(out).not.toContain("rounded-pill");
+  });
+});
+
+describe("判定の印", () => {
+  it("記号と言葉が付き、色だけで区別しない。回転・影を使わない", async () => {
+    const { VerdictStamp } = await import("./verdict-stamp");
+    const levels = ["no_fly", "needs_procedure", "procedure_done", "no_procedure", "unknown"] as const;
+    const shapes = new Set<string>();
+    for (const level of levels) {
+      const out = html(h(VerdictStamp, { level, "data-testid": `stamp-${level}` }));
+      expect(out).toContain("<svg");
+      expect(out).toContain(`data-level="${level}"`);
+      expect(out).toContain(`data-testid="stamp-${level}"`);
+      expect(out).not.toMatch(/rotate|shadow|rounded-pill/);
+      shapes.add(out.match(/data-shape="([^"]+)"/)![1]!);
+    }
+    expect(shapes.size).toBe(5);
+    expect(html(h(VerdictStamp, { level: "no_fly" }))).toContain("飛行不可");
+    expect(html(h(VerdictStamp, { level: "procedure_done" }))).toContain("手続き済み（条件付き）");
+    expect(html(h(VerdictStamp, { level: "unknown" }))).toContain("判定不能");
   });
 });
 

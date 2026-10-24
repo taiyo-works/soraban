@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { VerdictMark } from "@/components/verdict-mark";
 import { VERDICT_LABEL, VERDICT_SCALE } from "@/lib/verdict-display";
 import type { ItemVerdict } from "@soraban/regulations";
 import { cx } from "../cx";
@@ -12,6 +11,7 @@ import { Icon, type IconName } from "../icons";
 import { Dialog, InfoPopover, useToast } from "../overlays";
 import { Button, Card, Disclosure, EmptyState, Kbd, NoticeBar, PageHeader, SectionTitle, StatTile, StatusPill, type Meaning } from "../primitives";
 import { Segmented } from "../tabs";
+import { VerdictStamp } from "../verdict-stamp";
 import { MapPlaceholder, Workspace } from "../workspace";
 import { PLAN_STATUS_LABEL, PLAN_STATUS_MEANING, SAMPLE_FLIGHTS_14D, SAMPLE_PLANS, type SamplePlan } from "./sample-data";
 
@@ -28,18 +28,26 @@ const STEPS: readonly { readonly label: string; readonly state: string; readonly
   { label: "携行品", state: "未", meaning: "neutral", icon: "dot" },
 ];
 
-const STEP_TONE: Readonly<Record<Meaning, string>> = {
-  ok: "bg-ok-bg text-ok-fg shadow-[inset_0_0_0_1px_var(--ok-line)]",
-  warn: "bg-warn-bg text-warn-fg shadow-[inset_0_0_0_1px_var(--warn-line)]",
-  danger: "bg-danger-bg text-danger-fg shadow-[inset_0_0_0_1px_var(--danger-line)]",
-  info: "bg-info-bg text-info-fg shadow-[inset_0_0_0_1px_var(--info-line)]",
-  neutral: "bg-sunken text-fg-mute shadow-[inset_0_0_0_1px_var(--line)]",
+// The rule on top of a step: the state is also in the icon and the words, so the colour only supports them.
+const STEP_RULE: Readonly<Record<Meaning, string>> = {
+  ok: "border-ok-line",
+  warn: "border-warn-line",
+  danger: "border-danger-line",
+  info: "border-info-line",
+  neutral: "border-line-strong",
+};
+const STEP_FG: Readonly<Record<Meaning, string>> = {
+  ok: "text-ok-fg",
+  warn: "text-warn-fg",
+  danger: "text-danger-fg",
+  info: "text-info-fg",
+  neutral: "text-fg-mute",
 };
 
-const FACTS: readonly { readonly icon: IconName; readonly label: string; readonly value: string }[] = [
-  { icon: "place", label: "地点", value: "見本の地点 A" },
-  { icon: "aircraft", label: "機体", value: "見本機 01" },
-  { icon: "pilot", label: "操縦者", value: "見本 一郎" },
+const FACTS: readonly { readonly label: string; readonly value: string }[] = [
+  { label: "地点", value: "見本の地点 A" },
+  { label: "機体", value: "見本機 01" },
+  { label: "操縦者", value: "見本 一郎" },
 ];
 
 export function TodayScreen() {
@@ -71,64 +79,53 @@ export function TodayScreen() {
       <div className="grid gap-4 lg:grid-cols-12">
         <Card variant="primary" className="flex flex-col gap-6 lg:col-span-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex min-w-0 items-start gap-4">
-              <span className="mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-accent-soft text-accent">
-                <Icon name="flight" size={22} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-aux font-medium text-fg-mute">今日の運航</p>
-                <p className="text-[2.5rem] font-semibold leading-none tracking-tight tabular-nums text-fg">10:30</p>
-                <p className="mt-1.5 text-h3 font-semibold text-fg">見本の地点 A の撮影</p>
-              </div>
+            <div className="min-w-0">
+              <p className="text-aux font-medium text-fg-mute">今日の運航</p>
+              <p className="text-[2.5rem] font-semibold leading-none tabular-nums text-fg">10:30</p>
+              <p className="mt-2 text-h3 font-semibold text-fg">見本の地点 A の撮影</p>
             </div>
             <StatusPill meaning="warn">確認待ち</StatusPill>
           </div>
-          <ol className="grid grid-cols-4" aria-label="進行の帯">
-            {STEPS.map((st, i) => (
-              <li key={st.label} className="relative flex flex-col items-center gap-1.5 text-center">
-                {i < STEPS.length - 1 ? (
-                  <span aria-hidden="true" className={cx("absolute left-1/2 top-3.5 h-0.5 w-full -translate-y-1/2 rounded-pill", st.meaning === "ok" ? "bg-ok-line" : "bg-line")} />
-                ) : null}
-                <span className={cx("relative inline-flex h-7 w-7 items-center justify-center rounded-pill", STEP_TONE[st.meaning])}>
-                  <Icon name={st.icon} size={16} />
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-table font-medium text-fg">{st.label}</span>
-                  <span className="text-aux text-fg-soft">{st.state}</span>
+          <ol className="grid grid-cols-4 gap-2" aria-label="進行の帯">
+            {STEPS.map((st) => (
+              <li key={st.label} className={cx("flex flex-col gap-1 border-t-2 pt-2", STEP_RULE[st.meaning])}>
+                <span className="text-table font-medium text-fg">{st.label}</span>
+                <span className={cx("inline-flex items-center gap-1 text-aux", STEP_FG[st.meaning])}>
+                  <Icon name={st.icon} size={14} className="shrink-0" />
+                  {st.state}
                 </span>
               </li>
             ))}
           </ol>
-          <dl className="grid grid-cols-1 gap-3 rounded-[12px] bg-sunken px-4 py-3 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-line">
+          <dl className="grid grid-cols-1 divide-y divide-line border-y border-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {FACTS.map((f) => (
-              <div key={f.label} className="flex min-w-0 items-center gap-3 sm:px-4 sm:first:pl-0 sm:last:pr-0">
-                <Icon name={f.icon} size={20} className="text-fg-mute" />
-                <div className="min-w-0">
-                  <dt className="text-aux text-fg-mute">{f.label}</dt>
-                  <dd className="truncate text-table font-medium text-fg">{f.value}</dd>
-                </div>
+              <div key={f.label} className="min-w-0 py-2.5 sm:px-4 sm:first:pl-0 sm:last:pr-0">
+                <dt className="text-aux text-fg-mute">{f.label}</dt>
+                <dd className="truncate text-table font-medium text-fg">{f.value}</dd>
               </div>
             ))}
           </dl>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="inline-flex items-center gap-2 text-table text-fg-soft">
-              <Icon name="clock" size={16} className="text-fg-mute" />
+              <Icon name="clock" size={16} className="shrink-0 text-fg-mute" />
               確認の期限は 10:00 です
             </p>
             <Button variant="primary">確認の画面を開く</Button>
           </div>
         </Card>
-        <div className="flex flex-col gap-2 lg:col-span-4">
+        <div className="flex flex-col gap-3 lg:col-span-4">
           <StatTile size="lead" label="次にやること" value={3} unit="件" status="期限が近い" meaning="warn" href="#" />
-          <StatTile label="今日の飛行" value={2} unit="件" href="#" />
-          <StatTile label="飛行中" value={0} unit="件" status="なし" meaning="ok" href="#" />
-          <StatTile label="日誌が未記入" value={1} unit="件" status="要記入" meaning="warn" href="#" />
+          <div className="flex flex-col divide-y divide-line border-y border-line">
+            <StatTile label="今日の飛行" value={2} unit="件" href="#" />
+            <StatTile label="飛行中" value={0} unit="件" status="なし" meaning="ok" href="#" />
+            <StatTile label="日誌が未記入" value={1} unit="件" status="要記入" meaning="warn" href="#" />
+          </div>
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-12">
         <section className="flex flex-col gap-3 lg:col-span-7">
           <SectionTitle>次にやること</SectionTitle>
-          <ul className="flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card">
+          <ul className="flex flex-col divide-y divide-line border-y border-line">
             {nextActions.map((a) => (
               <li key={a.text} className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1 py-2.5">
                 <StatusPill meaning={a.meaning}>{a.urgency}</StatusPill>
@@ -140,9 +137,9 @@ export function TodayScreen() {
         </section>
         <section className="flex flex-col gap-3 lg:col-span-5">
           <SectionTitle aside={<Sparkline values={SAMPLE_FLIGHTS_14D} summary={`直近 14 日の飛行回数（見本）：合計 ${SAMPLE_FLIGHTS_14D.reduce((a, b) => a + b, 0)} 件`} />}>今日の残りと今後の予定</SectionTitle>
-          <ul className="flex flex-col rounded-card bg-sunken p-1.5">
+          <ul className="flex flex-col divide-y divide-line border-y border-line">
             {schedule.map((r) => (
-              <li key={r.name} className={cx("flex min-h-12 items-center gap-3 rounded-[10px] px-3 py-2", r.now && "bg-surface shadow-card")}>
+              <li key={r.name} aria-current={r.now ? "true" : undefined} className={cx("flex min-h-12 items-center gap-3 px-3 py-2", r.now && "bg-accent-soft")}>
                 <span className="w-12 shrink-0 text-table font-medium tabular-nums text-fg-soft">{r.time}</span>
                 <span className="min-w-0 flex-1 truncate text-body text-fg">{r.name}</span>
                 <span className="text-aux text-fg-mute">{r.day}</span>
@@ -406,9 +403,9 @@ export function FormScreen() {
           </SaveBar>
         </form>
         <nav aria-label="節の目次" className="sticky top-4 hidden h-fit flex-col xl:flex">
-          <p className="mb-1 px-3 text-aux font-semibold tracking-wide text-fg-mute">この画面の節</p>
+          <p className="mb-1 px-3 text-aux font-semibold text-fg-mute">この画面の節</p>
           {["基本", "通知", "メモ"].map((sec, i) => (
-            <a key={sec} href="#sample-form" aria-current={i === 0 ? "true" : undefined} className={cx("inline-flex min-h-9 items-center border-l-2 px-3 text-table transition-colors duration-[var(--dur-fast)] hov:text-fg", i === 0 ? "border-accent font-medium text-fg" : "border-line text-fg-soft")}>
+            <a key={sec} href="#sample-form" aria-current={i === 0 ? "true" : undefined} className={cx("inline-flex min-h-11 items-center rounded-ctl px-3 text-table transition-colors duration-[var(--dur)] hov:text-fg", i === 0 ? "bg-sunken font-semibold text-fg" : "text-fg-soft")}>
               {sec}
             </a>
           ))}
@@ -431,9 +428,7 @@ const VERDICT_HINT: Readonly<Record<ItemVerdict, string>> = {
 function PaneTitle({ icon, children }: { readonly icon: IconName; readonly children: string }) {
   return (
     <h3 className="inline-flex items-center gap-2 text-h3 font-semibold text-fg">
-      <span className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] bg-accent-soft text-accent">
-        <Icon name={icon} size={16} />
-      </span>
+      <Icon name={icon} size={18} className="text-fg-mute" />
       {children}
     </h3>
   );
@@ -482,7 +477,7 @@ export function WorkspaceScreen({ hotkeys = true }: { readonly hotkeys?: boolean
               判定する
             </Button>
             <div className="flex flex-col gap-1.5 border-t border-line pt-4">
-              <p className="text-aux font-semibold tracking-wide text-fg-mute">最近の地点（見本）</p>
+              <p className="text-aux font-semibold text-fg-mute">最近の地点（見本）</p>
               <ul className="flex flex-col">
                 {["見本の地点 A", "見本の地点 B", "見本の地点 C"].map((n) => (
                   <li key={n} className="flex min-h-10 items-center gap-2.5 text-table text-fg-soft">
@@ -497,14 +492,11 @@ export function WorkspaceScreen({ hotkeys = true }: { readonly hotkeys?: boolean
         result={
           <div className="flex flex-col gap-5">
             <PaneTitle icon="check-circle">結果</PaneTitle>
-            <div className="flex flex-col gap-3 rounded-card bg-sunken p-4">
-              <div className="flex items-center gap-3">
-                <VerdictMark level={verdict} size="md" decorative />
-                <p className="text-h2 font-semibold text-fg" data-testid="sample-verdict-label">{VERDICT_LABEL[verdict]}</p>
-              </div>
-              <p className="text-table leading-relaxed text-fg-soft">{VERDICT_HINT[verdict]}</p>
+            <div className="flex flex-col gap-2">
+              <VerdictStamp level={verdict} className="self-start" labelTestId="sample-verdict-label" />
+              <p className="text-table text-fg-soft">{VERDICT_HINT[verdict]}</p>
             </div>
-            <ul className="flex flex-col divide-y divide-line rounded-card bg-surface px-3 shadow-card" aria-label="確認項目（見本）">
+            <ul className="flex flex-col divide-y divide-line border-y border-line" aria-label="確認項目（見本）">
               {[
                 ["空港等の周辺", "ok", "対象外"],
                 ["人口集中地区", "warn", "対象"],
@@ -530,19 +522,13 @@ export function WorkspaceScreen({ hotkeys = true }: { readonly hotkeys?: boolean
           </div>
         }
         peek={
-          <span className="inline-flex items-center gap-2">
-            <VerdictMark level={verdict} size="sm" decorative />
-            <span className="font-semibold">{VERDICT_LABEL[verdict]}</span>
-          </span>
+          <VerdictStamp level={verdict} size="sm" />
         }
         floating={
-          <Card variant="standard" className="glass flex flex-col gap-2 !p-3.5 !shadow-float">
-            <p className="text-aux font-semibold tracking-wide text-fg-mute">凡例（見本）</p>
+          <Card variant="standard" className="flex flex-col gap-2 !p-3.5">
+            <p className="text-aux font-semibold text-fg-mute">凡例（見本）</p>
             {([...VERDICT_SCALE, "unknown"] as ItemVerdict[]).map((v) => (
-              <span key={v} className="inline-flex items-center gap-2 text-aux text-fg">
-                <VerdictMark level={v} size="sm" decorative />
-                {VERDICT_LABEL[v]}
-              </span>
+              <VerdictStamp key={v} level={v} size="sm" className="self-start" />
             ))}
           </Card>
         }
@@ -564,20 +550,20 @@ export function FieldScreen() {
     { name: "携行品", state: "未確認", meaning: "warn", icon: "alert" },
   ];
   return (
-    <div className="field ds mx-auto flex max-w-xl flex-col gap-4 rounded-card bg-app p-4 text-fg" data-testid="sample-field">
+    <div className="field ds mx-auto flex max-w-xl flex-col gap-4 rounded-ctl bg-app p-4 text-fg" data-testid="sample-field">
       <header className="flex flex-col gap-1">
         <p className="text-aux text-fg-mute">現場モード（見本）</p>
         <h3 className="text-h1 font-bold text-fg">見本の地点 A の撮影</h3>
         <div className="mt-2 flex items-center gap-3" aria-label="進み具合 3 / 4">
-          <span aria-hidden="true" className="flex h-2 flex-1 overflow-hidden rounded-pill bg-sunken">
-            <span className="h-full w-3/4 rounded-pill bg-ok-line" />
+          <span aria-hidden="true" className="flex h-2 flex-1 overflow-hidden rounded-ctl bg-sunken">
+            <span className="h-full w-3/4 bg-ok-line" />
           </span>
           <span className="text-aux font-semibold tabular-nums text-fg-soft">3 / 4</span>
         </div>
       </header>
       <ul className="flex flex-col gap-2" aria-label="項目の状態">
         {rows.map((r) => (
-          <li key={r.name} className={cx("flex min-h-14 items-center gap-3 rounded-card bg-surface px-4 py-3 shadow-card", r.meaning === "warn" && "shadow-[inset_0_0_0_2px_var(--warn-line)]")}>
+          <li key={r.name} className={cx("flex min-h-14 items-center gap-3 rounded-ctl border bg-surface px-4 py-3", r.meaning === "warn" ? "border-2 border-warn-line" : "border-line")}>
             <Icon name={r.icon} size={32} className={r.meaning === "ok" ? "text-ok-fg" : "text-warn-fg"} />
             <span className="min-w-0 flex-1 text-body font-medium text-fg">{r.name}</span>
             <span className={cx("text-state font-bold", r.meaning === "ok" ? "text-ok-fg" : "text-warn-fg")}>{r.state}</span>
@@ -587,7 +573,7 @@ export function FieldScreen() {
       <Button variant="primary" className="w-full !min-h-16 !text-state !font-bold" onClick={() => setRecorded(true)} data-testid="sample-field-primary">
         {recorded ? "離陸を記録しました" : "離陸を記録する"}
       </Button>
-      <div className="flex items-center justify-between gap-3 rounded-card bg-surface px-4 py-3 shadow-card" aria-live="polite">
+      <div className="flex items-center justify-between gap-3 rounded-ctl border border-line bg-surface px-4 py-3" aria-live="polite">
         <span className="text-body text-fg">送信待ち</span>
         <StatusPill meaning={recorded ? "warn" : "ok"}>{recorded ? "1 件 送信待ち" : "0 件"}</StatusPill>
       </div>
@@ -617,7 +603,7 @@ export function LegendScreen() {
       <PageHeader as="h3" title="状態の凡例" meta="色・形・文言をそろえて示します" actions={SAMPLE_BADGE} />
       <section className="flex flex-col gap-3">
         <SectionTitle>5 つの意味</SectionTitle>
-        <ul className="flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card">
+        <ul className="flex flex-col divide-y divide-line border-y border-line">
           {MEANING_ROWS.map((m) => (
             <li key={m.meaning} className="grid items-center gap-x-4 gap-y-2 py-3 sm:grid-cols-[5rem_9rem_minmax(0,1fr)]">
               <span className="text-table font-medium text-fg">{m.name}</span>
@@ -629,11 +615,11 @@ export function LegendScreen() {
       </section>
       <section className="flex flex-col gap-3">
         <SectionTitle aside={<InfoPopover label="判定の段階について">判定は 4 段階と「判定不能」で示します。言葉・記号・色の 3 つで見分けます。</InfoPopover>}>判定の 4 段階と判定不能</SectionTitle>
-        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <ul className="flex flex-col divide-y divide-line border-y border-line">
           {([...VERDICT_SCALE, "unknown"] as ItemVerdict[]).map((v) => (
-            <li key={v} className="flex items-center gap-3 rounded-card bg-surface px-4 py-3.5 shadow-card" data-testid={`sample-verdict-${v}`}>
-              <VerdictMark level={v} size="md" decorative />
-              <span className="min-w-0 text-body font-semibold text-fg">{VERDICT_LABEL[v]}</span>
+            <li key={v} className="grid items-center gap-x-4 gap-y-1 py-3 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]" data-testid={`sample-verdict-${v}`}>
+              <span className="flex"><VerdictStamp level={v} /></span>
+              <span className="text-table text-fg-soft">{VERDICT_HINT[v]}</span>
             </li>
           ))}
         </ul>

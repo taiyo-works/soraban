@@ -68,12 +68,13 @@ function ratio(a: string, b: string): number | null {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
-const SWATCHES: readonly string[] = ["bg-app", "bg-surface", "bg-sunken", "fg", "fg-soft", "fg-mute", "line", "line-strong", "accent", "accent-soft"];
+const SWATCHES: readonly string[] = ["bg-app", "bg-surface", "bg-sunken", "fg", "fg-soft", "fg-mute", "line", "line-strong", "accent", "accent-solid", "accent-soft"];
 const PAIRS: readonly { readonly label: string; readonly fg: string; readonly bg: string; readonly min: number }[] = [
   { label: "本文 × surface", fg: "fg", bg: "bg-surface", min: 4.5 },
   { label: "補助 × sunken", fg: "fg-mute", bg: "bg-sunken", min: 4.5 },
   { label: "アクセント × surface", fg: "accent", bg: "bg-surface", min: 4.5 },
-  { label: "ボタンの文字 × アクセント", fg: "accent-fg", bg: "accent", min: 4.5 },
+  { label: "ボタンの文字 × 主ボタンの地", fg: "accent-fg", bg: "accent-solid", min: 4.5 },
+  { label: "主ボタンの地 × surface（境界）", fg: "accent-solid", bg: "bg-surface", min: 3 },
   { label: "入力欄の境界 × surface", fg: "line-strong", bg: "bg-surface", min: 3 },
   { label: "成功 文字 × 地", fg: "ok-fg", bg: "ok-bg", min: 4.5 },
   { label: "注意 文字 × 地", fg: "warn-fg", bg: "warn-bg", min: 4.5 },
@@ -83,7 +84,7 @@ const PAIRS: readonly { readonly label: string; readonly fg: string; readonly bg
 
 export function TokensSection({ context }: { readonly context: string }) {
   const [rows, setRows] = useState<{ label: string; r: number | null; min: number }[]>([]);
-  // Read the live values after the theme / palette / mode attributes have been applied (re-run when `context` changes).
+  // Read the live values after the theme / mode attributes have been applied (re-run when `context` changes).
   // The read happens in an animation frame, once the new styles are in effect.
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -98,10 +99,10 @@ export function TokensSection({ context }: { readonly context: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <Sub title="色" note="現在のテーマ・配色案・現場モードの値です。">
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="色の見本">
+      <Sub title="色" note="現在のテーマ・現場モードの値です。紙色の地、墨色の文字、アクセントは藍 1 色です。">
+        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6" aria-label="色の見本">
           {SWATCHES.map((n) => (
-            <li key={n} className="flex flex-col gap-1.5 rounded-card bg-surface p-2 shadow-card">
+            <li key={n} className="flex flex-col gap-1.5 rounded-ctl border border-line bg-surface p-2">
               <span className="h-10 rounded-ctl border border-line" style={{ background: `var(--${n})` }} />
               <code className="font-mono text-aux text-fg-soft">{n}</code>
             </li>
@@ -120,7 +121,7 @@ export function TokensSection({ context }: { readonly context: string }) {
           {rows.map((r) => {
             const ok = r.r !== null && r.r >= r.min;
             return (
-              <li key={r.label} className="flex min-h-11 items-center justify-between gap-3 rounded-ctl bg-sunken px-3 py-1.5">
+              <li key={r.label} className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-ctl bg-sunken px-3 py-1.5">
                 <span className="min-w-0 text-table text-fg">{r.label}</span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 text-table tabular-nums text-fg-soft">
                   {r.r === null ? "—" : `${r.r.toFixed(2)}:1`}
@@ -131,15 +132,15 @@ export function TokensSection({ context }: { readonly context: string }) {
           })}
         </ul>
       </Sub>
-      <Sub title="文字の大きさ" note="見出し 22／24px、本文 15／14px、補助 12px 以上。数値は等幅。">
-        <div className="flex flex-col gap-2 rounded-card bg-surface p-4 shadow-card">
+      <Sub title="文字の大きさ" note="見出し 22／24px、本文 15／14px（行間 1.7）、補助 12px 以上。数値は等幅。">
+        <div className="flex flex-col gap-2 rounded-ctl border border-line bg-surface p-4">
           <p className="text-h1 font-semibold">ページ見出し（h1）</p>
           <p className="text-h2 font-semibold">節の見出し（h2）</p>
           <p className="text-h3 font-semibold">小見出し（h3）</p>
-          <p className="text-body">本文です。系統の違う書体を混ぜず、システムフォントのまま太さで階層を作ります。</p>
+          <p className="text-body">本文です。書体は日本語の 1 種類にそろえ、太さと大きさで階層を作ります。</p>
           <p className="text-table">表・一覧の文字です。</p>
           <p className="text-aux text-fg-mute">補助の文字（凡例・注記）です。</p>
-          <p className="text-stat font-semibold tabular-nums tracking-tight">1,234.5 <span className="text-aux font-normal text-fg-mute">統計の数値（等幅）</span></p>
+          <p className="text-stat font-semibold tabular-nums">1,234.5 <span className="text-aux font-normal text-fg-mute">統計の数値（等幅）</span></p>
         </div>
       </Sub>
     </div>
@@ -152,9 +153,9 @@ export function IconsSection() {
   return (
     <div className="flex flex-col gap-8">
       <Sub title={`アイコン（${ICON_NAMES.length} 個）`} note="24px の方眼・線 1.75px・currentColor。意味は隣の文字が担い、アイコンは装飾です。">
-        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-8" aria-label="アイコンの一覧" data-testid="icon-grid">
+        <ul className="grid grid-cols-3 gap-px border border-line bg-line sm:grid-cols-6 lg:grid-cols-8" aria-label="アイコンの一覧" data-testid="icon-grid">
           {ICON_NAMES.map((n) => (
-            <li key={n} className="flex flex-col items-center gap-1.5 rounded-card bg-surface px-1 py-3 shadow-card">
+            <li key={n} className="flex flex-col items-center gap-1.5 bg-surface px-1 py-3">
               <Icon name={n} size={24} className="text-fg" />
               <code className="max-w-full truncate font-mono text-aux text-fg-mute">{n}</code>
             </li>
@@ -171,9 +172,9 @@ export function IconsSection() {
       </Sub>
 
       <Sub title="アプリのアイコン案（3 案）" note="正方形・四隅まで塗りつぶし・角丸なし・文字なし。色は仮の青で、配色案に追従します。明・暗の背景の見本には、OS が付ける丸みを仮に付けて並べています。">
-        <ul className="grid gap-4 lg:grid-cols-3" aria-label="アプリのアイコン案">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-6 border-y border-line lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line" aria-label="アプリのアイコン案">
           {APP_ICON_PROPOSALS.map(({ id, label, note, Icon: Mark }) => (
-            <li key={id} className="flex flex-col gap-3 rounded-card bg-surface p-4 shadow-card" data-testid={`appicon-${id}`}>
+            <li key={id} className="flex flex-col gap-3 py-4 lg:px-4 lg:first:pl-0 lg:last:pr-0" data-testid={`appicon-${id}`}>
               <div>
                 <p className="text-h3 font-semibold text-fg">{label}</p>
                 <p className="text-aux text-fg-mute">{note}</p>
@@ -191,7 +192,7 @@ export function IconsSection() {
                 ] as const).map(([name, key, bg, fg]) => (
                   <div key={key} className={cx("flex flex-col gap-2 rounded-ctl p-3", bg)}>
                     <span className={cx("text-aux", fg)}>{name}（角丸は OS が付ける想定）</span>
-                    <div className="flex items-end gap-4">
+                    <div className="flex flex-wrap items-end gap-4">
                       {[180, 60, 29].map((s) => (
                         <div key={s} className="flex flex-col items-center gap-1" data-testid={`appicon-${id}-${key}-${s}`}>
                           <span className="block overflow-hidden" style={{ width: s, height: s, borderRadius: "22.5%" }}>
@@ -210,7 +211,7 @@ export function IconsSection() {
       </Sub>
 
       <Sub title="ドローンの線画（空の状態に小さく置く）" note="線 1.75px・currentColor。拡大しても線の太さは変わりません。">
-        <div className="flex flex-wrap items-center gap-6 rounded-card bg-surface p-4 text-fg-mute shadow-card">
+        <div className="flex flex-wrap items-center gap-6 rounded-ctl border border-line bg-surface p-4 text-fg-mute">
           <DroneLineArt width={200} />
           <DroneLineArt width={120} />
           <DroneLineArt width={64} />
@@ -232,10 +233,10 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
 
   return (
     <div className="flex flex-col gap-10">
-      <JournalControls />
+      <ControlsSection />
 
-      <Sub title="選択部品（チェック・ラジオ・トグル）" note="従来の見た目のまま（航空日誌の紙面は、ボタンと入力欄の試作のみ）。">
-        <div className="grid gap-4 rounded-card bg-surface p-4 shadow-card sm:grid-cols-2 lg:grid-cols-3">
+      <Sub title="チェック・ラジオ・トグル" note="トグルは角を丸めた四角の軌道で、つまみの位置と右のオン・オフの文字で状態を示します。">
+        <div className="grid gap-4 rounded-ctl border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-3">
           <State label="チェック"><div className="flex flex-col"><Checkbox label="既定" /><Checkbox label="選択済み" defaultChecked /><Checkbox label="無効" disabled /></div></State>
           <State label="ラジオ"><div className="flex flex-col"><Radio name="r-demo" label="一つ目" defaultChecked /><Radio name="r-demo" label="二つ目" /><Radio name="r-demo" label="無効" disabled /></div></State>
           <State label="トグル（スイッチ）">
@@ -248,13 +249,17 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
         </div>
       </Sub>
 
-      <Sub title="状態のピル・注意バー" note="5 つの意味は、アイコン（形）＋文言＋色で示します。">
+      <Sub title="状態の印・注意バー" note="5 つの意味は、アイコン（形）＋文言＋色で示します。丸いピルは件数のバッジだけに使います。">
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill meaning="ok">確認済み</StatusPill>
           <StatusPill meaning="warn">確認待ち</StatusPill>
           <StatusPill meaning="danger">期限切れ</StatusPill>
           <StatusPill meaning="info">案内</StatusPill>
           <StatusPill meaning="neutral">下書き</StatusPill>
+          <span className="inline-flex items-center gap-2 text-table text-fg-soft">
+            未確認の計画
+            <span className="rounded-pill bg-sunken px-2 text-aux font-medium tabular-nums text-fg">12</span>
+          </span>
         </div>
         <div className="grid gap-2 lg:grid-cols-2">
           <NoticeBar meaning="info" title="情報">固定の注意書きは、見出しの直下に常に表示します。</NoticeBar>
@@ -264,15 +269,17 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
         </div>
       </Sub>
 
-      <Sub title="カード（3 種）と統計タイル" note="主（1 画面に 1 つ）・標準・インセット。同じ形を敷き詰めません。">
-        <div className="grid gap-3 lg:grid-cols-3">
-          <Card variant="primary"><p className="text-h3 font-semibold">主カード</p><p className="text-table text-fg-soft">1 画面に 1 つ。いちばん大きく、面と影で前に出ます。</p></Card>
-          <Card variant="standard"><p className="text-h3 font-semibold">標準カード</p><p className="text-table text-fg-soft">一覧や要約の面です。</p></Card>
-          <Card variant="inset"><p className="text-h3 font-semibold">インセット</p><p className="text-table text-fg-soft">面の差だけで、枠も影もありません。</p></Card>
+      <Sub title="カード（3 種）と統計タイル" note="主（1 画面に 1 つ）・標準・インセット。影はなく、罫線と地色の差で分けます。同じ幅を並べません。">
+        <div className="flex flex-col gap-3">
+          <Card variant="primary"><p className="text-h3 font-semibold">主カード</p><p className="text-table text-fg-soft">1 画面に 1 つ。太い罫で囲み、いちばん大きく取ります。</p></Card>
+          <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+            <Card variant="standard"><p className="text-h3 font-semibold">標準カード</p><p className="text-table text-fg-soft">一覧や要約を入れる、細い罫の面です。</p></Card>
+            <Card variant="inset"><p className="text-h3 font-semibold">インセット</p><p className="text-table text-fg-soft">地色の差だけで、枠はありません。</p></Card>
+          </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <StatTile size="lead" label="次にやること" value={3} unit="件" status="期限が近い" meaning="warn" href="#" />
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col divide-y divide-line border-y border-line">
             <StatTile label="今日の飛行" value={2} unit="件" href="#" />
             <StatTile label="飛行中" value={0} unit="件" status="なし" meaning="ok" />
           </div>
@@ -280,7 +287,7 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
       </Sub>
 
       <Sub title="タブ・セグメント・ⓘ・折りたたみ・コンテキストメニュー">
-        <div className="flex flex-col gap-4 rounded-card bg-surface p-4 shadow-card">
+        <div className="flex flex-col gap-4 rounded-ctl border border-line bg-surface p-4">
           <Tabs
             idPrefix="demo-tabs"
             label="タブの見本"
@@ -317,7 +324,7 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
         </div>
       </Sub>
 
-      <Sub title="表・空の状態・読み込み中">
+      <Sub title="表・空・読み込み中・エラー">
         <div className="grid gap-4 lg:grid-cols-2">
           <DataTable
             caption="読み込み中の表の見本"
@@ -327,10 +334,13 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
             rows={[]}
             rowKey={() => ""}
           />
-          <EmptyState art={<DroneLineArt width={120} />} title="まだ記録がありません" action={<Button variant="primary" icon="plus">記録を作成</Button>}>
-            空の状態にだけ、少し長めの案内を置けます。最初の操作を主ボタンで示します。
+          <EmptyState art={<DroneLineArt width={120} />} title="飛行の記録はまだありません" action={<Button variant="primary" icon="plus">飛行を記録する</Button>}>
+            最初の飛行を記録すると、ここに一覧が出ます。
           </EmptyState>
         </div>
+        <NoticeBar meaning="danger" title="送信できませんでした" data-testid="demo-error">
+          通信が切れたため、記録は端末に保存されています。電波の届く場所で、もう一度「送信する」を押してください。
+        </NoticeBar>
         <div className="flex flex-wrap items-center gap-4 text-fg-mute">
           <span className="inline-flex items-center gap-2 text-table"><Spinner label="読み込み中" />読み込み中</span>
           <div className="w-48"><Skeleton className="h-4 w-full" /></div>
@@ -366,38 +376,23 @@ export function PartsSection({ density }: { readonly density: "standard" | "comp
   );
 }
 
-// ── 航空日誌の紙面（試作）：ボタンと入力欄 ───────────────────────────────────
+// ── ボタンと入力欄 ───────────────────────────────────────────────────────────
 
-const JOURNAL_BUTTONS = [
+const BUTTON_ROWS = [
   { variant: "primary", name: "主", label: "飛行計画を保存", busy: "保存中" },
   { variant: "secondary", name: "副", label: "下書きに戻す", busy: "戻し中" },
   { variant: "quiet", name: "控えめ", label: "あとで確認する", busy: "確認中" },
   { variant: "danger", name: "取り消し", label: "記録を取り消す", busy: "取消中" },
 ] as const;
 
-/**
- * Trial of the "journal paper" direction for buttons and entry fields only. `.jr` scopes the paper colours, the single
- * corner radius and the no-shadow rule (globals.css); the parts carry `jr:` classes that do nothing outside it.
- * Everything else in the catalog keeps the previous look until this is approved.
- */
-function JournalControls() {
+/** Buttons and entry fields in every state, with real wording. Hover, focus and pressed are forced on (data-force). */
+function ControlsSection() {
   return (
-    <div id="journal" className="scroll-mt-16" data-testid="journal-controls">
-      <div className="jr flex flex-col gap-8 rounded-card border border-line p-4 sm:p-6 [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-8">
-        <div className="flex flex-col gap-1.5">
-          <h3 className="text-h3 font-semibold text-fg">ボタンと入力欄（航空日誌の紙面・試作）</h3>
-          <p className="text-table leading-[1.7] text-fg-soft">
-            紙色の地に墨色の文字、アクセントは藍 1 色です。角丸は 1 種類、影と半透明はありません。この枠の中だけが新しい方針で、配色案の切り替えには従わず、現場モードでは現場用の色（7:1）に切り替わります。
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-5" data-testid="journal-buttons">
-          <div className="flex flex-col gap-0.5">
-            <h4 className="text-body font-semibold text-fg">ボタン</h4>
-            <p className="text-aux leading-[1.7] text-fg-mute">通常・ホバー・フォーカス・押下・無効・読み込み中。ホバー・フォーカス・押下は固定表示です。</p>
-          </div>
-          {JOURNAL_BUTTONS.map((b) => (
-            <div key={b.variant} className="grid grid-cols-2 gap-x-4 gap-y-4 field:max-sm:grid-cols-1 sm:grid-cols-3 lg:grid-cols-6" data-testid={`journal-buttons-${b.variant}`}>
+    <div id="controls" className="flex scroll-mt-16 flex-col gap-10" data-testid="controls-section">
+      <Sub title="ボタン" note="通常・ホバー・フォーカス・押下・無効・読み込み中。ホバー・フォーカス・押下は固定表示です。文字は枠からはみ出さず、長い文言は枠の中で折り返します。">
+        <div className="flex flex-col gap-6 border-y border-line py-5" data-testid="buttons">
+          {BUTTON_ROWS.map((b) => (
+            <div key={b.variant} className="grid grid-cols-2 gap-x-4 gap-y-4 field:max-sm:grid-cols-1 sm:grid-cols-3 lg:grid-cols-6" data-testid={`buttons-${b.variant}`}>
               <State label={`${b.name}：通常`}><Button variant={b.variant}>{b.label}</Button></State>
               <State label="ホバー"><Button variant={b.variant} data-force="hover">{b.label}</Button></State>
               <State label="フォーカス"><Button variant={b.variant} data-force="focus">{b.label}</Button></State>
@@ -407,53 +402,51 @@ function JournalControls() {
             </div>
           ))}
           <div className="flex flex-col gap-3">
-            <p className="text-aux leading-[1.7] text-fg-mute">長い文言：幅に合わせて伸び、収まらなければ枠の中で折り返します（文字は枠から出ません）。</p>
-            <div className="flex flex-wrap items-start gap-3" data-testid="journal-buttons-long">
+            <p className="text-aux text-fg-mute">長い文言：幅に合わせて伸び、収まらなければ枠の中で折り返します。</p>
+            <div className="flex flex-wrap items-start gap-3" data-testid="buttons-long">
               <Button variant="primary" icon="check-circle">日常点検の記録を確認して、運航管理者へ提出する</Button>
               <div className="w-48"><Button variant="secondary" className="w-full">飛行前の確認項目をすべて見直してから、もう一度送信する</Button></div>
               <Button variant="danger" icon="ban">確定した記録を取り消す</Button>
             </div>
           </div>
         </div>
+      </Sub>
 
-        <div className="flex flex-col gap-5" data-testid="journal-fields">
-          <div className="flex flex-col gap-0.5">
-            <h4 className="text-body font-semibold text-fg">入力欄</h4>
-            <p className="text-aux leading-[1.7] text-fg-mute">ラベルは常に欄の上に出します。時刻・座標・飛行時間は等幅の数字です。</p>
-          </div>
+      <Sub title="入力欄" note="ラベルは常に欄の上に出します。時刻・座標・飛行時間は等幅の数字です。エラーは「何が起きたか」と「どうすればよいか」を欄のすぐ下に書きます。">
+        <div className="flex flex-col gap-6 border-y border-line py-5" data-testid="fields">
           <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
             <State label="通常">
               <div className="w-full">
-                <FormField id="jr-reg" label="機体の登録記号" hint="機体に貼ってあるラベルの記号を入力します。">
-                  <TextInput id="jr-reg" aria-describedby={describedBy("jr-reg", { hint: true })} placeholder="JU から始まる 12 文字" />
+                <FormField id="ctl-reg" label="機体の登録記号" hint="機体に貼ってあるラベルの記号を入力します。">
+                  <TextInput id="ctl-reg" aria-describedby={describedBy("ctl-reg", { hint: true })} placeholder="JU から始まる 12 文字" />
                 </FormField>
               </div>
             </State>
             <State label="ホバー">
               <div className="w-full">
-                <FormField id="jr-pilot" label="操縦者の氏名">
-                  <TextInput id="jr-pilot" data-force="hover" placeholder="例：米子 太郎" />
+                <FormField id="ctl-pilot" label="操縦者の氏名">
+                  <TextInput id="ctl-pilot" data-force="hover" placeholder="例：米子 太郎" />
                 </FormField>
               </div>
             </State>
             <State label="フォーカス">
               <div className="w-full">
-                <FormField id="jr-place" label="離陸地点の名称">
-                  <TextInput id="jr-place" data-force="focus" defaultValue="弓ヶ浜公園 河川敷" />
+                <FormField id="ctl-place" label="離陸地点の名称">
+                  <TextInput id="ctl-place" data-force="focus" defaultValue="弓ヶ浜公園 河川敷" />
                 </FormField>
               </div>
             </State>
             <State label="無効">
               <div className="w-full">
-                <FormField id="jr-no" label="確定した記録の番号" hint="確定した記録は書き換えられません。訂正は新しい版として追記します。">
-                  <TextInput id="jr-no" disabled defaultValue="R-2026-0412" className="tabular-nums" aria-describedby={describedBy("jr-no", { hint: true })} />
+                <FormField id="ctl-no" label="確定した記録の番号" hint="確定した記録は書き換えられません。訂正は新しい版として追記します。">
+                  <TextInput id="ctl-no" disabled defaultValue="R-2026-0412" className="tabular-nums" aria-describedby={describedBy("ctl-no", { hint: true })} />
                 </FormField>
               </div>
             </State>
             <State label="読み込み中">
               <div className="w-full">
-                <FormField id="jr-addr" label="離陸地点の住所" hint="座標から住所を調べています。">
-                  <TextInput id="jr-addr" loading defaultValue="35.4821, 133.3190" className="tabular-nums" aria-describedby={describedBy("jr-addr", { hint: true })} />
+                <FormField id="ctl-addr" label="離陸地点の住所" hint="座標から住所を調べています。">
+                  <TextInput id="ctl-addr" loading defaultValue="35.4821, 133.3190" className="tabular-nums" aria-describedby={describedBy("ctl-addr", { hint: true })} />
                 </FormField>
               </div>
             </State>
@@ -466,9 +459,9 @@ function JournalControls() {
             </State>
             <State label="数字（等幅・右寄せ）">
               <div className="w-full">
-                <FormField id="jr-min" label="飛行時間" hint="離陸から着陸までの時間です。">
+                <FormField id="ctl-min" label="飛行時間" hint="離陸から着陸までの時間です。">
                   <div className="flex items-center gap-2">
-                    <div className="w-28"><TextInput id="jr-min" inputMode="numeric" defaultValue="25" className="text-right tabular-nums" aria-describedby={describedBy("jr-min", { hint: true })} /></div>
+                    <div className="w-28"><TextInput id="ctl-min" inputMode="numeric" defaultValue="25" className="text-right tabular-nums" aria-describedby={describedBy("ctl-min", { hint: true })} /></div>
                     <span className="text-body text-fg-soft">分</span>
                   </div>
                 </FormField>
@@ -476,36 +469,36 @@ function JournalControls() {
             </State>
             <State label="数字（座標）">
               <div className="w-full">
-                <FormField id="jr-lat" label="離陸地点の緯度" optional>
-                  <TextInput id="jr-lat" inputMode="decimal" defaultValue="35.482100" className="tabular-nums" />
+                <FormField id="ctl-lat" label="離陸地点の緯度" optional>
+                  <TextInput id="ctl-lat" inputMode="decimal" defaultValue="35.482100" className="tabular-nums" />
                 </FormField>
               </div>
             </State>
             <State label="選択">
               <div className="w-full">
-                <FormField id="jr-kind" label="飛行の区分">
-                  <Select id="jr-kind"><option>訓練</option><option>業務</option><option>点検</option></Select>
+                <FormField id="ctl-kind" label="飛行の区分">
+                  <Select id="ctl-kind"><option>訓練</option><option>業務</option><option>点検</option></Select>
                 </FormField>
               </div>
             </State>
             <State label="検索">
               <div className="w-full">
-                <FormField id="jr-find" label="計画を探す">
-                  <SearchInput id="jr-find" placeholder="地点名・機体名" />
+                <FormField id="ctl-find" label="計画を探す">
+                  <SearchInput id="ctl-find" placeholder="地点名・機体名" />
                 </FormField>
               </div>
             </State>
             <State label="複数行">
               <div className="w-full sm:col-span-2 lg:col-span-1">
-                <FormField id="jr-memo" label="気づいたこと" optional>
-                  <Textarea id="jr-memo" placeholder="風の強さや、周りの様子を書き留めます。" />
+                <FormField id="ctl-memo" label="気づいたこと" optional>
+                  <Textarea id="ctl-memo" placeholder="風の強さや、周りの様子を書き留めます。" />
                 </FormField>
               </div>
             </State>
           </div>
           <ErrorSummary errors={[{ id: "demo-err", message: "登録記号の形式が違います" }]} />
         </div>
-      </div>
+      </Sub>
     </div>
   );
 }

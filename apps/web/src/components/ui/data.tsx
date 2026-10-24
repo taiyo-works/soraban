@@ -108,7 +108,7 @@ export function DataTable<T>({
           </Button>
         </div>
       ) : null}
-      <div className="min-w-0 rounded-card md:overflow-hidden md:bg-surface md:shadow-card">
+      <div className="min-w-0 rounded-ctl md:overflow-hidden md:border md:border-line md:bg-surface">
         <table className="ds-table w-full border-collapse text-left text-table">
           <caption className="sr-only">{caption}</caption>
           <thead>
@@ -122,13 +122,13 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={() => toggle(c.key)}
-                        className={cx("-mx-2 inline-flex min-h-11 items-center gap-1 rounded-ctl px-2 hov:text-fg compact:min-h-9", active && "text-fg")}
+                        className={cx("-mx-2 inline-flex min-h-11 items-center gap-1 rounded-ctl px-2 hov:text-fg field:min-h-14 compact:min-h-9", active && "text-fg")}
                       >
                         {c.header}
                         <Icon name={active ? (sort!.dir === "asc" ? "chevron-up" : "chevron-down") : "sort"} size={14} />
                       </button>
                     ) : (
-                      <span className="inline-flex min-h-11 items-center compact:min-h-9">{c.header}</span>
+                      <span className="inline-flex min-h-11 items-center field:min-h-14 compact:min-h-9">{c.header}</span>
                     )}
                   </th>
                 );
@@ -139,7 +139,7 @@ export function DataTable<T>({
           <tbody className="max-md:flex max-md:flex-col max-md:gap-2">
             {loading
               ? Array.from({ length: 4 }, (_, i) => (
-                  <tr key={i} aria-hidden="true" className="max-md:rounded-card max-md:bg-surface max-md:p-3 max-md:shadow-card md:border-t md:border-line">
+                  <tr key={i} aria-hidden="true" className="max-md:rounded-ctl max-md:border max-md:border-line max-md:bg-surface max-md:p-3 md:border-t md:border-line">
                     {columns.map((c) => (
                       <td key={c.key} className="px-4 py-3">
                         <span className="ds-skeleton block h-4 w-3/4 rounded-ctl bg-sunken" />
@@ -158,7 +158,7 @@ export function DataTable<T>({
                       data-testid={rowTestId?.(row)}
                       aria-current={selected ? "true" : undefined}
                       className={cx(
-                        "transition-colors duration-[var(--dur-fast)] max-md:rounded-card max-md:bg-surface max-md:p-3 max-md:shadow-card md:border-t md:border-line",
+                        "transition-colors duration-[var(--dur)] max-md:rounded-ctl max-md:border max-md:border-line max-md:bg-surface max-md:p-3 md:border-t md:border-line",
                         href && "hov:bg-accent-soft md:cursor-pointer",
                         selected && "bg-accent-soft",
                       )}
@@ -176,7 +176,7 @@ export function DataTable<T>({
                           )}
                         >
                           {c.primary && href ? (
-                            <Link href={href} prefetch={false} className="ds-table-link inline-flex min-h-11 items-center rounded-ctl hov:underline md:min-h-0">
+                            <Link href={href} prefetch={false} className="ds-table-link inline-flex min-h-11 items-center rounded-ctl hov:underline md:min-h-0 field:min-h-14">
                               {c.cell(row)}
                             </Link>
                           ) : (
@@ -197,17 +197,17 @@ export function DataTable<T>({
 
 // ── Filter bar ───────────────────────────────────────────────────────────────
 
-/** A removable filter chip: "label: value" and an x button that removes it. */
+/** A removable filter chip: "label: value" and an x button that removes it. A ruled tag, not a pill. */
 export function Chip({ label, value, onRemove }: { readonly label: string; readonly value: string; readonly onRemove: () => void }) {
   return (
-    <span className="inline-flex min-h-8 items-center gap-1 rounded-pill bg-accent-soft pl-3 text-table text-accent">
+    <span className="inline-flex min-h-11 items-center gap-1 rounded-ctl border border-line-strong bg-surface pl-3 text-table text-fg field:min-h-14">
       <span className="text-fg-mute">{label}</span>
       <span className="font-medium">{value}</span>
       <button
         type="button"
         aria-label={`${label}「${value}」の絞り込みを外す`}
         onClick={onRemove}
-        className="inline-flex min-h-11 min-w-9 items-center justify-center rounded-pill hov:bg-accent/10"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
       >
         <Icon name="x" size={14} />
       </button>
@@ -268,7 +268,7 @@ export function FilterBar({
 
 /**
  * Tiny trend line for values that are already on the page. The numbers are always given in text too (`summary`),
- * because a line alone is not readable by everyone. Flat area fill only (no gradient).
+ * because a line alone is not readable by everyone. A line only: no fill, no gradient.
  */
 export function Sparkline({ values, summary, width = 96, height = 28 }: { readonly values: readonly number[]; readonly summary: string; readonly width?: number; readonly height?: number }) {
   const max = Math.max(1, ...values);
@@ -277,7 +277,6 @@ export function Sparkline({ values, summary, width = 96, height = 28 }: { readon
   const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("");
   return (
     <svg role="img" aria-label={summary} viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="shrink-0 text-accent">
-      <path d={`${d}L${width} ${height}L0 ${height}Z`} fill="currentColor" opacity={0.12} />
       <path d={d} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

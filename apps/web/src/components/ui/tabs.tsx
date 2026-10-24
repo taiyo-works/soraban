@@ -5,7 +5,7 @@ import { cx, type DataAttrs } from "./cx";
 import { Icon, type IconName } from "./icons";
 
 // Tabs (page-level switching), segmented control (2-4 choices, a display switch) and the bottom tab bar used by the
-// workspace below 1024px. Arrow keys move between items (roving tabindex); Home/End jump.
+// workspace below 1024px. Opaque, ruled; the selected item is told apart by a rule, weight and colour together. Arrow keys move between items (roving tabindex); Home/End jump.
 
 export type TabItem = { readonly id: string; readonly label: string; readonly icon?: IconName; readonly count?: number };
 
@@ -66,7 +66,7 @@ export function Tabs({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(t.id)}
             className={cx(
-              "-mb-px inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-body transition-colors duration-[var(--dur-fast)] field:min-h-14",
+              "-mb-px inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-body transition-colors duration-[var(--dur)] field:min-h-14",
               active ? "border-accent font-semibold text-fg" : "border-transparent text-fg-soft hov:text-fg",
             )}
           >
@@ -88,7 +88,7 @@ export function TabPanel({ idPrefix, id, active, children }: { readonly idPrefix
   );
 }
 
-/** iOS-style segmented control. A radio group: one choice selected. */
+/** Segmented control. A radio group: one choice selected. */
 export function Segmented({
   options,
   value,
@@ -103,7 +103,7 @@ export function Segmented({
 } & DataAttrs) {
   const { onKeyDown, ref } = useRoving(options.map((o) => o.id), value, onChange);
   return (
-    <div {...rest} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className="inline-flex max-w-full rounded-ctl bg-sunken p-0.5">
+    <div {...rest} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className="inline-flex max-w-full rounded-ctl border border-line-strong bg-sunken p-0.5">
       {options.map((o) => {
         const active = o.id === value;
         return (
@@ -116,8 +116,8 @@ export function Segmented({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(o.id)}
             className={cx(
-              "inline-flex min-h-11 min-w-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[6px] px-3 text-table transition-[background-color,color,box-shadow] duration-[var(--dur-fast)] field:min-h-14 field:text-body",
-              active ? "bg-surface font-semibold text-fg shadow-[0_1px_3px_rgb(0_0_0/0.15),0_0_0_0.5px_var(--line)]" : "text-fg-soft hov:text-fg",
+              "inline-flex min-h-11 min-w-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-[background-color,color,border-color] duration-[var(--dur)] field:min-h-14 field:text-body",
+              active ? "border-accent bg-surface font-semibold text-accent" : "border-transparent text-fg-soft hov:text-fg",
             )}
           >
             {o.icon ? <Icon name={o.icon} size={16} /> : null}
@@ -129,7 +129,7 @@ export function Segmented({
   );
 }
 
-/** Bottom tab bar for the workspace (below 1024px): opens the input / result / map panels. Translucent fixed chrome. */
+/** Bottom tab bar for the workspace (below 1024px): opens the input / result / map panels. Opaque fixed chrome. */
 export function BottomTabs({
   tabs,
   value,
@@ -148,7 +148,7 @@ export function BottomTabs({
 } & DataAttrs) {
   const { onKeyDown, ref } = useRoving(tabs.map((t) => t.id), value, onChange);
   return (
-    <div {...rest} role="tablist" aria-label={label} onKeyDown={onKeyDown} className={cx("glass grid border-t border-line pb-[env(safe-area-inset-bottom)]", className)} style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+    <div {...rest} role="tablist" aria-label={label} onKeyDown={onKeyDown} className={cx("grid border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]", className)} style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
       {tabs.map((t) => {
         const active = t.id === value;
         return (
@@ -162,9 +162,9 @@ export function BottomTabs({
             aria-controls={panelId(idPrefix, t.id)}
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(t.id)}
-            className="flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-aux touch-manipulation"
+            className={cx("flex min-h-14 flex-col items-center justify-center gap-0.5 border-t-2 px-1 text-aux touch-manipulation", active ? "border-accent" : "border-transparent")}
           >
-            <span className={cx("inline-flex h-7 w-14 items-center justify-center rounded-pill transition-colors duration-[var(--dur-fast)]", active ? "bg-accent-soft text-accent" : "text-fg-mute")}>
+            <span className={cx("inline-flex h-7 items-center justify-center transition-colors duration-[var(--dur)]", active ? "text-accent" : "text-fg-mute")}>
               {t.icon ? <Icon name={t.icon} size={20} /> : null}
             </span>
             <span className={active ? "font-bold text-fg" : "text-fg-soft"}>{t.label}</span>
