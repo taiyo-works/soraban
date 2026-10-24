@@ -656,8 +656,10 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     await tid(page, "incident-quick-injury-no").click();
     await tid(page, "incident-quick-submit").click();
     await expect(tid(page, "incident-quick-unsent")).toContainText("未送信 1 件");
-    await context.setOffline(false);
+    // 先に 503 の応答を仕込んでから通信を戻す。順序が逆だと、通信が戻った瞬間（online イベント）の自動の再送が本物のサーバーに
+    // 届いて未送信が 0 件になり、そのあとのログアウトの押下が警告なしでログアウトしてしまう（待ちの不足による不安定）。
     await page.route("**/api/ops/incidents", (route) => (route.request().method() === "POST" ? route.fulfill({ status: 503, body: "{}" }) : route.continue()));
+    await context.setOffline(false);
     await page.goto("/ops/more");
     // a click before hydration does nothing (no handler yet), so press again until the warning shows; with an unsent item
     // the hydrated click only ever opens the warning (never signs out), so repeating it is safe
