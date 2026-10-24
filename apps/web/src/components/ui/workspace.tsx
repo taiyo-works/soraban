@@ -239,7 +239,7 @@ function EdgeToggle({ side, open, onClick, controls, label }: { readonly side: "
  * A stand-in for the map (stage 4 puts the real map here). Drawn with tokens only; no data: contour lines, a river, a
  * park, a few blocks and two roads, in quiet tones so a floating panel or a pane reads clearly on top of it.
  */
-export function MapPlaceholder({ label = "地図の場所（見本）" }: { readonly label?: string }) {
+export function MapPlaceholder({ label = "地図の場所（見本）", site = true }: { readonly label?: string; /** Draw the sample flight area and pin (the menu trial places its own pin). */ readonly site?: boolean }) {
   return (
     <div className="relative h-full w-full overflow-hidden bg-sunken" role="img" aria-label={label}>
       <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
@@ -280,9 +280,13 @@ export function MapPlaceholder({ label = "地図の場所（見本）" }: { read
           <path d="M-10 258C70 244 150 270 230 250S370 232 410 244" stroke="var(--bg-surface)" strokeWidth="4" />
         </g>
         {/* the sample site: a flight area and a pin */}
-        <circle cx="205" cy="150" r="52" fill="var(--accent-soft)" />
-        <circle cx="205" cy="150" r="52" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 5" />
-        <circle cx="205" cy="150" r="7" fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth="3" />
+        {site ? (
+          <>
+            <circle cx="205" cy="150" r="52" fill="var(--accent-soft)" />
+            <circle cx="205" cy="150" r="52" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 5" />
+            <circle cx="205" cy="150" r="7" fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth="3" />
+          </>
+        ) : null}
       </svg>
       <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-ctl border border-line bg-surface px-3 py-1 text-aux text-fg-mute max-lg:hidden">{label}</span>
     </div>

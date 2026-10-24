@@ -89,8 +89,9 @@ describe("見本の設定（クエリ文字列）", () => {
   it("既知の値だけを読み、不明な値は既定に戻す", async () => {
     const { parseConfig, DEFAULT_CONFIG } = await import("../components/ui/catalog/config");
     expect(parseConfig({})).toEqual(DEFAULT_CONFIG);
+    // 案の見本（view・pc・sp・day・pcname・judge）は既定のまま変わらない（menu-trial.test.ts が別に確かめる）
     expect(parseConfig({ theme: "dark", field: "1", density: "compact", screen: "workspace" })).toEqual({
-      theme: "dark", field: true, density: "compact", screen: "workspace",
+      ...DEFAULT_CONFIG, theme: "dark", field: true, density: "compact", screen: "workspace",
     });
     expect(parseConfig({ theme: "neon", field: "yes", density: "x", screen: "none" })).toEqual(DEFAULT_CONFIG);
     // 配色案（palette）は廃止：古い共有 URL に付いていても無視する

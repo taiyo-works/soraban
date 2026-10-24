@@ -19,6 +19,12 @@ export const ICON_PATHS = {
       {dot(8.5, 14.5)}
     </>
   ),
+  home: (
+    <>
+      <path d="M4 11l8-6.5 8 6.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z" />
+      <path d="M10 20.5V15h4v5.5" />
+    </>
+  ),
   plan: (
     <>
       <rect x="4.5" y="3.5" width="15" height="17" rx="3.5" />
