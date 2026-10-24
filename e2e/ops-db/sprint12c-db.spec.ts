@@ -568,6 +568,8 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await page.goto("/ops/journal");
     await expect(page.getByTestId("journal-tab-incidents")).toHaveAttribute("href", "/ops/incidents");
     await expect(page.getByTestId("journal-new-incident")).toHaveAttribute("href", "/ops/incidents/new");
+    // 表示されるのを待ってから測る（読み込みの途中の要素は寸法が取れない）
+    await expect(page.getByTestId("journal-new-incident")).toBeVisible();
     expect((await page.getByTestId("journal-new-incident").boundingBox())!.height).toBeGreaterThanOrEqual(56);
     const pilotPage = await page.context().browser()!.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
     await signIn(pilotPage.request, seeded("a-pilot"));
