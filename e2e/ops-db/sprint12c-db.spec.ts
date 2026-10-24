@@ -193,8 +193,10 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
       await expect(page.getByTestId("today-empty-action").first()).toHaveText("飛行計画を作る");
       await expect(page.getByTestId("today-card")).toHaveCount(0);
     }
-    // 入力ボタンは残り、ログイン中の利用者と役割・ログアウトは右上の利用者メニュー（開いてから見える）にある
-    await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
+    // 入力ボタンは残り、ログイン中の利用者と役割・ログアウトは右上の利用者メニュー（開いてから見える）にある。
+    // 「飛行計画を作る」は同じ画面に 1 つだけ：予定のない日は先頭のカードの中、予定のある日は右上
+    if (first.card === null) await expect(page.getByTestId("ops-enter-plan")).toHaveCount(0);
+    else await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
     await expect(page.getByTestId("ops-enter-flight")).toBeVisible();
     await expect(page.getByTestId("ops-enter-inspection")).toBeVisible();
     await expect(page.getByTestId("today-heading")).toHaveText("ホーム");

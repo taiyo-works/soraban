@@ -520,7 +520,9 @@ html:has(body.has-bottom-nav) {
   --neutral-line: #e5e5ea;
 }
 
-/* Tailwind names for the new tokens (bg-surface, text-fg-mute, border-line-strong, bg-ok-bg, ...). */
+/* Tailwind names for the new tokens (bg-surface, text-fg-mute, border-line-strong, bg-ok-bg, ...).
+ * The type sizes carry the small-screen value as a fallback, so a part that is drawn outside `.ds` (the signed-in band on `/`)
+ * still gets a size instead of inheriting one. Inside `.ds` the `--fs-*` values win, as before. */
 @theme inline {
   --color-app: var(--bg-app);
   --color-surface: var(--bg-surface);
@@ -552,21 +554,21 @@ html:has(body.has-bottom-nav) {
   --color-neutral-line: var(--neutral-line);
   --radius-ctl: var(--r-journal);
   --radius-pill: var(--r-pill);
-  --text-h1: var(--fs-h1);
+  --text-h1: var(--fs-h1, 22px);
   --text-h1--line-height: 1.4;
-  --text-h2: var(--fs-h2);
+  --text-h2: var(--fs-h2, 17px);
   --text-h2--line-height: 1.45;
-  --text-h3: var(--fs-h3);
+  --text-h3: var(--fs-h3, 15px);
   --text-h3--line-height: 1.5;
-  --text-body: var(--fs-body);
+  --text-body: var(--fs-body, 15px);
   --text-body--line-height: 1.7;
-  --text-table: var(--fs-table);
+  --text-table: var(--fs-table, 14px);
   --text-table--line-height: 1.7;
-  --text-aux: var(--fs-aux);
+  --text-aux: var(--fs-aux, 12px);
   --text-aux--line-height: 1.7;
-  --text-stat: var(--fs-stat);
+  --text-stat: var(--fs-stat, 30px);
   --text-stat--line-height: 1.1;
-  --text-state: var(--fs-state);
+  --text-state: var(--fs-state, 14px);
   --text-state--line-height: 1.4;
 }
 

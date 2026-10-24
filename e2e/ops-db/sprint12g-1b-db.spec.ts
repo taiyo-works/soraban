@@ -81,6 +81,9 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await expect(page.getByTestId("today-empty-message")).not.toHaveText("");
     await expect(page.getByTestId("today-empty-action")).toHaveCount(2);
     await expect(page.getByTestId("today-empty-action").first()).toHaveText("飛行計画を作る");
+    // 同じ画面に「飛行計画を作る」は 1 つだけ（予定のない日はカードの中。右上には出さない）
+    await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(1);
+    await expect(page.getByTestId("ops-enter-plan")).toHaveCount(0);
     // 先頭：何もない旨と次の一手 → すぐ下に近づく期限
     const empty = (await page.getByTestId("today-empty").boundingBox())!;
     const dl = page.getByTestId("deadline-row");
@@ -137,6 +140,9 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await page.goto("/ops");
     const card = page.getByTestId("today-card");
     await expect(card).toHaveAttribute("data-plan-id", today.id);
+    // 予定のある日は、「飛行計画を作る」は右上の 1 つだけ（現場モードを開くが主ボタン）
+    await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(1);
+    await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
     await expect(page.getByTestId("today-card-reason")).toHaveText("今日の飛行");
     // 主ボタンは 1 つ（カードの中）。高さ 56px 以上
     await expect(card.getByTestId("today-card-primary")).toHaveText("現場モードを開く");
