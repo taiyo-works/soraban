@@ -677,6 +677,10 @@ html:has(body.has-bottom-nav) {
 @custom-variant foc (&:is(:focus-visible, [data-force~="focus"]));
 @custom-variant field (&:where(.field, .field *));
 @custom-variant compact (&:where([data-density="compact"], [data-density="compact"] *));
+/* Pressed state (forced in the catalog with data-force="active"); declared after `hov` so it wins when both apply. */
+@custom-variant act (&:is(:active, [data-force~="active"]));
+/* 航空日誌の紙面（試作）。`.jr` の中だけで効く。ほかの節・画面はこの variant の指定を読まない。 */
+@custom-variant jr (&:where(.jr, .jr *));
 
 /* ------------------------------------------------------------
  * `.ds` — the scope in which the new system applies.
@@ -808,6 +812,76 @@ html:has(.ds-page) {
 }
 .ds :is(.tnum, .num, time, td, [data-num]) {
   font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------
+ * `.jr` — 「航空日誌の紙面」の試作（Sprint 12g の見本のうち、ボタンと入力欄の節だけ）。
+ * 紙色の地・墨色の文字・藍 1 色。角丸は 1 種類（--r-journal）、影なし、半透明なし。
+ * 色は通常モードだけ置き換える（現場モードは 7:1 の専用の組をそのまま使う）。暗は紙の反転ではなく、
+ * 夜間の機内灯のような青みの濃い地に、紙の白を少し落とした文字を置く別の組。
+ * ---------------------------------------------------------- */
+.jr {
+  /* 角丸の値はここ 1 か所。ボタン・入力欄・面はすべてこれを通る。 */
+  --r-journal: 5px;
+  --r-ctl: var(--r-journal);
+  --r-card: var(--r-journal);
+  --sh-ring: 0px;
+  --sh-drop: transparent;
+  --sh-drop2: transparent;
+  --dur-fast: 200ms;
+  --glass-alpha: 100%;
+  --glass-filter: none;
+}
+.ds:not(.field) .jr {
+  --bg-app: #f1ede1;
+  --bg-surface: #fbf9f3;
+  --bg-sunken: #ebe6d7;
+  --fg: #171b22;
+  --fg-soft: #3b3f47;
+  --fg-mute: #5c5f66;
+  --line: #d8d1bd;
+  --line-strong: #857f6c;
+  --accent: #1f4a99;
+  --accent-hover: #183b7c;
+  --accent-fg: #ffffff;
+  --accent-soft: #e7ecf7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ds:not(.field) .jr {
+    --bg-app: #0d1118;
+    --bg-surface: #151b25;
+    --bg-sunken: #1f2733;
+    --fg: #ebe7da;
+    --fg-soft: #cfcbbf;
+    --fg-mute: #9ea3ad;
+    --line: #2b3444;
+    --line-strong: #7e8aa0;
+    --accent: #8fb0f0;
+    --accent-hover: #a6c0f4;
+    --accent-fg: #0b0d10;
+    --accent-soft: #16213a;
+  }
+}
+:root[data-theme="dark"] .ds:not(.field) .jr {
+  --bg-app: #0d1118;
+  --bg-surface: #151b25;
+  --bg-sunken: #1f2733;
+  --fg: #ebe7da;
+  --fg-soft: #cfcbbf;
+  --fg-mute: #9ea3ad;
+  --line: #2b3444;
+  --line-strong: #7e8aa0;
+  --accent: #8fb0f0;
+  --accent-hover: #a6c0f4;
+  --accent-fg: #0b0d10;
+  --accent-soft: #16213a;
+}
+.jr {
+  background: var(--bg-app);
+  color: var(--fg);
+  /* 日本語の組版：行頭に小書きの仮名や句読点を置かない。長い語は枠の中で折り返す。 */
+  line-break: strict;
+  overflow-wrap: anywhere;
 }
 
 /* Focus: 2px accent ring, visible on every interactive element (never removed). */

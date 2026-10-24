@@ -304,3 +304,55 @@ describe("1a-2 コントラスト（ui-direction.md 3.1 の組）", () => {
     expect(r("#5fc7ba", "#14171c")).toBe(8.87);
   });
 });
+
+// 航空日誌の紙面（試作）：`.jr` の紙・墨・藍の組。通常モードだけ置き換え（現場モードは現場用の組のまま）、暗は別の組。
+describe("航空日誌の紙面（.jr）", () => {
+  const SEL = ".ds:not(.field) .jr";
+  const light = RULES.find((r) => r.selector === SEL && !r.inDarkMedia)!;
+  const darkMedia = RULES.find((r) => r.selector === `:root:not([data-theme="light"]) ${SEL}` && r.inDarkMedia)!;
+  const darkAttr = RULES.find((r) => r.selector === `:root[data-theme="dark"] ${SEL}` && !r.inDarkMedia)!;
+  const shape = RULES.find((r) => r.selector === ".jr" && "--r-journal" in r.vars)!;
+
+  it("暗の 2 つの版（OS 設定と data-theme）は同じ宣言。明と暗は同じ名前のトークンを持つ", () => {
+    expect(darkMedia.vars).toEqual(darkAttr.vars);
+    expect(Object.keys(darkAttr.vars).sort()).toEqual(Object.keys(light.vars).sort());
+    expect(darkAttr.vars["--bg-surface"]).not.toBe(light.vars["--bg-surface"]);
+  });
+
+  it("角丸は 1 種類（4〜6px）で、1 か所の値（--r-journal）から引く。影・ガラスは持たない", () => {
+    const px = parseFloat(shape.vars["--r-journal"]!);
+    expect(shape.vars["--r-journal"]).toMatch(/^\d+px$/);
+    expect(px).toBeGreaterThanOrEqual(4);
+    expect(px).toBeLessThanOrEqual(6);
+    expect(shape.vars["--r-ctl"]).toBe("var(--r-journal)");
+    expect(shape.vars["--r-card"]).toBe("var(--r-journal)");
+    expect(shape.vars["--sh-drop"]).toBe("transparent");
+    expect(shape.vars["--glass-alpha"]).toBe("100%");
+    expect(shape.vars["--glass-filter"]).toBe("none");
+    // 動きは 200〜300ms
+    expect(parseInt(shape.vars["--dur-fast"]!, 10)).toBeGreaterThanOrEqual(200);
+  });
+
+  for (const [name, t] of [["明", light.vars], ["暗", darkAttr.vars]] as const) {
+    it(`コントラスト（${name}）：文字 4.5:1、境界 3:1、ボタンの文字 4.5:1`, () => {
+      const bad: string[] = [];
+      const chk = (label: string, fg: string, bg: string, min: number): void => {
+        const r = contrast(get(t, fg), get(t, bg));
+        if (r < min) bad.push(`${label} ${r.toFixed(2)} (< ${min})`);
+      };
+      for (const s of SURFACES) for (const f of ["fg", "fg-soft", "fg-mute", "accent"]) chk(`${f} on ${s}`, f, s, 4.5);
+      chk("accent-fg on accent", "accent-fg", "accent", 4.5);
+      chk("accent-fg on accent-hover", "accent-fg", "accent-hover", 4.5);
+      chk("accent on accent-soft", "accent", "accent-soft", 4.5);
+      chk("line-strong on bg-surface", "line-strong", "bg-surface", 3);
+      chk("line-strong on bg-sunken (disabled field)", "line-strong", "bg-sunken", 3);
+      chk("accent on bg-surface (focus ring)", "accent", "bg-surface", 3);
+      expect(bad).toEqual([]);
+    });
+  }
+
+  it("`jr` の variant は `.jr` の中だけに効く（:where で詳細度 0）。現場モードの色は置き換えない", () => {
+    expect(readFileSync(new URL("./globals.css", import.meta.url), "utf8")).toMatch(/@custom-variant jr \(&:where\(\.jr, \.jr \*\)\);/);
+    for (const r of RULES.filter((x) => x.selector.includes(".jr"))) expect(r.selector, r.selector).not.toMatch(/\.field \.jr/);
+  });
+});

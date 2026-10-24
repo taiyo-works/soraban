@@ -1119,3 +1119,155 @@ test.describe("K. Codex レビューの指摘（最大化中のトグル・color
     await expect(text).toBeVisible();
   });
 });
+
+// 航空日誌の紙面（試作）：ボタンと入力欄の節（#journal）だけが新しい方針。ほかの節・画面は変わらない。
+test.describe("L. 航空日誌の紙面（試作：ボタンと入力欄）", () => {
+  const J = "#journal";
+
+  /** 節の中のボタン・入力欄で、文字が枠からはみ出しているもの（子の矩形が親の外、または scrollWidth が超過）。 */
+  const overflowing = (page: Page): Promise<string[]> =>
+    page.evaluate((sel) => {
+      const out: string[] = [];
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} button, ${sel} input, ${sel} select, ${sel} textarea`))) {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0) continue;
+        const name = (el.textContent?.trim() || el.getAttribute("aria-label") || el.id).slice(0, 20);
+        if (el.scrollWidth > el.clientWidth + 1) out.push(`${name}: scrollWidth ${el.scrollWidth} > ${el.clientWidth}`);
+        if (el.tagName === "BUTTON") {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          for (const t of Array.from(range.getClientRects())) {
+            if (t.left < r.left - 0.5 || t.right > r.right + 0.5 || t.top < r.top - 0.5 || t.bottom > r.bottom + 0.5) out.push(`${name}: 文字が枠の外`);
+          }
+          const parent = el.parentElement!.getBoundingClientRect();
+          if (r.right > parent.right + 0.5) out.push(`${name}: 親の幅を超える`);
+        }
+      }
+      return out;
+    }, J);
+
+  const outsideFrame = (page: Page): Promise<string[]> =>
+    page.evaluate((sel) => {
+      const frame = document.querySelector(`${sel} .jr`)!.getBoundingClientRect();
+      const limit = Math.min(frame.right, document.documentElement.clientWidth) + 0.5;
+      const out: string[] = [];
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} .jr *`))) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.right > limit) out.push(`${el.tagName} ${(el.textContent ?? "").trim().slice(0, 12)} ${r.right.toFixed(0)} > ${limit.toFixed(0)}`);
+      }
+      return out;
+    }, J);
+  /** 見える影があるか（Tailwind の ring の層は透明・0px で残るため、それは影に数えない）。 */
+  const visibleShadow = (v: string): string => v.replace(/rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(, )?/g, "").replace(/^none$/, "").trim();
+
+  for (const width of [320, 375, 768, 1280]) {
+    test(`46. 幅 ${width}px：ボタン・入力欄の文字が枠から出ない（明・暗・現場 × 通常・拡大した文字）。節の外へ出ない`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const [theme, field] of [["light", false], ["dark", false], ["light", true]] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        await open(page, `theme=${theme}${field ? "&field=1" : ""}`);
+        for (const size of [null, "24px", "30px"]) {
+          await page.evaluate((s) => {
+            const ds = document.querySelector<HTMLElement>(".ds")!;
+            if (s) ds.style.setProperty("--fs-body", s);
+            else ds.style.removeProperty("--fs-body");
+          }, size);
+          const label = `幅 ${width} ${theme}${field ? " 現場" : ""} 文字 ${size ?? "既定"}`;
+          expect(await overflowing(page), label).toEqual([]);
+          // 節の中のどの要素も、節の枠（と画面の幅）の外へ出ない。ページ全体の横スクロールは節の外（画面の見本のタブなど）の要因があるため、節の中で見る。
+          expect(await outsideFrame(page), label).toEqual([]);
+        }
+      }
+    });
+  }
+
+  test("47. 角丸は 1 種類（5px）・影なし・半透明なし・ピル型なし。ほかの節の部品は従来のまま（8px・影あり）", async ({ page }) => {
+    await open(page);
+    const m = await page.evaluate((sel) => {
+      const radii = new Set<string>();
+      const shadows: string[] = [];
+      const filters: string[] = [];
+      const pills: string[] = [];
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} *`))) {
+        const cs = getComputedStyle(el);
+        if (el.getBoundingClientRect().width === 0) continue;
+        for (const c of ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius"] as const) {
+          const v = cs[c];
+          if (v !== "0px") radii.add(v);
+          if (parseFloat(v) >= 100) pills.push(`${el.tagName}.${el.className.toString().slice(0, 30)}`);
+        }
+        shadows.push(cs.boxShadow);
+        if (cs.backdropFilter !== "none" && cs.backdropFilter !== "") filters.push(el.tagName);
+      }
+      const panel = getComputedStyle(document.querySelector(`${sel} .jr`) ?? document.querySelector(sel)!);
+      return { radii: [...radii], shadows, filters, pills, panelBg: panel.backgroundColor };
+    }, J);
+    expect(m.radii).toEqual(["5px"]);
+    expect(m.shadows.map(visibleShadow).filter(Boolean)).toEqual([]);
+    expect(m.filters).toEqual([]);
+    expect(m.pills).toEqual([]);
+    expect(m.panelBg).not.toMatch(/rgba\(.*,\s*0?\.\d+\)/); // opaque
+    // outside the journal: the previous look is unchanged
+    const other = await page.getByTestId("open-dialog").evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { r: cs.borderTopLeftRadius, shadow: cs.boxShadow };
+    });
+    expect(other.r).toBe("8px");
+    expect(await page.getByTestId("ctl-command").evaluate((el) => getComputedStyle(el).whiteSpace)).toBe("nowrap");
+  });
+
+  test("48. タップ領域は 44px 以上（現場モードは 56px）。状態（押下・フォーカス・無効・読み込み中）が見える", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    for (const field of [false, true]) {
+      await open(page, field ? "field=1" : "");
+      const min = field ? 56 : 44;
+      const small = await page.evaluate(
+        ([sel, lim]) => {
+          const out: string[] = [];
+          for (const el of Array.from(document.querySelectorAll<HTMLElement>(`${sel} button, ${sel} input, ${sel} select, ${sel} textarea`))) {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0) continue;
+            if (r.height < (lim as number) - 0.5) out.push(`${(el.textContent?.trim() || el.id).slice(0, 16)} ${r.height.toFixed(1)}`);
+          }
+          return out;
+        },
+        [J, min] as const,
+      );
+      expect(small, field ? "現場" : "通常").toEqual([]);
+    }
+    await open(page);
+    const row = page.getByTestId("journal-buttons-primary");
+    const bg = (i: number): Promise<string> => row.locator("button").nth(i).evaluate((el) => getComputedStyle(el).backgroundColor);
+    const normal = await bg(0);
+    expect(await bg(1), "ホバー").not.toBe(normal);
+    expect(await bg(3), "押下").not.toBe(normal);
+    expect(await bg(3), "押下").not.toBe(await bg(1));
+    expect(await bg(4), "無効").not.toBe(normal);
+    await expect(row.locator("button").nth(4)).toBeDisabled();
+    await expect(row.locator("button").nth(5)).toHaveAttribute("aria-busy", "true");
+    // the forced focus has a visible 2px outline; real keyboard focus too
+    expect(await row.locator("button").nth(2).evaluate((el) => getComputedStyle(el).outlineWidth)).toBe("2px");
+    await page.locator("#jr-reg").focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    const ring = await page.locator("#jr-reg").evaluate((el) => ({ w: getComputedStyle(el).outlineWidth, s: getComputedStyle(el).outlineStyle, sh: getComputedStyle(el).boxShadow }));
+    expect({ ...ring, sh: visibleShadow(ring.sh) }).toEqual({ w: "2px", s: "solid", sh: "" });
+  });
+
+  test("49. 入力欄：ラベルが常に欄の上にあり、エラーは「何が起きたか・どうすればよいか」を欄のすぐ下に出す。数字は等幅", async ({ page }) => {
+    await open(page);
+    for (const id of ["jr-reg", "jr-pilot", "jr-place", "jr-min", "jr-lat", "jr-kind", "jr-memo", "demo-err"]) {
+      const label = page.locator(`label[for="${id}"]`);
+      await expect(label).toBeVisible();
+      const [lb, ib] = await Promise.all([label.boundingBox(), page.locator(`#${id}`).boundingBox()]);
+      expect(lb!.y + lb!.height, id).toBeLessThanOrEqual(ib!.y + 0.5);
+    }
+    await expect(page.locator("#demo-err")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("#demo-err-error")).toContainText("形式が違います");
+    await expect(page.locator("#demo-err-error")).toContainText("入力してください");
+    expect(await page.locator("#jr-min").evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toContain("tabular-nums");
+    // body text in the journal has a line height of at least 1.7
+    const lh = await page.locator(`${J} p`).first().evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
+    expect(lh).toBeGreaterThanOrEqual(1.7 - 0.01);
+  });
+});
