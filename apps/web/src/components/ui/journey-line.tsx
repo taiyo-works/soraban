@@ -17,6 +17,62 @@ export function stagesFromDone(labels: readonly string[], done: number, nextLabe
   return labels.map((label, i) => ({ label, state: i < done ? "done" : i === done ? "next" : "todo", ...(i === done ? { stateLabel: nextLabel } : {}) }));
 }
 
+/**
+ * 行程表（ホームの「次の飛行」の主役）。航空日誌の紙面らしく、罫で区切った 7 つの欄に、通し番号（等幅の 01〜07）・段の名前・済／次／未を置く。
+ * 「次」の欄だけは面を塗り、押印のような四角い印（「次」）を付ける。番号は CSS の counter で付ける（文書の文字は変えない：テストの読み取りと同じ）。
+ * 色は補助で、状態は文字と印（チェック・四角の印）が伝える。欄は 7 つで折り返さない（幅は欄ごとに 1/7）。
+ */
+export function JourneyLedger({ stages, "data-testid": testId = "route" }: { readonly stages: readonly JourneyLineStage[]; readonly "data-testid"?: string }) {
+  return (
+    <ol
+      aria-label="行程"
+      data-testid={testId}
+      data-variant="ledger"
+      className="@container grid border-b-2 border-fg bg-surface [counter-reset:stage]"
+      style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}
+    >
+      {stages.map((s, i) => {
+        const text = s.stateLabel ?? DEFAULT_STATE_LABEL[s.state];
+        return (
+          <li
+            key={s.label}
+            data-stage-state={s.state}
+            className={cx(
+              "flex min-w-0 flex-col items-start gap-1 border-t-[3px] px-1.5 pb-2.5 pt-1.5 [counter-increment:stage] before:font-mono before:text-[12px] before:leading-none before:tracking-wider before:text-fg-mute before:content-[counter(stage,decimal-leading-zero)] @md:px-3",
+              i > 0 && "border-l border-l-line",
+              s.state === "done" && "border-t-fg-soft",
+              s.state === "next" && "border-t-accent bg-accent-soft before:text-accent",
+              s.state === "todo" && "border-t-line-strong",
+              s.state === "skip" && "border-t-line-strong border-dashed",
+            )}
+          >
+            <span className={cx("whitespace-nowrap text-body font-semibold leading-snug", s.state === "next" ? "text-accent" : s.state === "done" ? "text-fg" : "text-fg-mute")}>{s.label}</span>
+            <span className={cx("inline-flex min-h-6 items-center gap-0.5 whitespace-nowrap text-aux leading-none", s.state === "done" ? "text-fg-soft" : "text-fg-mute")}>
+              {s.state === "next" ? (
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-[2px] border-2 border-accent-solid bg-accent-solid px-1 text-table font-bold leading-none text-accent-fg">{text}</span>
+              ) : s.state === "done" ? (
+                <>
+                  <Icon name="check" size={13} />
+                  {text}
+                </>
+              ) : s.state === "skip" ? (
+                <>
+                  <span aria-hidden="true" className="hidden @max-[18rem]:inline">
+                    －
+                  </span>
+                  <span className="@max-[18rem]:sr-only">{text}</span>
+                </>
+              ) : (
+                text
+              )}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function JourneyLine({
   stages,
   compact = false,

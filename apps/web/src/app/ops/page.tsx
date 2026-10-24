@@ -54,7 +54,7 @@ export default async function OpsHome() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
         <div className="flex min-w-0 flex-col gap-6">
-          {today.card ? <TodayCard card={today.card} today={today.today} /> : today.empty ? <TodayEmpty empty={today.empty} canPlan={canPlan} /> : null}
+          {today.card ? <TodayCard card={today.card} today={today.today} nextActions={today.nextActions} /> : today.empty ? <TodayEmpty empty={today.empty} canPlan={canPlan} /> : null}
           <TodayRest rows={today.rest} />
           <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} today={today.today} />
         </div>
