@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   AIRCRAFT_STATUS_TONE,
@@ -17,6 +18,8 @@ import { BACK_TO } from "@/components/ops/ops-nav-model";
 const GRID = "sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_6rem_minmax(0,9rem)]";
 
 // 機体の一覧（?includeVoided=1 で取消済みを含める）。狭い画面ではカード、広い画面では表の行で示す。
+export const metadata: Metadata = { title: "機体" };
+
 export default async function AircraftListPage({ searchParams }: { readonly searchParams: Promise<{ includeVoided?: string }> }) {
   const { ctx, me } = await requireOpsMember();
   const includeVoided = (await searchParams).includeVoided === "1";

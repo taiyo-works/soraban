@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MismatchBadges } from "@/components/ops/journal-ui";
 import { cx } from "@/components/ui/cx";
@@ -43,6 +44,8 @@ type Row =
 // 「日誌」（Sprint 12c 設計 G）：飛行記録と日常点検の入口と、最近 14 日の合算の一覧（日付順。食い違いの札つき）。
 // 既存の /ops/flights・/ops/inspections の経路・機能は変えず、入口と見せ方でまとめる。
 // Sprint 12g-1b：事故・ヒヤリハットも日誌の中へ（4 つ目の種類と、入力の入口「事故・ヒヤリハットを記録」）。新しい部品に置き換えた。
+export const metadata: Metadata = { title: "日誌" };
+
 export default async function OpsJournalPage({ searchParams }: { readonly searchParams: Promise<Record<string, string | undefined>> }) {
   const { ctx, me } = await requireOpsMember();
   const sp = await searchParams;

@@ -75,7 +75,9 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
     await expect(page.getByTestId("today-heading")).toHaveText("ホーム");
-    await expect(page.getByTestId("today-date")).toHaveText(DAY);
+    // 日付は読みやすい形（M-4。年は今日と違うときだけ）。機械可読な値は time の dateTime に残す
+    await expect(page.getByTestId("today-date")).toHaveText("1/5（火）");
+    await expect(page.getByTestId("today-date").locator("time")).toHaveAttribute("datetime", DAY);
     await expect(page.getByTestId("today-card")).toHaveCount(0);
     await expect(page.getByTestId("today-empty")).toBeVisible();
     await expect(page.getByTestId("today-empty-message")).not.toHaveText("");

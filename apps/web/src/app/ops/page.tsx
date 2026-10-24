@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { TodayCard, TodayDeadlines, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
 import { buttonClass, NoticeBar } from "@/components/ui/primitives";
 import { Icon } from "@/components/ui/icons";
+import { formatDay } from "@/lib/ops-day";
 import { planCreateDenied } from "@/server/ops/plan-page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { requireOpsMember } from "@/server/ops/page";
@@ -14,6 +16,8 @@ import { getToday } from "@/server/ops/today";
 //   右には「近づく期限」と「直近の飛行」。件数だけのタイルは作らない。予定のない日は、何もない旨と次の一手を先頭に出す。
 // 保存された状態は読まず、記録の有無から毎回導出する（server/ops/today.ts）。判定は目安で、通報・申請は DIPS で行う。
 // ログイン中の利用者の名前・役割・ログアウトは、右上の利用者メニューにある（components/ops/ops-nav.tsx）。
+export const metadata: Metadata = { title: "ホーム" };
+
 export default async function OpsHome() {
   const { ctx, me } = await requireOpsMember();
   const canEnter = recordCreateDenied(me) === null;
@@ -28,27 +32,35 @@ export default async function OpsHome() {
             ホーム
           </h1>
           <span className="text-table tabular-nums text-fg-mute" data-testid="today-date">
-            {today.today}
+            <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
           </span>
         </div>
-        {/* 予定のない日は、先頭のカードに「飛行計画を作る」がある。同じ画面に同じ操作を 2 つ置かない */}
-        {canPlan && today.card ? (
-          <Link href="/ops/plans/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-plan">
-            <Icon name="plus" size={18} />
-            飛行計画を作る
-          </Link>
+        {/* 予定のない日は、先頭のカードに「飛行計画を作る」「地点を判定する」がある。同じ画面に同じ操作を 2 つ置かない */}
+        {today.card ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {canPlan ? (
+              <Link href="/ops/plans/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-plan">
+                <Icon name="plus" size={18} />
+                飛行計画を作る
+              </Link>
+            ) : null}
+            <Link href="/" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-verdict">
+              <Icon name="verdict" size={18} />
+              地点を判定する
+            </Link>
+          </div>
         ) : null}
       </header>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
         <div className="flex min-w-0 flex-col gap-6">
-          {today.card ? <TodayCard card={today.card} /> : today.empty ? <TodayEmpty empty={today.empty} /> : null}
+          {today.card ? <TodayCard card={today.card} today={today.today} /> : today.empty ? <TodayEmpty empty={today.empty} canPlan={canPlan} /> : null}
           <TodayRest rows={today.rest} />
-          <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} />
+          <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} today={today.today} />
         </div>
         <div className="flex min-w-0 flex-col gap-6">
-          <TodayDeadlines deadlines={today.deadlines} />
-          <TodayUpcoming flights={today.upcoming} />
+          <TodayDeadlines deadlines={today.deadlines} today={today.today} />
+          <TodayUpcoming flights={today.upcoming} today={today.today} />
         </div>
       </div>
 

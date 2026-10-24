@@ -272,6 +272,14 @@ html:has(body.has-bottom-nav) {
   body.has-bottom-nav {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
+  /* 運航管理（.ds-page）は、下メニューの余白を body ではなく自分の枠の中で取る。body にも積むと、内容が短い画面でも 80px 余計にスクロールする
+   * （枠は min-height: 100dvh。余白は枠の内側なので、内容が短ければ高さは 100dvh のまま、長ければ末尾が下メニューに隠れない） */
+  body.has-bottom-nav:has(.ds-page) {
+    padding-bottom: 0;
+  }
+  .ds-page:has(> [data-testid="ops-bottom-nav"]) {
+    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* ============================================================

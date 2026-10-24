@@ -9,3 +9,13 @@ export const openUserMenu = async (page: Page): Promise<void> => {
     await expect(menu).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 20_000 });
 };
+
+// ホームの「次にやること」は最初の 3 件だけが見える。残りを読む・押す試験は、先に「ほか N 件を見る」を開く（開いていれば何もしない）。
+export const expandNextActions = async (page: Page): Promise<void> => {
+  const toggle = page.getByTestId("today-next-more-toggle");
+  if ((await toggle.count()) === 0) return;
+  await expect(async () => {
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true", { timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+};

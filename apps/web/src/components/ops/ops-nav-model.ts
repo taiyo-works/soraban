@@ -4,6 +4,9 @@ import type { IconName } from "@/components/ui/icons";
 import { can, type OpsAction } from "@/server/ops/authz";
 import type { MemberRoleDb } from "@soraban/db";
 
+/** 本文の枠の id（スキップリンクの移動先）。 */
+export const OPS_MAIN_ID = "ops-main";
+
 export type NavKey = "today" | "verdict" | "plans" | "journal" | "more";
 export type NavChildKey = "aircraft" | "pilots" | "permits" | "places";
 
@@ -12,7 +15,7 @@ export type NavItem = { readonly key: NavKey; readonly label: string; readonly h
 /** 下メニュー（<1024px）の 5 項目と、左メニューの本体。順序は仕事の流れ。 */
 export const NAV_ITEMS: readonly NavItem[] = [
   { key: "today", label: "ホーム", href: "/ops", icon: "home" },
-  { key: "verdict", label: "判定", href: "/", icon: "place" },
+  { key: "verdict", label: "判定", href: "/", icon: "verdict" },
   { key: "plans", label: "計画", href: "/ops/plans", icon: "plan" },
   { key: "journal", label: "日誌", href: "/ops/journal", icon: "journal" },
   { key: "more", label: "登録", href: "/ops/more", icon: "list" },

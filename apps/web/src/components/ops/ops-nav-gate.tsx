@@ -15,12 +15,15 @@ export async function OpsNavGate() {
   if (await skip()) return null;
   const ctx = await getSignedInMember();
   if (!ctx) return null;
-  return (
-    <>
-      <OpsSidebar role={ctx.member.role} />
-      <OpsBottomNav />
-    </>
-  );
+  return <OpsSidebar role={ctx.member.role} />;
+}
+
+// スマホの下の 5 タブは、Tab の順で本文のあとになるよう、枠の最後に置く（見た目は画面下に固定）。
+export async function OpsBottomNavGate() {
+  if (await skip()) return null;
+  const ctx = await getSignedInMember();
+  if (!ctx) return null;
+  return <OpsBottomNav />;
 }
 
 export async function OpsTopBarGate() {

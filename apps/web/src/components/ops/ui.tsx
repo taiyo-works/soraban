@@ -65,7 +65,7 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-3">
       {back ? (
-        <Link href={back.href} prefetch={false} className="-my-3 inline-flex min-h-11 items-center self-start text-xs text-brand-700 underline-offset-2 hover:underline">
+        <Link href={back.href} prefetch={false} className="-my-3 inline-flex min-h-11 min-w-11 items-center self-start text-xs text-brand-700 underline-offset-2 hover:underline">
           <span aria-hidden>← </span>
           {back.label}
         </Link>

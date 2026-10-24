@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PermitDeclaration, PermitValidityBadge, permitScopeSummary } from "@/components/ops/permit-ui";
 import { Badge, buttonGhostClass, buttonPrimaryClass, ListHead, listRowClass, Note, PageHeader, VoidedToggle } from "@/components/ops/ui";
@@ -12,6 +13,8 @@ const VALIDITIES = Object.keys(PERMIT_VALIDITY_LABEL) as PermitValidity[];
 
 // 許可・承認の登録の一覧（Sprint 12d 設計 G）。全役割が見られる。登録・訂正・失効・取消は運航管理者だけ。
 // 登録は利用者の申告で、そらばんは許可書そのものを確認できない。DIPS には接続しない。取消は既定で出さない（?includeVoided=1）。
+export const metadata: Metadata = { title: "許可・承認" };
+
 export default async function PermitListPage({
   searchParams,
 }: {

@@ -11,12 +11,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { cx } from "@/components/ui/cx";
-import { useDismiss } from "@/components/ui/hooks";
 import { Icon, type IconName } from "@/components/ui/icons";
 import { InfoPopover } from "@/components/ui/overlays";
 import type { MemberRoleDb } from "@soraban/db";
 import { SignOutButton } from "./ops-client";
-import { currentChildKey, currentNavKey, NAV_GROUPS, NAV_ITEM, NAV_ITEMS, navHiddenOn, visibleNavChildren } from "./ops-nav-model";
+import { currentChildKey, currentNavKey, NAV_GROUPS, NAV_ITEM, NAV_ITEMS, navHiddenOn, OPS_MAIN_ID, visibleNavChildren } from "./ops-nav-model";
 
 export type OpsNavUser = {
   readonly memberId: string;
@@ -154,19 +153,43 @@ function UserMenu({ user }: { readonly user: OpsNavUser }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
-  useDismiss(root, open, () => setOpen(false));
+  const trigger = useRef<HTMLButtonElement>(null);
+  // 閉じ方で、フォーカスの行き先が変わる。Escape（キーボード）はボタンへ戻す（戻さないと BODY に落ちて、次の Tab が頭からになる）。
+  // 外を押して閉じたときは、押した先に任せる（戻すと、押した入力欄からフォーカスを奪う）。
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: PointerEvent): void => {
+      if (root.current && e.target instanceof Node && !root.current.contains(e.target)) setOpen(false);
+    };
+    const key = (e: KeyboardEvent): void => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const active = document.activeElement;
+      // 開いている「ⓘ」の説明が先に閉じる（その Escape ではメニューを閉じない）。もう一度押すとメニューが閉じる
+      if (active instanceof HTMLElement && active !== trigger.current && active.getAttribute("aria-expanded") === "true" && root.current?.contains(active)) return;
+      setOpen(false);
+      if (!active || active === document.body || root.current?.contains(active)) trigger.current?.focus();
+    };
+    document.addEventListener("pointerdown", down);
+    document.addEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("pointerdown", down);
+      document.removeEventListener("keydown", key);
+    };
+  }, [open]);
   return (
     <div ref={root} className="relative">
       <button
+        ref={trigger}
         type="button"
         aria-expanded={open}
         aria-controls={id}
-        aria-label="利用者のメニュー"
+        // 画面に見える名前（PC では利用者名）を含める（WCAG 2.5.3）。スマホはアイコンだけなので、名前を読み上げで補う
+        aria-label={`${user.name}（利用者のメニュー）`}
         onClick={() => setOpen((o) => !o)}
         data-testid="user-menu-button"
         className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-ctl border border-line-strong bg-surface px-2.5 text-table text-fg hov:bg-sunken"
       >
-        <Icon name="pilot" size={18} />
+        <Icon name="account" size={18} />
         <span className="hidden max-w-[12rem] truncate lg:inline">{user.name}</span>
         <Icon name="chevron-down" size={14} className="text-fg-mute" />
       </button>
@@ -201,20 +224,38 @@ function UserMenu({ user }: { readonly user: OpsNavUser }) {
 }
 
 /**
- * 上の薄いバー。右に利用者メニュー。スマホでは左に画面名（いまの項目）。PC では左メニューと本文の上に、利用者メニューだけが右に出る。
- * 現場モード・サインイン・アクセス権なしでは出さない。
+ * 上の薄いバー。右に利用者メニュー。スマホでは左に製品名（画面名は本文の見出しが担うので、ここには置かない）。PC では左メニューに製品名があるので、
+ * 利用者メニューだけが右に出る。現場モード・サインイン・アクセス権なしでは出さない。
  */
 export function OpsTopBar({ user }: { readonly user: OpsNavUser }) {
   const pathname = usePathname() ?? "";
   if (navHiddenOn(pathname)) return null;
-  const key = currentNavKey(pathname);
   return (
-    <header data-testid="ops-header" className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-4 lg:px-8">
-      <p className="min-w-0 truncate text-h2 font-semibold text-fg lg:invisible" data-testid="ops-screen-name">
-        {key ? NAV_ITEM[key].label : "運航管理"}
-      </p>
+    <header data-testid="ops-header" className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-line bg-surface px-4 max-lg:h-12 lg:sticky lg:top-0 lg:z-30 lg:px-8">
+      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理 ホームへ" className="mr-auto flex min-h-11 items-center gap-2 lg:hidden" data-testid="ops-brand-mark">
+        <span className="text-h2 font-semibold leading-none text-fg">そらばん</span>
+        <span className="text-aux text-fg-mute">運航管理</span>
+      </Link>
       <UserMenu user={user} />
     </header>
+  );
+}
+
+/**
+ * 本文へ移動（スキップリンク）。キーボードの最初の Tab で出て、メニューと上のバーを飛ばして本文へ移る。PC・スマホ共通。
+ * 移動先は ops-frame.tsx の本文の枠（id=OPS_MAIN_ID）。メニューの出ない画面（現場モード・サインイン・アクセス権なし）には出さない。
+ */
+export function OpsSkipLink() {
+  const pathname = usePathname() ?? "";
+  if (navHiddenOn(pathname)) return null;
+  return (
+    <a
+      href={`#${OPS_MAIN_ID}`}
+      data-testid="skip-to-main"
+      className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-3 focus-visible:top-3 focus-visible:z-[60] focus-visible:inline-flex focus-visible:min-h-11 focus-visible:items-center focus-visible:rounded-ctl focus-visible:border focus-visible:border-line-strong focus-visible:bg-surface focus-visible:px-4 focus-visible:text-table focus-visible:font-semibold focus-visible:text-fg"
+    >
+      本文へ移動
+    </a>
   );
 }
 

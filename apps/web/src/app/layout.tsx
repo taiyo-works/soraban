@@ -34,8 +34,10 @@ const SITE_DESCRIPTION =
   "ドローン飛行の可否判定と運航管理。運営：フューチャーテック株式会社。現在は社内での試験運用中です。";
 
 // アイコンは app/icon.svg・app/favicon.ico（算盤の珠と梁の単純な図形）。共有時の表示（OG）は文字情報のみ。
+// 題名のテンプレートは、子の区間（/ops 以下）の title に「 — そらばん」を付ける。`/` は default のまま（SITE_TITLE）。
+// 運航管理のレイアウト（app/ops/layout.tsx）と同じ区間のページ（/ops）にも効かせるため、テンプレートはここに置く。
 export const metadata: Metadata = {
-  title: SITE_TITLE,
+  title: { template: "%s — そらばん", default: SITE_TITLE },
   description: SITE_DESCRIPTION,
   applicationName: "そらばん",
   openGraph: {

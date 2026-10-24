@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
 import { Badge, buttonFieldClass, CellLabel, ListHead, listRowClass, Note, PageHeader } from "@/components/ops/ui";
@@ -13,6 +14,8 @@ const GRID = "grid-cols-[minmax(0,1fr)_auto] gap-x-3 sm:grid-cols-[9rem_minmax(0
 const CARD = listRowClass.replace("grid-cols-1 ", "");
 
 // 日常点検記録の一覧（新しい順。機体・期間で絞り込み）。
+export const metadata: Metadata = { title: "日常点検" };
+
 export default async function InspectionListPage({
   searchParams,
 }: {

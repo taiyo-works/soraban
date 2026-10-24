@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { openUserMenu } from "../ops-menu";
+import { expandNextActions, openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 
 // Sprint 12c の E2E-DB（契約 7〜13・15・16 の画面・通しの部分）。
@@ -239,7 +239,8 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     const labels = await page.getByTestId("today-next-action-label").allInnerTexts();
     expect(labels.length).toBeGreaterThan(0);
     for (const l of labels) expect(l).toMatch(/[をにへ]|する|確認|記入|更新|開|依頼|入力|記録/);
-    // 押すとその作業の画面へ直接移る（緊急用務空域の確認 → 現場モードの飛行前）
+    // 押すとその作業の画面へ直接移る（緊急用務空域の確認 → 現場モードの飛行前）。最初に見えるのは上位 3 件だけなので、先に残りを開く
+    await expandNextActions(page);
     await tapAndWait(page, mine("check_emergency_airspace").getByTestId("today-next-action-link"), new RegExp(`/ops/plans/${plan.id}/field#preflight$`));
     await expect(page.getByTestId("field-root")).toBeVisible();
 
@@ -258,6 +259,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await page.goto("/ops");
     await expect(page.getByTestId("today-card").getByTestId("today-badge")).toHaveAttribute("data-code", "journal_pending");
     await expect(mine("write_journal")).toHaveCount(1);
+    await expandNextActions(page);
     await tapAndWait(page, mine("write_journal").getByTestId("today-next-action-link"), new RegExp(`/ops/flights/new\\?planId=${plan.id}&takeoffEventId=${takeoffEv.id}`));
 
     // 食い違い：計画の時間帯の外で飛んだ日誌を保存すると、直近 3 日間は「日誌の食い違いを確認する」が出る
@@ -282,6 +284,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(page.getByTestId("today-card").getByTestId("today-badge")).toHaveAttribute("data-code", "journaled");
     await expect(mine("write_journal")).toHaveCount(0);
     const mismatch = page.locator('[data-testid="today-next-action"][data-action-id="review_journal_mismatch"]');
+    await expandNextActions(page);
     await expect(mismatch.first()).toBeVisible();
     await expectNoForbiddenWords(page, "今日（食い違い）");
     await bm.dispose();
@@ -337,9 +340,11 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     expect(hereLook.icon).toBeGreaterThanOrEqual(1);
     // ハンバーガーは使わない（メニューを開く・閉じるボタンがない）
     await expect(page.getByRole("button", { name: /メニューを開く|ハンバーガー/ })).toHaveCount(0);
-    // 上の薄いバー：画面名と利用者メニュー
+    // 上の薄いバー：製品名と利用者メニュー。画面名は本文の見出し（h1）だけが担う（上のバーと見出しで二重にしない。M-1）
     await expect(page.getByTestId("ops-header")).toBeVisible();
-    await expect(page.getByTestId("ops-screen-name")).toHaveText("ホーム");
+    await expect(page.getByTestId("ops-screen-name")).toHaveCount(0);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/ホーム/);
+    await expect(page.getByTestId("ops-header")).not.toContainText("ホーム");
 
     // 現在地：日誌は /ops/flights*・/ops/inspections*・/ops/journal・/ops/incidents*、計画は /ops/plans*、登録は /ops/more ほか
     const current: [string, string][] = [

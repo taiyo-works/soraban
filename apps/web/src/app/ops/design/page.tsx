@@ -9,7 +9,7 @@ import { isDesignCatalogEnabled } from "@/lib/design-catalog";
 // The env check runs per request (connection()) so the build output does not bake the flag in.
 // proxy.ts answers 404 first when the flag is off; notFound() here is the second line of defence.
 export const metadata: Metadata = {
-  title: "デザイン見本 — そらばん",
+  title: { absolute: "デザイン見本 — そらばん" },
   robots: { index: false, follow: false },
 };
 
