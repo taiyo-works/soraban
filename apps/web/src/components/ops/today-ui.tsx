@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import type { IconName } from "@/components/ui/icons";
 import { Icon } from "@/components/ui/icons";
-import { JourneyLine } from "@/components/ui/journey-line";
+import { JourneyLedger, JourneyLine } from "@/components/ui/journey-line";
 import { formatDay, formatDaysIn } from "@/lib/ops-day";
 import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
 import { buttonClass, Card, SectionTitle, StatusPill, type Meaning } from "@/components/ui/primitives";
 import type { DeadlineDto } from "@/server/ops/deadlines-logic";
 import type { TodayBadgeDto, TodayCardDto, TodayDto, TodayRowDto, TodayUpcomingDto } from "@/server/ops/today";
 import type { TodayNextAction } from "@/server/ops/today-logic";
+import { journeyNext, type JourneyNext } from "./journey-next";
 import { MoreRows } from "./more-rows";
 import { Badge, type Tone } from "./ui";
 
@@ -61,12 +62,54 @@ function Fact({ label, children }: { readonly label: string; readonly children: 
 }
 
 /**
+ * 行程表の帯（「次の飛行」の主役）。カードの左右いっぱいに、罫で区切った 7 つの欄（番号・段・済／次／未）を置き、「次」の欄に押印のような印を付ける。
+ * 帯の下に 1 行：いまの「次」の段と、その段の作業（この計画の次にやること。押すとその作業へ）。
+ * 行程の導出（journey-logic）は変えない。ここは見せ方だけ。
+ */
+function RouteBand({ card, next }: { readonly card: TodayCardDto; readonly next: JourneyNext }) {
+  const done = card.journey.filter((s) => s.state === "done").length;
+  return (
+    <div className="-mx-5 flex flex-col gap-2 sm:-mx-6" data-testid="today-card-route">
+      <div className="flex items-baseline justify-between gap-3 px-5 sm:px-6">
+        <p className="text-aux font-medium text-fg-mute">行程</p>
+        <p className="font-mono text-aux tabular-nums text-fg-mute" data-testid="today-card-route-count">
+          済 {done} / {card.journey.length}
+        </p>
+      </div>
+      <JourneyLedger stages={card.journey} />
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-0 px-5 text-table text-fg-soft sm:px-6" data-testid="today-card-next">
+        {next.stage ? (
+          <>
+            <span>
+              次は<span className="font-semibold text-fg">{next.stage.label}</span>の段
+            </span>
+            {next.action ? (
+              <a
+                href={next.action.href}
+                className="inline-flex min-h-11 items-center gap-1 font-semibold text-accent hov:underline"
+                data-testid="today-card-next-link"
+                data-action-id={next.action.id}
+              >
+                {next.action.label}
+                <Icon name="chevron-right" size={16} />
+              </a>
+            ) : null}
+          </>
+        ) : (
+          <span className="py-2.5">すべての段が終わっています。</span>
+        )}
+      </p>
+    </div>
+  );
+}
+
+/**
  * 今日（なければ次）の飛行の大きなカード 1 枚。主ボタンは 1 つだけ（当日は「現場モードを開く」）。
  * 読む順：時刻と名称 → 機体・操縦者（何を・誰が） → 行程の 1 行（どこまで進んだか） → 判定・通報・確認（その中身） → 主ボタン。
  * 行程の 1 行と 3 つの行は同じ「判定・確認・通報」を指すが、行程は進み具合（済／次／未）、行は中身（判定の段階・通報の要否と状況・確認の状態の文言）を
  * 担う。機体・操縦者は行程にない情報なので、行から外して名称の下に置いた（5 行を 3 行にし、罫線も減らした）。
  */
-export function TodayCard({ card, today }: { readonly card: TodayCardDto; readonly today: string }) {
+export function TodayCard({ card, today, nextActions = [] }: { readonly card: TodayCardDto; readonly today: string; readonly nextActions?: readonly TodayNextAction[] }) {
   return (
     <Card
       as="section"
@@ -108,7 +151,7 @@ export function TodayCard({ card, today }: { readonly card: TodayCardDto; readon
           </span>
         </p>
       </div>
-      <JourneyLine stages={card.journey} />
+      <RouteBand card={card} next={journeyNext(card.journey, nextActions, card.planId)} />
       <dl className="flex flex-col border-t border-line pt-2">
         <Fact label="判定の段階">
           <span className="font-semibold" data-testid="today-card-verdict">

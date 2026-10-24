@@ -110,7 +110,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       order.push(id);
       if (id === "nav-more") break;
     }
-    expect(order[0]).toBe("skip-to-main");
+    expect(order[0], order.join(" > ")).toBe("skip-to-main");
+    expect(order, order.join(" > ")).toContain("more-link-aircraft");
     await page.goto("/ops/more");
     await expect(page.getByTestId("ops-more")).toBeVisible();
     await page.keyboard.press("Tab");
@@ -303,5 +304,75 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     expect(svg).toContain("stroke-dasharray");
     expect(svg).not.toContain("M8.5 10.5V8");
     await expectNoHorizontalScroll(page, "登録");
+  });
+
+  test("独創性：行程表が「次の飛行」の主役。7 つの欄（等幅の通し番号）・「次」の押印・次の段の作業。375・320px で折り返さない", async ({ page }) => {
+    const bm = await apiAs(seeded("b-manager"));
+    await clearPlans(bm);
+    const mark = `JURT${stamp}`;
+    const ac = await bm.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "行程表試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+    expect(ac.status(), await ac.text()).toBe(201);
+    const aircraftId = ((await ac.json()) as { id: string }).id;
+    const bp = await apiAs(seeded("b-pilot"));
+    const pilotId = ((await (await bp.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    await bp.dispose();
+    const r = await bm.post("/api/ops/plans", { data: { title: `行程表 ${stamp}`, aircraftId, pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
+    expect(r.status(), await r.text()).toBe(201);
+    const plan = (await r.json()) as { id: string };
+
+    await signIn(page.request, seeded("b-manager"));
+    for (const w of [375, 320]) {
+      await page.setViewportSize({ width: w, height: 812 });
+      await page.goto("/ops");
+      const card = page.getByTestId("today-card");
+      await expect(card).toHaveAttribute("data-plan-id", plan.id);
+      const route = card.getByTestId("route");
+      await page.waitForLoadState("networkidle");
+      await expect(route).toBeVisible();
+      await expect(route).toHaveAttribute("data-variant", "ledger");
+      const items = route.locator("li");
+      await expect(items).toHaveCount(7);
+      // 文書の文字は変えない（番号は CSS の生成内容）。文字は「判定 済」の形のまま
+      if (w === 375) {
+        const texts = (await items.allInnerTexts()).map((t) => t.replace(/\s+/g, " ").trim());
+        expect(texts.map((t) => t.split(" ")[0])).toEqual(["判定", "計画", "確認", "通報", "点検", "飛行", "日誌"]);
+      }
+      // 通し番号：等幅の 01〜07（::before の counter）
+      const nums = await items.evaluateAll((els) => els.map((e) => getComputedStyle(e, "::before").content.replace(/"/g, "")));
+      // （計算済みの値は counter の式のまま返る。01〜07 と見えることは、スクリーンショットで確かめた）
+      expect(nums).toEqual(Array(7).fill("counter(stage, decimal-leading-zero)"));
+      const mono = await items.first().evaluate((e) => getComputedStyle(e, "::before").fontFamily);
+      expect(mono.toLowerCase()).toMatch(/mono|menlo|consolas|courier/);
+      // 「次」の欄はちょうど 1 つ。四角い印の中に「次」（押印）。面が塗られる
+      const next = route.locator('li[data-stage-state="next"]');
+      await expect(next).toHaveCount(1);
+      await expect(next.locator("span:not(:has(span))", { hasText: /^次$/ })).toHaveCount(1);
+      const bg = await next.evaluate((e) => getComputedStyle(e).backgroundColor);
+      expect(bg).not.toBe("rgba(0, 0, 0, 0)");
+      // 帯はカードの左右いっぱい（主役の大きさ）。欄は 7 つで折り返さず、横スクロールもない
+      await expect(card).toBeVisible();
+      await expect(route).toBeVisible();
+      const cardBox = (await card.boundingBox())!;
+      const routeBox = (await route.boundingBox())!;
+      expect(routeBox.width).toBeGreaterThanOrEqual(cardBox.width - 3);
+      expect(routeBox.height, `${w}px の行程表の高さ`).toBeGreaterThanOrEqual(64);
+      for (const li of await items.all()) {
+        const m = await li.evaluate((e) => Array.from(e.querySelectorAll(":scope > span")).map((sp) => ({ sw: (sp as HTMLElement).scrollWidth, cw: (sp as HTMLElement).clientWidth, fs: parseFloat(getComputedStyle(sp).fontSize) })));
+        for (const x of m) {
+          expect(x.sw, `${w}px ではみ出し`).toBeLessThanOrEqual(x.cw + 1);
+          expect(x.fs).toBeGreaterThanOrEqual(12);
+        }
+      }
+      await expectNoHorizontalScroll(page, `ホーム（行程表 ${w}px）`);
+      // 帯の下：次の段と、その段の作業（この計画の「確認を依頼する」。押すとその作業へ）
+      await expect(card.getByTestId("today-card-next")).toContainText("次は計画の段");
+      const link = card.getByTestId("today-card-next-link");
+      await expect(link).toHaveAttribute("data-action-id", "request_confirmation");
+      await expect(link).toHaveText("確認を依頼する");
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await expect(card.getByTestId("today-card-route-count")).toHaveText("済 1 / 7");
+    }
+    await clearPlans(bm);
+    await bm.dispose();
   });
 });
