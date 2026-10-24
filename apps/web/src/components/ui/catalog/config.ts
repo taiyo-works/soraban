@@ -13,14 +13,44 @@ export const SCREENS = [
 ] as const;
 export type ScreenId = (typeof SCREENS)[number]["id"];
 
+// UX stage 2: the menu and home trial. `view=menu` shows it instead of the parts and screens (the default view is unchanged).
+export type View = "parts" | "menu";
+export type PcMenu = "rail" | "tabs";
+export type SpMenu = "tabs5" | "tabs4band";
+export type DayKind = "busy" | "empty";
+export type PcName = "judge" | "map";
+export type JudgeForm = "workspace" | "stack";
+
 export type CatalogConfig = {
   readonly theme: Theme;
   readonly field: boolean;
   readonly density: Density;
   readonly screen: ScreenId;
+  readonly view: View;
+  /** PC menu: a left menu in the order of the work, or tabs along the top. */
+  readonly pc: PcMenu;
+  /** Phone menu: five bottom tabs, or four bottom tabs with a band for the next flight. */
+  readonly sp: SpMenu;
+  /** A day with a flight, or a day without one. */
+  readonly day: DayKind;
+  /** The PC name of the judgement page: "判定" or "地図・判定". */
+  readonly pcname: PcName;
+  /** The PC judgement page: map first (workspace) or the current stack (form, map, result). */
+  readonly judge: JudgeForm;
 };
 
-export const DEFAULT_CONFIG: CatalogConfig = { theme: "auto", field: false, density: "standard", screen: "today" };
+export const DEFAULT_CONFIG: CatalogConfig = {
+  theme: "auto",
+  field: false,
+  density: "standard",
+  screen: "today",
+  view: "parts",
+  pc: "rail",
+  sp: "tabs5",
+  day: "busy",
+  pcname: "judge",
+  judge: "workspace",
+};
 
 /** Read the configuration from the query string (unknown values fall back to the defaults). */
 export function parseConfig(q: Readonly<Record<string, string | string[] | undefined>>): CatalogConfig {
@@ -28,11 +58,23 @@ export function parseConfig(q: Readonly<Record<string, string | string[] | undef
   const theme = one("theme");
   const density = one("density");
   const screen = one("screen");
+  const view = one("view");
+  const pc = one("pc");
+  const sp = one("sp");
+  const day = one("day");
+  const pcname = one("pcname");
+  const judge = one("judge");
   return {
     theme: theme === "auto" || theme === "light" || theme === "dark" ? theme : DEFAULT_CONFIG.theme,
     field: one("field") === "1",
     density: density === "standard" || density === "compact" ? density : DEFAULT_CONFIG.density,
     screen: SCREENS.some((x) => x.id === screen) ? (screen as ScreenId) : DEFAULT_CONFIG.screen,
+    view: view === "menu" ? "menu" : DEFAULT_CONFIG.view,
+    pc: pc === "rail" || pc === "tabs" ? pc : DEFAULT_CONFIG.pc,
+    sp: sp === "tabs5" || sp === "tabs4band" ? sp : DEFAULT_CONFIG.sp,
+    day: day === "busy" || day === "empty" ? day : DEFAULT_CONFIG.day,
+    pcname: pcname === "judge" || pcname === "map" ? pcname : DEFAULT_CONFIG.pcname,
+    judge: judge === "workspace" || judge === "stack" ? judge : DEFAULT_CONFIG.judge,
   };
 }
 

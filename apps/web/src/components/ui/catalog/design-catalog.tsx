@@ -10,12 +10,14 @@ import { ToastProvider } from "../overlays";
 import { Button, NoticeBar, PageHeader, StatusPill } from "../primitives";
 import { Segmented, TabPanel, Tabs } from "../tabs";
 import { IconsSection, PartsSection, TokensSection } from "./sections";
-import { DEFAULT_CONFIG, SCREENS, type CatalogConfig, type Density, type ScreenId, type Theme } from "./config";
+import { DEFAULT_CONFIG, SCREENS, type CatalogConfig, type DayKind, type Density, type JudgeForm, type PcMenu, type PcName, type ScreenId, type SpMenu, type Theme, type View } from "./config";
+import { MenuTrial } from "./menu-trial";
 import { FieldScreen, FormScreen, LegendScreen, ListScreen, TodayScreen, WorkspaceScreen } from "./screens";
 
 // Design catalog (Sprint 12g stage 1a). A static page: no auth, no DB, no network. State lives in the page and in the
 // query string (so a configuration can be shared as a link and screenshots are reproducible):
 //   ?theme=auto|light|dark  &field=1  &density=standard|compact  &screen=today|list|form|workspace|field|legend
+//   ?view=menu (the menu and home trial)  &pc=rail|tabs  &sp=tabs5|tabs4band  &day=busy|empty  &pcname=judge|map  &judge=workspace|stack
 // The page (server) reads the query string and passes it in as `initial`, so there is no effect-driven setup.
 
 // The sample screens come first: they are what the look (paper, ink, one indigo accent), density and field mode are judged on.
@@ -48,6 +50,12 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
   const [field, setField] = useState(initial.field);
   const [density, setDensity] = useState<Density>(initial.density);
   const [screen, setScreen] = useState<ScreenId>(initial.screen);
+  const [view, setView] = useState<View>(initial.view);
+  const [pc, setPc] = useState<PcMenu>(initial.pc);
+  const [sp, setSp] = useState<SpMenu>(initial.sp);
+  const [day, setDay] = useState<DayKind>(initial.day);
+  const [pcname, setPcname] = useState<PcName>(initial.pcname);
+  const [judge, setJudge] = useState<JudgeForm>(initial.judge);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   // true once the client has taken over (tests wait for it before interacting)
@@ -74,9 +82,18 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
     if (field) q.set("field", "1");
     if (density !== "standard") q.set("density", density);
     if (screen !== "today") q.set("screen", screen);
+    // the trial's choices are written only while the trial is shown, so the links of the other view stay as they were
+    if (view === "menu") {
+      q.set("view", "menu");
+      if (pc !== DEFAULT_CONFIG.pc) q.set("pc", pc);
+      if (sp !== DEFAULT_CONFIG.sp) q.set("sp", sp);
+      if (day !== DEFAULT_CONFIG.day) q.set("day", day);
+      if (pcname !== DEFAULT_CONFIG.pcname) q.set("pcname", pcname);
+      if (judge !== DEFAULT_CONFIG.judge) q.set("judge", judge);
+    }
     const s = q.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${s ? `?${s}` : ""}${window.location.hash}`);
-  }, [theme, field, density, screen]);
+  }, [theme, field, density, screen, view, pc, sp, day, pcname, judge]);
 
   const togglePalette = useCallback(() => setPaletteOpen((v) => !v), []);
   usePaletteHotkey(togglePalette, !field);
@@ -172,16 +189,34 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
             <NoticeBar meaning="neutral" icon="info" data-testid="catalog-notice">
               確認用の画面です。名称・数値・日付はすべて見本データで、実際の記録ではありません。本番の環境には表示されません。
             </NoticeBar>
-            <nav aria-label="見本の目次" className="flex flex-wrap gap-2">
-              {SECTIONS.map((s) => (
-                <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-ctl border border-line-strong px-4 text-table font-medium text-fg-soft transition-colors duration-[var(--dur)] hov:bg-accent-soft hov:text-accent field:min-h-14">
-                  {s.label}
-                  <Icon name="chevron-down" size={14} />
-                </a>
-              ))}
-            </nav>
+            <Segmented
+              label="見本の種類"
+              value={view}
+              onChange={(v) => setView(v as View)}
+              options={[
+                { id: "parts", label: "部品と画面" },
+                { id: "menu", label: "メニューとホームの案" },
+              ]}
+              data-testid="ctl-view"
+            />
+            {view === "parts" ? (
+              <nav aria-label="見本の目次" className="flex flex-wrap gap-2">
+                {SECTIONS.map((s) => (
+                  <a key={s.id} href={`#${s.id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-ctl border border-line-strong px-4 text-table font-medium text-fg-soft transition-colors duration-[var(--dur)] hov:bg-accent-soft hov:text-accent field:min-h-14">
+                    {s.label}
+                    <Icon name="chevron-down" size={14} />
+                  </a>
+                ))}
+              </nav>
+            ) : null}
           </div>
 
+          {view === "menu" ? (
+            <Block id="menu" title="メニューとホームの案">
+              <MenuTrial pc={pc} sp={sp} day={day} pcname={pcname} judge={judge} onPc={setPc} onSp={setSp} onDay={setDay} onPcname={setPcname} onJudge={setJudge} />
+            </Block>
+          ) : (
+            <>
           <Block id="screens" title="画面の構成（6 種）">
             <div className="flex flex-col gap-4">
               <Tabs
@@ -224,6 +259,8 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
           <Block id="parts" title="部品と状態">
             <PartsSection density={density} />
           </Block>
+            </>
+          )}
         </div>
 
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
