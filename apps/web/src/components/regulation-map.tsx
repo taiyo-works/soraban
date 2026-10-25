@@ -573,9 +573,17 @@ export function RegulationMap({
           }
         }
       }
+      // 地図に実際に反映した状態（E2E が確かめる）。非表示にしたグループ名のカンマ区切り。
+      const node = containerRef.current;
+      if (node) {
+        node.dataset["hiddenLayers"] = LAYER_GROUPS.filter((g) => !layerVisibility[g.key])
+          .map((g) => g.key)
+          .join(",");
+      }
     };
-    if (map.isStyleLoaded()) apply();
-    else map.once("load", apply);
+    // isStyleLoaded() は背景タイルの読み込み中に false になり、load は一度しか発火しない。
+    // そこで once("load") に頼ると、地図の移動直後の切替が地図に反映されず取りこぼされる。
+    runWhenLoaded(apply);
   }, [layerVisibility]);
 
   useEffect(() => {
@@ -597,9 +605,12 @@ export function RegulationMap({
           if (!src) return;
           src.setData(data);
           loadedPrefRef.current = prefCode;
+          // 地図に実際に反映した DID の都道府県コード（E2E が確かめる）。
+          const node = containerRef.current;
+          if (node) node.dataset["didPref"] = prefCode;
         };
-        if (map.isStyleLoaded()) apply();
-        else map.once("load", apply);
+        // 背景タイルの読み込み中（isStyleLoaded() が false）でも取りこぼさないよう、load 済みかを自前で管理する。
+        runWhenLoaded(apply);
       } catch {
         /* ignore */
       }
