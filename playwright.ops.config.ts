@@ -17,6 +17,8 @@ const MOCK_NEON_PORT = Number(process.env.E2E_MOCK_NEON_PORT ?? 3299);
 const MOCK_ADAPTER_PORT = Number(process.env.E2E_OPS_MOCK_ADAPTER_PORT ?? 3302);
 const MOCK_GSI_PORT = Number(process.env.E2E_OPS_MOCK_GSI_PORT ?? 3198);
 const MOCK_REVERSE_GEOCODER = `http://127.0.0.1:${MOCK_GSI_PORT}/reverse-geocoder/LonLatToAddress`;
+// 既定の 5 秒だと、画面の操作の間に空いていた API 用の接続をサーバーが閉じ、次の GET が ECONNRESET（socket hang up）で落ちることがある。
+const KEEP_ALIVE_MS = 120_000;
 const DATABASE_URL = process.env.E2E_OPS_DATABASE_URL ?? "";
 if (!DATABASE_URL) {
   throw new Error("E2E_OPS_DATABASE_URL（soraban_app で接続する DB の接続文字列）を設定してください。");
@@ -52,7 +54,7 @@ export default defineConfig({
       timeout: 30_000,
     },
     {
-      command: process.env.E2E_OPS_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${PORT} -H 127.0.0.1`,
+      command: process.env.E2E_OPS_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${PORT} -H 127.0.0.1 --keepAliveTimeout ${KEEP_ALIVE_MS}`,
       url: `http://127.0.0.1:${PORT}/api/health/db`,
       reuseExistingServer: false,
       timeout: 180_000,
@@ -78,7 +80,7 @@ export default defineConfig({
       },
     },
     {
-      command: process.env.E2E_OPS_MOCK_ADAPTER_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${MOCK_ADAPTER_PORT} -H 127.0.0.1`,
+      command: process.env.E2E_OPS_MOCK_ADAPTER_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${MOCK_ADAPTER_PORT} -H 127.0.0.1 --keepAliveTimeout ${KEEP_ALIVE_MS}`,
       url: `http://127.0.0.1:${MOCK_ADAPTER_PORT}/api/health/db`,
       reuseExistingServer: false,
       timeout: 180_000,
@@ -105,7 +107,7 @@ export default defineConfig({
       timeout: 30_000,
     },
     {
-      command: process.env.E2E_OPS_NEON_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${NEON_PORT}`,
+      command: process.env.E2E_OPS_NEON_SERVER_CMD ?? `pnpm --filter @soraban/web exec next start -p ${NEON_PORT} --keepAliveTimeout ${KEEP_ALIVE_MS}`,
       url: `http://localhost:${NEON_PORT}/api/health/db`,
       reuseExistingServer: false,
       timeout: 180_000,
