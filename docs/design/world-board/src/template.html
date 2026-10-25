@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1600">
+<title>そらばん 世界観ボード</title>
+<script>
+/* 色の「正」はここ 1 か所。CSS 変数もコントラスト表も、この値から作る。 */
+window.PAL = {
+  day: {
+    base: "#F7F7F3", surface: "#FFFFFF", sunken: "#ECEBE4",
+    ink: "#262523", g700: "#4A4843", g500: "#6A6862", g300: "#A8A69E", g200: "#C9C7BE", g100: "#E4E3DC", edge: "#6B6963",
+    orange: "#F89B48", copper: "#B4541F", copperStrong: "#8A3A10", copperTint: "#F5E0D0", white: "#FFFFFF",
+    red: "#B3202B", amber: "#EDB800", amberText: "#6B4700", blue: "#1D5A8E", green: "#2B6B3D"
+  },
+  night: {
+    base: "#1A1917", surface: "#232220", ink: "#ECEAE2", g500: "#A09E95", g300: "#6C6A63", g200: "#3A3935",
+    copper: "#E39B6A", red: "#FF8E8A", amber: "#F2C14E", blue: "#7DB6EA", green: "#8CCB9A"
+  }
+};
+(function () {
+  var r = document.documentElement.style, d = PAL.day, n = PAL.night, k;
+  for (k in d) r.setProperty("--" + k, d[k]);
+  for (k in n) r.setProperty("--n-" + k, n[k]);
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --jp:"Noto Sans JP","Hiragino Sans","Yu Gothic","IPAGothic",sans-serif;
+  --lat:"Manrope","Plus Jakarta Sans","Inter",sans-serif;
+  --mono:"JetBrains Mono","Noto Sans Mono",monospace;
+}
+html{background:var(--base)}
+body{width:1600px;background:var(--base);color:var(--ink);font-family:var(--jp);font-size:16px;line-height:1.8;letter-spacing:.05em;line-break:strict;font-feature-settings:"palt";-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0;font-feature-settings:normal}
+.lat{font-family:var(--lat);letter-spacing:-.02em;font-feature-settings:normal}
+h1,h2,h3{font-weight:500;text-wrap:balance}
+.wrap{padding:0 72px}
+section{padding:72px 0 80px;border-top:1px solid var(--g200)}
+section.w{background:#fff}
+.sh{position:relative}
+.sh::after{content:attr(data-no);position:absolute;right:0;top:-8px;font:300 120px/1 var(--lat);letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px var(--g200);opacity:.8;pointer-events:none}
+.sh{display:grid;grid-template-columns:120px 1fr;align-items:end;margin-bottom:72px}
+.sh .no{font-family:var(--mono);font-size:13px;color:var(--g500);letter-spacing:.08em;padding-bottom:10px}
+.sh h2{display:flex;align-items:baseline;gap:24px}
+.sh h2 .lat{font-size:64px;font-weight:700;line-height:1}
+.sh h2 .jp{font-size:18px;font-weight:400;color:var(--g700);letter-spacing:.12em}
+.bar{display:block;width:28px;height:2px;background:var(--copper);margin-bottom:14px}
+.cols{display:grid;grid-template-columns:repeat(12,1fr);column-gap:32px}
+.note{font-size:13px;line-height:1.7;color:var(--g700);letter-spacing:.03em}
+.cap{font-size:12px;color:var(--g500);letter-spacing:.04em;line-height:1.6}
+.lab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--g500);text-transform:uppercase}
+.dot{border-top:1px dotted var(--g300)}
+.rule{border-top:1px solid var(--g200)}
+.contour{display:block;width:100%;height:100%}
+.cl-minor{fill:none;stroke:var(--cs,#8E8472);stroke-width:.8;stroke-linecap:round}
+.cl-major{fill:none;stroke:var(--cm,#5B5144);stroke-width:1.5;stroke-linecap:round}
+.cl-label{font:10px var(--mono);fill:var(--cm,#5B5144);letter-spacing:0}
+.dark{--cs:#66645C;--cm:#A09E92;background:var(--n-base);color:var(--n-ink)}
+.dark .cl-label{fill:#A09E92}
+
+/* ---------- head ---------- */
+header{position:relative;height:500px;overflow:hidden}
+header .art{position:absolute;right:0;top:0;width:820px;height:500px;--cs:#B4AA97;--cm:#7C705D}
+header .art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--base) 0,rgba(247,247,243,0) 22%)}
+header .txt{position:relative;padding:56px 72px;width:860px}
+header .meta{display:flex;gap:28px;font-family:var(--mono);font-size:12px;color:var(--g500);letter-spacing:.1em}
+header h1{margin-top:60px;font-size:104px;font-weight:700;line-height:1;letter-spacing:.04em}
+header .tag{margin-top:26px;font-size:34px;font-weight:500;letter-spacing:.08em}
+header .aim{margin-top:20px;font-size:16px;color:var(--g700);width:560px;line-height:1.9}
+header .sub{position:absolute;left:72px;bottom:34px;font-size:12px;color:var(--g500)}
+
+/* ---------- color ---------- */
+.sw{display:grid;grid-template-columns:56px 150px 96px 1fr;column-gap:20px;align-items:center;padding:8px 0;border-top:1px solid var(--g100)}
+.sw:first-child{border-top:0}
+.sw i{display:block;width:56px;height:44px;border:1px solid rgba(38,34,30,.14)}
+.sw b{font-weight:500;font-size:15px}
+.sw .hex{font-family:var(--mono);font-size:13px}
+.sw span.u{font-size:13px;color:var(--g700)}
+.grp{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--g500);margin:28px 0 8px}
+.grp:first-child{margin-top:0}
+.vd{display:grid;grid-template-columns:1fr;row-gap:0}
+.vrow{display:grid;grid-template-columns:230px 1fr;column-gap:20px;align-items:center;padding:14px 0;border-top:1px solid var(--g100)}
+.vrow:first-child{border-top:0}
+.vchip{display:flex;align-items:center;gap:12px;height:52px;padding:0 18px;font-size:19px;font-weight:700;letter-spacing:.1em}
+.vchip svg{width:22px;height:22px;flex:none}
+.vrow .u{font-size:13px;color:var(--g700);line-height:1.6}
+.vrow .u .mono{font-size:12px;color:var(--ink)}
+.ct{width:100%;border-collapse:collapse}
+.ct th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--g500);text-align:left;font-weight:400;padding:0 0 8px}
+.ct td{padding:7px 0;border-top:1px solid var(--g100);font-size:13px;vertical-align:middle}
+.ct .smp{width:116px}
+.ct .smp span{display:flex;align-items:center;height:30px;padding:0 10px;font-size:14px;font-weight:700;border:1px solid rgba(38,34,30,.1)}
+.ct .r{font-family:var(--mono);font-size:13px;text-align:right;width:62px}
+.ct .m{font-family:var(--mono);font-size:12px;width:78px;text-align:right}
+.ok{color:#2B6B3D}.ng{color:#B3202B;font-weight:700}
+.dark .ok{color:#8CCB9A}.dark .ng{color:#FF8E8A}
+.night{padding:28px 30px 26px}
+.light-note{display:grid;grid-template-columns:1fr 1fr;column-gap:32px}
+.light-note h3{font-size:14px;margin-bottom:6px;letter-spacing:.1em}
+
+/* ---------- type ---------- */
+.spec{display:grid;grid-template-columns:150px 1fr;column-gap:20px;padding:14px 0;border-top:1px solid var(--g100);align-items:baseline}
+.spec:first-child{border-top:0}
+.spec .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--g500)}
+.tier{display:grid;grid-template-columns:150px 1fr;column-gap:20px;padding:22px 0;border-top:1px solid var(--g100);align-items:start}
+.tier .k .t{font-size:14px;font-weight:500}
+.tier .k .s{font-family:var(--mono);font-size:11px;color:var(--g500);line-height:1.7;margin-top:4px;letter-spacing:.02em}
+.t1 .en{font-family:var(--lat);font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-.025em}
+.t1 .ja{font-size:30px;font-weight:500;letter-spacing:.06em;line-height:1.4;margin-top:6px}
+.t2{font-size:16px;line-height:1.8;letter-spacing:.05em;max-width:640px}
+.t3{font-size:13px;line-height:1.6;letter-spacing:.03em;color:var(--g700);max-width:640px}
+.numrow{display:flex;gap:40px;margin-top:10px;align-items:baseline}
+.numrow .mono{font-size:30px;font-weight:500}
+.numrow .u{font-size:13px;color:var(--g500)}
+
+/* ---------- lines ---------- */
+.ln{display:grid;grid-template-columns:260px 1fr 280px;column-gap:28px;align-items:center;padding:20px 0;border-top:1px solid var(--g100)}
+.ln:first-child{border-top:0}
+.ln h3{font-size:15px}
+.ln .use{font-size:13px;color:var(--g700);line-height:1.7}
+.demo{position:relative;height:60px;display:flex;align-items:center}
+.btn{display:inline-flex;align-items:center;height:48px;padding:0 24px;background:var(--orange);color:var(--ink);font-weight:700;font-size:15px;letter-spacing:.1em}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--edge)}
+.arrow{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge);background:transparent}
+.arrow svg{width:18px;height:18px}
+
+/* ---------- menu parts ---------- */
+.tabbar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 72px;height:64px;border-top:1px solid var(--ink);background:var(--base);position:relative}
+.tabbar .it{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;letter-spacing:.08em;color:var(--g700);gap:2px}
+.tabbar .it .g{font-family:var(--lat);font-size:15px;font-weight:700;color:var(--ink);letter-spacing:0}
+.tabbar .it.cur{color:var(--ink);font-weight:700}
+.tabbar .it.cur::before{content:"";position:absolute;top:-1px;left:50%;margin-left:-14px;width:28px;height:3px;background:var(--copper)}
+.hb{width:48px;height:48px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;margin:auto}
+.hb i{display:block;width:18px;height:2px;background:var(--base);position:relative}
+.hb i::before{content:"";position:absolute;left:0;top:-6px;width:18px;height:2px;background:var(--base)}
+.hb i::after{content:"";position:absolute;left:0;top:6px;width:18px;height:2px;background:var(--base)}
+.hb.x i{background:transparent}
+.hb.x i::before{top:0;transform:rotate(45deg)}
+.hb.x i::after{top:0;transform:rotate(-45deg)}
+.hb.two i::after{display:none}
+.hb.two i{top:3px}
+.hb.two i::before{top:-3px}
+.badge{position:absolute;top:6px;left:calc(50% + 20px);min-width:20px;height:20px;border-radius:10px;background:var(--copper);color:#fff;font:700 11px/20px var(--mono);text-align:center;padding:0 5px;letter-spacing:0}
+.mi{position:relative;padding-top:14px;height:60px;border-top:0}
+.mi::before{content:"";position:absolute;top:0;left:0;width:24px;height:2px;background:var(--copper)}
+.mi .n{font-size:20px;font-weight:500;letter-spacing:.08em;line-height:1.4;display:flex;align-items:center;gap:12px}
+.mi .e{position:absolute;right:0;top:16px;font-family:var(--mono);font-size:11px;color:var(--g500);letter-spacing:.1em}
+.pip{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--copper)}
+.cnt{display:inline-block;min-width:22px;height:22px;border-radius:11px;background:var(--ink);color:var(--base);font:700 12px/22px var(--mono);text-align:center;padding:0 6px;letter-spacing:0}
+
+/* ---------- phone ---------- */
+.phone{position:relative;width:340px;height:700px;border:1px solid var(--ink);background:var(--base);overflow:hidden;flex:none}
+.phone .bg{position:absolute;left:0;right:0;opacity:.55;--cs:#C9C0AE;--cm:#B1A692}
+.phone .top{position:relative;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--g200)}
+.phone .top b{font-size:15px;letter-spacing:.14em;font-weight:700}
+.phone .top .mono{font-size:12px;color:var(--g700)}
+.phone .pad{position:relative;padding:22px 20px 0}
+.phone .tabbar{position:absolute;left:0;right:0;bottom:0}
+.next{background:var(--sunken);border:1px solid var(--g200);padding:16px 18px 18px;margin-top:16px}
+.next .t{font-family:var(--mono);font-size:44px;font-weight:500;line-height:1.1;letter-spacing:-.01em}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;font-size:12px;font-weight:700;letter-spacing:.08em}
+.chip svg{width:13px;height:13px}
+.row{display:grid;grid-template-columns:52px 1fr auto;column-gap:10px;padding:11px 0;border-top:1px dotted var(--g300);align-items:baseline;font-size:14px}
+.row .mono{font-size:13px}
+.row .w{font-size:12px;color:var(--g700)}
+
+/* ---------- splash ---------- */
+.frames{display:grid;grid-template-columns:repeat(4,340px);column-gap:30.67px}
+.frame{position:relative;width:340px;height:460px;overflow:hidden}
+.frame .logo{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center}
+.frame .logo b{display:block;font-size:44px;font-weight:700;letter-spacing:.2em;padding-left:.2em}
+.frame .logo .bar{margin:0 auto 18px}
+.frame .logo small{display:block;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.42em;padding-left:.42em;color:var(--n-g500)}
+.fl{margin-top:12px;display:flex;justify-content:space-between;align-items:baseline}
+.fl .mono{font-size:13px}
+
+/* ---------- art ---------- */
+.panel{position:relative;overflow:hidden}
+.panel .tag{position:absolute;left:18px;top:14px}
+
+/* ---------- donts ---------- */
+.dn{display:grid;grid-template-columns:70px 360px 1fr;column-gap:24px;padding:20px 0;border-top:1px solid var(--g100);align-items:baseline}
+.dn:first-child{border-top:0}
+.dn .no{font-family:var(--mono);font-size:13px;color:var(--g500)}
+.dn h3{font-size:18px;font-weight:700;letter-spacing:.04em}
+.dn p{font-size:14px;color:var(--g700);line-height:1.8}
+footer{padding:36px 72px 60px;border-top:1px solid var(--g200)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="s-red" viewBox="0 0 22 22"><rect x="2" y="2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M6.5 6.5l9 9M15.5 6.5l-9 9" stroke="currentColor" stroke-width="2.4" fill="none"/></symbol>
+  <symbol id="s-amber" viewBox="0 0 22 22"><path d="M11 2.5L20.5 19.5H1.5Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="miter"/><path d="M11 8.5v5.5" stroke="currentColor" stroke-width="2.4"/><rect x="10" y="15.4" width="2" height="2" fill="currentColor"/></symbol>
+  <symbol id="s-blue" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="11" cy="11" r="4" fill="currentColor"/></symbol>
+  <symbol id="s-green" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+</svg>
+
+<header>
+  <div class="art">{{HERO}}</div>
+  <div class="txt">
+    <div class="meta"><span>SORABAN</span><span>WORLD BOARD v0.1</span><span>2026-10-25</span></div>
+    <h1><span class="bar" style="width:40px;height:3px;margin-bottom:22px"></span>そらばん</h1>
+    <p class="tag">判断と記録を、迷わず。</p>
+    <p class="aim">飛ばす前の判定、飛ばした後の日誌・点検・通報を、一つの流れにする。晴れた屋外でも、暗い夜でも、片手で読める紙面を目指す。</p>
+  </div>
+  <p class="sub">この板は方向確認用です。画面の数字・機体名は表示例で、実データではありません。</p>
+</header>
+
+<!-- 01 COLOR -->
+<section id="color" class="w"><div class="wrap">
+  <div class="sh" data-no="01"><div class="no">01</div><h2><span class="lat">Color</span><span class="jp">色</span></h2></div>
+  <div class="cols">
+    <div style="grid-column:1/7">
+      <div class="grp">BASE / TEXT</div><div id="sw-base"></div>
+      <div class="grp">ACCENT（橙＝面、銅＝線と文字）</div><div id="sw-acc"></div>
+      <div class="grp">GRAY（暖色寄り・6 段）</div><div id="sw-gray"></div>
+    </div>
+    <div style="grid-column:7/13">
+      <div class="grp">判定の 4 段（色・形・文言の 3 つで示す）</div>
+      <div class="vd">
+        <div class="vrow"><div class="vchip" style="background:var(--red);color:#fff"><svg><use href="#s-red"/></svg>飛行不可</div><div class="u"><span class="mono">red</span> 空港の敷地内など。赤はここだけ。形は四角に×。</div></div>
+        <div class="vrow"><div class="vchip" style="background:var(--amber);color:var(--ink)"><svg><use href="#s-amber"/></svg>要手続き</div><div class="u"><span class="mono">amber</span> 黄みに寄せ、銅と離す。形は三角。文字だけ使うときは濃色 <span class="mono" id="hx-amberText"></span></div></div>
+        <div class="vrow"><div class="vchip" style="background:var(--blue);color:#fff"><svg><use href="#s-blue"/></svg>手続き済み</div><div class="u"><span class="mono">blue</span> 条件付きの許可・承認、情報。形は二重の丸。</div></div>
+        <div class="vrow"><div class="vchip" style="background:var(--green);color:#fff"><svg><use href="#s-green"/></svg>手続き不要</div><div class="u"><span class="mono">green</span> 形は輪。「安全」とは書かない。</div></div>
+      </div>
+      <p class="note" style="margin-top:14px">銅は判定の面に置かない。判定色の中で最も近い要手続き（黄み）とは、色相で約 20° 以上離している。</p>
+
+      <div class="grp" style="margin-top:34px">NIGHT（夜間・暗所）</div>
+      <div class="dark night">
+        <div style="display:grid;grid-template-columns:repeat(9,1fr);column-gap:8px" id="nsw"></div>
+        <div style="display:flex;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap">
+          <div class="chip" style="background:var(--n-red);color:#1A1815"><svg><use href="#s-red"/></svg>飛行不可</div>
+          <div class="chip" style="background:var(--n-amber);color:#1A1815"><svg><use href="#s-amber"/></svg>要手続き</div>
+          <div class="chip" style="background:var(--n-blue);color:#1A1815"><svg><use href="#s-blue"/></svg>手続き済み</div>
+          <div class="chip" style="background:var(--n-green);color:#1A1815"><svg><use href="#s-green"/></svg>手続き不要</div>
+        </div>
+        <p style="margin-top:16px;font-size:15px;line-height:1.8;color:var(--n-ink)">次の飛行　<span class="mono">9:30</span>　弓ヶ浜。<span style="color:var(--n-copper)">判定をやり直す</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols" style="margin-top:56px">
+    <div style="grid-column:1/7">
+      <div class="grp">コントラスト比（実測・WCAG の計算式）　昼</div>
+      <table class="ct" id="ct-day"><thead><tr><th>見本</th><th>組み合わせ</th><th style="text-align:right">比</th><th style="text-align:right">4.5:1</th><th style="text-align:right">7:1</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div style="grid-column:7/13">
+      <div class="grp">夜</div>
+      <div class="dark" style="padding:18px 22px 10px"><table class="ct" id="ct-night"><thead><tr><th>見本</th><th>組み合わせ</th><th style="text-align:right">比</th><th style="text-align:right">4.5:1</th><th style="text-align:right">7:1</th></tr></thead><tbody></tbody></table></div>
+      <div class="light-note" style="margin-top:28px">
+        <div><h3>昼の光（日差しの下）</h3><p class="note">画面の反射で文字は薄く見える。本文は 7:1 を基準にし、淡い灰の文字は注記にも使わない。地は純白にせず生成り、まぶしさを抑える。</p></div>
+        <div><h3>夜の光（暗所）</h3><p class="note">純白と純黒を避け、地は暖かい炭色、文字は生成りに寄せる。赤は暗いと沈むので、夜は明度を上げた別の値にする。</p></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 02 TYPE -->
+<section id="type"><div class="wrap">
+  <div class="sh" data-no="02"><div class="no">02</div><h2><span class="lat">Type</span><span class="jp">文字</span></h2></div>
+  <div class="cols">
+    <div style="grid-column:1/6">
+      <div class="spec"><span class="k">JAPANESE</span><div><b style="font-weight:500">Noto Sans JP</b>（Regular 400・Medium 500・Bold 700）<br><span class="note">Web フォントで配る。端末の游ゴシック・ヒラギノは代替。</span></div></div>
+      <div class="spec"><span class="k">HEADING LATIN</span><div><b class="lat" style="font-weight:700;font-size:20px">Manrope</b>（Bold 700）<br><span class="note">大きな英字の見出し専用。この板の画像は Manrope が無い環境で撮ったため、代わりの書体で出ている。</span></div></div>
+      <div class="spec"><span class="k">NUMERALS</span><div><b class="mono" style="font-weight:500">JetBrains Mono</b>（Medium 500）<br><span class="note">時刻・件数・標高など、桁がそろうべき数字だけ。</span></div></div>
+      <div class="spec"><span class="k">RULE</span><div class="note">書体は 3 種まで。日本語は太字を使い分けず、強調は 1 画面に 1 か所。見出しは字間を詰め（palt）、本文は少し開く（0.05em）。</div></div>
+      <div class="numrow" style="margin-top:26px">
+        <div><div class="mono">9:30–10:15</div><div class="u">時刻</div></div>
+        <div><div class="mono">150 m</div><div class="u">高度</div></div>
+        <div><div class="mono">あと 2 件</div><div class="u">手続き</div></div>
+      </div>
+    </div>
+    <div style="grid-column:6/13">
+      <div class="tier"><div class="k"><div class="t">見出し</div><div class="s">EN 64 / 1.05<br>JP 30 / 1.4<br>字間 −0.025em / 0.06em</div></div>
+        <div class="t1"><div class="en">Next Flight</div><div class="ja">次の飛行</div></div></div>
+      <div class="tier"><div class="k"><div class="t">本文</div><div class="s">16 / 1.8<br>字間 0.05em<br>1 行 35〜40 字</div></div>
+        <div class="t2">要手続き。人口集中地区の上空を飛ばすには、国土交通大臣の許可・承認が必要です。申請から飛行までの日数を見込み、手続きの期限を確かめてください。</div></div>
+      <div class="tier"><div class="k"><div class="t">注記</div><div class="s">13 / 1.6<br>字間 0.03em<br>色 g700 以上</div></div>
+        <div class="t3">判定は目安です。飛行の前に、最新の情報で必ず確かめてください。</div></div>
+      <div class="tier"><div class="k"><div class="t">操作</div><div class="s">15 Bold<br>字間 0.1em</div></div>
+        <div style="display:flex;gap:14px;align-items:center"><span class="btn">飛行計画を作る</span><span class="btn ghost">判定をやり直す</span><span class="cap">主ボタンは橙の面＋墨の文字。1 画面に 1 つ</span></div></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 03 LINES -->
+<section id="lines" class="w"><div class="wrap">
+  <div class="sh" data-no="03"><div class="no">03</div><h2><span class="lat">Lines</span><span class="jp">線とライン</span></h2></div>
+  <div class="cols">
+    <div style="grid-column:1/9">
+      <div class="ln"><h3>1px の罫線</h3>
+        <div class="demo"><div style="width:100%;border-top:1px solid var(--ink)"></div></div>
+        <div class="use">面と面の境。影のかわり。濃い（ink）は区切りの頭、薄い（g200）は行の間。</div></div>
+      <div class="ln"><h3>銅の短い線</h3>
+        <div class="demo"><div><span class="bar" style="width:28px;height:2px;margin:0 0 10px"></span><b style="font-size:20px;font-weight:500;letter-spacing:.08em">飛行計画</b></div></div>
+        <div class="use">長さ 24〜28px・太さ 2px。見出しとメニュー項目の上、現在の下タブの上だけ。</div></div>
+      <div class="ln"><h3>点線</h3>
+        <div class="demo" style="display:block;padding-top:6px">
+          <div class="mono" style="font-size:13px;display:grid;grid-template-columns:48px 1fr;padding:4px 0">9:30<span style="font-family:var(--jp)">飛行　弓ヶ浜</span></div>
+          <div class="dot"></div>
+          <div class="mono" style="font-size:13px;display:grid;grid-template-columns:48px 1fr;padding:4px 0">13:00<span style="font-family:var(--jp)">点検　飛行前</span></div></div>
+        <div class="use">同じ種類の行の間と、日付の切れ目だけ。段をまたぐ区切りには使わない。</div></div>
+      <div class="ln"><h3>角と丸</h3>
+        <div class="demo" style="gap:18px">
+          <div style="width:72px;height:40px;border:1px solid var(--ink)"></div>
+          <div class="hb two" style="margin:0;width:40px;height:40px"><i></i></div>
+          <span class="cnt">3</span><span class="arrow"><svg viewBox="0 0 18 18"><path d="M3 9h11M10 4.5L14.5 9 10 13.5" fill="none" stroke="#262523" stroke-width="1.6"/></svg></span>
+          <span style="position:relative;display:inline-block;width:20px;height:20px"><span class="pip" style="position:absolute;left:5px;top:5px"></span><span style="position:absolute;inset:0;border:1px solid var(--copper);border-radius:50%"></span></span>
+        </div>
+        <div class="use">ブロックは直角。丸は小さな操作部品だけ（ハンバーガー、丸の矢印、件数、現在地の点）。</div></div>
+    </div>
+    <div style="grid-column:9/13">
+      <div class="grp" style="margin-top:0">強調の規則：1 画面に 1 つ</div>
+      <div style="border:1px solid var(--ink);background:var(--surface);padding:22px 22px 24px">
+        <span class="bar"></span>
+        <div style="font-size:18px;font-weight:500;letter-spacing:.06em">今日の飛行</div>
+        <div class="dot" style="margin:14px 0 6px"></div>
+        <div class="row" style="border-top:0"><span class="mono">9:30</span><span>飛行　弓ヶ浜</span><span class="w">要手続き</span></div>
+        <div class="row"><span class="mono">13:00</span><span>点検　飛行前</span><span class="w">未</span></div>
+        <div style="margin-top:14px"><span class="btn">判定を見る</span></div>
+      </div>
+      <p class="note" style="margin-top:14px">この画面の強調は、橙の主ボタン 1 つ。判定の色（要手続き）は状態の表示で、強調には数えない。赤は、飛行不可が出たときだけ現れる。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- 04 MENU -->
+<section id="menu"><div class="wrap">
+  <div class="sh" data-no="04"><div class="no">04</div><h2><span class="lat">Menu</span><span class="jp">メニューの形</span></h2></div>
+  <div class="cols">
+    <div style="grid-column:1/6">
+      <div class="grp" style="margin-top:0">スマホ：下タブ + 右端の丸いハンバーガー</div>
+      <div style="width:400px;border:1px solid var(--ink);border-bottom:0;background:var(--base)">
+        <div style="height:46px;display:flex;align-items:center;padding:0 18px"><span class="cap">（画面の本文）</span></div>
+        <div class="tabbar" style="grid-template-columns:1fr 1fr 1fr 1fr 80px">
+          <div class="it cur"><span class="g">Home</span>ホーム</div>
+          <div class="it"><span class="g">Check</span>判定</div>
+          <div class="it"><span class="g">Plan</span>計画<span class="badge">2</span></div>
+          <div class="it"><span class="g">Log</span>日誌</div>
+          <div><div class="hb two"><i></i></div></div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:14px;width:400px">高さ 64px、押せる範囲は 48px 以上。現在地は銅の線と太字。ハンバーガーは 2 本線の丸。件数は丸のバッジ。タブの先は 4 つまでに絞り、残りは右端から開く。</p>
+    </div>
+    <div style="grid-column:6/9">
+      <div class="grp" style="margin-top:0">縦の一覧（開いたとき）</div>
+      <div style="width:100%;border:1px solid var(--g200);padding:22px 22px 8px;background:var(--surface)">
+        <div class="mi"><div class="n"><span class="pip"></span>今日</div><span class="e">TODAY</span></div>
+        <div class="mi"><div class="n">飛行計画</div><span class="e">PLANS</span></div>
+        <div class="mi"><div class="n">点検 <span class="cnt">2</span></div><span class="e">CHECKS</span></div>
+        <div class="mi"><div class="n">通報・許可</div><span class="e">REPORTS</span></div>
+      </div>
+      <p class="note" style="margin-top:14px">項目の間は 60px。上に銅の短い線。現在の項目だけ、丸い現在地の点。英字は等幅の小さな添え書き。</p>
+    </div>
+    <div style="grid-column:9/13">
+      <div class="grp" style="margin-top:0">PC：左ドロワー（右上のハンバーガーから開く案も同じ中身）</div>
+      <div style="border:1px solid var(--ink);background:var(--base);height:300px;position:relative;overflow:hidden">
+        <div style="height:44px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;padding:0 14px"><div style="display:flex;align-items:center;gap:12px"><div class="hb x" style="margin:0;width:32px;height:32px"><i style="width:14px"></i></div><b style="letter-spacing:.14em;font-size:14px">そらばん</b></div><span class="mono" style="font-size:11px;color:var(--g500)">10/27</span></div>
+        <div style="position:absolute;left:0;top:44px;bottom:0;width:176px;border-right:1px solid var(--ink);background:var(--surface);padding:14px 16px">
+          <div class="mi" style="height:44px;padding-top:10px"><div class="n" style="font-size:15px"><span class="pip" style="width:8px;height:8px"></span>今日</div></div>
+          <div class="mi" style="height:44px;padding-top:10px"><div class="n" style="font-size:15px">飛行計画</div></div>
+          <div class="mi" style="height:44px;padding-top:10px"><div class="n" style="font-size:15px">飛行記録</div></div>
+          <div class="mi" style="height:44px;padding-top:10px"><div class="n" style="font-size:15px">点検</div></div>
+        </div>
+        <div style="position:absolute;left:196px;right:16px;top:60px"><span class="bar" style="margin-bottom:8px"></span><div class="lat" style="font-size:32px;font-weight:700;line-height:1.1">Today</div><div class="dot" style="margin:12px 0 4px"></div><div class="row" style="grid-template-columns:42px 1fr;font-size:12px"><span class="mono">9:30</span><span>飛行　弓ヶ浜</span></div><div class="row" style="grid-template-columns:42px 1fr;font-size:12px"><span class="mono">13:00</span><span>点検　飛行前</span></div></div>
+      </div>
+      <p class="note" style="margin-top:14px">本文は押し出さず、ドロワーは本文の上に重ねる。幅 240px。開閉は 240ms。閉じる操作は、外側のタップと Esc。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- 05 SPLASH -->
+<section id="splash" class="w"><div class="wrap">
+  <div class="sh" data-no="05"><div class="no">05</div><h2><span class="lat">Splash</span><span class="jp">起動画面（初回のみ）</span></h2></div>
+  <div class="frames">
+    <div><div class="frame dark"><div style="position:absolute;left:170px;top:230px;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--n-copper)"></div></div>
+      <div class="fl"><span class="mono">0.0s</span><span class="cap">暗い地に、点が 1 つ</span></div></div>
+    <div><div class="frame dark">{{S2}}</div>
+      <div class="fl"><span class="mono">0.6s</span><span class="cap">外側から等高線が引かれる</span></div></div>
+    <div><div class="frame dark">{{S3}}<div class="logo"><span class="bar"></span><b>そらばん</b><small>SORABAN</small></div></div>
+      <div class="fl"><span class="mono">1.6s</span><span class="cap">線がそろい、名が現れる</span></div></div>
+    <div><div class="frame dark"><div class="logo" style="opacity:.55"><span class="bar"></span><b>そらばん</b><small>SORABAN</small></div></div>
+      <div class="fl"><span class="mono">2.4s</span><span class="cap">線が消え、画面へ溶ける</span></div></div>
+  </div>
+  <div class="cols" style="margin-top:44px">
+    <div style="grid-column:1/5"><div class="grp" style="margin-top:0">動き ①　ゆっくり広がる＋色の膜</div>
+      <p class="note">写真・等高線の面が、約 1 秒かけて 1.04 倍→1.0 倍へ静まり、橙の薄い膜が引く。<span class="mono">transition: transform 1s cubic-bezier(.165,.84,.44,1)</span>（ease-out-quart 系）。使う場所：起動画面、事務所 PC のトップ。</p></div>
+    <div style="grid-column:5/9"><div class="grp" style="margin-top:0">動き ②　下からせり上がる</div>
+      <p class="note">見出しとブロックが、下 24px から 1 秒で現れる。<span class="mono">IntersectionObserver</span> で 1 回だけ。戻るとき・再表示では動かさない。ライブラリは使わず、CSS と標準の仕組みだけで足りる範囲に収める。</p></div>
+    <div style="grid-column:9/13"><div class="grp" style="margin-top:0">抑える所</div>
+      <p class="note">現場モード（屋外・片手）は動き 0。<span class="mono">prefers-reduced-motion</span> では 4 コマ目だけを 0.4 秒。全画面の動画背景は使わない（現場の電波と速さ）。初回のみ・タップで飛ばせる。</p></div>
+  </div>
+  <p class="cap" style="margin-top:18px">光：起動は暗い地。夜に開いても眩しくない。屋外の昼は、起動画面を飛ばして本体の画面を先に見せる設定を想定する。</p>
+</div></section>
+
+<!-- 06 ART -->
+<section id="art"><div class="wrap">
+  <div class="sh" data-no="06"><div class="no">06</div><h2><span class="lat">Contour</span><span class="jp">アート要素：等高線</span></h2></div>
+  <div style="display:grid;grid-template-columns:940px 1fr;column-gap:40px">
+    <div class="panel" style="width:940px;height:480px;background:var(--surface);border:1px solid var(--g200);--cs:#A59B88;--cm:#5B5144">
+      {{ART}}
+      <span class="lab tag" style="background:var(--surface);padding:2px 8px">標高の表現 / 昼</span>
+    </div>
+    <div>
+      <div class="panel dark" style="width:100%;height:230px;border:1px solid var(--g200)">{{ARTN}}<span class="lab tag" style="color:#A29780">夜</span></div>
+      <div style="margin-top:20px">
+        <div class="spec"><span class="k">LINE</span><div class="note" style="margin:0">細線 0.8px、5 本ごとの索引線 1.5px。線は端で止まり、索引線は標高の数字で途切れる。</div></div>
+        <div class="spec"><span class="k">HAND</span><div class="note" style="margin:0">点にゆらぎ（±0.7px）を足し、均一な幾何パターンにしない。起伏の形は、手で置いた丘と低周波ノイズから生成。</div></div>
+        <div class="spec"><span class="k">USE</span><div class="note" style="margin:0">起動画面、見出しの背景、空の状態、メニューの下地（薄く）。判定の結果、入力欄、現場モードには置かない。</div></div>
+      </div>
+    </div>
+  </div>
+  <p class="cap" style="margin-top:14px">地図の上の点線は飛行経路、丸は現在地、四角は経由点（表示例）。生成は <span class="mono">docs/design/world-board/src/contours.mjs</span>（外部ライブラリなし）。</p>
+</div></section>
+
+<!-- 07 SCREENS -->
+<section id="screens" class="w"><div class="wrap">
+  <div class="sh" data-no="07"><div class="no">07</div><h2><span class="lat">Screens</span><span class="jp">ミニ画面</span></h2></div>
+  <div style="display:flex;gap:56px;align-items:flex-start">
+    <div class="phone">
+      <div class="top"><b>そらばん</b><span class="mono">10/27 火</span></div>
+      <div class="bg" style="top:54px;height:150px">{{HOMEBG}}</div>
+      <div class="pad">
+        <span class="bar"></span>
+        <div style="display:flex;align-items:baseline;gap:12px"><span class="lat" style="font-size:44px;font-weight:700;line-height:1">Today</span><span style="font-size:14px;color:var(--g700);letter-spacing:.12em">今日</span></div>
+        <div class="next">
+          <div class="lab">次の飛行</div>
+          <div class="t">9:30</div>
+          <div style="font-size:16px;margin-top:2px">弓ヶ浜（米子市）</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px"><span class="chip" style="background:var(--amber);color:var(--ink)"><svg><use href="#s-amber"/></svg>要手続き</span><span style="font-size:13px;color:var(--g700)">あと <span class="mono">2</span> 件</span></div>
+          <div style="margin-top:16px"><span class="btn" style="height:46px;width:100%;justify-content:center">判定を見る</span></div>
+        </div>
+        <div class="lab" style="margin:24px 0 2px">今日の予定</div>
+        <div class="row"><span class="mono">9:30</span><span>飛行　弓ヶ浜</span><span class="w">要手続き</span></div>
+        <div class="row"><span class="mono">13:00</span><span>点検　飛行前</span><span class="w">未</span></div>
+        <div class="row"><span class="mono">16:30</span><span>通報の結果を記録</span><span class="w">未</span></div>
+        <p class="cap" style="margin-top:14px">判定は目安です。</p>
+      </div>
+      <div class="tabbar">
+        <div class="it cur"><span class="g">Home</span>ホーム</div>
+        <div class="it"><span class="g">Check</span>判定</div>
+        <div class="it"><span class="g">Plan</span>計画<span class="badge">2</span></div>
+        <div class="it"><span class="g">Log</span>日誌</div>
+        <div><div class="hb two"><i></i></div></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="top"><b>そらばん</b><span class="mono">10/27 火</span></div>
+      <div class="bg" style="top:300px;height:340px">{{MENUBG}}</div>
+      <div class="pad" style="padding-top:20px">
+        <div class="lat" style="font-size:44px;font-weight:700;line-height:1;margin-bottom:12px">Menu</div>
+        <div class="mi"><div class="n"><span class="pip"></span>今日</div><span class="e">TODAY</span></div>
+        <div class="mi"><div class="n">判定</div><span class="e">CHECK</span></div>
+        <div class="mi"><div class="n">飛行計画</div><span class="e">PLANS</span></div>
+        <div class="mi"><div class="n">飛行記録</div><span class="e">LOG</span></div>
+        <div class="mi"><div class="n">点検 <span class="cnt">2</span></div><span class="e">CHECKS</span></div>
+        <div class="mi"><div class="n">通報・許可</div><span class="e">REPORTS</span></div>
+        <div class="mi" style="height:54px"><div class="n" style="color:var(--g700);font-size:17px">機体・操縦者・地点</div><span class="e">MASTER</span></div>
+      </div>
+      <div class="tabbar">
+        <div class="it"><span class="g">Home</span>ホーム</div>
+        <div class="it"><span class="g">Check</span>判定</div>
+        <div class="it"><span class="g">Plan</span>計画</div>
+        <div class="it"><span class="g">Log</span>日誌</div>
+        <div><div class="hb x"><i></i></div></div>
+      </div>
+    </div>
+
+    <div style="flex:1;padding-top:6px">
+      <h3 style="font-size:14px;letter-spacing:.1em;margin-bottom:6px">左：予定のある日のホーム</h3>
+      <p class="note">主役は「次の飛行」の 1 ブロック。時刻は等幅の大きな数字、判定は黄みの「要手続き」と残りの手続き件数。橙の主ボタンは 1 つ。予定は点線で区切った 3 行だけ。</p>
+      <h3 style="font-size:14px;letter-spacing:.1em;margin:28px 0 6px">右：メニューを開いた状態</h3>
+      <p class="note">下タブは残し、ハンバーガーが × に変わる。縦の一覧は、銅の短い線と余白で区切る。下に等高線を薄く敷く。</p>
+      <h3 style="font-size:14px;letter-spacing:.1em;margin:28px 0 6px">表示例について</h3>
+      <p class="note">機体名・時刻・場所は表示例。実機能との対応（どの項目が下タブに入るか）は、決まってから整える。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- 08 REFERENCE -->
+<section id="ref"><div class="wrap">
+  <div class="sh" data-no="08"><div class="no">08</div><h2><span class="lat">Borrow</span><span class="jp">取り入れる／変える／線引き</span></h2></div>
+  <div class="cols">
+    <div style="grid-column:1/5">
+      <div class="grp" style="margin-top:0">取り入れる（原則だけ）</div>
+      <p class="note" style="line-height:2">白と生成りを、セクションごとに交互に敷く。<br>純黒でない温かい黒（墨）。<br>目立つ色は 白・生成り・墨・橙 の 4 つだけ。<br>動きは「ゆっくり、滑らか」で、主な動きは 2 つ。<br>大きな英字の見出し＋日本語、行間 1.8・字間 0.05em。<br>下部固定ナビ、番号つきの見出し。</p>
+    </div>
+    <div style="grid-column:5/9">
+      <div class="grp" style="margin-top:0">変える（そらばん用に）</div>
+      <p class="note" style="line-height:2">橙は生成り上で 2.0:1。文字・細線に使わず、面と装飾だけ。線と文字は銅。<br>差し色（ピンク・紫・金茶）は入れない。判定色と混ざる。<br>ブロックと主ボタンは直角。丸は小さな部品だけ。<br>罫線（約 1.6:1）は区切り専用。押せる部品の境は約 5:1 の濃い色。<br>動画背景なし。動きが豊かなのは起動画面と事務所 PC のトップだけ。<br>番号は、巨大な背景でなく、輪郭線の薄い数字。</p>
+    </div>
+    <div style="grid-column:9/13">
+      <div class="grp" style="margin-top:0">権利の線引き</div>
+      <p class="note" style="line-height:2">ロゴ・写真・文章・図柄・細部の形は使わない。軌道を回る演出や、矢印が入れ替わる細部は写さない。<br>表現は、航空日誌・地図・等高線から作る。<br>のりさん提供の資料は未検証。サイトの実物は確認していない。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- 09 RULES -->
+<section id="rules" class="w"><div class="wrap">
+  <div class="sh" data-no="09"><div class="no">09</div><h2><span class="lat">Don’t</span><span class="jp">やらないこと</span></h2></div>
+  <div>
+    <div class="dn"><span class="no">01</span><h3>紫のグラデーション・発光・ガラス風</h3><p>面は不透明、境は 1px の罫線。モーフィズムは背景に近い面だけ（sunken）で、文字・境界・ボタンのコントラストは落とさない。</p></div>
+    <div class="dn"><span class="no">02</span><h3>同じ幅のカード並べ・丸いアイコンの札</h3><p>情報の重さで大きさを変える。丸は、ハンバーガー・件数・現在地の点だけ。</p></div>
+    <div class="dn"><span class="no">03</span><h3>色で判定を伝えるだけの表示</h3><p>判定は色・形（四角×・三角・二重丸・輪）・文言の 3 つで示す。アクセントの銅は判定の面に使わない。</p></div>
+    <div class="dn"><span class="no">04</span><h3>手を抜いた地図風・ダミー文</h3><p>等高線は生成で作ったものだけ。見本の文は、そらばんの実際の言葉か、表示例と断ったものだけにする。</p></div>
+    <div class="dn"><span class="no">05</span><h3>参考にしたサイトの見た目の模倣</h3><p>ロゴ・写真・文章・細部の形は使わない。取り入れたのは原則だけ：生成り系の地、橙と銅の役割分け、広い余白の縦の一覧、直角と小さな丸、字間と大きな英字の見出し。</p></div>
+  </div>
+</div></section>
+<footer class="cap">そらばん 世界観ボード v0.1　表示例を含む。日本語は端末の代替書体で描画している（Noto Sans JP が無い環境）。</footer>
+
+<script>
+(function () {
+  function lin(c) { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function lum(h) { var n = parseInt(h.slice(1), 16); return 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255); }
+  function ratio(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  var D = PAL.day, N = PAL.night, out = [];
+  function sw(host, list) {
+    var el = document.getElementById(host);
+    list.forEach(function (s) {
+      var v = D[s[0]];
+      el.insertAdjacentHTML("beforeend", '<div class="sw"><i style="background:' + v + '"></i><b>' + s[1] + '</b><span class="hex">' + v.toUpperCase() + '</span><span class="u">' + s[2] + "</span></div>");
+    });
+  }
+  sw("sw-base", [["base", "生成り", "画面の地。白と交互に敷く（セクション単位）"], ["surface", "白", "入力欄・ドロワー・交互の地"], ["sunken", "沈んだ面", "ごく弱い面。ここだけ立体感を許す"], ["ink", "墨（温かい黒）", "本文・見出し。純黒にしない"]]);
+  sw("sw-acc", [["orange", "橙（面）", "主ボタンの地・大きな面・装飾。墨の文字を載せる。文字・細線には使わない"], ["copper", "銅（線・文字）", "短い線・現在地・リンク。橙とは役割を分ける"], ["copperStrong", "銅（濃）", "現場モードで文字に使うとき（7:1）"], ["copperTint", "銅（淡）", "選択中の行の地"]]);
+  sw("sw-gray", [["g700", "g700", "補助の文字"], ["g500", "g500", "注記・添え書き"], ["g300", "g300", "点線"], ["g200", "g200", "区切り専用の罫（押せる部品の境には使わない）"], ["g100", "g100", "行の間の細い罫"], ["edge", "edge", "押せる部品の境界・入力欄の枠（約 5:1）"]]);
+  document.getElementById("hx-amberText").textContent = D.amberText.toUpperCase();
+
+  var nsw = document.getElementById("nsw");
+  [["base", "地"], ["surface", "面"], ["ink", "文字"], ["g500", "注記"], ["copper", "銅"], ["red", "赤"], ["amber", "黄"], ["blue", "青"], ["green", "緑"]].forEach(function (s) {
+    nsw.insertAdjacentHTML("beforeend", '<div><i style="display:block;height:44px;background:' + N[s[0]] + ';border:1px solid #4a443b"></i><div style="font-size:12px;margin-top:6px">' + s[1] + '</div><div class="mono" style="font-size:11px;color:var(--n-g500)">' + N[s[0]].toUpperCase() + "</div></div>");
+  });
+
+  var W = "#FFFFFF";
+  var dayPairs = [
+    ["本文", D.ink, D.base, "炭 / 生成り", 7], ["本文（面）", D.ink, D.surface, "炭 / 面", 7],
+    ["補助", D.g700, D.base, "g700 / 生成り", 7], ["注記", D.g500, D.base, "g500 / 生成り", 4.5],
+    ["銅", D.copper, D.base, "銅（文字）/ 生成り", 4.5], ["銅濃", D.copperStrong, D.base, "銅濃（現場）/ 生成り", 7],
+    ["主ボタン", D.ink, D.orange, "墨 / 橙（主ボタン）", 7], ["バッジ", W, D.copper, "白 / 銅（件数バッジ）", 4.5],
+    ["枠", D.edge, D.base, "edge / 生成り（部品の境界）", 4.5], ["橙", D.orange, D.base, "橙 / 生成り（文字には使わない）", 0], ["罫", D.g200, D.base, "g200 / 生成り（区切り専用）", 0],
+    ["飛行不可", W, D.red, "白 / 赤", 4.5], ["要手続き", D.ink, D.amber, "炭 / 黄", 4.5],
+    ["手続き済み", W, D.blue, "白 / 青", 4.5], ["手続き不要", W, D.green, "白 / 緑", 4.5],
+    ["要手続き", D.amberText, D.base, "濃黄（文字）/ 生成り", 7]
+  ];
+  var nightPairs = [
+    ["本文", N.ink, N.base, "文字 / 地", 7], ["注記", N.g500, N.base, "注記 / 地", 4.5],
+    ["銅", N.copper, N.base, "銅 / 地", 7], ["飛行不可", N.red, N.base, "赤 / 地", 7],
+    ["要手続き", N.amber, N.base, "黄 / 地", 7], ["手続き済み", N.blue, N.base, "青 / 地", 7],
+    ["手続き不要", N.green, N.base, "緑 / 地", 7], ["主ボタン", N.base, N.copper, "地 / 銅（ボタンの文字）", 4.5]
+  ];
+  function fill(id, pairs, tag) {
+    var tb = document.querySelector("#" + id + " tbody");
+    pairs.forEach(function (p) {
+      var r = ratio(p[1], p[2]), a = r >= 4.5, b = r >= 7, need = p[4];
+      var okTarget = need === 0 ? null : r >= need;
+      out.push({ set: tag, label: p[3], fg: p[1], bg: p[2], ratio: +r.toFixed(2), target: need, pass: okTarget });
+      tb.insertAdjacentHTML("beforeend",
+        '<tr><td class="smp"><span style="color:' + p[1] + ";background:" + p[2] + '">' + p[0] + "</span></td><td>" + p[3] + '</td><td class="r">' + r.toFixed(2) +
+        '</td><td class="m ' + (need === 0 ? "" : a ? "ok" : "ng") + '">' + (need === 0 ? "対象外" : a ? "○ 達成" : "× 未達") + '</td><td class="m ' + (need === 0 ? "" : b ? "ok" : (need === 7 ? "ng" : "")) + '">' + (need === 0 ? "—" : b ? "○ 達成" : (need === 7 ? "× 未達" : "—")) + "</td></tr>");
+    });
+  }
+  fill("ct-day", dayPairs, "day"); fill("ct-night", nightPairs, "night");
+  window.__contrast = out;
+  console.log("CONTRAST " + JSON.stringify(out));
+})();
+</script>
+</body>
+</html>
