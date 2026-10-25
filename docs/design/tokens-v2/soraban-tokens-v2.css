@@ -1,0 +1,100 @@
+/*
+ * そらばん デザイントークン v2（草案）。apps/web には入れない。docs/design/design-system-v2-draft.md が説明。
+ * 土台は FINESYSTEM（fg-finesystem.co.jp）：橙が主役、白とオフホワイトを交互、ピルボタン＋右端の墨の丸、角丸 16/8/4、影は 0 0 24px 黒 10% のみ。
+ * 名前は v1（apps/web/src/app/soraban-tokens.css）の --sb-* を引き継ぎ、意味が変わるものは設計書の「v1 との差分」に書いた。
+ * 暗（OS の暗い設定）は未定義。v1 の暗を v2 の面構成に合わせて作り直すのは実装 PR の前の別作業（設計書の未決）。
+ * 検査：node docs/design/tokens-v2/check-contrast-v2.mjs
+ */
+:root {
+  /* 帯の地：白・オフホワイト・ベージュを交互に敷く。ブロックは帯の地と逆の明るさにする */
+  --sb-base: #FFFFFF;
+  --sb-surface: #F7F7F3;
+  --sb-sunken: #EDEDE5;
+
+  /* 文字 */
+  --sb-ink: #262523;
+  --sb-ink-2: #4A4843;
+  --sb-ink-3: #5F5D57;
+  --sb-ph: #68655B;
+
+  /* 線：rule は区切り専用。押せる部品の縁は edge */
+  --sb-rule: #C4C4C4;
+  --sb-edge: #5F5D57;
+  --sb-focus: #262523;
+
+  /* 橙：操作の色（面・線・ホバー）。橙の面に載せる文字は墨。橙の細い文字は作らない */
+  --sb-orange: #F89B48;
+  --sb-orange-hover: #FFC189;
+  --sb-orange-deep: #E99347;
+  --sb-on-orange: #262523;
+
+  /* 判定：橙とは別系統。形（×△○）と言葉を併用する。fill=印・タグの面、on=その上の文字、fg=面の上の文字・線 */
+  --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
+  --sb-v-needs-fill: #EDB800;    --sb-v-needs-on: #262523;    --sb-v-needs-fg: #6B5800;
+  --sb-v-done-fill: #262523;     --sb-v-done-on: #F7F7F3;     --sb-v-done-fg: #262523;
+  --sb-v-none-fill: #225F36;     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: #225F36;
+  --sb-v-unknown-fill: #FFFFFF;  --sb-v-unknown-on: #4F5762;  --sb-v-unknown-fg: #4F5762;
+
+  /* 挿絵専用（判定画面のトップだけ。文字は載せない。UI の部品には使わない） */
+  --sb-art-sky: #DEF3F4;
+  --sb-art-sky-warm: #FFF1DE;
+  --sb-art-hill-far: #FFC189;
+  --sb-art-hill-mid: #2EBEC4;
+  --sb-art-hill-near: #0F6B70;
+  --sb-art-cloud: #FFFFFF;
+  --sb-contour: rgba(233, 147, 71, 0.38);
+  --sb-contour-major: rgba(233, 147, 71, 0.7);
+
+  /* 形 */
+  --sb-r-l: 16px;                /* ブロック・カード・地図の枠 */
+  --sb-r-m: 8px;                 /* 入力欄・小さな面 */
+  --sb-r-s: 4px;                 /* 判定の印の角・小さな部品 */
+  --sb-pill: 9999px;             /* ボタン・チップ・タグ・丸いバッジ */
+  --sb-shadow: 0 0 24px rgba(0, 0, 0, 0.1);
+  --sb-rule-w: 1px;
+  --sb-mark-w: 2px;
+
+  /* 寸法 */
+  --sb-hit-min: 44px;            /* 押せる部品の下限（チップ） */
+  --sb-hit: 48px;                /* 普通のボタン・入力欄 */
+  --sb-hit-primary: 56px;        /* 主ボタン */
+  --sb-hit-row: 48px;            /* チェック行（現場で 64px） */
+  --sb-fs-h: 22px;
+  --sb-fs-body: 15px;
+  --sb-fs-note: 12px;
+
+  /* 動き：2 種類だけ（ピルの矢印の入れ替え、せり上がり表示を 1 回）。現場と reduce では 0 */
+  --sb-dur: 500ms;
+  --sb-dur-rise: 600ms;
+  --sb-ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+/* 現場モード：手袋・日差し。7:1、陰影なし、罫を太く、押す部品を大きく、動きなし */
+:root[data-mode="field"] {
+  --sb-ink-2: #3A3834;
+  --sb-ink-3: #45423D;
+  --sb-ph: #4E4B44;
+  --sb-edge: #3A3834;
+  --sb-rule: #8A8880;
+  --sb-v-no-fg: #8A1520;
+  --sb-v-needs-fg: #5A4A00;
+  --sb-v-none-fg: #1B4E2C;
+  --sb-v-unknown-on: #3F4750;
+  --sb-v-unknown-fg: #3F4750;
+  --sb-shadow: none;
+  --sb-rule-w: 1.5px;
+  --sb-mark-w: 2.5px;
+  --sb-hit-min: 56px;
+  --sb-hit: 56px;
+  --sb-hit-primary: 64px;
+  --sb-hit-row: 64px;
+  --sb-fs-h: 24px;
+  --sb-fs-body: 18px;
+  --sb-fs-note: 14px;
+  --sb-dur: 0ms;
+  --sb-dur-rise: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sb-dur: 0ms; --sb-dur-rise: 0ms; }
+}

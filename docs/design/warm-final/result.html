@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>そらばん 判定の結果（3 状態）</title>
+<style>
+
+:root {
+  
+  --sb-base: #FFFFFF;
+  --sb-surface: #F7F7F3;
+  --sb-sunken: #EDEDE5;
+
+  
+  --sb-ink: #262523;
+  --sb-ink-2: #4A4843;
+  --sb-ink-3: #5F5D57;
+  --sb-ph: #68655B;
+
+  
+  --sb-rule: #C4C4C4;
+  --sb-edge: #5F5D57;
+  --sb-focus: #262523;
+
+  
+  --sb-orange: #F89B48;
+  --sb-orange-hover: #FFC189;
+  --sb-orange-deep: #E99347;
+  --sb-on-orange: #262523;
+
+  
+  --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
+  --sb-v-needs-fill: #EDB800;    --sb-v-needs-on: #262523;    --sb-v-needs-fg: #6B5800;
+  --sb-v-done-fill: #262523;     --sb-v-done-on: #F7F7F3;     --sb-v-done-fg: #262523;
+  --sb-v-none-fill: #225F36;     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: #225F36;
+  --sb-v-unknown-fill: #FFFFFF;  --sb-v-unknown-on: #4F5762;  --sb-v-unknown-fg: #4F5762;
+
+  
+  --sb-art-sky: #DEF3F4;
+  --sb-art-sky-warm: #FFF1DE;
+  --sb-art-hill-far: #FFC189;
+  --sb-art-hill-mid: #2EBEC4;
+  --sb-art-hill-near: #0F6B70;
+  --sb-art-cloud: #FFFFFF;
+  --sb-contour: rgba(233, 147, 71, 0.38);
+  --sb-contour-major: rgba(233, 147, 71, 0.7);
+
+  
+  --sb-r-l: 16px;                
+  --sb-r-m: 8px;                 
+  --sb-r-s: 4px;                 
+  --sb-pill: 9999px;             
+  --sb-shadow: 0 0 24px rgba(0, 0, 0, 0.1);
+  --sb-rule-w: 1px;
+  --sb-mark-w: 2px;
+
+  
+  --sb-hit-min: 44px;            
+  --sb-hit: 48px;                
+  --sb-hit-primary: 56px;        
+  --sb-hit-row: 48px;            
+  --sb-fs-h: 22px;
+  --sb-fs-body: 15px;
+  --sb-fs-note: 12px;
+
+  
+  --sb-dur: 500ms;
+  --sb-dur-rise: 600ms;
+  --sb-ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+
+:root[data-mode="field"] {
+  --sb-ink-2: #3A3834;
+  --sb-ink-3: #45423D;
+  --sb-ph: #4E4B44;
+  --sb-edge: #3A3834;
+  --sb-rule: #8A8880;
+  --sb-v-no-fg: #8A1520;
+  --sb-v-needs-fg: #5A4A00;
+  --sb-v-none-fg: #1B4E2C;
+  --sb-v-unknown-on: #3F4750;
+  --sb-v-unknown-fg: #3F4750;
+  --sb-shadow: none;
+  --sb-rule-w: 1.5px;
+  --sb-mark-w: 2.5px;
+  --sb-hit-min: 56px;
+  --sb-hit: 56px;
+  --sb-hit-primary: 64px;
+  --sb-hit-row: 64px;
+  --sb-fs-h: 24px;
+  --sb-fs-body: 18px;
+  --sb-fs-note: 14px;
+  --sb-dur: 0ms;
+  --sb-dur-rise: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sb-dur: 0ms; --sb-dur-rise: 0ms; }
+}
+
+
+:root{
+  --font:"Noto Sans JP","Plus Jakarta Sans","Hiragino Sans","Yu Gothic UI","Yu Gothic","IPAGothic","IPAPGothic",sans-serif;
+  --ink:var(--sb-ink); --ink-2:var(--sb-ink-2); --ink-3:var(--sb-ink-3); --ph:var(--sb-ph); --rule:var(--sb-rule); --edge:var(--sb-edge);
+  --orange:var(--sb-orange); --orange-light:var(--sb-orange-hover); --white:var(--sb-base); --off:var(--sb-surface); --beige:var(--sb-sunken);
+  --r-l:var(--sb-r-l); --r-m:var(--sb-r-m); --r-s:var(--sb-r-s); --pill:var(--sb-pill);
+  --v-needs-fg:var(--sb-v-needs-fg); --v-no:var(--sb-v-no-fill); --v-needs:var(--sb-v-needs-fill); --v-done:var(--sb-v-done-fill); --v-none:var(--sb-v-none-fill); --v-unknown:var(--sb-v-unknown-fg);
+  --ct:var(--sb-contour); --ct-major:var(--sb-contour-major);
+  --map-land:#FBF6EC; --map-water:#DEF3F4; --map-shore:#2EBEC4; --road:#FFFFFF; --road-casing:#C4C4C4;
+  --did-tint:#FFE3C7; --did-line:#B3500A; --park-line:#225F36; --air-line:#4A4843; --pin-halo:rgba(248,155,72,.28);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sb-base);color:var(--sb-ink);font-family:var(--font);font-size:var(--sb-fs-body);line-height:1.75;letter-spacing:.03em;line-break:strict;word-break:auto-phrase;overflow-wrap:anywhere}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0;padding:0}
+ul,ol{list-style:none}
+button,select,input{font:inherit;color:inherit;letter-spacing:inherit}
+a{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:2px;text-decoration-color:var(--orange)}
+:focus-visible{outline:3px solid var(--sb-focus);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* 帯（白・オフホワイト・ベージュを交互に） */
+.band{position:relative;padding:36px 16px}
+.band>*{max-width:1120px;margin-left:auto;margin-right:auto}
+.band-white{background:var(--white)}.band-off{background:var(--off)}.band-beige{background:var(--beige)}
+
+/* 見出し：左 5px の橙線＋背後の大きな薄い数字 */
+.sec-head{position:relative;margin-bottom:20px;padding:6px 0 6px 14px;border-left:5px solid var(--orange);min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.sec-head h2{font-size:22px;line-height:1.4;letter-spacing:.06em;font-weight:700;position:relative;z-index:1}
+.sec-num{position:absolute;right:0;top:-34px;font-size:112px;line-height:1;font-weight:800;letter-spacing:0;color:rgba(248,155,72,.2);font-family:"Plus Jakarta Sans","Noto Sans JP",sans-serif;pointer-events:none}
+.sec-note{font-size:13px;color:var(--ink-3);line-height:1.6;position:relative;z-index:1}
+
+/* ブロック（影は 0 0 24px 黒 10% のみ） */
+.block{background:var(--white);border-radius:var(--r-l);box-shadow:var(--sb-shadow);padding:20px 16px}
+.band-white .block{background:var(--off)}
+.block-soft{border-radius:var(--r-l);background:var(--off);padding:16px;margin-top:16px}
+.band-off .block-soft{background:var(--white)}
+
+/* ピルボタン：右端に墨の丸。ホバー・押下・フォーカスで矢印が入れ替わる（動き 1 種類め） */
+.pill{position:relative;display:inline-flex;align-items:center;justify-content:space-between;gap:14px;min-height:var(--sb-hit);padding:4px 4px 4px 24px;border-radius:var(--pill);border:1px solid transparent;cursor:pointer;font-weight:700;font-size:15px;line-height:1.3;text-align:left;text-decoration:none;color:var(--ink);transition:background var(--sb-dur) var(--sb-ease)}
+.pill-label{flex:1;min-width:0}
+.pill-arrow{position:relative;flex:none;display:block;width:44px;height:44px;border-radius:var(--pill);background:var(--ink);color:#fff;overflow:hidden;transition:background var(--sb-dur) var(--sb-ease),color var(--sb-dur) var(--sb-ease)}
+.pill-arrow .ar{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform var(--sb-dur) var(--sb-ease)}
+.pill-arrow .a2{transform:translateX(-130%)}
+.pill:hover .a1,.pill:active .a1,.pill:focus-visible .a1{transform:translateX(130%)}
+.pill:hover .a2,.pill:active .a2,.pill:focus-visible .a2{transform:none}
+.pill-primary{background:var(--orange);color:var(--sb-on-orange);min-height:var(--sb-hit-primary);font-size:16px}
+.pill-primary .pill-arrow{width:48px;height:48px}
+.pill-primary:hover,.pill-primary:active,.pill-primary:focus-visible{background:var(--orange-light)}
+.pill-primary:hover .pill-arrow,.pill-primary:active .pill-arrow,.pill-primary:focus-visible .pill-arrow{background:#fff;color:var(--ink)}
+.pill-secondary{background:rgba(255,255,255,.92);border-color:var(--rule);}
+.band-white .pill-secondary{background:#fff}
+.pill-secondary:hover .pill-arrow,.pill-secondary:active .pill-arrow,.pill-secondary:focus-visible .pill-arrow{background:var(--orange);color:var(--ink)}
+.pill-sm{min-height:48px;font-size:14px;padding-left:20px}
+.pill-sm .pill-arrow{width:40px;height:40px}
+.pill[disabled],.pill[aria-disabled="true"]{background:var(--sb-sunken);color:var(--ink-3);border:1.5px dashed var(--edge);cursor:not-allowed}
+.pill[disabled] .pill-arrow,.pill[aria-disabled="true"] .pill-arrow{background:var(--edge)}
+.pill[disabled]:hover .a1,.pill[aria-disabled="true"]:hover .a1{transform:none}
+.pill[disabled]:hover .a2,.pill[aria-disabled="true"]:hover .a2{transform:translateX(-130%)}
+.pill-block{width:100%}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  .pill-arrow .a2{display:none}
+  .pill:hover .a1,.pill:active .a1,.pill:focus-visible .a1{transform:none}
+}
+:root[data-mode="field"] .pill-arrow .a2{display:none}
+:root[data-mode="field"] .pill:hover .a1,:root[data-mode="field"] .pill:active .a1,:root[data-mode="field"] .pill:focus-visible .a1{transform:none}
+
+/* せり上がり表示（動き 2 種類め。ページごとに 1 回だけ） */
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.rise{animation:rise var(--sb-dur-rise) var(--sb-ease) 1 both}
+
+/* 判定タグ：形のマークと言葉をセットで */
+.vtag{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:3px 14px 3px 8px;border-radius:var(--pill);font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
+.vm{width:20px;height:20px;flex:none}.vm-lg{width:28px;height:28px}
+.v-no{background:var(--sb-v-no-fill);color:var(--sb-v-no-on)}
+.v-needs{background:var(--sb-v-needs-fill);color:var(--sb-v-needs-on);box-shadow:inset 0 0 0 2px var(--sb-v-needs-fg)}
+.v-done{background:var(--sb-v-done-fill);color:var(--sb-v-done-on)}
+.v-none{background:var(--sb-v-none-fill);color:var(--sb-v-none-on)}
+.v-unknown{background:var(--sb-v-unknown-fill);color:var(--sb-v-unknown-on);box-shadow:inset 0 0 0 1.5px var(--sb-v-unknown-fg)}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:2px 12px;border-radius:var(--pill);background:var(--white);border:1px solid var(--rule);font-size:12.5px;line-height:1.4;color:var(--ink-2);font-weight:500}
+.band-white .tag-pill,.block .tag-pill{background:var(--off)}
+.tag-deadline{background:var(--orange-light)!important;border-color:transparent;color:var(--ink);font-weight:700}
+.tag-strong{background:var(--ink)!important;border-color:transparent;color:#F7F7F3;font-weight:700}
+
+/* 結論の大きな印 */
+.v-head{display:flex;align-items:center;gap:14px}
+.v-big{flex:none;width:68px;height:68px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-m)}
+.v-big svg{width:44px;height:44px}
+.vb-needs{background:var(--sb-v-needs-fill);color:var(--sb-v-needs-on);box-shadow:inset 0 0 0 3px var(--sb-v-needs-fg)}
+.vb-no{background:var(--sb-v-no-fill);color:var(--sb-v-no-on)}
+.vb-none{background:var(--sb-v-none-fill);color:var(--sb-v-none-on)}
+.v-eyebrow{font-size:13px;color:var(--ink-3);font-weight:500;letter-spacing:.08em}
+.v-word{font-size:30px;font-weight:800;line-height:1.25;letter-spacing:.08em}
+.v-place{font-size:13px;color:var(--ink-3);line-height:1.6;margin-top:2px}
+.v-lead{font-size:15px;line-height:1.85}
+.v-lead strong{background:linear-gradient(transparent 62%,var(--orange-light) 62%)}
+.v-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.verdict-block{display:flex;flex-direction:column;gap:14px}
+
+/* 入力 */
+label.lbl,.lbl{display:block;font-size:14px;font-weight:700;margin-bottom:8px;letter-spacing:.05em}
+.inp,select.inp{width:100%;height:52px;border:1.5px solid var(--edge);border-radius:var(--r-m);background:#fff;padding:0 16px;font-size:16px;color:var(--ink);letter-spacing:.03em}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23262523' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:20px;padding-right:44px}
+.inp::placeholder{color:var(--ph);opacity:1}
+.hint{margin-top:8px;font-size:12.5px;line-height:1.7;color:var(--ink-3)}
+.btn-row{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.input-block .lbl{margin-bottom:8px}
+
+/* 地図・チップ */
+.map-block{padding:12px;position:relative}
+.map-frame{position:relative;border-radius:var(--r-m);overflow:hidden;border:1px solid var(--rule);aspect-ratio:640/440;background:var(--map-land)}
+.map-svg{display:block;width:100%;height:100%}
+.ct{stroke:var(--ct);stroke-width:1.4}.ct-major{stroke:var(--ct-major);stroke-width:2.2}
+.layers{padding:14px 4px 4px}
+.layers-title{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:10px}
+.layers-title span{display:block;font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:var(--sb-hit-min);padding:6px 16px 6px 12px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:700;line-height:1.2;background:transparent;transition:background var(--sb-dur) var(--sb-ease)}
+.chip.is-on{background:#fff;border:2px solid var(--ink);color:var(--ink)}
+.chip.is-off{border:2px dashed var(--edge);color:var(--ink-3);font-weight:500}
+.chip.is-on .chk{flex:none;width:18px;height:18px;padding:2px;border-radius:var(--pill);background:var(--orange);color:var(--ink)}
+.chip .chk-empty{flex:none;width:18px;height:18px;border-radius:var(--pill);border:2px solid var(--edge)}
+.chip.is-off svg:not(.chk){opacity:.6}
+.chip:hover,.chip:focus-visible{background:var(--orange-light)}
+
+/* 手続き・規制ごとの判定 */
+.proc-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.proc{display:flex;gap:14px;align-items:flex-start}
+.proc-no{flex:none;width:40px;height:40px;border-radius:var(--pill);background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.proc-done .proc-no{background:var(--off);color:var(--sb-v-done-fg)}
+.proc-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.proc h3{font-size:16.5px;line-height:1.55;letter-spacing:.04em}
+.proc-where{font-size:13.5px;color:var(--ink-2)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.proc-note{font-size:13px;line-height:1.75;color:var(--ink-3)}
+.proc .pill{align-self:flex-start;margin-top:4px}
+.items{padding:6px 16px}
+.item{display:grid;grid-template-columns:36px 1fr;gap:6px 12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.item:last-child{border-bottom:0}
+.item .vtag{grid-column:2;justify-self:start}
+.src{width:32px;height:32px;border-radius:var(--pill);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--beige);color:var(--ink)}
+.band-beige .src{background:var(--white)}
+.item-title{font-size:15px;font-weight:700;line-height:1.55}
+.item-note{font-size:13.5px;color:var(--ink-2);line-height:1.75;margin-top:2px}
+.legend-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.legend-row{display:flex;flex-wrap:wrap;gap:8px}
+.disc-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.disc{font-size:13px;line-height:1.9;color:var(--ink-2)}
+.copy{margin-top:16px;font-size:13px;color:var(--ink-2)}
+.src-note{margin-top:6px;font-size:12px;line-height:1.8;color:var(--ink-3)}
+
+/* ブランド */
+.brand{display:flex;align-items:center;gap:10px;font-size:30px;font-weight:800;letter-spacing:.1em;line-height:1.2}
+.brand-mark{display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:var(--pill);background:var(--orange);color:var(--ink);box-shadow:0 0 0 4px rgba(255,255,255,.7)}
+.brand-drone{width:30px;height:auto}
+
+/* 下 5 タブ（スマホ）と左メニュー（PC）、利用者メニュー */
+.tabbar{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);background:var(--white);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:60px;padding:6px 0;font-size:12px;font-weight:700;color:var(--ink-2);text-decoration:none;line-height:1.2}
+.tab-ic{width:56px;height:30px;border-radius:var(--pill);display:grid;place-items:center}
+.tab-ic svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"] .tab-ic{background:var(--orange)}
+.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 16px;background:var(--white);border-bottom:1px solid var(--rule)}
+.topbar h1{flex:1;min-width:0;font-size:20px;font-weight:800;letter-spacing:.06em;line-height:1.3}
+.topbar .sub{display:block;font-size:12.5px;font-weight:500;color:var(--ink-3);letter-spacing:.03em}
+.me{flex:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;min-width:44px;border-radius:var(--pill);border:1px solid var(--rule);background:var(--white);padding:0;cursor:pointer;font-weight:700}
+.me-ic{width:42px;height:42px;border-radius:var(--pill);background:var(--ink);color:#fff;display:grid;place-items:center;font-size:16px}
+.me-name{display:none;font-size:14px;padding-right:16px}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 8px;border-radius:var(--pill);font-size:14px;font-weight:700;text-decoration:none;color:var(--ink);border:1px solid var(--rule);background:var(--white)}
+.back svg{width:20px;height:20px}
+.side{display:none}
+
+/* 行程の 1 行 */
+.route{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.rs{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;border-radius:var(--r-m);text-align:center;line-height:1.2}
+.rs-dot{width:22px;height:22px;border-radius:var(--pill);display:grid;place-items:center}
+.rs-dot svg{width:12px;height:12px}
+.rs-name{font-size:13px;font-weight:700;letter-spacing:.02em}
+.rs-state{font-size:12px;font-weight:500;color:var(--ink-3)}
+.rs-done .rs-dot{background:var(--ink);color:#fff}
+.rs-next{background:var(--orange)}
+.rs-next .rs-dot{background:var(--ink);color:var(--orange)}
+.rs-next .rs-state{color:var(--ink);font-weight:700}
+.rs-todo .rs-dot{border:2px dashed var(--edge)}
+.rs-todo .rs-name{color:var(--ink-2);font-weight:500}
+
+/* ホーム */
+.stack{display:flex;flex-direction:column;gap:20px}
+.sect-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:17px;font-weight:800;letter-spacing:.06em;line-height:1.4;padding-left:12px;border-left:5px solid var(--orange)}
+.sect-title .aside{font-size:13px;font-weight:500;color:var(--ink-3);letter-spacing:.03em}
+.next-card{display:flex;flex-direction:column;gap:14px;padding:20px 16px}
+.nc-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.nc-reason{font-size:13px;font-weight:700;color:var(--ink-2)}
+.nc-time{font-size:40px;font-weight:800;line-height:1;letter-spacing:.02em;font-family:"Plus Jakarta Sans","Noto Sans JP",sans-serif;font-variant-numeric:tabular-nums}
+.nc-date{font-size:13px;color:var(--ink-3)}
+.nc-title{font-size:20px;line-height:1.5;font-weight:800;letter-spacing:.05em}
+.nc-facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink-2)}
+.nc-facts b{color:var(--ink)}
+.nc-next{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+.nc-next b{color:var(--ink)}
+.list{padding:4px 16px}
+.row{display:grid;grid-template-columns:1fr 40px;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule);min-height:64px;color:inherit;text-decoration:none}
+.row:last-child{border-bottom:0}
+.row-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.row-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row-title{font-size:15px;font-weight:700;line-height:1.5}
+.row-sub{font-size:13px;color:var(--ink-2);line-height:1.6}
+.row-go{width:36px;height:36px;border-radius:var(--pill);background:var(--ink);color:#fff;display:grid;place-items:center;justify-self:end}
+.row-go svg{width:18px;height:18px}
+.more-link{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:700;margin-top:4px}
+.quiet{font-size:13px;color:var(--ink-3);line-height:1.7;padding:6px 0 10px}
+.foot-band .disc{font-size:12.5px}
+
+
+
+body.p-result{background:var(--sb-sunken)}
+.results{display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:28px 24px 40px}
+.phone{width:390px;flex:none}
+.phone-label{margin:0 0 10px;display:inline-flex;align-items:center;min-height:32px;padding:2px 16px;border-radius:var(--pill);background:var(--ink);color:#F7F7F3;font-size:14px;font-weight:700;letter-spacing:.06em}
+.phone-in{border-radius:var(--r-l);overflow:hidden;background:var(--white);box-shadow:var(--sb-shadow)}
+.phone-in .topbar{position:static}
+.phone-in .band{padding:24px 16px}
+.phone-in .sec-head{margin-bottom:14px;min-height:44px}
+.phone-in .sec-head h2{font-size:18px}
+.phone-in .item .vtag{white-space:normal}
+
+</style>
+</head>
+<body class="p-result">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="m-no" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.6 8.6 L15.4 15.4 M15.4 8.6 L8.6 15.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="m-needs" viewBox="0 0 24 24"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="m-done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7.8 12.4 L10.9 15.4 L16.4 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="m-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="3.4"/></symbol>
+  <symbol id="m-unknown" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"/><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.2" fill="currentColor"/></symbol>
+</defs></svg><main class="results"><section class="phone" aria-label="要手続き"><p class="phone-label">要手続き</p><div class="phone-in"><header class="topbar"><a class="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5 L7 12 L14 19"/></svg>判定へ</a><h1>判定結果<span class="sub">米子市役所　35.4283, 133.3306</span></h1></header>
+    <div class="band band-off"><article class="block verdict-block rise" aria-label="結論：要手続き">
+      <div class="v-head"><div class="v-big vb-needs"><svg class="vm" aria-hidden="true"><use href="#m-needs"/></svg></div><div><p class="v-eyebrow">結論</p><p class="v-word">要手続き</p><p class="v-place">米子市役所　35.4283, 133.3306</p></div></div>
+      <p class="v-lead">この地点で飛ばすには、<strong>手続きが 1 件</strong>必要です。許可・承認が下りるまで飛行は始められません。</p>
+      <div class="v-meta"><span class="tag-pill">確認日 2026-10-25</span><span class="tag-pill">出典つき</span></div>
+      <div class="v-meta"><button type="button" class="pill pill-secondary pill-sm" ><span class="pill-label">結果を PDF で保存</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></span></button></div></article></div>
+    <div class="band band-beige"><div class="sec-head"><h2>要手続きの手続き</h2><p class="sec-note">期限の近い順</p></div><div class="proc-grid"><article class="block proc"><span class="proc-no" aria-hidden="true">1</span><div class="proc-body">
+    <h3>無人航空機の飛行許可・承認の申請（DID の上空）</h3><p class="proc-where">出す先：国土交通省 DIPS 2.0（オンライン）</p>
+    <div class="tags"><span class="tag-pill tag-deadline">期限　飛行の 10 開庁日前まで</span><span class="tag-pill">法令　国（航空法）</span></div>
+    <p class="proc-note">申請書はご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。</p>
+    <button type="button" class="pill pill-secondary pill-sm" ><span class="pill-label">DIPS 2.0 を開く</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 H16 V13 M16 4 L5 15"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 H16 V13 M16 4 L5 15"/></svg></span></span></button></div></article>
+  </div></div>
+    <div class="band band-white"><div class="sec-head"><h2>規制ごとの判定</h2></div><ul class="items block"><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法 第132条の85　人口集中地区（DID）</p><p class="item-note">この地点は DID の中です。無人航空機を飛ばすには国土交通大臣の許可・承認が要ります。</p></div><span class="vtag v-needs"><svg class="vm" aria-hidden="true"><use href="#m-needs"/></svg><span>要手続き</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　空港等周辺</p><p class="item-note">空港等の周辺区域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">小型無人機等飛行禁止法</p><p class="item-note">対象施設の周辺地域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li></ul></div></div></section><section class="phone" aria-label="飛行不可"><p class="phone-label">飛行不可</p><div class="phone-in"><header class="topbar"><a class="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5 L7 12 L14 19"/></svg>判定へ</a><h1>判定結果<span class="sub">米子鬼太郎空港の周辺　35.4922, 133.2358</span></h1></header>
+    <div class="band band-off"><article class="block verdict-block rise" aria-label="結論：飛行不可">
+      <div class="v-head"><div class="v-big vb-no"><svg class="vm" aria-hidden="true"><use href="#m-no"/></svg></div><div><p class="v-eyebrow">結論</p><p class="v-word">飛行不可</p><p class="v-place">米子鬼太郎空港の周辺　35.4922, 133.2358</p></div></div>
+      <p class="v-lead">この場所・条件では<strong>飛ばせません</strong>。手続きで解消できる制限ではないため、飛行場所か条件を見直してください。</p>
+      <div class="v-meta"><span class="tag-pill">確認日 2026-10-25</span><span class="tag-pill">出典つき</span></div>
+      <div class="v-meta"><button type="button" class="pill pill-secondary pill-sm" ><span class="pill-label">結果を PDF で保存</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></span></button></div></article></div>
+    <div class="band band-beige"><div class="sec-head"><h2>飛行できない理由</h2></div><div class="proc-grid"><article class="block proc"><span class="proc-no" aria-hidden="true"><svg class="vm vm-lg" aria-hidden="true"><use href="#m-no"/></svg></span><div class="proc-body"><h3>空港等の周辺区域の中です</h3><p class="proc-note" style="color:var(--ink-2)">航空法の空港等周辺の制限に当たります。地点か高度を変えて、もう一度判定してください。</p></div></article></div></div>
+    <div class="band band-white"><div class="sec-head"><h2>規制ごとの判定</h2></div><ul class="items block"><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　空港等周辺</p><p class="item-note">空港等の周辺区域の中です。この場所・条件では飛ばせません。</p></div><span class="vtag v-no"><svg class="vm" aria-hidden="true"><use href="#m-no"/></svg><span>飛行不可</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　人口集中地区（DID）</p><p class="item-note">この地点は DID の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">小型無人機等飛行禁止法</p><p class="item-note">対象施設の周辺地域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li></ul></div></div></section><section class="phone" aria-label="手続き不要"><p class="phone-label">手続き不要</p><div class="phone-in"><header class="topbar"><a class="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5 L7 12 L14 19"/></svg>判定へ</a><h1>判定結果<span class="sub">日野川の河川敷　35.3958, 133.3721</span></h1></header>
+    <div class="band band-off"><article class="block verdict-block rise" aria-label="結論：手続き不要">
+      <div class="v-head"><div class="v-big vb-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg></div><div><p class="v-eyebrow">結論</p><p class="v-word">手続き不要</p><p class="v-place">日野川の河川敷　35.3958, 133.3721</p></div></div>
+      <p class="v-lead">調べた範囲では、この地点に<strong>必要な手続きはありません</strong>。飛ぶ前の安全確認は、いつもどおり行ってください。</p>
+      <div class="v-meta"><span class="tag-pill">確認日 2026-10-25</span><span class="tag-pill">出典つき</span></div>
+      <div class="v-meta"><button type="button" class="pill pill-secondary pill-sm" ><span class="pill-label">結果を PDF で保存</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></span></button></div></article></div>
+    <div class="band band-beige"><div class="sec-head"><h2>飛行の前後に行うこと</h2></div><div class="proc-grid"><article class="block proc"><span class="proc-no" aria-hidden="true"><svg class="vm vm-lg" aria-hidden="true"><use href="#m-done"/></svg></span><div class="proc-body"><h3>飛行前の日常点検と、飛行日誌の記録</h3><p class="proc-note" style="color:var(--ink-2)">手続きは要りませんが、点検と記録は毎回必要です。計画を作ると、行程に沿って案内します。</p></div></article></div></div>
+    <div class="band band-white"><div class="sec-head"><h2>規制ごとの判定</h2></div><ul class="items block"><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　人口集中地区（DID）</p><p class="item-note">この地点は DID の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　空港等周辺</p><p class="item-note">空港等の周辺区域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-市">市</span><div class="item-text"><p class="item-title">米子市 都市公園条例</p><p class="item-note">公園の区域データが未整備のため、判定できません。市の窓口で確認してください。</p></div><span class="vtag v-unknown"><svg class="vm" aria-hidden="true"><use href="#m-unknown"/></svg><span>判定不能</span></span></li></ul></div></div></section></main>
+</body>
+</html>
