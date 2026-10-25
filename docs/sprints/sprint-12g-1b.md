@@ -168,7 +168,7 @@ push（PR の作成）の前に、手元で次をすべて通す。
 2. `pnpm test:e2e`（DB を使わない E2E。CI と同じく `pnpm build` 後に `next start`。環境変数は `ci.yml` の e2e ジョブと同じ）。
 3. `pnpm test:e2e:ops`（E2E-DB）は、**PostgreSQL 18＋PostGIS と `soraban_app` ロールがある環境でのみ**。ない環境では実行できないため、§6.2 の表のテストを grep で先に直し、「手元で未実行」と PR に明記する。
 4. evaluator（Playwright MCP）の目視：375・768・1280px × 明・暗。A はホーム・登録・日誌・メニュー、B は `/`（PC は 1280×800 と 1440×900）。
-5. `git diff origin/main` で C11（`packages/regulations/**`、`packages/db/**` のマイグレーション、`ENGINE_VERSION`、証跡 ID、`/api/**` の入出力）に差分がないこと。例外は §5 の `deadlines` の追加（応答に項目が増えるだけ）。`package.json` に差分がないこと。
+5. `git diff origin/main` で C11（`packages/regulations/**`、`packages/db/**` のマイグレーション、`ENGINE_VERSION`、証跡 ID、`/api/**` の入出力）に差分がないこと。例外は `/api/ops/today` の応答に増える項目 `deadlines`（§5）・`upcoming`・`journey`（`card.journey`、`upcoming[].journey`）の追加のみ（既存の項目は変えない）。`package.json` に差分がないこと。
 
 CI は PR に対して 1 回で通すことを目標にする。落ちた場合は、原因をまとめて直し、1 回の push にする。
 

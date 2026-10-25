@@ -7,7 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../../../..");
 const { contours, wobbleLine } = await import(path.join(root, "apps/web/src/components/ui/catalog/contour.ts"));
 
-const tokens = fs.readFileSync(path.join(here, "../soraban-tokens.css"), "utf8");
+const tokens = fs.readFileSync(path.join(here, "../../../../apps/web/src/app/soraban-tokens.css"), "utf8");
 // 暗・現場を 1 枚に並べるため、:root の宣言を同じ中身の枠（.sc-*）に写す。media は除く
 const scoped = tokens
   .replace(/@media \(prefers-color-scheme: dark\) \{[\s\S]*?\n\}\n/, "")

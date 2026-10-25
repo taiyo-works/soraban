@@ -1,5 +1,5 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=2400"><title>そらばん デザインシステム 1枚シート</title>
-<style>/* そらばん デザイントークン（まだアプリには取り込まない。正は ../design-system.md）
+<style>/* そらばん デザイントークン（globals.css が取り込む。値の説明は docs/design/design-system.md）
  *
  * 構成（check-contrast.mjs がこの並びと selector を前提に読む）
  *   1. :root                                   明（既定）
@@ -277,7 +277,7 @@
 
 /* 動きを減らす設定の人には、移動も拡大も出さない（値を 0 にするだけで、各部品は同じ書き方でよい） */
 </style>
-<style>/* 見本シート専用の部品の書き方。アプリのコードではない。値はすべて ../soraban-tokens.css のトークンから取る */
+<style>/* 見本シート専用の部品の書き方。アプリのコードではない。値はすべて apps/web/src/app/soraban-tokens.css のトークンから取る */
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--sb-base)}
 body{width:2400px;background:var(--sb-base);color:var(--sb-ink);font-family:var(--sb-font-jp);font-size:var(--sb-fs-body);line-height:var(--sb-lh-body);letter-spacing:var(--sb-ls-body);line-break:strict;-webkit-font-smoothing:antialiased}

@@ -302,7 +302,7 @@ describe("1a-2 コントラスト（ui-direction.md 3.1 の組）", () => {
 
 // Sprint 12h PR ① stage B: soraban-tokens.css (--sb-*) is imported by globals.css. Nothing references it yet, so the
 // look does not change; these checks keep the file, design-system.md 3.4 and the contrast script in step.
-const TOKENS_URL = new URL("../../../../docs/design/tokens/soraban-tokens.css", import.meta.url);
+const TOKENS_URL = new URL("./soraban-tokens.css", import.meta.url);
 const SB_RULES = parseRules(readFileSync(TOKENS_URL, "utf8").replace(/\/\*[\s\S]*?\*\//g, ""));
 const sbVars = (selector: string, inDark: boolean): Record<string, string> => {
   const r = SB_RULES.find((x) => x.selector === selector && x.inDarkMedia === inDark);
@@ -324,7 +324,7 @@ const sbResolve = (layers: Record<string, string>[]): Record<string, string> => 
 describe("12h P1-5 トークンの取り込み", () => {
   it("globals.css が soraban-tokens.css を読み込む。--sb-* 以外の宣言を globals.css に足さない", () => {
     const raw = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
-    expect(raw).toMatch(/@import "\.\.\/\.\.\/\.\.\/\.\.\/docs\/design\/tokens\/soraban-tokens\.css";/);
+    expect(raw).toMatch(/@import "\.\/soraban-tokens\.css";/);
     expect(CSS).not.toMatch(/--sb-/);
   });
 });

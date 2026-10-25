@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HOME_BAND_NEXT_ACTION_LIMIT, getToday } from "@/server/ops/today";
 import { getSignedInMember } from "@/server/ops/member-gate";
-import { OpsBottomNav } from "./ops/ops-nav";
+import { OpsBottomNavLazy } from "./ops-bottom-nav-lazy";
 import { TodayBadge, TodayNextActions } from "./ops/today-ui";
 import { OpsEntryFlag } from "./ops-entry-flag";
 
@@ -50,7 +50,7 @@ export async function OpsHomeEntry() {
           <span aria-hidden>→</span>
         </Link>
       </p>
-      <OpsBottomNav />
+      <OpsBottomNavLazy />
     </>
   );
 }

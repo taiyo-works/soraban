@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const css = fs.readFileSync(path.join(here, "soraban-tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+const css = fs.readFileSync(path.join(here, "../../../apps/web/src/app/soraban-tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
 // --- 最小のパーサ：ルール { selector, media, decls } を平らに取り出す（入れ子は @media の 1 段のみ） ---
 function parse(src) {

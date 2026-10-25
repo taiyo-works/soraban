@@ -5,7 +5,7 @@
 | 知りたいこと | 見る所 |
 |---|---|
 | 決定の記録・色・文字・部品・動き・移行計画 | `docs/design/design-system.md`（唯一の正） |
-| トークンの値 | `docs/design/tokens/soraban-tokens.css` |
+| トークンの値 | `apps/web/src/app/soraban-tokens.css` |
 | コントラストの検査 | `node docs/design/tokens/check-contrast.mjs` |
 | 全体の見本 | `docs/design/system-sheet.png` |
 | 過去の比較の記録（形・世界観） | `docs/design/shape-compare/`、`docs/design/world-board/` |
