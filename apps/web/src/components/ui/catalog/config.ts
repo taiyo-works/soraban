@@ -1,5 +1,6 @@
 // Catalog configuration (Sprint 12g stage 1a). Plain module (no "use client") so the server page can parse the query string.
 import type { IconName } from "../icons";
+import type { JudgeSp } from "./judge-trial-data";
 
 export type Theme = "auto" | "light" | "dark";
 export type Density = "standard" | "compact";
@@ -14,7 +15,7 @@ export const SCREENS = [
 export type ScreenId = (typeof SCREENS)[number]["id"];
 
 // UX stage 2: the menu and home trial. `view=menu` shows it instead of the parts and screens (the default view is unchanged).
-export type View = "parts" | "menu";
+export type View = "parts" | "menu" | "judge";
 export type PcMenu = "rail" | "tabs";
 export type SpMenu = "tabs5" | "tabs4band";
 export type DayKind = "busy" | "empty";
@@ -37,6 +38,8 @@ export type CatalogConfig = {
   readonly pcname: PcName;
   /** The PC judgement page: map first (workspace) or the current stack (form, map, result). */
   readonly judge: JudgeForm;
+  /** The phone arrangement of the judgement screen trial (`view=judge`, written as `sp=sheet|tabs|fold`). */
+  readonly jsp: JudgeSp;
 };
 
 export const DEFAULT_CONFIG: CatalogConfig = {
@@ -50,6 +53,7 @@ export const DEFAULT_CONFIG: CatalogConfig = {
   day: "busy",
   pcname: "judge",
   judge: "workspace",
+  jsp: "sheet",
 };
 
 /** Read the configuration from the query string (unknown values fall back to the defaults). */
@@ -69,9 +73,11 @@ export function parseConfig(q: Readonly<Record<string, string | string[] | undef
     field: one("field") === "1",
     density: density === "standard" || density === "compact" ? density : DEFAULT_CONFIG.density,
     screen: SCREENS.some((x) => x.id === screen) ? (screen as ScreenId) : DEFAULT_CONFIG.screen,
-    view: view === "menu" ? "menu" : DEFAULT_CONFIG.view,
+    view: view === "menu" || view === "judge" ? view : DEFAULT_CONFIG.view,
     pc: pc === "rail" || pc === "tabs" ? pc : DEFAULT_CONFIG.pc,
     sp: sp === "tabs5" || sp === "tabs4band" ? sp : DEFAULT_CONFIG.sp,
+    // In the judgement trial the same query word picks the phone arrangement; the three-pane PC layout is `pc=three` (the only one).
+    jsp: sp === "sheet" || sp === "tabs" || sp === "fold" ? sp : DEFAULT_CONFIG.jsp,
     day: day === "busy" || day === "empty" ? day : DEFAULT_CONFIG.day,
     pcname: pcname === "judge" || pcname === "map" ? pcname : DEFAULT_CONFIG.pcname,
     judge: judge === "workspace" || judge === "stack" ? judge : DEFAULT_CONFIG.judge,

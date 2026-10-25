@@ -11,12 +11,15 @@ import { Button, NoticeBar, PageHeader, StatusPill } from "../primitives";
 import { Segmented, TabPanel, Tabs } from "../tabs";
 import { IconsSection, PartsSection, TokensSection } from "./sections";
 import { DEFAULT_CONFIG, SCREENS, type CatalogConfig, type DayKind, type Density, type JudgeForm, type PcMenu, type PcName, type ScreenId, type SpMenu, type Theme, type View } from "./config";
+import { JudgeTrial } from "./judge-trial";
+import type { JudgeSp } from "./judge-trial-data";
 import { MenuTrial } from "./menu-trial";
 import { FieldScreen, FormScreen, LegendScreen, ListScreen, TodayScreen, WorkspaceScreen } from "./screens";
 
 // Design catalog (Sprint 12g stage 1a). A static page: no auth, no DB, no network. State lives in the page and in the
 // query string (so a configuration can be shared as a link and screenshots are reproducible):
 //   ?theme=auto|light|dark  &field=1  &density=standard|compact  &screen=today|list|form|workspace|field|legend
+//   ?view=judge (the judgement screen trial)  &sp=sheet|tabs|fold  &pc=three
 //   ?view=menu (the menu and home trial)  &pc=rail|tabs  &sp=tabs5|tabs4band  &day=busy|empty  &pcname=judge|map  &judge=workspace|stack
 // The page (server) reads the query string and passes it in as `initial`, so there is no effect-driven setup.
 
@@ -56,6 +59,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
   const [day, setDay] = useState<DayKind>(initial.day);
   const [pcname, setPcname] = useState<PcName>(initial.pcname);
   const [judge, setJudge] = useState<JudgeForm>(initial.judge);
+  const [jsp, setJsp] = useState<JudgeSp>(initial.jsp);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   // true once the client has taken over (tests wait for it before interacting)
@@ -91,9 +95,14 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
       if (pcname !== DEFAULT_CONFIG.pcname) q.set("pcname", pcname);
       if (judge !== DEFAULT_CONFIG.judge) q.set("judge", judge);
     }
+    if (view === "judge") {
+      q.set("view", "judge");
+      if (jsp !== DEFAULT_CONFIG.jsp) q.set("sp", jsp);
+      q.set("pc", "three");
+    }
     const s = q.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${s ? `?${s}` : ""}${window.location.hash}`);
-  }, [theme, field, density, screen, view, pc, sp, day, pcname, judge]);
+  }, [theme, field, density, screen, view, pc, sp, day, pcname, judge, jsp]);
 
   const togglePalette = useCallback(() => setPaletteOpen((v) => !v), []);
   usePaletteHotkey(togglePalette, !field);
@@ -131,6 +140,17 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
   );
 
   const context = `${theme}-${field ? "field" : "normal"}`;
+
+  // The judgement trial is judged as a whole screen, so it takes the page without the catalog's own header and notices.
+  if (view === "judge") {
+    return (
+      <ToastProvider>
+        <div className={cx("ds ds-page min-h-dvh", field && "field")} data-density={density} data-testid="design-catalog" data-hydrated={hydrated ? "1" : "0"} data-catalog-theme={theme} data-catalog-field={field ? "1" : "0"}>
+          <JudgeTrial sp={jsp} onSp={setJsp} />
+        </div>
+      </ToastProvider>
+    );
+  }
 
   return (
     <ToastProvider>
@@ -196,6 +216,7 @@ export function DesignCatalog({ initial = DEFAULT_CONFIG }: { readonly initial?:
               options={[
                 { id: "parts", label: "部品と画面" },
                 { id: "menu", label: "メニューとホームの案" },
+                { id: "judge", label: "判定画面の案" },
               ]}
               data-testid="ctl-view"
             />
