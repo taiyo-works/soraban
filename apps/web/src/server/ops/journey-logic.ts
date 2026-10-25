@@ -56,7 +56,8 @@ export type JourneyInput = {
 
 /** 各段が終わっているか。 */
 export const journeyDone = (i: JourneyInput): Readonly<Record<JourneyStageId, boolean>> => {
-  const flown = (i.hasLandedFlight && !i.inFlight) || i.hasFlightRecord;
+  // 飛行中の離陸があるあいだは、前の飛行の記録があっても「飛んだ」とは数えない（2 回目の飛行が「次」になる）
+  const flown = !i.inFlight && (i.hasLandedFlight || i.hasFlightRecord);
   return {
     judge: i.hasSnapshot && !i.judgementStale,
     plan: i.planState !== "draft",

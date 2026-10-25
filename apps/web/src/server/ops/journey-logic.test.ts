@@ -73,6 +73,16 @@ describe("段の規則（導出）", () => {
     expect(journeyDone(make({})).journal).toBe(false);
     expect(journeyDone(make({ journalPending: true })).journal).toBe(false);
   });
+
+  it("2 回目の飛行が飛行中なら、1 回目が日誌まで済んでいても、飛行は「次」・日誌は「未」（飛行中のガードは両方の導出に掛かる）", () => {
+    const input = make({ hasFlightRecord: true, hasLandedFlight: true, inFlight: true, journalPending: false, hasSnapshot: true, planState: "approved", reportStatus: "reported", inspectionDone: true });
+    const done = journeyDone(input);
+    expect(done.flight).toBe(false);
+    expect(done.journal).toBe(false);
+    const states = Object.fromEntries(journeyStages(input).map((st) => [st.id, st.state]));
+    expect(states["flight"]).toBe("next");
+    expect(states["journal"]).toBe("todo");
+  });
 });
 
 describe("7 段の状態", () => {
