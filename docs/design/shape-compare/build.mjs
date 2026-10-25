@@ -12,8 +12,8 @@ const C = {
   edge: "#4D4B46",        // ★ 旧 #6B6963（地に対し 5.1:1）→ 現場の 7:1 を満たす値
   orange: "#F89B48", copper: "#B4541F",
   copperText: "#8A3A10",  // ★ 銅を「文字」に使うときはこちら（旧 #B4541F は 4.6:1）
-  red: "#B3202B", redText: "#9A1A24", // ★ 赤の文字・線は暗い側へ（旧 6.2:1 → 7:1 超）
-  amber: "#EDB800", blue: "#1D5A8E", green: "#2B6B3D",
+  red: "#A81D28", redText: "#9A1A24", // ★ 赤の文字・線は暗い側へ（旧 6.2:1 → 7:1 超）
+  amber: "#EDB800", blue: "#1D5A8E", green: "#225F36",
 };
 const hex = (s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16));
 const lum = (c) => { const [r, g, b] = (typeof c === "string" ? hex(c) : c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
@@ -163,11 +163,12 @@ const rowsCommon = [
   ["危険　赤の文字と線 9A1A24 / 白", C.redText, W, "旧 B3202B は 6.65"],
   ["エラーの文字と線 9A1A24 / 生成り", C.redText, C.base],
   ["フォーカスの線　墨 / 白", C.ink, W, "太さ 2px＋外側に橙 3px"],
-  ["判定　白 / 赤", W, C.red, "15px 太字。7:1 には届かない"],
-  ["判定　墨 / 黄", C.ink, C.amber],
-  ["判定　白 / 青", W, C.blue],
-  ["判定　白 / 緑", W, C.green],
-  ["チェック「正常」の文字　緑 / 白", C.green, W],
+  ["判定　白 / 赤 A81D28", W, C.red, "★ 旧 B3202B は 6.65"],
+  ["判定　墨 / 黄（黄は暗い文字なので元から足りている）", C.ink, C.amber],
+  ["判定　白 / 青 1D5A8E", W, C.blue, "旧のまま（7.2 で足りていた）"],
+  ["判定　白 / 緑 225F36", W, C.green, "★ 旧 2B6B3D は 6.42"],
+  ["チェック「正常」の文字　緑 / 白", C.green, W, "★ 旧は 6.42"],
+  ["チェック「正常」の文字　緑 / 生成り", C.green, C.base],
   ["無効ボタンの文字　g500 / くぼみ色", C.g500, C.sunken, "無効は基準の対象外。読める線は守る"],
 ];
 const rowsA = [
@@ -183,6 +184,14 @@ const rowsB = [
   ["B 入力欄の線　edge / 白", C.edge, W],
   ["B カードの白 / 生成り（面の差）", W, C.base, "押せないので可。輪郭は影 24px 頼み"],
 ];
+const rowsC = [
+  ["C 主ボタン　生成り文字 / 墨の面", C.base, C.ink],
+  ["C 副ボタン・入力欄の線　edge / 生成り", C.edge, C.base, "A と同じ線。角だけ 3px"],
+  ["C 入力欄の線　edge / くぼみ色", C.edge, C.sunken],
+  ["C 丸い矢印　生成り / 墨の円（主）", C.base, C.ink],
+  ["C 丸い矢印　橙 / 墨の円（CTA）", C.orange, C.ink],
+  ["C 現在の項目の押す領域　くぼみ色 / 生成り", C.sunken, C.base, "面の差は 1.1。位置は銅の点と太字が示す"],
+];
 const th = `<thead><tr><th>見本</th><th>組み合わせ</th><th style="text-align:right">比</th><th>4.5</th><th>7</th><th>備考</th></tr></thead>`;
 const tbl = (rows) => `<table class="ct">${th}<tbody>${rows.map((r) => row(...r)).join("")}</tbody></table>`;
 
@@ -195,13 +204,13 @@ const T = (k) => txt.split(`<!--${k}-->`)[1].split("<!--/-->")[0];
 let html = fs.readFileSync(path.join(here, "page.html"), "utf8");
 const rep = {
   CSS: css.replace(/\{\{(\w+)\}\}/g, (_, k) => C[k] || ""),
-  SVG, PARTS_A: shell("sa", parts), PARTS_B: shell("sb", parts),
-  CT_COMMON: tbl(rowsCommon), CT_A: tbl(rowsA), CT_B: tbl(rowsB),
-  M_HOME_A: shell("sa", mHome), M_HOME_B: shell("sb", mHome),
-  M_CHECK_A: shell("sa", mCheck), M_CHECK_B: shell("sb", mCheck),
-  M_MENU_A: shell("sa", mMenu), M_MENU_B: shell("sb", mMenu),
-  PC_A: shell("sa", pc), PC_B: shell("sb", pc),
-  SUMMARY: T("summary"), NOTES_HOME: T("n-home"), NOTES_CHECK: T("n-check"), NOTES_MENU: T("n-menu"), NOTES_PC: T("n-pc"), VERDICT: T("verdict"),
+  SVG, PARTS_A: shell("sa", parts), PARTS_B: shell("sb", parts), PARTS_C: shell("sc", parts),
+  CT_COMMON: tbl(rowsCommon), CT_A: tbl(rowsA), CT_B: tbl(rowsB), CT_C: tbl(rowsC),
+  M_HOME_A: shell("sa", mHome), M_HOME_B: shell("sb", mHome), M_HOME_C: shell("sc", mHome),
+  M_CHECK_A: shell("sa", mCheck), M_CHECK_B: shell("sb", mCheck), M_CHECK_C: shell("sc", mCheck),
+  M_MENU_A: shell("sa", mMenu), M_MENU_B: shell("sb", mMenu), M_MENU_C: shell("sc", mMenu),
+  PC_A: shell("sa", pc), PC_B: shell("sb", pc), PC_C: shell("sc", pc),
+  SUMMARY: T("summary"), NOTES_HOME: T("n-home"), NOTES_CHECK: T("n-check"), NOTES_MENU: T("n-menu"), NOTES_PC: T("n-pc"), NOTES_C: T("n-c"), VERDICT: T("verdict"),
 };
 for (const [k, v] of Object.entries(rep)) html = html.replace(`{{${k}}}`, () => v);
 fs.writeFileSync(path.join(here, "index.html"), html);
