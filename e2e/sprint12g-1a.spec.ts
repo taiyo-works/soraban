@@ -1169,9 +1169,10 @@ test.describe("L. 航空日誌の紙面（見本の全体）", () => {
   const visibleShadow = (v: string): string => v.replace(/rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(, )?/g, "").replace(/^none$/, "").trim();
 
   /** 画面に出ている要素の角丸・影・ぼかし・半透明の地を集める。 */
-  const surfaceFacts = (page: Page): Promise<{ radii: string[]; shadows: string[]; filters: string[]; pills: string[]; translucent: string[] }> =>
+  const surfaceFacts = (page: Page): Promise<{ radii: string[]; radiusOwners: string[]; shadows: string[]; filters: string[]; pills: string[]; translucent: string[] }> =>
     page.evaluate(() => {
       const radii = new Set<string>();
+      const radiusOwners: string[] = [];
       const shadows: string[] = [];
       const filters: string[] = [];
       const pills: string[] = [];
@@ -1189,7 +1190,13 @@ test.describe("L. 航空日誌の紙面（見本の全体）", () => {
           if (parseFloat(v) >= 100) {
             // a pill is allowed only on a small count
             if (!/^\d{1,3}$/.test((el.textContent ?? "").trim())) pills.push(`${el.tagName} ${(el.textContent ?? "").trim().slice(0, 12)}`);
-          } else radii.add(v);
+          } else if (v === "50%" && el.matches('input[type="radio"]')) {
+            // the round shape of a native radio comes from the browser's own style (newer Chromium reports it as 50%), not from ours
+            continue;
+          } else {
+            radii.add(v);
+            radiusOwners.push(`${v} ${el.tagName.toLowerCase()}${el.getAttribute("type") ? `[type=${el.getAttribute("type")}]` : ""}.${String(el.className).slice(0, 40)}`);
+          }
         }
         shadows.push(cs.boxShadow);
         if (cs.backdropFilter && cs.backdropFilter !== "none") filters.push(el.tagName);
@@ -1197,7 +1204,7 @@ test.describe("L. 航空日誌の紙面（見本の全体）", () => {
         const alpha = /\/\s*([\d.]+)\)$/.exec(bg)?.[1] ?? /^rgba\([^)]*,\s*([\d.]+)\)$/.exec(bg)?.[1];
         if (alpha !== undefined && parseFloat(alpha) > 0 && parseFloat(alpha) < 1) translucent.push(`${el.tagName} ${bg}`);
       }
-      return { radii: [...radii], shadows, filters, pills, translucent };
+      return { radii: [...radii], radiusOwners, shadows, filters, pills, translucent };
     });
 
   test("47. 角丸は 1 種類（5px）・影なし・ぼかしなし・半透明の地なし・ピルは件数だけ。6 つの画面・部品・開いたダイアログとトースト（明・暗・現場）", async ({ page }) => {
@@ -1208,7 +1215,7 @@ test.describe("L. 航空日誌の紙面（見本の全体）", () => {
         if (screen === "workspace") await page.setViewportSize({ width: 1280, height: 900 });
         const m = await surfaceFacts(page);
         const label = `${theme}${field ? " 現場" : ""} ${screen}`;
-        expect(m.radii, label).toEqual(["5px"]);
+        expect(m.radii, `${label} ${m.radiusOwners.filter((o) => !o.startsWith("5px ")).join(" / ")}`).toEqual(["5px"]);
         expect(m.shadows.map(visibleShadow).filter(Boolean), label).toEqual([]);
         expect(m.filters, label).toEqual([]);
         expect(m.pills, label).toEqual([]);
