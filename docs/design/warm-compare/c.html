@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>そらばん 判定画面 C 空と地図の絵本</title>
+<style>
+
+:root{
+  --orange:#F89B48; --orange-deep:#E99347; --orange-light:#FFC189;
+  --white:#FFFFFF; --off:#F7F7F3; --beige:#EDEDE5;
+  --ink:#262523; --ink-2:#4A4843; --ink-3:#5F5D57; --ph:#68655B; --rule:#C4C4C4; --edge:#5F5D57;
+  --teal:#2EBEC4; --teal-deep:#0F6B70; --kincha:#D7A761; --pink:#CF727C; --sky:#DEF3F4;
+  --v-no:#A81D28; --v-no-fg:#9A1A24; --v-needs:#EDB800; --v-needs-fg:#6B5800; --v-done:#262523; --v-none:#225F36; --v-unknown:#4F5762;
+  --r-l:24px; --r-m:12px; --r-s:6px; --pill:9999px;
+  --shadow:0 0 24px rgba(0,0,0,.1);
+  --map-land:#FFF4E2; --map-water:#BFE9EC; --map-shore:#2EBEC4;
+  --road:#FFFFFF; --road-casing:#C4C4C4;
+  --did-tint:#FFD6AB; --did-line:#B3500A; --park-line:#0F6B70; --air-line:#0F6B70; --pin-halo:rgba(248,155,72,.3);
+  --ease:cubic-bezier(.22,.8,.2,1);
+  --font:"Noto Sans JP","Plus Jakarta Sans","Hiragino Sans","Yu Gothic UI","Yu Gothic","IPAGothic","IPAPGothic",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--white);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.75;letter-spacing:.03em;line-break:strict;word-break:auto-phrase;overflow-wrap:anywhere}
+h1,h2,h3,p,ul,dl,dd,figure{margin:0;padding:0}
+ul{list-style:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+a{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:2px;text-decoration-color:var(--orange)}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.page{overflow:hidden}
+
+/* 面は白・オフホワイト・ベージュを交互に敷く */
+.band{position:relative;padding:40px 16px}
+.band>*{max-width:1120px;margin-left:auto;margin-right:auto}
+.band-white{background:var(--white)}
+.band-off{background:var(--off)}
+.band-beige{background:var(--beige)}
+
+/* 見出し：左 5px の橙線＋背後の大きな薄い数字 */
+.sec-head{position:relative;margin-bottom:22px;padding:6px 0 6px 14px;border-left:5px solid var(--orange);min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.sec-head h2{font-size:22px;line-height:1.4;letter-spacing:.06em;font-weight:700}
+.sec-num{position:absolute;right:0;top:-34px;font-size:112px;line-height:1;font-weight:800;letter-spacing:0;color:rgba(248,155,72,.2);font-family:"Plus Jakarta Sans","Noto Sans JP",sans-serif;pointer-events:none;z-index:0}
+.sec-head h2,.sec-note{position:relative;z-index:1}
+.sec-note{font-size:13px;color:var(--ink-3);line-height:1.6}
+
+/* ヒーロー */
+.hero{padding-top:28px;padding-bottom:36px}
+.hero-text{position:relative;z-index:2;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-size:34px;font-weight:800;letter-spacing:.1em;line-height:1.2}
+.brand-mark{display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:var(--pill);background:var(--orange);color:var(--ink)}
+.brand-drone{width:30px;height:auto}
+h1{font-size:17px;font-weight:700;color:var(--ink-2);letter-spacing:.06em;line-height:1.5}
+.lead{max-width:40em;font-size:15px;line-height:1.9;color:var(--ink-2)}
+.lead strong{display:block;color:var(--ink);font-weight:700}
+.facts{display:grid;grid-template-columns:1fr;gap:6px;max-width:640px;margin-top:4px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.facts div{display:grid;grid-template-columns:6.2em 1fr;gap:8px;font-size:13px;line-height:1.6}
+.facts dt{color:var(--ink-3)}
+
+/* 面（ブロック） */
+.block{background:var(--white);border-radius:var(--r-l);box-shadow:var(--shadow);padding:20px 16px}
+.band-white .block{background:var(--off)}
+.block-soft{border-radius:var(--r-l);background:var(--off);padding:16px;margin-top:16px}
+.check-grid{display:grid;grid-template-columns:1fr;gap:20px}
+.col-left{display:flex;flex-direction:column;gap:20px;min-width:0}
+.col-right{min-width:0}
+
+/* 入力 */
+.input-block label{display:block;font-size:14px;font-weight:700;margin-bottom:8px;letter-spacing:.05em}
+input[type=text]{width:100%;height:52px;border:1.5px solid var(--edge);border-radius:var(--r-m);background:#fff;padding:0 16px;font:inherit;font-size:16px;color:var(--ink);letter-spacing:.03em}
+input::placeholder{color:var(--ph);opacity:1}
+.hint{margin-top:8px;font-size:12.5px;line-height:1.7;color:var(--ink-3)}
+.btn-row{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+
+/* ピルボタン：右端に墨の丸＋白い矢印。ホバー/押下/フォーカスで丸が橙に変わる */
+.pill{position:relative;display:inline-flex;align-items:center;justify-content:space-between;gap:14px;min-height:52px;padding:4px 4px 4px 24px;border-radius:var(--pill);border:1px solid transparent;cursor:pointer;font-weight:700;font-size:15px;line-height:1.3;text-align:left;transition:background .5s var(--ease),color .5s var(--ease)}
+.pill-label{flex:1;min-width:0}
+.pill-arrow{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--pill);background:var(--ink);color:#fff;transition:background .5s var(--ease),color .5s var(--ease),transform .5s var(--ease)}
+.pill-primary{background:var(--orange);color:var(--ink);min-height:56px;font-size:16px}
+.pill-primary .pill-arrow{width:48px;height:48px}
+.pill-primary:hover,.pill-primary:active,.pill-primary:focus-visible{background:var(--orange-light)}
+.pill-secondary{background:rgba(255,255,255,.92);border-color:var(--rule);color:var(--ink)}
+.pill-secondary:hover .pill-arrow,.pill-secondary:active .pill-arrow,.pill-secondary:focus-visible .pill-arrow{background:var(--orange);color:var(--ink);transform:translateX(2px)}
+.pill-primary:hover .pill-arrow,.pill-primary:active .pill-arrow,.pill-primary:focus-visible .pill-arrow{background:#fff;color:var(--ink);transform:translateX(2px)}
+.pill-sm{min-height:48px;font-size:14px;padding-left:20px}
+.pill-sm .pill-arrow{width:40px;height:40px}
+
+/* 判定タグ：形のマークと言葉をセットで */
+.vtag{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:3px 14px 3px 8px;border-radius:var(--pill);font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
+.vm{width:20px;height:20px;flex:none}
+.vm-lg{width:28px;height:28px}
+.v-no{background:var(--v-no);color:#fff}
+.v-needs{background:var(--v-needs);color:var(--ink);box-shadow:inset 0 0 0 2px var(--v-needs-fg)}
+.v-done{background:var(--v-done);color:#F7F7F3}
+.v-none{background:var(--v-none);color:#fff}
+.v-unknown{background:#fff;color:var(--v-unknown);box-shadow:inset 0 0 0 1.5px var(--v-unknown)}
+.tag-pill{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--pill);background:var(--white);border:1px solid var(--rule);font-size:12.5px;line-height:1.4;color:var(--ink-2);font-weight:500}
+.band-white .tag-pill{background:var(--off)}
+.tag-deadline{background:var(--orange-light)!important;border-color:transparent;color:var(--ink);font-weight:700}
+
+/* 結論 */
+.verdict-block{display:flex;flex-direction:column;gap:14px}
+.v-head{display:flex;align-items:center;gap:14px}
+.v-big{flex:none;width:68px;height:68px;display:flex;align-items:center;justify-content:center;background:var(--v-needs);color:var(--ink);box-shadow:inset 0 0 0 3px var(--v-needs-fg);border-radius:var(--r-m)}
+.v-big svg{width:44px;height:44px}
+.v-eyebrow{font-size:13px;color:var(--ink-3);font-weight:500;letter-spacing:.08em}
+.v-word{font-size:30px;font-weight:800;line-height:1.25;letter-spacing:.08em}
+.v-place{font-size:13px;color:var(--ink-3);line-height:1.6;margin-top:2px}
+.v-lead{font-size:15px;line-height:1.85}
+.v-lead strong{background:linear-gradient(transparent 62%,var(--orange-light) 62%)}
+.v-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;position:relative;z-index:1}
+
+/* 地図 */
+.map-block{padding:12px;position:relative}
+.map-frame{position:relative;border-radius:var(--r-m);overflow:hidden;border:1px solid var(--rule);aspect-ratio:640/440;background:var(--map-land)}
+.map-svg{display:block;width:100%;height:100%}
+.ct{stroke:var(--ct);stroke-width:1.4}
+.ct-major{stroke:var(--ct-major);stroke-width:2.2}
+.layers{padding:14px 4px 4px}
+.layers-title{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:10px}
+.layers-title span{display:block;font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 16px 6px 12px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:700;line-height:1.2;transition:background .5s var(--ease)}
+.chip.is-on{background:#fff;border:2px solid var(--ink);color:var(--ink)}
+.chip.is-off{background:transparent;border:2px dashed var(--edge);color:var(--ink-3);font-weight:500}
+.chip.is-on .chk{flex:none;width:18px;height:18px;padding:2px;border-radius:var(--pill);background:var(--orange);color:var(--ink)}
+.chip .chk-empty{flex:none;width:18px;height:18px;border-radius:var(--pill);border:2px solid var(--edge)}
+.chip.is-off svg:not(.chk){opacity:.6}
+.chip:hover{background:var(--orange-light)}
+
+/* 手続き */
+.proc-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.proc{display:flex;gap:14px;align-items:flex-start}
+.proc-no{flex:none;width:40px;height:40px;border-radius:var(--pill);background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.proc-done .proc-no{background:var(--off);color:var(--v-done)}
+.proc-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.proc h3{font-size:16.5px;line-height:1.55;letter-spacing:.04em}
+.proc-where{font-size:13.5px;color:var(--ink-2)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.proc-note{font-size:13px;line-height:1.75;color:var(--ink-3)}
+.proc .pill{align-self:flex-start;margin-top:4px}
+
+/* 規制ごとの判定 */
+.items{padding:6px 16px}
+.item{display:grid;grid-template-columns:36px 1fr;gap:6px 12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.item:last-child{border-bottom:0}
+.item .vtag{grid-column:2;justify-self:start}
+.src{width:32px;height:32px;border-radius:var(--pill);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--beige);color:var(--ink)}
+.item-title{font-size:15px;font-weight:700;line-height:1.55}
+.item-note{font-size:13.5px;color:var(--ink-2);line-height:1.75;margin-top:2px}
+.legend-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.legend-row{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 免責 */
+.disc-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.disc{font-size:13px;line-height:1.9;color:var(--ink-2)}
+.copy{margin-top:18px;font-size:13px;color:var(--ink-2)}
+.src-note{margin-top:6px;font-size:12px;line-height:1.8;color:var(--ink-3)}
+@media (min-width:900px){.disc,.src-note{padding-right:18%}}
+
+.hero-art{position:absolute;pointer-events:none}
+
+@media (min-width:900px){
+  body{font-size:16px}
+  .band{padding:64px 32px}
+  .hero{padding-top:56px;padding-bottom:64px}
+  .brand{font-size:48px}
+  .brand-mark{width:60px;height:60px}.brand-drone{width:40px}
+  h1{font-size:20px}
+  .lead{font-size:16px}
+  .facts{grid-template-columns:repeat(3,1fr);gap:24px;padding:16px 0}
+  .facts div{grid-template-columns:1fr;gap:2px}
+  .sec-head{margin-bottom:28px}
+  .sec-head h2{font-size:26px}
+  .sec-num{font-size:150px;top:-52px}
+  .check-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:28px;align-items:start}
+  .col-right{position:sticky;top:20px}
+  .block{padding:28px 28px}
+  .map-block{padding:14px}
+  .proc-grid{grid-template-columns:1fr 1fr}
+  .proc{padding:24px}
+  .item{grid-template-columns:40px 1fr auto;align-items:center;gap:16px;padding:18px 0}
+  .item .vtag{grid-column:3;justify-self:end}
+  .items{padding:8px 28px}
+  .v-word{font-size:36px}
+  .v-big{width:80px;height:80px}.v-big svg{width:52px;height:52px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+:root{--ct:rgba(46,190,196,.55);--ct-major:rgba(15,107,112,.6)}
+.d-c .hero{padding:0;background:var(--sky);overflow:hidden;border-radius:0 0 32px 32px}
+.d-c .hero>*{max-width:none}
+.art-c{position:absolute;inset:0}
+.art-c>svg{position:absolute;inset:0;width:100%;height:100%}
+.d-c .hero-text{position:relative;max-width:1120px;margin:0 auto;padding:28px 16px 170px}
+.d-c .brand,.d-c h1,.d-c .lead{max-width:34em}
+.d-c .lead{color:var(--ink)}
+.d-c .facts{border-color:rgba(38,37,35,.35)}
+.d-c .facts dt{color:var(--ink-2)}
+.d-c .brand-mark{background:var(--orange);box-shadow:0 0 0 4px #fff}
+.d-c h1{color:var(--ink)}
+.cloud{position:absolute;color:#fff;pointer-events:none}
+.cloud svg{width:100%;height:auto;display:block}
+.cloud-1{right:6%;top:30px;width:110px;opacity:.95}.cloud-2{right:34%;top:110px;width:84px;opacity:.9}
+.art-c .art-drone{position:absolute;right:8%;top:70px;width:88px;color:var(--ink);transform:rotate(-8deg)}
+.art-c .art-drone svg{width:100%;height:auto}
+.d-c .band:not(.hero){padding-top:44px}
+.d-c .verdict-block{position:relative;overflow:hidden;padding-bottom:62px}
+.d-c .verdict-block::after{content:"";position:absolute;left:0;right:0;bottom:0;height:44px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%2044%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%2044%20V26%20C60%208%20120%208%20180%2022%20S300%2038%20400%2014%20V44Z%22%20fill%3D%22%23DEF3F4%22%2F%3E%3Cpath%20d%3D%22M0%2044%20V34%20C80%2020%20140%2026%20210%2034%20S330%2040%20400%2028%20V44Z%22%20fill%3D%22%232EBEC4%22%20opacity%3D%22.55%22%2F%3E%3C%2Fsvg%3E") no-repeat;background-size:100% 100%;pointer-events:none}
+.d-c .v-big{border-radius:22px;box-shadow:inset 0 0 0 3px var(--v-needs-fg),0 0 0 5px var(--sky)}
+.d-c .map-block{background:var(--white);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--teal)}
+.d-c .map-frame{border-radius:16px;border:1.5px solid var(--ink)}
+.cloud-map{left:-14px;top:-20px;width:92px;z-index:3;color:#fff;filter:drop-shadow(0 1.5px 0 #262523) drop-shadow(0 -1px 0 #262523) drop-shadow(1.5px 0 0 #262523) drop-shadow(-1.5px 0 0 #262523)}
+.d-c .chip.is-on .chk{background:var(--teal)}
+.d-c .band-beige{background:var(--sky)}
+.d-c .band-beige .block{background:var(--white)}
+.d-c .band-beige .tag-pill{background:var(--off)}
+.d-c .src{background:var(--sky);color:var(--ink)}
+.d-c .src-県{background:var(--orange-light)}.d-c .src-市{background:#C8EEF0}
+.d-c .proc-no{background:var(--teal);color:var(--ink)}
+.d-c .proc-done .proc-no{background:var(--off);color:var(--v-done)}
+.d-c input[type=text]{border-radius:16px}
+@media (max-width:899px){.art-c .art-drone{display:none}}
+@media (min-width:900px){
+  .d-c .hero-text{padding:64px 32px 210px}
+  .cloud-1{right:7%;top:34px;width:170px}.cloud-2{right:36%;top:150px;width:120px}
+  .art-c .art-drone{right:14%;top:96px;width:170px}
+  .cloud-map{width:120px;left:-22px;top:-30px}
+}
+
+
+</style>
+</head>
+<body class="d-c">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="m-no" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.6 8.6 L15.4 15.4 M15.4 8.6 L8.6 15.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="m-needs" viewBox="0 0 24 24"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="m-done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7.8 12.4 L10.9 15.4 L16.4 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="m-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="3.4"/></symbol>
+  <symbol id="m-unknown" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"/><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.2" fill="currentColor"/></symbol>
+</defs></svg>
+
+<div class="page">
+
+<header class="hero band band-white">
+  <div class="hero-art art-c" aria-hidden="true">
+    <svg viewBox="0 0 1000 420" preserveAspectRatio="xMidYMax slice" width="100%" height="100%">
+      <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DEF3F4"/><stop offset=".62" stop-color="#FFF1DE"/><stop offset="1" stop-color="#FFC189"/></linearGradient></defs>
+      <rect width="1000" height="420" fill="url(#sky)"/>
+      <circle cx="790" cy="214" r="86" fill="#F89B48"/><circle cx="790" cy="214" r="122" fill="none" stroke="#F89B48" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>
+      <path d="M0 300 C120 230 240 250 350 290 S560 320 700 262 S900 230 1000 270 V420 H0Z" fill="#FFC189"/>
+      <path d="M0 340 C140 280 300 300 420 340 S650 372 800 318 S940 300 1000 320 V420 H0Z" fill="#2EBEC4"/>
+      <path d="M0 385 C160 345 330 365 480 392 S800 400 1000 360 V420 H0Z" fill="#0F6B70"/>
+      <g fill="none" stroke="#262523" stroke-opacity=".38" stroke-width="1.8">
+        <path d="M60 296 C150 262 250 270 330 296"/><path d="M110 296 C170 278 240 282 290 296"/>
+        <path d="M600 304 C680 270 780 266 880 292"/><path d="M660 304 C720 286 800 282 850 298"/>
+        <path d="M30 352 C150 322 300 334 420 352"/><path d="M480 356 C600 330 720 336 830 346"/>
+      </g>
+    </svg>
+    <div class="cloud cloud-1"><svg viewBox="0 0 160 70" aria-hidden="true"><path d="M26 62 C8 62 4 40 22 36 C22 18 46 10 58 24 C66 6 98 6 104 28 C124 22 142 36 134 52 C132 60 126 62 120 62 Z" fill="currentColor"/></svg></div><div class="cloud cloud-2"><svg viewBox="0 0 160 70" aria-hidden="true"><path d="M26 62 C8 62 4 40 22 36 C22 18 46 10 58 24 C66 6 98 6 104 28 C124 22 142 36 134 52 C132 60 126 62 120 62 Z" fill="currentColor"/></svg></div>
+    <div class="art-drone">
+<svg class="" viewBox="0 0 160 96" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="62" y="38" width="36" height="18" rx="9"/>
+  <circle cx="80" cy="47" r="4.5"/>
+  <path d="M64 42 L36 28 M96 42 L124 28 M64 52 L36 66 M96 52 L124 66"/>
+  <ellipse cx="30" cy="24" rx="22" ry="4.5"/><ellipse cx="130" cy="24" rx="22" ry="4.5"/>
+  <ellipse cx="30" cy="70" rx="22" ry="4.5"/><ellipse cx="130" cy="70" rx="22" ry="4.5"/>
+  <path d="M30 24 V28 M130 24 V28 M30 66 V70 M130 66 V70"/>
+  <path d="M70 58 V68 M90 58 V68 M64 68 H76 M84 68 H96"/>
+</svg></div>
+  </div>
+  <div class="hero-text">
+    <p class="brand"><span class="brand-mark" aria-hidden="true">
+<svg class="brand-drone" viewBox="0 0 160 96" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="62" y="38" width="36" height="18" rx="9"/>
+  <circle cx="80" cy="47" r="4.5"/>
+  <path d="M64 42 L36 28 M96 42 L124 28 M64 52 L36 66 M96 52 L124 66"/>
+  <ellipse cx="30" cy="24" rx="22" ry="4.5"/><ellipse cx="130" cy="24" rx="22" ry="4.5"/>
+  <ellipse cx="30" cy="70" rx="22" ry="4.5"/><ellipse cx="130" cy="70" rx="22" ry="4.5"/>
+  <path d="M30 24 V28 M130 24 V28 M30 66 V70 M130 66 V70"/>
+  <path d="M70 58 V68 M90 58 V68 M64 68 H76 M84 68 H96"/>
+</svg></span>そらばん</p>
+    <h1>ドローン飛行の可否判定と運航管理</h1>
+    <p class="lead"><strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>飛ばす前に、その地点がどの法令・条例に当たり、どの手続きが要るかを一度に確かめ、出典つきの記録として残せます。</p>
+    <dl class="facts">
+      <div><dt>運営者</dt><dd>フューチャーテック株式会社</dd></div>
+      <div><dt>利用の範囲</dt><dd>現在は社内での試験運用中</dd></div>
+      <div><dt>対象地域</dt><dd>鳥取県・島根県</dd></div>
+    </dl>
+  </div>
+</header>
+
+<section class="band band-off" aria-labelledby="h-check">
+  <div class="sec-head"><span class="sec-num" aria-hidden="true">01</span><h2 id="h-check">地点を判定する</h2><p class="sec-note">住所・座標・地図のクリックで地点を指定できます</p></div>
+  <div class="check-grid">
+    <div class="col-left">
+      <form class="block input-block" onsubmit="return false">
+        <label for="addr">住所または緯度・経度</label>
+        <input id="addr" type="text" value="鳥取県米子市加茂町1丁目1番地" placeholder="例: 鳥取県米子市加茂町1丁目1番地">
+        <p class="hint">国土地理院の住所検索で位置を決めます。座標（35.4283, 133.3306）や Google マップの URL も貼れます。</p>
+        <div class="btn-row">
+          <button type="button" class="pill pill-primary"><span class="pill-label">この地点を判定する</span><span class="pill-arrow"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></button>
+          <button type="button" class="pill pill-secondary"><span class="pill-label">現在地で判定</span><span class="pill-arrow"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/><circle cx="10" cy="10" r="7"/><path d="M10 1.5 V4 M10 16 V18.5 M1.5 10 H4 M16 10 H18.5" stroke-linecap="round"/></svg></span></button>
+        </div>
+      </form>
+
+      <article class="block verdict-block" aria-labelledby="h-verdict">
+        <div class="v-head"><div class="v-big"><svg class="vm" aria-hidden="true"><use href="#m-needs"/></svg></div><div><p class="v-eyebrow" id="h-verdict">結論</p><p class="v-word">要手続き</p><p class="v-place">米子市役所　35.4283, 133.3306</p></div></div>
+        <p class="v-lead">この地点で飛ばすには、<strong>手続きが 1 件</strong>必要です。許可・承認が下りるまで飛行は始められません。</p>
+        <div class="v-meta"><span class="tag-pill">確認日 2026-10-25</span><span class="tag-pill">出典つき</span></div>
+        <div class="v-meta"><button type="button" class="pill pill-secondary pill-sm"><span class="pill-label">結果を PDF で保存</span><span class="pill-arrow"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></button></div>
+      </article>
+    </div>
+
+    <div class="col-right">
+      <div class="block map-block">
+        <div class="cloud cloud-map" aria-hidden="true"><svg viewBox="0 0 160 70" aria-hidden="true"><path d="M26 62 C8 62 4 40 22 36 C22 18 46 10 58 24 C66 6 98 6 104 28 C124 22 142 36 134 52 C132 60 126 62 120 62 Z" fill="currentColor"/></svg></div>
+        <div class="map-frame">
+<svg class="map-svg" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="米子市役所の周辺の地図。人口集中地区（斜線の面）の中に現在地の印があり、右下に空港等周辺の破線の円がある。">
+  <defs>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="var(--did-tint)"/><path d="M0 0V9" stroke="var(--did-line)" stroke-width="3"/></pattern>
+    <pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.7" fill="var(--park-line)"/></pattern>
+  </defs>
+  <rect width="640" height="440" fill="var(--map-land)"/>
+  <path d="M430 0 C470 40 560 50 640 40 V0 Z M0 400 C60 380 120 420 200 440 H0 Z" fill="var(--map-water)"/>
+  <path d="M430 0 C470 40 560 50 640 40" fill="none" stroke="var(--map-shore)" stroke-width="3"/>
+  <g fill="none"><path d="M154.2 330.0L153.4 332.7L152.4 335.4L151.2 337.9L149.6 340.4L147.6 342.6L145.4 344.7L142.8 346.6L140.1 348.2L137.3 349.7L134.5 351.0L131.6 352.3L128.9 353.5L126.1 354.8L123.2 356.1L120.2 357.4L117.0 358.5L113.6 359.4L110.0 360.0L106.3 360.1L102.7 359.9L99.1 359.2L95.8 358.2L92.6 356.9L89.6 355.5L86.6 354.0L83.7 352.5L80.7 351.1L77.6 349.6L74.4 348.0L71.1 346.2L68.0 344.1L65.1 341.8L62.8 339.1L61.2 336.2L60.3 333.1L60.4 330.0L61.2 326.9L62.7 324.0L64.8 321.3L67.3 318.8L70.0 316.6L72.9 314.6L75.8 312.8L78.8 311.1L81.9 309.7L85.0 308.5L88.2 307.6L91.4 306.8L94.7 306.3L97.9 306.0L101.0 305.9L104.1 305.7L107.0 305.5L110.0 305.1L113.1 304.6L116.4 303.9L120.0 303.1L124.0 302.4L128.2 301.9L132.7 301.7L137.2 302.0L141.6 302.9L145.5 304.4L148.9 306.5L151.6 309.0L153.5 311.9L154.7 315.0L155.4 318.1L155.5 321.2L155.3 324.2L154.9 327.2L154.2 330.0Z" class="ct"/><path d="M187.4 330.0L186.2 334.8L184.5 339.5L182.2 343.9L179.4 348.2L176.0 352.1L171.9 355.7L167.5 359.0L162.7 361.9L157.9 364.5L153.0 366.9L148.2 369.3L143.4 371.7L138.5 374.1L133.5 376.5L128.2 378.8L122.4 380.8L116.4 382.3L110.0 383.1L103.5 383.2L97.1 382.6L90.9 381.3L85.0 379.4L79.4 377.2L74.1 374.8L68.8 372.4L63.4 370.0L57.9 367.5L52.1 365.0L46.1 362.2L40.2 359.0L34.6 355.3L29.7 351.0L25.9 346.2L23.4 341.0L22.4 335.5L22.8 330.0L24.6 324.6L27.6 319.5L31.4 314.8L35.7 310.5L40.5 306.7L45.4 303.1L50.4 300.0L55.6 297.1L60.9 294.7L66.4 292.6L72.0 290.9L77.6 289.7L83.3 288.8L88.9 288.2L94.3 287.7L99.5 287.3L104.7 286.6L110.0 285.6L115.5 284.4L121.5 282.8L128.1 281.3L135.3 279.9L143.0 279.0L151.0 278.9L158.9 279.7L166.4 281.6L173.1 284.6L178.7 288.5L183.0 293.2L186.1 298.4L188.0 303.8L189.0 309.3L189.3 314.7L189.0 320.0L188.4 325.1L187.4 330.0Z" class="ct"/><path d="M220.2 330.0L218.5 336.8L216.2 343.5L213.0 349.9L208.8 355.9L203.8 361.5L198.0 366.6L191.7 371.2L185.0 375.3L178.2 379.1L171.5 382.8L164.8 386.4L158.1 390.0L151.3 393.7L144.0 397.3L136.3 400.6L128.0 403.4L119.2 405.4L110.0 406.4L100.7 406.3L91.6 405.1L82.8 403.1L74.4 400.4L66.4 397.3L58.6 394.1L50.8 390.9L42.8 387.7L34.4 384.4L25.7 380.9L16.9 376.9L8.3 372.3L0.3 366.8L-6.4 360.5L-11.4 353.4L-14.4 345.8L-15.3 337.9L-14.1 330.0L-11.1 322.4L-6.6 315.2L-1.1 308.6L5.1 302.5L11.8 297.0L18.7 292.0L25.7 287.5L33.0 283.5L40.5 280.0L48.3 277.0L56.2 274.7L64.2 272.9L72.2 271.6L80.0 270.6L87.6 269.7L95.0 268.7L102.4 267.3L110.0 265.4L118.1 263.2L127.0 260.6L136.7 258.1L147.3 256.1L158.6 255.0L170.0 255.1L181.2 256.7L191.6 260.0L200.7 264.7L208.2 270.6L214.0 277.6L218.0 285.1L220.5 292.9L221.8 300.7L222.2 308.4L222.0 315.8L221.3 323.0L220.2 330.0Z" class="ct"/><path d="M252.6 330.0L250.6 338.9L247.5 347.5L243.3 355.7L237.9 363.5L231.2 370.7L223.7 377.3L215.5 383.2L207.1 388.6L198.5 393.7L190.1 398.7L181.6 403.7L173.1 408.7L164.2 413.7L154.8 418.5L144.6 422.8L133.6 426.3L122.0 428.6L110.0 429.5L98.0 429.1L86.2 427.4L74.8 424.6L63.9 421.2L53.4 417.4L43.0 413.5L32.5 409.7L21.6 405.8L10.2 401.9L-1.6 397.4L-13.4 392.2L-24.6 386.0L-34.7 378.6L-43.0 370.1L-48.8 360.6L-52.0 350.6L-52.4 340.2L-50.2 330.0L-45.8 320.2L-39.7 311.0L-32.5 302.5L-24.5 294.7L-16.1 287.7L-7.4 281.2L1.6 275.4L11.0 270.2L20.6 265.6L30.6 261.9L40.8 258.9L51.1 256.5L61.3 254.8L71.2 253.3L80.9 251.7L90.4 249.8L100.0 247.4L110.0 244.4L120.8 240.8L132.7 237.1L145.8 233.7L160.0 231.2L174.7 230.0L189.6 230.7L204.0 233.4L217.0 238.2L228.3 244.9L237.4 253.1L244.2 262.3L249.0 272.2L252.0 282.3L253.7 292.3L254.4 302.1L254.4 311.7L253.8 320.9L252.6 330.0Z" class="ct-major"/><path d="M284.7 330.0L282.3 340.9L278.6 351.4L273.3 361.5L266.4 371.0L258.2 379.8L249.0 387.8L239.1 395.1L229.0 401.9L218.8 408.4L208.8 414.8L198.7 421.2L188.4 427.7L177.5 434.2L165.7 440.2L152.9 445.4L139.2 449.4L124.8 451.8L110.0 452.6L95.2 451.6L80.8 449.3L66.9 445.9L53.5 441.8L40.4 437.5L27.3 433.1L13.8 428.9L-0.2 424.6L-14.9 419.9L-29.8 414.5L-44.6 407.9L-58.4 400.0L-70.4 390.6L-79.8 379.7L-86.2 367.8L-89.1 355.3L-88.7 342.5L-85.3 330.0L-79.4 318.1L-71.8 306.9L-62.9 296.6L-53.3 287.2L-43.2 278.6L-32.7 270.7L-21.9 263.5L-10.6 257.2L1.2 251.7L13.4 247.1L25.8 243.4L38.3 240.5L50.5 238.1L62.4 235.9L74.1 233.4L85.6 230.4L97.4 226.7L110.0 222.2L123.7 217.2L138.8 212.3L155.4 208.0L173.1 205.1L191.5 204.2L209.7 205.7L226.9 209.8L242.3 216.5L255.4 225.3L265.9 235.8L273.7 247.5L279.1 259.7L282.7 272.0L284.8 284.2L286.0 296.0L286.3 307.6L286.0 318.9L284.7 330.0Z" class="ct"/><path d="M316.6 330.0L313.8 342.8L309.2 355.3L302.8 367.2L294.5 378.3L284.7 388.7L273.9 398.1L262.4 406.8L250.8 415.1L239.3 423.1L227.8 431.1L216.1 439.1L204.0 447.2L191.0 455.0L176.8 462.1L161.4 468.1L144.9 472.4L127.6 474.9L110.0 475.3L92.5 473.9L75.5 470.9L59.0 466.9L43.1 462.4L27.3 457.8L11.2 453.2L-5.4 448.7L-22.9 444.0L-40.9 438.6L-59.1 432.2L-76.7 424.1L-92.8 414.3L-106.4 402.7L-116.7 389.4L-123.1 375.0L-125.5 359.9L-124.0 344.7L-119.3 330.0L-111.9 316.0L-102.8 303.0L-92.4 291.0L-81.2 279.9L-69.6 269.7L-57.5 260.4L-44.8 252.0L-31.5 244.5L-17.7 238.1L-3.4 232.7L11.1 228.4L25.6 224.8L39.8 221.6L53.6 218.4L67.1 214.7L80.7 210.3L94.8 204.9L110.0 198.7L126.7 192.3L145.2 186.1L165.4 181.1L186.8 178.1L208.6 177.8L229.9 180.5L249.8 186.3L267.3 195.0L282.0 206.2L293.6 219.1L302.2 233.1L308.4 247.5L312.6 262.0L315.4 276.2L317.1 290.0L317.9 303.6L317.9 316.9L316.6 330.0Z" class="ct"/><path d="M348.2 330.0L345.0 344.8L339.5 359.1L331.8 372.8L322.1 385.6L310.8 397.4L298.5 408.3L285.6 418.6L272.8 428.3L259.9 438.0L247.1 447.6L233.9 457.4L219.9 467.0L204.7 476.2L188.0 484.3L169.9 490.9L150.5 495.4L130.4 497.7L110.0 497.7L89.9 495.7L70.3 492.3L51.2 487.9L32.6 483.2L13.9 478.4L-5.4 473.9L-25.4 469.2L-46.3 464.2L-67.9 458.1L-89.3 450.4L-109.6 440.7L-127.7 428.8L-142.5 414.8L-153.2 399.0L-159.3 382.0L-160.9 364.4L-158.2 346.9L-152.0 330.0L-143.3 314.0L-132.7 299.2L-120.9 285.4L-108.4 272.8L-95.3 261.1L-81.6 250.4L-67.2 240.7L-52.0 232.1L-36.1 224.8L-19.8 218.7L-3.2 213.6L13.1 209.1L29.0 205.0L44.6 200.5L59.9 195.4L75.5 189.1L92.0 181.9L110.0 173.9L129.9 165.9L152.0 158.6L175.8 153.2L200.8 150.4L226.0 150.9L250.2 155.1L272.5 163.0L291.8 174.0L307.9 187.5L320.5 202.9L329.9 219.1L336.8 235.7L341.8 252.2L345.4 268.3L347.8 284.1L349.3 299.6L349.5 314.9L348.2 330.0Z" class="ct"/><path d="M573.2 150.0L574.4 152.2L575.4 154.5L576.1 157.0L576.3 159.6L575.9 162.2L574.8 164.6L573.0 166.8L570.6 168.7L567.6 170.1L564.4 171.1L561.0 171.8L557.5 172.1L554.2 172.2L551.0 172.0L548.1 171.9L545.2 171.6L542.6 171.3L540.0 171.0L537.5 170.6L535.1 170.1L532.8 169.6L530.6 168.9L528.4 168.1L526.2 167.3L524.1 166.5L521.9 165.7L519.6 164.9L517.1 164.0L514.5 163.0L511.8 161.8L509.2 160.5L506.7 158.8L504.6 156.9L503.0 154.7L502.0 152.4L501.7 150.0L502.1 147.6L503.1 145.3L504.6 143.1L506.4 141.1L508.3 139.2L510.3 137.5L512.3 135.9L514.3 134.3L516.3 132.8L518.4 131.3L520.6 129.9L523.0 128.6L525.6 127.6L528.4 126.9L531.3 126.5L534.3 126.4L537.2 126.6L540.0 127.0L542.7 127.5L545.3 128.2L547.8 128.8L550.2 129.5L552.6 130.3L555.0 131.1L557.3 132.0L559.5 133.1L561.6 134.3L563.4 135.7L565.0 137.3L566.3 138.9L567.5 140.7L568.6 142.4L569.7 144.2L570.8 146.1L572.0 148.0L573.2 150.0Z" class="ct"/><path d="M600.9 150.0L603.2 154.0L605.0 158.3L606.2 162.9L606.3 167.5L605.2 172.1L602.8 176.4L599.2 180.2L594.6 183.3L589.1 185.7L583.1 187.4L577.0 188.4L570.9 188.9L565.0 189.0L559.5 188.9L554.2 188.7L549.3 188.4L544.6 188.0L540.0 187.5L535.6 186.9L531.3 186.1L527.1 185.1L523.0 183.9L519.1 182.6L515.1 181.3L511.2 180.0L507.0 178.6L502.6 177.2L497.9 175.7L493.1 173.9L488.1 171.8L483.3 169.2L479.0 166.1L475.4 162.6L472.9 158.6L471.5 154.4L471.4 150.0L472.4 145.7L474.4 141.6L477.1 137.7L480.2 134.2L483.6 130.9L487.0 127.7L490.4 124.7L493.8 121.8L497.3 118.9L501.0 116.2L505.0 113.6L509.4 111.4L514.2 109.7L519.2 108.5L524.5 107.9L529.8 107.8L535.0 108.2L540.0 108.9L544.8 109.9L549.5 110.9L554.0 112.1L558.4 113.2L562.8 114.5L567.1 115.9L571.2 117.6L575.2 119.5L578.8 121.8L582.0 124.4L584.9 127.2L587.4 130.1L589.6 133.2L591.7 136.3L593.8 139.5L596.1 142.8L598.5 146.3L600.9 150.0Z" class="ct"/><path d="M629.8 150.0L633.2 155.9L635.8 162.3L637.1 168.9L636.9 175.6L634.8 182.1L630.8 188.1L625.0 193.3L617.9 197.5L609.8 200.7L601.1 202.9L592.3 204.3L583.6 205.0L575.4 205.2L567.6 205.2L560.3 205.0L553.3 204.7L546.5 204.3L540.0 203.8L533.6 203.0L527.4 201.9L521.4 200.5L515.5 199.0L509.7 197.3L503.9 195.5L497.9 193.7L491.6 191.9L485.0 190.0L477.9 187.9L470.6 185.3L463.4 182.2L456.5 178.3L450.5 173.7L445.7 168.4L442.5 162.5L441.1 156.3L441.4 150.0L443.2 143.8L446.3 138.0L450.2 132.5L454.7 127.4L459.3 122.6L463.9 118.0L468.5 113.6L473.2 109.2L478.1 105.0L483.4 100.9L489.3 97.3L495.7 94.2L502.7 91.9L510.1 90.3L517.7 89.6L525.4 89.6L532.8 90.2L540.0 91.2L546.9 92.5L553.6 93.9L560.1 95.4L566.6 96.9L572.9 98.7L579.1 100.7L585.2 103.1L590.8 106.0L596.0 109.3L600.6 113.0L604.7 117.1L608.3 121.3L611.7 125.7L615.1 130.1L618.5 134.7L622.2 139.5L626.1 144.5L629.8 150.0Z" class="ct"/><path d="M660.0 150.0L664.4 157.9L667.6 166.4L668.9 175.1L667.8 183.8L664.3 192.2L658.3 199.7L650.2 206.1L640.4 211.3L629.6 215.1L618.2 217.8L606.8 219.4L595.8 220.3L585.4 220.8L575.5 221.0L566.1 221.0L557.2 220.8L548.5 220.5L540.0 219.9L531.7 218.9L523.6 217.6L515.7 216.0L507.9 214.1L500.2 212.0L492.4 210.0L484.3 207.9L475.7 205.7L466.6 203.4L457.0 200.6L447.3 197.2L437.7 192.9L428.9 187.7L421.5 181.4L415.8 174.2L412.3 166.4L411.1 158.2L412.0 150.0L414.8 142.0L419.0 134.5L424.1 127.4L429.6 120.8L435.3 114.5L440.9 108.4L446.6 102.4L452.5 96.6L458.8 90.9L465.7 85.6L473.5 80.9L482.1 77.1L491.4 74.2L501.2 72.4L511.1 71.6L521.0 71.8L530.7 72.6L540.0 73.8L549.0 75.3L557.7 77.0L566.3 78.7L574.7 80.6L583.1 82.8L591.3 85.4L599.1 88.6L606.4 92.4L613.1 96.8L619.1 101.7L624.5 107.0L629.4 112.5L634.1 118.1L638.9 123.8L644.0 129.7L649.3 136.0L654.8 142.7L660.0 150.0Z" class="ct-major"/><path d="M691.4 150.0L696.8 160.0L700.2 170.5L701.0 181.4L698.9 192.1L693.6 202.1L685.3 211.0L674.6 218.5L662.1 224.5L648.5 228.9L634.5 231.9L620.8 233.9L607.6 235.1L595.0 235.8L583.2 236.3L571.9 236.6L561.0 236.7L550.4 236.5L540.0 235.9L529.8 234.8L519.8 233.3L510.0 231.4L500.3 229.3L490.6 227.1L480.6 224.8L470.1 222.6L459.1 220.1L447.4 217.4L435.2 214.0L422.9 209.6L411.2 204.1L400.7 197.2L392.1 189.2L385.8 180.0L382.3 170.2L381.6 160.1L383.3 150.0L387.2 140.3L392.4 131.1L398.5 122.4L404.9 114.2L411.4 106.4L417.9 98.7L424.5 91.2L431.5 83.8L439.3 76.7L448.0 70.2L457.8 64.6L468.6 60.0L480.2 56.8L492.4 54.8L504.7 54.1L516.8 54.3L528.6 55.3L540.0 56.7L551.0 58.3L561.8 60.1L572.4 62.0L582.9 64.2L593.3 66.8L603.4 70.1L613.0 74.1L622.0 78.9L630.2 84.4L637.6 90.5L644.3 96.9L650.7 103.5L657.0 110.3L663.5 117.3L670.4 124.6L677.6 132.4L684.7 140.8L691.4 150.0Z" class="ct"/><path d="M724.0 150.0L730.1 162.1L733.4 174.8L733.4 187.7L729.7 200.2L722.2 211.8L711.4 222.0L698.0 230.4L682.7 237.1L666.4 242.0L650.1 245.4L634.1 247.7L618.8 249.3L604.4 250.5L590.7 251.4L577.6 252.0L564.8 252.4L552.3 252.3L540.0 251.8L527.9 250.7L516.0 249.0L504.3 247.0L492.6 244.8L480.7 242.5L468.4 240.2L455.5 237.8L441.7 235.2L427.3 232.0L412.4 227.8L397.8 222.4L384.1 215.5L372.1 206.9L362.6 197.0L356.1 185.8L352.9 174.0L352.8 161.9L355.5 150.0L360.3 138.6L366.5 127.7L373.3 117.5L380.4 107.8L387.6 98.3L394.7 89.0L402.2 79.8L410.4 70.9L419.7 62.5L430.2 54.8L442.1 48.3L455.2 43.2L469.3 39.7L483.8 37.6L498.3 36.9L512.7 37.3L526.6 38.3L540.0 39.8L553.1 41.4L565.9 43.2L578.6 45.3L591.2 47.8L603.6 50.9L615.6 54.8L626.9 59.7L637.5 65.5L647.2 72.1L656.0 79.2L664.3 86.7L672.3 94.5L680.4 102.4L688.9 110.6L697.8 119.2L707.0 128.6L716.0 138.8L724.0 150.0Z" class="ct"/></g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M0 250 C120 230 220 260 330 232 S520 200 640 230" stroke="var(--road-casing)" stroke-width="12"/>
+    <path d="M0 250 C120 230 220 260 330 232 S520 200 640 230" stroke="var(--road)" stroke-width="8"/>
+    <path d="M330 232 C340 150 300 90 320 0" stroke="var(--road-casing)" stroke-width="10"/>
+    <path d="M330 232 C340 150 300 90 320 0" stroke="var(--road)" stroke-width="6"/>
+    <path d="M330 232 C350 300 420 340 470 440" stroke="var(--road-casing)" stroke-width="10"/>
+    <path d="M330 232 C350 300 420 340 470 440" stroke="var(--road)" stroke-width="6"/>
+  </g>
+  <path d="M232 168 Q300 120 392 150 Q452 196 430 270 Q380 322 290 306 Q222 270 232 168 Z" fill="url(#hatch)" stroke="var(--did-line)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M70 90 Q110 60 170 80 Q190 120 150 150 Q90 160 70 90 Z" fill="url(#dots)" stroke="var(--park-line)" stroke-width="2.4" stroke-dasharray="2 5" stroke-linecap="round"/>
+  <circle cx="560" cy="372" r="86" fill="none" stroke="var(--air-line)" stroke-width="3" stroke-dasharray="10 7"/>
+  <path d="M520 372 H600" stroke="var(--air-line)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="330" cy="232" r="46" fill="var(--pin-halo)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+  <circle cx="330" cy="232" r="13" fill="var(--orange)" stroke="var(--ink)" stroke-width="3.5"/>
+  <circle cx="330" cy="232" r="4" fill="var(--ink)"/>
+  <g font-size="24" font-weight="700" fill="var(--ink)">
+    <rect x="352" y="196" width="150" height="34" rx="17" fill="#fff" stroke="var(--ink)" stroke-width="2"/>
+    <text x="364" y="221">米子市役所</text>
+    <rect x="248" y="262" width="62" height="32" rx="17" fill="var(--ink)"/><text x="259" y="285" fill="#fff" font-size="22">DID</text>
+    <text x="440" y="344" font-size="22">空港等周辺</text>
+    <text x="84" y="190" font-size="22">公園</text>
+  </g>
+</svg></div>
+        <div class="layers" role="group" aria-label="規制レイヤー">
+          <p class="layers-title">規制レイヤー（5/7 表示）<span>押すと地図の表示を切り替えます</span></p>
+          <div class="chips">
+            <button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="2" fill="var(--did-tint)" stroke="var(--did-line)" stroke-width="2"/><path d="M5 15 L15 5 M9 16 L17 8 M3 11 L9 5" stroke="var(--did-line)" stroke-width="1.6"/></svg><span>DID</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="2" fill="#B9B7AE" stroke="#4A4843" stroke-width="1.6"/></svg><span>工業専用</span></button><button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--air-line)" stroke-width="2.2" stroke-dasharray="3.4 2.4"/></svg><span>空港等周辺</span></button><button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--ink)" stroke-width="2.2"/><circle cx="10" cy="10" r="2.6" fill="var(--ink)"/></svg><span>小型無人機法</span></button><button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="5" fill="none" stroke="var(--park-line)" stroke-width="2" stroke-dasharray="1.5 3.2" stroke-linecap="round"/><circle cx="7" cy="10" r="1.4" fill="var(--park-line)"/><circle cx="13" cy="10" r="1.4" fill="var(--park-line)"/></svg><span>都市公園</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M10 2.5 L17.5 10 L10 17.5 L2.5 10 Z" fill="none" stroke="var(--ink)" stroke-width="2"/></svg><span>指定史跡</span></button><button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-dasharray="1.2 3.2" stroke-linecap="round"/></svg><span>公衆密集地</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band-beige" aria-labelledby="h-proc">
+  <div class="sec-head"><span class="sec-num" aria-hidden="true">02</span><h2 id="h-proc">要手続きの手続き</h2><p class="sec-note">期限の近い順に並べています</p></div>
+  <div class="proc-grid">
+    <article class="block proc">
+      <span class="proc-no" aria-hidden="true">1</span>
+      <div class="proc-body">
+        <h3>無人航空機の飛行許可・承認の申請（DID の上空）</h3>
+        <p class="proc-where">出す先：国土交通省 DIPS 2.0（オンライン）</p>
+        <div class="tags"><span class="tag-pill tag-deadline">期限　飛行の 10 開庁日前まで</span><span class="tag-pill">法令　国（航空法）</span></div>
+        <p class="proc-note">申請書はご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。</p>
+        <button type="button" class="pill pill-secondary pill-sm"><span class="pill-label">DIPS 2.0 を開く</span><span class="pill-arrow"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 H16 V13 M16 4 L5 15"/></svg></span></button>
+      </div>
+    </article>
+    <article class="block proc proc-done">
+      <span class="proc-no" aria-hidden="true"><svg class="vm vm-lg" aria-hidden="true"><use href="#m-done"/></svg></span>
+      <div class="proc-body">
+        <h3>庁舎周辺での飛行（鳥取県条例）</h3>
+        <p class="proc-where">記録：施設管理者の同意（本人入力）</p>
+        <div class="tags"><span class="tag-pill">条件　飛行前に管理者へ連絡</span><span class="tag-pill">法令　県</span></div>
+        <p class="proc-note">ご本人が自分で手続きを済ませた記録の表示です。そらばんが手続きを行ったわけではありません。</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="band band-white" aria-labelledby="h-items">
+  <div class="sec-head"><span class="sec-num" aria-hidden="true">03</span><h2 id="h-items">規制ごとの判定</h2><p class="sec-note">形と言葉で見分けられます。色だけでは区別しません</p></div>
+  <ul class="items block">
+    <li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法 第132条の85　人口集中地区（DID）</p><p class="item-note">この地点は DID の中です。無人航空機を飛ばすには国土交通大臣の許可・承認が要ります。</p></div><span class="vtag v-needs"><svg class="vm" aria-hidden="true"><use href="#m-needs"/></svg><span>要手続き</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">航空法　空港等周辺</p><p class="item-note">空港等の周辺区域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-国">国</span><div class="item-text"><p class="item-title">小型無人機等飛行禁止法</p><p class="item-note">対象施設の周辺地域の外です。</p></div><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span></li><li class="item"><span class="src src-県">県</span><div class="item-text"><p class="item-title">鳥取県 迷惑行為等防止条例（庁舎の周辺 100m）</p><p class="item-note">施設管理者の同意を記録済みです。条件：飛行前に管理者へ連絡。</p></div><span class="vtag v-done"><svg class="vm" aria-hidden="true"><use href="#m-done"/></svg><span>手続き済み</span></span></li><li class="item"><span class="src src-市">市</span><div class="item-text"><p class="item-title">米子市 都市公園条例</p><p class="item-note">公園の区域データが未整備のため、判定できません。市の窓口で確認してください。</p></div><span class="vtag v-unknown"><svg class="vm" aria-hidden="true"><use href="#m-unknown"/></svg><span>判定不能</span></span></li>
+  </ul>
+  <div class="legend block-soft" aria-label="判定の見分け方">
+    <p class="legend-title">判定の見分け方</p>
+    <div class="legend-row"><span class="vtag v-no"><svg class="vm" aria-hidden="true"><use href="#m-no"/></svg><span>飛行不可</span></span><span class="vtag v-needs"><svg class="vm" aria-hidden="true"><use href="#m-needs"/></svg><span>要手続き</span></span><span class="vtag v-done"><svg class="vm" aria-hidden="true"><use href="#m-done"/></svg><span>手続き済み</span></span><span class="vtag v-none"><svg class="vm" aria-hidden="true"><use href="#m-none"/></svg><span>手続き不要</span></span><span class="vtag v-unknown"><svg class="vm" aria-hidden="true"><use href="#m-unknown"/></svg><span>判定不能</span></span></div>
+  </div>
+</section>
+
+<section class="band band-off foot" aria-labelledby="h-disc">
+  <h2 id="h-disc" class="disc-title">免責事項</h2>
+  <p class="disc">本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。緊急用務空域等の動的情報は反映していません。実運用前に必ず <a href="#">国土交通省 DIPS</a>、警察庁、各自治体の最新情報をご確認ください。自治体の条例データの一部は手作業で収録しており、各データに確認日と確からしさ（低・中・高）を付けています。</p>
+  <p class="copy">© 2026 フューチャーテック株式会社　鳥取県西伯郡日吉津村</p>
+  <p class="src-note">出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、国土地理院ジオコーダ・住所検索・ベクタータイル、警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県例規集。画面の文言は表示見本です。</p>
+</section>
+
+</div>
+</body>
+</html>
