@@ -583,6 +583,8 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       expect(tab!.height).toBeGreaterThanOrEqual(56);
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto("/ops/flights");
+      // boundingBox は待たない。左メニューが描かれてから測る
+      await expect(page.getByTestId("ops-sidebar").getByTestId("nav-verdict")).toBeVisible();
       const home = await page.getByTestId("ops-sidebar").getByTestId("nav-verdict").boundingBox();
       expect(home!.height).toBeGreaterThanOrEqual(44);
       const logo = await page.getByRole("link", { name: /そらばん 運航管理/ }).boundingBox();

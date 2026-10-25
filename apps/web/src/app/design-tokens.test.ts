@@ -2,6 +2,7 @@
 // Reads the CSS, resolves the tokens for every context (light / dark, normal / field mode) the way the cascade does,
 // and checks the contrast ratios listed in docs/design/ui-direction.md 3.1:
 //   normal text 4.5:1, non-text meaning (input/button borders, icons) 3:1, field-mode body text and primary buttons 7:1.
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -296,5 +297,73 @@ describe("1a-2 コントラスト（ui-direction.md 3.1 の組）", () => {
     expect(r("#ebe7da", "#151b25")).toBe(13.97);
     expect(r("#8fb0f0", "#151b25")).toBe(7.93);
     expect(r("#ffffff", "#4a72c4")).toBe(4.67);
+  });
+});
+
+// Sprint 12h PR ① stage B: soraban-tokens.css (--sb-*) is imported by globals.css. Nothing references it yet, so the
+// look does not change; these checks keep the file, design-system.md 3.4 and the contrast script in step.
+const TOKENS_URL = new URL("../../../../docs/design/tokens/soraban-tokens.css", import.meta.url);
+const SB_RULES = parseRules(readFileSync(TOKENS_URL, "utf8").replace(/\/\*[\s\S]*?\*\//g, ""));
+const sbVars = (selector: string, inDark: boolean): Record<string, string> => {
+  const r = SB_RULES.find((x) => x.selector === selector && x.inDarkMedia === inDark);
+  if (!r) throw new Error(`rule not found: ${selector}`);
+  return r.vars;
+};
+const SB_DARK = ':root:not([data-theme="light"])';
+const SB_MODES: readonly (readonly [string, Record<string, string>[]])[] = [
+  ["明", [sbVars(":root", false)]],
+  ["暗", [sbVars(":root", false), sbVars(SB_DARK, true)]],
+  ["現場・明", [sbVars(":root", false), sbVars(':root[data-mode="field"]', false)]],
+  [
+    "現場・暗",
+    [sbVars(":root", false), sbVars(':root[data-mode="field"]', false), sbVars(SB_DARK, true), sbVars(`${SB_DARK}[data-mode="field"]`, true)],
+  ],
+];
+const sbResolve = (layers: Record<string, string>[]): Record<string, string> => Object.assign({}, ...layers);
+
+describe("12h P1-5 トークンの取り込み", () => {
+  it("globals.css が soraban-tokens.css を読み込む。--sb-* 以外の宣言を globals.css に足さない", () => {
+    const raw = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+    expect(raw).toMatch(/@import "\.\.\/\.\.\/\.\.\/\.\.\/docs\/design\/tokens\/soraban-tokens\.css";/);
+    expect(CSS).not.toMatch(/--sb-/);
+  });
+});
+
+describe("12h P1-6 新トークンのコントラストと暗の一致", () => {
+  it("check-contrast.mjs が 196 組すべてを満たす（終了コード 0）", () => {
+    const out = execFileSync(process.execPath, [new URL("../../../../docs/design/tokens/check-contrast.mjs", import.meta.url).pathname], { encoding: "utf8" });
+    expect(out).toContain("組 49 × 4 通り = 196 件を検査。満たさない: 0");
+  });
+
+  it("暗（OS 設定）と暗（強制）の宣言が一致する。現場の暗も同じ", () => {
+    expect(sbVars(':root[data-theme="dark"]', false)).toEqual(sbVars(SB_DARK, true));
+    expect(sbVars(':root[data-theme="dark"][data-mode="field"]', false)).toEqual(sbVars(`${SB_DARK}[data-mode="field"]`, true));
+  });
+});
+
+describe("12h P1-7 soraban-tokens.css と design-system.md 3.4 の表", () => {
+  const md = readFileSync(new URL("../../../../docs/design/design-system.md", import.meta.url), "utf8");
+  const section = md.slice(md.indexOf("### 3.4"), md.indexOf("### 3.5"));
+  const rows = [...section.matchAll(/^\| `(--sb-[\w-]+)` \|[^|]*\|\s*`(#\w+)` \|\s*`(#\w+)` \|\s*`(#\w+)` \|\s*`(#\w+)` \|$/gm)];
+
+  it("表の色の行は、CSS の 4 通り（明・暗・現場・明・現場・暗）の値と一致する", () => {
+    expect(rows.length).toBeGreaterThanOrEqual(35);
+    const bad: string[] = [];
+    for (const m of rows) {
+      SB_MODES.forEach(([mode, layers], i) => {
+        const css = sbResolve(layers)[m[1]!];
+        if (css?.toUpperCase() !== m[i + 2]!.toUpperCase()) bad.push(`${m[1]} ${mode}: CSS ${css} / 表 ${m[i + 2]}`);
+      });
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("CSS の色（#rrggbb）のトークンは、すべて表にある（表にない色を足さない）", () => {
+    const inTable = rows.map((m) => m[1]!).sort();
+    const inCss = Object.entries(sbResolve(SB_MODES[3]![1]))
+      .filter(([, v]) => /^#[0-9a-f]{6}$/i.test(v))
+      .map(([k]) => k)
+      .sort();
+    expect(inCss).toEqual(inTable);
   });
 });
