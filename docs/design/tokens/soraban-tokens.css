@@ -1,0 +1,237 @@
+/* そらばん デザイントークン（まだアプリには取り込まない。正は ../design-system.md）
+ *
+ * 構成（check-contrast.mjs がこの並びと selector を前提に読む）
+ *   1. :root                                   明（既定）
+ *   2. :root[data-mode="field"]                現場・明
+ *   3. @media (prefers-color-scheme: dark)     暗（OS 設定。手動で明に固定した場合を除く）
+ *   4. :root[data-theme="dark"]                暗（強制。3 と同じ宣言。スクリプトが一致を確かめる）
+ *   暗は独立したパレットではなく、全体共通の夜間用。明・暗とも、現場は 7:1 に寄せる。
+ */
+
+:root {
+  /* 地と面。面は地より少し明るく、くぼみは少し暗い。モーフィズムはこの 3 層の間だけ */
+  --sb-base: #F7F7F3;
+  --sb-surface: #FFFFFF;
+  --sb-sunken: #ECEBE4;
+
+  /* 文字。注釈も 12px 以上で 4.5:1 を保てる濃さにしてある */
+  --sb-ink: #262523;
+  --sb-ink-2: #4A4843;
+  --sb-ink-3: #5F5D57;
+
+  /* 罫は区切り専用（約 1.6:1）。押せる部品の境は edge を使い、罫で代用しない */
+  --sb-rule: #C9C7BE;
+  --sb-rule-soft: #E4E3DC;
+  --sb-edge: #4D4B46;
+
+  /* 橙は面だけ（生成り上で 2:1 のため線や文字に使うと読めない）。線と文字は銅 */
+  --sb-orange: #F89B48;
+  --sb-orange-hover: #FFAE66;
+  --sb-on-orange: #262523;
+  --sb-copper: #B4541F;
+  --sb-copper-text: #8A3A10;
+  --sb-focus: #B4541F;
+
+  /* 押せない部品。無効の理由は必ず文で添える（色だけで伝えない） */
+  --sb-disabled-fg: #716F68;
+
+  /* トーストなど、地と反転して浮く面 */
+  --sb-inverse-bg: #262523;
+  --sb-inverse-fg: #F7F7F3;
+
+  /* 判定 5 段。fill = 塗り、on = 塗りの上の文字、fg = 面の上に置く文字・線。形と文言を必ず併用する */
+  --sb-v-no-fill: #A81D28;      --sb-v-no-on: #FFFFFF;      --sb-v-no-fg: #9A1A24;
+  --sb-v-needs-fill: #EDB800;   --sb-v-needs-on: #262523;   --sb-v-needs-fg: #6B5800;
+  --sb-v-done-fill: #262523;    --sb-v-done-on: #F7F7F3;    --sb-v-done-fg: #262523;
+  --sb-v-none-fill: #225F36;    --sb-v-none-on: #FFFFFF;    --sb-v-none-fg: #225F36;
+  --sb-v-unknown-fill: #4F5762; --sb-v-unknown-on: #FFFFFF; --sb-v-unknown-fg: #4F5762;
+
+  /* 等高線。地の約 1.3 倍の濃さ。文字の背後には置かない（置いても 7:1 を割らない濃さ） */
+  --sb-contour: #DDDBD1;
+  --sb-contour-major: #C9C7BE;
+
+  /* 形。ブロックは直角、押せる部品だけ 3px、丸は許可リストの部品だけ */
+  --sb-r-block: 0;
+  --sb-r-ctl: 3px;
+  --sb-r-round: 999px;
+  --sb-line: 1px;
+  --sb-line-mark: 2px;
+
+  /* 押せる大きさ。現場は手袋と日差しを前提に大きくする */
+  --sb-hit: 48px;
+  --sb-hit-primary: 52px;
+
+  /* 文字。階層は 3 段。数値は Manrope の等幅数字で桁をそろえる */
+  --sb-font-jp: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "IPAGothic", sans-serif;
+  --sb-font-lat: "Manrope", "Noto Sans JP", sans-serif;
+  --sb-fs-head: 20px;
+  --sb-fs-body: 15px;
+  --sb-fs-note: 12px;
+  --sb-lh-head: 1.5;
+  --sb-lh-body: 1.75;
+  --sb-ls-head: 0.06em;
+  --sb-ls-body: 0.04em;
+
+  /* 余白は 4px 基準 */
+  --sb-s1: 4px;  --sb-s2: 8px;  --sb-s3: 12px; --sb-s4: 16px;
+  --sb-s5: 24px; --sb-s6: 32px; --sb-s7: 48px; --sb-s8: 64px;
+  --sb-menu-w: 240px;
+  --sb-content-max: 1200px;
+
+  /* モーフィズム。地に近い面だけ。強さは「見れば分かるが、なくても使える」程度 */
+  --sb-soft-out: 2px 2px 6px rgba(38, 37, 35, 0.07), -2px -2px 6px rgba(255, 255, 255, 0.8);
+  --sb-soft-in: inset 2px 2px 4px rgba(38, 37, 35, 0.08), inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+
+  /* 動き。事務所の PC と入口だけ豊か。現場は 0、reduced-motion も 0（下） */
+  --sb-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sb-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-t-press: 120ms;
+  --sb-t-state: 200ms;
+  --sb-t-menu: 420ms;
+  --sb-t-rise: 800ms;
+  --sb-t-reveal: 1000ms;
+}
+
+:root[data-mode="field"] {
+  --sb-base: #FCFCFA;
+  --sb-sunken: #EBEBE3;
+  --sb-ink: #1A1917;
+  --sb-ink-2: #3A3834;
+  --sb-ink-3: #4F4D48;
+  --sb-rule: #8A877F;           /* 現場は影を罫に置き換えるので、区切りも見える濃さ */
+  --sb-rule-soft: #B9B7AE;
+  --sb-edge: #3A3834;
+  --sb-copper: #8F4216;
+  --sb-copper-text: #7A3209;
+  --sb-focus: #7A3209;
+  --sb-disabled-fg: #66645E;
+  --sb-inverse-bg: #1A1917;
+  --sb-inverse-fg: #FCFCFA;
+  --sb-v-no-fill: #8F1B24;      --sb-v-no-fg: #8A1920;
+  --sb-v-needs-fg: #574700;
+  --sb-v-done-fill: #1A1917;    --sb-v-done-on: #FCFCFA;    --sb-v-done-fg: #1A1917;
+  --sb-v-none-fill: #1D5230;    --sb-v-none-fg: #1D5230;
+  --sb-v-unknown-fill: #4A515C; --sb-v-unknown-fg: #444B56;
+  --sb-contour: #E2E0D7;
+  --sb-contour-major: #CFCDC4;
+  --sb-line: 1.5px;
+  --sb-line-mark: 2.5px;
+  --sb-hit: 56px;
+  --sb-hit-primary: 64px;
+  --sb-fs-head: 24px;
+  --sb-fs-body: 18px;
+  --sb-fs-note: 14px;
+  --sb-soft-out: none;
+  --sb-soft-in: none;
+  --sb-t-press: 0ms;
+  --sb-t-state: 0ms;
+  --sb-t-menu: 0ms;
+  --sb-t-rise: 0ms;
+  --sb-t-reveal: 0ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sb-base: #151412;
+    --sb-surface: #1C1B18;
+    --sb-sunken: #0F0E0D;
+    --sb-ink: #ECE9E2;
+    --sb-ink-2: #CFCBC1;
+    --sb-ink-3: #A9A59B;
+    --sb-rule: #3A3935;
+    --sb-rule-soft: #26251F;
+    --sb-edge: #9A968C;
+    --sb-on-orange: #151412;
+    --sb-disabled-fg: #7D7A72;
+    --sb-copper: #EAA06A;
+    --sb-copper-text: #EAA06A;
+    --sb-focus: #EAA06A;
+    --sb-inverse-bg: #ECE9E2;
+    --sb-inverse-fg: #151412;
+    --sb-v-no-fill: #F28A90;      --sb-v-no-on: #151412;      --sb-v-no-fg: #F28A90;
+    --sb-v-needs-fill: #E6C64A;   --sb-v-needs-on: #151412;   --sb-v-needs-fg: #E6C64A;
+    --sb-v-done-fill: #CDD4DF;    --sb-v-done-on: #151412;    --sb-v-done-fg: #CDD4DF;
+    --sb-v-none-fill: #86C88A;    --sb-v-none-on: #151412;    --sb-v-none-fg: #86C88A;
+    --sb-v-unknown-fill: #ADB3BD; --sb-v-unknown-on: #151412; --sb-v-unknown-fg: #ADB3BD;
+    --sb-contour: #1F1E1B;
+    --sb-contour-major: #2B2A26;
+    --sb-soft-out: 2px 2px 6px rgba(0, 0, 0, 0.4), -2px -2px 6px rgba(255, 255, 255, 0.03);
+    --sb-soft-in: inset 2px 2px 4px rgba(0, 0, 0, 0.5), inset -2px -2px 4px rgba(255, 255, 255, 0.03);
+  }
+  :root:not([data-theme="light"])[data-mode="field"] {
+    --sb-base: #090908;
+    --sb-surface: #151412;
+    --sb-sunken: #201F1E;
+    --sb-ink: #F3F1EB;
+    --sb-ink-2: #DAD6CD;
+    --sb-ink-3: #BDB9AF;
+    --sb-rule: #75726B;
+    --sb-rule-soft: #4A4843;
+    --sb-edge: #B5B1A7;
+  --sb-disabled-fg: #9B978D;
+    --sb-disabled-fg: #9B978D;
+    --sb-v-no-fill: #F6A0A5;
+    --sb-v-no-fg: #F6A0A5;
+    --sb-contour: #161513;
+    --sb-contour-major: #201F1C;
+    --sb-soft-out: none;
+    --sb-soft-in: none;
+  }
+}
+
+:root[data-theme="dark"] {
+  --sb-base: #151412;
+  --sb-surface: #1C1B18;
+  --sb-sunken: #0F0E0D;
+  --sb-ink: #ECE9E2;
+  --sb-ink-2: #CFCBC1;
+  --sb-ink-3: #A9A59B;
+  --sb-rule: #3A3935;
+  --sb-rule-soft: #26251F;
+  --sb-edge: #9A968C;
+  --sb-on-orange: #151412;
+  --sb-disabled-fg: #7D7A72;
+  --sb-copper: #EAA06A;
+  --sb-copper-text: #EAA06A;
+  --sb-focus: #EAA06A;
+  --sb-inverse-bg: #ECE9E2;
+  --sb-inverse-fg: #151412;
+  --sb-v-no-fill: #F28A90;      --sb-v-no-on: #151412;      --sb-v-no-fg: #F28A90;
+  --sb-v-needs-fill: #E6C64A;   --sb-v-needs-on: #151412;   --sb-v-needs-fg: #E6C64A;
+  --sb-v-done-fill: #CDD4DF;    --sb-v-done-on: #151412;    --sb-v-done-fg: #CDD4DF;
+  --sb-v-none-fill: #86C88A;    --sb-v-none-on: #151412;    --sb-v-none-fg: #86C88A;
+  --sb-v-unknown-fill: #ADB3BD; --sb-v-unknown-on: #151412; --sb-v-unknown-fg: #ADB3BD;
+  --sb-contour: #1F1E1B;
+  --sb-contour-major: #2B2A26;
+  --sb-soft-out: 2px 2px 6px rgba(0, 0, 0, 0.4), -2px -2px 6px rgba(255, 255, 255, 0.03);
+  --sb-soft-in: inset 2px 2px 4px rgba(0, 0, 0, 0.5), inset -2px -2px 4px rgba(255, 255, 255, 0.03);
+}
+:root[data-theme="dark"][data-mode="field"] {
+  --sb-base: #090908;
+  --sb-surface: #151412;
+  --sb-sunken: #201F1E;
+  --sb-ink: #F3F1EB;
+  --sb-ink-2: #DAD6CD;
+  --sb-ink-3: #BDB9AF;
+  --sb-rule: #75726B;
+  --sb-rule-soft: #4A4843;
+  --sb-edge: #B5B1A7;
+  --sb-disabled-fg: #9B978D;
+  --sb-v-no-fill: #F6A0A5;
+  --sb-v-no-fg: #F6A0A5;
+  --sb-contour: #161513;
+  --sb-contour-major: #201F1C;
+  --sb-soft-out: none;
+  --sb-soft-in: none;
+}
+
+/* 動きを減らす設定の人には、移動も拡大も出さない（値を 0 にするだけで、各部品は同じ書き方でよい） */
+@media (prefers-reduced-motion: reduce) {
+  :root, :root[data-mode="field"] {
+    --sb-t-press: 0ms;
+    --sb-t-state: 0ms;
+    --sb-t-menu: 0ms;
+    --sb-t-rise: 0ms;
+    --sb-t-reveal: 0ms;
+  }
+}
