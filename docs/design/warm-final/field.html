@@ -333,6 +333,38 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 }
 
 
+body.ops{min-height:100vh;display:flex;flex-direction:column;background:var(--off)}
+.shell{flex:1;display:flex;flex-direction:column;min-width:0}
+.main{flex:1;padding:20px 16px 28px}
+.s-brand{font-size:26px}
+.s-nav{display:flex;flex-direction:column;gap:4px}
+.s-head{margin:14px 0 2px 14px;font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.1em}
+.s-head-blank{margin:6px 0 0}
+.s-item{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border-radius:var(--pill);font-size:15px;font-weight:700;color:var(--ink);text-decoration:none}
+.s-item svg{width:22px;height:22px;flex:none}
+.s-item:hover{background:var(--beige)}
+.s-item[aria-current="page"]{background:var(--orange)}
+.s-children{display:flex;flex-direction:column;margin-left:26px;border-left:2px solid var(--rule)}
+.s-child{display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.jump{margin-bottom:20px}
+.jump-cap{font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px}
+.jump-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.jump .pill{padding-left:16px;gap:6px;font-size:14px;min-width:0}
+.jump .pill-sm .pill-arrow{width:40px;height:40px}
+.page-title{display:none}
+.pc-only{display:none}
+@media (min-width:1024px){
+  body.ops{display:grid;grid-template-columns:264px minmax(0,1fr)}
+  .side{display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh;padding:24px 16px;background:var(--white);border-right:1px solid var(--rule)}
+  .tabbar,.m-only{display:none}
+  .pc-only{display:inline-flex}
+  .topbar{position:static;min-height:84px;padding:20px 32px 0;background:transparent;border-bottom:0}
+  .topbar h1{font-size:28px}
+  .me{border-color:var(--rule)}
+  .me-name{display:inline}
+  .main{padding:16px 32px 56px;max-width:1080px;width:100%}
+}
+
 body{background:var(--sb-surface);font-size:var(--sb-fs-body);line-height:1.6}
 .f{max-width:560px;margin:0 auto;padding:12px 16px 32px;display:flex;flex-direction:column;gap:16px}
 .f-back{display:flex;align-items:center;gap:8px;min-height:var(--sb-hit);padding:0 18px 0 12px;border:var(--sb-rule-w) solid var(--sb-edge);border-radius:var(--sb-pill);background:#fff;font-size:var(--sb-fs-body);font-weight:700;text-decoration:none;color:var(--ink);align-self:flex-start}
@@ -364,11 +396,24 @@ body{background:var(--sb-surface);font-size:var(--sb-fs-body);line-height:1.6}
 .f-btn.pill-secondary{border:var(--sb-mark-w) solid var(--ink);background:#fff}
 .f-reason{font-size:var(--sb-fs-note);color:var(--ink-2);line-height:1.6;text-align:center}
 .f-card .pill{padding-left:20px;font-size:var(--sb-fs-body)}
+body.p-field{display:flex;flex-direction:column;min-height:100vh}
+body.p-field .f{flex:1;width:100%;padding-bottom:40px}
+/* 現場でも下タブを出す（高さ 64px。本文の末尾はタブの上に十分な余白を取り、隠れない） */
+body.p-field .tab{min-height:max(64px,var(--sb-hit-primary));font-size:var(--sb-fs-note);border-top:0}
+body.p-field .tabbar{border-top:var(--sb-rule-w) solid var(--sb-edge)}
+body.p-field .tab-ic{height:36px}
 
 </style>
 </head>
 <body class="p-field">
-<main class="f" aria-label="現場モード">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="m-no" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.6 8.6 L15.4 15.4 M15.4 8.6 L8.6 15.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="m-needs" viewBox="0 0 24 24"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="m-done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7.8 12.4 L10.9 15.4 L16.4 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="m-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="3.4"/></symbol>
+  <symbol id="m-unknown" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"/><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.2" fill="currentColor"/></symbol>
+</defs></svg><main class="f" aria-label="現場モード">
   <a class="f-back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5 L7 12 L14 19"/></svg>ホームへ戻る</a>
   <div><h1 class="f-title">加茂川 護岸の点検撮影</h1><p class="f-sub">10:30　JU0123　山田 太郎</p></div>
   <nav class="f-steps" aria-label="段階"><a class="f-step" href="#flight" aria-current="step">▶ ① 飛行前</a><a class="f-step" href="#">○ ② 離着陸</a><a class="f-step" href="#">○ ③ 日誌</a></nav>
@@ -406,5 +451,6 @@ body{background:var(--sb-surface);font-size:var(--sb-fs-body);line-height:1.6}
   <button type="button" class="pill pill-primary f-btn" disabled aria-describedby="why"><span class="pill-label">② 離着陸へ進む</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></span></button>
   <p class="f-reason" id="why">あと 3 項目が未了です。すべて済むと押せます。</p>
 </main>
+<nav class="tabbar" aria-label="主なメニュー" data-testid="ops-bottom-nav"><a class="tab" href="/ops"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 L12 4 L20.5 11 M6 9.5 V19.5 H18 V9.5"/></svg></span>ホーム</a><a class="tab" href="/ops/plans" aria-current="page"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10.5 H20 M8.5 3.5 V7 M15.5 3.5 V7"/></svg></span>計画</a><a class="tab" href="/ops/inspections"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="3"/><path d="M9.5 3.5h5a1 1 0 0 1 1 1v1.5h-7V4.5a1 1 0 0 1 1-1z"/><path d="M9 13.5l2 2 4-4.5"/></svg></span>点検</a><a class="tab" href="/ops/journal"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5 H17 a2 2 0 0 1 2 2 V19.5 H7 a2 2 0 0 1-2-2 Z M9 9 H15 M9 12.5 H15"/></svg></span>日誌</a><a class="tab" href="/ops/more"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7 H20 M9 12 H20 M9 17 H20 M4.5 7 H5.5 M4.5 12 H5.5 M4.5 17 H5.5"/></svg></span>登録</a></nav>
 </body>
 </html>

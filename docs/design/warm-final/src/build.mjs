@@ -25,12 +25,15 @@ const ic = {
   verdict: `<path d="M12 21 C7 15.5 5 12.5 5 10 a7 7 0 0 1 14 0 c0 2.5-2 5.5-7 11z"/><circle cx="12" cy="10" r="2.6"/>`,
   plan: `<rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10.5 H20 M8.5 3.5 V7 M15.5 3.5 V7"/>`,
   journal: `<path d="M5 4.5 H17 a2 2 0 0 1 2 2 V19.5 H7 a2 2 0 0 1-2-2 Z M9 9 H15 M9 12.5 H15"/>`,
+  inspect: `<rect x="5" y="4.5" width="14" height="16" rx="3"/><path d="M9.5 3.5h5a1 1 0 0 1 1 1v1.5h-7V4.5a1 1 0 0 1 1-1z"/><path d="M9 13.5l2 2 4-4.5"/>`,
   list: `<path d="M9 7 H20 M9 12 H20 M9 17 H20 M4.5 7 H5.5 M4.5 12 H5.5 M4.5 17 H5.5"/>`,
   back: `<path d="M14 5 L7 12 L14 19"/>`,
 };
 const svgIc = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[k]}</svg>`;
-const NAV = [["home", "ホーム", "/ops"], ["verdict", "判定", "/"], ["plan", "計画", "/ops/plans"], ["journal", "日誌", "/ops/journal"], ["list", "登録", "/ops/more"]];
-const tabbar = (cur) => `<nav class="tabbar" aria-label="主なメニュー">${NAV.map(([k, l, h]) => `<a class="tab" href="${h}"${k === cur ? ' aria-current="page"' : ""}><span class="tab-ic">${svgIc(k)}</span>${l}</a>`).join("")}</nav>`;
+const NAV = [["home", "ホーム", "/ops"], ["verdict", "判定", "/"], ["plan", "計画", "/ops/plans"], ["inspect", "点検", "/ops/inspections"], ["journal", "日誌", "/ops/journal"], ["list", "登録", "/ops/more"]];
+// スマホの下タブは 5 つ（流れ：計画→点検→日誌）。判定はタブに置かず、ホームの上部と計画の作成画面のピルから `/` へ行く。PC の左メニューは 6 項目。
+const TABS = ["home", "plan", "inspect", "journal", "list"].map((k) => NAV.find((n) => n[0] === k));
+const tabbar = (cur) => `<nav class="tabbar" aria-label="主なメニュー" data-testid="ops-bottom-nav">${TABS.map(([k, l, h]) => `<a class="tab" href="${h}"${k === cur ? ' aria-current="page"' : ""}><span class="tab-ic">${svgIc(k)}</span>${l}</a>`).join("")}</nav>`;
 const sideNav = (cur) => {
   const it = (k) => { const [, l, h] = NAV.find((n) => n[0] === k); return `<a class="s-item" href="${h}"${k === cur ? ' aria-current="page"' : ""}>${svgIc(k)}<span>${l}</span></a>`; };
   const ch = (l) => `<a class="s-child" href="#">${l}</a>`;
@@ -39,12 +42,14 @@ const sideNav = (cur) => {
   <nav class="s-nav" aria-label="主なメニュー">
     ${it("home")}
     <p class="s-head">調べる</p>${it("verdict")}
-    <p class="s-head">飛ばす</p>${it("plan")}${it("journal")}
+    <p class="s-head">飛ばす</p>${it("plan")}${it("inspect")}${it("journal")}
     <p class="s-head s-head-blank"></p>${it("list")}
     <div class="s-children">${["機体", "操縦者", "許可・承認", "地点"].map(ch).join("")}</div>
   </nav>
 </aside>`;
 };
+// 判定への入口（ホームの上部と計画の作成画面）。1 タップで判定画面（/）へ。高さ 48px 以上
+const judgeJump = (caption) => `<section class="jump" aria-label="判定へ"><p class="jump-cap">${caption}</p><div class="jump-row">${pill("pill-secondary pill-sm", "現在地で判定", { tag: "a", href: "/", icon: `<span class="pill-arrow" aria-hidden="true"><span class="ar a1">${PIN_ICON}</span><span class="ar a2">${PIN_ICON}</span></span>` })}${pill("pill-secondary pill-sm", "場所を調べる", { tag: "a", href: "/" })}</div></section>`;
 const meBtn = `<button type="button" class="me" aria-label="利用者メニュー：山田 太郎（運航管理者）"><span class="me-ic" aria-hidden="true">山</span><span class="me-name">山田 太郎　運航管理者</span></button>`;
 const opsCss = `
 body.ops{min-height:100vh;display:flex;flex-direction:column;background:var(--off)}
@@ -60,6 +65,11 @@ body.ops{min-height:100vh;display:flex;flex-direction:column;background:var(--of
 .s-item[aria-current="page"]{background:var(--orange)}
 .s-children{display:flex;flex-direction:column;margin-left:26px;border-left:2px solid var(--rule)}
 .s-child{display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.jump{margin-bottom:20px}
+.jump-cap{font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px}
+.jump-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.jump .pill{padding-left:16px;gap:6px;font-size:14px;min-width:0}
+.jump .pill-sm .pill-arrow{width:40px;height:40px}
 .page-title{display:none}
 .pc-only{display:none}
 @media (min-width:1024px){
@@ -283,6 +293,7 @@ function homePage() {
 .foot-note{margin-top:28px;padding:16px;border-radius:var(--r-l);background:var(--beige);font-size:12.5px;line-height:1.8;color:var(--ink-2)}
 .main>.top-actions{margin-bottom:16px}
 @media (min-width:1024px){
+  .jump-row{max-width:520px}
   .home-grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:28px;align-items:start}
   .next-card{padding:28px}
   .next-card .pill{align-self:flex-start;min-width:320px}
@@ -323,7 +334,7 @@ ${sideNav("home")}
 <div class="shell">
   <header class="topbar"><h1>ホーム<span class="sub">2026年10月25日（日）</span></h1>
     <span class="top-actions"><span class="pc-only">${pill("pill-primary", "飛行計画を作る", { extra: 'style="min-height:52px"' })}</span>${meBtn}</span></header>
-  <main class="main"><div class="home-grid"><div class="col">${nextCard}${next}</div><div class="col">${deadlines}${upcoming}</div></div>
+  <main class="main">${judgeJump("飛ばす前に、地点を判定する")}<div class="home-grid"><div class="col">${nextCard}${next}</div><div class="col">${deadlines}${upcoming}</div></div>
     <p class="foot-note" data-testid="today-disclaimer">本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。実運用前に必ず国土交通省 DIPS、警察庁、各自治体の最新情報をご確認ください。</p></main>
 </div>
 ${tabbar("home")}`;
@@ -364,9 +375,15 @@ body{background:var(--sb-surface);font-size:var(--sb-fs-body);line-height:1.6}
 .f-btn.pill-secondary{border:var(--sb-mark-w) solid var(--ink);background:#fff}
 .f-reason{font-size:var(--sb-fs-note);color:var(--ink-2);line-height:1.6;text-align:center}
 .f-card .pill{padding-left:20px;font-size:var(--sb-fs-body)}
+body.p-field{display:flex;flex-direction:column;min-height:100vh}
+body.p-field .f{flex:1;width:100%;padding-bottom:40px}
+/* 現場でも下タブを出す（高さ 64px。本文の末尾はタブの上に十分な余白を取り、隠れない） */
+body.p-field .tab{min-height:max(64px,var(--sb-hit-primary));font-size:var(--sb-fs-note);border-top:0}
+body.p-field .tabbar{border-top:var(--sb-rule-w) solid var(--sb-edge)}
+body.p-field .tab-ic{height:36px}
 `;
   const chkSvg = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg>`;
-  const body = `<main class="f" aria-label="現場モード">
+  const body = `${symbols(3)}<main class="f" aria-label="現場モード">
   <a class="f-back" href="#">${svgIc("back")}ホームへ戻る</a>
   <div><h1 class="f-title">加茂川 護岸の点検撮影</h1><p class="f-sub">10:30　JU0123　山田 太郎</p></div>
   <nav class="f-steps" aria-label="段階"><a class="f-step" href="#flight" aria-current="step">▶ ① 飛行前</a><a class="f-step" href="#">○ ② 離着陸</a><a class="f-step" href="#">○ ③ 日誌</a></nav>
@@ -403,8 +420,9 @@ body{background:var(--sb-surface);font-size:var(--sb-fs-body);line-height:1.6}
 
   ${pill("pill-primary f-btn", "② 離着陸へ進む", { extra: 'disabled aria-describedby="why"' })}
   <p class="f-reason" id="why">あと 3 項目が未了です。すべて済むと押せます。</p>
-</main>`;
-  return html({ title: "そらばん 現場の点検（飛行前）", attrs: ' data-mode="field"', bodyClass: "p-field", css, body });
+</main>
+${tabbar("plan")}`;
+  return html({ title: "そらばん 現場の点検（飛行前）", attrs: ' data-mode="field"', bodyClass: "p-field", css: opsCss + css, body });
 }
 
 // ───────── (e) 飛行日誌の入力 ─────────
@@ -474,9 +492,77 @@ ${tabbar("journal")}`;
   return html({ title: "そらばん 飛行日誌の入力", bodyClass: "ops p-journal", css, body });
 }
 
+
+// ───────── 点検の一覧 ─────────
+function inspectionsPage() {
+  const t = (txt, c = "") => `<span class="tag-pill ${c}">${txt}</span>`;
+  const todo = (when, kind, plan, ac) => `<a class="row" href="#"><span class="row-main"><span class="row-tags">${t(when, when === "今日" ? "tag-deadline" : "")}${t(kind)}${t("－ 未実施", "tag-strong")}</span><span class="row-title">${plan}</span><span class="row-sub">機体　${ac}</span></span><span class="row-go" aria-hidden="true">${ARROW}</span></a>`;
+  const rec = (dt, ac, who, kind, ok) => `<a class="row" href="#"><span class="row-main"><span class="row-tags">${t(dt)}${t(kind)}${ok ? t("✓ 正常") : t("！ 異常あり", "tag-strong")}</span><span class="row-title">${ac}</span><span class="row-sub">実施者　${who}</span></span><span class="row-go" aria-hidden="true">${ARROW}</span></a>`;
+  const chipf = (txt, on) => `<button type="button" class="chip ${on ? "is-on" : "is-off"}" aria-pressed="${on}">${on ? CHECK : '<span class="chk-empty" aria-hidden="true"></span>'}<span>${txt}</span></button>`;
+  const css = opsCss + `
+.insp-new{margin-bottom:20px}
+.insp-new .pill{width:100%}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.count{font-size:13px;color:var(--ink-3)}
+@media (min-width:1024px){.insp-new .pill{width:auto;min-width:320px}}
+`;
+  const body = `${symbols(3)}
+${sideNav("inspect")}
+<div class="shell">
+  <header class="topbar"><h1>点検<span class="sub">飛行前・飛行後の日常点検</span></h1>${meBtn}</header>
+  <main class="main">
+    <div class="insp-new">${pill("pill-primary", "新しい点検", { tag: "a", href: "/ops/inspections/new" })}</div>
+    <section aria-label="未実施の点検" class="stack"><h2 class="sect-title">未実施<span class="aside">3 件</span></h2>
+      <div class="block list">
+        ${todo("今日", "飛行前", "加茂川 護岸の点検撮影　10:30", "JU0123")}
+        ${todo("昨日", "飛行後", "日野川 橋脚の点検（10/24）", "JU0456")}
+        ${todo("10/27", "飛行前", "日野川 橋脚の点検　9:00", "JU0456")}
+      </div></section>
+    <section aria-label="点検の記録" style="margin-top:28px"><h2 class="sect-title">記録<span class="aside">新しい順</span></h2>
+      <div class="filters" role="group" aria-label="区分で絞り込む">${chipf("すべて", true)}${chipf("飛行前", false)}${chipf("飛行後", false)}</div>
+      <div class="block list">
+        ${rec("10/24 07:42", "JU0456", "山田 太郎", "飛行前", true)}
+        ${rec("10/23 15:10", "JU0123", "佐藤 花子", "飛行後", false)}
+        ${rec("10/23 08:05", "JU0123", "佐藤 花子", "飛行前", true)}
+      </div><p class="quiet count">3 件</p></section>
+  </main>
+</div>
+${tabbar("inspect")}`;
+  return html({ title: "そらばん 点検の一覧", bodyClass: "ops p-inspections", css, body });
+}
+
+// ───────── 計画の作成（判定への導線つき） ─────────
+function planNewPage() {
+  const css = opsCss + `
+.form{display:flex;flex-direction:column;gap:16px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}.fld:last-child{margin-bottom:0}
+.req{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:var(--pill);background:var(--ink);color:#F7F7F3;font-size:12px;font-weight:700;margin-left:8px}
+.fld .lbl{margin:0}
+.savebar{position:sticky;bottom:0;z-index:4;padding:12px 16px;background:rgba(247,247,243,.96);border-top:1px solid var(--rule)}
+@media (min-width:1024px){.form{max-width:760px}}
+`;
+  const body = `${symbols(3)}
+${sideNav("plan")}
+<div class="shell">
+  <header class="topbar"><a class="back" href="/ops/plans">${svgIc("back")}計画</a><h1>飛行計画を作る</h1>${meBtn}</header>
+  <main class="main"><form class="form" onsubmit="return false">
+    ${judgeJump("地点がまだ決まっていないときは、先に判定画面で調べられます")}
+    <section class="block"><div class="fld"><label class="lbl" for="pn">計画の名前<span class="req">必須</span></label><input id="pn" class="inp" type="text" value="加茂川 護岸の点検撮影"></div>
+      <div class="fld"><label class="lbl" for="pp">飛行する場所<span class="req">必須</span></label><input id="pp" class="inp" type="text" value="鳥取県米子市加茂町1丁目1番地"><p class="hint">住所か座標。判定した地点は、そのまま使えます。</p></div>
+      <div class="fld"><label class="lbl" for="pd">飛行日時<span class="req">必須</span></label><input id="pd" class="inp" type="text" value="2026-10-25　10:30 〜 11:15"></div>
+      <div class="fld"><label class="lbl" for="pa">機体<span class="req">必須</span></label><select id="pa" class="inp"><option>JU0123</option></select></div></section>
+  </form></main>
+  <div class="savebar">${pill("pill-primary", "計画を保存する", { extra: 'style="width:100%"' })}</div>
+</div>
+${tabbar("plan")}`;
+  return html({ title: "そらばん 飛行計画を作る", bodyClass: "ops p-plannew", css, body });
+}
+
 write("top.html", topPage());
 write("result.html", resultPage());
 write("home.html", homePage());
 write("field.html", fieldPage());
 write("journal.html", journalPage());
-console.log("built top / result / home / field / journal");
+write("inspections.html", inspectionsPage());
+write("plan-new.html", planNewPage());
+console.log("built top / result / home / field / inspections / journal / plan-new");

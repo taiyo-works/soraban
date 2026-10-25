@@ -12,7 +12,7 @@ const shots = [
   ["top", "mobile", 390, 844], ["top", "pc", 1280, 900],
   ["result", "mobile", 1280, 900],
   ["home", "mobile", 390, 844], ["home", "pc", 1280, 900],
-  ["field", "mobile", 390, 844], ["journal", "mobile", 390, 844],
+  ["field", "mobile", 390, 844], ["inspections", "mobile", 390, 844], ["journal", "mobile", 390, 844], ["plan-new", "mobile", 390, 844],
 ];
 let total = 0;
 for (const [id, name, w, h] of shots) {
@@ -47,6 +47,7 @@ for (const [id, name, w, h] of shots) {
     const hero = document.querySelector(".hero"); if (hero) extra.hero = Math.round(hero.getBoundingClientRect().height);
     if (field) {
       extra.rows = [...document.querySelectorAll(".chk-row")].map((e) => Math.round(e.getBoundingClientRect().height));
+      extra.tab = Math.round(document.querySelector(".tab").getBoundingClientRect().height); extra.tabs = document.querySelectorAll(".tabbar .tab").length; extra.lastVsTab = Math.round(document.querySelector(".tabbar").getBoundingClientRect().top - document.querySelector("#why").getBoundingClientRect().bottom);
       extra.primary = [...document.querySelectorAll(".pill-primary,.f-btn")].map((e) => Math.round(e.getBoundingClientRect().height));
       const anim = [...document.querySelectorAll("*")].filter((e) => { const c = getComputedStyle(e); return (c.animationName !== "none" && parseFloat(c.animationDuration) > 0) || parseFloat(c.transitionDuration) > 0; }).length;
       extra.animated = anim;
