@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 新しいデザインシステムのトークン（--sb-*）。値の正は docs 側の 1 か所。取り込むだけで、まだどの部品も参照しない */
+@import "../../../../docs/design/tokens/soraban-tokens.css";
 
 /* ============================================================
  * Soraban — design tokens

@@ -100,6 +100,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const skip = page.getByTestId("skip-to-main");
     await expect(skip).toHaveText("本文へ移動");
     await expect(skip).not.toBeInViewport();
+    // 本文の一覧が描かれる前に Tab を送ると、順が本文を飛ばして下タブへ行く
+    await expect(page.getByTestId("more-link-aircraft")).toBeVisible();
     const order: string[] = [];
     for (let i = 0; i < 40; i++) {
       await page.keyboard.press("Tab");
