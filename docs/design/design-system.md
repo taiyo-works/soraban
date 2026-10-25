@@ -1,6 +1,6 @@
 # そらばん デザインシステム
 
-2026-10-25 版（v1）。この文書が唯一の正。値の実体は `docs/design/tokens/soraban-tokens.css`、検査は `docs/design/tokens/check-contrast.mjs`、全体の見本は `docs/design/system-sheet.png`。アプリのソースにはまだ取り込んでいない（移行は §12）。見本の元は `docs/design/tokens/sheet/`（`node build.mjs` で HTML、`node shoot.mjs 出力.png` で画像。Chromium は `/opt/pw-browsers`）。
+2026-10-25 版（v1）。この文書が唯一の正。値の実体は `apps/web/src/app/soraban-tokens.css`、検査は `docs/design/tokens/check-contrast.mjs`、全体の見本は `docs/design/system-sheet.png`。トークンは `--sb-*` として globals.css に取り込み済みで、部品はまだ参照しない（移行は §12）。見本の元は `docs/design/tokens/sheet/`（`node build.mjs` で HTML、`node shoot.mjs 出力.png` で画像。Chromium は `/opt/pw-browsers`）。
 
 ## 1. 原則
 
@@ -64,6 +64,8 @@
 暗は全パレット共通の夜間用で、OS の設定で自動に切り替わる（手動切替は後回し）。現場は明・暗のどちらにも重ねられ、7:1 に寄せ、陰影を罫に置き換える。`data-mode="field"` を付けると現場になる。
 
 ### 3.4 トークンと値（`soraban-tokens.css` と一致）
+
+トークンの値の正は `apps/web/src/app/soraban-tokens.css`（本番のビルドに入るためアプリ側に置く。`docs/design/tokens/` に残すのは検査スクリプトと見本のソース）。
 
 色の一覧。寸法（`--sb-hit`＝48／52px、現場 56／64px）、文字の大きさ、余白、動きの秒数は、同じ CSS の値が本書 §4〜§8 の表と一致している（寸法と最小文字は検査スクリプトが下限を確かめる）。
 

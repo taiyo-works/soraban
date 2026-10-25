@@ -1,4 +1,4 @@
-/* 見本シート専用の部品の書き方。アプリのコードではない。値はすべて ../soraban-tokens.css のトークンから取る */
+/* 見本シート専用の部品の書き方。アプリのコードではない。値はすべて apps/web/src/app/soraban-tokens.css のトークンから取る */
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--sb-base)}
 body{width:2400px;background:var(--sb-base);color:var(--sb-ink);font-family:var(--sb-font-jp);font-size:var(--sb-fs-body);line-height:var(--sb-lh-body);letter-spacing:var(--sb-ls-body);line-break:strict;-webkit-font-smoothing:antialiased}

@@ -91,7 +91,7 @@ main との差の全体は 131 ファイル（コード・テスト 90 ファイ
 |---|---|---|
 | K1 | CI | verify・e2e・db が通る。db ジョブは PostgreSQL 18＋PostGIS（`EXPECT_PG_MAJOR=18`）が正 |
 | K2 | 手元 | PR の前に `pnpm typecheck`・`lint`・`test`・`build`・`test:e2e` を通す。E2E-DB（`pnpm test:e2e:ops`）はサーバーがある環境でだけ。ない場合は「未実行」と書き、影響するテストを grep で先に直す |
-| K3 | git | `git diff origin/main` で、`packages/**`、マイグレーション、`ENGINE_VERSION`（`soraban-0.4.0-verdict-2026-10`）、証跡 ID、`/api/**` の入出力、`apps/web/src/server/**` のロジックに差分がない。例外は①の `deadlines`（`/api/ops/today` の応答に項目が増えるだけ） |
+| K3 | git | `git diff origin/main` で、`packages/**`、マイグレーション、`ENGINE_VERSION`（`soraban-0.4.0-verdict-2026-10`）、証跡 ID、`/api/**` の入出力、`apps/web/src/server/**` のロジックに差分がない。例外は①の `/api/ops/today`：応答に増える項目は `deadlines`・`upcoming`・`journey`（`card.journey`、`upcoming[].journey`）の追加のみで、既存の項目は変えない（`today.ts`・`deadlines-logic.ts`・`journey-logic.ts`・`register-counts.ts` とそのテスト） |
 | K4 | git | `package.json`・`pnpm-lock.yaml` に差分がない（依存を足さない。フォントは `next/font`） |
 | K5 | E2E | `data-testid`・固定の文言の定数・G1／N1〜N7 の位置と DOM の順を変えない。既存テストの期待値を弱めない。直したテストは「名前・変更内容・理由」を PR に一覧する |
 | K6 | コントラスト | `node docs/design/tokens/check-contrast.mjs` が終了コード 0（196 組、不足 0）。実画面は文字 4.5:1／非文字 3:1、現場は 7:1／4.5:1 |
@@ -117,6 +117,17 @@ main との差の全体は 131 ファイル（コード・テスト 90 ファイ
 | P1-9 | 視覚 | PR A（12g-1b の A1〜A14）の evaluator 合格レポート：ホーム・登録・日誌・メニュー × 375/768/1280 × 明・暗 |
 | P1-10 | 文書 | §14 の整合（12g・12g-1b・design-system §12 の参照）。HANDOFF の更新は別トラック（§13） |
 | P1-11 | 運用 | マージ後、統合した 5 ブランチの削除はのりさんの指示を待つ |
+
+### 4.1 PR ① の実装で決めたこと・変えたテスト（K5・K10。PR の説明用）
+
+- **トークンの置き場**：`soraban-tokens.css` は `apps/web/src/app/` に置く（Vercel の Root Directory は apps/web。docs だけの変更は CI が動かないため、docs 側の値が本番の CSS を変えると検査を素通りする）。`check-contrast.mjs` と見本のソース（`docs/design/tokens/sheet/`）は docs に残し、ここを読む。
+- **`/` の JS**：`ops-home-entry.tsx` が `ops-nav` を静的に読むと、未ログインの `/` も約 28KB（gzip）多く読む。下メニューは `ops-bottom-nav-lazy.tsx`（`next/dynamic`）に分け、描かれるときだけ読む。
+- **変えたテスト（12g-1a の見本の置き換えによる。意図の変更）**
+  - 削除した検査：配色案（palette 1〜3）の規則と、ガラス（`--glass`・`backdrop-filter`）の検査。配色案は 6 に確定し、ガラスは使わないため。
+  - 置き換えた検査：旧 accent の組（文字・境の組）→ `accent-solid`（主ボタンの塗りと文字）の組。
+  - 削除した `data-testid`：`ctl-palette`（配色案の切り替え）、`more-me`・`more-me-name`（登録画面の利用者の行。`sprint12c-db` の該当の検査も同時に外した）。
+- **E2E-DB の待ち（期待値は変えない）**：`sprint11-db`（左メニューが描かれてから `boundingBox`）、`sprint12g-1b-fix-db` I-3（一覧が描かれてから Tab）。`playwright.ops.config.ts` のサーバーに `--keepAliveTimeout`（ECONNRESET 対策）。
+- **既知の不安定（PR ② で扱う）**：`sprint11b.spec.ts:113`（フォント差し替えの CLS 0.0003。main でも同率）。
 
 ## 5. PR ②：判定画面 `/`（完了条件 27）
 

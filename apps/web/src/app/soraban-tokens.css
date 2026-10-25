@@ -1,4 +1,4 @@
-/* そらばん デザイントークン（まだアプリには取り込まない。正は ../design-system.md）
+/* そらばん デザイントークン（globals.css が取り込む。値の説明は docs/design/design-system.md）
  *
  * 構成（check-contrast.mjs がこの並びと selector を前提に読む）
  *   1. :root                                   明（既定）
