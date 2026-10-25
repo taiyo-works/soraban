@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>そらばん 飛行日誌の入力</title>
+<style>
+
+:root {
+  
+  --sb-base: #FFFFFF;
+  --sb-surface: #F7F7F3;
+  --sb-sunken: #EDEDE5;
+
+  
+  --sb-ink: #262523;
+  --sb-ink-2: #4A4843;
+  --sb-ink-3: #5F5D57;
+  --sb-ph: #68655B;
+
+  
+  --sb-rule: #C4C4C4;
+  --sb-edge: #5F5D57;
+  --sb-focus: #262523;
+
+  
+  --sb-orange: #F89B48;
+  --sb-orange-hover: #FFC189;
+  --sb-orange-deep: #E99347;
+  --sb-on-orange: #262523;
+
+  
+  --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
+  --sb-v-needs-fill: #EDB800;    --sb-v-needs-on: #262523;    --sb-v-needs-fg: #6B5800;
+  --sb-v-done-fill: #262523;     --sb-v-done-on: #F7F7F3;     --sb-v-done-fg: #262523;
+  --sb-v-none-fill: #225F36;     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: #225F36;
+  --sb-v-unknown-fill: #FFFFFF;  --sb-v-unknown-on: #4F5762;  --sb-v-unknown-fg: #4F5762;
+
+  
+  --sb-art-sky: #DEF3F4;
+  --sb-art-sky-warm: #FFF1DE;
+  --sb-art-hill-far: #FFC189;
+  --sb-art-hill-mid: #2EBEC4;
+  --sb-art-hill-near: #0F6B70;
+  --sb-art-cloud: #FFFFFF;
+  --sb-contour: rgba(233, 147, 71, 0.38);
+  --sb-contour-major: rgba(233, 147, 71, 0.7);
+
+  
+  --sb-r-l: 16px;                
+  --sb-r-m: 8px;                 
+  --sb-r-s: 4px;                 
+  --sb-pill: 9999px;             
+  --sb-shadow: 0 0 24px rgba(0, 0, 0, 0.1);
+  --sb-rule-w: 1px;
+  --sb-mark-w: 2px;
+
+  
+  --sb-hit-min: 44px;            
+  --sb-hit: 48px;                
+  --sb-hit-primary: 56px;        
+  --sb-hit-row: 48px;            
+  --sb-fs-h: 22px;
+  --sb-fs-body: 15px;
+  --sb-fs-note: 12px;
+
+  
+  --sb-dur: 500ms;
+  --sb-dur-rise: 600ms;
+  --sb-ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+
+:root[data-mode="field"] {
+  --sb-ink-2: #3A3834;
+  --sb-ink-3: #45423D;
+  --sb-ph: #4E4B44;
+  --sb-edge: #3A3834;
+  --sb-rule: #8A8880;
+  --sb-v-no-fg: #8A1520;
+  --sb-v-needs-fg: #5A4A00;
+  --sb-v-none-fg: #1B4E2C;
+  --sb-v-unknown-on: #3F4750;
+  --sb-v-unknown-fg: #3F4750;
+  --sb-shadow: none;
+  --sb-rule-w: 1.5px;
+  --sb-mark-w: 2.5px;
+  --sb-hit-min: 56px;
+  --sb-hit: 56px;
+  --sb-hit-primary: 64px;
+  --sb-hit-row: 64px;
+  --sb-fs-h: 24px;
+  --sb-fs-body: 18px;
+  --sb-fs-note: 14px;
+  --sb-dur: 0ms;
+  --sb-dur-rise: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sb-dur: 0ms; --sb-dur-rise: 0ms; }
+}
+
+
+:root{
+  --font:"Noto Sans JP","Plus Jakarta Sans","Hiragino Sans","Yu Gothic UI","Yu Gothic","IPAGothic","IPAPGothic",sans-serif;
+  --ink:var(--sb-ink); --ink-2:var(--sb-ink-2); --ink-3:var(--sb-ink-3); --ph:var(--sb-ph); --rule:var(--sb-rule); --edge:var(--sb-edge);
+  --orange:var(--sb-orange); --orange-light:var(--sb-orange-hover); --white:var(--sb-base); --off:var(--sb-surface); --beige:var(--sb-sunken);
+  --r-l:var(--sb-r-l); --r-m:var(--sb-r-m); --r-s:var(--sb-r-s); --pill:var(--sb-pill);
+  --v-needs-fg:var(--sb-v-needs-fg); --v-no:var(--sb-v-no-fill); --v-needs:var(--sb-v-needs-fill); --v-done:var(--sb-v-done-fill); --v-none:var(--sb-v-none-fill); --v-unknown:var(--sb-v-unknown-fg);
+  --ct:var(--sb-contour); --ct-major:var(--sb-contour-major);
+  --map-land:#FBF6EC; --map-water:#DEF3F4; --map-shore:#2EBEC4; --road:#FFFFFF; --road-casing:#C4C4C4;
+  --did-tint:#FFE3C7; --did-line:#B3500A; --park-line:#225F36; --air-line:#4A4843; --pin-halo:rgba(248,155,72,.28);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sb-base);color:var(--sb-ink);font-family:var(--font);font-size:var(--sb-fs-body);line-height:1.75;letter-spacing:.03em;line-break:strict;word-break:auto-phrase;overflow-wrap:anywhere}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0;padding:0}
+ul,ol{list-style:none}
+button,select,input{font:inherit;color:inherit;letter-spacing:inherit}
+a{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:2px;text-decoration-color:var(--orange)}
+:focus-visible{outline:3px solid var(--sb-focus);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* 帯（白・オフホワイト・ベージュを交互に） */
+.band{position:relative;padding:36px 16px}
+.band>*{max-width:1120px;margin-left:auto;margin-right:auto}
+.band-white{background:var(--white)}.band-off{background:var(--off)}.band-beige{background:var(--beige)}
+
+/* 見出し：左 5px の橙線＋背後の大きな薄い数字 */
+.sec-head{position:relative;margin-bottom:20px;padding:6px 0 6px 14px;border-left:5px solid var(--orange);min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.sec-head h2{font-size:22px;line-height:1.4;letter-spacing:.06em;font-weight:700;position:relative;z-index:1}
+.sec-num{position:absolute;right:0;top:-34px;font-size:112px;line-height:1;font-weight:800;letter-spacing:0;color:rgba(248,155,72,.2);font-family:"Plus Jakarta Sans","Noto Sans JP",sans-serif;pointer-events:none}
+.sec-note{font-size:13px;color:var(--ink-3);line-height:1.6;position:relative;z-index:1}
+
+/* ブロック（影は 0 0 24px 黒 10% のみ） */
+.block{background:var(--white);border-radius:var(--r-l);box-shadow:var(--sb-shadow);padding:20px 16px}
+.band-white .block{background:var(--off)}
+.block-soft{border-radius:var(--r-l);background:var(--off);padding:16px;margin-top:16px}
+.band-off .block-soft{background:var(--white)}
+
+/* ピルボタン：右端に墨の丸。ホバー・押下・フォーカスで矢印が入れ替わる（動き 1 種類め） */
+.pill{position:relative;display:inline-flex;align-items:center;justify-content:space-between;gap:14px;min-height:var(--sb-hit);padding:4px 4px 4px 24px;border-radius:var(--pill);border:1px solid transparent;cursor:pointer;font-weight:700;font-size:15px;line-height:1.3;text-align:left;text-decoration:none;color:var(--ink);transition:background var(--sb-dur) var(--sb-ease)}
+.pill-label{flex:1;min-width:0}
+.pill-arrow{position:relative;flex:none;display:block;width:44px;height:44px;border-radius:var(--pill);background:var(--ink);color:#fff;overflow:hidden;transition:background var(--sb-dur) var(--sb-ease),color var(--sb-dur) var(--sb-ease)}
+.pill-arrow .ar{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform var(--sb-dur) var(--sb-ease)}
+.pill-arrow .a2{transform:translateX(-130%)}
+.pill:hover .a1,.pill:active .a1,.pill:focus-visible .a1{transform:translateX(130%)}
+.pill:hover .a2,.pill:active .a2,.pill:focus-visible .a2{transform:none}
+.pill-primary{background:var(--orange);color:var(--sb-on-orange);min-height:var(--sb-hit-primary);font-size:16px}
+.pill-primary .pill-arrow{width:48px;height:48px}
+.pill-primary:hover,.pill-primary:active,.pill-primary:focus-visible{background:var(--orange-light)}
+.pill-primary:hover .pill-arrow,.pill-primary:active .pill-arrow,.pill-primary:focus-visible .pill-arrow{background:#fff;color:var(--ink)}
+.pill-secondary{background:rgba(255,255,255,.92);border-color:var(--rule);}
+.band-white .pill-secondary{background:#fff}
+.pill-secondary:hover .pill-arrow,.pill-secondary:active .pill-arrow,.pill-secondary:focus-visible .pill-arrow{background:var(--orange);color:var(--ink)}
+.pill-sm{min-height:48px;font-size:14px;padding-left:20px}
+.pill-sm .pill-arrow{width:40px;height:40px}
+.pill[disabled],.pill[aria-disabled="true"]{background:var(--sb-sunken);color:var(--ink-3);border:1.5px dashed var(--edge);cursor:not-allowed}
+.pill[disabled] .pill-arrow,.pill[aria-disabled="true"] .pill-arrow{background:var(--edge)}
+.pill[disabled]:hover .a1,.pill[aria-disabled="true"]:hover .a1{transform:none}
+.pill[disabled]:hover .a2,.pill[aria-disabled="true"]:hover .a2{transform:translateX(-130%)}
+.pill-block{width:100%}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  .pill-arrow .a2{display:none}
+  .pill:hover .a1,.pill:active .a1,.pill:focus-visible .a1{transform:none}
+}
+:root[data-mode="field"] .pill-arrow .a2{display:none}
+:root[data-mode="field"] .pill:hover .a1,:root[data-mode="field"] .pill:active .a1,:root[data-mode="field"] .pill:focus-visible .a1{transform:none}
+
+/* せり上がり表示（動き 2 種類め。ページごとに 1 回だけ） */
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.rise{animation:rise var(--sb-dur-rise) var(--sb-ease) 1 both}
+
+/* 判定タグ：形のマークと言葉をセットで */
+.vtag{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:3px 14px 3px 8px;border-radius:var(--pill);font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
+.vm{width:20px;height:20px;flex:none}.vm-lg{width:28px;height:28px}
+.v-no{background:var(--sb-v-no-fill);color:var(--sb-v-no-on)}
+.v-needs{background:var(--sb-v-needs-fill);color:var(--sb-v-needs-on);box-shadow:inset 0 0 0 2px var(--sb-v-needs-fg)}
+.v-done{background:var(--sb-v-done-fill);color:var(--sb-v-done-on)}
+.v-none{background:var(--sb-v-none-fill);color:var(--sb-v-none-on)}
+.v-unknown{background:var(--sb-v-unknown-fill);color:var(--sb-v-unknown-on);box-shadow:inset 0 0 0 1.5px var(--sb-v-unknown-fg)}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:2px 12px;border-radius:var(--pill);background:var(--white);border:1px solid var(--rule);font-size:12.5px;line-height:1.4;color:var(--ink-2);font-weight:500}
+.band-white .tag-pill,.block .tag-pill{background:var(--off)}
+.tag-deadline{background:var(--orange-light)!important;border-color:transparent;color:var(--ink);font-weight:700}
+.tag-strong{background:var(--ink)!important;border-color:transparent;color:#F7F7F3;font-weight:700}
+
+/* 結論の大きな印 */
+.v-head{display:flex;align-items:center;gap:14px}
+.v-big{flex:none;width:68px;height:68px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-m)}
+.v-big svg{width:44px;height:44px}
+.vb-needs{background:var(--sb-v-needs-fill);color:var(--sb-v-needs-on);box-shadow:inset 0 0 0 3px var(--sb-v-needs-fg)}
+.vb-no{background:var(--sb-v-no-fill);color:var(--sb-v-no-on)}
+.vb-none{background:var(--sb-v-none-fill);color:var(--sb-v-none-on)}
+.v-eyebrow{font-size:13px;color:var(--ink-3);font-weight:500;letter-spacing:.08em}
+.v-word{font-size:30px;font-weight:800;line-height:1.25;letter-spacing:.08em}
+.v-place{font-size:13px;color:var(--ink-3);line-height:1.6;margin-top:2px}
+.v-lead{font-size:15px;line-height:1.85}
+.v-lead strong{background:linear-gradient(transparent 62%,var(--orange-light) 62%)}
+.v-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.verdict-block{display:flex;flex-direction:column;gap:14px}
+
+/* 入力 */
+label.lbl,.lbl{display:block;font-size:14px;font-weight:700;margin-bottom:8px;letter-spacing:.05em}
+.inp,select.inp{width:100%;height:52px;border:1.5px solid var(--edge);border-radius:var(--r-m);background:#fff;padding:0 16px;font-size:16px;color:var(--ink);letter-spacing:.03em}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23262523' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:20px;padding-right:44px}
+.inp::placeholder{color:var(--ph);opacity:1}
+.hint{margin-top:8px;font-size:12.5px;line-height:1.7;color:var(--ink-3)}
+.btn-row{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.input-block .lbl{margin-bottom:8px}
+
+/* 地図・チップ */
+.map-block{padding:12px;position:relative}
+.map-frame{position:relative;border-radius:var(--r-m);overflow:hidden;border:1px solid var(--rule);aspect-ratio:640/440;background:var(--map-land)}
+.map-svg{display:block;width:100%;height:100%}
+.ct{stroke:var(--ct);stroke-width:1.4}.ct-major{stroke:var(--ct-major);stroke-width:2.2}
+.layers{padding:14px 4px 4px}
+.layers-title{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:10px}
+.layers-title span{display:block;font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:var(--sb-hit-min);padding:6px 16px 6px 12px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:700;line-height:1.2;background:transparent;transition:background var(--sb-dur) var(--sb-ease)}
+.chip.is-on{background:#fff;border:2px solid var(--ink);color:var(--ink)}
+.chip.is-off{border:2px dashed var(--edge);color:var(--ink-3);font-weight:500}
+.chip.is-on .chk{flex:none;width:18px;height:18px;padding:2px;border-radius:var(--pill);background:var(--orange);color:var(--ink)}
+.chip .chk-empty{flex:none;width:18px;height:18px;border-radius:var(--pill);border:2px solid var(--edge)}
+.chip.is-off svg:not(.chk){opacity:.6}
+.chip:hover,.chip:focus-visible{background:var(--orange-light)}
+
+/* 手続き・規制ごとの判定 */
+.proc-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.proc{display:flex;gap:14px;align-items:flex-start}
+.proc-no{flex:none;width:40px;height:40px;border-radius:var(--pill);background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.proc-done .proc-no{background:var(--off);color:var(--sb-v-done-fg)}
+.proc-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.proc h3{font-size:16.5px;line-height:1.55;letter-spacing:.04em}
+.proc-where{font-size:13.5px;color:var(--ink-2)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.proc-note{font-size:13px;line-height:1.75;color:var(--ink-3)}
+.proc .pill{align-self:flex-start;margin-top:4px}
+.items{padding:6px 16px}
+.item{display:grid;grid-template-columns:36px 1fr;gap:6px 12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.item:last-child{border-bottom:0}
+.item .vtag{grid-column:2;justify-self:start}
+.src{width:32px;height:32px;border-radius:var(--pill);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--beige);color:var(--ink)}
+.band-beige .src{background:var(--white)}
+.item-title{font-size:15px;font-weight:700;line-height:1.55}
+.item-note{font-size:13.5px;color:var(--ink-2);line-height:1.75;margin-top:2px}
+.legend-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.legend-row{display:flex;flex-wrap:wrap;gap:8px}
+.disc-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.disc{font-size:13px;line-height:1.9;color:var(--ink-2)}
+.copy{margin-top:16px;font-size:13px;color:var(--ink-2)}
+.src-note{margin-top:6px;font-size:12px;line-height:1.8;color:var(--ink-3)}
+
+/* ブランド */
+.brand{display:flex;align-items:center;gap:10px;font-size:30px;font-weight:800;letter-spacing:.1em;line-height:1.2}
+.brand-mark{display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:var(--pill);background:var(--orange);color:var(--ink);box-shadow:0 0 0 4px rgba(255,255,255,.7)}
+.brand-drone{width:30px;height:auto}
+
+/* 下 5 タブ（スマホ）と左メニュー（PC）、利用者メニュー */
+.tabbar{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);background:var(--white);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:60px;padding:6px 0;font-size:12px;font-weight:700;color:var(--ink-2);text-decoration:none;line-height:1.2}
+.tab-ic{width:56px;height:30px;border-radius:var(--pill);display:grid;place-items:center}
+.tab-ic svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"] .tab-ic{background:var(--orange)}
+.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 16px;background:var(--white);border-bottom:1px solid var(--rule)}
+.topbar h1{flex:1;min-width:0;font-size:20px;font-weight:800;letter-spacing:.06em;line-height:1.3}
+.topbar .sub{display:block;font-size:12.5px;font-weight:500;color:var(--ink-3);letter-spacing:.03em}
+.me{flex:none;display:inline-flex;align-items:center;gap:10px;min-height:44px;min-width:44px;border-radius:var(--pill);border:1px solid var(--rule);background:var(--white);padding:0;cursor:pointer;font-weight:700}
+.me-ic{width:42px;height:42px;border-radius:var(--pill);background:var(--ink);color:#fff;display:grid;place-items:center;font-size:16px}
+.me-name{display:none;font-size:14px;padding-right:16px}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 8px;border-radius:var(--pill);font-size:14px;font-weight:700;text-decoration:none;color:var(--ink);border:1px solid var(--rule);background:var(--white)}
+.back svg{width:20px;height:20px}
+.side{display:none}
+
+/* 行程の 1 行 */
+.route{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.rs{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;border-radius:var(--r-m);text-align:center;line-height:1.2}
+.rs-dot{width:22px;height:22px;border-radius:var(--pill);display:grid;place-items:center}
+.rs-dot svg{width:12px;height:12px}
+.rs-name{font-size:13px;font-weight:700;letter-spacing:.02em}
+.rs-state{font-size:12px;font-weight:500;color:var(--ink-3)}
+.rs-done .rs-dot{background:var(--ink);color:#fff}
+.rs-next{background:var(--orange)}
+.rs-next .rs-dot{background:var(--ink);color:var(--orange)}
+.rs-next .rs-state{color:var(--ink);font-weight:700}
+.rs-todo .rs-dot{border:2px dashed var(--edge)}
+.rs-todo .rs-name{color:var(--ink-2);font-weight:500}
+
+/* ホーム */
+.stack{display:flex;flex-direction:column;gap:20px}
+.sect-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:17px;font-weight:800;letter-spacing:.06em;line-height:1.4;padding-left:12px;border-left:5px solid var(--orange)}
+.sect-title .aside{font-size:13px;font-weight:500;color:var(--ink-3);letter-spacing:.03em}
+.next-card{display:flex;flex-direction:column;gap:14px;padding:20px 16px}
+.nc-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.nc-reason{font-size:13px;font-weight:700;color:var(--ink-2)}
+.nc-time{font-size:40px;font-weight:800;line-height:1;letter-spacing:.02em;font-family:"Plus Jakarta Sans","Noto Sans JP",sans-serif;font-variant-numeric:tabular-nums}
+.nc-date{font-size:13px;color:var(--ink-3)}
+.nc-title{font-size:20px;line-height:1.5;font-weight:800;letter-spacing:.05em}
+.nc-facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink-2)}
+.nc-facts b{color:var(--ink)}
+.nc-next{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+.nc-next b{color:var(--ink)}
+.list{padding:4px 16px}
+.row{display:grid;grid-template-columns:1fr 40px;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule);min-height:64px;color:inherit;text-decoration:none}
+.row:last-child{border-bottom:0}
+.row-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.row-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row-title{font-size:15px;font-weight:700;line-height:1.5}
+.row-sub{font-size:13px;color:var(--ink-2);line-height:1.6}
+.row-go{width:36px;height:36px;border-radius:var(--pill);background:var(--ink);color:#fff;display:grid;place-items:center;justify-self:end}
+.row-go svg{width:18px;height:18px}
+.more-link{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:700;margin-top:4px}
+.quiet{font-size:13px;color:var(--ink-3);line-height:1.7;padding:6px 0 10px}
+.foot-band .disc{font-size:12.5px}
+
+@media (min-width:900px){
+  body{font-size:16px}
+  .band{padding:56px 32px}
+  .sec-head{margin-bottom:26px}
+  .sec-head h2{font-size:26px}
+  .sec-num{font-size:150px;top:-52px}
+  .block{padding:28px}
+  .map-block{padding:14px}
+  .proc-grid{grid-template-columns:1fr 1fr}
+  .proc{padding:24px}
+  .item{grid-template-columns:40px 1fr auto;align-items:center;gap:16px;padding:18px 0}
+  .item .vtag{grid-column:3;justify-self:end}
+  .items{padding:8px 28px}
+  .v-word{font-size:36px}.v-big{width:80px;height:80px}.v-big svg{width:52px;height:52px}
+  .disc,.src-note{padding-right:18%}
+}
+
+
+body.ops{min-height:100vh;display:flex;flex-direction:column;background:var(--off)}
+.shell{flex:1;display:flex;flex-direction:column;min-width:0}
+.main{flex:1;padding:20px 16px 28px}
+.s-brand{font-size:26px}
+.s-nav{display:flex;flex-direction:column;gap:4px}
+.s-head{margin:14px 0 2px 14px;font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.1em}
+.s-head-blank{margin:6px 0 0}
+.s-item{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border-radius:var(--pill);font-size:15px;font-weight:700;color:var(--ink);text-decoration:none}
+.s-item svg{width:22px;height:22px;flex:none}
+.s-item:hover{background:var(--beige)}
+.s-item[aria-current="page"]{background:var(--orange)}
+.s-children{display:flex;flex-direction:column;margin-left:26px;border-left:2px solid var(--rule)}
+.s-child{display:flex;align-items:center;min-height:44px;padding:0 14px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.page-title{display:none}
+.pc-only{display:none}
+@media (min-width:1024px){
+  body.ops{display:grid;grid-template-columns:264px minmax(0,1fr)}
+  .side{display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh;padding:24px 16px;background:var(--white);border-right:1px solid var(--rule)}
+  .tabbar,.m-only{display:none}
+  .pc-only{display:inline-flex}
+  .topbar{position:static;min-height:84px;padding:20px 32px 0;background:transparent;border-bottom:0}
+  .topbar h1{font-size:28px}
+  .me{border-color:var(--rule)}
+  .me-name{display:inline}
+  .main{padding:16px 32px 56px;max-width:1080px;width:100%}
+}
+
+.j-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-m);background:var(--beige);font-size:13px;line-height:1.7;color:var(--ink-2)}
+.form{display:flex;flex-direction:column;gap:16px}
+.step .sec-head{margin-bottom:14px;min-height:44px;padding-top:2px;padding-bottom:2px}
+.step .sec-head h2{font-size:18px}
+.step .sec-num{font-size:72px;top:-22px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}.fld:last-child{margin-bottom:0}
+.fld .lbl{margin:0;display:flex;align-items:center;gap:8px}
+.req{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:var(--pill);background:var(--ink);color:#F7F7F3;font-size:12px;font-weight:700}
+.dt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dt .now{grid-column:1/-1}
+.btn-s{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:var(--pill);border:1px solid var(--rule);background:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.btn-s svg{width:18px;height:18px}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.radios{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rad{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border:1.5px solid var(--edge);border-radius:var(--r-m);background:#fff;font-weight:700}
+.rad.is-on{border:2px solid var(--ink);background:var(--off)}
+.rad .dot{flex:none;width:24px;height:24px;border-radius:var(--pill);border:2px solid var(--edge);display:grid;place-items:center}
+.rad.is-on .dot::after{content:"";width:12px;height:12px;border-radius:var(--pill);background:var(--orange);box-shadow:0 0 0 2px var(--ink)}
+.savebar{position:sticky;bottom:0;z-index:4;padding:12px 16px;background:rgba(247,247,243,.96);border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+.savebar .hint{margin:0;text-align:center}
+@media (min-width:1024px){.form{max-width:760px}}
+
+</style>
+</head>
+<body class="ops p-journal">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="m-no" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.6 8.6 L15.4 15.4 M15.4 8.6 L8.6 15.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="m-needs" viewBox="0 0 24 24"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="m-done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7.8 12.4 L10.9 15.4 L16.4 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="m-none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="3.4"/></symbol>
+  <symbol id="m-unknown" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"/><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.2" fill="currentColor"/></symbol>
+</defs></svg>
+<div class="shell" style="flex:1">
+  <header class="topbar"><a class="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5 L7 12 L14 19"/></svg>日誌</a><h1>飛行記録を入力<span class="sub">様式1　飛行日誌</span></h1><button type="button" class="me" aria-label="利用者メニュー：山田 太郎（運航管理者）"><span class="me-ic" aria-hidden="true">山</span><span class="me-name">山田 太郎　運航管理者</span></button></header>
+  <main class="main"><form class="form" onsubmit="return false">
+    <p class="j-note"><span aria-hidden="true">✓</span><span>入力中の内容は、この端末に下書きとして残ります。再読み込みや通信の切断では消えません。保存すると下書きは消えます。</span></p>
+
+    <section class="block step" aria-labelledby="s1"><div class="sec-head"><span class="sec-num" aria-hidden="true">01</span><h2 id="s1">機体・操縦者・日常点検</h2></div>
+      <div class="fld"><label class="lbl" for="ac">機体<span class="req">必須</span></label><select id="ac" class="inp"><option>JU0123</option></select></div>
+      <div class="fld"><label class="lbl" for="pl">操縦者<span class="req">必須</span></label><select id="pl" class="inp"><option>山田 太郎</option></select></div>
+      <div class="fld"><label class="lbl" for="ins">日常点検</label><select id="ins" class="inp"><option>2026-10-25 07:42　飛行前　正常</option></select><p class="hint">同じ機体の、飛行日の点検から選びます。</p></div>
+    </section>
+
+    <section class="block step" aria-labelledby="s2"><div class="sec-head"><span class="sec-num" aria-hidden="true">02</span><h2 id="s2">離陸</h2></div>
+      <div class="fld"><label class="lbl" for="tp">離陸場所<span class="req">必須</span></label><input id="tp" class="inp" type="text" value="加茂川 左岸 護岸の上"><p class="hint">地名・施設名など、正確な位置が分かる名前（100 文字以内）</p>
+        <button type="button" class="pill pill-secondary pill-sm" ><span class="pill-label">現在地を入れる</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/><circle cx="10" cy="10" r="7"/><path d="M10 1.5 V4 M10 16 V18.5 M1.5 10 H4 M16 10 H18.5" stroke-linecap="round"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/><circle cx="10" cy="10" r="7"/><path d="M10 1.5 V4 M10 16 V18.5 M1.5 10 H4 M16 10 H18.5" stroke-linecap="round"/></svg></span></span></button></div>
+      <div class="fld"><span class="lbl">離陸時刻<span class="req">必須</span></span><div class="dt"><button type="button" class="btn-s now"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5 V10 L13 12"/></svg>今の時刻を入れる</button><input class="inp" type="text" value="2026-10-25" aria-label="離陸日"><input class="inp" type="text" value="10:32" aria-label="離陸時刻"></div><p class="hint">日本時間（24 時間制、分まで）。手で直せます。</p></div>
+    </section>
+
+    <section class="block step" aria-labelledby="s3"><div class="sec-head"><span class="sec-num" aria-hidden="true">03</span><h2 id="s3">着陸</h2></div>
+      <div class="fld"><span class="lbl">着陸時刻<span class="req">必須</span></span><div class="dt"><button type="button" class="btn-s now"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5 V10 L13 12"/></svg>今の時刻を入れる</button><input class="inp" type="text" value="2026-10-25" aria-label="着陸日"><input class="inp" type="text" value="10:58" aria-label="着陸時刻"></div><p class="hint">飛行時間　26 分（離陸から着陸まで）</p></div>
+      <div class="fld"><label class="lbl" for="lp">着陸場所<span class="req">必須</span></label><input id="lp" class="inp" type="text" value="加茂川 左岸 護岸の上"></div>
+    </section>
+
+    <section class="block step" aria-labelledby="s4"><div class="sec-head"><span class="sec-num" aria-hidden="true">04</span><h2 id="s4">飛行概要</h2></div>
+      <div class="fld"><label class="lbl" for="pu">飛行の目的<span class="req">必須</span></label><input id="pu" class="inp" type="text" value="護岸の点検（空撮）"><p class="hint">例：空撮、インフラ点検、測量（100 文字以内）</p></div>
+      <div class="fld"><span class="lbl">特定飛行の形態</span><div class="choices" role="group" aria-label="特定飛行の形態"><button type="button" class="chip is-on" aria-pressed="true"><svg class="chk" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 L6.5 12 L13 4.5"/></svg><span>人口集中地区（DID）上空</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><span>夜間飛行</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><span>目視外飛行</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><span>人・物件から 30m 未満</span></button><button type="button" class="chip is-off" aria-pressed="false"><span class="chk-empty" aria-hidden="true"></span><span>催し場所上空</span></button></div></div>
+    </section>
+
+    <section class="block step" aria-labelledby="s5"><div class="sec-head"><span class="sec-num" aria-hidden="true">05</span><h2 id="s5">安全に影響のあった事項・不具合</h2></div>
+      <div class="fld" role="radiogroup" aria-label="飛行の安全に影響のあった事項"><span class="lbl">飛行の安全に影響のあった事項<span class="req">必須</span></span>
+        <div class="radios"><div class="rad is-on" role="radio" aria-checked="true" tabindex="0"><span class="dot" aria-hidden="true"></span>なし</div><div class="rad" role="radio" aria-checked="false" tabindex="-1"><span class="dot" aria-hidden="true"></span>あり</div></div></div>
+    </section>
+  </form></main>
+  <div class="savebar"><button type="button" class="pill pill-primary" style="width:100%"><span class="pill-label">保存する</span><span class="pill-arrow" aria-hidden="true"><span class="ar a1"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span><span class="ar a2"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5"/></svg></span></span></button><p class="hint">保存すると、版として残り、あとから訂正できます。</p></div>
+</div>
+<nav class="tabbar" aria-label="主なメニュー"><a class="tab" href="/ops"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 L12 4 L20.5 11 M6 9.5 V19.5 H18 V9.5"/></svg></span>ホーム</a><a class="tab" href="/"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21 C7 15.5 5 12.5 5 10 a7 7 0 0 1 14 0 c0 2.5-2 5.5-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></span>判定</a><a class="tab" href="/ops/plans"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10.5 H20 M8.5 3.5 V7 M15.5 3.5 V7"/></svg></span>計画</a><a class="tab" href="/ops/journal" aria-current="page"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5 H17 a2 2 0 0 1 2 2 V19.5 H7 a2 2 0 0 1-2-2 Z M9 9 H15 M9 12.5 H15"/></svg></span>日誌</a><a class="tab" href="/ops/more"><span class="tab-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7 H20 M9 12 H20 M9 17 H20 M4.5 7 H5.5 M4.5 12 H5.5 M4.5 17 H5.5"/></svg></span>登録</a></nav>
+</body>
+</html>
