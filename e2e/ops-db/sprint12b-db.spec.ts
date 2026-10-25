@@ -737,6 +737,8 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     }
     // 絞り込みの切り替え（取消済みを含める）も 44px 以上
     await page.goto("/ops/flights");
+    await expect(page.locator("main").first()).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
     await small("/ops/flights（絞り込み）");
 
     // ③ 訂正フォーム：機体は読み取り専用の文（折り返して全部見える）。新規の機体セレクトは親に収まる
