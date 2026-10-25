@@ -403,7 +403,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
           ) : null}
         </div>
         <Field label="機体認証の区分" required={false} error={errors["airworthinessClass"]}>
-          <select className={inputClass} value={v.airworthinessClass} onChange={set("airworthinessClass")}>
+          <select className={`${inputClass} min-h-12`} value={v.airworthinessClass} onChange={set("airworthinessClass")}>
             <option value="">なし</option>
             <option value="first">第一種</option>
             <option value="second">第二種</option>
@@ -435,7 +435,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
           error={errors["status"]}
           hint="「抹消」は国の登録を抹消した機体です。誤って登録した場合は、詳細画面の「取消」を使います。"
         >
-          <select className={inputClass} value={v.status} onChange={set("status")}>
+          <select className={`${inputClass} min-h-12`} value={v.status} onChange={set("status")}>
             <option value="active">使用中</option>
             <option value="suspended">休止</option>
             <option value="deregistered">抹消</option>
@@ -636,7 +636,7 @@ export function PilotForm({
             error={errors["memberId"]}
             hint="結び付けた利用者は、この操縦者の情報を自分で訂正でき、技能証明書番号の全桁を見られます。"
           >
-            <select className={inputClass} value={v.memberId} onChange={set("memberId")}>
+            <select className={`${inputClass} min-h-12`} value={v.memberId} onChange={set("memberId")}>
               <option value="">なし</option>
               {memberOptions.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -657,7 +657,7 @@ export function PilotForm({
           {v.hasLicense ? (
             <div className="grid grid-cols-1 gap-4 border-l-2 border-rule pl-3 sm:grid-cols-2">
               <Field label="技能証明の区分" required error={errors["licenseClass"]}>
-                <select className={inputClass} value={v.licenseClass} onChange={set("licenseClass")}>
+                <select className={`${inputClass} min-h-12`} value={v.licenseClass} onChange={set("licenseClass")}>
                   <option value="">選んでください</option>
                   <option value="first">一等</option>
                   <option value="second">二等</option>
@@ -775,7 +775,7 @@ export function MemberInviteForm() {
           <input className={inputClass} value={v.displayName} onChange={(e) => setV({ ...v, displayName: e.target.value })} />
         </Field>
         <Field label="役割" required error={errors["role"]}>
-          <select className={inputClass} value={v.role} onChange={(e) => setV({ ...v, role: e.target.value })}>
+          <select className={`${inputClass} min-h-12`} value={v.role} onChange={(e) => setV({ ...v, role: e.target.value })}>
             <option value="manager">運航管理者</option>
             <option value="pilot">操縦者</option>
             <option value="viewer">閲覧者</option>
@@ -835,14 +835,14 @@ export function MemberControls({
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={`${member.displayName}の変更`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="役割" error={errors["role"]}>
-          <select className={inputClass} value={role} onChange={(e) => setRole(e.target.value)}>
+          <select className={`${inputClass} min-h-12`} value={role} onChange={(e) => setRole(e.target.value)}>
             <option value="manager">運航管理者</option>
             <option value="pilot">操縦者</option>
             <option value="viewer">閲覧者</option>
           </select>
         </Field>
         <Field label="利用" error={errors["status"]}>
-          <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <select className={`${inputClass} min-h-12`} value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="active">利用できる</option>
             <option value="disabled">停止</option>
           </select>
