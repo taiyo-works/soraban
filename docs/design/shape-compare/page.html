@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1600">
+<title>そらばん 部品の形 比較 A｜B</title>
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+{{SVG}}
+<header class="page-head" id="head">
+  <div class="meta"><span>SORABAN</span><span>SHAPE COMPARE v0.1</span><span>2026-10-25</span></div>
+  <h1>部品の形、2 案を並べる　A｜B</h1>
+  <p>PC もスマホも同じ部品で組むために、角の扱いだけを変えた 2 案を、同じ内容で並べました。色・文字・線・銅の短い線・等高線は世界観ボードのまま。画面の数字と場所は表示例で、実データではありません。</p>
+</header>
+
+<section class="sx" id="summary"><div class="wrap">
+  <div class="sh"><span class="no">00</span><h2>2 案のちがい</h2><span class="sub">ここだけ読めば選べます</span></div>
+  {{SUMMARY}}
+</div></section>
+
+<section class="sx w" id="parts"><div class="wrap">
+  <div class="sh"><span class="no">01</span><h2>部品の一覧</h2><span class="sub">同じ HTML に、角の値だけ違う CSS を当てています</span></div>
+  <div class="ab">
+    <div><div class="tag"><b>A</b><span>直角＋ごく弱いモーフィズム</span></div>{{PARTS_A}}</div>
+    <div><div class="tag"><b>B</b><span>ピル型＋角丸</span></div>{{PARTS_B}}</div>
+  </div>
+  <div class="cthead" style="margin-top:44px">コントラスト比の実測（WCAG の計算式。4.5 は通常、7 は現場。★は今回、足りなくて直した所）</div>
+  <div class="ab">
+    <div><div class="cthead" style="margin-top:0">共通の色</div>{{CT_COMMON}}</div>
+    <div><div class="cthead" style="margin-top:0">A だけ</div>{{CT_A}}<div class="cthead">B だけ</div>{{CT_B}}</div>
+  </div>
+</div></section>
+
+<section class="sx" id="mobile"><div class="wrap">
+  <div class="sh"><span class="no">02</span><h2>スマホ（375px）3 画面</h2><span class="sub">左が A、右が B。文言は同じ</span></div>
+  <div class="mrow"><div><div class="mlab">A　ホーム</div>{{M_HOME_A}}</div><div><div class="mlab">B　ホーム</div>{{M_HOME_B}}</div><div class="note">{{NOTES_HOME}}</div></div>
+  <div class="mrow"><div><div class="mlab">A　飛行前点検</div>{{M_CHECK_A}}</div><div><div class="mlab">B　飛行前点検</div>{{M_CHECK_B}}</div><div class="note">{{NOTES_CHECK}}</div></div>
+  <div class="mrow"><div><div class="mlab">A　メニューを開いた状態</div>{{M_MENU_A}}</div><div><div class="mlab">B　メニューを開いた状態</div>{{M_MENU_B}}</div><div class="note">{{NOTES_MENU}}</div></div>
+</div></section>
+
+<section class="sx w" id="pc"><div class="wrap">
+  <div class="sh"><span class="no">03</span><h2>PC（1280px）ホーム</h2><span class="sub">スマホと同じ部品。並びだけ変えています。幅が広いので A の下に B</span></div>
+  <div class="pcblock"><div class="mlab">A</div>{{PC_A}}</div>
+  <div class="pcblock"><div class="mlab">B</div>{{PC_B}}</div>
+  <div class="note" style="max-width:1100px">{{NOTES_PC}}</div>
+</div></section>
+
+<section class="sx" id="verdict"><div class="wrap">
+  <div class="sh"><span class="no">04</span><h2>推奨と、反対の見方</h2></div>
+  <div class="prose">{{VERDICT}}</div>
+</div></section>
+</body>
+</html>
