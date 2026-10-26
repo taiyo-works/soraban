@@ -2,7 +2,8 @@
  * そらばん デザイントークン v2（草案）。apps/web には入れない。docs/design/design-system-v2-draft.md が説明。
  * 土台は FINESYSTEM（fg-finesystem.co.jp）：橙が主役、白とオフホワイトを交互、ピルボタン＋右端の墨の丸、角丸 16/8/4、影は 0 0 24px 黒 10% のみ。
  * 名前は v1（apps/web/src/app/soraban-tokens.css）の --sb-* を引き継ぎ、意味が変わるものは設計書の「v1 との差分」に書いた。
- * 暗（OS の暗い設定）は未定義。v1 の暗を v2 の面構成に合わせて作り直すのは実装 PR の前の別作業（設計書の未決）。
+ * 暗（OS の暗い設定）は末尾近くの 4 ブロック：@media (prefers-color-scheme: dark) の中の :root:not([data-theme="light"]) と同 [data-mode="field"]、
+ * 強制の :root[data-theme="dark"] と同 [data-mode="field"]。OS 設定と強制は同じ宣言（検査が一致を確かめる）。考え方は設計書の §9。
  * 検査：node docs/design/tokens-v2/check-contrast-v2.mjs
  */
 :root {
@@ -10,6 +11,15 @@
   --sb-base: #FFFFFF;
   --sb-surface: #F7F7F3;
   --sb-sunken: #EDEDE5;
+
+  /* 部品の面（暗で値が変わるため名前を持たせた。明は従来の #FFFFFF／橙の薄い面と同じ値） */
+  --sb-control: #FFFFFF;         /* 副ボタン・チップ（ON）・小さなタグの面 */
+  --sb-field: #FFFFFF;           /* 入力欄・選択欄の面（暗では地より深いくぼみ） */
+  --sb-hover: #FFC189;           /* 押せる部品のホバー面（チップ・メニュー）。文字は ink */
+  --sb-mark-bg: #FFC189;         /* 本文の強調（蛍光ペン風の下線の面）。文字は ink */
+  --sb-inverse-bg: #262523;      /* 反転タグ・ラベル（墨の面） */
+  --sb-inverse-fg: #F7F7F3;
+  --sb-on-dot: #FFFFFF;          /* 墨の丸（ピルの右端・番号・行の矢印）の上の矢印・数字。暗では丸が明るくなり、これが墨になる */
 
   /* 文字 */
   --sb-ink: #262523;
@@ -27,6 +37,7 @@
   --sb-orange-hover: #FFC189;
   --sb-orange-deep: #E99347;
   --sb-on-orange: #262523;
+  --sb-on-orange-fg: #FFFFFF;   /* 橙の面の上の墨の丸に載る矢印（明暗とも固定の白） */
 
   /* 判定：橙とは別系統。形（×△○）と言葉を併用する。fill=印・タグの面、on=その上の文字、fg=面の上の文字・線 */
   --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
@@ -42,8 +53,13 @@
   --sb-art-hill-mid: #2EBEC4;
   --sb-art-hill-near: #0F6B70;
   --sb-art-cloud: #FFFFFF;
+  --sb-art-sky-low: #FFE3C7;     /* 空の地平線側の色 */
+  --sb-art-line: #262523;        /* 挿絵の線（ドローン・雲・航跡・丘の等高線） */
   --sb-contour: rgba(233, 147, 71, 0.38);
   --sb-contour-major: rgba(233, 147, 71, 0.7);
+  --sb-halo: rgba(255, 255, 255, 0.7);   /* ブランドの丸の外側の輪（装飾） */
+  --sb-sec-num: rgba(248, 155, 72, 0.2); /* 見出しの背後の大きな数字（装飾） */
+  --sb-tile-filter: none;        /* 地図タイルにだけ掛ける明るさ調整（暗で眩しさを抑える案） */
 
   /* 形 */
   --sb-r-l: 16px;                /* ブロック・カード・地図の枠 */
@@ -93,6 +109,127 @@
   --sb-fs-note: 14px;
   --sb-dur: 0ms;
   --sb-dur-rise: 0ms;
+}
+
+/*
+ * 暗（OS の暗い設定）。v1 と同じ形式：@media の中が OS 設定、:root[data-theme="dark"] が強制。2 組の宣言は同じ（検査が一致を確かめる）。
+ * 考え方：温かい黒の 3 層（地は純黒にしない）／橙は暗でも主役で、橙の面の上の文字は墨のまま／ピルの丸は明るい丸＋墨の矢印に反転／
+ * 影は使わず 1px の輪郭で面を分ける／判定は「明るい塗り＋暗い文字」に反転して形と言葉を併用／現場の暗は 7:1 を満たす値。
+ * 暗で値を持たない（明と同じ）トークン：橙 3 種、on-orange、on-orange-fg、形（角丸・線の太さ）、寸法、動き。
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sb-base: #1B1A18;
+    --sb-surface: #252421;
+    --sb-sunken: #121110;
+    --sb-control: #34322F;
+    --sb-field: #121110;
+    --sb-hover: #4A3220;
+    --sb-mark-bg: #6B4527;
+    --sb-inverse-bg: #F1EEE7;
+    --sb-inverse-fg: #1B1A18;
+    --sb-on-dot: #1B1A18;
+    --sb-ink: #F1EEE7;
+    --sb-ink-2: #D3CFC5;
+    --sb-ink-3: #ADA99F;
+    --sb-ph: #A29E94;
+    --sb-rule: #45433F;
+    --sb-edge: #9A968C;
+    --sb-focus: #F1EEE7;
+    --sb-v-no-fill: #F4797F;       --sb-v-no-on: #1B1A18;       --sb-v-no-fg: #F4797F;
+    --sb-v-needs-fill: #E6C64A;    --sb-v-needs-on: #1B1A18;    --sb-v-needs-fg: #E6C64A;
+    --sb-v-done-fill: #CDD4DF;     --sb-v-done-on: #1B1A18;     --sb-v-done-fg: #CDD4DF;
+    --sb-v-none-fill: #86C88A;     --sb-v-none-on: #1B1A18;     --sb-v-none-fg: #86C88A;
+    --sb-v-unknown-fill: #1B1A18;  --sb-v-unknown-on: #ADB3BD;  --sb-v-unknown-fg: #ADB3BD;
+    --sb-art-sky: #1F2A2D;
+    --sb-art-sky-warm: #2B2622;
+    --sb-art-sky-low: #3A2B1E;
+    --sb-art-hill-far: #6F4526;
+    --sb-art-hill-mid: #1A5559;
+    --sb-art-hill-near: #123F42;
+    --sb-art-cloud: #34322F;
+    --sb-art-line: #D3CFC5;
+    --sb-contour: rgba(233, 147, 71, 0.26);
+    --sb-contour-major: rgba(233, 147, 71, 0.5);
+    --sb-halo: rgba(241, 238, 231, 0.16);
+    --sb-sec-num: rgba(248, 155, 72, 0.16);
+    --sb-tile-filter: brightness(0.8);
+    --sb-shadow: 0 0 0 1px #3A3834;
+  }
+  :root:not([data-theme="light"])[data-mode="field"] {
+    --sb-base: #141312;
+    --sb-surface: #1F1E1B;
+    --sb-sunken: #0A0A09;
+    --sb-control: #2A2825;
+    --sb-field: #0A0A09;
+    --sb-ink: #F8F6F1;
+    --sb-ink-2: #E4E0D7;
+    --sb-ink-3: #CCC8BE;
+    --sb-ph: #C0BCB2;
+    --sb-rule: #85827A;
+    --sb-edge: #BDB9AF;
+    --sb-v-no-fill: #F6A0A5;
+    --sb-v-no-fg: #F6A0A5;
+    --sb-contour: rgba(233, 147, 71, 0.2);
+    --sb-contour-major: rgba(233, 147, 71, 0.4);
+    --sb-shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --sb-base: #1B1A18;
+  --sb-surface: #252421;
+  --sb-sunken: #121110;
+  --sb-control: #34322F;
+  --sb-field: #121110;
+  --sb-hover: #4A3220;
+  --sb-mark-bg: #6B4527;
+  --sb-inverse-bg: #F1EEE7;
+  --sb-inverse-fg: #1B1A18;
+  --sb-on-dot: #1B1A18;
+  --sb-ink: #F1EEE7;
+  --sb-ink-2: #D3CFC5;
+  --sb-ink-3: #ADA99F;
+  --sb-ph: #A29E94;
+  --sb-rule: #45433F;
+  --sb-edge: #9A968C;
+  --sb-focus: #F1EEE7;
+  --sb-v-no-fill: #F4797F;       --sb-v-no-on: #1B1A18;       --sb-v-no-fg: #F4797F;
+  --sb-v-needs-fill: #E6C64A;    --sb-v-needs-on: #1B1A18;    --sb-v-needs-fg: #E6C64A;
+  --sb-v-done-fill: #CDD4DF;     --sb-v-done-on: #1B1A18;     --sb-v-done-fg: #CDD4DF;
+  --sb-v-none-fill: #86C88A;     --sb-v-none-on: #1B1A18;     --sb-v-none-fg: #86C88A;
+  --sb-v-unknown-fill: #1B1A18;  --sb-v-unknown-on: #ADB3BD;  --sb-v-unknown-fg: #ADB3BD;
+  --sb-art-sky: #1F2A2D;
+  --sb-art-sky-warm: #2B2622;
+  --sb-art-sky-low: #3A2B1E;
+  --sb-art-hill-far: #6F4526;
+  --sb-art-hill-mid: #1A5559;
+  --sb-art-hill-near: #123F42;
+  --sb-art-cloud: #34322F;
+  --sb-art-line: #D3CFC5;
+  --sb-contour: rgba(233, 147, 71, 0.26);
+  --sb-contour-major: rgba(233, 147, 71, 0.5);
+  --sb-halo: rgba(241, 238, 231, 0.16);
+  --sb-sec-num: rgba(248, 155, 72, 0.16);
+  --sb-tile-filter: brightness(0.8);
+  --sb-shadow: 0 0 0 1px #3A3834;
+}
+:root[data-theme="dark"][data-mode="field"] {
+  --sb-base: #141312;
+  --sb-surface: #1F1E1B;
+  --sb-sunken: #0A0A09;
+  --sb-control: #2A2825;
+  --sb-field: #0A0A09;
+  --sb-ink: #F8F6F1;
+  --sb-ink-2: #E4E0D7;
+  --sb-ink-3: #CCC8BE;
+  --sb-ph: #C0BCB2;
+  --sb-rule: #85827A;
+  --sb-edge: #BDB9AF;
+  --sb-v-no-fill: #F6A0A5;
+  --sb-v-no-fg: #F6A0A5;
+  --sb-contour: rgba(233, 147, 71, 0.2);
+  --sb-contour-major: rgba(233, 147, 71, 0.4);
+  --sb-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

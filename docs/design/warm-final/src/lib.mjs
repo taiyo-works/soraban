@@ -74,13 +74,13 @@ export function mapSvg(d) {
   <path d="M70 90 Q110 60 170 80 Q190 120 150 150 Q90 160 70 90 Z" fill="url(#dots)" stroke="var(--park-line)" stroke-width="2.4" stroke-dasharray="2 5" stroke-linecap="round"/>
   <circle cx="560" cy="372" r="86" fill="none" stroke="var(--air-line)" stroke-width="3" stroke-dasharray="10 7"/>
   <path d="M520 372 H600" stroke="var(--air-line)" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="330" cy="232" r="46" fill="var(--pin-halo)" stroke="var(--ink)" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
-  <circle cx="330" cy="232" r="13" fill="var(--orange)" stroke="var(--ink)" stroke-width="3.5"/>
-  <circle cx="330" cy="232" r="4" fill="var(--ink)"/>
-  <g font-size="24" font-weight="700" fill="var(--ink)">
-    <rect x="352" y="196" width="150" height="34" rx="${d.mapChipR}" fill="#fff" stroke="var(--ink)" stroke-width="2"/>
+  <circle cx="330" cy="232" r="46" fill="var(--pin-halo)" stroke="var(--map-ink)" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+  <circle cx="330" cy="232" r="13" fill="var(--orange)" stroke="var(--map-ink)" stroke-width="3.5"/>
+  <circle cx="330" cy="232" r="4" fill="var(--map-ink)"/>
+  <g font-size="24" font-weight="700" fill="var(--map-ink)">
+    <rect x="352" y="196" width="150" height="34" rx="${d.mapChipR}" fill="#fff" stroke="var(--map-ink)" stroke-width="2"/>
     <text x="364" y="221">米子市役所</text>
-    <rect x="248" y="262" width="62" height="32" rx="${d.mapChipR}" fill="var(--ink)"/><text x="259" y="285" fill="#fff" font-size="22">DID</text>
+    <rect x="248" y="262" width="62" height="32" rx="${d.mapChipR}" fill="var(--map-ink)"/><text x="259" y="285" fill="#fff" font-size="22">DID</text>
     <text x="440" y="344" font-size="22">空港等周辺</text>
     <text x="84" y="190" font-size="22">公園</text>
   </g>
@@ -95,10 +95,10 @@ export const swatch = (k) => ({
   did: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="2" fill="var(--did-tint)" stroke="var(--did-line)" stroke-width="2"/><path d="M5 15 L15 5 M9 16 L17 8 M3 11 L9 5" stroke="var(--did-line)" stroke-width="1.6"/></svg>`,
   ind: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="2" fill="#B9B7AE" stroke="#4A4843" stroke-width="1.6"/></svg>`,
   air: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--air-line)" stroke-width="2.2" stroke-dasharray="3.4 2.4"/></svg>`,
-  law: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--ink)" stroke-width="2.2"/><circle cx="10" cy="10" r="2.6" fill="var(--ink)"/></svg>`,
+  law: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--map-ink)" stroke-width="2.2"/><circle cx="10" cy="10" r="2.6" fill="var(--map-ink)"/></svg>`,
   park: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="5" fill="none" stroke="var(--park-line)" stroke-width="2" stroke-dasharray="1.5 3.2" stroke-linecap="round"/><circle cx="7" cy="10" r="1.4" fill="var(--park-line)"/><circle cx="13" cy="10" r="1.4" fill="var(--park-line)"/></svg>`,
-  heri: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M10 2.5 L17.5 10 L10 17.5 L2.5 10 Z" fill="none" stroke="var(--ink)" stroke-width="2"/></svg>`,
-  crowd: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-dasharray="1.2 3.2" stroke-linecap="round"/></svg>`,
+  heri: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M10 2.5 L17.5 10 L10 17.5 L2.5 10 Z" fill="none" stroke="var(--map-ink)" stroke-width="2"/></svg>`,
+  crowd: `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="var(--map-ink)" stroke-width="2.2" stroke-dasharray="1.2 3.2" stroke-linecap="round"/></svg>`,
 }[k]);
 
 export const ITEMS = [
