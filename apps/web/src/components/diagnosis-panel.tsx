@@ -20,6 +20,7 @@ import { doneByProcedureId, isModelAircraftDiagnosis } from "@/lib/verdict-displ
 import { DeadlineCalendar } from "./deadline-calendar";
 import { PrefillTable } from "./prefill-table";
 import { ManualDraft } from "./manual-draft";
+import { Disclosure } from "./ui/sb-parts";
 
 type Props = {
   readonly diagnosis: DiagnoseResponse;
@@ -278,7 +279,7 @@ export function DiagnosisPanel({
         const def = getCategoryDefinition(diagnosis.category);
         return (
           <div
-            className={`${diagnosis.category === "emergency_no_fly" ? "border-l-4" : "border-l-2"} ${sev.rule} ${sev.surface} px-4 py-3.5 ${sev.emphatic ? "border-y border-r" : ""}`}
+            className={`${diagnosis.category === "emergency_no_fly" ? "border-l-4" : "border-l-2"} ${sev.rule} ${sev.surface} rounded-sb-l px-4 py-3.5 ${sev.emphatic ? "border-y border-r" : ""}`}
           >
             <div className={`flex items-center gap-2 ${sev.accent}`}>
               <SeverityMark shape={sev.mark} className={sev.accent} />
@@ -352,10 +353,18 @@ export function DiagnosisPanel({
       })()}
 
       {/* 免責（全画面表示の契約）。最終確認は DIPS／航空局で。 */}
-      <div className="border-l-2 border-sb-ink bg-sb-base px-4 py-3 text-xs leading-relaxed text-sb-ink-2">
+      <div className="rounded-sb-m border-l-2 border-sb-ink bg-sb-base px-4 py-3 text-xs leading-relaxed text-sb-ink-2">
         <span className="sb-eyebrow">免責</span> {diagnosis.disclaimer}
       </div>
 
+      {/* 申請の準備（必要手続き・期限・プリフィル・書類の下書き・束ね PDF）は、見出しだけ見せて畳む。
+          カテゴリー切り分け（出典つき）と免責は、上に常に出す。 */}
+      <Disclosure
+        testId="diagnosis-details"
+        variant="plain"
+        title="申請の準備"
+        note={`必要手続き ${diagnosis.procedures.length} 件・提出期限・プリフィル表・書類の下書き・束ね PDF`}
+      >
       {/* 必要手続きチェックリスト */}
       <div className="flex flex-col gap-3">
         <div className="flex items-end justify-between gap-3">
@@ -543,6 +552,7 @@ export function DiagnosisPanel({
           </div>
         ) : null}
       </dl>
+      </Disclosure>
     </section>
   );
 }

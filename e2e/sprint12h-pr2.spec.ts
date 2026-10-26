@@ -1,4 +1,5 @@
-import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { devices, expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expectFontSize, openDetails } from "./field-checks";
 import { Meter, type Measure } from "./judge-measure";
 
 // Sprint 12h PR ②（docs/sprints/sprint-12h-pr2.md）：公開の判定画面 `/` の作り直し（デザインシステム v2）の E2E。
@@ -360,12 +361,135 @@ test.describe("Q-12 375×812 の最初の画面", () => {
     await expect(page.getByRole("button", { name: /この地点を判定する/ })).toBeInViewport({ ratio: 1 });
     await expect(page.getByTestId("current-location-button")).toBeInViewport({ ratio: 1 });
     await expect(page.getByTestId("current-location-button")).toContainText("現在地で判定");
+    // 結論は入力の直下（契約 §6.2 の順：入力 → 結論 → 地図）。最初の画面（812px）のすぐ下で、1 画面分のスクロールで見出しごと入る
     const top = await page.getByTestId("verdict-conclusion").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
     await testInfo.attach("conclusion-top", { body: String(Math.round(top)), contentType: "text/plain" });
-    // 1 画面分（812px）スクロールしたとき、結論の上端が画面に入る
-    expect(top, "結論の上端（ページ上の位置）").toBeLessThanOrEqual(812 * 2);
+    expect(top, "結論の上端（ページ上の位置）").toBeLessThanOrEqual(812 + 200);
     await page.evaluate(() => window.scrollTo(0, 812));
-    await expect(page.getByTestId("verdict-conclusion")).toBeInViewport();
+    await expect(page.locator("#verdict-heading")).toBeInViewport({ ratio: 1 });
+  });
+});
+
+// ───────────────────────── B1 判定したあと結論が画面に入る（評価 B1。モバイル端末の模擬） ─────────────────────────
+
+// 実機に近い条件：isMobile・hasTouch・小さめの高さ（ブラウザの上下の帯を引いたあとの見える高さ）。375×812 の模擬ではなく端末の定義を使う。
+const MOBILES = [
+  { name: "iPhone SE 第 3 世代（375×667）", use: devices["iPhone SE (3rd gen)"] },
+  { name: "iPhone SE 第 1 世代（320×568）", use: devices["iPhone SE"] },
+  { name: "Pixel 5（393×727）", use: devices["Pixel 5"] },
+] as const;
+
+const conclusionPos = (page: Page) =>
+  page.evaluate(() => {
+    const el = document.querySelector('[data-testid="verdict-conclusion"]');
+    const r = el?.getBoundingClientRect();
+    return { top: r ? r.top : null, bottom: r ? r.bottom : null, vh: window.innerHeight, scrollY: window.scrollY, focus: (document.activeElement as HTMLElement | null)?.id ?? "" };
+  });
+
+test.describe("B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ）", () => {
+  for (const m of MOBILES) {
+    test(`${m.name}：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり）`, async ({ browser }) => {
+      const ctx = await browser.newContext({ ...m.use });
+      const page = await ctx.newPage();
+      await openReady(page);
+      const initial = await conclusionPos(page);
+      expect(initial.scrollY, "開いただけではスクロールしない").toBe(0);
+      // 1 画面分（vh）スクロールして、結論の見出しが画面の上半分に入る（5px の差に頼らない）
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+      const after = await page.locator("#verdict-heading").evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom };
+      });
+      expect(after.top, "1 画面分スクロールした後の見出しの上端").toBeGreaterThan(0);
+      // 見出しの下端も画面に入り、下に余裕（結論の語・形が見える）がある
+      expect(after.bottom, "1 画面分スクロールした後の見出しの下端").toBeLessThan(initial.vh - 80);
+      await ctx.close();
+    });
+
+    test(`${m.name}：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る`, async ({ browser }) => {
+      const ctx = await browser.newContext({ ...m.use });
+      const page = await ctx.newPage();
+      await openReady(page);
+      await page.getByLabel("住所または緯度・経度").fill("35.4278, 133.3314");
+      const check = waitCheck(page);
+      const diag = waitDiagnose(page);
+      await page.getByRole("button", { name: "この地点を判定する" }).click();
+      await Promise.all([check, diag]);
+      await expect(page.locator("#verdict-heading")).toBeFocused();
+      // 滑らかなスクロールが終わるのを待つ（上端が 0 以上、画面の上半分に入る）
+      await expect.poll(async () => (await conclusionPos(page)).top!, { message: "結論の上端が画面の中（上半分）" }).toBeLessThan(m.use.viewport!.height * 0.5);
+      const pos = await conclusionPos(page);
+      expect(pos.top!, "結論の上端が画面の中（上半分）").toBeGreaterThanOrEqual(0);
+      expect(pos.scrollY, "スクロールした").toBeGreaterThan(0);
+      await ctx.close();
+    });
+
+    test(`${m.name}：地図をクリックして地点を選ぶと、同じように結論が画面に入る`, async ({ browser }) => {
+      const ctx = await browser.newContext({ ...m.use });
+      const page = await ctx.newPage();
+      await openReady(page);
+      const map = page.getByTestId("regulation-map");
+      await map.scrollIntoViewIfNeeded();
+      const check = waitCheck(page);
+      const diag = waitDiagnose(page);
+      // 地図の左上寄りを押す（ズームボタン・帰属の外）
+      const box = (await map.boundingBox())!;
+      await page.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.6);
+      await Promise.all([check, diag]);
+      await expect(page.locator("#verdict-heading")).toBeFocused();
+      await expect.poll(async () => (await conclusionPos(page)).top!, { message: "結論の上端が画面の中（上半分）" }).toBeLessThan(m.use.viewport!.height * 0.5);
+      const pos = await conclusionPos(page);
+      expect(pos.top!).toBeGreaterThanOrEqual(0);
+      await ctx.close();
+    });
+  }
+
+  test("動きを減らす設定と現場モードでは、結論へ瞬間に移る（滑らかなスクロールにしない）", async ({ browser }) => {
+    for (const mode of ["reduce", "field"] as const) {
+      const ctx = await browser.newContext({ ...devices["Pixel 5"], reducedMotion: mode === "reduce" ? "reduce" : "no-preference" });
+      const page = await ctx.newPage();
+      await openReady(page);
+      if (mode === "field") await page.evaluate(() => document.documentElement.setAttribute("data-mode", "field"));
+      // scrollIntoView の behavior を記録する（instant＝auto）
+      await page.evaluate(() => {
+        const orig = Element.prototype.scrollIntoView;
+        (window as unknown as { __behaviors: string[] }).__behaviors = [];
+        Element.prototype.scrollIntoView = function (arg?: boolean | ScrollIntoViewOptions) {
+          (window as unknown as { __behaviors: string[] }).__behaviors.push(typeof arg === "object" && arg ? String(arg.behavior) : "none");
+          return orig.call(this, arg as ScrollIntoViewOptions);
+        };
+      });
+      await page.getByLabel("住所または緯度・経度").fill("35.4278, 133.3314");
+      const check = waitCheck(page);
+      await page.getByRole("button", { name: "この地点を判定する" }).click();
+      await check;
+      await expect(page.locator("#verdict-heading")).toBeFocused();
+      const behaviors = await page.evaluate(() => (window as unknown as { __behaviors: string[] }).__behaviors);
+      expect(behaviors, mode).toEqual(["auto"]);
+      await ctx.close();
+    }
+  });
+
+  test("通常は滑らかに移る（smooth）。初回の自動判定では動かさない", async ({ browser }) => {
+    const ctx = await browser.newContext({ ...devices["Pixel 5"] });
+    const page = await ctx.newPage();
+    await page.addInitScript(() => {
+      const orig = Element.prototype.scrollIntoView;
+      (window as unknown as { __behaviors: string[] }).__behaviors = [];
+      Element.prototype.scrollIntoView = function (arg?: boolean | ScrollIntoViewOptions) {
+        (window as unknown as { __behaviors: string[] }).__behaviors.push(typeof arg === "object" && arg ? String(arg.behavior) : "none");
+        return orig.call(this, arg as ScrollIntoViewOptions);
+      };
+    });
+    await openReady(page);
+    expect(await page.evaluate(() => (window as unknown as { __behaviors: string[] }).__behaviors), "初回の自動判定").toEqual([]);
+    await page.getByLabel("住所または緯度・経度").fill("35.4278, 133.3314");
+    const check = waitCheck(page);
+    await page.getByRole("button", { name: "この地点を判定する" }).click();
+    await check;
+    await expect(page.locator("#verdict-heading")).toBeFocused();
+    expect(await page.evaluate(() => (window as unknown as { __behaviors: string[] }).__behaviors)).toEqual(["smooth"]);
+    await ctx.close();
   });
 });
 
@@ -491,7 +615,7 @@ test.describe("Q-21 地図の層（追加）", () => {
 // ───────────────────────── Q-22 キーボード・ランドマーク ─────────────────────────
 
 test.describe("Q-22 キーボードとランドマーク", () => {
-  test("最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 地図 → 結果 で、DOM の順と同じ", async ({ page }) => {
+  test("最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 結論 → 地図 で、DOM の順と同じ", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await openReady(page);
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
@@ -506,13 +630,13 @@ test.describe("Q-22 キーボードとランドマーク", () => {
     await expect(page.locator("header").first()).toBeVisible();
     await expect(page.locator("h1")).toHaveCount(1);
     expect(await page.locator("h2").count()).toBeGreaterThanOrEqual(3);
-    // DOM の順：入力欄 → 地図 → 結論
+    // DOM の順：入力欄 → 結論 → 地図（契約 §6.2。見た目の順と同じ）
     const order = await page.evaluate(() => {
       const pos = (sel: string): number => {
         const el = document.querySelector(sel);
         return el ? Array.from(document.querySelectorAll("*")).indexOf(el) : -1;
       };
-      return [pos("#address-input"), pos('[data-testid="regulation-map"]'), pos('[data-testid="verdict-conclusion"]')];
+      return [pos("#address-input"), pos('[data-testid="verdict-conclusion"]'), pos('[data-testid="regulation-map"]')];
     });
     expect(order[0]).toBeGreaterThan(-1);
     expect(order[1]).toBeGreaterThan(order[0]!);
@@ -602,11 +726,21 @@ test.describe("Q-24 根拠欄（既存の出典・確認日・版・改正・確
       await expect(card).toContainText(/確からしさ (高|中|低)/);
       await expect(card).toContainText(/条文確認 \d{4}-\d{2}-\d{2}/);
     }
+    // 畳んである根拠の詳細は、開くと見える（開いた状態の印は B2 で確かめる）
+    const first = cards.first().getByTestId("regulation-detail");
+    await expect(first).not.toHaveAttribute("open", "");
+    await expect(cards.first().getByTestId("regulation-datasets")).toBeHidden();
+    await openDetails(first);
+    await expect(cards.first().getByTestId("regulation-datasets")).toBeVisible();
+    // 畳んだままでも、出典・確認日・確からしさは見えている（根拠を隠さない）
+    await expect(cards.nth(1).getByRole("link", { name: /出典/ })).toBeVisible();
+    await expect(cards.nth(1).getByTestId("regulation-data-verified")).toBeVisible();
     // 版（台帳の version）：DID のカードに出る（引けないカードでも崩れない）
     await expect(page.getByTestId("regulation-card-aviation-law-did").getByTestId("regulation-datasets")).toContainText(/版 A16-20/);
     // 反映済みの改正（飛行禁止法のカード）
     await expect(page.locator('[data-testid^="regulation-card-small-drone"]').getByTestId("regulation-datasets")).toContainText("反映済みの改正");
     // 出さないもの：判例・裁判例、確認の状態としての「確認済み／要確認／未確認」の札（独立した札・状態の欄）
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => ((d as HTMLDetailsElement).open = true)));
     const text = await page.locator("main").innerText();
     expect(text).not.toMatch(/判例|裁判例/);
     const statusChips = await page.locator("main *").evaluateAll((els) =>
@@ -739,6 +873,190 @@ test.describe("Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層
         expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(2);
       }
       await ctx.close();
+    });
+  }
+});
+
+// ───────────────────────── B2 縦の長さ：畳んだ状態と開いた状態（評価 B2） ─────────────────────────
+
+test.describe("B2 縦が長すぎない：規制カード・申請支援・収録の一覧は見出し（と要約）だけ、開くと中身", () => {
+  test("375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている", async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    await expect(page.getByTestId("diagnosis-details")).toBeVisible();
+    const h = await page.evaluate(() => document.documentElement.scrollHeight);
+    await testInfo.attach("page-height-375", { body: String(h), contentType: "text/plain" });
+    expect(h, "ページ全体の高さ（375px）").toBeLessThanOrEqual(16_646);
+    expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);
+    for (const id of ["diagnosis-details", "coverage-details"]) await expect(page.getByTestId(id)).not.toHaveAttribute("open", "");
+    const cards = page.locator('[data-testid^="regulation-card-"]');
+    const n = await cards.count();
+    expect(n).toBeGreaterThanOrEqual(3);
+    for (let i = 0; i < n; i++) await expect(cards.nth(i).getByTestId("regulation-detail")).not.toHaveAttribute("open", "");
+  });
+
+  test("畳んだままでも見える要約：規制カードの名称・段・判定・この地点の理由・出典・確認日・確からしさ。結論の札（確認日・出典つき）と免責", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const card = page.getByTestId("regulation-card-aviation-law-did");
+    await expect(card.getByRole("heading", { level: 3 })).toBeVisible();
+    await expect(card.getByTestId("regulation-base-status")).toBeVisible();
+    await expect(card.getByTestId("regulation-verdict")).toBeVisible();
+    await expect(card).toContainText("この地点");
+    await expect(card.getByRole("link", { name: /出典/ })).toBeVisible();
+    await expect(card.getByTestId("regulation-data-verified")).toBeVisible();
+    await expect(card).toContainText(/確からしさ (高|中|低)/);
+    await expect(page.getByTestId("verdict-checked-date")).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);
+    await expect(page.getByTestId("verdict-sourced")).toContainText("出典つき");
+    await expect(page.getByTestId("site-disclaimer")).toBeVisible();
+    await expect(page.getByTestId("result-details").getByText("免責").first()).toBeVisible();
+    // 申請支援は、カテゴリー切り分け（出典つき）と免責が畳まずに見え、準備の中身だけが畳まれている
+    await expect(page.getByTestId("diagnosis-category-headline")).toBeVisible();
+    await expect(page.getByTestId("diagnosis-details").locator("summary")).toBeVisible();
+    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeHidden();
+  });
+
+  test("開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const dd = page.getByTestId("diagnosis-details");
+    const summary = dd.locator("> summary");
+    await summary.scrollIntoViewIfNeeded();
+    const hint = async (): Promise<{ text: string; transform: string }> =>
+      summary.evaluate((el) => ({
+        text: getComputedStyle(el.querySelector(".sb-disc-hint")!, "::before").content,
+        transform: getComputedStyle(el.querySelector(".sb-disc-chev")!).transform,
+      }));
+    const closed = await hint();
+    expect(closed.text).toBe('"開く"');
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(dd).toHaveAttribute("open", "");
+    const opened = await hint();
+    expect(opened.text).toBe('"閉じる"');
+    expect(opened.transform, "矢印の向きが変わる（形で分かる）").not.toBe(closed.transform);
+    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeVisible();
+    await summary.focus();
+    await page.keyboard.press("Space");
+    await expect(dd).not.toHaveAttribute("open", "");
+    expect((await hint()).text).toBe('"開く"');
+    const box = (await summary.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    await summary.focus();
+    expect(await summary.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe("solid");
+  });
+
+  test("収録の一覧は閉じていて、開くと一覧が出る", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const cov = page.getByTestId("coverage-details");
+    await expect(cov).not.toHaveAttribute("open", "");
+    await expect(cov.locator("li").first()).toBeHidden();
+    await openDetails(cov);
+    expect(await cov.locator("li").count()).toBeGreaterThanOrEqual(5);
+    await expect(cov.locator("li").first()).toBeVisible();
+  });
+
+  test("申請の準備を開くと、必要手続き・提出期限・束ね PDF が出る", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openReady(page);
+    const dd = page.getByTestId("diagnosis-details");
+    await openDetails(dd);
+    await expect(dd).toContainText("必要手続きチェックリスト");
+    await expect(dd).toContainText("提出期限");
+    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeVisible();
+  });
+});
+
+// ───────────────────────── N1〜N5 非ブロッカー（評価） ─────────────────────────
+
+test.describe("N1 結論の札と責任の注記", () => {
+  test("結論に「確認日」「出典つき」の札と「ご本人の名義で…ご本人が提出します」の注記。代行・代理申請の語がない", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const ev = page.getByTestId("verdict-evidence");
+    await expect(ev).toBeVisible();
+    await expect(ev.getByTestId("verdict-checked-date")).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);
+    await expect(ev.getByTestId("verdict-sourced")).toContainText(/出典つき（\d+ 件）/);
+    await expect(page.getByTestId("verdict-responsibility")).toContainText("ご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。");
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => ((d as HTMLDetailsElement).open = true)));
+    const text = await page.locator("main").innerText();
+    expect(text).not.toMatch(/代行|代理申請|代理で申請/);
+  });
+
+  test("「手続き済み」の記録の注記は、結論が「手続き済み」のときだけ付く", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openReady(page);
+    const level = async (): Promise<string | null> => page.getByTestId("verdict-summary").getAttribute("data-level");
+    const note = page.getByTestId("verdict-responsibility");
+    // 要手続き：責任の注記だけ
+    expect(await level()).not.toBe("procedure_done");
+    await expect(note).not.toContainText("そらばんが手続きを行ったわけではありません");
+    // DID の許可を入れ、可能な限り手続き済みに近づける（結論が手続き済みになった場合は記録の注記が付く）
+    const conditions = page.locator("details", { hasText: "機体・運航条件" }).first();
+    await openDetails(conditions);
+    const diag = waitDiagnose(page);
+    await conditions.getByRole("checkbox", { name: "国交省 DIPS：DID 上空の飛行許可" }).check();
+    await diag;
+    await expect(page.getByTestId("verdict-summary")).not.toHaveAttribute("data-level", "pending");
+    if ((await level()) === "procedure_done") await expect(note).toContainText("そらばんが手続きを行ったわけではありません");
+    else await expect(note).not.toContainText("そらばんが手続きを行ったわけではありません");
+  });
+});
+
+test.describe("N2 文字は 12px 以上", () => {
+  for (const [w, h] of [[375, 812], [1280, 800]] as const) {
+    test(`${w}px：/ の文字（地図の層の状態の札を含む）はすべて 12px 以上`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await openReady(page);
+      await expectFontSize(page, "main", 12, `${w}px`);
+    });
+  }
+});
+
+test.describe("N3 地図の高さ（スマホは画面の高さの 40〜50%）", () => {
+  for (const [w, h] of [[375, 812], [390, 700], [360, 740], [393, 727]] as const) {
+    test(`${w}×${h}`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await openReady(page);
+      const mh = (await page.getByTestId("regulation-map").boundingBox())!.height;
+      expect(mh, `地図の高さ ${mh}（画面の高さ ${h} の ${Math.round((mh / h) * 100)}%）`).toBeGreaterThanOrEqual(260);
+      expect(mh / h, "画面の高さに対する割合").toBeGreaterThanOrEqual(0.38);
+      expect(mh / h, "画面の高さに対する割合").toBeLessThanOrEqual(0.52);
+    });
+  }
+});
+
+test.describe("N4 結論より下の箱も v2 の丸み", () => {
+  test("手続きの票・規制ごとの判定・飛行の前後の点検・規制カードの角が丸い（12px 以上）", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const radii = await page.evaluate(() => {
+      const r = (el: Element | null): number => (el ? parseFloat(getComputedStyle(el).borderTopLeftRadius) : -1);
+      return {
+        procedure: r(document.querySelector('[data-testid="verdict-procedure"]')),
+        item: r(document.querySelector('[data-testid="verdict-item"]')),
+        duties: r(document.querySelector('[data-testid="verdict-duties"]')),
+        card: r(document.querySelector('[data-testid^="regulation-card-"]')),
+        verdictLine: r(document.querySelector('[data-testid="regulation-verdict-line"]')),
+      };
+    });
+    for (const [k, v] of Object.entries(radii)) expect(v, `${k} の角の丸み`).toBeGreaterThanOrEqual(8);
+    expect(radii.procedure).toBeGreaterThanOrEqual(12);
+    expect(radii.item).toBeGreaterThanOrEqual(12);
+    expect(radii.card).toBeGreaterThanOrEqual(12);
+  });
+});
+
+test.describe("N5 PC の最初の画面に 2 つのピル", () => {
+  for (const [w, h] of [[1280, 800], [1440, 900]] as const) {
+    test(`${w}×${h}：「この地点を判定する」「現在地で判定」が最初の画面に入る`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await openReady(page);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(page.getByRole("button", { name: "この地点を判定する" })).toBeInViewport({ ratio: 1 });
+      await expect(page.getByTestId("current-location-button")).toBeInViewport({ ratio: 1 });
+      await expect(page.locator("#address-input")).toBeInViewport({ ratio: 1 });
     });
   }
 });

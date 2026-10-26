@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11a 契約（docs/sprints/sprint-11a.md）の E2E。制度の最新化と公開面の意図の明確化。
 // 本番相当サーバー（baseURL、同梱データ）だけを使う。運航管理の項目は e2e/ops-db/sprint11a-db.spec.ts。
@@ -48,6 +49,7 @@ const pdfText = async (download: Download): Promise<string> => {
 
 const bundlePdf = async (page: Page): Promise<string> => {
   const dl = page.waitForEvent("download");
+  await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
   await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
   return pdfText(await dl);
 };
@@ -163,6 +165,7 @@ test.describe("C. 制度の最新化（申請支援）", () => {
     const section = diagnosisSection(page);
     await expect(section).toContainText("飛行できません");
     const emergency = section.locator("article", { hasText: "緊急用務空域の指定の確認" });
+    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
     await expect(emergency).toBeVisible();
     await expect(emergency).not.toContainText("開庁日以上前までに提出");
     // 期限の一覧（逆算）にも緊急用務空域の項目がない

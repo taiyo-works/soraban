@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11f 契約（docs/sprints/sprint-11f.md）の E2E。判定の表示の軽微な直し：
 // 100g 未満で DID 内の地点の表示、診断待ちの履歴、参照先の分割、未収録の市町村の題名。
@@ -127,6 +128,7 @@ const setWeight = async (page: Page, w: string): Promise<void> => {
 const latestHistory = (page: Page) => page.getByTestId("history-item").first();
 const bundledPdf = async (page: Page): Promise<string> => {
   const dl = page.waitForEvent("download");
+  await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
   await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
   return pdfText(await dl);
 };

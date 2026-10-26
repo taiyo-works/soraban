@@ -55,7 +55,24 @@ type Props = {
     readonly applied: Readonly<Record<string, string>>;
     readonly item: Readonly<Record<string, string>>;
   };
+  /**
+   * どの部分を出すか。`/` は結論を入力の直下に、手続き以降を地図の下に置くため 2 つに分けて描く（Sprint 12h PR ②）。
+   * all＝従来どおり全部（運航管理の画面）。conclusion＝結論のカードだけ。details＝飛行できない理由・手続き・義務・項目ごとの判定。
+   */
+  readonly part?: "all" | "conclusion" | "details";
+  /**
+   * 結論のカードの下に出す「確認日」「出典つき」の札と、責任の注記（判定画面 `/` だけが渡す）。
+   * checkedDate：判定に使ったデータの確認日のうち最も新しい日（YYYY-MM-DD）。sourced：出典のリンクを持つ規制の数。
+   */
+  readonly evidence?: { readonly checkedDate: string | undefined; readonly sourced: number };
 };
+
+/** 手続きの責任の線（北極星：本人名義・本人提出）。代行・代理申請と読める語は使わない。 */
+export const RESPONSIBILITY_NOTE =
+  "手続きは、ご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。";
+/** 「手続き済み」は記録の表示であって、そらばんが手続きをしたのではない。 */
+export const DONE_RECORD_NOTE =
+  "「手続き済み」は、ご本人が自分で手続きを済ませた記録の表示です。そらばんが手続きを行ったわけではありません。";
 
 const DUTY_KIND_LABEL = { premise: "前提", per_flight: "飛行ごと" } as const;
 
@@ -223,20 +240,25 @@ function ModelAircraftReferenceList() {
   );
 }
 
-export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes }: Props) {
+export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes, part = "all", evidence }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
+  const showConclusion = part !== "details";
+  const showDetails = part !== "conclusion";
+  // 手続き以降は、結論が確定したときだけ出る。確定していないとき、詳細の部分は何も描かない
+  if (part === "details" && !ready) return null;
   return (
     <div
-      data-testid="verdict-summary"
+      data-testid={part === "details" ? "verdict-details" : "verdict-summary"}
       data-level={ready ? verdict.level : failed ? "failed" : "pending"}
       className="flex flex-col gap-7"
     >
       {/* 結論（見本：結果カード。形の印＋語＋短い説明＋確認日・出典つきの札＋ボタン） */}
+      {showConclusion ? (
       <div className="flex flex-col items-stretch gap-3">
         <div
           data-testid="verdict-conclusion"
-          className={`sb-block flex min-w-0 flex-1 flex-col gap-3.5 ${ready ? "sb-rise" : ""}`}
+          className={`sb-block flex min-w-0 flex-1 flex-col gap-3 ${ready ? "sb-rise" : ""}`}
           aria-labelledby="verdict-heading"
         >
           {ready ? (
@@ -244,7 +266,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
               <div className="flex items-center gap-3.5">
                 <VerdictBig level={verdict.level} />
                 <div className="min-w-0">
-                  <p id="verdict-heading" className="sb-v-eyebrow">
+                  <p id="verdict-heading" tabIndex={-1} className="sb-v-eyebrow">
                     {VERDICT_SECTION_TITLE.conclusion}
                   </p>
                   <p data-testid="verdict-level" className="sb-v-word" data-verdict-key={VERDICT_KEY[verdict.level]}>
@@ -282,7 +304,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   <VerdictSign level="unknown" className="" />
                 </div>
                 <div className="min-w-0">
-                  <p id="verdict-heading" className="sb-v-eyebrow">
+                  <p id="verdict-heading" tabIndex={-1} className="sb-v-eyebrow">
                     {VERDICT_SECTION_TITLE.conclusion}
                   </p>
                   <p className="sb-v-word">{VERDICT_FAILED_LABEL}</p>
@@ -302,7 +324,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
             <div className="flex items-center gap-3.5">
               <span aria-hidden className="sb-v-big border-2 border-dashed border-sb-edge" />
               <div className="min-w-0">
-                <p id="verdict-heading" className="sb-v-eyebrow">
+                <p id="verdict-heading" tabIndex={-1} className="sb-v-eyebrow">
                   {VERDICT_SECTION_TITLE.conclusion}
                 </p>
                 <p data-testid="verdict-pending" className="sb-v-word !text-sb-ink-3" role="status">
@@ -312,11 +334,28 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
               </div>
             </div>
           )}
+          {ready && evidence ? (
+            <div className="flex flex-col gap-1.5 border-t border-sb-rule pt-2.5" data-testid="verdict-evidence">
+              <p className="flex flex-wrap items-center gap-2">
+                <span className="sb-tag" data-testid="verdict-checked-date">
+                  確認日 <span className="sb-num">{evidence.checkedDate ?? "—"}</span>
+                </span>
+                <span className="sb-tag" data-testid="verdict-sourced">
+                  出典つき{evidence.sourced > 0 ? <span className="sb-num">（{evidence.sourced} 件）</span> : null}
+                </span>
+              </p>
+              <p className="text-xs leading-snug text-sb-ink-2" data-testid="verdict-responsibility">
+                {RESPONSIBILITY_NOTE}
+                {verdict.level === "procedure_done" ? <> {DONE_RECORD_NOTE}</> : null}
+              </p>
+            </div>
+          ) : null}
           {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
         </div>
       </div>
+      ) : null}
 
-      {ready ? (
+      {showDetails && ready ? (
         <>
           {/* 飛行できない理由 */}
           {verdict.noFly.length > 0 ? (
@@ -328,7 +367,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     key={n.itemId}
                     data-testid="verdict-no-fly-item"
                     data-item-id={n.itemId}
-                    className={`flex items-start gap-2.5 border border-sb-rule border-l-4 bg-sb-base px-3 py-2 text-sm text-sb-ink ${VERDICT_EDGE.no_fly}`}
+                    className={`flex items-start gap-2.5 rounded-sb-l border-l-4 bg-sb-base px-4 py-3 text-sm text-sb-ink shadow-sb ${VERDICT_EDGE.no_fly}`}
                   >
                     <span className="pt-0.5">
                       <VerdictSign level="no_fly" />
@@ -369,7 +408,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="flex flex-col gap-1.5 md:table-row-group">
+                  <tbody className="flex flex-col gap-3 md:table-row-group">
                     {verdict.procedures.map((p, i) => {
                       const countdown = deadlineCountdown(p.deadline.date);
                       const edge = VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"];
@@ -386,7 +425,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                           data-item-id={p.itemId}
                           data-legal-tier={p.legalTier}
                           data-deadline-date={p.deadline.date ?? ""}
-                          className={`grid grid-cols-[2.5rem_minmax(0,1fr)] border border-l-4 border-sb-rule bg-sb-base pb-1.5 md:table-row md:border-0 md:bg-transparent md:pb-0 ${edge}`}
+                          className={`grid grid-cols-[2.5rem_minmax(0,1fr)] rounded-sb-l border-l-4 bg-sb-base pb-1.5 shadow-sb md:table-row md:rounded-none md:border-0 md:bg-transparent md:pb-0 md:shadow-none ${edge}`}
                         >
                           <td
                             className={`${cell} pl-2.5 pt-2.5 sb-num text-sm font-medium tnum text-sb-ink max-md:row-span-4 md:border-l-4 md:pl-3 ${edge}`}
@@ -492,7 +531,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
           {/* 飛行の前後に必ず行うこと（点検表） */}
           <div data-testid="verdict-duties-section" className="flex flex-col gap-2">
             <SectionHead count={verdict.perFlightDuties.length}>{VERDICT_SECTION_TITLE.duties}</SectionHead>
-            <ul data-testid="verdict-duties" className="flex flex-col divide-y divide-sb-rule border-b border-sb-rule">
+            <ul data-testid="verdict-duties" className="flex flex-col divide-y divide-sb-rule rounded-sb-l bg-sb-base px-4 py-1 shadow-sb">
               {verdict.perFlightDuties.map((d) => (
                 <li
                   key={d.id}
@@ -502,7 +541,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   className="grid grid-cols-[4.5rem_1fr] items-baseline gap-x-3 py-1.5 text-xs text-sb-ink-2"
                 >
                   <span
-                    className={`justify-self-start border px-1.5 py-px text-xs leading-tight ${
+                    className={`justify-self-start rounded-sb-pill border px-2 py-px text-xs leading-tight ${
                       d.kind === "premise" ? "border-sb-rule text-sb-ink-3" : "border-sb-edge text-sb-ink"
                     }`}
                   >
@@ -533,7 +572,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     <th className="py-1 pr-2 font-medium">判定</th>
                   </tr>
                 </thead>
-                <tbody className="block border-t border-sb-rule md:table-row-group md:border-t-0">
+                <tbody className="flex flex-col gap-3 md:table-row-group">
                   {verdict.items.map((it) => (
                     <tr
                       key={it.id}
@@ -541,7 +580,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       data-item-id={it.id}
                       data-base-status={it.baseStatus}
                       data-verdict={it.verdict}
-                      className={`block border-b border-l-2 border-sb-rule py-1.5 pl-3 align-top md:table-row md:border-l-0 md:py-0 md:pl-0 ${VERDICT_EDGE[it.verdict]}`}
+                      className={`block rounded-sb-l border-b-0 border-l-4 bg-sb-base py-2 pl-3 align-top shadow-sb md:table-row md:rounded-none md:border-b md:border-l-0 md:border-sb-rule md:bg-transparent md:py-0 md:pl-0 md:shadow-none ${VERDICT_EDGE[it.verdict]}`}
                     >
                       <td className={`block pb-1 pr-3 text-sb-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}

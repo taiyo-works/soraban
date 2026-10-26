@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 10a 契約（docs/sprints/sprint-10a.md）の E2E。公開面の整備（トップ画面・PDF の表示）。
 // 本番相当サーバー（baseURL）だけを使う。
@@ -167,6 +168,7 @@ test.describe("C. PDF", () => {
   test("9. 申請支援 PDF に運営者・免責・「判定の版」があり、特許・社内向けの語がない", async ({ page }) => {
     await openReady(page);
     const dl = page.waitForEvent("download");
+    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
     await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
     const t = await pdfText(await dl);
     expect(t).toContain(OPERATOR);

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11g 契約 14〜16（docs/sprints/sprint-11g.md）の E2E。100g 未満の機体（模型航空機）の手続きを「許可または通報」と表示する。
 // 補助関数は e2e/sprint11e.spec.ts と同じ。本番相当サーバー（baseURL、同梱データ）だけを使う。
@@ -178,6 +179,7 @@ test.describe("Sprint 11g：許可または通報", () => {
     );
 
     const dl = page.waitForEvent("download");
+    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
     await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
     const app = await pdfText(await dl);
     const a = squash(app);

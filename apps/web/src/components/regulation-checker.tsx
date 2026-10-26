@@ -387,6 +387,19 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const canExportPdf =
     screenVerdict !== undefined && !verdictPending && !conclusionFailed && resultIsCurrent;
   const showResultDetail = result !== null && resultIsCurrent && !checkFailed;
+  // 結論の札（確認日・出典つき）：判定に使ったデータの確認日のうち最も新しい日と、出典のリンクを持つ規制の数。
+  const evidenceSummary =
+    showResultDetail && result
+      ? {
+          checkedDate: result.regulations
+            .flatMap((r) => r.datasets.map((d) => d.verifiedAt))
+            .filter((v) => v.length >= 10)
+            .map((v) => v.slice(0, 10))
+            .sort()
+            .at(-1),
+          sourced: result.regulations.filter((r) => Boolean(r.url)).length,
+        }
+      : undefined;
   // 再試行：地点判定が失敗していれば地点判定と診断を新しい実行としてやり直し、診断だけの失敗なら診断をやり直す。
   const retryVerdict = (): void => {
     if (checkFailed) {
@@ -629,6 +642,20 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     return Object.keys(ctx).length > 0 ? ctx : undefined;
   };
 
+  // 利用者が地点を決めて判定したあと、結論へ移る（結論が画面に入る動線。Sprint 12h PR ② の評価 B1）。
+  // 結論のカードの上端へスクロールし、結論の見出しへフォーカスを移す（読み上げ対応）。動きを減らす設定・現場モードでは瞬間移動。
+  // 初回の自動判定・条件の変更による再判定では動かさない（goToLocation からだけ要求する）。
+  const conclusionRequestRef = useRef<boolean>(false);
+  const conclusionScrolledRef = useRef<boolean>(false);
+  const conclusionSawPendingRef = useRef<boolean>(false);
+  const [conclusionTick, setConclusionTick] = useState<number>(0);
+  const requestConclusion = (): void => {
+    conclusionRequestRef.current = true;
+    conclusionScrolledRef.current = false;
+    conclusionSawPendingRef.current = false;
+    setConclusionTick((t) => t + 1);
+  };
+
   const applyLocation = (loc: LatLng): void => {
     setLat(round6(loc.lat));
     setLng(round6(loc.lng));
@@ -852,6 +879,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     setLocatedCircle(null);
     setAddressDirty(false);
     applyLocation(loc);
+    requestConclusion();
     const airspaceChanged = !sameFlagSet(userAirspaceFlags, seedAirspace);
     const didChanged = didConfirmedNotApplicable;
     if (airspaceChanged) setUserAirspaceFlags(seedAirspace);
@@ -875,6 +903,25 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       runId,
     );
   };
+
+  useEffect(() => {
+    if (!conclusionRequestRef.current) return;
+    const box = document.querySelector<HTMLElement>('[data-testid="verdict-conclusion"]');
+    if (!box) return;
+    const instant =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.getAttribute("data-mode") === "field";
+    if (!conclusionScrolledRef.current) {
+      conclusionScrolledRef.current = true;
+      box.scrollIntoView({ block: "start", behavior: instant ? "auto" : "smooth" });
+    }
+    // 判定中を一度見てから、結論が出た（または失敗が確定した）ら、見出しへフォーカスを移して要求を終える
+    // （判定中の表示は別の要素なので、先に移すと、結論が出たときにフォーカスが外れる）
+    if (verdictPending) conclusionSawPendingRef.current = true;
+    if (conclusionFailed || (conclusionSawPendingRef.current && screenVerdict !== undefined && !verdictPending)) {
+      document.getElementById("verdict-heading")?.focus({ preventScroll: true });
+      conclusionRequestRef.current = false;
+    }
+  }, [conclusionTick, conclusionFailed, screenVerdict, verdictPending, result, checkError]);
 
   const handlePick = (loc: LatLng, method: MapPickMethod = "click"): void => {
     if (!isValidLatLng(loc)) return;
@@ -1180,23 +1227,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
         </div>
       </form>
 
-      {/* ─── MAP ───────────────────────────────── */}
-      <div className="sb-area-map flex flex-col gap-2">
-        {locationNote ? (
-          <p className="sb-note-card is-ok flex flex-col gap-0.5 !text-sb-ink" role="status" data-testid="location-note">
-            {locationNote.title ? <span className="text-sm font-bold">{locationNote.title}</span> : null}
-            <span>{locationNote.text}</span>
-            {locationNote.source ? <span className="text-xs text-sb-ink-3">出典：{locationNote.source}</span> : null}
-          </p>
-        ) : null}
-        <RegulationMap center={center} prefCode={prefCode} onPick={handlePick} candidate={geoCandidate ?? locatedCircle} />
-      </div>
-
-      {/* ─── RESULT ───────────────────────────────── */}
+      {/* ─── RESULT（結論）：入力の直下。判定したら、ここへ移る（見出しにフォーカスも移す） ─── */}
       {result || checkError ? (
-        <section className="sb-area-wide flex flex-col gap-6" aria-live="polite" data-testid="result-section">
+        <section className="sb-area-result flex flex-col gap-6" aria-live="polite" data-testid="result-section">
           {/* 結論（4 段の判定）と段取り（Sprint 11d D1） */}
           <VerdictSummary
+            part="conclusion"
+            {...(evidenceSummary ? { evidence: evidenceSummary } : {})}
             verdict={screenVerdict}
             pending={verdictPending}
             failed={conclusionFailed}
@@ -1244,6 +1281,26 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               </div>
             }
           />
+
+        </section>
+      ) : null}
+
+      {/* ─── MAP ───────────────────────────────── */}
+      <div className="sb-area-map flex flex-col gap-2">
+        {locationNote ? (
+          <p className="sb-note-card is-ok flex flex-col gap-0.5 !text-sb-ink" role="status" data-testid="location-note">
+            {locationNote.title ? <span className="text-sm font-bold">{locationNote.title}</span> : null}
+            <span>{locationNote.text}</span>
+            {locationNote.source ? <span className="text-xs text-sb-ink-3">出典：{locationNote.source}</span> : null}
+          </p>
+        ) : null}
+        <RegulationMap center={center} prefCode={prefCode} onPick={handlePick} candidate={geoCandidate ?? locatedCircle} />
+      </div>
+
+      {/* ─── 手続き・規制ごとの判定・証跡（地図の下） ─── */}
+      {result || checkError ? (
+        <section className="sb-area-wide flex flex-col gap-6" data-testid="result-details" aria-label="手続きと規制ごとの判定">
+          <VerdictSummary part="details" verdict={screenVerdict} pending={verdictPending} failed={conclusionFailed} />
 
           {!showResultDetail ? (
             <p data-testid="regulations-unavailable" className="sb-note-card border border-dashed border-sb-edge">
@@ -1377,7 +1434,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               {combinedStatus.message}
             </p>
           ) : null}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
               <span className="sb-field-text">緯度（北緯・度）</span>
               <input
@@ -1556,7 +1613,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
           {/* 飛行方法チェックボックス群 */}
           <span className="sb-field-text">飛行方法（該当するものを選択）</span>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2">
             {FLIGHT_METHOD_FLAGS.map((flag) => {
               const checked = methodFlags.includes(flag);
               return (

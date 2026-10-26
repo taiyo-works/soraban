@@ -11,7 +11,7 @@ import {
 } from "@soraban/regulations";
 import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL } from "@/lib/verdict-display";
 import { TierGauge } from "./verdict-mark";
-import { VerdictTag } from "./ui/sb-parts";
+import { Disclosure, VerdictTag } from "./ui/sb-parts";
 
 type Props = {
   readonly regulation: RegulationWithStatus;
@@ -83,12 +83,16 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
   const exceptions = regulation.clauseGraph.exceptions;
   const confidence = summarizeConfidence(regulation.confidence);
   const verifiedAtDate = regulation.confidence.verifiedAt.slice(0, 10);
+  const latestDataVerified = regulation.datasets
+    .map((d) => d.verifiedAt.slice(0, 10))
+    .sort()
+    .at(-1);
   return (
     <article
       data-testid={`regulation-card-${regulation.id}`}
       data-status={regulation.status}
       data-verdict={verdictItem?.verdict ?? ""}
-      className="sb-item-card flex flex-col gap-3"
+      className="sb-item-card flex flex-col gap-2.5"
     >
       <div className="flex items-center gap-2">
         <span
@@ -107,7 +111,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {verdictItem ? (
         <p
           data-testid="regulation-verdict-line"
-          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-sb-s border-y border-l-4 border-sb-rule py-1.5 pl-2 text-xs text-sb-ink-2 ${provisional ? "border-l-sb-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
+          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-sb-m border border-l-4 border-sb-rule py-1.5 pl-2 pr-2 text-xs text-sb-ink-2 ${provisional ? "border-l-sb-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
         >
           <span>元の判定 {baseStatusDisplay(verdictItem)}</span>
           <span aria-hidden>→</span>
@@ -136,9 +140,6 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       <h3 className="text-base font-bold leading-snug text-sb-ink">
         {regulation.title}
       </h3>
-      <p className="text-xs leading-relaxed text-sb-ink-2">
-        {regulation.summary}
-      </p>
       {regulation.didDetail ? (
         <p
           data-testid="did-detail"
@@ -205,20 +206,28 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           </ul>
         </div>
       ) : null}
-      {exceptions.length > 0 ? (
-        <details className="rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-ink-2">
-          <summary className="min-h-11 cursor-pointer text-xs tracking-wide text-sb-ink-3 leading-[2.75rem]">
-            例外節 {exceptions.length} 件
-          </summary>
-          <ul className="mt-2 flex flex-col gap-1.5">
-            {exceptions.map((ex) => (
-              <li key={ex.id} className="leading-snug">
-                ・{ex.condition}
-              </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
+      {/* 説明・使用データ・版・改正・例外節は「根拠の詳細」に畳む。出典・確認日・確からしさは下の 1 行に常に出す */}
+      <Disclosure
+        variant="plain"
+        testId="regulation-detail"
+        title="根拠の詳細"
+        note="説明・使用データ・版・改正"
+      >
+        <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="regulation-summary">
+          {regulation.summary}
+        </p>
+        {exceptions.length > 0 ? (
+          <div data-testid="regulation-exceptions" className="flex flex-col gap-1 text-xs leading-relaxed text-sb-ink-2">
+            <p className="sb-eyebrow">例外節 {exceptions.length} 件</p>
+            <ul className="flex flex-col gap-1.5">
+              {exceptions.map((ex) => (
+                <li key={ex.id} className="leading-snug">
+                  ・{ex.condition}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       {/* データ出典と確認日（Sprint 7）・反映済みの改正。判定本文と区別するため脚注として置く */}
       <div
         data-testid="regulation-datasets"
@@ -260,6 +269,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           </div>
         ) : null}
       </div>
+      </Disclosure>
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-sb-rule pt-2.5 text-xs tracking-wide text-sb-ink-3">
         {regulation.url ? (
           <a
@@ -270,6 +280,11 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           >
             出典 ↗
           </a>
+        ) : null}
+        {latestDataVerified ? (
+          <span title="使用データの確認日のうち最も新しい日" className="tnum" data-testid="regulation-data-verified">
+            確認日 {latestDataVerified}
+          </span>
         ) : null}
         {regulation.dataYear ? (
           <span className="tnum">基準年 {regulation.dataYear}</span>

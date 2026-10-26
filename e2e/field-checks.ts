@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 // 現場モードの見た目の基準（Sprint 12c 契約 15）を検査する補助。ブラウザで計算した色・寸法から、WCAG の式で比を求める。
 // 明るい配色と暗い配色は、呼び出し側が page.emulateMedia({ colorScheme }) で切り替えてから呼ぶ。
@@ -183,4 +183,20 @@ export const expectNoHorizontalScroll = async (page: Page, label: string): Promi
     clientWidth: document.documentElement.clientWidth,
   }));
   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);
+};
+
+/**
+ * 折りたたみ（`<details>`）を開く。すでに開いていれば何もしない。
+ * 判定画面 `/` は、規制カードの「根拠の詳細」・申請支援の「申請の準備」・収録の一覧を、見出しだけ見せて畳んでいる（Sprint 12h PR ②）。
+ * 畳まれた中の部品は画面に見えず押せないので、見る・押す前に開く。文字の内容を読むだけの検査（toContainText）は、開かなくてもよい。
+ */
+export const openDetails = async (details: Locator): Promise<void> => {
+  const open = await details.evaluate((e) => (e as HTMLDetailsElement).open);
+  if (!open) await details.locator("> summary").first().click();
+  await expect(details).toHaveAttribute("open", "");
+};
+
+/** 申請支援の「申請の準備」（必要手続き・提出期限・プリフィル・書類の下書き・束ね PDF）を開く。 */
+export const openDiagnosis = async (page: Page): Promise<void> => {
+  await openDetails(page.getByTestId("diagnosis-details"));
 };

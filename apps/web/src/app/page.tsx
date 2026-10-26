@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { BrandDrone, HeroIllustration } from "@/components/hero-illustration";
 import { OpsHomeEntry } from "@/components/ops-home-entry";
 import { RegulationChecker } from "@/components/regulation-checker";
-import { SectionHead } from "@/components/ui/sb-parts";
+import { Disclosure, SectionHead } from "@/components/ui/sb-parts";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
 // 自治体の件数は COVERAGE_SUMMARY から出す（収録を増やすと自動で反映される）。
@@ -172,7 +172,12 @@ export default function Home() {
             title="収録している規制とデータ"
             note="件数と確認日は現在の収録内容から表示しています"
           />
-          <p className="mb-4 max-w-2xl text-sm leading-relaxed text-sb-ink-2">
+          <Disclosure
+            testId="coverage-details"
+            title="収録の一覧を見る"
+            note={`${COVERAGE_LAYERS.length} 区分・出典と確認日つき`}
+          >
+          <p className="max-w-2xl text-sm leading-relaxed text-sb-ink-2">
             地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、都道府県と市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
           </p>
           <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -193,6 +198,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          </Disclosure>
         </section>
 
         {/* ============================ 免責・フッター ============================ */}

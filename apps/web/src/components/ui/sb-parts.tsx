@@ -187,3 +187,49 @@ export function SectionHead({
     </div>
   );
 }
+
+// ── 折りたたみ（見出しだけ見せ、開くと中身が出る。キーボードで開閉でき、開閉は形（矢印の向き）と文字（開く／閉じる）で分かる）──
+// 標準の <details>／<summary> をそのまま使う（Enter／Space で開閉。開閉の状態は支援技術にも伝わる）。
+// 「開く／閉じる」の文字は CSS の ::before で出す（soraban-ui.css の .sb-disc-hint）ので、ここは構造だけ。動きは付けない。
+export function Disclosure({
+  title,
+  note,
+  children,
+  testId,
+  className,
+  defaultOpen = false,
+  variant = "block",
+  summaryTestId,
+}: {
+  readonly title: ReactNode;
+  /** 見出しの右に添える短い説明（件数など）。 */
+  readonly note?: ReactNode;
+  readonly children: ReactNode;
+  readonly testId?: string;
+  readonly className?: string;
+  readonly defaultOpen?: boolean;
+  /** block＝カード（枠つき）／plain＝枠なし（カードの中の一部）。 */
+  readonly variant?: "block" | "plain";
+  readonly summaryTestId?: string;
+}) {
+  return (
+    <details
+      className={cx("sb-disc", variant === "block" ? "sb-block" : "sb-disc-plain", className)}
+      {...(testId ? { "data-testid": testId } : {})}
+      {...(defaultOpen ? { open: true } : {})}
+    >
+      <summary {...(summaryTestId ? { "data-testid": summaryTestId } : {})}>
+        <span className="sb-disc-text">
+          <span className="sb-disc-title">{title}</span>
+          {note ? <span className="sb-disc-note">{note}</span> : null}
+        </span>
+        <span className="sb-disc-hint">
+          <svg className="sb-disc-chev" viewBox="0 0 20 20" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M5 8 L10 13 L15 8" />
+          </svg>
+        </span>
+      </summary>
+      <div className="sb-disc-body">{children}</div>
+    </details>
+  );
+}

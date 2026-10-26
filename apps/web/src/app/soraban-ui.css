@@ -612,7 +612,7 @@ input.sb-check:disabled {
 /* ===== ヒーロー（挿絵は `/` のトップだけ。スマホ 232px、PC 320px。文字は空の上にだけ置く） ===== */
 .sb-hero {
   position: relative;
-  height: 150px;
+  height: 128px;
   overflow: hidden;
   background: var(--sb-art-sky);
 }
@@ -738,7 +738,7 @@ input.sb-check:disabled {
   }
   .sb-band-first {
     padding-top: 12px;
-    padding-bottom: 20px;
+    padding-bottom: 12px;
   }
   .sb-band-first .sb-sec-head {
     min-height: 38px;
@@ -755,12 +755,12 @@ input.sb-check:disabled {
     padding: 12px 14px 14px;
   }
   .sb-hero-art svg {
-    height: 150px;
+    height: 128px;
   }
 }
 @media (min-width: 1024px) {
   .sb-hero {
-    height: 320px;
+    height: 280px;
   }
   .sb-art-m {
     display: none;
@@ -797,11 +797,13 @@ input.sb-check:disabled {
 .sb-check-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 @media (min-width: 1024px) {
   .sb-check-grid {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    /* 地図は 2 行にまたがる。余りの高さは 2 行目（結論）へ回し、入力の高さを変えない（結論の位置がぶれない） */
+    grid-template-rows: auto 1fr;
     gap: 20px;
     align-items: start;
   }
@@ -809,9 +811,13 @@ input.sb-check:disabled {
     grid-column: 1;
     grid-row: 1;
   }
+  .sb-area-result {
+    grid-column: 1;
+    grid-row: 2;
+  }
   .sb-area-map {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 1 / span 2;
   }
   .sb-area-wide {
     grid-column: 1 / -1;
@@ -960,7 +966,7 @@ input.sb-check:disabled {
   padding: 0 8px;
   border-radius: var(--sb-pill);
   border: 1px solid var(--sb-edge);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
   color: var(--sb-ink-2);
@@ -1034,6 +1040,9 @@ input.sb-check:disabled {
 .sb-map-frame .maplibregl-ctrl-attrib-button {
   width: 44px;
   height: 44px;
+  /* 44px に広げた枠で ⓘ の絵が並んで繰り返されないよう、中央に 1 つだけ置く */
+  background-repeat: no-repeat;
+  background-position: center;
 }
 .sb-map-frame .maplibregl-ctrl-attrib.maplibregl-compact {
   min-height: 44px;
@@ -1048,4 +1057,101 @@ input.sb-check:disabled {
 }
 .sb-layer:hover .text-sb-ink-3 {
   color: var(--sb-ink-2);
+}
+
+/* ===== 折りたたみ（Disclosure）。見出しだけ見せ、開くと中身が出る ===== */
+.sb-disc > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--sb-ink);
+}
+.sb-disc-text {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+}
+.sb-disc > summary::-webkit-details-marker {
+  display: none;
+}
+.sb-disc-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.sb-disc-note {
+  font-size: 12px;
+  color: var(--sb-ink-2);
+}
+/* 開閉の印：矢印の向き（閉＝下向き、開＝上向き）と、文字（開く／閉じる）。動きは付けない（動きは 2 つだけ） */
+.sb-disc-hint {
+  flex: none;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.sb-disc-hint::before {
+  content: "開く";
+}
+.sb-disc[open] > summary .sb-disc-hint::before {
+  content: "閉じる";
+}
+.sb-disc[open] > summary .sb-disc-chev {
+  transform: rotate(180deg);
+}
+.sb-disc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 12px;
+}
+.sb-disc[open] > summary {
+  border-bottom: 1px solid var(--sb-rule);
+  padding-bottom: 4px;
+}
+.sb-disc-plain {
+  border-top: 1px solid var(--sb-rule);
+  padding-top: 4px;
+}
+.sb-disc > summary:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+  border-radius: var(--sb-r-s);
+}
+.sb-area-result [data-testid="verdict-conclusion"] {
+  scroll-margin-top: 12px;
+}
+
+/* 地図の高さ：スマホは画面の高さの 40%（260〜380px）。PC（2 列）は 4:3 */
+.sb-map-canvas {
+  height: clamp(260px, 40svh, 380px);
+}
+@media (min-width: 1024px) {
+  .sb-map-canvas {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* PC：2 つのピルは横に並べて、最初の画面（1280×800）に両方入れる */
+@media (min-width: 1024px) {
+  .sb-area-input .sb-btn-row {
+    flex-direction: row;
+  }
+  .sb-area-input .sb-btn-row > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }

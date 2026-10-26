@@ -54,7 +54,7 @@ export function HeroIllustration() {
   return (
     <div className="sb-hero-art" aria-hidden="true" data-testid="hero-art">
       <div className="sb-art-m">
-        <svg viewBox="0 0 390 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <svg viewBox="0 22 390 128" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
           <defs>
             <linearGradient id="sb-sky-m" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="var(--sb-art-sky)" />
@@ -66,7 +66,7 @@ export function HeroIllustration() {
               <path d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" />
             </clipPath>
           </defs>
-          <rect width="390" height="150" fill="url(#sb-sky-m)" />
+          <rect y="22" width="390" height="128" fill="url(#sb-sky-m)" />
           <circle cx="330" cy="104" r="22" fill="var(--sb-orange)" />
           <circle cx="330" cy="104" r="34" fill="none" stroke="var(--sb-orange)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
           <Cloud x={204} y={46} scale={0.3} stroke={6.7} />
@@ -79,11 +79,11 @@ export function HeroIllustration() {
           </g>
           <path d="M0 132 C80 112 170 126 250 136 S350 130 390 120 V150 H0Z" fill="var(--sb-art-hill-mid)" />
           <path d="M0 146 C90 136 180 142 270 148 S360 145 390 141 V150 H0Z" fill="var(--sb-base)" />
-          <DroneLine x={250} y={10} width={74} height={44} />
+          <DroneLine x={250} y={26} width={74} height={44} />
         </svg>
       </div>
       <div className="sb-art-p">
-        <svg viewBox="0 0 1280 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <svg viewBox="0 40 1280 280" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
           <defs>
             <linearGradient id="sb-sky-p" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="var(--sb-art-sky)" />
@@ -95,10 +95,10 @@ export function HeroIllustration() {
               <path d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" />
             </clipPath>
           </defs>
-          <rect width="1280" height="320" fill="url(#sb-sky-p)" />
+          <rect y="40" width="1280" height="280" fill="url(#sb-sky-p)" />
           <circle cx="1060" cy="168" r="56" fill="var(--sb-orange)" />
           <circle cx="1060" cy="168" r="84" fill="none" stroke="var(--sb-orange)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
-          <Cloud x={1110} y={40} scale={0.95} stroke={2.1} />
+          <Cloud x={1110} y={52} scale={0.95} stroke={2.1} />
           <Cloud x={700} y={96} scale={0.62} stroke={3.2} />
           <Cloud x={1190} y={150} scale={0.55} stroke={3.6} />
           <path d="M690 258 C760 210 830 150 905 92" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeDasharray="2 9" strokeLinecap="round" />
@@ -110,7 +110,7 @@ export function HeroIllustration() {
           </g>
           <path d="M0 290 C240 268 460 294 700 274 S1070 228 1280 248 V320 H0Z" fill="var(--sb-art-hill-mid)" />
           <path d="M0 313 C300 297 560 313 820 301 S1150 283 1280 295 V320 H0Z" fill="var(--sb-base)" />
-          <DroneLine x={880} y={30} width={150} height={90} />
+          <DroneLine x={880} y={48} width={150} height={90} />
         </svg>
       </div>
     </div>

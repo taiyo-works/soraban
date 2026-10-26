@@ -635,12 +635,12 @@ export function RegulationMap({
 
   const visibleCount = Object.values(layerVisibility).filter(Boolean).length;
 
-  // 地図の枠：スマホは 16:10、PC は 4:3（縦に積む画面で、入力・結論が地図に押し出されない高さ）。
+  // 地図の枠：スマホは画面の高さの 40%（260〜380px。操作しやすく、縦を伸ばしすぎない）、PC は 4:3。
   const canvas = (
     <div
       ref={containerRef}
       data-testid="regulation-map"
-      className="aspect-[16/10] w-full lg:aspect-[4/3]"
+      className="sb-map-canvas w-full"
       style={{ touchAction: "pan-x pan-y" }}
     />
   );

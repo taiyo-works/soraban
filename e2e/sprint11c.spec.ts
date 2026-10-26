@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11c 契約（docs/sprints/sprint-11c.md）の E2E。許可の入力の不具合修正
 // （飛行禁止法の「同意」と「通報」を分ける、「国交省 DIPS」の説明を動きに合わせる）。
@@ -152,6 +153,7 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
     await openReady(page);
     await selectPreset(page, MIHO);
     const proc = page.locator("article", { hasText: PROC_TITLE });
+    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
     await expect(proc).toBeVisible();
     await openConditions(page);
     await toggle(consent(page), page, true);
