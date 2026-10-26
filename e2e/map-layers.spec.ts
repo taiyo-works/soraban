@@ -48,3 +48,46 @@ test.describe("地図の規制レイヤー", () => {
     await expect(map(page)).toHaveAttribute("data-did-pref", "32", { timeout: 30_000 });
   });
 });
+
+test.describe("飛行禁止法 対象施設レイヤーの塗り分け", () => {
+  test("凡例に『敷地・区域』『周辺地域』『要確認帯』の文字ラベルが 3 つあり、未収録の施設が書かれている", async ({ page }) => {
+    await stubTiles(page, 100);
+    await page.goto("/");
+    const group = page.locator("label", { hasText: "小型無人機等飛行禁止法 対象施設" });
+    await expect(group).toBeVisible();
+    const zones = group.getByTestId("legend-zones").locator("li");
+    await expect(zones).toHaveCount(3);
+    await expect(zones.nth(0)).toContainText("敷地・区域");
+    await expect(zones.nth(0)).toContainText("レッドゾーン");
+    await expect(zones.nth(1)).toContainText("周辺地域");
+    await expect(zones.nth(1)).toContainText("イエローゾーン");
+    await expect(zones.nth(1)).toContainText("原則飛行禁止");
+    await expect(zones.nth(2)).toContainText("要確認帯");
+    await expect(zones.nth(2)).toContainText("法定の範囲ではありません");
+    await expect(group).toContainText("指定を確認できた施設のうち地図に収録できたのは6件");
+    await expect(group).toContainText("情報本部 美保通信所は位置を確認できず未収録");
+  });
+
+  test("地図には要確認帯（灰の点線）のレイヤーが赤・黄と別に載り、チェックで一括して切り替わる", async ({ page }) => {
+    await stubTiles(page, 100);
+    await page.goto("/");
+    await expect(map(page)).toHaveAttribute("data-did-pref", "31", { timeout: 60_000 });
+    const layers = (await map(page).getAttribute("data-base-layers"))!.split(",");
+    expect(layers).toEqual(
+      expect.arrayContaining([
+        "base-check-outline",
+        "base-yellow-fill",
+        "base-yellow-outline",
+        "base-red-fill",
+        "base-red-outline-approx",
+      ]),
+    );
+    expect(new Set(layers).size).toBe(layers.length);
+
+    const base = page.locator("label", { hasText: "小型無人機等飛行禁止法 対象施設" }).getByRole("checkbox");
+    await base.uncheck();
+    await expect(map(page)).toHaveAttribute("data-hidden-layers", "base", { timeout: 15_000 });
+    await base.check();
+    await expect(map(page)).toHaveAttribute("data-hidden-layers", "", { timeout: 15_000 });
+  });
+});

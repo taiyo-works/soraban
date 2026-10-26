@@ -14,6 +14,13 @@ import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import { createRightClickPicker } from "@/lib/right-click";
 import { CurrentLocationControl } from "./current-location-control";
 import {
+  BASE_ZONE_COLORS,
+  BASE_ZONE_LAYER_IDS,
+  BASE_ZONE_LEGEND,
+  RED_HATCH_IMAGE_ID,
+  makeHatchImage,
+} from "./regulation-map-zones";
+import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
   ALL_SENSITIVE_FACILITIES,
@@ -84,9 +91,10 @@ const polygonToGeoJson = (
 
 const polygonsToFeatureCollection = (
   polygons: readonly Polygon[],
+  properties: GeoJSON.GeoJsonProperties = {},
 ): GeoJSON.FeatureCollection<GeoJSON.Polygon> => ({
   type: "FeatureCollection",
-  features: polygons.map(polygonToGeoJson),
+  features: polygons.map((p) => ({ ...polygonToGeoJson(p), properties: { ...properties } })),
 });
 
 const EMPTY_FC: GeoJSON.FeatureCollection = {
@@ -142,6 +150,9 @@ const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
   .join("・");
 const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
 
+// 指定は確認できたが位置を確認できず、地図に収録していない施設（README.md「確認できなかった事項」）。
+const UNMAPPED_FACILITY_NOTE = "情報本部 美保通信所は位置を確認できず未収録";
+
 const LAYER_GROUPS: ReadonlyArray<{
   readonly key: LayerKey;
   readonly label: string;
@@ -149,6 +160,13 @@ const LAYER_GROUPS: ReadonlyArray<{
   /** 色の意味など、ラベルだけでは伝わらない補足（任意） */
   readonly detail?: string;
   readonly swatch: string;
+  /** 色分けの意味を文字ラベル付きで示す（任意）。色だけに頼らない。 */
+  readonly zones?: ReadonlyArray<{
+    readonly key: string;
+    readonly label: string;
+    readonly note: string;
+    readonly swatch: string;
+  }>;
   readonly layerIds: readonly string[];
 }> = [
   {
@@ -175,11 +193,12 @@ const LAYER_GROUPS: ReadonlyArray<{
   },
   {
     key: "base",
-    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（敷地＋おおむね 1,000m）`,
+    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（地図に収録）`,
     source: `${datasetLegend(DATASET_IDS.smallDroneLawFacilities)}・敷地形状は概算`,
-    detail: "赤：敷地と周辺地域／黄：外側の要確認帯（色の意味は規制カードに記載）",
+    detail: `指定を確認できた施設のうち地図に収録できたのは${SMALL_DRONE_LAW_FACILITIES.length}件。${UNMAPPED_FACILITY_NOTE}`,
     swatch: "bg-rose-500/50 ring-2 ring-amber-500 rounded-full",
-    layerIds: ["base-yellow-fill", "base-yellow-outline", "base-red-fill", "base-red-outline"],
+    zones: BASE_ZONE_LEGEND,
+    layerIds: BASE_ZONE_LAYER_IDS,
   },
   {
     key: "parks",
@@ -255,11 +274,23 @@ export function RegulationMap({
       .setLngLat([center.lng, center.lat])
       .addTo(map);
 
-    // 敷地＋1,000m（red）と、その外側の yellow 幅（告示の区域図で要確認）。
-    const baseRedFc = polygonsToFeatureCollection(
+    // 赤＝敷地・区域、黄＝周辺地域（敷地境界から aroundM）、灰の点線＝要確認帯（独自・法定ではない）。
+    // 敷地形状が中心点＋推定半径の施設は approx=true（斜線＋破線で「敷地は概算」を示す）。
+    const siteRings = (approx: boolean): Polygon[] =>
+      SMALL_DRONE_LAW_FACILITIES.filter((f) => (f.geometry.type === "center") === approx).flatMap(
+        (f) => facilitySiteRings(f, 0),
+      );
+    const baseRedFc: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {
+      type: "FeatureCollection",
+      features: [
+        ...polygonsToFeatureCollection(siteRings(true), { approx: true }).features,
+        ...polygonsToFeatureCollection(siteRings(false), { approx: false }).features,
+      ],
+    };
+    const baseYellowFc = polygonsToFeatureCollection(
       SMALL_DRONE_LAW_FACILITIES.flatMap((f) => facilitySiteRings(f, f.aroundM)),
     );
-    const baseYellowFc = polygonsToFeatureCollection(
+    const baseCheckFc = polygonsToFeatureCollection(
       SMALL_DRONE_LAW_FACILITIES.flatMap((f) => facilitySiteRings(f, f.aroundM + f.yellowWidthM)),
     );
     const parksFc = polygonsToFeatureCollection(ALL_MUNICIPAL_PARKS.map((p) => p.polygon));
@@ -343,33 +374,77 @@ export function RegulationMap({
           /* ignore */
         });
 
+      // そらばん独自の要確認帯：灰の点線の輪郭のみ（塗りなし）。黄・赤とは別の見た目。
+      map.addSource("base-check", { type: "geojson", data: baseCheckFc });
+      map.addLayer({
+        id: "base-check-outline",
+        type: "line",
+        source: "base-check",
+        paint: {
+          "line-color": BASE_ZONE_COLORS.check,
+          "line-width": 1.5,
+          "line-dasharray": [1, 2],
+        },
+      });
+
+      // 黄（イエローゾーン）＝周辺地域。飛行禁止の領域なので、塗りと実線の輪郭ではっきり示す。
       map.addSource("base-yellow", { type: "geojson", data: baseYellowFc });
       map.addLayer({
         id: "base-yellow-fill",
         type: "fill",
         source: "base-yellow",
-        paint: { "fill-color": "#f59e0b", "fill-opacity": 0.18 },
+        paint: { "fill-color": BASE_ZONE_COLORS.yellow, "fill-opacity": 0.3 },
       });
       map.addLayer({
         id: "base-yellow-outline",
         type: "line",
         source: "base-yellow",
-        paint: { "line-color": "#d97706", "line-width": 1 },
+        paint: { "line-color": BASE_ZONE_COLORS.yellowLine, "line-width": 2 },
       });
 
+      // 赤（レッドゾーン）＝敷地・区域。敷地形状が概算の施設は斜線＋破線の輪郭。
       map.addSource("base-red", { type: "geojson", data: baseRedFc });
       map.addLayer({
         id: "base-red-fill",
         type: "fill",
         source: "base-red",
-        paint: { "fill-color": "#dc2626", "fill-opacity": 0.32 },
+        paint: { "fill-color": BASE_ZONE_COLORS.red, "fill-opacity": 0.3 },
+      });
+      try {
+        if (!map.hasImage(RED_HATCH_IMAGE_ID)) map.addImage(RED_HATCH_IMAGE_ID, makeHatchImage());
+        map.addLayer({
+          id: "base-red-hatch",
+          type: "fill",
+          source: "base-red",
+          filter: ["==", ["get", "approx"], true],
+          paint: { "fill-pattern": RED_HATCH_IMAGE_ID },
+        });
+      } catch {
+        /* 斜線が使えなくても、破線の輪郭で「概算」は分かる */
+      }
+      map.addLayer({
+        id: "base-red-outline-approx",
+        type: "line",
+        source: "base-red",
+        filter: ["==", ["get", "approx"], true],
+        paint: {
+          "line-color": BASE_ZONE_COLORS.redLine,
+          "line-width": 2,
+          "line-dasharray": [3, 2],
+        },
       });
       map.addLayer({
         id: "base-red-outline",
         type: "line",
         source: "base-red",
-        paint: { "line-color": "#991b1b", "line-width": 1.5 },
+        filter: ["!=", ["get", "approx"], true],
+        paint: { "line-color": BASE_ZONE_COLORS.redLine, "line-width": 2 },
       });
+      if (containerRef.current) {
+        containerRef.current.dataset["baseLayers"] = BASE_ZONE_LAYER_IDS.filter((id) =>
+          map.getLayer(id),
+        ).join(",");
+      }
 
       map.addSource("parks", { type: "geojson", data: parksFc });
       map.addLayer({
@@ -710,6 +785,24 @@ export function RegulationMap({
                         <span className="mt-0.5 text-[10px] text-ink-soft">
                           {group.detail}
                         </span>
+                      ) : null}
+                      {group.zones ? (
+                        <ul className="mt-1 flex flex-col gap-1" data-testid="legend-zones">
+                          {group.zones.map((z) => (
+                            <li key={z.key} className="flex items-start gap-1.5 text-[11px] text-ink">
+                              <span
+                                className={`mt-0.5 inline-block h-3 w-3 shrink-0 ring-1 ${z.swatch} ${
+                                  z.key === "check" ? "border border-dashed border-gray-600" : ""
+                                }`}
+                                aria-hidden
+                              />
+                              <span>
+                                <strong className="font-medium">{z.label}</strong>
+                                <span className="text-ink-soft">：{z.note}</span>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       ) : null}
                       <span className="mt-0.5 text-[10px] text-ink-mute">
                         {group.source}
