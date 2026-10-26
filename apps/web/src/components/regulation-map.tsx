@@ -12,21 +12,20 @@ import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import type { CurrentLocationCandidate } from "@/lib/current-location";
 import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import { createRightClickPicker } from "@/lib/right-click";
-import { CurrentLocationControl } from "./current-location-control";
+import { BASE_ZONE_COLORS, BASE_ZONE_LAYER_IDS, RED_HATCH_IMAGE_ID, makeHatchImage } from "./regulation-map-zones";
 import {
-  BASE_ZONE_COLORS,
-  BASE_ZONE_LAYER_IDS,
-  BASE_ZONE_LEGEND,
-  RED_HATCH_IMAGE_ID,
-  makeHatchImage,
-} from "./regulation-map-zones";
+  LAYER_DEFS,
+  LAYER_GROUP_ORDER,
+  MAP_COLORS,
+  NO_LAYER_ROWS,
+  type LayerDef,
+  type LayerKey,
+  type SwatchKind,
+} from "./regulation-map-layers";
 import {
   ALL_HERITAGE_SITES,
   ALL_MUNICIPAL_PARKS,
   ALL_SENSITIVE_FACILITIES,
-  COVERAGE_SUMMARY,
-  DATASET_IDS,
-  getDataset,
   SENSITIVE_FACILITY_BUFFER_M,
   SMALL_DRONE_LAW_FACILITIES,
   type SmallDroneFacility,
@@ -39,12 +38,8 @@ type Props = {
   readonly center: LatLng;
   readonly prefCode?: string;
   readonly onPick?: (loc: LatLng, method: MapPickMethod) => void;
-  /** 現在地の候補（精度の円と印を表示する。判定はしない）。 */
+  /** 現在地の精度の円と印（確認待ちの現在地、または判定した現在地）。表示だけで、判定には使わない。 */
   readonly candidate?: CurrentLocationCandidate | null;
-  /** 現在地の候補の更新（地図に重ねる現在地ボタン・候補のパネルから呼ぶ）。 */
-  readonly onCandidate?: (c: CurrentLocationCandidate | null) => void;
-  /** 現在地の候補で判定する（「この地点で判定」）。 */
-  readonly onConfirmCandidate?: (c: CurrentLocationCandidate) => void;
 };
 
 // タッチ直後にブラウザが合成する click・contextmenu を無視する時間（ms）。
@@ -102,23 +97,6 @@ const EMPTY_FC: GeoJSON.FeatureCollection = {
   features: [],
 };
 
-type LayerKey =
-  | "did"
-  | "industrial"
-  | "airports"
-  | "base"
-  | "parks"
-  | "heritage"
-  | "sensitive";
-
-// 凡例の出典表記（データセット台帳から組み立てる）。
-const datasetLegend = (id: string): string => {
-  const d = getDataset(id);
-  const year = d.baseYear !== null ? `・基準年 ${d.baseYear}` : "";
-  const bundled = d.bundled ? "" : "・本体データ未同梱";
-  return `${d.name}${year}・確認日 ${d.verifiedAt}${bundled}`;
-};
-
 // 飛行禁止法の対象施設：敷地（ポリゴン、または中心点＋推定半径）と、その外側 1,000m・
 // 1,000m＋yellow 幅の帯を描く。中心点のみの施設は円で近似（概算）。
 const facilitySiteRings = (f: SmallDroneFacility, extraM: number): Polygon[] => {
@@ -131,105 +109,56 @@ const facilitySiteRings = (f: SmallDroneFacility, extraM: number): Polygon[] => 
   return g.rings[0]!.map((p) => circlePolygon(p, extraM, 48));
 };
 
-// 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
-// レジストリ追加だけで自動的に表記が伸びる。
-const formatMuniBreakdown = (
-  entries: ReadonlyArray<readonly [string, number]>,
-): string =>
-  entries
-    .filter(([, n]) => n > 0)
-    .map(([name, n]) => `${name.replace(/[市区町村]$/, "")}${n}`)
-    .join(" + ");
+/** 地図の印（判定地点・現在地）は表示だけ。操作する部品ではないので、読み上げ・Tab の対象にしない（押す部品の 44px の検査の対象外）。 */
+const makeMarkerDecorative = (marker: Marker): void => {
+  const el = marker.getElement();
+  el.setAttribute("aria-hidden", "true");
+  el.removeAttribute("tabindex");
+  el.removeAttribute("role");
+  el.removeAttribute("aria-label");
+  el.style.pointerEvents = "none";
+};
 
-const PARK_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalParkCounts);
-const HERITAGE_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalHeritageCounts);
-const SENSITIVE_BREAKDOWN = formatMuniBreakdown(COVERAGE_SUMMARY.municipalSensitiveCounts);
-const PARK_MUNI_LABEL = COVERAGE_SUMMARY.municipalParkNames.join("・");
-const HERITAGE_MUNI_LABEL = COVERAGE_SUMMARY.municipalHeritageCounts
-  .map(([name]) => name)
-  .join("・");
-const PREF_NUISANCE_LABEL = COVERAGE_SUMMARY.prefectureNuisanceNames.join("・");
+// 層の定義（一覧・地図の層 ID・判定の規則・出典）は regulation-map-layers.ts にある（単体テストで対応を固定）。
+const LAYER_GROUPS = LAYER_DEFS;
 
-// 指定は確認できたが位置を確認できず、地図に収録していない施設（README.md「確認できなかった事項」）。
-const UNMAPPED_FACILITY_NOTE = "情報本部 美保通信所は位置を確認できず未収録";
-
-const LAYER_GROUPS: ReadonlyArray<{
-  readonly key: LayerKey;
-  readonly label: string;
-  readonly source: string;
-  /** 色の意味など、ラベルだけでは伝わらない補足（任意） */
-  readonly detail?: string;
-  readonly swatch: string;
-  /** 色分けの意味を文字ラベル付きで示す（任意）。色だけに頼らない。 */
-  readonly zones?: ReadonlyArray<{
-    readonly key: string;
-    readonly label: string;
-    readonly note: string;
-    readonly swatch: string;
-  }>;
-  readonly layerIds: readonly string[];
-}> = [
-  {
-    key: "did",
-    label: "DID（航空法第132条の85）",
-    source: datasetLegend(DATASET_IDS.did),
-    swatch: "bg-rose-500/40 ring-rose-600 rounded-sm",
-    layerIds: ["did-fill", "did-outline"],
-  },
-  {
-    key: "industrial",
-    label: "工業専用地域（DID から除外・告示第435号）",
-    source: datasetLegend(DATASET_IDS.industrialExclusive),
-    detail: "収録済みの市町村のみ表示",
-    swatch: "bg-sky-500/40 ring-sky-700 rounded-sm",
-    layerIds: ["industrial-fill", "industrial-outline"],
-  },
-  {
-    key: "airports",
-    label: "空港等周辺",
-    source: datasetLegend(DATASET_IDS.airports),
-    swatch: "bg-violet-500/40 ring-violet-700 rounded-sm",
-    layerIds: ["airports-fill", "airports-outline"],
-  },
-  {
-    key: "base",
-    label: `小型無人機等飛行禁止法 対象施設 ${SMALL_DRONE_LAW_FACILITIES.length} 件（地図に収録）`,
-    source: `${datasetLegend(DATASET_IDS.smallDroneLawFacilities)}・敷地形状は概算`,
-    detail: `指定を確認できた施設のうち地図に収録できたのは${SMALL_DRONE_LAW_FACILITIES.length}件。${UNMAPPED_FACILITY_NOTE}`,
-    swatch: "bg-rose-500/50 ring-2 ring-amber-500 rounded-full",
-    zones: BASE_ZONE_LEGEND,
-    layerIds: BASE_ZONE_LAYER_IDS,
-  },
-  {
-    key: "parks",
-    label: `都市公園（${PARK_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalParks} 件）`,
-    source: `${PARK_MUNI_LABEL} 都市公園条例`,
-    swatch: "bg-emerald-500/40 ring-emerald-700 rounded-sm",
-    layerIds: ["parks-fill", "parks-outline"],
-  },
-  {
-    key: "heritage",
-    label: `指定史跡（${HERITAGE_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalHeritage} 件）`,
-    source: `文化財保護法125条 / ${HERITAGE_MUNI_LABEL} 文化財条例`,
-    swatch: "bg-orange-500/40 ring-orange-700 rounded-sm",
-    layerIds: ["heritage-fill", "heritage-outline"],
-  },
-  {
-    key: "sensitive",
-    label: `公衆密集地 ${SENSITIVE_FACILITY_BUFFER_M}m（${SENSITIVE_BREAKDOWN} / 計 ${COVERAGE_SUMMARY.totalSensitive} 件）`,
-    source: `${PREF_NUISANCE_LABEL} 迷惑行為等防止条例`,
-    swatch: "bg-yellow-500/40 ring-yellow-700 rounded-full",
-    layerIds: ["sensitive-fill", "sensitive-outline"],
-  },
-];
+/** 凡例の見本（地図と同じ明るい下地の上に、形・線種・模様で区別できる印を描く。色は地図の固定色）。 */
+function LayerSwatch({ kind }: { readonly kind: SwatchKind }) {
+  const C = MAP_COLORS;
+  return (
+    <svg viewBox="0 0 20 20" width={22} height={22} aria-hidden="true" className="sb-swatch" data-swatch={kind}>
+      {kind === "did" ? (
+        <>
+          <rect x="2" y="3" width="16" height="14" rx="2" fill="var(--sb-map-did-tint)" stroke={C.didLine} strokeWidth="2" />
+          <path d="M5 15 L15 5 M9 16 L17 8 M3 11 L9 5" stroke={C.didLine} strokeWidth="1.6" />
+        </>
+      ) : null}
+      {kind === "industrial" ? <rect x="2" y="3" width="16" height="14" rx="2" fill="var(--sb-map-industrial-fill)" stroke={C.industrialLine} strokeWidth="1.6" /> : null}
+      {kind === "airport" ? <circle cx="10" cy="10" r="7.5" fill="none" stroke={C.airportLine} strokeWidth="2.2" strokeDasharray="3.4 2.4" /> : null}
+      {kind === "base" ? (
+        <>
+          <circle cx="10" cy="10" r="7.5" fill="none" stroke={BASE_ZONE_COLORS.yellowLine} strokeWidth="2" />
+          <circle cx="10" cy="10" r="3.6" fill={BASE_ZONE_COLORS.red} stroke={BASE_ZONE_COLORS.redLine} strokeWidth="1.6" />
+        </>
+      ) : null}
+      {kind === "park" ? (
+        <>
+          <rect x="2" y="3" width="16" height="14" rx="5" fill="none" stroke={C.parkLine} strokeWidth="2" strokeDasharray="1.5 3.2" strokeLinecap="round" />
+          <circle cx="7" cy="10" r="1.4" fill={C.parkLine} />
+          <circle cx="13" cy="10" r="1.4" fill={C.parkLine} />
+        </>
+      ) : null}
+      {kind === "heritage" ? <path d="M10 2.5 L17.5 10 L10 17.5 L2.5 10 Z" fill="none" stroke={C.heritageLine} strokeWidth="2" /> : null}
+      {kind === "sensitive" ? <circle cx="10" cy="10" r="7.5" fill="none" stroke={C.sensitiveLine} strokeWidth="2.2" strokeDasharray="1.2 3.2" strokeLinecap="round" /> : null}
+    </svg>
+  );
+}
 
 export function RegulationMap({
   center,
   prefCode,
   onPick,
   candidate = null,
-  onCandidate,
-  onConfirmCandidate,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -270,9 +199,10 @@ export function RegulationMap({
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     mapRef.current = map;
-    markerRef.current = new maplibregl.Marker({ color: "#dc2626" })
+    markerRef.current = new maplibregl.Marker({ color: MAP_COLORS.pin })
       .setLngLat([center.lng, center.lat])
       .addTo(map);
+    makeMarkerDecorative(markerRef.current);
 
     // 赤＝敷地・区域、黄＝周辺地域（敷地境界から aroundM）、灰の点線＝要確認帯（独自・法定ではない）。
     // 敷地形状が中心点＋推定半径の施設は approx=true（斜線＋破線で「敷地は概算」を示す）。
@@ -312,13 +242,13 @@ export function RegulationMap({
         id: "did-fill",
         type: "fill",
         source: "did",
-        paint: { "fill-color": "#dc2626", "fill-opacity": 0.18 },
+        paint: { "fill-color": MAP_COLORS.didLine, "fill-opacity": 0.2 },
       });
       map.addLayer({
         id: "did-outline",
         type: "line",
         source: "did",
-        paint: { "line-color": "#dc2626", "line-width": 1, "line-dasharray": [2, 2] },
+        paint: { "line-color": MAP_COLORS.didLine, "line-width": 1.4, "line-dasharray": [2, 2] },
       });
 
       // 工業専用地域（DID 除外）— /api/industrial から（収録済み市町村のみ）
@@ -327,13 +257,13 @@ export function RegulationMap({
         id: "industrial-fill",
         type: "fill",
         source: "industrial",
-        paint: { "fill-color": "#0284c7", "fill-opacity": 0.22 },
+        paint: { "fill-color": MAP_COLORS.industrial, "fill-opacity": 0.3 },
       });
       map.addLayer({
         id: "industrial-outline",
         type: "line",
         source: "industrial",
-        paint: { "line-color": "#0369a1", "line-width": 1.2 },
+        paint: { "line-color": MAP_COLORS.industrialLine, "line-width": 1.2 },
       });
       void fetch("/api/industrial")
         .then((r) => (r.ok ? r.json() : null))
@@ -352,13 +282,13 @@ export function RegulationMap({
         id: "airports-fill",
         type: "fill",
         source: "airports",
-        paint: { "fill-color": "#7c3aed", "fill-opacity": 0.30 },
+        paint: { "fill-color": MAP_COLORS.airportFill, "fill-opacity": 0.2 },
       });
       map.addLayer({
         id: "airports-outline",
         type: "line",
         source: "airports",
-        paint: { "line-color": "#5b21b6", "line-width": 1.5 },
+        paint: { "line-color": MAP_COLORS.airportLine, "line-width": 2, "line-dasharray": [3, 2] },
       });
 
       void fetch("/api/airports")
@@ -451,13 +381,13 @@ export function RegulationMap({
         id: "parks-fill",
         type: "fill",
         source: "parks",
-        paint: { "fill-color": "#10b981", "fill-opacity": 0.25 },
+        paint: { "fill-color": MAP_COLORS.parkFill, "fill-opacity": 0.25 },
       });
       map.addLayer({
         id: "parks-outline",
         type: "line",
         source: "parks",
-        paint: { "line-color": "#047857", "line-width": 1.5 },
+        paint: { "line-color": MAP_COLORS.parkLine, "line-width": 1.5 },
       });
 
       map.addSource("heritage", { type: "geojson", data: heritageFc });
@@ -465,13 +395,13 @@ export function RegulationMap({
         id: "heritage-fill",
         type: "fill",
         source: "heritage",
-        paint: { "fill-color": "#f97316", "fill-opacity": 0.30 },
+        paint: { "fill-color": MAP_COLORS.heritageFill, "fill-opacity": 0.22 },
       });
       map.addLayer({
         id: "heritage-outline",
         type: "line",
         source: "heritage",
-        paint: { "line-color": "#c2410c", "line-width": 1.5, "line-dasharray": [3, 1] },
+        paint: { "line-color": MAP_COLORS.heritageLine, "line-width": 1.5, "line-dasharray": [3, 1] },
       });
 
       map.addSource("sensitive", { type: "geojson", data: sensitiveFc });
@@ -479,13 +409,13 @@ export function RegulationMap({
         id: "sensitive-fill",
         type: "fill",
         source: "sensitive",
-        paint: { "fill-color": "#eab308", "fill-opacity": 0.18 },
+        paint: { "fill-color": MAP_COLORS.sensitiveFill, "fill-opacity": 0.16 },
       });
       map.addLayer({
         id: "sensitive-outline",
         type: "line",
         source: "sensitive",
-        paint: { "line-color": "#a16207", "line-width": 1, "line-dasharray": [1, 1] },
+        paint: { "line-color": MAP_COLORS.sensitiveLine, "line-width": 1.2, "line-dasharray": [1, 1] },
       });
     });
 
@@ -606,13 +536,13 @@ export function RegulationMap({
           id: "current-location-fill",
           type: "fill",
           source: "current-location",
-          paint: { "fill-color": "#1d3557", "fill-opacity": 0.14 },
+          paint: { "fill-color": MAP_COLORS.candidate, "fill-opacity": 0.14 },
         });
         m.addLayer({
           id: "current-location-outline",
           type: "line",
           source: "current-location",
-          paint: { "line-color": "#1d3557", "line-width": 2 },
+          paint: { "line-color": MAP_COLORS.candidate, "line-width": 2 },
         });
       }
       if (candidate) {
@@ -624,9 +554,10 @@ export function RegulationMap({
     candidateMarkerRef.current?.remove();
     candidateMarkerRef.current = null;
     if (candidate) {
-      candidateMarkerRef.current = new maplibregl.Marker({ color: "#1d3557" })
+      candidateMarkerRef.current = new maplibregl.Marker({ color: MAP_COLORS.candidate })
         .setLngLat([candidate.lng, candidate.lat])
         .addTo(map);
+      makeMarkerDecorative(candidateMarkerRef.current);
       map.easeTo({
         center: [candidate.lng, candidate.lat],
         zoom: zoomForAccuracy(candidate.accuracyM),
@@ -654,6 +585,12 @@ export function RegulationMap({
         node.dataset["hiddenLayers"] = LAYER_GROUPS.filter((g) => !layerVisibility[g.key])
           .map((g) => g.key)
           .join(",");
+        // MapLibre から読み戻した実際の表示状態（層ごと：visible／none／mixed／missing）。data-hidden-layers と食い違わないことを E2E が確かめる。
+        node.dataset["layerVisibility"] = LAYER_GROUPS.map((g) => {
+          const states = g.layerIds.map((id) => (map.getLayer(id) ? ((map.getLayoutProperty(id, "visibility") as string | undefined) ?? "visible") : "missing"));
+          const state = states.every((v) => v === "visible") ? "visible" : states.every((v) => v === "none") ? "none" : states.includes("missing") ? "missing" : "mixed";
+          return `${g.key}:${state}`;
+        }).join(",");
       }
     };
     // isStyleLoaded() は背景タイルの読み込み中に false になり、load は一度しか発火しない。
@@ -698,123 +635,138 @@ export function RegulationMap({
 
   const visibleCount = Object.values(layerVisibility).filter(Boolean).length;
 
-  // モバイルは 2:3（下端に重ねる候補のパネルの上に、中央の精度の円が見える高さを確保する）、sm 以上は 16:9。
+  // 地図の枠：スマホは 16:10、PC は 4:3（縦に積む画面で、入力・結論が地図に押し出されない高さ）。
   const canvas = (
     <div
       ref={containerRef}
       data-testid="regulation-map"
-      className="aspect-[2/3] w-full sm:aspect-[16/9]"
+      className="aspect-[16/10] w-full lg:aspect-[4/3]"
       style={{ touchAction: "pan-x pan-y" }}
     />
   );
 
+  const rowsByGroup = LAYER_GROUP_ORDER.map((name) => ({
+    name,
+    layers: LAYER_GROUPS.filter((g) => g.group === name),
+    notes: NO_LAYER_ROWS.filter((g) => g.group === name),
+  })).filter((g) => g.layers.length + g.notes.length > 0);
+
+  // 層のチップ（押す部品は 44px 以上。ON は 2px の墨の枠、OFF は破線）。読み上げの名前は正式な名前（短い名前は装飾）。
+  // 小型無人機等飛行禁止法だけは、色分けの凡例（文字ラベルつき）をチップの中に出す（幅いっぱいの行）。
+  const renderLayer = (group: LayerDef) => {
+    const checked = layerVisibility[group.key];
+    const wide = group.zones !== undefined;
+    return (
+      <li key={group.key} className={wide ? "col-span-2 lg:col-span-3" : undefined}>
+        <label className={`sb-layer ${checked ? "is-on" : "is-off"} ${wide ? "is-wide" : ""}`}>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) =>
+              setLayerVisibility((prev) => ({
+                ...prev,
+                [group.key]: e.target.checked,
+              }))
+            }
+            className="sb-check"
+          />
+          <LayerSwatch kind={group.swatch} />
+          <span className="flex min-w-0 flex-1 flex-col gap-1 text-[13px] leading-snug">
+            <span aria-hidden="true" className="font-bold">
+              {group.shortLabel}
+            </span>
+            {wide ? null : <span className="sb-sr">{group.label}</span>}
+            {wide ? (
+              <>
+                <span className="text-xs text-sb-ink-2">{group.label}</span>
+                {group.detail ? <span className="sb-sr">{group.detail}</span> : null}
+              </>
+            ) : null}
+            {group.zones ? (
+              <ul className="flex flex-col gap-1" data-testid="legend-zones">
+                {group.zones.map((z) => (
+                  <li key={z.key} className="flex items-start gap-1.5 text-xs text-sb-ink">
+                    <span
+                      className="mt-0.5 inline-block h-3 w-3 shrink-0 rounded-sb-s border-2"
+                      style={{
+                        background: z.key === "site" ? BASE_ZONE_COLORS.red : z.key === "around" ? BASE_ZONE_COLORS.yellow : "transparent",
+                        borderColor: z.key === "site" ? BASE_ZONE_COLORS.redLine : z.key === "around" ? BASE_ZONE_COLORS.yellowLine : BASE_ZONE_COLORS.check,
+                        borderStyle: z.key === "check" ? "dashed" : "solid",
+                      }}
+                      aria-hidden
+                    />
+                    <span>
+                      <strong className="font-bold">{z.label}</strong>
+                      <span className="text-sb-ink-2">：{z.note}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </span>
+        </label>
+      </li>
+    );
+  };
+
   return (
-    <div className="flex flex-col gap-2">
-      {/* 地図: モバイルでは aspect 2:3 (縦長) で画面の主役に近づける。
-          touch-action で縦スクロールとピンチを両立させる */}
-      <div className="overflow-hidden border border-rule">
+    <div className="sb-block sb-map-block flex flex-col gap-3" data-testid="map-block">
+      <div className="sb-map-frame">
         {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
             主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
         <p
-          className="flex items-start gap-2 border-b border-rule bg-paper-soft px-3 py-2 text-xs leading-relaxed text-ink"
+          className="flex items-start gap-2 border-b border-sb-rule bg-sb-surface px-3 py-1.5 text-xs leading-snug text-sb-ink"
           data-testid="map-pick-hint"
         >
-          <span aria-hidden className="mt-[0.35em] inline-block h-2 w-2 shrink-0 rounded-full bg-[#dc2626]" />
+          <span aria-hidden className="mt-[0.4em] inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: MAP_COLORS.pin }} />
           <span>
             <span className="pointer-fine:hidden">
-              地図を<strong className="font-medium">長押し</strong>すると、その位置を判定地点（赤い印）にします。指を動かすと地図の移動になります。
+              地図を<strong className="font-bold">長押し</strong>すると、その位置を判定地点（赤い印）にします。指を動かすと地図の移動になります。
             </span>
             <span className="hidden pointer-fine:inline">
-              地図を<strong className="font-medium">クリック</strong>または<strong className="font-medium">右クリック</strong>すると、その位置を判定地点（赤い印）にします。
+              地図を<strong className="font-bold">クリック</strong>または<strong className="font-bold">右クリック</strong>すると、その位置を判定地点（赤い印）にします。
             </span>
           </span>
         </p>
-        {onCandidate && onConfirmCandidate ? (
-          <CurrentLocationControl candidate={candidate} onCandidate={onCandidate} onConfirm={onConfirmCandidate}>
-            {canvas}
-          </CurrentLocationControl>
-        ) : (
-          canvas
-        )}
+        {canvas}
       </div>
-      {/* レイヤーレジェンド: モバイルではデフォルト折りたたみ */}
-      <details
-        className="flex flex-col gap-2 border border-rule bg-paper/60 p-3 text-xs sm:[&>summary]:hidden sm:[&>div]:!flex"
-        open
-      >
-        <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-ink select-none [&::-webkit-details-marker]:hidden">
-          <span>規制レイヤー（{visibleCount}/{LAYER_GROUPS.length} 表示）</span>
-          <span aria-hidden className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mute">
-            ▾ tap
-          </span>
-        </summary>
-        <div className="flex flex-col gap-2 sm:!flex">
-          <span className="text-[11px] text-ink-mute hidden sm:block">
-            ・チェックで地図表示を切替
-          </span>
-          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-            {LAYER_GROUPS.map((group) => {
-              const checked = layerVisibility[group.key];
-              return (
-                <li key={group.key}>
-                  <label
-                    className={`flex min-h-[44px] cursor-pointer items-start gap-2 border px-2 py-2 transition-colors ${
-                      checked
-                        ? "border-rule bg-paper-soft"
-                        : "border-transparent text-ink-mute"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) =>
-                        setLayerVisibility((prev) => ({
-                          ...prev,
-                          [group.key]: e.target.checked,
-                        }))
-                      }
-                      className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-700"
-                    />
-                    <span
-                      className={`mt-0.5 inline-block h-2.5 w-2.5 ring-1 ${group.swatch}`}
-                      aria-hidden
-                    />
-                    <span className="flex flex-1 flex-col leading-tight">
-                      <span className="font-medium text-ink">{group.label}</span>
-                      {group.detail ? (
-                        <span className="mt-0.5 text-[10px] text-ink-soft">
-                          {group.detail}
-                        </span>
-                      ) : null}
-                      {group.zones ? (
-                        <ul className="mt-1 flex flex-col gap-1" data-testid="legend-zones">
-                          {group.zones.map((z) => (
-                            <li key={z.key} className="flex items-start gap-1.5 text-[11px] text-ink">
-                              <span
-                                className={`mt-0.5 inline-block h-3 w-3 shrink-0 ring-1 ${z.swatch} ${
-                                  z.key === "check" ? "border border-dashed border-gray-600" : ""
-                                }`}
-                                aria-hidden
-                              />
-                              <span>
-                                <strong className="font-medium">{z.label}</strong>
-                                <span className="text-ink-soft">：{z.note}</span>
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      <span className="mt-0.5 text-[10px] text-ink-mute">
-                        {group.source}
+      {/* 規制レイヤー（チップ。押すと地図の表示を切り替える。出典・状態は下の「出典と状態」） */}
+      <section aria-label="規制レイヤー" className="flex flex-col gap-2" data-testid="layer-list">
+        <h3 className="text-sm font-bold">
+          規制レイヤー（{visibleCount}/{LAYER_GROUPS.length} 表示）
+        </h3>
+        <ul className="sb-layer-list">
+          {/* 幅いっぱいの行（小型無人機等飛行禁止法。色分けの凡例つき）は最後に置き、短いチップを 2 列で詰める */}
+          {[...LAYER_GROUPS.filter((g) => !g.zones), ...LAYER_GROUPS.filter((g) => g.zones)].map(renderLayer)}
+        </ul>
+        <details className="sb-layer-sources">
+          <summary>各層の出典と状態（公式データ・概算）</summary>
+          {rowsByGroup.map((g) => (
+            <div key={g.name} data-group={g.name} className="flex flex-col gap-1.5">
+              <p className="sb-layer-group">{g.name}</p>
+              <ul className="flex flex-col gap-2">
+                {g.layers.map((l) => (
+                  <li key={l.key} className="text-xs leading-relaxed text-sb-ink-2" data-layer-row={l.key}>
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-bold text-sb-ink">{l.label}</span>
+                      <span className="sb-status" data-status={l.status}>
+                        {l.status}
                       </span>
                     </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </details>
+                    <span className="block text-sb-ink-3">{l.source}</span>
+                    {l.detail ? <span className="block text-sb-ink-2">{l.detail}</span> : null}
+                  </li>
+                ))}
+                {g.notes.map((n) => (
+                  <li key={n.label} className="text-xs leading-relaxed text-sb-ink-2" data-testid="layer-no-map-row">
+                    <span className="font-bold text-sb-ink">{n.label}</span>：{n.note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </details>
+      </section>
     </div>
   );
 }

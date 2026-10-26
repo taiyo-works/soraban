@@ -682,7 +682,7 @@ test.describe("I. 現場モードの基準（C4・C6）：7:1・56px・大きな
 });
 
 test.describe("J. 既存の画面の見た目が変わらない（1a-8）", () => {
-  test("33. 判定画面（/）は、新しいトークンを使わず、紙・インク・藍のまま（.ds・色の宣言・Web フォントが変わらない）", async ({ page }) => {
+  test("33. 判定画面（/）は v2 のトークン（地・字・Noto Sans JP・暗）で、.ds は付かず、見本の設定が漏れない", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto(`${MAIN}/`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -700,16 +700,18 @@ test.describe("J. 既存の画面の見た目が変わらない（1a-8）", () =
         radius: rs.getPropertyValue("--radius-sharp").trim(),
       };
     });
-    expect(v.bg).toBe("rgb(245, 242, 234)");
-    expect(v.fg).toBe("rgb(14, 20, 33)");
-    expect(v.grid).toBe(true);
-    expect(v.family).toMatch(/IBM[ _]Plex[ _]Sans[ _]JP/);
+    // Sprint 12h PR ②：`/` は意図して v2 に置き換えた。旧「紙・インク・藍・方眼・IBM Plex」を守る検査は、v2 の値（地=--sb-base、
+    // 字=--sb-ink、方眼なし、Noto Sans JP、暗は暖かい黒）に差し替える。見本の設定が漏れない（.ds なし・--color-paper/--radius-sharp は /ops 用に残る）ことは変えない
+    expect(v.bg).toBe("rgb(255, 255, 255)");
+    expect(v.fg).toBe("rgb(38, 37, 35)");
+    expect(v.grid).toBe(false);
+    expect(v.family).toMatch(/Noto[ _]Sans[ _]JP/);
     expect(v.scheme).toBe("normal");
     expect(v.paper).toBe("#f5f2ea");
     expect(v.radius).toBe("2px");
     await page.emulateMedia({ colorScheme: "dark" });
     const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(dark).toBe("rgb(12, 19, 32)");
+    expect(dark).toBe("rgb(27, 26, 24)");
   });
 
   test("34. 見本の設定（data-theme）は、見本を離れても残らない（/ を開き直すと付かない）", async ({ page }) => {

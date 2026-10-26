@@ -32,30 +32,30 @@ const urgencyTone: Readonly<
   >
 > = {
   overdue: {
-    rule: "border-signal-red",
-    accent: "text-signal-red",
-    surface: "bg-signal-red-soft",
+    rule: "border-sb-v-no-fg",
+    accent: "text-sb-v-no-fg",
+    surface: "bg-sb-surface",
     label: "期限超過",
     mark: "triangle",
   },
   urgent: {
-    rule: "border-signal-amber",
-    accent: "text-signal-amber",
-    surface: "bg-signal-amber-soft",
+    rule: "border-sb-v-needs-fg",
+    accent: "text-sb-v-needs-fg",
+    surface: "bg-sb-surface",
     label: "期限が近い",
     mark: "square",
   },
   ok: {
-    rule: "border-signal-green",
-    accent: "text-signal-green",
-    surface: "bg-paper",
+    rule: "border-sb-v-none-fg",
+    accent: "text-sb-v-none-fg",
+    surface: "bg-sb-base",
     label: "余裕あり",
     mark: "diamond",
   },
   none: {
-    rule: "border-rule",
-    accent: "text-ink-mute",
-    surface: "bg-paper",
+    rule: "border-sb-rule",
+    accent: "text-sb-ink-3",
+    surface: "bg-sb-base",
     label: "—",
     mark: "none",
   },
@@ -134,17 +134,16 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
   return (
     <section className="flex flex-col gap-3" aria-labelledby="deadline-calendar-heading">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-        <p id="deadline-calendar-heading" className="eyebrow">
-          <span aria-hidden className="bearing-mark" />
+        <p id="deadline-calendar-heading" className="sb-eyebrow">
           提出期限カレンダー
         </p>
         {hasPlannedDate ? (
           // 起算日（飛行予定日）。すべての提出期限はここから逆算される — その関係を
           // 「起算日 →」のラベルで明示し、日付は mono の tnum で固定幅に揃える。
-          <p className="flex items-baseline gap-2 text-[11px] tracking-wide text-ink-mute">
-            <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-ink-mute" />
+          <p className="flex items-baseline gap-2 text-xs tracking-wide text-sb-ink-3">
+            <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-sb-edge" />
             起算日 — 飛行予定日
-            <span className="tnum text-[11px] font-medium normal-case tracking-normal text-ink">
+            <span className="tnum text-xs font-medium normal-case tracking-normal text-sb-ink">
               {formatJaDate(plannedDate)}
             </span>
           </p>
@@ -154,10 +153,10 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
       {/* 飛行予定日 未入力時のガイダンス（誤った日付を出さない契約）。
           S1 の空状態と同じ border-dashed の控えめなプレースホルダ体裁で統一する。 */}
       {!hasPlannedDate ? (
-        <div className="flex items-start gap-3 border border-dashed border-rule bg-paper px-4 py-5 text-sm leading-relaxed text-ink-soft">
+        <div className="flex items-start gap-3 border border-dashed border-sb-rule bg-sb-base px-4 py-5 text-sm leading-relaxed text-sb-ink-2 rounded-sb-m">
           <span
             aria-hidden
-            className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rotate-45 bg-ink-mute"
+            className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rotate-45 bg-sb-ink-3"
           />
           <span>
             飛行予定日を入力してください。飛行日が決まると、各手続きの提出期限（飛行日 −
@@ -165,7 +164,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
           </span>
         </div>
       ) : items.length === 0 ? (
-        <p className="border border-dashed border-rule bg-paper px-4 py-5 text-sm leading-relaxed text-ink-soft">
+        <p className="border border-dashed border-sb-rule bg-sb-base px-4 py-5 text-sm leading-relaxed text-sb-ink-2 rounded-sb-m">
           提出期限の逆算対象となる申請手続き（許可・承認）はありません。
         </p>
       ) : (
@@ -190,48 +189,48 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                     mono 数字の語彙で「台帳の一葉」感を出す。 */}
                 <span
                   aria-hidden
-                  className="flex select-none items-center justify-center self-stretch border-r border-rule/50 px-2.5 font-mono text-[10px] tnum text-ink-mute"
+                  className="flex select-none items-center justify-center self-stretch border-r border-sb-rule px-2.5 sb-num text-xs tnum text-sb-ink-3"
                 >
                   {String(idx + 1).padStart(2, "0")}
                 </span>
 
                 {/* 手続き名 + 逆算根拠（「何を」を担う列）。 */}
                 <div className="flex flex-col justify-center gap-0.5 py-3 pr-3 sm:pr-0">
-                  <span className="font-display text-sm font-medium leading-snug text-ink">
+                  <span className=" text-sm font-medium leading-snug text-sb-ink">
                     {procedure.title}
                   </span>
-                  <span className="text-[11px] leading-relaxed text-ink-mute">
+                  <span className="text-xs leading-relaxed text-sb-ink-3">
                     {procedure.leadTimeBusinessDays} 開庁日前まで（土日・国民の祝日を除く）
                   </span>
                 </div>
 
                 {/* 期限日（「いつまで」を担う列＝この行の主役）。
-                    日付を font-display の大きめ数字で組み、残り日数とアラートを真下に重ねる。 */}
-                <div className="col-span-2 flex items-center justify-between gap-3 border-t border-rule/40 px-3 py-2.5 sm:col-span-1 sm:flex-col sm:items-end sm:justify-center sm:border-l sm:border-t-0 sm:py-3 sm:pl-4">
+                    日付を  の大きめ数字で組み、残り日数とアラートを真下に重ねる。 */}
+                <div className="col-span-2 flex items-center justify-between gap-3 border-t border-sb-rule px-3 py-2.5 sm:col-span-1 sm:flex-col sm:items-end sm:justify-center sm:border-l sm:border-t-0 sm:py-3 sm:pl-4">
                   {submitBy && parts ? (
                     <>
                       {/* 主役の日付。MM/DD は ink で最大の可読性（WCAG AA）を確保し、
                           逼迫度は先頭の製図記号（accent 色）と下のバッジ・左罫・地色で符号化する。 */}
-                      <p className="flex items-baseline gap-1.5 font-display leading-none tnum text-ink">
+                      <p className="flex items-baseline gap-1.5  leading-none tnum text-sb-ink">
                         <span className={`flex items-baseline self-center ${tone.accent}`}>
                           <UrgencyMark shape={tone.mark} />
                         </span>
-                        <span className="text-[11px] font-normal text-ink-mute tnum">
+                        <span className="text-xs font-normal text-sb-ink-3 tnum">
                           {parts.year}
                         </span>
                         <span className="text-xl font-medium tracking-tight tnum sm:text-2xl">
                           {parts.md}
                         </span>
-                        <span className="text-xs font-normal text-ink-mute">（{parts.weekday}）</span>
+                        <span className="text-xs font-normal text-sb-ink-3">（{parts.weekday}）</span>
                       </p>
 
                       {/* アラート＝色＋符号＋テキストの三重符号化。
                           overdue は赤の塗りバッジで最も強く、urgent は amber 罫、ok は控えめ。 */}
                       <span
-                        className={`inline-flex shrink-0 items-center gap-1.5 border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${
+                        className={`inline-flex shrink-0 items-center gap-1.5 border px-2 py-1 sb-num text-xs uppercase tracking-wider ${
                           isOverdue
-                            ? "border-signal-red bg-signal-red font-medium text-paper"
-                            : `${tone.rule} bg-paper text-ink-soft`
+                            ? "border-sb-v-no-fg bg-sb-v-no-fg font-medium text-sb-base"
+                            : `${tone.rule} bg-sb-base text-sb-ink-2`
                         }`}
                       >
                         {/* 逼迫度の符号（色）は glyph と枠線が担い、ラベル文字は ink-soft で可読性を確保。 */}
@@ -248,7 +247,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                       </span>
                     </>
                   ) : (
-                    <span className="font-mono text-xs text-ink-mute">{basis}</span>
+                    <span className="sb-num text-xs text-sb-ink-3">{basis}</span>
                   )}
                 </div>
               </li>
@@ -259,7 +258,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
 
       {/* 期限は目安である旨の断り（spec §11-C: 標準処理期間は目安）。 */}
       {hasPlannedDate && items.length > 0 ? (
-        <p className="text-[11px] leading-relaxed text-ink-mute">
+        <p className="text-xs leading-relaxed text-sb-ink-3">
           ※ 「飛行開始の 10 開庁日以上前」を計算根拠としていますが、標準処理期間は目安であり、
           確定的な法定処理期間ではありません（内容により前後します）。祝日は内閣府公開データに基づきます。
           最終的な提出可否は DIPS／航空局でご確認ください。

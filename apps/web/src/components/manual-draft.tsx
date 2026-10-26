@@ -56,20 +56,19 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
   // 選択トグル: ラジオではなくセグメント風のボタン 2 つ（タップしやすく状態が明確）。
   // 選択中は藍塗り＋左の状態記（製図記号）で「いま選ばれている方針」を二重に明示。
   const segBtn = (active: boolean): string =>
-    `flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper ${
+    `flex-1 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-sb-pill border-2 px-4 py-2.5 text-sm font-bold transition-colors ${
       active
-        ? "border-brand-700 bg-brand-700 text-paper"
-        : "border-rule bg-paper text-ink-soft hover:border-ink-soft hover:bg-paper-soft"
+        ? "border-sb-ink bg-sb-control text-sb-ink"
+        : "border-dashed border-sb-edge bg-transparent text-sb-ink-2 hover:bg-sb-hover"
     }`;
 
   return (
     <section className="flex flex-col gap-3" aria-labelledby="manual-draft-heading">
       <div className="flex flex-col gap-1">
-        <p id="manual-draft-heading" className="eyebrow">
-          <span aria-hidden className="bearing-mark" />
+        <p id="manual-draft-heading" className="sb-eyebrow">
           書類ドラフト — 飛行マニュアル
         </p>
-        <p className="text-xs leading-relaxed text-ink-soft">
+        <p className="text-xs leading-relaxed text-sb-ink-2">
           「標準マニュアル（01／02）を使う」か「独自マニュアルを作る」かを選べます。
           標準を選んだ場合は本ツールでは本文を表示しません（著作権配慮）。独自を選ぶと、
           選択中の飛行方法に対応した骨子（記載すべき項目と観点）を生成します。
@@ -92,7 +91,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
           <span
             aria-hidden
             className={`inline-block h-2 w-2 shrink-0 rotate-45 ${
-              choice === "standard" ? "bg-paper" : "border border-rule"
+              choice === "standard" ? "bg-sb-orange" : "border border-sb-edge"
             }`}
           />
           標準マニュアル（01／02）を使う
@@ -107,7 +106,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
           <span
             aria-hidden
             className={`inline-block h-2 w-2 shrink-0 rotate-45 ${
-              choice === "custom" ? "bg-paper" : "border border-rule"
+              choice === "custom" ? "bg-sb-orange" : "border border-sb-edge"
             }`}
           />
           独自マニュアルを作る（骨子を生成）
@@ -116,40 +115,40 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
 
       {/* 出力（選択に応じて変わる） */}
       {choice === "standard" ? (
-        <div className="flex flex-col gap-2 border-l-2 border-brand-700 bg-paper px-4 py-3.5">
-          <p className="eyebrow !text-[11px]">{draft.standardReference.label} を使用</p>
-          <p className="text-xs leading-relaxed text-ink-soft">{draft.standardNotice}</p>
-          <p className="border-t border-rule/60 pt-2 text-[11px] tracking-wide text-ink-mute">
+        <div className="flex flex-col gap-2 border-l-2 border-sb-ink bg-sb-base px-4 py-3.5">
+          <p className="sb-eyebrow">{draft.standardReference.label} を使用</p>
+          <p className="text-xs leading-relaxed text-sb-ink-2">{draft.standardNotice}</p>
+          <p className="border-t border-sb-rule pt-2 text-xs tracking-wide text-sb-ink-3">
             参照{" "}
             <a
               href={draft.standardReference.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+              className="text-sb-ink underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
             >
               航空局 標準マニュアル（出典）↗
             </a>
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 border border-rule bg-paper px-4 py-4">
-          <p className="text-[11px] leading-relaxed text-ink-mute">
+        <div className="flex flex-col gap-4 border border-sb-rule bg-sb-base px-4 py-4 rounded-sb-m">
+          <p className="text-xs leading-relaxed text-sb-ink-3">
             ※ 以下は記載すべき項目の見出しと観点（骨子）です。航空局 標準マニュアル01／02
             の本文は含みません（著作権配慮）。実際のマニュアルは自社の運用に合わせて作成してください。
           </p>
 
           {/* 基本構成 */}
           <div className="flex flex-col gap-2.5">
-            <p className="flex items-center gap-2 text-[11px] tracking-wide text-ink-mute">
-              <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-ink-mute" />
+            <p className="flex items-center gap-2 text-xs tracking-wide text-sb-ink-3">
+              <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-sb-edge" />
               基本構成
-              <span aria-hidden className="h-px flex-1 bg-rule/60" />
+              <span aria-hidden className="h-px flex-1 bg-sb-rule" />
             </p>
             <ol className="flex flex-col gap-3">
               {draft.baseSections.map((s) => (
-                <li key={s.id} className="border-l border-rule pl-3.5">
-                  <p className="font-display text-sm font-medium leading-snug text-ink">{s.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">{s.outline}</p>
+                <li key={s.id} className="border-l border-sb-rule pl-3.5">
+                  <p className=" text-sm font-medium leading-snug text-sb-ink">{s.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-sb-ink-2">{s.outline}</p>
                 </li>
               ))}
             </ol>
@@ -157,33 +156,33 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
 
           {/* 飛行方法に応じた追記観点 */}
           {draft.methodSections.length > 0 ? (
-            <div className="flex flex-col gap-2.5 border-t border-rule pt-3.5">
-              <p className="flex items-center gap-2 text-[11px] tracking-wide text-brand-700">
-                <span aria-hidden className="inline-block h-1.5 w-1.5 bg-brand-700" />
+            <div className="flex flex-col gap-2.5 border-t border-sb-rule pt-3.5">
+              <p className="flex items-center gap-2 text-xs tracking-wide text-sb-ink">
+                <span aria-hidden className="inline-block h-1.5 w-1.5 bg-sb-ink" />
                 選択した飛行方法に応じて追記する観点
-                <span aria-hidden className="h-px flex-1 bg-brand-700/30" />
+                <span aria-hidden className="h-px flex-1 bg-sb-ink" />
               </p>
               <ol className="flex flex-col gap-3">
                 {draft.methodSections.map((m) => (
-                  <li key={m.flag} className="border-l-2 border-brand-700 pl-3">
-                    <p className="font-display text-sm font-medium text-ink">{m.title}</p>
+                  <li key={m.flag} className="border-l-2 border-sb-ink pl-3">
+                    <p className=" text-sm font-medium text-sb-ink">{m.title}</p>
                     <ul className="mt-1 flex flex-col gap-1">
                       {m.points.map((p, i) => {
                         // 観点の文中の URL は本文から切り分け、観点の下に短い表記の控えめなリンクとして添える。
                         const point = splitInlineSource(p);
                         return (
-                          <li key={i} className="flex gap-1.5 text-xs leading-relaxed text-ink-soft">
-                            <span aria-hidden className="mt-1.5 inline-block h-1 w-1 shrink-0 rotate-45 bg-brand-700" />
+                          <li key={i} className="flex gap-1.5 text-xs leading-relaxed text-sb-ink-2">
+                            <span aria-hidden className="mt-1.5 inline-block h-1 w-1 shrink-0 rotate-45 bg-sb-ink" />
                             <span className="min-w-0">
                               {point.text}
                               {point.urls.map((url) => (
-                                <span key={url} className="mt-0.5 block text-[11px] text-ink-mute">
+                                <span key={url} className="mt-0.5 block text-xs text-sb-ink-3">
                                   出典{" "}
                                   <a
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="break-all font-mono text-[10.5px] underline decoration-rule underline-offset-2 hover:text-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+                                    className="break-all sb-num text-[10.5px] underline decoration-sb-rule underline-offset-2 hover:text-sb-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus focus-visible:ring-offset-1 focus-visible:ring-offset-sb-base"
                                   >
                                     {shortUrl(url)}
                                   </a>
@@ -194,13 +193,13 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
                         );
                       })}
                     </ul>
-                    <p className="mt-1.5 text-[11px] tracking-wide text-ink-mute">
+                    <p className="mt-1.5 text-xs tracking-wide text-sb-ink-3">
                       根拠 {m.legalBasis}{" "}
                       <a
                         href={m.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-brand-700 underline-offset-2 hover:underline"
+                        className="text-sb-ink underline-offset-2 hover:underline"
                       >
                         出典 ↗
                       </a>
@@ -210,21 +209,21 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
               </ol>
             </div>
           ) : (
-            <p className="border-t border-rule pt-3 text-xs leading-relaxed text-ink-mute">
+            <p className="border-t border-sb-rule pt-3 text-xs leading-relaxed text-sb-ink-3">
               飛行方法が選択されていないため、追記観点はありません。基本構成のみを骨子とします。
             </p>
           )}
         </div>
       )}
 
-      <div className="flex items-center gap-3 border-t border-rule pt-3">
+      <div className="flex items-center gap-3 border-t border-sb-rule pt-3">
         <button
           type="button"
           onClick={() => void handleCopyText()}
-          className={`inline-flex items-center gap-1.5 rounded-sharp border px-3 py-2 font-mono text-[10px] uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-sb-pill border px-4 py-2 sb-num text-xs font-bold transition-colors ${
             copied
-              ? "border-signal-green bg-signal-green-soft text-signal-green"
-              : "border-rule bg-paper text-ink-soft hover:border-brand-700 hover:text-brand-700"
+              ? "border-sb-v-none-fg bg-sb-surface text-sb-v-none-fg"
+              : "border-sb-edge bg-sb-control text-sb-ink hover:bg-sb-hover"
           }`}
           title="ドラフトのテキストをコピー"
         >

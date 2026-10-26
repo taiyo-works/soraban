@@ -1,0 +1,1051 @@
+/* そらばん v2：公開の判定画面 `/` の部品（見本：docs/design/warm-final/）。
+ * 色・角丸・影・寸法・動きは、すべて soraban-tokens.css の --sb-* を引く（16 進の直書きは地図の固定色だけ。下の「地図の固定色」）。
+ * 動きは 2 種類だけ（ピルの矢印の入れ替え、結論のせり上がり 1 回）。どちらも CSS だけで、減らす指定・現場では時間 0。 */
+
+/* 地図の固定色：地図タイル（国土地理院の淡色）が暗でも明るいままなので、地図の上の色・印は明暗で変えない（設計書 §9.6）。
+ * MapLibre の描画（JS）も同じ値を regulation-map-colors.ts から使う。色の意味は形・線種・模様でも伝える。 */
+:root {
+  --sb-map-ink: #262523;
+  --sb-map-swatch-bg: #fbf6ec;
+  --sb-map-did-tint: #ffe3c7;
+  --sb-map-did-line: #b3500a;
+  --sb-map-air-line: #4a4843;
+  --sb-map-park-line: #225f36;
+  --sb-map-industrial-fill: #b9b7ae;
+  --sb-map-heritage-line: #262523;
+}
+
+/* Web フォント（Noto Sans JP）の代用の字体。読み込み前・間に合わなかったときの表示で、縦の寸法と欧文の幅を Noto Sans JP に合わせる。
+ * 値は Noto Sans JP の表示上の縦の寸法（レイアウトが使う hhea：ascent 1.160・descent 0.288・行間 0。実機で、字体が入れ替わった前後の文字の位置を測って確かめた）。
+ * 欧文は Arial との幅の比（標準 0.950・太字 0.963）で size-adjust し、override は 寸法 ÷ size-adjust。
+ * これで字体が入れ替わっても、文字の縦の位置が動かず（行の高さ・文字の基準線が同じ）、レイアウトのずれ（CLS）が出ない。 */
+@font-face {
+  font-family: "Soraban Latin Fallback";
+  src: local("Arial"), local("Helvetica"), local("Liberation Sans");
+  unicode-range: U+0020-007E, U+00A0-00FF;
+  font-weight: 100 600;
+  size-adjust: 95%;
+  ascent-override: 122.1%;
+  descent-override: 30.3%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Soraban Latin Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"), local("Liberation Sans Bold");
+  unicode-range: U+0020-007E, U+00A0-00FF;
+  font-weight: 601 900;
+  size-adjust: 96.3%;
+  ascent-override: 120.5%;
+  descent-override: 29.9%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Soraban JP Fallback";
+  src:
+    local("Hiragino Sans W3"), local("HiraginoSans-W3"), local("Hiragino Kaku Gothic ProN W3"), local("HiraginoKakuGothicProN-W3"),
+    local("Yu Gothic Medium"), local("YuGothic-Medium"), local("Meiryo"), local("Noto Sans CJK JP Regular"), local("NotoSansCJKjp-Regular"),
+    local("Noto Sans JP"), local("IPAexGothic"), local("IPAGothic"), local("IPAPGothic");
+  font-weight: 100 600;
+  ascent-override: 116%;
+  descent-override: 28.8%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Soraban JP Fallback";
+  src:
+    local("Hiragino Sans W6"), local("HiraginoSans-W6"), local("Hiragino Kaku Gothic ProN W6"), local("HiraginoKakuGothicProN-W6"),
+    local("Yu Gothic Bold"), local("YuGothic-Bold"), local("Meiryo Bold"), local("Noto Sans CJK JP Bold"), local("NotoSansCJKjp-Bold"),
+    local("IPAexGothic"), local("IPAGothic"), local("IPAPGothic");
+  font-weight: 601 900;
+  ascent-override: 116%;
+  descent-override: 28.8%;
+  line-gap-override: 0%;
+}
+
+/* ===== ページの骨格 ===== */
+.sb-page {
+  color: var(--sb-ink);
+  font-size: var(--sb-fs-body);
+  line-height: 1.75;
+  letter-spacing: 0.03em;
+  line-break: strict;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+.sb-page *:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sb-num {
+  font-family: var(--font-num), sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.sb-band {
+  position: relative;
+  padding: 28px 16px;
+}
+.sb-band > * {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.sb-band-white {
+  background: var(--sb-base);
+}
+.sb-band-off {
+  background: var(--sb-surface);
+}
+.sb-band-beige {
+  background: var(--sb-sunken);
+}
+@media (min-width: 1024px) {
+  .sb-band {
+    padding: 48px 32px;
+  }
+}
+
+/* 見出し：左 5px の橙線＋背後の大きな薄い数字（装飾） */
+.sb-sec-head {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 4px 0 4px 14px;
+  border-left: 5px solid var(--sb-orange);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
+}
+.sb-sec-head h2 {
+  position: relative;
+  z-index: 1;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.sb-sec-num {
+  position: absolute;
+  right: 0;
+  top: -30px;
+  font-size: 96px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--sb-sec-num);
+  font-family: var(--font-num), sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+.sb-sec-note {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sb-ink-3);
+}
+@media (min-width: 1024px) {
+  .sb-sec-head h2 {
+    font-size: 26px;
+  }
+  .sb-sec-num {
+    font-size: 140px;
+    top: -48px;
+  }
+}
+
+/* ブロック（影は 1 種類）。白の帯の中ではオフホワイト、他では白 */
+.sb-block {
+  background: var(--sb-base);
+  border-radius: var(--sb-r-l);
+  box-shadow: var(--sb-shadow);
+  padding: 20px 16px;
+  min-width: 0;
+}
+.sb-band-white .sb-block {
+  background: var(--sb-surface);
+}
+.sb-block-soft {
+  border-radius: var(--sb-r-l);
+  background: var(--sb-surface);
+  padding: 14px 16px;
+}
+.sb-band-off .sb-block-soft {
+  background: var(--sb-base);
+}
+@media (min-width: 1024px) {
+  .sb-block {
+    padding: 24px;
+  }
+}
+
+/* ===== ピルボタン（右端に墨の丸。矢印の入れ替えは動き 1 種類め） ===== */
+.sb-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: var(--sb-hit);
+  padding: 4px 4px 4px 22px;
+  border-radius: var(--sb-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+  text-decoration: none;
+  color: var(--sb-ink);
+  background: transparent;
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.sb-pill-label {
+  flex: 1;
+  min-width: 0;
+}
+.sb-pill-arrow {
+  position: relative;
+  flex: none;
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-ink);
+  color: var(--sb-on-dot);
+  overflow: hidden;
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    color var(--sb-dur) var(--sb-ease);
+}
+.sb-pill-arrow .sb-ar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+.sb-pill-arrow .sb-a2 {
+  transform: translateX(-130%);
+}
+.sb-pill:hover .sb-a1,
+.sb-pill:active .sb-a1,
+.sb-pill:focus-visible .sb-a1 {
+  transform: translateX(130%);
+}
+.sb-pill:hover .sb-a2,
+.sb-pill:active .sb-a2,
+.sb-pill:focus-visible .sb-a2 {
+  transform: none;
+}
+.sb-pill-primary {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+  min-height: var(--sb-hit-primary);
+  font-size: 16px;
+}
+.sb-pill-primary .sb-pill-arrow {
+  width: 48px;
+  height: 48px;
+  background: var(--sb-on-orange);
+  color: var(--sb-on-orange-fg);
+}
+.sb-pill-primary:hover,
+.sb-pill-primary:active,
+.sb-pill-primary:focus-visible {
+  background: var(--sb-orange-hover);
+}
+.sb-pill-primary:hover .sb-pill-arrow,
+.sb-pill-primary:active .sb-pill-arrow,
+.sb-pill-primary:focus-visible .sb-pill-arrow {
+  background: var(--sb-on-orange-fg);
+  color: var(--sb-on-orange);
+}
+.sb-pill-secondary {
+  background: var(--sb-control);
+  border-color: var(--sb-edge);
+}
+.sb-pill-secondary:hover .sb-pill-arrow,
+.sb-pill-secondary:active .sb-pill-arrow,
+.sb-pill-secondary:focus-visible .sb-pill-arrow {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+}
+.sb-pill-sm {
+  min-height: var(--sb-hit);
+  font-size: 14px;
+  padding-left: 20px;
+}
+.sb-pill-sm .sb-pill-arrow {
+  width: 40px;
+  height: 40px;
+}
+.sb-pill:disabled,
+.sb-pill[aria-disabled="true"] {
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+  border: 1.5px dashed var(--sb-edge);
+  cursor: not-allowed;
+}
+.sb-pill:disabled .sb-pill-arrow,
+.sb-pill[aria-disabled="true"] .sb-pill-arrow {
+  background: var(--sb-edge);
+  color: var(--sb-base);
+}
+.sb-pill:disabled:hover .sb-a1,
+.sb-pill[aria-disabled="true"]:hover .sb-a1 {
+  transform: none;
+}
+.sb-pill:disabled:hover .sb-a2,
+.sb-pill[aria-disabled="true"]:hover .sb-a2 {
+  transform: translateX(-130%);
+}
+.sb-pill-block {
+  width: 100%;
+}
+:root[data-mode="field"] .sb-pill-arrow .sb-a2 {
+  display: none;
+}
+:root[data-mode="field"] .sb-pill:hover .sb-a1,
+:root[data-mode="field"] .sb-pill:active .sb-a1,
+:root[data-mode="field"] .sb-pill:focus-visible .sb-a1 {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-pill-arrow .sb-a2 {
+    display: none;
+  }
+  .sb-pill:hover .sb-a1,
+  .sb-pill:active .sb-a1,
+  .sb-pill:focus-visible .sb-a1 {
+    transform: none;
+  }
+}
+
+/* 文字だけのボタン（住所検索・取消・再試行など）。押す高さは 44px 以上 */
+.sb-text-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--sb-hit-min);
+  padding: 0 16px;
+  border-radius: var(--sb-pill);
+  border: 1.5px solid var(--sb-edge);
+  background: var(--sb-control);
+  color: var(--sb-ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.sb-text-btn:hover,
+.sb-text-btn:active {
+  background: var(--sb-hover);
+}
+.sb-text-btn:disabled {
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* せり上がり（動き 2 種類め。判定結果が出たときの結論カードだけ。1 回） */
+@keyframes sb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.sb-rise {
+  animation: sb-rise var(--sb-dur-rise) var(--sb-ease) 1 both;
+}
+
+/* ===== タグ・判定の札 ===== */
+.sb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 12px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-rule);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--sb-ink-2);
+  font-weight: 500;
+}
+.sb-tag-deadline {
+  background: var(--sb-orange-hover);
+  border-color: transparent;
+  color: var(--sb-on-orange);
+  font-weight: 700;
+}
+.sb-tag-strong {
+  background: var(--sb-inverse-bg);
+  border-color: transparent;
+  color: var(--sb-inverse-fg);
+  font-weight: 700;
+}
+.sb-vtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 14px 3px 8px;
+  border-radius: var(--sb-pill);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.sb-vm {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.sb-v-no {
+  background: var(--sb-v-no-fill);
+  color: var(--sb-v-no-on);
+}
+.sb-v-needs {
+  background: var(--sb-v-needs-fill);
+  color: var(--sb-v-needs-on);
+  box-shadow: inset 0 0 0 2px var(--sb-v-needs-fg);
+}
+.sb-v-done {
+  background: var(--sb-v-done-fill);
+  color: var(--sb-v-done-on);
+}
+.sb-v-none {
+  background: var(--sb-v-none-fill);
+  color: var(--sb-v-none-on);
+}
+.sb-v-unknown {
+  background: var(--sb-v-unknown-fill);
+  color: var(--sb-v-unknown-on);
+  box-shadow: inset 0 0 0 1.5px var(--sb-v-unknown-fg);
+}
+/* 結論の大きな印（68px。PC 80px） */
+.sb-v-big {
+  flex: none;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sb-r-m);
+}
+.sb-v-big svg {
+  width: 44px;
+  height: 44px;
+}
+.sb-vb-needs {
+  background: var(--sb-v-needs-fill);
+  color: var(--sb-v-needs-on);
+  box-shadow: inset 0 0 0 3px var(--sb-v-needs-fg);
+}
+.sb-vb-no {
+  background: var(--sb-v-no-fill);
+  color: var(--sb-v-no-on);
+}
+.sb-vb-done {
+  background: var(--sb-v-done-fill);
+  color: var(--sb-v-done-on);
+}
+.sb-vb-none {
+  background: var(--sb-v-none-fill);
+  color: var(--sb-v-none-on);
+}
+.sb-vb-unknown {
+  background: var(--sb-v-unknown-fill);
+  color: var(--sb-v-unknown-on);
+  box-shadow: inset 0 0 0 2.5px var(--sb-v-unknown-fg);
+  border-radius: var(--sb-r-m);
+}
+.sb-v-eyebrow {
+  font-size: 13px;
+  color: var(--sb-ink-3);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.sb-v-word {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+}
+.sb-mark {
+  background: linear-gradient(transparent 62%, var(--sb-mark-bg) 62%);
+}
+@media (min-width: 1024px) {
+  .sb-v-word {
+    font-size: 34px;
+  }
+  .sb-v-big {
+    width: 76px;
+    height: 76px;
+  }
+  .sb-v-big svg {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* ===== 入力 ===== */
+.sb-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.sb-input {
+  width: 100%;
+  min-height: 52px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-r-m);
+  background: var(--sb-field);
+  padding: 0 16px;
+  font-size: 16px;
+  color: var(--sb-ink);
+  letter-spacing: 0.03em;
+}
+.sb-input.sb-input-sm {
+  min-height: 48px;
+}
+select.sb-input {
+  appearance: none;
+  padding-right: 44px;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 50%,
+    calc(100% - 16px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+.sb-input::placeholder {
+  color: var(--sb-ph);
+  opacity: 1;
+}
+.sb-hint {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--sb-ink-3);
+}
+.sb-field-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--sb-ink-2);
+}
+.sb-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--sb-ink-2);
+}
+/* チェック行・チェックの枠（見た目は丸め。行は 16・枠は 4） */
+input.sb-check {
+  appearance: none;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 2px solid var(--sb-edge);
+  border-radius: var(--sb-r-s);
+  background: var(--sb-field);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  color: var(--sb-on-orange);
+}
+input.sb-check::after {
+  content: "";
+  width: 11px;
+  height: 6px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+input.sb-check:checked {
+  background: var(--sb-orange);
+  border-color: var(--sb-ink);
+}
+input.sb-check:checked::after {
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+input.sb-check:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+.sb-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: var(--sb-hit-row);
+  padding: 10px 12px;
+  border-radius: var(--sb-r-m);
+  background: var(--sb-surface);
+  cursor: pointer;
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.sb-check-row:hover,
+.sb-check-row:active {
+  background: var(--sb-hover);
+}
+.sb-check-row.is-on {
+  background: var(--sb-hover);
+}
+.sb-check-row:has(:focus-visible) {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+
+/* ===== ヒーロー（挿絵は `/` のトップだけ。スマホ 232px、PC 320px。文字は空の上にだけ置く） ===== */
+.sb-hero {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  background: var(--sb-art-sky);
+}
+.sb-hero-art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sb-hero-art svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sb-art-m {
+  display: block;
+}
+.sb-art-p {
+  display: none;
+}
+.sb-hero-text {
+  position: relative;
+  z-index: 2;
+  padding: 14px 16px 0;
+}
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+.sb-brand-mark {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sb-pill);
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+  box-shadow: 0 0 0 4px var(--sb-halo);
+}
+.sb-brand-mark svg {
+  width: 30px;
+  height: auto;
+}
+.sb-hero-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+}
+.sb-intro {
+  padding: 12px 16px 4px;
+  background: var(--sb-base);
+}
+.sb-intro-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.sb-lead {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--sb-ink-2);
+  max-width: 46rem;
+}
+.sb-lead strong {
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-ops-note {
+  border-left: 3px solid var(--sb-orange);
+  padding-left: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sb-ink-3);
+}
+.sb-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+.sb-facts > div {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 24px;
+  padding: 1px 12px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-control);
+  border: 1px solid var(--sb-rule);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.sb-facts dt {
+  color: var(--sb-ink-3);
+  white-space: nowrap;
+}
+.sb-facts dd {
+  font-weight: 700;
+  min-width: 0;
+}
+.sb-disclaimer-short {
+  border-left: 3px solid var(--sb-ink);
+  padding-left: 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--sb-ink-2);
+  max-width: 46rem;
+}
+@media (max-width: 1023px) {
+  /* スマホ：入力欄と 2 つのボタンが最初の画面（375×812）に入るよう、見出しの注記を省く */
+  .sb-band-first .sb-sec-note {
+    display: none;
+  }
+  .sb-band-first {
+    padding-top: 12px;
+    padding-bottom: 20px;
+  }
+  .sb-band-first .sb-sec-head {
+    min-height: 38px;
+    margin-bottom: 8px;
+  }
+  .sb-band-first .sb-sec-head h2 {
+    font-size: 20px;
+  }
+  .sb-band-first .sb-sec-num {
+    font-size: 72px;
+    top: -18px;
+  }
+  .sb-block {
+    padding: 12px 14px 14px;
+  }
+  .sb-hero-art svg {
+    height: 150px;
+  }
+}
+@media (min-width: 1024px) {
+  .sb-hero {
+    height: 320px;
+  }
+  .sb-art-m {
+    display: none;
+  }
+  .sb-art-p {
+    display: block;
+  }
+  .sb-hero-text {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 32px 0;
+  }
+  .sb-brand {
+    font-size: 46px;
+  }
+  .sb-brand-mark {
+    width: 56px;
+    height: 56px;
+  }
+  .sb-brand-mark svg {
+    width: 38px;
+  }
+  .sb-hero-sub {
+    max-width: none;
+    font-size: 19px;
+    margin-top: 6px;
+  }
+  .sb-intro {
+    padding: 24px 32px 8px;
+  }
+}
+
+/* ===== 判定の入力と結果の骨格 ===== */
+.sb-check-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+@media (min-width: 1024px) {
+  .sb-check-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .sb-area-input {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .sb-area-map {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .sb-area-wide {
+    grid-column: 1 / -1;
+  }
+}
+.sb-btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.sb-note-card {
+  border-radius: var(--sb-r-m);
+  background: var(--sb-surface);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--sb-ink-2);
+}
+.sb-note-card.is-warn {
+  border-left: 4px solid var(--sb-v-needs-fg);
+}
+.sb-note-card.is-error {
+  border-left: 4px solid var(--sb-v-no-fg);
+}
+.sb-note-card.is-ok {
+  border-left: 4px solid var(--sb-v-none-fg);
+}
+
+/* ===== 地図と層 ===== */
+.sb-map-block {
+  padding: 12px;
+}
+.sb-map-frame {
+  position: relative;
+  border-radius: var(--sb-r-m);
+  overflow: hidden;
+  border: 1px solid var(--sb-rule);
+  background: var(--sb-map-swatch-bg);
+}
+.sb-map-frame .maplibregl-canvas-container canvas {
+  filter: var(--sb-tile-filter);
+}
+/* 地図の標準ズームボタンは 44px にする（押す部品の下限）。スマホはピンチで足りるが、キーボード・マウスのために残す */
+.sb-map-frame .maplibregl-ctrl-group {
+  border-radius: var(--sb-r-m);
+  box-shadow: var(--sb-shadow);
+}
+.sb-map-frame .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+}
+.sb-layer-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .sb-layer-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.sb-layer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--sb-hit-min);
+  height: 100%;
+  padding: 6px 10px 6px 8px;
+  border-radius: var(--sb-pill);
+  cursor: pointer;
+  background: var(--sb-control);
+  border: 2px solid var(--sb-ink);
+  color: var(--sb-ink);
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.sb-layer.is-wide {
+  align-items: flex-start;
+  border-radius: var(--sb-r-l);
+  padding: 8px 12px 8px 8px;
+}
+.sb-layer.is-off {
+  background: transparent;
+  border: 2px dashed var(--sb-edge);
+  color: var(--sb-ink-3);
+}
+.sb-layer:hover {
+  background: var(--sb-hover);
+}
+.sb-layer:has(:focus-visible) {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sb-layer input.sb-check {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--sb-pill);
+}
+.sb-swatch {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--sb-r-s);
+  background: var(--sb-map-swatch-bg);
+}
+.sb-layer.is-off .sb-swatch {
+  opacity: 0.6;
+}
+.sb-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.sb-layer-sources {
+  border-radius: var(--sb-r-m);
+  background: var(--sb-surface);
+  padding: 0 12px;
+}
+.sb-layer-sources > summary {
+  min-height: var(--sb-hit-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+.sb-layer-sources[open] {
+  padding-bottom: 12px;
+}
+.sb-layer-group {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+  margin: 10px 0 6px;
+}
+.sb-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: var(--sb-pill);
+  border: 1px solid var(--sb-edge);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink-2);
+}
+
+/* ===== 手続き・規制ごとの判定 ===== */
+.sb-item-card {
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+  padding: 16px;
+  min-width: 0;
+}
+.sb-src {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--sb-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--sb-sunken);
+  color: var(--sb-ink);
+}
+.sb-divider {
+  border: 0;
+  border-top: 1px solid var(--sb-rule);
+}
+
+/* スキップリンク：最初の Tab で現れ、本文へ移る */
+.sb-skip {
+  position: absolute;
+  left: 8px;
+  top: -80px;
+  z-index: 50;
+  min-height: var(--sb-hit-min);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 20px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+  font-weight: 700;
+  text-decoration: none;
+}
+.sb-skip:focus {
+  top: 8px;
+}
+
+/* 公開の判定画面 `/` に置く運航管理の下メニューだけ、`.ds` の色の名前を v2 に付け替える（形・寸法は変えない。③ で置き換える）。
+ * /ops 本体と見本（/ops/design）の `.ds` は触らない。 */
+.ds.ds-sb {
+  --bg-app: var(--sb-surface);
+  --bg-surface: var(--sb-base);
+  --bg-sunken: var(--sb-sunken);
+  --fg: var(--sb-ink);
+  --fg-soft: var(--sb-ink-2);
+  --fg-mute: var(--sb-ink-3);
+  --line: var(--sb-rule);
+  --line-strong: var(--sb-edge);
+  --accent: var(--sb-ink);
+  --accent-soft: var(--sb-orange);
+  --accent-solid: var(--sb-orange);
+  --accent-solid-hover: var(--sb-orange-hover);
+  --accent-fg: var(--sb-on-orange);
+}
+
+/* 地図の出典表記の開閉ボタンも 44px（押す部品の下限）。出典の文は地図の右下に収める */
+.sb-map-frame .maplibregl-ctrl-attrib-button {
+  width: 44px;
+  height: 44px;
+}
+.sb-map-frame .maplibregl-ctrl-attrib.maplibregl-compact {
+  min-height: 44px;
+  border-radius: var(--sb-pill);
+}
+/* チェック行：選ばれている行・ホバーの行は面が橙になるので、薄い文字色は 4.5:1 を保つ濃さに上げる */
+.sb-check-row.is-on .text-sb-ink-3,
+.sb-check-row:hover .text-sb-ink-3,
+.sb-check-row.is-on .sb-hint,
+.sb-check-row:hover .sb-hint {
+  color: var(--sb-ink-2);
+}
+.sb-layer:hover .text-sb-ink-3 {
+  color: var(--sb-ink-2);
+}

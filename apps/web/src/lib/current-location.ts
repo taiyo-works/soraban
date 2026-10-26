@@ -19,6 +19,13 @@ export const LOW_ACCURACY_MESSAGE =
 export const CURRENT_LOCATION_PRIVACY_NOTE =
   "現在地はこの端末の中で地図の表示に使います。『この地点で判定』を押したときだけ、判定のために座標を送ります";
 
+/**
+ * 判定画面 `/` の現在地の説明（押したらすぐ判定する挙動）。計画の作成画面（/ops）は「この地点を使う」の流れなので、
+ * そちらは上の CURRENT_LOCATION_PRIVACY_NOTE のまま使う（文が食い違わないように別の定数にしている）。
+ */
+export const CURRENT_LOCATION_JUDGE_NOTE =
+  "現在地は、「現在地で判定」を押したときに 1 回だけ取得し、判定には緯度・経度（小数 6 桁）だけを送ります（精度は表示だけ）。精度が 100 m を超えるときは、確認してから判定します";
+
 const FALLBACK_GUIDE = "住所検索・地図の長押し（右クリック）で指定してください";
 
 // GeolocationPositionError のコード（1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE, 3: TIMEOUT）

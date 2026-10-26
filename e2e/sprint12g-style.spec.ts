@@ -108,16 +108,19 @@ test.describe("スタイル案の見本", () => {
     await expect(page.getByTestId("menu-trial")).toBeVisible();
   });
 
-  test("8. 実画面（/）は、スタイルの見本の影響を受けない（.sty がなく、紙・インクのまま）", async ({ page }) => {
+  test("8. 実画面（/）は、スタイルの見本の影響を受けない（.sty がなく、v2 の地色のまま）", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto(`${MAIN}/`);
     await expect(page.locator(".sty")).toHaveCount(0);
-    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(245, 242, 234)");
+    // Sprint 12h PR ②：実画面の地色は v2 の --sb-base（明）= #FFFFFF。旧「紙」(#F5F2EA) から契約どおり変わった。見本の --s-app が漏れていないことの検査は変えない
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(255, 255, 255)");
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--s-app"))).toBe("");
   });
 
   test("9. キーボードで移動でき、フォーカスの輪が見える", async ({ page }) => {
     await page.goto(STYLE);
+    // 本体は後からストリームで届く（それまでは「読み込み中…」だけで、フォーカスできる部品がない）。届くのを待ってから Tab を押す
+    await expect(page.getByTestId("style-trial")).toBeVisible();
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");

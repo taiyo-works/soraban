@@ -2,14 +2,16 @@ import {
   AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE,
   CONFIDENCE_LABEL,
   formatMachineCondition,
+  getDataset,
   shouldShowAirportMlitNote,
   summarizeConfidence,
   type DidDetail,
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL, VERDICT_TONE } from "@/lib/verdict-display";
-import { TierGauge, VerdictMark } from "./verdict-mark";
+import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL } from "@/lib/verdict-display";
+import { TierGauge } from "./verdict-mark";
+import { VerdictTag } from "./ui/sb-parts";
 
 type Props = {
   readonly regulation: RegulationWithStatus;
@@ -25,17 +27,17 @@ type Props = {
 
 // 確信度のトーン: ブランド藍と信号色のみ使用。zinc/amber/emerald の混入を避ける。
 const confidenceTone = {
-  high: "text-signal-green",
-  medium: "text-signal-amber",
-  low: "text-signal-red",
+  high: "text-sb-v-none-fg",
+  medium: "text-sb-v-needs-fg",
+  low: "text-sb-v-no-fg",
 } as const;
 
 // ステータスバッジ: 塗りでなく細い枠線で表現。LED 感を消し製図インクに寄せる。
 const statusBadgeClass = {
-  red: "border-signal-red text-signal-red bg-signal-red-soft",
-  yellow: "border-signal-amber text-signal-amber bg-signal-amber-soft",
-  green: "border-signal-green text-signal-green bg-signal-green-soft",
-  unknown: "border-rule text-ink-mute bg-paper-soft",
+  red: "border-sb-v-no-fg text-sb-v-no-fg bg-sb-surface",
+  yellow: "border-sb-v-needs-fg text-sb-v-needs-fg bg-sb-surface",
+  green: "border-sb-v-none-fg text-sb-v-none-fg bg-sb-surface",
+  unknown: "border-sb-rule text-sb-ink-3 bg-sb-surface",
 } as const;
 
 // Sprint 11d：札は元の判定（BASE_STATUS_LABEL：該当／該当の可能性（要確認）／非該当／判定不能（データ未整備））。
@@ -43,9 +45,9 @@ const statusBadgeClass = {
 
 // 出典バッジ: ブランド藍 1 系統で塗り/抜き/罫線の 3 段階に分ける。
 const sourceTone = {
-  国: "border-ink text-ink",
-  都道府県: "border-brand-700 text-brand-700",
-  市町村: "border-rule text-ink-soft",
+  国: "border-sb-edge text-sb-ink",
+  都道府県: "border-sb-ink text-sb-ink",
+  市町村: "border-sb-rule text-sb-ink-2",
 } as const;
 
 // DID の判定詳細の表示（「非該当（工業専用地域）」「除外未確認」を区別する）。
@@ -60,12 +62,21 @@ const DID_DETAIL_LABEL: Readonly<Record<DidDetail, string>> = {
 
 // DID 判定詳細の左罫線の色。文言に結論を含めたうえで、罫線は補助として信号色に揃える。
 const DID_DETAIL_TONE: Readonly<Record<DidDetail, string>> = {
-  no_data: "border-signal-amber",
-  outside_did: "border-rule",
-  industrial_exclusive: "border-signal-green",
-  in_did: "border-signal-red",
-  in_did_near_industrial_boundary: "border-signal-red",
-  in_did_exclusion_unverified: "border-signal-amber",
+  no_data: "border-sb-v-needs-fg",
+  outside_did: "border-sb-rule",
+  industrial_exclusive: "border-sb-v-none-fg",
+  in_did: "border-sb-v-no-fg",
+  in_did_near_industrial_boundary: "border-sb-v-no-fg",
+  in_did_exclusion_unverified: "border-sb-v-needs-fg",
+};
+
+/** 台帳の版（データセット台帳 sources.json の version）。台帳から引けないときは出さない。 */
+const datasetVersion = (id: string): string | undefined => {
+  try {
+    return getDataset(id).version;
+  } catch {
+    return undefined;
+  }
 };
 
 export function RegulationCard({ regulation, pilotPermits, verdictItem, provisional = false }: Props) {
@@ -77,18 +88,18 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       data-testid={`regulation-card-${regulation.id}`}
       data-status={regulation.status}
       data-verdict={verdictItem?.verdict ?? ""}
-      className="flex flex-col gap-3 border border-rule bg-paper p-5 transition-colors hover:border-ink/40"
+      className="sb-item-card flex flex-col gap-3"
     >
       <div className="flex items-center gap-2">
         <span
-          className={`inline-flex items-center border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider ${sourceTone[regulation.source]}`}
+          className={`inline-flex items-center rounded-sb-pill border px-2.5 py-px text-xs font-bold ${sourceTone[regulation.source]}`}
         >
           {regulation.source}
         </span>
-        <span className="text-[11px] text-ink-mute">{regulation.authority}</span>
+        <span className="text-xs text-sb-ink-3">{regulation.authority}</span>
         <span
           data-testid="regulation-base-status"
-          className={`ml-auto inline-flex items-center border px-2 py-0.5 text-[11px] font-semibold ${statusBadgeClass[regulation.status]}`}
+          className={`ml-auto inline-flex items-center rounded-sb-pill border-2 px-2.5 py-0.5 text-xs font-bold ${statusBadgeClass[regulation.status]}`}
         >
           {regulationBaseLabel(regulation)}
         </span>
@@ -96,7 +107,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {verdictItem ? (
         <p
           data-testid="regulation-verdict-line"
-          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 border-y border-l-2 border-rule py-1.5 pl-2 text-[11px] text-ink-soft ${provisional ? "border-l-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
+          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-sb-s border-y border-l-4 border-sb-rule py-1.5 pl-2 text-xs text-sb-ink-2 ${provisional ? "border-l-sb-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
         >
           <span>元の判定 {baseStatusDisplay(verdictItem)}</span>
           <span aria-hidden>→</span>
@@ -108,63 +119,59 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           </span>
           <span aria-hidden>→</span>
           {provisional ? (
-            <span data-testid="regulation-verdict-provisional" className="font-medium text-ink-mute">
+            <span data-testid="regulation-verdict-provisional" className="font-medium text-sb-ink-3">
               {PROVISIONAL_ITEM_NOTE}
             </span>
           ) : (
-            <span
-              data-testid="regulation-verdict"
-              className={`inline-flex items-center gap-1 font-semibold ${VERDICT_TONE[verdictItem.verdict]}`}
-            >
-              <VerdictMark level={verdictItem.verdict} size="sm" decorative />
+            <VerdictTag level={verdictItem.verdict} testId="regulation-verdict">
               {VERDICT_LABEL[verdictItem.verdict]}
-            </span>
+            </VerdictTag>
           )}
-          <span className="ml-auto inline-flex items-end gap-1 text-ink-mute">
+          <span className="ml-auto inline-flex items-end gap-1 text-sb-ink-3">
             <TierGauge tier={regulation.legalTier} />
             <span className="leading-none">{legalTierLabel(regulation.legalTier)}</span>
           </span>
         </p>
       ) : null}
-      <h3 className="font-display text-base font-medium leading-snug text-ink">
+      <h3 className="text-base font-bold leading-snug text-sb-ink">
         {regulation.title}
       </h3>
-      <p className="text-xs leading-relaxed text-ink-soft">
+      <p className="text-xs leading-relaxed text-sb-ink-2">
         {regulation.summary}
       </p>
       {regulation.didDetail ? (
         <p
           data-testid="did-detail"
-          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-ink ${isModelAircraftDidExcluded(regulation) ? "border-rule" : DID_DETAIL_TONE[regulation.didDetail]}`}
+          className={`border-l-2 pl-3 text-xs font-medium leading-relaxed text-sb-ink ${isModelAircraftDidExcluded(regulation) ? "border-sb-rule" : DID_DETAIL_TONE[regulation.didDetail]}`}
         >
           {isModelAircraftDidExcluded(regulation) ? MODEL_AIRCRAFT_DID_DETAIL_LABEL : DID_DETAIL_LABEL[regulation.didDetail]}
         </p>
       ) : null}
-      <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-        <span className="eyebrow !text-[11px]">この地点</span>{" "}
-        <span className="text-ink-soft">{regulationNoteDisplay(regulation)}</span>
+      <p className="border-l border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-3">
+        <span className="sb-eyebrow">この地点</span>{" "}
+        <span className="text-sb-ink-2">{regulationNoteDisplay(regulation)}</span>
       </p>
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p
           data-testid="airport-mlit-note"
-          className="border-l-2 border-signal-amber bg-signal-amber-soft/45 px-3 py-2 text-xs leading-relaxed text-ink-soft"
+          className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
         >
-          <span className="eyebrow block !text-[11px]">入力した許可について</span>{" "}
+          <span className="sb-eyebrow block ">入力した許可について</span>{" "}
           {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
         </p>
       ) : null}
       {verdictItem && verdictItem.appliedPermits.length > 0 ? (
         <div
           data-testid="regulation-applied-permits"
-          className="border-l-2 border-brand-700 bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
+          className="rounded-sb-m border-l-4 border-sb-ink bg-sb-hover px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
         >
-          <p className="eyebrow !text-[11px]">適用した許可・同意・目的（元の判定は変えない）</p>
+          <p className="sb-eyebrow">適用した許可・同意・目的（元の判定は変えない）</p>
           <ul className="mt-1 flex flex-col gap-1">
             {verdictItem.appliedPermits.map((p) => (
               <li key={p.id} className="leading-snug">
                 <span>・{p.condition}</span>
                 {p.machine ? (
-                  <span className="block pl-2.5 text-[11px] tracking-wide text-ink-mute">{p.machine}</span>
+                  <span className="block pl-2.5 text-xs tracking-wide text-sb-ink-3">{p.machine}</span>
                 ) : null}
               </li>
             ))}
@@ -174,9 +181,9 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
         <div
           data-testid="regulation-excluded"
-          className="border-l-2 border-signal-green bg-signal-green-soft px-3 py-2 text-[11px] leading-relaxed text-signal-green"
+          className="rounded-sb-m border-l-4 border-sb-v-none-fg bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-v-none-fg"
         >
-          <p className="eyebrow !text-[11px] !text-signal-green">
+          <p className="sb-eyebrow !text-sb-v-none-fg">
             {regulation.statusBeforeExclusion !== undefined ? EXCLUDED_BY_WEIGHT_HEADING : EXCLUDED_HEADING}
           </p>
           {regulation.statusBeforeExclusion !== undefined ? (
@@ -189,7 +196,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
               <li key={ex.id} className="leading-snug">
                 <span>・{ex.condition}</span>
                 {ex.machine ? (
-                  <span className="block pl-2.5 text-[11px] tracking-wide text-signal-green/70">
+                  <span className="block pl-2.5 text-xs tracking-wide text-sb-v-none-fg">
                     {formatMachineCondition(ex.machine)}
                   </span>
                 ) : null}
@@ -199,8 +206,8 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         </div>
       ) : null}
       {exceptions.length > 0 ? (
-        <details className="border border-rule bg-paper-soft px-3 py-2 text-[11px] leading-relaxed text-ink-soft">
-          <summary className="cursor-pointer text-[11px] tracking-wide text-ink-mute">
+        <details className="rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-ink-2">
+          <summary className="min-h-11 cursor-pointer text-xs tracking-wide text-sb-ink-3 leading-[2.75rem]">
             例外節 {exceptions.length} 件
           </summary>
           <ul className="mt-2 flex flex-col gap-1.5">
@@ -215,16 +222,18 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {/* データ出典と確認日（Sprint 7）・反映済みの改正。判定本文と区別するため脚注として置く */}
       <div
         data-testid="regulation-datasets"
-        className="flex flex-col gap-1.5 border-t border-dashed border-rule pt-2.5 text-[11px] leading-relaxed text-ink-mute"
+        className="sb-block-soft flex flex-col gap-2 !p-3 text-xs leading-relaxed text-sb-ink-3"
       >
+        <p className="text-sm font-bold text-sb-ink">根拠（使用データ・確認日・版・反映済みの改正・出典）</p>
         <div>
-          <p className="eyebrow !text-[11px]">使用データ</p>
+          <p className="sb-eyebrow">使用データ</p>
           <ul className="mt-0.5 flex flex-col gap-0.5">
             {regulation.datasets.map((d) => (
               <li key={d.id}>
-                <span className="text-ink-soft">{d.name}</span>
+                <span className="text-sb-ink-2">{d.name}</span>
                 <span className="tnum">
                   {d.baseYear !== null ? `（基準年 ${d.baseYear}）` : ""}・確認日 {d.verifiedAt}
+                  {datasetVersion(d.id) ? `・版 ${datasetVersion(d.id)}` : ""}
                 </span>
               </li>
             ))}
@@ -232,7 +241,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         </div>
         {regulation.amendments.length > 0 ? (
           <div>
-            <p className="eyebrow !text-[11px]">反映済みの改正</p>
+            <p className="sb-eyebrow">反映済みの改正</p>
             <ul className="mt-0.5 flex flex-col gap-0.5">
               {regulation.amendments.map((a) => (
                 <li key={a.id}>
@@ -240,7 +249,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
                     href={a.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+                    className="inline-flex min-h-11 min-w-11 items-center text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
                   >
                     {a.title}
                   </a>
@@ -251,13 +260,13 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           </div>
         ) : null}
       </div>
-      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 text-[11px] tracking-wide text-ink-mute">
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-sb-rule pt-2.5 text-xs tracking-wide text-sb-ink-3">
         {regulation.url ? (
           <a
             href={regulation.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-brand-700 underline-offset-2 hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
           >
             出典 ↗
           </a>

@@ -1,0 +1,46 @@
+/* そらばん v2：Tailwind の名前（bg-sb-base、text-sb-ink-2、rounded-sb-l など）を --sb-* に結ぶ。
+ * 値はここに書かない（値の正は soraban-tokens.css）。`inline` なので、暗・現場で --sb-* が変わるとそのまま追従する。 */
+@theme inline {
+  --color-sb-base: var(--sb-base);
+  --color-sb-surface: var(--sb-surface);
+  --color-sb-sunken: var(--sb-sunken);
+  --color-sb-control: var(--sb-control);
+  --color-sb-field: var(--sb-field);
+  --color-sb-hover: var(--sb-hover);
+  --color-sb-mark: var(--sb-mark-bg);
+  --color-sb-inverse: var(--sb-inverse-bg);
+  --color-sb-inverse-fg: var(--sb-inverse-fg);
+  --color-sb-on-dot: var(--sb-on-dot);
+  --color-sb-ink: var(--sb-ink);
+  --color-sb-ink-2: var(--sb-ink-2);
+  --color-sb-ink-3: var(--sb-ink-3);
+  --color-sb-ph: var(--sb-ph);
+  --color-sb-rule: var(--sb-rule);
+  --color-sb-edge: var(--sb-edge);
+  --color-sb-focus: var(--sb-focus);
+  --color-sb-orange: var(--sb-orange);
+  --color-sb-orange-hover: var(--sb-orange-hover);
+  --color-sb-on-orange: var(--sb-on-orange);
+  --color-sb-v-no: var(--sb-v-no-fill);
+  --color-sb-v-no-on: var(--sb-v-no-on);
+  --color-sb-v-no-fg: var(--sb-v-no-fg);
+  --color-sb-v-needs: var(--sb-v-needs-fill);
+  --color-sb-v-needs-on: var(--sb-v-needs-on);
+  --color-sb-v-needs-fg: var(--sb-v-needs-fg);
+  --color-sb-v-done: var(--sb-v-done-fill);
+  --color-sb-v-done-on: var(--sb-v-done-on);
+  --color-sb-v-done-fg: var(--sb-v-done-fg);
+  --color-sb-v-none: var(--sb-v-none-fill);
+  --color-sb-v-none-on: var(--sb-v-none-on);
+  --color-sb-v-none-fg: var(--sb-v-none-fg);
+  --color-sb-v-unknown: var(--sb-v-unknown-fill);
+  --color-sb-v-unknown-on: var(--sb-v-unknown-on);
+  --color-sb-v-unknown-fg: var(--sb-v-unknown-fg);
+  --radius-sb-l: var(--sb-r-l);
+  --radius-sb-m: var(--sb-r-m);
+  --radius-sb-s: var(--sb-r-s);
+  --radius-sb-pill: var(--sb-pill);
+  --shadow-sb: var(--sb-shadow);
+  /* 書体は 2 つだけ。和文は Noto Sans JP、数字・座標・証跡 ID は Plus Jakarta Sans（tabular-nums を併用） */
+  --font-num: var(--font-jakarta), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic UI", sans-serif;
+}

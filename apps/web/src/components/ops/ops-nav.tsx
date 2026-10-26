@@ -108,7 +108,7 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
  * スマホの下メニュー（5 タブ）。1024px 以上では出さない。`/`（判定画面）にも置く（ログイン済みのとき）。
  * `.ds` の外（`/`）でも新しいトークンで描けるよう、外側に `ds` を付け、地は内側の面が塗る。
  */
-export function OpsBottomNav() {
+export function OpsBottomNav({ variant = "ds" }: { readonly variant?: "ds" | "sb" } = {}) {
   const pathname = usePathname() ?? "";
   const hidden = navHiddenOn(pathname);
   // 本文の末尾が下メニューに隠れないよう、スマホでは body に余白を取る（globals.css の .has-bottom-nav）
@@ -120,7 +120,7 @@ export function OpsBottomNav() {
   if (hidden) return null;
   const current = currentNavKey(pathname);
   return (
-    <nav aria-label="運航管理のメニュー（下）" data-testid="ops-bottom-nav" className="ds fixed inset-x-0 bottom-0 z-40 lg:hidden">
+    <nav aria-label="運航管理のメニュー（下）" data-testid="ops-bottom-nav" className={`ds ${variant === "sb" ? "ds-sb " : ""}fixed inset-x-0 bottom-0 z-40 lg:hidden`}>
       <ul className="mx-auto grid grid-cols-5 border-t border-line-strong bg-surface pb-[env(safe-area-inset-bottom)]">
         {NAV_ITEMS.map((it) => {
           const active = current === it.key;
@@ -146,6 +146,11 @@ export function OpsBottomNav() {
       </ul>
     </nav>
   );
+}
+
+/** 公開の判定画面 `/` の下メニュー。色だけ v2（橙・墨・白）。形・寸法は /ops と同じ（③ で置き換える）。 */
+export function OpsBottomNavSb() {
+  return <OpsBottomNav variant="sb" />;
 }
 
 /** 右上の利用者メニュー。名前・役割（ⓘに説明）・メールアドレス・ログアウト。 */

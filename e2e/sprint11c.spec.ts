@@ -34,7 +34,7 @@ const selectPreset = async (page: Page, name: string): Promise<void> => {
   await Promise.all([check, diag]);
 };
 
-/** 「05 — 機体・運航条件」を開く（取得済みの許可のチェックはこの中にある）。 */
+/** 「機体・運航条件」を開く（取得済みの許可のチェックはこの中にある）。 */
 const openConditions = async (page: Page): Promise<void> => {
   const details = conditions(page);
   if ((await details.getAttribute("open")) === null) {
@@ -44,7 +44,7 @@ const openConditions = async (page: Page): Promise<void> => {
 };
 
 // 申請支援の手続きのチェック（「施設管理者の同意 ＋ … を完了にする」）と取り違えないよう、05 の中に限る。
-const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
+const conditions = (page: Page): Locator => page.locator("details", { hasText: "機体・運航条件" });
 const consent = (page: Page) => conditions(page).getByRole("checkbox", { name: "施設管理者の同意" });
 const notice = (page: Page) => conditions(page).getByRole("checkbox", { name: "公安委員会への通報" });
 const DIPS_DID = "国交省 DIPS：DID 上空の飛行許可";

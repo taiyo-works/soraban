@@ -46,3 +46,7 @@ node docs/design/warm-final/src/build.mjs
 node docs/design/warm-final/src/shoot.mjs      # 撮影と検査（Chromium は /opt/pw-browsers/chromium-1243）
 python3 docs/design/warm-final/src/compose.py  # overview.png
 ```
+
+## 暗い表示（2026-10-26 追加）
+
+`dark/` に暗の見本 3 画面（判定のトップ・結果 3 状態・運航ホーム）と `overview-dark.png`。明の HTML に `data-theme="dark"` を足しただけで、暗の値は `tokens-v2/soraban-tokens-v2.css` の暗のブロックから当たる。考え方と色の対応表は `design-system-v2-draft.md` §9。作り直し：`node docs/design/warm-final/src/build.mjs && node docs/design/warm-final/dark/src/build-dark.mjs && node docs/design/warm-final/dark/src/shoot-dark.mjs && python3 docs/design/warm-final/dark/src/compose-dark.py`。

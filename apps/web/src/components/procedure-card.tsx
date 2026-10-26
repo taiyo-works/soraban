@@ -2,7 +2,7 @@
 
 import type { RequiredProcedure, VerdictDoneItem } from "@soraban/regulations";
 import { VERDICT_LABEL } from "@/lib/verdict-display";
-import { VerdictMark } from "./verdict-mark";
+import { VerdictSign } from "./ui/sb-parts";
 import {
   isNoFlyConfirmation,
   PROCEDURE_BADGE_LABEL,
@@ -35,11 +35,11 @@ type Props = {
 // DRS（登録）と DIPS 2.0（許可承認）と 条例 を視覚的に別物として扱う。
 // パネル末尾の「2 系統の窓口」案内と同じ塗り分けで一貫させる。
 const systemTone: Readonly<Record<RequiredProcedure["system"], string>> = {
-  "DIPS 2.0": "border-brand-700 text-brand-700 bg-brand-50",
-  DRS: "border-ink text-ink bg-paper-soft",
-  "条例（各管理者）": "border-rule text-ink-soft bg-paper-soft",
+  "DIPS 2.0": "border-sb-ink text-sb-ink bg-sb-hover",
+  DRS: "border-sb-edge text-sb-ink bg-sb-surface",
+  "条例（各管理者）": "border-sb-rule text-sb-ink-2 bg-sb-surface",
   // 航空法とは別系統の窓口。信号色（赤）は判定結果専用なので使わず、墨の抜きで区別する。
-  都道府県公安委員会: "border-ink-soft text-ink-soft bg-paper",
+  都道府県公安委員会: "border-sb-edge text-sb-ink-2 bg-sb-base",
 };
 
 export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, category, satisfied }: Props) {
@@ -52,56 +52,54 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       data-testid="procedure-card"
       data-procedure-id={procedure.id}
       data-verdict={satisfied ? "procedure_done" : ""}
-      className={`flex flex-col gap-3 border p-5 transition-colors ${
-        done ? "border-signal-green bg-signal-green-soft" : "border-rule bg-paper hover:border-ink/40"
-      }`}
+      className={`sb-item-card flex flex-col gap-3 ${done ? "border-2 border-sb-v-none-fg" : ""}`}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span
-          className={`inline-flex items-center whitespace-nowrap border px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider ${systemTone[procedure.system]}`}
+          className={`inline-flex items-center whitespace-nowrap rounded-sb-pill border px-2.5 py-px sb-num text-xs font-bold ${systemTone[procedure.system]}`}
         >
           {procedure.system}
         </span>
-        <span className="whitespace-nowrap text-[11px] text-ink-mute">{kindLabel}</span>
+        <span className="whitespace-nowrap text-xs text-sb-ink-3">{kindLabel}</span>
         {noFly ? (
-          <span className="ml-auto inline-flex items-center gap-1.5 whitespace-nowrap border border-signal-red bg-signal-red-soft px-2 py-0.5 text-[10px] font-medium text-signal-red">
+          <span className="ml-auto inline-flex items-center gap-1.5 whitespace-nowrap rounded-sb-pill border border-sb-v-no-fg bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-v-no-fg">
             <span aria-hidden className="relative inline-block h-2 w-2 rounded-full border border-current">
               <span className="absolute inset-x-px top-1/2 h-px -translate-y-1/2 bg-current" />
             </span>
             指定中は飛行不可
           </span>
         ) : badge === "after_release" ? (
-          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
             {PROCEDURE_BADGE_LABEL.after_release}
           </span>
         ) : procedure.kind === "facility_consent_notice" ? (
-          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
             航空法とは別系統（飛行禁止法）
           </span>
         ) : procedure.waivableByIIB ? (
-          <span className="ml-auto inline-flex items-center gap-1 border border-rule bg-paper-soft px-2 py-0.5 text-[10px] font-medium text-ink-mute">
+          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-current" />
             IIB 相当で不要化可
           </span>
         ) : (
-          <span className="ml-auto inline-flex items-center gap-1 border border-signal-amber bg-signal-amber-soft px-2 py-0.5 text-[10px] font-medium text-signal-amber">
+          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-v-needs-fg bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-v-needs-fg">
             <span aria-hidden className="inline-block h-1.5 w-1.5 bg-current" />
             IIA 相当・不要化不可
           </span>
         )}
       </div>
 
-      <label className="group/check flex cursor-pointer items-start gap-2.5">
+      <label className="group/check flex min-h-11 cursor-pointer items-start gap-2.5">
         <input
           type="checkbox"
           checked={done}
           onChange={(e) => onToggleDone(procedure.id, e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          className="sb-check mt-0.5"
           aria-label={`${procedure.title} を完了にする`}
         />
         <h4
-          className={`font-display text-base font-medium leading-snug transition-colors ${
-            done ? "text-signal-green line-through" : "text-ink group-hover/check:text-brand-700"
+          className={` text-base font-bold leading-snug transition-colors ${
+            done ? "text-sb-v-none-fg line-through" : "text-sb-ink group-hover/check:text-sb-ink"
           }`}
         >
           {procedure.title}
@@ -111,13 +109,13 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       {satisfied ? (
         <div
           data-testid="procedure-verdict-done"
-          className="flex flex-col gap-1 border border-rule border-l-4 border-l-verdict-done bg-paper px-3 py-2 text-[11px] leading-relaxed text-ink-soft"
+          className="flex flex-col gap-1 rounded-sb-m border-l-4 border-l-sb-v-done-fg bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
         >
-          <p className="flex items-center gap-1.5 font-semibold text-ink">
-            <VerdictMark level="procedure_done" size="sm" decorative />
+          <p className="flex items-center gap-1.5 font-semibold text-sb-ink">
+            <VerdictSign level="procedure_done" />
             {VERDICT_LABEL.procedure_done}：{satisfied.appliedPermits.map((p) => p.label).join(" / ")}
           </p>
-          <ul className="ml-[20px] flex flex-col gap-0.5 border-l-2 border-dashed border-verdict-done pl-2.5">
+          <ul className="ml-[20px] flex flex-col gap-0.5 border-l-2 border-dashed border-sb-v-done-fg pl-2.5">
             {satisfied.conditions.map((c) => (
               <li key={c}>・{c}</li>
             ))}
@@ -126,29 +124,29 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       ) : null}
 
       {procedure.note ? (
-        <p className="text-xs leading-relaxed text-ink-soft">{procedure.note}</p>
+        <p className="text-xs leading-relaxed text-sb-ink-2">{procedure.note}</p>
       ) : null}
 
-      <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-        <span className="eyebrow !text-[11px]">法的根拠</span>{" "}
-        <span className="text-ink-soft">{procedure.legalBasis}</span>
+      <p className="border-l border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-3">
+        <span className="sb-eyebrow">法的根拠</span>{" "}
+        <span className="text-sb-ink-2">{procedure.legalBasis}</span>
       </p>
 
       {deadlineBasis ? (
-        <p className="border-l border-rule pl-3 text-xs leading-relaxed text-ink-mute">
-          <span className="eyebrow !text-[11px]">提出期限</span>{" "}
-          <span className="text-ink-soft">{deadlineBasis}</span>
+        <p className="border-l border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-3">
+          <span className="sb-eyebrow">提出期限</span>{" "}
+          <span className="text-sb-ink-2">{deadlineBasis}</span>
         </p>
       ) : null}
 
       {/* システム系統 URL（手続きをする場所）と 出典 URL（条文・手引き）を別導線で。
           手続き窓口を主導線（藍・矢印つき）、出典を従（控えめ）として段差をつける。 */}
-      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-2.5 text-[11px]">
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-sb-rule pt-2.5 text-xs">
         <a
           href={procedure.systemUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-brand-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+          className="inline-flex min-h-11 min-w-11 items-center font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
           title={
             procedure.kind === "facility_consent_notice"
               ? "事前通報の方法（警察庁の案内）を開く"
@@ -163,12 +161,12 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
               ? `${procedure.system} を開く ↗`
               : `${procedure.system} で手続き ↗`}
         </a>
-        <span aria-hidden className="h-3 w-px bg-rule" />
+        <span aria-hidden className="h-3 w-px bg-sb-rule" />
         <a
           href={procedure.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-ink-mute underline-offset-2 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper"
+          className="inline-flex min-h-11 min-w-11 items-center text-sb-ink-2 underline decoration-sb-orange decoration-2 underline-offset-4"
           title="根拠条文・手引きの出典を開く"
         >
           出典 ↗
@@ -176,7 +174,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
         {/* 検証日メタ（改正レビュー用）。確定事実の出典と並べて「いつ確認したか」を示す。 */}
         {verifiedAt ? (
           <span
-            className="ml-auto text-ink-mute/80 normal-case tracking-normal"
+            className="ml-auto text-sb-ink-3 normal-case tracking-normal"
             title="この手続き定義を一次情報で確認した日付（改正レビュー用）"
           >
             確認日 {verifiedAt}

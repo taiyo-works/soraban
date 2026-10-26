@@ -51,20 +51,20 @@ export const VERDICT_GLYPH: Readonly<Record<ItemVerdict, string>> = {
 
 /** 段階の色（画面の Tailwind クラス。文字・記号の色）。 */
 export const VERDICT_TONE: Readonly<Record<ItemVerdict, string>> = {
-  no_fly: "text-verdict-no-fly",
-  needs_procedure: "text-verdict-needs",
-  procedure_done: "text-verdict-done",
-  no_procedure: "text-verdict-clear",
-  unknown: "text-verdict-unknown",
+  no_fly: "text-sb-v-no-fg",
+  needs_procedure: "text-sb-v-needs-fg",
+  procedure_done: "text-sb-v-done-fg",
+  no_procedure: "text-sb-v-none-fg",
+  unknown: "text-sb-v-unknown-fg",
 };
 
 /** 段階の縁（運航票の左端の帯。画面の Tailwind クラス）。 */
 export const VERDICT_EDGE: Readonly<Record<ItemVerdict, string>> = {
-  no_fly: "border-l-verdict-no-fly",
-  needs_procedure: "border-l-verdict-needs",
-  procedure_done: "border-l-verdict-done",
-  no_procedure: "border-l-verdict-clear",
-  unknown: "border-l-verdict-unknown",
+  no_fly: "border-l-sb-v-no-fg",
+  needs_procedure: "border-l-sb-v-needs-fg",
+  procedure_done: "border-l-sb-v-done-fg",
+  no_procedure: "border-l-sb-v-none-fg",
+  unknown: "border-l-sb-v-unknown-fg",
 };
 
 /** 段階の色（PDF の 16 進。globals.css のライトの値と同じ）。 */
