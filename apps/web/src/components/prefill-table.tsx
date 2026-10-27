@@ -10,8 +10,8 @@ type Props = {
 // system → 表示トーン（DRS=墨抜き / DIPS 2.0=藍）。procedure-card・パネル末尾の
 // 「2 系統の窓口」と同じ塗り分けで一貫させ、別導線であることを一目で示す。
 const systemTone: Readonly<Record<PrefillField["system"], string>> = {
-  "DIPS 2.0": "border-brand-700 text-brand-700 bg-brand-50",
-  DRS: "border-ink text-ink bg-paper-soft",
+  "DIPS 2.0": "border-sb-ink text-sb-ink bg-sb-hover",
+  DRS: "border-sb-edge text-sb-ink bg-sb-surface",
 };
 
 // クリップボードへコピー。navigator.clipboard が使えない環境（http や古い WebView）の
@@ -63,12 +63,11 @@ export function PrefillTable({ prefill }: Props) {
   if (prefill.length === 0) {
     return (
       <section className="flex flex-col gap-3" aria-labelledby="prefill-heading">
-        <p id="prefill-heading" className="eyebrow">
-          <span aria-hidden className="bearing-mark" />
+        <p id="prefill-heading" className="sb-eyebrow">
           DIPS／DRS 入力プリフィル
         </p>
-        <p className="flex items-start gap-3 border border-dashed border-rule bg-paper px-4 py-5 text-sm leading-relaxed text-ink-soft">
-          <span aria-hidden className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rotate-45 bg-ink-mute" />
+        <p className="flex items-start gap-3 border border-dashed border-sb-rule bg-sb-base px-4 py-5 text-sm leading-relaxed text-sb-ink-2 rounded-sb-m">
+          <span aria-hidden className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rotate-45 bg-sb-ink-3" />
           <span>現在の入力ではプリフィルする項目がありません。地点・飛行方法・機体重量を入力してください。</span>
         </p>
       </section>
@@ -79,19 +78,18 @@ export function PrefillTable({ prefill }: Props) {
     <section className="flex flex-col gap-3" aria-labelledby="prefill-heading">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
         <div className="flex flex-col gap-1">
-          <p id="prefill-heading" className="eyebrow">
-            <span aria-hidden className="bearing-mark" />
+          <p id="prefill-heading" className="sb-eyebrow">
             DIPS／DRS 入力プリフィル (
             <span className="tnum">{String(prefill.length).padStart(2, "0")}</span> 行)
           </p>
-          <p className="max-w-prose text-xs leading-relaxed text-ink-soft">
+          <p className="max-w-prose text-xs leading-relaxed text-sb-ink-2">
             各行の値をコピーして、DIPS 2.0（許可・承認）／DRS（機体登録）のフォームに貼り付けてください。
             自動入力はしません（規約・法的リスク回避）。入力先システムは行ごとに区別しています。
           </p>
         </div>
         {/* 系統の凡例（行頭の系統列と同じ塗り分け）。DRS と DIPS 2.0 が別ポータルである
             ことを表頭で一目に示す。値・ラベルは変えず装飾の凡例のみ。 */}
-        <div className="flex shrink-0 items-center gap-3 text-[11px] tracking-wide text-ink-mute">
+        <div className="flex shrink-0 items-center gap-3 text-xs tracking-wide text-sb-ink-3">
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden className={`inline-block h-2.5 w-2.5 border ${systemTone.DRS}`} />
             DRS
@@ -104,12 +102,12 @@ export function PrefillTable({ prefill }: Props) {
       </div>
 
       {/* 台帳組版: 通し番号 / 系統 / 入力欄 / 値（主役） / 出所 / コピー。
-          値列を主役として font-display・ink で最も強く、ラベルと出所は従属色に落とす。
+          値列を主役として ・ink で最も強く、ラベルと出所は従属色に落とす。
           モバイルでも崩れないよう min-w + 横スクロール。 */}
-      <div className="-mx-4 overflow-x-auto border-y border-rule px-4 sm:mx-0 sm:border sm:px-0">
-        <table className="w-full min-w-[680px] border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b border-ink/80 bg-paper-soft/60 text-[11px] tracking-wide text-ink-mute">
+      <div className="rounded-sb-m border border-sb-rule md:overflow-x-auto">
+        <table className="block w-full border-collapse text-left text-sm md:table md:min-w-[680px]">
+          <thead className="max-md:hidden">
+            <tr className="border-b border-sb-edge bg-sb-surface text-xs tracking-wide text-sb-ink-3">
               <th scope="col" className="w-8 py-2.5 pl-3 text-center font-medium">
                 <span aria-hidden>#</span>
               </th>
@@ -119,7 +117,7 @@ export function PrefillTable({ prefill }: Props) {
               <th scope="col" className="py-2.5 pr-3 font-medium">
                 DIPS／DRS 入力欄
               </th>
-              <th scope="col" className="py-2.5 pr-3 font-medium text-ink-soft">
+              <th scope="col" className="py-2.5 pr-3 font-medium text-sb-ink-2">
                 値（コピペ用）
               </th>
               <th scope="col" className="py-2.5 pr-3 font-medium">
@@ -130,48 +128,48 @@ export function PrefillTable({ prefill }: Props) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-rule/70">
+          <tbody className="block divide-y divide-sb-rule md:table-row-group">
             {prefill.map((f, idx) => {
               const state = copied[idx];
               return (
                 <tr
                   key={`${f.system}-${f.dipsFieldLabel}-${idx}`}
-                  className="align-top transition-colors hover:bg-paper-soft/40"
+                  className="flex flex-col gap-1 px-3 py-3 align-top transition-colors hover:bg-sb-surface md:table-row md:p-0"
                 >
                   {/* 通し番号（register の一葉感。coverage 一覧・期限カレンダーと同じ mono tnum）。 */}
                   <td
                     aria-hidden
-                    className="select-none py-3 pl-3 text-center align-middle font-mono text-[10px] tnum text-ink-mute"
+                    className="select-none py-3 pl-3 text-center align-middle sb-num text-xs tnum text-sb-ink-3 max-md:hidden"
                   >
                     {String(idx + 1).padStart(2, "0")}
                   </td>
-                  <td className="py-3 pl-3 pr-3">
+                  <td className="py-3 pl-3 pr-3 max-md:block max-md:p-0">
                     <span
-                      className={`inline-flex items-center border px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-wider ${systemTone[f.system]}`}
+                      className={`inline-flex items-center border px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider ${systemTone[f.system]}`}
                     >
                       {f.system}
                     </span>
                   </td>
-                  <td className="py-3 pr-3 text-[13px] leading-relaxed text-ink-soft">
+                  <td className="py-3 pr-3 text-[13px] leading-relaxed text-sb-ink-2 max-md:block max-md:p-0" data-label="入力欄">
                     {f.dipsFieldLabel}
                   </td>
                   {/* 値＝この表の主役。display 書体・ink で最大の可読性を確保。 */}
-                  <td className="py-3 pr-3">
-                    <span className="font-display font-medium text-ink">{f.value}</span>
+                  <td className="py-3 pr-3 max-md:block max-md:p-0" data-label="値">
+                    <span className=" font-medium text-sb-ink">{f.value}</span>
                   </td>
-                  <td className="py-3 pr-3 text-[11px] leading-relaxed text-ink-mute">
+                  <td className="py-3 pr-3 text-xs leading-relaxed text-sb-ink-3 max-md:block max-md:p-0" data-label="出所">
                     {f.source}
                   </td>
-                  <td className="py-3 pr-3 text-right">
+                  <td className="py-3 pr-3 text-right max-md:block max-md:p-0 max-md:text-left">
                     <button
                       type="button"
                       onClick={() => void handleCopy(idx, f.value)}
-                      className={`inline-flex min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sharp border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1 focus-visible:ring-offset-paper ${
+                      className={`inline-flex min-h-11 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sb-pill border px-3 py-1.5 sb-num text-xs font-bold transition-colors ${
                         state === "ok"
-                          ? "border-signal-green bg-signal-green-soft text-signal-green"
+                          ? "border-sb-v-none-fg bg-sb-surface text-sb-v-none-fg"
                           : state === "fail"
-                            ? "border-signal-red bg-signal-red-soft text-signal-red"
-                            : "border-rule bg-paper text-ink-soft hover:border-brand-700 hover:text-brand-700"
+                            ? "border-sb-v-no-fg bg-sb-surface text-sb-v-no-fg"
+                            : "border-sb-edge bg-sb-control text-sb-ink hover:bg-sb-hover"
                       }`}
                       aria-label={`${f.dipsFieldLabel} の値「${f.value}」をコピー`}
                       title="この値をクリップボードにコピー"

@@ -77,11 +77,11 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
     await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
     await expect(page.getByTestId("ops-bottom-nav").locator("a")).toHaveCount(5);
     await expect(page.getByTestId("ops-sidebar")).toBeHidden();
-    // 公開の判定画面 `/` は .ds を使わず、旧い紙・インクのまま（下メニューの部品だけが自前の .ds を持つ）
+    // 公開の判定画面 `/` は .ds を使わず、v2 のトークン（地は --sb-base＝白。PR ② で旧い紙の色から変更）で描く（下メニューの部品だけが自前の .ds を持つ）
     await page.goto(`${BASE}/`);
     await expect(page.getByTestId("site-ops-note")).toBeVisible();
     await expect(page.locator(".ds:not([data-testid='ops-bottom-nav'])")).toHaveCount(0);
-    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(245, 242, 234)");
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(255, 255, 255)");
     // while signed in, the catalog still has no ops chrome and does not look the user up
     await page.goto(`${BASE}/ops/design`);
     await expect(page.getByTestId("design-catalog")).toBeVisible();

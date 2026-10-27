@@ -1,31 +1,30 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans_JP } from "next/font/google";
+import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Display: Fraunces — 光学サイズ・SOFT・WONK 軸を持つ可変セリフ。
-// 「測量野帳」的な節度ある華やかさを担保するための主役。
-// next/font では weight を省略 (= variable) にしないと axes が使えない。
-const fraunces = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["SOFT", "WONK", "opsz"],
+// 書体は 2 つだけ（デザインシステム v2）。どちらも next/font でビルド時に取得して自前配信する（外部への通信なし）。
+// - 和文：Noto Sans JP。太さは 400・500・700。日本語の分割ファイルは先読みしない（preload: false）。使う文字を含む分割だけが
+//   unicode-range で読まれる。先読みすると全分割の転送量が増え、LCP が遅れるため。fallback は端末の和文ゴシック。
+//   display は swap：読み込めたら入れ替える（optional だと初回は Noto Sans JP にならず、デザインの字体を出せない）。
+//   swap で字体が入れ替わるとき、文字の矩形が変わるとレイアウトのずれ（0.0002〜0.0005）になる。原因は、フォールバックの縦の寸法
+//   （ascent・descent）と Noto Sans JP の hhea（1.16・0.288）のずれ。そこで fallback の先頭に、寸法を揃えた代用の字体
+//   （soraban-ui.css の @font-face。size-adjust・ascent-override・descent-override）を置き、入れ替えで矩形が動かないようにした。
+//   これで sprint11b.spec の「見出し内の CLS は 0」と全体の CLS 0 を、しきい値を変えずに満たす。
+// - 数字・英字：Plus Jakarta Sans（座標・証跡 ID・件数。tabular-nums を併用）。latin だけを先読みする。太さは 500・700。
+const notoSansJp = Noto_Sans_JP({
+  variable: "--font-noto-jp",
+  weight: ["400", "500", "700"],
   display: "swap",
+  preload: false,
+  // 読み込み前の字体は、端末の和文ゴシックを Noto Sans JP の縦の寸法（ascent・descent）に合わせた代用の字体（soraban-ui.css の @font-face）。
+  // 字体が入れ替わっても、文字の縦の位置・行の高さが動かない（見出し内の CLS を 0 に保つ）。
+  fallback: ["Soraban Latin Fallback", "Soraban JP Fallback", "sans-serif"],
 });
 
-// Body: IBM Plex Sans JP — 官公庁・テクニカル文脈と相性が良く日本語混植可。
-const plexSansJp = IBM_Plex_Sans_JP({
-  variable: "--font-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
-
-// Mono: IBM Plex Mono — 座標・evidenceId・engine 名版数のための数値書体。
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["500", "700"],
   display: "swap",
 });
 
@@ -57,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${fraunces.variable} ${plexSansJp.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${notoSansJp.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

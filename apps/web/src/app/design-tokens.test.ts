@@ -322,17 +322,28 @@ const SB_MODES: readonly (readonly [string, Record<string, string>[]])[] = [
 const sbResolve = (layers: Record<string, string>[]): Record<string, string> => Object.assign({}, ...layers);
 
 describe("12h P1-5 トークンの取り込み", () => {
-  it("globals.css が soraban-tokens.css を読み込む。--sb-* 以外の宣言を globals.css に足さない", () => {
+  it("globals.css が soraban-tokens.css（値）・soraban-theme.css（Tailwind の名前）・soraban-ui.css（部品）を読み込む。--sb-* の宣言（値）を globals.css に足さない（参照はよい）", () => {
     const raw = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
     expect(raw).toMatch(/@import "\.\/soraban-tokens\.css";/);
-    expect(CSS).not.toMatch(/--sb-/);
+    expect(raw).toMatch(/@import "\.\/soraban-theme\.css";/);
+    expect(raw).toMatch(/@import "\.\/soraban-ui\.css";/);
+    expect(CSS).not.toMatch(/--sb-[\w-]+\s*:/);
+    // 値は soraban-tokens.css だけ。theme は var() で結ぶだけで、16 進の色を持たない
+    const theme = readFileSync(new URL("./soraban-theme.css", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(theme).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 });
 
-describe("12h P1-6 新トークンのコントラストと暗の一致", () => {
-  it("check-contrast.mjs が 196 組すべてを満たす（終了コード 0）", () => {
-    const out = execFileSync(process.execPath, [new URL("../../../../docs/design/tokens/check-contrast.mjs", import.meta.url).pathname], { encoding: "utf8" });
-    expect(out).toContain("組 49 × 4 通り = 196 件を検査。満たさない: 0");
+// Sprint 12h PR ②（デザインシステム v2）：トークンの値は soraban-tokens.css（アプリの実ファイル）が正。
+// 検査 check-contrast-v2.mjs はこの実ファイルを読む。設計の見本 docs/design/tokens-v2/soraban-tokens-v2.css と宣言が同じであることも確かめる。
+const DOCS_TOKENS = parseRules(
+  readFileSync(new URL("../../../../docs/design/tokens-v2/soraban-tokens-v2.css", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, ""),
+);
+
+describe("12h P1-6 新トークンのコントラストと暗の一致（v2）", () => {
+  it("check-contrast-v2.mjs（アプリの実ファイルを読む）が 4 通り・274 件すべてを満たす（終了コード 0）", () => {
+    const out = execFileSync(process.execPath, [new URL("../../../../docs/design/tokens-v2/check-contrast-v2.mjs", import.meta.url).pathname], { encoding: "utf8" });
+    expect(out).toContain("組 71（通常 68／現場 68／暗 69／現場・暗 69）= 計 274 件と、寸法・動き・暗の構造を検査。満たさない: 0");
   });
 
   it("暗（OS 設定）と暗（強制）の宣言が一致する。現場の暗も同じ", () => {
@@ -341,29 +352,70 @@ describe("12h P1-6 新トークンのコントラストと暗の一致", () => {
   });
 });
 
-describe("12h P1-7 soraban-tokens.css と design-system.md 3.4 の表", () => {
-  const md = readFileSync(new URL("../../../../docs/design/design-system.md", import.meta.url), "utf8");
-  const section = md.slice(md.indexOf("### 3.4"), md.indexOf("### 3.5"));
-  const rows = [...section.matchAll(/^\| `(--sb-[\w-]+)` \|[^|]*\|\s*`(#\w+)` \|\s*`(#\w+)` \|\s*`(#\w+)` \|\s*`(#\w+)` \|$/gm)];
+describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2）", () => {
+  const docs = (selector: string, inDark: boolean): Record<string, string> => {
+    const r = DOCS_TOKENS.find((x) => x.selector === selector && x.inDarkMedia === inDark);
+    if (!r) throw new Error(`rule not found in docs: ${selector}`);
+    return r.vars;
+  };
+  const SELECTORS: ReadonlyArray<readonly [string, boolean]> = [
+    [":root", false],
+    [':root[data-mode="field"]', false],
+    [SB_DARK, true],
+    [`${SB_DARK}[data-mode="field"]`, true],
+    [':root[data-theme="dark"]', false],
+    [':root[data-theme="dark"][data-mode="field"]', false],
+  ];
 
-  it("表の色の行は、CSS の 4 通り（明・暗・現場・明・現場・暗）の値と一致する", () => {
-    expect(rows.length).toBeGreaterThanOrEqual(35);
+  it("6 つの規則（明・現場・暗 OS・現場の暗 OS・暗 強制・現場の暗 強制）の宣言が、見本と 1 つ残らず一致する", () => {
     const bad: string[] = [];
-    for (const m of rows) {
-      SB_MODES.forEach(([mode, layers], i) => {
-        const css = sbResolve(layers)[m[1]!];
-        if (css?.toUpperCase() !== m[i + 2]!.toUpperCase()) bad.push(`${m[1]} ${mode}: CSS ${css} / 表 ${m[i + 2]}`);
-      });
+    for (const [sel, dark] of SELECTORS) {
+      const app = sbVars(sel, dark);
+      const doc = docs(sel, dark);
+      for (const k of new Set([...Object.keys(app), ...Object.keys(doc)])) {
+        if (app[k] !== doc[k]) bad.push(`${dark ? "@dark " : ""}${sel} ${k}: アプリ ${app[k]} / 見本 ${doc[k]}`);
+      }
     }
     expect(bad).toEqual([]);
   });
 
-  it("CSS の色（#rrggbb）のトークンは、すべて表にある（表にない色を足さない）", () => {
-    const inTable = rows.map((m) => m[1]!).sort();
-    const inCss = Object.entries(sbResolve(SB_MODES[3]![1]))
-      .filter(([, v]) => /^#[0-9a-f]{6}$/i.test(v))
-      .map(([k]) => k)
-      .sort();
-    expect(inCss).toEqual(inTable);
+  it("値の要点：橙が主役、角丸 16/8/4/ピル、影は 1 種類、押す部品 44/48/56（現場 56/56/64）、暗は温かい黒、v1 の角丸の名前は残っていない", () => {
+    for (const [mode, layers] of SB_MODES) {
+      const t = sbResolve(layers);
+      expect(t["--sb-orange"], mode).toBe("#F89B48");
+      expect(t["--sb-on-orange"], mode).toBe("#262523");
+      expect(t["--sb-r-l"], mode).toBe("16px");
+      expect(t["--sb-r-m"], mode).toBe("8px");
+      expect(t["--sb-r-s"], mode).toBe("4px");
+      expect(t["--sb-pill"], mode).toBe("9999px");
+      for (const gone of ["--sb-r-block", "--sb-r-ctl", "--sb-r-round", "--sb-soft-out", "--sb-soft-in", "--sb-copper"]) expect(t[gone], `${mode} ${gone}`).toBeUndefined();
+    }
+    const light = sbResolve(SB_MODES[0]![1]);
+    const dark = sbResolve(SB_MODES[1]![1]);
+    const field = sbResolve(SB_MODES[2]![1]);
+    const fieldDark = sbResolve(SB_MODES[3]![1]);
+    expect([light["--sb-base"], light["--sb-surface"], light["--sb-sunken"]]).toEqual(["#FFFFFF", "#F7F7F3", "#EDEDE5"]);
+    expect([dark["--sb-base"], dark["--sb-surface"], dark["--sb-sunken"]]).toEqual(["#1B1A18", "#252421", "#121110"]);
+    expect(fieldDark["--sb-ink"]).toBe("#F8F6F1");
+    expect(light["--sb-shadow"]).toBe("0 0 24px rgba(0, 0, 0, 0.1)");
+    expect(dark["--sb-shadow"]).toBe("0 0 0 1px #3A3834");
+    expect(field["--sb-shadow"]).toBe("none");
+    expect([light["--sb-hit-min"], light["--sb-hit"], light["--sb-hit-primary"]]).toEqual(["44px", "48px", "56px"]);
+    expect([field["--sb-hit-min"], field["--sb-hit"], field["--sb-hit-primary"], field["--sb-hit-row"]]).toEqual(["56px", "56px", "64px", "64px"]);
+    // 暗の地は純黒でなく温かい（赤 ≥ 青）
+    for (const k of ["--sb-base", "--sb-surface", "--sb-sunken"]) {
+      const h = dark[k]!;
+      expect(parseInt(h.slice(1, 3), 16)).toBeGreaterThanOrEqual(parseInt(h.slice(5, 7), 16));
+    }
+  });
+
+  it("CSS の色（#rrggbb）のトークンは、見本にもある（見本にない色を足さない）。動きは現場と減らす指定で 0", () => {
+    const inCss = Object.keys(sbResolve(SB_MODES[3]![1])).sort();
+    const inDocs = Object.keys(Object.assign({}, ...SELECTORS.map(([sel, dark]) => docs(sel, dark)))).sort();
+    expect(inCss).toEqual(inDocs);
+    expect(sbResolve(SB_MODES[2]![1])["--sb-dur"]).toBe("0ms");
+    expect(sbResolve(SB_MODES[2]![1])["--sb-dur-rise"]).toBe("0ms");
+    const raw = readFileSync(TOKENS_URL, "utf8");
+    expect(raw).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-rise: 0ms; \}/);
   });
 });

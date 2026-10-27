@@ -23,16 +23,16 @@ export async function OpsHomeEntry() {
     <>
       <OpsEntryFlag />
       {band ? (
-        <section aria-label="ホーム" className="flex flex-col gap-2 border-l-2 border-brand-700 pl-3 text-sm" data-testid="home-today-band">
-          <h2 className="eyebrow !text-[10px]">ホーム</h2>
+        <section aria-label="ホーム" className="sb-block-soft flex flex-col gap-2 !p-3 text-sm" data-testid="home-today-band">
+          <h2 className="sb-eyebrow">ホーム</h2>
           {band.card ? (
-            <a href={band.card.primary.href} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule-soft pb-2 text-ink hover:bg-paper-soft" data-testid="home-today-flight">
-              <span className="font-mono tnum">{band.card.timeLabel}</span>
+            <a href={band.card.primary.href} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-sb-rule pb-2 text-sb-ink hover:bg-sb-hover" data-testid="home-today-flight">
+              <span className="sb-num tnum">{band.card.timeLabel}</span>
               <span className="min-w-0 flex-1 break-words">{band.card.title}</span>
               <TodayBadge badge={band.card.badge} />
             </a>
           ) : (
-            <p className="text-ink-soft" data-testid="home-today-empty">
+            <p className="text-sb-ink-2" data-testid="home-today-empty">
               {band.empty?.message}
             </p>
           )}
@@ -44,10 +44,13 @@ export async function OpsHomeEntry() {
           href="/ops"
           prefetch={false}
           data-testid="home-ops-link"
-          className="inline-flex min-h-11 items-center gap-2 rounded-sharp border border-brand-700 bg-paper px-4 font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          className="sb-pill sb-pill-secondary sb-pill-sm"
         >
-          ホームへ
-          <span aria-hidden>→</span>
+          <span className="sb-pill-label">ホームへ</span>
+          <span className="sb-pill-arrow" aria-hidden="true">
+            <span className="sb-ar sb-a1">→</span>
+            <span className="sb-ar sb-a2">→</span>
+          </span>
         </Link>
       </p>
       <OpsBottomNavLazy />

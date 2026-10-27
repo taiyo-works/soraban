@@ -71,7 +71,11 @@ const geoCalls = (page: Page) =>
   page.evaluate(() => (window as unknown as { __geoCalls: { get: number; watch: number } }).__geoCalls);
 
 test.describe("C・E. 現在地（本番相当サーバー）", () => {
-  test("ボタンを押すと地図が移り精度の円と精度を表示、この時点では判定・検索の通信がない。『この地点で判定』で与えた座標（小数 6 桁）で判定し、要求本文に精度・時刻・指定方法がない", async ({
+  // Sprint 12h PR ②：現在地は「押したらすぐ判定」（精度 100m 以内は確認なし、超えるときだけ確認を 1 回）。
+  // 以前は「ボタンを押した時点では判定・検索の通信がなく、『この地点で判定』で初めて判定」だった。
+  // 変えたのは「押した後に判定の通信が 1 回ある」ことだけで、要求本文に精度・時刻・指定方法がないこと・開いただけで位置を要求しないこと・
+  // 押すまで通信がないこと・追跡しないことは、元と同じ（より厳しく、保存・Cookie にも精度がないことを足した）。
+  test("開いただけでは位置を要求せず、押すまで通信がない。押すと判定の通信が 1 回ずつ（check・diagnose）で、与えた座標（小数 6 桁）だけを送り、要求本文に精度・時刻・指定方法がない。結果に「現在地（精度 約 30 m）」を添える", async ({
     browser,
     baseURL,
   }) => {
@@ -81,39 +85,25 @@ test.describe("C・E. 現在地（本番相当サーバー）", () => {
 
     // ページを開いただけでは位置情報を要求しない
     expect(await geoCalls(page)).toEqual({ get: 0, watch: 0 });
-    // 説明文がボタンの近くにある（契約 14）
-    await expect(page.getByTestId("current-location")).toContainText(
-      "現在地はこの端末の中で地図の表示に使います。『この地点で判定』を押したときだけ、判定のために座標を送ります",
-    );
+    // 説明文がボタンの近くにある
+    await expect(page.getByTestId("current-location")).toContainText("「現在地で判定」を押したときに 1 回だけ取得し");
+    await expect(page.getByTestId("current-location")).toContainText("緯度・経度（小数 6 桁）だけを送ります");
+    await expect(page.getByTestId("current-location-button")).toContainText("現在地で判定");
 
+    // 押すまで通信がない（開いたあとの待ちの間も）
     const apiCalls: string[] = [];
     const onReq = (r: Request) => {
-      if (isApi(r.url(), ["check", "diagnose", "geocode"])) apiCalls.push(r.url());
+      if (isApi(r.url(), ["check", "diagnose", "geocode"])) apiCalls.push(new URL(r.url()).pathname);
     };
     page.on("request", onReq);
-
-    await page.getByTestId("current-location-button").click();
-    await expect(page.getByTestId("current-location-candidate")).toContainText("現在地（精度 約 30 m）");
-    const map = page.getByTestId("regulation-map");
-    await expect(map).toHaveAttribute("data-accuracy-radius-m", "30");
-    await expect
-      .poll(async () => Number(await map.getAttribute("data-center-lat")))
-      .toBeCloseTo(GEO.latitude, 4);
-    await expect
-      .poll(async () => Number(await map.getAttribute("data-center-lng")))
-      .toBeCloseTo(GEO.longitude, 4);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(800);
     expect(apiCalls).toEqual([]);
-    expect(await geoCalls(page)).toEqual({ get: 1, watch: 0 });
-    // 精度 30m では低精度の注意を出さない
-    await expect(page.getByText("位置の精度が低い")).toHaveCount(0);
 
-    page.off("request", onReq);
     const checkReq = page.waitForRequest((r) => isApi(r.url(), ["check"]));
     const diagReq = page.waitForRequest((r) => isApi(r.url(), ["diagnose"]));
     const check = waitCheck(page);
     const diag = waitDiagnose(page);
-    await page.getByRole("button", { name: "この地点で判定" }).click();
+    await page.getByTestId("current-location-button").click();
     const [cReq, dReq] = await Promise.all([checkReq, diagReq, check, diag]);
     for (const req of [cReq, dReq]) {
       const body = req.postDataJSON() as Record<string, unknown>;
@@ -124,32 +114,90 @@ test.describe("C・E. 現在地（本番相当サーバー）", () => {
         expect(raw, key).not.toContain(`"${key}"`);
       }
     }
+    // 判定の通信は check と diagnose が 1 回ずつ（住所検索は呼ばない）
+    await page.waitForTimeout(800);
+    expect(apiCalls.filter((p) => p === "/api/check")).toHaveLength(1);
+    expect(apiCalls.filter((p) => p === "/api/diagnose")).toHaveLength(1);
+    expect(apiCalls.filter((p) => p === "/api/geocode")).toHaveLength(0);
+    page.off("request", onReq);
+    expect(await geoCalls(page)).toEqual({ get: 1, watch: 0 });
+
+    // 確認のパネルは出ず、精度は結果に添える（画面の表示だけ）。地図は精度の円を残す
+    await expect(page.getByTestId("current-location-candidate")).toHaveCount(0);
+    await expect(page.getByTestId("location-note")).toContainText("現在地（精度 約 30 m）");
+    const map = page.getByTestId("regulation-map");
+    await expect(map).toHaveAttribute("data-accuracy-radius-m", "30");
+    await expect
+      .poll(async () => Number(await map.getAttribute("data-center-lat")))
+      .toBeCloseTo(GEO.latitude, 4);
+    await expect
+      .poll(async () => Number(await map.getAttribute("data-center-lng")))
+      .toBeCloseTo(GEO.longitude, 4);
+    await expect(page.getByText("位置の精度が低い")).toHaveCount(0);
     await expect(latInput(page)).toHaveValue("35.440012");
     await expect(lngInput(page)).toHaveValue("133.350046");
+
+    // 精度は保存しない（履歴は判定した地点の記録。精度・取得時刻・方法は含まない）
+    const storage = await page.evaluate(() => {
+      const out: Record<string, string> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i)!;
+        out[k] = localStorage.getItem(k) ?? "";
+      }
+      return JSON.stringify(out) + document.cookie;
+    });
+    expect(storage).not.toContain("accuracy");
     await ctx.close();
   });
 
-  test("精度 150m では精度が低い旨を表示する", async ({ browser, baseURL }) => {
+  test("精度 150m では、精度が低い旨と「この位置で判定しますか」の確認を 1 回出し、確認の前は判定の通信がない。『この地点で判定』で 1 回ずつ判定する", async ({
+    browser,
+    baseURL,
+  }) => {
     const ctx = await geoContext(browser, baseURL, { grant: true, accuracy: 150 });
     const page = await ctx.newPage();
     await openReady(page);
+    const apiCalls: string[] = [];
+    page.on("request", (r) => {
+      if (isApi(r.url(), ["check", "diagnose", "geocode"])) apiCalls.push(new URL(r.url()).pathname);
+    });
     await page.getByTestId("current-location-button").click();
-    await expect(page.getByTestId("current-location-candidate")).toContainText("現在地（精度 約 150 m）");
-    await expect(page.getByTestId("current-location-candidate")).toContainText(
-      "位置の精度が低い。地図で位置を確かめ、長押し（右クリック）で直してください",
-    );
+    const panel = page.getByTestId("current-location-candidate");
+    await expect(panel).toContainText("現在地（精度 約 150 m）");
+    await expect(panel).toContainText("この位置で判定しますか");
+    await expect(panel).toContainText("位置の精度が低い。地図で位置を確かめ、長押し（右クリック）で直してください");
+    await expect(page.getByTestId("regulation-map")).toHaveAttribute("data-accuracy-radius-m", "150");
+    // 確認の前は、判定の通信がない
+    await page.waitForTimeout(800);
+    expect(apiCalls).toEqual([]);
+
+    const check = waitCheck(page);
+    const diag = waitDiagnose(page);
+    await page.getByRole("button", { name: "この地点で判定" }).click();
+    await Promise.all([check, diag]);
+    await expect(panel).toHaveCount(0);
+    await page.waitForTimeout(800);
+    expect(apiCalls.filter((p) => p === "/api/check")).toHaveLength(1);
+    expect(apiCalls.filter((p) => p === "/api/diagnose")).toHaveLength(1);
+    await expect(page.getByTestId("location-note")).toContainText("現在地（精度 約 150 m）");
     await ctx.close();
   });
 
-  test("取消の後、localStorage・Cookie に現在地の座標と精度がない", async ({ browser, baseURL }) => {
-    const ctx = await geoContext(browser, baseURL, { grant: true, accuracy: 37 });
+  test("確認で取消した後は判定せず、localStorage・Cookie に現在地の座標と精度がない", async ({ browser, baseURL }) => {
+    const ctx = await geoContext(browser, baseURL, { grant: true, accuracy: 137 });
     const page = await ctx.newPage();
     await openReady(page);
+    const apiCalls: string[] = [];
+    page.on("request", (r) => {
+      if (isApi(r.url(), ["check", "diagnose"])) apiCalls.push(r.url());
+    });
     await page.getByTestId("current-location-button").click();
     await expect(page.getByTestId("current-location-candidate")).toBeVisible();
     await page.getByRole("button", { name: "取消" }).click();
     await expect(page.getByTestId("current-location-candidate")).toHaveCount(0);
     await expect(page.getByTestId("regulation-map")).not.toHaveAttribute("data-accuracy-radius-m", /.*/);
+    await page.waitForTimeout(800);
+    expect(apiCalls).toEqual([]);
     const storage = await page.evaluate(() => {
       const out: Record<string, string> = {};
       for (let i = 0; i < localStorage.length; i++) {
@@ -165,6 +213,27 @@ test.describe("C・E. 現在地（本番相当サーバー）", () => {
       expect(s).not.toContain("133.35005");
       expect(s).not.toContain("accuracy");
     }
+    await ctx.close();
+  });
+
+  test("`/?start=here`・`/?start=search`：位置の要求は 0 のまま、フォーカスだけが「現在地で判定」・住所の入力欄に移る（押すのは利用者）", async ({
+    browser,
+    baseURL,
+  }) => {
+    const ctx = await geoContext(browser, baseURL, { grant: true });
+    const page = await ctx.newPage();
+    await openReady(page, "/?start=here");
+    await expect(page.getByTestId("current-location-button")).toBeFocused();
+    expect(await geoCalls(page)).toEqual({ get: 0, watch: 0 });
+    const page2 = await ctx.newPage();
+    await openReady(page2, "/?start=search");
+    await expect(page2.locator("#address-input")).toBeFocused();
+    expect(await geoCalls(page2)).toEqual({ get: 0, watch: 0 });
+    // パラメータがなければ、どこにもフォーカスを移さない
+    const page3 = await ctx.newPage();
+    await openReady(page3, "/");
+    await expect(page3.getByTestId("current-location-button")).not.toBeFocused();
+    await expect(page3.locator("#address-input")).not.toBeFocused();
     await ctx.close();
   });
 

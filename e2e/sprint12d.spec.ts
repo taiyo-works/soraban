@@ -41,8 +41,8 @@ test.describe("Sprint 12d：運航管理が無効のとき", () => {
     await page.goto("/");
     await Promise.all([check, diag]);
     await expect(page.getByTestId("verdict-level")).toBeVisible();
-    // 05 — 機体・運航条件（折りたたみ）を開くと、DIPS の許可・承認を種類ごとに「持っている」と入力できる（範囲は照合しない。12c までと同じ）
-    const details = page.locator("details", { hasText: "05 — 機体・運航条件" });
+    // 機体・運航条件（折りたたみ）を開くと、DIPS の許可・承認を種類ごとに「持っている」と入力できる（範囲は照合しない。12c までと同じ）
+    const details = page.locator("details", { hasText: "機体・運航条件" });
     if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
     await expect(details.getByRole("checkbox", { name: "国交省 DIPS：DID 上空の飛行許可" })).toBeVisible();
     await expect(details.getByRole("checkbox", { name: "国交省 DIPS：夜間飛行の承認" })).toBeVisible();

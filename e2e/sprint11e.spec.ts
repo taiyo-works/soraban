@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11e 契約（docs/sprints/sprint-11e.md）の E2E。100g 未満の機体（模型航空機）の手続きと参照先。
 // 補助関数は e2e/sprint11d.spec.ts と同じ。
@@ -52,12 +53,12 @@ const gotoLatLng = async (page: Page, lat: number, lng: number): Promise<void> =
   await page.getByPlaceholder("133.3314", { exact: true }).fill(String(lng));
   const check = waitCheck(page);
   const diag = waitDiagnose(page);
-  await page.getByRole("button", { name: /規制をチェック/ }).click();
+  await page.getByRole("button", { name: /この地点を判定する/ }).click();
   await Promise.all([check, diag]);
   await settled(page);
 };
 
-const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
+const conditions = (page: Page): Locator => page.locator("details", { hasText: "機体・運航条件" });
 const openConditions = async (page: Page): Promise<void> => {
   const details = conditions(page);
   if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
@@ -77,7 +78,7 @@ const toggle = async (box: Locator, page: Page, on: boolean, withCheck = true): 
 
 /** 飛行方法のチェック（06 の中。申請支援の診断だけをやり直す）。 */
 const methodBox = (page: Page, label: string) =>
-  page.locator("fieldset", { hasText: "06 — 飛行方法" }).getByRole("checkbox", { name: label, exact: true });
+  page.locator("fieldset", { hasText: "飛行方法（申請支援）" }).getByRole("checkbox", { name: label, exact: true });
 
 const setPlannedDate = async (page: Page, iso: string): Promise<void> => {
   const diag = waitDiagnose(page);
@@ -170,6 +171,7 @@ test.describe("Sprint 11e：100g 未満の機体（模型航空機）", () => {
 
     // 申請支援の束ね PDF
     const dl = page.waitForEvent("download");
+    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
     await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
     const app = await pdfText(await dl);
     expect(squash(app)).toContain(squash("対象外（模型航空機。航空法の無人航空機の区分に当たらない）"));

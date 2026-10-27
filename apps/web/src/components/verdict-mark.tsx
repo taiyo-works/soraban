@@ -90,7 +90,7 @@ export function TierGauge({ tier }: { tier: LegalTier }) {
       {[1, 2, 3].map((i) => (
         <span
           key={i}
-          className={`w-[3px] ${i <= w ? "bg-ink" : "bg-rule"}`}
+          className={`w-[3px] ${i <= w ? "bg-sb-ink" : "bg-sb-rule"}`}
           style={{ height: `${4 + i * 3}px` }}
         />
       ))}

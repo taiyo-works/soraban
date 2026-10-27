@@ -50,12 +50,12 @@ const gotoLatLng = async (page: Page, lat: number, lng: number): Promise<void> =
   await page.getByPlaceholder("133.3314", { exact: true }).fill(String(lng));
   const check = waitCheck(page);
   const diag = waitDiagnose(page);
-  await page.getByRole("button", { name: /規制をチェック/ }).click();
+  await page.getByRole("button", { name: /この地点を判定する/ }).click();
   await Promise.all([check, diag]);
   await settled(page);
 };
 
-const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
+const conditions = (page: Page): Locator => page.locator("details", { hasText: "機体・運航条件" });
 const openConditions = async (page: Page): Promise<void> => {
   const details = conditions(page);
   if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
@@ -75,7 +75,7 @@ const toggle = async (box: Locator, page: Page, on: boolean, withCheck = true): 
 
 /** 飛行方法のチェック（06 の中。申請支援の診断だけをやり直す）。 */
 const methodBox = (page: Page, label: string) =>
-  page.locator("fieldset", { hasText: "06 — 飛行方法" }).getByRole("checkbox", { name: label, exact: true });
+  page.locator("fieldset", { hasText: "飛行方法（申請支援）" }).getByRole("checkbox", { name: label, exact: true });
 
 const setPlannedDate = async (page: Page, iso: string): Promise<void> => {
   const diag = waitDiagnose(page);
@@ -517,7 +517,7 @@ test.describe("C. 表示・PDF・履歴", () => {
     await page.getByPlaceholder("133.3314", { exact: true }).fill(String(QUIET.lng));
     const check = waitCheck(page);
     const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
-    await page.getByRole("button", { name: /規制をチェック/ }).click();
+    await page.getByRole("button", { name: /この地点を判定する/ }).click();
     await Promise.all([check, failed]);
     await expectNoClearVerdict(page);
 
@@ -542,7 +542,7 @@ test.describe("C. 表示・PDF・履歴", () => {
     await page.getByPlaceholder("133.3314", { exact: true }).fill(String(QUIET.lng));
     const failed = page.waitForResponse((r) => r.url().endsWith("/api/check"));
     const diag = waitDiagnose(page);
-    await page.getByRole("button", { name: /規制をチェック/ }).click();
+    await page.getByRole("button", { name: /この地点を判定する/ }).click();
     await Promise.all([failed, diag]);
     await expect(page.getByTestId("verdict-failed")).toBeVisible();
     await expect(summary(page)).toHaveAttribute("data-level", "failed");

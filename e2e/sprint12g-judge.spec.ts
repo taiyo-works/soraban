@@ -260,11 +260,10 @@ test.describe("台本ごとの操作数：現状の判定画面（/）", () => {
 
         // ② 現在地で判定する（位置情報はモック）
         await open();
+        // Sprint 12h PR ②：現在地は押したらすぐ判定（精度 30m は確認なし）。押す回数は 2 回（押す→この地点で判定）から 1 回になった
         m = new Meter(page);
-        await m.click(page.getByTestId("current-location-button"));
-        await expect(page.getByTestId("current-location-candidate")).toBeVisible();
         const done2 = waitDiagnose(page);
-        await m.click(page.getByTestId("current-location-candidate").getByRole("button", { name: "この地点で判定" }));
+        await m.click(page.getByTestId("current-location-button"));
         await done2;
         await page.waitForTimeout(300);
         results.push(await m.finish("current", vp, "2-geo", map, answer, 120));

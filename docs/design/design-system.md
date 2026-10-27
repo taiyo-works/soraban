@@ -1,5 +1,7 @@
 # そらばん デザインシステム
 
+> **2026-10-26 更新（Sprint 12h PR ②）：現行の正は `design-system-v2-draft.md`（v2）です。** 値の実体は `apps/web/src/app/soraban-tokens.css`（v2 の値。明・暗・現場・現場の暗）、検査は `docs/design/tokens-v2/check-contrast-v2.mjs`（アプリの実ファイルを読む）。この文書（v1）は、`.ds`（運航管理の画面。③ で置き換える）が使う旧い値と、名前の経緯を残すための履歴です。v1 の `--sb-r-block/ctl/round`・`--sb-copper`・`--sb-soft-*` などは、`soraban-tokens.css` から外れました。
+
 2026-10-25 版（v1）。この文書が唯一の正。値の実体は `apps/web/src/app/soraban-tokens.css`、検査は `docs/design/tokens/check-contrast.mjs`、全体の見本は `docs/design/system-sheet.png`。トークンは `--sb-*` として globals.css に取り込み済みで、部品はまだ参照しない（移行は §12）。見本の元は `docs/design/tokens/sheet/`（`node build.mjs` で HTML、`node shoot.mjs 出力.png` で画像。Chromium は `/opt/pw-browsers`）。
 
 ## 1. 原則

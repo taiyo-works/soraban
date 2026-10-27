@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
+import { openDiagnosis, openDetails } from "./field-checks";
 
 // Sprint 7 契約（docs/sprints/sprint-7.md）の E2E。
 //   - 本番相当サーバー（baseURL、DID_DATA_DIR・INDUSTRIAL_DATA_DIR なし）：飛行禁止法・出典表示・PDF
@@ -101,6 +102,7 @@ test.describe("A. 小型無人機等飛行禁止法（本番相当サーバー�
     await page.goto("/");
     await gotoCoords(page, MIHO_700M);
     const proc = page.locator("article", { hasText: title });
+    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
     await expect(proc).toBeVisible();
     await expect(proc.getByRole("link", { name: /出典/ })).toHaveAttribute(
       "href",
@@ -136,6 +138,7 @@ test.describe("C. 工業専用地域の除外（本番相当サーバー・実�
     await expect(did).toHaveAttribute("data-status", "green");
     await expect(did.getByTestId("did-detail")).toHaveText("DID：非該当（工業専用地域）");
     await expect(did).toContainText("境港市 の工業専用地域内");
+    await openDetails(did.getByTestId("regulation-detail")); // 反映済みの改正は「根拠の詳細」に畳んである
     await expect(did.getByRole("link", { name: /国土交通省告示第435号/ })).toHaveAttribute(
       "href",
       "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
@@ -170,6 +173,7 @@ test.describe("C. 工業専用地域の除外（フィクスチャ用サーバ�
     const did = card(page, "aviation-law-did");
     await expect(did).toHaveAttribute("data-status", "green");
     await expect(did.getByTestId("did-detail")).toHaveText("DID：非該当（工業専用地域）");
+    await openDetails(did.getByTestId("regulation-detail")); // 反映済みの改正は「根拠の詳細」に畳んである
     await expect(did.getByRole("link", { name: /国土交通省告示第435号/ })).toHaveAttribute(
       "href",
       "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
@@ -201,6 +205,7 @@ test.describe("D. データ出典と確認日（本番相当サーバー）", ()
     const t1 = await pdfText(await dl1);
 
     const dl2 = page.waitForEvent("download");
+    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
     await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
     const t2 = await pdfText(await dl2);
 

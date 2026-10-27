@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
+import { openDiagnosis } from "./field-checks";
 
 // Sprint 11c 契約（docs/sprints/sprint-11c.md）の E2E。許可の入力の不具合修正
 // （飛行禁止法の「同意」と「通報」を分ける、「国交省 DIPS」の説明を動きに合わせる）。
@@ -34,7 +35,7 @@ const selectPreset = async (page: Page, name: string): Promise<void> => {
   await Promise.all([check, diag]);
 };
 
-/** 「05 — 機体・運航条件」を開く（取得済みの許可のチェックはこの中にある）。 */
+/** 「機体・運航条件」を開く（取得済みの許可のチェックはこの中にある）。 */
 const openConditions = async (page: Page): Promise<void> => {
   const details = conditions(page);
   if ((await details.getAttribute("open")) === null) {
@@ -44,7 +45,7 @@ const openConditions = async (page: Page): Promise<void> => {
 };
 
 // 申請支援の手続きのチェック（「施設管理者の同意 ＋ … を完了にする」）と取り違えないよう、05 の中に限る。
-const conditions = (page: Page): Locator => page.locator("details", { hasText: "05 — 機体・運航条件" });
+const conditions = (page: Page): Locator => page.locator("details", { hasText: "機体・運航条件" });
 const consent = (page: Page) => conditions(page).getByRole("checkbox", { name: "施設管理者の同意" });
 const notice = (page: Page) => conditions(page).getByRole("checkbox", { name: "公安委員会への通報" });
 const DIPS_DID = "国交省 DIPS：DID 上空の飛行許可";
@@ -152,6 +153,7 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
     await openReady(page);
     await selectPreset(page, MIHO);
     const proc = page.locator("article", { hasText: PROC_TITLE });
+    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
     await expect(proc).toBeVisible();
     await openConditions(page);
     await toggle(consent(page), page, true);
