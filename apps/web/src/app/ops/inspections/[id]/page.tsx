@@ -60,7 +60,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
       <div className="flex flex-col gap-5">
         <PageHeader
           eyebrow="日常点検の詳細"
-          back={{ href: "/ops/inspections", label: "日常点検の一覧" }}
+          back={{ href: "/ops/inspections", label: "点検の一覧" }}
           title={
             <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="break-all">

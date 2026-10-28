@@ -323,10 +323,15 @@ const INSPECTION_SELECT = `select i.*, a.registration_mark, to_char(i.inspected_
 export const getInspection = async (db: OpsDb, orgId: string, id: string): Promise<InspectionWithAircraft | null> =>
   (await db.query<InspectionWithAircraft>(`${INSPECTION_SELECT} where i.org_id = $1 and i.id = $2`, [orgId, id])).rows[0] ?? null;
 
-/** 日常点検記録の一覧（新しい順、最大 500 件）。 */
-export const listInspections = async (db: OpsDb, orgId: string, f: RecordFilter): Promise<InspectionWithAircraft[]> => {
+/**
+ * 日常点検記録の一覧（新しい順、最大 500 件）。
+ * timing（飛行前／飛行後）は省略できる。省略すると全区分（従来どおり）。渡したときは、件数の上限（500 件）の**前**に絞り込む
+ * （上限のあとに絞ると、500 件より古い位置にある区分の記録が「0 件」に見える）。
+ */
+export const listInspections = async (db: OpsDb, orgId: string, f: RecordFilter, timing?: "pre_flight" | "post_flight"): Promise<InspectionWithAircraft[]> => {
   const where = ["i.org_id = $1"];
   const params: unknown[] = [orgId];
+  if (timing) where.push(`i.timing = $${params.push(timing)}`);
   if (f.aircraftId) where.push(`i.aircraft_id = $${params.push(f.aircraftId)}`);
   if (f.pilotId) where.push(`i.pilot_id = $${params.push(f.pilotId)}`);
   if (f.from) where.push(`i.inspected_date >= $${params.push(f.from)}::date`);

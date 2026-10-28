@@ -94,8 +94,13 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     expect(rows.length).toBeGreaterThanOrEqual(2);
     const first = (await dl.first().boundingBox())!;
     expect(empty.y).toBeLessThan(first.y);
-    // 最初の画面（高さ 812px から下の 5 タブの 56px を除いた範囲）に、期限の最初の行が全部入る
-    expect(first.y + first.height).toBeLessThanOrEqual(812 - 56);
+    // 最初の画面（高さ 812px から下の 5 タブの 60px を除いた範囲）に、期限の最初の行が全部入る。
+    // Sprint 12h PR ③a：上部に判定のピル（見出し＋2 つのピル＋間隔）が入ったので、その高さの分だけ、枠を下げて測る。
+    // ピルより下の配置が、これまでと同じ余裕（タブは 56 → 60px で 4px 厳しくなった）に収まることを確かめる
+    const pillsBox = (await page.getByTestId("judge-pills").boundingBox())!;
+    const pillsBlock = (await empty.y) - pillsBox.y; // ピルの区画の上端から、空のカードの上端まで（ピルの高さと間隔）
+    expect(pillsBlock).toBeGreaterThan(48);
+    expect(first.y + first.height - pillsBlock).toBeLessThanOrEqual(812 - 60);
     // 期限の並び：近い順。技能証明は氏名、許可・承認は番号。技能証明書の番号は出ない。機体の期限は出ない旨の 1 行
     await expect(dl.nth(0)).toContainText(pilotName);
     await expect(dl.nth(0)).toContainText("あと 15 日");
@@ -251,10 +256,13 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
       await expect(back, p).toHaveAttribute("href", "/ops/more");
       expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(44);
     }
-    for (const p of ["/ops/flights", "/ops/inspections"]) {
-      await page.goto(p);
-      await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first(), p).toHaveAttribute("href", "/ops/journal");
-    }
+    // 点検は 1 段目の画面（Sprint 12h PR ③a）：戻りリンクを置かない（計画の一覧と同じ検査）。飛行記録の一覧の戻り先は日誌のまま
+    await page.goto("/ops/flights");
+    await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
+    await page.goto("/ops/inspections");
+    await expect(page.getByTestId("ops-inspections")).toBeVisible();
+    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
+    await expect(page.locator("main").getByRole("link", { name: /日誌|一覧へ戻る|戻る/ })).toHaveCount(0);
     await page.goto("/ops/plans");
     await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
     await ctx.close();

@@ -700,10 +700,10 @@ const inspectionInputFromData = (d: Readonly<Record<string, unknown>>): Record<s
   return out;
 };
 
-export const listInspections = async (ctx: OpsContext, filter: RecordFilter = {}): Promise<InspectionDto[]> => {
+export const listInspections = async (ctx: OpsContext, filter: RecordFilter = {}, timing?: "pre_flight" | "post_flight"): Promise<InspectionDto[]> => {
   assertCan(ctx, "inspection.read");
   const mine = await myPilot(ctx);
-  return (await store.listInspections(ctx.db, ctx.member.org_id, filter)).map((r) => inspectionDto(r, mine));
+  return (await store.listInspections(ctx.db, ctx.member.org_id, filter, timing)).map((r) => inspectionDto(r, mine));
 };
 
 const loadInspection = async (ctx: OpsContext, id: string): Promise<InspectionWithAircraft> => {

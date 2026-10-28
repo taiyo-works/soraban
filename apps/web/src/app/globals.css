@@ -270,7 +270,7 @@ html:has(body.has-bottom-nav) {
     padding-bottom: 0;
   }
   .ds-page:has(> [data-testid="ops-bottom-nav"]) {
-    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
   }
 }
 

@@ -1,28 +1,45 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { BACK_TABLE, BACK_TO, currentChildKey, currentNavKey, FIELD_BACK, NAV_CHILDREN, NAV_GROUPS, NAV_ITEMS, navHiddenOn, visibleNavChildren } from "./ops-nav-model";
+import { BACK_TABLE, BACK_TO, BOTTOM_TABS, currentChildKey, currentNavKey, FIELD_BACK, NAV_CHILDREN, NAV_GROUPS, NAV_ITEM, navHiddenOn, SIDE_ITEMS, visibleNavChildren } from "./ops-nav-model";
 
 const PLAN = "00000000-0000-4000-8000-000000000001";
 
 describe("メニューの定義（Sprint 12g-1b 段階 A）", () => {
-  it("5 項目：ホーム／判定／計画／日誌／登録。行き先（URL）は据え置き", () => {
-    expect(NAV_ITEMS.map((i) => [i.label, i.href])).toEqual([
+  it("下タブは 5 つ：ホーム／計画／点検／日誌／登録（この順。判定はない）。行き先（URL）は据え置き", () => {
+    expect(BOTTOM_TABS.map((i) => [i.label, i.href])).toEqual([
       ["ホーム", "/ops"],
-      ["判定", "/"],
       ["計画", "/ops/plans"],
+      ["点検", "/ops/inspections"],
       ["日誌", "/ops/journal"],
       ["登録", "/ops/more"],
     ]);
+    expect(BOTTOM_TABS.map((i) => i.key)).not.toContain("verdict");
   });
 
-  it("左メニューの順：ホーム／調べる＝判定／飛ばす＝計画・日誌／登録（見本と同じ）。子項目は機体・操縦者・許可・承認・地点", () => {
+  it("左メニューは 6 項目：ホーム／判定／計画／点検／日誌／登録（PC には判定が残る）", () => {
+    expect(SIDE_ITEMS.map((i) => [i.label, i.href])).toEqual([
+      ["ホーム", "/ops"],
+      ["判定", "/"],
+      ["計画", "/ops/plans"],
+      ["点検", "/ops/inspections"],
+      ["日誌", "/ops/journal"],
+      ["登録", "/ops/more"],
+    ]);
+    // 下タブの項目は、すべて左メニューにもある（定義は 1 つ）
+    for (const t of BOTTOM_TABS) expect(SIDE_ITEMS).toContain(t);
+    expect(Object.keys(NAV_ITEM).sort()).toEqual(SIDE_ITEMS.map((i) => i.key).sort());
+  });
+
+  it("左メニューの順：ホーム／調べる＝判定／飛ばす＝計画・点検・日誌／登録（見本と同じ）。子項目は機体・操縦者・許可・承認・地点", () => {
     expect(NAV_GROUPS.map((g) => [g.heading, g.keys])).toEqual([
       [null, ["today"]],
       ["調べる", ["verdict"]],
-      ["飛ばす", ["plans", "journal"]],
+      ["飛ばす", ["plans", "inspections", "journal"]],
       [null, ["more"]],
     ]);
+    // グループに出る項目は、左メニューの 6 項目と同じ（漏れも重複もない）
+    expect(NAV_GROUPS.flatMap((g) => g.keys)).toEqual(SIDE_ITEMS.map((i) => i.key));
     expect(NAV_CHILDREN.map((c) => [c.label, c.href])).toEqual([
       ["機体", "/ops/aircraft"],
       ["操縦者", "/ops/pilots"],
@@ -47,7 +64,7 @@ describe("メニューの定義（Sprint 12g-1b 段階 A）", () => {
     }
   });
 
-  it("現在地：日誌は飛行記録・日常点検・日誌・事故・ヒヤリハット、計画は /ops/plans*、登録は機体・操縦者・許可・承認・地点・利用者も含む", () => {
+  it("現在地：点検は /ops/inspections*、日誌は飛行記録・日誌・事故・ヒヤリハット、計画は /ops/plans*、登録は機体・操縦者・許可・承認・地点・利用者も含む", () => {
     const cases: [string, string | null][] = [
       ["/", "verdict"],
       ["/ops", "today"],
@@ -59,8 +76,9 @@ describe("メニューの定義（Sprint 12g-1b 段階 A）", () => {
       ["/ops/flights", "journal"],
       ["/ops/flights/new", "journal"],
       [`/ops/flights/${PLAN}`, "journal"],
-      ["/ops/inspections", "journal"],
-      ["/ops/inspections/new", "journal"],
+      ["/ops/inspections", "inspections"],
+      ["/ops/inspections/new", "inspections"],
+      [`/ops/inspections/${PLAN}`, "inspections"],
       ["/ops/more", "more"],
       ["/ops/aircraft", "more"],
       ["/ops/pilots/new", "more"],
@@ -71,6 +89,11 @@ describe("メニューの定義（Sprint 12g-1b 段階 A）", () => {
       ["/somewhere-else", null],
     ];
     for (const [p, key] of cases) expect(currentNavKey(p), p).toBe(key);
+  });
+
+  it("`/` では下タブのどれも現在地にならない（判定は左メニューだけ）", () => {
+    expect(currentNavKey("/")).toBe("verdict");
+    expect(BOTTOM_TABS.some((t) => t.key === currentNavKey("/"))).toBe(false);
   });
 
   it("子項目の現在地：機体・操縦者・許可・承認・地点だけ。登録の画面そのものや日誌では子項目なし", () => {
@@ -101,17 +124,23 @@ describe("戻りリンクの行き先の統一（A6）", () => {
     }
   });
 
-  it("1 段目の画面（ホーム・計画・日誌・登録）には戻りリンクを置かない", () => {
-    for (const s of ["/ops", "/ops/plans", "/ops/journal", "/ops/more"]) {
+  it("1 段目の画面（ホーム・計画・点検・日誌・登録）には戻りリンクを置かない", () => {
+    for (const s of ["/ops", "/ops/plans", "/ops/inspections", "/ops/journal", "/ops/more"]) {
       expect(BACK_TABLE.find((r) => r.screen === s)?.back, s).toBeNull();
     }
   });
 
-  it("一覧の戻り先：登録の下の一覧は登録へ、記録の一覧は日誌へ。現場モードの退路は「ホームへ戻る」", () => {
+  it("点検の新規・詳細の戻り先は点検の一覧（ラベルは「点検の一覧」。タブ名に合わせる）", () => {
+    for (const s of ["/ops/inspections/new", `/ops/inspections/${PLAN}`]) {
+      expect(BACK_TABLE.find((r) => r.screen === s)?.back, s).toEqual({ href: "/ops/inspections", label: "点検の一覧" });
+    }
+  });
+
+  it("一覧の戻り先：登録の下の一覧は登録へ、飛行記録・事故の一覧は日誌へ。現場モードの退路は「ホームへ戻る」", () => {
     for (const s of ["/ops/aircraft", "/ops/pilots", "/ops/permits", "/ops/places", "/ops/members"]) {
       expect(BACK_TABLE.find((r) => r.screen === s)?.back, s).toEqual(BACK_TO.register);
     }
-    for (const s of ["/ops/flights", "/ops/inspections", "/ops/incidents"]) {
+    for (const s of ["/ops/flights", "/ops/incidents"]) {
       expect(BACK_TABLE.find((r) => r.screen === s)?.back, s).toEqual(BACK_TO.journal);
     }
     expect(BACK_TO.register).toEqual({ href: "/ops/more", label: "登録" });
@@ -147,8 +176,8 @@ describe("名称の統一（A5）：古い呼び名が画面のコードに残�
 });
 
 describe("アイコンの重複（M-6）", () => {
-  it("メニューの 5 項目と登録の子項目は、すべて別のアイコン（判定と地点、操縦者と利用者を取り違えない）", () => {
-    const icons = [...NAV_ITEMS.map((i) => i.icon), ...NAV_CHILDREN.map((c) => c.icon)];
+  it("メニューの 6 項目と登録の子項目は、すべて別のアイコン（判定と地点、点検と日誌、操縦者と利用者を取り違えない）", () => {
+    const icons = [...SIDE_ITEMS.map((i) => i.icon), ...NAV_CHILDREN.map((c) => c.icon)];
     expect(new Set(icons).size).toBe(icons.length);
   });
 });

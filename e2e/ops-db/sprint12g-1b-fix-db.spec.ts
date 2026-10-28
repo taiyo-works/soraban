@@ -257,9 +257,11 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await expect(due).toContainText("社内の目安であり、法定の期限ではありません。");
     await expect(page.getByTestId("today-next-action").first().locator("[data-meaning]")).toHaveCount(1);
     await expectNoHorizontalScroll(page, "ホーム（予定のある日）");
-    // 右上：「飛行計画を作る」と「地点を判定する」（予定のある日だけ）
+    // 右上：「飛行計画を作る」（予定のある日だけ）。判定への入口は、上部のピル 2 つ（Sprint 12h PR ③a。以前の「地点を判定する」ボタン `ops-enter-verdict` の置き換え。行き先は `/` の入口へ）
     await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
-    await expect(page.getByTestId("ops-enter-verdict")).toHaveAttribute("href", "/");
+    await expect(page.getByTestId("ops-enter-verdict")).toHaveCount(0);
+    await expect(page.getByTestId("judge-pill-here")).toHaveAttribute("href", "/?start=here");
+    await expect(page.getByTestId("judge-pill-search")).toHaveAttribute("href", "/?start=search");
     await clearPlans(bm);
     await bm.dispose();
   });
@@ -283,7 +285,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
 
   test("M-11. 戻りリンクの押せる範囲は幅・高さとも 44px 以上（登録・日誌・一覧・詳細）", async ({ page }) => {
     await signIn(page.request, seeded("b-manager"));
-    for (const [path, name] of [["/ops/aircraft", /登録/], ["/ops/pilots", /登録/], ["/ops/flights", /日誌/], ["/ops/incidents", /日誌/], ["/ops/inspections", /日誌/], ["/ops/permits", /登録/], ["/ops/places", /登録/], ["/ops/aircraft/new", /機体の一覧/], ["/ops/plans/new", /飛行計画の一覧/]] as const) {
+    for (const [path, name] of [["/ops/aircraft", /登録/], ["/ops/pilots", /登録/], ["/ops/flights", /日誌/], ["/ops/incidents", /日誌/], ["/ops/inspections/new", /点検の一覧/], ["/ops/permits", /登録/], ["/ops/places", /登録/], ["/ops/aircraft/new", /機体の一覧/], ["/ops/plans/new", /飛行計画の一覧/]] as const) {
       await page.goto(path);
       const link = page.getByRole("main").getByRole("link", { name }).first();
       await expect(link, path).toBeVisible();
@@ -299,6 +301,9 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await page.goto("/ops/more");
     const iconOf = async (testId: string): Promise<string> => page.getByTestId(testId).locator("svg").first().evaluate((s) => s.innerHTML);
     expect(await iconOf("nav-verdict")).not.toBe(await iconOf("nav-places"));
+    // 点検のアイコンは、ほかの 5 項目（ホーム・判定・計画・日誌・登録）のどれとも別の絵（Sprint 12h PR ③a）
+    const inspection = await iconOf("nav-inspections");
+    for (const k of ["nav-today", "nav-verdict", "nav-plans", "nav-journal", "nav-more"]) expect(inspection, `点検と ${k}`).not.toBe(await iconOf(k));
     expect(await iconOf("nav-pilots")).not.toBe(await iconOf("more-link-members"));
     expect(await iconOf("user-menu-button")).not.toBe(await iconOf("nav-pilots"));
     // 鍵（lock）の図形（rect の角丸 3 と M8.5 10.5V8…）が dips-note にない。点線の輪（stroke-dasharray）だけ

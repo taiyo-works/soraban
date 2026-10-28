@@ -571,16 +571,16 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       for (const [path, name] of [
         ["/ops/flights", "日誌"],
         ["/ops/flights/new", "飛行記録の一覧"],
-        ["/ops/inspections/new", "日常点検の一覧"],
+        ["/ops/inspections/new", "点検の一覧"],
       ] as const) {
         await page.goto(path);
         const box = await page.locator("main").getByRole("link", { name, exact: false }).first().boundingBox();
         expect(box, `${path} ${name}`).not.toBeNull();
         expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(44);
       }
-      // メニューは新しい部品（Sprint 12g-1b）：スマホは下の 5 タブ（56px 以上）、PC は左メニューの判定の項目とロゴが 44px 以上
-      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-verdict").boundingBox();
-      expect(tab!.height).toBeGreaterThanOrEqual(56);
+      // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは ホーム／計画／点検／日誌／登録 の 5 つ・60px 以上に）：スマホは下の 5 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
+      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections").boundingBox();
+      expect(tab!.height).toBeGreaterThanOrEqual(60);
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto("/ops/flights");
       // boundingBox は待たない。左メニューが描かれてから測る
