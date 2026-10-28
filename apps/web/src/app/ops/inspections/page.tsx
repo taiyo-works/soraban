@@ -60,8 +60,7 @@ export default async function InspectionListPage({
     filter = {};
   }
   const timing = parseTiming(sp["timing"]);
-  const [all, aircraft, today] = await Promise.all([listInspections(ctx, filter), listAircraft(ctx, true), getToday(ctx, { limit: NEXT_ACTIONS_ALL })]);
-  const rows = timing ? all.filter((i) => i.timing === timing) : all;
+  const [rows, aircraft, today] = await Promise.all([listInspections(ctx, filter, timing ?? undefined), listAircraft(ctx, true), getToday(ctx, { limit: NEXT_ACTIONS_ALL })]);
   const pending = pendingPreflightInspections(today);
   const denied = recordCreateDenied(me);
   const canCreate = denied === null;
@@ -145,9 +144,10 @@ export default async function InspectionListPage({
         <SecHead title="記録" aside="新しい順" />
         <nav aria-label="区分で絞り込む" className="sb-chips" data-testid="inspection-timing-filter">
           {([null, ...INSPECTION_TIMINGS] as const).map((t) => (
-            <Link key={t ?? "all"} href={chipHref(sp, t)} prefetch={false} aria-current={timing === t ? "true" : undefined} className="sb-chip" data-testid={`inspection-timing-${t ?? "all"}`}>
+            // 絞り込みは通常のリンク（画面ごと読み直す。RecordFilter の GET の form と同じ作法で、クライアント遷移の途中状態を持たない）
+            <a key={t ?? "all"} href={chipHref(sp, t)} aria-current={timing === t ? "true" : undefined} className="sb-chip" data-testid={`inspection-timing-${t ?? "all"}`}>
               {t ? INSPECTION_TIMING_LABELS[t] : "すべて"}
-            </Link>
+            </a>
           ))}
         </nav>
         <RecordFilter basePath="/ops/inspections" aircraft={aircraft} value={filter} hidden={timing ? { timing } : {}} />

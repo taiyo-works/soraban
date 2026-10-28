@@ -531,4 +531,34 @@ describe.skipIf(!ADMIN_URL)("飛行記録・日常点検記録の DB（時刻・
     await expectOpsError(rec.createFlight(ctxOf(viewer), flightInput(a.id, pilotB.id, "2027-01-04T23:00", "2027-01-04T23:10")), 403);
     expect((await rec.listFlights(ctxOf(viewer), { aircraftId: a.id })).length).toBe(1);
   });
+  it("点検の一覧：区分（飛行前／飛行後）の絞り込みは、件数の上限（500 件）の前に効く。500 件より古い位置の飛行前の記録が、飛行前の絞り込みで見える（Sprint 12h PR ③a）", async () => {
+    const a = await newAircraft(0);
+    const items = Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal" }]));
+    const make = (inspectedAt: string, timing: "pre_flight" | "post_flight") =>
+      rec.createInspection(mgr(), { aircraftId: a.id, pilotId: pilotA.id, inspectedAt, timing, placeName: "本社", items });
+    // いちばん古い飛行前が 1 件。そのあとに、新しい飛行後が上限（500）を超えて 505 件
+    const oldest = await make("2026-01-01T07:00", "pre_flight");
+    const start = Date.UTC(2026, 1, 1, 0, 0);
+    for (let k = 0; k < 505; k += 5) {
+      await Promise.all(
+        Array.from({ length: 5 }, (_, j) => {
+          const at = new Date(start + (k + j) * 60_000 * 30 + 9 * 3600_000); // JST の表示用に 9 時間足す（UTC の値を JST の入力として使う）
+          const p = (n: number) => String(n).padStart(2, "0");
+          return make(`${at.getUTCFullYear()}-${p(at.getUTCMonth() + 1)}-${p(at.getUTCDate())}T${p(at.getUTCHours())}:${p(at.getUTCMinutes())}`, "post_flight");
+        }),
+      );
+    }
+    // 絞り込みなし：最新 500 件だけ（最も古い飛行前は上限の外）
+    const all = await rec.listInspections(mgr(), { aircraftId: a.id });
+    expect(all.length).toBe(500);
+    expect(all.some((i) => i.id === oldest.record.id)).toBe(false);
+    // 飛行前で絞ると、上限の外にあった記録が見える。飛行後は 500 件（上限）
+    const pre = await rec.listInspections(mgr(), { aircraftId: a.id }, "pre_flight");
+    expect(pre.map((i) => i.id)).toEqual([oldest.record.id]);
+    expect((await rec.listInspections(mgr(), { aircraftId: a.id }, "post_flight")).length).toBe(500);
+    // 引数を省略したときの挙動は従来どおり。他の組織の記録は出ない
+    expect(all.every((i) => i.timing === "post_flight")).toBe(true);
+    const otherOrg = ctxOf(await addMember(orgB, "manager", "s11-mgr-b2"));
+    expect(await rec.listInspections(otherOrg, {}, "pre_flight")).toEqual([]);
+  }, 120_000);
 });
