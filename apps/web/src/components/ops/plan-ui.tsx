@@ -6,7 +6,7 @@ import { REPORT_FIXED_NOTE } from "@soraban/regulations";
 import type { DeadlineState, NextAction } from "@/server/ops/report-logic";
 import { VERDICT_LABEL, unknownCountLabel } from "@/lib/verdict-display";
 import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
-import { VerdictMark } from "../verdict-mark";
+import { VerdictTag } from "@/components/ui/sb-parts";
 import { cx } from "@/components/ui/cx";
 import { Icon, type IconName } from "@/components/ui/icons";
 import { type Tone } from "./ui";
@@ -34,22 +34,22 @@ const STATE_GLYPH: Readonly<Record<PlanState, string>> = {
   voided: "×",
 };
 
-// 札：文字は常に ink（背景の淡い色の上でも 4.5:1 以上）。色は枠・背景・記号だけに使い、意味は記号と文字が担う。
+// 札：文字は常に墨（面の上でも 4.5:1 以上）。意味は記号と文字が担い、形（実線・破線・反転）で補う。判定の色（赤・琥珀・緑）は判定の印だけに使う。
 const CHIP_BOX: Record<Tone, string> = {
-  neutral: "border-rule bg-paper",
-  brand: "border-brand-500 bg-brand-50",
-  green: "border-signal-green/60 bg-signal-green-soft",
-  amber: "border-signal-amber/70 bg-signal-amber-soft",
-  red: "border-signal-red/60 bg-signal-red-soft",
-  mute: "border-rule bg-paper-soft",
+  neutral: "border border-sb-rule bg-sb-base text-sb-ink",
+  brand: "border border-transparent bg-sb-inverse text-sb-inverse-fg font-bold",
+  green: "border-[1.5px] border-sb-ink bg-sb-base text-sb-ink font-bold",
+  amber: "border-[1.5px] border-dashed border-sb-ink bg-sb-hover text-sb-ink font-bold",
+  red: "border-[1.5px] border-sb-v-no-fg bg-sb-base text-sb-v-no-fg font-bold",
+  mute: "border border-dashed border-sb-edge bg-sb-sunken text-sb-ink-3",
 };
 const CHIP_GLYPH: Record<Tone, string> = {
-  neutral: "text-ink-soft",
-  brand: "text-brand-700",
-  green: "text-signal-green",
-  amber: "text-signal-amber",
-  red: "text-signal-red",
-  mute: "text-ink-soft",
+  neutral: "text-current",
+  brand: "text-current",
+  green: "text-current",
+  amber: "text-current",
+  red: "text-current",
+  mute: "text-current",
 };
 
 type ChipProps = { readonly tone: Tone; readonly glyph: string; readonly children: React.ReactNode } & Record<`data-${string}`, string | undefined>;
@@ -60,9 +60,9 @@ function Chip({ tone, glyph, children, ...rest }: ChipProps) {
   return (
     <span
       {...attrs}
-      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sharp border px-2 py-0.5 text-xs font-medium leading-5 text-ink ${CHIP_BOX[tone]}`}
+      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-[12.5px] font-medium leading-5 ${CHIP_BOX[tone]}`}
     >
-      <span aria-hidden className={`w-3 text-center font-mono text-[13px] font-bold leading-none ${CHIP_GLYPH[tone]}`}>
+      <span aria-hidden className={`w-3 text-center sb-num text-[13px] font-bold leading-none ${CHIP_GLYPH[tone]}`}>
         {glyph}
       </span>
       {children}
@@ -102,39 +102,32 @@ export function ReportBadge({ report, bare }: { readonly report: ReportRequireme
   );
 }
 
-const REPORT_BAR: Record<ReportRequirement["kind"], string> = {
-  confirm: "border-l-signal-amber",
-  not_applicable_model: "border-l-rule",
-  required: "border-l-brand-700",
-  recommended: "border-l-signal-green",
-};
-
 /** 通報の要否（根拠つき）。固定の文言（そらばんは DIPS に送信しません…）を必ず添える。 */
 export function ReportBox({ report }: { readonly report: ReportRequirement }) {
   return (
     <div
-      className={`flex flex-col gap-3 rounded-sharp border border-l-4 border-rule bg-paper px-3 py-3 sm:px-4 ${REPORT_BAR[report.kind]}`}
+      className="flex flex-col gap-3 rounded-sb-l bg-sb-base px-4 py-4 opx-shadow"
       data-testid="plan-report-box"
       data-kind={report.kind}
     >
-      <p className="flex items-start gap-3 text-base font-medium leading-snug text-ink">
+      <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
         <span
           aria-hidden
-          className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sharp border font-mono text-sm font-bold ${CHIP_BOX[REPORT_TONE[report.kind]]} ${CHIP_GLYPH[REPORT_TONE[report.kind]]}`}
+          className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[REPORT_TONE[report.kind]]} ${CHIP_GLYPH[REPORT_TONE[report.kind]]}`}
         >
           {REPORT_GLYPH[report.kind]}
         </span>
         <span className="pt-0.5" data-testid="plan-report-label">{report.label}</span>
       </p>
       {report.reasons.length > 0 ? (
-        <ul className="flex list-disc flex-col gap-1 pl-12 text-sm leading-relaxed text-ink-soft" data-testid="plan-report-reasons">
+        <ul className="flex list-disc flex-col gap-1 pl-12 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
           {report.reasons.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>
       ) : null}
       {report.exceptionNote ? (
-        <p className="ml-10 border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-exception">
+        <p className="opx-note ml-10" data-testid="plan-report-exception">
           {report.exceptionNote}
         </p>
       ) : null}
@@ -148,23 +141,24 @@ export function ReportBox({ report }: { readonly report: ReportRequirement }) {
 /** 「そらばんは DIPS に送信しません。…」の固定の文言。 */
 export function DipsNotice({ text = REPORT_FIXED_NOTE }: { readonly text?: string }) {
   return (
-    <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-dips-notice">
+    <p className="opx-note" data-testid="plan-dips-notice">
       {text}
     </p>
   );
 }
 
-/** 判定の結論の札（4 段の言葉＋記号。判定不能の件数があれば添える）。 */
+/** 判定の結論の札（4 段の言葉＋形。判定不能の件数があれば添える）。判定の印は PR ② の部品（形と言葉を併用）。 */
 export function VerdictBadge({ level, unknownCount, bare }: { readonly level: string; readonly unknownCount?: number; readonly bare?: boolean }) {
   const label = VERDICT_LABEL[level as ItemVerdict] ?? level;
+  const known = level in VERDICT_LABEL;
   return (
-    <span
-      className="inline-flex flex-wrap items-center gap-x-1.5 text-sm font-medium text-ink"
-      {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}
-    >
-      {level in VERDICT_LABEL ? <VerdictMark level={level as ItemVerdict} size="sm" decorative /> : null}
-      <span>{label}</span>
-      {unknownCount ? <span className="text-xs font-normal text-ink-soft">（{unknownCountLabel(unknownCount)}）</span> : null}
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-sb-ink" {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}>
+      {known ? (
+        <VerdictTag level={level as ItemVerdict}>{label}</VerdictTag>
+      ) : (
+        <span>{label}</span>
+      )}
+      {unknownCount ? <span className="text-xs font-normal text-sb-ink-2">（{unknownCountLabel(unknownCount)}）</span> : null}
     </span>
   );
 }
@@ -197,30 +191,30 @@ export function PlanDigest({
   readonly stateLabel: string;
   readonly stale: boolean;
 }) {
-  const row = "grid min-h-11 grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-rule-soft px-3 py-2 last:border-b-0 hover:bg-paper-soft";
+  const row = "grid min-h-12 grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
   return (
-    <nav aria-label="要点" className="rounded-sharp border border-rule bg-paper" data-testid="plan-digest">
+    <nav aria-label="要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
       <a href="#sec-verdict" className={row}>
-        <span className="text-xs text-ink-mute">結論</span>
+        <span className="text-xs text-sb-ink-3">結論</span>
         <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <VerdictBadge level={verdictLevel} unknownCount={unknownCount} bare />
           {stale ? <StaleBadge bare /> : null}
         </span>
-        <span aria-hidden className="text-ink-mute">↓</span>
+        <span aria-hidden className="text-sb-ink-3">↓</span>
       </a>
       <a href="#sec-report" className={row}>
-        <span className="text-xs text-ink-mute">通報</span>
+        <span className="text-xs text-sb-ink-3">通報</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <ReportBadge report={report} bare />
         </span>
-        <span aria-hidden className="text-ink-mute">↓</span>
+        <span aria-hidden className="text-sb-ink-3">↓</span>
       </a>
       <a href="#sec-confirm" className={row}>
-        <span className="text-xs text-ink-mute">確認</span>
+        <span className="text-xs text-sb-ink-3">確認</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span aria-hidden className="text-ink-mute">↓</span>
+        <span aria-hidden className="text-sb-ink-3">↓</span>
       </a>
     </nav>
   );
@@ -231,9 +225,9 @@ export function JudgementMissing({ label, testId }: { readonly label: string; re
   return (
     <span
       {...(testId ? { "data-testid": testId } : {})}
-      className="inline-flex items-center gap-2 rounded-sharp border border-l-4 border-signal-amber/70 border-l-signal-amber bg-signal-amber-soft px-2.5 py-1.5 text-sm font-medium leading-snug text-ink"
+      className="inline-flex items-center gap-2 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-2 text-sm font-bold leading-snug text-sb-ink"
     >
-      <span aria-hidden className="font-mono text-sm font-bold text-signal-amber">
+      <span aria-hidden className="sb-num text-sm font-bold text-sb-ink">
         !
       </span>
       {label}
@@ -281,11 +275,11 @@ export function ReportStatusBadge({ status, bare }: { readonly status: Pick<Repo
 // 次にやること：段（最優先〜推奨）は「印＋段の名前」で示す。色を使うのは最優先（危険）と期限超過（注意）の 2 段だけで、
 // 札・左の太い線・行の塗りは使わない。残りの段は墨色の印と補助の文字（色がなくても段の名前で区別できる）。
 const TIER_MARK: Readonly<Record<number, { readonly icon: IconName; readonly tone: string; readonly text: string }>> = {
-  1: { icon: "alert", tone: "text-danger-fg", text: "text-danger-fg font-semibold" },
-  2: { icon: "clock", tone: "text-warn-fg", text: "text-warn-fg font-semibold" },
-  3: { icon: "dot", tone: "text-fg-soft", text: "text-fg-mute" },
-  4: { icon: "info", tone: "text-fg-mute", text: "text-fg-mute" },
-  5: { icon: "chevron-right", tone: "text-fg-mute", text: "text-fg-mute" },
+  1: { icon: "alert", tone: "text-sb-ink", text: "text-sb-ink font-bold" },
+  2: { icon: "clock", tone: "text-sb-ink", text: "text-sb-ink font-bold" },
+  3: { icon: "dot", tone: "text-sb-ink-2", text: "text-sb-ink-3" },
+  4: { icon: "info", tone: "text-sb-ink-3", text: "text-sb-ink-3" },
+  5: { icon: "chevron-right", tone: "text-sb-ink-3", text: "text-sb-ink-3" },
 };
 const TIER_TEXT: Readonly<Record<number, string>> = { 1: "最優先", 2: "期限超過", 3: "未了", 4: "確認・変更", 5: "推奨" };
 
@@ -328,31 +322,31 @@ export function NextActionItem({
       <Icon name={mark.icon} size={18} className={cx("mt-1 shrink-0", mark.tone)} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="text-body font-medium leading-snug text-fg" data-testid={`${testId}-label`}>
+          <span className="text-[15px] font-bold leading-snug text-sb-ink" data-testid={`${testId}-label`}>
             {action.label}
           </span>
           <span className={cx("whitespace-nowrap text-aux", mark.text)}>{TIER_TEXT[action.tier]}</span>
         </span>
-        <span className="text-table text-fg-soft [text-wrap:pretty]">
+        <span className="text-table text-sb-ink-2 [text-wrap:pretty]">
           <KeepDates text={action.reason} />
         </span>
         {action.dueLabel ? (
-          <span className="text-table text-fg [text-wrap:pretty]" data-testid={`${testId}-due`}>
+          <span className="text-table text-sb-ink [text-wrap:pretty]" data-testid={`${testId}-due`}>
             <KeepDates text={action.dueLabel} />
           </span>
         ) : null}
         {!action.canAct ? (
-          <span className="text-table text-fg-mute" data-testid={`${testId}-cannot`}>
+          <span className="text-table text-sb-ink-3" data-testid={`${testId}-cannot`}>
             {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
           </span>
         ) : null}
       </span>
-      {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-fg-mute" /> : null}
+      {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-sb-ink-3" /> : null}
     </>
   );
   const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-11", flush ? "" : "px-3");
   return action.canAct ? (
-    <a href={action.href} className={cx(box, "hov:bg-accent-soft")} data-testid={`${testId}-link`} data-action-id={action.id}>
+    <a href={action.href} className={cx(box, "hover:bg-sb-hover")} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}
     </a>
   ) : (
@@ -366,16 +360,16 @@ export function NextActionItem({
 export function NextActionsList({ actions }: { readonly actions: readonly NextAction[] }) {
   return (
     <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="next-actions">
-      <h2 className="eyebrow">
+      <h2 className="opx-eyebrow">
         次にやること
-        {actions.length > 0 ? <span className="ml-2 font-mono tnum normal-case tracking-normal">{actions.length} 件</span> : null}
+        {actions.length > 0 ? <span className="ml-2 sb-num tnum normal-case tracking-normal">{actions.length} 件</span> : null}
       </h2>
       {actions.length === 0 ? (
-        <p className="rounded-sharp border border-rule bg-paper px-3 py-3 text-sm text-ink-mute" data-testid="next-actions-empty">
+        <p className="rounded-sb-l bg-sb-base px-4 py-4 text-sm text-sb-ink-2 opx-shadow" data-testid="next-actions-empty">
           {NEXT_ACTIONS_EMPTY_LABEL}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-rule-soft rounded-sharp border border-rule bg-paper">
+        <ul className="flex flex-col divide-y divide-sb-rule overflow-hidden rounded-sb-l bg-sb-base opx-shadow">
           {actions.map((a) => (
             <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
               <NextActionItem action={a} />
@@ -388,11 +382,11 @@ export function NextActionsList({ actions }: { readonly actions: readonly NextAc
 }
 
 const DEADLINE_BAR: Readonly<Record<DeadlineState["state"], string>> = {
-  none: "border-l-rule",
-  upcoming: "border-l-brand-700",
-  past_guide: "border-l-signal-amber bg-signal-amber-soft/40",
-  overdue_started: "border-l-signal-red bg-signal-red-soft/50",
-  recommended_open: "border-l-signal-green",
+  none: "bg-sb-base opx-shadow",
+  upcoming: "bg-sb-base opx-shadow",
+  past_guide: "border-[1.5px] border-dashed border-sb-ink bg-sb-base",
+  overdue_started: "border-[1.5px] border-sb-v-no-fg bg-sb-surface",
+  recommended_open: "bg-sb-base opx-shadow",
 };
 const DEADLINE_TONE: Readonly<Record<DeadlineState["state"], Tone>> = {
   none: "neutral",
@@ -419,37 +413,37 @@ export function DeadlineBox({ deadline }: { readonly deadline: DeadlineState }) 
   const started = deadline.state === "overdue_started";
   return (
     <div
-      className={`flex flex-col gap-3 rounded-sharp border border-l-4 border-rule px-3 py-3 text-sm sm:px-4 ${DEADLINE_BAR[deadline.state]}`}
+      className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 text-sm ${DEADLINE_BAR[deadline.state]}`}
       data-testid="plan-report-deadline"
       data-state={deadline.state}
     >
-      <p className="flex items-start gap-3 font-medium leading-snug text-ink">
+      <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
         <span
           aria-hidden
-          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sharp border font-mono text-[13px] font-bold leading-none text-ink ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
+          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[13px] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
         >
           {DEADLINE_GLYPH[deadline.state]}
         </span>
         <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-at">
-          社内の目安の時刻：<span className="font-mono text-sm tnum text-ink">{deadline.guideAtJst}</span>（日本時間）
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
+          社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
         </p>
       ) : null}
       {deadline.guideNote ? (
-        <p className="pl-11 text-xs leading-relaxed text-ink-soft" data-testid="plan-report-guide-note">
+        <p className="pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
           {deadline.guideNote}
         </p>
       ) : null}
-      <div className="flex flex-col gap-1.5 border-t border-rule-soft pl-11 pt-2.5">
+      <div className="flex flex-col gap-1.5 border-t border-sb-rule pl-11 pt-2.5">
         {deadline.penaltyNote ? (
-          <p className="text-[11px] leading-relaxed text-ink-soft" data-testid="plan-report-penalty">
+          <p className="text-[12px] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
             {deadline.penaltyNote}
           </p>
         ) : null}
-        {deadline.outageNote ? <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.outageNote}</p> : null}
-        <p className="text-[11px] leading-relaxed text-ink-soft">{deadline.smallDroneLawNote}</p>
+        {deadline.outageNote ? <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+        <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
       </div>
     </div>
   );
@@ -460,23 +454,23 @@ export function ReportStatusBox({ status, changes }: { readonly status: ReportSt
   const tone = STATUS_TONE[status.code];
   return (
     <div className="flex flex-col gap-2" data-testid="plan-report-status" data-code={status.code}>
-      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-ink">
+      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-sb-ink">
         <span
           aria-hidden
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sharp border font-mono text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
         >
           {status.mark}
         </span>
         <span className="pt-0.5" data-testid="plan-report-status-label">{status.label}</span>
       </p>
-      {status.detail && status.code !== "reported" ? <p className="pl-10 font-mono text-xs tnum text-ink-soft">{status.detail}</p> : null}
+      {status.detail && status.code !== "reported" ? <p className="pl-10 sb-num text-xs tnum text-sb-ink-2">{status.detail}</p> : null}
       {changes.length > 0 ? (
-        <div className="ml-10 flex flex-col gap-1 border-l-2 border-signal-amber pl-3" data-testid="plan-report-changes">
-          <p className="text-xs font-medium text-ink">通報時から変わった点</p>
-          <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-ink-soft">
+        <div className="opx-note ml-10 flex flex-col gap-1" data-testid="plan-report-changes">
+          <p className="text-xs font-medium text-sb-ink">通報時から変わった点</p>
+          <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-sb-ink-2">
             {changes.map((c) => (
               <li key={c.key} data-testid="plan-report-change-row" data-key={c.key}>
-                {c.label}：<span className="font-mono tnum">{c.before}</span> → <span className="font-mono tnum">{c.after}</span>
+                {c.label}：<span className="sb-num tnum">{c.before}</span> → <span className="sb-num tnum">{c.after}</span>
               </li>
             ))}
           </ul>

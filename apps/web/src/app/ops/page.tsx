@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
+import { Notice } from "@/components/ops/ui";
 import { JudgePills } from "@/components/ops/judge-pills";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { TodayCard, TodayDeadlines, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
-import { buttonClass, NoticeBar } from "@/components/ui/primitives";
-import { Icon } from "@/components/ui/icons";
 import { formatDay } from "@/lib/ops-day";
 import { planCreateDenied } from "@/server/ops/plan-page";
 import { recordCreateDenied } from "@/server/ops/record-page";
@@ -25,23 +24,23 @@ export default async function OpsHome() {
   const canPlan = planCreateDenied(me) === null;
   const today = await getToday(ctx);
   return (
-    <main className="flex flex-col gap-6" data-testid="ops-today">
+    <main className="flex flex-col gap-4 lg:gap-6" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
       <div className="flex flex-col gap-3">
         <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h1 className="text-h1 font-semibold text-fg" data-testid="today-heading">
+            <h1 className="opx-h1" data-testid="today-heading">
               ホーム
             </h1>
-            <span className="text-table tabular-nums text-fg-mute" data-testid="today-date">
+            <span className="opx-num text-[13px] text-sb-ink-3" data-testid="today-date">
               <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
             </span>
           </div>
           {/* 予定のない日は、先頭のカードに「飛行計画を作る」がある。同じ画面に同じ操作を 2 つ置かない。判定への入口は、下のピル（上部） */}
           {today.card && canPlan ? (
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/ops/plans/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-plan">
-                <Icon name="plus" size={18} />
+              <Link href="/ops/plans/new" prefetch={false} className="opx-btn" data-testid="ops-enter-plan">
+                <span aria-hidden>＋</span>
                 飛行計画を作る
               </Link>
             </div>
@@ -50,36 +49,34 @@ export default async function OpsHome() {
         <JudgePills />
       </div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
-        <div className="flex min-w-0 flex-col gap-6">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-7">
+        <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
           {today.card ? <TodayCard card={today.card} today={today.today} nextActions={today.nextActions} /> : today.empty ? <TodayEmpty empty={today.empty} canPlan={canPlan} /> : null}
           <TodayRest rows={today.rest} />
           <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} today={today.today} />
         </div>
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
           <TodayDeadlines deadlines={today.deadlines} today={today.today} />
           <TodayUpcoming flights={today.upcoming} today={today.today} />
         </div>
       </div>
 
       {canEnter ? (
-        <nav aria-label="記録の入力" className="flex flex-col gap-2 border-t border-line pt-5">
-          <p className="text-aux text-fg-mute">記録を入力</p>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href="/ops/flights/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-14 sm:min-h-11")} data-testid="ops-enter-flight">
-              <Icon name="flight" size={18} />
+        <nav aria-label="記録の入力" className="flex flex-col gap-2 border-t border-sb-rule pt-5">
+          <p className="text-[13px] font-bold text-sb-ink-2">記録を入力</p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link href="/ops/flights/new" prefetch={false} className="opx-btn min-h-14 sm:min-h-12" data-testid="ops-enter-flight">
               飛行記録を入力
             </Link>
-            <Link href="/ops/inspections/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-14 sm:min-h-11")} data-testid="ops-enter-inspection">
-              <Icon name="inspection" size={18} />
+            <Link href="/ops/inspections/new" prefetch={false} className="opx-btn min-h-14 sm:min-h-12" data-testid="ops-enter-inspection">
               日常点検を入力
             </Link>
           </div>
         </nav>
       ) : null}
-      <NoticeBar meaning="neutral" icon="info" data-testid="today-disclaimer">
+      <Notice data-testid="today-disclaimer">
         {PLAN_JUDGEMENT_DISCLAIMER}そらばんは DIPS に送信しません。
-      </NoticeBar>
+      </Notice>
     </main>
   );
 }

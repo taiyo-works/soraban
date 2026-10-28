@@ -119,29 +119,23 @@ export const messageFor = (r: ApiResult): string => {
 export const fieldErrorsOf = (r: ApiResult): Record<string, string> =>
   r.data["fields"] && typeof r.data["fields"] === "object" ? (r.data["fields"] as Record<string, string>) : {};
 
-export const inputClass =
-  "w-full min-w-0 rounded-sharp border border-rule bg-paper px-3 py-2.5 text-base text-ink outline-none transition-colors placeholder:text-ink-mute/70 focus:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-1 focus:ring-offset-paper aria-[invalid=true]:border-signal-red sm:text-sm";
-export const checkboxClass = "h-4 w-4 shrink-0 cursor-pointer accent-brand-700";
-export const checkRowClass = "flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink";
+export const inputClass = "sb-input";
+export const checkboxClass = "sb-check";
+export const checkRowClass = "opx-check-row";
 const buttonClass = buttonPrimaryClass;
 const subtleButtonClass = buttonGhostClass;
 
 /** 項目名の右に付ける「必須」「任意」の札。読み上げは aria-required で伝えるため、札は読ませない。 */
 export const RequiredTag = ({ required }: { readonly required?: boolean }) =>
   required === undefined ? null : (
-    <span
-      aria-hidden
-      className={`rounded-sharp border px-1 text-[10px] leading-4 ${
-        required ? "border-brand-500 text-brand-700" : "border-rule text-ink-mute"
-      }`}
-    >
+    <span aria-hidden className={required ? "opx-required" : "opx-optional"}>
       {required ? "必須" : "任意"}
     </span>
   );
 
 export const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
   message ? (
-    <span id={id} role="alert" className="text-xs leading-relaxed text-signal-red">
+    <span id={id} role="alert" className="opx-field-error">
       <span aria-hidden>! </span>
       {message}
     </span>
@@ -179,9 +173,11 @@ export const Field = ({
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
   return (
-    <div className="flex min-w-0 flex-col gap-1.5 text-sm text-ink">
+    <div className="flex min-w-0 flex-col gap-1.5 text-sm text-sb-ink">
       <span className="flex items-center gap-2">
-        <label htmlFor={controlId}>{label}</label>
+        <label htmlFor={controlId} className="font-bold">
+          {label}
+        </label>
         <RequiredTag required={required} />
       </span>
       {cloneElement(children, {
@@ -192,7 +188,7 @@ export const Field = ({
       })}
       <FieldError id={errorId} message={error} />
       {hint ? (
-        <span id={hintId} className="text-xs leading-relaxed text-ink-mute">
+        <span id={hintId} className="opx-hint">
           {hint}
         </span>
       ) : null}
@@ -203,12 +199,7 @@ export const Field = ({
 /** 送信の結果のエラー。長いフォームでも目に入るよう、送信ボタンの直上に出す。 */
 export const FormError = ({ message }: { readonly message: string | null }) =>
   message ? (
-    <p
-      role="alert"
-      tabIndex={-1}
-      data-form-error
-      className="outline-none focus-visible:ring-2 focus-visible:ring-signal-red rounded-sharp border border-signal-red/60 bg-signal-red-soft px-3 py-2 text-sm leading-relaxed text-signal-red"
-    >
+    <p role="alert" tabIndex={-1} data-form-error className="opx-form-error outline-none focus-visible:outline-[3px] focus-visible:outline-sb-focus">
       {message}
     </p>
   ) : null;
@@ -216,14 +207,14 @@ export const FormError = ({ message }: { readonly message: string | null }) =>
 /** 入力欄のまとまり（狭い画面では 1 列、広い画面では 2 列）。 */
 export const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
   <fieldset className="flex min-w-0 flex-col gap-3">
-    <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">{title}</legend>
+    <legend className="mb-1 text-[13px] font-bold tracking-wider text-sb-ink-2">{title}</legend>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
   </fieldset>
 );
 
 /** 送信ボタンと送信の結果のエラーの並び。 */
 export const SubmitRow = ({ message, children }: { readonly message: string | null; readonly children: ReactNode }) => (
-  <div className="flex flex-col gap-3 border-t border-rule-soft pt-4">
+  <div className="opx-submit">
     <FormError message={message} />
     <div className="flex flex-wrap items-center gap-3">{children}</div>
   </div>
@@ -352,7 +343,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
           hint="JU で始まる英数字（例：JU1234567890）。小文字で入力しても大文字で保存します。"
         >
           <input
-            className={`${inputClass} font-mono uppercase`}
+            className={`${inputClass} sb-num uppercase`}
             value={v.registrationMark}
             onChange={set("registrationMark")}
             autoComplete="off"
@@ -368,7 +359,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         </Field>
         <Field label="製造番号" required error={errors["serialNumber"]}>
           <input
-            className={`${inputClass} font-mono`}
+            className={`${inputClass} sb-num`}
             value={v.serialNumber}
             onChange={set("serialNumber")}
             autoComplete="off"
@@ -389,7 +380,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
             型式認証を受けている
           </label>
           {v.typeCertified ? (
-            <div className="grid grid-cols-1 gap-4 border-l-2 border-rule pl-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 border-l-2 border-sb-rule pl-3 sm:grid-cols-3">
               <Field label="型式認証の種類" required error={errors["typeCertCategory"]}>
                 <input className={inputClass} value={v.typeCertCategory} onChange={set("typeCertCategory")} />
               </Field>
@@ -397,7 +388,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
                 <input className={inputClass} value={v.typeCertModel} onChange={set("typeCertModel")} />
               </Field>
               <Field label="型式認証書番号" required error={errors["typeCertNumber"]}>
-                <input className={`${inputClass} font-mono`} value={v.typeCertNumber} onChange={set("typeCertNumber")} />
+                <input className={`${inputClass} sb-num`} value={v.typeCertNumber} onChange={set("typeCertNumber")} />
               </Field>
             </div>
           ) : null}
@@ -412,7 +403,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         {v.airworthinessClass ? (
           <Field label="機体認証書番号" required error={errors["airworthinessCertNumber"]}>
             <input
-              className={`${inputClass} font-mono`}
+              className={`${inputClass} sb-num`}
               value={v.airworthinessCertNumber}
               onChange={set("airworthinessCertNumber")}
             />
@@ -442,7 +433,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
           </select>
         </Field>
         <fieldset className="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
-          <legend className="mb-1.5 flex items-center gap-2 text-sm text-ink">
+          <legend className="mb-1.5 flex items-center gap-2 text-sm text-sb-ink">
             <span>使用開始時の既存の総飛行時間</span>
             <RequiredTag required />
           </legend>
@@ -457,7 +448,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
               value={v.hours}
               onChange={set("hours")}
             />
-            <span className="text-sm text-ink-soft">時間</span>
+            <span className="text-sm text-sb-ink-2">時間</span>
             <input
               aria-label="既存の総飛行時間（分）"
               aria-invalid={flightError ? true : undefined}
@@ -468,10 +459,10 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
               value={v.minutes}
               onChange={set("minutes")}
             />
-            <span className="text-sm text-ink-soft">分</span>
+            <span className="text-sm text-sb-ink-2">分</span>
           </div>
           <FieldError id={flightErrorId} message={flightError} />
-          <span id={`${flightId}-hint`} className="text-xs leading-relaxed text-ink-mute">
+          <span id={`${flightId}-hint`} className="text-xs leading-relaxed text-sb-ink-3">
             この機体をそらばんで記録し始める前に飛んだ時間の合計。分は 0〜59 で入力します（なければ 0 時間 0 分）。
           </span>
         </fieldset>
@@ -491,7 +482,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         <button type="submit" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -532,7 +523,7 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
         <button type="submit" className={buttonDangerClass} disabled={busy}>
           {label}を取り消す
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -655,7 +646,7 @@ export function PilotForm({
             技能証明の交付を受けている
           </label>
           {v.hasLicense ? (
-            <div className="grid grid-cols-1 gap-4 border-l-2 border-rule pl-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 border-l-2 border-sb-rule pl-3 sm:grid-cols-2">
               <Field label="技能証明の区分" required error={errors["licenseClass"]}>
                 <select className={`${inputClass} min-h-12`} value={v.licenseClass} onChange={set("licenseClass")}>
                   <option value="">選んでください</option>
@@ -670,7 +661,7 @@ export function PilotForm({
                 hint="英数字と「-」で 30 文字以内。一覧では末尾 4 桁以外を伏せて表示します。"
               >
                 <input
-                  className={`${inputClass} font-mono`}
+                  className={`${inputClass} sb-num`}
                   value={v.licenseNumber}
                   onChange={set("licenseNumber")}
                   autoComplete="off"
@@ -688,7 +679,7 @@ export function PilotForm({
       </Group>
 
       <fieldset className="flex min-w-0 flex-col gap-1">
-        <legend className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-mute">限定事項（該当するものを選ぶ）</legend>
+        <legend className="mb-1 sb-num text-[12px] uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <label className={checkRowClass}>
             <input type="checkbox" className={checkboxClass} checked={v.limitationType} onChange={check("limitationType")} />
@@ -723,7 +714,7 @@ export function PilotForm({
         <button type="submit" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -786,7 +777,7 @@ export function MemberInviteForm() {
         <button type="submit" className={buttonClass} disabled={busy}>
           招待する
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -855,7 +846,7 @@ export function MemberControls({
         <button type="submit" className={subtleButtonClass} disabled={busy}>
           変更する
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -929,7 +920,7 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
         ログアウト
       </button>
       {warning ? (
-        <div role="alert" className="flex flex-col gap-3 rounded-ctl border border-warn-line bg-warn-bg p-3 text-table text-warn-fg" data-testid="signout-warning">
+        <div role="alert" className="flex flex-col gap-3 rounded-sb-m border border-sb-ink bg-sb-surface p-3 text-table text-sb-ink" data-testid="signout-warning">
           <p className="flex items-start gap-2 font-medium [text-wrap:pretty]">
             <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
             <span className="min-w-0">

@@ -36,10 +36,10 @@ const CHECKS: Readonly<Record<ProcedureRecordKind, readonly (keyof typeof PROCED
 const STATUS_TONE: Readonly<Record<ProcedureRecordSummaryDto["status"], Tone>> = { none: "amber", done: "green", stale: "amber", retracted: "mute" };
 // 状況の箱：色は線と背景だけ。意味は札の記号と文字が担う。
 const STATUS_BOX: Readonly<Record<ProcedureRecordSummaryDto["status"], string>> = {
-  none: "border-rule border-l-signal-amber bg-signal-amber-soft/40",
-  done: "border-rule border-l-signal-green bg-signal-green-soft/40",
-  stale: "border-rule border-l-signal-amber bg-signal-amber-soft/40",
-  retracted: "border-rule border-l-rule bg-paper-soft",
+  none: "border-sb-rule border-l-sb-ink bg-sb-surface",
+  done: "border-sb-rule border-l-sb-ink bg-sb-surface",
+  stale: "border-sb-rule border-l-sb-ink bg-sb-surface",
+  retracted: "border-sb-rule border-l-sb-rule bg-sb-surface",
 };
 const STATUS_GLYPH: Readonly<Record<ProcedureRecordSummaryDto["status"], string>> = { none: "！", done: "✓", stale: "△", retracted: "－" };
 
@@ -80,7 +80,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
         e.preventDefault();
         void onSubmit();
       }}
-      className="flex flex-col gap-3 rounded-sharp border border-rule-soft bg-paper px-3 py-3"
+      className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-3"
       aria-label={kind === "dips_permit" ? "許可・承認の申請の記録" : "飛行禁止法の同意・通報の記録"}
       data-testid={`procedure-form-${kind}`}
     >
@@ -97,7 +97,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
         <input className={`${inputClass} min-h-12`} value={reference} onChange={(e) => setReference(e.target.value)} data-testid={`procedure-reference-${kind}`} />
       </Field>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-xs text-ink-mute">確認（すべて必要です）</legend>
+        <legend className="mb-1 text-xs text-sb-ink-3">確認（すべて必要です）</legend>
         {CHECKS[kind].map((k) => (
           <label key={k} className={confirmRowClass}>
             <input
@@ -111,7 +111,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
           </label>
         ))}
         {CHECKS[kind].some((k) => errors[`checks.${k}`]) ? (
-          <span role="alert" className="text-xs text-signal-red">
+          <span role="alert" className="text-xs text-sb-v-no-fg">
             <span aria-hidden>! </span>
             すべての確認にチェックを入れてください。
           </span>
@@ -163,7 +163,7 @@ function RetractForm({ planId, planVersion, kind }: { readonly planId: string; r
         e.preventDefault();
         void onSubmit();
       }}
-      className="flex flex-col gap-3 rounded-sharp border border-signal-red/50 px-3 py-3"
+      className="flex flex-col gap-3 rounded-sb-m border border-sb-v-no-fg px-3 py-3"
       aria-label="記録の取り下げ"
       data-testid={`procedure-retract-form-${kind}`}
     >
@@ -199,7 +199,7 @@ export function ProcedureRecordsPanel({
   const shown = summary.filter((s) => s.applicable || s.latest !== null);
   if (shown.length === 0) {
     return (
-      <p className="text-sm text-ink-mute" data-testid="procedure-none">
+      <p className="text-sm text-sb-ink-3" data-testid="procedure-none">
         この計画の判定には、DIPS の許可・承認の申請や、小型無人機等飛行禁止法の手続きはありません。
       </p>
     );
@@ -207,34 +207,34 @@ export function ProcedureRecordsPanel({
   return (
     <div className="flex flex-col gap-4" data-testid="plan-procedures">
       {/* 記録は利用者の申告で、許可・承認が下りたことを示すものではない。カードの上で先に読めるよう、枠つきで置く。 */}
-      <p className="rounded-sharp border border-l-4 border-rule border-l-brand-700 bg-paper-soft px-3 py-2.5 text-sm leading-relaxed text-ink">{PROCEDURE_RECORD_NOTE}</p>
+      <p className="rounded-sb-m border border-l-4 border-sb-rule border-l-sb-ink bg-sb-surface px-3 py-2.5 text-sm leading-relaxed text-sb-ink">{PROCEDURE_RECORD_NOTE}</p>
       {shown.map((s) => {
         const mine = records.filter((r) => r.kind === s.kind);
         const done = s.status === "done";
         return (
-          <article key={s.kind} className="flex flex-col gap-3 rounded-sharp border border-rule bg-paper" data-testid={`procedure-${s.kind}`} data-status={s.status}>
-            <header className="flex flex-col gap-2.5 border-b border-rule-soft px-3 pb-3 pt-3 sm:px-4">
-              <h3 className="text-sm font-medium text-ink">{s.kindLabel}</h3>
-              <div className={`flex flex-col gap-1 rounded-sharp border border-l-4 px-3 py-2.5 ${STATUS_BOX[s.status]}`}>
+          <article key={s.kind} className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-base" data-testid={`procedure-${s.kind}`} data-status={s.status}>
+            <header className="flex flex-col gap-2.5 border-b border-sb-rule px-3 pb-3 pt-3 sm:px-4">
+              <h3 className="text-sm font-medium text-sb-ink">{s.kindLabel}</h3>
+              <div className={`flex flex-col gap-1 rounded-sb-m border border-l-4 px-3 py-2.5 ${STATUS_BOX[s.status]}`}>
                 <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
                   <Badge tone={STATUS_TONE[s.status]} data-testid={`procedure-status-${s.kind}`} data-status={s.status}>
                     <span aria-hidden className="mr-1">{STATUS_GLYPH[s.status]}</span>
                     {s.statusLabel}
                   </Badge>
                   {s.latest && done ? (
-                    <span className="font-mono text-xs tnum text-ink" data-testid={`procedure-latest-${s.kind}`}>
+                    <span className="sb-num text-xs tnum text-sb-ink" data-testid={`procedure-latest-${s.kind}`}>
                       {s.latest.doneAtJst}
                       {s.latest.reference ? `・控え ${s.latest.reference}` : ""}
                     </span>
                   ) : null}
                 </p>
                 {s.deadlineLabel ? (
-                  <p className="text-xs leading-relaxed text-ink-soft" data-testid={`procedure-deadline-${s.kind}`}>
+                  <p className="text-xs leading-relaxed text-sb-ink-2" data-testid={`procedure-deadline-${s.kind}`}>
                     {s.deadlineLabel}
                   </p>
                 ) : null}
                 {s.status === "stale" ? (
-                  <p className="text-xs leading-relaxed text-ink" data-testid={`procedure-stale-${s.kind}`}>
+                  <p className="text-xs leading-relaxed text-sb-ink" data-testid={`procedure-stale-${s.kind}`}>
                     {PROCEDURE_RECORD_STALE_LABEL}
                   </p>
                 ) : null}
@@ -248,25 +248,25 @@ export function ProcedureRecordsPanel({
                   <DoneForm planId={planId} planVersion={planVersion} kind={s.kind} />
                 ) : null
               ) : !canRecord ? (
-                <p className="text-xs text-ink-mute">記録は運航管理者と、この計画の操縦者本人だけが行えます。</p>
+                <p className="text-xs text-sb-ink-3">記録は運航管理者と、この計画の操縦者本人だけが行えます。</p>
               ) : null}
             </div>
             {mine.length > 0 ? (
-              <ol className="mx-3 mb-3 flex flex-col border-t border-rule-soft sm:mx-4" data-testid={`procedure-history-${s.kind}`}>
+              <ol className="mx-3 mb-3 flex flex-col border-t border-sb-rule sm:mx-4" data-testid={`procedure-history-${s.kind}`}>
                 {mine.map((r) => (
-                  <li key={r.id} className="flex flex-col gap-1 border-b border-rule-soft py-2.5 text-xs text-ink-soft last:border-b-0" data-testid="procedure-history-row" data-action={r.action}>
+                  <li key={r.id} className="flex flex-col gap-1 border-b border-sb-rule py-2.5 text-xs text-sb-ink-2 last:border-b-0" data-testid="procedure-history-row" data-action={r.action}>
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                      <span className="text-sm font-medium text-ink">{r.label}</span>
-                      {r.doneAtJst ? <span className="font-mono tnum text-ink">{r.doneAtJst}</span> : null}
+                      <span className="text-sm font-medium text-sb-ink">{r.label}</span>
+                      {r.doneAtJst ? <span className="sb-num tnum text-sb-ink">{r.doneAtJst}</span> : null}
                     </span>
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
                       <span>版 {r.planVersion}</span>
-                      <time dateTime={r.createdAt} className="font-mono tnum">{r.createdAtJst}</time>
+                      <time dateTime={r.createdAt} className="sb-num tnum">{r.createdAtJst}</time>
                       <span>{r.recordedByName}</span>
                     </span>
                     {r.reference ? <span className="break-all">控え：{r.reference}</span> : null}
                     {r.reason ? <span className="break-all">理由：{r.reason}</span> : null}
-                    {!r.forCurrentSnapshot && r.action === "done" ? <span className="text-ink-mute">前の判定に対する記録です。</span> : null}
+                    {!r.forCurrentSnapshot && r.action === "done" ? <span className="text-sb-ink-3">前の判定に対する記録です。</span> : null}
                   </li>
                 ))}
               </ol>

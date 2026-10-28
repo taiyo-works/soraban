@@ -42,7 +42,7 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
     await expect(page.getByTestId("ops-header")).toHaveCount(0);
   });
 
-  test("4. ログイン済みの運航管理の画面は、紙面のトークン（.ds）で描かれ、PC は左メニューと右上の利用者メニュー、スマホは下の 5 タブ。公開の判定画面 `/` は .ds を使わない", async ({ page }) => {
+  test("4. ログイン済みの運航管理の画面は、v2 のトークン（.ds.ops-v2）で描かれ、PC は左メニューと右上の利用者メニュー、スマホは下の 5 タブ。公開の判定画面 `/` は .ds を使わない", async ({ page }) => {
     const r = await page.request.post(`${BASE}/api/test-auth/sign-in`, {
       data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" },
     });
@@ -65,9 +65,9 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
         const h = getComputedStyle(document.querySelector('[data-testid="ops-header"]')!);
         return { bg: b.backgroundColor, fg: b.color, headerBorder: h.borderBottomWidth, grid: b.backgroundImage };
       });
-      // 新しいトークン（明）：紙の地 #f1ede1、墨の字 #171b22。旧い方眼は出ない
-      expect(v.bg, path).toBe("rgb(241, 237, 225)");
-      expect(v.fg, path).toBe("rgb(23, 27, 34)");
+      // v2 のトークン（明）：地は --sb-surface（オフホワイト #F7F7F3）、字は --sb-ink（墨 #262523）。旧い紙の色・方眼は出ない（Sprint 12h PR ③b1：値を v2 に差し替え）
+      expect(v.bg, path).toBe("rgb(247, 247, 243)");
+      expect(v.fg, path).toBe("rgb(38, 37, 35)");
       expect(v.grid, path).toBe("none");
       expect(v.headerBorder, path).toBe("1px");
     }

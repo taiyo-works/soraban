@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import "./ops-v2.css";
+import "./ops-v2-screens.css";
 import { OPS_CONTENT_CLASS, OpsFrame } from "@/components/ops/ops-frame";
 import { OpsBottomNavGate, OpsNavGate, OpsTopBarGate } from "@/components/ops/ops-nav-gate";
 
@@ -23,9 +25,9 @@ export default function OpsLayout({ children }: { readonly children: React.React
   return (
     <Suspense
       fallback={
-        <div className="ds ds-page flex flex-1 flex-col">
+        <div className="ds ds-page ops-v2 flex flex-1 flex-col">
           <div className={OPS_CONTENT_CLASS}>
-            <p className="text-table text-fg-mute">読み込み中…</p>
+            <p className="text-table text-sb-ink-3">読み込み中…</p>
           </div>
         </div>
       }
@@ -47,7 +49,7 @@ export default function OpsLayout({ children }: { readonly children: React.React
           </Suspense>
         }
       >
-        <Suspense fallback={<p className="text-table text-fg-mute">読み込み中…</p>}>{children}</Suspense>
+        <Suspense fallback={<p className="text-table text-sb-ink-3">読み込み中…</p>}>{children}</Suspense>
       </OpsFrame>
     </Suspense>
   );

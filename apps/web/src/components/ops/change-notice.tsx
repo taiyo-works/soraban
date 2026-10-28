@@ -92,7 +92,7 @@ export function ChangeNotice({
       data-testid="ops-change-notice"
       className={
         message
-          ? `rounded-sharp border border-signal-green/60 bg-signal-green-soft px-3 py-2 text-sm text-signal-green outline-none focus-visible:ring-2 focus-visible:ring-brand-700 ${className}`
+          ? `rounded-sb-m border border-sb-ink bg-sb-surface px-3 py-2 text-sm text-sb-v-none-fg outline-none focus-visible:ring-2 focus-visible:ring-sb-focus ${className}`
           : "sr-only"
       }
     >

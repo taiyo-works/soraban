@@ -13,11 +13,11 @@ export function MismatchBadges({ mismatches }: { readonly mismatches: readonly J
       {mismatches.map((m) => (
         <span
           key={m.code}
-          className="flex items-start gap-2 rounded-ctl border border-[color-mix(in_srgb,var(--warn-line)_45%,var(--bg-surface))] bg-warn-bg px-2.5 py-1.5 text-table leading-snug text-warn-fg [text-wrap:pretty]"
+          className="flex items-start gap-2 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-2 text-[13px] leading-snug text-sb-ink [text-wrap:pretty]"
           data-testid="flight-mismatch"
           data-code={m.code}
         >
-          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-[color:var(--warn-line)]" />
+          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-sb-ink" />
           <span className="min-w-0">{m.label}</span>
         </span>
       ))}
@@ -33,7 +33,7 @@ export function TakeoffGaps({ gaps }: { readonly gaps: readonly FieldGapLike[] |
     <ul className="flex flex-col gap-1" data-testid="flight-takeoff-gaps">
       {gaps.map((g) => (
         <li key={g.item} className="flex items-start gap-2" data-testid="flight-takeoff-gap" data-item={g.item}>
-          <Icon name="alert" size={16} className="mt-1 shrink-0 text-warn-fg" />
+          <Icon name="alert" size={16} className="mt-1 shrink-0 text-sb-ink" />
           <span>{fieldGapLabel(g)}</span>
         </li>
       ))}

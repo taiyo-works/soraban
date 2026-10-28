@@ -34,7 +34,7 @@ export default async function InspectionNewPage({
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
-        <p className="text-xs leading-relaxed text-ink-mute">飛行の前（または後）に行った日常点検の結果を入力します。</p>
+        <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
       </PageHeader>
       <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(returnTo ? { returnTo } : {})} />
     </main>

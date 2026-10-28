@@ -51,37 +51,37 @@ export default async function FlightListPage({
         {canCreate ? null : <Note>{recordCreateDenied(me)}</Note>}
       </PageHeader>
       <RecordFilter basePath="/ops/flights" aircraft={aircraft} value={filter} />
-      <p className="font-mono text-[11px] tnum text-ink-mute">{rows.length} 件</p>
+      <p className="sb-num text-[12px] tnum text-sb-ink-3">{rows.length} 件</p>
       {rows.length === 0 ? (
-        <p className="border-y border-rule py-6 text-center text-sm text-ink-mute">飛行記録はありません。</p>
+        <p className="border-y border-sb-rule py-6 text-center text-sm text-sb-ink-3">飛行記録はありません。</p>
       ) : (
         <div className="flex flex-col">
           <ListHead columns={["飛行年月日", "機体", "操縦者", "離陸–着陸", "飛行時間", "総飛行時間"]} gridClass={GRID} />
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="flight-list">
             {rows.map((f) => (
               <li key={f.id}>
-                <Link prefetch={false} href={`/ops/flights/${f.id}`} className={`${CARD} ${GRID} ${f.voided ? "text-ink-mute" : ""}`}>
-                  <span className="col-start-1 row-start-1 font-mono tnum text-ink sm:col-auto sm:row-auto">
+                <Link prefetch={false} href={`/ops/flights/${f.id}`} className={`${CARD} ${GRID} ${f.voided ? "text-sb-ink-3" : ""}`}>
+                  <span className="col-start-1 row-start-1 sb-num tnum text-sb-ink sm:col-auto sm:row-auto">
                     <span className="sr-only">飛行年月日</span>
                     {f.flightDate}
                   </span>
-                  <span className="col-span-2 col-start-2 row-start-1 min-w-0 break-all font-mono text-ink-soft sm:col-span-1 sm:col-auto sm:row-auto">
+                  <span className="col-span-2 col-start-2 row-start-1 min-w-0 break-all sb-num text-sb-ink-2 sm:col-span-1 sm:col-auto sm:row-auto">
                     <span className="sr-only">機体</span>
                     {f.registrationMark}
                   </span>
-                  <span className="col-span-2 col-start-1 row-start-3 min-w-0 break-words text-ink-soft sm:col-span-1 sm:col-auto sm:row-auto sm:text-ink">
+                  <span className="col-span-2 col-start-1 row-start-3 min-w-0 break-words text-sb-ink-2 sm:col-span-1 sm:col-auto sm:row-auto sm:text-sb-ink">
                     <CellLabel>操縦者</CellLabel>
                     {f.pilotName}
                   </span>
-                  <span className="col-span-2 col-start-1 row-start-2 font-mono text-base tnum text-ink sm:col-span-1 sm:col-auto sm:row-auto sm:text-[13px]">
+                  <span className="col-span-2 col-start-1 row-start-2 sb-num text-base tnum text-sb-ink sm:col-span-1 sm:col-auto sm:row-auto sm:text-[13px]">
                     <span className="sr-only">離陸–着陸</span>
                     {f.takeoffAtJst.slice(11)}–{f.landingAtJst}
                   </span>
-                  <span className="col-start-3 row-start-2 text-right font-mono text-base tnum sm:col-auto sm:row-auto sm:text-left sm:text-sm">
+                  <span className="col-start-3 row-start-2 text-right sb-num text-base tnum sm:col-auto sm:row-auto sm:text-left sm:text-sm">
                     <CellLabel>飛行時間</CellLabel>
                     {formatHm(f.flightMinutes)}
                   </span>
-                  <span className="col-start-3 row-start-3 flex flex-wrap items-center justify-end gap-1.5 font-mono tnum sm:col-auto sm:row-auto sm:justify-start">
+                  <span className="col-start-3 row-start-3 flex flex-wrap items-center justify-end gap-1.5 sb-num tnum sm:col-auto sm:row-auto sm:justify-start">
                     <CellLabel>総飛行時間</CellLabel>
                     {f.totalFlightMinutes === null ? <Badge tone="red">取消済み</Badge> : formatHm(f.totalFlightMinutes)}
                   </span>

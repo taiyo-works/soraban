@@ -336,32 +336,32 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       const route = card.getByTestId("route");
       await page.waitForLoadState("networkidle");
       await expect(route).toBeVisible();
-      await expect(route).toHaveAttribute("data-variant", "ledger");
+      // Sprint 12h PR ③b1：行程は「丸い印＋段の名前＋済／次／未」（見本 home.html の .route）。以前の通し番号（等幅の 01〜07）の欄は、丸い印に置き換えた
+      await expect(route).toHaveAttribute("data-variant", "dots");
       const items = route.locator("li");
       await expect(items).toHaveCount(7);
-      // 文書の文字は変えない（番号は CSS の生成内容）。文字は「判定 済」の形のまま
+      // 文書の文字は変えない。文字は「判定 済」の形のまま
       if (w === 375) {
         const texts = (await items.allInnerTexts()).map((t) => t.replace(/\s+/g, " ").trim());
         expect(texts.map((t) => t.split(" ")[0])).toEqual(["判定", "計画", "確認", "通報", "点検", "飛行", "日誌"]);
       }
-      // 通し番号：等幅の 01〜07（::before の counter）
-      const nums = await items.evaluateAll((els) => els.map((e) => getComputedStyle(e, "::before").content.replace(/"/g, "")));
-      // （計算済みの値は counter の式のまま返る。01〜07 と見えることは、スクリーンショットで確かめた）
-      expect(nums).toEqual(Array(7).fill("counter(stage, decimal-leading-zero)"));
-      const mono = await items.first().evaluate((e) => getComputedStyle(e, "::before").fontFamily);
-      expect(mono.toLowerCase()).toMatch(/mono|menlo|consolas|courier/);
-      // 「次」の欄はちょうど 1 つ。四角い印の中に「次」（押印）。面が塗られる
+      // 7 つの欄それぞれに丸い印（装飾。読み上げない）。済は塗りの丸（チェック）、次は ▶、未は破線の輪（形で見分ける。色だけに頼らない）
+      await expect(route.locator(".opx-rs-dot[aria-hidden='true']")).toHaveCount(7);
+      expect(await route.locator('li[data-stage-state="done"] .opx-rs-dot svg path').count()).toBeGreaterThanOrEqual(1);
+      const todoBorder = await route.locator('li[data-stage-state="todo"] .opx-rs-dot').first().evaluate((e) => getComputedStyle(e).borderTopStyle);
+      expect(todoBorder).toBe("dashed");
+      // 「次」の欄はちょうど 1 つ。橙の面が塗られ、文字は「次」
       const next = route.locator('li[data-stage-state="next"]');
       await expect(next).toHaveCount(1);
-      await expect(next.locator("span:not(:has(span))", { hasText: /^次$/ })).toHaveCount(1);
+      await expect(next.locator(".opx-rs-state")).toHaveText("次");
       const bg = await next.evaluate((e) => getComputedStyle(e).backgroundColor);
       expect(bg).not.toBe("rgba(0, 0, 0, 0)");
-      // 帯はカードの左右いっぱい（主役の大きさ）。欄は 7 つで折り返さず、横スクロールもない
+      // 帯はカードの幅いっぱい（カードの余白の内側。③b1 で、左右の端まで伸ばす形から、余白の内側に置く形に）。欄は 7 つで折り返さず、横スクロールもない
       await expect(card).toBeVisible();
       await expect(route).toBeVisible();
       const cardBox = (await card.boundingBox())!;
       const routeBox = (await route.boundingBox())!;
-      expect(routeBox.width).toBeGreaterThanOrEqual(cardBox.width - 3);
+      expect(routeBox.width).toBeGreaterThanOrEqual(cardBox.width - 60);
       expect(routeBox.height, `${w}px の行程表の高さ`).toBeGreaterThanOrEqual(64);
       for (const li of await items.all()) {
         const m = await li.evaluate((e) => Array.from(e.querySelectorAll(":scope > span")).map((sp) => ({ sw: (sp as HTMLElement).scrollWidth, cw: (sp as HTMLElement).clientWidth, fs: parseFloat(getComputedStyle(sp).fontSize) })));

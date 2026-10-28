@@ -93,7 +93,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
 const planCheckRow =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sharp border border-rule-soft bg-paper px-3 py-2.5 text-sm leading-snug text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
+  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
 const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
 const selectClass = `${inputClass} min-h-12`;
 
@@ -133,15 +133,15 @@ function PermitNumberHelper({
             const known = registered.has(t.key);
             const saved = isEdit ? savedByKey.get(t.key) : undefined;
             return (
-              <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 text-xs leading-relaxed ${known ? "border-signal-green" : "border-signal-amber"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
-                <span className="break-all font-mono text-[13px] text-ink">{t.text}</span>
+              <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 text-xs leading-relaxed ${known ? "border-sb-ink" : "border-sb-ink"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
+                <span className="break-all sb-num text-[13px] text-sb-ink">{t.text}</span>
                 {known ? (
-                  <span className="text-ink-soft">
+                  <span className="text-sb-ink-2">
                     登録があります。{saved ? `保存済みの照合：${saved.statusLabel}${saved.reasons.length > 0 ? `（${saved.reasons.join("／")}）` : ""}。` : ""}
                     範囲に収まるかは、保存したときに計画の日時・場所・機体・操縦者で照合します。
                   </span>
                 ) : (
-                  <span className="font-medium text-ink" data-testid="plan-permit-unregistered">
+                  <span className="font-medium text-sb-ink" data-testid="plan-permit-unregistered">
                     <span aria-hidden>? </span>
                     {PERMIT_UNREGISTERED_WARNING}
                   </span>
@@ -153,14 +153,14 @@ function PermitNumberHelper({
       ) : null}
       {candidates.length > 0 ? (
         <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
-          <p className="text-xs font-medium text-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
-          <p className="text-xs leading-relaxed text-ink-soft">{helper?.candidatesNote}</p>
+          <p className="text-xs font-medium text-sb-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
+          <p className="text-xs leading-relaxed text-sb-ink-2">{helper?.candidatesNote}</p>
           <ul className="flex flex-col gap-1.5">
             {candidates.map((c) => (
-              <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sharp border border-l-2 border-rule border-l-brand-500 bg-paper px-3 py-2" data-testid="plan-permit-candidate">
+              <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sb-m border border-l-2 border-sb-rule border-l-sb-ink bg-sb-base px-3 py-2" data-testid="plan-permit-candidate">
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="break-all font-mono text-[13px] text-ink">{c.permitNumber}</span>
-                  <span className="text-xs text-ink-soft">{c.summary}</span>
+                  <span className="break-all sb-num text-[13px] text-sb-ink">{c.permitNumber}</span>
+                  <span className="text-xs text-sb-ink-2">{c.summary}</span>
                 </span>
                 <button type="button" className={buttonGhostClass} onClick={() => onInsert(c.permitNumber)} data-testid="plan-permit-insert">
                   番号を入れる
@@ -170,7 +170,7 @@ function PermitNumberHelper({
           </ul>
         </div>
       ) : null}
-      <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft">{PERMIT_DECLARATION_NOTE}</p>
+      <p className="opx-note">{PERMIT_DECLARATION_NOTE}</p>
     </div>
   );
 }
@@ -338,9 +338,9 @@ export function PlanForm({
   const unavailableReason = useSyncExternalStore(noopSubscribe, geoReasonSnapshot, () => "");
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={isEdit ? "飛行計画の訂正" : "飛行計画の入力"} data-testid="plan-form">
+    <form ref={formRef} onSubmit={onSubmit} className="opx-form flex flex-col gap-6" aria-label={isEdit ? "飛行計画の訂正" : "飛行計画の入力"} data-testid="plan-form">
       {handoffWeightG ? (
-        <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-handoff-note">
+        <p className="opx-note" data-testid="plan-handoff-note">
           判定画面の入力（地点・飛行の方法・許可・予定日）を引き継ぎました。判定の結果は引き継ぎません。保存すると、サーバーが判定をやり直します。
           判定画面で入れた機体の重さ（{handoffWeightG} g）は参考です。計画の判定には、選んだ機体の登録上の最大離陸重量を使います。
         </p>
@@ -352,15 +352,15 @@ export function PlanForm({
         </Field>
         {isEdit ? (
           // 機体は訂正で変えられない。無効化した select は 375px で表示が切れるため、読み取り専用の文（折り返す）で示す
-          <div className="flex min-w-0 flex-col gap-1.5 text-sm text-ink" data-testid="plan-aircraft-readonly">
+          <div className="flex min-w-0 flex-col gap-1.5 text-sm text-sb-ink" data-testid="plan-aircraft-readonly">
             <span className="flex items-center gap-2">
               <span>機体</span>
             </span>
-            <p className="break-words rounded-sharp border border-rule-soft bg-paper-soft px-3 py-2.5 text-base leading-snug text-ink sm:text-sm" data-testid="plan-aircraft-text">
-              <span className="font-mono">{selectedAircraft?.registrationMark ?? ""}</span>
+            <p className="break-words rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-2.5 text-base leading-snug text-sb-ink sm:text-sm" data-testid="plan-aircraft-text">
+              <span className="sb-num">{selectedAircraft?.registrationMark ?? ""}</span>
               <span>（{selectedAircraft?.modelName ?? ""}）</span>
             </p>
-            <span className="text-xs leading-relaxed text-ink-mute">機体は訂正で変えられません。誤った場合は中止して作り直してください。</span>
+            <span className="text-xs leading-relaxed text-sb-ink-3">機体は訂正で変えられません。誤った場合は中止して作り直してください。</span>
           </div>
         ) : (
           <Field
@@ -380,7 +380,7 @@ export function PlanForm({
           </Field>
         )}
         {selectedAircraft && selectedAircraft.maxTakeoffWeightKg === null ? (
-          <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-weight-unknown">
+          <p className="opx-note" data-testid="plan-weight-unknown">
             この機体は最大離陸重量が登録されていないため、通報の要否は「要確認」になります。機体の登録を訂正すると、判定を最新にできます。
           </p>
         ) : null}
@@ -396,13 +396,13 @@ export function PlanForm({
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="予定開始（日付）" required error={errors["plannedStartAt"]} hint="日本時間">
-            <input type="date" className={`${inputClass} min-h-12 font-mono tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />
+            <input type="date" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />
           </Field>
           <Field label="予定開始（時刻）" required hint="日本時間。分まで">
-            <input type="time" className={`${inputClass} min-h-12 font-mono tnum`} value={v.startTime} onChange={(e) => set("startTime", e.target.value)} data-testid="plan-start-time" />
+            <input type="time" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startTime} onChange={(e) => set("startTime", e.target.value)} data-testid="plan-start-time" />
           </Field>
           <Field label="所要時間（分）" required error={errors["durationMinutes"]} hint="1〜1440 分。24 時間を超える飛行は別の計画に分けます。">
-            <input inputMode="numeric" className={`${inputClass} min-h-12 font-mono tnum`} value={v.duration} onChange={(e) => set("duration", e.target.value)} data-testid="plan-duration" />
+            <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.duration} onChange={(e) => set("duration", e.target.value)} data-testid="plan-duration" />
           </Field>
         </div>
         <Field label="飛行の目的" required error={errors["purpose"]} hint="100 文字以内。飛行記録の目的に引き継ぎます。">
@@ -411,7 +411,7 @@ export function PlanForm({
       </section>
 
       <fieldset className="flex min-w-0 flex-col gap-4" data-testid="plan-place-section">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">場所</legend>
+        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">場所</legend>
         {places.length > 0 ? (
           <Field label="よく使う地点から選ぶ" required={false} hint="選ぶと、名称と座標が入ります。座標は計画に写しとして残ります。">
             <select className={selectClass} value={v.savedPlaceId} onChange={(e) => pickPlace(e.target.value)} data-testid="plan-saved-place">
@@ -431,7 +431,7 @@ export function PlanForm({
           <Field label="緯度" required error={errors["latitude"]} hint="世界測地系（WGS84）、小数 6 桁まで">
             <input
               inputMode="decimal"
-              className={`${inputClass} min-h-12 font-mono tnum`}
+              className={`${inputClass} min-h-12 sb-num tnum`}
               value={v.lat}
               onChange={(e) => setV((s) => ({ ...s, lat: e.target.value, savedPlaceId: "" }))}
               data-testid="plan-lat"
@@ -440,7 +440,7 @@ export function PlanForm({
           <Field label="経度" required error={errors["longitude"]}>
             <input
               inputMode="decimal"
-              className={`${inputClass} min-h-12 font-mono tnum`}
+              className={`${inputClass} min-h-12 sb-num tnum`}
               value={v.lng}
               onChange={(e) => setV((s) => ({ ...s, lng: e.target.value, savedPlaceId: "" }))}
               data-testid="plan-lng"
@@ -448,21 +448,21 @@ export function PlanForm({
           </Field>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-sharp border border-rule-soft bg-paper-soft px-3 py-3" data-testid="plan-place-helper">
-          <p className="text-xs leading-relaxed text-ink-mute">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
+        <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-3" data-testid="plan-place-helper">
+          <p className="text-xs leading-relaxed text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
               現在地を取得する
             </button>
           </div>
           {locStatus ? (
-            <p role="status" className="text-xs leading-relaxed text-ink-soft" data-testid="plan-loc-status">
+            <p role="status" className="text-xs leading-relaxed text-sb-ink-2" data-testid="plan-loc-status">
               {locStatus}
             </p>
           ) : null}
-          {unavailableReason && !locStatus ? <p className="text-xs leading-relaxed text-ink-mute">{unavailableReason}</p> : null}
+          {unavailableReason && !locStatus ? <p className="text-xs leading-relaxed text-sb-ink-3">{unavailableReason}</p> : null}
           <div className="flex flex-col gap-2">
-            <label htmlFor="plan-address-q" className="text-sm text-ink">
+            <label htmlFor="plan-address-q" className="text-sm text-sb-ink">
               住所で探す
             </label>
             <div className="flex gap-2">
@@ -472,21 +472,21 @@ export function PlanForm({
               </button>
             </div>
             {searchNote ? (
-              <p role="status" className="text-xs text-ink-mute">
+              <p role="status" className="text-xs text-sb-ink-3">
                 {searchNote}
               </p>
             ) : null}
             {hits && hits.length > 0 ? (
-              <ul className="flex flex-col divide-y divide-rule-soft rounded-sharp border border-rule" data-testid="plan-address-results">
+              <ul className="flex flex-col divide-y divide-sb-rule rounded-sb-m border border-sb-rule" data-testid="plan-address-results">
                 {hits.slice(0, 5).map((h) => (
                   <li key={`${h.lat},${h.lng},${h.title}`}>
                     <button
                       type="button"
-                      className="flex min-h-11 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-paper-soft"
+                      className="flex min-h-11 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-surface"
                       onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
                     >
                       <span>{h.title}</span>
-                      <span className="font-mono text-[11px] tnum text-ink-mute">
+                      <span className="sb-num text-[12px] tnum text-sb-ink-3">
                         {h.lat}, {h.lng}
                       </span>
                     </button>
@@ -496,21 +496,21 @@ export function PlanForm({
             ) : null}
           </div>
           {candidate ? (
-            <div className="flex flex-col gap-2 rounded-sharp border border-brand-500 bg-paper px-3 py-3" data-testid="plan-candidate">
-              <p className="text-sm text-ink">
+            <div className="flex flex-col gap-2 rounded-sb-m border border-sb-ink bg-sb-base px-3 py-3" data-testid="plan-candidate">
+              <p className="text-sm text-sb-ink">
                 候補：{candidate.label}
-                <span className="ml-2 font-mono text-xs tnum text-ink-soft">
+                <span className="ml-2 sb-num text-xs tnum text-sb-ink-2">
                   {round6(candidate.lat)}, {round6(candidate.lng)}
                 </span>
-                {candidate.accuracyM !== undefined ? <span className="ml-2 text-xs text-ink-soft">（{formatAccuracy(candidate.accuracyM)}）</span> : null}
+                {candidate.accuracyM !== undefined ? <span className="ml-2 text-xs text-sb-ink-2">（{formatAccuracy(candidate.accuracyM)}）</span> : null}
               </p>
               {candidate.accuracyM !== undefined && isLowAccuracy(candidate.accuracyM) ? (
-                <p className="border-l-2 border-signal-amber pl-2 text-xs leading-relaxed text-ink-soft" role="status">
+                <p className="opx-note" role="status">
                   <span className="font-medium">注意：</span>
                   {LOW_ACCURACY_MESSAGE}
                 </p>
               ) : null}
-              <p className="text-xs text-ink-mute">まだ入力欄に入れていません。{CURRENT_LOCATION_PRIVACY_NOTE}</p>
+              <p className="text-xs text-sb-ink-3">まだ入力欄に入れていません。{CURRENT_LOCATION_PRIVACY_NOTE}</p>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className={buttonPrimaryClass} onClick={useCandidate} data-testid="plan-use-candidate">
                   この地点を使う
@@ -525,17 +525,17 @@ export function PlanForm({
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <Field label="範囲の半径（m）" required={false} error={errors["radiusM"]} hint="1〜10000 m。点と半径で表します。">
-            <input inputMode="numeric" className={`${inputClass} min-h-12 font-mono tnum`} value={v.radius} onChange={(e) => set("radius", e.target.value)} data-testid="plan-radius" />
+            <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.radius} onChange={(e) => set("radius", e.target.value)} data-testid="plan-radius" />
           </Field>
           <Field label="最大高度（m）" required={false} error={errors["maxAltitudeM"]} hint="0〜2000 m。150 m 以上は「150m以上の高さ」として判定に入ります。">
-            <input inputMode="numeric" className={`${inputClass} min-h-12 font-mono tnum`} value={v.altitude} onChange={(e) => set("altitude", e.target.value)} data-testid="plan-altitude" />
+            <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.altitude} onChange={(e) => set("altitude", e.target.value)} data-testid="plan-altitude" />
           </Field>
         </div>
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-flags">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">飛行の方法・空域</legend>
-        <p className="text-xs leading-relaxed text-ink-mute">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
+        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">飛行の方法・空域</legend>
+        <p className="text-xs leading-relaxed text-sb-ink-3">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_FLAG_CHOICES.map((c) => (
             <label key={c.value} className={planCheckRow}>
@@ -548,8 +548,8 @@ export function PlanForm({
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-permits">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
-        <p className="border-l-2 border-brand-700 pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-permit-registry-note">
+        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
+        <p className="opx-note" data-testid="plan-permit-registry-note">
           国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
           計画の日時・場所・機体・操縦者が範囲に収まるものが判定に使われます。許可・承認は登録から照合します。
         </p>
@@ -562,7 +562,7 @@ export function PlanForm({
           ))}
         </div>
         <FormErrorLine message={errors["pilotPermits"]} />
-        <p className="text-xs leading-relaxed text-ink-mute">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
+        <p className="text-xs leading-relaxed text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
       </fieldset>
 
       <section className="flex flex-col gap-4" aria-label="判定の条件">
@@ -616,11 +616,11 @@ export function PlanForm({
           {isEdit ? "訂正を保存する" : "計画を保存する"}
         </button>
         {busy ? (
-          <span role="status" className="text-sm text-ink-soft" data-testid="plan-judging">
+          <span role="status" className="text-sm text-sb-ink-2" data-testid="plan-judging">
             判定中…（サーバーで判定を実行して保存します）
           </span>
         ) : (
-          <span className="text-xs text-ink-mute">保存すると、サーバーが判定を実行し、その結果を判定の根拠として残します。</span>
+          <span className="text-xs text-sb-ink-3">保存すると、サーバーが判定を実行し、その結果を判定の根拠として残します。</span>
         )}
       </SubmitRow>
     </form>
@@ -629,7 +629,7 @@ export function PlanForm({
 
 const FormErrorLine = ({ message }: { readonly message?: string }) =>
   message ? (
-    <span role="alert" className="text-xs leading-relaxed text-signal-red">
+    <span role="alert" className="text-xs leading-relaxed text-sb-v-no-fg">
       <span aria-hidden>! </span>
       {message}
     </span>
@@ -684,7 +684,7 @@ export function RejudgeButton({ planId, version, highlight }: { readonly planId:
           判定をやり直す
         </button>
         {busy ? (
-          <span role="status" className="text-xs text-ink-soft" data-testid="plan-judging">
+          <span role="status" className="text-xs text-sb-ink-2" data-testid="plan-judging">
             判定中…
           </span>
         ) : null}
@@ -718,12 +718,12 @@ export function ConfirmPanel({ planId, version, stale }: { readonly planId: stri
     <form
       ref={formRef}
       onSubmit={(e) => e.preventDefault()}
-      className="flex flex-col gap-3 rounded-sharp border border-brand-500 bg-paper px-3 py-3 sm:px-4"
+      className="flex flex-col gap-3 rounded-sb-m border border-sb-ink bg-sb-base px-3 py-3 sm:px-4"
       aria-label="確認・差し戻し"
       data-testid="plan-confirm-panel"
     >
       {stale ? (
-        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft">
+        <p className="opx-note">
           判定が古くなっています。確認の前に「判定をやり直す」ことをお勧めします（やり直すと計画の版が上がり、確認は新しい版に対して行います）。
         </p>
       ) : null}
@@ -810,13 +810,13 @@ export function PlaceForm({ initial }: { readonly initial?: PlaceFormValue }) {
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="緯度" required error={errors["latitude"]} hint="世界測地系（WGS84）、小数 6 桁まで">
-          <input inputMode="decimal" className={`${inputClass} min-h-12 font-mono tnum`} value={v.lat} onChange={set("lat")} data-testid="place-lat" />
+          <input inputMode="decimal" className={`${inputClass} min-h-12 sb-num tnum`} value={v.lat} onChange={set("lat")} data-testid="place-lat" />
         </Field>
         <Field label="経度" required error={errors["longitude"]}>
-          <input inputMode="decimal" className={`${inputClass} min-h-12 font-mono tnum`} value={v.lng} onChange={set("lng")} data-testid="place-lng" />
+          <input inputMode="decimal" className={`${inputClass} min-h-12 sb-num tnum`} value={v.lng} onChange={set("lng")} data-testid="place-lng" />
         </Field>
       </div>
-      <p className="text-xs leading-relaxed text-ink-mute">
+      <p className="text-xs leading-relaxed text-sb-ink-3">
         登録する前に、地図で位置を目で確かめてください。座標が実際の位置とずれていると、判定が実際の地点とずれます。
       </p>
       <Field label="メモ" required={false} error={errors["note"]} hint="200 文字以内">
@@ -831,7 +831,7 @@ export function PlaceForm({ initial }: { readonly initial?: PlaceFormValue }) {
         <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="place-submit">
           {editing ? "訂正を保存する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
