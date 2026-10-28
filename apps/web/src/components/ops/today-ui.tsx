@@ -1,53 +1,80 @@
 import type { ReactNode } from "react";
-import type { IconName } from "@/components/ui/icons";
 import { Icon } from "@/components/ui/icons";
-import { JourneyLedger, JourneyLine } from "@/components/ui/journey-line";
 import { formatDay, formatDaysIn } from "@/lib/ops-day";
 import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
-import { buttonClass, Card, SectionTitle, StatusPill, type Meaning } from "@/components/ui/primitives";
+import { SectionHead } from "@/components/ui/sb-parts";
 import type { DeadlineDto } from "@/server/ops/deadlines-logic";
 import type { TodayBadgeDto, TodayCardDto, TodayDto, TodayRowDto, TodayUpcomingDto } from "@/server/ops/today";
 import type { TodayNextAction } from "@/server/ops/today-logic";
 import { journeyNext, type JourneyNext } from "./journey-next";
 import { MoreRows } from "./more-rows";
-import { Badge, type Tone } from "./ui";
 
-// ホームの部品（Sprint 12c 設計 C・G。Sprint 12g-1b で新しい部品（components/ui）に作り直した）。
+// ホームの部品（Sprint 12c 設計 C・G。Sprint 12h PR ③b で v2 に）。見本：docs/design/warm-final/home.html。
 // サーバー・クライアントのどちらからも使える（描くだけで、判断はしない）。状態は、色だけでなく記号と文字で示す。
-// TodayBadge と TodayNextActions は `/`（判定画面）の「ホーム」の帯も使う（`/` は 12g-1b の B で紙面にする）。
+// TodayBadge と TodayNextActions は `/`（判定画面）のログイン済みの帯も使う。`/` は app/ops/ops-v2.css を読まないので、この 2 つと MoreRows は
+// 共通の soraban-ui.css の .sb-*（と Tailwind の --sb-* の名前）だけで描く（`/` の CSS を増やさない）。
 
-const BADGE_TONE: Readonly<Record<TodayBadgeDto["code"], Tone>> = {
-  in_flight: "brand",
-  journal_pending: "amber",
-  journaled: "green",
-  ended: "mute",
-  planned: "neutral",
+const BADGE_CLASS: Readonly<Record<TodayBadgeDto["code"], string>> = {
+  in_flight: "sb-tag sb-tag-strong",
+  journal_pending: "sb-tag sb-tag-deadline",
+  journaled: "sb-tag",
+  ended: "sb-tag",
+  planned: "sb-tag",
 };
 
 export function TodayBadge({ badge }: { readonly badge: TodayBadgeDto }) {
   return (
-    <Badge tone={BADGE_TONE[badge.code]} data-testid="today-badge" data-code={badge.code}>
+    <span className={BADGE_CLASS[badge.code]} data-testid="today-badge" data-code={badge.code}>
       <span aria-hidden>{badge.mark} </span>
       {badge.label}
-    </Badge>
+    </span>
   );
 }
 
-const STATUS: Readonly<Record<TodayBadgeDto["code"], { readonly meaning: Meaning; readonly icon: IconName }>> = {
-  in_flight: { meaning: "info", icon: "flight" },
-  journal_pending: { meaning: "warn", icon: "alert" },
-  journaled: { meaning: "ok", icon: "check-circle" },
-  ended: { meaning: "neutral", icon: "dot" },
-  planned: { meaning: "neutral", icon: "clock" },
-};
-
-/** 状況の札（飛行中・日誌待ち・日誌済み・終了・予定）。アイコンと文字で示す。 */
+/** 状況の札（飛行中・日誌待ち・日誌済み・終了・予定）。印と文字で示す。 */
 export function TodayStatus({ badge }: { readonly badge: TodayBadgeDto }) {
-  const s = STATUS[badge.code];
   return (
-    <StatusPill meaning={s.meaning} icon={s.icon} data-testid="today-badge" data-code={badge.code}>
+    <span className={BADGE_CLASS[badge.code]} data-testid="today-badge" data-code={badge.code}>
+      <span aria-hidden>{badge.mark} </span>
       {badge.label}
-    </StatusPill>
+    </span>
+  );
+}
+
+// 行程の 1 行（判定→計画→確認→通報→点検→飛行→日誌）。各段は「丸い印＋段の名前＋済／次／未」。「次」の段だけ橙の面。
+// 状態は文字と印の形（チェック・▶・破線の輪）が伝える（色だけに頼らない）。7 段が 320px でも折り返さない。
+type RouteStage = { readonly label: string; readonly state: "done" | "next" | "todo" | "skip"; readonly stateLabel?: string };
+const ROUTE_STATE_LABEL = { done: "済", next: "次", todo: "未", skip: "対象外" } as const;
+
+function RouteDot({ state }: { readonly state: RouteStage["state"] }) {
+  if (state === "done")
+    return (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 8.5 L6.5 12 L13 4.5" />
+      </svg>
+    );
+  if (state === "next")
+    return (
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M5 3 L13 8 L5 13 Z" />
+      </svg>
+    );
+  return null;
+}
+
+function Route({ stages, compact = false }: { readonly stages: readonly RouteStage[]; readonly compact?: boolean }) {
+  return (
+    <ol aria-label="行程" data-testid="route" data-variant="dots" className={compact ? "opx-route opx-route-compact" : "opx-route"} style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
+      {stages.map((st) => (
+        <li key={st.label} data-stage-state={st.state} className={`opx-rs opx-rs-${st.state}`}>
+          <span className="opx-rs-dot" aria-hidden="true">
+            <RouteDot state={st.state} />
+          </span>
+          <span className="opx-rs-name">{st.label}</span>
+          <span className="opx-rs-state">{st.stateLabel ?? ROUTE_STATE_LABEL[st.state]}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -55,43 +82,37 @@ export function TodayStatus({ badge }: { readonly badge: TodayBadgeDto }) {
 function Fact({ label, children }: { readonly label: string; readonly children: ReactNode }) {
   return (
     <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1">
-      <dt className="text-aux text-fg-mute">{label}</dt>
-      <dd className="min-w-0 text-table text-fg [text-wrap:pretty]">{children}</dd>
+      <dt className="text-[13px] text-sb-ink-3">{label}</dt>
+      <dd className="min-w-0 text-sb-ink [text-wrap:pretty]">{children}</dd>
     </div>
   );
 }
 
 /**
- * 行程表の帯（「次の飛行」の主役）。カードの左右いっぱいに、罫で区切った 7 つの欄（番号・段・済／次／未）を置き、「次」の欄に押印のような印を付ける。
+ * 行程表の帯（「次の飛行」の主役）。7 つの段（丸い印・段の名前・済／次／未）を 1 行に置き、「次」の段を橙の面にする。
  * 帯の下に 1 行：いまの「次」の段と、その段の作業（この計画の次にやること。押すとその作業へ）。
  * 行程の導出（journey-logic）は変えない。ここは見せ方だけ。
  */
 function RouteBand({ card, next }: { readonly card: TodayCardDto; readonly next: JourneyNext }) {
   const done = card.journey.filter((s) => s.state === "done").length;
   return (
-    <div className="-mx-5 flex flex-col gap-2 sm:-mx-6" data-testid="today-card-route">
-      <div className="flex items-baseline justify-between gap-3 px-5 sm:px-6">
-        <p className="text-aux font-medium text-fg-mute">行程</p>
-        <p className="font-mono text-aux tabular-nums text-fg-mute" data-testid="today-card-route-count">
+    <div className="flex flex-col gap-2" data-testid="today-card-route">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-[13px] font-bold text-sb-ink-2">行程</p>
+        <p className="opx-num text-[13px] text-sb-ink-3" data-testid="today-card-route-count">
           済 {done} / {card.journey.length}
         </p>
       </div>
-      <JourneyLedger stages={card.journey} />
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-0 px-5 text-table text-fg-soft sm:px-6" data-testid="today-card-next">
+      <Route stages={card.journey} />
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-0 text-sb-ink-2" data-testid="today-card-next">
         {next.stage ? (
           <>
             <span>
-              次は<span className="font-semibold text-fg">{next.stage.label}</span>の段
+              次は<span className="font-bold text-sb-ink">{next.stage.label}</span>の段
             </span>
             {next.action ? (
-              <a
-                href={next.action.href}
-                className="inline-flex min-h-11 items-center gap-1 font-semibold text-accent hov:underline"
-                data-testid="today-card-next-link"
-                data-action-id={next.action.id}
-              >
+              <a href={next.action.href} className="opx-underlink" data-testid="today-card-next-link" data-action-id={next.action.id}>
                 {next.action.label}
-                <Icon name="chevron-right" size={16} />
               </a>
             ) : null}
           </>
@@ -105,75 +126,69 @@ function RouteBand({ card, next }: { readonly card: TodayCardDto; readonly next:
 
 /**
  * 今日（なければ次）の飛行の大きなカード 1 枚。主ボタンは 1 つだけ（当日は「現場モードを開く」）。
- * 読む順：時刻と名称 → 機体・操縦者（何を・誰が） → 行程の 1 行（どこまで進んだか） → 判定・通報・確認（その中身） → 主ボタン。
- * 行程の 1 行と 3 つの行は同じ「判定・確認・通報」を指すが、行程は進み具合（済／次／未）、行は中身（判定の段階・通報の要否と状況・確認の状態の文言）を
- * 担う。機体・操縦者は行程にない情報なので、行から外して名称の下に置いた（5 行を 3 行にし、罫線も減らした）。
+ * 読む順：時刻と名称 → 機体・操縦者（何を・誰が） → 判定・通報・確認（その中身） → 行程の 1 行（どこまで進んだか） → 主ボタン。
+ * 行程の 1 行と 3 つの行は同じ「判定・確認・通報」を指すが、行程は進み具合（済／次／未）、行は中身（判定の段階・通報の要否と状況・確認の状態の文言）を担う。
  */
 export function TodayCard({ card, today, nextActions = [] }: { readonly card: TodayCardDto; readonly today: string; readonly nextActions?: readonly TodayNextAction[] }) {
   return (
-    <Card
-      as="section"
-      variant="primary"
-      aria-label={card.reasonLabel}
-      data-testid="today-card"
-      data-reason={card.reason}
-      data-plan-id={card.planId}
-      className="flex flex-col gap-4"
-    >
+    <section aria-label={card.reasonLabel} data-testid="today-card" data-reason={card.reason} data-plan-id={card.planId} className="sb-block opx-nc">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <p className="text-aux font-medium text-fg-soft" data-testid="today-card-reason">
+        <p className="text-[13px] font-bold text-sb-ink-2" data-testid="today-card-reason">
           {card.reasonLabel}
         </p>
         <TodayStatus badge={card.badge} />
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-          <p className="text-stat font-semibold leading-none tabular-nums text-fg" data-testid="today-card-time">
+          <p className="opx-nc-time" data-testid="today-card-time">
             {card.timeLabel}
           </p>
-          <p className="text-table tabular-nums text-fg-mute" data-testid="today-card-date">
+          <p className="opx-num text-[13px] text-sb-ink-3" data-testid="today-card-date">
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>
           </p>
         </div>
-        <h2 className="mt-1.5 text-h2 font-semibold text-fg [text-wrap:balance]" data-testid="today-card-title">
+        <h2 className="opx-nc-title mt-1.5 [text-wrap:balance]" data-testid="today-card-title">
           {card.title}
         </h2>
-        <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-table text-fg-soft">
+        <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sb-ink-2">
           <span>
-            <span className="text-aux text-fg-mute">機体 </span>
-            <span data-testid="today-card-aircraft">
-              <span className="tabular-nums">{card.registrationMark}</span>（{card.modelName}）
+            <span className="text-[13px] text-sb-ink-3">機体 </span>
+            <span className="font-bold text-sb-ink" data-testid="today-card-aircraft">
+              <span className="opx-num">{card.registrationMark}</span>（{card.modelName}）
             </span>
           </span>
           <span>
-            <span className="text-aux text-fg-mute">操縦者 </span>
-            <span data-testid="today-card-pilot">{card.pilotName}</span>
+            <span className="text-[13px] text-sb-ink-3">操縦者 </span>
+            <span className="font-bold text-sb-ink" data-testid="today-card-pilot">
+              {card.pilotName}
+            </span>
           </span>
         </p>
       </div>
-      <RouteBand card={card} next={journeyNext(card.journey, nextActions, card.planId)} />
-      <dl className="flex flex-col border-t border-line pt-2">
+      <dl className="flex flex-col">
         <Fact label="判定の段階">
-          <span className="font-semibold" data-testid="today-card-verdict">
+          <span className="font-bold" data-testid="today-card-verdict">
             {card.verdictLabel}
             {card.judgementStale ? "（判定が古い）" : ""}
           </span>
         </Fact>
         <Fact label="通報の状況">
-          <span data-testid="today-card-report">
+          <span className="font-bold" data-testid="today-card-report">
             <span aria-hidden>{card.report.statusMark} </span>
             {card.report.requirementLabel}／{card.report.statusLabel}
           </span>
         </Fact>
         <Fact label="確認の状況">
-          <span data-testid="today-card-confirmation">{card.confirmation.label}</span>
+          <span className="font-bold" data-testid="today-card-confirmation">
+            {card.confirmation.label}
+          </span>
         </Fact>
       </dl>
-      <a href={card.primary.href} className={buttonClass("primary", "md", "min-h-14 w-full sm:w-auto sm:self-start")} data-testid="today-card-primary" data-kind={card.primary.kind}>
-        <Icon name={card.primary.kind === "field" ? "flight" : "plan"} size={18} />
+      <RouteBand card={card} next={journeyNext(card.journey, nextActions, card.planId)} />
+      <a href={card.primary.href} className="opx-btn opx-btn-primary opx-nc-primary" data-testid="today-card-primary" data-kind={card.primary.kind}>
         {card.primary.label}
       </a>
-    </Card>
+    </section>
   );
 }
 
@@ -182,13 +197,13 @@ export function TodayRest({ rows }: { readonly rows: readonly TodayRowDto[] }) {
   if (rows.length === 0) return null;
   return (
     <section aria-label="今日の残りの飛行" className="flex flex-col gap-2" data-testid="today-rest">
-      <SectionTitle>今日の残りの飛行</SectionTitle>
-      <ul className="flex flex-col divide-y divide-line border-y border-line">
+      <SectionHead id="today-rest-h" title="今日の残りの飛行" />
+      <ul className="sb-block sb-rows !py-1">
         {rows.map((r) => (
           <li key={r.planId} data-testid="today-rest-row">
-            <a href={r.href} className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1 py-2 text-table transition-colors hov:bg-accent-soft" data-testid="today-rest-link">
-              <span className="tabular-nums text-fg">{r.timeLabel}</span>
-              <span className="min-w-0 flex-1 break-words text-body font-medium text-fg">{r.title}</span>
+            <a href={r.href} className="sb-row flex-wrap" data-testid="today-rest-link">
+              <span className="opx-num font-bold">{r.timeLabel}</span>
+              <span className="min-w-0 flex-1 break-words font-bold">{r.title}</span>
               <TodayStatus badge={r.badge} />
             </a>
           </li>
@@ -205,31 +220,40 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
   // 計画を作れない役割（閲覧者・操縦者の行に結び付いていない操縦者）には「飛行計画を作る」を出さない（押しても作れない）。サーバーの文言・経路は変えない
   const actions = canPlan ? empty.actions : empty.actions.filter((a) => a.href !== PLAN_NEW_HREF);
   return (
-    <Card as="section" variant="primary" aria-label="今日の飛行" className="flex flex-col gap-4" data-testid="today-empty">
-      <p className="text-h2 font-semibold text-fg" data-testid="today-empty-message">
+    <section aria-label="今日の飛行" className="sb-block flex flex-col gap-3" data-testid="today-empty">
+      <p className="text-[18px] font-bold leading-snug" data-testid="today-empty-message">
         {empty.message}
       </p>
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row">
         {actions.map((a, i) => (
-          <a key={a.href} href={a.href} className={buttonClass(i === 0 ? "primary" : "secondary", "md", "min-h-14 sm:min-h-11")} data-testid="today-empty-action">
+          <a key={a.href} href={a.href} className={i === 0 ? "opx-btn opx-btn-primary" : "opx-btn min-h-14 sm:min-h-12"} data-testid="today-empty-action">
             {a.label}
           </a>
         ))}
       </div>
-    </Card>
+    </section>
+  );
+}
+
+/** 「計画の一覧へ」（次にやることの見出しの右。押す高さは 44px 以上）。 */
+function PlansLink({ href }: { readonly href: string }) {
+  return (
+    <a href={href} className="inline-flex min-h-11 items-center text-[14px] font-bold text-sb-ink underline decoration-sb-orange decoration-[3px] underline-offset-4" data-testid="today-plans-link">
+      計画の一覧へ
+    </a>
   );
 }
 
 /** 次にやること：最初の画面に出す件数（残りは「ほか N 件を見る」で開く。近づく期限などが最初の画面から落ちないようにする）。 */
 export const NEXT_ACTIONS_INITIAL = 3;
 
-// 期限の札（見本の「近づく期限」と同じ StatusPill）。状態は札の文字と印で伝え、色は補助。
-const TIER_PILL: Readonly<Record<number, { readonly meaning: Meaning; readonly icon: IconName; readonly text: string }>> = {
-  1: { meaning: "danger", icon: "alert", text: "最優先" },
-  2: { meaning: "warn", icon: "clock", text: "期限超過" },
-  3: { meaning: "neutral", icon: "dot", text: "未了" },
-  4: { meaning: "info", icon: "info", text: "確認・変更" },
-  5: { meaning: "neutral", icon: "dot", text: "推奨" },
+// 急ぎ度の札（見本の「次にやること」の札）。状態は札の文字と印で伝え、橙は「急ぎ」の面だけに使う（判定の色は使わない）。
+const TIER_PILL: Readonly<Record<number, { readonly cls: string; readonly mark: string; readonly text: string; readonly meaning: string }>> = {
+  1: { cls: "sb-tag sb-tag-strong", mark: "！", text: "最優先", meaning: "danger" },
+  2: { cls: "sb-tag sb-tag-strong", mark: "！", text: "期限超過", meaning: "warn" },
+  3: { cls: "sb-tag sb-tag-deadline", mark: "○", text: "未了", meaning: "neutral" },
+  4: { cls: "sb-tag", mark: "ⓘ", text: "確認・変更", meaning: "info" },
+  5: { cls: "sb-tag", mark: "○", text: "推奨", meaning: "neutral" },
 };
 
 /**
@@ -256,41 +280,45 @@ function HomeActionRow({ action, today }: { readonly action: TodayNextAction; re
     <>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <StatusPill meaning={pill.meaning} icon={pill.icon}>
+          <span className={pill.cls} data-meaning={pill.meaning}>
+            <span aria-hidden>{pill.mark}</span>
             {pill.text}
-          </StatusPill>
+          </span>
           {action.planTitle ? (
-            <span className="min-w-0 text-aux text-fg-mute" data-testid="today-next-action-plan">
+            <span className="min-w-0 text-[13px] text-sb-ink-3" data-testid="today-next-action-plan">
               {action.planTitle}
             </span>
           ) : null}
         </span>
-        <span className="text-body font-medium leading-snug text-fg" data-testid="today-next-action-label">
+        <span className="text-[15px] font-bold leading-snug text-sb-ink" data-testid="today-next-action-label">
           {action.label}
         </span>
-        <span className="text-table text-fg-soft [text-wrap:pretty]">{day(action.reason)}</span>
+        <span className="text-[13px] leading-relaxed text-sb-ink-2 [text-wrap:pretty]">{day(action.reason)}</span>
         {due ? (
           <span className="flex flex-col gap-0.5" data-testid="today-next-action-due">
-            <span className="text-table text-fg [text-wrap:pretty]">{day(due.head)}</span>
-            {due.note ? <span className="text-aux text-fg-mute [text-wrap:pretty]">{due.note}</span> : null}
+            <span className="text-[13px] leading-relaxed text-sb-ink [text-wrap:pretty]">{day(due.head)}</span>
+            {due.note ? <span className="text-[12px] leading-relaxed text-sb-ink-3 [text-wrap:pretty]">{due.note}</span> : null}
           </span>
         ) : null}
         {!action.canAct ? (
-          <span className="text-table text-fg-mute" data-testid="today-next-action-cannot">
+          <span className="text-[13px] text-sb-ink-3" data-testid="today-next-action-cannot">
             {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
           </span>
         ) : null}
       </span>
-      {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-fg-mute" /> : null}
+      {action.canAct ? (
+        <span className="sb-go-dot" aria-hidden="true">
+          <Icon name="chevron-right" size={20} />
+        </span>
+      ) : null}
     </>
   );
-  const box = "flex min-h-14 items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]";
   return action.canAct ? (
-    <a href={action.href} className={`${box} hov:bg-accent-soft`} data-testid="today-next-action-link" data-action-id={action.id}>
+    <a href={action.href} className="sb-row !items-start" data-testid="today-next-action-link" data-action-id={action.id}>
       {body}
     </a>
   ) : (
-    <div className={box} data-testid="today-next-action-link" data-action-id={action.id}>
+    <div className="sb-row !items-start" data-testid="today-next-action-link" data-action-id={action.id}>
       {body}
     </div>
   );
@@ -323,23 +351,27 @@ export function TodayNextActions({
   const tail = actions.slice(NEXT_ACTIONS_INITIAL);
   return (
     <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="today-next-actions">
-      {heading ? <SectionTitle aside={total ? <span className="text-table tabular-nums text-fg-mute">{total} 件</span> : undefined}>次にやること</SectionTitle> : null}
+      {heading ? (
+        <div className="sb-sec-head sb-sec-row">
+          <h2 id="today-next-h">次にやること</h2>
+          <span className="flex items-center gap-x-4">
+            {total ? <span className="sb-num text-[13px] text-sb-ink-3">{total} 件</span> : null}
+            {plansHref ? <PlansLink href={plansHref} /> : null}
+          </span>
+        </div>
+      ) : null}
       {actions.length === 0 ? (
-        <p className="flex items-center gap-2 border-y border-line py-4 text-table text-fg-soft" data-testid="today-next-actions-empty">
-          <Icon name="check-circle" size={18} className="shrink-0 text-fg-mute" />
+        <p className="flex items-center gap-2 text-sb-ink-2" data-testid="today-next-actions-empty">
+          <Icon name="check-circle" size={18} className="shrink-0 text-sb-ink-3" />
           いま、やることはありません。
         </p>
       ) : (
-        <div className="flex flex-col border-y border-line">
-          <ul className="flex flex-col divide-y divide-line">{head.map((a, i) => row(a, i))}</ul>
+        <div className={heading ? "sb-block !py-1" : ""}>
+          <ul className="sb-rows">{head.map((a, i) => row(a, i))}</ul>
           {tail.length > 0 ? <MoreRows count={tail.length} data-testid="today-next-more">{tail.map((a, i) => row(a, head.length + i))}</MoreRows> : null}
         </div>
       )}
-      {plansHref ? (
-        <a href={plansHref} className="inline-flex min-h-11 items-center self-start text-table text-accent underline underline-offset-2" data-testid="today-plans-link">
-          計画の一覧へ
-        </a>
-      ) : null}
+      {plansHref && !heading ? <PlansLink href={plansHref} /> : null}
     </section>
   );
 }
@@ -348,33 +380,34 @@ export function TodayNextActions({
 export function TodayDeadlines({ deadlines, today }: { readonly deadlines: readonly DeadlineDto[]; readonly today: string }) {
   return (
     <section aria-label="近づく期限" data-testid="home-deadlines" className="flex flex-col gap-2">
-      <SectionTitle>近づく期限</SectionTitle>
+      <SectionHead id="home-deadlines-h" title="近づく期限" note="60 日以内" />
       {deadlines.length === 0 ? (
-        <p className="border-y border-line py-4 text-table text-fg-soft" data-testid="home-deadlines-empty">
+        <p className="text-sb-ink-2" data-testid="home-deadlines-empty">
           60 日以内に近づく期限はありません。
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-line border-y border-line">
+        <ul className="sb-block sb-rows !py-1">
           {deadlines.map((d) => (
             <li key={`${d.kind}-${d.id}`} data-testid="deadline-row" data-kind={d.kind}>
-              <a href={d.href} className="flex min-h-14 items-center gap-3 py-2 transition-colors hov:bg-accent-soft" data-testid="deadline-link">
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-body font-medium text-fg">{d.what}</span>
-                  <span className="break-words text-aux text-fg-mute">
+              <a href={d.href} className="sb-row" data-testid="deadline-link">
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-[15px] font-bold leading-snug">{d.what}</span>
+                  <span className="break-words text-[13px] text-sb-ink-2">
                     {d.subject}
                     {d.licenseStatus === "renewal_window" ? "　更新の申請期間" : d.licenseStatus === "past_deadline" ? "　更新の申請期限を過ぎています" : d.licenseStatus === "expired" ? "　有効期限切れ" : ""}
                   </span>
                 </span>
-                <span className="flex shrink-0 flex-col items-end gap-0.5">
-                  <span className="text-table tabular-nums text-fg">
+                <span className="flex shrink-0 flex-col items-end gap-1">
+                  <span className="sb-num text-[13px] text-sb-ink">
                     <time dateTime={d.date}>{formatDay(d.date, today)}</time>
                   </span>
                   {d.overdue || d.daysLeft <= 30 ? (
-                    <StatusPill meaning={d.overdue ? "danger" : "warn"} icon={d.overdue ? "alert" : "clock"}>
+                    <span className={d.overdue ? "sb-tag sb-tag-strong" : "sb-tag sb-tag-deadline"}>
+                      <span aria-hidden>{d.overdue ? "！" : "○"}</span>
                       {d.leftLabel}
-                    </StatusPill>
+                    </span>
                   ) : (
-                    <span className="text-aux text-fg-mute">{d.leftLabel}</span>
+                    <span className="text-[13px] text-sb-ink-3">{d.leftLabel}</span>
                   )}
                 </span>
               </a>
@@ -382,7 +415,7 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
           ))}
         </ul>
       )}
-      <p className="text-aux text-fg-mute" data-testid="home-deadlines-note">
+      <p className="text-[12.5px] text-sb-ink-3" data-testid="home-deadlines-note">
         機体の期限は、記録する場所がまだないため出ません。
       </p>
     </section>
@@ -393,26 +426,26 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
 export function TodayUpcoming({ flights, today }: { readonly flights: readonly TodayUpcomingDto[]; readonly today: string }) {
   return (
     <section aria-label="直近の飛行" data-testid="home-upcoming" className="flex flex-col gap-2">
-      <SectionTitle>直近の飛行</SectionTitle>
+      <SectionHead id="home-upcoming-h" title="直近の飛行" note="7 日以内" />
       {flights.length === 0 ? (
-        <p className="border-y border-line py-4 text-table text-fg-soft" data-testid="home-upcoming-empty">
+        <p className="text-sb-ink-2" data-testid="home-upcoming-empty">
           今日から 7 日以内に、ほかの飛行の予定はありません。
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-line border-y border-line">
+        <ul className="sb-block sb-rows !py-1">
           {flights.map((f) => (
             <li key={f.planId} data-testid="upcoming-row" data-plan-id={f.planId}>
-              <a href={f.href} className="flex flex-col gap-2 py-3 transition-colors hov:bg-accent-soft" data-testid="upcoming-link">
+              <a href={f.href} className="sb-row !flex-col !items-stretch !gap-2" data-testid="upcoming-link">
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="min-w-0 text-body font-medium text-fg">
-                    <span className="tabular-nums">
+                  <span className="min-w-0 text-[15px] font-bold leading-snug">
+                    <span className="sb-num">
                       <time dateTime={f.plannedDate}>{formatDay(f.plannedDate, today)}</time>
                     </span>{" "}
                     {f.title}
                   </span>
-                  <span className="text-aux text-fg-mute">あと {f.daysLeft} 日</span>
+                  <span className="text-[13px] text-sb-ink-3">あと {f.daysLeft} 日</span>
                 </span>
-                <JourneyLine stages={f.journey} compact />
+                <Route stages={f.journey} compact />
               </a>
             </li>
           ))}

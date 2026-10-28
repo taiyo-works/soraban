@@ -1,0 +1,228 @@
+/* 運航管理 `/ops` の v2：画面ごとの部品（Sprint 12h PR ③b1。ホーム・計画・点検・日誌）。値は --sb-* だけ。app/ops/layout.tsx だけが読み込む。 */
+
+@layer components {
+/* ===== ホーム（見本：home.html） ===== */
+.opx-underlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sb-hit-min);
+  color: var(--sb-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--sb-orange);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+.opx-nc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.opx-nc-time {
+  font-family: var(--font-num), sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.opx-nc-title {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+}
+.opx-nc-primary {
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  .opx-nc-time {
+    font-size: 52px;
+  }
+  .opx-nc-title {
+    font-size: 24px;
+  }
+  .opx-nc-primary {
+    align-self: flex-start;
+    width: auto;
+    min-width: 320px;
+  }
+}
+/* 行程：丸い印・段の名前・済／次／未。「次」の段だけ橙の面（形：チェック＝済、▶＝次、破線の輪＝未） */
+.opx-route {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-rs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 0 6px;
+  border-radius: var(--sb-r-m);
+  text-align: center;
+  line-height: 1.2;
+}
+.opx-rs-dot {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--sb-pill);
+}
+.opx-rs-dot svg {
+  width: 12px;
+  height: 12px;
+}
+.opx-rs-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.opx-rs-state {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sb-ink-3);
+  white-space: nowrap;
+}
+.opx-rs-done .opx-rs-dot {
+  background: var(--sb-ink);
+  color: var(--sb-on-dot);
+}
+.opx-rs-next {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+}
+.opx-rs-next .opx-rs-dot {
+  background: var(--sb-on-orange);
+  color: var(--sb-orange);
+}
+.opx-rs-next .opx-rs-state {
+  color: var(--sb-on-orange);
+  font-weight: 700;
+}
+.opx-rs-todo .opx-rs-dot,
+.opx-rs-skip .opx-rs-dot {
+  border: 2px dashed var(--sb-edge);
+}
+.opx-rs-todo .opx-rs-name,
+.opx-rs-skip .opx-rs-name {
+  color: var(--sb-ink-2);
+  font-weight: 500;
+}
+.opx-route-compact .opx-rs {
+  padding: 4px 0;
+}
+.opx-route-compact .opx-rs-dot {
+  width: 18px;
+  height: 18px;
+}
+@media (max-width: 400px) {
+  .opx-rs-name {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+}
+
+/* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
+ * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の橙線）にする。保存の帯（.opx-submit）は区画の外。 */
+.opx-form > section,
+.opx-form > fieldset {
+  min-width: 0;
+  padding: 20px 16px;
+  border: 0;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+}
+@media (min-width: 1024px) {
+  .opx-form > section,
+  .opx-form > fieldset {
+    padding: 24px;
+  }
+}
+.opx-form > fieldset > legend,
+.opx-form > section > h2:first-child,
+.opx-form > section > legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 4px 0 4px 14px;
+  border: 0;
+  border-left: 5px solid var(--sb-orange);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: var(--sb-ink);
+}
+.opx-form > fieldset > legend + * {
+  clear: both;
+}
+.opx-form > fieldset {
+  position: relative;
+}
+.opx-form > fieldset > legend {
+  position: relative;
+  box-sizing: border-box;
+}
+/* 見出しの背後の大きな薄い番号（装飾。読み上げない） */
+.opx-step-num {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-family: var(--font-num), sans-serif;
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--sb-sec-num);
+  pointer-events: none;
+  user-select: none;
+}
+.opx-form > fieldset > legend {
+  z-index: 1;
+}
+}
+
+/* ===== 共通の .sb-*（unlayered）の上書き ===== */
+.sb-sec-head[data-tone="danger"] {
+  border-left-color: var(--sb-v-no-fg);
+}
+/* 見出しの右に件数（次にやること） */
+.sb-sec-head.sb-sec-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* ホームのスマホ：見出しを低くして、近づく期限が最初の画面から落ちないようにする（PC は見本どおりの大きさ） */
+@media (max-width: 1023px) {
+  [data-testid="ops-today"] .sb-sec-head {
+    min-height: 36px;
+    margin-bottom: 6px;
+    padding: 2px 0 2px 12px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-start;
+    column-gap: 10px;
+  }
+  [data-testid="ops-today"] .sb-sec-head.sb-sec-row {
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+  [data-testid="ops-today"] .sb-sec-head h2 {
+    font-size: 19px;
+  }
+  [data-testid="ops-today"] .sb-row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}

@@ -17,8 +17,10 @@ export const OPS_CONTENT_CLASS = "mx-auto flex w-full max-w-5xl flex-1 flex-col 
 export function OpsFrame({ nav, topBar, bottomNav, children }: { readonly nav: ReactNode; readonly topBar: ReactNode; readonly bottomNav: ReactNode; readonly children: ReactNode }) {
   const pathname = usePathname() ?? "";
   if (pathname === DESIGN_CATALOG_PATH) return <>{children}</>;
+  // 現場モード（…/field）は ③b2 で v2 の現場の値にする。それまでは旧い値のまま（枠の v2 を当てない）
+  const isField = /\/field(\/|$)/.test(pathname);
   return (
-    <div className="ds ds-page flex flex-1 flex-col lg:flex-row" data-testid="ops-root">
+    <div className={`ds ds-page${isField ? "" : " ops-v2"} flex flex-1 flex-col lg:flex-row`} data-testid="ops-root">
       <OpsSkipLink />
       {nav}
       <div className="flex min-w-0 flex-1 flex-col">

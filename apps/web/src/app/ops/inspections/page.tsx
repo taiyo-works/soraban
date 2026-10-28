@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
 import { Icon } from "@/components/ui/icons";
-import { NoticeBar, PageHeader } from "@/components/ui/primitives";
+import { Notice, PageHeader } from "@/components/ops/ui";
 import { PillLink } from "@/components/ui/sb-parts";
 import { pendingPreflightInspections } from "@/lib/inspection-pending";
 import { INSPECTION_TIMING_LABELS, INSPECTION_TIMINGS, type InspectionTiming } from "@/lib/ops-records";
@@ -37,7 +37,7 @@ function SecHead({ title, aside, testId }: { readonly title: string; readonly as
         <h2>{title}</h2>
       </div>
       {aside ? (
-        <p className="text-table tabular-nums text-fg-mute" {...(testId ? { "data-testid": testId } : {})}>
+        <p className="sb-num text-[13px] text-sb-ink-3" {...(testId ? { "data-testid": testId } : {})}>
           {aside}
         </p>
       ) : null}
@@ -75,18 +75,16 @@ export default async function InspectionListPage({
           </PillLink>
         </div>
       ) : (
-        <NoticeBar meaning="neutral" icon="info">
-          {denied}
-        </NoticeBar>
+        <Notice>{denied}</Notice>
       )}
 
       <section aria-label="未実施" className="flex flex-col gap-3" data-testid="inspection-pending">
         <SecHead title="未実施" aside={`${pending.length} 件`} testId="inspection-pending-count" />
-        <p className="text-aux text-fg-mute" data-testid="inspection-pending-scope">
+        <p className="text-[13px] text-sb-ink-3" data-testid="inspection-pending-scope">
           今日の計画で、飛行前の点検の記録がまだないものです。
         </p>
         {pending.length === 0 ? (
-          <p className="sb-block-soft text-table text-fg-soft" data-testid="inspection-pending-empty">
+          <p className="sb-block-soft text-table text-sb-ink-2" data-testid="inspection-pending-empty">
             未実施の点検はありません。
           </p>
         ) : (
@@ -101,17 +99,17 @@ export default async function InspectionListPage({
                         <span className="sb-tag">飛行前</span>
                         <span className="sb-tag sb-tag-strong">－ 未実施</span>
                       </span>
-                      <span className="text-body font-bold text-fg [text-wrap:pretty]" data-testid="inspection-pending-title">
+                      <span className="text-body font-bold text-sb-ink [text-wrap:pretty]" data-testid="inspection-pending-title">
                         {p.title}
-                        {p.timeLabel ? <span className="sb-num ml-2 text-table font-medium text-fg-soft">{p.timeLabel}</span> : null}
+                        {p.timeLabel ? <span className="sb-num ml-2 text-table font-medium text-sb-ink-2">{p.timeLabel}</span> : null}
                       </span>
                       {p.registrationMark ? (
-                        <span className="text-aux text-fg-mute">
-                          機体 <span className="sb-num text-fg-soft">{p.registrationMark}</span>
+                        <span className="text-[13px] text-sb-ink-3">
+                          機体 <span className="sb-num text-sb-ink-2">{p.registrationMark}</span>
                         </span>
                       ) : null}
                       {p.canAct ? null : (
-                        <span className="text-table text-fg-mute" data-testid="inspection-pending-cannot">
+                        <span className="text-table text-sb-ink-3" data-testid="inspection-pending-cannot">
                           点検の入力は、運航管理者または計画の操縦者本人が行います。
                         </span>
                       )}
@@ -144,18 +142,19 @@ export default async function InspectionListPage({
         <SecHead title="記録" aside="新しい順" />
         <nav aria-label="区分で絞り込む" className="sb-chips" data-testid="inspection-timing-filter">
           {([null, ...INSPECTION_TIMINGS] as const).map((t) => (
-            // 絞り込みは通常のリンク（画面ごと読み直す。RecordFilter の GET の form と同じ作法で、クライアント遷移の途中状態を持たない）
+            // 同じ画面の ?timing= の切り替えは通常のリンク（<a>。画面ごと読み直す）。next/link だと、行き来を繰り返すうちに、サーバーが 200 を返しているのに
+            // 画面と URL が切り替わらないことがある（Sprint 12h PR ③b1 の調査：docs/evaluations/12h-pr3b1-test-changes.md §E）。prefetch={false} でも直らなかった
             <a key={t ?? "all"} href={chipHref(sp, t)} aria-current={timing === t ? "true" : undefined} className="sb-chip" data-testid={`inspection-timing-${t ?? "all"}`}>
               {t ? INSPECTION_TIMING_LABELS[t] : "すべて"}
             </a>
           ))}
         </nav>
         <RecordFilter basePath="/ops/inspections" aircraft={aircraft} value={filter} hidden={timing ? { timing } : {}} />
-        <p className="text-table tabular-nums text-fg-mute" data-testid="inspection-count">
+        <p className="sb-num text-[13px] text-sb-ink-3" data-testid="inspection-count">
           {rows.length} 件
         </p>
         {rows.length === 0 ? (
-          <p className="sb-block-soft text-table text-fg-soft" data-testid="inspection-empty">
+          <p className="sb-block-soft text-table text-sb-ink-2" data-testid="inspection-empty">
             日常点検の記録はありません。
           </p>
         ) : (
@@ -186,12 +185,12 @@ export default async function InspectionListPage({
                         )}
                         {i.voided ? <span className="sb-tag">取消済み</span> : null}
                       </span>
-                      <span className={`text-body font-bold ${i.voided ? "text-fg-mute line-through" : "text-fg"}`}>
+                      <span className={`text-body font-bold ${i.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`}>
                         <span className="sr-only">機体</span>
                         <span className="sb-num break-all">{i.registrationMark}</span>
                       </span>
-                      <span className="break-words text-table text-fg-soft">
-                        <span className="text-aux text-fg-mute">実施者 </span>
+                      <span className="break-words text-table text-sb-ink-2">
+                        <span className="text-[13px] text-sb-ink-3">実施者 </span>
                         {i.inspectorName}
                       </span>
                     </span>

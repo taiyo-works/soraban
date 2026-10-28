@@ -28,7 +28,7 @@ import { OpsError } from "@/server/ops/service";
 import { JUDGEMENT_LINK_MISSING_LABEL } from "@/server/ops/records";
 
 const DECISION_LABEL = { approved: "確認", returned: "差し戻し" } as const;
-const mono = "font-mono text-xs tnum break-all";
+const mono = "sb-num text-xs tnum break-all";
 
 // 飛行計画の詳細：概要／判定の要約／通報の要否／確認の状況／この計画の飛行記録／版の履歴（Sprint 12a 設計 F）。
 export default async function PlanDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
@@ -59,16 +59,16 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
   const j = plan.judgement;
 
   const overview: [string, React.ReactNode][] = [
-    ["予定開始（日本時間）", <span key="s" className="font-mono tnum" data-testid="plan-start">{plan.plannedStartAtJst}</span>],
+    ["予定開始（日本時間）", <span key="s" className="sb-num tnum" data-testid="plan-start">{plan.plannedStartAtJst}</span>],
     ["所要時間", `${plan.durationMinutes} 分`],
-    ["機体", <span key="a" className="font-mono">{plan.registrationMark}（{plan.modelName}）</span>],
+    ["機体", <span key="a" className="sb-num">{plan.registrationMark}（{plan.modelName}）</span>],
     ["操縦者", <span key="p" data-testid="plan-pilot-name">{plan.pilotName}</span>],
     ["飛行の目的", plan.purpose],
     [
       "場所",
       <span key="pl" className="flex flex-col">
         <span>{plan.placeName}</span>
-        <span className="font-mono text-xs tnum text-ink-soft">
+        <span className="sb-num text-xs tnum text-sb-ink-2">
           {plan.latitude}, {plan.longitude}（WGS84）{plan.radiusM !== null ? `／半径 ${plan.radiusM} m` : ""}
         </span>
       </span>,
@@ -86,7 +86,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
       })(),
     ],
     ["運航の目的（例外）", plan.judgementPurpose ? (PURPOSE_VALUE_LABEL[plan.judgementPurpose] ?? plan.judgementPurpose) : "通常運航"],
-    ["許可・承認の番号", <span key="pn" className="break-all font-mono text-xs" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
+    ["許可・承認の番号", <span key="pn" className="break-all sb-num text-xs" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
     ["メモ", plan.notes ?? "—"],
   ];
 
@@ -101,12 +101,12 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           <div className="flex flex-wrap items-center gap-2">
             <PlanStateBadge state={plan.state} label={plan.stateLabel} />
             {plan.freshness.stale ? <StaleBadge /> : null}
-            <span className="font-mono text-[11px] tnum text-ink-mute">版 {plan.version}</span>
+            <span className="sb-num text-[12px] tnum text-sb-ink-3">版 {plan.version}</span>
           </div>
         </PageHeader>
         {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
         <p
-          className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink"
+          className="opx-note"
           data-testid="plan-disclaimer"
         >
           {PLAN_JUDGEMENT_DISCLAIMER}
@@ -173,13 +173,13 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           <PlanStateBadge state={plan.state} label={plan.stateLabel} />
           {plan.selfConfirmation ? <Badge tone="amber" data-testid="plan-self-confirmation">{SELF_CONFIRMATION_LABEL}</Badge> : null}
         </div>
-        <dl className="flex flex-col border-t border-rule text-sm" data-testid="plan-confirm-facts">
-          <div className="grid grid-cols-1 gap-0.5 border-b border-rule-soft py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-            <dt className="text-xs text-ink-mute sm:text-sm">判定不能の件数</dt>
+        <dl className="flex flex-col border-t border-sb-rule text-sm" data-testid="plan-confirm-facts">
+          <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+            <dt className="text-xs text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
             <dd data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
           </div>
-          <div className="grid grid-cols-1 gap-0.5 border-b border-rule-soft py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-            <dt className="text-xs text-ink-mute sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
+          <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+            <dt className="text-xs text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
             <dd data-testid="plan-stale-sources">
               {plan.staleSources.length === 0 ? (
                 "ありません"
@@ -203,22 +203,22 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           </div>
         ) : null}
         {plan.confirmations.length === 0 ? (
-          plan.state !== "draft" && !plan.voided ? <p className="text-sm text-ink-mute">確認の記録はまだありません。</p> : null
+          plan.state !== "draft" && !plan.voided ? <p className="text-sm text-sb-ink-3">確認の記録はまだありません。</p> : null
         ) : (
-          <ol className="flex flex-col border-t border-rule" data-testid="plan-confirmations">
+          <ol className="flex flex-col border-t border-sb-rule" data-testid="plan-confirmations">
             {[...plan.confirmations].reverse().map((c) => (
-              <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-rule-soft py-3 pl-3 text-sm ${c.decision === "approved" ? "border-l-signal-green" : "border-l-signal-red"}`} data-testid="plan-confirmation-row">
+              <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-sb-rule py-3 pl-3 text-sm ${c.decision === "approved" ? "border-l-sb-ink" : "border-l-sb-v-no-fg"}`} data-testid="plan-confirmation-row">
                 <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <Badge tone={c.decision === "approved" ? "green" : "red"} data-testid="plan-confirmation-decision">
                     <span aria-hidden className="mr-1">{c.decision === "approved" ? "✓" : "↩"}</span>
                     {DECISION_LABEL[c.decision]}
                   </Badge>
                   {c.selfConfirmation ? <Badge tone="amber">{SELF_CONFIRMATION_LABEL}</Badge> : null}
-                  <span className="font-mono text-xs tnum text-ink-mute">版 {c.planVersion}</span>
-                  <time dateTime={c.createdAt} className="font-mono text-xs tnum text-ink-soft">{c.createdAtJst}</time>
+                  <span className="sb-num text-xs tnum text-sb-ink-3">版 {c.planVersion}</span>
+                  <time dateTime={c.createdAt} className="sb-num text-xs tnum text-sb-ink-2">{c.createdAtJst}</time>
                   <span>{c.confirmerName}</span>
                 </p>
-                {c.reason ? <p className="break-all text-ink-soft">理由：{c.reason}</p> : null}
+                {c.reason ? <p className="break-all text-sb-ink-2">理由：{c.reason}</p> : null}
               </li>
             ))}
           </ol>
@@ -242,16 +242,16 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           data-testid="plan-judgement"
           rows={[
             ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-            ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="font-mono text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
+            ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
             ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
             ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
             ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
           ]}
         />
         {plan.freshness.stale ? (
-          <div className="flex flex-col gap-2 border-l-2 border-signal-amber pl-3" data-testid="plan-stale-box">
-            <p className="text-sm font-medium text-ink">判定が古くなっています</p>
-            <ul className="list-disc pl-5 text-sm text-ink-soft" data-testid="plan-stale-reasons">
+          <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
+            <p className="text-sm font-medium text-sb-ink">判定が古くなっています</p>
+            <ul className="list-disc pl-5 text-sm text-sb-ink-2" data-testid="plan-stale-reasons">
               {plan.freshness.reasons.map((r) => (
                 <li key={r.code}>{r.label}</li>
               ))}
@@ -262,7 +262,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
             判定の根拠を見る
           </Link>
-          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-brand-700 underline underline-offset-2" data-testid="plan-snapshots-link">
+          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-sb-ink underline underline-offset-2" data-testid="plan-snapshots-link">
             判定の履歴を見る
           </Link>
         </div>
@@ -284,27 +284,27 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
           空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
         </Note>
-        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+        <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         {planPermits.permits.window ? (
-          <p className="font-mono text-xs tnum text-ink-soft" data-testid="plan-permit-window">
+          <p className="sb-num text-xs tnum text-sb-ink-2" data-testid="plan-permit-window">
             照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}
           </p>
         ) : null}
         {!planPermits.judgementUpToDate ? (
-          <p className="border-l-2 border-signal-amber pl-3 text-sm leading-relaxed text-ink" data-testid="plan-permit-stale">
+          <p className="opx-note" data-testid="plan-permit-stale">
             ! 登録（または許可番号）が、判定した時点から変わっています。判定をやり直すと、現在の登録で照合し直します。
           </p>
         ) : null}
         <PlanPermitList summary={planPermits.permits} />
         {planPermits.candidates.length > 0 ? (
           <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
-            <p className="text-sm font-medium text-ink">範囲に収まる登録済みの許可・承認（候補）</p>
-            <p className="text-xs leading-relaxed text-ink-soft">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
-            <ul className="flex flex-col border-t border-rule">
+            <p className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
+            <p className="text-xs leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
+            <ul className="flex flex-col border-t border-sb-rule">
               {planPermits.candidates.map((c) => (
-                <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-rule-soft border-l-brand-500 py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
-                  <span className="break-all font-mono text-[13px] text-ink">{c.permitNumber}</span>
-                  <span className="text-xs text-ink-soft">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
+                <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
+                  <span className="break-all sb-num text-[13px] text-sb-ink">{c.permitNumber}</span>
+                  <span className="text-xs text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
                 </li>
               ))}
             </ul>
@@ -315,12 +315,12 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             ) : null}
           </div>
         ) : null}
-        <div className="flex flex-col gap-1 border-l-2 border-rule pl-3 text-xs leading-relaxed text-ink-soft" data-testid="plan-permit-applied-note">
+        <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
           <p>
             「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、
             範囲に収まるときだけ判定が変わります。
           </p>
-          <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-brand-700 underline underline-offset-2" data-testid="plan-permits-link">
+          <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
             許可・承認の登録を見る
           </Link>
         </div>
@@ -328,15 +328,15 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
 
       <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">
         {plan.flights.length === 0 ? (
-          <p className="text-sm text-ink-mute" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
+          <p className="text-sm text-sb-ink-3" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
         ) : (
-          <ul className="flex flex-col border-t border-rule" data-testid="plan-flights">
+          <ul className="flex flex-col border-t border-sb-rule" data-testid="plan-flights">
             {plan.flights.map((f) => (
-              <li key={f.id} className="border-b border-rule-soft">
-                <Link prefetch={false} href={`/ops/flights/${f.id}`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 py-2.5 text-sm hover:bg-paper-soft" data-testid="plan-flight-row">
-                  <span className="font-mono tnum">{f.flightDate}</span>
-                  <span className="font-mono tnum">{f.takeoffAtJst.slice(11)}–{f.landingAtJst}</span>
-                  <span className="font-mono text-ink-soft">{f.registrationMark}</span>
+              <li key={f.id} className="border-b border-sb-rule">
+                <Link prefetch={false} href={`/ops/flights/${f.id}`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 py-2.5 text-sm hover:bg-sb-surface" data-testid="plan-flight-row">
+                  <span className="sb-num tnum">{f.flightDate}</span>
+                  <span className="sb-num tnum">{f.takeoffAtJst.slice(11)}–{f.landingAtJst}</span>
+                  <span className="sb-num text-sb-ink-2">{f.registrationMark}</span>
                   <span>{f.pilotName}</span>
                   {f.voided ? <Badge tone="red">取消済み</Badge> : null}
                 </Link>
@@ -349,10 +349,10 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             <Link prefetch={false} href={`/ops/flights/new?planId=${plan.id}`} className={`${buttonOutlineBrandClass} self-start`} data-testid="plan-make-flight">
               飛行記録を作る
             </Link>
-            <p className="text-xs text-ink-mute">機体・操縦者・目的・場所・特定飛行の形態を引き継ぎます。離陸・着陸の時刻は、実際の時刻を入れてください。</p>
+            <p className="text-xs text-sb-ink-3">機体・操縦者・目的・場所・特定飛行の形態を引き継ぎます。離陸・着陸の時刻は、実際の時刻を入れてください。</p>
           </div>
         ) : null}
-        <p className="text-xs text-ink-mute">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
+        <p className="text-xs text-sb-ink-3">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
       </Section>
 
       <LinkedIncidentsSection dto={planIncidents} />

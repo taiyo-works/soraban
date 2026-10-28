@@ -2,18 +2,18 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 // 運航管理（Sprint 10）の画面で共通に使う見た目の部品（サーバー・クライアントのどちらからも使える）。
-// 判定画面の意匠（紙面調・藍 1 色・1px の罫線・角 2px・影なし）に合わせる。
-// 色だけで意味を伝えないよう、状態は必ず文字で示し、色は補助にとどめる。
+// Sprint 12h PR ③b：デザインシステム v2（暖色・ピル・角丸 16/8/4）。見た目は app/ops/ops-v2.css の .opx-*（と soraban-ui.css の .sb-*）で、値は --sb-* だけ。
+// 色だけで意味を伝えないよう、状態は必ず文字で示し、形（実線・破線・反転）を併用する。
 
 export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
 
 const toneClass: Record<Tone, string> = {
-  neutral: "border-rule text-ink-soft",
-  brand: "border-brand-500 text-brand-700",
-  green: "border-signal-green/60 bg-signal-green-soft text-ink",
-  amber: "border-signal-amber/60 bg-signal-amber-soft text-ink",
-  red: "border-signal-red/60 bg-signal-red-soft text-ink",
-  mute: "border-rule bg-paper-soft text-ink-mute",
+  neutral: "",
+  brand: "opx-badge-brand",
+  green: "opx-badge-green",
+  amber: "opx-badge-amber",
+  red: "opx-badge-red",
+  mute: "opx-badge-mute",
 };
 
 /** 状態・役割などの小さな札。中身は文字だけにする（data-testid 等の属性はそのまま渡せる）。 */
@@ -23,10 +23,7 @@ export function Badge({
   ...rest
 }: { readonly tone?: Tone; readonly children: ReactNode } & Record<`data-${string}`, string>) {
   return (
-    <span
-      {...rest}
-      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-sharp border px-1.5 py-px text-[11px] font-medium leading-5 ${toneClass[tone]}`}
-    >
+    <span {...rest} className={`opx-badge ${toneClass[tone]}`.trim()}>
       {children}
     </span>
   );
@@ -52,12 +49,15 @@ export const ROLE_DESCRIPTIONS = {
 export function PageHeader({
   title,
   eyebrow,
+  meta,
   back,
   aside,
   children,
 }: {
   readonly title: ReactNode;
   readonly eyebrow?: string;
+  /** 見出しの右に添える短い説明（画面の副題）。 */
+  readonly meta?: ReactNode;
   readonly back?: { readonly href: string; readonly label: string };
   readonly aside?: ReactNode;
   readonly children?: ReactNode;
@@ -65,15 +65,18 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-3">
       {back ? (
-        <Link href={back.href} prefetch={false} className="-my-3 inline-flex min-h-11 min-w-11 items-center self-start text-xs text-brand-700 underline-offset-2 hover:underline">
+        <Link href={back.href} prefetch={false} className="opx-back">
           <span aria-hidden>← </span>
           {back.label}
         </Link>
       ) : null}
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex min-w-0 flex-col gap-1">
-          {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-          <h1 className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl">{title}</h1>
+          {eyebrow ? <p className="opx-eyebrow">{eyebrow}</p> : null}
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="opx-h1">{title}</h1>
+            {meta ? <span className="text-[13px] text-sb-ink-3">{meta}</span> : null}
+          </div>
         </div>
         {aside}
       </div>
@@ -82,7 +85,7 @@ export function PageHeader({
   );
 }
 
-/** 画面内の区切り（判定画面の節見出しと同じ、罫線＋方位記の見出し）。 */
+/** 画面内の区切り（v2 の見出し：左 5px の橙線）。 */
 export function Section({
   title,
   description,
@@ -99,83 +102,76 @@ export function Section({
 } & Record<`aria-${string}`, string>) {
   return (
     <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4">
-      <div className={`flex flex-col gap-1 border-b pb-2 ${tone === "danger" ? "border-signal-red/50" : "border-rule"}`}>
-        <h2 className="font-display text-lg font-light text-ink sm:text-xl">
-          <span aria-hidden className="bearing-mark" />
-          {title}
-        </h2>
-        {description ? <p className="text-xs leading-relaxed text-ink-mute">{description}</p> : null}
+      <div className="sb-sec-head" {...(tone === "danger" ? { "data-tone": "danger" } : {})}>
+        <h2>{title}</h2>
+        {description ? <p className="sb-sec-note">{description}</p> : null}
       </div>
       {children}
     </section>
   );
 }
 
-/** 罫線の左に藍の線を引いた短い説明（権限・取消の意味など）。 */
+/** 短い説明（権限・取消の意味など）。くぼみの面に置く。 */
 export function Note({ children, tone = "brand" }: { readonly children: ReactNode; readonly tone?: "brand" | "red" }) {
+  return <p className={`opx-note ${tone === "red" ? "opx-note-red" : ""}`.trim()}>{children}</p>;
+}
+
+/** 常に見える固定の注意書き（折りたたまない）。くぼみの面。warn・danger は枠の形（破線・実線）でも区別する。 */
+export function Notice({
+  meaning = "neutral",
+  title,
+  children,
+  ...rest
+}: {
+  readonly meaning?: "neutral" | "info" | "warn" | "danger" | "ok";
+  readonly title?: string;
+  readonly children: ReactNode;
+} & Record<`data-${string}`, string>) {
   return (
-    <p
-      className={`border-l-2 py-0.5 pl-3 text-xs leading-relaxed ${
-        tone === "red" ? "border-signal-red text-ink-soft" : "border-brand-700 text-ink-soft"
-      }`}
-    >
-      {children}
-    </p>
+    <div {...rest} role="note" data-meaning={meaning} className="opx-notice">
+      {title ? <p className="font-bold text-sb-ink">{title}</p> : null}
+      <div>{children}</div>
+    </div>
   );
 }
 
-/** 詳細画面の項目の並び（狭い画面では見出しの下に値、広い画面では 2 列）。 */
+/** 詳細画面の項目の並び（狭い画面では見出しの下に値、広い画面では 2 列）。白いカードの中に置く。 */
 export function DetailList({
   rows,
   ...rest
 }: { readonly rows: readonly (readonly [string, ReactNode])[] } & Record<`data-${string}`, string>) {
   return (
-    <dl {...rest} className="flex flex-col border-t border-rule text-sm">
+    <dl {...rest} className="opx-card opx-detail">
       {rows.map(([k, v]) => (
-        <div
-          key={k}
-          className="grid grid-cols-1 gap-0.5 border-b border-rule-soft py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4"
-        >
-          <dt className="text-xs text-ink-mute sm:text-sm">{k}</dt>
-          <dd className="min-w-0 break-all text-ink">{v}</dd>
+        <div key={k}>
+          <dt>{k}</dt>
+          <dd>{v}</dd>
         </div>
       ))}
     </dl>
   );
 }
 
-/** 一覧の「取消していないもの／取消済みも含める」の切り替え。 */
+/** 一覧の「取消していないもの／取消済みも含める」の切り替え（チップ。現在地は実線＋太字＋aria-current）。 */
 export function VoidedToggle({ basePath, includeVoided }: { readonly basePath: string; readonly includeVoided: boolean }) {
-  const item = (active: boolean) =>
-    `inline-flex min-h-11 items-center px-3 text-xs ${
-      active ? "bg-brand-700 text-paper" : "bg-paper text-ink-soft hover:bg-paper-soft"
-    }`;
   return (
-    <nav aria-label="表示する範囲" className="inline-flex self-start overflow-hidden rounded-sharp border border-rule">
-      <Link href={basePath} className={item(!includeVoided)} aria-current={!includeVoided ? "page" : undefined}>
+    <nav aria-label="表示する範囲" className="opx-seg">
+      <a href={basePath} aria-current={!includeVoided ? "page" : undefined}>
         取消していないもの
-      </Link>
-      <Link
-        href={`${basePath}?includeVoided=1`}
-        className={`${item(includeVoided)} border-l border-rule`}
-        aria-current={includeVoided ? "page" : undefined}
-      >
+      </a>
+      <a href={`${basePath}?includeVoided=1`} aria-current={includeVoided ? "page" : undefined}>
         取消済みも含める
-      </Link>
+      </a>
     </nav>
   );
 }
 
-/** 一覧の行（狭い画面ではカード、広い画面では表の行）。見出しの行は ListHead で出す。 */
-export const listRowClass =
-  "grid grid-cols-1 gap-1.5 rounded-sharp border border-rule bg-paper px-3 py-3 text-sm transition-colors hover:bg-paper-soft focus-visible:bg-paper-soft sm:items-center sm:gap-4 sm:rounded-none sm:border-x-0 sm:border-t-0 sm:bg-transparent sm:px-2";
+/** 一覧の行（狭い画面では白いカード、広い画面では表の行）。見出しの行は ListHead で出す。 */
+export const listRowClass = "opx-row";
 
 export function ListHead({ columns, gridClass }: { readonly columns: readonly string[]; readonly gridClass: string }) {
   return (
-    <div
-      aria-hidden
-      className={`hidden gap-4 border-b border-rule px-2 pb-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-mute sm:grid ${gridClass}`}
-    >
+    <div aria-hidden className={`opx-listhead ${gridClass}`}>
       {columns.map((c) => (
         <span key={c}>{c}</span>
       ))}
@@ -185,23 +181,17 @@ export function ListHead({ columns, gridClass }: { readonly columns: readonly st
 
 /** カードの中で、狭い画面だけ見せる項目名（広い画面では列見出しが代わりになる。読み上げでは常に読む）。 */
 export function CellLabel({ children }: { readonly children: ReactNode }) {
-  return <span className="mr-2 text-xs text-ink-mute sm:sr-only">{children}</span>;
+  return <span className="opx-cell-label">{children}</span>;
 }
 
-export const buttonPrimaryClass =
-  "inline-flex min-h-11 items-center justify-center rounded-sharp bg-brand-700 px-5 text-sm font-medium text-paper transition-colors hover:bg-brand-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40";
-export const buttonGhostClass =
-  "inline-flex min-h-11 items-center justify-center rounded-sharp border border-rule bg-paper px-4 text-sm text-ink-soft transition-colors hover:border-ink-soft hover:bg-paper-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40";
-export const buttonDangerClass =
-  "inline-flex min-h-11 items-center justify-center rounded-sharp border border-signal-red bg-paper px-4 text-sm font-medium text-signal-red transition-colors hover:bg-signal-red-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-red focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40";
+export const buttonPrimaryClass = "opx-btn opx-btn-primary";
+export const buttonGhostClass = "opx-btn";
+export const buttonDangerClass = "opx-btn opx-btn-danger";
 
-/** 屋外で手袋でも押せる大きさの主ボタン（高さ 56px）。クラスの重ね書きで高さが競合しないよう、置き換えで作る。 */
-export const buttonFieldClass = buttonPrimaryClass.replace("min-h-11", "min-h-14").replace("px-5", "px-8").replace("text-sm", "text-base");
-/** 藍の枠のボタン（主ボタンの次に押してほしい操作）。 */
-export const buttonOutlineBrandClass = buttonGhostClass
-  .replace("border-rule ", "border-brand-700 ")
-  .replace("text-ink-soft ", "font-medium text-brand-700 ")
-  .replace("hover:border-ink-soft hover:bg-paper-soft", "hover:bg-brand-50");
+/** 屋外で手袋でも押せる大きさの主ボタン（高さ 56px 以上。現場は 64px）。 */
+export const buttonFieldClass = "opx-btn opx-btn-primary opx-btn-field";
+/** 縁の太いボタン（主ボタンの次に押してほしい操作）。 */
+export const buttonOutlineBrandClass = "opx-btn";
 
 /**
  * 技能証明書番号の表示。伏せた値（先頭が「*」）は、伏せた部分を薄く、見えている末尾を濃く示し、
@@ -211,7 +201,7 @@ export function LicenseNumber({ value, ...rest }: { readonly value: string } & R
   const m = /^(\*+)(.*)$/.exec(value);
   if (!m) {
     return (
-      <span {...rest} className="break-all font-mono">
+      <span {...rest} className="break-all sb-num tnum">
         {value}
       </span>
     );
@@ -219,9 +209,9 @@ export function LicenseNumber({ value, ...rest }: { readonly value: string } & R
   const [, hidden, tail] = m;
   return (
     <span {...rest} className="inline-flex flex-wrap items-baseline gap-x-2">
-      <span aria-hidden className="break-all font-mono tracking-wider">
-        <span className="text-ink-mute/70">{"•".repeat(hidden!.length)}</span>
-        <span className="text-ink">{tail}</span>
+      <span aria-hidden className="break-all sb-num tracking-wider">
+        <span className="text-sb-ink-3">{"•".repeat(hidden!.length)}</span>
+        <span className="text-sb-ink">{tail}</span>
       </span>
       <span className="sr-only">
         末尾 {tail!.length} 桁は {tail}（ほかは伏せています）

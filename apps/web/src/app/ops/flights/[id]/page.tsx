@@ -35,24 +35,24 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
   const options = correctable ? await recordFormOptions(ctx, me) : null;
   const coord = (lat: number | null, lng: number | null, acc: number | null) =>
     lat === null || lng === null ? null : (
-      <span className="block font-mono text-xs text-ink-soft tnum">
+      <span className="block sb-num text-xs text-sb-ink-2 tnum">
         {lat}, {lng}（WGS84）{acc !== null ? `／精度 約 ${acc} m` : ""}
       </span>
     );
   const rows: [string, React.ReactNode][] = [
-    ["機体（登録記号）", <span key="a" className="font-mono">{f.registrationMark}</span>],
+    ["機体（登録記号）", <span key="a" className="sb-num">{f.registrationMark}</span>],
     [
       "操縦者",
       <span key="p" className="flex flex-col">
         <span data-testid="flight-pilot-name">{f.pilotName}</span>
         {f.pilotLicenseNumber ? (
-          <span className="text-xs text-ink-soft">
+          <span className="text-xs text-sb-ink-2">
             技能証明書番号：<LicenseNumber value={f.pilotLicenseNumber} data-testid="flight-license" />
           </span>
         ) : (
-          <span className="text-xs text-ink-mute">技能証明なし</span>
+          <span className="text-xs text-sb-ink-3">技能証明なし</span>
         )}
-        <span className="text-xs text-ink-mute">（記録した時点の内容）</span>
+        <span className="text-xs text-sb-ink-3">（記録した時点の内容）</span>
       </span>,
     ],
     ["飛行の目的", f.purpose],
@@ -64,7 +64,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     [
       "離陸",
       <span key="t" className="flex flex-col">
-        <span className="font-mono tnum">{f.takeoffAtJst.slice(11)}</span>
+        <span className="sb-num tnum">{f.takeoffAtJst.slice(11)}</span>
         <span>{f.takeoffPlace}</span>
         {coord(f.takeoffLat, f.takeoffLng, f.takeoffAccuracyM)}
       </span>,
@@ -72,7 +72,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
     [
       "着陸",
       <span key="l" className="flex flex-col">
-        <span className="font-mono tnum">{f.landingAtJst}</span>
+        <span className="sb-num tnum">{f.landingAtJst}</span>
         <span>{f.landingPlace}</span>
         {coord(f.landingLat, f.landingLng, f.landingAccuracyM)}
       </span>,
@@ -95,13 +95,13 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
       ) : (
         <ul key="df" className="flex flex-col gap-2">
           {f.defects.map((d, i) => (
-            <li key={i} className="flex flex-col gap-0.5 border-l-2 border-rule pl-2">
+            <li key={i} className="flex flex-col gap-0.5 border-l-2 border-sb-rule pl-2">
               <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="font-mono text-xs tnum text-ink-mute">{d.occurredOn}</span>
+                <span className="sb-num text-xs tnum text-sb-ink-3">{d.occurredOn}</span>
                 <span>{d.description}</span>
                 {d.actionOn === null && d.action === null ? <Badge tone="neutral">処置は未記載</Badge> : null}
               </span>
-              <span className="text-xs text-ink-soft">
+              <span className="text-xs text-sb-ink-2">
                 処置：{d.actionOn ?? "—"} {d.action ?? ""}／確認者：{d.confirmerName ?? "—"}
               </span>
             </li>
@@ -150,7 +150,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           ],
         ] as [string, React.ReactNode][])
       : []),
-    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
+    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
   ];
   return (
     <main className="flex flex-col gap-10">
@@ -174,7 +174,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
         )}
         <dl
           aria-label="飛行の要点"
-          className="grid grid-cols-2 gap-px overflow-hidden rounded-sharp border border-rule bg-rule sm:grid-cols-5"
+          className="grid grid-cols-2 gap-px overflow-hidden rounded-sb-m border border-sb-rule bg-sb-rule sm:grid-cols-5"
         >
           {(
             [
@@ -193,9 +193,9 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
               ],
             ] as const
           ).map(([k, val, cls]) => (
-            <div key={k} className={`flex flex-col gap-1 bg-paper px-3 py-2.5 ${cls}`}>
-              <dt className="text-xs text-ink-mute">{k}</dt>
-              <dd className="font-mono text-lg leading-tight tnum text-ink">{val}</dd>
+            <div key={k} className={`flex flex-col gap-1 bg-sb-base px-3 py-2.5 ${cls}`}>
+              <dt className="text-xs text-sb-ink-3">{k}</dt>
+              <dd className="sb-num text-lg leading-tight tnum text-sb-ink">{val}</dd>
             </div>
           ))}
         </dl>
@@ -209,7 +209,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
               <span className="group-open/correct:hidden">訂正の入力を開く</span>
               <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
             </summary>
-            <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
+            <div className="mt-4 border-l-2 border-sb-ink pl-3 sm:pl-5">
               <FlightForm key={f.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} memberId={me.member.id} editing={f} />
             </div>
           </details>

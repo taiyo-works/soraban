@@ -14,44 +14,44 @@ export function VersionList({ versions }: { readonly versions: readonly VersionD
       description="登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。"
     >
       <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-row"]:last-child' />
-      <ol className="flex flex-col border-t border-rule" data-testid="version-list">
+      <ol className="flex flex-col border-t border-sb-rule" data-testid="version-list">
         {versions.map((v) => (
           <li
             key={v.versionNo}
-            className="grid scroll-mt-24 grid-cols-1 gap-2 border-b border-rule-soft py-3 text-sm outline-none focus-visible:bg-brand-50 focus-visible:ring-2 focus-visible:ring-brand-700 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
+            className="grid scroll-mt-24 grid-cols-1 gap-2 border-b border-sb-rule py-3 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
             data-testid="version-row"
             tabIndex={-1}
           >
             <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1.5">
-              <span className="font-mono text-xs tnum text-ink-mute">版 {v.versionNo}</span>
+              <span className="sb-num text-xs tnum text-sb-ink-3">版 {v.versionNo}</span>
               <Badge tone={OP_TONE[v.op]} data-testid="version-op">
                 {OP_LABELS[v.op]}
               </Badge>
             </div>
             <div className="flex min-w-0 flex-col gap-1">
-              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-ink">
+              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sb-ink">
                 <span className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-ink-mute">日時</span>
-                  <time dateTime={v.createdAt} className="font-mono text-[13px] tnum" data-testid="version-time">
+                  <span className="text-xs text-sb-ink-3">日時</span>
+                  <time dateTime={v.createdAt} className="sb-num text-[13px] tnum" data-testid="version-time">
                     {v.createdAtJst}
                   </time>
                 </span>
                 <span className="flex min-w-0 items-baseline gap-1.5">
-                  <span className="shrink-0 text-xs text-ink-mute">操作した人</span>
+                  <span className="shrink-0 text-xs text-sb-ink-3">操作した人</span>
                   <span className="break-all" data-testid="version-actor">
                     {v.actorName}
                   </span>
                 </span>
               </p>
               {v.reason ? (
-                <p className="break-all leading-relaxed text-ink-soft" data-testid="version-reason">
-                  <span className="text-xs text-ink-mute">理由：</span>
+                <p className="break-all leading-relaxed text-sb-ink-2" data-testid="version-reason">
+                  <span className="text-xs text-sb-ink-3">理由：</span>
                   {v.reason}
                 </p>
               ) : null}
               {v.changedFields.length > 0 ? (
-                <p className="leading-relaxed text-ink-soft" data-testid="version-changed">
-                  <span className="text-xs text-ink-mute">変わった項目：</span>
+                <p className="leading-relaxed text-sb-ink-2" data-testid="version-changed">
+                  <span className="text-xs text-sb-ink-3">変わった項目：</span>
                   {v.changedFields.join("、")}
                 </p>
               ) : null}
@@ -66,8 +66,8 @@ export function VersionList({ versions }: { readonly versions: readonly VersionD
 export function Forbidden({ message = "この操作は運航管理者だけが行えます。" }: { readonly message?: string }) {
   return (
     <main className="flex max-w-xl flex-col gap-4">
-      <h1 className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl">権限がありません</h1>
-      <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft">{message}</p>
+      <h1 className="font-display text-2xl font-light leading-tight text-sb-ink sm:text-3xl">権限がありません</h1>
+      <p className="opx-note">{message}</p>
     </main>
   );
 }

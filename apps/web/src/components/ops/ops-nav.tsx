@@ -70,16 +70,16 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
     <nav
       aria-label="運航管理のメニュー（左）"
       data-testid="ops-sidebar"
-      className="hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:gap-0.5 lg:self-start lg:overflow-y-auto lg:border-r lg:border-line lg:bg-surface lg:p-3"
+      className="hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:gap-0.5 lg:self-start lg:overflow-y-auto lg:border-r lg:border-sb-rule lg:bg-sb-base lg:p-3"
     >
-      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理" className="mb-2 flex min-h-11 flex-col justify-center rounded-sb-m px-3 hov:bg-sunken" data-testid="ops-logo">
-        <span className="text-h2 font-semibold leading-tight text-fg">そらばん</span>
-        <span className="text-aux text-fg-mute">運航管理</span>
+      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理" className="mb-2 flex min-h-11 flex-col justify-center rounded-sb-m px-3 hover:bg-sb-sunken" data-testid="ops-logo">
+        <span className="text-h2 font-semibold leading-tight text-sb-ink">そらばん</span>
+        <span className="text-aux text-sb-ink-3">運航管理</span>
       </Link>
       {/* 見出し（調べる・飛ばす）は項目の左端（アイコンの左）にそろえ、グループの間は余白で切る。登録（と子項目）の前だけ罫を 1 本引く */}
       {NAV_GROUPS.map((g) => (
-        <div key={g.keys.join("-")} className={cx("flex flex-col gap-0.5", g.keys[0] === "more" ? "mt-3 border-t border-line pt-3" : g.heading ? "mt-3" : "")}>
-          {g.heading ? <p className="px-3 pb-1 text-aux font-bold text-fg-soft">{g.heading}</p> : null}
+        <div key={g.keys.join("-")} className={cx("flex flex-col gap-0.5", g.keys[0] === "more" ? "mt-3 border-t border-sb-rule pt-3" : g.heading ? "mt-3" : "")}>
+          {g.heading ? <p className="px-3 pb-1 text-aux font-bold text-sb-ink-2">{g.heading}</p> : null}
           {g.keys.map((k) => {
             const item = NAV_ITEM[k];
             const hasChild = k === "more" && child !== null;
@@ -87,7 +87,7 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
               <div key={k} className="flex flex-col gap-0.5">
                 <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
                 {k === "more" ? (
-                  <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-line pl-1.5">
+                  <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-sb-rule pl-1.5">
                     {visibleNavChildren(role).map((c) => (
                       <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />
                     ))}
@@ -183,11 +183,11 @@ function UserMenu({ user }: { readonly user: OpsNavUser }) {
         aria-label={`${user.name}（利用者のメニュー）`}
         onClick={() => setOpen((o) => !o)}
         data-testid="user-menu-button"
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-sb-m border border-line-strong bg-surface px-2.5 text-table text-fg hov:bg-sunken"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-sb-m border border-sb-edge bg-sb-base px-2.5 text-table text-sb-ink hover:bg-sb-sunken"
       >
         <Icon name="account" size={18} />
         <span className="hidden max-w-[12rem] truncate lg:inline">{user.name}</span>
-        <Icon name="chevron-down" size={14} className="text-fg-mute" />
+        <Icon name="chevron-down" size={14} className="text-sb-ink-3" />
       </button>
       {open ? (
         <div
@@ -195,20 +195,20 @@ function UserMenu({ user }: { readonly user: OpsNavUser }) {
           role="group"
           aria-label="利用者"
           data-testid="user-menu"
-          className="ds-pop absolute right-0 top-full z-50 mt-1 flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-3 rounded-sb-m border border-line-strong bg-surface p-4 text-table"
+          className="ds-pop absolute right-0 top-full z-50 mt-1 flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-3 rounded-sb-m border border-sb-edge bg-sb-base p-4 text-table"
         >
           <div className="flex flex-col gap-1">
-            <p className="break-words font-semibold text-fg" data-testid="ops-me-name">
+            <p className="break-words font-semibold text-sb-ink" data-testid="ops-me-name">
               {user.name}
             </p>
             <div className="flex items-center gap-1">
-              <p className="text-fg-soft" data-testid="ops-me-role">
+              <p className="text-sb-ink-2" data-testid="ops-me-role">
                 <span>役割：</span>
                 {user.roleLabel}
               </p>
               <InfoPopover label="役割でできること">{user.roleDescription}</InfoPopover>
             </div>
-            <p className="break-all text-aux text-fg-mute" data-testid="ops-me-email">
+            <p className="break-all text-aux text-sb-ink-3" data-testid="ops-me-email">
               {user.email}
             </p>
           </div>
@@ -227,10 +227,10 @@ export function OpsTopBar({ user }: { readonly user: OpsNavUser }) {
   const pathname = usePathname() ?? "";
   if (navHiddenOn(pathname)) return null;
   return (
-    <header data-testid="ops-header" className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-line bg-surface px-4 max-lg:h-12 lg:sticky lg:top-0 lg:z-30 lg:px-8">
+    <header data-testid="ops-header" className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-sb-rule bg-sb-base px-4 max-lg:h-12 lg:sticky lg:top-0 lg:z-30 lg:px-8">
       <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理 ホームへ" className="mr-auto flex min-h-11 items-center gap-2 lg:hidden" data-testid="ops-brand-mark">
-        <span className="text-h2 font-semibold leading-none text-fg">そらばん</span>
-        <span className="text-aux text-fg-mute">運航管理</span>
+        <span className="text-h2 font-semibold leading-none text-sb-ink">そらばん</span>
+        <span className="text-aux text-sb-ink-3">運航管理</span>
       </Link>
       <UserMenu user={user} />
     </header>
@@ -248,7 +248,7 @@ export function OpsSkipLink() {
     <a
       href={`#${OPS_MAIN_ID}`}
       data-testid="skip-to-main"
-      className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-3 focus-visible:top-3 focus-visible:z-[60] focus-visible:inline-flex focus-visible:min-h-11 focus-visible:items-center focus-visible:rounded-sb-m focus-visible:border focus-visible:border-line-strong focus-visible:bg-surface focus-visible:px-4 focus-visible:text-table focus-visible:font-semibold focus-visible:text-fg"
+      className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-3 focus-visible:top-3 focus-visible:z-[60] focus-visible:inline-flex focus-visible:min-h-11 focus-visible:items-center focus-visible:rounded-sb-m focus-visible:border focus-visible:border-sb-edge focus-visible:bg-sb-base focus-visible:px-4 focus-visible:text-table focus-visible:font-semibold focus-visible:text-sb-ink"
     >
       本文へ移動
     </a>
@@ -260,10 +260,10 @@ export function OpsBrandHeader() {
   const pathname = usePathname() ?? "";
   if (pathname !== "/ops/sign-in" && pathname !== "/ops/no-access") return null;
   return (
-    <header className="flex items-center border-b border-line pb-3" data-testid="ops-brand">
-      <Link href="/" prefetch={false} aria-label="そらばん 運航管理" className="flex min-h-11 flex-col justify-center text-fg">
+    <header className="flex items-center border-b border-sb-rule pb-3" data-testid="ops-brand">
+      <Link href="/" prefetch={false} aria-label="そらばん 運航管理" className="flex min-h-11 flex-col justify-center text-sb-ink">
         <span className="text-h2 font-semibold leading-tight">そらばん</span>
-        <span className="text-aux text-fg-mute">運航管理</span>
+        <span className="text-aux text-sb-ink-3">運航管理</span>
       </Link>
     </header>
   );

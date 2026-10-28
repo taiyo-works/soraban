@@ -28,16 +28,16 @@ export default async function InspectionDetailPage({ params }: { readonly params
   const correctable = !i.voided && canCorrectRecord(me, i.isSelf);
   const options = correctable ? await recordFormOptions(ctx, me) : null;
   const rows: [string, React.ReactNode][] = [
-    ["実施年月日・時刻", <span key="d" className="font-mono tnum">{i.inspectedAtJst}</span>],
+    ["実施年月日・時刻", <span key="d" className="sb-num tnum">{i.inspectedAtJst}</span>],
     ["区分", INSPECTION_TIMING_LABELS[i.timing]],
-    ["機体（登録記号）", <span key="a" className="font-mono">{i.registrationMark}</span>],
-    ["実施者", <span key="p">{i.inspectorName}<span className="ml-1 text-xs text-ink-mute">（記録した時点の氏名）</span></span>],
+    ["機体（登録記号）", <span key="a" className="sb-num">{i.registrationMark}</span>],
+    ["実施者", <span key="p">{i.inspectorName}<span className="ml-1 text-xs text-sb-ink-3">（記録した時点の氏名）</span></span>],
     [
       "実施場所",
       <span key="pl" className="flex flex-col">
         <span>{i.placeName}</span>
         {i.latitude !== null ? (
-          <span className="font-mono text-xs text-ink-soft tnum">
+          <span className="sb-num text-xs text-sb-ink-2 tnum">
             {i.latitude}, {i.longitude}（WGS84）{i.accuracyM !== null ? `／精度 約 ${i.accuracyM} m` : ""}
           </span>
         ) : null}
@@ -48,7 +48,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
         it.label,
         <span key={it.key} className="flex flex-wrap items-center gap-2" data-testid={`inspection-result-${it.key}`}>
           <Badge tone={it.result === "normal" ? "green" : "red"}>{INSPECTION_RESULT_LABELS[it.result]}</Badge>
-          {it.note ? <span className="text-ink-soft">{it.note}</span> : null}
+          {it.note ? <span className="text-sb-ink-2">{it.note}</span> : null}
         </span>,
       ],
     ),
@@ -90,7 +90,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
               <span className="group-open/correct:hidden">訂正の入力を開く</span>
               <span className="hidden group-open/correct:inline">訂正の入力を閉じる</span>
             </summary>
-            <div className="mt-4 border-l-2 border-brand-700 pl-3 sm:pl-5">
+            <div className="mt-4 border-l-2 border-sb-ink pl-3 sm:pl-5">
               <InspectionForm key={i.version} aircraft={options.aircraft} pilots={options.pilots} fixedPilotId={options.fixedPilotId} memberId={me.member.id} editing={i} />
             </div>
           </details>

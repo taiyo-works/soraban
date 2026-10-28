@@ -1,0 +1,593 @@
+/* 運航管理 `/ops` の v2（そらばん デザインシステム v2。Sprint 12h PR ③b）。見本：docs/design/warm-final/（home・inspections・plan-new・journal）。
+ * このファイルは app/ops/layout.tsx だけが読み込む（公開の `/` は読まない。`/` の CSS を増やさないため）。値は持たず、soraban-tokens.css の --sb-* だけを使う。
+ * 構成：1 新しい名前の置き換え（.ds が持つ旧い名前を v2 の値に付け替え、触っていない画面も色が v2 になる）、2 ページの骨格、3 部品（.opx-*）。
+ * 旧い名前（--bg-*、--fg-*、--color-ink ほか）は、③b2 で全画面が .opx-*／.sb-* に移ったあと、④ で消す。 */
+
+@layer theme, base, components, utilities;
+
+/* ===== 1 旧い名前を v2 の値へ（運航管理の枠 .ops-v2 の中だけ。見本ページ /ops/design は枠を持たないので影響しない） ===== */
+.ds.ops-v2 {
+  --bg-app: var(--sb-surface);
+  --bg-surface: var(--sb-base);
+  --bg-sunken: var(--sb-sunken);
+  --fg: var(--sb-ink);
+  --fg-soft: var(--sb-ink-2);
+  --fg-mute: var(--sb-ink-3);
+  --line: var(--sb-rule);
+  --line-strong: var(--sb-edge);
+  /* 文字・リンク・フォーカスは墨。橙は面だけ（橙の細い文字は作らない） */
+  --accent: var(--sb-ink);
+  --accent-soft: var(--sb-hover);
+  --accent-solid: var(--sb-orange);
+  --accent-solid-hover: var(--sb-orange-hover);
+  --accent-fg: var(--sb-on-orange);
+  --ok-fg: var(--sb-v-none-fg);
+  --ok-bg: color-mix(in srgb, var(--sb-v-none-fill) 10%, var(--sb-base));
+  --ok-line: var(--sb-v-none-fg);
+  --warn-fg: var(--sb-v-needs-fg);
+  --warn-bg: color-mix(in srgb, var(--sb-v-needs-fill) 14%, var(--sb-base));
+  --warn-line: var(--sb-v-needs-fg);
+  --danger-fg: var(--sb-v-no-fg);
+  --danger-bg: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  --danger-line: var(--sb-v-no-fg);
+  --info-fg: var(--sb-ink-2);
+  --info-bg: var(--sb-sunken);
+  --info-line: var(--sb-edge);
+  --neutral-fg: var(--sb-ink-2);
+  --neutral-bg: var(--sb-sunken);
+  --neutral-line: var(--sb-edge);
+  --verdict-no-fly: var(--sb-v-no-fg);
+  --verdict-needs: var(--sb-v-needs-fg);
+  --verdict-done: var(--sb-v-done-fg);
+  --verdict-clear: var(--sb-v-none-fg);
+  --verdict-unknown: var(--sb-v-unknown-fg);
+  --r-journal: var(--sb-r-m);
+  --scrim: color-mix(in srgb, var(--sb-ink) 45%, transparent);
+  --ds-font-sans: var(--font-noto-jp), "Soraban Latin Fallback", "Soraban JP Fallback", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  --fs-h1: var(--sb-fs-h);
+  --fs-body: var(--sb-fs-body);
+  --fs-table: 14px;
+  --fs-aux: var(--sb-fs-note);
+  --tap: var(--sb-hit-min);
+}
+/* 現場の画面（.field）は ③b2 で v2 の現場の値に付け替える。それまで枠の色・文字は旧いまま変えない */
+
+/* ===== 2 ページの骨格 ===== */
+.ds.ops-v2 {
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  letter-spacing: 0.02em;
+}
+html:has(.ops-v2),
+html:has(.ops-v2) body {
+  background: var(--sb-surface);
+}
+html:has(.ops-v2) body {
+  color: var(--sb-ink);
+  background-image: none;
+}
+.ds.ops-v2 :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.ds.ops-v2 :is(input, select, textarea):focus-visible {
+  outline-offset: 0;
+}
+.ds.ops-v2 ::selection {
+  background: var(--sb-mark-bg);
+  color: var(--sb-ink);
+}
+.ds.ops-v2 :is(h1, h2, h3) {
+  letter-spacing: 0.04em;
+}
+.ds.ops-v2 .opx-num,
+.ds.ops-v2 :is(time, [data-num]) {
+  font-family: var(--font-num), sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+/* 上のバーと左メニューの区切り（旧い名前を通して v2 の値になる）に、v2 の面の形を足す */
+.ds.ops-v2 [data-testid="ops-header"] {
+  background: var(--sb-base);
+  border-bottom: var(--sb-rule-w) solid var(--sb-rule);
+}
+.ds.ops-v2 [data-testid="ops-sidebar"] {
+  background: var(--sb-base);
+  border-right: var(--sb-rule-w) solid var(--sb-rule);
+}
+.ds.ops-v2 [data-testid="user-menu-button"] {
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-control);
+  min-height: var(--sb-hit-min);
+}
+.ds.ops-v2 [data-testid="user-menu"] {
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+}
+
+/* ===== 3 部品 =====
+ * @layer components に置く：Tailwind の部品（utilities）で、画面ごとに幅・高さ・余白を重ね書きできるようにする（.opx-btn に w-full など）。 */
+@layer components {
+/* ボタン：普通 48px、主ボタン 56px（現場 56／64px）。文字は 15px 太字。主ボタンは橙の面＋右端の墨の丸（矢印は文字の →） */
+.opx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: var(--sb-hit);
+  padding: 0 22px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-control);
+  color: var(--sb-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.opx-btn:hover,
+.opx-btn:active {
+  background: var(--sb-hover);
+}
+.opx-btn-primary {
+  min-height: var(--sb-hit-primary);
+  padding: 4px 4px 4px 26px;
+  border-color: transparent;
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+  font-size: 16px;
+  justify-content: space-between;
+}
+.opx-btn-primary {
+  position: relative;
+}
+/* 右端の墨の丸（::after）と、その上の矢印（::before。マスクで形だけ描き、色は --sb-on-orange-fg）。
+ * 文字（content: "→"）にしない：疑似要素の文字は読み上げ・アクセシブルネームに入り、ボタンの名前が「保存→」になる */
+.opx-btn-primary::after {
+  content: "";
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-on-orange);
+}
+.opx-btn-primary::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  background: var(--sb-on-orange-fg);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
+  pointer-events: none;
+}
+.opx-btn-primary:hover,
+.opx-btn-primary:active {
+  background: var(--sb-orange-hover);
+}
+.opx-btn-danger {
+  border-color: var(--sb-v-no-fg);
+  color: var(--sb-v-no-fg);
+}
+.opx-btn-danger:hover,
+.opx-btn-danger:active {
+  background: color-mix(in srgb, var(--sb-v-no-fill) 12%, var(--sb-base));
+}
+/* 現場の大きな主ボタン（高さ 64px 以上。現場の値は --sb-hit-primary が持つ） */
+.opx-btn-field {
+  min-height: max(var(--sb-hit-primary), 56px);
+  font-size: 17px;
+}
+.opx-btn:disabled,
+.opx-btn[aria-disabled="true"] {
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+  border: 1.5px dashed var(--sb-edge);
+  cursor: not-allowed;
+}
+.opx-btn-primary:disabled::after,
+.opx-btn-primary[aria-disabled="true"]::after {
+  background: var(--sb-edge);
+}
+.opx-btn-primary:disabled::before,
+.opx-btn-primary[aria-disabled="true"]::before {
+  background: var(--sb-base);
+}
+.opx-btn-sm {
+  min-height: var(--sb-hit-min);
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* 戻りリンク：丸いボタン形。幅・高さとも 44px 以上 */
+.opx-back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 4px;
+  min-height: var(--sb-hit-min);
+  min-width: var(--sb-hit-min);
+  padding: 0 16px 0 12px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-control);
+  color: var(--sb-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.opx-back:hover {
+  background: var(--sb-hover);
+}
+
+/* 画面の見出し */
+.opx-h1 {
+  font-size: var(--sb-fs-h);
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--sb-ink);
+}
+.opx-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--sb-ink-2);
+}
+@media (min-width: 640px) {
+  .opx-h1 {
+    font-size: calc(var(--sb-fs-h) + 4px);
+  }
+}
+
+/* 札（状態・役割）。形（実線・破線・反転）と文字で見分ける。判定の色（赤・琥珀・緑）は意味が違うので札には使わない */
+.opx-badge {
+  display: inline-flex;
+  flex: 0 1 auto;
+  max-width: 100%;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 1px 12px;
+  border: 1px solid var(--sb-rule);
+  border-radius: var(--sb-pill);
+  background: var(--sb-surface);
+  color: var(--sb-ink-2);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.opx-badge-brand {
+  border-color: transparent;
+  background: var(--sb-inverse-bg);
+  color: var(--sb-inverse-fg);
+  font-weight: 700;
+}
+.opx-badge-green {
+  border: 1.5px solid var(--sb-ink);
+  background: var(--sb-base);
+  color: var(--sb-ink);
+  font-weight: 700;
+}
+.opx-badge-amber {
+  border: 1.5px dashed var(--sb-ink);
+  background: var(--sb-orange-hover);
+  color: var(--sb-on-orange);
+  font-weight: 700;
+}
+.opx-badge-red {
+  border: 1.5px solid var(--sb-v-no-fg);
+  background: var(--sb-base);
+  color: var(--sb-v-no-fg);
+  font-weight: 700;
+}
+.opx-badge-mute {
+  border: 1px dashed var(--sb-edge);
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+}
+
+/* 説明（権限・取消の意味など）：オフホワイトのくぼみ。左の線や色の囲みは使わない */
+.opx-note {
+  padding: 10px 14px;
+  border-radius: var(--sb-r-m);
+  background: var(--sb-sunken);
+  color: var(--sb-ink-2);
+  font-size: 13px;
+  line-height: 1.75;
+}
+.opx-note-red {
+  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
+  color: var(--sb-ink);
+}
+
+/* 固定の注意書き（常に見える。折りたたまない）。neutral・info はくぼみの面、warn は破線の枠、danger は実線の枠 */
+.opx-notice {
+  padding: 14px 16px;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-sunken);
+  color: var(--sb-ink-2);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.opx-notice[data-meaning="warn"] {
+  background: var(--sb-base);
+  border: 1.5px dashed var(--sb-ink);
+  color: var(--sb-ink);
+}
+.opx-notice[data-meaning="danger"] {
+  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  border: 1.5px solid var(--sb-v-no-fg);
+  color: var(--sb-ink);
+}
+.opx-notice[data-meaning="ok"] {
+  background: var(--sb-base);
+  border: 1.5px solid var(--sb-ink);
+  color: var(--sb-ink);
+}
+
+/* 影は 1 種類（--sb-shadow）。Tailwind の shadow-* は複数の影を重ねて出すため使わない */
+.opx-shadow {
+  box-shadow: var(--sb-shadow);
+}
+
+/* 白いカード（影は 1 種類） */
+.opx-card {
+  min-width: 0;
+  padding: 20px 16px;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+}
+@media (min-width: 1024px) {
+  .opx-card {
+    padding: 24px;
+  }
+}
+
+/* 項目の並び（詳細）：カードの中の定義リスト */
+.opx-detail {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 14px;
+}
+.opx-detail > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 12px 0;
+  border-bottom: var(--sb-rule-w) solid var(--sb-rule);
+}
+.opx-detail > div:last-child {
+  border-bottom: 0;
+}
+.opx-detail dt {
+  font-size: 13px;
+  color: var(--sb-ink-3);
+}
+.opx-detail dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--sb-ink);
+}
+@media (min-width: 640px) {
+  .opx-detail > div {
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+/* 範囲の切り替え（チップ。現在地は実線＋太字、ほかは破線） */
+.opx-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.opx-seg > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sb-hit-min);
+  padding: 6px 16px;
+  border: 2px dashed var(--sb-edge);
+  border-radius: var(--sb-pill);
+  color: var(--sb-ink-3);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.opx-seg > a:hover {
+  background: var(--sb-hover);
+}
+.opx-seg > a[aria-current="page"],
+.opx-seg > a[aria-current="true"] {
+  border: 2px solid var(--sb-ink);
+  background: var(--sb-control);
+  color: var(--sb-ink);
+  font-weight: 700;
+}
+
+/* 一覧の行：狭い画面は白いカード、広い画面は表の行。見出しの行（.opx-listhead）はくぼみの帯 */
+.opx-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+  font-size: 14px;
+  color: var(--sb-ink);
+  transition: background var(--sb-dur) var(--sb-ease);
+}
+.opx-row:hover,
+.opx-row:focus-visible {
+  background: var(--sb-hover);
+}
+.opx-listhead {
+  display: none;
+  gap: 16px;
+  padding: 8px 16px;
+  border-radius: var(--sb-r-m);
+  background: var(--sb-sunken);
+  color: var(--sb-ink-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+@media (min-width: 640px) {
+  .opx-listhead {
+    display: grid;
+  }
+  .opx-row {
+    align-items: center;
+    gap: 16px;
+    min-height: 56px;
+    padding: 8px 16px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    border-bottom: var(--sb-rule-w) solid var(--sb-rule);
+  }
+}
+.opx-cell-label {
+  margin-right: 8px;
+  color: var(--sb-ink-3);
+  font-size: 12px;
+}
+@media (min-width: 640px) {
+  .opx-cell-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.opx-required {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-inverse-bg);
+  color: var(--sb-inverse-fg);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.opx-optional {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border: 1px dashed var(--sb-edge);
+  border-radius: var(--sb-pill);
+  color: var(--sb-ink-3);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.opx-field-error {
+  color: var(--sb-v-no-fg);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.opx-form-error {
+  padding: 10px 14px;
+  border-radius: var(--sb-r-m);
+  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
+  color: var(--sb-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+/* チェックの行（選択肢）：押せる行は 48px 以上 */
+.opx-check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--sb-hit-row);
+  padding: 8px 14px;
+  border-radius: var(--sb-r-m);
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+.opx-check-row:hover {
+  background: var(--sb-hover);
+}
+/* 保存の帯：画面の下に貼り付く送信ボタンの並び */
+.opx-submit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+/* 余白の小さな文字（12px 未満にしない） */
+.opx-hint {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--sb-ink-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .opx-btn,
+  .opx-row {
+    transition: none;
+  }
+}
+:root[data-mode="field"] .opx-btn,
+:root[data-mode="field"] .opx-row {
+  transition: none;
+}
+}
+
+/* ===== 4 共通の .sb-*（unlayered）の上書き：@layer の外に置く（unlayered の規則は layer の規則に勝つため、ここに書かないと効かない） ===== */
+.ds.ops-v2 textarea.sb-input {
+  min-height: 96px;
+  padding: 12px 16px;
+  line-height: 1.7;
+}
+.sb-input[aria-invalid="true"] {
+  border-color: var(--sb-v-no-fg);
+  box-shadow: inset 0 0 0 1px var(--sb-v-no-fg);
+}
+.sb-input:disabled {
+  border-style: dashed;
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+}
+/* 入力欄は、横に並べた行の中で縮める（既定の最小幅のままだと、日付と時刻の 2 つが 375px の列からはみ出す） */
+.ds.ops-v2 .sb-input {
+  min-width: 0;
+}
+/* 動き：2 種類（ピルの矢印・せり上がり）以外は付けない。Tailwind の transition-*（既定 150ms）は、現場と「動きを減らす」で 0 にする（Q-16） */
+:root[data-mode="field"] .ds.ops-v2 *,
+:root[data-mode="field"] .ds.ops-v2 *::before,
+:root[data-mode="field"] .ds.ops-v2 *::after {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds.ops-v2 *,
+  .ds.ops-v2 *::before,
+  .ds.ops-v2 *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

@@ -11,7 +11,7 @@ export function MoreRows({ count, children, "data-testid": testId = "more-rows" 
   const id = useId();
   return (
     <>
-      <ul id={id} hidden={!open} className="flex flex-col divide-y divide-line border-t border-line" data-testid={`${testId}-list`}>
+      <ul id={id} hidden={!open} className="sb-rows border-t border-sb-rule" data-testid={`${testId}-list`}>
         {children}
       </ul>
       <button
@@ -20,7 +20,7 @@ export function MoreRows({ count, children, "data-testid": testId = "more-rows" 
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
         data-testid={`${testId}-toggle`}
-        className="flex min-h-11 w-full items-center gap-1.5 border-t border-line text-table text-accent touch-manipulation hov:underline"
+        className="flex min-h-11 w-full items-center gap-1.5 border-t border-sb-rule text-[14px] font-bold text-sb-ink touch-manipulation hover:underline"
       >
         <Icon name={open ? "chevron-up" : "chevron-down"} size={16} />
         {open ? `ほか ${count} 件を閉じる` : `ほか ${count} 件を見る`}
