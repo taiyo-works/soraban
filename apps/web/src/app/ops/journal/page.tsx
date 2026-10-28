@@ -67,6 +67,11 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
     <main className="flex flex-col gap-6" data-testid="ops-journal">
       <DraftOwnerGuard memberId={me.member.id} />
       <PageHeader title="日誌" meta="飛行記録・日常点検・事故・ヒヤリハット" />
+      {/* 点検は独立した画面になった（下タブ・左メニューの「点検」）。日誌の中の日常点検はそのまま残し、一覧への入口を 1 本だけ足す */}
+      <Link href="/ops/inspections" prefetch={false} className="-mt-3 inline-flex min-h-11 items-center gap-1 self-start text-table text-accent underline underline-offset-2" data-testid="journal-to-inspections">
+        点検の一覧へ
+        <Icon name="chevron-right" size={16} />
+      </Link>
       {canCreate || canIncident ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {canCreate ? (

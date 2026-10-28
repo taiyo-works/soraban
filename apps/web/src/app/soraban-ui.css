@@ -281,6 +281,11 @@
   width: 40px;
   height: 40px;
 }
+/* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、左の余白と矢印との間を詰める */
+.sb-pill-tight {
+  gap: 8px;
+  padding-left: 16px;
+}
 .sb-pill:disabled,
 .sb-pill[aria-disabled="true"] {
   background: var(--sb-sunken);
@@ -1154,4 +1159,137 @@ input.sb-check:disabled {
     flex: 1 1 0;
     min-width: 0;
   }
+}
+
+/* ===== 運航管理のメニュー（Sprint 12h PR ③a。見本：warm-final/home.html の .tabbar／.tab） =====
+ * 下タブ 5 つ（高さ 60px 以上）と、PC の左メニュー（項目 48px）。現在地は橙の面＋太字＋aria-current（色だけに頼らない）。 */
+.sb-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: var(--sb-base);
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.sb-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 60px;
+  padding: 6px 0;
+  font-size: var(--sb-fs-note);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--sb-ink-2);
+  touch-action: manipulation;
+}
+.sb-tab-ic {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 30px;
+  border-radius: var(--sb-pill);
+}
+.sb-tab:hover .sb-tab-ic {
+  background: var(--sb-hover);
+}
+.sb-tab[aria-current="page"] {
+  color: var(--sb-ink);
+  font-weight: 700;
+}
+.sb-tab[aria-current="page"] .sb-tab-ic {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+}
+.sb-tab:focus-visible,
+.sb-side-link:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: -3px;
+}
+.sb-side-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--sb-hit);
+  padding: 0 12px;
+  border-radius: var(--sb-r-m);
+  font-size: var(--sb-fs-body);
+  color: var(--sb-ink-2);
+  touch-action: manipulation;
+}
+.sb-side-link:hover {
+  background: var(--sb-hover);
+  color: var(--sb-ink);
+}
+.sb-side-link[data-ancestor] {
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-side-link[aria-current="page"] {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+  font-weight: 700;
+}
+.sb-side-sub {
+  min-height: var(--sb-hit-min);
+  gap: 10px;
+  padding: 0 10px;
+}
+
+/* ===== 一覧の行・絞り込みのチップ（Sprint 12h PR ③a。点検の一覧。見本：warm-final/inspections.html） ===== */
+.sb-rows > li + li {
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+.sb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--sb-hit-row);
+  padding: 14px 0;
+  color: inherit;
+}
+.sb-go-dot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-ink);
+  color: var(--sb-on-dot);
+}
+a.sb-row:hover .sb-go-dot,
+a.sb-row:focus-visible .sb-go-dot {
+  background: var(--sb-orange);
+  color: var(--sb-on-orange);
+}
+.sb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--sb-hit-min);
+  padding: 6px 16px;
+  border-radius: var(--sb-pill);
+  border: 2px dashed var(--sb-edge);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--sb-ink-3);
+}
+.sb-chip:hover {
+  background: var(--sb-hover);
+}
+.sb-chip[aria-current="true"] {
+  border: 2px solid var(--sb-ink);
+  background: var(--sb-control);
+  color: var(--sb-ink);
+  font-weight: 700;
 }

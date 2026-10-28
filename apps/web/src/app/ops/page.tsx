@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
+import { JudgePills } from "@/components/ops/judge-pills";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { TodayCard, TodayDeadlines, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
 import { buttonClass, NoticeBar } from "@/components/ui/primitives";
@@ -26,31 +27,28 @@ export default async function OpsHome() {
   return (
     <main className="flex flex-col gap-6" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h1 className="text-h1 font-semibold text-fg" data-testid="today-heading">
-            ホーム
-          </h1>
-          <span className="text-table tabular-nums text-fg-mute" data-testid="today-date">
-            <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
-          </span>
-        </div>
-        {/* 予定のない日は、先頭のカードに「飛行計画を作る」「地点を判定する」がある。同じ画面に同じ操作を 2 つ置かない */}
-        {today.card ? (
-          <div className="flex flex-wrap items-center gap-2">
-            {canPlan ? (
+      <div className="flex flex-col gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="text-h1 font-semibold text-fg" data-testid="today-heading">
+              ホーム
+            </h1>
+            <span className="text-table tabular-nums text-fg-mute" data-testid="today-date">
+              <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
+            </span>
+          </div>
+          {/* 予定のない日は、先頭のカードに「飛行計画を作る」がある。同じ画面に同じ操作を 2 つ置かない。判定への入口は、下のピル（上部） */}
+          {today.card && canPlan ? (
+            <div className="flex flex-wrap items-center gap-2">
               <Link href="/ops/plans/new" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-plan">
                 <Icon name="plus" size={18} />
                 飛行計画を作る
               </Link>
-            ) : null}
-            <Link href="/" prefetch={false} className={buttonClass("secondary", "md", "min-h-11")} data-testid="ops-enter-verdict">
-              <Icon name="verdict" size={18} />
-              地点を判定する
-            </Link>
-          </div>
-        ) : null}
-      </header>
+            </div>
+          ) : null}
+        </header>
+        <JudgePills />
+      </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8">
         <div className="flex min-w-0 flex-col gap-6">

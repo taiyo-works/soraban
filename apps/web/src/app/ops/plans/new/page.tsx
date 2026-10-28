@@ -1,4 +1,5 @@
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
+import { JudgePills } from "@/components/ops/judge-pills";
 import { DipsNotice } from "@/components/ops/plan-ui";
 import { PlanForm } from "@/components/ops/plans-client";
 import { Forbidden } from "@/components/ops/versions";
@@ -27,6 +28,7 @@ export default async function PlanNewPage({
         <Note>{PLAN_JUDGEMENT_DISCLAIMER}</Note>
         <DipsNotice />
       </PageHeader>
+      <JudgePills lead="地点がまだ決まっていないときは、先に判定画面で調べられます" />
       <PlanForm
         aircraft={aircraft}
         pilots={pilots}

@@ -1,5 +1,6 @@
 // メニューの定義と経路の判断（純粋関数・定数）。クライアントの部品（ops-nav.tsx）と、サーバーの画面（戻りリンク）が共有する。
-// 名称は 5 つだけ：ホーム／判定／計画／日誌／登録（docs/sprints/sprint-12g-1b.md）。URL は変えない（ホーム＝/ops、登録＝/ops/more）。
+// 下タブ（スマホ）は 5 つ：ホーム／計画／点検／日誌／登録。左メニュー（PC）は 6 項目：ホーム／判定／計画／点検／日誌／登録（docs/sprints/sprint-12h-pr3.md §4）。
+// 判定は下タブに置かない（ホームと計画の作成画面のピルから入る）。URL は変えない（ホーム＝/ops、登録＝/ops/more）。
 import type { IconName } from "@/components/ui/icons";
 import { can, type OpsAction } from "@/server/ops/authz";
 import type { MemberRoleDb } from "@soraban/db";
@@ -7,27 +8,34 @@ import type { MemberRoleDb } from "@soraban/db";
 /** 本文の枠の id（スキップリンクの移動先）。 */
 export const OPS_MAIN_ID = "ops-main";
 
-export type NavKey = "today" | "verdict" | "plans" | "journal" | "more";
+export type NavKey = "today" | "verdict" | "plans" | "inspections" | "journal" | "more";
 export type NavChildKey = "aircraft" | "pilots" | "permits" | "places";
 
 export type NavItem = { readonly key: NavKey; readonly label: string; readonly href: string; readonly icon: IconName };
 
-/** 下メニュー（<1024px）の 5 項目と、左メニューの本体。順序は仕事の流れ。 */
-export const NAV_ITEMS: readonly NavItem[] = [
-  { key: "today", label: "ホーム", href: "/ops", icon: "home" },
-  { key: "verdict", label: "判定", href: "/", icon: "verdict" },
-  { key: "plans", label: "計画", href: "/ops/plans", icon: "plan" },
-  { key: "journal", label: "日誌", href: "/ops/journal", icon: "journal" },
-  { key: "more", label: "登録", href: "/ops/more", icon: "list" },
-];
+/** 6 項目すべての定義（キーで引く表）。 */
+export const NAV_ITEM: Readonly<Record<NavKey, NavItem>> = {
+  today: { key: "today", label: "ホーム", href: "/ops", icon: "home" },
+  verdict: { key: "verdict", label: "判定", href: "/", icon: "verdict" },
+  plans: { key: "plans", label: "計画", href: "/ops/plans", icon: "plan" },
+  inspections: { key: "inspections", label: "点検", href: "/ops/inspections", icon: "inspection" },
+  journal: { key: "journal", label: "日誌", href: "/ops/journal", icon: "journal" },
+  more: { key: "more", label: "登録", href: "/ops/more", icon: "list" },
+};
 
-export const NAV_ITEM = Object.fromEntries(NAV_ITEMS.map((i) => [i.key, i])) as Readonly<Record<NavKey, NavItem>>;
+const pick = (keys: readonly NavKey[]): readonly NavItem[] => keys.map((k) => NAV_ITEM[k]);
+
+/** 下タブ（<1024px）の 5 項目。順序は仕事の流れ（計画→点検→日誌）。判定は置かない。 */
+export const BOTTOM_TABS: readonly NavItem[] = pick(["today", "plans", "inspections", "journal", "more"]);
+
+/** 左メニュー（PC）の 6 項目。 */
+export const SIDE_ITEMS: readonly NavItem[] = pick(["today", "verdict", "plans", "inspections", "journal", "more"]);
 
 /** 左メニューの区切り（見出しは「調べる」「飛ばす」。ホームと登録は見出しなし）。 */
 export const NAV_GROUPS: readonly { readonly heading: string | null; readonly keys: readonly NavKey[] }[] = [
   { heading: null, keys: ["today"] },
   { heading: "調べる", keys: ["verdict"] },
-  { heading: "飛ばす", keys: ["plans", "journal"] },
+  { heading: "飛ばす", keys: ["plans", "inspections", "journal"] },
   { heading: null, keys: ["more"] },
 ];
 
@@ -52,13 +60,15 @@ export const navHiddenOn = (pathname: string): boolean =>
 
 /**
  * どの項目が現在地か。
- *   日誌：飛行記録・日常点検・日誌・事故・ヒヤリハット／計画：/ops/plans*（現場モードを除く）／登録：登録・機体・操縦者・許可・承認・地点・利用者。
+ *   点検：/ops/inspections*／日誌：飛行記録・日誌・事故・ヒヤリハット／計画：/ops/plans*（現場モードを除く）／登録：登録・機体・操縦者・許可・承認・地点・利用者。
+ *   `/` は判定（左メニューの現在地）。下タブには判定がないので、`/` では下タブのどれも現在地にならない。
  */
 export const currentNavKey = (pathname: string): NavKey | null => {
   if (pathname === "/") return "verdict";
   if (pathname === "/ops") return "today";
   if (pathname.startsWith("/ops/plans")) return "plans";
-  if (/^\/ops\/(flights|inspections|journal|incidents)/.test(pathname)) return "journal";
+  if (pathname.startsWith("/ops/inspections")) return "inspections";
+  if (/^\/ops\/(flights|journal|incidents)/.test(pathname)) return "journal";
   if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members)/.test(pathname)) return "more";
   return null;
 };
@@ -70,14 +80,14 @@ export const currentChildKey = (pathname: string): NavChildKey | null => {
 };
 
 // ---- 戻りリンク ----------------------------------------------------------------------------------------
-// 戻り先は「メニューで親になっている画面」。1 段目の画面（ホーム・計画・日誌・登録）には戻りリンクを置かない（メニューが退路）。
+// 戻り先は「メニューで親になっている画面」。1 段目の画面（ホーム・計画・点検・日誌・登録）には戻りリンクを置かない（メニューが退路）。
 
 export type BackLink = { readonly href: string; readonly label: string };
 
 export const BACK_TO = {
   /** 機体・操縦者・許可・承認・よく使う地点・利用者の一覧 → 登録 */
   register: { href: "/ops/more", label: "登録" },
-  /** 飛行記録・日常点検・事故・ヒヤリハットの一覧 → 日誌 */
+  /** 飛行記録・事故・ヒヤリハットの一覧 → 日誌 */
   journal: { href: "/ops/journal", label: "日誌" },
 } as const satisfies Record<string, BackLink>;
 
@@ -92,6 +102,7 @@ const ID = "00000000-0000-4000-8000-000000000001";
 export const BACK_TABLE: readonly { readonly screen: string; readonly back: BackLink | null }[] = [
   { screen: "/ops", back: null },
   { screen: "/ops/plans", back: null },
+  { screen: "/ops/inspections", back: null },
   { screen: "/ops/journal", back: null },
   { screen: "/ops/more", back: null },
   { screen: "/ops/aircraft", back: BACK_TO.register },
@@ -100,7 +111,6 @@ export const BACK_TABLE: readonly { readonly screen: string; readonly back: Back
   { screen: "/ops/places", back: BACK_TO.register },
   { screen: "/ops/members", back: BACK_TO.register },
   { screen: "/ops/flights", back: BACK_TO.journal },
-  { screen: "/ops/inspections", back: BACK_TO.journal },
   { screen: "/ops/incidents", back: BACK_TO.journal },
   // 各詳細・入力・訂正・通報・判定の記録は、自分の一覧／計画の詳細へ（変更なし）
   { screen: "/ops/aircraft/new", back: { href: "/ops/aircraft", label: "機体の一覧" } },
@@ -113,8 +123,8 @@ export const BACK_TABLE: readonly { readonly screen: string; readonly back: Back
   { screen: `/ops/places/${ID}`, back: { href: "/ops/places", label: "よく使う地点" } },
   { screen: "/ops/flights/new", back: { href: "/ops/flights", label: "飛行記録の一覧" } },
   { screen: `/ops/flights/${ID}`, back: { href: "/ops/flights", label: "飛行記録の一覧" } },
-  { screen: "/ops/inspections/new", back: { href: "/ops/inspections", label: "日常点検の一覧" } },
-  { screen: `/ops/inspections/${ID}`, back: { href: "/ops/inspections", label: "日常点検の一覧" } },
+  { screen: "/ops/inspections/new", back: { href: "/ops/inspections", label: "点検の一覧" } },
+  { screen: `/ops/inspections/${ID}`, back: { href: "/ops/inspections", label: "点検の一覧" } },
   { screen: "/ops/incidents/new", back: { href: "/ops/incidents", label: "事故・ヒヤリハットの一覧" } },
   { screen: `/ops/incidents/${ID}`, back: { href: "/ops/incidents", label: "事故・ヒヤリハットの一覧" } },
   { screen: "/ops/plans/new", back: { href: "/ops/plans", label: "飛行計画の一覧" } },

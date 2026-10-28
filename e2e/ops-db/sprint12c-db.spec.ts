@@ -198,6 +198,26 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     if (first.card === null) await expect(page.getByTestId("ops-enter-plan")).toHaveCount(0);
     else await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
     await expect(page.getByTestId("ops-enter-flight")).toBeVisible();
+    // 判定への入口（Sprint 12h PR ③a）：上部のピル 2 つ。高さ 48px 以上・2 列・間 8px 以上、行き先は `/?start=here`・`/?start=search`
+    const pills = page.getByTestId("judge-pills");
+    await expect(pills).toBeVisible();
+    const here = page.getByTestId("judge-pill-here");
+    const search = page.getByTestId("judge-pill-search");
+    await expect(here).toHaveText("現在地で判定");
+    await expect(search).toHaveText("場所を調べる");
+    await expect(here).toHaveAttribute("href", "/?start=here");
+    await expect(search).toHaveAttribute("href", "/?start=search");
+    const [hb, sbx] = [(await here.boundingBox())!, (await search.boundingBox())!];
+    expect(hb.height).toBeGreaterThanOrEqual(48);
+    expect(sbx.height).toBeGreaterThanOrEqual(48);
+    expect(Math.abs(hb.y - sbx.y), "2 列（同じ高さに並ぶ）").toBeLessThan(2);
+    expect(sbx.x - (hb.x + hb.width), "ピルの間隔").toBeGreaterThanOrEqual(8);
+    // 上部は画面の先頭の近く（見出しの直後）。同じ画面の 375×812 の最初の画面に入る
+    expect(hb.y + hb.height).toBeLessThan(812);
+    await expect(pills.locator("a")).toHaveCount(2);
+    // ホーム上部に、点検への大きなボタンを置かない（点検の入口は下タブと、次の飛行カードの 1 行リンク。入力ボタンは画面の末尾の「記録を入力」）
+    await expect(page.locator("[data-testid='ops-today'] header a[href^='/ops/inspections']")).toHaveCount(0);
+    expect((await page.getByTestId("ops-enter-inspection").boundingBox())!.y, "点検の入力ボタンはピルより下").toBeGreaterThan(hb.y + hb.height);
     await expect(page.getByTestId("ops-enter-inspection")).toBeVisible();
     await expect(page.getByTestId("today-heading")).toHaveText("ホーム");
     await expect(page.getByTestId("ops-me-name")).toHaveCount(0);
@@ -290,7 +310,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await bm.dispose();
   });
 
-  test("8・16. メニュー：スマホ（1024px 未満）は下の 5 タブ、PC は左メニュー。5 項目の行き先と現在地、375px で折り返さない・高さ 56px 以上・末尾が隠れない。現場モード・サインインでは出ない", async ({ page, browser }) => {
+  test("8・16. メニュー：スマホ（1024px 未満）は下の 5 タブ（ホーム／計画／点検／日誌／登録）、PC は左メニュー（6 項目）。行き先と現在地、375px で折り返さない・高さ 60px 以上・末尾が隠れない。`/` では下タブに現在地がない。現場モード・サインインでは出ない", async ({ page, browser }) => {
     const manager = await apiAs(seeded("a-manager"));
     const aircraft = await createAircraft(manager);
     const plan = await createPlan(manager, planBody(aircraft.id, await pilotIdOf(seeded("a-pilot"))));
@@ -304,17 +324,20 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(page.getByTestId("ops-sidebar")).toBeHidden();
     const items = [
       ["today", "ホーム", "/ops"],
-      ["verdict", "判定", "/"],
       ["plans", "計画", "/ops/plans"],
+      ["inspections", "点検", "/ops/inspections"],
       ["journal", "日誌", "/ops/journal"],
       ["more", "登録", "/ops/more"],
     ] as const;
+    // 下タブは 5 つだけ。この順。判定は置かない（ホームと計画の作成画面のピルから入る）
+    expect((await nav.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "計画", "点検", "日誌", "登録"]);
+    await expect(nav.getByTestId("nav-verdict")).toHaveCount(0);
     for (const [key, label, href] of items) {
       const link = nav.getByTestId(`nav-${key}`);
       await expect(link).toHaveAttribute("href", href);
       await expect(link).toContainText(label);
       const box = (await link.boundingBox())!;
-      expect(box.height, `${label} の高さ`).toBeGreaterThanOrEqual(56);
+      expect(box.height, `${label} の高さ`).toBeGreaterThanOrEqual(60);
       // ラベルが折り返さない（1 行の高さ）
       const labelBox = (await link.locator("span").last().boundingBox())!;
       expect(labelBox.height, `${label} のラベルが折り返している`).toBeLessThan(24);
@@ -325,13 +348,14 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     const widths = await Promise.all(items.map(async ([key]) => (await nav.getByTestId(`nav-${key}`).boundingBox())!.width));
     for (const w of widths) expect(Math.abs(w - 375 / 5)).toBeLessThan(2);
     await expectNoHorizontalScroll(page, "下メニュー");
-    // 現在地は 4 つの手がかり（aria-current・data-active・太字・面の塗り）とアイコンで示す
+    // 現在地は 4 つの手がかり（aria-current・data-active・太字・橙の面）とアイコンで示す。面は、見本どおりアイコンの丸い面（タブの先頭の要素）
     const here = nav.getByTestId("nav-today");
     const other = nav.getByTestId("nav-plans");
     await expect(here).toHaveAttribute("aria-current", "page");
     await expect(here).toHaveAttribute("data-active", "true");
     await expect(other).not.toHaveAttribute("aria-current", "page");
-    const look = (loc: Locator) => loc.evaluate((el) => ({ weight: Number(getComputedStyle(el).fontWeight), bg: getComputedStyle(el).backgroundColor, icon: el.querySelectorAll("svg").length }));
+    const look = (loc: Locator) =>
+      loc.evaluate((el) => ({ weight: Number(getComputedStyle(el).fontWeight), bg: getComputedStyle(el.firstElementChild!).backgroundColor, icon: el.querySelectorAll("svg").length }));
     const [hereLook, otherLook] = [await look(here), await look(other)];
     expect(hereLook.weight).toBeGreaterThanOrEqual(600);
     expect(otherLook.weight).toBeLessThan(600);
@@ -346,13 +370,14 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/ホーム/);
     await expect(page.getByTestId("ops-header")).not.toContainText("ホーム");
 
-    // 現在地：日誌は /ops/flights*・/ops/inspections*・/ops/journal・/ops/incidents*、計画は /ops/plans*、登録は /ops/more ほか
+    // 現在地：点検は /ops/inspections*、日誌は /ops/flights*・/ops/journal・/ops/incidents*、計画は /ops/plans*、登録は /ops/more ほか
     const current: [string, string][] = [
       ["/ops/plans", "plans"],
       [`/ops/plans/${plan.id}`, "plans"],
       ["/ops/flights", "journal"],
       ["/ops/flights/new", "journal"],
-      ["/ops/inspections", "journal"],
+      ["/ops/inspections", "inspections"],
+      ["/ops/inspections/new", "inspections"],
       ["/ops/journal", "journal"],
       ["/ops/incidents", "journal"],
       ["/ops/incidents/new", "journal"],
@@ -376,16 +401,21 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     // 押すと行き先へ移る
     await page.goto("/ops");
     await tapAndWait(page, nav.getByTestId("nav-plans"), /\/ops\/plans$/);
+    await tapAndWait(page, nav.getByTestId("nav-inspections"), /\/ops\/inspections$/);
+    await expect(nav.getByTestId("nav-inspections")).toHaveAttribute("aria-current", "page");
     await tapAndWait(page, nav.getByTestId("nav-journal"), /\/ops\/journal$/);
     await tapAndWait(page, nav.getByTestId("nav-more"), /\/ops\/more$/);
     await tapAndWait(page, nav.getByTestId("nav-today"), /\/ops$/);
-    await tapAndWait(page, nav.getByTestId("nav-verdict"), new RegExp(`^${BASE.replace(/[.]/g, "\\.")}/$`));
+    // 判定へは、ホーム上部のピル（下タブに判定はない）
+    await tapAndWait(page, page.getByTestId("judge-pill-search"), new RegExp(`^${BASE.replace(/[.]/g, "\\.")}/\\?start=search$`));
     // Next のクライアント遷移は、前の画面を隠して残す（Activity）。同じ data-testid が重ならないよう、読み直してから確かめる
     await page.reload();
 
     // ログイン済みの `/`：下メニューと「ホーム」の帯と、ホームへのリンク。自動では転送されない
     await expect(nav).toBeVisible();
-    await expect(nav.getByTestId("nav-verdict")).toHaveAttribute("aria-current", "page");
+    // `/` は判定（左メニューの現在地）。下タブのどれも現在地にならない
+    await expect(nav.locator('[aria-current="page"]')).toHaveCount(0);
+    await expect(nav.locator('[data-active="true"]')).toHaveCount(0);
     await expect(page.getByTestId("home-today-band")).toBeVisible();
     await expect(page.getByTestId("home-ops-link")).toBeVisible();
     await expect(page.getByTestId("home-ops-link")).toContainText("ホームへ");
@@ -411,20 +441,23 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     for (const [key, , href] of items) await expect(nav.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
     await tapAndWait(page, nav.getByTestId("nav-journal"), /\/ops\/journal$/);
 
-    // PC（1280px）は左メニュー：上から ホーム／調べる＝判定／飛ばす＝計画・日誌／登録（機体・操縦者・許可・承認・地点）
+    // PC（1280px）は左メニュー（6 項目）：上から ホーム／調べる＝判定／飛ばす＝計画・点検・日誌／登録（機体・操縦者・許可・承認・地点）
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/ops");
     const side = page.getByTestId("ops-sidebar");
     await expect(side).toBeVisible();
     await expect(nav).toBeHidden();
-    expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "判定", "計画", "日誌", "登録", "機体", "操縦者", "許可・承認", "地点"]);
+    expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "判定", "計画", "点検", "日誌", "登録", "機体", "操縦者", "許可・承認", "地点"]);
     await expect(side).toContainText("調べる");
     await expect(side).toContainText("飛ばす");
     for (const [key, , href] of items) await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
+    await expect(side.getByTestId("nav-verdict")).toHaveAttribute("href", "/");
     for (const [key, href] of [["aircraft", "/ops/aircraft"], ["pilots", "/ops/pilots"], ["permits", "/ops/permits"], ["places", "/ops/places"]] as const) {
       await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
     }
     for (const a of await side.locator('a[data-testid^="nav-"]').all()) expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // 項目は 48px 以上（子項目は 44px 以上）、現在地は橙の面
+    for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, k).toBeGreaterThanOrEqual(47.5);
     // 現在地（子項目は子が現在地、親の「登録」は太字だけの祖先）
     await expect(side.getByTestId("nav-today")).toHaveAttribute("aria-current", "page");
     await page.goto("/ops/aircraft");
@@ -435,6 +468,9 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(side.locator('[data-active="true"]')).toHaveCount(1);
     await page.goto("/ops/incidents");
     await expect(side.getByTestId("nav-journal")).toHaveAttribute("data-active", "true");
+    await page.goto("/ops/inspections");
+    await expect(side.getByTestId("nav-inspections")).toHaveAttribute("aria-current", "page");
+    await expect(side.getByTestId("nav-journal")).toHaveAttribute("data-active", "false");
     // 利用者メニューは PC でも右上にある
     await expect(page.getByTestId("user-menu-button")).toBeVisible();
     await page.goto("/ops");
