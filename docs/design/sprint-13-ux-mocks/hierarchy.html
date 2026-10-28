@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>そらばん 情報の3段（配置のスケッチ）</title>
+  <style>
+    :root {
+      --base: #ffffff;
+      --surface: #f7f7f3;
+      --sunken: #edede5;
+      --ink: #262523;
+      --ink-2: #4a4843;
+      --orange: #f89b48;
+      --rule: #c4c4c4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--sunken);
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    .note { color: var(--ink-2); font-size: 14px; margin: 0 0 28px; }
+    .pair { display: grid; gap: 16px; }
+    @media (min-width: 800px) { .pair { grid-template-columns: 1fr 1fr; } }
+    article {
+      background: var(--base);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    h2 { font-size: 16px; margin: 0 0 12px; }
+    .row { border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+    .now { background: var(--ink); color: var(--surface); }
+    .today { background: var(--surface); }
+    .more { background: var(--base); border: 1px solid var(--rule); color: var(--ink-2); }
+    .pill {
+      display: inline-block;
+      margin-top: 8px;
+      background: var(--orange);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    ol { margin: 8px 0 0; padding-left: 1.2em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>情報は 3 段だけ</h1>
+    <p class="note">配置の順を示すスケッチです。実画面ではなく、他の製品の画面でもありません。色はそらばんの操作色（橙）と墨だけを使っています。</p>
+    <div class="pair">
+      <article>
+        <h2>地点の判定</h2>
+        <div class="row now">いまの 1 行<br />要手続き</div>
+        <div class="row today">
+          今日使うもの
+          <ol>
+            <li>住所</li>
+            <li>この地点を判定する</li>
+            <li>現在地で判定</li>
+            <li>地図</li>
+          </ol>
+          <span class="pill">この地点を判定する</span>
+        </div>
+        <div class="row more">根拠（閉じておく）<br />出典、確認日、証跡</div>
+      </article>
+      <article>
+        <h2>今日の運航</h2>
+        <div class="row now">いまの 1 行<br />次の飛行 10:30 点検が未</div>
+        <div class="row today">
+          今日使うもの
+          <ol>
+            <li>点検を始める</li>
+            <li>日誌を開く</li>
+            <li>計画を見る</li>
+          </ol>
+          <span class="pill">点検を始める</span>
+        </div>
+        <div class="row more">根拠（閉じておく）<br />判定の版、通報の記録</div>
+      </article>
+    </div>
+  </main>
+</body>
+</html>
