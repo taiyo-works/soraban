@@ -389,7 +389,8 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
         <ul className="sb-block sb-rows !py-1">
           {deadlines.map((d) => (
             <li key={`${d.kind}-${d.id}`} data-testid="deadline-row" data-kind={d.kind}>
-              <a href={d.href} className="sb-row" data-testid="deadline-link">
+              {/* 一覧の行は上下 14px。ここだけ 8px に戻す。2 行の期限を、375×812 の最初の画面（下タブ 60px を除く）に収めるため */}
+              <a href={d.href} className="sb-row !py-2" data-testid="deadline-link">
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="text-[15px] font-bold leading-snug">{d.what}</span>
                   <span className="break-words text-[13px] text-sb-ink-2">
