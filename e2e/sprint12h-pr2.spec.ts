@@ -386,6 +386,24 @@ const conclusionPos = (page: Page) =>
     return { top: r ? r.top : null, bottom: r ? r.bottom : null, vh: window.innerHeight, scrollY: window.scrollY, focus: (document.activeElement as HTMLElement | null)?.id ?? "" };
   });
 
+// 滑らかなスクロールの着地を待つ。地図を先に画面へ入れると結論は一旦画面の上（top が負）にあり、
+// 「半分より上」だけだとその負の値が通り、着地（scroll-margin-top: 12px）の前の数 px を拾う。
+// 着地後の上端は 0 以上かつ画面の上半分。返した値は、その条件が真だったときの位置。
+const expectConclusionEntered = async (page: Page, viewportHeight: number) => {
+  let pos = await conclusionPos(page);
+  await expect
+    .poll(
+      async () => {
+        pos = await conclusionPos(page);
+        const top = pos.top ?? -1;
+        return top >= 0 && top < viewportHeight * 0.5;
+      },
+      { message: "結論の上端が画面の上半分に入っている" },
+    )
+    .toBe(true);
+  return pos;
+};
+
 test.describe("B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ）", () => {
   for (const m of MOBILES) {
     test(`${m.name}：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり）`, async ({ browser }) => {
@@ -416,10 +434,7 @@ test.describe("B1 判定したあと、結論が画面に入る（スクロー�
       await page.getByRole("button", { name: "この地点を判定する" }).click();
       await Promise.all([check, diag]);
       await expect(page.locator("#verdict-heading")).toBeFocused();
-      // 滑らかなスクロールが終わるのを待つ（上端が 0 以上、画面の上半分に入る）
-      await expect.poll(async () => (await conclusionPos(page)).top!, { message: "結論の上端が画面の中（上半分）" }).toBeLessThan(m.use.viewport!.height * 0.5);
-      const pos = await conclusionPos(page);
-      expect(pos.top!, "結論の上端が画面の中（上半分）").toBeGreaterThanOrEqual(0);
+      const pos = await expectConclusionEntered(page, m.use.viewport!.height);
       expect(pos.scrollY, "スクロールした").toBeGreaterThan(0);
       await ctx.close();
     });
@@ -437,9 +452,7 @@ test.describe("B1 判定したあと、結論が画面に入る（スクロー�
       await page.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.6);
       await Promise.all([check, diag]);
       await expect(page.locator("#verdict-heading")).toBeFocused();
-      await expect.poll(async () => (await conclusionPos(page)).top!, { message: "結論の上端が画面の中（上半分）" }).toBeLessThan(m.use.viewport!.height * 0.5);
-      const pos = await conclusionPos(page);
-      expect(pos.top!).toBeGreaterThanOrEqual(0);
+      await expectConclusionEntered(page, m.use.viewport!.height);
       await ctx.close();
     });
   }
