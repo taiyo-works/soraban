@@ -129,6 +129,58 @@
   }
 }
 
+/* ===== 登録（機体・操縦者・許可・承認・地点。見本なし：表の行・札・くぼみの組み合わせ。Sprint 12h PR ③b2a） =====
+ * データ表：狭い画面は行ごとの白いカード、広い画面（640px〜）は外枠が角丸 16 の白い面に、くぼみの見出し行と罫線だけの行を並べる */
+.opx-table {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .opx-table {
+    background: var(--sb-base);
+    border-radius: var(--sb-r-l);
+    box-shadow: var(--sb-shadow);
+  }
+  .opx-table > .opx-listhead {
+    border-radius: var(--sb-r-l) var(--sb-r-l) 0 0;
+    padding-inline: 20px;
+  }
+  .opx-table .opx-row {
+    padding-inline: 20px;
+  }
+  .opx-table > ul:first-child > li:first-child > .opx-row {
+    border-top-left-radius: var(--sb-r-l);
+    border-top-right-radius: var(--sb-r-l);
+  }
+  .opx-table > ul > li:last-child > .opx-row {
+    border-bottom: 0;
+    border-bottom-left-radius: var(--sb-r-l);
+    border-bottom-right-radius: var(--sb-r-l);
+  }
+}
+/* 記録の 1 件（照合・根拠・版の履歴）：くぼみの面。確認が要るものは破線の枠、強調する版は実線の枠（左の線や色の囲みは使わない） */
+.opx-edge-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1.5px solid transparent;
+  border-radius: var(--sb-r-m);
+  background: var(--sb-surface);
+  font-size: 14px;
+}
+.opx-edge-attn {
+  border-style: dashed;
+  border-color: var(--sb-ink);
+}
+.opx-edge-hl {
+  border-style: solid;
+  border-color: var(--sb-ink);
+  background: var(--sb-hover);
+}
+
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
  * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の橙線）にする。保存の帯（.opx-submit）は区画の外。 */
 .opx-form > section,

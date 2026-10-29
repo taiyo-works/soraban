@@ -6,18 +6,18 @@ export default async function OpsNoAccess() {
   const provider = await requireOpsEnabled();
   return (
     <main className="flex max-w-xl flex-col gap-6">
-      <h1 className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl" data-testid="ops-no-access">
+      <h1 className="opx-h1" data-testid="ops-no-access">
         権限がありません
       </h1>
-      <div className="flex flex-col gap-3 text-sm leading-relaxed text-ink-soft">
+      <div className="flex flex-col gap-3 text-sm leading-relaxed text-sb-ink-2">
         <p>運航管理者に招待を依頼してください。</p>
-        <p className="text-xs text-ink-mute">次のいずれかに当たる場合、この画面が表示されます。</p>
-        <ul className="flex flex-col gap-1 border-l-2 border-rule pl-3 text-xs text-ink-mute">
+        <p className="text-[13px] text-sb-ink-3">次のいずれかに当たる場合、この画面が表示されます。</p>
+        <ul className="opx-note flex list-disc flex-col gap-1 pl-8">
           <li>ログインしたメールアドレスが招待されていない</li>
           <li>メールアドレスの確認が済んでいない</li>
           <li>利用が停止されている</li>
         </ul>
-        <p className="text-xs text-ink-mute">別の Google アカウントで入り直す場合は、いったんログアウトしてください。</p>
+        <p className="text-[13px] text-sb-ink-3">別の Google アカウントで入り直す場合は、いったんログアウトしてください。</p>
       </div>
       <div>
         <SignOutButton provider={provider} />

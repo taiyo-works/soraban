@@ -50,30 +50,30 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/pilots" includeVoided={includeVoided} />
-        <p className="font-mono text-[11px] tnum text-ink-mute">{rows.length} 件</p>
+        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
-        <p className="border-y border-rule py-6 text-center text-sm text-ink-mute">登録された操縦者はいません。</p>
+        <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された操縦者はいません。</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="opx-table">
           <ListHead columns={["氏名", "技能証明", "技能証明書番号", ""]} gridClass={GRID} />
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="pilot-list">
             {rows.map((p) => (
               <li key={p.id}>
-                <Link href={`/ops/pilots/${p.id}`} className={`${listRowClass} ${GRID} ${p.voided ? "text-ink-mute" : ""}`}>
-                  <span className="min-w-0 break-words text-[15px] text-ink">
+                <Link href={`/ops/pilots/${p.id}`} className={`${listRowClass} ${GRID} ${p.voided ? "text-sb-ink-3" : ""}`}>
+                  <span className="min-w-0 break-words text-[15px] text-sb-ink">
                     <CellLabel>氏名</CellLabel>
                     {p.fullName}
-                    {p.isSelf ? <span className="ml-2 text-xs text-brand-700">（あなた）</span> : null}
+                    {p.isSelf ? <span className="ml-2 text-xs font-bold text-sb-ink">（あなた）</span> : null}
                   </span>
-                  <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 text-ink-soft">
+                  <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 text-sb-ink-2">
                     <span>
                       <CellLabel>技能証明</CellLabel>
                       {p.hasLicense && p.licenseClass ? LICENSE_CLASS_LABELS[p.licenseClass] : "なし"}
                     </span>
                     <LicenseRenewalNotice expiresOn={p.licenseExpiresOn} today={today} voided={p.voided} compact />
                   </span>
-                  <span className="flex min-w-0 items-baseline text-ink-soft">
+                  <span className="flex min-w-0 items-baseline text-sb-ink-2">
                     <CellLabel>番号</CellLabel>
                     {p.hasLicense && p.licenseNumber ? <LicenseNumber value={p.licenseNumber} /> : <span>—</span>}
                   </span>

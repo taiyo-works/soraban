@@ -43,18 +43,18 @@ export default async function PermitListPage({
       >
         <PermitDeclaration declaration={PERMIT_DECLARATION_NOTE} noDipsNote={PERMIT_NO_DIPS_NOTE} />
         <Note>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
-        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+        <p className="opx-note" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         {manager ? null : <Note>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
       </PageHeader>
 
-      <form method="get" className="flex flex-wrap items-end gap-3" data-testid="permit-filter" aria-label="許可・承認の絞り込み">
-        <label className="flex min-w-0 flex-col gap-1 text-xs text-ink-mute">
+      <form method="get" className="sb-block-soft flex flex-wrap items-end gap-3" data-testid="permit-filter" aria-label="許可・承認の絞り込み">
+        <label className="sb-field-text flex min-w-0 flex-col gap-1">
           番号・空港名
-          <input name="q" defaultValue={q ?? ""} className="min-h-11 w-56 max-w-full rounded-sharp border border-rule bg-paper px-3 text-base text-ink sm:text-sm" data-testid="permit-filter-q" />
+          <input name="q" defaultValue={q ?? ""} className="sb-input w-56 max-w-full" data-testid="permit-filter-q" />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-mute">
+        <label className="sb-field-text flex flex-col gap-1">
           有効性
-          <select name="validity" defaultValue={validity ?? ""} className="min-h-11 rounded-sharp border border-rule bg-paper px-3 text-base text-ink sm:text-sm" data-testid="permit-filter-validity">
+          <select name="validity" defaultValue={validity ?? ""} className="sb-input" data-testid="permit-filter-validity">
             <option value="">すべて</option>
             {VALIDITIES.map((v) => (
               <option key={v} value={v}>
@@ -70,31 +70,31 @@ export default async function PermitListPage({
       </form>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/permits" includeVoided={includeVoided} />
-        <p className="font-mono text-[11px] tnum text-ink-mute" data-testid="permit-count">{rows.length} 件</p>
+        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3" data-testid="permit-count">{rows.length} 件</p>
       </div>
 
       {rows.length === 0 ? (
-        <p className="border-y border-rule py-6 text-center text-sm text-ink-mute" data-testid="permit-empty">登録された許可・承認はありません。</p>
+        <p className="sb-block-soft text-center text-sm text-sb-ink-2" data-testid="permit-empty">登録された許可・承認はありません。</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="opx-table">
           <ListHead columns={["番号", "種類", "有効期間", "有効性"]} gridClass={GRID} />
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="permit-list">
             {rows.map((p) => (
               <li key={p.id}>
-                <Link prefetch={false} href={`/ops/permits/${p.id}`} className={`${listRowClass} ${GRID} ${p.voided ? "text-ink-mute" : ""}`} data-testid="permit-row" data-validity={p.validity}>
-                  <span className="min-w-0 break-all font-mono text-[15px] text-ink" data-testid="permit-row-number">{p.permitNumber}</span>
-                  <span className="flex min-w-0 flex-col gap-0.5 text-ink-soft">
+                <Link prefetch={false} href={`/ops/permits/${p.id}`} className={`${listRowClass} ${GRID} ${p.voided ? "text-sb-ink-3" : ""}`} data-testid="permit-row" data-validity={p.validity}>
+                  <span className="min-w-0 break-all sb-num text-[15px] text-sb-ink" data-testid="permit-row-number">{p.permitNumber}</span>
+                  <span className="flex min-w-0 flex-col gap-0.5 text-sb-ink-2">
                     <span data-testid="permit-row-kinds">
                       {p.coverageLabel}：{p.kinds.map((k) => k.label).join("、")}
                     </span>
-                    <span className="text-xs text-ink-soft" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
+                    <span className="text-xs text-sb-ink-2" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
                   </span>
-                  <span className="font-mono text-xs tnum text-ink-soft" data-testid="permit-row-period">
+                  <span className="sb-num text-[13px] tnum text-sb-ink-2" data-testid="permit-row-period">
                     {p.validFrom} 〜 {p.validTo}
                   </span>
                   <span className="flex flex-wrap items-center gap-1.5">
                     <PermitValidityBadge p={p} />
-                    {p.revokedOn ? <Badge tone="red">失効日 {p.revokedOn}</Badge> : null}
+                    {p.revokedOn ? <Badge tone="alert" mark="！">失効日 {p.revokedOn}</Badge> : null}
                   </span>
                 </Link>
               </li>

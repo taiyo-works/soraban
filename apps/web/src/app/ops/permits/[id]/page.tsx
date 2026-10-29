@@ -35,18 +35,18 @@ export default async function PermitDetailPage({
   const canRevoke = can(me.member.role, "permit.revoke") && !p.voided && p.status === "active";
   const canVoid = can(me.member.role, "permit.void") && !p.voided;
   const opts = canUpdate ? await permitFormOptions(ctx, [...p.aircraftScope.ids, ...p.pilotScope.ids]) : null;
-  const mono = (s: string) => <span className="font-mono">{s}</span>;
+  const mono = (s: string) => <span className="sb-num">{s}</span>;
   const scopeText = (s: { type: "any" | "listed"; labels: readonly string[] }) =>
     s.type === "any" ? "限定しない（許可書で確認してください）" : s.labels.join("、");
   const rows: [string, React.ReactNode][] = [
-    ["番号", <span key="n" className="font-mono" data-testid="permit-detail-number">{p.permitNumber}</span>],
+    ["番号", <span key="n" className="sb-num" data-testid="permit-detail-number">{p.permitNumber}</span>],
     ["包括／個別", p.coverageLabel],
     ["許可・承認の種類", <span key="k" data-testid="permit-detail-kinds">{p.kinds.map((k) => k.label).join("、")}</span>],
     ...(p.airportNames.length > 0 ? ([["空港名", p.airportNames.join("、")]] as [string, React.ReactNode][]) : []),
     ["許可書発行日", mono(p.issuedOn)],
     [
       "許可期間",
-      <span key="pe" className="font-mono tnum" data-testid="permit-detail-period">
+      <span key="pe" className="sb-num tnum" data-testid="permit-detail-period">
         {p.validFrom} 〜 {p.validTo}
         {p.revokedOn ? `（失効日 ${p.revokedOn}。有効な最終日 ${p.effectiveLastDate}）` : ""}
       </span>,
@@ -58,13 +58,13 @@ export default async function PermitDetailPage({
         <span>{p.placeSummary}</span>
         {p.placeScope.type === "circles"
           ? p.placeScope.circles.map((c, i) => (
-              <span key={i} className="font-mono text-xs tnum text-ink-soft">
+              <span key={i} className="sb-num text-xs tnum text-sb-ink-2">
                 {c.name ? `${c.name}：` : ""}
                 {c.lat}, {c.lng}／半径 {c.radiusM} m
               </span>
             ))
           : null}
-        {p.placeScope.type === "text" ? <span className="text-ink-soft">{p.placeScope.text || "（記載なし）"}</span> : null}
+        {p.placeScope.type === "text" ? <span className="text-sb-ink-2">{p.placeScope.text || "（記載なし）"}</span> : null}
       </span>,
     ],
     ["機体の範囲", scopeText(p.aircraftScope)],
@@ -74,7 +74,7 @@ export default async function PermitDetailPage({
     ["補助者の配置が条件", p.requiresObserver ? "はい" : "いいえ"],
     ["立入管理措置が条件", p.requiresAccessControl ? "はい" : "いいえ"],
     ["照合できない条件（文章）", p.conditionsText ?? "—"],
-    ["現在の版", <span key="ver" className="font-mono tnum" data-testid="permit-detail-version">版 {p.version}</span>],
+    ["現在の版", <span key="ver" className="sb-num tnum" data-testid="permit-detail-version">版 {p.version}</span>],
   ];
   return (
     <main className="flex flex-col gap-10">
@@ -91,7 +91,7 @@ export default async function PermitDetailPage({
         />
         <PermitDeclaration declaration={p.declaration} noDipsNote={p.noDipsNote} />
         {p.notes.map((n) => (
-          <p key={n} className="text-xs leading-relaxed text-ink-mute" data-testid="permit-note">{n}</p>
+          <p key={n} className="text-xs leading-relaxed text-sb-ink-3" data-testid="permit-note">{n}</p>
         ))}
         {p.voided ? (
           <Note tone="red">この登録は取り消されています（誤登録の記録）。登録内容と版の履歴は残しています。訂正はできません。</Note>
@@ -132,7 +132,7 @@ export default async function PermitDetailPage({
             pilotOptions={opts.pilots}
             affectedCount={p.basisPlanCount}
           />
-          <p className="text-xs leading-relaxed text-ink-mute">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+          <p className="text-xs leading-relaxed text-sb-ink-3">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         </Section>
       ) : null}
 

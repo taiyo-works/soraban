@@ -73,8 +73,9 @@ export type PermitFormValue = {
 const emptyCircle = (): CircleValue => ({ name: "", lat: "", lng: "", radiusM: "" });
 const toggle = (list: readonly string[], v: string): string[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
+// 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は墨の枠と薄い地で示す（チェックの記号と併用）。③b1 の計画の入力（plans-client.tsx）と同じ作り
 const rowClass =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sharp border border-rule-soft bg-paper px-3 py-2.5 text-sm leading-snug text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
+  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
 const box = `${checkboxClass} mt-0.5 h-5! w-5!`;
 
 /** 登録・訂正のフォーム。訂正では reason と expectedVersion を送る。 */
@@ -182,7 +183,7 @@ export function PermitForm({
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={editing ? "許可・承認の訂正" : "許可・承認の登録"} data-testid="permit-form">
       <Group title="許可書の記載">
         <Field label="許可・承認の番号" required error={errors["permitNumber"]} hint="許可書の表記のまま。1 通ずつ登録します（区切り文字は使えません）。">
-          <input className={`${inputClass} font-mono`} value={v.permitNumber} onChange={(e) => set("permitNumber", e.target.value)} autoComplete="off" spellCheck={false} data-testid="permit-number" />
+          <input className={`${inputClass} sb-num`} value={v.permitNumber} onChange={(e) => set("permitNumber", e.target.value)} autoComplete="off" spellCheck={false} data-testid="permit-number" />
         </Field>
         <Field label="包括許可／個別許可" required error={errors["coverage"]}>
           <select
@@ -211,7 +212,7 @@ export function PermitForm({
       </Group>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-kinds">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">許可・承認の種類</legend>
+        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">許可・承認の種類</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {kindChoices.map((c) => {
             const disabled = c.value === "airport" && v.coverage === "blanket";
@@ -224,7 +225,7 @@ export function PermitForm({
           })}
         </div>
         <FieldError message={errors["kinds"]} />
-        <p className="text-xs leading-relaxed text-ink-mute">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
+        <p className="text-xs leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
         {hasAirport ? (
           <Field label="空港名（1 行に 1 件・5 件まで）" required error={errors["airportNames"]} hint="どの空港の許可かの表記です（照合には使いません）。">
             <textarea className={inputClass} rows={2} value={v.airportNames} onChange={(e) => set("airportNames", e.target.value)} data-testid="permit-airport-names" />
@@ -233,7 +234,7 @@ export function PermitForm({
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-place">
-        <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">場所の範囲</legend>
+        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">場所の範囲</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
           {(
             [
@@ -251,11 +252,11 @@ export function PermitForm({
             );
           })}
         </div>
-        {v.coverage === "individual" ? <p className="text-xs leading-relaxed text-ink-mute">個別許可は全国を範囲にできません。</p> : null}
+        {v.coverage === "individual" ? <p className="text-xs leading-relaxed text-sb-ink-3">個別許可は全国を範囲にできません。</p> : null}
         {v.placeType === "circles" ? (
           <div className="flex flex-col gap-3" data-testid="permit-circles">
             {v.circles.map((c, i) => (
-              <div key={i} className="grid grid-cols-1 gap-3 border-l-4 border-brand-500 bg-paper-soft py-3 pl-3 pr-3 sm:grid-cols-4" data-testid="permit-circle">
+              <div key={i} className="grid grid-cols-1 gap-3 rounded-sb-m bg-sb-surface p-3 sm:grid-cols-4" data-testid="permit-circle">
                 <Field label={`円 ${i + 1} の名称（任意）`}>
                   <input className={inputClass} value={c.name} onChange={(e) => setCircle(i, { name: e.target.value })} data-testid="permit-circle-name" />
                 </Field>
@@ -280,7 +281,7 @@ export function PermitForm({
                 円を追加する
               </button>
             ) : null}
-            <p className="text-xs leading-relaxed text-ink-mute">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
+            <p className="text-xs leading-relaxed text-sb-ink-3">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
           </div>
         ) : null}
         {v.placeType === "text" ? (
@@ -288,7 +289,7 @@ export function PermitForm({
             <Field label="場所（文章）" required={false} hint="300 文字以内">
               <textarea className={inputClass} rows={3} value={v.placeText} onChange={(e) => set("placeText", e.target.value)} data-testid="permit-place-text" />
             </Field>
-            <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="permit-text-note">
+            <p className="opx-note" data-testid="permit-text-note">
               場所が文章だけの許可は照合できないため、判定には適用しません（要手続きのままです）。
             </p>
           </div>
@@ -343,7 +344,7 @@ export function PermitForm({
 
       {editing ? (
         <div className="flex flex-col gap-3">
-          <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft" data-testid="permit-affects-note">
+          <p className="opx-note" data-testid="permit-affects-note">
             番号・種類・期間・範囲などを変えると、この登録を使っている計画が「判定が古い」になります
             {affectedCount !== undefined ? `（いま根拠にしている計画：${affectedCount} 件）` : ""}。計画ごとに判定をやり直してください（自動では書き換えません）。
           </p>
@@ -357,7 +358,7 @@ export function PermitForm({
         <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="permit-submit">
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -386,7 +387,7 @@ function ScopePicker({
 }) {
   return (
     <fieldset className="flex min-w-0 flex-col gap-3" data-testid={testId}>
-      <legend className="mb-1 w-full border-b border-rule pb-1.5 text-sm font-medium text-ink">{title}</legend>
+      <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">{title}</legend>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         <label className={rowClass}>
           <input type="radio" name={`${testId}-type`} className={box} checked={type === "any"} onChange={() => onType("any")} data-testid={`${testId}-any`} />
@@ -398,11 +399,11 @@ function ScopePicker({
         </label>
       </div>
       {type === "any" ? (
-        <p className="border-l-2 border-signal-amber pl-3 text-xs leading-relaxed text-ink-soft">
+        <p className="opx-note">
           限定しない場合も、許可書に機体・操縦者の限定がないか許可書で確認してください。
         </p>
       ) : options.length === 0 ? (
-        <p className="text-xs text-ink-mute">{emptyLabel}</p>
+        <p className="text-xs text-sb-ink-3">{emptyLabel}</p>
       ) : (
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {options.map((o) => (

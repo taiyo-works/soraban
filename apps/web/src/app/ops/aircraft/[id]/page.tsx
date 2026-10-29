@@ -18,7 +18,7 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
   }
   const versions = await listAircraftVersions(ctx, id);
   const manager = me.member.role === "manager";
-  const mono = (s: string) => <span className="font-mono">{s}</span>;
+  const mono = (s: string) => <span className="sb-num">{s}</span>;
   const rows: [string, React.ReactNode][] = [
     ["登録記号", mono(a.registrationMark)],
     ["型式名", a.modelName],
@@ -29,8 +29,8 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
       a.typeCertified ? (
         <span className="flex flex-col">
           <span>あり</span>
-          <span className="text-ink-soft">
-            種類：{a.typeCertCategory}／型式：{a.typeCertModel}／番号：<span className="font-mono">{a.typeCertNumber}</span>
+          <span className="text-sb-ink-2">
+            種類：{a.typeCertCategory}／型式：{a.typeCertModel}／番号：<span className="sb-num">{a.typeCertNumber}</span>
           </span>
         </span>
       ) : (
@@ -42,7 +42,7 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
       a.airworthinessClass ? (
         <span>
           {CERT_CLASS_LABELS[a.airworthinessClass]}
-          <span className="text-ink-soft">（番号：<span className="font-mono">{a.airworthinessCertNumber}</span>）</span>
+          <span className="text-sb-ink-2">（番号：<span className="sb-num">{a.airworthinessCertNumber}</span>）</span>
         </span>
       ) : (
         "なし"
@@ -53,18 +53,18 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
       "使用開始時の既存の総飛行時間",
       <span key="m" className="tnum">
         {Math.floor(a.initialFlightMinutes / 60)} 時間 {a.initialFlightMinutes % 60} 分
-        <span className="ml-1 font-mono text-xs text-ink-mute">（{formatMinutes(a.initialFlightMinutes)}）</span>
+        <span className="ml-1 sb-num text-xs text-sb-ink-3">（{formatMinutes(a.initialFlightMinutes)}）</span>
       </span>,
     ],
     [
       "現在の総飛行時間",
       <span key="t" className="flex flex-col">
-        <span className="font-mono tnum" data-testid="aircraft-total">
+        <span className="sb-num tnum" data-testid="aircraft-total">
           {formatMinutes(a.totalFlightMinutes)}
         </span>
-        <span className="text-xs text-ink-mute">
+        <span className="text-xs text-sb-ink-3">
           既存の総飛行時間 ＋ 取消していない飛行記録 {a.flightCount} 件の飛行時間の合計。
-          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-2">
+          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">
             この機体の飛行記録
           </a>
         </span>

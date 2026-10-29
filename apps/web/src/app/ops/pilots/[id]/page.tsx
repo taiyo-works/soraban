@@ -37,7 +37,7 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
         <span className="flex flex-col gap-0.5">
           <LicenseNumber value={p.licenseNumber} />
           {p.licenseNumberMasked ? (
-            <span className="text-xs text-ink-mute">末尾 4 桁以外を伏せています。全桁は運航管理者と本人だけが見られます。</span>
+            <span className="text-xs text-sb-ink-3">末尾 4 桁以外を伏せています。全桁は運航管理者と本人だけが見られます。</span>
           ) : null}
         </span>
       ) : (
@@ -54,7 +54,7 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
             href={LICENSE_RENEWAL_SOURCE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-brand-700 underline underline-offset-2 hover:text-ink"
+            className="inline-flex min-h-11 items-center text-[13px] font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
           >
             更新の手続き（国土交通省）↗
           </a>
@@ -67,10 +67,10 @@ export default async function PilotDetailPage({ params }: { readonly params: Pro
     [
       "そらばんで記録した飛行の累計",
       <span key="rt" className="flex flex-col">
-        <span className="font-mono tnum" data-testid="pilot-recorded-total">
+        <span className="sb-num tnum" data-testid="pilot-recorded-total">
           {formatMinutes(p.recordedFlightMinutes)}
         </span>
-        <span className="text-xs text-ink-mute">
+        <span className="text-xs text-sb-ink-3">
           取消していない飛行記録 {p.recordedFlightCount} 件の飛行時間の合計（全機体）。そらばんで記録する前の飛行時間は含みません。
         </span>
       </span>,
