@@ -986,11 +986,11 @@ export const listFieldInspections = async (
   orgId: string,
   aircraftIds: readonly string[],
   date: string,
-): Promise<{ id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }[]> => {
+): Promise<{ id: string; aircraft_id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }[]> => {
   if (aircraftIds.length === 0) return [];
   return (
-    await db.query<{ id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }>(
-      `select id, inspected_at, has_abnormal, timing, inspected_date::text as inspected_date_text from daily_inspections
+    await db.query<{ id: string; aircraft_id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }>(
+      `select id, aircraft_id, inspected_at, has_abnormal, timing, inspected_date::text as inspected_date_text from daily_inspections
         where org_id = $1 and aircraft_id = any($2::uuid[]) and voided_at is null
           and inspected_date >= $3::date - 1 and inspected_date <= $3::date
         order by inspected_at, id`,

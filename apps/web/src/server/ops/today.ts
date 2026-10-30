@@ -12,7 +12,7 @@ import { jstDate, jstTime, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { fieldState, type FieldEventLite, type FieldFlightRecordLite, type FieldState } from "./field-logic";
 import { deadlines as deadlinesOf, type DeadlineDto } from "./deadlines-logic";
-import { inspectionLites, toLite } from "./field-rows";
+import { fieldInspectionLites, toLite } from "./field-rows";
 import { enrichFlights } from "./flight-extras";
 import { incidentTodayActions } from "./incidents";
 import { journeyStages, type JourneyStageDto } from "./journey-logic";
@@ -234,7 +234,7 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
   // まとめて引く（計画の件数に比例しない）
   const [events, inspectionRows, flightRecordPlanIds] = await Promise.all([
     store.listFieldEventsFor(ctx.db, org, planIds),
-    store.listPreflightInspections(ctx.db, org, [...new Set(rows.map((r) => r.aircraft_id))], today),
+    store.listFieldInspections(ctx.db, org, [...new Set(rows.map((r) => r.aircraft_id))], today),
     store.plansWithFlightRecords(ctx.db, org, planIds),
   ]);
   const linkedRecordIds = events.map((e) => e.flight_record_id).filter((x): x is string => x !== null);
@@ -247,10 +247,8 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
   const recordState: FieldFlightRecordLite[] = voidState;
   const stateBy = new Map<string, FieldState>();
   for (const r of rows) {
-    const inspections = inspectionLites(
-      inspectionRows.filter((x) => x.aircraft_id === r.aircraft_id),
-      today,
-    );
+    // 飛行前・飛行後の日常点検（飛行後点検の未了を導出する。Sprint 14）
+    const inspections = fieldInspectionLites(inspectionRows.filter((x) => x.aircraft_id === r.aircraft_id));
     stateBy.set(r.id, fieldState({ events: eventsBy.get(r.id) ?? [], inspections, flightRecords: recordState, day: today }));
   }
 
