@@ -4,7 +4,7 @@
 |---|---|
 | ドキュメント種別 | 機能仕様（Feature Spec） |
 | 対象機能 | DIPS 飛行許可・承認 申請支援（手続き診断 ＋ 書類ドラフト ＋ DIPS 入力プリフィル） |
-| 親文書 | `docs/00_NORTH_STAR.md`（戦略コア）／ `docs/soraban_master_plan.md`（運用・モジュール定義） |
+| 親文書 | `docs/00_NORTH_STAR.md`（戦略コア）／ `docs/archive/soraban_master_plan.md`（2026-04 の旧計画。保管のみ） |
 | 対応箇所 | North Star §3.1 コアフロー末尾「→ 申請書類生成」／ master_plan **Module C（書類自動生成）** の計画内拡張 |
 | 安全クリティカル区分 | **法令を扱う安全クリティカル機能**。確証のない事実は本文に「※要再確認」と明記し、確定事実と区別する。 |
 | 作成日 | 2026-06-22 |

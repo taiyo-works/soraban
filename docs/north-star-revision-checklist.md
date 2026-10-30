@@ -27,7 +27,7 @@
 | 未対応 | 中 | 同 §2.2（差分マップ）・§7（先行技術） | 条例の構造化を「他にない」とする表現が、DIPS の「条例等」種別の存在と矛盾しないか見直す。裏付けのない断定的な比較は弱める |
 | 未対応 | 低 | 同 §5・§6・§8・§9（特許前提・課金・旧リスク表） | §0.1 が優先する旨の注記を維持。今回の改訂では本文を直さない |
 | 済（版 1.7） | 高 | 同 §11（改訂履歴）・冒頭の版・最終更新 | 版 1.7（または 2.0）を追加。変更の理由を記載 |
-| 未対応 | 中 | `docs/soraban_master_plan.md` | 古い計画（2026-04 時点の「個人開発」「4/30 デモ」「特許コア」）。冒頭に「北極星 §0.1 とその改訂が優先」の注記があるか確認し、なければ追加。Phase 表は新しい段階に合わせるか、旧計画として残す |
+| 済（2026-10-30、`docs/archive/` へ移動） | 中 | `docs/soraban_master_plan.md` | 古い計画（2026-04 時点の「個人開発」「4/30 デモ」「特許コア」）。冒頭に「北極星 §0.1 とその改訂が優先」の注記があるか確認し、なければ追加。Phase 表は新しい段階に合わせるか、旧計画として残す |
 
 ## 2. 引き継ぎ・仕様・スプリント
 
@@ -73,7 +73,7 @@
 | 未対応 | 中 | `packages/regulations/data/sources.json` の台帳の項目 | 提案 §3.2 の項目（種類、条・項、確認の状態など）を足すかの設計（実装は新スプリントで） |
 | 未対応 | 中 | `docs/runbooks/production-db-prep.md` | 個人情報（DIPS から取り込む氏名・技能証明書番号）の保管と、国内保管の判断の記述を確認 |
 | 未対応 | 低 | `docs/patent-claim-draft.md` | 保留のまま。北極星の改訂では触れない |
-| 未対応 | 低 | `docs/yonago-regulations-mock.md`、`docs/soraban_6day_sprint*.md`、`docs/SanFlightGuard_Setup.md`、`docs/soraban_hinomori_Setup.md` | 旧い資料。内容が現行と食い違う旨の注記が要るか確認するだけでよい |
+| 済（2026-10-30、`docs/archive/` へ移動） | 低 | `docs/yonago-regulations-mock.md`、`docs/soraban_6day_sprint*.md`、`docs/SanFlightGuard_Setup.md`、`docs/soraban_hinomori_Setup.md` | 旧い資料。内容が現行と食い違う旨の注記が要るか確認するだけでよい |
 
 ## 6. 直したあとの確認
 
