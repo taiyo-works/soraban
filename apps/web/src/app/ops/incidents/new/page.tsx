@@ -38,7 +38,7 @@ export default async function IncidentNewPage({
           pilots={opts.pilots}
         />
       ) : (
-        <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft" data-testid="incident-new-forbidden">
+        <p className="opx-note" data-testid="incident-new-forbidden">
           閲覧者は記録できません。運航管理者または操縦者に記録を依頼してください。
         </p>
       )}

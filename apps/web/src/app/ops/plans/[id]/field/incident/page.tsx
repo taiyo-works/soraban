@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { FieldModeMark } from "@/components/ops/field-mode-mark";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { IncidentQuickClient } from "@/components/ops/incident-quick-client";
 import { can } from "@/server/ops/authz";
@@ -20,6 +21,7 @@ export default async function PlanFieldIncidentPage({ params }: { readonly param
   }
   return (
     <>
+      <FieldModeMark />
       <DraftOwnerGuard memberId={me.member.id} />
       <IncidentQuickClient planId={plan.id} planTitle={plan.title} memberId={me.member.id} canCreate={can(me.member.role, "incident.create")} />
     </>

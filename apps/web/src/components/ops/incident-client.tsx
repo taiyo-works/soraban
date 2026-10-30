@@ -50,10 +50,10 @@ import { confirmBoxClass, confirmRowClass, JstDateTimeField, joinJst, splitJst }
 import { buttonPrimaryClass, buttonDangerClass, VERSION_NOTICE_TARGET } from "./ui";
 
 const radioRowClass =
-  "flex min-h-11 cursor-pointer items-center gap-3 rounded-sharp border border-rule bg-paper px-3 py-2 text-sm text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
-const radioClass = "h-5 w-5 shrink-0 cursor-pointer accent-brand-700";
+  "opx-check-row border-[1.5px] border-transparent has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover";
+const radioClass = "h-5 w-5 shrink-0 cursor-pointer accent-sb-ink";
 // 項目のまとまりの見出し（12a・12d のフォームと同じ、下に罫線を引いた小見出し）
-const legendClass = "mb-1 flex w-full items-center gap-2 border-b border-rule pb-1.5 text-sm font-medium text-ink";
+const legendClass = "mb-1 flex w-full items-center gap-2 border-b border-sb-rule pb-1.5 text-sm font-bold text-sb-ink";
 
 /** 誤りの文言（項目ごとの誤りがあれば入力欄の下に、無ければ送信ボタンの上に）。 */
 const messageOf = (r: ApiResult): string => {
@@ -89,7 +89,7 @@ export type IncidentFormInitial = {
 
 const ErrorText = ({ message, testId }: { readonly message?: string; readonly testId?: string }) =>
   message ? (
-    <span role="alert" className="text-xs leading-relaxed text-signal-red" data-testid={testId}>
+    <span role="alert" className="text-xs font-bold leading-relaxed text-sb-v-no-fg" data-testid={testId}>
       <span aria-hidden>! </span>
       {message}
     </span>
@@ -115,7 +115,7 @@ function YesNoUnknownField({
     <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={error ? true : undefined}>
       <legend className={legendClass}>
         {legend}
-        <span aria-hidden className="rounded-sharp border border-brand-500 px-1 text-[10px] leading-4 text-brand-700">必須</span>
+        <span aria-hidden className="opx-required">必須</span>
       </legend>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {YES_NO_UNKNOWN.map((v) => (
@@ -213,7 +213,7 @@ export function IncidentForm({
             {o.label}
           </span>
           {o.description ? (
-            <span className="text-sm leading-relaxed text-ink-soft" data-testid={`incident-event-type-desc-${o.key}`}>
+            <span className="text-sm leading-relaxed text-sb-ink-2" data-testid={`incident-event-type-desc-${o.key}`}>
               {o.description}
             </span>
           ) : null}
@@ -273,7 +273,7 @@ export function IncidentForm({
       <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["kind"] ? true : undefined}>
         <legend className={legendClass}>
           区分
-          <span aria-hidden className="rounded-sharp border border-brand-500 px-1 text-[10px] leading-4 text-brand-700">必須</span>
+          <span aria-hidden className="opx-required">必須</span>
         </legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {INCIDENT_KINDS.map((k) => (
@@ -283,7 +283,7 @@ export function IncidentForm({
             </label>
           ))}
         </div>
-        <p className="text-xs leading-relaxed text-ink-soft" data-testid="incident-kind-notice">
+        <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="incident-kind-notice">
           {INCIDENT_KIND_NOTICE}
         </p>
         <ErrorText message={errors["kind"]} />
@@ -344,20 +344,20 @@ export function IncidentForm({
       <fieldset className="flex min-w-0 flex-col gap-3" aria-invalid={errors["eventTypes"] ? true : undefined} data-testid="incident-event-types">
         <legend className={legendClass}>
           起きた事象の類型
-          <span aria-hidden className="rounded-sharp border border-brand-500 px-1 text-[10px] leading-4 text-brand-700">必須</span>
+          <span aria-hidden className="opx-required">必須</span>
         </legend>
-        <p className="text-sm leading-relaxed text-ink-soft" data-testid="incident-event-type-notice">
+        <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="incident-event-type-notice">
           {INCIDENT_EVENT_TYPE_NOTICE}
         </p>
         <ul className="flex flex-col gap-2" data-testid="incident-event-types-possible">
           {possibleOpts.map(typeOption)}
         </ul>
         {/* 事実の類型（目安には効かない）。点線の区切りで目安に効く 7 類型から離す（「当たらない」の意味に見えないよう、選択肢の形は同じ） */}
-        <ul className="mt-3 flex flex-col gap-2 border-t border-dashed border-rule pt-5" data-testid="incident-event-types-fact-only">
+        <ul className="mt-3 flex flex-col gap-2 border-t border-dashed border-sb-edge pt-5" data-testid="incident-event-types-fact-only">
           {factOnlyOpts.map(typeOption)}
         </ul>
         {/* 排他の 2 つ（同時に選べない）。実線の区切りでさらに離し、選択肢の枠を破線にして形でも区別する */}
-        <ul className="mt-5 flex flex-col gap-2 border-t border-rule pt-5" data-testid="incident-event-types-exclusive">
+        <ul className="mt-5 flex flex-col gap-2 border-t border-sb-rule pt-5" data-testid="incident-event-types-exclusive">
           {exclusiveOpts.map(typeOption)}
         </ul>
         <ErrorText message={errors["eventTypes"]} testId="incident-event-types-error" />
@@ -370,7 +370,7 @@ export function IncidentForm({
           testId="incident-live-guidance"
         />
       ) : (
-        <p className="rounded-sharp border border-dashed border-rule px-4 py-3.5 text-sm leading-relaxed text-ink-soft" data-testid="incident-live-guidance-empty">
+        <p className="rounded-sb-m border border-dashed border-sb-edge px-4 py-3.5 text-sm leading-relaxed text-sb-ink-2" data-testid="incident-live-guidance-empty">
           事象の類型を選ぶと、報告の対象になる可能性の目安がここに出ます。
         </p>
       )}
@@ -404,7 +404,7 @@ export function IncidentForm({
 
       <fieldset className="flex min-w-0 flex-col gap-4">
         <legend className={legendClass}>起きたこと</legend>
-        <p className="border-l-2 border-brand-700 pl-3 text-sm leading-relaxed text-ink-soft" data-testid="incident-personal-notice">
+        <p className="opx-note" data-testid="incident-personal-notice">
           {INCIDENT_PERSONAL_INFO_NOTICE}
         </p>
         <Field label="何が起きたか" required error={errors["summary"]} hint={`${INCIDENT_LIMITS.summary} 文字まで`}>
@@ -436,7 +436,7 @@ export function IncidentForm({
         </div>
         {followUp === "done" ? (
           <Field label="対応が済んだ日" required error={errors["followUpOn"]}>
-            <input type="date" className={`${inputClass} max-w-56 font-mono`} value={followUpOn} onChange={(e) => setFollowUpOn(e.target.value)} data-testid="incident-follow-up-on" />
+            <input type="date" className={`${inputClass} max-w-56 sb-num`} value={followUpOn} onChange={(e) => setFollowUpOn(e.target.value)} data-testid="incident-follow-up-on" />
           </Field>
         ) : null}
       </fieldset>
@@ -451,7 +451,7 @@ export function IncidentForm({
         <button type="submit" className={`${buttonPrimaryClass} min-h-12 w-full sm:w-auto`} disabled={busy} data-testid="incident-submit">
           {mode === "create" ? "記録する" : "訂正を保存する"}
         </button>
-        {busy ? <span className="text-xs text-ink-mute">送信しています…</span> : null}
+        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -491,7 +491,7 @@ export function IncidentFollowUpForm({ id, version, status, on }: { readonly id:
       </div>
       {s === "done" ? (
         <Field label="対応が済んだ日" required error={errors["followUpOn"]}>
-          <input type="date" className={`${inputClass} max-w-56 font-mono`} value={date} onChange={(e) => setDate(e.target.value)} data-testid="incident-follow-up-update-on" />
+          <input type="date" className={`${inputClass} max-w-56 sb-num`} value={date} onChange={(e) => setDate(e.target.value)} data-testid="incident-follow-up-update-on" />
         </Field>
       ) : null}
       <Field label="更新の理由" required error={errors["reason"]}>
@@ -583,7 +583,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
         <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
           報告の結果を記録する
         </button>
-        {!checked ? <span className="text-xs text-ink-soft">確認のチェックを入れると記録できます。</span> : null}
+        {!checked ? <span className="text-xs text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
       </SubmitRow>
     </form>
   );
@@ -635,7 +635,7 @@ export function IncidentConsultedForm({ id, defaultDoneAt }: { readonly id: stri
         <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
           要否を確かめたことを記録する
         </button>
-        {!checked ? <span className="text-xs text-ink-soft">確認のチェックを入れると記録できます。</span> : null}
+        {!checked ? <span className="text-xs text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
       </SubmitRow>
     </form>
   );

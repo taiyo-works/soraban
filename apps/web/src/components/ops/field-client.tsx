@@ -58,27 +58,28 @@ import { newRequestId } from "./drafts";
 import { flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
 import { FIELD_BACK } from "./ops-nav-model";
 
-const BTN =
-  "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp px-5 py-2 text-lg font-bold touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
-const BTN_PRIMARY = `${BTN} border-2 border-brand-700 bg-brand-700 text-paper`;
-const BTN_OUTLINE = `${BTN} border-2 border-brand-700 bg-paper text-brand-700`;
-const BTN_WARN = `${BTN} border-2 border-signal-red bg-paper text-ink`;
-const BTN_FLIGHT =
-  "inline-flex min-h-24 w-full items-center justify-center rounded-sharp border-2 border-brand-700 bg-brand-700 px-5 text-4xl font-bold tracking-[0.2em] text-paper touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
-// Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い紙の地・左寄せ・
+// 現場の値（56／64px・7:1・影なし・動きなし）は、現場の 2 画面を開いている間だけ <html data-mode="field"> が付くことで効く（FieldModeMark）。
+// 見た目は ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*。意味は枠の形（実線・破線・太さ）と記号・文字が担い、色は補助。
+const BTN = "opx-btn w-full";
+const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
+const BTN_OUTLINE = BTN;
+// 選択中・現在地の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
+const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+const BTN_WARN = "opx-btn opx-btn-danger w-full";
+const BTN_FLIGHT = "opx-btn opx-btn-primary opx-btn-field w-full min-h-24 text-4xl tracking-[0.2em]";
+// Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い地・左寄せ・
 // 太字にしない帯にする（高さ 56px・全幅・文字 18px は保つ）。行き先は右端の矢印で示す。
-const BAND_INCIDENT =
-  "flex min-h-14 w-full items-center gap-3 rounded-sharp border-2 border-rule bg-paper-soft px-3 py-2 text-left text-lg font-medium text-ink touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
-// 札（枠）。意味は枠の太さ・左の太線・記号と文字が担い、色は補助。済は実線、未は破線。
-const BOX = "flex flex-col gap-3 rounded-sharp border-2 border-rule bg-paper p-3";
-const BOX_TODO = "flex flex-col gap-3 rounded-sharp border-2 border-dashed border-ink-mute bg-paper p-3";
-const BOX_DONE = "flex flex-col gap-3 rounded-sharp border-2 border-l-8 border-signal-green bg-paper p-3";
-const BOX_BAD = "flex flex-col gap-3 rounded-sharp border-2 border-l-8 border-signal-red bg-paper p-3";
-const BOX_WARN = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-red bg-signal-red-soft p-3 text-ink";
-const BOX_NOTE = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft p-3 text-ink";
-const BOX_OK = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-green bg-signal-green-soft p-3 text-ink";
+const BAND_INCIDENT = "opx-band";
+// 札（枠）。済は実線の墨、未は破線、異常は太い赤の実線。
+const BOX = "opx-box";
+const BOX_TODO = "opx-box opx-box-todo";
+const BOX_DONE = "opx-box opx-box-done";
+const BOX_BAD = "opx-box opx-box-bad";
+const BOX_WARN = "opx-box opx-box-warn";
+const BOX_NOTE = "opx-box opx-box-note";
+const BOX_OK = "opx-box opx-box-ok";
 // 緊急用務空域が「指定されている」：画面で最も目立たせる（太い枠・大きな見出し・記号と文字）
-const BOX_ALARM = "flex flex-col gap-2 rounded-sharp border-[6px] border-signal-red bg-signal-red-soft p-4 text-ink";
+const BOX_ALARM = "opx-box opx-box-alarm";
 
 type Banner = {
   readonly id: string;
@@ -358,7 +359,7 @@ export function FieldClient({
                 <p className="text-xl font-bold" data-testid={`field-item-state-${item}`}>
                   <span aria-hidden>{mark} </span>
                   {word}
-                  {time ? <span className="font-mono">（{time}）</span> : null}
+                  {time ? <span className="sb-num">（{time}）</span> : null}
                 </p>
               </div>
 
@@ -399,7 +400,7 @@ export function FieldClient({
                       </label>
                       <select
                         id="field-em-source"
-                        className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg text-ink"
+                        className="sb-input !min-h-14 w-full text-lg"
                         value={emSource}
                         onChange={(e) => setEmSource(e.target.value)}
                         data-testid="field-em-source"
@@ -418,7 +419,7 @@ export function FieldClient({
                             type="button"
                             role="radio"
                             aria-checked={emResult === r}
-                            className={emResult === r ? BTN_PRIMARY : BTN_OUTLINE}
+                            className={emResult === r ? BTN_SEL : BTN_OUTLINE}
                             data-testid={`field-em-result-${r}`}
                             onClick={() => setEmResult(r)}
                           >
@@ -485,13 +486,13 @@ export function FieldClient({
                     {plan.permitNumbers ? `許可・承認の番号：${plan.permitNumbers}` : "許可・承認の番号の登録はありません。"}
                   </p>
                   {plan.permitStates.length > 0 ? (
-                    <ul className="flex flex-col gap-3 border-l-4 border-ink-soft pl-3 text-lg" data-testid="field-permit-states">
+                    <ul className="opx-note flex flex-col gap-3 text-lg" data-testid="field-permit-states">
                       {plan.permitStates.map((n) => (
                         <li key={n.numberText} data-testid="field-permit-state" data-status={n.status}>
-                          <span className="break-all font-mono">{n.numberText}</span>：{n.statusLabel}
+                          <span className="break-all sb-num">{n.numberText}</span>：{n.statusLabel}
                         </li>
                       ))}
-                      <li className="text-base text-ink-soft">登録は利用者の入力です。許可書を携行し、書かれた条件を確認してください。</li>
+                      <li className="text-base text-sb-ink-2">登録は利用者の入力です。許可書を携行し、書かれた条件を確認してください。</li>
                     </ul>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled ? (
@@ -525,13 +526,13 @@ export function FieldClient({
         ② 離着陸
       </h2>
       {inFlight ? (
-        <div className="flex flex-col gap-1 rounded-sharp border-2 border-l-8 border-brand-700 bg-brand-50 p-3 text-ink" data-testid="field-in-flight">
+        <div className="opx-box opx-box-ok !gap-1" data-testid="field-in-flight">
           <p className="text-2xl font-bold">
             <span aria-hidden>{FIELD_STATE_MARK.in_flight} </span>
             {FIELD_STATE_IN_FLIGHT}
-            <span className="font-mono">（離陸 {hm(open!.takeoffAt)}）</span>
+            <span className="sb-num">（離陸 {hm(open!.takeoffAt)}）</span>
           </p>
-          <p className="font-mono text-6xl font-bold leading-tight tabular-nums" data-testid="field-elapsed" aria-label="経過時間">
+          <p className="sb-num text-6xl font-bold leading-tight tabular-nums" data-testid="field-elapsed" aria-label="経過時間">
             {elapsed}
           </p>
         </div>
@@ -586,7 +587,7 @@ export function FieldClient({
                   {i + 1} 回目：<span aria-hidden>{phaseMark} </span>
                   {phaseLabel}
                 </p>
-                <p className="font-mono">
+                <p className="sb-num">
                   離陸 {hm(f.takeoffAt)}
                   {f.landingAt ? ` → 着陸 ${hm(f.landingAt)}` : ""}
                 </p>
@@ -659,7 +660,7 @@ export function FieldClient({
 
   return (
     <main
-      className="flex flex-col gap-5 bg-paper pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-ink touch-manipulation"
+      className="flex flex-col gap-5 pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-sb-ink touch-manipulation"
       data-testid="field-root"
       data-hydrated={hydrated ? "true" : "false"}
       aria-label="現場モード"
@@ -674,16 +675,16 @@ export function FieldClient({
       ) : null}
 
       {/* 上部：計画の要点（運航票の見出し）と「ホームへ戻る」 */}
-      <header className="flex flex-col gap-3 border-b-2 border-ink-mute pb-4">
-        <div className="flex flex-col gap-1 border-l-8 border-brand-700 pl-3">
+      <header className="flex flex-col gap-3 border-b-[length:var(--sb-mark-w)] border-sb-edge pb-4">
+        <div className="flex flex-col gap-1 border-l-[length:8px] border-sb-orange pl-3">
           <h1 className="text-2xl font-bold leading-snug" data-testid="field-plan-title">
             {plan.title}
           </h1>
-          <p className="font-mono tabular-nums" data-testid="field-plan-time">
+          <p className="sb-num tabular-nums" data-testid="field-plan-time">
             {plan.timeLabel}
           </p>
           <p data-testid="field-plan-who">
-            <span className="font-mono">{plan.registrationMark}</span>（{plan.modelName}）／<span className="whitespace-nowrap">{plan.pilotName}</span>
+            <span className="sb-num">{plan.registrationMark}</span>（{plan.modelName}）／<span className="whitespace-nowrap">{plan.pilotName}</span>
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -697,10 +698,10 @@ export function FieldClient({
                   key={p.id}
                   href={fieldHref(p.id)}
                   aria-current={p.isCurrent ? "page" : undefined}
-                  className={`${p.isCurrent ? BTN_PRIMARY : BTN_OUTLINE} min-w-0 flex-1 basis-36 !gap-0 !px-3 !py-1 flex-col`}
+                  className={`${p.isCurrent ? BTN_SEL : BTN_OUTLINE} min-w-0 flex-1 basis-36 !gap-0 !px-3 !py-1 flex-col`}
                   data-testid="field-same-day-link"
                 >
-                  <span className="font-mono">
+                  <span className="sb-num">
                     {p.isCurrent ? "▶ " : ""}
                     {p.timeLabel}
                   </span>
@@ -714,11 +715,11 @@ export function FieldClient({
             （ヘッダーの中に置き、段階・送信の状況を挟んで 24px 以上離す）。押すと簡易記録の画面へ移るだけで、その場では記録しない */}
         {incidentHref ? (
           <a href={incidentHref} className={BAND_INCIDENT} data-testid="field-incident-link">
-            <span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-sharp border-2 border-ink-soft leading-none">
+            <span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-sb-pill border-2 border-sb-edge leading-none">
               ＋
             </span>
             <span className="min-w-0 flex-1">事故・ヒヤリハットを記録する</span>
-            <span aria-hidden className="shrink-0 text-ink-soft">
+            <span aria-hidden className="shrink-0 text-sb-ink-2">
               →
             </span>
           </a>
@@ -732,7 +733,7 @@ export function FieldClient({
             key={n}
             href={href}
             aria-current={stage === n ? "step" : undefined}
-            className={`${stage === n ? BTN_PRIMARY : BTN_OUTLINE} flex-col !gap-0 !px-1 text-center`}
+            className={`${stage === n ? BTN_SEL : BTN_OUTLINE} flex-col !gap-0 !px-1 text-center`}
             data-testid={`field-step-${n}`}
             data-current={stage === n ? "true" : "false"}
           >
@@ -744,7 +745,7 @@ export function FieldClient({
 
       {/* 送信の状況・注記 */}
       <section aria-label="送信の状況" className="flex flex-col gap-3">
-        <p className={unsent > 0 ? BOX_NOTE : "flex items-center gap-2 px-1 text-ink-soft"} role="status" data-testid="field-unsent" data-count={unsent}>
+        <p className={unsent > 0 ? BOX_NOTE : "flex items-center gap-2 px-1 text-sb-ink-2"} role="status" data-testid="field-unsent" data-count={unsent}>
           <span className={unsent > 0 ? "text-2xl font-bold" : "font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
           {unsent > 0 ? <span>電波が戻ると自動で送ります。</span> : null}
         </p>
