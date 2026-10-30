@@ -217,3 +217,14 @@ describe("レビュー指摘の修正", () => {
     expect(by(base({ report: { requirementKind: "recommended", statusCode: "no_record", effective: null } }))["report"]!.countsAsGap).toBe(false);
   });
 });
+
+describe("再評価後のユーザー決定（通報の前後は記録の時刻で判定）", () => {
+  it("記録の時刻（created_at）が離陸より後なら、入力された通報日時が前でも要確認", () => {
+    const eff = { id: "r", dipsNumber: "D-1", numberUnavailable: false, reportedAtJst: "2027-01-05T10:00", recordedAtJst: "2027-01-05T12:30" };
+    const d = by(base({ atJst: "2027-01-05T12:00", report: { requirementKind: "required", statusCode: "reported", effective: eff } }))["report"]!;
+    expect(d.status).toBe("needs_check");
+    expect(d.countsAsGap).toBe(true);
+    const ok = by(base({ atJst: "2027-01-05T12:00", report: { requirementKind: "required", statusCode: "reported", effective: { ...eff, recordedAtJst: "2027-01-05T11:00" } } }))["report"]!;
+    expect(ok.status).toBe("confirmed");
+  });
+});

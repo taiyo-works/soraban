@@ -293,6 +293,19 @@ export const licenseNextActions = (list: readonly LicenseActionInput[]): TodayNe
   return out;
 };
 
-/** 複数の計画をまたいで並べ（tier、飛行開始までの時間）、上位 limit 件に絞る。 */
-export const rankNextActions = (list: readonly TodayNextAction[], limit: number = TODAY_NEXT_ACTION_LIMIT): TodayNextAction[] =>
-  [...list].sort(compareNextActions).slice(0, limit);
+/** 上位の枠に押し出されても、必ず残す次にやること（Sprint 14 の再評価後のユーザー決定：飛行後点検は「今日」に常に出す）。 */
+export const PINNED_NEXT_ACTION_IDS: readonly string[] = ["do_post_inspection"];
+
+/**
+ * 複数の計画をまたいで並べ（tier、飛行開始までの時間）、上位 limit 件に絞る。
+ * 方針（Sprint 14）：「今日」の枠（limit が TODAY_NEXT_ACTION_LIMIT 以上）では、PINNED_NEXT_ACTION_IDS の項目は枠の外でも必ず残す。
+ * 上位 limit 件の並びと中身は変えず（既存の項目の扱いを壊さない）、枠に入らなかった固定の項目だけを、急ぐ順のまま末尾に足す。
+ * ホームの帯（limit 3）のような小さな枠には足さない（帯は「今日」への入口で、全件は「今日」に出る）。
+ */
+export const rankNextActions = (list: readonly TodayNextAction[], limit: number = TODAY_NEXT_ACTION_LIMIT): TodayNextAction[] => {
+  const sorted = [...list].sort(compareNextActions);
+  const top = sorted.slice(0, limit);
+  if (limit < TODAY_NEXT_ACTION_LIMIT) return top;
+  const pinned = sorted.slice(limit).filter((a) => PINNED_NEXT_ACTION_IDS.includes(a.id));
+  return [...top, ...pinned];
+};

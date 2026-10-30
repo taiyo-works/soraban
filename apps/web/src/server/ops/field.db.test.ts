@@ -1415,6 +1415,37 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(v.docs.find((d) => d.key === "permit")!.status).not.toBe("confirmed");
     });
 
+    it("ユーザー決定：通報の前後は記録の時刻で判定する。記録が離陸より後なら、入力した通報日時が前でも要確認、離陸の gaps に通報が出る", async () => {
+      const p = await approvedPlan(O);
+      await reportNew(O, p, "2027-01-05T11:00");
+      // 記録の時刻を離陸（12:00）より後にする（DB の時計は実時刻のため、所有者のロールで記録の時刻だけを動かす）
+      await owner.query("update flight_reports set created_at = '2027-01-05T12:30:00+09:00' where plan_id = $1", [p.id]);
+      const v = await field.getFieldView(mgr(O), p.id);
+      expect(v.docs.find((d) => d.key === "report")).toMatchObject({ status: "needs_check" });
+      const t = await post(O, p.id, body("takeoff"));
+      const g = Object.fromEntries(t.event.gaps!.map((x) => [x.item, x.state]));
+      expect(g["report"]).toBe("after_takeoff");
+    });
+
+    it("ユーザー決定：日誌済みの飛行のラウンドに属する空域・飛行自粛要請・現場状況の確認は取り消せない（409 round_journaled）。計画ごとの確認は取り消せる", async () => {
+      const p = await newPlan(O);
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      const em = await post(O, p.id, checkBody("emergency_airspace", t("11:00")));
+      const rs = await post(O, p.id, checkBody("flight_restriction", t("11:01")));
+      const st = await post(O, p.id, siteBody(SITE_N, t("11:02")));
+      const cr = await post(O, p.id, checkBody("carry", t("11:03")));
+      const tk = await post(O, p.id, body("takeoff", t("11:10")));
+      await post(O, p.id, body("landing", t("11:30")));
+      // 日誌待ちのうちは取り消せる（取り消して記録し直す）
+      await post(O, p.id, body("undo", { targetEventId: em.event.id }));
+      const em2 = await post(O, p.id, checkBody("emergency_airspace", { occurredAt: "2027-01-05T11:05", queued: true }));
+      // 2 つ目の緊急用務空域の確認は着陸の後に記録したので次のラウンドに属する。日誌に結び付ける
+      await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T11:10", "2027-01-05T11:30", { takeoffEventId: tk.event.id }));
+      for (const target of [rs, st]) await expectOpsError(post(O, p.id, body("undo", { targetEventId: target.event.id })), 409, "round_journaled");
+      await expect(post(O, p.id, body("undo", { targetEventId: cr.event.id }))).resolves.toMatchObject({ created: true });
+      await expect(post(O, p.id, body("undo", { targetEventId: em2.event.id }))).resolves.toMatchObject({ created: true });
+    });
+
     it("D-9 1 つの計画で 2 回飛ぶ通し：確認 → 離陸 → 着陸 → 飛行後点検 → 次の飛行 → 確認 → 離陸 → 着陸", async () => {
       const p = await approvedPlan(O);
       await inspect(O, "2027-01-05T10:00");

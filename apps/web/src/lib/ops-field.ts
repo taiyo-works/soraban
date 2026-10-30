@@ -270,6 +270,7 @@ export const FIELD_ERROR_MESSAGE: Readonly<Record<string, string>> = {
   already_undone: "すでに取り消されています。",
   not_undoable: "この記録は取り消せません。",
   doc_not_confirmable: "この項目は人の確認の対象ではありません（登録から自動で判定されているか、通報の画面で記録します）。",
+  round_journaled: "この確認が属する飛行は日誌に記録されています。取り消せません。",
   later_flight_exists: "次の飛行が始まっているため、この着陸は取り消せません。",
   doc_unmet: "登録内容が条件を満たしていません。確認の記録ではなく、登録を直してください。",
   note_required: "「いる／あり／制限あり」を選んだときは、備考を入力してください。",
