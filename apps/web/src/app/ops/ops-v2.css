@@ -576,6 +576,10 @@ html:has(.ops-v2) body {
 :root[data-mode="field"] .opx-row {
   transition: none;
 }
+/* 現場の文字は 18px 以上（ボタンも本文と同じ大きさ） */
+:root[data-mode="field"] .opx-btn {
+  font-size: var(--sb-fs-body);
+}
 }
 
 /* ===== 4 共通の .sb-*（unlayered）の上書き：@layer の外に置く（unlayered の規則は layer の規則に勝つため、ここに書かないと効かない） ===== */

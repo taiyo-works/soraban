@@ -86,7 +86,7 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
         const min = s.field ? 7 : 4.5;
         const samples = await collectTextSamples(page, root(s));
         expect(samples.length, label).toBeGreaterThan(0);
-        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < min || t.fontSize < (s.field ? 14 : 12))).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
+        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < min || t.fontSize < (s.field ? 18 : 12))).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
         expect(bad, label).toEqual([]);
       }
     }
