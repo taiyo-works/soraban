@@ -7,7 +7,7 @@
 | 対象読者 | 開発者本人、共同開発者、将来の特許代理人・投資家 |
 | 最終更新 | 2026-10-26 |
 | 版 | 1.7 |
-| 関連文書 | `soraban_master_plan.md`（運用・スプリント計画）、`north-star-revision-proposal.md`（§0.1.11 の提案と理由）、`north-star-revision-checklist.md`（見直す文書の一覧） |
+| 関連文書 | `archive/soraban_master_plan.md`（2026-04 の旧計画。保管のみ）、`north-star-revision-proposal.md`（§0.1.11 の提案と理由）、`north-star-revision-checklist.md`（見直す文書の一覧） |
 
 このドキュメントは「何を作るか」「なぜ作るか」「どう守るか」「何で勝つか」の四点を一冊に収める。実装計画・スプリント・タスク管理は `soraban_master_plan.md` に分離されている。両者は補完関係。
 
@@ -604,7 +604,7 @@ judgments
 
 ## 付録 B：関連ドキュメント
 
-- `soraban_master_plan.md` — 6 日スプリント計画と運用詳細
+- `archive/soraban_master_plan.md` — 2026-04 の 6 日スプリント計画と運用詳細（保管のみ。2026-10-30 に移動）
 - `docs/01_patent_claims_draft.md` — 特許請求項の詳細ドラフト（作成予定）
 - `docs/02_prior_art_dossier.md` — 先行技術調査の証跡保管（作成予定）
 - `docs/03_nda_template_ja.md` — テスター向け NDA 雛形（作成予定）
