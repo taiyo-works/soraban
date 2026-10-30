@@ -1,3 +1,4 @@
+import { safeReturnTo } from "@/lib/ops-return";
 import { notFound } from "next/navigation";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { Note, PageHeader } from "@/components/ops/ui";
@@ -40,7 +41,7 @@ export default async function PlanReportPage({
     <main className="flex flex-col gap-8">
       <PageHeader
         eyebrow="通報の内容"
-        back={{ href: `/ops/plans/${view.planId}`, label: "飛行計画の詳細" }}
+        back={safeReturnTo(sp["returnTo"]) ? { href: safeReturnTo(sp["returnTo"])!, label: "現場モードへ戻る" } : { href: `/ops/plans/${view.planId}`, label: "飛行計画の詳細" }}
         title={<span className="break-words" data-testid="report-plan-title">{view.planTitle}</span>}
       />
       <ChangeNotice target="report" />

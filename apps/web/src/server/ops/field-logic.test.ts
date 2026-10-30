@@ -489,6 +489,19 @@ describe("Sprint 14 A-1：飛行ラウンドの導出", () => {
     expect(state([t1], { inspections: [p1] }).postPending).toEqual([]);
   });
 
+  it("日誌への引き継ぎ：各飛行は、そのラウンドの飛行前の点検を持つ（着陸でラウンドが閉じても失われない）", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const t2 = takeoff("14:10");
+    const l2 = landing(t2, "14:30");
+    const s = state([t1, l1, t2, l2], { inspections: [insp("i1", "12:50"), insp("i2", "13:45")] });
+    expect(s.flights.map((f) => f.preInspectionId)).toEqual(["i1", "i2"]);
+    // 現在のラウンド（次の飛行）の点検は無いが、閉じた飛行の点検は残る
+    expect(s.checks.inspection.done).toBe(false);
+    expect(state([t1, l1], { inspections: [insp("i1", "12:50")] }).flights[0]!.preInspectionId).toBe("i1");
+    expect(state([t1], { inspections: [] }).flights[0]!.preInspectionId).toBeNull();
+  });
+
   it("飛行後点検は、その飛行の着陸より前の点検では満たされない", () => {
     const t1 = takeoff("13:10");
     const l1 = landing(t1, "13:30");

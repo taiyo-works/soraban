@@ -212,6 +212,8 @@ export type FieldFlightDto = {
   readonly phaseLabel: string;
   /** Sprint 14：何回目の飛行か（1 始まり）と、飛行後点検の状態。 */
   readonly roundNumber: number;
+  /** この飛行のラウンドの飛行前の日常点検の ID（日誌への引き継ぎ）。 */
+  readonly preInspectionId: string | null;
   readonly post: { readonly done: boolean; readonly inspectionId: string | null; readonly abnormal: boolean; readonly time: string | null };
   /** 計画の時間帯の外の知らせ（離陸が早い・着陸が遅い）。 */
   readonly windowNotice: WindowNoticeDto | null;
@@ -471,7 +473,7 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       statusLabel: d.effective === "confirmed_human" ? FIELD_DOC_HUMAN_CONFIRMED_LABEL : FIELD_DOC_STATUS_LABEL[d.status],
       basis: d.basis,
       notes: d.notes,
-      href: d.key === "report" ? `/ops/plans/${plan.id}/report` : d.href ? withFieldReturn(d.href, plan.id) : null,
+      href: d.key === "report" ? withFieldReturn(`/ops/plans/${plan.id}/report`, plan.id) : d.href ? withFieldReturn(d.href, plan.id) : null,
       canConfirm: d.canConfirm && canRecord && plan.voided_at === null,
       humanConfirmEventId: d.humanConfirmEventId,
       humanConfirmedTime: d.humanConfirmedAt ? jstTime(new Date(d.humanConfirmedAt)) : null,
@@ -525,6 +527,7 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       phase: f.phase,
       phaseLabel: PHASE_LABEL[f.phase],
       roundNumber: f.roundIndex + 1,
+      preInspectionId: f.preInspectionId,
       post: { done: f.post.done, inspectionId: f.post.inspectionId, abnormal: f.post.abnormal, time: f.post.at ? jstTime(new Date(f.post.at)) : null },
       windowNotice: windowNotice(plan, new Date(f.takeoffAt), f.landingAt ? new Date(f.landingAt) : null),
     }),

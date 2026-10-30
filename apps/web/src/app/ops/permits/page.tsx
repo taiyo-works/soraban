@@ -7,6 +7,7 @@ import { requireOpsMember } from "@/server/ops/page";
 import { PERMIT_DECLARATION_NOTE, PERMIT_FORMAT_UNVERIFIED_NOTE, PERMIT_NO_DIPS_NOTE, PERMIT_VALIDITY_LABEL, type PermitValidity } from "@/server/ops/permit-logic";
 import { listPermits } from "@/server/ops/permits";
 import { BACK_TO } from "@/components/ops/ops-nav-model";
+import { safeReturnTo } from "@/lib/ops-return";
 
 const GRID = "sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)]";
 const VALIDITIES = Object.keys(PERMIT_VALIDITY_LABEL) as PermitValidity[];
@@ -18,10 +19,12 @@ export const metadata: Metadata = { title: "許可・承認" };
 export default async function PermitListPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ includeVoided?: string; validity?: string; q?: string }>;
+  readonly searchParams: Promise<{ includeVoided?: string; validity?: string; q?: string; returnTo?: string }>;
 }) {
   const { ctx, me } = await requireOpsMember();
   const sp = await searchParams;
+  // Sprint 14：現場モードから来たとき、戻り先を現場モードにする（同じオリジンの /ops/ 配下だけ）
+  const returnTo = safeReturnTo(sp.returnTo);
   const includeVoided = sp.includeVoided === "1";
   const validity = VALIDITIES.find((v) => v === sp.validity);
   const q = sp.q?.trim() || undefined;
@@ -32,7 +35,7 @@ export default async function PermitListPage({
       <PageHeader
         title="許可・承認"
         eyebrow="登録（利用者の申告）"
-        back={BACK_TO.register}
+        back={returnTo ? { href: returnTo, label: "現場モードへ戻る" } : BACK_TO.register}
         aside={
           manager ? (
             <Link prefetch={false} href="/ops/permits/new" className={buttonPrimaryClass} data-testid="permit-new-link">
