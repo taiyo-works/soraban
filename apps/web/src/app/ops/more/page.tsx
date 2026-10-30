@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { Icon, type IconName } from "@/components/ui/icons";
-import { PageHeader, SectionTitle } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/ops/ui";
 import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { getRegisterCounts } from "@/server/ops/register-counts";
@@ -28,24 +28,21 @@ export default async function OpsMorePage() {
       <DraftOwnerGuard memberId={me.member.id} />
       <PageHeader title="登録" meta={me.org.name} />
       <nav aria-label="登録のメニュー">
-        <ul className="flex flex-col divide-y divide-line border-y border-line" data-testid="more-menu">
+        <ul className="sb-block sb-rows !py-1" data-testid="more-menu">
           {items.map((m) => (
             <li key={m.href}>
-              <Link
-                href={m.href}
-                prefetch={false}
-                data-testid={`more-link-${m.id}`}
-                className="flex min-h-16 w-full items-center gap-3 py-2 transition-colors hov:bg-accent-soft"
-              >
-                <Icon name={m.icon} size={22} className="text-fg-mute" />
+              <Link href={m.href} prefetch={false} data-testid={`more-link-${m.id}`} className="sb-row min-h-16 w-full">
+                <Icon name={m.icon} size={22} className="shrink-0 text-sb-ink-2" />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-body font-medium text-fg">{m.title}</span>
-                  <span className="text-aux text-fg-mute">{m.body}</span>
+                  <span className="text-[15px] font-bold text-sb-ink">{m.title}</span>
+                  <span className="text-[13px] text-sb-ink-2">{m.body}</span>
                 </span>
-                <span className="shrink-0 text-table tabular-nums text-fg-soft" data-testid={`more-count-${m.id}`}>
+                <span className="shrink-0 sb-num text-[14px] tnum text-sb-ink-2" data-testid={`more-count-${m.id}`}>
                   {m.count} {m.unit}
                 </span>
-                <Icon name="chevron-right" size={18} className="shrink-0 text-fg-mute" />
+                <span aria-hidden className="sb-go-dot">
+                  <Icon name="chevron-right" size={18} />
+                </span>
               </Link>
             </li>
           ))}
@@ -53,23 +50,27 @@ export default async function OpsMorePage() {
       </nav>
       {canManageMembers ? (
         <section aria-label="管理" className="flex flex-col gap-2" data-testid="more-admin">
-          <SectionTitle>管理</SectionTitle>
-          <ul className="flex flex-col divide-y divide-line border-y border-line">
+          <div className="sb-sec-head">
+            <h2>管理</h2>
+          </div>
+          <ul className="sb-block sb-rows !py-1">
             <li>
-              <Link href="/ops/members" prefetch={false} data-testid="more-link-members" className="flex min-h-16 w-full items-center gap-3 py-2 transition-colors hov:bg-accent-soft">
-                <Icon name="account" size={22} className="text-fg-mute" />
+              <Link href="/ops/members" prefetch={false} data-testid="more-link-members" className="sb-row min-h-16 w-full">
+                <Icon name="account" size={22} className="shrink-0 text-sb-ink-2" />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-body font-medium text-fg">利用者</span>
-                  <span className="text-aux text-fg-mute">招待・役割の変更・利用の停止</span>
+                  <span className="text-[15px] font-bold text-sb-ink">利用者</span>
+                  <span className="text-[13px] text-sb-ink-2">招待・役割の変更・利用の停止</span>
                 </span>
-                <Icon name="chevron-right" size={18} className="shrink-0 text-fg-mute" />
+                <span aria-hidden className="sb-go-dot">
+                  <Icon name="chevron-right" size={18} />
+                </span>
               </Link>
             </li>
           </ul>
         </section>
       ) : null}
-      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-ctl bg-sunken px-4 py-3 text-table text-fg-soft" data-testid="dips-note">
-        <Icon name="unlinked" size={16} className="shrink-0 text-fg-mute" />
+      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-sb-m bg-sb-sunken px-4 py-3 text-[13px] text-sb-ink-2" data-testid="dips-note">
+        <Icon name="unlinked" size={16} className="shrink-0 text-sb-ink-3" />
         <p>DIPS との接続：未接続。機体・操縦者はアプリの中で登録し、通報は DIPS で行った結果を手で記録します。</p>
       </section>
     </main>

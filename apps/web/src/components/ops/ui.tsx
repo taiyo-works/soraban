@@ -5,25 +5,31 @@ import type { ReactNode } from "react";
 // Sprint 12h PR ③b：デザインシステム v2（暖色・ピル・角丸 16/8/4）。見た目は app/ops/ops-v2.css の .opx-*（と soraban-ui.css の .sb-*）で、値は --sb-* だけ。
 // 色だけで意味を伝えないよう、状態は必ず文字で示し、形（実線・破線・反転）を併用する。
 
+// "alert"（期限切れ・失効など。墨の面＋「！」）と "soon"（期限が近い。薄い橙の面）は、期限の札用。判定の色（赤・琥珀・緑）は使わない（形と言葉で区別する）。
 export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
+export type BadgeTone = Tone | "alert" | "soon";
 
-const toneClass: Record<Tone, string> = {
+const toneClass: Record<BadgeTone, string> = {
   neutral: "",
   brand: "opx-badge-brand",
   green: "opx-badge-green",
   amber: "opx-badge-amber",
   red: "opx-badge-red",
   mute: "opx-badge-mute",
+  alert: "opx-badge-alert",
+  soon: "opx-badge-soon",
 };
 
-/** 状態・役割などの小さな札。中身は文字だけにする（data-testid 等の属性はそのまま渡せる）。 */
+/** 状態・役割などの小さな札。中身は文字だけにする（data-testid 等の属性はそのまま渡せる）。mark は先頭の印（読み上げない。「！」など）。 */
 export function Badge({
   tone = "neutral",
+  mark,
   children,
   ...rest
-}: { readonly tone?: Tone; readonly children: ReactNode } & Record<`data-${string}`, string>) {
+}: { readonly tone?: BadgeTone; readonly mark?: string; readonly children: ReactNode } & Record<`data-${string}`, string>) {
   return (
     <span {...rest} className={`opx-badge ${toneClass[tone]}`.trim()}>
+      {mark ? <span aria-hidden>{mark}</span> : null}
       {children}
     </span>
   );

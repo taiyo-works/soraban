@@ -295,6 +295,27 @@ html:has(.ops-v2) body {
   background: var(--sb-sunken);
   color: var(--sb-ink-3);
 }
+/* 期限の札（許可・承認の有効性、技能証明の更新期限）：判定の色（赤・琥珀・緑）は使わない。形と言葉で区別する。
+ * 期限切れ・失効＝墨の面に「！」、期限が近い＝薄い橙の面（ホームの「近づく期限」の札と同じ。v2 草案 §3） */
+.opx-badge-alert {
+  border-color: transparent;
+  background: var(--sb-inverse-bg);
+  color: var(--sb-inverse-fg);
+  font-weight: 700;
+}
+.opx-badge-soon {
+  border-color: transparent;
+  background: var(--sb-orange-hover);
+  color: var(--sb-on-orange);
+  font-weight: 700;
+}
+/* 文言の先頭の印（×）を「！」に見せる：文字（テキスト・読み上げ）は変えず、見た目だけ。代替テキストを空にして読み上げに入れない */
+.opx-badge-alert:has(> .opx-mark-x)::before {
+  content: "！" / "";
+}
+.opx-badge-alert > .opx-mark-x {
+  display: none;
+}
 
 /* 説明（権限・取消の意味など）：オフホワイトのくぼみ。左の線や色の囲みは使わない */
 .opx-note {

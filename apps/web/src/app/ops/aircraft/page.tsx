@@ -42,30 +42,30 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />
-        <p className="font-mono text-[11px] tnum text-ink-mute">{rows.length} 件</p>
+        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
-        <p className="border-y border-rule py-6 text-center text-sm text-ink-mute">登録された機体はありません。</p>
+        <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された機体はありません。</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="opx-table">
           <ListHead columns={["登録記号", "型式名（設計製造者）", "総飛行時間", "状態"]} gridClass={GRID} />
           <ul className="flex flex-col gap-2 sm:gap-0" data-testid="aircraft-list">
             {rows.map((a) => (
               <li key={a.id}>
                 <Link
                   href={`/ops/aircraft/${a.id}`}
-                  className={`${listRowClass} ${GRID} ${a.voided ? "text-ink-mute" : ""}`}
+                  className={`${listRowClass} ${GRID} ${a.voided ? "text-sb-ink-3" : ""}`}
                 >
-                  <span className="min-w-0 break-all font-mono text-[15px] text-ink">
+                  <span className="min-w-0 break-all sb-num text-[15px] text-sb-ink">
                     <CellLabel>登録記号</CellLabel>
                     {a.registrationMark}
                   </span>
-                  <span className="min-w-0 break-words text-ink-soft">
+                  <span className="min-w-0 break-words text-sb-ink-2">
                     <CellLabel>型式名</CellLabel>
                     {a.modelName}
-                    <span className="text-ink-mute">（{a.manufacturer}）</span>
+                    <span className="text-sb-ink-3">（{a.manufacturer}）</span>
                   </span>
-                  <span className="font-mono tnum text-ink-soft">
+                  <span className="sb-num tnum text-sb-ink-2">
                     <CellLabel>総飛行時間</CellLabel>
                     {formatMinutes(a.totalFlightMinutes)}
                   </span>

@@ -9,8 +9,8 @@ export default async function OpsSignIn() {
     <main className="flex max-w-xl flex-col gap-6">
       <PageHeader title="ログイン" />
       {provider === "neon" ? (
-        <div className="flex flex-col gap-5 rounded-sharp border border-rule bg-paper px-4 py-5 sm:px-6">
-          <p className="text-sm leading-relaxed text-ink-soft">
+        <div className="sb-block flex flex-col gap-5">
+          <p className="text-sm leading-relaxed text-sb-ink-2">
             運航管理者から招待されたメールアドレスの Google アカウントでログインしてください。
           </p>
           <GoogleSignInButton />
@@ -19,7 +19,7 @@ export default async function OpsSignIn() {
           </Note>
         </div>
       ) : (
-        <p className="text-sm leading-relaxed text-ink-soft">
+        <p className="sb-block-soft text-sm leading-relaxed text-sb-ink-2">
           テスト用の本人確認を使っています（AUTH_PROVIDER=test）。POST /api/test-auth/sign-in でログインしてください。
         </p>
       )}
