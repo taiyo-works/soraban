@@ -72,6 +72,7 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0014 | 運航管理（Sprint 12c）：`flight_field_events`（現場の事実の記録＝飛行前の確認・離陸・着陸・取り消す・日誌との結び付き。追記専用）・`flight_field_event_hash`、更新・削除・TRUNCATE を拒むトリガー、追加前のトリガー（計画・利用者の検査、`snapshot_id`・`plan_version`・記録者の写し・`recorded_at`・`content_hash` の決定）、複合外部キーの受け皿として `daily_inspections`・`flight_records` に一意制約（列は変えない）、アプリ用ロールへの権限付与（参照と追加だけ） |
 | 0015 | 運航管理（Sprint 12d）：`permit_registrations`（許可・承認の登録のヘッド表。`record_versions` の `entity_type = permit_registration` から DB が作る。登録は利用者の申告）、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0012 の定義に `permit_registration` の分岐を足す）、`judgement_snapshots` への追加前のトリガー `judgement_snapshots_permit_basis`（`input.permitBasis` の各要素が同じ組織の実在の版とハッシュに一致すること。`SB409` `permit_basis_invalid`）、アプリ用ロールへの権限付与（参照だけ） |
 | 0016 | 運航管理（Sprint 12e）：`incident_records`（事故・ヒヤリハットの記録のヘッド表。`record_versions` の `entity_type = incident_record` から DB が作る）、`incident_report_records`（国への報告の記録。追記専用。利用者の申告）・`incident_report_record_hash`・`verify_incident_report_records`、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0015 の定義に `incident_record` の分岐を足す）、アプリ用ロールへの権限付与（`incident_records` は参照だけ、`incident_report_records` は参照と追加だけ） |
+| 0017 | 運航管理（Sprint 14）：`flight_field_events` に確認項目 `docs_confirm`・`flight_restriction`・`site_conditions` と、構造化された列（`doc_key`、`site_third_party`・`site_other_aircraft`・`site_rain`・`site_visibility`・`site_wind_ms`・`site_temp_c`）を追加（追記専用・冪等性・取り消しは 0014 のまま）、`flight_field_event_hash_v2`、追加前のトリガーの置き換え |
 
 ### ランナー
 
@@ -411,3 +412,11 @@ grant execute on function ops_jst_minute_to_timestamptz(text), ops_timestamptz_t
 - `@neondatabase/auth` は `0.6.0-beta`（ベータ版）を版固定で使う。CI・E2E は Neon Auth に接続しないため、実際の Neon Auth との結合（Google ログイン → `/ops` に役割が出る）は手順 7 で初めて確かめる。
 - Neon Auth の SDK のミドルウェア処理（`processAuthMiddleware`）は `proxy.ts`（`apps/web/src/server/ops/neon-proxy.ts`）で、`AUTH_PROVIDER=neon` かつ有効なときの `/ops` 以下だけに通す。Google から戻ったとき（`?neon_auth_session_verifier=…` と challenge Cookie）の verifier のセッションへの交換、セッションの Cookie（`session_data` 等）の更新、未ログインのサインイン画面への転送を、ページの描画より前に行う（サーバーコンポーネントの中では Cookie を書けないため）。更新した Cookie は同じ要求の Cookie ヘッダーにも反映し、ページの `getSession()` は Cookie の写しだけで済む。`/ops/sign-in`・`/ops/no-access` は保護しないが、交換と更新は行う。`/api` 以下は対象外（ルートハンドラの `getSession()` は Cookie を書ける）。E2E-DB では Neon Auth の上流の模擬サーバー（`e2e/mock-neon-auth-server.mjs`）で、Google から戻ったときと Cookie の更新を確かめている（実際の Google・Neon Auth との結合は手順 7 で確かめる）。
 
+
+
+## 現場の事実の記録のハッシュ（`flight_field_events.content_hash`）
+
+- 0014〜0016 で書いた行は `soraban-field-event-v1`（`flight_field_event_hash`）。**書き換えない**。
+- 0017 以降に書く行は `soraban-field-event-v2`（`flight_field_event_hash_v2`）。入力は jsonb の配列（UTF-8）で、先頭の識別子の次に 29 要素：
+  v1 の 22 要素（`id`・`org_id`・`plan_id`・`kind`・`item`・`result`・`source`・`target_event_id`・`flight_record_id`・`inspection_id`・`report_id`・`occurred_at`・`snapshot_id`・`plan_version`・`gaps`・`note`・`queued`・`client_event_id`・`recorded_by_member_id`・`recorded_by_name`・`recorded_by_role`・`recorded_at`）に、`doc_key`・`site_third_party`・`site_other_aircraft`・`site_rain`・`site_visibility`・`site_wind_ms`・`site_temp_c` の 7 要素を続ける（時刻は UTC のマイクロ秒つき ISO）。出力は SHA-256 の 16 進小文字。
+- 切り替えの基準：追加前のトリガーが 0017 の適用以後、すべての新しい行を v2 で計算する。行ごとの版の印は持たない。v1 の行を検証するときは v1 の関数、0017 以後の行は v2 の関数を使う（`recorded_at` が 0017 の適用時刻より前か後かで見分ける）。

@@ -353,6 +353,15 @@ export function FieldClient({
       return;
     }
     setSiteBusy(true);
+    // 送信待ち（着陸など）が残っていると、この記録が前のラウンドに数えられる。先に送り切る（送り切れなければ押せない）
+    if (unsentCount(loadPlanOutbox(planId, memberId)) > 0) {
+      await flush();
+      if (unsentCount(loadPlanOutbox(planId, memberId)) > 0) {
+        setSiteMsg("送信待ちの記録が残っています。通信できるときに、送られてからもう一度押してください。");
+        setSiteBusy(false);
+        return;
+      }
+    }
     const clientEventId = newRequestId();
     const occurredAt = nowJstInput(new Date());
     try {
@@ -463,7 +472,8 @@ export function FieldClient({
 
   // ---- Sprint 14：書類・手続き（登録内容から自動判定。足りないものだけ人が確認する） ----------------------
   const docRows = view.docs.map((d) => {
-    const human = d.status === "needs_check" ? state.docConfirms[d.key] : undefined;
+    // 人の確認は、自動判定が要確認で、通報以外の項目だけ有効（サーバーと同じ規則）
+    const human = d.status === "needs_check" && d.key !== "report" ? state.docConfirms[d.key] : undefined;
     const effective: "confirmed_auto" | "confirmed_human" | "needs_check" | "unmet" =
       d.status === "unmet" ? "unmet" : d.status === "confirmed" ? "confirmed_auto" : human ? "confirmed_human" : "needs_check";
     return { d, human, effective, canConfirm: d.status === "needs_check" && !human && d.key !== "report" && view.canRecord && !cancelled };
@@ -479,7 +489,7 @@ export function FieldClient({
       <ul className="flex flex-col gap-3">
         {docRows.map(({ d, human, effective, canConfirm }) => {
           const word = effective === "confirmed_human" ? FIELD_DOC_HUMAN_CONFIRMED_LABEL : FIELD_DOC_STATUS_LABEL[d.status];
-          const mark = FIELD_DOC_STATUS_MARK[d.status];
+          const mark = effective === "confirmed_human" ? FIELD_DOC_STATUS_MARK.confirmed : FIELD_DOC_STATUS_MARK[d.status];
           const cls = effective === "unmet" ? BOX_BAD : effective === "needs_check" ? BOX_TODO : BOX_DONE;
           return (
             <li key={d.key} className={cls} data-testid={`field-docs-item-${d.key}`} data-status={d.status} data-effective={effective}>
@@ -1005,7 +1015,7 @@ export function FieldClient({
                     離陸を{FIELD_UNDO_LABEL}
                   </button>
                 ) : null}
-                {view.canRecord && f.phase === "journal_pending" && f.landingEventId ? (
+                {view.canRecord && f.phase === "journal_pending" && f.landingEventId && !state.flights.some((x) => x.roundIndex > f.roundIndex) ? (
                   <button type="button" className={BTN_OUTLINE} data-testid="field-undo-landing" onClick={() => onUndo(f.landingEventId!, "着陸")}>
                     着陸を{FIELD_UNDO_LABEL}
                   </button>

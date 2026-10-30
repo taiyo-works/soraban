@@ -1367,6 +1367,54 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(JSON.stringify(after.docs)).not.toMatch(/通報不要|手続き不要|該当なし/);
     });
 
+    it("レビュー指摘：人の確認の対象は要確認の項目だけ（通報・自動で確認済みの項目は 409 doc_not_confirmable）", async () => {
+      const p = await newPlan(O);
+      await expectOpsError(post(O, p.id, checkBody("docs_confirm", { docKey: "report" })), 409, "doc_not_confirmable");
+      await expectOpsError(post(O, p.id, checkBody("docs_confirm", { docKey: "registration" })), 409, "doc_not_confirmable");
+      await expect(post(O, p.id, checkBody("docs_confirm", { docKey: "manual" }))).resolves.toMatchObject({ created: true });
+    });
+
+    it("レビュー指摘：人の確認は計画の版に結び付く。計画を訂正して版が進むと、前の版への確認は引き継がれない", async () => {
+      const p = await newPlan(O);
+      await post(O, p.id, checkBody("docs_confirm", { docKey: "remote_id" }));
+      expect((await field.getFieldView(mgr(O), p.id)).docs.find((d) => d.key === "remote_id")!.effective).toBe("confirmed_human");
+      await plans.updatePlan(mgr(O), p.id, { expectedVersion: p.version, reason: "名称の訂正", title: "訂正後" });
+      const v = await field.getFieldView(mgr(O), p.id);
+      expect(v.docs.find((d) => d.key === "remote_id")!.effective).toBe("needs_check");
+      // 新しい版で確認し直せる
+      await post(O, p.id, checkBody("docs_confirm", { docKey: "remote_id" }));
+      expect((await field.getFieldView(mgr(O), p.id)).docs.find((d) => d.key === "remote_id")!.effective).toBe("confirmed_human");
+    });
+
+    it("レビュー指摘：次の飛行が始まっている着陸は取り消せない（409 later_flight_exists）", async () => {
+      const p = await newPlan(O);
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      await post(O, p.id, body("takeoff", t("11:00")));
+      const l1 = await post(O, p.id, body("landing", t("11:20")));
+      await post(O, p.id, body("takeoff", t("11:30")));
+      await expectOpsError(post(O, p.id, body("undo", { targetEventId: l1.event.id })), 409, "later_flight_exists");
+    });
+
+    it("レビュー指摘：飛行中は開いている離陸の時刻で判定する。離陸のあとに記録した通報は確認済みにならない", async () => {
+      const p = await approvedPlan(O);
+      await post(O, p.id, body("takeoff", { occurredAt: "2027-01-05T11:50", queued: true }));
+      await reportNew(O, p, "2027-01-05T11:58");
+      const v = await field.getFieldView(mgr(O), p.id);
+      expect(v.docs.find((d) => d.key === "report")).toMatchObject({ status: "needs_check" });
+    });
+
+    it("レビュー指摘：夜間と目視外が必要な計画に、夜間だけの有効な許可では確認済みにならない", async () => {
+      const { createPermit } = await import("./permits");
+      const num = `PART-${randomUUID().slice(0, 6)}`;
+      await createPermit(mgr(O), {
+        permitNumber: num, coverage: "blanket", kinds: ["night"], issuedOn: "2026-09-25", validFrom: "2026-10-01", validTo: "2027-09-30",
+        placeScope: { type: "nationwide" }, aircraftScope: { type: "any" }, pilotScope: { type: "any" }, clientRequestId: randomUUID(),
+      });
+      const p = await newPlan(O, { permitNumbers: num, flags: ["method_night", "method_bvlos"] });
+      const v = await field.getFieldView(mgr(O), p.id);
+      expect(v.docs.find((d) => d.key === "permit")!.status).not.toBe("confirmed");
+    });
+
     it("D-9 1 つの計画で 2 回飛ぶ通し：確認 → 離陸 → 着陸 → 飛行後点検 → 次の飛行 → 確認 → 離陸 → 着陸", async () => {
       const p = await approvedPlan(O);
       await inspect(O, "2027-01-05T10:00");

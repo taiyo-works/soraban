@@ -11,12 +11,15 @@ const permit = (over: Partial<DocsPermitNumber> = {}): DocsPermitNumber => ({
   versionNo: 2,
   validFrom: "2027-01-01",
   validTo: "2027-12-31",
+  kinds: ["did"],
   reasonLabels: [],
   ...over,
 });
 
 const base = (over: Partial<DocsJudgeInput> = {}): DocsJudgeInput => ({
   plannedStartAtJst: "2027-01-05T13:00",
+  plannedEndAtJst: "2027-01-05T14:00",
+  wantedKinds: ["did"],
   atJst: "2027-01-05T12:00",
   permits: [permit()],
   aircraft: { id: "a1", registrationMark: "JU1234AB5678", status: "active", voided: false },
@@ -87,11 +90,13 @@ describe("B-3 技能証明（日付またぎ）", () => {
     expect(by(base({ pilot: pilot(null) }))["license"]!.status).toBe("needs_check");
   });
   it("JST 0 時付近の飛行でも、飛行日（JST）で比べる", () => {
-    const at = { plannedStartAtJst: "2027-01-06T00:05", atJst: "2027-01-06T00:00" };
+    const at = { plannedStartAtJst: "2027-01-06T00:05", plannedEndAtJst: "2027-01-06T01:05", atJst: "2027-01-06T00:00" };
     expect(by(base({ ...at, pilot: pilot("2027-01-05") }))["license"]!.status).toBe("unmet");
     expect(by(base({ ...at, pilot: pilot("2027-01-06") }))["license"]!.status).toBe("confirmed");
-    const late = { plannedStartAtJst: "2027-01-05T23:55", atJst: "2027-01-05T23:50" };
-    expect(by(base({ ...late, pilot: pilot("2027-01-05") }))["license"]!.status).toBe("confirmed");
+    const late = { plannedStartAtJst: "2027-01-05T23:55", plannedEndAtJst: "2027-01-06T00:55", atJst: "2027-01-05T23:50" };
+    // 意図の変更：予定終了日（翌日 00:55）と離陸日の遅い方で照合するため、日付をまたぐ飛行は終了日で比べる
+    expect(by(base({ ...late, pilot: pilot("2027-01-05") }))["license"]!.status).toBe("unmet");
+    expect(by(base({ ...late, pilot: pilot("2027-01-06") }))["license"]!.status).toBe("confirmed");
   });
   it("限定の登録がある・技能証明なしは、自動で確認済みにしない", () => {
     expect(by(base({ pilot: pilot("2027-06-30", { hasLimitation: true }) }))["license"]!.status).toBe("needs_check");
@@ -145,7 +150,8 @@ describe("B-5 登録記号", () => {
     expect(ok.status).toBe("confirmed");
     expect(ok.notes).toContain("登録の有効期限は人が確認");
     expect(ok.basis[0]).toContain("JU1");
-    expect(by(base({ aircraft: air("active", true) }))["registration"]!.status).toBe("needs_check");
+    // 取消済みの機体は満たさない
+    expect(by(base({ aircraft: air("active", true) }))["registration"]!.status).toBe("unmet");
   });
 });
 
@@ -170,5 +176,44 @@ describe("人の確認と未了事項", () => {
       { key: "permit", state: "unmet" },
       { key: "manual", state: "needs_check" },
     ]);
+  });
+});
+
+describe("レビュー指摘の修正", () => {
+  it("許可：必要な種類の一部だけを覆う登録は確認済みにしない（夜間＋目視外に夜間だけの許可）", () => {
+    const night = permit({ kinds: ["night"], numberText: "N-1", permitNumber: "N-1" });
+    const i = base({ wantedKinds: ["night", "bvlos"], permits: [night] });
+    const d = by(i)["permit"]!;
+    expect(d.status).toBe("needs_check");
+    expect(d.notes.join("")).toContain("登録で確認できない種類");
+    // 種類の和集合が必要な種類を覆えば確認済み
+    const bvlos = permit({ kinds: ["bvlos"], numberText: "B-1", permitNumber: "B-1" });
+    expect(by(base({ wantedKinds: ["night", "bvlos"], permits: [night, bvlos] }))["permit"]!.status).toBe("confirmed");
+    // 必要な種類が判定できない（空）ときは確認済みにしない
+    expect(by(base({ wantedKinds: [], permits: [night] }))["permit"]!.status).toBe("needs_check");
+  });
+  it("許可・技能証明：実際の離陸日が有効期間の最終日より後なら満たさない（予定開始日だけで照合しない）", () => {
+    const i = base({ atJst: "2028-01-02T09:00", permits: [permit({ validTo: "2027-12-31" })], pilot: { id: "p1", fullName: "山田", hasLicense: true, licenseExpiresOn: "2027-12-31", hasLimitation: false } });
+    expect(by(i)["permit"]!.status).toBe("unmet");
+    expect(by(i)["license"]!.status).toBe("unmet");
+  });
+  it("人の確認は、確認できない項目（通報・満たさない・確認済み）には効かない", () => {
+    const hc = { at: "x", eventId: "e" };
+    const noReport = base({ report: { requirementKind: "required", statusCode: "no_record", effective: null }, humanConfirms: { report: hc, registration: hc } });
+    const d = by(noReport);
+    expect(d["report"]!.humanConfirmed).toBe(false);
+    expect(d["report"]!.effective).toBe("needs_check");
+    expect(d["registration"]!.humanConfirmed).toBe(false);
+    expect(d["registration"]!.effective).toBe("confirmed_auto");
+  });
+  it("取消済みの操縦者は満たさない", () => {
+    const i = base({ pilot: { id: "p1", fullName: "山田", hasLicense: true, licenseExpiresOn: "2030-01-01", hasLimitation: false, voided: true } });
+    expect(by(i)["license"]!.status).toBe("unmet");
+  });
+  it("通報が要確認（受付番号なし・通報日時なし・要否不明）なら、未了に数える（推奨・対象外は数えない）", () => {
+    const e = { id: "x", dipsNumber: null, numberUnavailable: true, reportedAtJst: null };
+    expect(by(base({ report: { requirementKind: "required", statusCode: "reported", effective: e } }))["report"]!.countsAsGap).toBe(true);
+    expect(by(base({ report: { requirementKind: "unknown", statusCode: "no_record", effective: null } }))["report"]!.countsAsGap).toBe(true);
+    expect(by(base({ report: { requirementKind: "recommended", statusCode: "no_record", effective: null } }))["report"]!.countsAsGap).toBe(false);
   });
 });
