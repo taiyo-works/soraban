@@ -5,11 +5,18 @@
 //   - 緊急用務空域は情報源（選択肢の ID）と結果（not_designated／designated）が必須。
 import {
   EMERGENCY_SOURCE_OPTIONS,
+  FIELD_DOC_KEYS,
   FIELD_RECORDABLE_CHECK_ITEMS,
   FIELD_RECORDABLE_KINDS,
+  SITE_NOTE_REQUIRED_MESSAGE,
+  SITE_TEMP_RANGE,
+  SITE_WIND_RANGE,
   isEmergencySource,
-  type FieldCheckItem,
+  siteHasAttention,
   type FieldCheckResult,
+  type FieldDocKey,
+  type FieldRecordableCheckItem,
+  type FieldSiteValues,
 } from "@/lib/ops-field";
 import { parseJstMinute } from "@/lib/ops-time";
 import { isUuid } from "./validate-records";
@@ -17,7 +24,16 @@ import { isUuid } from "./validate-records";
 type Input = Readonly<Record<string, unknown>>;
 
 export type FieldEventInput =
-  | { readonly kind: "check"; readonly item: Exclude<FieldCheckItem, "inspection">; readonly result: FieldCheckResult; readonly source: string | null }
+  | {
+      readonly kind: "check";
+      readonly item: FieldRecordableCheckItem;
+      readonly result: FieldCheckResult;
+      readonly source: string | null;
+      /** docs_confirm のとき。 */
+      readonly docKey: FieldDocKey | null;
+      /** site_conditions のとき。 */
+      readonly site: FieldSiteValues | null;
+    }
   | { readonly kind: "takeoff" }
   | { readonly kind: "landing" }
   | { readonly kind: "undo" };
@@ -41,6 +57,54 @@ export type FieldValidated =
 export const FIELD_NOTE_MAX = 300;
 
 const present = (v: unknown): boolean => v !== undefined && v !== null && v !== "";
+
+const SITE_ENUMS = {
+  thirdParty: ["none", "present"],
+  otherAircraft: ["none", "present"],
+  rain: ["none", "present"],
+  visibility: ["good", "limited"],
+} as const;
+
+/** 現場状況の入力（選択 4 つは必須、風速・気温は任意）。範囲外・選択肢の外は 400（key は site.○○）。 */
+const parseSite = (
+  raw: unknown,
+  bad: (key: string, code: string, message: string) => void,
+): FieldSiteValues | null => {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    bad("site", "required", "現場状況（site）が必要です");
+    return null;
+  }
+  const r = raw as Record<string, unknown>;
+  let ok = true;
+  for (const [k, allowed] of Object.entries(SITE_ENUMS)) {
+    const v = r[k];
+    if (typeof v !== "string" || !(allowed as readonly string[]).includes(v)) {
+      bad(`site.${k}`, present(v) ? "invalid" : "required", `${k} は ${allowed.join("・")} のいずれかです`);
+      ok = false;
+    }
+  }
+  const numField = (k: "windMs" | "tempC", range: { readonly min: number; readonly max: number }): number | null | undefined => {
+    const v = r[k];
+    if (v === undefined || v === null || v === "") return null;
+    if (typeof v !== "number" || !Number.isFinite(v) || v < range.min || v > range.max) {
+      bad(`site.${k}`, "out_of_range", `${k} は ${range.min} 以上 ${range.max} 以下の数値です`);
+      ok = false;
+      return undefined;
+    }
+    return Math.round(v * 10) / 10;
+  };
+  const windMs = numField("windMs", SITE_WIND_RANGE);
+  const tempC = numField("tempC", SITE_TEMP_RANGE);
+  if (!ok || windMs === undefined || tempC === undefined) return null;
+  return {
+    thirdParty: r["thirdParty"] as FieldSiteValues["thirdParty"],
+    otherAircraft: r["otherAircraft"] as FieldSiteValues["otherAircraft"],
+    rain: r["rain"] as FieldSiteValues["rain"],
+    visibility: r["visibility"] as FieldSiteValues["visibility"],
+    windMs,
+    tempC,
+  };
+};
 
 export const validateFieldEvent = (input: Input): FieldValidated => {
   const errors: Record<string, string> = {};
@@ -103,17 +167,32 @@ export const validateFieldEvent = (input: Input): FieldValidated => {
   }
 
   // 確認
-  let item: Exclude<FieldCheckItem, "inspection"> | null = null;
+  let item: FieldRecordableCheckItem | null = null;
   let result: FieldCheckResult = "done";
   let source: string | null = null;
+  let docKey: FieldDocKey | null = null;
+  let site: FieldSiteValues | null = null;
   if (kind === "check") {
     const raw = input["item"];
     if (raw === "inspection") {
       bad("item", "derived", "日常点検は、実際の日常点検の記録から導出されます（確認の行は作りません）");
     } else if (typeof raw !== "string" || !(FIELD_RECORDABLE_CHECK_ITEMS as readonly string[]).includes(raw)) {
-      bad("item", present(raw) ? "invalid" : "required", "確認の項目は emergency_airspace・report_recheck・carry のいずれかです");
+      bad("item", present(raw) ? "invalid" : "required", `確認の項目は ${FIELD_RECORDABLE_CHECK_ITEMS.join("・")} のいずれかです`);
     } else {
-      item = raw as Exclude<FieldCheckItem, "inspection">;
+      item = raw as FieldRecordableCheckItem;
+    }
+    if (item === "docs_confirm") {
+      const k = input["docKey"];
+      if (typeof k !== "string" || !(FIELD_DOC_KEYS as readonly string[]).includes(k)) {
+        bad("docKey", present(k) ? "invalid" : "required", `書類・手続きの項目（docKey）は ${FIELD_DOC_KEYS.join("・")} のいずれかです`);
+      } else docKey = k as FieldDocKey;
+    }
+    if (item === "site_conditions") {
+      const sv = parseSite(input["site"], bad);
+      if (sv) {
+        site = sv;
+        if (siteHasAttention(sv) && note === null && !errors["note"]) bad("note", "note_required", SITE_NOTE_REQUIRED_MESSAGE);
+      }
     }
     if (item === "emergency_airspace") {
       const r = input["result"];
@@ -135,7 +214,7 @@ export const validateFieldEvent = (input: Input): FieldValidated => {
   const base = { clientEventId, occurredAt: input["occurredAt"] as string, occurredAtDate, targetRef, queued, note };
   switch (kind) {
     case "check":
-      return { ok: true, data: { ...base, kind: "check", item: item!, result, source } };
+      return { ok: true, data: { ...base, kind: "check", item: item!, result, source, docKey, site } };
     case "takeoff":
       return { ok: true, data: { ...base, kind: "takeoff" } };
     case "landing":

@@ -347,7 +347,10 @@ describe("takeoffGaps（離陸の未了事項。離陸は止めない）", () =>
       { item: "judgement", state: "stale" },
       { item: "carry", state: "none" },
     ]);
-    expect(g.map((x) => x.item)).toEqual([...FIELD_GAP_ITEMS]);
+    // Sprint 14：round を渡さない呼び出し（12c と同じ）では、新しい未了の項目は数えない。意図の変更：FIELD_GAP_ITEMS に
+    // Sprint 14 の項目が増えたため、12c の 6 項目に絞って順序を比べる。
+    const legacy = ["inspection", "emergency_airspace", "report", "confirmation", "judgement", "carry"];
+    expect(g.map((x) => x.item)).toEqual(FIELD_GAP_ITEMS.filter((x) => legacy.includes(x)));
   });
 
   it("日常点検：異常あり。緊急用務空域：指定されている", () => {

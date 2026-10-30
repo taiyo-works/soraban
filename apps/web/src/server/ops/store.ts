@@ -888,6 +888,17 @@ export type FieldEventInsert = {
   readonly queued: boolean;
   readonly clientEventId: string;
   readonly recordedByMemberId: string;
+  /** Sprint 14（0017）。docs_confirm の対象。 */
+  readonly docKey?: string | null;
+  /** Sprint 14（0017）。site_conditions の値。 */
+  readonly site?: {
+    readonly thirdParty: string;
+    readonly otherAircraft: string;
+    readonly rain: string;
+    readonly visibility: string;
+    readonly windMs: number | null;
+    readonly tempC: number | null;
+  } | null;
 };
 
 /**
@@ -897,8 +908,10 @@ export type FieldEventInsert = {
 export const insertFieldEventOn = async (c: OpsTx, i: FieldEventInsert): Promise<string> => {
   const r = await c.query<{ id: string }>(
     `insert into flight_field_events (org_id, plan_id, kind, item, result, source, target_event_id, flight_record_id, inspection_id,
-       report_id, occurred_at, gaps, note, queued, client_event_id, recorded_by_member_id)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, ops_jst_minute_to_timestamptz($11), $12::jsonb, $13, $14, $15, $16)
+       report_id, occurred_at, gaps, note, queued, client_event_id, recorded_by_member_id,
+       doc_key, site_third_party, site_other_aircraft, site_rain, site_visibility, site_wind_ms, site_temp_c)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, ops_jst_minute_to_timestamptz($11), $12::jsonb, $13, $14, $15, $16,
+       $17, $18, $19, $20, $21, $22, $23)
      returning id`,
     [
       i.orgId,
@@ -917,6 +930,13 @@ export const insertFieldEventOn = async (c: OpsTx, i: FieldEventInsert): Promise
       i.queued,
       i.clientEventId,
       i.recordedByMemberId,
+      i.docKey ?? null,
+      i.site?.thirdParty ?? null,
+      i.site?.otherAircraft ?? null,
+      i.site?.rain ?? null,
+      i.site?.visibility ?? null,
+      i.site?.windMs ?? null,
+      i.site?.tempC ?? null,
     ],
   );
   return r.rows[0]!.id;
@@ -951,6 +971,28 @@ export const listPreflightInspections = async (
     await db.query<{ id: string; aircraft_id: string; inspected_at: Date | string; has_abnormal: boolean }>(
       `select id, aircraft_id, inspected_at, has_abnormal from daily_inspections
         where org_id = $1 and aircraft_id = any($2::uuid[]) and voided_at is null and timing = 'pre_flight' and inspected_date = $3::date
+        order by inspected_at, id`,
+      [orgId, [...aircraftIds], date],
+    )
+  ).rows;
+};
+
+/**
+ * 現場の導出に使う日常点検（飛行前・飛行後。取消していないもの）。date の前日からの分を読む（日付をまたぐ飛行後点検のため）。
+ * 飛行前の点検は呼び出し側が点検の日付で絞る（fieldState の day）。
+ */
+export const listFieldInspections = async (
+  db: Queryable,
+  orgId: string,
+  aircraftIds: readonly string[],
+  date: string,
+): Promise<{ id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }[]> => {
+  if (aircraftIds.length === 0) return [];
+  return (
+    await db.query<{ id: string; inspected_at: Date | string; has_abnormal: boolean; timing: "pre_flight" | "post_flight"; inspected_date_text: string }>(
+      `select id, inspected_at, has_abnormal, timing, inspected_date::text as inspected_date_text from daily_inspections
+        where org_id = $1 and aircraft_id = any($2::uuid[]) and voided_at is null
+          and inspected_date >= $3::date - 1 and inspected_date <= $3::date
         order by inspected_at, id`,
       [orgId, [...aircraftIds], date],
     )

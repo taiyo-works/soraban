@@ -42,7 +42,7 @@ describe("parseMigrationFiles", () => {
     expect(a!.checksum).not.toBe(b!.checksum);
   });
 
-  it("リポジトリのマイグレーションは 0001〜0016 で検証を通る", async () => {
+  it("リポジトリのマイグレーションは 0001〜0017 で検証を通る", async () => {
     const { readMigrationDir } = await import("./migrate");
     expect(readMigrationDir(DEFAULT_MIGRATIONS_DIR).map((x) => x.filename)).toEqual([
       "0001_initial_schema.sql",
@@ -61,6 +61,7 @@ describe("parseMigrationFiles", () => {
       "0014_flight_field_events.sql",
       "0015_permit_registrations.sql",
       "0016_incident_records.sql",
+      "0017_field_round_records.sql",
     ]);
   });
 });

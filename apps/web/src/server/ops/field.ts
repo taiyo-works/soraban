@@ -29,15 +29,26 @@ import {
   FIELD_STATE_TODO,
   FIELD_CHECK_RESULT_LABEL,
   INSPECTION_ABNORMAL_GUIDANCE,
+  FIELD_DOC_HUMAN_CONFIRMED_LABEL,
+  FIELD_DOC_LABEL,
+  FIELD_DOC_STATUS_LABEL,
+  FLIGHT_RESTRICTION_SOURCE,
+  FIELD_RESTRICTION_UNCONFIRMED_NOTE,
+  FIELD_EMERGENCY_SOURCE_NOTE,
   checkFieldTime,
   fieldErrorMessage,
+  withFieldReturn,
   outsidePlanWindowLabel,
   type FieldCheckItem,
   type FieldCheckResult,
+  type FieldDocKey,
+  type FieldEventItem,
   type FieldEventKind,
+  type FieldSiteValues,
 } from "@/lib/ops-field";
 import { formatJst, jstDate, jstTime, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
+import { docGapsOf, judgeFieldDocs, type DocJudgement, type DocsJudgeInput } from "./docs-judge";
 import { decideTransition, takeoffGaps, type FieldEventLite, type FieldFlight, type InspectionLite, type FieldGap, type FieldState, type FieldRequest } from "./field-logic";
 import { loadFieldState } from "./field-rows";
 import { gapDto, type GapDto } from "./flight-extras";
@@ -62,9 +73,13 @@ export type FieldEventDto = {
   readonly id: string;
   readonly planId: string;
   readonly kind: FieldEventKind;
-  readonly item: FieldCheckItem | null;
+  readonly item: FieldEventItem | null;
   readonly result: FieldCheckResult | null;
   readonly source: string | null;
+  /** Sprint 14：docs_confirm の対象。それ以外は null。 */
+  readonly docKey: FieldDocKey | null;
+  /** Sprint 14：site_conditions の値。それ以外は null。 */
+  readonly site: FieldSiteValues | null;
   readonly targetEventId: string | null;
   readonly flightRecordId: string | null;
   readonly inspectionId: string | null;
@@ -90,6 +105,18 @@ export type FieldEventDto = {
   readonly contentHash: string;
 };
 
+const siteOfRow = (r: FieldEventRowWithTimes): FieldSiteValues | null =>
+  r.item === "site_conditions" && r.site_third_party && r.site_other_aircraft && r.site_rain && r.site_visibility
+    ? {
+        thirdParty: r.site_third_party,
+        otherAircraft: r.site_other_aircraft,
+        rain: r.site_rain,
+        visibility: r.site_visibility,
+        windMs: r.site_wind_ms === null ? null : Number(r.site_wind_ms),
+        tempC: r.site_temp_c === null ? null : Number(r.site_temp_c),
+      }
+    : null;
+
 export const fieldEventDto = (r: FieldEventRowWithTimes): FieldEventDto => ({
   id: r.id,
   planId: r.plan_id,
@@ -97,6 +124,8 @@ export const fieldEventDto = (r: FieldEventRowWithTimes): FieldEventDto => ({
   item: r.item,
   result: r.result,
   source: r.source,
+  docKey: r.doc_key,
+  site: siteOfRow(r),
   targetEventId: r.target_event_id,
   flightRecordId: r.flight_record_id,
   inspectionId: r.inspection_id,
@@ -149,6 +178,23 @@ export type FieldItemDto = {
   readonly undoable: boolean;
 };
 
+export type FieldDocDto = {
+  readonly key: FieldDocKey;
+  readonly label: string;
+  readonly status: DocJudgement["status"];
+  readonly effective: DocJudgement["effective"];
+  /** 状態の語（確認済み／要確認／満たさない）。人が確認した場合は「確認済み（人が確認）」。 */
+  readonly statusLabel: string;
+  readonly basis: readonly string[];
+  readonly notes: readonly string[];
+  /** 登録の画面（現場画面へ戻る returnTo つき）。 */
+  readonly href: string | null;
+  readonly canConfirm: boolean;
+  /** 人が確認した行の ID（取り消す対象）。 */
+  readonly humanConfirmEventId: string | null;
+  readonly humanConfirmedTime: string | null;
+};
+
 export type FieldFlightDto = {
   readonly takeoffEventId: string;
   readonly takeoffClientEventId: string;
@@ -164,6 +210,9 @@ export type FieldFlightDto = {
   readonly flightRecordId: string | null;
   readonly phase: FieldFlight["phase"];
   readonly phaseLabel: string;
+  /** Sprint 14：何回目の飛行か（1 始まり）と、飛行後点検の状態。 */
+  readonly roundNumber: number;
+  readonly post: { readonly done: boolean; readonly inspectionId: string | null; readonly abnormal: boolean; readonly time: string | null };
   /** 計画の時間帯の外の知らせ（離陸が早い・着陸が遅い）。 */
   readonly windowNotice: WindowNoticeDto | null;
 };
@@ -224,6 +273,32 @@ export type FieldViewDto = {
   /** 飛行前の 4 項目（日常点検、緊急用務空域、通報済みの再確認、携行品の順）。 */
   readonly items: readonly FieldItemDto[];
   readonly report: FieldReportDto;
+  /** Sprint 14：書類・手続き 6 項目の判定（登録内容から導出。画面を開くたびに作り直す）。 */
+  readonly docs: readonly FieldDocDto[];
+  /** Sprint 14：いまのラウンド（飛行中ならその飛行、そうでなければ次に始める飛行）の空域（飛行自粛要請）・現場状況。 */
+  readonly round: {
+    readonly number: number;
+    readonly restriction: {
+      readonly done: boolean;
+      readonly eventId: string | null;
+      readonly time: string | null;
+      readonly sourceTitle: string;
+      /** 公表ページの URL。一次情報で確かめられていないときは null（URL を創作しない）。 */
+      readonly url: string | null;
+      readonly note: string;
+    };
+    readonly emergencyNote: string;
+    readonly site: {
+      readonly done: boolean;
+      readonly eventId: string | null;
+      readonly time: string | null;
+      readonly values: FieldSiteValues | null;
+      readonly note: string | null;
+      readonly attention: boolean;
+    };
+  };
+  /** Sprint 14：飛行後点検が未了の飛行の数。 */
+  readonly postPendingCount: number;
   readonly emergencySources: readonly { readonly id: string; readonly title: string; readonly url: string }[];
   /** 離陸 → 着陸 → 日誌の組（離陸の古い順。複数回の離着陸がありうる）。 */
   readonly flights: readonly FieldFlightDto[];
@@ -305,15 +380,62 @@ const effectiveReportedAt = (b: Bundle): string | null => {
   return id ? (b.extras.rows.find((r) => r.id === id)?.reported_at_jst ?? null) : null;
 };
 
-const gapsFor = (b: Bundle, checks: FieldState["checks"], takeoffAtJst: string): FieldGap[] =>
+/** 書類・手続きの判定の入力を作る。同じ組織の計画・機体・操縦者・許可の照合・通報だけを読む（組織をまたがない）。 */
+const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bundle, state: FieldState, atJst: string): Promise<DocsJudgeInput> => {
+  const plan = b.plan;
+  const aircraft = await store.getAircraft(q as store.OpsDb, orgId, plan.aircraft_id);
+  const pilot = await store.getPilot(q as store.OpsDb, orgId, plan.pilot_id);
+  const eff = b.dto.report.status.effectiveId ? b.extras.rows.find((r) => r.id === b.dto.report.status.effectiveId) : undefined;
+  return {
+    plannedStartAtJst: toJstInput(asDate(plan.planned_start_at)),
+    atJst,
+    permits: b.dto.permits.numbers.map((n) => ({
+      numberText: n.numberText,
+      status: n.status,
+      registrationId: n.registrationId,
+      permitNumber: n.permitNumber,
+      versionNo: n.versionNo,
+      validFrom: n.validFrom,
+      validTo: n.validTo,
+      reasonLabels: n.reasons.map((x) => x.label),
+    })),
+    aircraft: aircraft
+      ? { id: aircraft.id, registrationMark: aircraft.registration_mark, status: aircraft.status, voided: aircraft.voided_at !== null }
+      : null,
+    pilot: pilot
+      ? {
+          id: pilot.id,
+          fullName: pilot.full_name,
+          hasLicense: pilot.has_license,
+          licenseExpiresOn: pilot.license_expires_on,
+          hasLimitation: pilot.limitation_type || pilot.limitation_weight || pilot.limitation_daytime || pilot.limitation_vlos,
+        }
+      : null,
+    report: {
+      requirementKind: b.dto.report.kind,
+      statusCode: b.dto.report.status.code,
+      effective: eff
+        ? { id: eff.id, dipsNumber: eff.dips_number, numberUnavailable: eff.number_unavailable, reportedAtJst: eff.reported_at_jst }
+        : null,
+    },
+    humanConfirms: state.docConfirms,
+  };
+};
+
+const gapsFor = (b: Bundle, state: FieldState, takeoffAtJst: string, docs: readonly DocJudgement[]): FieldGap[] =>
   takeoffGaps({
-    checks,
+    checks: state.checks,
     requirementKind: b.dto.report.kind,
     reportStatusCode: b.dto.report.status.code,
     effectiveReportedAt: effectiveReportedAt(b),
     takeoffAtJst,
     planState: b.dto.state,
     judgementStale: b.dto.freshness.stale,
+    round: {
+      docs: docGapsOf(docs),
+      restrictionDone: state.round.restriction.done,
+      site: { done: state.round.site.done, attention: state.round.site.attention },
+    },
   });
 
 // ---- 現場モードの状態 -------------------------------------------------------------
@@ -339,6 +461,23 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
   const start = asDate(plan.planned_start_at);
   const end = new Date(start.getTime() + plan.duration_minutes * MINUTE_MS);
   const report = reportBlock(plan, dto, b.extras);
+  const docJudgements = judgeFieldDocs(await loadDocsInput(ctx.db, org, b, state, toJstInput(now)));
+  const docDtos = docJudgements.map(
+    (d): FieldDocDto => ({
+      key: d.key,
+      label: FIELD_DOC_LABEL[d.key],
+      status: d.status,
+      effective: d.effective,
+      statusLabel: d.effective === "confirmed_human" ? FIELD_DOC_HUMAN_CONFIRMED_LABEL : FIELD_DOC_STATUS_LABEL[d.status],
+      basis: d.basis,
+      notes: d.notes,
+      href: d.key === "report" ? `/ops/plans/${plan.id}/report` : d.href ? withFieldReturn(d.href, plan.id) : null,
+      canConfirm: d.canConfirm && canRecord && plan.voided_at === null,
+      humanConfirmEventId: d.humanConfirmEventId,
+      humanConfirmedTime: d.humanConfirmedAt ? jstTime(new Date(d.humanConfirmedAt)) : null,
+    }),
+  );
+  const siteRow = state.round.site.eventId ? loaded.rows.find((r) => r.id === state.round.site.eventId) : undefined;
 
   const items = FIELD_CHECK_ITEMS.map((item): FieldItemDto => {
     const c = state.checks[item];
@@ -385,6 +524,8 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       flightRecordId: f.flightRecordId,
       phase: f.phase,
       phaseLabel: PHASE_LABEL[f.phase],
+      roundNumber: f.roundIndex + 1,
+      post: { done: f.post.done, inspectionId: f.post.inspectionId, abnormal: f.post.abnormal, time: f.post.at ? jstTime(new Date(f.post.at)) : null },
       windowNotice: windowNotice(plan, new Date(f.takeoffAt), f.landingAt ? new Date(f.landingAt) : null),
     }),
   );
@@ -433,11 +574,33 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
     canInspect: can(ctx.member.role, "inspection.create", { isSelf: dto.isSelf }),
     items,
     report,
+    docs: docDtos,
+    round: {
+      number: state.round.index + 1,
+      restriction: {
+        done: state.round.restriction.done,
+        eventId: state.round.restriction.eventId,
+        time: state.round.restriction.at ? jstTime(new Date(state.round.restriction.at)) : null,
+        sourceTitle: FLIGHT_RESTRICTION_SOURCE.title,
+        url: FLIGHT_RESTRICTION_SOURCE.url,
+        note: FLIGHT_RESTRICTION_SOURCE.url === null ? FIELD_RESTRICTION_UNCONFIRMED_NOTE : `確認元：${FLIGHT_RESTRICTION_SOURCE.title}／確認日 ${FLIGHT_RESTRICTION_SOURCE.checkedOn ?? "未記録"}`,
+      },
+      emergencyNote: FIELD_EMERGENCY_SOURCE_NOTE,
+      site: {
+        done: state.round.site.done,
+        eventId: state.round.site.eventId,
+        time: state.round.site.at ? jstTime(new Date(state.round.site.at)) : null,
+        values: state.round.site.values,
+        note: siteRow?.note ?? null,
+        attention: state.round.site.attention,
+      },
+    },
+    postPendingCount: state.postPending.length,
     emergencySources: EMERGENCY_SOURCE_OPTIONS,
     flights,
     openFlightEventId: state.openFlight?.takeoffEventId ?? null,
     pendingJournalTakeoffEventIds: state.pendingJournal.map((f) => f.takeoffEventId),
-    takeoffPreview: gapsFor(b, state.checks, toJstInput(now)).map(gapDto),
+    takeoffPreview: gapsFor(b, state, toJstInput(now), docJudgements).map(gapDto),
     sameDayPlans: sameDay.length > 1 ? sameDay : [],
     stateInput: {
       events: loaded.events,
@@ -463,6 +626,10 @@ const sameContent = async (ctx: OpsContext, existing: FieldEventRowWithTimes, pl
   if ((existing.note ?? null) !== d.note) return false;
   if (d.kind === "check") {
     if (existing.item !== d.item || existing.result !== d.result || (existing.source ?? null) !== d.source) return false;
+    if ((existing.doc_key ?? null) !== d.docKey) return false;
+    const es = siteOfRow(existing);
+    if ((es === null) !== (d.site === null)) return false;
+    if (es && d.site && JSON.stringify(es) !== JSON.stringify(d.site)) return false;
   }
   if (d.targetRef !== null) {
     const t = await store.getFieldEventByRef(ctx.db, ctx.member.org_id, d.targetRef);
@@ -537,13 +704,20 @@ export const recordFieldEvent = async (ctx: OpsContext, planId: string, body: un
       // 日常点検は離陸の日で導出する（日付をまたぐ場合に備える）
       const takeoffDay = jstDate(d.occurredAtDate);
       const forDay = takeoffDay === today ? loaded : await loadFieldState(c, org, b.plan, takeoffDay);
-      gaps = gapsFor(b, forDay.state.checks, d.occurredAt);
+      // 書類・手続きは離陸の時点の登録内容で判定した結果を写す（あとで登録を変えても、離陸の gaps は書き換えない）
+      const docsAtTakeoff = judgeFieldDocs(await loadDocsInput(c, org, b, forDay.state, d.occurredAt));
+      gaps = gapsFor(b, forDay.state, d.occurredAt, docsAtTakeoff);
       notice = windowNotice(b.plan, d.occurredAtDate, null);
     } else if (d.kind === "landing") {
       const open = loaded.state.openFlight;
       notice = windowNotice(b.plan, open ? new Date(open.takeoffAt) : null, d.occurredAtDate);
     } else if (d.kind === "check" && d.item === "report_recheck") {
       reportId = b.dto.report.status.effectiveId;
+    } else if (d.kind === "check" && d.item === "docs_confirm") {
+      // 満たさない項目は人の確認で変えない（登録を直す）。要確認の項目だけ確認できる
+      const docs = judgeFieldDocs(await loadDocsInput(c, org, b, loaded.state, toJstInput(now)));
+      const hit = docs.find((x) => x.key === d.docKey);
+      if (hit && hit.status === "unmet") throw new OpsError(409, "doc_unmet");
     }
 
     let id: string;
@@ -565,6 +739,8 @@ export const recordFieldEvent = async (ctx: OpsContext, planId: string, body: un
         queued: d.queued,
         clientEventId: d.clientEventId,
         recordedByMemberId: ctx.member.id,
+        docKey: d.kind === "check" ? d.docKey : null,
+        site: d.kind === "check" ? d.site : null,
       });
     } catch (e) {
       return conflictFromInsert(e);

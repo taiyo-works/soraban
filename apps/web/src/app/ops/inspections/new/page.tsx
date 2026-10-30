@@ -12,7 +12,7 @@ import { recordCreateDenied, recordFormOptions } from "@/server/ops/record-page"
 export default async function InspectionNewPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ aircraftId?: string; planId?: string; returnTo?: string }>;
+  readonly searchParams: Promise<{ aircraftId?: string; planId?: string; returnTo?: string; timing?: string }>;
 }) {
   const { ctx, me } = await requireOpsMember();
   const denied = recordCreateDenied(me);
@@ -31,12 +31,13 @@ export default async function InspectionNewPage({
     }
   }
   const returnTo = safeReturnTo(sp.returnTo);
+  const initialTiming = sp.timing === "post_flight" ? ("post_flight" as const) : undefined;
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
       </PageHeader>
-      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(returnTo ? { returnTo } : {})} />
+      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} />
     </main>
   );
 }

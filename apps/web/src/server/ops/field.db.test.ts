@@ -198,6 +198,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
   const post = (o: Org, planId: string, b: Record<string, unknown>, ctx?: OpsContext) => field.recordFieldEvent(ctx ?? mgr(o), planId, b);
   const checkBody = (item: string, extra: Record<string, unknown> = {}) =>
     body("check", { item, ...(item === "emergency_airspace" ? { result: "not_designated", source: SRC } : {}), ...extra });
+  const SITE_OK = { thirdParty: "none", otherAircraft: "none", rain: "none", visibility: "good", windMs: 3.2, tempC: 18 };
   const flightInput = (o: Org, takeoffAt: string, landingAt: string, extra: Record<string, unknown> = {}) => ({
     aircraftId: o.aircraft,
     pilotId: o.pilotFree.id,
@@ -312,9 +313,11 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(row.recorded_by_role).toBe("manager");
       // 再計算は SQL の中で行う（JS の Date はマイクロ秒を持てない）
       const h = await owner.query(
-        `select flight_field_event_hash(e.id, e.org_id, e.plan_id, e.kind, e.item, e.result, e.source, e.target_event_id,
+        // Sprint 14（0017）：新しい行のハッシュは soraban-field-event-v2（新しい列を含む）
+        `select flight_field_event_hash_v2(e.id, e.org_id, e.plan_id, e.kind, e.item, e.result, e.source, e.target_event_id,
                 e.flight_record_id, e.inspection_id, e.report_id, e.occurred_at, e.snapshot_id, e.plan_version, e.gaps, e.note,
-                e.queued, e.client_event_id, e.recorded_by_member_id, e.recorded_by_name, e.recorded_by_role, e.recorded_at) as h
+                e.queued, e.client_event_id, e.recorded_by_member_id, e.recorded_by_name, e.recorded_by_role, e.recorded_at,
+                e.doc_key, e.site_third_party, e.site_other_aircraft, e.site_rain, e.site_visibility, e.site_wind_ms, e.site_temp_c) as h
            from flight_field_events e where e.id = $1`,
         [row.id],
       );
@@ -440,9 +443,17 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(r.created).toBe(true);
       const e = r.event;
       expect(e.kind).toBe("takeoff");
+      // Sprint 14（意図の変更）：12c の 5 項目に、飛行自粛要請・現場状況・書類・手続き（要確認）が加わる。
+      // この計画は許可番号なし・リモートID／飛行マニュアルは常に要確認。登録記号と登録記号は機体台帳から確認済みになり未了に出ない。このテストの操縦者は有効期限が未入力なので技能証明も要確認
       expect(e.gaps!.map((g) => [g.item, g.state])).toEqual([
         ["inspection", "none"],
         ["emergency_airspace", "none"],
+        ["flight_restriction", "none"],
+        ["site_conditions", "none"],
+        ["docs_permit", "needs_check"],
+        ["docs_remote_id", "needs_check"],
+        ["docs_license", "needs_check"],
+        ["docs_manual", "needs_check"],
         ["report", "none"],
         ["confirmation", "draft"],
         ["carry", "none"],
@@ -465,6 +476,10 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       await reportNew(O, p, "2027-01-05T11:00");
       await post(O, p.id, checkBody("emergency_airspace"));
       await post(O, p.id, checkBody("carry"));
+      // Sprint 14（意図の変更）：飛行自粛要請・現場状況・要確認の書類（人が確認）も済ませて、はじめて未了が空になる
+      await post(O, p.id, checkBody("flight_restriction"));
+      await post(O, p.id, checkBody("site_conditions", { site: SITE_OK }));
+      for (const k of ["permit", "remote_id", "license", "manual"]) await post(O, p.id, checkBody("docs_confirm", { docKey: k }));
       const r = await post(O, p.id, body("takeoff"));
       expect(r.event.gaps).toEqual([]);
       expect((await eventRows(p.id)).at(-1).gaps).toEqual([]);
