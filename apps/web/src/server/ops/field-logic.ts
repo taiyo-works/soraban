@@ -136,6 +136,8 @@ export type FieldFlight = {
   readonly phase: FieldFlightPhase;
   /** 0 始まりのラウンドの番号。 */
   readonly roundIndex: number;
+  /** この飛行のラウンドの飛行前の日常点検（直前の飛行の着陸以後・この飛行の着陸まで。最新）。無ければ null。日誌への引き継ぎに使う。 */
+  readonly preInspectionId: string | null;
   /** この飛行の後の飛行後点検（着陸していなければ done: false）。 */
   readonly post: FieldPostInspection;
 };
@@ -309,6 +311,18 @@ export const fieldState = (i: FieldStateInput): FieldState => {
             .filter((x) => x.inspectedAt >= landing.occurredAt && (nextTakeoff === undefined || x.inspectedAt < nextTakeoff.occurredAt))
             .sort((a, b) => (a.inspectedAt < b.inspectedAt ? -1 : a.inspectedAt > b.inspectedAt ? 1 : a.id < b.id ? -1 : 1))
             .pop();
+    // この飛行のラウンドの飛行前の点検（現在のラウンドではなく、この飛行のもの）
+    const prevL = idx > 0 ? landingOf(takeoffs[idx - 1]!) : null;
+    const preHit = i.inspections
+      .filter(
+        (x) =>
+          x.timing === "pre_flight" &&
+          x.date === i.day &&
+          (prevL === null || x.inspectedAt >= prevL.occurredAt) &&
+          (landing === null || x.inspectedAt <= landing.occurredAt),
+      )
+      .sort((a, b) => (a.inspectedAt < b.inspectedAt ? -1 : a.inspectedAt > b.inspectedAt ? 1 : a.id < b.id ? -1 : 1))
+      .pop();
     return {
       takeoffEventId: t.id,
       takeoffClientEventId: t.clientEventId,
@@ -322,6 +336,7 @@ export const fieldState = (i: FieldStateInput): FieldState => {
       flightRecordId: journal?.flightRecordId ?? null,
       phase: landing === null ? "in_flight" : journal === null ? "journal_pending" : "journaled",
       roundIndex: idx,
+      preInspectionId: preHit?.id ?? null,
       post: postHit
         ? { done: true, inspectionId: postHit.id, abnormal: postHit.hasAbnormal, at: postHit.inspectedAt }
         : { done: false, inspectionId: null, abnormal: false, at: null },

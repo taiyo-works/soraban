@@ -768,6 +768,18 @@ export function FieldClient({
                   <p className="text-base text-ink-soft" data-testid="field-emergency-note">
                     {view.round.emergencyNote}
                   </p>
+                  {view.emergencySources.map((src) => (
+                    <a
+                      key={src.id}
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={BTN_OUTLINE}
+                      data-testid="field-emergency-link"
+                    >
+                      {src.title}を開く
+                    </a>
+                  ))}
                   {!c.done && view.canRecord && !cancelled ? (
                     <div className="flex flex-col gap-3">
                       <label className="flex flex-col gap-1 font-bold" htmlFor="field-em-source">

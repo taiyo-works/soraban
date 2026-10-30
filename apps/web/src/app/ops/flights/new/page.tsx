@@ -57,7 +57,8 @@ export default async function FlightNewPage({
             takeoffEventId: takeoffRef,
             takeoffAt: flight?.takeoffAt ?? null,
             landingAt: flight?.landingAt ?? null,
-            inspectionId: view.items.find((x) => x.item === "inspection")?.inspectionId ?? null,
+            // 着陸でラウンドが閉じるため、現在のラウンドではなく、この飛行のラウンドの点検を使う
+            inspectionId: flight?.preInspectionId ?? view.items.find((x) => x.item === "inspection")?.inspectionId ?? null,
             // 離陸と着陸の両方の時刻が決まったときだけ「解決済み」。着陸がまだなら送信待ちから回復を試みる
             resolved: flight?.takeoffAt != null && flight.landingAt != null,
             takeoffRefs: [takeoffRef, flight?.takeoffEventId, flight?.takeoffClientEventId].filter((x): x is string => typeof x === "string"),
