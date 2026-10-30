@@ -48,9 +48,11 @@ import {
 } from "@/lib/ops-field";
 import { formatJst, jstDate, jstTime, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
+import { relevantDipsKinds } from "./permit-logic";
 import { docGapsOf, judgeFieldDocs, type DocJudgement, type DocsJudgeInput } from "./docs-judge";
 import { decideTransition, takeoffGaps, type FieldEventLite, type FieldFlight, type InspectionLite, type FieldGap, type FieldState, type FieldRequest } from "./field-logic";
 import { loadFieldState } from "./field-rows";
+import { planPermitInputOfRow } from "./permit-match";
 import { gapDto, type GapDto } from "./flight-extras";
 import { loadPlanBundle } from "./plans";
 import { asDate, nowOf } from "./records";
@@ -320,6 +322,8 @@ export type FieldViewDto = {
     readonly inspections: readonly InspectionLite[];
     readonly flightRecords: readonly { readonly id: string; readonly voided: boolean }[];
     readonly day: string;
+    /** 計画の現在の版（書類・手続きの人の確認は同じ版の行だけが有効）。 */
+    readonly planVersion: number;
   };
 };
 
@@ -390,9 +394,12 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
   const eff = b.dto.report.status.effectiveId ? b.extras.rows.find((r) => r.id === b.dto.report.status.effectiveId) : undefined;
   return {
     plannedStartAtJst: toJstInput(asDate(plan.planned_start_at)),
+    plannedEndAtJst: toJstInput(new Date(asDate(plan.planned_start_at).getTime() + plan.duration_minutes * MINUTE_MS)),
+    wantedKinds: relevantDipsKinds(planPermitInputOfRow(plan).flags),
     atJst,
     permits: b.dto.permits.numbers.map((n) => ({
       numberText: n.numberText,
+      kinds: n.kinds.map((k) => k.kind),
       status: n.status,
       registrationId: n.registrationId,
       permitNumber: n.permitNumber,
@@ -410,6 +417,7 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
           fullName: pilot.full_name,
           hasLicense: pilot.has_license,
           licenseExpiresOn: dateOnly(pilot.license_expires_on),
+          voided: pilot.voided_at !== null,
           hasLimitation: pilot.limitation_type || pilot.limitation_weight || pilot.limitation_daytime || pilot.limitation_vlos,
         }
       : null,
@@ -433,6 +441,7 @@ const gapsFor = (b: Bundle, state: FieldState, takeoffAtJst: string, docs: reado
     takeoffAtJst,
     planState: b.dto.state,
     judgementStale: b.dto.freshness.stale,
+    reportUnverified: docs.some((d) => d.key === "report" && d.countsAsGap),
     round: {
       docs: docGapsOf(docs),
       restrictionDone: state.round.restriction.done,
@@ -463,7 +472,9 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
   const start = asDate(plan.planned_start_at);
   const end = new Date(start.getTime() + plan.duration_minutes * MINUTE_MS);
   const report = reportBlock(plan, dto, b.extras);
-  const docJudgements = judgeFieldDocs(await loadDocsInput(ctx.db, org, b, state, toJstInput(now)));
+  const docJudgements = judgeFieldDocs(
+    await loadDocsInput(ctx.db, org, b, state, state.openFlight ? toJstInput(new Date(state.openFlight.takeoffAt)) : toJstInput(now)),
+  );
   const docDtos = docJudgements.map(
     (d): FieldDocDto => ({
       key: d.key,
@@ -610,6 +621,7 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       inspections: loaded.inspections,
       flightRecords: loaded.flightRecords,
       day: today,
+      planVersion: plan.current_version,
     },
   };
 };
@@ -718,9 +730,12 @@ export const recordFieldEvent = async (ctx: OpsContext, planId: string, body: un
       reportId = b.dto.report.status.effectiveId;
     } else if (d.kind === "check" && d.item === "docs_confirm") {
       // 満たさない項目は人の確認で変えない（登録を直す）。要確認の項目だけ確認できる
-      const docs = judgeFieldDocs(await loadDocsInput(c, org, b, loaded.state, toJstInput(now)));
+      const open = loaded.state.openFlight;
+      const docs = judgeFieldDocs(await loadDocsInput(c, org, b, loaded.state, open ? toJstInput(new Date(open.takeoffAt)) : toJstInput(now)));
       const hit = docs.find((x) => x.key === d.docKey);
+      // 満たさない項目は登録を直す。自動で確認済みの項目・通報は、人の確認の対象にしない（要確認の項目だけ）
       if (hit && hit.status === "unmet") throw new OpsError(409, "doc_unmet");
+      if (!hit || hit.status !== "needs_check" || hit.key === "report") throw new OpsError(409, "doc_not_confirmable");
     }
 
     let id: string;

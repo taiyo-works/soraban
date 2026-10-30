@@ -37,6 +37,8 @@ export type FieldEventLite = {
   readonly item: FieldEventItem | null;
   readonly result: FieldCheckResult | null;
   readonly source: string | null;
+  /** Sprint 14：記録した時点の計画の版（人の確認は、同じ版の行だけが有効）。送信待ちの行は省略（いまの版として扱う）。 */
+  readonly planVersion?: number | null;
   /** Sprint 14：docs_confirm の対象（それ以外は null か省略）。 */
   readonly docKey?: FieldDocKey | null;
   /** Sprint 14：site_conditions の値（それ以外は null か省略）。備考は端末に残さないため、導出には使わない。 */
@@ -73,6 +75,8 @@ export type FieldStateInput = {
   readonly flightRecords: readonly FieldFlightRecordLite[];
   /** 日常点検を探す日（JST の YYYY-MM-DD）。画面では今日、離陸の未了事項では離陸の日。 */
   readonly day: string;
+  /** Sprint 14：計画の現在の版。書類・手続きの人の確認は、この版と同じ版の行だけが有効（機体・操縦者などの変更を引き継がない）。省略すると版で絞らない。 */
+  readonly planVersion?: number;
 };
 
 // ---- 出力 -----------------------------------------------------------------
@@ -240,6 +244,8 @@ export const fieldState = (i: FieldStateInput): FieldState => {
   for (const e of events) {
     if (e.kind !== "check" || undone.has(e.id)) continue;
     if (e.item === "docs_confirm" && e.docKey && (FIELD_DOC_KEYS as readonly string[]).includes(e.docKey)) {
+      // 計画の版が変わったら（機体・操縦者・飛行形態などの変更）、前の版への人の確認は引き継がない
+      if (i.planVersion !== undefined && e.planVersion !== undefined && e.planVersion !== null && e.planVersion !== i.planVersion) continue;
       docConfirms[e.docKey] = { eventId: e.id, at: e.occurredAt };
     } else if (e.item === "flight_restriction" && inRound(e)) {
       restriction = { done: true, eventId: e.id, at: e.occurredAt };
@@ -399,6 +405,7 @@ export type FieldTransitionErrorCode =
   | "no_open_flight"
   | "landing_exists"
   | "journal_exists"
+  | "later_flight_exists"
   | "already_undone"
   | "not_undoable"
   | "invalid_target";
@@ -457,6 +464,8 @@ export const decideTransition = (
       if (t.kind === "landing") {
         const f = state.flights.find((x) => x.landingEventId === t.id);
         if (f && f.phase === "journaled") return rejected("journal_exists");
+        // 次の飛行が始まっている着陸は取り消せない（前のラウンドを開き直すと、状態が壊れる）
+        if (f && state.flights.some((x) => x.roundIndex > f.roundIndex)) return rejected("later_flight_exists");
       }
       return { ok: true, targetEventId: t.id };
     }
@@ -495,6 +504,8 @@ export type TakeoffGapsInput = {
   readonly takeoffAtJst: string;
   readonly planState: PlanState;
   readonly judgementStale: boolean;
+  /** Sprint 14：通報の書類・手続きが「要確認」（受付番号が無い・通報日時が無い・要否を判定できない）。通報の未了を出す。省略は false。 */
+  readonly reportUnverified?: boolean;
   /**
    * Sprint 14：書類・手続き、空域（飛行自粛要請）、現場状況の未了。省略すると（12c の呼び出し）これらは数えない。
    *   docs：要確認・満たさない（人が確認した要確認は含めない。通報は report の未了が担うので含めない）
@@ -536,6 +547,8 @@ export const takeoffGaps = (i: TakeoffGapsInput): FieldGap[] => {
       if (i.effectiveReportedAt !== null && i.effectiveReportedAt > i.takeoffAtJst) add("report", "after_takeoff");
     } else add("report", "none");
   }
+  // 受付番号が無い・通報日時が無い・要否を判定できない（要確認）ときも、通報の未了にする（二重には数えない）
+  if (i.reportUnverified && !out.some((g) => g.item === "report")) add("report", "none");
   switch (i.planState) {
     case "draft":
       add("confirmation", "draft");

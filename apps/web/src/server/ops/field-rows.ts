@@ -33,6 +33,7 @@ export const toLite = (r: FieldEventRowWithTimes): FieldEventLite => ({
   reportId: r.report_id,
   occurredAt: asDate(r.occurred_at).toISOString(),
   recordedKey: r.recorded_key,
+  planVersion: r.plan_version,
   queued: r.queued,
   gaps: r.gaps === null ? null : (r.gaps as unknown as FieldEventLite["gaps"]),
 });
@@ -77,7 +78,7 @@ export type LoadedFieldState = {
 export const loadFieldState = async (
   q: Queryable,
   orgId: string,
-  plan: { readonly id: string; readonly aircraft_id: string },
+  plan: { readonly id: string; readonly aircraft_id: string; readonly current_version?: number },
   /** 日常点検を探す日（JST の YYYY-MM-DD）。日誌に結び付ける離陸の検査のように、点検が要らないときは null。 */
   day: string | null,
 ): Promise<LoadedFieldState> => {
@@ -89,5 +90,5 @@ export const loadFieldState = async (
     orgId,
     rows.map((r) => r.flight_record_id).filter((x): x is string => x !== null),
   );
-  return { rows, events, inspections, flightRecords, state: fieldState({ events, inspections, flightRecords, day: day ?? "" }) };
+  return { rows, events, inspections, flightRecords, state: fieldState({ events, inspections, flightRecords, day: day ?? "", ...(plan.current_version !== undefined ? { planVersion: plan.current_version } : {}) }) };
 };

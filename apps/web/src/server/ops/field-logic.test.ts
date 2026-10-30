@@ -557,3 +557,35 @@ describe("Sprint 14 A-3：takeoffGaps に書類・手続きと現場状況", () 
     expect(Object.keys(FIELD_GAP_ITEM_LABEL).sort()).toEqual([...FIELD_GAP_ITEMS].sort());
   });
 });
+
+describe("レビュー指摘の修正（field-logic）", () => {
+  it("人の確認は、記録した版と計画の現在の版が同じときだけ有効（機体・操縦者の変更を引き継がない）", () => {
+    const d1 = check("docs_confirm", "done", "13:00", { docKey: "remote_id", planVersion: 1 });
+    const d2 = check("docs_confirm", "done", "13:01", { docKey: "manual", planVersion: 2 });
+    const pending = check("docs_confirm", "done", "13:02", { docKey: "permit", planVersion: null });
+    const s = state([d1, d2, pending], { planVersion: 2 });
+    expect(s.docConfirms.remote_id).toBeUndefined();
+    expect(s.docConfirms.manual?.eventId).toBe(d2.id);
+    expect(s.docConfirms.permit?.eventId).toBe(pending.id);
+    expect(state([d1], {}).docConfirms.remote_id?.eventId).toBe(d1.id);
+  });
+  it("次の飛行が始まっている着陸は取り消せない（later_flight_exists）。最後の着陸は取り消せる", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const t2 = takeoff("14:10");
+    const events = [t1, l1, t2];
+    const r1 = decideTransition(events, state(events), { kind: "undo", targetEventId: l1.id }, { planCancelled: false });
+    expect(r1).toEqual({ ok: false, status: 409, code: "later_flight_exists" });
+    const t2l = landing(t2, "14:30");
+    const all = [t1, l1, t2, t2l];
+    expect(decideTransition(all, state(all), { kind: "undo", targetEventId: t2l.id }, { planCancelled: false }).ok).toBe(true);
+    expect(decideTransition(all, state(all), { kind: "undo", targetEventId: l1.id }, { planCancelled: false })).toMatchObject({ ok: false, code: "later_flight_exists" });
+  });
+  it("takeoffGaps：通報が要確認（reportUnverified）なら通報の未了を出す（二重には出さない）", () => {
+    const base = { requirementKind: "required", reportStatusCode: "reported", effectiveReportedAt: "2027-01-04T10:00", takeoffAtJst: "2027-01-05T13:10", planState: "approved" as const, judgementStale: false };
+    const checks = state([check("emergency_airspace", "not_designated"), check("carry"), check("report_recheck")], { inspections: [insp("i", "12:00")] }).checks;
+    expect(takeoffGaps({ ...base, checks, reportUnverified: true })).toEqual([{ item: "report", state: "none" }]);
+    expect(takeoffGaps({ ...base, checks, reportStatusCode: "no_record", reportUnverified: true }).filter((g) => g.item === "report")).toHaveLength(1);
+    expect(takeoffGaps({ ...base, checks })).toEqual([]);
+  });
+});

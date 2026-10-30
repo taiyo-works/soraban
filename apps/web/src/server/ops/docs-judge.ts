@@ -6,6 +6,7 @@
 //   - 各判定は根拠（登録の種類・番号または記号・期間・版）を返す。技能証明書の番号は根拠に含めない（名前と期限まで）。
 //   - 「人が確認した」は計画ごとに持ち越す（humanConfirms）。満たさない項目は人の確認で変えない（登録を直す）。
 //   - 判定の入力は、呼び出し側が同じ組織のデータだけから作る（組織をまたぐ登録を読まない）。
+import { PERMIT_KIND_LABEL } from "./permit-logic";
 import {
   FIELD_DOC_KEYS,
   FIELD_DOC_LABEL,
@@ -23,6 +24,8 @@ import {
 
 export type DocsPermitNumber = {
   readonly numberText: string;
+  /** この登録で関係した種類（permit-match の relevantKinds。適用したときだけ入る）。 */
+  readonly kinds?: readonly string[];
   /** permit-match の結果（applied・reference・not_relevant・not_applied・unregistered）。 */
   readonly status: string;
   readonly registrationId: string | null;
@@ -35,8 +38,12 @@ export type DocsPermitNumber = {
 };
 
 export type DocsJudgeInput = {
-  /** 飛行の予定開始（JST の `YYYY-MM-DDTHH:MM`）。飛行日はこの日付部分。 */
+  /** 飛行の予定開始（JST の `YYYY-MM-DDTHH:MM`）。 */
   readonly plannedStartAtJst: string;
+  /** 飛行の予定終了（JST の `YYYY-MM-DDTHH:MM`）。技能証明・許可は、予定終了日と判定時刻（離陸）の日付の遅い方で照合する。 */
+  readonly plannedEndAtJst: string;
+  /** 計画の飛行に必要な DIPS の許可・承認の種類（relevantDipsKinds）。登録の種類がこれをすべて覆うときだけ確認済みにする。 */
+  readonly wantedKinds: readonly string[];
   /** 判定の時刻（JST の `YYYY-MM-DDTHH:MM`。画面では現在、離陸の未了事項では離陸の時刻）。通報が離陸より前かの判定に使う。 */
   readonly atJst: string;
   readonly permits: readonly DocsPermitNumber[];
@@ -55,6 +62,8 @@ export type DocsJudgeInput = {
     readonly licenseExpiresOn: string | null;
     /** 限定の登録（種類・重量・昼間・目視内）のどれかがある。 */
     readonly hasLimitation: boolean;
+    /** 取り消された操縦者の登録。 */
+    readonly voided?: boolean;
   } | null;
   readonly report: {
     /** reportRequirement の kind（required・confirm・recommended・not_applicable_model）。 */
@@ -98,6 +107,12 @@ export type DocJudgement = {
 };
 
 const dateOf = (jst: string): string => jst.slice(0, 10);
+/** 照合日：予定終了日と、判定時刻（離陸）の日付の遅い方。 */
+const lateDateOf = (i: DocsJudgeInput): string => {
+  const end = dateOf(i.plannedEndAtJst);
+  const at = dateOf(i.atJst);
+  return end > at ? end : at;
+};
 
 const j = (
   key: FieldDocKey,
@@ -108,10 +123,10 @@ const j = (
   opts: { readonly input: DocsJudgeInput; readonly confirmable?: boolean; readonly gap?: boolean },
 ): DocJudgement => {
   const hc = opts.input.humanConfirms[key];
-  const humanConfirmed = status === "needs_check" && hc !== undefined;
+  const confirmable = opts.confirmable ?? true;
+  const humanConfirmed = status === "needs_check" && confirmable && hc !== undefined;
   const effective: DocJudgement["effective"] =
     status === "unmet" ? "unmet" : status === "confirmed" ? "confirmed_auto" : humanConfirmed ? "confirmed_human" : "needs_check";
-  const confirmable = opts.confirmable ?? true;
   return {
     key,
     label: FIELD_DOC_LABEL[key],
@@ -141,19 +156,39 @@ const judgePermit = (i: DocsJudgeInput): DocJudgement => {
   if (rel.length === 0) {
     return j("permit", "needs_check", [], ["この計画に結びつけた許可・承認の登録がありません。必要かどうかを人が確認します。"], href, { input: i });
   }
-  const applied = rel.filter((n) => n.status === "applied");
-  const notApplied = rel.filter((n) => n.status === "not_applied");
+  const late = lateDateOf(i);
+  const link = (n: DocsPermitNumber | undefined): string => (n?.registrationId ? `/ops/permits/${n.registrationId}` : href);
+  // 実際の離陸日が予定より遅く、適用した登録の有効な最終日を過ぎるときは、期間外（満たさない）として扱う
+  const lapsed = (n: DocsPermitNumber): boolean => n.status === "applied" && n.validTo !== null && n.validTo < late;
+  const applied = rel.filter((n) => n.status === "applied" && !lapsed(n));
+  const notApplied = rel.filter((n) => n.status === "not_applied" || lapsed(n));
   if (applied.length === rel.length) {
-    return j("permit", "confirmed", rel.map(permitBasisOf), [], rel[0]!.registrationId ? `/ops/permits/${rel[0]!.registrationId}` : href, { input: i });
+    // 適用された登録の種類の和集合が、計画の飛行に必要な種類をすべて覆うときだけ確認済み（一部の種類だけでは確認済みにしない）
+    const covered = new Set(applied.flatMap((n) => n.kinds ?? []));
+    const missing = i.wantedKinds.filter((k) => !covered.has(k));
+    if (i.wantedKinds.length > 0 && missing.length === 0) {
+      return j("permit", "confirmed", rel.map(permitBasisOf), [], link(rel[0]), { input: i });
+    }
+    return j(
+      "permit",
+      "needs_check",
+      rel.map(permitBasisOf),
+      [
+        i.wantedKinds.length === 0
+          ? "計画の飛行に必要な許可・承認の種類を判定できません。人が確認します。"
+          : `計画の飛行に必要な種類のうち、登録で確認できない種類があります（${missing.map((k) => PERMIT_KIND_LABEL[k as keyof typeof PERMIT_KIND_LABEL] ?? k).join("・")}）。人が確認します。`,
+      ],
+      link(rel[0]),
+      { input: i },
+    );
   }
   if (applied.length === 0 && notApplied.length > 0) {
-    const first = notApplied[0]!;
     return j(
       "permit",
       "unmet",
       notApplied.map(permitBasisOf),
-      notApplied.flatMap((n) => n.reasonLabels),
-      first.registrationId ? `/ops/permits/${first.registrationId}` : href,
+      notApplied.flatMap((n) => (n.reasonLabels.length > 0 ? n.reasonLabels : ["許可期間が飛行の最終日より前に終わっています"])),
+      link(notApplied[0]),
       { input: i },
     );
   }
@@ -163,7 +198,7 @@ const judgePermit = (i: DocsJudgeInput): DocJudgement => {
     "needs_check",
     rel.map(permitBasisOf),
     ["一部の許可・承認が、期間・範囲を満たすと確認できていません。人が確認します。", ...rel.filter((n) => n.status !== "applied").flatMap((n) => n.reasonLabels)],
-    rel[0]!.registrationId ? `/ops/permits/${rel[0]!.registrationId}` : href,
+    link(rel[0]),
     { input: i },
   );
 };
@@ -175,9 +210,10 @@ const judgeRegistration = (i: DocsJudgeInput): DocJudgement => {
   }
   const href = `/ops/aircraft/${a.id}`;
   const basis = [`登録記号 ${a.registrationMark}`];
+  if (a.voided) return j("registration", "unmet", basis, ["機体の登録が取り消されています。"], href, { input: i });
   if (a.status === "suspended") return j("registration", "unmet", basis, ["機体の状態が休止です。"], href, { input: i });
   if (a.status === "deregistered") return j("registration", "unmet", basis, ["機体の状態が登録取消です。"], href, { input: i });
-  if (a.voided) return j("registration", "needs_check", basis, ["機体の登録が取り消されています。人が確認します。"], href, { input: i });
+  if (a.voided) return j("registration", "unmet", basis, ["機体の登録が取り消されています。"], href, { input: i });
   return j("registration", "confirmed", basis, [FIELD_DOC_REGISTRATION_EXPIRY_NOTE], href, { input: i });
 };
 
@@ -189,12 +225,13 @@ const judgeLicense = (i: DocsJudgeInput): DocJudgement => {
   const p = i.pilot;
   if (!p) return j("license", "needs_check", [], ["操縦者の登録が確認できません。人が確認します。"], "/ops/pilots", { input: i });
   const href = `/ops/pilots/${p.id}`;
+  if (p.voided) return j("license", "unmet", [`${p.fullName}`], ["操縦者の登録が取り消されています。"], href, { input: i });
   if (!p.hasLicense) return j("license", "needs_check", [`${p.fullName}`], ["技能証明の登録がありません。人が確認します。"], href, { input: i });
   if (p.licenseExpiresOn === null) {
     return j("license", "needs_check", [`${p.fullName}`], ["技能証明の有効期限が未入力です。人が確認します。"], href, { input: i });
   }
   const basis = [`${p.fullName}／有効期限 ${p.licenseExpiresOn}`];
-  if (p.licenseExpiresOn < dateOf(i.plannedStartAtJst)) {
+  if (p.licenseExpiresOn < lateDateOf(i)) {
     return j("license", "unmet", basis, ["技能証明の有効期限が飛行日より前です。"], href, { input: i });
   }
   if (p.hasLimitation) {
