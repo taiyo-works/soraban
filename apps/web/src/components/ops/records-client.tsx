@@ -1226,6 +1226,7 @@ export function InspectionForm({
   fixedPilotId,
   initialAircraftId,
   initialPilotId,
+  initialTiming,
   returnTo,
   editing,
   memberId,
@@ -1236,6 +1237,8 @@ export function InspectionForm({
   readonly initialAircraftId?: string;
   /** 飛行計画から来たとき、実施者の初期値（計画の操縦者。操縦者役割は固定の操縦者が優先）。 */
   readonly initialPilotId?: string;
+  /** Sprint 14：現場モードの飛行後点検から来たとき、点検の時期の初期値（飛行後）。 */
+  readonly initialTiming?: "pre_flight" | "post_flight";
   /** 保存後に戻る画面（現場モードから来たとき。同じオリジンの /ops/ 配下のパスだけ。呼び出し側が検査済みの値を渡す）。 */
   readonly returnTo?: string;
   readonly editing?: InspectionFormInitial;
@@ -1260,7 +1263,7 @@ export function InspectionForm({
           >,
           specialNotes: editing.specialNotes ?? "",
         }
-      : emptyInspection(initialAircraftId ?? "", fixedPilotId ?? initialPilotId ?? ""),
+      : { ...emptyInspection(initialAircraftId ?? "", fixedPilotId ?? initialPilotId ?? ""), ...(initialTiming ? { timing: initialTiming } : {}) },
   );
   const [loaded, setLoaded] = useState(isEdit);
   const [reason, setReason] = useState("");

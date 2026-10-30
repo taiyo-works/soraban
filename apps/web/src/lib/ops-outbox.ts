@@ -8,10 +8,10 @@
 //   - 4xx（業務上の拒否：clock_skew・too_old・plan_cancelled・landing_exists など）の行は黙って捨てない。
 //     「送れませんでした」と理由を行ごとに残し、利用者が「あとから入力」へ進むか、破棄を選べる。後ろの行は止めない（理由の行だけ飛ばす）。
 //   - キーは計画ごと・利用者ごと。末尾が利用者の ID なので、他の利用者の保存は clearOtherUsersDrafts（drafts.ts）が消す。
-//   - 端末に残す内容は、計画の ID（キー）・種別・時刻・識別子・確認の項目だけ。氏名・技能証明書番号・座標・自由記述は入れない。
+//   - 端末に残す内容は、計画の ID（キー）・種別・時刻・識別子・確認の項目（書類の項目キー・現場状況の選択と数値を含む）だけ。氏名・技能証明書番号・座標・自由記述は入れない。
 //   - ログアウトは、未送信が残っているときに警告し、黙って消さない。
-import type { FieldCheckItem, FieldCheckResult } from "./ops-field";
-import { fieldErrorMessage } from "./ops-field";
+import type { FieldCheckResult, FieldDocKey, FieldRecordableCheckItem, FieldSiteValues } from "./ops-field";
+import { FIELD_DOC_KEYS, FIELD_RECORDABLE_CHECK_ITEMS, SITE_TEMP_RANGE, SITE_WIND_RANGE, fieldErrorMessage, siteHasAttention } from "./ops-field";
 
 /** drafts.ts の PREFIX と同じ（clearOtherUsersDrafts が他の利用者の保存を消せるように、同じ接頭辞・末尾が利用者の ID）。 */
 export const OUTBOX_KEY_PREFIX = "soraban:ops-draft:field-";
@@ -28,8 +28,15 @@ export type OutboxEntry = {
   readonly kind: OutboxKind;
   /** 事実の時刻（JST の `YYYY-MM-DDTHH:MM`）。押した時点の端末の時計。 */
   readonly occurredAt: string;
-  readonly item?: Exclude<FieldCheckItem, "inspection">;
+  readonly item?: FieldRecordableCheckItem;
   readonly result?: FieldCheckResult;
+  /** Sprint 14：書類・手続きの人の確認の対象（項目キー）。 */
+  readonly docKey?: FieldDocKey;
+  /**
+   * Sprint 14：現場状況の選択と数値（風速・気温）。備考の自由記述は端末に残さない（契約 C-9）。
+   * 「いる／あり／制限あり」を含む現場状況は備考が必須なので、送信待ちに入れない（sanitizeSite が null を返す）。
+   */
+  readonly site?: FieldSiteValues;
   /** 緊急用務空域の確認元（選択肢の ID）。 */
   readonly source?: string;
   /** landing（飛行中の離陸）・undo（取り消す行）が指す行。サーバーの ID が分からない（まだ届いていない）ときは端末の識別子。 */
@@ -49,6 +56,42 @@ const KINDS: readonly string[] = ["check", "takeoff", "landing", "undo"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MINUTE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
+const SITE_NONE_PRESENT = ["none", "present"];
+const num = (v: unknown, range: { readonly min: number; readonly max: number }): number | null | undefined => {
+  if (v === null || v === undefined) return null;
+  if (typeof v !== "number" || !Number.isFinite(v) || v < range.min || v > range.max) return undefined;
+  return Math.round(v * 10) / 10;
+};
+
+/**
+ * 現場状況を許す形に絞る。選択は列挙された値だけ、数値は範囲内だけ。注意あり（いる／あり／制限あり）は備考が必須で、
+ * 備考は端末に残さないため null を返す（その行は送信待ちに入れない。オンラインの間に入力する）。
+ */
+export const sanitizeSite = (raw: unknown): FieldSiteValues | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const tp = r["thirdParty"];
+  const oa = r["otherAircraft"];
+  const rain = r["rain"];
+  const vis = r["visibility"];
+  if (typeof tp !== "string" || !SITE_NONE_PRESENT.includes(tp)) return null;
+  if (typeof oa !== "string" || !SITE_NONE_PRESENT.includes(oa)) return null;
+  if (typeof rain !== "string" || !SITE_NONE_PRESENT.includes(rain)) return null;
+  if (vis !== "good" && vis !== "limited") return null;
+  const wind = num(r["windMs"], SITE_WIND_RANGE);
+  const temp = num(r["tempC"], SITE_TEMP_RANGE);
+  if (wind === undefined || temp === undefined) return null;
+  const v: FieldSiteValues = {
+    thirdParty: tp as FieldSiteValues["thirdParty"],
+    otherAircraft: oa as FieldSiteValues["otherAircraft"],
+    rain: rain as FieldSiteValues["rain"],
+    visibility: vis,
+    windMs: wind,
+    tempC: temp,
+  };
+  return siteHasAttention(v) ? null : v;
+};
+
 /** 保存・読み込みのたびに、許す項目だけに絞る（余計な項目＝氏名・座標などが紛れ込んでも端末に残さない）。 */
 export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
   if (!raw || typeof raw !== "object") return null;
@@ -65,6 +108,11 @@ export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
   const rejected = r["status"] === "rejected" && rejection && typeof rejection["code"] === "string";
   const item = str("item");
   const result = str("result");
+  const docKey = str("docKey");
+  const site = r["site"] === undefined ? undefined : sanitizeSite(r["site"]);
+  // 現場状況の行は、許す形（備考が要らない選択）でなければ端末に残さない
+  if (item === "site_conditions" && !site) return null;
+  if (item === "docs_confirm" && !(docKey && (FIELD_DOC_KEYS as readonly string[]).includes(docKey))) return null;
   const source = str("source");
   const target = uuid("targetEventId");
   const targetClient = uuid("targetClientEventId");
@@ -72,7 +120,9 @@ export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
     clientEventId: r["clientEventId"].toLowerCase(),
     kind: r["kind"] as OutboxKind,
     occurredAt: r["occurredAt"],
-    ...(item && ["emergency_airspace", "report_recheck", "carry"].includes(item) ? { item: item as OutboxEntry["item"] } : {}),
+    ...(item && (FIELD_RECORDABLE_CHECK_ITEMS as readonly string[]).includes(item) ? { item: item as OutboxEntry["item"] } : {}),
+    ...(docKey && item === "docs_confirm" && (FIELD_DOC_KEYS as readonly string[]).includes(docKey) ? { docKey: docKey as FieldDocKey } : {}),
+    ...(site && item === "site_conditions" ? { site } : {}),
     ...(result && ["done", "not_designated", "designated"].includes(result) ? { result: result as FieldCheckResult } : {}),
     ...(source && source.length <= 100 ? { source } : {}),
     ...(target ? { targetEventId: target } : {}),
@@ -134,6 +184,8 @@ export const toRequestBody = (e: OutboxEntry): Record<string, unknown> => ({
   ...(e.item ? { item: e.item } : {}),
   ...(e.result ? { result: e.result } : {}),
   ...(e.source ? { source: e.source } : {}),
+  ...(e.docKey ? { docKey: e.docKey } : {}),
+  ...(e.site ? { site: e.site } : {}),
   ...(e.targetEventId ? { targetEventId: e.targetEventId } : {}),
   ...(e.targetClientEventId ? { targetClientEventId: e.targetClientEventId } : {}),
 });

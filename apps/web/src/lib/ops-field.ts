@@ -19,8 +19,18 @@ export const FIELD_RECORDABLE_KINDS = ["check", "takeoff", "landing", "undo"] as
 export const FIELD_CHECK_ITEMS = ["inspection", "emergency_airspace", "report_recheck", "carry"] as const;
 export type FieldCheckItem = (typeof FIELD_CHECK_ITEMS)[number];
 /** 確認の行を持つ項目（日常点検は実際の点検の記録から導出するため、確認の行を作らない）。 */
-export const FIELD_RECORDABLE_CHECK_ITEMS = ["emergency_airspace", "report_recheck", "carry"] as const;
+export const FIELD_RECORDABLE_CHECK_ITEMS = [
+  "emergency_airspace",
+  "report_recheck",
+  "carry",
+  // Sprint 14：書類・手続きの人の確認（doc_key つき）／飛行自粛要請の確認／現場状況
+  "docs_confirm",
+  "flight_restriction",
+  "site_conditions",
+] as const;
 export type FieldRecordableCheckItem = (typeof FIELD_RECORDABLE_CHECK_ITEMS)[number];
+/** 行（flight_field_events.item）に入る項目。画面の確認項目（FIELD_CHECK_ITEMS）に Sprint 14 の 3 項目を足したもの。 */
+export type FieldEventItem = FieldCheckItem | "docs_confirm" | "flight_restriction" | "site_conditions";
 
 export type FieldCheckResult = "done" | "not_designated" | "designated";
 
@@ -101,12 +111,33 @@ export const FIELD_REPORT_OPEN_LABEL = "通報内容を開く";
 
 // ---- 未了事項（離陸の写し） ---------------------------------------------------
 
-export const FIELD_GAP_ITEMS = ["inspection", "emergency_airspace", "report", "confirmation", "judgement", "carry"] as const;
+export const FIELD_GAP_ITEMS = [
+  "inspection",
+  "emergency_airspace",
+  "flight_restriction",
+  "site_conditions",
+  "docs_permit",
+  "docs_registration",
+  "docs_remote_id",
+  "docs_license",
+  "docs_manual",
+  "report",
+  "confirmation",
+  "judgement",
+  "carry",
+] as const;
 export type FieldGapItem = (typeof FIELD_GAP_ITEMS)[number];
 
 export const FIELD_GAP_ITEM_LABEL: Readonly<Record<FieldGapItem, string>> = {
   inspection: "日常点検",
   emergency_airspace: "緊急用務空域の確認",
+  flight_restriction: "飛行自粛要請の確認",
+  site_conditions: "現場状況",
+  docs_permit: "許可承認書",
+  docs_registration: "登録記号",
+  docs_remote_id: "リモートID",
+  docs_license: "技能証明書",
+  docs_manual: "飛行マニュアルの組み合わせ制限",
   report: "通報",
   confirmation: "運航管理者の確認",
   judgement: "判定",
@@ -124,6 +155,10 @@ export const FIELD_GAP_STATES = [
   "draft",
   "pending",
   "returned",
+  // Sprint 14：書類・手続き（要確認／満たさない）、現場状況（注意あり）
+  "needs_check",
+  "unmet",
+  "attention",
 ] as const;
 export type FieldGapState = (typeof FIELD_GAP_STATES)[number];
 
@@ -137,6 +172,9 @@ export const FIELD_GAP_STATE_LABEL: Readonly<Record<FieldGapState, string>> = {
   draft: "下書き",
   pending: "確認待ち",
   returned: "差し戻し",
+  needs_check: "要確認",
+  unmet: "満たさない",
+  attention: "注意あり",
 };
 
 /** 「確認（運航管理者）」の stale は「前の版への確認」と読む。 */
@@ -231,6 +269,8 @@ export const FIELD_ERROR_MESSAGE: Readonly<Record<string, string>> = {
   already_journaled: "この飛行はすでに日誌に記録されています。",
   already_undone: "すでに取り消されています。",
   not_undoable: "この記録は取り消せません。",
+  doc_unmet: "登録内容が条件を満たしていません。確認の記録ではなく、登録を直してください。",
+  note_required: "「いる／あり／制限あり」を選んだときは、備考を入力してください。",
   invalid_target: "取り消す・結び付ける対象が正しくありません。",
   request_conflict: "同じ識別子で内容の違う記録があります。",
   not_found: "計画または記録が見つかりません。",
@@ -262,7 +302,7 @@ export const JOURNAL_MISMATCH_RECENT_DAYS = 3;
 
 // ---- 画面への経路（今日の「次にやること」・現場モードの導線） -----------------------
 
-export type FieldAnchor = "preflight" | "flight" | "journal";
+export type FieldAnchor = "preflight" | "flight" | "post" | "journal";
 
 /** 現場モード。アンカーで段階（飛行前・離着陸・日誌）を指す。 */
 export const fieldHref = (planId: string, anchor?: FieldAnchor): string =>
@@ -290,3 +330,134 @@ export const TODAY_EMPTY_ACTIONS: readonly { readonly label: string; readonly hr
 
 /** 端末に送信待ちを保存できないとき（保存先がない・容量超過）の注記。送信されるまで画面を閉じさせない。 */
 export const OUTBOX_UNSAVED_NOTE = "この端末では送信待ちを保存できません。電波が戻って送信されるまで、この画面を閉じないでください。";
+
+// ---- Sprint 14：書類・手続き（飛行前に登録内容から自動判定する 6 項目） ------------------------
+//
+// 項目は企画書の「書類と手続き」から転記した 6 つで固定（増減しない）。判定できないものは「要確認」に倒し、
+// 「確認済み」「不要」「該当なし」にしない。通報を免除する言い回しは使わない（12a 契約 15 の禁止語）。
+// 登録内容の表示は、許可書・技能証明書の原本・写しを意味する表現にしない（Sprint 18 で扱う）。
+
+export const FIELD_DOC_KEYS = ["permit", "registration", "remote_id", "license", "report", "manual"] as const;
+export type FieldDocKey = (typeof FIELD_DOC_KEYS)[number];
+
+export const FIELD_DOC_LABEL: Readonly<Record<FieldDocKey, string>> = {
+  permit: "許可承認書",
+  registration: "登録記号",
+  remote_id: "リモートID",
+  license: "技能証明書",
+  report: "飛行計画の通報",
+  manual: "飛行マニュアルの組み合わせ制限",
+};
+
+/** 自動判定の結果（3 値）。判定できないときは needs_check。 */
+export type FieldDocStatus = "confirmed" | "needs_check" | "unmet";
+
+/** 画面に出す状態の語と記号（色だけで区別しない：記号・文字・枠の形）。 */
+export const FIELD_DOC_STATUS_LABEL: Readonly<Record<FieldDocStatus, string>> = {
+  confirmed: "確認済み",
+  needs_check: "要確認",
+  unmet: "満たさない",
+};
+export const FIELD_DOC_STATUS_MARK: Readonly<Record<FieldDocStatus, string>> = {
+  confirmed: "✓",
+  needs_check: "？",
+  unmet: "×",
+};
+/** 要確認の項目を人が確認したあとの表示。 */
+export const FIELD_DOC_HUMAN_CONFIRMED_LABEL = "確認済み（人が確認）";
+export const FIELD_DOC_CONFIRM_ACTION = "確認した";
+export const FIELD_DOC_FIX_LABEL = "登録を直す";
+export const FIELD_DOC_BASIS_LABEL = "根拠を見る";
+
+/** 登録の有効期限は記録する場所が無い（Sprint 24 で扱う）。確認済みの表示に残す注記。 */
+export const FIELD_DOC_REGISTRATION_EXPIRY_NOTE = "登録の有効期限は人が確認";
+export const FIELD_DOC_REMOTE_ID_NOTE = "機体の登録にリモートIDの項目がないため、人が確認します。※要再確認";
+export const FIELD_DOC_MANUAL_NOTE = "組織の飛行マニュアルと機体・操縦者・飛行形態の組み合わせの登録がないため、人が確認します。※要再確認";
+export const FIELD_DOC_LICENSE_CONDITION_NOTE = "限定など登録に持たない条件は、証明書で人が確認します。";
+
+// ---- Sprint 14：空域（緊急用務空域・飛行自粛要請） -----------------------------------------------
+
+/** 飛行自粛要請の確認元。公表ページの URL は一次情報で確かめられていない（Sprint 14 P-3）。URL を創作しない。 */
+export const FLIGHT_RESTRICTION_SOURCE: { readonly title: string; readonly url: string | null; readonly checkedOn: string | null } = {
+  title: "飛行自粛要請の公表ページ",
+  url: null,
+  checkedOn: null,
+};
+export const FIELD_RESTRICTION_UNCONFIRMED_NOTE = "確認先は未確認です（公表ページの場所を一次情報で確かめられていません）。※要再確認";
+export const FIELD_RESTRICTION_ACTION = "飛行自粛要請を確認した";
+export const FIELD_RESTRICTION_LABEL = "飛行自粛要請の確認";
+/** 緊急用務空域の確認元の注記（確認元・確認日つき）。 */
+export const FIELD_EMERGENCY_SOURCE_NOTE = "確認元：国土交通省の緊急用務空域の公表（Q&A）。確認日は記録の時刻。公表は変わるため、当日の最新を確かめてください。";
+
+// ---- Sprint 14：現場状況（毎回人が確認する事実。合否の閾値は決めない） ------------------------------
+
+export type FieldSiteChoice = "none" | "present";
+export type FieldSiteVisibility = "good" | "limited";
+
+export const SITE_FIELDS = ["third_party", "other_aircraft", "rain", "visibility"] as const;
+export type SiteField = (typeof SITE_FIELDS)[number];
+
+export const SITE_FIELD_LABEL: Readonly<Record<SiteField, string>> = {
+  third_party: "第三者",
+  other_aircraft: "他機",
+  rain: "雨",
+  visibility: "視程",
+};
+/** 選択肢（値と表示）。「いる／あり／制限あり」は注意あり（備考が必須）。 */
+export const SITE_OPTIONS: Readonly<Record<SiteField, readonly { readonly value: string; readonly label: string; readonly attention: boolean }[]>> = {
+  third_party: [
+    { value: "none", label: "いない", attention: false },
+    { value: "present", label: "いる", attention: true },
+  ],
+  other_aircraft: [
+    { value: "none", label: "いない", attention: false },
+    { value: "present", label: "いる", attention: true },
+  ],
+  rain: [
+    { value: "none", label: "なし", attention: false },
+    { value: "present", label: "あり", attention: true },
+  ],
+  visibility: [
+    { value: "good", label: "良好", attention: false },
+    { value: "limited", label: "制限あり", attention: true },
+  ],
+};
+export const SITE_NOTE_REQUIRED_MESSAGE = "「いる／あり／制限あり」を選んだときは、備考を入力してください。";
+export const SITE_NOTE_MAX = 300;
+/** 風速（m/s）・気温（℃）の入力の妥当性の範囲。飛行の可否の基準ではない（法令の閾値を決めない）。 */
+export const SITE_WIND_RANGE = { min: 0, max: 60 } as const;
+export const SITE_TEMP_RANGE = { min: -50, max: 60 } as const;
+export const SITE_THRESHOLD_NOTE = "風速・気温などの飛行の可否の基準は、取扱要領・飛行マニュアルで確認してください（この画面は事実を記録するだけです）。※要再確認";
+
+export type FieldSiteValues = {
+  readonly thirdParty: FieldSiteChoice;
+  readonly otherAircraft: FieldSiteChoice;
+  readonly rain: FieldSiteChoice;
+  readonly visibility: FieldSiteVisibility;
+  readonly windMs: number | null;
+  readonly tempC: number | null;
+};
+
+/** 「いる／あり／制限あり」が 1 つでもあるか（注意あり）。 */
+export const siteHasAttention = (v: Pick<FieldSiteValues, "thirdParty" | "otherAircraft" | "rain" | "visibility">): boolean =>
+  v.thirdParty === "present" || v.otherAircraft === "present" || v.rain === "present" || v.visibility === "limited";
+
+// ---- Sprint 14：飛行後点検・ラウンド ------------------------------------------------------------
+
+export const FIELD_POST_INSPECTION_LABEL = "飛行後点検";
+export const FIELD_POST_INSPECTION_ACTION = "飛行後点検をする";
+export const FIELD_POST_INSPECTION_LATER = "あとで点検する（未了として残ります）";
+export const FIELD_POST_INSPECTION_PENDING_NOTE = "飛行後点検が未了です。あとからでも点検できます。";
+export const FIELD_POST_DEFECT_GUIDE = "異常があったときは、不具合として記録してください。整備への紐付けは別のスプリントで扱います。";
+export const FIELD_NEXT_FLIGHT_LABEL = "次の飛行を始める";
+export const FIELD_ROUND_LABEL = (n: number): string => `${n} 回目の飛行`;
+export const FIELD_TAKEOFF_WITH_GAPS_NOTE = "未了のまま離陸しました";
+export const FIELD_SITE_ATTENTION_LABEL = "現場状況に注意あり";
+
+/** 飛行後点検の入力（日常点検の入力・飛行後）。保存後は現場モードへ戻る。 */
+export const postInspectionNewHref = (planId: string): string =>
+  `/ops/inspections/new?planId=${planId}&timing=post_flight&returnTo=${encodeURIComponent(fieldHref(planId, "post"))}`;
+
+/** 登録の画面から現場モードへ戻るリンク（returnTo の作法：同じオリジンの /ops/ 配下だけ）。 */
+export const withFieldReturn = (path: string, planId: string): string =>
+  `${path}${path.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(fieldHref(planId, "preflight"))}`;

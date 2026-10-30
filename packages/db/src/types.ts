@@ -455,7 +455,16 @@ export type PlanProcedureRecordRow = {
 /** flight_field_events.kind。check＝飛行前の確認／takeoff＝離陸／landing＝着陸／undo＝取り消す／journal_linked＝日誌との結び付き。 */
 export type FieldEventKindDb = "check" | "takeoff" | "landing" | "undo" | "journal_linked";
 /** flight_field_events.item（check のとき）。inspection＝日常点検／emergency_airspace＝緊急用務空域／report_recheck＝通報済みの再確認／carry＝携行品。 */
-export type FieldCheckItemDb = "inspection" | "emergency_airspace" | "report_recheck" | "carry";
+export type FieldCheckItemDb =
+  | "inspection"
+  | "emergency_airspace"
+  | "report_recheck"
+  | "carry"
+  | "docs_confirm"
+  | "flight_restriction"
+  | "site_conditions";
+/** flight_field_events.doc_key（0017）。docs_confirm の対象の書類・手続き。 */
+export type FieldDocKeyDb = "permit" | "registration" | "remote_id" | "license" | "report" | "manual";
 export type FieldCheckResultDb = "done" | "not_designated" | "designated";
 /** takeoff の gaps（離陸の時点の未了事項の写し）の 1 要素。 */
 export type FieldGapDb = { readonly item: string; readonly state: string };
@@ -485,6 +494,15 @@ export type FlightFieldEventRow = {
   readonly recorded_by_role: MemberRoleDb;
   readonly recorded_at: string;
   readonly content_hash: string;
+  // ---- 0017（Sprint 14）。該当する行以外は null ----
+  readonly doc_key: FieldDocKeyDb | null;
+  readonly site_third_party: "none" | "present" | null;
+  readonly site_other_aircraft: "none" | "present" | null;
+  readonly site_rain: "none" | "present" | null;
+  readonly site_visibility: "good" | "limited" | null;
+  /** numeric(4,1)。pg は文字列で返す。 */
+  readonly site_wind_ms: string | null;
+  readonly site_temp_c: string | null;
 };
 
 // ---- 許可・承認の登録（Sprint 12d。0015） ----
@@ -1018,6 +1036,13 @@ export const FLIGHT_FIELD_EVENT_COLUMNS = columns<FlightFieldEventRow>()([
   "recorded_by_role",
   "recorded_at",
   "content_hash",
+  "doc_key",
+  "site_third_party",
+  "site_other_aircraft",
+  "site_rain",
+  "site_visibility",
+  "site_wind_ms",
+  "site_temp_c",
 ]);
 
 export const PERMIT_REGISTRATION_COLUMNS = columns<PermitRegistrationRow>()([
