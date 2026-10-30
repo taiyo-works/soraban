@@ -10,6 +10,7 @@ import {
 } from "@/lib/ops-field";
 import { can } from "./authz";
 import { checkJournalLink } from "./field-logic";
+import { specificFlightTypesFromFlags } from "./plan-logic";
 import { loadFieldState } from "./field-rows";
 import { emptyFlightExtra, enrichFlights, type FlightExtra, type GapDto } from "./flight-extras";
 import type { JournalMismatch } from "./journal-logic";
@@ -24,7 +25,7 @@ import {
   type VersionDto,
 } from "./service";
 import * as store from "./store";
-import { OpsError, type FlightWithTotal, type InspectionWithAircraft, type RecordFilter } from "./store";
+import { OpsError, type FlightWithTotal, type InspectionWithAircraft, type PlanWithJoins, type RecordFilter } from "./store";
 import { maskLicenseNumber, validateChangeMeta } from "./validate";
 import {
   FLIGHT_FIELDS,
@@ -444,9 +445,39 @@ const resolveTakeoffLink = async (
   return { planId: plan.id, snapshotId: plan.current_snapshot_id, takeoffEventId: takeoff.id };
 };
 
+/**
+ * Sprint 15：端末の送信待ちから送る日誌（fillFromPlan: true）は、端末に自由記述・座標を残さないため、目的・離着陸の場所・座標・
+ * 特定飛行の形態を送らない。サーバーが計画（flightPlanId、または takeoffEventId の離陸の計画）から、画面の「計画から作る」と
+ * 同じ値を入れる（送られた値があればそちらを使う）。計画が見つからなければ何もしない（入力検査が必須の項目を指摘する）。
+ */
+const fillFlightFromPlan = async (ctx: OpsContext, raw: Input): Promise<Input> => {
+  if (raw["fillFromPlan"] !== true) return raw;
+  let planId: string | null = typeof raw["flightPlanId"] === "string" && isUuid(raw["flightPlanId"]) ? raw["flightPlanId"].toLowerCase() : null;
+  if (planId === null && typeof raw["takeoffEventId"] === "string" && isUuid(raw["takeoffEventId"])) {
+    planId = (await store.getFieldEventByRef(ctx.db, ctx.member.org_id, raw["takeoffEventId"]))?.plan_id ?? null;
+  }
+  if (planId === null) return raw;
+  const plan = await store.getPlan(ctx.db, ctx.member.org_id, planId);
+  if (!plan) return raw;
+  const empty = (k: string): boolean => raw[k] === undefined || raw[k] === null || (typeof raw[k] === "string" && (raw[k] as string).trim() === "");
+  const snap = raw["specificFlightTypes"] === undefined ? await store.getSnapshot(ctx.db, ctx.member.org_id, plan.id, plan.current_snapshot_id) : null;
+  const flags = ((snap?.result as { flags?: readonly string[] } | undefined)?.flags ?? []) as readonly string[];
+  const lat = Number.isFinite(Number(plan.latitude)) ? Number(plan.latitude) : null;
+  const lng = Number.isFinite(Number(plan.longitude)) ? Number(plan.longitude) : null;
+  return {
+    ...raw,
+    ...(empty("purpose") ? { purpose: plan.purpose } : {}),
+    ...(empty("takeoffPlace") ? { takeoffPlace: plan.place_name } : {}),
+    ...(empty("landingPlace") ? { landingPlace: plan.place_name } : {}),
+    ...(empty("takeoffLat") && empty("takeoffLng") && lat !== null && lng !== null ? { takeoffLat: lat, takeoffLng: lng } : {}),
+    ...(empty("landingLat") && empty("landingLng") && lat !== null && lng !== null ? { landingLat: lat, landingLng: lng } : {}),
+    ...(raw["specificFlightTypes"] === undefined ? { specificFlightTypes: specificFlightTypesFromFlags(flags) } : {}),
+  };
+};
+
 export const createFlight = async (ctx: OpsContext, body: unknown): Promise<SaveResult<FlightDto>> => {
   const mine = await assertMayCreate(ctx, "flight.create");
-  const input = asInput(body);
+  const input = await fillFlightFromPlan(ctx, asInput(body));
   const req = parseClientRequestId(input["clientRequestId"]);
   const v = validateFlight(input, nowOf(ctx));
   if (!req.ok || !v.ok) {
@@ -717,9 +748,33 @@ export const getInspection = async (ctx: OpsContext, id: string): Promise<Inspec
   return inspectionDto(await loadInspection(ctx, id), await myPilot(ctx));
 };
 
+/**
+ * Sprint 15（R-1）：点検を結び付ける飛行計画（planId）。同じ組織の計画だけ（無ければ 400 plan_not_found）。
+ * 結び付けるのは、計画の機体と点検の機体が同じで、計画が中止されていないときだけ（呼び出し側が判定する）。
+ */
+const resolveInspectionPlan = async (ctx: OpsContext, raw: unknown): Promise<PlanWithJoins | null> => {
+  if (raw === undefined || raw === null || raw === "") return null;
+  if (typeof raw !== "string" || !isUuid(raw)) fieldError("planId", "invalid", "飛行計画が正しくありません");
+  const plan = await store.getPlan(ctx.db, ctx.member.org_id, (raw as string).toLowerCase());
+  if (!plan) fieldError("planId", "plan_not_found", "飛行計画が見つかりません");
+  return plan;
+};
+
+/**
+ * 日常点検を作る。Sprint 15：
+ *   - planId があれば、点検の保存と同じトランザクションで、その計画の現場の記録に「点検の結び付き」（kind=check・item=inspection・
+ *     inspection_id）を追記する（R-1。飛行後点検は、この結び付きのある点検だけを、その計画の「済」に数える）。
+ *   - fillFromPlan: true（端末の送信待ちから送る点検）なら、実施場所が空のとき計画の場所名を入れる（端末に場所を残さないため）。
+ *   - queued: true は、結び付きの行の「送信待ちを経由した」印に写す。
+ */
 export const createInspection = async (ctx: OpsContext, body: unknown): Promise<SaveResult<InspectionDto>> => {
   const mine = await assertMayCreate(ctx, "inspection.create");
-  const input = asInput(body);
+  const raw = asInput(body);
+  const plan = await resolveInspectionPlan(ctx, raw["planId"]);
+  const input: Input =
+    plan && raw["fillFromPlan"] === true && (typeof raw["placeName"] !== "string" || raw["placeName"].trim() === "")
+      ? { ...raw, placeName: plan.place_name }
+      : raw;
   const req = parseClientRequestId(input["clientRequestId"]);
   const v = validateInspection(input, nowOf(ctx));
   if (!req.ok || !v.ok) {
@@ -734,21 +789,49 @@ export const createInspection = async (ctx: OpsContext, body: unknown): Promise<
   const aircraft = await loadAircraftForRecord(ctx, v.data.aircraft_id, true);
   const pilot = await loadPilotForRecord(ctx, v.data.pilot_id, "pilotId", false);
   const id = randomUUID();
+  const version = {
+    orgId: ctx.member.org_id,
+    entityType: "daily_inspection" as const,
+    entityId: id,
+    op: "create" as const,
+    data: {
+      ...v.data,
+      inspector_name: pilot.full_name,
+      inspector_version: pilot.current_version,
+      client_request_id: req.value,
+    },
+    reason: null,
+    actorMemberId: ctx.member.id,
+  };
+  // 計画の機体と同じ機体の点検で、計画が中止されていないときだけ結び付ける（中止した計画には確認の行を追記できない）
+  const linkPlan = plan && plan.aircraft_id === v.data.aircraft_id && plan.voided_at === null ? plan : null;
   try {
-    await store.appendVersion(ctx.db, {
-      orgId: ctx.member.org_id,
-      entityType: "daily_inspection",
-      entityId: id,
-      op: "create",
-      data: {
-        ...v.data,
-        inspector_name: pilot.full_name,
-        inspector_version: pilot.current_version,
-        client_request_id: req.value,
-      },
-      reason: null,
-      actorMemberId: ctx.member.id,
-    });
+    if (linkPlan) {
+      await store.withTransaction(ctx.db, async (c) => {
+        await store.lockPlanOn(c, linkPlan.id);
+        await store.appendVersionOn(c, version);
+        await store.insertFieldEventOn(c, {
+          orgId: ctx.member.org_id,
+          planId: linkPlan.id,
+          kind: "check",
+          item: "inspection",
+          result: "done",
+          source: null,
+          targetEventId: null,
+          flightRecordId: null,
+          inspectionId: id,
+          reportId: null,
+          occurredAtJst: v.data.inspected_at,
+          gaps: null,
+          note: null,
+          queued: input["queued"] === true,
+          clientEventId: randomUUID(),
+          recordedByMemberId: ctx.member.id,
+        });
+      });
+    } else {
+      await store.appendVersion(ctx.db, version);
+    }
   } catch (e) {
     if (e instanceof OpsError && e.code === "duplicate_request" && req.value) {
       const existingId = await existingRequest(ctx, "daily_inspection", req.value);

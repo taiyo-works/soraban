@@ -136,6 +136,22 @@ describe("B-4 通報", () => {
       expect(JSON.stringify(d)).not.toMatch(/通報不要|手続き不要|該当なし/);
     }
   });
+  it("Sprint 15 U-2：根拠に通報日時とそらばんへの記録の時刻の両方が出る。記録が離陸後なら要確認のまま、理由を説明する", () => {
+    const eff = { id: "rep1", dipsNumber: "D-0001", numberUnavailable: false, reportedAtJst: "2027-01-05T11:00", recordedAtJst: "2027-01-05T12:30" };
+    // 判定時刻（離陸）12:00。通報日時 11:00 は前だが、記録 12:30 は後
+    const late = by(base({ atJst: "2027-01-05T12:00", report: rep({ effective: eff }) }))["report"]!;
+    expect(late.status).toBe("needs_check");
+    expect(late.basis.join("\n")).toContain("通報日時 2027-01-05 11:00");
+    expect(late.basis.join("\n")).toContain("そらばんへの記録 2027-01-05 12:30");
+    expect(late.notes.join("")).toContain("そらばんへの記録が離陸より後");
+    // 記録が離陸より前なら確認済み。根拠には同じく両方の時刻
+    const ok = by(base({ atJst: "2027-01-05T13:00", report: rep({ effective: eff }) }))["report"]!;
+    expect(ok.status).toBe("confirmed");
+    expect(ok.basis.join("\n")).toMatch(/通報日時 2027-01-05 11:00[\s\S]*そらばんへの記録 2027-01-05 12:30/);
+    // 通報日時そのものが離陸より後のときは、記録の遅れの説明は出さない
+    const after = by(base({ atJst: "2027-01-05T10:00", report: rep({ effective: eff }) }))["report"]!;
+    expect(after.notes.join("")).not.toContain("そらばんへの記録が離陸より後");
+  });
   it("通報は人の「確認した」で済ませない（通報の画面で記録する）", () => {
     expect(by(base({ report: rep({ statusCode: "no_record", effective: null }) }))["report"]!.canConfirm).toBe(false);
   });

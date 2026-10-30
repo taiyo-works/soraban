@@ -108,6 +108,14 @@ export const FIELD_REPORT_NOT_REQUIRED_MODEL = "この飛行は通報の記録�
 export const FIELD_REPORT_NONE_WARNING = "通報の記録がありません。通報内容を開いて、DIPS で通報したか確かめてください。";
 export const FIELD_REPORT_CHANGED_WARNING = "計画が通報時から変わっています。変更通報が要るか確かめてください。";
 export const FIELD_REPORT_OPEN_LABEL = "通報内容を開く";
+/**
+ * Sprint 15（U-2）：DIPS での通報日時は離陸より前だが、そらばんへの記録が離陸より後のときの説明。
+ * 判定（要確認）は変えない。同じ画面の「DIPS で通報済み」との食い違いを読めるようにする。
+ */
+export const FIELD_REPORT_RECORDED_LATE_NOTE =
+  "DIPS での通報日時は離陸より前ですが、そらばんへの記録が離陸より後のため、記録の時刻で判定しています。";
+/** Sprint 15（U-2）：通報の記録が無い・まだの計画で、飛行前に出す案内（判定と離陸の未了は変えない）。 */
+export const FIELD_REPORT_RECORD_BEFORE_TAKEOFF = "通報は、離陸の前にそらばんへ記録してください（記録の時刻で、離陸の前の通報かを判定します）。";
 
 // ---- 未了事項（離陸の写し） ---------------------------------------------------
 

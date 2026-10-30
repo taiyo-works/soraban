@@ -16,6 +16,7 @@ import {
   FIELD_DOC_REMOTE_ID_NOTE,
   FIELD_REPORT_NOT_REQUIRED_MODEL,
   FIELD_REPORT_NOT_REQUIRED_RECOMMENDED,
+  FIELD_REPORT_RECORDED_LATE_NOTE,
   type FieldDocKey,
   type FieldDocStatus,
 } from "@/lib/ops-field";
@@ -265,11 +266,28 @@ const judgeReport = (i: DocsJudgeInput): DocJudgement => {
   if (num === null) {
     return j("report", "needs_check", [], ["通報の受付番号がありません。番号を記録してください。"], href, { input: i, confirmable: false });
   }
-  const basis = [`受付番号 ${num}${e.reportedAtJst ? `（${e.reportedAtJst.replace("T", " ")} 通報）` : ""}`];
+  // Sprint 15（U-2）：根拠に、通報日時（DIPS での通報。利用者の入力）と、そらばんへの記録の時刻（サーバーが決める）の両方を出す。
+  // 判定は記録の時刻でも比べるため、DIPS で離陸前に通報していても、記録が離陸より後なら要確認になる。その理由を読めるようにする。
+  const basis = [
+    `受付番号 ${num}`,
+    `通報日時 ${e.reportedAtJst ? e.reportedAtJst.replace("T", " ") : "（記録なし）"}（DIPS での通報。利用者の入力）`,
+    ...(e.recordedAtJst ? [`そらばんへの記録 ${e.recordedAtJst.replace("T", " ")}`] : []),
+  ];
   // 前後はサーバーが決める記録の時刻でも比べる（入力された通報日時が前でも、記録が離陸より後なら事前の通報として数えない）
   if (e.reportedAtJst === null || e.reportedAtJst > i.atJst || (e.recordedAtJst != null && e.recordedAtJst > i.atJst)) {
     // 離陸より後に記録された通報は、事前の通報として数えない
-    return j("report", "needs_check", basis, ["通報の記録が離陸より後です。事前の通報として数えません。"], href, { input: i, confirmable: false });
+    const recordedLate = e.reportedAtJst !== null && e.reportedAtJst <= i.atJst && e.recordedAtJst != null && e.recordedAtJst > i.atJst;
+    return j(
+      "report",
+      "needs_check",
+      basis,
+      [
+        "通報の記録が離陸より後です。事前の通報として数えません。",
+        ...(recordedLate ? [FIELD_REPORT_RECORDED_LATE_NOTE] : []),
+      ],
+      href,
+      { input: i, confirmable: false },
+    );
   }
   return j("report", "confirmed", basis, [], href, { input: i });
 };
