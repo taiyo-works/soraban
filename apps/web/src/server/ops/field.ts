@@ -381,9 +381,17 @@ const windowNotice = (plan: PlanWithJoins, takeoffAt: Date | null, landingAt: Da
 
 type Bundle = Awaited<ReturnType<typeof loadPlanBundle>>;
 
+/**
+ * 有効な通報の、離陸との前後を比べる時刻（JST の `YYYY-MM-DDTHH:MM`）。
+ * Sprint 14 の再評価後のユーザー決定：通報の前後はサーバーが決める記録の時刻（created_at）で判定する。利用者が入力した
+ * 通報日時（reported_at）が前でも、記録の時刻が離陸より後なら事前の通報として数えない。両方のうち遅い方を返す。
+ */
 const effectiveReportedAt = (b: Bundle): string | null => {
   const id = b.dto.report.status.effectiveId;
-  return id ? (b.extras.rows.find((r) => r.id === id)?.reported_at_jst ?? null) : null;
+  const r = id ? b.extras.rows.find((x) => x.id === id) : undefined;
+  if (!r) return null;
+  const recorded = toJstInput(asDate(r.created_at));
+  return r.reported_at_jst === null ? recorded : r.reported_at_jst > recorded ? r.reported_at_jst : recorded;
 };
 
 /** 書類・手続きの判定の入力を作る。同じ組織の計画・機体・操縦者・許可の照合・通報だけを読む（組織をまたがない）。 */
@@ -425,7 +433,13 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
       requirementKind: b.dto.report.kind,
       statusCode: b.dto.report.status.code,
       effective: eff
-        ? { id: eff.id, dipsNumber: eff.dips_number, numberUnavailable: eff.number_unavailable, reportedAtJst: eff.reported_at_jst }
+        ? {
+            id: eff.id,
+            dipsNumber: eff.dips_number,
+            numberUnavailable: eff.number_unavailable,
+            reportedAtJst: eff.reported_at_jst,
+            recordedAtJst: toJstInput(asDate(eff.created_at)),
+          }
         : null,
     },
     humanConfirms: state.docConfirms,

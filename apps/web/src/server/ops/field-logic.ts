@@ -406,6 +406,7 @@ export type FieldTransitionErrorCode =
   | "landing_exists"
   | "journal_exists"
   | "later_flight_exists"
+  | "round_journaled"
   | "already_undone"
   | "not_undoable"
   | "invalid_target";
@@ -419,6 +420,22 @@ export type FieldTransition =
   | { readonly ok: false; readonly status: 409; readonly code: FieldTransitionErrorCode };
 
 const rejected = (code: FieldTransitionErrorCode): FieldTransition => ({ ok: false, status: 409, code });
+
+/** ラウンドごとの確認の項目（日誌済みのラウンドでは取り消せない）。計画ごとの確認（書類の人の確認・通報済みの再確認・携行品）は含めない。 */
+export const ROUND_CHECK_ITEMS = ["emergency_airspace", "flight_restriction", "site_conditions"] as const;
+
+/**
+ * 行が属するラウンド（0 始まり）。その行より前に記録された、取り消されていない着陸（取り消されていない離陸に対するもの）の数。
+ */
+export const roundIndexOf = (events: readonly FieldEventLite[], e: FieldEventLite): number => {
+  const undone = undoneIds(events);
+  const by = indexEvents(events);
+  return events.filter((l) => {
+    if (l.kind !== "landing" || undone.has(l.id) || l.recordedKey >= e.recordedKey) return false;
+    const t = l.targetEventId === null ? undefined : by.get(l.targetEventId);
+    return t !== undefined && !undone.has(t.id);
+  }).length;
+};
 
 /**
  * 遷移の規則（設計 B）。
@@ -460,6 +477,11 @@ export const decideTransition = (
       if (t.kind === "takeoff") {
         const f = state.flights.find((x) => x.takeoffEventId === t.id);
         if (f && f.landingEventId !== null) return rejected("landing_exists");
+      }
+      if (t.kind === "check" && t.item !== null && (ROUND_CHECK_ITEMS as readonly string[]).includes(t.item)) {
+        // ラウンドごとの確認は、その確認が属するラウンドの飛行が日誌済みなら取り消せない（C-3 をラウンドの確認に広げる）
+        const f = state.flights[roundIndexOf(events, t)];
+        if (f && f.phase === "journaled") return rejected("round_journaled");
       }
       if (t.kind === "landing") {
         const f = state.flights.find((x) => x.landingEventId === t.id);

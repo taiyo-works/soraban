@@ -310,6 +310,18 @@ describe("rankNextActions（複数の計画をまたぐ並び）", () => {
     expect(rankNextActions(many, 3).map((x) => x.startsInMinutes)).toEqual([0, 1, 2]);
     expect([...list].sort(compareNextActions)[0]!.id).toBe("record_landing");
   });
+  it("Sprint 14：飛行後点検は上位 8 件の枠に押し出されても必ず残る（枠の中身と並びは変えず、末尾に足す）。小さな枠（帯）には足さない", () => {
+    const many = Array.from({ length: 9 }, (_, i) => a("record_landing", 1, i, `p${i}`));
+    const post = a("do_post_inspection", 3, 0, "post");
+    const r = rankNextActions([post, ...many]);
+    expect(r).toHaveLength(9);
+    expect(r.slice(0, 8).map((x) => x.startsInMinutes)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(r[8]).toMatchObject({ id: "do_post_inspection", planId: "post" });
+    // 枠に収まるときは足さない（二重にしない）
+    expect(rankNextActions([post, ...many.slice(0, 3)]).filter((x) => x.id === "do_post_inspection")).toHaveLength(1);
+    // ホームの帯（3 件）には足さない
+    expect(rankNextActions([post, ...many], 3)).toHaveLength(3);
+  });
 });
 
 describe("次にやることの表示名（新しい項目）", () => {

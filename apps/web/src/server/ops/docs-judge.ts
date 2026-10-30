@@ -75,6 +75,8 @@ export type DocsJudgeInput = {
       readonly dipsNumber: string | null;
       readonly numberUnavailable: boolean;
       readonly reportedAtJst: string | null;
+      /** サーバーが決めた記録の時刻（created_at。JST の `YYYY-MM-DDTHH:MM`）。省略は通報日時だけで比べる。 */
+      readonly recordedAtJst?: string | null;
     } | null;
   };
   /** 人が確認した項目（計画ごと。取り消されていない最新の行）。at は確認の時刻（ISO）、eventId は取り消す行。 */
@@ -213,7 +215,6 @@ const judgeRegistration = (i: DocsJudgeInput): DocJudgement => {
   if (a.voided) return j("registration", "unmet", basis, ["機体の登録が取り消されています。"], href, { input: i });
   if (a.status === "suspended") return j("registration", "unmet", basis, ["機体の状態が休止です。"], href, { input: i });
   if (a.status === "deregistered") return j("registration", "unmet", basis, ["機体の状態が登録取消です。"], href, { input: i });
-  if (a.voided) return j("registration", "unmet", basis, ["機体の登録が取り消されています。"], href, { input: i });
   return j("registration", "confirmed", basis, [FIELD_DOC_REGISTRATION_EXPIRY_NOTE], href, { input: i });
 };
 
@@ -265,7 +266,8 @@ const judgeReport = (i: DocsJudgeInput): DocJudgement => {
     return j("report", "needs_check", [], ["通報の受付番号がありません。番号を記録してください。"], href, { input: i, confirmable: false });
   }
   const basis = [`受付番号 ${num}${e.reportedAtJst ? `（${e.reportedAtJst.replace("T", " ")} 通報）` : ""}`];
-  if (e.reportedAtJst === null || e.reportedAtJst > i.atJst) {
+  // 前後はサーバーが決める記録の時刻でも比べる（入力された通報日時が前でも、記録が離陸より後なら事前の通報として数えない）
+  if (e.reportedAtJst === null || e.reportedAtJst > i.atJst || (e.recordedAtJst != null && e.recordedAtJst > i.atJst)) {
     // 離陸より後に記録された通報は、事前の通報として数えない
     return j("report", "needs_check", basis, ["通報の記録が離陸より後です。事前の通報として数えません。"], href, { input: i, confirmable: false });
   }

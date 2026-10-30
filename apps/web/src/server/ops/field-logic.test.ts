@@ -589,3 +589,29 @@ describe("レビュー指摘の修正（field-logic）", () => {
     expect(takeoffGaps({ ...base, checks })).toEqual([]);
   });
 });
+
+describe("再評価後のユーザー決定（日誌済みのラウンドの確認）", () => {
+  it("日誌済みの飛行のラウンドに属するラウンドごとの確認（空域・飛行自粛要請・現場状況）は取り消せない（round_journaled）。計画ごとの確認は取り消せる", () => {
+    const em = check("emergency_airspace", "not_designated", "13:00");
+    const rs = check("flight_restriction", "done", "13:01");
+    const st = check("site_conditions", "done", "13:02", { site: { thirdParty: "none", otherAircraft: "none", rain: "none", visibility: "good", windMs: null, tempC: null } });
+    const cr = check("carry", "done", "13:03");
+    const dc = check("docs_confirm", "done", "13:04", { docKey: "manual" });
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const j1 = journal(t1, "r1");
+    const events = [em, rs, st, cr, dc, t1, l1, j1];
+    const s = state(events, { flightRecords: [{ id: "r1", voided: false }] });
+    for (const target of [em, rs, st]) {
+      expect(decideTransition(events, s, { kind: "undo", targetEventId: target.id }, { planCancelled: false })).toEqual({ ok: false, status: 409, code: "round_journaled" });
+    }
+    for (const target of [cr, dc]) expect(decideTransition(events, s, { kind: "undo", targetEventId: target.id }, { planCancelled: false }).ok).toBe(true);
+    // 日誌に記録していない（日誌待ち）なら取り消せる
+    const ev2 = [em, t1, l1];
+    expect(decideTransition(ev2, state(ev2), { kind: "undo", targetEventId: em.id }, { planCancelled: false }).ok).toBe(true);
+    // 次のラウンド（着陸の後）の確認は、前の飛行が日誌済みでも取り消せる
+    const em2 = check("emergency_airspace", "not_designated", "14:00");
+    const ev3 = [...events, em2];
+    expect(decideTransition(ev3, state(ev3, { flightRecords: [{ id: "r1", voided: false }] }), { kind: "undo", targetEventId: em2.id }, { planCancelled: false }).ok).toBe(true);
+  });
+});

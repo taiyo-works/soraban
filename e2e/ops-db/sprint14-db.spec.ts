@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { expandNextActions } from "../ops-menu";
 import { expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 
 // Sprint 14 の E2E-DB（契約 D-1〜D-12）。DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与えた next start に対して実行する
@@ -219,6 +220,12 @@ for (const vp of [
       await expect(page.getByTestId("field-post-link")).toHaveAttribute("href", /timing=post_flight/);
       await page.getByTestId("field-post-later").click();
       await expect(page.getByTestId("field-post-pending")).toBeVisible();
+      // ユーザー決定：飛行後点検は「今日」の次にやることに常に出る（シード済みの組織で上位 8 件が埋まっていても、枠の外で残る）
+      const today = (await (await manager.get("/api/ops/today")).json()) as { nextActions: { id: string; planId: string | null }[] };
+      expect(today.nextActions.some((a) => a.id === "do_post_inspection" && a.planId === plan.id)).toBe(true);
+      await page.goto("/ops");
+      await expandNextActions(page);
+      await expect(page.locator(`[data-testid="today-next-action"][data-action-id="do_post_inspection"][data-plan-id="${plan.id}"]`)).toBeVisible();
 
       // 飛行後点検を保存して戻ると完了になる（保存は API で代用。入力画面への遷移は上の href で確かめた）
       await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:45`, "post_flight");
@@ -280,6 +287,45 @@ for (const vp of [
       await expect(page.getByTestId("field-docs-fix-license")).toBeVisible();
       expect((await getField(manager, plan.id)).flights[0]!.gaps.map((g) => g.item)).toEqual(before);
       await settle(manager, plan.id);
+    });
+
+    test("ユーザー決定：日誌済みの飛行のラウンドに属する確認は取り消せない（409 round_journaled）。計画ごとの確認は取り消せる", async ({ page }) => {
+      const manager = await apiAs(seeded("a-manager"));
+      await signIn(page.request, seeded("a-manager"));
+      await page.clock.setFixedTime(at("11:59:30"));
+      const aircraft = await createAircraft(manager);
+      const pilotId = await pilotIdOf(seeded("a-pilot"));
+      const plan = await createPlan(manager, aircraft.id, pilotId);
+      const rs = (await (await postPast(manager, plan.id, "11:01", { kind: "check", item: "flight_restriction" })).json()) as { id: string };
+      const cr = (await (await postPast(manager, plan.id, "11:02", { kind: "check", item: "carry" })).json()) as { id: string };
+      const tk = (await (await postPast(manager, plan.id, "11:10", { kind: "takeoff" })).json()) as { id: string };
+      await postPast(manager, plan.id, "11:30", { kind: "landing" });
+      const f = await manager.post("/api/ops/flights", {
+        data: {
+          aircraftId: aircraft.id,
+          pilotId,
+          purpose: "空撮",
+          takeoffPlace: "米子市日吉津 本社",
+          landingPlace: "米子市日吉津 本社",
+          safetyIssue: false,
+          takeoffAt: `${DAY}T11:10`,
+          landingAt: `${DAY}T11:30`,
+          flightPlanId: plan.id,
+          takeoffEventId: tk.id,
+        },
+      });
+      expect(f.status(), await f.text()).toBe(201);
+      const r = await postEvent(manager, plan.id, { kind: "undo", targetEventId: rs.id });
+      expect(r.status()).toBe(409);
+      expect(((await r.json()) as { error: string }).error).toBe("round_journaled");
+      // 画面にも、日誌済みのラウンドの確認を取り消すボタンは出ない（いまのラウンドは次の飛行）
+      await openField(page, plan.id);
+      await expect(page.getByTestId("field-restriction-undo")).toHaveCount(0);
+      await expect(page.getByTestId("field-restriction-state")).toContainText("未");
+      // 計画ごとの確認（携行品）は取り消せる
+      expect((await postEvent(manager, plan.id, { kind: "undo", targetEventId: cr.id })).status()).toBe(201);
+      const plan2 = (await (await manager.get(`/api/ops/plans/${plan.id}`)).json()) as { version: number };
+      await manager.post(`/api/ops/plans/${plan.id}/void`, { data: { expectedVersion: plan2.version, reason: "試験の後始末" } });
     });
 
     test("D-11：通信できない状態で、既に開いている画面から確認を押すと送信待ちに入り、戻ると二重なく送られる", async ({ page, context }) => {
