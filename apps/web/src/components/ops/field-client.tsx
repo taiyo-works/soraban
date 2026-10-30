@@ -473,7 +473,7 @@ export function FieldClient({
       <h3 id="field-h-docs" className="text-xl font-bold">
         書類・手続き
       </h3>
-      <p className="text-base text-ink-soft" data-testid="field-docs-note">
+      <p className="text-ink" data-testid="field-docs-note">
         登録内容から自動で判定しています。足りないもの（要確認）だけ、確認してください。登録は利用者の入力です。
       </p>
       <ul className="flex flex-col gap-3">
@@ -491,7 +491,7 @@ export function FieldClient({
                 </p>
               </div>
               {d.basis.length > 0 ? (
-                <ul className="flex flex-col gap-1 border-l-4 border-ink-soft pl-3 text-base" data-testid={`field-docs-basis-${d.key}`} aria-label={`${d.label}の根拠`}>
+                <ul className="flex flex-col gap-1 border-l-4 border-ink-soft pl-3" data-testid={`field-docs-basis-${d.key}`} aria-label={`${d.label}の根拠`}>
                   {d.basis.map((b) => (
                     <li key={b} className="break-words">
                       {b}
@@ -500,7 +500,7 @@ export function FieldClient({
                 </ul>
               ) : null}
               {d.notes.length > 0 ? (
-                <ul className="flex flex-col gap-1 text-base" data-testid={`field-docs-notes-${d.key}`}>
+                <ul className="flex flex-col gap-1" data-testid={`field-docs-notes-${d.key}`}>
                   {d.notes.map((n) => (
                     <li key={n}>{n}</li>
                   ))}
@@ -595,7 +595,7 @@ export function FieldClient({
         </p>
       </div>
       {st.done && st.values ? (
-        <ul className="flex flex-col gap-1 text-base" data-testid="field-site-values">
+        <ul className="flex flex-col gap-1" data-testid="field-site-values">
           {SITE_FIELDS.map((f) => {
             const key = f === "third_party" ? "thirdParty" : f === "other_aircraft" ? "otherAircraft" : f;
             const val = (st.values as unknown as Record<string, string>)[key];
@@ -698,7 +698,7 @@ export function FieldClient({
           {!draftSite ? <p data-testid="field-site-hint">第三者・他機・雨・視程を選ぶと記録できます（風速・気温は未入力でも記録できます）。</p> : null}
         </div>
       ) : null}
-      <p className="text-base text-ink-soft" data-testid="field-site-threshold-note">
+      <p className="text-ink" data-testid="field-site-threshold-note">
         {SITE_THRESHOLD_NOTE}
       </p>
       {st.eventId && view.canRecord ? (
@@ -765,7 +765,7 @@ export function FieldClient({
                       {c.source ? `（${view.emergencySources.find((s) => s.id === c.source)?.title ?? c.source}）` : ""}
                     </p>
                   ) : null}
-                  <p className="text-base text-ink-soft" data-testid="field-emergency-note">
+                  <p className="text-ink" data-testid="field-emergency-note">
                     {view.round.emergencyNote}
                   </p>
                   {view.emergencySources.map((src) => (
