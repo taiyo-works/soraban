@@ -481,12 +481,29 @@ describe("Sprint 14 A-1：飛行ラウンドの導出", () => {
     const t2 = takeoff("14:10");
     const l2 = landing(t2, "14:30");
     const p1 = insp("p1", "13:40", { timing: "post_flight" });
-    const s = state([t1, l1, t2, l2], { inspections: [p1] });
+    // Sprint 15（R-1）：この計画に結び付いた点検だけを数える（結び付きは点検の保存時にサーバーが追記する確認の行）
+    const link1 = check("inspection", "done", "13:40", { inspectionId: "p1" });
+    const s = state([t1, l1, t2, l2, link1], { inspections: [p1] });
     expect(s.flights[0]!.post).toMatchObject({ done: true, inspectionId: "p1" });
     expect(s.flights[1]!.post.done).toBe(false);
     expect(s.postPending.map((f) => f.takeoffEventId)).toEqual([t2.id]);
     // 飛行中は対象外
-    expect(state([t1], { inspections: [p1] }).postPending).toEqual([]);
+    expect(state([t1, link1], { inspections: [p1] }).postPending).toEqual([]);
+  });
+
+  it("Sprint 15 R-1：計画に結び付いていない飛行後点検（別の計画の点検・結び付きのない既存の点検）は、機体と時刻が合っても済にしない", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const p1 = insp("p1", "13:40", { timing: "post_flight" });
+    // 結び付きなし（Sprint 14 以前の点検、または別の計画に結び付いた点検）
+    expect(state([t1, l1], { inspections: [p1] }).flights[0]!.post.done).toBe(false);
+    expect(state([t1, l1], { inspections: [p1] }).postPending.map((f) => f.takeoffEventId)).toEqual([t1.id]);
+    // 結び付きを取り消すと、満たさない状態に戻る
+    const link = check("inspection", "done", "13:40", { inspectionId: "p1" });
+    expect(state([t1, l1, link], { inspections: [p1] }).flights[0]!.post.done).toBe(true);
+    expect(state([t1, l1, link, undo(link)], { inspections: [p1] }).flights[0]!.post.done).toBe(false);
+    // 結び付きは確認項目（checks）には影響しない（日常点検の確認は実際の点検の記録から導出する）
+    expect(state([link], { inspections: [] }).checks.inspection.done).toBe(false);
   });
 
   it("日誌への引き継ぎ：各飛行は、そのラウンドの飛行前の点検を持つ（着陸でラウンドが閉じても失われない）", () => {
@@ -506,7 +523,7 @@ describe("Sprint 14 A-1：飛行ラウンドの導出", () => {
     const t1 = takeoff("13:10");
     const l1 = landing(t1, "13:30");
     const early = insp("p0", "13:00", { timing: "post_flight" });
-    expect(state([t1, l1], { inspections: [early] }).flights[0]!.post.done).toBe(false);
+    expect(state([t1, l1, check("inspection", "done", "13:00", { inspectionId: "p0" })], { inspections: [early] }).flights[0]!.post.done).toBe(false);
   });
 });
 

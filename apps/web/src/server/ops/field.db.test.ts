@@ -1467,8 +1467,8 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(v.items.find((i) => i.item === "emergency_airspace")!.done).toBe(false);
       expect(v.items.find((i) => i.item === "carry")!.done).toBe(true);
       expect(v.docs.find((d) => d.key === "remote_id")!.effective).toBe("confirmed_human");
-      // 飛行後点検（飛行後の日常点検）
-      await inspect(O, "2027-01-05T11:45", { timing: "post_flight" });
+      // 飛行後点検（飛行後の日常点検）。Sprint 15（R-1）：計画に結び付けた点検だけが、その計画の飛行後点検に数える
+      await inspect(O, "2027-01-05T11:45", { timing: "post_flight", planId: p.id });
       v = await field.getFieldView(mgr(O), p.id);
       expect(v.postPendingCount).toBe(0);
       expect(v.flights[0]!.post.done).toBe(true);
@@ -1499,6 +1499,111 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(g["flight_restriction"]).toBe("none");
       const row = (await eventRows(p.id)).find((r) => r.kind === "takeoff");
       expect(row.gaps.some((x: { item: string }) => x.item === "site_conditions")).toBe(true);
+    });
+  });
+
+  describe("8. Sprint 15 R-1：飛行後点検を計画に結び付ける", () => {
+    const landed = async () => {
+      const p = await approvedPlan(A);
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      await post(A, p.id, body("takeoff", t("11:20")));
+      await post(A, p.id, body("landing", t("11:40")));
+      return p;
+    };
+
+    it("同じ機体・同じ日の 2 つの計画で、一方の計画に結び付けた飛行後点検は、他方の計画を満たさない", async () => {
+      const p1 = await landed();
+      const p2 = await landed();
+      const before = await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [p1.id]);
+      const r = await inspect(A, "2027-01-05T11:45", { timing: "post_flight", planId: p1.id });
+      // 点検の保存と同じトランザクションで、計画 1 にだけ結び付きの行（check・inspection・inspection_id）が追記される
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection' and inspection_id = $2", [p1.id, r.record.id])).toBe(1);
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [p1.id])).toBe(before + 1);
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [p2.id])).toBe(0);
+      const v1 = await field.getFieldView(mgr(A), p1.id);
+      const v2 = await field.getFieldView(mgr(A), p2.id);
+      expect(v1.flights[0]!.post.done).toBe(true);
+      expect(v1.postPendingCount).toBe(0);
+      // 機体と時刻は合っているが、計画 2 には結び付いていない
+      expect(v2.flights[0]!.post.done).toBe(false);
+      expect(v2.postPendingCount).toBe(1);
+    });
+
+    it("結び付きのない飛行後点検（Sprint 14 以前の点検・planId なしの点検）は、どの計画の飛行後点検にも数えない", async () => {
+      const p = await landed();
+      await inspect(A, "2027-01-05T11:46", { timing: "post_flight" });
+      const v = await field.getFieldView(mgr(A), p.id);
+      expect(v.flights[0]!.post.done).toBe(false);
+      expect(v.postPendingCount).toBe(1);
+    });
+
+    it("同じ clientRequestId の再送は、点検も結び付きも 1 行のまま（冪等）。別の組織の計画には結び付けられない（400）", async () => {
+      const p = await landed();
+      const reqId = randomUUID();
+      const a = await inspect(A, "2027-01-05T11:47", { timing: "post_flight", planId: p.id, clientRequestId: reqId, queued: true });
+      const b = await inspect(A, "2027-01-05T11:47", { timing: "post_flight", planId: p.id, clientRequestId: reqId, queued: true });
+      expect(a.created).toBe(true);
+      expect(b.created).toBe(false);
+      expect(b.record.id).toBe(a.record.id);
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [p.id])).toBe(1);
+      const link = (await eventRows(p.id)).find((x) => x.item === "inspection");
+      expect(link.queued).toBe(true);
+      expect(link.inspection_id).toBe(a.record.id);
+      const other = await approvedPlan(B);
+      await expectOpsError(inspect(A, "2027-01-05T11:48", { timing: "post_flight", planId: other.id }), 400);
+    });
+
+    it("計画の機体と違う機体の点検・中止した計画には結び付けない（点検は保存される）", async () => {
+      const p = await landed();
+      const voided = await approvedPlan(A);
+      await plans.voidPlan(mgr(A), voided.id, { expectedVersion: voided.version, reason: "中止" });
+      const r = await inspect(A, "2027-01-05T11:49", { timing: "post_flight", planId: voided.id });
+      expect(r.created).toBe(true);
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [voided.id])).toBe(0);
+      expect((await field.getFieldView(mgr(A), p.id)).postPendingCount).toBe(1);
+    });
+
+    it("fillFromPlan：場所名を送らない点検（端末の送信待ち）は、計画の場所名が入る", async () => {
+      const p = await landed();
+      const r = await rec.createInspection(mgr(A), {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotFree.id,
+        inspectedAt: "2027-01-05T11:50",
+        timing: "post_flight",
+        items: ITEMS,
+        planId: p.id,
+        fillFromPlan: true,
+      });
+      expect(r.record.placeName).toBe("フューチャーテック株式会社 本社");
+      expect(r.record.latitude).toBeNull();
+    });
+
+    it("fillFromPlan：目的・場所・座標・特定飛行の形態を送らない日誌は、計画の値が入る（日誌への結び付きも 1 回）", async () => {
+      const pl = await newPlan(A, { plannedStartAt: "2027-01-05T09:00" });
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      const tk = await post(A, pl.id, body("takeoff", t("09:20")));
+      await post(A, pl.id, body("landing", t("09:40")));
+      const reqId = randomUUID();
+      const input = {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotFree.id,
+        takeoffAt: "2027-01-05T09:20",
+        landingAt: "2027-01-05T09:40",
+        safetyIssue: false,
+        takeoffEventId: tk.event.clientEventId,
+        flightPlanId: pl.id,
+        clientRequestId: reqId,
+        fillFromPlan: true,
+      };
+      const f = await rec.createFlight(mgr(A), input);
+      expect(f.created).toBe(true);
+      expect(f.record.purpose).toBe("空撮");
+      expect(f.record.takeoffPlace).toBe("フューチャーテック株式会社 本社");
+      expect(f.record.takeoffLat).not.toBeNull();
+      expect(f.record.specificFlightTypes).toContain("night");
+      const again = await rec.createFlight(mgr(A), input);
+      expect(again.created).toBe(false);
+      expect(await count("flight_field_events", "plan_id = $1 and kind = 'journal_linked'", [pl.id])).toBe(1);
     });
   });
 });

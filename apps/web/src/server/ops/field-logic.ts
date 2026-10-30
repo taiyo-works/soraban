@@ -298,7 +298,13 @@ export const fieldState = (i: FieldStateInput): FieldState => {
   const takeoffs = events.filter((e) => e.kind === "takeoff" && !undone.has(e.id));
   const landings = events.filter((e) => e.kind === "landing" && !undone.has(e.id));
   const journals = events.filter((e) => e.kind === "journal_linked");
-  const postInspections = i.inspections.filter((x) => x.timing === "post_flight");
+  // Sprint 15（R-1）：飛行後点検は、この計画に結び付いた点検だけを数える。結び付きは、点検の保存と同じトランザクションで
+  // サーバーが追記する確認の行（kind=check・item=inspection・inspection_id）で、取り消されていないもの。結び付きの無い点検
+  // （Sprint 14 以前の点検、別の計画の点検）は、機体と時刻が合っても「済」にしない（同じ機体を同じ日に別の計画で飛ばす場合に取り違えない）。
+  const linkedInspections = new Set(
+    events.filter((e) => e.kind === "check" && e.item === "inspection" && e.inspectionId !== null && !undone.has(e.id)).map((e) => e.inspectionId as string),
+  );
+  const postInspections = i.inspections.filter((x) => x.timing === "post_flight" && linkedInspections.has(x.id));
   const flights: FieldFlight[] = takeoffs.map((t, idx): FieldFlight => {
     // 対応する取り消されていない着陸（複数なら最新）
     const landing = landings.filter((l) => resolve(l.targetEventId)?.id === t.id).pop() ?? null;
