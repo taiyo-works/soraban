@@ -294,7 +294,10 @@ for (const vp of [
       await signIn(page.request, seeded("a-manager"));
       await page.clock.setFixedTime(at("11:59:30"));
       const aircraft = await createAircraft(manager);
-      const pilotId = await pilotIdOf(seeded("a-pilot"));
+      // 飛行記録は操縦者の時間帯の重なりを拒むため（overlap）、画面の幅ごとに別の操縦者を作る
+      const pr = await manager.post("/api/ops/pilots", { data: { fullName: `日誌 試験${stamp}${seq++}`, hasLicense: false } });
+      expect(pr.status(), await pr.text()).toBe(201);
+      const pilotId = ((await pr.json()) as { id: string }).id;
       const plan = await createPlan(manager, aircraft.id, pilotId);
       const rs = (await (await postPast(manager, plan.id, "11:01", { kind: "check", item: "flight_restriction" })).json()) as { id: string };
       const cr = (await (await postPast(manager, plan.id, "11:02", { kind: "check", item: "carry" })).json()) as { id: string };
