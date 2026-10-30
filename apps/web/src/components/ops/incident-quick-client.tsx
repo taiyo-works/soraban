@@ -5,7 +5,7 @@
 //   - 確認ダイアログは出さない。押した記録は端末の送信待ちに 1 行保存してから自分のサーバーへ送る（lib/incident-outbox.ts）。
 //     押した結果は送信の前に画面へ反映する。未送信は「未送信 N 件」で常に示し、4xx は黙って捨てず「あとから入力」へ案内する。
 //   - 端末に残すのは、計画の ID（キー）・区分・けがの有無・時刻・識別子だけ（氏名・技能証明書番号・座標・自由記述は入れない）。
-//   - 押す部品は高さ 56px 以上・間 12px 以上、文字は 18px 以上、状態の語は 20px 以上。色だけで区別しない。見た目は最低限（designer が磨く）。
+//   - 押す部品は高さ 56px 以上・間 12px 以上、文字は 18px 以上、状態の語は 20px 以上。色だけで区別しない。見た目は v2 の部品。
 import { useCallback, useEffect, useState } from "react";
 import { discardRejectedIncident, enqueueIncident, incidentUnsentCount, rejectedIncidentEntries, type IncidentOutboxState } from "@/lib/incident-outbox";
 import {
@@ -28,16 +28,18 @@ import { newRequestId } from "./drafts";
 import { flushIncidentOutbox, loadPlanIncidentOutbox, planIncidentOutboxUnsaved, updatePlanIncidentOutbox } from "./incident-outbox";
 import { IncidentFactNotice, IncidentOfficialNotice, IncidentSafetyFirst } from "./incident-ui";
 
-const BTN =
-  "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp px-5 py-2 text-lg font-bold touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
-const BTN_PRIMARY = `${BTN} border-2 border-brand-700 bg-brand-700 text-paper`;
-const BTN_OUTLINE = `${BTN} border-2 border-brand-700 bg-paper text-brand-700`;
-const BTN_WARN = `${BTN} border-2 border-signal-red bg-paper text-ink`;
-// 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく（置き換えで作り、クラスの競合を避ける）
-const BTN_RECORD = BTN_PRIMARY.replace("min-h-14", "min-h-16").replace("text-lg", "text-xl");
-const BOX_NOTE = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft p-3 text-ink";
-const BOX_WARN = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-red bg-signal-red-soft p-3 text-ink";
-const BOX_OK = "flex flex-col gap-3 rounded-sharp border-2 border-l-8 border-signal-green bg-signal-green-soft p-3 text-ink";
+// 見た目は ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*。現場の値（56／64px・7:1・影なし・動きなし）は FieldModeMark（<html data-mode="field">）が効かせる。
+const BTN = "opx-btn w-full";
+const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
+const BTN_OUTLINE = BTN;
+// 選択中の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
+const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+const BTN_WARN = "opx-btn opx-btn-danger w-full";
+// 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく
+const BTN_RECORD = `${BTN_PRIMARY} min-h-16 text-xl`;
+const BOX_NOTE = "opx-box opx-box-note";
+const BOX_WARN = "opx-box opx-box-warn";
+const BOX_OK = "opx-box opx-box-ok";
 
 type Saved = { readonly clientRequestId: string; readonly hm: string; readonly recordId: string | null };
 
@@ -120,7 +122,7 @@ export function IncidentQuickClient({
           type="button"
           role="radio"
           aria-checked={value === v}
-          className={value === v ? BTN_PRIMARY : BTN_OUTLINE}
+          className={value === v ? BTN_SEL : BTN_OUTLINE}
           onClick={() => set(v)}
           disabled={saved !== null}
           data-testid={`${testPrefix}-${v}`}
@@ -134,7 +136,7 @@ export function IncidentQuickClient({
 
   return (
     <main
-      className="flex flex-col gap-6 bg-paper pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-ink touch-manipulation"
+      className="flex flex-col gap-6 pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-sb-ink touch-manipulation"
       data-testid="incident-quick-root"
       data-hydrated={hydrated ? "true" : "false"}
       aria-label="事故・ヒヤリハットの簡易記録"
@@ -144,7 +146,7 @@ export function IncidentQuickClient({
       {/* ② 事実の記録の注意 */}
       <IncidentFactNotice large />
 
-      <header className="flex flex-col gap-1 border-l-8 border-brand-700 pl-3">
+      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-orange pl-3">
         <h1 className="text-2xl font-bold leading-snug">事故・ヒヤリハットの簡易記録</h1>
         <p data-testid="incident-quick-plan">{planTitle}</p>
       </header>
@@ -200,10 +202,10 @@ export function IncidentQuickClient({
             {choice(PEOPLE_INJURY_LABEL, YES_NO_UNKNOWN, (v) => YES_NO_UNKNOWN_LABEL[v], injury, setInjury, "incident-quick-injury")}
           </section>
           {/* ⑤ 類型はあとで入力できる旨 */}
-          <p className="border-l-4 border-ink-soft pl-3 text-ink" data-testid="incident-quick-later">
+          <p className="opx-note !text-lg !leading-relaxed !text-sb-ink" data-testid="incident-quick-later">
             {INCIDENT_QUICK_LATER_NOTICE}
           </p>
-          <p className="pl-4 text-ink-soft" data-testid="incident-quick-time">
+          <p className="pl-4 text-sb-ink-2" data-testid="incident-quick-time">
             時刻：いま（押した時刻で記録します）
           </p>
           {/* ⑥ 記録する */}
@@ -211,7 +213,7 @@ export function IncidentQuickClient({
             記録する
           </button>
           {!ready ? (
-            <p className="-mt-3 text-center text-ink-soft" data-testid="incident-quick-hint">
+            <p className="-mt-3 text-center text-sb-ink-2" data-testid="incident-quick-hint">
               区分とけがの有無を選ぶと記録できます。
             </p>
           ) : null}

@@ -30,7 +30,7 @@ export default async function PlanReportPage({
     if (e instanceof OpsError && e.status === 503) {
       return (
         <main className="flex max-w-xl flex-col gap-4" data-testid="report-unavailable">
-          <h1 className="font-display text-2xl font-light leading-tight text-ink sm:text-3xl">通報の機能を使えません</h1>
+          <h1 className="opx-h1">通報の機能を使えません</h1>
           <Note tone="red">通報の送信元の設定が正しくありません。管理者に連絡してください。</Note>
         </main>
       );

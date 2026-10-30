@@ -25,33 +25,33 @@ export default async function SnapshotListPage({ params }: { readonly params: Pr
       <PageHeader title="判定の履歴" eyebrow={plan.title} back={{ href: `/ops/plans/${id}`, label: "飛行計画の詳細" }}>
         <Note>判定をやり直しても、前の判定は書き換えられず、ここに残ります。</Note>
       </PageHeader>
-      <ol className="flex flex-col gap-2" data-testid="snapshot-list">
+      <ol className="flex flex-col gap-3" data-testid="snapshot-list">
         {[...list].reverse().map((s) => (
           <li key={s.id}>
             <Link prefetch={false}
               href={`/ops/plans/${id}/snapshots/${s.id}`}
-              className="flex flex-col gap-1.5 rounded-sharp border border-rule bg-paper px-3 py-3 text-sm hover:bg-paper-soft"
+              className="opx-row opx-row-card"
               data-testid="snapshot-row"
             >
               <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="font-mono text-sm tnum" data-testid="snapshot-seq">
+                <span className="sb-num text-sm font-bold tnum" data-testid="snapshot-seq">
                   判定 {s.seq}
                 </span>
                 {s.isCurrent ? <Badge tone="brand" data-testid="snapshot-current">現在の判定</Badge> : null}
-                <time dateTime={s.createdAt} className="font-mono text-xs tnum text-ink-soft">
+                <time dateTime={s.createdAt} className="sb-num text-xs tnum text-sb-ink-2">
                   {formatJst(new Date(s.createdAt))}
                 </time>
-                <span className="text-xs text-ink-soft" data-testid="snapshot-reason">
+                <span className="text-xs text-sb-ink-2" data-testid="snapshot-reason">
                   {SNAPSHOT_REASON_LABEL[s.reason] ?? s.reason}
                 </span>
               </span>
               <VerdictBadge level={s.verdictLevel} unknownCount={s.verdictUnknownCount} />
-              <span className="break-all font-mono text-[11px] tnum text-ink-mute">
+              <span className="break-all sb-num text-xs tnum text-sb-ink-3">
                 地点判定 {s.checkEvidenceId}
                 <span aria-hidden className="mx-1.5">／</span>
                 申請支援 {s.diagnosisEvidenceId}
               </span>
-              <span className="break-all font-mono text-[11px] tnum text-ink-mute">{s.engineVersion}</span>
+              <span className="break-all sb-num text-xs tnum text-sb-ink-3">{s.engineVersion}</span>
             </Link>
           </li>
         ))}

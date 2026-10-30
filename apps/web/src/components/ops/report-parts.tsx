@@ -37,13 +37,13 @@ export function JstDateTimeField({
     <div className="flex flex-col gap-1.5" role="group" aria-describedby={hintId} data-testid={testId}>
       <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-end gap-3 [&_span[aria-hidden]]:shrink-0 [&_span[aria-hidden]]:whitespace-nowrap">
         <Field label={`${label}（日付）`} required error={error}>
-          <input type="date" className={`${inputClass} min-h-12 font-mono tnum`} value={date} onChange={(e) => onDate(e.target.value)} data-testid={`${testId}-date`} />
+          <input type="date" className={`${inputClass} min-h-12 sb-num tnum`} value={date} onChange={(e) => onDate(e.target.value)} data-testid={`${testId}-date`} />
         </Field>
         <Field label={`${label}（時刻）`} required>
-          <input type="time" className={`${inputClass} min-h-12 font-mono tnum`} value={time} onChange={(e) => onTime(e.target.value)} data-testid={`${testId}-time`} />
+          <input type="time" className={`${inputClass} min-h-12 sb-num tnum`} value={time} onChange={(e) => onTime(e.target.value)} data-testid={`${testId}-time`} />
         </Field>
       </div>
-      <p id={hintId} className="text-xs leading-relaxed text-ink-mute">
+      <p id={hintId} className="text-xs leading-relaxed text-sb-ink-3">
         {hint}
       </p>
     </div>
@@ -52,5 +52,5 @@ export function JstDateTimeField({
 
 /** 画面の確認のチェック（44px 以上の行）。 */
 export const confirmRowClass =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sharp border border-rule bg-paper px-3 py-2.5 text-sm leading-snug text-ink hover:bg-paper-soft has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-700";
-export const confirmBoxClass = "mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-brand-700";
+  "opx-check-row !items-start border-[1.5px] border-transparent !py-2.5 leading-snug has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover";
+export const confirmBoxClass = "mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-sb-ink";

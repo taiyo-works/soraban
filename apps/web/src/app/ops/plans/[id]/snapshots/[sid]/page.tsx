@@ -17,7 +17,7 @@ import { verdictPermitNotesFromBasis } from "@/server/ops/permit-page";
 import { getPlan, getSnapshot } from "@/server/ops/plans";
 import { OpsError } from "@/server/ops/service";
 
-const mono = "font-mono text-xs tnum break-all";
+const mono = "sb-num text-xs tnum break-all";
 
 // 判定の根拠：保存した判定の結果を、判定画面と同じ部品で読み取り専用に描く。再計算はしない（保存したものを見せる）。
 // 証跡 ID（地点判定・申請支援）、エンジンの版、使ったデータセット（名称・基準年・確認日）、手続きデータの版と確認日、作成者・日時、ハッシュ。
@@ -52,7 +52,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
       >
         <div className="flex flex-wrap items-center gap-2">
           {s.isCurrent ? <Badge tone="brand" data-testid="snapshot-current">現在の判定</Badge> : <Badge tone="mute" data-testid="snapshot-past">過去の判定</Badge>}
-          <span className="text-xs text-ink-soft">{SNAPSHOT_REASON_LABEL[s.reason] ?? s.reason}</span>
+          <span className="text-xs text-sb-ink-2">{SNAPSHOT_REASON_LABEL[s.reason] ?? s.reason}</span>
         </div>
         <Note>{PLAN_JUDGEMENT_DISCLAIMER}</Note>
       </PageHeader>
@@ -68,15 +68,15 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
             ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="basis-check-evidence">{s.checkEvidenceId}</span>],
             ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="basis-diagnosis-evidence">{s.diagnosisEvidenceId}</span>],
             ["エンジンの版", <span key="e" className={mono} data-testid="basis-engine">{s.engineVersion}</span>],
-            ["判定の日時", <time key="t" dateTime={s.checkedAt} className="font-mono text-xs tnum">{formatJst(new Date(s.checkedAt))}（{s.checkedAt}）</time>],
+            ["判定の日時", <time key="t" dateTime={s.checkedAt} className="sb-num text-xs tnum">{formatJst(new Date(s.checkedAt))}（{s.checkedAt}）</time>],
             [
               "手続きデータの版",
-              <span key="pr" className="font-mono text-xs tnum" data-testid="basis-procedures">
+              <span key="pr" className="sb-num text-xs tnum" data-testid="basis-procedures">
                 第 {s.proceduresRevision} 版・確認日 {s.proceduresVerifiedAt}
               </span>,
             ],
             ["作成者", s.createdByName ?? "—"],
-            ["作成日時（日本時間）", <time key="ca" dateTime={s.createdAt} className="font-mono text-xs tnum">{formatJst(new Date(s.createdAt))}</time>],
+            ["作成日時（日本時間）", <time key="ca" dateTime={s.createdAt} className="sb-num text-xs tnum">{formatJst(new Date(s.createdAt))}</time>],
             ["直前のハッシュ", <span key="ph" className={mono}>{s.prevHash}</span>],
             ["内容のハッシュ", <span key="ch" className={mono} data-testid="basis-hash">{s.contentHash}</span>],
           ]}
@@ -85,15 +85,15 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
 
       <Section title="使ったデータセット" aria-label="使ったデータセット" description="名称・基準年・確認日。確認日が古い（90 日超）ものは印を付けます。">
         {s.datasets.length === 0 ? (
-          <p className="text-sm text-ink-mute">記録されたデータセットはありません。</p>
+          <p className="sb-block-soft text-sm text-sb-ink-2">記録されたデータセットはありません。</p>
         ) : (
-          <ul className="flex flex-col border-t border-rule" data-testid="basis-datasets">
+          <ul className="opx-card flex flex-col !py-2" data-testid="basis-datasets">
             {s.datasets.map((d) => {
               const stale = s.staleSources.some((x) => x.id === d.id);
               return (
-                <li key={d.id} className="flex flex-col gap-0.5 border-b border-rule-soft py-2.5 text-sm" data-testid="basis-dataset">
-                  <span className="text-ink">{d.name}</span>
-                  <span className="font-mono text-xs tnum text-ink-soft">
+                <li key={d.id} className="flex flex-col gap-0.5 border-b border-sb-rule py-2.5 text-sm last:border-b-0" data-testid="basis-dataset">
+                  <span className="text-sb-ink">{d.name}</span>
+                  <span className="sb-num text-xs tnum text-sb-ink-2">
                     基準年 {d.baseYear ?? "—"}／確認日 {d.verifiedAt}
                     {stale ? <Badge tone="amber">確認日が古い</Badge> : null}
                   </span>
@@ -108,7 +108,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
         <DetailList
           data-testid="basis-input"
           rows={[
-            ["座標", <span key="l" className="font-mono text-xs tnum">{input.lat}, {input.lng}</span>],
+            ["座標", <span key="l" className="sb-num text-xs tnum">{input.lat}, {input.lng}</span>],
             ["機体重量", input.droneWeightG === null || input.droneWeightG === undefined ? "未登録（重量が分からない）" : `${input.droneWeightG} g`],
             ["予定日", input.plannedDate ?? "—"],
             ["飛行の方法・空域（選択）", (input.flags ?? []).length === 0 ? "なし" : (input.flags ?? []).map((f) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f).join("、")],
@@ -124,7 +124,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
       </Section>
 
       <div className="flex flex-wrap gap-3">
-        <Link prefetch={false} href={`/ops/plans/${id}`} className="inline-flex min-h-11 items-center text-sm text-brand-700 underline underline-offset-2" data-testid="basis-plan-link">
+        <Link prefetch={false} href={`/ops/plans/${id}`} className="opx-underlink text-sm" data-testid="basis-plan-link">
           飛行計画に戻る
         </Link>
       </div>
