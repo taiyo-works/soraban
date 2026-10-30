@@ -405,3 +405,142 @@ describe("outboxAsEvents（送信待ちの行を状態の導出に足す）", ()
     expect(s2.flights[0]).toMatchObject({ phase: "journal_pending", landingQueued: true });
   });
 });
+
+// ---- Sprint 14 契約 A：飛行ラウンド ------------------------------------------------------------
+
+describe("Sprint 14 A-1：飛行ラウンドの導出", () => {
+  const SITE = { thirdParty: "none", otherAircraft: "none", rain: "none", visibility: "good", windMs: null, tempC: null } as const;
+  const site = (hm = "13:00", extra: Partial<FieldEventLite> = {}) => check("site_conditions", "done", hm, { site: SITE, ...extra });
+  const docs = (key: "permit" | "remote_id", hm = "13:00") => check("docs_confirm", "done", hm, { docKey: key });
+
+  it("ラウンドの番号：離陸〜着陸で 1 ラウンドが閉じ、次の入力は次のラウンドに数える", () => {
+    expect(state([]).round.index).toBe(0);
+    const t1 = takeoff("13:10");
+    expect(state([t1]).round.index).toBe(0); // 飛行中は同じラウンド
+    const l1 = landing(t1, "13:30");
+    expect(state([t1, l1]).round.index).toBe(1);
+    const t2 = takeoff("14:10");
+    expect(state([t1, l1, t2]).round.index).toBe(1);
+    expect(state([t1, l1, t2]).flights.map((f) => f.roundIndex)).toEqual([0, 1]);
+  });
+
+  it("取り消し（undo）で閉じたラウンドが開き直る", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    expect(state([t1, l1, undo(l1)]).round.index).toBe(0);
+    expect(state([t1, l1, undo(l1)]).openFlight?.takeoffEventId).toBe(t1.id);
+  });
+
+  it("A-2 ラウンドごとの項目（空域・現場状況・緊急用務空域）は、前のラウンドの記録で満たされない", () => {
+    const em = check("emergency_airspace", "not_designated", "13:00");
+    const rs = check("flight_restriction", "done", "13:01");
+    const st = site("13:02");
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const first = state([em, rs, st, t1]);
+    expect(first.checks.emergency_airspace.done).toBe(true);
+    expect(first.round.restriction.done).toBe(true);
+    expect(first.round.site.done).toBe(true);
+    const next = state([em, rs, st, t1, l1]);
+    expect(next.checks.emergency_airspace.done).toBe(false);
+    expect(next.round.restriction.done).toBe(false);
+    expect(next.round.site.done).toBe(false);
+    // 次のラウンドで確認し直すと満たされる
+    const em2 = check("emergency_airspace", "not_designated", "14:00");
+    expect(state([em, rs, st, t1, l1, em2]).checks.emergency_airspace.done).toBe(true);
+  });
+
+  it("A-2 計画ごとの項目（書類・手続きの人の確認・通報済みの再確認・携行品）は次のラウンドに持ち越される", () => {
+    const d = docs("permit");
+    const rc = check("report_recheck");
+    const cr = check("carry");
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const s = state([d, rc, cr, t1, l1]);
+    expect(s.docConfirms.permit?.eventId).toBe(d.id);
+    expect(s.checks.report_recheck.done).toBe(true);
+    expect(s.checks.carry.done).toBe(true);
+    // 取り消すと戻る
+    expect(state([d, rc, cr, t1, l1, undo(d)]).docConfirms.permit).toBeUndefined();
+  });
+
+  it("日常点検（飛行前）も前のラウンドの点検では満たされない（着陸より前の点検は数えない）", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const s0 = state([t1, l1], { inspections: [insp("i1", "12:50")] });
+    expect(s0.checks.inspection.done).toBe(false);
+    const s1 = state([t1, l1], { inspections: [insp("i1", "12:50"), insp("i2", "13:45")] });
+    expect(s1.checks.inspection).toMatchObject({ done: true, inspectionId: "i2" });
+    // 最初のラウンドは従来どおり（その日の飛行前の点検）
+    expect(state([], { inspections: [insp("i1", "12:50")] }).checks.inspection.done).toBe(true);
+  });
+
+  it("飛行後点検：着陸のあとの飛行後の日常点検から導出する。次の離陸の前までを、その飛行のものとして数える", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const t2 = takeoff("14:10");
+    const l2 = landing(t2, "14:30");
+    const p1 = insp("p1", "13:40", { timing: "post_flight" });
+    const s = state([t1, l1, t2, l2], { inspections: [p1] });
+    expect(s.flights[0]!.post).toMatchObject({ done: true, inspectionId: "p1" });
+    expect(s.flights[1]!.post.done).toBe(false);
+    expect(s.postPending.map((f) => f.takeoffEventId)).toEqual([t2.id]);
+    // 飛行中は対象外
+    expect(state([t1], { inspections: [p1] }).postPending).toEqual([]);
+  });
+
+  it("飛行後点検は、その飛行の着陸より前の点検では満たされない", () => {
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const early = insp("p0", "13:00", { timing: "post_flight" });
+    expect(state([t1, l1], { inspections: [early] }).flights[0]!.post.done).toBe(false);
+  });
+});
+
+describe("Sprint 14 A-3：takeoffGaps に書類・手続きと現場状況", () => {
+  const baseIn = {
+    requirementKind: "required",
+    reportStatusCode: "reported",
+    effectiveReportedAt: "2027-01-04T10:00",
+    takeoffAtJst: "2027-01-05T13:10",
+    planState: "approved" as const,
+    judgementStale: false,
+  };
+  const done = (): FieldState["checks"] =>
+    state([check("emergency_airspace", "not_designated"), check("carry"), check("report_recheck")], { inspections: [insp("i", "12:00")] }).checks;
+
+  it("round を渡さなければ従来どおり（新しい項目は数えない）", () => {
+    expect(takeoffGaps({ ...baseIn, checks: done() })).toEqual([]);
+  });
+
+  it("要確認・満たさない・飛行自粛要請と現場状況の未入力・注意ありが、項目の順に並ぶ", () => {
+    const g = takeoffGaps({
+      ...baseIn,
+      checks: done(),
+      round: {
+        docs: [
+          { key: "permit", state: "unmet" },
+          { key: "manual", state: "needs_check" },
+        ],
+        restrictionDone: false,
+        site: { done: true, attention: true },
+      },
+    });
+    expect(g).toEqual([
+      { item: "flight_restriction", state: "none" },
+      { item: "site_conditions", state: "attention" },
+      { item: "docs_permit", state: "unmet" },
+      { item: "docs_manual", state: "needs_check" },
+    ]);
+    expect(takeoffGaps({ ...baseIn, checks: done(), round: { docs: [], restrictionDone: true, site: { done: false, attention: false } } })).toEqual([
+      { item: "site_conditions", state: "none" },
+    ]);
+  });
+
+  it("FIELD_GAP_ITEMS の表示名の表が揃っている（欠けると落ちる）", async () => {
+    const { FIELD_GAP_ITEM_LABEL, FIELD_GAP_STATES, FIELD_GAP_STATE_LABEL } = await import("@/lib/ops-field");
+    for (const k of FIELD_GAP_ITEMS) expect(FIELD_GAP_ITEM_LABEL[k], k).toBeTruthy();
+    for (const k of FIELD_GAP_STATES) expect(FIELD_GAP_STATE_LABEL[k], k).toBeTruthy();
+    expect(Object.keys(FIELD_GAP_ITEM_LABEL).sort()).toEqual([...FIELD_GAP_ITEMS].sort());
+  });
+});

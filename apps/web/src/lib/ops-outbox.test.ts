@@ -315,3 +315,51 @@ describe("recoverFlightFromOutbox：日誌の入力を送信待ちの離着陸�
     expect(recoverFlightFromOutbox(st(land({ targetEventId: SERVER_T })), [SERVER_T], null)).toBeNull();
   });
 });
+
+// ---- Sprint 14 E-3：新しい種別を通し、氏名・番号・座標・自由記述の混入を落とす -------------------------
+describe("sanitizeEntry（Sprint 14）", () => {
+  const ID = "11111111-1111-4111-8111-111111111111";
+  const base = { clientEventId: ID, kind: "check", occurredAt: "2027-01-05T12:00", status: "pending", attempts: 0 };
+  const SITE = { thirdParty: "none", otherAircraft: "none", rain: "none", visibility: "good", windMs: 3, tempC: 20 };
+
+  it("書類・手続きの確認（項目キー）と飛行自粛要請の確認を通す", async () => {
+    const { sanitizeEntry } = await import("./ops-outbox");
+    expect(sanitizeEntry({ ...base, item: "docs_confirm", docKey: "remote_id" })).toMatchObject({ item: "docs_confirm", docKey: "remote_id" });
+    expect(sanitizeEntry({ ...base, item: "flight_restriction" })).toMatchObject({ item: "flight_restriction" });
+    expect(sanitizeEntry({ ...base, item: "docs_confirm", docKey: "bogus" })).toBeNull();
+    expect(sanitizeEntry({ ...base, item: "docs_confirm" })).toBeNull();
+  });
+
+  it("現場状況：注意なしの選択と数値だけ通す。余計な項目（氏名・番号・座標・備考）は落とす", async () => {
+    const { sanitizeEntry } = await import("./ops-outbox");
+    const e = sanitizeEntry({
+      ...base,
+      item: "site_conditions",
+      site: { ...SITE, note: "自由記述", name: "山田", licenseNumber: "X-1", lat: 35.1 },
+      note: "自由記述",
+      pilotName: "山田 太郎",
+      latitude: 35.1,
+      licenseNumber: "X-1",
+    });
+    expect(e).toMatchObject({ item: "site_conditions", site: SITE });
+    const json = JSON.stringify(e);
+    for (const leak of ["自由記述", "山田", "X-1", "35.1", "note", "latitude", "licenseNumber"]) expect(json).not.toContain(leak);
+  });
+
+  it("C-9 備考が必須の現場状況（いる／あり／制限あり）は送信待ちに入れない。範囲外の数値も入れない", async () => {
+    const { sanitizeEntry, enqueue, emptyOutbox } = await import("./ops-outbox");
+    for (const patch of [{ thirdParty: "present" }, { otherAircraft: "present" }, { rain: "present" }, { visibility: "limited" }]) {
+      expect(sanitizeEntry({ ...base, item: "site_conditions", site: { ...SITE, ...patch } })).toBeNull();
+      expect(enqueue(emptyOutbox(), { ...base, kind: "check", item: "site_conditions", site: { ...SITE, ...patch } as never }).entries).toHaveLength(0);
+    }
+    expect(sanitizeEntry({ ...base, item: "site_conditions", site: { ...SITE, windMs: 999 } })).toBeNull();
+    expect(sanitizeEntry({ ...base, item: "site_conditions" })).toBeNull();
+  });
+
+  it("送信の本文に docKey・site を載せ、備考は載せない", async () => {
+    const { sanitizeEntry, toRequestBody } = await import("./ops-outbox");
+    const e = sanitizeEntry({ ...base, item: "site_conditions", site: SITE })!;
+    expect(toRequestBody(e)).toMatchObject({ item: "site_conditions", site: SITE, queued: true });
+    expect(toRequestBody(e)).not.toHaveProperty("note");
+  });
+});
