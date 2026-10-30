@@ -240,6 +240,8 @@ export const planHref = (planId: string, id: NextActionId): string => {
       return inspectionNewHref(planId);
     case "check_emergency_airspace":
       return fieldHref(planId, "preflight");
+    case "do_post_inspection":
+      return fieldHref(planId, "post");
     case "write_journal":
       return journalNewHref(planId);
     case "review_journal_mismatch":

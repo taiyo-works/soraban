@@ -203,7 +203,16 @@ describe("fieldNextActions", () => {
     expect(ids(fieldNextActions(input(state(journaled, { inspection: true, flightRecords: [{ id: "r1", voided: false }] }))))).not.toContain("write_journal");
     expect(ids(fieldNextActions(input(state(journaled, { inspection: true, flightRecords: [{ id: "r1", voided: true }] }))))).toContain("write_journal");
     // 中止した計画でも日誌待ちは出る
-    expect(ids(fieldNextActions(input(state(events), { voided: true })))).toEqual(["write_journal"]);
+    // Sprint 14（意図の変更）：着陸のあと飛行後点検が未了なら do_post_inspection も出る（日誌待ちと並ぶ）
+    expect(ids(fieldNextActions(input(state(events), { voided: true })))).toEqual(["do_post_inspection", "write_journal"]);
+  });
+
+  it("Sprint 14：着陸のあと飛行後点検が未了なら「飛行後点検をする」（現場画面の飛行後点検へ）。済めば消える", () => {
+    const events: Partial<FieldEventLite>[] = [{ kind: "takeoff" }, { kind: "landing", targetEventId: "e1" }];
+    const a = fieldNextActions(input(state(events, { inspection: true }))).find((x) => x.id === "do_post_inspection");
+    expect(a).toMatchObject({ tier: 3, href: "/ops/plans/p1/field#post" });
+    // 飛行中は出ない
+    expect(ids(fieldNextActions(input(state([{ kind: "takeoff" }], { inspection: true }))))).not.toContain("do_post_inspection");
   });
 
   it("予定終了から 60 分を過ぎても、飛行記録も離陸の行も無ければ日誌を記入する（境界：ちょうど 60 分後から）", () => {

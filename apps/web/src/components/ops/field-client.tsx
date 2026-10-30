@@ -11,6 +11,36 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import {
   EMERGENCY_DESIGNATED_WARNING,
   FIELD_AFTER_ENTRY_LABEL,
+  FIELD_DOC_BASIS_LABEL,
+  FIELD_DOC_CONFIRM_ACTION,
+  FIELD_DOC_FIX_LABEL,
+  FIELD_DOC_HUMAN_CONFIRMED_LABEL,
+  FIELD_DOC_STATUS_LABEL,
+  FIELD_DOC_STATUS_MARK,
+  FIELD_NEXT_FLIGHT_LABEL,
+  FIELD_POST_DEFECT_GUIDE,
+  FIELD_POST_INSPECTION_ACTION,
+  FIELD_POST_INSPECTION_LABEL,
+  FIELD_POST_INSPECTION_LATER,
+  FIELD_POST_INSPECTION_PENDING_NOTE,
+  FIELD_RESTRICTION_ACTION,
+  FIELD_RESTRICTION_LABEL,
+  FIELD_ROUND_LABEL,
+  FIELD_TAKEOFF_WITH_GAPS_NOTE,
+  SITE_FIELDS,
+  SITE_FIELD_LABEL,
+  SITE_NOTE_MAX,
+  SITE_NOTE_REQUIRED_MESSAGE,
+  SITE_OPTIONS,
+  SITE_TEMP_RANGE,
+  SITE_THRESHOLD_NOTE,
+  SITE_WIND_RANGE,
+  fieldErrorMessage,
+  postInspectionNewHref,
+  siteHasAttention,
+  type FieldDocKey,
+  type FieldSiteValues,
+  type FieldRecordableCheckItem,
   FIELD_CHECK_ACTION_LABEL,
   FIELD_CHECK_ITEMS,
   FIELD_CHECK_ITEM_LABEL,
@@ -37,7 +67,6 @@ import {
   journalNewHref,
   landingRecordedMessage,
   takeoffRecordedMessage,
-  type FieldCheckItem,
   type FieldCheckResult,
   type FieldGapLike,
 } from "@/lib/ops-field";
@@ -55,7 +84,7 @@ import { WakeLockController, wakeLockNote, type WakeLockStatus } from "@/lib/wak
 import { fieldState, outboxAsEvents, type FieldFlight } from "@/server/ops/field-logic";
 import type { FieldViewDto } from "@/server/ops/field";
 import { newRequestId } from "./drafts";
-import { flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
+import { fieldEventsUrl, flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
 import { FIELD_BACK } from "./ops-nav-model";
 
 const BTN =
@@ -118,6 +147,14 @@ export function FieldClient({
   const [wl, setWl] = useState<WakeLockStatus>("idle");
   const [emSource, setEmSource] = useState("");
   const [emResult, setEmResult] = useState<"" | "not_designated" | "designated">("");
+  // Sprint 14：現場状況の入力（選択・数値・備考）と、飛行後点検を「あとで」にした飛行
+  const [siteSel, setSiteSel] = useState<Record<string, string>>({});
+  const [siteWind, setSiteWind] = useState("");
+  const [siteTemp, setSiteTemp] = useState("");
+  const [siteNote, setSiteNote] = useState("");
+  const [siteMsg, setSiteMsg] = useState<string | null>(null);
+  const [siteBusy, setSiteBusy] = useState(false);
+  const [postLater, setPostLater] = useState<ReadonlySet<string>>(new Set());
   const lastPress = useRef(Number.NEGATIVE_INFINITY);
   const wake = useRef<WakeLockController | null>(null);
 
@@ -262,9 +299,90 @@ export function FieldClient({
     setBanner({ id, kind: "landing", hm, gaps: null, notice: null, undoRef: id, text: "" });
   };
 
-  const onCheck = (item: Exclude<FieldCheckItem, "inspection">, extra: { result?: FieldCheckResult; source?: string } = {}) => {
+  const CHECK_LABEL: Readonly<Record<FieldRecordableCheckItem, string>> = {
+    emergency_airspace: FIELD_CHECK_ITEM_LABEL.emergency_airspace,
+    report_recheck: FIELD_CHECK_ITEM_LABEL.report_recheck,
+    carry: FIELD_CHECK_ITEM_LABEL.carry,
+    docs_confirm: "書類・手続きの確認",
+    flight_restriction: FIELD_RESTRICTION_LABEL,
+    site_conditions: "現場状況",
+  };
+  const onCheck = (
+    item: FieldRecordableCheckItem,
+    extra: { result?: FieldCheckResult; source?: string; docKey?: FieldDocKey; site?: FieldSiteValues } = {},
+  ) => {
     const { id, hm } = record({ kind: "check", item, ...extra });
-    setBanner({ id, kind: "check", hm, gaps: null, notice: null, undoRef: id, text: `${FIELD_CHECK_ITEM_LABEL[item]}を記録しました（${hm}）。` });
+    setBanner({ id, kind: "check", hm, gaps: null, notice: null, undoRef: id, text: `${CHECK_LABEL[item]}を記録しました（${hm}）。` });
+  };
+
+  // 現場状況：注意あり（いる／あり／制限あり）は備考が必須。備考は端末に残さないため、送信待ちを経由せず、いま送る
+  const siteValues = (): FieldSiteValues | null => {
+    const sel = siteSel;
+    if (!sel["third_party"] || !sel["other_aircraft"] || !sel["rain"] || !sel["visibility"]) return null;
+    const numOf = (raw: string, range: { min: number; max: number }): number | null | undefined => {
+      if (raw.trim() === "") return null;
+      const n = Number(raw);
+      return Number.isFinite(n) && n >= range.min && n <= range.max ? Math.round(n * 10) / 10 : undefined;
+    };
+    const windMs = numOf(siteWind, SITE_WIND_RANGE);
+    const tempC = numOf(siteTemp, SITE_TEMP_RANGE);
+    if (windMs === undefined || tempC === undefined) return null;
+    return {
+      thirdParty: sel["third_party"] as FieldSiteValues["thirdParty"],
+      otherAircraft: sel["other_aircraft"] as FieldSiteValues["otherAircraft"],
+      rain: sel["rain"] as FieldSiteValues["rain"],
+      visibility: sel["visibility"] as FieldSiteValues["visibility"],
+      windMs,
+      tempC,
+    };
+  };
+  const onSiteSubmit = async () => {
+    const v = siteValues();
+    if (!v || siteBusy) return;
+    setSiteMsg(null);
+    if (!siteHasAttention(v)) {
+      onCheck("site_conditions", { site: v });
+      setSiteSel({});
+      setSiteWind("");
+      setSiteTemp("");
+      setSiteNote("");
+      return;
+    }
+    if (siteNote.trim() === "") {
+      setSiteMsg(SITE_NOTE_REQUIRED_MESSAGE);
+      return;
+    }
+    setSiteBusy(true);
+    const clientEventId = newRequestId();
+    const occurredAt = nowJstInput(new Date());
+    try {
+      const res = await fetch(fieldEventsUrl(planId), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ kind: "check", item: "site_conditions", clientEventId, occurredAt, queued: false, site: v, note: siteNote.trim() }),
+      });
+      if (res.ok) {
+        await reloadView();
+        setBanner({ id: clientEventId, kind: "check", hm: occurredAt.slice(11, 16), gaps: null, notice: null, undoRef: clientEventId, text: `現場状況を記録しました（${occurredAt.slice(11, 16)}）。` });
+        setSiteSel({});
+        setSiteWind("");
+        setSiteTemp("");
+        setSiteNote("");
+      } else {
+        let code = "";
+        try {
+          code = String(((await res.json()) as { error?: unknown }).error ?? "");
+        } catch {
+          // 本文なし
+        }
+        setSiteMsg(fieldErrorMessage(code));
+      }
+    } catch {
+      setSiteMsg("通信できません。備考つきの現場状況は端末に残せないため、通信できるときにもう一度押してください。");
+    } finally {
+      setSiteBusy(false);
+    }
   };
 
   const onUndo = (ref: string, label: string) => {
@@ -282,6 +400,9 @@ export function FieldClient({
     const e = state.checks[item].eventId;
     if (e) activeRefs.add(e);
   }
+  if (state.round.restriction.eventId) activeRefs.add(state.round.restriction.eventId);
+  if (state.round.site.eventId) activeRefs.add(state.round.site.eventId);
+  for (const c of Object.values(state.docConfirms)) if (c) activeRefs.add(c.eventId);
 
   const bannerText = (b: Banner): string => {
     if (b.kind === "takeoff") return takeoffRecordedMessage(b.hm, b.gaps ?? []);
@@ -340,11 +461,263 @@ export function FieldClient({
   ) : null;
   const bannerBelow = banner !== null && (banner.kind === "takeoff" || banner.kind === "landing");
 
+  // ---- Sprint 14：書類・手続き（登録内容から自動判定。足りないものだけ人が確認する） ----------------------
+  const docRows = view.docs.map((d) => {
+    const human = d.status === "needs_check" ? state.docConfirms[d.key] : undefined;
+    const effective: "confirmed_auto" | "confirmed_human" | "needs_check" | "unmet" =
+      d.status === "unmet" ? "unmet" : d.status === "confirmed" ? "confirmed_auto" : human ? "confirmed_human" : "needs_check";
+    return { d, human, effective, canConfirm: d.status === "needs_check" && !human && d.key !== "report" && view.canRecord && !cancelled };
+  });
+  const docsEl = (
+    <section aria-labelledby="field-h-docs" className="flex flex-col gap-3" data-testid="field-docs">
+      <h3 id="field-h-docs" className="text-xl font-bold">
+        書類・手続き
+      </h3>
+      <p className="text-base text-ink-soft" data-testid="field-docs-note">
+        登録内容から自動で判定しています。足りないもの（要確認）だけ、確認してください。登録は利用者の入力です。
+      </p>
+      <ul className="flex flex-col gap-3">
+        {docRows.map(({ d, human, effective, canConfirm }) => {
+          const word = effective === "confirmed_human" ? FIELD_DOC_HUMAN_CONFIRMED_LABEL : FIELD_DOC_STATUS_LABEL[d.status];
+          const mark = FIELD_DOC_STATUS_MARK[d.status];
+          const cls = effective === "unmet" ? BOX_BAD : effective === "needs_check" ? BOX_TODO : BOX_DONE;
+          return (
+            <li key={d.key} className={cls} data-testid={`field-docs-item-${d.key}`} data-status={d.status} data-effective={effective}>
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                <h4 className="text-xl font-bold">{d.label}</h4>
+                <p className="text-xl font-bold" data-testid={`field-docs-state-${d.key}`}>
+                  <span aria-hidden>{mark} </span>
+                  {word}
+                </p>
+              </div>
+              {d.basis.length > 0 ? (
+                <ul className="flex flex-col gap-1 border-l-4 border-ink-soft pl-3 text-base" data-testid={`field-docs-basis-${d.key}`} aria-label={`${d.label}の根拠`}>
+                  {d.basis.map((b) => (
+                    <li key={b} className="break-words">
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {d.notes.length > 0 ? (
+                <ul className="flex flex-col gap-1 text-base" data-testid={`field-docs-notes-${d.key}`}>
+                  {d.notes.map((n) => (
+                    <li key={n}>{n}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {d.href ? (
+                <a href={d.href} className={BTN_OUTLINE} data-testid={d.status === "unmet" ? `field-docs-fix-${d.key}` : `field-docs-link-${d.key}`}>
+                  {d.status === "unmet" ? FIELD_DOC_FIX_LABEL : d.status === "confirmed" ? FIELD_DOC_BASIS_LABEL : `${d.label}の登録を開く`}
+                </a>
+              ) : null}
+              {canConfirm ? (
+                <button type="button" className={BTN_PRIMARY} data-testid={`field-docs-confirm-${d.key}`} onClick={() => onCheck("docs_confirm", { docKey: d.key })}>
+                  {FIELD_DOC_CONFIRM_ACTION}
+                </button>
+              ) : null}
+              {human && view.canRecord ? (
+                <button
+                  type="button"
+                  className={BTN_OUTLINE}
+                  data-testid={`field-docs-undo-${d.key}`}
+                  onClick={() => onUndo(human.eventId, d.label)}
+                >
+                  {FIELD_UNDO_LABEL}
+                </button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+
+  // ---- Sprint 14：飛行自粛要請の確認（ラウンドごと） -----------------------------------------------
+  const rs = state.round.restriction;
+  const restrictionEl = (
+    <section
+      aria-labelledby="field-h-restriction"
+      className={rs.done ? BOX_DONE : BOX_TODO}
+      data-testid="field-restriction"
+      data-done={rs.done ? "true" : "false"}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <h3 id="field-h-restriction" className="text-xl font-bold">
+          {FIELD_RESTRICTION_LABEL}
+        </h3>
+        <p className="text-xl font-bold" data-testid="field-restriction-state">
+          <span aria-hidden>{rs.done ? FIELD_STATE_MARK.done : FIELD_STATE_MARK.todo} </span>
+          {rs.done ? FIELD_STATE_DONE : FIELD_STATE_TODO}
+          {rs.at ? <span className="font-mono">（{hm(rs.at)}）</span> : null}
+        </p>
+      </div>
+      <p data-testid="field-restriction-note">{view.round.restriction.note}</p>
+      {view.round.restriction.url ? (
+        <a href={view.round.restriction.url} target="_blank" rel="noopener noreferrer" className={BTN_OUTLINE} data-testid="field-restriction-link">
+          {view.round.restriction.sourceTitle}を開く
+        </a>
+      ) : null}
+      {!rs.done && view.canRecord && !cancelled ? (
+        <button type="button" className={BTN_PRIMARY} data-testid="field-restriction-submit" onClick={() => onCheck("flight_restriction")}>
+          {FIELD_RESTRICTION_ACTION}
+        </button>
+      ) : null}
+      {rs.eventId && view.canRecord ? (
+        <button type="button" className={BTN_OUTLINE} data-testid="field-restriction-undo" onClick={() => onUndo(rs.eventId!, FIELD_RESTRICTION_LABEL)}>
+          {FIELD_UNDO_LABEL}
+        </button>
+      ) : null}
+    </section>
+  );
+
+  // ---- Sprint 14：現場状況（毎回人が確認する事実。合否の閾値は決めない） -----------------------------
+  const st = state.round.site;
+  const draftSite = siteValues();
+  const draftAttention = draftSite !== null && siteHasAttention(draftSite);
+  const siteCanSubmit = draftSite !== null && (!draftAttention || siteNote.trim() !== "");
+  const siteEl = (
+    <section
+      aria-labelledby="field-h-site"
+      className={!st.done ? BOX_TODO : st.attention ? BOX_BAD : BOX_DONE}
+      data-testid="field-site"
+      data-done={st.done ? "true" : "false"}
+      data-attention={st.attention ? "true" : "false"}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <h3 id="field-h-site" className="text-xl font-bold">
+          現場状況
+        </h3>
+        <p className="text-xl font-bold" data-testid="field-site-state">
+          <span aria-hidden>{!st.done ? FIELD_STATE_MARK.todo : st.attention ? FIELD_STATE_MARK.abnormal : FIELD_STATE_MARK.done} </span>
+          {!st.done ? FIELD_STATE_TODO : st.attention ? "注意あり" : FIELD_STATE_DONE}
+          {st.at ? <span className="font-mono">（{hm(st.at)}）</span> : null}
+        </p>
+      </div>
+      {st.done && st.values ? (
+        <ul className="flex flex-col gap-1 text-base" data-testid="field-site-values">
+          {SITE_FIELDS.map((f) => {
+            const key = f === "third_party" ? "thirdParty" : f === "other_aircraft" ? "otherAircraft" : f;
+            const val = (st.values as unknown as Record<string, string>)[key];
+            return (
+              <li key={f}>
+                {SITE_FIELD_LABEL[f]}：{SITE_OPTIONS[f].find((o) => o.value === val)?.label ?? val}
+              </li>
+            );
+          })}
+          <li>風速：{st.values.windMs === null ? "未入力" : `${st.values.windMs} m/s`}</li>
+          <li>気温：{st.values.tempC === null ? "未入力" : `${st.values.tempC} ℃`}</li>
+          {view.round.site.note ? <li data-testid="field-site-recorded-note">備考：{view.round.site.note}</li> : null}
+        </ul>
+      ) : null}
+      {!st.done && view.canRecord && !cancelled ? (
+        <div className="flex flex-col gap-3" data-testid="field-site-form">
+          {SITE_FIELDS.map((f) => (
+            <div key={f} role="radiogroup" aria-label={SITE_FIELD_LABEL[f]} className="flex flex-col gap-3">
+              <p className="font-bold">{SITE_FIELD_LABEL[f]}</p>
+              <div className="grid grid-cols-2 gap-3">
+                {SITE_OPTIONS[f].map((o) => {
+                  const on = siteSel[f] === o.value;
+                  return (
+                    <button
+                      key={o.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      className={on ? BTN_PRIMARY : BTN_OUTLINE}
+                      data-testid={`field-site-${f}-${o.value}`}
+                      onClick={() => setSiteSel((cur) => ({ ...cur, [f]: o.value }))}
+                    >
+                      <span aria-hidden>{on ? "◉" : "○"}</span>
+                      {o.label}
+                      {o.attention ? <span aria-hidden>！</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1 font-bold" htmlFor="field-site-wind">
+              風速（m/s・任意）
+              <input
+                id="field-site-wind"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min={SITE_WIND_RANGE.min}
+                max={SITE_WIND_RANGE.max}
+                className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg font-normal text-ink"
+                value={siteWind}
+                onChange={(e) => setSiteWind(e.target.value)}
+                data-testid="field-site-wind"
+              />
+            </label>
+            <label className="flex flex-col gap-1 font-bold" htmlFor="field-site-temp">
+              気温（℃・任意）
+              <input
+                id="field-site-temp"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min={SITE_TEMP_RANGE.min}
+                max={SITE_TEMP_RANGE.max}
+                className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg font-normal text-ink"
+                value={siteTemp}
+                onChange={(e) => setSiteTemp(e.target.value)}
+                data-testid="field-site-temp"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col gap-1 font-bold" htmlFor="field-site-note">
+            備考{draftAttention ? "（必須）" : "（任意）"}
+            <textarea
+              id="field-site-note"
+              rows={2}
+              maxLength={SITE_NOTE_MAX}
+              className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 py-2 text-lg font-normal text-ink"
+              value={siteNote}
+              onChange={(e) => setSiteNote(e.target.value)}
+              aria-required={draftAttention}
+              data-testid="field-site-note"
+            />
+          </label>
+          {draftAttention ? (
+            <p className={BOX_NOTE} data-testid="field-site-note-required">
+              {SITE_NOTE_REQUIRED_MESSAGE}備考は端末に残さないため、通信できるときに記録します。
+            </p>
+          ) : null}
+          {siteMsg ? (
+            <p className={BOX_WARN} role="alert" data-testid="field-site-error">
+              {siteMsg}
+            </p>
+          ) : null}
+          <button type="button" className={BTN_PRIMARY} disabled={!siteCanSubmit || siteBusy} data-testid="field-site-submit" onClick={() => void onSiteSubmit()}>
+            現場状況を記録する
+          </button>
+          {!draftSite ? <p data-testid="field-site-hint">第三者・他機・雨・視程を選ぶと記録できます（風速・気温は未入力でも記録できます）。</p> : null}
+        </div>
+      ) : null}
+      <p className="text-base text-ink-soft" data-testid="field-site-threshold-note">
+        {SITE_THRESHOLD_NOTE}
+      </p>
+      {st.eventId && view.canRecord ? (
+        <button type="button" className={BTN_OUTLINE} data-testid="field-site-undo" onClick={() => onUndo(st.eventId!, "現場状況")}>
+          {FIELD_UNDO_LABEL}
+        </button>
+      ) : null}
+    </section>
+  );
+
   const preflightEl = (
     <section id="preflight" aria-labelledby="field-h-preflight" className="flex scroll-mt-4 flex-col gap-3" data-testid="field-preflight">
       <h2 id="field-h-preflight" className="text-2xl font-bold">
         ① 飛行前の確認
       </h2>
+      <p className="font-bold" data-testid="field-round-label">
+        {FIELD_ROUND_LABEL(state.round.index + 1)}
+        {inFlight ? "（飛行中）" : ""}
+      </p>
       <ul className="flex flex-col gap-3">
         {FIELD_CHECK_ITEMS.map((item) => {
           const c = state.checks[item];
@@ -392,6 +765,9 @@ export function FieldClient({
                       {c.source ? `（${view.emergencySources.find((s) => s.id === c.source)?.title ?? c.source}）` : ""}
                     </p>
                   ) : null}
+                  <p className="text-base text-ink-soft" data-testid="field-emergency-note">
+                    {view.round.emergencyNote}
+                  </p>
                   {!c.done && view.canRecord && !cancelled ? (
                     <div className="flex flex-col gap-3">
                       <label className="flex flex-col gap-1 font-bold" htmlFor="field-em-source">
@@ -516,6 +892,9 @@ export function FieldClient({
           );
         })}
       </ul>
+      {restrictionEl}
+      {siteEl}
+      {docsEl}
     </section>
   );
 
@@ -575,7 +954,7 @@ export function FieldClient({
 
       {state.flights.length > 0 ? (
         <ol className="flex flex-col gap-3" data-testid="field-flights">
-          {state.flights.map((f, i) => {
+          {state.flights.map((f) => {
             const dto = view.flights.find((x) => x.takeoffEventId === f.takeoffEventId);
             const phaseLabel =
               f.phase === "in_flight" ? FIELD_STATE_IN_FLIGHT : f.phase === "journal_pending" ? FIELD_STATE_JOURNAL_PENDING : FIELD_STATE_JOURNAL_DONE;
@@ -583,7 +962,7 @@ export function FieldClient({
             return (
               <li key={f.takeoffEventId} className={BOX} data-testid="field-flight-row" data-phase={f.phase}>
                 <p className="text-xl font-bold">
-                  {i + 1} 回目：<span aria-hidden>{phaseMark} </span>
+                  {f.roundIndex + 1} 回目：<span aria-hidden>{phaseMark} </span>
                   {phaseLabel}
                 </p>
                 <p className="font-mono">
@@ -598,6 +977,9 @@ export function FieldClient({
                 ) : null}
                 {f.gaps.length > 0 ? (
                   <p data-testid="field-flight-gaps">
+                    <span className="font-bold" data-testid="field-flight-gaps-notice">
+                      {FIELD_TAKEOFF_WITH_GAPS_NOTE}。
+                    </span>
                     離陸時の未了：{f.gaps.map(fieldGapLabel).join("、")}
                   </p>
                 ) : null}
@@ -620,6 +1002,81 @@ export function FieldClient({
             );
           })}
         </ol>
+      ) : null}
+    </section>
+  );
+
+  // ---- Sprint 14：飛行後点検（着陸のあと。後回しにできる。未了として残る） -------------------------------
+  const landedFlights = state.flights.filter((f) => f.landingEventId !== null);
+  const postEl = (
+    <section id="post" aria-labelledby="field-h-post" className="flex scroll-mt-4 flex-col gap-3" data-testid="field-post">
+      <h2 id="field-h-post" className="text-2xl font-bold">
+        {FIELD_POST_INSPECTION_LABEL}
+      </h2>
+      {landedFlights.length === 0 ? (
+        <p data-testid="field-post-none">着陸を記録すると、ここから飛行後点検に進めます。</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {landedFlights.map((f) => {
+            const later = postLater.has(f.takeoffEventId);
+            return (
+              <li
+                key={f.takeoffEventId}
+                className={f.post.done ? (f.post.abnormal ? BOX_BAD : BOX_DONE) : BOX_TODO}
+                data-testid="field-post-row"
+                data-done={f.post.done ? "true" : "false"}
+              >
+                <p className="text-xl font-bold" data-testid="field-post-state">
+                  {FIELD_ROUND_LABEL(f.roundIndex + 1)}：<span aria-hidden>{f.post.done ? (f.post.abnormal ? FIELD_STATE_MARK.abnormal : FIELD_STATE_MARK.done) : FIELD_STATE_MARK.todo} </span>
+                  {f.post.done ? (f.post.abnormal ? FIELD_STATE_ABNORMAL : FIELD_STATE_DONE) : FIELD_STATE_TODO}
+                  {f.post.at ? <span className="font-mono">（{hm(f.post.at)}）</span> : null}
+                </p>
+                {f.post.done && f.post.inspectionId ? (
+                  <a href={`/ops/inspections/${f.post.inspectionId}`} className={BTN_OUTLINE} data-testid="field-post-view">
+                    点検の記録を見る
+                  </a>
+                ) : null}
+                {f.post.done && f.post.abnormal ? (
+                  <p className={BOX_WARN} role="alert" data-testid="field-post-defect">
+                    <span className="text-xl font-bold">！ 異常あり</span>
+                    {FIELD_POST_DEFECT_GUIDE}
+                  </p>
+                ) : null}
+                {!f.post.done && view.canInspect && !later ? (
+                  <>
+                    <a href={postInspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-post-link">
+                      {FIELD_POST_INSPECTION_ACTION}
+                    </a>
+                    <button
+                      type="button"
+                      className={BTN_OUTLINE}
+                      data-testid="field-post-later"
+                      onClick={() => setPostLater((cur) => new Set([...cur, f.takeoffEventId]))}
+                    >
+                      {FIELD_POST_INSPECTION_LATER}
+                    </button>
+                  </>
+                ) : null}
+                {!f.post.done && later ? (
+                  <>
+                    <p className={BOX_NOTE} data-testid="field-post-pending">
+                      {FIELD_POST_INSPECTION_PENDING_NOTE}
+                    </p>
+                    <a href={postInspectionNewHref(planId)} className={BTN_OUTLINE} data-testid="field-post-link-later">
+                      {FIELD_POST_INSPECTION_ACTION}
+                    </a>
+                  </>
+                ) : null}
+                {!f.post.done && !view.canInspect ? <p data-testid="field-post-noaccess">飛行後点検は、点検できる人が記入します。</p> : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {!inFlight && state.flights.length > 0 ? (
+        <a href="#preflight" className={BTN_OUTLINE} data-testid="field-next-flight">
+          {FIELD_NEXT_FLIGHT_LABEL}（{FIELD_ROUND_LABEL(state.round.index + 1)}）
+        </a>
       ) : null}
     </section>
   );
@@ -653,8 +1110,12 @@ export function FieldClient({
   );
 
   // 並び：いま必要な操作を上に（段階 1＝飛行前が先、飛行中・離陸待ち＝離着陸が先、着陸後＝日誌が先）。画面の並びと読み上げ・Tab の順を一致させる
-  const sectionOrder: readonly ("preflight" | "flight" | "journal")[] =
-    stage === 1 ? ["preflight", "flight", "journal"] : stage === 3 ? ["journal", "flight", "preflight"] : ["flight", "journal", "preflight"];
+  const sectionOrder: readonly ("preflight" | "flight" | "post" | "journal")[] =
+    stage === 1
+      ? ["preflight", "flight", "post", "journal"]
+      : stage === 3
+        ? ["journal", "post", "flight", "preflight"]
+        : ["flight", "post", "journal", "preflight"];
   const emergencyDesignated = state.checks.emergency_airspace.designated;
 
   return (
@@ -803,7 +1264,7 @@ export function FieldClient({
       ) : null}
 
       {sectionOrder.map((k) => (
-        <Fragment key={k}>{k === "preflight" ? preflightEl : k === "flight" ? flightEl : journalEl}</Fragment>
+        <Fragment key={k}>{k === "preflight" ? preflightEl : k === "flight" ? flightEl : k === "post" ? postEl : journalEl}</Fragment>
       ))}
 
       <p className={BOX} data-testid="field-offline-note">

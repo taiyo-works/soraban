@@ -244,6 +244,8 @@ export type NextActionId =
   | "record_landing"
   | "do_inspection"
   | "check_emergency_airspace"
+  // Sprint 14：着陸のあと、飛行後点検が未了
+  | "do_post_inspection"
   | "write_journal"
   | "review_journal_mismatch"
   | "renew_license"
@@ -256,6 +258,7 @@ export const FIELD_NEXT_ACTION_IDS = [
   "record_landing",
   "do_inspection",
   "check_emergency_airspace",
+  "do_post_inspection",
   "write_journal",
   "review_journal_mismatch",
   "renew_license",
@@ -283,6 +286,7 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   record_landing: "着陸を記録する",
   do_inspection: "日常点検をする",
   check_emergency_airspace: "緊急用務空域を確認する",
+  do_post_inspection: "飛行後点検をする",
   write_journal: "日誌を記入する",
   review_journal_mismatch: "日誌の食い違いを確認する",
   renew_license: "技能証明を更新する",

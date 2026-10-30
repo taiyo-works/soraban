@@ -350,7 +350,7 @@ describe("sanitizeEntry（Sprint 14）", () => {
     const { sanitizeEntry, enqueue, emptyOutbox } = await import("./ops-outbox");
     for (const patch of [{ thirdParty: "present" }, { otherAircraft: "present" }, { rain: "present" }, { visibility: "limited" }]) {
       expect(sanitizeEntry({ ...base, item: "site_conditions", site: { ...SITE, ...patch } })).toBeNull();
-      expect(enqueue(emptyOutbox(), { ...base, kind: "check", item: "site_conditions", site: { ...SITE, ...patch } as never }).entries).toHaveLength(0);
+      expect(enqueue(emptyOutbox(), { clientEventId: ID, kind: "check", occurredAt: "2027-01-05T12:00", item: "site_conditions", site: { ...SITE, ...patch } as never }).entries).toHaveLength(0);
     }
     expect(sanitizeEntry({ ...base, item: "site_conditions", site: { ...SITE, windMs: 999 } })).toBeNull();
     expect(sanitizeEntry({ ...base, item: "site_conditions" })).toBeNull();

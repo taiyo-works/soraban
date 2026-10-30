@@ -1,3 +1,4 @@
+import { safeReturnTo } from "@/lib/ops-return";
 import { notFound } from "next/navigation";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { BasisPlanList, PermitDeclaration, PermitValidityBadge, PermitVersionList } from "@/components/ops/permit-ui";
@@ -17,11 +18,13 @@ export default async function PermitDetailPage({
   searchParams,
 }: {
   readonly params: Promise<{ id: string }>;
-  readonly searchParams: Promise<{ version?: string }>;
+  readonly searchParams: Promise<{ version?: string; returnTo?: string }>;
 }) {
   const { ctx, me } = await requireOpsMember();
   const { id } = await params;
   const sp = await searchParams;
+  // Sprint 14：現場モードから来たとき（returnTo は同じオリジンの /ops/ 配下だけ）、戻り先を現場モードにする
+  const returnTo = safeReturnTo(sp.returnTo);
   let p;
   try {
     p = await getPermit(ctx, id);
@@ -81,7 +84,7 @@ export default async function PermitDetailPage({
       <div className="flex flex-col gap-5">
         <PageHeader
           eyebrow="許可・承認の詳細"
-          back={{ href: "/ops/permits", label: "許可・承認の一覧" }}
+          back={returnTo ? { href: returnTo, label: "現場モードへ戻る" } : { href: "/ops/permits", label: "許可・承認の一覧" }}
           title={
             <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="break-all" data-testid="permit-title">許可・承認 {p.permitNumber}</span>

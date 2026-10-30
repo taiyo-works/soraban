@@ -156,6 +156,7 @@ export type FieldActionInput = {
  *   着陸を記録する（tier 1）：飛行中の離陸がある（中止した計画でも出す）
  *   日常点検をする（tier 3）：飛行当日で、計画の機体の飛行前の点検が今日付けで無い
  *   緊急用務空域を確認する（tier 3）：飛行当日で、確認の行（取り消されていない）が無い
+ *   飛行後点検をする（tier 3）：着陸済みで、その飛行の後の飛行後の日常点検が無い（Sprint 14）
  *   日誌を記入する（tier 3）：日誌待ちの着陸がある。または予定終了から 60 分を過ぎても、飛行記録も離陸の行も無い
  * 中止した計画は、着陸を記録する・日誌を記入する（日誌待ち）だけを出す。
  */
@@ -163,7 +164,7 @@ export const fieldNextActions = (i: FieldActionInput): TodayNextAction[] => {
   const out: TodayNextAction[] = [];
   const startsInMinutes = Math.floor((i.plannedStartAt.getTime() - i.now.getTime()) / MINUTE_MS);
   const add = (
-    id: "record_landing" | "do_inspection" | "check_emergency_airspace" | "write_journal",
+    id: "record_landing" | "do_inspection" | "check_emergency_airspace" | "do_post_inspection" | "write_journal",
     tier: NextActionTier,
     reason: string,
     href: string,
@@ -194,6 +195,11 @@ export const fieldNextActions = (i: FieldActionInput): TodayNextAction[] => {
     if (!i.state.checks.emergency_airspace.done) {
       add("check_emergency_airspace", 3, "飛行当日です。緊急用務空域の確認の記録がありません", fieldHref(i.planId, "preflight"), i.can.record);
     }
+  }
+  // Sprint 14：着陸のあと、飛行後点検が未了（日付に関わらず、日誌待ちと同じく残る）。後回しにできるが、ここに出続ける
+  const postPending = i.state.postPending[0];
+  if (postPending) {
+    add("do_post_inspection", 3, "着陸を記録しました。飛行後点検の記録がありません", fieldHref(i.planId, "post"), i.can.inspect);
   }
   const pending = i.state.pendingJournal[0];
   if (pending) {

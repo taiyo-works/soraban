@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { safeReturnTo } from "@/lib/ops-return";
 import { AircraftForm, VoidForm } from "@/components/ops/ops-client";
 import { VersionList } from "@/components/ops/versions";
 import { AIRCRAFT_STATUS_TONE, Badge, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
@@ -6,9 +7,11 @@ import { getAircraft, listAircraftVersions, OpsError } from "@/server/ops/servic
 import { AIRCRAFT_STATUS_LABELS, CERT_CLASS_LABELS, formatMinutes, requireOpsMember } from "@/server/ops/page";
 
 // 機体の詳細（訂正・取消・版の一覧）。取消済みでも詳細と版の一覧は残る。
-export default async function AircraftDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
+export default async function AircraftDetailPage({ params, searchParams }: { readonly params: Promise<{ id: string }>; readonly searchParams?: Promise<{ returnTo?: string }> }) {
   const { ctx, me } = await requireOpsMember();
   const { id } = await params;
+  // Sprint 14：現場モードから来たとき（returnTo は同じオリジンの /ops/ 配下だけ）、戻り先を現場モードにする
+  const returnTo = safeReturnTo((await searchParams)?.returnTo);
   let a;
   try {
     a = await getAircraft(ctx, id);
@@ -77,7 +80,7 @@ export default async function AircraftDetailPage({ params }: { readonly params: 
       <div className="flex flex-col gap-5">
         <PageHeader
           eyebrow="機体の詳細"
-          back={{ href: "/ops/aircraft", label: "機体の一覧" }}
+          back={returnTo ? { href: returnTo, label: "現場モードへ戻る" } : { href: "/ops/aircraft", label: "機体の一覧" }}
           title={
             <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="break-all">機体 {a.registrationMark}</span>
