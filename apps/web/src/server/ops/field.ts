@@ -54,7 +54,7 @@ import { loadFieldState } from "./field-rows";
 import { gapDto, type GapDto } from "./flight-extras";
 import { loadPlanBundle } from "./plans";
 import { asDate, nowOf } from "./records";
-import { asInput, assertCan, type OpsContext } from "./service";
+import { asInput, assertCan, dateOnly, type OpsContext } from "./service";
 import * as store from "./store";
 import { OpsError, type FieldEventRowWithTimes, type PlanWithJoins } from "./store";
 import { validateFieldEvent, type FieldEventData } from "./validate-field";
@@ -407,7 +407,7 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
           id: pilot.id,
           fullName: pilot.full_name,
           hasLicense: pilot.has_license,
-          licenseExpiresOn: pilot.license_expires_on,
+          licenseExpiresOn: dateOnly(pilot.license_expires_on),
           hasLimitation: pilot.limitation_type || pilot.limitation_weight || pilot.limitation_daytime || pilot.limitation_vlos,
         }
       : null,
