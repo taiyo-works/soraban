@@ -280,7 +280,7 @@ export const fieldBundleGet = opsHandler("GET /api/ops/field-bundle", async ({ c
   const raw = new URL(req.url).searchParams.get("planId");
   if (raw !== null && !svc.isUuid(raw)) return json(404, { error: "not_found" });
   const r = await field.getFieldBundles(ctx, raw === null ? null : raw.toLowerCase());
-  return json(200, { ...r, build: process.env["SORABAN_BUILD_ID"] ?? null });
+  return json(200, { ...r, build: process.env.SORABAN_BUILD_ID ?? null });
 });
 export const planFieldEventsList = opsHandler("GET /api/ops/plans/[id]/field-events", async ({ ctx, params }) =>
   json(200, await field.listFieldEvents(ctx, params["id"] ?? "")),

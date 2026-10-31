@@ -15,7 +15,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { OpsEnv } from "./availability";
 
 /** 保護しない（未ログインでも開ける）運航管理の画面。verifier の交換と Cookie の更新は行う。 */
-export const PUBLIC_OPS_PATHS = ["/ops/sign-in", "/ops/no-access"] as const;
+// Sprint 15：圏外用の画面の枠・Service Worker・マニフェストは利用者のデータを含まず、Cookie なしで取得されるため保護しない。
+export const PUBLIC_OPS_PATHS = ["/ops/sign-in", "/ops/no-access", "/ops/offline", "/ops/sw.js", "/ops/manifest.webmanifest"] as const;
 export const OPS_LOGIN_URL = "/ops/sign-in";
 
 const isUnder = (pathname: string, base: string): boolean => pathname === base || pathname.startsWith(`${base}/`);

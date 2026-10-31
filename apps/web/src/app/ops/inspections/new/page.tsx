@@ -21,11 +21,13 @@ export default async function InspectionNewPage({
   const { aircraft, pilots, fixedPilotId } = await recordFormOptions(ctx, me);
   let aircraftId = sp.aircraftId && isUuid(sp.aircraftId) ? sp.aircraftId.toLowerCase() : undefined;
   let pilotId: string | undefined;
+  let planId: string | undefined;
   if (sp.planId && isUuid(sp.planId)) {
     try {
       const plan = await getPlan(ctx, sp.planId);
       aircraftId = plan.aircraftId;
       pilotId = plan.pilotId;
+      planId = plan.id;
     } catch (e) {
       if (!(e instanceof OpsError && e.status === 404)) throw e;
     }
@@ -37,7 +39,7 @@ export default async function InspectionNewPage({
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
       </PageHeader>
-      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} />
+      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} {...(planId ? { planId } : {})} />
     </main>
   );
 }
