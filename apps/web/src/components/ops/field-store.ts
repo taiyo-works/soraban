@@ -93,6 +93,13 @@ export const listBundles = async (memberId: string): Promise<FieldBundlePlan[]> 
   return out.sort((a, b) => (a.plan.startIso < b.plan.startIso ? -1 : a.plan.startIso > b.plan.startIso ? 1 : 0));
 };
 
+/** 1 つの束を消す。 */
+export const deleteBundle = async (memberId: string, planId: string): Promise<void> => {
+  const key = bundleKey(memberId, planId);
+  memory.delete(key);
+  await tx("readwrite", (s) => s.delete(key));
+};
+
 /** 束を消す。memberId を渡せばその利用者の分だけ、渡さなければすべて（ログアウト）。 */
 export const clearBundles = async (memberId?: string): Promise<void> => {
   for (const k of await allKeys()) {
@@ -149,13 +156,26 @@ export const clearCurrentMember = (): void => {
 export const fetchBundles = async (
   memberId: string,
   planId?: string,
+  /** 全体を取り直すとき、送信待ちが残っている計画（束を消さない）。 */
+  keepPlanIds: readonly string[] = [],
 ): Promise<{ readonly bundles: number; readonly build: string | null; readonly serverNow: string } | null> => {
   try {
-    const res = await fetch(`/api/ops/field-bundle${planId ? `?planId=${planId}` : ""}`, { credentials: "same-origin", cache: "no-store" });
+    // 全体の取り直しでは、端末にある束の計画も送り、まだ使えるものだけ返してもらう（返らなかった束は消す。G-2）
+    const known = planId ? [] : (await listBundles(memberId)).map((b) => b.planId);
+    const q = planId ? `?planId=${planId}` : known.length > 0 ? `?known=${known.join(",")}` : "";
+    const res = await fetch(`/api/ops/field-bundle${q}`, { credentials: "same-origin", cache: "no-store" });
     if (!res.ok) return null;
     const data = (await res.json()) as { memberId?: string; bundles?: unknown[]; build?: string | null; serverNow?: string };
     if (data.memberId !== memberId || !Array.isArray(data.bundles)) return null;
     await saveBundles(memberId, data.bundles);
+    if (!planId) {
+      const returned = new Set(data.bundles.map((b) => (b && typeof b === "object" ? String((b as { planId?: unknown }).planId ?? "") : "")));
+      // 操縦者が変わった・中止した・過去の計画の束は消す。送信待ちが残っている計画の束は残す（圏外で送る前に画面を開けるように）
+      for (const id of known) {
+        if (returned.has(id) || keepPlanIds.includes(id)) continue;
+        await deleteBundle(memberId, id);
+      }
+    }
     return { bundles: data.bundles.length, build: data.build ?? null, serverNow: data.serverNow ?? new Date().toISOString() };
   } catch {
     return null;

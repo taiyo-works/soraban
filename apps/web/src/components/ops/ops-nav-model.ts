@@ -54,9 +54,13 @@ export const visibleNavChildren = (role: MemberRoleDb): readonly NavChild[] => N
 /** 現場モードと、その中の現場の簡易記録（Sprint 12e）。メニューも利用者メニューも出さない。 */
 export const FIELD_PATH = /^\/ops\/plans\/[^/]+\/field(\/incident)?\/?$/;
 
-/** メニューを出さない画面：現場モード（現場の簡易記録を含む）・サインイン・アクセス権なし。 */
+/**
+ * メニューを出さない画面：現場モード（現場の簡易記録を含む）・サインイン・アクセス権なし。
+ * Sprint 15：圏外用の現場の枠（/ops/offline/field）も現場モード。Service Worker はこの枠を現場の URL（/ops/plans/<id>/field）で返すため、
+ * サーバーで描いた枠とブラウザの最初の描画で、メニュー・本文へ移動のリンクの有無を揃える（揃わないと水和の誤り #418 になる）。
+ */
 export const navHiddenOn = (pathname: string): boolean =>
-  FIELD_PATH.test(pathname) || pathname === "/ops/sign-in" || pathname === "/ops/no-access";
+  FIELD_PATH.test(pathname) || pathname === "/ops/offline/field" || pathname === "/ops/sign-in" || pathname === "/ops/no-access";
 
 /**
  * どの項目が現在地か。

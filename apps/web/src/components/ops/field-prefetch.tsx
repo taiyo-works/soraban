@@ -22,7 +22,7 @@ export function FieldPrefetch({ memberId }: { readonly memberId: string }) {
     }, 0);
     setCurrentMember(memberId);
     void (async () => {
-      const r = navigator.onLine ? await fetchBundles(memberId) : null;
+      const r = navigator.onLine ? await fetchBundles(memberId, undefined, planIdsWithOutbox(memberId)) : null;
       if (r) reportServerBuild(r.build);
       const saved = await listBundles(memberId);
       const latest = saved.map((b) => b.fetchedAt).sort().pop() ?? null;
@@ -36,7 +36,7 @@ export function FieldPrefetch({ memberId }: { readonly memberId: string }) {
     };
   }, [memberId]);
   return (
-    <div className="flex flex-col gap-2 text-[13px] text-sb-ink-2">
+    <div className="flex flex-col gap-2 text-base text-sb-ink-2">
       {status ? (
         <p data-testid="pwa-prefetch-status" data-count={status.count}>
           圏外用に端末へ保存した計画：{status.count} 件{status.at ? `（${jstTime(new Date(status.at))} 更新）` : ""}
