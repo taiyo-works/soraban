@@ -107,9 +107,10 @@ const getEvents = async (ctx: APIRequestContext, planId: string): Promise<EventJ
 const postEvent = (ctx: APIRequestContext, planId: string, body: Record<string, unknown>) =>
   ctx.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: NOW_JST, ...body } });
 
-const createInspection = async (ctx: APIRequestContext, aircraftId: string, pilotId: string, inspectedAt = `${DAY}T11:00`): Promise<{ id: string }> => {
+// Sprint 15：点検は計画に結び付いた点検だけが、その計画の現場の「済」に数える（現場から入れる点検と同じく planId を渡す。意図の変更）
+const createInspection = async (ctx: APIRequestContext, aircraftId: string, pilotId: string, inspectedAt = `${DAY}T11:00`, planId?: string): Promise<{ id: string }> => {
   const r = await ctx.post("/api/ops/inspections", {
-    data: { aircraftId, pilotId, inspectedAt, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL },
+    data: { aircraftId, pilotId, inspectedAt, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL, ...(planId ? { planId } : {}) },
   });
   expect(r.status(), await r.text()).toBe(201);
   return (await r.json()) as { id: string };
@@ -723,6 +724,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
         timing: "pre_flight",
         placeName: "本社 駐車場",
         items: { ...ALL_NORMAL, propeller: { result: "abnormal", note: "欠け" } },
+        planId: plan2.id,
       },
     });
     expect(abnormal.status(), await abnormal.text()).toBe(201);
@@ -857,7 +859,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     const selfPilot = await pilotIdOf(seeded("a-pilot"));
     const aircraft = await createAircraft(manager);
     const plan = await createPlan(manager, nightPlan(aircraft.id, selfPilot));
-    const insp = await createInspection(manager, aircraft.id, selfPilot);
+    const insp = await createInspection(manager, aircraft.id, selfPilot, undefined, plan.id);
     await signIn(page.request, seeded("a-pilot"));
     await fixClock(page, "12:00:10");
     await openField(page, plan.id);
@@ -1151,7 +1153,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
       const plan = await createPlan(manager, nightPlan(aircraft.id, selfPilot));
       // 状態を作る：点検（異常あり）・緊急用務空域（指定されている）・通報の記録なし
       const abnormal = await manager.post("/api/ops/inspections", {
-        data: { aircraftId: aircraft.id, pilotId: selfPilot, inspectedAt: `${DAY}T11:30`, timing: "pre_flight", placeName: "本社", items: { ...ALL_NORMAL, battery: { result: "abnormal", note: "膨らみ" } } },
+        data: { aircraftId: aircraft.id, pilotId: selfPilot, inspectedAt: `${DAY}T11:30`, timing: "pre_flight", placeName: "本社", items: { ...ALL_NORMAL, battery: { result: "abnormal", note: "膨らみ" } }, planId: plan.id },
       });
       expect(abnormal.status()).toBe(201);
       const em = await postEvent(manager, plan.id, { kind: "check", item: "emergency_airspace", result: "designated", source: "mlit-emergency-airspace-qa" });

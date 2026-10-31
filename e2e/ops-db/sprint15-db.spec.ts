@@ -262,6 +262,12 @@ test.describe("Sprint 15 B：先読み", () => {
     expect((await pilot2.get(`/api/ops/field-bundle?planId=${mine.id}`)).status()).toBe(403);
     const anon = await pwRequest.newContext({ baseURL: BASE });
     expect((await anon.get("/api/ops/field-bundle")).status()).toBe(401);
+    // G-2：中止した計画の束は、次にホームで取り直したときに端末から消える
+    const fresh = (await (await manager.get(`/api/ops/plans/${mine.id}`)).json()) as { version: number };
+    expect((await manager.post(`/api/ops/plans/${mine.id}/void`, { data: { expectedVersion: fresh.version, reason: "中止の試験" } })).status()).toBe(200);
+    await page.goto("/ops");
+    await expect(page.getByTestId("pwa-prefetch-status")).toBeVisible();
+    await expect.poll(async () => (await bundleKeys(page)).includes(`${me.member.id}:${mine.id}`)).toBe(false);
     for (const c of [manager, pilotCtx, bManager, pilot2, anon]) await c.dispose();
   });
 
@@ -308,6 +314,9 @@ for (const vp of [
       const { manager, aircraft, pilot } = await prepare(page);
       const plan = await createPlan(manager, aircraft.id, pilot.id);
       const notSaved = await createPlan(manager, aircraft.id, pilot.id, { plannedStartAt: `${DAY}T17:00` });
+      // 圏外用の枠を水和するときの誤り（React #418 など）が出ないこと
+      const pageErrors: string[] = [];
+      page.on("pageerror", (e) => pageErrors.push(String(e)));
       await page.clock.setFixedTime(at("11:56:00"));
       await openField(page, plan.id);
       await waitSw(page);
@@ -402,6 +411,7 @@ for (const vp of [
       await page.goto(`/ops/plans/${notSaved.id}/field`);
       await expect(page.getByTestId("offline-not-saved")).toHaveText("この計画は端末に保存されていません。電波のある場所で一度開いてください。");
 
+      expect(pageErrors, "圏外の枠の水和の誤り").toEqual([]);
       // E-1：通信を戻すと、作った順に送られる
       await context.setOffline(false);
       await openField(page, plan.id);
@@ -627,6 +637,32 @@ test.describe("Sprint 15 F：端末と個人情報", () => {
   });
 });
 
+test.describe("Sprint 15 F（再評価）：ログアウトせずに別の利用者がログインしたとき", () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
+
+  test("F-1：ホーム以外の画面（計画の一覧）だけを開いてから圏外になっても、前の利用者の先読みの計画は出ない", async ({ page, context }) => {
+    const { manager, aircraft, pilot } = await prepare(page);
+    const plan = await createPlan(manager, aircraft.id, pilot.id);
+    await page.clock.setFixedTime(at("11:56:00"));
+    await openField(page, plan.id);
+    await waitSw(page);
+    await waitBundle(page, plan.id);
+    // ログアウトせずに、別の利用者（閲覧者）でログインし直す
+    await context.clearCookies();
+    await signIn(page.request, seeded("a-viewer"));
+    const viewerId = await memberIdOf(page.request);
+    await page.goto("/ops/plans");
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem("soraban:ops-current-member"))).toBe(viewerId);
+    await expect.poll(async () => (await bundleKeys(page)).some((k) => k.endsWith(`:${plan.id}`))).toBe(false);
+    await setOnline(page, context, false);
+    await page.goto(`/ops/plans/${plan.id}/field`);
+    await expect(page.getByTestId("offline-not-saved")).toBeVisible();
+    await expect(page.getByText(plan.title)).toHaveCount(0);
+    await setOnline(page, context, true);
+    await manager.dispose();
+  });
+});
+
 test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示", () => {
   test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
@@ -660,6 +696,63 @@ test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け
     const r = await manager.post("/api/ops/inspections", { data: { aircraftId: aircraft.id, pilotId: pilot.id, inspectedAt: `${DAY}T11:20`, timing: "post_flight", placeName: "本社", items: ALL_NORMAL } });
     expect(r.status()).toBe(201);
     expect((await getField(manager, p2.id)).postPendingCount).toBe(1);
+    await manager.dispose();
+  });
+
+  test("BUG-1：計画の操縦者でない操縦者は、他人の計画に点検を結び付けられない（API・画面とも 403。飛行後点検は未のまま）", async ({ page }) => {
+    const manager = await apiAs(seeded("a-manager"));
+    const aPilot = await apiAs(seeded("a-pilot"));
+    const aPilotId = ((await (await aPilot.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    const other = await apiAs(seeded("a-pilot2"));
+    const otherPilotId = ((await (await other.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    const aircraft = await createAircraft(manager);
+    const plan = await createPlan(manager, aircraft.id, aPilotId, { plannedStartAt: `${DAY}T15:30` });
+    const post = (hm: string, body: Record<string, unknown>) =>
+      aPilot.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, queued: true, ...body } });
+    expect((await post("10:35", { kind: "takeoff" })).status()).toBe(201);
+    expect((await post("10:45", { kind: "landing" })).status()).toBe(201);
+    const r = await other.post("/api/ops/inspections", {
+      data: { aircraftId: aircraft.id, pilotId: otherPilotId, inspectedAt: `${DAY}T10:55`, timing: "post_flight", placeName: "本社", items: ALL_NORMAL, planId: plan.id },
+    });
+    expect(r.status()).toBe(403);
+    expect((await other.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T10:56`, queued: true, kind: "check", item: "carry", result: "done" } })).status()).toBe(403);
+    expect((await getEvents(manager, plan.id)).filter((e) => e.item === "inspection")).toHaveLength(0);
+    expect((await getField(manager, plan.id)).postPendingCount).toBe(1);
+    // 画面（URL に他人の計画）から保存しても結び付かない（権限の誤りが出る）
+    await signIn(page.request, seeded("a-pilot2"));
+    await page.clock.setFixedTime(at("11:30:00"));
+    await page.goto(`/ops/inspections/new?planId=${plan.id}&timing=post_flight`);
+    await page.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
+    await page.getByRole("button", { name: "すべて正常" }).click();
+    await page.getByRole("button", { name: "保存", exact: true }).click();
+    await expect(page.getByText("権限").first()).toBeVisible();
+    expect((await getField(manager, plan.id)).postPendingCount).toBe(1);
+    // 計画の操縦者本人は結び付けられる
+    const self = await aPilot.post("/api/ops/inspections", {
+      data: { aircraftId: aircraft.id, pilotId: aPilotId, inspectedAt: `${DAY}T10:57`, timing: "post_flight", placeName: "本社", items: ALL_NORMAL, planId: plan.id },
+    });
+    expect(self.status(), await self.text()).toBe(201);
+    expect((await getField(manager, plan.id)).postPendingCount).toBe(0);
+    for (const c of [manager, aPilot, other]) await c.dispose();
+  });
+
+  test("追加の判断：飛行前点検も、同じ機体・同じ日の別の計画の点検や、結び付きのない点検では満たされない", async ({ page }) => {
+    const { manager, aircraft, pilot } = await prepare(page);
+    const p1 = await createPlan(manager, aircraft.id, pilot.id);
+    const p2 = await createPlan(manager, aircraft.id, pilot.id, { plannedStartAt: `${DAY}T15:00` });
+    const mk = (hm: string, extra: Record<string, unknown> = {}) =>
+      manager.post("/api/ops/inspections", { data: { aircraftId: aircraft.id, pilotId: pilot.id, inspectedAt: `${DAY}T${hm}`, timing: "pre_flight", placeName: "本社", items: ALL_NORMAL, ...extra } });
+    expect((await mk("10:00")).status()).toBe(201);
+    await page.clock.setFixedTime(at("11:30:00"));
+    await openField(page, p1.id);
+    await expect(page.getByTestId("field-item-state-inspection")).toContainText("未");
+    // 現場から点検へ移る導線は planId を渡す
+    await expect(page.getByTestId("field-inspection-link")).toHaveAttribute("href", new RegExp(`planId=${p1.id}`));
+    expect((await mk("10:05", { planId: p1.id })).status()).toBe(201);
+    await openField(page, p1.id);
+    await expect(page.getByTestId("field-item-state-inspection")).toContainText("済");
+    await openField(page, p2.id);
+    await expect(page.getByTestId("field-item-state-inspection")).toContainText("未");
     await manager.dispose();
   });
 

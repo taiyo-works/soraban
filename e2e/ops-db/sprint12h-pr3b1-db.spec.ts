@@ -72,7 +72,8 @@ test.beforeAll(async () => {
     longitude: 133.380508,
     flags: [],
   });
-  const inspection = await post<{ id: string }>(manager, "/api/ops/inspections", { aircraftId: aircraft.id, pilotId, inspectedAt: `${DAY}T08:30`, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL });
+  // Sprint 15：点検は計画に結び付ける（計画の現場の「済」に数える点検。意図の変更）
+  const inspection = await post<{ id: string }>(manager, "/api/ops/inspections", { aircraftId: aircraft.id, pilotId, inspectedAt: `${DAY}T08:30`, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL, planId: plan.id });
   await post(manager, "/api/ops/inspections", { aircraftId: aircraft.id, pilotId, inspectedAt: `${DAY}T09:10`, timing: "post_flight", placeName: "本社 駐車場", items: { ...ALL_NORMAL, propeller: { result: "abnormal", note: "欠け" } } });
   const flight = await post<{ id: string }>(manager, "/api/ops/flights", { aircraftId: aircraft.id, pilotId, purpose: "空撮", takeoffPlace: "米子市日吉津 本社", landingPlace: "米子市日吉津 本社", safetyIssue: false, takeoffAt: `${DAY}T09:00`, landingAt: `${DAY}T09:26` });
   fx = { planId: plan.id, inspectionId: inspection.id, flightId: flight.id, mark };
