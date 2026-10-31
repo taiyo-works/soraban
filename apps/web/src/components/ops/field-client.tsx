@@ -1285,11 +1285,6 @@ export function FieldClient({
           </strong>
         ) : null}
       </span>
-      {unsent > 0 && online ? (
-        <button type="button" className={`${BTN_OUTLINE} !w-auto !py-1`} data-testid="field-send-now" onClick={() => void flush()}>
-          いま送る
-        </button>
-      ) : null}
     </section>
   );
 
@@ -1385,6 +1380,12 @@ export function FieldClient({
           <span className={unsent > 0 ? "text-2xl font-bold" : "font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
           {unsent > 0 ? <span>電波が戻ると自動で送ります。</span> : null}
         </p>
+        {/* 帯（画面の上に固定）には押す部品を置かない（スクロールした操作の上に重ならない）。「いま送る」は送信の状況に置く */}
+        {unsent > 0 && online ? (
+          <button type="button" className={BTN_OUTLINE} data-testid="field-send-now" onClick={() => void flush()}>
+            いま送る
+          </button>
+        ) : null}
         {expiryHours !== null ? (
           <p className={BOX_WARN} role="alert" data-testid="field-expiry-warning">
             {OUTBOX_EXPIRY_WARNING(expiryHours)}
