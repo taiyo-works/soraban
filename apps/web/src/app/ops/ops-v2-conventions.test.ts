@@ -67,8 +67,28 @@ const B2A_FILES = [
   "components/ops/license-renewal.tsx",
 ];
 
-describe("Q-9 ③b1・Q-5 ③b2a の画面・部品は v2 のトークンだけ", () => {
-  for (const f of [...B1_FILES, ...B2A_FILES]) {
+/** ③b2b で v2 にした現場・事故・通報・判定の履歴の画面・部品（docs/evaluations/12h-pr3b2b-test-changes.md に一覧。これで /ops の旧トークンは 0） */
+const B2B_FILES = [
+  "components/ops/field-client.tsx",
+  "components/ops/incident-quick-client.tsx",
+  "components/ops/incident-client.tsx",
+  "components/ops/incident-ui.tsx",
+  "app/ops/incidents/page.tsx",
+  "app/ops/incidents/new/page.tsx",
+  "app/ops/incidents/[id]/page.tsx",
+  "components/ops/report-client.tsx",
+  "components/ops/report-parts.tsx",
+  "app/ops/plans/[id]/report/page.tsx",
+  "app/ops/plans/[id]/snapshots/page.tsx",
+  "app/ops/plans/[id]/snapshots/[sid]/page.tsx",
+  "app/ops/plans/[id]/field/page.tsx",
+  "app/ops/plans/[id]/field/incident/page.tsx",
+  "components/ops/field-mode-mark.tsx",
+  "components/ops/ops-frame.tsx",
+];
+
+describe("Q-9 ③b1・Q-5 ③b2a／③b2b の画面・部品は v2 のトークンだけ", () => {
+  for (const f of [...B1_FILES, ...B2A_FILES, ...B2B_FILES]) {
     it(`${f}：旧トークンの参照・色の直書きが 0`, () => {
       const src = stripComments(read(f));
       expect(src.match(LEGACY)?.[0] ?? null).toBeNull();
@@ -76,8 +96,8 @@ describe("Q-9 ③b1・Q-5 ③b2a の画面・部品は v2 のトークンだけ"
       expect(src.match(/#[0-9a-fA-F]{6}\b|\brgba?\(|\bhsla?\(/)?.[0] ?? null).toBeNull();
     });
   }
-  it("③b2a：登録系の画面に、旧い部品の名前（ui/primitives・font-display・font-mono・左の線の枠）が 0", () => {
-    for (const f of B2A_FILES) {
+  it("③b2a・③b2b：登録系と現場・事故・通報・履歴の画面に、旧い部品の名前（ui/primitives・font-display・font-mono・左の線の枠）が 0", () => {
+    for (const f of [...B2A_FILES, ...B2B_FILES]) {
       const src = stripComments(read(f));
       expect(src, f).not.toMatch(/ui\/primitives/);
       expect(src.match(/(?<![\w-])(?:font-display|font-mono|font-light|text-aux|text-body|text-table)(?![\w-])/)?.[0] ?? null, f).toBeNull();
@@ -149,10 +169,21 @@ describe("Q-18a 公開の `/` の CSS を増やさない", () => {
     // `.ds` 全体（/ops/design の見本）は書き換えない
     expect(css).not.toMatch(/^\.ds \{/m);
   });
-  it("現場（…/field）には .ops-v2 の枠を当てない（現場の v2 化は ③b2）", () => {
+  it("現場（…/field）にも .ops-v2 の枠を当て、現場の 2 画面だけが表示中の間 data-mode=\"field\" を付ける（③b2b。③b1 の「枠を当てない」を反転）", () => {
     const frame = read("components/ops/ops-frame.tsx");
-    expect(frame).toMatch(/isField/);
-    expect(frame).toMatch(/ops-v2/);
+    expect(frame).not.toMatch(/isField/);
+    expect(frame).toMatch(/ds ds-page ops-v2/);
+    for (const f of ["app/ops/plans/[id]/field/page.tsx", "app/ops/plans/[id]/field/incident/page.tsx"]) {
+      expect(read(f), f).toMatch(/<FieldModeMark \/>/);
+    }
+    // 印を付ける部品は、離れたとき（unmount・Activity で隠れたとき）に外す
+    const mark = stripComments(read("components/ops/field-mode-mark.tsx"));
+    expect(mark).toMatch(/useLayoutEffect/);
+    expect(mark).toMatch(/removeAttribute/);
+    // 現場の 2 ページ以外・公開の `/` は data-mode を設定しない（読むだけ）
+    for (const f of ["app/globals.css", "app/page.tsx", "app/layout.tsx", "app/ops/layout.tsx", "components/ops/ops-frame.tsx", "components/ops/field-client.tsx", "components/ops/incident-quick-client.tsx"]) {
+      expect(stripComments(read(f)), f).not.toMatch(/setAttribute\(\s*["']data-mode|dataset\.mode|data-mode=["']field/);
+    }
   });
 });
 

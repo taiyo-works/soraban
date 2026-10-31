@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { FieldModeMark } from "@/components/ops/field-mode-mark";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { FieldClient } from "@/components/ops/field-client";
 import { incidentQuickHref } from "@/lib/ops-incident";
@@ -21,6 +22,7 @@ export default async function PlanFieldPage({ params }: { readonly params: Promi
   }
   return (
     <>
+      <FieldModeMark />
       <DraftOwnerGuard memberId={me.member.id} />
       <FieldClient initial={view} memberId={me.member.id} incidentHref={can(me.member.role, "incident.create") ? incidentQuickHref(view.plan.id) : null} />
     </>

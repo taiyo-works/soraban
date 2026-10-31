@@ -181,6 +181,82 @@
   background: var(--sb-hover);
 }
 
+/* ===== 現場・簡易記録の枠（Sprint 12h PR ③b2b）。意味は枠の形（実線・破線・太さ）と記号・文字が担い、色は補助。線の太さは --sb-mark-w（現場 2.5px） ===== */
+.opx-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  color: var(--sb-ink);
+}
+.opx-box-todo {
+  border: var(--sb-mark-w) dashed var(--sb-edge);
+}
+.opx-box-done,
+.opx-box-ok {
+  border: var(--sb-mark-w) solid var(--sb-ink);
+}
+.opx-box-bad,
+.opx-box-warn {
+  gap: 8px;
+  border: var(--sb-mark-w) solid var(--sb-v-no-fg);
+  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+}
+.opx-box-bad {
+  gap: 12px;
+  background: var(--sb-base);
+}
+.opx-box-note {
+  gap: 8px;
+  border: var(--sb-mark-w) dashed var(--sb-ink);
+}
+.opx-box-alarm {
+  gap: 8px;
+  padding: 16px;
+  border: 6px solid var(--sb-v-no-fg);
+  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+}
+.opx-band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--sb-hit);
+  padding: 8px 12px;
+  border: var(--sb-rule-w) solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  font-size: 18px;
+  line-height: 1.4;
+  text-align: left;
+}
+.opx-band:hover {
+  background: var(--sb-hover);
+}
+/* 面だけで見せる主ボタン（右端の丸と矢印なし）：選択中・現在地 */
+.opx-btn-primary.opx-btn-flat {
+  justify-content: center;
+  padding: 4px 22px;
+}
+.opx-btn-primary.opx-btn-flat::before,
+.opx-btn-primary.opx-btn-flat::after {
+  display: none;
+}
+/* 常にカードの行（狭い画面でも広い画面でも。判定の履歴） */
+.opx-row.opx-row-card {
+  align-items: start;
+  padding: 14px 16px;
+  border-bottom: 0;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-base);
+  box-shadow: var(--sb-shadow);
+}
+
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
  * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の橙線）にする。保存の帯（.opx-submit）は区画の外。 */
 .opx-form > section,
