@@ -37,6 +37,10 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${PORT}`,
     trace: "retain-on-failure",
     ...devices["Desktop Chrome"],
+    // Sprint 15：運航管理の画面は Service Worker を登録する。既存の E2E は Service Worker が無い前提（page.route で応答を作る、
+    // 圏外で画面の読み込みが失敗する、など）で書かれているため、既定では止める（Sprint 14 までと同じ条件）。
+    // Sprint 15 の E2E（sprint15-db.spec.ts）だけが test.use({ serviceWorkers: "allow" }) で許可する。
+    serviceWorkers: "block",
     ...(process.env.E2E_CHROMIUM_PATH
       ? {
           launchOptions: {

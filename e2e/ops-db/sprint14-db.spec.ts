@@ -57,8 +57,8 @@ const createPlan = async (ctx: APIRequestContext, aircraftId: string, pilotId: s
 };
 const postEvent = (ctx: APIRequestContext, planId: string, body: Record<string, unknown>) =>
   ctx.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: NOW_JST, ...body } });
-const createInspection = async (ctx: APIRequestContext, aircraftId: string, pilotId: string, inspectedAt: string, timing: "pre_flight" | "post_flight") => {
-  const r = await ctx.post("/api/ops/inspections", { data: { aircraftId, pilotId, inspectedAt, timing, placeName: "本社 駐車場", items: ALL_NORMAL } });
+const createInspection = async (ctx: APIRequestContext, aircraftId: string, pilotId: string, inspectedAt: string, timing: "pre_flight" | "post_flight", extra: Record<string, unknown> = {}) => {
+  const r = await ctx.post("/api/ops/inspections", { data: { aircraftId, pilotId, inspectedAt, timing, placeName: "本社 駐車場", items: ALL_NORMAL, ...extra } });
   expect(r.status(), await r.text()).toBe(201);
   return (await r.json()) as { id: string };
 };
@@ -228,7 +228,8 @@ for (const vp of [
       await expect(page.locator(`[data-testid="today-next-action"][data-action-id="do_post_inspection"][data-plan-id="${plan.id}"]`)).toBeVisible();
 
       // 飛行後点検を保存して戻ると完了になる（保存は API で代用。入力画面への遷移は上の href で確かめた）
-      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:45`, "post_flight");
+      // Sprint 15（R-1）：飛行後点検は計画に結び付けた点検だけを数える。入力画面（現場から開いたとき）と同じく planId を送る
+      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:45`, "post_flight", { planId: plan.id });
       await openField(page, plan.id);
       await expect(page.getByTestId("field-post-state")).toContainText("済");
 
