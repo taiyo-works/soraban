@@ -136,6 +136,9 @@ type Banner = {
   readonly text: string;
 };
 
+/** 電波が戻ってから送り始めるまでの待ち（ミリ秒）。 */
+const ONLINE_RESEND_DELAY_MS = 1000;
+
 const KIND_LABEL: Readonly<Record<OutboxEntry["kind"], string>> = {
   check: "確認",
   takeoff: "離陸",
@@ -262,20 +265,30 @@ export function FieldClient({
     const iv = window.setInterval(() => {
       if (unsentCount(loadPlanOutbox(planId, memberId)) > 0) void flush();
     }, OUTBOX_RETRY_INTERVAL_MS);
+    // 戻ったら送り、サーバーの内容と先読みの束を最新にする（契約 B-4・E-1）。電波が戻った直後は接続が揺れやすいため、
+    // 少し待ってから送る（その間に再び圏外になれば送らない。送らなくても、15 秒ごとの再試行と「いま送る」がある）
+    let onlineTimer: number | undefined;
     const onOnline = () => {
       setOnline(true);
-      // 戻ったら送り、サーバーの内容と先読みの束を最新にする（契約 B-4・E-1）
-      void flush().then(async () => {
-        await reloadView();
-        await refreshBundle();
-      });
+      window.clearTimeout(onlineTimer);
+      onlineTimer = window.setTimeout(() => {
+        if (!navigator.onLine) return;
+        void flush().then(async () => {
+          await reloadView();
+          await refreshBundle();
+        });
+      }, ONLINE_RESEND_DELAY_MS);
     };
-    const onOffline = () => setOnline(false);
+    const onOffline = () => {
+      window.clearTimeout(onlineTimer);
+      setOnline(false);
+    };
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
       window.clearTimeout(t);
       window.clearInterval(iv);
+      window.clearTimeout(onlineTimer);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
