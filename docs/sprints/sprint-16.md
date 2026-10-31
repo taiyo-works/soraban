@@ -1,6 +1,6 @@
 # Sprint 16: 明るいデザインへの統一（白基調ですっきり。12h ④ を吸収）
 
-> 状態: **計画（ユーザーの承認待ち）。** 2026-10-31、planner 作成。アプリのコードは変えていない。既存の契約（`sprint-12h.md`・`sprint-14.md`・`sprint-15.md` ほか）・北極星・`README.md`・`ops-field-redesign-plan.md` は書き換えていない（番号の付け直しの提案は §3、索引の更新はオーケストレーターに任せる）。
+> 状態: **承認済み（2026-10-31）。** ユーザーの決定: ①進め方は推奨どおり（Sprint 14・15 を main へ → PR #47 を載せ直してマージ → 16-1 → 16-2 → 16-3。12h ④は 16 に吸収）②暗い表示は**常に明るい表示**（暗の値は休眠させて残す）③公開の `/` の挿絵は**塗りを外して線画に**④見本の実機確認のため、Vercel の Preview に `DESIGN_CATALOG=1` を**ユーザーが設定する**。2026-10-31、planner 作成。
 > 要望: 「UI を明るめのデザインで統一したい」（2026-10-30）。方向（2026-10-31、ユーザー決定）: **白基調ですっきり**。白〜ごく薄いグレーの地に、操作の橙と判定色だけを差す。**直射日光の屋外での読みやすさを優先**する。
 > 親: `ops-field-redesign-plan.md` §12、`sprint-12h.md` §7（④）、`sprint-12g.md`（ゲート U1）、`docs/design/design-system-v2-draft.md`（v2 の正）、`sprint-14.md` P-2、`sprint-15.md`、`docs/evaluations/sprint-15-eval.md`（D-1・D-2・R4-1）。
 > 突き合わせた現状: 作業ブランチ `claude/vigilant-fermi-g54nho`（`d0fb4d5`。Sprint 14・15 の成果を含み、main へは未マージ）、`main` 先端 `848b946`、PR #47 のブランチ `origin/feat/12h-pr3b2b-field-v2`（`a9688b3`）。
