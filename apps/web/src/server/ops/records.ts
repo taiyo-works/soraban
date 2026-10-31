@@ -771,6 +771,11 @@ export const createInspection = async (ctx: OpsContext, body: unknown): Promise<
   const mine = await assertMayCreate(ctx, "inspection.create");
   const raw = asInput(body);
   const plan = await resolveInspectionPlan(ctx, raw["planId"]);
+  // 結び付けは現場の記録（flight_field_events）の追記なので、現場の記録と同じ権限（運航管理者、または計画の操縦者本人）が要る。
+  // 他人の計画を指定した点検は 403（結び付けずに保存すると、利用者は結び付いたと誤解しうるため保存もしない）
+  if (plan && !can(ctx.member.role, "field.record", { isSelf: mine !== null && mine.id === plan.pilot_id })) {
+    throw new OpsError(403, "forbidden");
+  }
   const input: Input =
     plan && raw["fillFromPlan"] === true && (typeof raw["placeName"] !== "string" || raw["placeName"].trim() === "")
       ? { ...raw, placeName: plan.place_name }

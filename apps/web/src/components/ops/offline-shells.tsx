@@ -186,7 +186,7 @@ export function OfflineInspectionShell() {
         </p>
         <p className="font-mono">実施時刻：保存した時刻（端末の時計）</p>
       </header>
-      {!b.perms.canInspect ? (
+      {!b.perms.canInspect || !b.perms.canRecord ? (
         <p className={BOX_WARN} data-testid="offline-inspection-noaccess">
           日常点検は、点検できる人が記入します。
         </p>

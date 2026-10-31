@@ -472,7 +472,8 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
 
     it("すべて済ませてから離陸すると、未了事項は空", async () => {
       const p = await approvedPlan(O);
-      await inspect(O, "2027-01-05T10:00");
+      // Sprint 15：飛行前点検も計画に結び付いた点検だけが数える（意図の変更。現場から入れた点検と同じく planId を渡す）
+      await inspect(O, "2027-01-05T10:00", { planId: p.id });
       await reportNew(O, p, "2027-01-05T11:00");
       await post(O, p.id, checkBody("emergency_airspace"));
       await post(O, p.id, checkBody("carry"));
@@ -487,7 +488,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
 
     it("未了事項：異常あり・指定されている・通報の記録が離陸より後・判定が古い・前の版への確認", async () => {
       const p = await approvedPlan(O);
-      await inspect(O, "2027-01-05T10:00", { items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
+      await inspect(O, "2027-01-05T10:00", { planId: p.id, items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
       await post(O, p.id, checkBody("emergency_airspace", { result: "designated" }));
       await post(O, p.id, checkBody("carry"));
       // 通報を 11:58 に記録し、離陸は 11:55（記録が離陸より後）
@@ -698,7 +699,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(v.today).toBe("2027-01-05");
       expect(v.serverNowJst).toBe("2027-01-05T12:00");
       // 日常点検は実際の点検の記録から導出する
-      await inspect(O, "2027-01-05T09:30", { items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
+      await inspect(O, "2027-01-05T09:30", { planId: p.id, items: { ...ITEMS, frame: { result: "abnormal", note: "亀裂" } } });
       v = await field.getFieldView(mgr(O), p.id);
       expect(v.items[0]).toMatchObject({ done: true, stateLabel: "異常あり", abnormal: true, time: "09:30" });
       expect(v.items[0]!.warning).toContain("飛行を止めて不具合を確認");
@@ -1006,8 +1007,8 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(ids(t)).toEqual(expect.arrayContaining(["report", "do_inspection", "check_emergency_airspace", "request_confirmation"]));
       expect(t.nextActions.every((a, i, arr) => i === 0 || arr[i - 1]!.tier <= a.tier)).toBe(true);
       for (const a of t.nextActions) expect(a.label).toMatch(/する$|直す$/);
-      // 記録を足すだけで一覧が変わる
-      await inspect(O, "2027-01-05T09:00");
+      // 記録を足すだけで一覧が変わる（Sprint 15：点検は計画に結び付ける）
+      await inspect(O, "2027-01-05T09:00", { planId: p1.id });
       await post(O, p1.id, checkBody("emergency_airspace"), mgr(O));
       t = await today.getToday(mgr(O));
       expect(t.nextActions.filter((a) => a.planId === p1.id).map((a) => a.id)).not.toContain("do_inspection");
@@ -1448,7 +1449,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
 
     it("D-9 1 つの計画で 2 回飛ぶ通し：確認 → 離陸 → 着陸 → 飛行後点検 → 次の飛行 → 確認 → 離陸 → 着陸", async () => {
       const p = await approvedPlan(O);
-      await inspect(O, "2027-01-05T10:00");
+      await inspect(O, "2027-01-05T10:00", { planId: p.id });
       await reportNew(O, p, "2027-01-05T11:00");
       const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
       await post(O, p.id, checkBody("emergency_airspace", t("11:10")));
@@ -1473,7 +1474,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(v.postPendingCount).toBe(0);
       expect(v.flights[0]!.post.done).toBe(true);
       // 次の飛行（点検からやり直し）
-      await inspect(O, "2027-01-05T11:50");
+      await inspect(O, "2027-01-05T11:50", { planId: p.id });
       await post(O, p.id, checkBody("emergency_airspace", t("11:51")));
       await post(O, p.id, checkBody("flight_restriction", t("11:52")));
       await post(O, p.id, siteBody(SITE_N, t("11:53")));
@@ -1551,6 +1552,55 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(link.inspection_id).toBe(a.record.id);
       const other = await approvedPlan(B);
       await expectOpsError(inspect(A, "2027-01-05T11:48", { timing: "post_flight", planId: other.id }), 400);
+    });
+
+    it("BUG-1：計画の操縦者でない操縦者は、他人の計画に点検を結び付けられない（403。点検も結び付きも増えず、飛行後点検は未のまま）。運航管理者・計画の操縦者本人は結び付けられる", async () => {
+      // 計画 p は操縦者 pilotLinked（利用者 pilotMember に結び付く）の計画
+      const p = await approvedPlan(A, { pilotId: A.pilotLinked.id });
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      await post(A, p.id, body("takeoff", t("10:35")));
+      await post(A, p.id, body("landing", t("10:45")));
+      // 別の操縦者（pilotMember2。自分の操縦者の行を持つ）が、自分の点検に p を指定する
+      const existing = (await owner.query<PilotRow>("select * from pilots where member_id = $1", [A.pilotMember2.id])).rows[0];
+      const other = existing ?? (await addPilot(A.id, "別の 操縦者", A.pilotMember2.id));
+      const otherCtx = ctxOf(A.pilotMember2);
+      const before = await count("daily_inspections", "org_id = $1", [A.id]);
+      await expectOpsError(
+        rec.createInspection(otherCtx, { aircraftId: A.aircraft, pilotId: other.id, inspectedAt: "2027-01-05T10:55", timing: "post_flight", placeName: "本社", items: ITEMS, planId: p.id }),
+        403,
+        "forbidden",
+      );
+      // 比較：同じ人が現場の行を直接送っても 403
+      await expectOpsError(post(A, p.id, checkBody("carry"), otherCtx), 403);
+      expect(await count("daily_inspections", "org_id = $1", [A.id])).toBe(before);
+      expect(await count("flight_field_events", "plan_id = $1 and item = 'inspection'", [p.id])).toBe(0);
+      expect((await field.getFieldView(mgr(A), p.id)).postPendingCount).toBe(1);
+      // 計画の操縦者本人は結び付けられる
+      const self = await rec.createInspection(ctxOf(A.pilotMember), {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotLinked.id,
+        inspectedAt: "2027-01-05T10:56",
+        timing: "post_flight",
+        placeName: "本社",
+        items: ITEMS,
+        planId: p.id,
+      });
+      expect(self.created).toBe(true);
+      expect((await field.getFieldView(mgr(A), p.id)).postPendingCount).toBe(0);
+    });
+
+    it("飛行前点検も計画に結び付いた点検だけを数える（同じ機体・同じ日の別の計画の飛行前点検では満たさない）", async () => {
+      const p1 = await approvedPlan(A);
+      const p2 = await approvedPlan(A);
+      await inspect(A, "2027-01-05T10:00", { planId: p1.id });
+      const v1 = await field.getFieldView(mgr(A), p1.id);
+      const v2 = await field.getFieldView(mgr(A), p2.id);
+      expect(v1.items.find((i) => i.item === "inspection")!.done).toBe(true);
+      expect(v2.items.find((i) => i.item === "inspection")!.done).toBe(false);
+      // 結び付きのない点検（点検の一覧から入れた点検）も満たさない
+      const p3 = await approvedPlan(A);
+      await inspect(A, "2027-01-05T10:01");
+      expect((await field.getFieldView(mgr(A), p3.id)).items.find((i) => i.item === "inspection")!.done).toBe(false);
     });
 
     it("計画の機体と違う機体の点検・中止した計画には結び付けない（点検は保存される）", async () => {
