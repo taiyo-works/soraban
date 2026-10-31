@@ -638,3 +638,15 @@ export const takeoffGaps = (i: TakeoffGapsInput): FieldGap[] => {
   // 項目の順を固定する
   return out.sort((a, b) => FIELD_GAP_ITEMS.indexOf(a.item) - FIELD_GAP_ITEMS.indexOf(b.item));
 };
+
+/**
+ * Sprint 15（X-1）：日誌の入力の既定の飛行前点検。
+ *   - この飛行が現場の記録にあれば、その飛行のラウンドの点検（preInspectionId。着陸より後の点検は入らない）だけを使う。
+ *     現在のラウンドの点検では代えない（着陸でラウンドが閉じた後の点検は、次の飛行のラウンドのもの）。
+ *   - 離陸の行がまだサーバーに届いていない（端末の送信待ち）ときだけ、現在のラウンドの点検を候補にする
+ *     （画面が、端末から戻した離着陸の時刻と照らし、着陸より後の点検なら既定から外す）。
+ */
+export const journalPreInspectionId = (
+  flight: { readonly preInspectionId: string | null } | undefined,
+  currentRoundInspectionId: string | null,
+): string | null => (flight ? flight.preInspectionId : currentRoundInspectionId);

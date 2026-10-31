@@ -9,10 +9,11 @@ import { recordCreateDenied, recordFormOptions } from "@/server/ops/record-page"
 
 // 日常点検の入力（Sprint 11 設計 E、様式2 の 9 項目）。
 // ?planId=…&returnTo=… で、現場モードから来たとき（Sprint 12c）：計画の機体・操縦者を引き継ぎ、保存後に returnTo（/ops/ 配下の同一オリジンのパスだけ）へ戻る。
+// ?takeoffAt=YYYY-MM-DDTHH:MM で、日誌の入力から来たとき（Sprint 15 X-1）：飛行前の点検の実施日時がその飛行の離陸より後なら知らせる。
 export default async function InspectionNewPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ aircraftId?: string; planId?: string; returnTo?: string; timing?: string }>;
+  readonly searchParams: Promise<{ aircraftId?: string; planId?: string; returnTo?: string; timing?: string; takeoffAt?: string }>;
 }) {
   const { ctx, me } = await requireOpsMember();
   const denied = recordCreateDenied(me);
@@ -34,12 +35,13 @@ export default async function InspectionNewPage({
   }
   const returnTo = safeReturnTo(sp.returnTo);
   const initialTiming = sp.timing === "post_flight" ? ("post_flight" as const) : undefined;
+  const flightTakeoffAt = typeof sp.takeoffAt === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(sp.takeoffAt) ? sp.takeoffAt : undefined;
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
       </PageHeader>
-      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} {...(planId ? { planId } : {})} />
+      <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} {...(planId ? { planId } : {})} {...(flightTakeoffAt ? { flightTakeoffAt } : {})} />
     </main>
   );
 }

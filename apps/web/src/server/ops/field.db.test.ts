@@ -13,6 +13,7 @@ import { runRegulationCheckWith } from "../check-core";
 import { runDiagnosis } from "../diagnose-core";
 import { baselineProvider } from "../sprint11e-baseline";
 import * as field from "./field";
+import { journalPreInspectionId } from "./field-logic";
 import type { Judge } from "./judge";
 import { toDiagnosisRunInput } from "./plan-logic";
 import * as plans from "./plans";
@@ -1654,6 +1655,58 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       const again = await rec.createFlight(mgr(A), input);
       expect(again.created).toBe(false);
       expect(await count("flight_field_events", "plan_id = $1 and kind = 'journal_linked'", [pl.id])).toBe(1);
+    });
+
+    it("X-1：着陸より後に実施した飛行前点検は、その飛行の日誌の既定に入らない（次のラウンドには数える）。結び付けて保存すると知らせる。離陸より前の点検は従来どおり引き継ぐ", async () => {
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      // 飛行（08:00〜08:10）の後、08:30 に日誌の画面から飛行前点検を入れた（計画に結び付く）
+      const late = await newPlan(A, { plannedStartAt: "2027-01-05T08:00" });
+      const tk = await post(A, late.id, body("takeoff", t("08:00")));
+      await post(A, late.id, body("landing", t("08:10")));
+      const lateInsp = await inspect(A, "2027-01-05T08:30", { planId: late.id });
+      const v = await field.getFieldView(mgr(A), late.id);
+      expect(v.flights[0]!.preInspectionId).toBeNull();
+      // 次のラウンドの飛行前点検としては済（Sprint 14 のラウンドの導出）
+      expect(v.items.find((i) => i.item === "inspection")!.inspectionId).toBe(lateInsp.record.id);
+      // 日誌の既定（/ops/flights/new?planId&takeoffEventId と同じ組み立て）には入らない
+      const flight = v.flights.find((x) => x.takeoffEventId === tk.event.id);
+      expect(journalPreInspectionId(flight, v.items.find((i) => i.item === "inspection")!.inspectionId)).toBeNull();
+      // 利用者がその点検を選んで保存すると、保存は止めずに知らせる
+      const f = await rec.createFlight(mgr(A), {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotFree.id,
+        takeoffAt: "2027-01-05T08:00",
+        landingAt: "2027-01-05T08:10",
+        safetyIssue: false,
+        takeoffEventId: tk.event.id,
+        flightPlanId: late.id,
+        dailyInspectionId: lateInsp.record.id,
+        fillFromPlan: true,
+      });
+      expect(f.created).toBe(true);
+      expect(f.warnings).toContain("pre_inspection_after_takeoff");
+
+      // 12c の引き継ぎ：離陸より前（06:50）の点検は、その飛行の点検として日誌に入り、知らせは出ない
+      const early = await newPlan(A, { plannedStartAt: "2027-01-05T07:00" });
+      const earlyInsp = await inspect(A, "2027-01-05T06:50", { planId: early.id });
+      const tk2 = await post(A, early.id, body("takeoff", t("07:00")));
+      await post(A, early.id, body("landing", t("07:10")));
+      const v2 = await field.getFieldView(mgr(A), early.id);
+      const flight2 = v2.flights.find((x) => x.takeoffEventId === tk2.event.id);
+      expect(journalPreInspectionId(flight2, v2.items.find((i) => i.item === "inspection")!.inspectionId)).toBe(earlyInsp.record.id);
+      const f2 = await rec.createFlight(mgr(A), {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotFree.id,
+        takeoffAt: "2027-01-05T07:00",
+        landingAt: "2027-01-05T07:10",
+        safetyIssue: false,
+        takeoffEventId: tk2.event.id,
+        flightPlanId: early.id,
+        dailyInspectionId: earlyInsp.record.id,
+        fillFromPlan: true,
+      });
+      expect(f2.created).toBe(true);
+      expect(f2.warnings).not.toContain("pre_inspection_after_takeoff");
     });
   });
 

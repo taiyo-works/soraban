@@ -328,6 +328,32 @@ export const inspectionNewHref = (planId: string): string =>
 export const journalNewHref = (planId: string, takeoffEventId?: string | null): string =>
   `/ops/flights/new?planId=${planId}${takeoffEventId ? `&takeoffEventId=${takeoffEventId}` : ""}`;
 
+// ---- 日誌の飛行前点検の前後（Sprint 15 X-1） -----------------------------------------------
+
+/**
+ * 飛行前の日常点検の実施日時と、ある飛行の離陸・着陸の時刻の前後。どれも JST の "YYYY-MM-DDTHH:MM"（秒以下は見ない）。
+ *   - before_takeoff：離陸の分まで（離陸の時刻が分からないときも、こちら）
+ *   - after_takeoff：離陸の分より後で、着陸の分まで（着陸の時刻が分からないときも、こちら）
+ *   - after_landing：着陸の分より後
+ * 着陸より後に実施した点検は、その飛行の飛行前点検として扱わない（日誌の既定に入れない）。離陸より後の点検を選んだときは知らせる。
+ * 次の飛行の飛行前点検として数えるかは、現場のラウンドの導出（Sprint 14。field-logic.ts）に従う。
+ */
+export type PreInspectionTiming = "before_takeoff" | "after_takeoff" | "after_landing";
+export const preInspectionTimingFor = (inspectedAt: string, takeoffAt: string | null, landingAt: string | null): PreInspectionTiming => {
+  const i = inspectedAt.slice(0, 16);
+  if (landingAt && i > landingAt.slice(0, 16)) return "after_landing";
+  if (takeoffAt && i > takeoffAt.slice(0, 16)) return "after_takeoff";
+  return "before_takeoff";
+};
+/** 日誌の入力で、離陸より後に実施した飛行前の点検を選んでいるとき（保存は止めない）。 */
+export const JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF =
+  "選んだ日常点検（飛行前）の実施日時は、この飛行の離陸より後です。離陸より後の点検は、この飛行の飛行前点検として扱いません。飛行の前に行った点検か確かめてください。";
+/** 日誌の入力から日常点検の入力へ移ったとき、実施日時がその飛行の離陸より後のとき（hm は離陸の時刻）。 */
+export const inspectionAfterFlightTakeoffNote = (hm: string): string =>
+  `実施日時が、日誌の飛行の離陸（${hm}）より後です。離陸より後の点検は、この飛行の飛行前点検として扱いません（日誌に既定で結び付けません）。飛行の前に点検した場合は、実際に点検した時刻に直してください。`;
+/** 日誌の入力の引き継ぎで、この飛行の離陸より前の飛行前点検が無いとき。 */
+export const JOURNAL_NO_PRE_INSPECTION_NOTE = "この飛行の前の、飛行前の日常点検は見つかりませんでした。";
+
 // ---- 「今日」の空の状態 ------------------------------------------------------------
 
 /** 今日の画面に飛行計画がまったくないとき（何がないか）。 */
