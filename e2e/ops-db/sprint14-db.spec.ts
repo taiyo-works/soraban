@@ -205,7 +205,8 @@ for (const vp of [
       const pilotId = await pilotIdOf(seeded("a-pilot"));
       const plan = await createPlan(manager, aircraft.id, pilotId);
       // サーバーの固定時計は JST 12:00。事実の時刻はそれより前（送信待ちの経路）にする
-      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:00`, "pre_flight");
+      // Sprint 15：飛行前点検も計画に結び付けた点検だけが数える（意図の変更）
+      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:00`, "pre_flight", { planId: plan.id });
       await postPast(manager, plan.id, "11:05", { kind: "check", item: "docs_confirm", docKey: "remote_id" });
       await postPast(manager, plan.id, "11:20", { kind: "takeoff" });
       await postPast(manager, plan.id, "11:40", { kind: "landing" });
@@ -243,7 +244,7 @@ for (const vp of [
       await expect(page.getByTestId("field-docs-state-remote_id")).toContainText("確認済み（人が確認）");
 
       // D-9：2 回目の確認 → 離陸 → 着陸
-      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:50`, "pre_flight");
+      await createInspection(manager, aircraft.id, pilotId, `${DAY}T11:50`, "pre_flight", { planId: plan.id });
       await postPast(manager, plan.id, "11:51", { kind: "check", item: "emergency_airspace", result: "not_designated", source: "mlit-emergency-airspace-qa" });
       await postPast(manager, plan.id, "11:52", { kind: "check", item: "flight_restriction" });
       await postPast(manager, plan.id, "11:53", {

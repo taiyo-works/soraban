@@ -258,9 +258,9 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await expect(row.getByTestId("inspection-pending-link")).toHaveAttribute("href", new RegExp(`^/ops/inspections/new\\?planId=${plan.id}`));
     const count = Number((await page.getByTestId("inspection-pending-count").innerText()).replace(/\D/g, ""));
     expect(count).toBe(await page.getByTestId("inspection-pending-row").count());
-    // 点検を記録すると、未実施から消える
+    // 点検を記録すると、未実施から消える（Sprint 15：計画に結び付いた点検だけが数える。未実施のリンクと同じく planId を渡す。意図の変更）
     const r = await manager.post("/api/ops/inspections", {
-      data: { aircraftId: aircraft.id, pilotId, inspectedAt: `${DAY}T11:00`, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL },
+      data: { aircraftId: aircraft.id, pilotId, inspectedAt: `${DAY}T11:00`, timing: "pre_flight", placeName: "本社 駐車場", items: ALL_NORMAL, planId: plan.id },
     });
     expect(r.status(), await r.text()).toBe(201);
     await page.goto("/ops/inspections");
