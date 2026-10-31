@@ -46,7 +46,7 @@
 | 12h ② | 公開の判定画面 `/` の作り直し（契約） | 実装までマージ済み | 契約 #40、実装 #41（2026-10-27） | `sprint-12h-pr2.md` |
 | 13 | 飛行計画通報 API、判定履歴のサーバー保存、README、CI の確認、UX | 計画（本日付の契約。実装しない） | 未作成 | `sprint-13.md` |
 | 14 | 現場の流れの再編（書類・手続き 6 項目の自動判定、空域・現場状況、飛行後点検、飛行ごとの繰り返し）。R1 の 1 本目 | 評価合格（2026-10-30、3 回目の評価。`docs/evaluations/sprint-14-eval.md`）。main へは未マージ | ブランチ `claude/vigilant-fermi-g54nho`（PR 未作成） | `sprint-14.md`、計画は `ops-field-redesign-plan.md` |
-| 15 | 圏外でも現場が回る（PWA、当日データの先読み、点検・日誌を含む送信待ち）。R1 の 2 本目 | 実装済み・評価待ち（ブランチ `claude/vigilant-fermi-g54nho`。実機の確認 G は未） | 未作成 | `sprint-15.md`、`../evaluations/sprint-15-pr-notes.md` |
+| 15 | 圏外でも現場が回る（PWA、当日データの先読み、点検・日誌を含む送信待ち）。R1 の 2 本目 | 評価合格（2026-10-31、3 回目の評価）。main へは未マージ。実機の確認 G は未 | ブランチ `claude/vigilant-fermi-g54nho`（PR 未作成） | `sprint-15.md`、`../evaluations/sprint-15-pr-notes.md` |
 | 16〜27 | 点検整備、日誌の確定と PDF、携行資料、通報の接続、報告まで、社外へ（R1〜R4） | 計画のみ。番号は仮。契約は着手前に作る | 未作成 | `ops-field-redesign-plan.md`（旧 12f の期限一覧は 24 に吸収） |
 
 ### 12h の分割（2026-10-28）
