@@ -48,8 +48,37 @@ const landing = (to: FieldEventLite, hm = "13:30", extra: Partial<FieldEventLite
 const undo = (target: FieldEventLite) => ev({ kind: "undo", targetEventId: target.id });
 const journal = (to: FieldEventLite, recordId: string) => ev({ kind: "journal_linked", targetEventId: to.id, flightRecordId: recordId });
 
-const state = (events: FieldEventLite[], over: Partial<FieldStateInput> = {}): FieldState =>
-  fieldState({ events, inspections: [], flightRecords: [], day: DAY, ...over });
+/**
+ * Sprint 15：点検は、計画に結び付いた点検だけが数える（R-1・飛行前点検も）。既存のテストの点検は「この計画で入れた点検」の意図なので、
+ * 既定で結び付きの行（kind=check・item=inspection）を足す。結び付きの有無そのものを確かめるテストは { link: false } で足さない。
+ */
+const linkEvents = (inspections: readonly InspectionLite[], events: readonly FieldEventLite[]): FieldEventLite[] =>
+  inspections
+    .filter((x) => !events.some((e) => e.item === "inspection" && e.inspectionId === x.id))
+    .map((x, k) => ({
+      id: `link-${x.id}`,
+      clientEventId: `00000000-0000-4000-9000-${String(k).padStart(12, "0")}`,
+      kind: "check" as const,
+      item: "inspection" as const,
+      result: "done" as const,
+      source: null,
+      targetEventId: null,
+      flightRecordId: null,
+      inspectionId: x.id,
+      reportId: null,
+      occurredAt: x.inspectedAt,
+      recordedKey: `0-link-${k}`,
+      queued: false,
+      gaps: null,
+    }));
+const state = (events: FieldEventLite[], over: Partial<FieldStateInput> = {}, opts: { readonly link?: boolean } = {}): FieldState =>
+  fieldState({
+    inspections: [],
+    flightRecords: [],
+    day: DAY,
+    ...over,
+    events: opts.link === false ? events : [...events, ...linkEvents(over.inspections ?? [], events)],
+  });
 
 const insp = (id: string, hm: string, over: Partial<InspectionLite> = {}): InspectionLite => ({
   id,
@@ -496,14 +525,30 @@ describe("Sprint 14 A-1：飛行ラウンドの導出", () => {
     const l1 = landing(t1, "13:30");
     const p1 = insp("p1", "13:40", { timing: "post_flight" });
     // 結び付きなし（Sprint 14 以前の点検、または別の計画に結び付いた点検）
-    expect(state([t1, l1], { inspections: [p1] }).flights[0]!.post.done).toBe(false);
-    expect(state([t1, l1], { inspections: [p1] }).postPending.map((f) => f.takeoffEventId)).toEqual([t1.id]);
+    expect(state([t1, l1], { inspections: [p1] }, { link: false }).flights[0]!.post.done).toBe(false);
+    expect(state([t1, l1], { inspections: [p1] }, { link: false }).postPending.map((f) => f.takeoffEventId)).toEqual([t1.id]);
     // 結び付きを取り消すと、満たさない状態に戻る
     const link = check("inspection", "done", "13:40", { inspectionId: "p1" });
     expect(state([t1, l1, link], { inspections: [p1] }).flights[0]!.post.done).toBe(true);
-    expect(state([t1, l1, link, undo(link)], { inspections: [p1] }).flights[0]!.post.done).toBe(false);
-    // 結び付きは確認項目（checks）には影響しない（日常点検の確認は実際の点検の記録から導出する）
+    expect(state([t1, l1, link, undo(link)], { inspections: [p1] }, { link: false }).flights[0]!.post.done).toBe(false);
+    // 結び付きの行だけで、点検の記録が無ければ済にしない
     expect(state([link], { inspections: [] }).checks.inspection.done).toBe(false);
+  });
+
+  it("Sprint 15（追加）：飛行前点検も、計画に結び付いた点検だけを数える。結び付きのない点検・取り消した結び付きは満たさない。日誌への引き継ぎも同じ", () => {
+    const pre = insp("i1", "12:50");
+    // 結び付きなし：確認項目も、離陸の未了も、日誌への引き継ぎも「なし」
+    const s0 = state([], { inspections: [pre] }, { link: false });
+    expect(s0.checks.inspection.done).toBe(false);
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    expect(state([t1, l1], { inspections: [pre] }, { link: false }).flights[0]!.preInspectionId).toBeNull();
+    // 結び付きあり
+    const link = check("inspection", "done", "12:50", { inspectionId: "i1" });
+    expect(state([link], { inspections: [pre] }).checks.inspection).toMatchObject({ done: true, inspectionId: "i1" });
+    expect(state([link, t1, l1], { inspections: [pre] }).flights[0]!.preInspectionId).toBe("i1");
+    // 結び付きを取り消すと満たさない
+    expect(state([link, undo(link)], { inspections: [pre] }, { link: false }).checks.inspection.done).toBe(false);
   });
 
   it("日誌への引き継ぎ：各飛行は、そのラウンドの飛行前の点検を持つ（着陸でラウンドが閉じても失われない）", () => {

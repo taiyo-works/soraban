@@ -138,8 +138,25 @@ describe("fieldNextActions", () => {
         };
       },
     );
+    // Sprint 15：点検は計画に結び付いた点検だけが数える。この補助の点検は「この計画で入れた点検」なので、結び付きの行を足す
+    const link: FieldEventLite = {
+      id: "link-i1",
+      clientEventId: "link-c1",
+      kind: "check",
+      item: "inspection",
+      result: "done",
+      source: null,
+      targetEventId: null,
+      flightRecordId: null,
+      inspectionId: "i1",
+      reportId: null,
+      occurredAt: NOW.toISOString(),
+      recordedKey: "k000",
+      queued: false,
+      gaps: null,
+    };
     return fieldState({
-      events: evs,
+      events: over.inspection ? [...evs, link] : evs,
       inspections: over.inspection ? [{ id: "i1", inspectedAt: NOW.toISOString(), date: TODAY, timing: "pre_flight", hasAbnormal: false }] : [],
       flightRecords: over.flightRecords ?? [],
       day: TODAY,
