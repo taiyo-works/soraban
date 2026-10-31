@@ -1266,7 +1266,7 @@ export function FieldClient({
   const bandEl = (
     <section
       aria-label="接続と送信の状況"
-      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-ink-mute bg-paper px-1 py-2 text-base"
+      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-ink-mute bg-paper px-1 py-2 text-lg leading-snug"
       data-testid="field-status-band"
       data-online={online ? "true" : "false"}
     >
@@ -1286,7 +1286,7 @@ export function FieldClient({
         ) : null}
       </span>
       {unsent > 0 && online ? (
-        <button type="button" className={`${BTN_OUTLINE} !min-h-12 !w-auto !py-1 text-base`} data-testid="field-send-now" onClick={() => void flush()}>
+        <button type="button" className={`${BTN_OUTLINE} !w-auto !py-1`} data-testid="field-send-now" onClick={() => void flush()}>
           いま送る
         </button>
       ) : null}
