@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今日 | そらばん（UI 設計プロトタイプ）</title>
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body class="">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></symbol><symbol id="i-drone" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><circle cx="5" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v5M12 16.2v.3"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H16"/></symbol><symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4 10 14M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol><symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 3.4-2.2M19 12.5a10 10 0 0 0-5-2.6"/><path d="M2 9a15 15 0 0 1 4.5-3M22 9a15 15 0 0 0-9-3.9"/><path d="M12 20h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-takeoff" viewBox="0 0 24 24"><path d="M12 20V5M5 12l7-7 7 7"/></symbol><symbol id="i-land" viewBox="0 0 24 24"><path d="M12 4v15M5 12l7 7 7-7"/></symbol><symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></symbol><symbol id="i-poly" viewBox="0 0 24 24"><path d="M12 3l8 6-3 11H7L4 9z"/></symbol><symbol id="i-circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.3"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-jump" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol><symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol></defs></svg>
+<div class="app">
+<aside class="side" aria-label="メニュー"><div class="brand"><span class="logo" role="img" aria-label="フューチャーテックのロゴ"></span>そらばん</div>
+   <nav><a class="create" href="02-report-new.html"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg>通報を作る</a>
+   <a href="01-home-today.html" aria-current="page"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg>今日</a>
+   <a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg>案件</a>
+   <a href="07-logbook.html"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg>日誌・飛行時間</a>
+   <a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg>機体の点検</a>
+   <a href="#pilots"><svg class="i " aria-hidden="true"><use href="#i-user"/></svg>操縦者</a>
+   <a href="#help"><svg class="i " aria-hidden="true"><use href="#i-info"/></svg>取扱説明</a></nav>
+   <div class="prov">提供: フューチャーテック株式会社</div></aside>
+<header class="topbar"><span class="brand"><span class="logo" role="img" aria-label="フューチャーテックのロゴ"></span>そらばん</span><span class="ctx"><svg class="i sm" aria-hidden="true"><use href="#i-save"/></svg>送信待ち 0 件</span></header>
+<main class="main" id="main">
+
+<div class="title"><div class="eyebrow">10月31日（土）</div><h1>今日の飛行は 3 件</h1></div>
+<div class="cols two">
+<div>
+ <section class="hero" aria-labelledby="next-h">
+  <div class="when"><span class="t num" id="next-h">13:30</span><span class="u">予定 ・ 約 1 時間</span></div>
+  <div class="what">架空町 公民館 屋根の点検</div>
+  <div class="meta">案件: サンプル商事 屋根点検 ・ 機体 01（例） ・ 操縦者 見本 一郎</div>
+  <ol class="rail" aria-label="飛行の流れ"><li class="done"><span class="dot"><svg class="i sm" aria-hidden="true"><use href="#i-check"/></svg></span><span class="short">通報</span><span class="full">飛行計画の通報</span></li><li class="now" aria-current="step"><span class="dot">2</span><span class="short">前点検</span><span class="full">飛行前点検</span></li><li class="todo"><span class="dot">3</span><span class="short">離陸</span><span class="full">離陸</span></li><li class="todo"><span class="dot">4</span><span class="short">着陸</span><span class="full">着陸</span></li><li class="todo"><span class="dot">5</span><span class="short">後点検</span><span class="full">飛行後点検</span></li><li class="todo"><span class="dot">6</span><span class="short">日誌</span><span class="full">日誌</span></li></ol>
+  <div class="actions">
+   <a class="btn btn-primary" href="04-preflight.html"><span>飛行前点検を始める</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
+  </div>
+  <div class="row-flex sp-t"><span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>通報 記録済み</span><span class="note">受付番号は日誌に結びつきます</span></div>
+ </section>
+
+ <section class="sec" aria-labelledby="today-h">
+  <h2 id="today-h">今日の飛行<span class="count">3 件</span></h2>
+  <ul class="lines">
+   <li><div><div class="k num">09:00 – 09:24</div><div class="v big">架空町 公民館 北側</div></div><span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>日誌 確定待ち</span></li>
+   <li><div><div class="k num">13:30 –</div><div class="v big">架空町 公民館 屋根の点検</div></div><span class="st now">次の飛行</span></li>
+   <li><div><div class="k num">15:30 –</div><div class="v big">架空町 倉庫 外壁の撮影</div></div><span class="st todo">通報 記録済み</span></li>
+  </ul>
+ </section>
+</div>
+
+<div>
+ <section class="sec" aria-labelledby="act-h" style="margin-top:0">
+  <h2 id="act-h">対応が必要<span class="count">2 件</span></h2>
+  <ul class="lines">
+   <li><div><div class="k">明日 10:00 の計画</div><div class="v">通報の受付番号が未記録です</div></div><a class="btn sm" href="03-report-confirm.html">記録する</a></li>
+   <li><div><div class="k">機体 02（例）</div><div class="v">直近の点検に異常あり</div></div><a class="btn sm" href="08-aircraft-inspection.html">点検を見る</a></li>
+  </ul>
+ </section>
+ <section class="sec" aria-labelledby="save-h">
+  <h2 id="save-h">この端末の保存</h2>
+  <ul class="lines">
+   <li><span class="k">送信待ち</span><span class="v num">0 件</span></li>
+   <li><span class="k">最後に保存</span><span class="v num">10:42:08</span></li>
+   <li><span class="k">圏外用に保存した今日の計画</span><span class="v num">3 件</span></li>
+  </ul>
+ </section>
+ <section class="sec" aria-labelledby="hrs-h">
+  <h2 id="hrs-h">総飛行時間</h2>
+  <ul class="lines">
+   <li><span class="k">機体 01（例）</span><span class="hours num">128:42</span></li>
+   <li><span class="k">機体 02（例）</span><span class="hours num">64:05</span></li>
+   <li><span class="k">操縦者 見本 一郎</span><span class="hours num">190:11</span></li>
+  </ul>
+ </section>
+ <p class="sp-t2"><a class="btn btn-quiet" href="#judge">区域の判定（補助）を見る</a></p>
+</div>
+</div>
+</main>
+<footer class="foot">提供: フューチャーテック株式会社 ・ これは設計用の静的プロトタイプです（保存・送信はしません）。</footer>
+<nav class="tabbar" aria-label="メニュー"><a href="01-home-today.html" aria-current="page"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg><span>今日</span></a><a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg><span>案件</span></a><a class="create" href="02-report-new.html"><span class="plus"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg></span><span>通報を作る</span></a><a href="07-logbook.html"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg><span>日誌</span></a><a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg><span>機体</span></a></nav>
+</div>
+
+<script src="proto.js"></script>
+</body>
+</html>

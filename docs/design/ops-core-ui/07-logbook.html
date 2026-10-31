@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日誌・飛行時間 | そらばん（UI 設計プロトタイプ）</title>
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body class="">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></symbol><symbol id="i-drone" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><circle cx="5" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v5M12 16.2v.3"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H16"/></symbol><symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4 10 14M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol><symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 3.4-2.2M19 12.5a10 10 0 0 0-5-2.6"/><path d="M2 9a15 15 0 0 1 4.5-3M22 9a15 15 0 0 0-9-3.9"/><path d="M12 20h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-takeoff" viewBox="0 0 24 24"><path d="M12 20V5M5 12l7-7 7 7"/></symbol><symbol id="i-land" viewBox="0 0 24 24"><path d="M12 4v15M5 12l7 7 7-7"/></symbol><symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></symbol><symbol id="i-poly" viewBox="0 0 24 24"><path d="M12 3l8 6-3 11H7L4 9z"/></symbol><symbol id="i-circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.3"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-jump" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol><symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol></defs></svg>
+<div class="app">
+<aside class="side" aria-label="メニュー"><div class="brand"><span class="logo" role="img" aria-label="フューチャーテックのロゴ"></span>そらばん</div>
+   <nav><a class="create" href="02-report-new.html"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg>通報を作る</a>
+   <a href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg>今日</a>
+   <a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg>案件</a>
+   <a href="07-logbook.html" aria-current="page"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg>日誌・飛行時間</a>
+   <a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg>機体の点検</a>
+   <a href="#pilots"><svg class="i " aria-hidden="true"><use href="#i-user"/></svg>操縦者</a>
+   <a href="#help"><svg class="i " aria-hidden="true"><use href="#i-info"/></svg>取扱説明</a></nav>
+   <div class="prov">提供: フューチャーテック株式会社</div></aside>
+<header class="topbar"><span class="brand"><span class="logo" role="img" aria-label="フューチャーテックのロゴ"></span>そらばん</span><span class="ctx"><svg class="i sm" aria-hidden="true"><use href="#i-save"/></svg>送信待ち 0 件</span></header>
+<main class="main" id="main">
+
+<div class="title"><div class="eyebrow">飛行日誌</div><h1>日誌と飛行時間</h1></div>
+<nav class="tabs" aria-label="日誌の見方"><a href="#rec" aria-current="page">飛行記録</a><a href="#ac">機体別</a><a href="#pl">操縦者別</a><a href="#fm">様式・出力</a></nav>
+
+<div class="cols two sp-t2">
+<div>
+ <section class="hero" aria-labelledby="pend-h" style="margin-top:8px">
+  <div class="eyebrow">確定待ち 2 件のうち、最初の 1 件</div>
+  <div class="when"><span class="t num" id="pend-h">09:00–09:24</span><span class="u">10月31日（土）</span></div>
+  <div class="what">架空町 公民館 北側 ・ 飛行時間 <span class="num">0:24</span></div>
+  <div class="meta">機体 01（例） ・ 操縦者 見本 一郎 ・ 点検 前後とも済み</div>
+  <div class="actions sp-t2"><a class="btn btn-primary" href="#detail"><span>内容を見て確定する</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></a></div>
+ </section>
+
+ <section class="sec" aria-labelledby="sum-h"><h2 id="sum-h">飛行時間の合計</h2>
+  <div class="total"><div><div class="note">今月</div><div class="n num">6:18<small>時間:分</small></div></div><div><div class="note">飛行回数（今月）</div><div class="n num">9<small>回</small></div></div></div>
+  <ul class="lines sp-t">
+   <li><span class="k">機体 01（例） 総飛行時間</span><span class="hours num">128:42</span></li>
+   <li><span class="k">操縦者 見本 一郎 総飛行時間</span><span class="hours num">190:11</span></li>
+  </ul>
+ </section>
+
+ <section class="sec" aria-labelledby="list-h"><h2 id="list-h">飛行記録<span class="count">10月</span></h2>
+  <ul>
+   <li class="rec" aria-current="true"><span class="t num">10/31 09:00–09:24</span><span class="hours num">0:24</span><span class="d">架空町 公民館 北側 ・ 機体 01（例）</span><span style="grid-column:1/-1"><span class="st warn"><svg class="i " aria-hidden="true"><use href="#i-alert"/></svg>確定待ち</span></span></li>
+   <li class="rec"><span class="t num">10/30 14:10–14:52</span><span class="hours num">0:42</span><span class="d">架空町 倉庫 ・ 機体 01（例）</span><span style="grid-column:1/-1"><span class="st warn"><svg class="i " aria-hidden="true"><use href="#i-alert"/></svg>確定待ち</span></span></li>
+   <li class="rec"><span class="t num">10/28 10:05–10:41</span><span class="hours num">0:36</span><span class="d">架空町 公園 ・ 機体 02（例）</span><span style="grid-column:1/-1"><span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>確定済み</span></span></li>
+   <li class="rec"><span class="t num">10/24 13:30–14:12</span><span class="hours num">0:42</span><span class="d">架空町 公民館 ・ 機体 01（例）</span><span style="grid-column:1/-1"><span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>確定済み</span></span></li>
+  </ul>
+ </section>
+</div>
+
+<div id="detail">
+ <section aria-labelledby="det-h" style="margin-top:8px"><h2 id="det-h" class="sec" style="margin:0;font-size:var(--fs-h2);font-weight:800;padding-bottom:10px;border-bottom:2px solid var(--ink)">この記録の内容（様式 1 の項目）</h2>
+  <dl class="kv">
+   <dt>飛行日・目的</dt><dd>10月31日 ・ 屋根の点検（目視と撮影） <span class="st info" style="font-size:14px;padding:2px 8px">入力</span></dd>
+   <dt>離陸場所</dt><dd>架空町 公民館 北側 <span class="st info" style="font-size:14px;padding:2px 8px">通報から</span></dd>
+   <dt>離陸時刻</dt><dd class="num">09:00 <span class="st info" style="font-size:14px;padding:2px 8px">ボタン計測</span></dd>
+   <dt>着陸時刻</dt><dd class="num">09:24 <span class="st info" style="font-size:14px;padding:2px 8px">ボタン計測</span></dd>
+   <dt>飛行時間</dt><dd class="num">0:24 <span class="st info" style="font-size:14px;padding:2px 8px">自動計算</span></dd>
+   <dt>総飛行時間（機体）</dt><dd class="num">128:42 <span class="st info" style="font-size:14px;padding:2px 8px">自動計算</span></dd>
+   <dt>飛行前・後の点検</dt><dd><span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>前 異常なし</span> <span class="st done"><svg class="i " aria-hidden="true"><use href="#i-check"/></svg>後 異常なし</span></dd>
+   <dt>安全に影響のあった事項</dt><dd>なし <span class="st info" style="font-size:14px;padding:2px 8px">飛行後点検から</span></dd>
+   <dt>不具合</dt><dd>なし</dd>
+  </dl>
+ </section>
+ <section class="sec" aria-labelledby="fix-h"><h2 id="fix-h">飛行時間の補正</h2>
+  <div class="diff"><div><div class="note">ボタンで測った時間</div><div class="n num">0:24</div></div><div><div class="note">取り込んだ記録の時間</div><div class="n num">0:25</div></div></div>
+  <div class="field"><span class="lbl">採る方</span><div class="seg" role="radiogroup" aria-label="採る時間"><label><input type="radio" name="adopt" checked>ボタン</label><label><input type="radio" name="adopt">取り込んだ記録</label></div></div>
+  <div class="field"><label for="why">理由（変えるとき）</label><input id="why" class="in" placeholder="例: 着陸のボタンが遅れた"></div>
+  <p class="note">ボタンで測った元の時刻は、版として残ります。</p>
+ </section>
+ <div class="sticky-act" style="margin-top:20px"><button class="btn btn-primary" type="button"><span>この記録を確定する</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></button><span class="note">確定したあとは書き換えません。直すときは、理由を付けた新しい版になります。</span></div>
+ <div class="row-flex sp-t2"><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-ext"/></svg>PDF</button><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-list"/></svg>CSV</button><span class="note">期間・機体・操縦者で絞って出力します</span></div>
+</div>
+</div>
+</main>
+<footer class="foot">提供: フューチャーテック株式会社 ・ これは設計用の静的プロトタイプです（保存・送信はしません）。</footer>
+<nav class="tabbar" aria-label="メニュー"><a href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg><span>今日</span></a><a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg><span>案件</span></a><a class="create" href="02-report-new.html"><span class="plus"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg></span><span>通報を作る</span></a><a href="07-logbook.html" aria-current="page"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg><span>日誌</span></a><a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg><span>機体</span></a></nav>
+</div>
+
+<script src="proto.js"></script>
+</body>
+</html>

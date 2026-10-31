@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通報の新規登録 | そらばん（UI 設計プロトタイプ）</title>
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body class="">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></symbol><symbol id="i-drone" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><circle cx="5" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v5M12 16.2v.3"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H16"/></symbol><symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4 10 14M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol><symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 3.4-2.2M19 12.5a10 10 0 0 0-5-2.6"/><path d="M2 9a15 15 0 0 1 4.5-3M22 9a15 15 0 0 0-9-3.9"/><path d="M12 20h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-takeoff" viewBox="0 0 24 24"><path d="M12 20V5M5 12l7-7 7 7"/></symbol><symbol id="i-land" viewBox="0 0 24 24"><path d="M12 4v15M5 12l7 7 7-7"/></symbol><symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></symbol><symbol id="i-poly" viewBox="0 0 24 24"><path d="M12 3l8 6-3 11H7L4 9z"/></symbol><symbol id="i-circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="1.5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.3"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-jump" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol><symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol></defs></svg>
+<div class="app" data-field-chrome>
+<aside class="side" aria-label="メニュー"><div class="brand"><span class="logo" role="img" aria-label="フューチャーテックのロゴ"></span>そらばん</div>
+   <nav><a class="create" href="02-report-new.html"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg>通報を作る</a>
+   <a href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg>今日</a>
+   <a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg>案件</a>
+   <a href="07-logbook.html"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg>日誌・飛行時間</a>
+   <a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg>機体の点検</a>
+   <a href="#pilots"><svg class="i " aria-hidden="true"><use href="#i-user"/></svg>操縦者</a>
+   <a href="#help"><svg class="i " aria-hidden="true"><use href="#i-info"/></svg>取扱説明</a></nav>
+   <div class="prov">提供: フューチャーテック株式会社</div></aside>
+<header class="topbar"><a class="back" href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-back"/></svg>今日</a><span class="ctx">サンプル商事 屋根点検</span></header>
+<main class="main" id="main">
+
+<div class="title wiz-title"><div class="eyebrow">案件: サンプル商事 屋根点検 ・ 新しい通報</div><h1>飛行計画の通報を作る</h1></div>
+<div data-wizard>
+<div class="cols rail-l">
+ <nav class="stepnav" aria-label="入力の手順"><ol>
+  <li><a href="#s1"><span class="dot">1</span>範囲</a></li>
+  <li><a href="#s2"><span class="dot">2</span>日時と高度</a></li>
+  <li><a href="#s3"><span class="dot">3</span>機体と操縦者</a></li>
+  <li><a href="#s4"><span class="dot">4</span>飛行の内容</a></li>
+  <li><a href="#s5"><span class="dot">5</span>安全と保険</a></li>
+  <li><a href="#s6"><span class="dot">6</span>連絡先と名称</a></li>
+ </ol>
+ <div class="sp-t2"><a class="btn block sm" href="#dup"><svg class="i sm" aria-hidden="true"><use href="#i-copy"/></svg>前回の計画を複製</a></div></nav>
+ <div>
+  <div class="steps" aria-hidden="true"><i class="s now"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i></div>
+  <div class="stepname"><span class="n" id="stepcount">1 / 6</span><b id="stepname">範囲</b><a class="btn sm only-m dup" href="#dup" style="margin-left:auto"><svg class="i sm" aria-hidden="true"><use href="#i-copy"/></svg>前回を複製</a></div>
+  
+<section data-step="1" class="panel" aria-label="範囲">
+ <div class="cols two">
+  <div>
+   <div class="mapwrap" id="mapwrap" role="application" aria-label="飛行範囲の地図">
+    <svg class="base" id="basemap" viewBox="-600 -420 1200 840" aria-hidden="true">
+  <rect x="-600" y="-420" width="1200" height="840" fill="#F3F1EA"/>
+  <rect x="-575" y="-390" width="330" height="230" rx="10" fill="#E1EAD8"/>
+  <path d="M-600 300 C-300 250 -100 330 200 260 S 520 130 600 170" fill="none" stroke="#CFE1E8" stroke-width="64"/>
+  <g stroke-linecap="round" fill="none">
+   <path d="M-600 -70 C-200 -95 220 40 600 5" stroke="#D2CEC0" stroke-width="30"/><path d="M-600 -70 C-200 -95 220 40 600 5" stroke="#fff" stroke-width="22"/>
+   <path d="M-230 -420 V420" stroke="#D2CEC0" stroke-width="20"/><path d="M-230 -420 V420" stroke="#fff" stroke-width="13"/>
+   <path d="M230 -420 C 240 -100 210 200 260 420" stroke="#D2CEC0" stroke-width="20"/><path d="M230 -420 C 240 -100 210 200 260 420" stroke="#fff" stroke-width="13"/>
+   <path d="M-600 -250 H600" stroke="#D2CEC0" stroke-width="16"/><path d="M-600 -250 H600" stroke="#fff" stroke-width="10"/>
+  </g>
+  <rect x="-560" y="265" width="31" height="23" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="228" y="-7" width="32" height="38" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="255" y="-0" width="43" height="35" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="322" y="-211" width="33" height="36" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="194" y="-342" width="43" height="30" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="436" y="185" width="26" height="31" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="437" y="102" width="41" height="33" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="425" y="256" width="33" height="27" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="344" y="-147" width="27" height="26" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="228" y="234" width="24" height="25" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="422" y="-342" width="33" height="27" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="158" y="267" width="37" height="22" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-122" y="-181" width="33" height="29" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-201" y="-8" width="40" height="24" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="419" y="-60" width="48" height="35" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="455" y="-102" width="43" height="25" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="298" y="234" width="25" height="39" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-476" y="-95" width="27" height="20" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="516" y="-226" width="41" height="22" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="395" y="243" width="49" height="42" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="262" y="-187" width="22" height="24" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="240" y="-37" width="43" height="24" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="393" y="-215" width="33" height="41" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-432" y="-38" width="22" height="42" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="128" y="265" width="23" height="41" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-357" y="298" width="39" height="36" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-503" y="159" width="43" height="37" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-22" y="-357" width="25" height="42" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-419" y="102" width="49" height="19" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="394" y="223" width="52" height="43" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="266" y="-86" width="29" height="37" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="393" y="-101" width="29" height="29" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="398" y="11" width="33" height="34" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="234" y="-145" width="44" height="29" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="123" y="231" width="50" height="23" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="137" y="-285" width="37" height="32" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="273" y="282" width="36" height="23" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-78" y="-264" width="42" height="32" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="251" y="-362" width="31" height="32" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-341" y="126" width="31" height="24" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="329" y="261" width="49" height="36" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="476" y="-362" width="45" height="34" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="222" y="249" width="23" height="22" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="93" y="282" width="28" height="21" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-342" y="92" width="29" height="30" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="513" y="-84" width="42" height="38" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="312" y="302" width="27" height="42" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-11" y="-294" width="28" height="34" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-113" y="-316" width="29" height="42" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="280" y="155" width="35" height="40" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="479" y="181" width="42" height="33" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="-184" y="-95" width="37" height="31" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/><rect x="227" y="239" width="47" height="44" rx="2" fill="#E6E2D7" stroke="#D5D0C2" stroke-width="1.5"/>
+  <rect x="-80" y="96" width="150" height="62" rx="4" fill="#DDD8CB" stroke="#C4BEAD" stroke-width="2"/>
+  <text x="-5" y="133" text-anchor="middle" font-size="19" font-weight="700" fill="#4A4843" font-family="sans-serif">架空町公民館</text>
+  <text x="-380" y="295" font-size="20" fill="#5E8394" font-family="sans-serif" transform="rotate(-6 -380 295)">架空川</text>
+  </svg>
+    <svg class="over" id="over" aria-hidden="false"></svg>
+    <div class="map-top"><span class="pillbox"><span id="st-name">範囲 1</span></span><span class="pillbox"><span class="num"><span id="st-verts">5</span> 頂点 ・ <span id="st-area">0</span> m²</span></span></div>
+    <div class="map-act"><button class="btn" id="btn-del" type="button" hidden><svg class="i sm" aria-hidden="true"><use href="#i-trash"/></svg>頂点を削除</button><button class="btn" id="btn-done" type="button" hidden disabled><svg class="i sm" aria-hidden="true"><use href="#i-check"/></svg>完了</button></div>
+    <div class="toast" id="toast" hidden role="status"><span></span><button type="button">取り消す</button></div>
+    <div class="map-attr">地図は参考のモックです</div>
+   </div>
+   <p class="note sp-t" id="maphint" aria-live="polite"></p>
+   
+<div class="toolbar" role="toolbar" aria-label="範囲の編集">
+ <button class="tool" data-mode="select" aria-pressed="true"><svg class="i " aria-hidden="true"><use href="#i-cursor"/></svg>選ぶ</button>
+ <button class="tool" data-mode="draw" aria-pressed="false"><svg class="i " aria-hidden="true"><use href="#i-poly"/></svg>点を打つ</button>
+ <button class="tool" data-mode="circle" aria-pressed="false"><svg class="i " aria-hidden="true"><use href="#i-circ"/></svg>円</button>
+ <button class="tool" id="btn-undo" disabled><svg class="i " aria-hidden="true"><use href="#i-undo"/></svg>戻す</button>
+ <button class="tool" id="btn-redo" disabled><svg class="i " aria-hidden="true"><use href="#i-redo"/></svg>やり直す</button>
+</div>
+
+  </div>
+  <div class="mapside">
+   <details class="grp" id="lists">
+    <summary><span>範囲と頂点の一覧</span><span class="note num"><span id="st-ranges">1</span> 範囲</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+    <div class="note">周長 <span class="num" id="st-perim">0</span> m ・ 数値を直接入力して頂点を動かすこともできます（座標は小数 6 桁）。</div>
+    <div id="rlist" class="vlist" role="listbox" aria-label="範囲の一覧"></div>
+    <div id="radius-row" class="row-flex sp-t" hidden><span class="lbl" style="font-weight:700">円の半径</span><span class="stepper" data-r><button type="button" data-d="-10" aria-label="10 m 小さく">−</button><output id="radius-out">60</output><button type="button" data-d="10" aria-label="10 m 大きく">＋</button></span><span class="note">m（1〜10,000）</span></div>
+    <div id="vlist" class="vlist" role="listbox" aria-label="頂点の座標（緯度, 経度）"></div>
+   </details>
+   <div class="row-flex sp-t"><button class="btn sm" id="btn-addrange" type="button"><svg class="i sm" aria-hidden="true"><use href="#i-plus"/></svg>範囲を足す</button><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-pin"/></svg>現在地へ</button><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-list"/></svg>保存した飛行経路から選ぶ</button></div>
+  </div>
+ </div>
+</section>
+<section data-step="2" class="panel" aria-label="日時と高度" hidden>
+ <div class="field"><label for="d1">飛行の開始日時 <span class="req">必須</span></label>
+  <div class="row-flex"><input id="d1" class="in" type="date" value="2026-10-31" style="flex:1 1 180px"><input class="in" type="time" value="13:30" aria-label="開始時刻" style="flex:1 1 120px"></div>
+  <div class="chips" role="group" aria-label="開始時刻の候補"><label class="chip"><input type="radio" name="t" checked>13:30</label><label class="chip"><input type="radio" name="t">14:00</label><label class="chip"><input type="radio" name="t">15:30</label><label class="chip"><input type="radio" name="t">明日 10:00</label></div></div>
+ <div class="field"><span class="lbl">所要時間 <span class="req">必須</span></span>
+  <div class="chips" role="group" aria-label="所要時間"><label class="chip"><input type="radio" name="dur">30 分</label><label class="chip"><input type="radio" name="dur" checked>1 時間</label><label class="chip"><input type="radio" name="dur">2 時間</label><label class="chip"><input type="radio" name="dur">3 時間</label></div>
+  <div class="row-flex sp-t"><span class="note">終了日時</span><b class="num">2026年10月31日 14:30</b><span class="st info"><svg class="i " aria-hidden="true"><use href="#i-lock"/></svg>開始と所要時間から自動</span></div></div>
+ <div class="field"><label for="mx">最大飛行時間</label><div class="row-flex"><input id="mx" class="in num" style="width:96px" value="0"><span>時間</span><input class="in num" style="width:96px" value="30" aria-label="分"><span>分</span></div></div>
+ <div class="field"><label for="al">飛行高度 <span class="req">必須</span></label><div class="row-flex"><input id="al" class="in num" style="width:120px" value="30" inputmode="numeric"><span>m（1〜999）</span></div><span class="hint">範囲ごとの高度は控えに残し、通報には最大の高度を使います。</span></div>
+ <div class="field"><label for="sp">飛行速度</label><div class="row-flex"><input id="sp" class="in num" style="width:120px" value="5" inputmode="decimal"><span>km/h（約 2.7 kt に自動換算）</span></div></div>
+ <div class="field"><span class="lbl">定期・複数日</span><button class="btn"><svg class="i sm" aria-hidden="true"><use href="#i-cal"/></svg>定期・複数日を指定する</button></div>
+</section>
+<section data-step="3" class="panel" aria-label="機体と操縦者" hidden>
+ <p class="note">機体と操縦者は、DIPS に登録済みのものから選びます。登録・変更は DIPS で行います。</p>
+ <div class="field"><label for="ac">機体 <span class="req">必須</span></label><select id="ac" class="in"><option>機体 01（例） ・ 登録記号 JU-0000</option><option>機体 02（例） ・ 登録記号 JU-0001</option></select><span class="hint">前回の計画の機体を選んであります。</span></div>
+ <div class="frames"><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>機体情報</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div></div>
+ <div class="field"><label for="pl">操縦者 <span class="req">必須</span></label><select id="pl" class="in"><option>操縦者 見本 一郎</option><option>操縦者 見本 二郎</option></select></div>
+ <div class="frames"><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>操縦者情報</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div></div>
+ <div class="field"><label for="pm">飛行許可番号 <span class="opt">任意</span></label><input id="pm" class="in" placeholder="取得済みの番号を控えから選ぶ、または入力"></div>
+</section>
+<section data-step="4" class="panel" aria-label="飛行の内容" hidden>
+ <div class="field"><label for="pp">飛行の目的（控え） <span class="req">必須</span></label><input id="pp" class="in" value="屋根の点検（目視と撮影）"><span class="hint">日誌の「飛行概要」にも使います。</span></div>
+ <div class="frames"><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>飛行目的</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>飛行空域</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>飛行方法</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div></div>
+ <div class="field"><label for="dep">出発地</label><input id="dep" class="in" value="架空町 公民館 駐車場"></div>
+ <div class="field"><label for="arr">目的地</label><input id="arr" class="in" value="同じ場所"></div>
+</section>
+<section data-step="5" class="panel" aria-label="安全と保険" hidden>
+ <div class="field"><span class="lbl">立入管理措置を講じますか</span>
+  <div class="chips" role="group" aria-label="立入管理措置"><label class="chip"><input type="checkbox" checked>立入管理区画の設定</label><label class="chip"><input type="checkbox">立入管理区画の設定（レベル 3 飛行）</label><label class="chip"><input type="checkbox">同（レベル 3.5 飛行関連）</label><label class="chip"><input type="checkbox">立入禁止区画の設定</label></div>
+  <span class="hint">DIPS の続きの項目は未確認です。確認できた分だけを表示しています。</span></div>
+ <div class="field"><span class="lbl">係留飛行を行いますか</span><div class="seg" role="radiogroup" aria-label="係留飛行"><label><input type="radio" name="tether">はい</label><label><input type="radio" name="tether" checked>いいえ</label></div></div>
+ <div class="field"><span class="lbl">補助者人数</span><div class="row-flex"><span class="stepper" data-stepper data-min="0" data-max="99"><button type="button" data-d="-1" aria-label="1 人減らす">−</button><output>2</output><button type="button" data-d="1" aria-label="1 人増やす">＋</button></span><span>人</span></div></div>
+ <div class="frames"><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>保険に関する情報</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div></div>
+</section>
+<section data-step="6" class="panel" aria-label="連絡先と名称" hidden>
+ <div class="field"><span class="lbl">連絡先</span><div class="seg" role="radiogroup" aria-label="連絡先の選び方"><label><input type="radio" name="ct" checked>自アカウント</label><label><input type="radio" name="ct">許可書類の記載</label><label><input type="radio" name="ct">操縦者</label></div></div>
+ <dl class="kv"><dt>氏名</dt><dd>見本 一郎</dd><dt>国／地域・都道府県</dt><dd>日本 ・ 架空県</dd><dt>住所</dt><dd>架空町 1-2-3</dd><dt>電話</dt><dd class="num">000-0000-0000</dd><dt>メールアドレス</dt><dd>sample@example.invalid</dd></dl>
+ <div class="field"><label for="ot">その他情報</label><textarea id="ot" class="in" rows="2" placeholder="自由記述"></textarea></div>
+ <div class="frames"><div class="unknown"><b><svg class="i sm" aria-hidden="true"><use href="#i-lock"/></svg>カテゴリー</b><span class="note">DIPS の区分です。中身はまだ確認できていないため、項目を表示していません。</span></div></div>
+ <div class="field"><label for="nm">飛行計画名称 <span class="req">必須</span></label><input id="nm" class="in num" value="FlightPlan-202610311330"><span class="hint">既定の名称のままで構いません。</span></div>
+</section>
+ </div>
+</div>
+<div class="sticky-act"><div class="row-flex" style="flex-wrap:nowrap"><a class="btn" id="btn-prev" href="#s1" hidden aria-label="前の手順へ" style="min-width:56px"><svg class="i " aria-hidden="true"><use href="#i-back"/></svg></a><a class="btn btn-primary" id="btn-next" href="#s2" style="flex:1"><span class="lbl">次へ: 日時と高度</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></a></div></div>
+</div>
+</main>
+<footer class="foot">提供: フューチャーテック株式会社 ・ これは設計用の静的プロトタイプです（保存・送信はしません）。</footer>
+<nav class="tabbar" aria-label="メニュー"><a href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg><span>今日</span></a><a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg><span>案件</span></a><a class="create" href="02-report-new.html" aria-current="page"><span class="plus"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg></span><span>通報を作る</span></a><a href="07-logbook.html"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg><span>日誌</span></a><a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg><span>機体</span></a></nav>
+</div>
+<script>(function(){var d=document.getElementById('lists');if(d&&innerWidth>=960)d.open=true;})();</script>
+<script src="proto.js"></script>
+</body>
+</html>
