@@ -213,6 +213,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
     // M-1：上バーは製品名と利用者メニュー。画面名「ホーム」は本文の h1 だけ
+    // 上バーが描かれるまで待ってから測る（流し込みの途中の「読み込み中…」のときに測ると boundingBox が null になる。検査の基準は変えない）
+    await expect(page.getByTestId("ops-header")).toBeVisible();
     await expect(page.getByTestId("ops-screen-name")).toHaveCount(0);
     expect((await page.getByTestId("ops-header").boundingBox())!.height).toBeLessThanOrEqual(48);
     await expect(page.getByTestId("ops-header")).not.toContainText("ホーム");
