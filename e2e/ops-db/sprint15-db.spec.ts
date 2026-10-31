@@ -770,8 +770,13 @@ test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け
     const href = (await link.getAttribute("href"))!;
     expect(href).toContain(`planId=${plan.id}`);
     expect(decodeURIComponent(href)).toContain(`returnTo=/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    // X-1：日誌の離陸の日時を点検の入力へ渡す
+    expect(decodeURIComponent(href)).toContain(`takeoffAt=${DAY}T11:00`);
     await link.click();
     await page.waitForURL(/\/ops\/inspections\/new/);
+    // X-1：実施日時の既定（今 = 11:30）は離陸（11:00）より後。「この飛行の飛行前点検として扱いません」と知らせる
+    await expect(page.getByTestId("inspection-after-takeoff")).toContainText("離陸（11:00）より後");
+    await expect(page.getByTestId("inspection-after-takeoff")).toContainText("飛行前点検として扱いません");
     await page.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
     await page.getByRole("button", { name: "すべて正常" }).click();
     await page.getByRole("button", { name: "保存", exact: true }).click();
@@ -780,7 +785,73 @@ test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け
     const linked = (await getEvents(manager, plan.id)).filter((e) => e.kind === "check" && e.item === "inspection");
     expect(linked).toHaveLength(1);
     await expect(page.getByTestId("inspection-select").locator("option")).toHaveCount(2);
+    // X-1：着陸より後（11:30）の点検は、この飛行の日誌の既定に入らない（警告なしに選ばれない）
+    await expect(page.getByTestId("inspection-select")).toHaveValue("");
+    await expect(page.getByTestId("flight-from-field")).toContainText("飛行前の日常点検は見つかりませんでした");
+    expect((await getField(manager, plan.id)).flights[0]!.preInspectionId).toBeNull();
+    await expect(page.getByTestId("record-warnings")).toHaveCount(0);
+    // 利用者が選ぶと、離陸より後の飛行前点検だと知らせる（保存は止めない）
+    await page.getByTestId("inspection-select").selectOption(linked[0]!.inspectionId!);
+    await expect(page.getByTestId("record-warnings")).toContainText("この飛行の飛行前点検として扱いません");
     await manager.dispose();
+  });
+
+  test("X-1：日誌から点検へ移り、実施日時を離陸より前に直して保存すると、知らせは消え、その点検がこの飛行の日誌の既定に入る（12c の引き継ぎ）", async ({ page }) => {
+    const { manager, aircraft, pilot } = await prepare(page);
+    const plan = await createPlan(manager, aircraft.id, pilot.id);
+    const post = (hm: string, body: Record<string, unknown>) =>
+      manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, queued: true, ...body } });
+    const tk = (await (await post("11:00", { kind: "takeoff" })).json()) as { id: string };
+    expect((await post("11:10", { kind: "landing" })).status()).toBe(201);
+    await page.clock.setFixedTime(at("11:30:00"));
+    await page.goto(`/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    await page.getByTestId("journal-inspection-new").click();
+    await page.waitForURL(/\/ops\/inspections\/new/);
+    const iform = page.getByRole("form", { name: "日常点検の入力" });
+    await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("11:30");
+    await expect(page.getByTestId("inspection-after-takeoff")).toBeVisible();
+    await iform.getByLabel("実施時刻", { exact: true }).fill("10:50");
+    await expect(page.getByTestId("inspection-after-takeoff")).toHaveCount(0);
+    await iform.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
+    await page.getByRole("button", { name: "すべて正常" }).click();
+    await page.getByRole("button", { name: "保存", exact: true }).click();
+    await page.waitForURL(new RegExp(`/ops/flights/new\\?planId=${plan.id}`));
+    const linked = (await getEvents(manager, plan.id)).filter((e) => e.kind === "check" && e.item === "inspection");
+    expect(linked).toHaveLength(1);
+    expect((await getField(manager, plan.id)).flights[0]!.preInspectionId).toBe(linked[0]!.inspectionId);
+    await expect(page.getByTestId("inspection-select")).toHaveValue(linked[0]!.inspectionId!);
+    await expect(page.getByTestId("flight-from-field")).toContainText("飛行前の日常点検を結び付けました");
+    await expect(page.getByTestId("record-warnings")).toHaveCount(0);
+    await manager.dispose();
+  });
+
+  test("X-3：点検を計画に結び付ける権限の無い操縦者（他人の計画）には、日誌の点検リンクに planId を付けない。計画の操縦者本人には付ける", async ({ page }) => {
+    const manager = await apiAs(seeded("a-manager"));
+    const aPilot = await apiAs(seeded("a-pilot"));
+    const aPilotId = ((await (await aPilot.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    const aircraft = await createAircraft(manager);
+    const plan = await createPlan(manager, aircraft.id, aPilotId, { plannedStartAt: `${DAY}T16:30` });
+    const post = (hm: string, body: Record<string, unknown>) =>
+      aPilot.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, queued: true, ...body } });
+    const tk = (await (await post("10:20", { kind: "takeoff" })).json()) as { id: string };
+    expect((await post("10:30", { kind: "landing" })).status()).toBe(201);
+    await page.clock.setFixedTime(at("11:30:00"));
+    // 他人の計画の操縦者：リンクは従来の点検の入力（planId・returnTo なし）
+    await signIn(page.request, seeded("a-pilot2"));
+    await page.goto(`/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    const link = page.getByTestId("journal-inspection-new");
+    await expect(link).toBeVisible();
+    const otherHref = (await link.getAttribute("href"))!;
+    expect(otherHref).not.toContain("planId");
+    expect(otherHref).not.toContain("returnTo");
+    expect(otherHref).toContain(`aircraftId=${aircraft.id}`);
+    // 計画の操縦者本人：planId と returnTo を付ける
+    await signIn(page.request, seeded("a-pilot"));
+    await page.goto(`/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    const selfHref = (await page.getByTestId("journal-inspection-new").getAttribute("href"))!;
+    expect(selfHref).toContain(`planId=${plan.id}`);
+    expect(selfHref).toContain("returnTo=");
+    for (const c of [manager, aPilot]) await c.dispose();
   });
 
   test("U-2：通報の根拠に通報日時とそらばんへの記録の時刻が出る。記録が無い計画では、離陸の前に記録する案内が出る", async ({ page }) => {
