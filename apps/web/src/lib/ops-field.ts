@@ -335,7 +335,7 @@ export const journalNewHref = (planId: string, takeoffEventId?: string | null): 
  *   - before_takeoff：離陸の分まで（離陸の時刻が分からないときも、こちら）
  *   - after_takeoff：離陸の分より後で、着陸の分まで（着陸の時刻が分からないときも、こちら）
  *   - after_landing：着陸の分より後
- * 着陸より後に実施した点検は、その飛行の飛行前点検として扱わない（日誌の既定に入れない）。離陸より後の点検を選んだときは知らせる。
+ * 離陸より後に実施した点検は、その飛行の飛行前点検として扱わない（日誌の既定に入れない。X-4）。離陸より後の点検を選んだときは知らせる。
  * 次の飛行の飛行前点検として数えるかは、現場のラウンドの導出（Sprint 14。field-logic.ts）に従う。
  */
 export type PreInspectionTiming = "before_takeoff" | "after_takeoff" | "after_landing";

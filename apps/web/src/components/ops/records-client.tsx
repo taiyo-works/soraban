@@ -808,12 +808,12 @@ export function FlightForm({
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
   const selectedPilot = pilots.find((p) => p.id === v.pilotId);
 
-  // Sprint 15（X-1）：現場から引き継いだ既定の点検が、この飛行の着陸より後に実施した飛行前点検なら、既定から外す
-  // （端末の送信待ちから離着陸の時刻を戻したときに起こりうる。サーバーは着陸より後の点検を既定にしない）。利用者が選び直せば、その選択に従う
+  // Sprint 15（X-1・X-4）：現場から引き継いだ既定の点検が、この飛行の離陸より後に実施した飛行前点検なら、既定から外す
+  // （端末の送信待ちから離着陸の時刻を戻したときに起こりうる。サーバーは離陸より後の点検を既定にしない）。利用者が選び直せば、その選択に従う
   const byId = (id: string) => (candidates ?? []).find((c) => c.id === id);
   const fieldDefault = !inspectionTouched && fromField?.inspectionId != null && v.dailyInspectionId === fromField.inspectionId ? byId(v.dailyInspectionId) : undefined;
   const dropDefault =
-    fieldDefault !== undefined && fieldDefault.timing === "pre_flight" && preInspectionTimingFor(fieldDefault.inspectedAt, takeoffAt || null, landingAt || null) === "after_landing";
+    fieldDefault !== undefined && fieldDefault.timing === "pre_flight" && preInspectionTimingFor(fieldDefault.inspectedAt, takeoffAt || null, landingAt || null) !== "before_takeoff";
   const inspectionValue = dropDefault ? "" : v.dailyInspectionId;
   const selectedInspection = inspectionValue ? byId(inspectionValue) : undefined;
 

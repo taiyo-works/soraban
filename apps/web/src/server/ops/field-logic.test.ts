@@ -730,3 +730,24 @@ describe("Sprint 15 X-1：日誌の既定の飛行前点検（着陸より後の
     expect(journalPreInspectionId(undefined, null)).toBeNull();
   });
 });
+
+describe("Sprint 15 X-4：離陸より前の点検だけを、その飛行の飛行前点検として数える", () => {
+  it("離陸（11:00）と着陸（11:10）の間（11:05）の点検は、その飛行の点検にならず、日誌の既定にも入らない", () => {
+    const t1 = takeoff("11:00");
+    const l1 = landing(t1, "11:10");
+    const s = state([t1, l1], { inspections: [insp("mid", "11:05")] });
+    expect(s.flights[0]!.preInspectionId).toBeNull();
+    expect(journalPreInspectionId(s.flights[0], s.checks.inspection.inspectionId)).toBeNull();
+    // 離陸と同じ分の点検は、離陸より前として数える
+    expect(state([t1, l1], { inspections: [insp("same", "11:00")] }).flights[0]!.preInspectionId).toBe("same");
+  });
+
+  it("飛行中は、その離陸より後の点検でラウンドの「済」にならない。離陸より前の点検は済のまま", () => {
+    const t1 = takeoff("11:00");
+    expect(state([t1], { inspections: [insp("mid", "11:05")] }).checks.inspection.done).toBe(false);
+    expect(state([t1], { inspections: [insp("mid", "11:05")] }).flights[0]!.preInspectionId).toBeNull();
+    const s = state([t1], { inspections: [insp("pre", "10:50"), insp("mid", "11:05")] });
+    expect(s.checks.inspection).toMatchObject({ done: true, inspectionId: "pre" });
+    expect(s.flights[0]!.preInspectionId).toBe("pre");
+  });
+});

@@ -281,8 +281,17 @@ export const fieldState = (i: FieldStateInput): FieldState => {
   const linkedInspections = new Set(
     events.filter((e) => e.kind === "check" && e.item === "inspection" && e.inspectionId !== null && !undone.has(e.id)).map((e) => e.inspectionId as string),
   );
+  // Sprint 15（X-4）：飛行中に飛行前点検はできないため、飛行中（いまのラウンドの離陸が着陸していない）は、その離陸より後の点検を数えない
+  const openTakeoffAt = lastIsOpen && lastTakeoff ? lastTakeoff.occurredAt : null;
   const pre = i.inspections
-    .filter((x) => x.timing === "pre_flight" && linkedInspections.has(x.id) && x.date === i.day && (roundStartAt === null || x.inspectedAt >= roundStartAt))
+    .filter(
+      (x) =>
+        x.timing === "pre_flight" &&
+        linkedInspections.has(x.id) &&
+        x.date === i.day &&
+        (roundStartAt === null || x.inspectedAt >= roundStartAt) &&
+        (openTakeoffAt === null || x.inspectedAt <= openTakeoffAt),
+    )
     .sort((a, b) => (a.inspectedAt < b.inspectedAt ? -1 : a.inspectedAt > b.inspectedAt ? 1 : a.id < b.id ? -1 : 1));
   const latestInspection = pre[pre.length - 1];
   if (latestInspection) {
@@ -324,7 +333,8 @@ export const fieldState = (i: FieldStateInput): FieldState => {
             .filter((x) => x.inspectedAt >= landing.occurredAt && (nextTakeoff === undefined || x.inspectedAt < nextTakeoff.occurredAt))
             .sort((a, b) => (a.inspectedAt < b.inspectedAt ? -1 : a.inspectedAt > b.inspectedAt ? 1 : a.id < b.id ? -1 : 1))
             .pop();
-    // この飛行のラウンドの飛行前の点検（現在のラウンドではなく、この飛行のもの）
+    // この飛行のラウンドの飛行前の点検（現在のラウンドではなく、この飛行のもの）。Sprint 15（X-4）：この飛行の離陸より前の点検だけ
+    // （離陸から着陸の間の点検は、飛行中にはできないので飛行前点検にしない。以前は着陸までを数えていた）
     const prevL = idx > 0 ? landingOf(takeoffs[idx - 1]!) : null;
     const preHit = i.inspections
       .filter(
@@ -333,7 +343,7 @@ export const fieldState = (i: FieldStateInput): FieldState => {
           linkedInspections.has(x.id) &&
           x.date === i.day &&
           (prevL === null || x.inspectedAt >= prevL.occurredAt) &&
-          (landing === null || x.inspectedAt <= landing.occurredAt),
+          x.inspectedAt <= t.occurredAt,
       )
       .sort((a, b) => (a.inspectedAt < b.inspectedAt ? -1 : a.inspectedAt > b.inspectedAt ? 1 : a.id < b.id ? -1 : 1))
       .pop();
@@ -641,10 +651,10 @@ export const takeoffGaps = (i: TakeoffGapsInput): FieldGap[] => {
 
 /**
  * Sprint 15（X-1）：日誌の入力の既定の飛行前点検。
- *   - この飛行が現場の記録にあれば、その飛行のラウンドの点検（preInspectionId。着陸より後の点検は入らない）だけを使う。
+ *   - この飛行が現場の記録にあれば、その飛行のラウンドの点検（preInspectionId。離陸より後の点検は入らない。X-4）だけを使う。
  *     現在のラウンドの点検では代えない（着陸でラウンドが閉じた後の点検は、次の飛行のラウンドのもの）。
  *   - 離陸の行がまだサーバーに届いていない（端末の送信待ち）ときだけ、現在のラウンドの点検を候補にする
- *     （画面が、端末から戻した離着陸の時刻と照らし、着陸より後の点検なら既定から外す）。
+ *     （画面が、端末から戻した離着陸の時刻と照らし、離陸より後の点検なら既定から外す）。
  */
 export const journalPreInspectionId = (
   flight: { readonly preInspectionId: string | null } | undefined,
