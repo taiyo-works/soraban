@@ -756,6 +756,33 @@ test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け
     await manager.dispose();
   });
 
+  test("再評価：日誌の画面の「日常点検を入力する」は計画を付けて開き、保存した点検は計画に結び付き、日誌の入力へ戻る", async ({ page }) => {
+    const { manager, aircraft, pilot } = await prepare(page);
+    const plan = await createPlan(manager, aircraft.id, pilot.id);
+    const post = (hm: string, body: Record<string, unknown>) =>
+      manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, queued: true, ...body } });
+    const tk = (await (await post("11:00", { kind: "takeoff" })).json()) as { id: string };
+    expect((await post("11:10", { kind: "landing" })).status()).toBe(201);
+    await page.clock.setFixedTime(at("11:30:00"));
+    await page.goto(`/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    const link = page.getByTestId("journal-inspection-new");
+    await expect(link).toBeVisible();
+    const href = (await link.getAttribute("href"))!;
+    expect(href).toContain(`planId=${plan.id}`);
+    expect(decodeURIComponent(href)).toContain(`returnTo=/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    await link.click();
+    await page.waitForURL(/\/ops\/inspections\/new/);
+    await page.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
+    await page.getByRole("button", { name: "すべて正常" }).click();
+    await page.getByRole("button", { name: "保存", exact: true }).click();
+    // 保存すると日誌の入力へ戻り、点検は計画に結び付いている
+    await page.waitForURL(new RegExp(`/ops/flights/new\\?planId=${plan.id}`));
+    const linked = (await getEvents(manager, plan.id)).filter((e) => e.kind === "check" && e.item === "inspection");
+    expect(linked).toHaveLength(1);
+    await expect(page.getByTestId("inspection-select").locator("option")).toHaveCount(2);
+    await manager.dispose();
+  });
+
   test("U-2：通報の根拠に通報日時とそらばんへの記録の時刻が出る。記録が無い計画では、離陸の前に記録する案内が出る", async ({ page }) => {
     const { manager, aircraft, pilot } = await prepare(page);
     const plan = await createPlan(manager, aircraft.id, pilot.id, { flags: ["method_night"] });

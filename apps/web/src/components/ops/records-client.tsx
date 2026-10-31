@@ -24,7 +24,7 @@ import {
   type InspectionResult,
   type InspectionTiming,
 } from "@/lib/ops-records";
-import { JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF, JOURNAL_MISMATCH_REPORT_MISSING } from "@/lib/ops-field";
+import { JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF, JOURNAL_MISMATCH_REPORT_MISSING, journalNewHref } from "@/lib/ops-field";
 import { recoverFlightFromOutbox } from "@/lib/ops-outbox";
 import { setChangeFlash } from "./change-notice";
 import { clearDraft, clearOtherUsersDrafts, draftKey, loadDraft, newRequestId, saveDraft } from "./drafts";
@@ -631,6 +631,17 @@ const flightHasInput = (d: Partial<FlightState>): boolean =>
 
 const joinDt = (d: string, t: string): string => (d && t ? `${d}T${t.slice(0, 5)}` : "");
 
+/**
+ * 日誌の入力から日常点検の入力へ（飛行日の点検が無いとき）。Sprint 15：計画から作る日誌（計画の機体のまま）では planId を付け、
+ * 点検をその計画に結び付ける（飛行前点検は計画に結び付いた点検だけが数える。権限はサーバーが現場の記録と同じく確かめる）。
+ * 保存後は日誌の入力へ戻る。計画を経ない日誌・計画と違う機体では従来どおり（結び付けない）。
+ */
+export const inspectionNewFromJournalHref = (aircraftId: string, fromPlan?: FlightFromPlan, fromField?: FlightFromField): string => {
+  if (!fromPlan || fromPlan.aircraftId !== aircraftId) return `/ops/inspections/new?aircraftId=${aircraftId}`;
+  const back = journalNewHref(fromPlan.planId, fromField?.takeoffEventId ?? null);
+  return `/ops/inspections/new?aircraftId=${aircraftId}&planId=${fromPlan.planId}&returnTo=${encodeURIComponent(back)}`;
+};
+
 export function FlightForm({
   aircraft,
   pilots,
@@ -947,7 +958,7 @@ export function FlightForm({
         </Field>
         <Warnings items={warnings} />
         {noInspectionOnDay ? (
-          <a href={`/ops/inspections/new?aircraftId=${v.aircraftId}`} className={`${buttonOutlineBrandClass} self-start`}>
+          <a href={inspectionNewFromJournalHref(v.aircraftId, fromPlan, fromField)} className={`${buttonOutlineBrandClass} self-start`} data-testid="journal-inspection-new">
             日常点検を入力する
           </a>
         ) : null}
