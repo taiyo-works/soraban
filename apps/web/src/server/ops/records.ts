@@ -7,6 +7,8 @@ import { INSPECTION_ITEMS, type InspectionItemKey, type InspectionResult, type I
 import {
   JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
   JOURNAL_MISMATCH_REPORT_MISSING,
+  JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF,
+  preInspectionTimingFor,
 } from "@/lib/ops-field";
 import { can } from "./authz";
 import { checkJournalLink } from "./field-logic";
@@ -298,7 +300,9 @@ export type RecordWarning =
   // Sprint 12c：日誌の食い違い（知らせるだけ。保存は止めない）
   | "outside_plan_window"
   | "report_missing"
-  | "report_after_takeoff";
+  | "report_after_takeoff"
+  // Sprint 15（X-1）：離陸より後に実施した飛行前の点検を結び付けた（知らせるだけ。保存は止めない）
+  | "pre_inspection_after_takeoff";
 
 export const WARNING_MESSAGES: Readonly<Record<RecordWarning, string>> = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
@@ -309,6 +313,7 @@ export const WARNING_MESSAGES: Readonly<Record<RecordWarning, string>> = {
   outside_plan_window: "計画の時間帯の外で飛行しています。",
   report_missing: JOURNAL_MISMATCH_REPORT_MISSING,
   report_after_takeoff: JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
+  pre_inspection_after_takeoff: JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF,
 };
 
 const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<RecordWarning[]> => {
@@ -320,6 +325,16 @@ const flightWarnings = async (ctx: OpsContext, f: FlightWithTotal): Promise<Reco
   }
   const latest = await store.latestInspectionBefore(ctx.db, ctx.member.org_id, f.aircraft_id, asDate(f.takeoff_at));
   if (latest?.has_abnormal) out.push("recent_inspection_abnormal");
+  // Sprint 15（X-1）：結び付けた飛行前の点検が、この飛行の離陸より後に実施したもの（分の単位で比べる）
+  if (f.daily_inspection_id) {
+    const linked = await store.getInspection(ctx.db, ctx.member.org_id, f.daily_inspection_id);
+    if (
+      linked?.timing === "pre_flight" &&
+      preInspectionTimingFor(toJstInput(asDate(linked.inspected_at)), toJstInput(asDate(f.takeoff_at)), toJstInput(asDate(f.landing_at))) !== "before_takeoff"
+    ) {
+      out.push("pre_inspection_after_takeoff");
+    }
+  }
   const expires = p ? dateOnly(p.license_expires_on) : null;
   if (expires && expires < f.flight_date_text) out.push("license_expired");
   if (a?.status === "suspended") out.push("aircraft_suspended");

@@ -4,7 +4,9 @@ import { PageHeader } from "@/components/ops/ui";
 import { isUuid, OpsError } from "@/server/ops/service";
 import { requireOpsMember } from "@/server/ops/page";
 import { specificFlightTypesFromFlags } from "@/server/ops/plan-logic";
+import { can } from "@/server/ops/authz";
 import { getFieldView } from "@/server/ops/field";
+import { journalPreInspectionId } from "@/server/ops/field-logic";
 import { getPlan, getSnapshot } from "@/server/ops/plans";
 import { recordCreateDenied, recordFormOptions } from "@/server/ops/record-page";
 
@@ -48,6 +50,9 @@ export default async function FlightNewPage({
           lat: plan.latitude,
           lng: plan.longitude,
           specificFlightTypes: specificFlightTypesFromFlags(flags),
+          // Sprint 15（X-3）：点検を計画に結び付けるのは現場の記録と同じ権限（運航管理者、または計画の操縦者本人）。
+          // 権限が無ければ、日誌の画面の点検のリンクに planId を付けない（保存して初めて 403 を知る形にしない）
+          canLinkInspection: can(ctx.member.role, "field.record", { isSelf: plan.isSelf }),
         };
         if (takeoffRef) {
           // 現場モードの離陸の行（ID か端末の識別子）から、実際の離着陸の時刻と飛行前の点検を引き継ぐ。まだ届いていなければ端末の送信待ちから取る。
@@ -57,8 +62,9 @@ export default async function FlightNewPage({
             takeoffEventId: takeoffRef,
             takeoffAt: flight?.takeoffAt ?? null,
             landingAt: flight?.landingAt ?? null,
-            // 着陸でラウンドが閉じるため、現在のラウンドではなく、この飛行のラウンドの点検を使う
-            inspectionId: flight?.preInspectionId ?? view.items.find((x) => x.item === "inspection")?.inspectionId ?? null,
+            // 着陸でラウンドが閉じるため、現在のラウンドではなく、この飛行のラウンドの点検を使う。着陸より後の点検（次の飛行の
+            // ラウンドの点検）で代えない（Sprint 15 X-1）
+            inspectionId: journalPreInspectionId(flight, view.items.find((x) => x.item === "inspection")?.inspectionId ?? null),
             // 離陸と着陸の両方の時刻が決まったときだけ「解決済み」。着陸がまだなら送信待ちから回復を試みる
             resolved: flight?.takeoffAt != null && flight.landingAt != null,
             takeoffRefs: [takeoffRef, flight?.takeoffEventId, flight?.takeoffClientEventId].filter((x): x is string => typeof x === "string"),

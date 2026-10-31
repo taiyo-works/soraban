@@ -21,7 +21,11 @@ import {
   isEmergencySource,
   journalNewHref,
   landingRecordedMessage,
+  inspectionAfterFlightTakeoffNote,
+  JOURNAL_NO_PRE_INSPECTION_NOTE,
+  JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF,
   outsidePlanWindowLabel,
+  preInspectionTimingFor,
   takeoffRecordedMessage,
 } from "./ops-field";
 import { MODEL_AIRCRAFT_REFERENCES } from "@soraban/regulations";
@@ -146,4 +150,26 @@ describe("Sprint 12c の新しいソースの grep", () => {
       expect(src).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|sendBeacon|https?:\/\//);
     });
   }
+});
+
+describe("Sprint 15 X-1：飛行前点検と飛行の前後", () => {
+  it("離陸の分まで／離陸より後で着陸の分まで／着陸より後（秒以下は見ない）", () => {
+    expect(preInspectionTimingFor("2027-01-05T10:50", "2027-01-05T11:00", "2027-01-05T11:10")).toBe("before_takeoff");
+    expect(preInspectionTimingFor("2027-01-05T11:00", "2027-01-05T11:00", "2027-01-05T11:10")).toBe("before_takeoff");
+    expect(preInspectionTimingFor("2027-01-05T11:05", "2027-01-05T11:00", "2027-01-05T11:10")).toBe("after_takeoff");
+    expect(preInspectionTimingFor("2027-01-05T11:10", "2027-01-05T11:00", "2027-01-05T11:10")).toBe("after_takeoff");
+    expect(preInspectionTimingFor("2027-01-05T11:30", "2027-01-05T11:00", "2027-01-05T11:10")).toBe("after_landing");
+    expect(preInspectionTimingFor("2027-01-05T11:30:59", "2027-01-05T11:30:00", null)).toBe("before_takeoff");
+    // 時刻が分からないときは比べない
+    expect(preInspectionTimingFor("2027-01-05T11:30", null, null)).toBe("before_takeoff");
+    expect(preInspectionTimingFor("2027-01-05T11:30", "2027-01-05T11:00", null)).toBe("after_takeoff");
+  });
+  it("知らせの文言は「飛行前点検として扱いません」を含み、禁止語を含まない", () => {
+    for (const m of [JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF, inspectionAfterFlightTakeoffNote("11:00"), JOURNAL_NO_PRE_INSPECTION_NOTE]) {
+      for (const w of ["通報不要", "代行", "代理"]) expect(m).not.toContain(w);
+    }
+    expect(JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF).toContain("飛行前点検として扱いません");
+    expect(inspectionAfterFlightTakeoffNote("11:00")).toContain("離陸（11:00）");
+    expect(inspectionAfterFlightTakeoffNote("11:00")).toContain("飛行前点検として扱いません");
+  });
 });

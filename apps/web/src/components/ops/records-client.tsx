@@ -24,7 +24,15 @@ import {
   type InspectionResult,
   type InspectionTiming,
 } from "@/lib/ops-records";
-import { JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF, JOURNAL_MISMATCH_REPORT_MISSING, journalNewHref } from "@/lib/ops-field";
+import {
+  inspectionAfterFlightTakeoffNote,
+  JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
+  JOURNAL_MISMATCH_REPORT_MISSING,
+  JOURNAL_NO_PRE_INSPECTION_NOTE,
+  JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF,
+  journalNewHref,
+  preInspectionTimingFor,
+} from "@/lib/ops-field";
 import { recoverFlightFromOutbox } from "@/lib/ops-outbox";
 import { setChangeFlash } from "./change-notice";
 import { clearDraft, clearOtherUsersDrafts, draftKey, loadDraft, newRequestId, saveDraft } from "./drafts";
@@ -140,6 +148,7 @@ export const WARNING_TEXT = {
   outside_plan_window: "計画の時間帯の外で飛行しています。",
   report_missing: JOURNAL_MISMATCH_REPORT_MISSING,
   report_after_takeoff: JOURNAL_MISMATCH_REPORT_AFTER_TAKEOFF,
+  pre_inspection_after_takeoff: JOURNAL_PRE_INSPECTION_AFTER_TAKEOFF,
 } as const;
 
 export type AircraftOption = {
@@ -346,10 +355,10 @@ const posOf = (lat: number | null, lng: number | null, acc: number | null): Posi
   acc: acc === null ? "" : String(acc),
 });
 
-function Warnings({ items }: { readonly items: readonly string[] }) {
+function Warnings({ items, testId = "record-warnings" }: { readonly items: readonly string[]; readonly testId?: string }) {
   if (items.length === 0) return null;
   return (
-    <div data-testid="record-warnings" className="flex flex-col gap-1.5 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-3">
+    <div data-testid={testId} className="flex flex-col gap-1.5 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-3">
       <p className="text-[13px] font-bold text-sb-ink">確認してください（保存は止めません）</p>
       <ul className="flex flex-col gap-1 text-sm text-sb-ink">
         {items.map((w) => (
@@ -541,6 +550,11 @@ export type FlightFromPlan = {
   readonly lng: number;
   /** スナップショットの結果の flags（DID・空港の導出を含む）から写した特定飛行の形態。 */
   readonly specificFlightTypes: readonly string[];
+  /**
+   * Sprint 15（X-3）：この利用者が、点検をこの計画に結び付けられるか（現場の記録と同じ権限）。false なら、日誌の画面の点検の
+   * リンクに planId を付けない。省略は true と同じ（サーバーが保存のときにも確かめる）。
+   */
+  readonly canLinkInspection?: boolean;
 };
 
 /**
@@ -635,11 +649,20 @@ const joinDt = (d: string, t: string): string => (d && t ? `${d}T${t.slice(0, 5)
  * 日誌の入力から日常点検の入力へ（飛行日の点検が無いとき）。Sprint 15：計画から作る日誌（計画の機体のまま）では planId を付け、
  * 点検をその計画に結び付ける（飛行前点検は計画に結び付いた点検だけが数える。権限はサーバーが現場の記録と同じく確かめる）。
  * 保存後は日誌の入力へ戻る。計画を経ない日誌・計画と違う機体では従来どおり（結び付けない）。
+ * X-3：結び付ける権限の無い利用者（他人の計画の操縦者）には planId・returnTo を付けない（従来の点検の入力）。
+ * X-1：日誌の離陸の日時（JST の "YYYY-MM-DDTHH:MM"）が入っていれば takeoffAt で渡す。点検の入力は、実施日時が離陸より後のとき
+ * 「この飛行の飛行前点検として扱いません」と知らせる。
  */
-export const inspectionNewFromJournalHref = (aircraftId: string, fromPlan?: FlightFromPlan, fromField?: FlightFromField): string => {
-  if (!fromPlan || fromPlan.aircraftId !== aircraftId) return `/ops/inspections/new?aircraftId=${aircraftId}`;
+export const inspectionNewFromJournalHref = (
+  aircraftId: string,
+  fromPlan?: FlightFromPlan,
+  fromField?: FlightFromField,
+  takeoffAt?: string,
+): string => {
+  const t = takeoffAt && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(takeoffAt) ? `&takeoffAt=${encodeURIComponent(takeoffAt)}` : "";
+  if (!fromPlan || fromPlan.aircraftId !== aircraftId || fromPlan.canLinkInspection === false) return `/ops/inspections/new?aircraftId=${aircraftId}${t}`;
   const back = journalNewHref(fromPlan.planId, fromField?.takeoffEventId ?? null);
-  return `/ops/inspections/new?aircraftId=${aircraftId}&planId=${fromPlan.planId}&returnTo=${encodeURIComponent(back)}`;
+  return `/ops/inspections/new?aircraftId=${aircraftId}&planId=${fromPlan.planId}&returnTo=${encodeURIComponent(back)}${t}`;
 };
 
 export function FlightForm({
@@ -693,6 +716,8 @@ export function FlightForm({
     readonly ok: boolean;
     readonly list: readonly InspectionCandidate[];
   } | null>(null);
+  // 日常点検を利用者が選び直したか（Sprint 15 X-1：現場から引き継いだ既定の点検だけを、離着陸の時刻と照らして外す）
+  const [inspectionTouched, setInspectionTouched] = useState(false);
   const { formRef, requestErrorFocus } = useErrorFocus();
 
   // 下書きの読み込み（新規のときだけ）。点検の画面から来た場合は、その機体・点検を優先する。
@@ -783,8 +808,21 @@ export function FlightForm({
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
   const selectedPilot = pilots.find((p) => p.id === v.pilotId);
 
+  // Sprint 15（X-1）：現場から引き継いだ既定の点検が、この飛行の着陸より後に実施した飛行前点検なら、既定から外す
+  // （端末の送信待ちから離着陸の時刻を戻したときに起こりうる。サーバーは着陸より後の点検を既定にしない）。利用者が選び直せば、その選択に従う
+  const byId = (id: string) => (candidates ?? []).find((c) => c.id === id);
+  const fieldDefault = !inspectionTouched && fromField?.inspectionId != null && v.dailyInspectionId === fromField.inspectionId ? byId(v.dailyInspectionId) : undefined;
+  const dropDefault =
+    fieldDefault !== undefined && fieldDefault.timing === "pre_flight" && preInspectionTimingFor(fieldDefault.inspectedAt, takeoffAt || null, landingAt || null) === "after_landing";
+  const inspectionValue = dropDefault ? "" : v.dailyInspectionId;
+  const selectedInspection = inspectionValue ? byId(inspectionValue) : undefined;
+
   const warnings: string[] = [];
   if (v.aircraftId && candidates !== null && sameDay.length === 0) warnings.push(WARNING_TEXT.no_inspection_on_day);
+  // 離陸より後に実施した飛行前の点検を選んでいるときは知らせる（保存は止めない。警告なしに選ばれないように）
+  if (selectedInspection?.timing === "pre_flight" && preInspectionTimingFor(selectedInspection.inspectedAt, takeoffAt || null, landingAt || null) !== "before_takeoff") {
+    warnings.push(WARNING_TEXT.pre_inspection_after_takeoff);
+  }
   if (v.aircraftId && candidatesFailed) warnings.push(WARNING_TEXT.inspections_unavailable);
   const latest = (candidates ?? []).find((c) => !takeoffAt || c.inspectedAt <= takeoffAt);
   if (latest?.hasAbnormal) warnings.push(WARNING_TEXT.recent_inspection_abnormal);
@@ -797,7 +835,7 @@ export function FlightForm({
     return {
       aircraftId: v.aircraftId || null,
       pilotId: v.pilotId || null,
-      dailyInspectionId: v.dailyInspectionId || null,
+      dailyInspectionId: inspectionValue || null,
       purpose: v.purpose,
       waypoints: v.waypoints || null,
       specificFlightTypes: v.specificFlightTypes,
@@ -905,7 +943,7 @@ export function FlightForm({
       ) : null}
       {fromField ? (
         <p className="opx-note" data-testid="flight-from-field">
-          {fromField.inspectionId ? "飛行前の日常点検を結び付けました。" : "この日の飛行前の日常点検は見つかりませんでした。"}「飛行の安全に影響のあった事項」を確かめて保存してください。
+          {fromField.inspectionId && !dropDefault ? "飛行前の日常点検を結び付けました。" : JOURNAL_NO_PRE_INSPECTION_NOTE}「飛行の安全に影響のあった事項」を確かめて保存してください。
           {fieldNote ? ` ${fieldNote}` : ""}
         </p>
       ) : null}
@@ -945,10 +983,18 @@ export function FlightForm({
           </select>
         </Field>
         <Field label="日常点検" required={false} error={errors["dailyInspectionId"]} hint="同じ機体の、飛行日の点検から選びます。">
-          <select className={`${inputClass} min-h-12`} value={v.dailyInspectionId} onChange={(e) => set("dailyInspectionId", e.target.value)} data-testid="inspection-select">
+          <select
+            className={`${inputClass} min-h-12`}
+            value={inspectionValue}
+            onChange={(e) => {
+              setInspectionTouched(true);
+              set("dailyInspectionId", e.target.value);
+            }}
+            data-testid="inspection-select"
+          >
             <option value="">紐付けない</option>
             {(candidates ?? [])
-              .filter((c) => c.inspectedDate === flightDay || c.id === v.dailyInspectionId)
+              .filter((c) => c.inspectedDate === flightDay || c.id === inspectionValue)
               .map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.inspectedAtJst} {INSPECTION_TIMING_LABELS[c.timing]}（{c.inspectorName}）{c.hasAbnormal ? "［異常あり］" : ""}
@@ -958,7 +1004,7 @@ export function FlightForm({
         </Field>
         <Warnings items={warnings} />
         {noInspectionOnDay ? (
-          <a href={inspectionNewFromJournalHref(v.aircraftId, fromPlan, fromField)} className={`${buttonOutlineBrandClass} self-start`} data-testid="journal-inspection-new">
+          <a href={inspectionNewFromJournalHref(v.aircraftId, fromPlan, fromField, takeoffAt || undefined)} className={`${buttonOutlineBrandClass} self-start`} data-testid="journal-inspection-new">
             日常点検を入力する
           </a>
         ) : null}
@@ -1242,6 +1288,7 @@ export function InspectionForm({
   editing,
   memberId,
   planId,
+  flightTakeoffAt,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
@@ -1255,6 +1302,11 @@ export function InspectionForm({
   readonly initialTiming?: "pre_flight" | "post_flight";
   /** 保存後に戻る画面（現場モードから来たとき。同じオリジンの /ops/ 配下のパスだけ。呼び出し側が検査済みの値を渡す）。 */
   readonly returnTo?: string;
+  /**
+   * Sprint 15（X-1）：日誌の入力から来たとき、その飛行の離陸の日時（JST の "YYYY-MM-DDTHH:MM"）。飛行前の点検の実施日時が
+   * これより後なら「この飛行の飛行前点検として扱いません」と知らせる（実施日時は利用者が入れた事実のまま。勝手に変えない）。
+   */
+  readonly flightTakeoffAt?: string;
   readonly editing?: InspectionFormInitial;
   /** ログイン中の利用者の内部 ID（下書きを利用者ごとに分ける）。 */
   readonly memberId: string;
@@ -1480,6 +1532,9 @@ export function InspectionForm({
             </label>
           ))}
         </ChoiceGroup>
+        {flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
+          <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
+        ) : null}
         <PlaceInput
           label="実施場所"
           name={v.placeName}

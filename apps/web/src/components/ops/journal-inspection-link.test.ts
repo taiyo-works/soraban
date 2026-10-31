@@ -13,4 +13,18 @@ describe("inspectionNewFromJournalHref", () => {
     expect(inspectionNewFromJournalHref("a1")).toBe("/ops/inspections/new?aircraftId=a1");
     expect(inspectionNewFromJournalHref("a2", plan)).toBe("/ops/inspections/new?aircraftId=a2");
   });
+  it("X-3：点検を計画に結び付ける権限の無い利用者（他人の計画の操縦者）には planId・returnTo を付けない", () => {
+    const h = inspectionNewFromJournalHref("a1", { ...plan, canLinkInspection: false }, { takeoffEventId: "t1" } as never);
+    expect(h).toBe("/ops/inspections/new?aircraftId=a1");
+    expect(h).not.toContain("planId");
+    // 権限があるときは付ける
+    expect(inspectionNewFromJournalHref("a1", { ...plan, canLinkInspection: true })).toContain("planId=p1");
+  });
+  it("X-1：日誌の離陸の日時があれば takeoffAt で渡す（形式の正しいものだけ）", () => {
+    expect(inspectionNewFromJournalHref("a1", plan, { takeoffEventId: "t1" } as never, "2027-01-05T11:00")).toBe(
+      `/ops/inspections/new?aircraftId=a1&planId=p1&returnTo=${encodeURIComponent("/ops/flights/new?planId=p1&takeoffEventId=t1")}&takeoffAt=${encodeURIComponent("2027-01-05T11:00")}`,
+    );
+    expect(inspectionNewFromJournalHref("a1", undefined, undefined, "2027-01-05T11:00")).toBe(`/ops/inspections/new?aircraftId=a1&takeoffAt=${encodeURIComponent("2027-01-05T11:00")}`);
+    expect(inspectionNewFromJournalHref("a1", undefined, undefined, "11:00")).toBe("/ops/inspections/new?aircraftId=a1");
+  });
 });

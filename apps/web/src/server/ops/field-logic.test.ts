@@ -4,6 +4,7 @@ import {
   checkJournalLink,
   decideTransition,
   fieldState,
+  journalPreInspectionId,
   outboxAsEvents,
   takeoffGaps,
   undoneIds,
@@ -700,5 +701,32 @@ describe("Sprint 15：送信待ちの点検・日誌を導出に足す（圏外�
     expect(s.flights[0]!.post).toMatchObject({ done: true, inspectionId: uid(9001) });
     expect(s.flights[0]!.phase).toBe("journaled");
     expect(s.pendingJournal).toEqual([]);
+  });
+});
+
+describe("Sprint 15 X-1：日誌の既定の飛行前点検（着陸より後の点検で代えない）", () => {
+  it("飛行（11:00〜11:10）の後に入れた飛行前点検（11:30）は、その飛行の点検にならず、日誌の既定にも入らない。次のラウンドの点検には数える（Sprint 14 の導出）", () => {
+    const t1 = takeoff("11:00");
+    const l1 = landing(t1, "11:10");
+    const s = state([t1, l1], { inspections: [insp("late", "11:30")] });
+    expect(s.flights[0]!.preInspectionId).toBeNull();
+    // 現在のラウンド（次の飛行）の飛行前点検としては済（離陸より前のため）
+    expect(s.checks.inspection).toMatchObject({ done: true, inspectionId: "late" });
+    // 日誌の既定：この飛行が記録にあれば、現在のラウンドの点検で代えない
+    expect(journalPreInspectionId(s.flights[0], s.checks.inspection.inspectionId)).toBeNull();
+  });
+
+  it("離陸より前の点検は、従来どおり日誌の既定に入る（12c の引き継ぎ）。同じ日に後から入れた点検があっても変わらない", () => {
+    const t1 = takeoff("11:00");
+    const l1 = landing(t1, "11:10");
+    const s = state([t1, l1], { inspections: [insp("early", "10:50"), insp("late", "11:30")] });
+    expect(s.flights[0]!.preInspectionId).toBe("early");
+    expect(journalPreInspectionId(s.flights[0], s.checks.inspection.inspectionId)).toBe("early");
+  });
+
+  it("離陸の行がまだ届いていない（送信待ち）ときだけ、現在のラウンドの点検を候補にする", () => {
+    const s = state([], { inspections: [insp("i1", "10:50")] });
+    expect(journalPreInspectionId(undefined, s.checks.inspection.inspectionId)).toBe("i1");
+    expect(journalPreInspectionId(undefined, null)).toBeNull();
   });
 });
