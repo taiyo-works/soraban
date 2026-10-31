@@ -277,9 +277,12 @@ export const planFieldGet = opsHandler("GET /api/ops/plans/[id]/field", async ({
 );
 // Sprint 15：先読みの束。build はビルドの識別子（古い画面と新しい API の食い違いを画面が検出する）。
 export const fieldBundleGet = opsHandler("GET /api/ops/field-bundle", async ({ ctx, req }) => {
-  const raw = new URL(req.url).searchParams.get("planId");
+  const sp = new URL(req.url).searchParams;
+  const raw = sp.get("planId");
   if (raw !== null && !svc.isUuid(raw)) return json(404, { error: "not_found" });
-  const r = await field.getFieldBundles(ctx, raw === null ? null : raw.toLowerCase());
+  // known：端末にある束の計画（取り直しで、まだ使えるものだけ返す。返さなかった束は端末が消す）
+  const known = (sp.get("known") ?? "").split(",").filter((x) => svc.isUuid(x)).map((x) => x.toLowerCase());
+  const r = await field.getFieldBundles(ctx, raw === null ? null : raw.toLowerCase(), known);
   return json(200, { ...r, build: process.env.SORABAN_BUILD_ID ?? null });
 });
 export const planFieldEventsList = opsHandler("GET /api/ops/plans/[id]/field-events", async ({ ctx, params }) =>

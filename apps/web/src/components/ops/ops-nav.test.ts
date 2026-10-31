@@ -57,6 +57,9 @@ describe("メニューの定義（Sprint 12g-1b 段階 A）", () => {
   it("現場モード・サインイン・アクセス権なしでは出さない", () => {
     expect(navHiddenOn(`/ops/plans/${PLAN}/field`)).toBe(true);
     expect(navHiddenOn(`/ops/plans/${PLAN}/field/`)).toBe(true);
+    // Sprint 15：圏外用の現場の枠（現場の URL で返る）も現場モード
+    expect(navHiddenOn("/ops/offline/field")).toBe(true);
+    expect(navHiddenOn("/ops/offline/inspection")).toBe(false);
     expect(navHiddenOn("/ops/sign-in")).toBe(true);
     expect(navHiddenOn("/ops/no-access")).toBe(true);
     for (const p of ["/", "/ops", "/ops/plans", `/ops/plans/${PLAN}`, `/ops/plans/${PLAN}/report`, "/ops/journal", "/ops/more", "/ops/flights/new"]) {

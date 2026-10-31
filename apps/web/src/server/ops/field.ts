@@ -375,7 +375,12 @@ export const FIELD_BUNDLE_DAYS = 2;
  * 先読みの束（Sprint 15 設計 3）。planId を渡すとその計画の束（運航管理者、または計画の操縦者本人だけ。他は 403、他の組織は 404）。
  * 渡さなければ、今日と明日の、利用者が操縦者の計画の束。どちらも許可リスト（sanitizeFieldBundle）で絞ってから返す。
  */
-export const getFieldBundles = async (ctx: OpsContext, planId: string | null): Promise<{ readonly memberId: string; readonly serverNow: string; readonly bundles: FieldBundlePlan[] }> => {
+export const getFieldBundles = async (
+  ctx: OpsContext,
+  planId: string | null,
+  /** 端末にすでにある束の計画（取り直しのとき）。まだ使える（記録できる・中止していない・今日以降）ものは束を返し、返さなかった束は端末が消す。 */
+  knownIds: readonly string[] = [],
+): Promise<{ readonly memberId: string; readonly serverNow: string; readonly bundles: FieldBundlePlan[] }> => {
   assertCan(ctx, "field.read");
   const now = nowOf(ctx);
   const today = jstDate(now);
@@ -399,6 +404,16 @@ export const getFieldBundles = async (ctx: OpsContext, planId: string | null): P
     const b = await loadPlanBundle(ctx, p.id);
     if (!b.dto.isSelf) continue;
     const x = await one(p.id);
+    if (x) out.push(x);
+  }
+  // 端末にある束（運航管理者が開いた他の操縦者の計画など）：まだ使えるものだけ取り直す。操縦者が変わった・中止した・過去の計画は返さない
+  for (const id of knownIds.slice(0, 50)) {
+    if (out.some((x) => x.planId === id)) continue;
+    const plan = await store.getPlan(ctx.db, org, id);
+    if (!plan || plan.voided_at !== null || plan.planned_date_text < today) continue;
+    const b = await loadPlanBundle(ctx, id);
+    if (!can(ctx.member.role, "field.record", { isSelf: b.dto.isSelf })) continue;
+    const x = await one(id);
     if (x) out.push(x);
   }
   return { memberId: ctx.member.id, serverNow: now.toISOString(), bundles: out };
