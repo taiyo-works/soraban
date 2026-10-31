@@ -825,6 +825,31 @@ test.describe("Sprint 15 追加：R-1 飛行後点検の計画への結び付け
     await manager.dispose();
   });
 
+  test("X-4：離陸と着陸の間に実施した点検は、その飛行の飛行前点検にならない（飛行中の「済」にも日誌の既定にも入らず、選ぶと知らせる）", async ({ page }) => {
+    const { manager, aircraft, pilot } = await prepare(page);
+    const plan = await createPlan(manager, aircraft.id, pilot.id);
+    const post = (hm: string, body: Record<string, unknown>) =>
+      manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, queued: true, ...body } });
+    const tk = (await (await post("11:00", { kind: "takeoff" })).json()) as { id: string };
+    const mid = await manager.post("/api/ops/inspections", {
+      data: { aircraftId: aircraft.id, pilotId: pilot.id, inspectedAt: `${DAY}T11:05`, timing: "pre_flight", placeName: "本社", items: ALL_NORMAL, planId: plan.id },
+    });
+    expect(mid.status(), await mid.text()).toBe(201);
+    const midId = ((await mid.json()) as { id: string }).id;
+    // 飛行中：この飛行の飛行前点検にならない
+    expect((await getField(manager, plan.id)).flights[0]!.preInspectionId).toBeNull();
+    expect((await post("11:10", { kind: "landing" })).status()).toBe(201);
+    expect((await getField(manager, plan.id)).flights[0]!.preInspectionId).toBeNull();
+    await page.clock.setFixedTime(at("11:30:00"));
+    await page.goto(`/ops/flights/new?planId=${plan.id}&takeoffEventId=${tk.id}`);
+    await expect(page.getByTestId("inspection-select").locator(`option[value="${midId}"]`)).toHaveCount(1);
+    await expect(page.getByTestId("inspection-select")).toHaveValue("");
+    await expect(page.getByTestId("flight-from-field")).toContainText("飛行前の日常点検は見つかりませんでした");
+    await page.getByTestId("inspection-select").selectOption(midId);
+    await expect(page.getByTestId("record-warnings")).toContainText("この飛行の飛行前点検として扱いません");
+    await manager.dispose();
+  });
+
   test("X-3：点検を計画に結び付ける権限の無い操縦者（他人の計画）には、日誌の点検リンクに planId を付けない。計画の操縦者本人には付ける", async ({ page }) => {
     const manager = await apiAs(seeded("a-manager"));
     const aPilot = await apiAs(seeded("a-pilot"));
