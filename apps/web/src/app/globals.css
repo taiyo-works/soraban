@@ -269,8 +269,9 @@ html:has(body.has-bottom-nav) {
   body.has-bottom-nav:has(.ds-page) {
     padding-bottom: 0;
   }
-  /* Sprint 15：下メニューの高さに 4px の余裕を足す。行の高さの合計が小数になる画面（ホームの次にやることが 2 行など）でも、
-   * 末尾が下メニューの上端より下に 1px 未満はみ出さない（sprint12g-1b-fix M-8） */
+  /* Sprint 15：下メニューの高さに 4px の余裕を足す。ホームでは、先読みの件数の行（pwa-prefetch-status）が描画の後から
+   * 免責の文より上に差し込まれ、末尾を約 32px 押し下げる。一番下まで送った直後にこの行が入っても、末尾が下メニューの上端に
+   * かかりにくくするための余裕（sprint12g-1b-fix M-8。テストはこの行が入ってから送る。Sprint 15 R3-1） */
   .ds-page:has(> [data-testid="ops-bottom-nav"]) {
     padding-bottom: calc(4.25rem + 4px + env(safe-area-inset-bottom, 0px));
   }

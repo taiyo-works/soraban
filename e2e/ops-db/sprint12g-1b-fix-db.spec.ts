@@ -186,6 +186,9 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
     await expect(page.getByTestId("today-disclaimer")).toBeVisible();
+    // 先読みの件数の行（pwa-prefetch-status）は、端末の保存を読み終えてから免責の文より上に差し込まれ、免責の文を押し下げる。
+    // その行が入ってから一番下へ送る（送った後に押し下げられると、測る位置がずれる。Sprint 15 R3-1）。上限と対象は変えない
+    await expect(page.getByTestId("pwa-prefetch-status")).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const last = (await page.getByTestId("today-disclaimer").boundingBox())!;
     const nav = (await page.getByTestId("ops-bottom-nav").boundingBox())!;
