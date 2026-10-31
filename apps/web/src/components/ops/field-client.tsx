@@ -596,7 +596,7 @@ export function FieldClient({
       <h3 id="field-h-docs" className="text-xl font-bold">
         書類・手続き
       </h3>
-      <p className="text-ink" data-testid="field-docs-note">
+      <p className="text-sb-ink" data-testid="field-docs-note">
         登録内容から自動で判定しています。足りないもの（要確認）だけ、確認してください。登録は利用者の入力です。
       </p>
       <ul className="flex flex-col gap-3">
@@ -614,7 +614,7 @@ export function FieldClient({
                 </p>
               </div>
               {d.basis.length > 0 ? (
-                <ul className="flex flex-col gap-1 border-l-4 border-ink-soft pl-3" data-testid={`field-docs-basis-${d.key}`} aria-label={`${d.label}の根拠`}>
+                <ul className="flex flex-col gap-1 border-l-[length:4px] border-sb-edge pl-3" data-testid={`field-docs-basis-${d.key}`} aria-label={`${d.label}の根拠`}>
                   {d.basis.map((b) => (
                     <li key={b} className="break-words">
                       {b}
@@ -672,7 +672,7 @@ export function FieldClient({
         <p className="text-xl font-bold" data-testid="field-restriction-state">
           <span aria-hidden>{rs.done ? FIELD_STATE_MARK.done : FIELD_STATE_MARK.todo} </span>
           {rs.done ? FIELD_STATE_DONE : FIELD_STATE_TODO}
-          {rs.at ? <span className="font-mono">（{hm(rs.at)}）</span> : null}
+          {rs.at ? <span className="sb-num tabular-nums">（{hm(rs.at)}）</span> : null}
         </p>
       </div>
       <p data-testid="field-restriction-note">{view.round.restriction.note}</p>
@@ -714,7 +714,7 @@ export function FieldClient({
         <p className="text-xl font-bold" data-testid="field-site-state">
           <span aria-hidden>{!st.done ? FIELD_STATE_MARK.todo : st.attention ? FIELD_STATE_MARK.abnormal : FIELD_STATE_MARK.done} </span>
           {!st.done ? FIELD_STATE_TODO : st.attention ? "注意あり" : FIELD_STATE_DONE}
-          {st.at ? <span className="font-mono">（{hm(st.at)}）</span> : null}
+          {st.at ? <span className="sb-num tabular-nums">（{hm(st.at)}）</span> : null}
         </p>
       </div>
       {st.done && st.values ? (
@@ -770,7 +770,7 @@ export function FieldClient({
                 step="0.1"
                 min={SITE_WIND_RANGE.min}
                 max={SITE_WIND_RANGE.max}
-                className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg font-normal text-ink"
+                className="sb-input !min-h-14 w-full px-3 text-lg font-normal"
                 value={siteWind}
                 onChange={(e) => setSiteWind(e.target.value)}
                 data-testid="field-site-wind"
@@ -785,7 +785,7 @@ export function FieldClient({
                 step="0.1"
                 min={SITE_TEMP_RANGE.min}
                 max={SITE_TEMP_RANGE.max}
-                className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg font-normal text-ink"
+                className="sb-input !min-h-14 w-full px-3 text-lg font-normal"
                 value={siteTemp}
                 onChange={(e) => setSiteTemp(e.target.value)}
                 data-testid="field-site-temp"
@@ -798,7 +798,7 @@ export function FieldClient({
               id="field-site-note"
               rows={2}
               maxLength={SITE_NOTE_MAX}
-              className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 py-2 text-lg font-normal text-ink"
+              className="sb-input !min-h-14 w-full px-3 py-2 text-lg font-normal"
               value={siteNote}
               onChange={(e) => setSiteNote(e.target.value)}
               aria-required={draftAttention}
@@ -821,7 +821,7 @@ export function FieldClient({
           {!draftSite ? <p data-testid="field-site-hint">第三者・他機・雨・視程を選ぶと記録できます（風速・気温は未入力でも記録できます）。</p> : null}
         </div>
       ) : null}
-      <p className="text-ink" data-testid="field-site-threshold-note">
+      <p className="text-sb-ink" data-testid="field-site-threshold-note">
         {SITE_THRESHOLD_NOTE}
       </p>
       {st.eventId && view.canRecord ? (
@@ -888,7 +888,7 @@ export function FieldClient({
                       {c.source ? `（${view.emergencySources.find((s) => s.id === c.source)?.title ?? c.source}）` : ""}
                     </p>
                   ) : null}
-                  <p className="text-ink" data-testid="field-emergency-note">
+                  <p className="text-sb-ink" data-testid="field-emergency-note">
                     {view.round.emergencyNote}
                   </p>
                   {view.emergencySources.map((src) => (
@@ -1170,7 +1170,7 @@ export function FieldClient({
                 <p className="text-xl font-bold" data-testid="field-post-state">
                   {FIELD_ROUND_LABEL(f.roundIndex + 1)}：<span aria-hidden>{f.post.done ? (f.post.abnormal ? FIELD_STATE_MARK.abnormal : FIELD_STATE_MARK.done) : FIELD_STATE_MARK.todo} </span>
                   {f.post.done ? (f.post.abnormal ? FIELD_STATE_ABNORMAL : FIELD_STATE_DONE) : FIELD_STATE_TODO}
-                  {f.post.at ? <span className="font-mono">（{hm(f.post.at)}）</span> : null}
+                  {f.post.at ? <span className="sb-num tabular-nums">（{hm(f.post.at)}）</span> : null}
                 </p>
                 {f.post.done && f.post.inspectionId ? (
                   <a href={`/ops/inspections/${f.post.inspectionId}`} className={BTN_OUTLINE} data-testid="field-post-view">
@@ -1267,7 +1267,7 @@ export function FieldClient({
   const bandEl = (
     <section
       aria-label="接続と送信の状況"
-      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-ink-mute bg-paper px-1 py-2 text-lg leading-snug"
+      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-sb-edge bg-sb-base px-1 py-2 text-lg leading-snug"
       data-testid="field-status-band"
       data-online={online ? "true" : "false"}
     >
