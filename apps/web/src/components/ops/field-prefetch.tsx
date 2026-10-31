@@ -45,7 +45,7 @@ export function FieldPrefetch({ memberId }: { readonly memberId: string }) {
       ) : null}
       {!standalone ? (
         <details data-testid="pwa-install-guide">
-          <summary className="cursor-pointer py-2">ホーム画面に追加する（圏外の現場で開くため）</summary>
+          <summary className="min-h-12 cursor-pointer py-3">ホーム画面に追加する（圏外の現場で開くため）</summary>
           <p>
             {ios
               ? "Safari の共有ボタンから「ホーム画面に追加」を選びます。"
