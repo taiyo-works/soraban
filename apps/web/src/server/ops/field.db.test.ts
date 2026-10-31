@@ -1606,4 +1606,47 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(await count("flight_field_events", "plan_id = $1 and kind = 'journal_linked'", [pl.id])).toBe(1);
     });
   });
+
+  describe("9. Sprint 15 B-1・B-2：先読みの束", () => {
+    it("一覧は今日・明日の、利用者が操縦者の計画だけ。他の人の計画・中止した計画・他の組織の計画は入らない", async () => {
+      const mine = await newPlan(A, { pilotId: A.pilotLinked.id, plannedStartAt: "2027-01-06T09:00" });
+      const others = await newPlan(A);
+      const later = await newPlan(A, { pilotId: A.pilotLinked.id, plannedStartAt: "2027-01-08T09:00" });
+      const pilotCtx = ctxOf(A.pilotMember);
+      const r = await field.getFieldBundles(pilotCtx, null);
+      const ids = r.bundles.map((b) => b.planId);
+      expect(ids).toContain(mine.id);
+      expect(ids).not.toContain(others.id);
+      expect(ids).not.toContain(later.id);
+      expect(r.bundles.every((b) => b.memberId === A.pilotMember.id)).toBe(true);
+      // 技能証明書の番号・座標・自由記述（目的）を含まない
+      const text = JSON.stringify(r);
+      const lic = (await owner.query("select license_number from pilots where id = $1", [A.pilotLinked.id])).rows[0]?.license_number as string | null;
+      if (lic) expect(text).not.toContain(lic);
+      expect(text).not.toContain(String(HQ.latitude));
+      expect(text).not.toContain("空撮");
+    });
+
+    it("計画を指定した束：運航管理者と計画の操縦者本人だけ（他の操縦者・閲覧者は 403）。他の組織の計画は 404", async () => {
+      const p = await newPlan(A, { pilotId: A.pilotLinked.id });
+      expect((await field.getFieldBundles(mgr(A), p.id)).bundles.map((b) => b.planId)).toEqual([p.id]);
+      expect((await field.getFieldBundles(ctxOf(A.pilotMember), p.id)).bundles).toHaveLength(1);
+      await expectOpsError(field.getFieldBundles(ctxOf(A.pilotMember2), p.id), 403);
+      await expectOpsError(field.getFieldBundles(ctxOf(A.viewer), p.id), 403);
+      const pB = await newPlan(B);
+      await expectOpsError(field.getFieldBundles(mgr(A), pB.id), 404);
+    });
+
+    it("B-5：束から組み立てた画面は、サーバーの画面と書類・手続きの判定・未了の予告が同じ", async () => {
+      const p = await approvedPlan(A);
+      await post(A, p.id, checkBody("docs_confirm", { docKey: "remote_id", occurredAt: "2027-01-05T11:00", queued: true }));
+      const view = await field.getFieldView(mgr(A), p.id);
+      const b = (await field.getFieldBundles(mgr(A), p.id)).bundles[0]!;
+      const { composeFieldView } = await import("./field-compose");
+      const v2 = composeFieldView(JSON.parse(JSON.stringify(b)), { now: new Date("2027-01-05T12:00:00+09:00") });
+      expect(v2.docs).toEqual(view.docs);
+      expect(v2.takeoffPreview).toEqual(view.takeoffPreview);
+      expect(v2.items).toEqual(view.items);
+    });
+  });
 });

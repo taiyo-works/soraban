@@ -13,33 +13,12 @@
 //   - 技能証明書番号・氏名は行に入れない。DIPS へは送信しない（自分の DB だけ）。
 import { VERDICT_LABEL } from "@soraban/regulations";
 import {
-  EMERGENCY_DESIGNATED_WARNING,
-  EMERGENCY_SOURCE_OPTIONS,
-  FIELD_CHECK_ITEMS,
-  FIELD_CHECK_ITEM_LABEL,
   FIELD_REPORT_CHANGED_WARNING,
   FIELD_REPORT_NONE_WARNING,
   FIELD_REPORT_NOT_REQUIRED_MODEL,
   FIELD_REPORT_NOT_REQUIRED_RECOMMENDED,
-  FIELD_STATE_ABNORMAL,
-  FIELD_STATE_DONE,
-  FIELD_STATE_IN_FLIGHT,
-  FIELD_STATE_JOURNAL_DONE,
-  FIELD_STATE_JOURNAL_PENDING,
-  FIELD_STATE_TODO,
-  FIELD_CHECK_RESULT_LABEL,
-  INSPECTION_ABNORMAL_GUIDANCE,
-  FIELD_DOC_HUMAN_CONFIRMED_LABEL,
-  FIELD_DOC_LABEL,
-  FIELD_DOC_STATUS_LABEL,
-  FLIGHT_RESTRICTION_SOURCE,
-  FIELD_RESTRICTION_UNCONFIRMED_NOTE,
-  FIELD_EMERGENCY_SOURCE_NOTE,
   checkFieldTime,
   fieldErrorMessage,
-  withFieldReturn,
-  outsidePlanWindowLabel,
-  type FieldCheckItem,
   type FieldCheckResult,
   type FieldDocKey,
   type FieldEventItem,
@@ -49,11 +28,27 @@ import {
 import { formatJst, jstDate, jstTime, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { relevantDipsKinds } from "./permit-logic";
-import { docGapsOf, judgeFieldDocs, type DocJudgement, type DocsJudgeInput } from "./docs-judge";
-import { decideTransition, takeoffGaps, type FieldEventLite, type FieldFlight, type InspectionLite, type FieldGap, type FieldState, type FieldRequest } from "./field-logic";
+import { judgeFieldDocs, type DocJudgement, type DocsJudgeInput } from "./docs-judge";
+import { decideTransition, type FieldGap, type FieldState, type FieldRequest } from "./field-logic";
+import {
+  FIELD_BUNDLE_VERSION,
+  composeFieldView,
+  docsInputOf,
+  gapDto,
+  gapsFromInput,
+  sanitizeFieldBundle,
+  windowNoticeOf,
+  type FieldBundleDocsInput,
+  type FieldBundlePlan,
+  type FieldGapInput,
+  type FieldReportDto,
+  type FieldViewDto,
+  type GapDto,
+  type WindowNoticeDto,
+} from "./field-compose";
+import { specificFlightTypesFromFlags } from "./plan-logic";
 import { loadFieldState } from "./field-rows";
 import { planPermitInputOfRow } from "./permit-match";
-import { gapDto, type GapDto } from "./flight-extras";
 import { loadPlanBundle } from "./plans";
 import { asDate, nowOf } from "./records";
 import { asInput, assertCan, dateOnly, type OpsContext } from "./service";
@@ -62,14 +57,17 @@ import { OpsError, type FieldEventRowWithTimes, type PlanWithJoins } from "./sto
 import { validateFieldEvent, type FieldEventData } from "./validate-field";
 import type { PlanDto } from "./plans";
 
-// ---- DTO -----------------------------------------------------------------
+export type {
+  FieldDocDto,
+  FieldFlightDto,
+  FieldItemDto,
+  FieldReportDto,
+  FieldViewDto,
+  WindowNoticeDto,
+  FieldBundlePlan,
+} from "./field-compose";
 
-export type WindowNoticeDto = {
-  readonly code: "outside_plan_window";
-  readonly label: string;
-  readonly earlyMinutes: number;
-  readonly lateMinutes: number;
-};
+// ---- DTO -----------------------------------------------------------------
 
 export type FieldEventDto = {
   readonly id: string;
@@ -156,177 +154,6 @@ export type FieldEventPostDto = FieldEventDto & {
   readonly duplicate: boolean;
 };
 
-export type FieldItemDto = {
-  readonly item: FieldCheckItem;
-  readonly label: string;
-  readonly done: boolean;
-  /** 済／未／異常あり（文字。色だけで区別しない）。 */
-  readonly stateLabel: string;
-  /** 済の時刻（表示用 HH:MM）。 */
-  readonly time: string | null;
-  readonly result: FieldCheckResult | null;
-  readonly resultLabel: string | null;
-  /** 緊急用務空域の確認元（選択肢の ID と題名）。 */
-  readonly source: string | null;
-  readonly sourceTitle: string | null;
-  /** 取り消す対象の確認の行の ID（日常点検・未は null）。 */
-  readonly eventId: string | null;
-  readonly inspectionId: string | null;
-  readonly abnormal: boolean;
-  readonly designated: boolean;
-  /** 目立たせる警告（指定されている・異常あり・通報の記録なし 等）。止める文言にしない。 */
-  readonly warning: string | null;
-  /** 取り消すボタンを出してよいか（行があり、記録する権限がある）。 */
-  readonly undoable: boolean;
-};
-
-export type FieldDocDto = {
-  readonly key: FieldDocKey;
-  readonly label: string;
-  readonly status: DocJudgement["status"];
-  readonly effective: DocJudgement["effective"];
-  /** 状態の語（確認済み／要確認／満たさない）。人が確認した場合は「確認済み（人が確認）」。 */
-  readonly statusLabel: string;
-  readonly basis: readonly string[];
-  readonly notes: readonly string[];
-  /** 登録の画面（現場画面へ戻る returnTo つき）。 */
-  readonly href: string | null;
-  readonly canConfirm: boolean;
-  /** 人が確認した行の ID（取り消す対象）。 */
-  readonly humanConfirmEventId: string | null;
-  readonly humanConfirmedTime: string | null;
-};
-
-export type FieldFlightDto = {
-  readonly takeoffEventId: string;
-  readonly takeoffClientEventId: string;
-  readonly takeoffAt: string;
-  readonly takeoffTime: string;
-  readonly takeoffQueued: boolean;
-  readonly gaps: readonly GapDto[];
-  readonly landingEventId: string | null;
-  readonly landingAt: string | null;
-  readonly landingTime: string | null;
-  readonly landingQueued: boolean;
-  readonly journalEventId: string | null;
-  readonly flightRecordId: string | null;
-  readonly phase: FieldFlight["phase"];
-  readonly phaseLabel: string;
-  /** Sprint 14：何回目の飛行か（1 始まり）と、飛行後点検の状態。 */
-  readonly roundNumber: number;
-  /** この飛行のラウンドの飛行前の日常点検の ID（日誌への引き継ぎ）。 */
-  readonly preInspectionId: string | null;
-  readonly post: { readonly done: boolean; readonly inspectionId: string | null; readonly abnormal: boolean; readonly time: string | null };
-  /** 計画の時間帯の外の知らせ（離陸が早い・着陸が遅い）。 */
-  readonly windowNotice: WindowNoticeDto | null;
-};
-
-export type FieldReportDto = {
-  readonly requirementKind: string;
-  readonly requirementLabel: string;
-  readonly statusCode: string;
-  readonly statusLabel: string;
-  readonly statusMark: string;
-  /** 通報の日時・番号（手動記録なら「手動（利用者の申告）」を含む表示）。無ければ null。 */
-  readonly detail: string | null;
-  readonly effectiveReportId: string | null;
-  /** 記録の取得元（手動＝利用者の申告）。 */
-  readonly channelLabel: string | null;
-  /** 推奨・対象外の計画：「この飛行は通報の記録を必須としません」。それ以外は null。 */
-  readonly notRequiredNote: string | null;
-  readonly warning: string | null;
-  /** 「通報内容を開く」の経路。 */
-  readonly reportHref: string;
-  /** 「通報内容を再確認した」を出してよいか（有効な通報がある）。 */
-  readonly canRecheck: boolean;
-};
-
-export type FieldViewDto = {
-  readonly serverNow: string;
-  /** サーバーの現在（JST の `YYYY-MM-DDTHH:MM`）。 */
-  readonly serverNowJst: string;
-  readonly today: string;
-  readonly plan: {
-    readonly id: string;
-    readonly title: string;
-    readonly plannedDate: string;
-    readonly plannedStartAtJst: string;
-    readonly plannedEndAtJst: string;
-    /** 表示用 `HH:MM〜HH:MM`。 */
-    readonly timeLabel: string;
-    readonly durationMinutes: number;
-    readonly registrationMark: string;
-    readonly modelName: string;
-    readonly pilotName: string;
-    readonly placeName: string;
-    readonly purpose: string;
-    readonly permitNumbers: string | null;
-    /** 許可番号ごとの照合の状態（Sprint 12d。読み取りだけ。判定の結論は変えない）。 */
-    readonly permitStates: readonly { readonly numberText: string; readonly status: string; readonly statusLabel: string }[];
-    readonly voided: boolean;
-    readonly state: string;
-    readonly stateLabel: string;
-    readonly verdictLevel: string;
-    readonly verdictLabel: string;
-    readonly judgementStale: boolean;
-    readonly isSelf: boolean;
-  };
-  readonly canRecord: boolean;
-  readonly canJournal: boolean;
-  readonly canInspect: boolean;
-  /** 飛行前の 4 項目（日常点検、緊急用務空域、通報済みの再確認、携行品の順）。 */
-  readonly items: readonly FieldItemDto[];
-  readonly report: FieldReportDto;
-  /** Sprint 14：書類・手続き 6 項目の判定（登録内容から導出。画面を開くたびに作り直す）。 */
-  readonly docs: readonly FieldDocDto[];
-  /** Sprint 14：いまのラウンド（飛行中ならその飛行、そうでなければ次に始める飛行）の空域（飛行自粛要請）・現場状況。 */
-  readonly round: {
-    readonly number: number;
-    readonly restriction: {
-      readonly done: boolean;
-      readonly eventId: string | null;
-      readonly time: string | null;
-      readonly sourceTitle: string;
-      /** 公表ページの URL。一次情報で確かめられていないときは null（URL を創作しない）。 */
-      readonly url: string | null;
-      readonly note: string;
-    };
-    readonly emergencyNote: string;
-    readonly site: {
-      readonly done: boolean;
-      readonly eventId: string | null;
-      readonly time: string | null;
-      readonly values: FieldSiteValues | null;
-      readonly note: string | null;
-      readonly attention: boolean;
-    };
-  };
-  /** Sprint 14：飛行後点検が未了の飛行の数。 */
-  readonly postPendingCount: number;
-  readonly emergencySources: readonly { readonly id: string; readonly title: string; readonly url: string }[];
-  /** 離陸 → 着陸 → 日誌の組（離陸の古い順。複数回の離着陸がありうる）。 */
-  readonly flights: readonly FieldFlightDto[];
-  readonly openFlightEventId: string | null;
-  /** 着陸済みで日誌待ちの離陸の ID（古い順）。 */
-  readonly pendingJournalTakeoffEventIds: readonly string[];
-  /** いま離陸した場合の未了事項の予告（離陸は止めない）。 */
-  readonly takeoffPreview: readonly GapDto[];
-  /** 同じ日の、他の計画（切り替えボタン用。無ければ空）。 */
-  readonly sameDayPlans: readonly { readonly id: string; readonly title: string; readonly timeLabel: string; readonly isCurrent: boolean }[];
-  /**
-   * 状態を端末で導出し直すための入力（送信待ちの行を足して fieldState に渡し、押した結果を即座に反映する）。
-   * 技能証明書番号・氏名は含まない。
-   */
-  readonly stateInput: {
-    readonly events: readonly FieldEventLite[];
-    readonly inspections: readonly InspectionLite[];
-    readonly flightRecords: readonly { readonly id: string; readonly voided: boolean }[];
-    readonly day: string;
-    /** 計画の現在の版（書類・手続きの人の確認は同じ版の行だけが有効）。 */
-    readonly planVersion: number;
-  };
-};
-
 // ---- 通報の状況（再掲） ----------------------------------------------------
 
 const CHANNEL_LABEL: Readonly<Record<string, string>> = {
@@ -368,14 +195,8 @@ const reportBlock = (plan: PlanWithJoins, dto: PlanDto, extras: Awaited<ReturnTy
 
 const MINUTE_MS = 60_000;
 
-const windowNotice = (plan: PlanWithJoins, takeoffAt: Date | null, landingAt: Date | null): WindowNoticeDto | null => {
-  const start = asDate(plan.planned_start_at).getTime();
-  const end = start + plan.duration_minutes * MINUTE_MS;
-  const early = takeoffAt ? Math.max(0, Math.ceil((start - takeoffAt.getTime()) / MINUTE_MS)) : 0;
-  const late = landingAt ? Math.max(0, Math.ceil((landingAt.getTime() - end) / MINUTE_MS)) : 0;
-  if (early === 0 && late === 0) return null;
-  return { code: "outside_plan_window", label: outsidePlanWindowLabel(early, late), earlyMinutes: early, lateMinutes: late };
-};
+const windowNotice = (plan: PlanWithJoins, takeoffAt: Date | null, landingAt: Date | null): WindowNoticeDto | null =>
+  windowNoticeOf(asDate(plan.planned_start_at).toISOString(), plan.duration_minutes, takeoffAt, landingAt);
 
 // ---- 離陸の未了事項（サーバーが導出する） ----------------------------------------------
 
@@ -394,8 +215,19 @@ const effectiveReportedAt = (b: Bundle): string | null => {
   return r.reported_at_jst === null ? recorded : r.reported_at_jst > recorded ? r.reported_at_jst : recorded;
 };
 
-/** 書類・手続きの判定の入力を作る。同じ組織の計画・機体・操縦者・許可の照合・通報だけを読む（組織をまたがない）。 */
-const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bundle, state: FieldState, atJst: string): Promise<DocsJudgeInput> => {
+const gapInputOf = (b: Bundle): FieldGapInput => ({
+  requirementKind: b.dto.report.kind,
+  reportStatusCode: b.dto.report.status.code,
+  effectiveReportedAt: effectiveReportedAt(b),
+  planState: b.dto.state,
+  judgementStale: b.dto.freshness.stale,
+});
+
+/**
+ * 書類・手続きの判定の入力（人の確認と判定時刻を除く）を作る。同じ組織の計画・機体・操縦者・許可の照合・通報だけを読む（組織をまたがない）。
+ * 技能証明書の番号は入れない（氏名・有効期限・限定の有無まで）。
+ */
+const loadDocsBase = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bundle): Promise<FieldBundleDocsInput> => {
   const plan = b.plan;
   const aircraft = await store.getAircraft(q as store.OpsDb, orgId, plan.aircraft_id);
   const pilot = await store.getPilot(q as store.OpsDb, orgId, plan.pilot_id);
@@ -404,7 +236,6 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
     plannedStartAtJst: toJstInput(asDate(plan.planned_start_at)),
     plannedEndAtJst: toJstInput(new Date(asDate(plan.planned_start_at).getTime() + plan.duration_minutes * MINUTE_MS)),
     wantedKinds: relevantDipsKinds(planPermitInputOfRow(plan).flags),
-    atJst,
     permits: b.dto.permits.numbers.map((n) => ({
       numberText: n.numberText,
       kinds: n.kinds.map((k) => k.kind),
@@ -442,138 +273,31 @@ const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bun
           }
         : null,
     },
-    humanConfirms: state.docConfirms,
   };
 };
 
+const loadDocsInput = async (q: store.OpsDb | store.OpsTx, orgId: string, b: Bundle, state: FieldState, atJst: string): Promise<DocsJudgeInput> =>
+  docsInputOf(await loadDocsBase(q, orgId, b), state, atJst);
+
 const gapsFor = (b: Bundle, state: FieldState, takeoffAtJst: string, docs: readonly DocJudgement[]): FieldGap[] =>
-  takeoffGaps({
-    checks: state.checks,
-    requirementKind: b.dto.report.kind,
-    reportStatusCode: b.dto.report.status.code,
-    effectiveReportedAt: effectiveReportedAt(b),
-    takeoffAtJst,
-    planState: b.dto.state,
-    judgementStale: b.dto.freshness.stale,
-    reportUnverified: docs.some((d) => d.key === "report" && d.countsAsGap),
-    round: {
-      docs: docGapsOf(docs),
-      restrictionDone: state.round.restriction.done,
-      site: { done: state.round.site.done, attention: state.round.site.attention },
-    },
-  });
+  gapsFromInput(gapInputOf(b), state, takeoffAtJst, docs);
 
-// ---- 現場モードの状態 -------------------------------------------------------------
+// ---- 先読みの束・現場モードの状態 -------------------------------------------------------
 
-const PHASE_LABEL: Readonly<Record<FieldFlight["phase"], string>> = {
-  in_flight: FIELD_STATE_IN_FLIGHT,
-  journal_pending: FIELD_STATE_JOURNAL_PENDING,
-  journaled: FIELD_STATE_JOURNAL_DONE,
-};
-
-const sourceTitle = (id: string | null): string | null => EMERGENCY_SOURCE_OPTIONS.find((o) => o.id === id)?.title ?? null;
-
-export const getFieldView = async (ctx: OpsContext, planId: string): Promise<FieldViewDto> => {
-  assertCan(ctx, "field.read");
-  const b = await loadPlanBundle(ctx, planId);
+/** 束を作る（許可リストで絞る前）。loaded は今日の日付で読んだ現場の行・点検・飛行記録。 */
+const buildBundle = async (ctx: OpsContext, b: Bundle, loaded: Awaited<ReturnType<typeof loadFieldState>>, now: Date): Promise<FieldBundlePlan> => {
   const { plan, dto } = b;
-  const now = nowOf(ctx);
-  const today = jstDate(now);
-  const org = ctx.member.org_id;
-  const loaded = await loadFieldState(ctx.db, org, plan, today);
-  const state = loaded.state;
-  const canRecord = can(ctx.member.role, "field.record", { isSelf: dto.isSelf });
   const start = asDate(plan.planned_start_at);
   const end = new Date(start.getTime() + plan.duration_minutes * MINUTE_MS);
-  const report = reportBlock(plan, dto, b.extras);
-  const docJudgements = judgeFieldDocs(
-    await loadDocsInput(ctx.db, org, b, state, state.openFlight ? toJstInput(new Date(state.openFlight.takeoffAt)) : toJstInput(now)),
-  );
-  const docDtos = docJudgements.map(
-    (d): FieldDocDto => ({
-      key: d.key,
-      label: FIELD_DOC_LABEL[d.key],
-      status: d.status,
-      effective: d.effective,
-      statusLabel: d.effective === "confirmed_human" ? FIELD_DOC_HUMAN_CONFIRMED_LABEL : FIELD_DOC_STATUS_LABEL[d.status],
-      basis: d.basis,
-      notes: d.notes,
-      href: d.key === "report" ? withFieldReturn(`/ops/plans/${plan.id}/report`, plan.id) : d.href ? withFieldReturn(d.href, plan.id) : null,
-      canConfirm: d.canConfirm && canRecord && plan.voided_at === null,
-      humanConfirmEventId: d.humanConfirmEventId,
-      humanConfirmedTime: d.humanConfirmedAt ? jstTime(new Date(d.humanConfirmedAt)) : null,
-    }),
-  );
-  const siteRow = state.round.site.eventId ? loaded.rows.find((r) => r.id === state.round.site.eventId) : undefined;
-
-  const items = FIELD_CHECK_ITEMS.map((item): FieldItemDto => {
-    const c = state.checks[item];
-    const warning =
-      item === "inspection" && c.abnormal
-        ? INSPECTION_ABNORMAL_GUIDANCE
-        : item === "emergency_airspace" && c.designated
-          ? EMERGENCY_DESIGNATED_WARNING
-          : item === "report_recheck"
-            ? report.warning
-            : null;
-    return {
-      item,
-      label: FIELD_CHECK_ITEM_LABEL[item],
-      done: c.done,
-      stateLabel: !c.done ? FIELD_STATE_TODO : c.abnormal ? FIELD_STATE_ABNORMAL : FIELD_STATE_DONE,
-      time: c.at ? jstTime(new Date(c.at)) : null,
-      result: c.result,
-      resultLabel: c.result ? FIELD_CHECK_RESULT_LABEL[c.result] : null,
-      source: c.source,
-      sourceTitle: sourceTitle(c.source),
-      eventId: c.eventId,
-      inspectionId: c.inspectionId,
-      abnormal: c.abnormal,
-      designated: c.designated,
-      warning,
-      undoable: c.eventId !== null && canRecord,
-    };
-  });
-
-  const flights = state.flights.map(
-    (f): FieldFlightDto => ({
-      takeoffEventId: f.takeoffEventId,
-      takeoffClientEventId: f.takeoffClientEventId,
-      takeoffAt: toJstInput(new Date(f.takeoffAt)),
-      takeoffTime: jstTime(new Date(f.takeoffAt)),
-      takeoffQueued: f.takeoffQueued,
-      gaps: f.gaps.map(gapDto),
-      landingEventId: f.landingEventId,
-      landingAt: f.landingAt ? toJstInput(new Date(f.landingAt)) : null,
-      landingTime: f.landingAt ? jstTime(new Date(f.landingAt)) : null,
-      landingQueued: f.landingQueued,
-      journalEventId: f.journalEventId,
-      flightRecordId: f.flightRecordId,
-      phase: f.phase,
-      phaseLabel: PHASE_LABEL[f.phase],
-      roundNumber: f.roundIndex + 1,
-      preInspectionId: f.preInspectionId,
-      post: { done: f.post.done, inspectionId: f.post.inspectionId, abnormal: f.post.abnormal, time: f.post.at ? jstTime(new Date(f.post.at)) : null },
-      windowNotice: windowNotice(plan, new Date(f.takeoffAt), f.landingAt ? new Date(f.landingAt) : null),
-    }),
-  );
-
-  const sameDay = (await store.listPlans(ctx.db, org, { from: plan.planned_date_text, to: plan.planned_date_text, oldestFirst: true }))
-    .filter((p) => p.voided_at === null)
-    .map((p) => {
-      const s = asDate(p.planned_start_at);
-      return {
-        id: p.id,
-        title: p.title,
-        timeLabel: `${jstTime(s)}〜${jstTime(new Date(s.getTime() + p.duration_minutes * MINUTE_MS))}`,
-        isCurrent: p.id === plan.id,
-      };
-    });
-
+  const snap = await store.getSnapshot(ctx.db, ctx.member.org_id, plan.id, plan.current_snapshot_id);
+  const flags = ((snap?.result as { flags?: readonly string[] } | undefined)?.flags ?? []) as readonly string[];
+  const insp = [...loaded.inspections].sort((x, y) => (x.inspectedAt < y.inspectedAt ? -1 : x.inspectedAt > y.inspectedAt ? 1 : 0));
+  const last = insp[insp.length - 1];
   return {
-    serverNow: now.toISOString(),
-    serverNowJst: toJstInput(now),
-    today,
+    v: FIELD_BUNDLE_VERSION,
+    memberId: ctx.member.id,
+    planId: plan.id,
+    fetchedAt: now.toISOString(),
     plan: {
       id: plan.id,
       title: plan.title,
@@ -586,7 +310,6 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       modelName: plan.model_name,
       pilotName: plan.pilot_name,
       placeName: plan.place_name,
-      purpose: plan.purpose,
       permitNumbers: plan.permit_numbers,
       permitStates: dto.permits.numbers.map((n) => ({ numberText: n.numberText, status: n.status, statusLabel: n.statusLabel })),
       voided: plan.voided_at !== null,
@@ -596,48 +319,89 @@ export const getFieldView = async (ctx: OpsContext, planId: string): Promise<Fie
       verdictLabel: (VERDICT_LABEL as Record<string, string>)[dto.judgement.verdictLevel] ?? dto.judgement.verdictLevel,
       judgementStale: dto.freshness.stale,
       isSelf: dto.isSelf,
+      startIso: start.toISOString(),
     },
-    canRecord,
-    canJournal: can(ctx.member.role, "flight.create", { isSelf: dto.isSelf }),
-    canInspect: can(ctx.member.role, "inspection.create", { isSelf: dto.isSelf }),
-    items,
-    report,
-    docs: docDtos,
-    round: {
-      number: state.round.index + 1,
-      restriction: {
-        done: state.round.restriction.done,
-        eventId: state.round.restriction.eventId,
-        time: state.round.restriction.at ? jstTime(new Date(state.round.restriction.at)) : null,
-        sourceTitle: FLIGHT_RESTRICTION_SOURCE.title,
-        url: FLIGHT_RESTRICTION_SOURCE.url,
-        note: FLIGHT_RESTRICTION_SOURCE.url === null ? FIELD_RESTRICTION_UNCONFIRMED_NOTE : `確認元：${FLIGHT_RESTRICTION_SOURCE.title}／確認日 ${FLIGHT_RESTRICTION_SOURCE.checkedOn ?? "未記録"}`,
-      },
-      emergencyNote: FIELD_EMERGENCY_SOURCE_NOTE,
-      site: {
-        done: state.round.site.done,
-        eventId: state.round.site.eventId,
-        time: state.round.site.at ? jstTime(new Date(state.round.site.at)) : null,
-        values: state.round.site.values,
-        note: siteRow?.note ?? null,
-        attention: state.round.site.attention,
-      },
+    perms: {
+      canRecord: can(ctx.member.role, "field.record", { isSelf: dto.isSelf }),
+      canJournal: can(ctx.member.role, "flight.create", { isSelf: dto.isSelf }),
+      canInspect: can(ctx.member.role, "inspection.create", { isSelf: dto.isSelf }),
     },
-    postPendingCount: state.postPending.length,
-    emergencySources: EMERGENCY_SOURCE_OPTIONS,
-    flights,
-    openFlightEventId: state.openFlight?.takeoffEventId ?? null,
-    pendingJournalTakeoffEventIds: state.pendingJournal.map((f) => f.takeoffEventId),
-    takeoffPreview: gapsFor(b, state, toJstInput(now), docJudgements).map(gapDto),
-    sameDayPlans: sameDay.length > 1 ? sameDay : [],
-    stateInput: {
-      events: loaded.events,
-      inspections: loaded.inspections,
-      flightRecords: loaded.flightRecords,
-      day: today,
-      planVersion: plan.current_version,
+    report: reportBlock(plan, dto, b.extras),
+    docs: await loadDocsBase(ctx.db, ctx.member.org_id, b),
+    gap: gapInputOf(b),
+    state: { events: loaded.events, inspections: loaded.inspections, flightRecords: loaded.flightRecords, planVersion: plan.current_version },
+    form: {
+      aircraftId: plan.aircraft_id,
+      pilotId: plan.pilot_id,
+      specificFlightTypes: specificFlightTypesFromFlags(flags),
+      lastInspection: last ? { inspectedAt: last.inspectedAt, timing: last.timing, hasAbnormal: last.hasAbnormal } : null,
     },
   };
+};
+
+export const getFieldView = async (ctx: OpsContext, planId: string): Promise<FieldViewDto> => {
+  assertCan(ctx, "field.read");
+  const b = await loadPlanBundle(ctx, planId);
+  const { plan } = b;
+  const now = nowOf(ctx);
+  const today = jstDate(now);
+  const org = ctx.member.org_id;
+  const loaded = await loadFieldState(ctx.db, org, plan, today);
+  const bundle = await buildBundle(ctx, b, loaded, now);
+  const sameDay = (await store.listPlans(ctx.db, org, { from: plan.planned_date_text, to: plan.planned_date_text, oldestFirst: true }))
+    .filter((p) => p.voided_at === null)
+    .map((p) => {
+      const s = asDate(p.planned_start_at);
+      return {
+        id: p.id,
+        title: p.title,
+        timeLabel: `${jstTime(s)}〜${jstTime(new Date(s.getTime() + p.duration_minutes * MINUTE_MS))}`,
+        isCurrent: p.id === plan.id,
+      };
+    });
+  // 画面と先読みの束が同じ組み立てを通る（契約 B-5）。束に入れない自由記述（目的・現場状況の備考）と同じ日の計画だけを足す
+  return composeFieldView(bundle, {
+    now,
+    purpose: plan.purpose,
+    siteNote: (eventId) => loaded.rows.find((r) => r.id === eventId)?.note ?? null,
+    sameDayPlans: sameDay.length > 1 ? sameDay : [],
+  });
+};
+
+/** 一覧の束の対象：今日と明日（JST）の、中止されていない、利用者が操縦者の計画（その利用者が現場で扱うもの）。 */
+export const FIELD_BUNDLE_DAYS = 2;
+
+/**
+ * 先読みの束（Sprint 15 設計 3）。planId を渡すとその計画の束（運航管理者、または計画の操縦者本人だけ。他は 403、他の組織は 404）。
+ * 渡さなければ、今日と明日の、利用者が操縦者の計画の束。どちらも許可リスト（sanitizeFieldBundle）で絞ってから返す。
+ */
+export const getFieldBundles = async (ctx: OpsContext, planId: string | null): Promise<{ readonly memberId: string; readonly serverNow: string; readonly bundles: FieldBundlePlan[] }> => {
+  assertCan(ctx, "field.read");
+  const now = nowOf(ctx);
+  const today = jstDate(now);
+  const org = ctx.member.org_id;
+  const one = async (id: string): Promise<FieldBundlePlan | null> => {
+    const b = await loadPlanBundle(ctx, id);
+    const loaded = await loadFieldState(ctx.db, org, b.plan, today);
+    return sanitizeFieldBundle(await buildBundle(ctx, b, loaded, now));
+  };
+  if (planId !== null) {
+    const b = await loadPlanBundle(ctx, planId);
+    // 他の人の計画は端末に入れない（記録できる人＝運航管理者・計画の操縦者本人だけ）
+    if (!can(ctx.member.role, "field.record", { isSelf: b.dto.isSelf })) throw new OpsError(403, "forbidden");
+    const x = await one(planId);
+    return { memberId: ctx.member.id, serverNow: now.toISOString(), bundles: x ? [x] : [] };
+  }
+  const tomorrow = jstDate(new Date(now.getTime() + 24 * 3600_000));
+  const rows = (await store.listPlans(ctx.db, org, { from: today, to: tomorrow, oldestFirst: true })).filter((p) => p.voided_at === null);
+  const out: FieldBundlePlan[] = [];
+  for (const p of rows) {
+    const b = await loadPlanBundle(ctx, p.id);
+    if (!b.dto.isSelf) continue;
+    const x = await one(p.id);
+    if (x) out.push(x);
+  }
+  return { memberId: ctx.member.id, serverNow: now.toISOString(), bundles: out };
 };
 
 export const listFieldEvents = async (ctx: OpsContext, planId: string): Promise<{ readonly events: FieldEventDto[] }> => {
