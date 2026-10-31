@@ -57,13 +57,22 @@ export const clearDraft = (key: string): void => {
   }
 };
 
-/** 運航管理のすべての下書きを消す（ログアウト時）。 */
-export const clearOpsDrafts = (): void => {
+/** 送信待ち（現場の記録・点検・日誌、事故・ヒヤリハットの簡易記録）のキーか。 */
+const isOutboxStorageKey = (k: string): boolean => k.startsWith(`${PREFIX}field-`) || k.startsWith(`${PREFIX}incident-`);
+
+/**
+ * 運航管理のすべての下書きを消す（ログアウト時）。
+ * Sprint 15：keepOutboxOf を渡すと、その利用者の送信待ちだけは残す（未送信を警告したうえで「残してログアウト」を選んだとき）。
+ * 同じ利用者が再びログインすると続きを送る。別の利用者がログインすると clearOtherUsersDrafts が消す。
+ */
+export const clearOpsDrafts = (opts: { readonly keepOutboxOf?: string } = {}): void => {
   try {
     const keys: string[] = [];
     for (let i = 0; i < window.localStorage.length; i++) {
       const k = window.localStorage.key(i);
-      if (k?.startsWith(PREFIX)) keys.push(k);
+      if (!k?.startsWith(PREFIX)) continue;
+      if (opts.keepOutboxOf && isOutboxStorageKey(k) && k.endsWith(`:${opts.keepOutboxOf}`)) continue;
+      keys.push(k);
     }
     for (const k of keys) window.localStorage.removeItem(k);
   } catch {

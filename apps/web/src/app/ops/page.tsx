@@ -4,6 +4,7 @@ import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { Notice } from "@/components/ops/ui";
 import { JudgePills } from "@/components/ops/judge-pills";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
+import { FieldPrefetch } from "@/components/ops/field-prefetch";
 import { TodayCard, TodayDeadlines, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
 import { formatDay } from "@/lib/ops-day";
 import { planCreateDenied } from "@/server/ops/plan-page";
@@ -74,6 +75,8 @@ export default async function OpsHome() {
           </div>
         </nav>
       ) : null}
+      {/* Sprint 15：圏外用の先読み・送信待ちの続き・ホーム画面への追加の案内（最初の画面の並びを変えないよう、下に置く） */}
+      <FieldPrefetch memberId={me.member.id} />
       <Notice data-testid="today-disclaimer">
         {PLAN_JUDGEMENT_DISCLAIMER}そらばんは DIPS に送信しません。
       </Notice>

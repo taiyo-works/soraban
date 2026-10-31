@@ -6,6 +6,7 @@ import { cloneElement, useCallback, useEffect, useId, useRef, useState, type For
 import { setChangeFlash } from "./change-notice";
 import { clearOpsDrafts, clearOtherUsersDrafts } from "./drafts";
 import { flushOutbox, planIdsWithOutbox, unsavedUnsentCountForMember } from "./field-outbox";
+import { clearBundles, clearCurrentMember, clearOtherMembersBundles, setCurrentMember } from "./field-store";
 import { flushIncidentOutbox, incidentUnsentTotalForMember, planIdsWithIncidentOutbox } from "./incident-outbox";
 import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import { Icon } from "@/components/ui/icons";
@@ -860,11 +861,14 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
   const [warning, setWarning] = useState<string | null>(null);
   const [sendFailed, setSendFailed] = useState(false);
 
-  const signOut = async () => {
+  const signOut = async (keepOutbox = false) => {
     setBusy(true);
     // 入力中の下書き（氏名・場所を含みうる）は、ログアウトで端末から消す（Sprint 11 設計 G）。
     // 未送信の現場の記録が残っているときは、警告のあとの確認を経たときだけここへ来る（Sprint 12c）。
-    clearOpsDrafts();
+    // Sprint 15：先読みの束（IndexedDB）はログアウトで必ず消す。送信待ちは「残してログアウト」を選んだときだけ残す。
+    clearOpsDrafts(keepOutbox && memberId ? { keepOutboxOf: memberId } : {});
+    await clearBundles();
+    clearCurrentMember();
     try {
       if (provider === "test") {
         await send("POST", "/api/test-auth/sign-out");
@@ -935,6 +939,16 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
             <button type="button" className={dsButtonClass("secondary", "md", "min-h-14 w-full")} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
               やめる
             </button>
+            <button
+              type="button"
+              className={dsButtonClass("secondary", "md", "min-h-14 w-full flex-col gap-0 py-1.5")}
+              onClick={() => void signOut(true)}
+              disabled={busy}
+              data-testid="signout-keep"
+            >
+              <span>送信待ちを残してログアウト</span>
+              <span className="text-aux font-normal">（先読みは消します。同じ人がログインすると続きを送ります）</span>
+            </button>
             <button type="button" className={dsButtonClass("danger", "md", "mt-2 min-h-14 w-full flex-col gap-0 py-1.5")} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
               <span>送らずにログアウト</span>
               <span className="text-aux font-normal">（記録を捨てる）</span>
@@ -974,6 +988,9 @@ export function GoogleSignInButton() {
 export function DraftOwnerGuard({ memberId }: { readonly memberId: string }) {
   useEffect(() => {
     clearOtherUsersDrafts(memberId);
+    // Sprint 15：別の利用者がログインしたら、前の利用者の先読みの束も消す。圏外で開くときの利用者を覚える
+    void clearOtherMembersBundles(memberId);
+    setCurrentMember(memberId);
   }, [memberId]);
   return null;
 }

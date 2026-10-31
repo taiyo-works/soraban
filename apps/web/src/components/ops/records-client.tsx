@@ -129,7 +129,7 @@ function ChoiceGroup({
   );
 }
 
-const WARNING_TEXT = {
+export const WARNING_TEXT = {
   no_inspection_on_day: "この機体の、飛行日の日常点検がありません。",
   inspections_unavailable: "日常点検の候補を取得できません（通信を確かめてください）。点検の有無は確かめられていません。",
   recent_inspection_abnormal: "この機体の直近の日常点検に「異常」があります。",
@@ -1230,11 +1230,14 @@ export function InspectionForm({
   returnTo,
   editing,
   memberId,
+  planId,
 }: {
   readonly aircraft: readonly AircraftOption[];
   readonly pilots: readonly PilotOption[];
   readonly fixedPilotId: string | null;
   readonly initialAircraftId?: string;
+  /** Sprint 15（R-1）：現場モードから来たときの計画。保存時に送り、サーバーが点検を計画に結び付ける（飛行後点検はその計画にだけ数える）。 */
+  readonly planId?: string;
   /** 飛行計画から来たとき、実施者の初期値（計画の操縦者。操縦者役割は固定の操縦者が優先）。 */
   readonly initialPilotId?: string;
   /** Sprint 14：現場モードの飛行後点検から来たとき、点検の時期の初期値（飛行後）。 */
@@ -1358,7 +1361,7 @@ export function InspectionForm({
     };
     const r = isEdit
       ? await trySend("PATCH", `/api/ops/inspections/${editing.id}`, { ...body, expectedVersion: editing.version, reason })
-      : await trySend("POST", "/api/ops/inspections", { ...body, clientRequestId: v.clientRequestId });
+      : await trySend("POST", "/api/ops/inspections", { ...body, clientRequestId: v.clientRequestId, ...(planId ? { planId } : {}) });
     setBusy(false);
     if (!r.ok) {
       if (r.status === 0 || r.status >= 500) {

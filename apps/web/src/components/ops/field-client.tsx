@@ -48,6 +48,7 @@ import {
   FIELD_DOUBLE_TAP_GUARD_MS,
   FIELD_OFFLINE_SCOPE_NOTE,
   FIELD_REPORT_OPEN_LABEL,
+  FIELD_REPORT_RECORD_BEFORE_TAKEOFF,
   FIELD_STATE_ABNORMAL,
   FIELD_STATE_DONE,
   FIELD_STATE_IN_FLIGHT,
@@ -71,20 +72,35 @@ import {
   type FieldGapLike,
 } from "@/lib/ops-field";
 import {
+  OUTBOX_EXPIRY_WARNING,
   discardRejected,
   emptyOutbox,
   enqueue,
+  expiringSoon,
   rejectedEntries,
   unsentCount,
   type OutboxEntry,
   type OutboxState,
 } from "@/lib/ops-outbox";
-import { jstTime, nowJstInput } from "@/lib/ops-time";
+import { jstDate, jstTime, nowJstInput } from "@/lib/ops-time";
+import { DEVICE_STORAGE_NOTES } from "@/lib/pwa";
 import { WakeLockController, wakeLockNote, type WakeLockStatus } from "@/lib/wake-lock";
-import { fieldState, outboxAsEvents, type FieldFlight } from "@/server/ops/field-logic";
-import type { FieldViewDto } from "@/server/ops/field";
+import { fieldState, outboxAsEvents, outboxAsInspections, type FieldFlight } from "@/server/ops/field-logic";
+import { composeFieldView, fieldBundleIsStale, type FieldBundlePlan, type FieldViewDto } from "@/server/ops/field-compose";
 import { newRequestId } from "./drafts";
-import { fieldEventsUrl, flushOutbox, loadPlanOutbox, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
+import {
+  fieldEventsUrl,
+  flushOutbox,
+  loadPlanOutbox,
+  markOutboxSaved,
+  outboxAuthRequired,
+  outboxMeta,
+  planOutboxUnsaved,
+  updatePlanOutbox,
+} from "./field-outbox";
+import { fetchBundles, loadBundle, setCurrentMember } from "./field-store";
+import { reportServerBuild } from "./pwa-register";
+import { WARNING_TEXT } from "./records-client";
 import { FIELD_BACK } from "./ops-nav-model";
 
 const BTN =
@@ -133,14 +149,28 @@ export function FieldClient({
   initial,
   memberId,
   incidentHref = null,
+  bundle: initialBundle = null,
 }: {
   readonly initial: FieldViewDto;
   readonly memberId: string;
   /** Sprint 12e：現場の簡易記録（事故・ヒヤリハット）への経路。記録できない利用者には渡さない（帯を出さない）。 */
   readonly incidentHref?: string | null;
+  /**
+   * Sprint 15：圏外で開いたとき（Service Worker が返した枠）の先読みの束。渡されたら、画面は束と端末の送信待ちから組み立てる
+   * （サーバーから読み直せたら、サーバーの内容に切り替える）。
+   */
+  readonly bundle?: FieldBundlePlan | null;
 }) {
   const planId = initial.plan.id;
-  const [view, setView] = useState<FieldViewDto>(initial);
+  const [serverView, setView] = useState<FieldViewDto>(initial);
+  // Sprint 15：画面の出どころ（サーバー／端末の先読みの束）と、端末の先読みの束
+  const [source, setSource] = useState<"server" | "bundle">(initialBundle ? "bundle" : "server");
+  const [bundle, setBundle] = useState<FieldBundlePlan | null>(initialBundle);
+  const [online, setOnline] = useState(true);
+  const [sentWarnings, setSentWarnings] = useState<readonly string[]>([]);
+  const [authRequired, setAuthRequired] = useState(false);
+  // 状態の帯の時刻の判定（先読みの古さ・72 時間の期限）に使う現在。開いたときと 30 秒ごとに更新する
+  const [clockMs, setClockMs] = useState(0);
   const [outbox, setOutbox] = useState<OutboxState>(emptyOutbox());
   const [banner, setBanner] = useState<Banner | null>(null);
   const [nowMs, setNowMs] = useState(0);
@@ -164,9 +194,10 @@ export function FieldClient({
 
   const reloadView = useCallback(async (): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/ops/plans/${planId}/field`, { credentials: "same-origin" });
+      const res = await fetch(`/api/ops/plans/${planId}/field`, { credentials: "same-origin", cache: "no-store" });
       if (!res.ok) return false;
       setView((await res.json()) as FieldViewDto);
+      setSource("server");
       return true;
     } catch {
       // 通信できないときは、いまの表示のまま
@@ -174,8 +205,24 @@ export function FieldClient({
     }
   }, [planId]);
 
+  // Sprint 15：先読みの束を取り直して端末に保存する（オンラインのとき。登録が変わっていれば、圏外の判定も最新になる）
+  const refreshBundle = useCallback(async () => {
+    const r = await fetchBundles(memberId, planId);
+    if (r) reportServerBuild(r.build);
+    const b = await loadBundle(memberId, planId);
+    if (b) setBundle(b);
+  }, [memberId, planId]);
+
   const flush = useCallback(async () => {
+    const warned: string[] = [];
     const r = await flushOutbox(planId, memberId, (info) => {
+      // Sprint 15：送信待ちの日誌のサーバーの警告（点検なし・計画との相違など）は、送れた後に出す（契約 D-3）
+      if (info.entry.kind === "journal" && Array.isArray(info.data["warnings"])) {
+        for (const w of info.data["warnings"] as unknown[]) {
+          const text = typeof w === "string" ? (WARNING_TEXT as Record<string, string>)[w] : undefined;
+          if (text) warned.push(`日誌（離陸 ${info.entry.journal?.takeoffAt.slice(11, 16) ?? ""}）：${text}`);
+        }
+      }
       // 送れたとき、押した直後の帯を、サーバーが導出した未了事項・時間帯の知らせで置き換える
       const gaps = Array.isArray(info.data["gaps"]) ? (info.data["gaps"] as FieldGapLike[]) : null;
       const wn = info.data["windowNotice"] as { label?: string } | null | undefined;
@@ -186,6 +233,8 @@ export function FieldClient({
     // 送れた行は、サーバーの状態を読み直してから端末の送信待ちの表示を更新する
     // （先に送信待ちの表示から消すと、読み直しまでの間、離陸した直後の画面が「離陸前」に一瞬戻る）
     if (r.sent > 0) await reloadView();
+    if (warned.length > 0) setSentWarnings((cur) => [...cur, ...warned]);
+    setAuthRequired(outboxAuthRequired());
     reloadOutbox();
     return r;
   }, [planId, memberId, reloadOutbox, reloadView]);
@@ -194,28 +243,75 @@ export function FieldClient({
   useEffect(() => {
     const t = window.setTimeout(() => {
       reloadOutbox();
+      setOnline(navigator.onLine);
       setHydrated(true);
-      void flush();
+      // Sprint 15：この端末でログインしている利用者を覚え（圏外で開くときに使う）、先読みの束を取り直す
+      setCurrentMember(memberId);
+      void (async () => {
+        await flush();
+        if (navigator.onLine) {
+          // 圏外の枠で開いた画面も、通信できればサーバーの内容に切り替える
+          if (source === "bundle") await reloadView();
+          await refreshBundle();
+        } else if (!bundle) {
+          const b = await loadBundle(memberId, planId);
+          if (b) setBundle(b);
+        }
+      })();
     }, 0);
     const iv = window.setInterval(() => {
       if (unsentCount(loadPlanOutbox(planId, memberId)) > 0) void flush();
     }, OUTBOX_RETRY_INTERVAL_MS);
-    const onOnline = () => void flush();
+    const onOnline = () => {
+      setOnline(true);
+      // 戻ったら送り、サーバーの内容と先読みの束を最新にする（契約 B-4・E-1）
+      void flush().then(async () => {
+        await reloadView();
+        await refreshBundle();
+      });
+    };
+    const onOffline = () => setOnline(false);
     window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
     return () => {
       window.clearTimeout(t);
       window.clearInterval(iv);
       window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
     };
-  }, [flush, reloadOutbox, planId, memberId]);
+    // 画面を開いたときと、接続の変化のときだけ（source・bundle の変化では張り直さない）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flush, reloadOutbox, reloadView, refreshBundle, planId, memberId]);
+
+  useEffect(() => {
+    const tick = () => setClockMs(Date.now());
+    const t = window.setTimeout(tick, 0);
+    const iv = window.setInterval(tick, 30_000);
+    return () => {
+      window.clearTimeout(t);
+      window.clearInterval(iv);
+    };
+  }, [outbox]);
+
+  // Sprint 15：圏外の枠で開いたときは、先読みの束と端末の送信待ちから画面を組み立てる（送信待ちが変わるたびに作り直す。契約 B-5・D-1）
+  const view = useMemo((): FieldViewDto => {
+    if (source !== "bundle" || !bundle) return serverView;
+    return composeFieldView(bundle, {
+      now: new Date(),
+      extraEvents: outboxAsEvents(outbox.entries),
+      extraInspections: outboxAsInspections(outbox.entries),
+    });
+  }, [source, bundle, serverView, outbox]);
 
   // ---- 状態（行から毎回導出する。送信待ちの行も足す） -------------------------------------
   const state = useMemo(() => {
     const serverClientIds = new Set(view.stateInput.events.map((e) => e.clientEventId));
     const pending = outboxAsEvents(outbox.entries.filter((e) => !serverClientIds.has(e.clientEventId)));
+    // Sprint 15：送信待ちの点検（圏外で保存した点検）も、送れる前から画面に反映する
+    const inspIds = new Set(view.stateInput.inspections.map((x) => x.id));
     return fieldState({
       events: [...view.stateInput.events, ...pending],
-      inspections: view.stateInput.inspections,
+      inspections: [...view.stateInput.inspections, ...outboxAsInspections(outbox.entries).filter((x) => !inspIds.has(x.id))],
       flightRecords: view.stateInput.flightRecords,
       day: view.stateInput.day,
     });
@@ -277,6 +373,7 @@ export function FieldClient({
     const clientEventId = newRequestId();
     const occurredAt = nowJstInput(new Date());
     updatePlanOutbox(planId, memberId, (s) => enqueue(s, { ...p, clientEventId, occurredAt }));
+    markOutboxSaved(memberId);
     reloadOutbox();
     void flush();
     return { id: clientEventId, hm: occurredAt.slice(11, 16) };
@@ -860,6 +957,12 @@ export function FieldClient({
                     </p>
                   ) : null}
                   {view.report.notRequiredNote ? <p data-testid="field-report-not-required">{view.report.notRequiredNote}</p> : null}
+                  {/* Sprint 15（U-2）：通報の記録が無い・まだの計画では、離陸の前にそらばんへ記録するよう案内する（判定と離陸の未了は変えない） */}
+                  {(view.report.requirementKind === "required" || view.report.requirementKind === "confirm") && view.report.effectiveReportId === null ? (
+                    <p className={BOX_NOTE} data-testid="field-report-record-before-takeoff">
+                      {FIELD_REPORT_RECORD_BEFORE_TAKEOFF}
+                    </p>
+                  ) : null}
                   {view.report.warning ? (
                     <p className={BOX_WARN} role="alert" data-testid="field-report-warning">
                       <span className="text-xl font-bold">！ 通報の確認</span>
@@ -1142,6 +1245,41 @@ export function FieldClient({
         : ["flight", "post", "journal", "preflight"];
   const emergencyDesignated = state.checks.emergency_airspace.designated;
 
+  // ---- Sprint 15：状態の帯（接続・送信待ち・最後に保存した時刻・先読みの最終更新。色だけでなく文字で示す） ----------------
+  const meta = hydrated ? outboxMeta(memberId) : { savedAt: null, sentAt: null };
+  const bundleStale = bundle !== null && clockMs > 0 && fieldBundleIsStale(bundle.fetchedAt, clockMs);
+  const expiryHours = clockMs > 0 ? expiringSoon(outbox, clockMs) : null;
+  const dayTime = (iso: string): string => `${jstDate(new Date(iso)).slice(5).replace("-", "/")} ${jstTime(new Date(iso))}`;
+  const bandEl = (
+    <section
+      aria-label="接続と送信の状況"
+      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-ink-mute bg-paper px-1 py-2 text-base"
+      data-testid="field-status-band"
+      data-online={online ? "true" : "false"}
+    >
+      <span className="font-bold" data-testid="field-status-connection">
+        {online ? "● 接続あり" : "× 接続なし（圏外）"}
+      </span>
+      <span className="font-bold" data-testid="field-status-unsent" data-count={unsent}>
+        送信待ち {unsent} 件
+      </span>
+      <span data-testid="field-status-saved">最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}</span>
+      <span data-testid="field-status-prefetch">
+        先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}
+        {bundleStale ? (
+          <strong className="ml-1" data-testid="field-status-prefetch-stale">
+            （古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）
+          </strong>
+        ) : null}
+      </span>
+      {unsent > 0 && online ? (
+        <button type="button" className={`${BTN_OUTLINE} !min-h-12 !w-auto !py-1 text-base`} data-testid="field-send-now" onClick={() => void flush()}>
+          いま送る
+        </button>
+      ) : null}
+    </section>
+  );
+
   return (
     <main
       className="flex flex-col gap-5 bg-paper pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-ink touch-manipulation"
@@ -1149,6 +1287,7 @@ export function FieldClient({
       data-hydrated={hydrated ? "true" : "false"}
       aria-label="現場モード"
     >
+      {bandEl}
       {/* 緊急用務空域が「指定されている」：最上位の警告。画面の最上部に、ほかのどの表示よりも大きく出す */}
       {emergencyDesignated ? (
         <p className={BOX_ALARM} role="alert" data-testid="field-emergency-warning">
@@ -1233,6 +1372,32 @@ export function FieldClient({
           <span className={unsent > 0 ? "text-2xl font-bold" : "font-bold"}>{unsent > 0 ? `！ 未送信 ${unsent} 件` : "✓ 送信済み"}</span>
           {unsent > 0 ? <span>電波が戻ると自動で送ります。</span> : null}
         </p>
+        {expiryHours !== null ? (
+          <p className={BOX_WARN} role="alert" data-testid="field-expiry-warning">
+            {OUTBOX_EXPIRY_WARNING(expiryHours)}
+          </p>
+        ) : null}
+        {authRequired ? (
+          <div className={BOX_WARN} role="alert" data-testid="field-auth-required">
+            <p className="font-bold">ログインの有効期限が切れています。送信待ちの記録は端末に残っています。</p>
+            <p>もう一度ログインすると、続きを送ります。</p>
+            <a href="/ops/sign-in" className={BTN_OUTLINE} data-testid="field-auth-signin">
+              ログインする
+            </a>
+          </div>
+        ) : null}
+        {sentWarnings.length > 0 ? (
+          <div className={BOX_NOTE} role="status" data-testid="field-sent-warnings">
+            <p className="font-bold">送信した記録の確認事項（保存はされています）</p>
+            <ul className="flex flex-col gap-1">
+              {sentWarnings.map((w, i) => (
+                <li key={`${i}-${w}`} data-testid="field-sent-warning">
+                  {w}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         {planOutboxUnsaved(planId, memberId) ? (
           <p className={BOX_WARN} role="alert" data-testid="field-outbox-unsaved">
             {OUTBOX_UNSAVED_NOTE}
@@ -1294,6 +1459,14 @@ export function FieldClient({
       <p className={BOX} data-testid="field-offline-note">
         {FIELD_OFFLINE_SCOPE_NOTE}
       </p>
+      <details className={BOX} data-testid="field-device-storage">
+        <summary className="min-h-14 cursor-pointer py-3 font-bold">端末に保存されている内容</summary>
+        <ul className="flex list-disc flex-col gap-2 pl-5">
+          {DEVICE_STORAGE_NOTES.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+      </details>
     </main>
   );
 }
