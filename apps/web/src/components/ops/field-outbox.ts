@@ -5,11 +5,15 @@
 import {
   applyOutcome,
   classifyResponse,
+  isExpired,
+  isFieldEventKind,
   isOutboxKey,
   loadOutbox,
   nextToSend,
   outboxKey,
   rejectedCount,
+  rememberId,
+  requestFor,
   saveOutbox,
   toRequestBody,
   unsentCount,
@@ -87,17 +91,51 @@ export const requestBodyFor = (e: OutboxEntry, nowMs: number): Record<string, un
 
 export type SentInfo = { readonly entry: OutboxEntry; readonly status: number; readonly data: Record<string, unknown> };
 
+// ---- Sprint 15：最後に保存した時刻・最後に送れた時刻（利用者ごと。状態の帯に出す） ---------------------
+
+/** 利用者ごとの送信の記録の時刻。接頭辞は下書きと同じ（ログアウトで消え、他の利用者の分は clearOtherUsersDrafts が消す）。 */
+export const outboxMetaKey = (memberId: string): string => `soraban:ops-draft:fieldmeta:${memberId}`;
+export type OutboxMeta = { readonly savedAt: string | null; readonly sentAt: string | null };
+
+export const loadOutboxMeta = (memberId: string): OutboxMeta => {
+  try {
+    const raw = storage()?.getItem(outboxMetaKey(memberId));
+    const v = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    const iso = (x: unknown): string | null => (typeof x === "string" && Number.isFinite(Date.parse(x)) ? x : null);
+    return { savedAt: iso(v["savedAt"]), sentAt: iso(v["sentAt"]) };
+  } catch {
+    return { savedAt: null, sentAt: null };
+  }
+};
+const memoryMeta = new Map<string, OutboxMeta>();
+const writeMeta = (memberId: string, patch: Partial<OutboxMeta>): void => {
+  const next = { ...(memoryMeta.get(memberId) ?? loadOutboxMeta(memberId)), ...patch };
+  memoryMeta.set(memberId, next);
+  try {
+    storage()?.setItem(outboxMetaKey(memberId), JSON.stringify(next));
+  } catch {
+    // 保存できない環境ではメモリだけ
+  }
+};
+/** 画面の「最後に保存した時刻」（端末の送信待ちに入れた時刻）。 */
+export const markOutboxSaved = (memberId: string, at = new Date()): void => writeMeta(memberId, { savedAt: at.toISOString() });
+export const outboxMeta = (memberId: string): OutboxMeta => memoryMeta.get(memberId) ?? loadOutboxMeta(memberId);
+
+/** 直近の送信が 401（ログインが切れている）で止まったか。送れたら消える（契約 E-7）。 */
+let authRequired = false;
+export const outboxAuthRequired = (): boolean => authRequired;
+
 const sendOne = async (
-  planId: string,
-  entry: OutboxEntry,
+  url: string,
+  body: Record<string, unknown>,
 ): Promise<{ readonly status: number | null; readonly code?: string; readonly data: Record<string, unknown> }> => {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FIELD_SEND_TIMEOUT_MS);
   try {
-    const res = await fetch(fieldEventsUrl(planId), {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(requestBodyFor(entry, Date.now())),
+      body: JSON.stringify(body),
       credentials: "same-origin",
       signal: ctrl.signal,
     });
@@ -139,12 +177,25 @@ export const flushOutbox = (planId: string, memberId: string, onSent?: (info: Se
       const cur = loadPlanOutbox(planId, memberId);
       const entry = nextToSend(cur);
       if (!entry) return { sent, rejected, blocked: false };
-      const res = await sendOne(planId, entry);
+      // Sprint 15：72 時間を超えた点検・日誌は送らない（延長しない）。現場の事実はサーバーが too_old で拒む
+      if (!isFieldEventKind(entry.kind) && isExpired(entry, Date.now())) {
+        updatePlanOutbox(planId, memberId, (s) => applyOutcome(s, entry.clientEventId, { kind: "reject", status: 400, code: "too_old" }));
+        rejected += 1;
+        continue;
+      }
+      // 種別ごとの送り先。点検・日誌は、送れた点検のサーバーの ID に読み替えてから送る（順序と依存。契約 E-3）
+      const req = requestFor(cur, planId, entry);
+      const res = await sendOne(req.url, isFieldEventKind(entry.kind) ? requestBodyFor(entry, Date.now()) : req.body);
       const outcome = classifyResponse({ status: res.status, ...(res.code ? { code: res.code } : {}) });
-      updatePlanOutbox(planId, memberId, (s) => applyOutcome(s, entry.clientEventId, outcome));
+      authRequired = res.status === 401 ? true : res.status !== null && res.status < 400 ? false : authRequired;
+      updatePlanOutbox(planId, memberId, (s) => {
+        const next = applyOutcome(s, entry.clientEventId, outcome);
+        return outcome.kind === "sent" && !isFieldEventKind(entry.kind) ? rememberId(next, entry.clientEventId, res.data["id"]) : next;
+      });
       if (outcome.kind === "retry") return { sent, rejected, blocked: true };
       if (outcome.kind === "sent") {
         sent += 1;
+        writeMeta(memberId, { sentAt: new Date().toISOString() });
         onSent?.({ entry, status: res.status ?? 0, data: res.data });
       } else {
         rejected += 1;

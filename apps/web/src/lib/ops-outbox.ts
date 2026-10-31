@@ -10,6 +10,18 @@
 //   - キーは計画ごと・利用者ごと。末尾が利用者の ID なので、他の利用者の保存は clearOtherUsersDrafts（drafts.ts）が消す。
 //   - 端末に残す内容は、計画の ID（キー）・種別・時刻・識別子・確認の項目（書類の項目キー・現場状況の選択と数値を含む）だけ。氏名・技能証明書番号・座標・自由記述は入れない。
 //   - ログアウトは、未送信が残っているときに警告し、黙って消さない。
+//
+// Sprint 15（圏外）：同じ送信待ちに、日常点検（inspection）と日誌（journal）を種別として足す（キー・形式・既存の種別は 12c のまま）。
+//   - 点検・日誌は、作った順に、現場の事実と同じ列に並ぶ。点検 → それを指す日誌 の順を守り、端末の仮の識別子（clientEventId）を
+//     サーバーの ID に読み替える（ids に対応を残す）。
+//   - 端末に残す自由記述は、点検の「異常」の項目の備考と、日誌の「飛行の安全に影響のあった事項」の内容だけ（契約 D-5 の推奨の方式）。
+//     どちらも送れた時点・破棄した時点で行ごと消える。上限は 500 文字（サーバーの入力検査と同じ）。氏名・技能証明書番号・座標・
+//     計画の目的・場所名は入れない（送るときにサーバーが計画から補う：fillFromPlan）。
+//   - 72 時間（FIELD_QUEUED_MAX_AGE_HOURS）を超えた点検・日誌は送らずに「古すぎて送れません」として残す（延長しない）。
+//     12 時間以内に超える行があれば、画面が事前に知らせる（expiringSoon）。
+import { INSPECTION_ITEMS, MAX_LONG_TEXT, type InspectionItemKey } from "./ops-records";
+import { FIELD_QUEUED_MAX_AGE_HOURS } from "./ops-field";
+import { parseJstMinute } from "./ops-time";
 import type { FieldCheckResult, FieldDocKey, FieldRecordableCheckItem, FieldSiteValues } from "./ops-field";
 import { FIELD_DOC_KEYS, FIELD_RECORDABLE_CHECK_ITEMS, SITE_TEMP_RANGE, SITE_WIND_RANGE, fieldErrorMessage, siteHasAttention } from "./ops-field";
 
@@ -20,7 +32,35 @@ export const OUTBOX_KEY_PREFIX = "soraban:ops-draft:field-";
 export const outboxKey = (planId: string, memberId: string): string => `${OUTBOX_KEY_PREFIX}${planId}:${memberId}`;
 export const isOutboxKey = (key: string): boolean => key.startsWith(OUTBOX_KEY_PREFIX);
 
-export type OutboxKind = "check" | "takeoff" | "landing" | "undo";
+export type OutboxKind = "check" | "takeoff" | "landing" | "undo" | "inspection" | "journal";
+/** 現場の事実（POST /api/ops/plans/[id]/field-events に送る種別）。 */
+export const FIELD_EVENT_OUTBOX_KINDS: readonly OutboxKind[] = ["check", "takeoff", "landing", "undo"];
+export const isFieldEventKind = (k: OutboxKind): boolean => FIELD_EVENT_OUTBOX_KINDS.includes(k);
+
+/** Sprint 15：圏外で保存した日常点検（9 項目を項目別に）。備考は「異常」の項目だけ（自由記述の最小限）。 */
+export type OutboxInspection = {
+  readonly timing: "pre_flight" | "post_flight";
+  readonly aircraftId: string;
+  readonly pilotId: string;
+  readonly items: Readonly<Record<InspectionItemKey, { readonly result: "normal" | "abnormal"; readonly note?: string }>>;
+};
+
+/** Sprint 15：圏外で保存した日誌（飛行記録）。離着陸の時刻は現場の記録から引き継ぐ。 */
+export type OutboxJournal = {
+  readonly aircraftId: string;
+  readonly pilotId: string;
+  readonly takeoffAt: string;
+  readonly landingAt: string;
+  /** 結び付ける離陸（サーバーの行の ID か端末の識別子。サーバーがどちらでも引ける）。 */
+  readonly takeoffRef: string;
+  /** 飛行前の点検（サーバーの ID）。 */
+  readonly inspectionId?: string;
+  /** 飛行前の点検が送信待ちの点検のとき、その端末の識別子（送るときにサーバーの ID に読み替える）。 */
+  readonly inspectionClientRef?: string;
+  readonly safetyIssue: boolean;
+  /** 「あり」のときだけ（自由記述の最小限。500 文字まで）。 */
+  readonly safetyIssueDetail?: string;
+};
 export type OutboxStatus = "pending" | "rejected";
 
 export type OutboxEntry = {
@@ -42,17 +82,26 @@ export type OutboxEntry = {
   /** landing（飛行中の離陸）・undo（取り消す行）が指す行。サーバーの ID が分からない（まだ届いていない）ときは端末の識別子。 */
   readonly targetEventId?: string;
   readonly targetClientEventId?: string;
+  /** Sprint 15：kind=inspection の内容。 */
+  readonly inspection?: OutboxInspection;
+  /** Sprint 15：kind=journal の内容。 */
+  readonly journal?: OutboxJournal;
   readonly status: OutboxStatus;
   /** 送ろうとした回数。 */
   readonly attempts: number;
   readonly rejection?: { readonly status: number; readonly code: string; readonly message: string };
 };
 
-export type OutboxState = { readonly v: 1; readonly entries: readonly OutboxEntry[] };
+export type OutboxState = {
+  readonly v: 1;
+  readonly entries: readonly OutboxEntry[];
+  /** Sprint 15：端末の仮の識別子 → サーバーの ID（送れた点検など。後ろの行の読み替えに使う）。省略は空（12c の形式）。 */
+  readonly ids?: Readonly<Record<string, string>>;
+};
 
 export const emptyOutbox = (): OutboxState => ({ v: 1, entries: [] });
 
-const KINDS: readonly string[] = ["check", "takeoff", "landing", "undo"];
+const KINDS: readonly string[] = ["check", "takeoff", "landing", "undo", "inspection", "journal"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MINUTE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -92,6 +141,61 @@ export const sanitizeSite = (raw: unknown): FieldSiteValues | null => {
   return siteHasAttention(v) ? null : v;
 };
 
+const isUuidStr = (v: unknown): v is string => typeof v === "string" && UUID.test(v);
+const freeText = (v: unknown): string | null => {
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t.length > 0 && t.length <= MAX_LONG_TEXT ? t : null;
+};
+
+/** 点検の内容を許す形に絞る。9 項目すべてに正常・異常があり、異常の項目は備考（500 文字まで）が必須。正常の項目の備考は残さない。 */
+export const sanitizeInspection = (raw: unknown): OutboxInspection | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  if (r["timing"] !== "pre_flight" && r["timing"] !== "post_flight") return null;
+  if (!isUuidStr(r["aircraftId"]) || !isUuidStr(r["pilotId"])) return null;
+  const items = r["items"];
+  if (!items || typeof items !== "object") return null;
+  const out: Record<string, { result: "normal" | "abnormal"; note?: string }> = {};
+  for (const it of INSPECTION_ITEMS) {
+    const x = (items as Record<string, unknown>)[it.key] as Record<string, unknown> | undefined;
+    if (!x || (x["result"] !== "normal" && x["result"] !== "abnormal")) return null;
+    if (x["result"] === "abnormal") {
+      const note = freeText(x["note"]);
+      if (!note) return null;
+      out[it.key] = { result: "abnormal", note };
+    } else out[it.key] = { result: "normal" };
+  }
+  return {
+    timing: r["timing"],
+    aircraftId: r["aircraftId"].toLowerCase(),
+    pilotId: r["pilotId"].toLowerCase(),
+    items: out as OutboxInspection["items"],
+  };
+};
+
+/** 日誌の内容を許す形に絞る。「あり」なら内容（500 文字まで）が必須、「なし」なら内容を残さない。 */
+export const sanitizeJournal = (raw: unknown): OutboxJournal | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  if (!isUuidStr(r["aircraftId"]) || !isUuidStr(r["pilotId"]) || !isUuidStr(r["takeoffRef"])) return null;
+  if (typeof r["takeoffAt"] !== "string" || !MINUTE.test(r["takeoffAt"]) || typeof r["landingAt"] !== "string" || !MINUTE.test(r["landingAt"])) return null;
+  if (typeof r["safetyIssue"] !== "boolean") return null;
+  const detail = r["safetyIssue"] ? freeText(r["safetyIssueDetail"]) : null;
+  if (r["safetyIssue"] && !detail) return null;
+  return {
+    aircraftId: r["aircraftId"].toLowerCase(),
+    pilotId: r["pilotId"].toLowerCase(),
+    takeoffAt: r["takeoffAt"],
+    landingAt: r["landingAt"],
+    takeoffRef: r["takeoffRef"].toLowerCase(),
+    ...(isUuidStr(r["inspectionId"]) ? { inspectionId: r["inspectionId"].toLowerCase() } : {}),
+    ...(isUuidStr(r["inspectionClientRef"]) ? { inspectionClientRef: r["inspectionClientRef"].toLowerCase() } : {}),
+    safetyIssue: r["safetyIssue"],
+    ...(detail ? { safetyIssueDetail: detail } : {}),
+  };
+};
+
 /** 保存・読み込みのたびに、許す項目だけに絞る（余計な項目＝氏名・座標などが紛れ込んでも端末に残さない）。 */
 export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
   if (!raw || typeof raw !== "object") return null;
@@ -113,6 +217,10 @@ export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
   // 現場状況の行は、許す形（備考が要らない選択）でなければ端末に残さない
   if (item === "site_conditions" && !site) return null;
   if (item === "docs_confirm" && !(docKey && (FIELD_DOC_KEYS as readonly string[]).includes(docKey))) return null;
+  const inspection = r["kind"] === "inspection" ? sanitizeInspection(r["inspection"]) : null;
+  const journal = r["kind"] === "journal" ? sanitizeJournal(r["journal"]) : null;
+  if (r["kind"] === "inspection" && !inspection) return null;
+  if (r["kind"] === "journal" && !journal) return null;
   const source = str("source");
   const target = uuid("targetEventId");
   const targetClient = uuid("targetClientEventId");
@@ -127,6 +235,8 @@ export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
     ...(source && source.length <= 100 ? { source } : {}),
     ...(target ? { targetEventId: target } : {}),
     ...(targetClient ? { targetClientEventId: targetClient } : {}),
+    ...(inspection ? { inspection } : {}),
+    ...(journal ? { journal } : {}),
     status: rejected ? "rejected" : "pending",
     attempts: typeof r["attempts"] === "number" && Number.isFinite(r["attempts"]) ? Math.max(0, Math.floor(r["attempts"])) : 0,
     ...(rejected
@@ -141,6 +251,19 @@ export const sanitizeEntry = (raw: unknown): OutboxEntry | null => {
   };
 };
 
+/** 識別子の対応（端末の識別子 → サーバーの ID）。どちらも UUID のものだけ、最大 200 件。 */
+const sanitizeIds = (raw: unknown): Record<string, string> | null => {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out: Record<string, string> = {};
+  let n = 0;
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!UUID.test(k) || !isUuidStr(v)) continue;
+    out[k.toLowerCase()] = v.toLowerCase();
+    if (++n >= 200) break;
+  }
+  return n > 0 ? out : null;
+};
+
 /** 保存された文字列を読む。壊れていれば空にする（端末の保存は、読めなくても画面を壊さない）。 */
 export const parseOutbox = (raw: string | null): OutboxState => {
   if (!raw) return emptyOutbox();
@@ -150,13 +273,22 @@ export const parseOutbox = (raw: string | null): OutboxState => {
     const entries = v.entries.map(sanitizeEntry).filter((e): e is OutboxEntry => e !== null);
     // 同じ識別子は 1 件だけ（先のものを残す）
     const seen = new Set<string>();
-    return { v: 1, entries: entries.filter((e) => (seen.has(e.clientEventId) ? false : (seen.add(e.clientEventId), true))) };
+    const ids = sanitizeIds((v as { ids?: unknown }).ids);
+    return {
+      v: 1,
+      entries: entries.filter((e) => (seen.has(e.clientEventId) ? false : (seen.add(e.clientEventId), true))),
+      ...(ids ? { ids } : {}),
+    };
   } catch {
     return emptyOutbox();
   }
 };
 
-export const serializeOutbox = (s: OutboxState): string => JSON.stringify({ v: 1, entries: s.entries.map((e) => sanitizeEntry(e)).filter(Boolean) });
+export const serializeOutbox = (s: OutboxState): string => {
+  // 送信待ちが残っている間だけ、対応を残す（全部送れたら項目ごと消える。saveOutbox）
+  const ids = s.ids && s.entries.length > 0 ? sanitizeIds(s.ids) : null;
+  return JSON.stringify({ v: 1, entries: s.entries.map((e) => sanitizeEntry(e)).filter(Boolean), ...(ids ? { ids } : {}) });
+};
 
 // ---- 操作 -----------------------------------------------------------------
 
@@ -164,7 +296,7 @@ export const serializeOutbox = (s: OutboxState): string => JSON.stringify({ v: 1
 export const enqueue = (s: OutboxState, e: Omit<OutboxEntry, "status" | "attempts" | "rejection"> & Partial<Pick<OutboxEntry, "status" | "attempts">>): OutboxState => {
   const entry = sanitizeEntry({ ...e, status: "pending", attempts: 0 });
   if (!entry || s.entries.some((x) => x.clientEventId === entry.clientEventId)) return s;
-  return { v: 1, entries: [...s.entries, entry] };
+  return { ...s, v: 1, entries: [...s.entries, entry] };
 };
 
 export const pendingEntries = (s: OutboxState): OutboxEntry[] => s.entries.filter((e) => e.status === "pending");
@@ -190,6 +322,93 @@ export const toRequestBody = (e: OutboxEntry): Record<string, unknown> => ({
   ...(e.targetClientEventId ? { targetClientEventId: e.targetClientEventId } : {}),
 });
 
+/** 端末の識別子をサーバーの ID に読み替える（対応が無ければそのまま）。 */
+export const resolveRef = (s: OutboxState, ref: string): string => s.ids?.[ref.toLowerCase()] ?? ref;
+
+/**
+ * Sprint 15：送り先と本文（種別ごと）。現場の事実は 12c の toRequestBody、点検は POST /api/ops/inspections、
+ * 日誌は POST /api/ops/flights。点検・日誌の clientRequestId は端末の識別子（clientEventId）。場所名・目的・座標は送らない
+ * （サーバーが計画から補う：fillFromPlan）。送信待ちの点検を指す日誌は、送れた点検のサーバーの ID に読み替える。
+ */
+export const requestFor = (s: OutboxState, planId: string, e: OutboxEntry): { readonly url: string; readonly body: Record<string, unknown> } => {
+  if (e.kind === "inspection" && e.inspection) {
+    const i = e.inspection;
+    return {
+      url: "/api/ops/inspections",
+      body: {
+        clientRequestId: e.clientEventId,
+        aircraftId: i.aircraftId,
+        pilotId: i.pilotId,
+        inspectedAt: e.occurredAt,
+        timing: i.timing,
+        items: Object.fromEntries(Object.entries(i.items).map(([k, v]) => [k, { result: v.result, note: v.note ?? null }])),
+        planId,
+        fillFromPlan: true,
+        queued: true,
+      },
+    };
+  }
+  if (e.kind === "journal" && e.journal) {
+    const j = e.journal;
+    const mapped = j.inspectionClientRef ? s.ids?.[j.inspectionClientRef] : undefined;
+    const inspectionId = j.inspectionId ?? mapped ?? null;
+    return {
+      url: "/api/ops/flights",
+      body: {
+        clientRequestId: e.clientEventId,
+        aircraftId: j.aircraftId,
+        pilotId: j.pilotId,
+        takeoffAt: j.takeoffAt,
+        landingAt: j.landingAt,
+        takeoffEventId: resolveRef(s, j.takeoffRef),
+        dailyInspectionId: inspectionId,
+        flightPlanId: planId,
+        safetyIssue: j.safetyIssue,
+        safetyIssueDetail: j.safetyIssue ? (j.safetyIssueDetail ?? null) : null,
+        fillFromPlan: true,
+      },
+    };
+  }
+  return { url: `/api/ops/plans/${planId}/field-events`, body: toRequestBody(e) };
+};
+
+/** 送れた行のサーバーの ID を対応に残す（点検・日誌の応答の id。後ろの行の読み替えに使う）。 */
+export const rememberId = (s: OutboxState, clientEventId: string, serverId: unknown): OutboxState =>
+  typeof serverId === "string" && UUID.test(serverId)
+    ? { ...s, ids: { ...(s.ids ?? {}), [clientEventId.toLowerCase()]: serverId.toLowerCase() } }
+    : s;
+
+// ---- 72 時間の上限（Sprint 15 契約 E-6） ---------------------------------------------
+
+/** 期限が近いと知らせる残り時間（時間）。 */
+export const OUTBOX_EXPIRY_WARN_HOURS = 12;
+
+/** 行の残り時間（時間。負なら超えている）。時刻が読めなければ null。 */
+export const hoursLeft = (e: OutboxEntry, nowMs: number): number | null => {
+  const at = parseJstMinute(e.occurredAt);
+  return at ? FIELD_QUEUED_MAX_AGE_HOURS - (nowMs - at.getTime()) / 3600_000 : null;
+};
+
+/** 72 時間を超えた行（送らずに「古すぎて送れません」にする。サーバーも too_old で拒む）。 */
+export const isExpired = (e: OutboxEntry, nowMs: number): boolean => {
+  const h = hoursLeft(e, nowMs);
+  return h !== null && h < 0;
+};
+
+/** 12 時間以内に 72 時間を超える未送信の行の、最も短い残り時間（時間、切り捨て）。無ければ null。 */
+export const expiringSoon = (s: OutboxState, nowMs: number): number | null => {
+  let min: number | null = null;
+  for (const e of pendingEntries(s)) {
+    const h = hoursLeft(e, nowMs);
+    if (h === null || h < 0 || h > OUTBOX_EXPIRY_WARN_HOURS) continue;
+    min = min === null ? h : Math.min(min, h);
+  }
+  return min === null ? null : Math.max(0, Math.floor(min));
+};
+
+export const OUTBOX_EXPIRY_WARNING = (h: number): string =>
+  `送れていない記録があります。あと ${h} 時間で古すぎて送れなくなります（72 時間まで）。電波のある場所で送ってください。`;
+
 export type SendOutcome =
   /** 送れた（201・200）。 */
   | { readonly kind: "sent" }
@@ -211,6 +430,7 @@ export const classifyResponse = (res: { readonly status: number | null; readonly
 
 /** 送信の結果を反映する。送れた行は消し、再試行の行は回数だけ増やし、拒否の行は理由つきで残す。 */
 export const applyOutcome = (s: OutboxState, clientEventId: string, outcome: SendOutcome): OutboxState => ({
+  ...s,
   v: 1,
   entries:
     outcome.kind === "sent"
@@ -231,6 +451,7 @@ export const applyOutcome = (s: OutboxState, clientEventId: string, outcome: Sen
 
 /** 拒否された行を破棄する（利用者が選ぶ）。未送信の行は破棄しない（黙って消さない）。 */
 export const discardRejected = (s: OutboxState, clientEventId: string): OutboxState => ({
+  ...s,
   v: 1,
   entries: s.entries.filter((e) => !(e.clientEventId === clientEventId && e.status === "rejected")),
 });
