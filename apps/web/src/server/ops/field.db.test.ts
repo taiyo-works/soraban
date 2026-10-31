@@ -1708,6 +1708,34 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       expect(f2.created).toBe(true);
       expect(f2.warnings).not.toContain("pre_inspection_after_takeoff");
     });
+
+    it("X-4：離陸と着陸の間に実施した点検は、その飛行の飛行前点検にならない（飛行中のラウンドの「済」にも、日誌の既定にも入らない）", async () => {
+      const t = (hm: string) => ({ occurredAt: `2027-01-05T${hm}`, queued: true });
+      const p = await newPlan(A, { plannedStartAt: "2027-01-05T05:00" });
+      const tk = await post(A, p.id, body("takeoff", t("05:00")));
+      const mid = await inspect(A, "2027-01-05T05:05", { planId: p.id });
+      const inFlight = await field.getFieldView(mgr(A), p.id);
+      expect(inFlight.items.find((i) => i.item === "inspection")!.done).toBe(false);
+      expect(inFlight.flights[0]!.preInspectionId).toBeNull();
+      await post(A, p.id, body("landing", t("05:10")));
+      const v = await field.getFieldView(mgr(A), p.id);
+      const flight = v.flights.find((x) => x.takeoffEventId === tk.event.id);
+      expect(flight!.preInspectionId).toBeNull();
+      expect(journalPreInspectionId(flight, v.items.find((i) => i.item === "inspection")!.inspectionId)).toBeNull();
+      // 結び付けて保存すると知らせる
+      const f = await rec.createFlight(mgr(A), {
+        aircraftId: A.aircraft,
+        pilotId: A.pilotFree.id,
+        takeoffAt: "2027-01-05T05:00",
+        landingAt: "2027-01-05T05:10",
+        safetyIssue: false,
+        takeoffEventId: tk.event.id,
+        flightPlanId: p.id,
+        dailyInspectionId: mid.record.id,
+        fillFromPlan: true,
+      });
+      expect(f.warnings).toContain("pre_inspection_after_takeoff");
+    });
   });
 
   describe("9. Sprint 15 B-1・B-2：先読みの束", () => {
