@@ -3,13 +3,13 @@
 // （計画 1 回・通報 1 回・日誌との結び付き 1 回。件数に依らず一定）。records.ts・plans.ts から使う（このファイルはどちらも読まない）。
 import type { ReportRowLite } from "@soraban/dips";
 import { reportRequirement } from "@soraban/regulations";
-import { fieldGapLabel } from "@/lib/ops-field";
-import type { FieldGap } from "./field-logic";
 import { journalMismatches, type JournalMismatch } from "./journal-logic";
 import * as store from "./store";
 import type { FlightWithTotal, Queryable, ReportRowWithTimes } from "./store";
 
-export type GapDto = FieldGap & { readonly label: string };
+import { gapDto, type GapDto } from "./field-compose";
+
+export type { GapDto };
 
 export type FlightExtra = {
   /** 日誌の食い違い（計画の時間帯の外・通報の記録）。計画なしは空。保存は止めない。 */
@@ -24,11 +24,7 @@ export type FlightExtra = {
 
 const EMPTY: FlightExtra = { mismatches: [], takeoffGaps: null, takeoffEventId: null, planTitle: null };
 
-export const gapDto = (g: { readonly item: string; readonly state: string }): GapDto => ({
-  item: g.item as FieldGap["item"],
-  state: g.state as FieldGap["state"],
-  label: fieldGapLabel(g),
-});
+export { gapDto };
 
 const asDate = (v: unknown): Date => (v instanceof Date ? v : new Date(String(v)));
 

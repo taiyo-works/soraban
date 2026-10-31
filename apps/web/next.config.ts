@@ -10,8 +10,13 @@ const repoRoot = path.join(
   "..",
 );
 
+// Sprint 15：ビルドの識別子（Service Worker のキャッシュの版と、画面と API の版の食い違いの検出に使う）。ビルドのときに 1 回決め、
+// env でサーバーとブラウザの両方の束に埋め込む（秘密ではない）。Vercel ではコミットの SHA の先頭、それ以外はビルドの時刻。
+const BUILD_ID = (process.env["VERCEL_GIT_COMMIT_SHA"] ?? "").slice(0, 12) || `local-${Date.now().toString(36)}`;
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  env: { SORABAN_BUILD_ID: BUILD_ID },
   transpilePackages: ["@soraban/db", "@soraban/dips", "@soraban/regulations", "@soraban/geo"],
 
   // 規制データ (airports / parks) は @soraban/regulations で静的 import して
