@@ -363,3 +363,150 @@ describe("sanitizeEntry（Sprint 14）", () => {
     expect(toRequestBody(e)).not.toHaveProperty("note");
   });
 });
+
+describe("Sprint 15：点検・日誌の送信待ち（D-2・D-3・D-5・E-1・E-3・E-6・E-8・F-2）", () => {
+  const PLAN = "22222222-2222-4222-8222-222222222222";
+  const AIR = "33333333-3333-4333-8333-333333333333";
+  const PIL = "44444444-4444-4444-8444-444444444444";
+  const KEYS = ["general", "propeller", "frame", "communication", "propulsion", "power", "autopilot", "controller", "battery"];
+  const items = (abnormal: Record<string, string> = {}) =>
+    Object.fromEntries(KEYS.map((k) => [k, abnormal[k] ? { result: "abnormal", note: abnormal[k] } : { result: "normal", note: "正常の備考" }]));
+  const insp = (n: number, extra: Record<string, unknown> = {}) => ({
+    clientEventId: id(n),
+    kind: "inspection" as const,
+    occurredAt: "2027-01-05T11:00",
+    inspection: { timing: "pre_flight", aircraftId: AIR, pilotId: PIL, items: items(), ...extra },
+  });
+  const journal = (n: number, j: Record<string, unknown> = {}) => ({
+    clientEventId: id(n),
+    kind: "journal" as const,
+    occurredAt: "2027-01-05T12:00",
+    journal: { aircraftId: AIR, pilotId: PIL, takeoffAt: "2027-01-05T11:10", landingAt: "2027-01-05T11:40", takeoffRef: id(2), safetyIssue: false, ...j },
+  });
+
+  it("D-2・D-5：9 項目が項目別に入る。異常の項目は備考が必須（無ければ入れない）。正常の項目の備考・余計な項目（氏名・座標・場所）は残らない", async () => {
+    const { sanitizeEntry } = await import("./ops-outbox");
+    const e = sanitizeEntry({
+      ...insp(1, { items: items({ battery: "膨らみ" }), pilotName: "山田 太郎", latitude: 35.43, placeName: "本社", specialNotes: "特記" }),
+      status: "pending",
+      attempts: 0,
+      licenseNumber: "LIC-1",
+    })!;
+    expect(Object.keys(e.inspection!.items)).toHaveLength(9);
+    expect(e.inspection!.items.battery).toEqual({ result: "abnormal", note: "膨らみ" });
+    expect(e.inspection!.items.general).toEqual({ result: "normal" });
+    const json = JSON.stringify(e);
+    for (const leak of ["山田", "35.43", "本社", "特記", "LIC-1", "正常の備考"]) expect(json).not.toContain(leak);
+    // 異常で備考なし、8 項目しかない、は入れない
+    expect(sanitizeEntry({ ...insp(1, { items: { ...items(), battery: { result: "abnormal" } } }), status: "pending", attempts: 0 })).toBeNull();
+    const eight = items();
+    delete (eight as Record<string, unknown>)["battery"];
+    expect(sanitizeEntry({ ...insp(1, { items: eight }), status: "pending", attempts: 0 })).toBeNull();
+    // 備考は 500 文字まで
+    expect(sanitizeEntry({ ...insp(1, { items: items({ frame: "あ".repeat(501) }) }), status: "pending", attempts: 0 })).toBeNull();
+  });
+
+  it("D-3・D-5：日誌は「あり」のときだけ内容（自由記述）を残す。目的・場所・座標・操縦者の氏名は残らない", async () => {
+    const { sanitizeEntry } = await import("./ops-outbox");
+    const e = sanitizeEntry({ ...journal(5, { safetyIssue: false, safetyIssueDetail: "なしの内容", purpose: "空撮", takeoffPlace: "本社", takeoffLat: 35.43, pilotName: "山田" }), status: "pending", attempts: 0 })!;
+    const json = JSON.stringify(e);
+    for (const leak of ["なしの内容", "空撮", "本社", "35.43", "山田"]) expect(json).not.toContain(leak);
+    expect(sanitizeEntry({ ...journal(5, { safetyIssue: true }), status: "pending", attempts: 0 })).toBeNull();
+    expect(sanitizeEntry({ ...journal(5, { safetyIssue: true, safetyIssueDetail: "鳥が接近" }), status: "pending", attempts: 0 })!.journal!.safetyIssueDetail).toBe("鳥が接近");
+  });
+
+  it("D-5：送れた行・破棄した行は自由記述ごと端末から消える", async () => {
+    const { enqueue, emptyOutbox, applyOutcome, discardRejected, saveOutbox, loadOutbox } = await import("./ops-outbox");
+    const st = new MemStorage();
+    const key = outboxKey(PLAN, PIL);
+    let s = enqueue(emptyOutbox(), { ...insp(1, { items: items({ battery: "膨らみ" }) }) } as never);
+    s = enqueue(s, journal(5, { safetyIssue: true, safetyIssueDetail: "鳥が接近" }) as never);
+    saveOutbox(st, key, s);
+    expect(st.getItem(key)).toContain("膨らみ");
+    s = applyOutcome(s, id(1), { kind: "sent" });
+    s = applyOutcome(s, id(5), { kind: "reject", status: 400, code: "invalid_input" });
+    saveOutbox(st, key, s);
+    expect(st.getItem(key)).not.toContain("膨らみ");
+    s = discardRejected(loadOutbox(st, key), id(5));
+    saveOutbox(st, key, s);
+    expect(st.getItem(key)).toBeNull();
+  });
+
+  it("E-1・E-3：作った順に送る。点検が先、それを指す日誌が後。送れた点検のサーバーの ID に読み替える", async () => {
+    const { enqueue, emptyOutbox, requestFor, rememberId, applyOutcome, nextToSend } = await import("./ops-outbox");
+    let s = enqueue(emptyOutbox(), insp(1) as never);
+    s = enqueue(s, { clientEventId: id(2), kind: "takeoff", occurredAt: "2027-01-05T11:10" });
+    s = enqueue(s, { clientEventId: id(3), kind: "landing", occurredAt: "2027-01-05T11:40", targetClientEventId: id(2) });
+    s = enqueue(s, journal(5, { inspectionClientRef: id(1) }) as never);
+    const sentUrls: string[] = [];
+    const SERVER_INSPECTION = "99999999-9999-4999-8999-999999999999";
+    for (let e = nextToSend(s); e; e = nextToSend(s)) {
+      const r = requestFor(s, PLAN, e);
+      sentUrls.push(r.url);
+      if (e.kind === "journal") {
+        expect(r.body["dailyInspectionId"]).toBe(SERVER_INSPECTION);
+        expect(r.body["takeoffEventId"]).toBe(id(2));
+        expect(r.body["fillFromPlan"]).toBe(true);
+        expect(r.body).not.toHaveProperty("purpose");
+        expect(r.body).not.toHaveProperty("takeoffLat");
+      }
+      if (e.kind === "inspection") {
+        expect(r.body).toMatchObject({ clientRequestId: id(1), planId: PLAN, fillFromPlan: true, queued: true, inspectedAt: "2027-01-05T11:00" });
+        expect(r.body).not.toHaveProperty("placeName");
+      }
+      s = applyOutcome(s, e.clientEventId, { kind: "sent" });
+      if (e.kind === "inspection") s = rememberId(s, e.clientEventId, SERVER_INSPECTION);
+    }
+    expect(sentUrls).toEqual(["/api/ops/inspections", `/api/ops/plans/${PLAN}/field-events`, `/api/ops/plans/${PLAN}/field-events`, "/api/ops/flights"]);
+  });
+
+  it("E-3：対応はサーバーの ID の読み替えに使い、保存・読み込みで保たれる（送信待ちが空になると項目ごと消える）", async () => {
+    const { enqueue, emptyOutbox, rememberId, parseOutbox, serializeOutbox, saveOutbox } = await import("./ops-outbox");
+    let s = enqueue(emptyOutbox(), journal(5, { inspectionClientRef: id(1) }) as never);
+    s = rememberId(s, id(1), "99999999-9999-4999-8999-999999999999");
+    expect(parseOutbox(serializeOutbox(s)).ids).toEqual({ [id(1)]: "99999999-9999-4999-8999-999999999999" });
+    const st = new MemStorage();
+    saveOutbox(st, outboxKey(PLAN, PIL), { v: 1, entries: [], ids: s.ids! });
+    expect(st.getItem(outboxKey(PLAN, PIL))).toBeNull();
+  });
+
+  it("E-8：12c の形式（ids なし・現場の事実だけ）の送信待ちが、そのまま読めて同じ本文で送れる", async () => {
+    const { parseOutbox, requestFor } = await import("./ops-outbox");
+    const legacy = JSON.stringify({
+      v: 1,
+      entries: [
+        { clientEventId: id(2), kind: "takeoff", occurredAt: "2027-01-05T11:10", status: "pending", attempts: 1 },
+        { clientEventId: id(3), kind: "check", item: "carry", result: "done", occurredAt: "2027-01-05T11:12", status: "pending", attempts: 0 },
+        { clientEventId: id(4), kind: "landing", occurredAt: "2027-01-05T11:40", targetClientEventId: id(2), status: "rejected", attempts: 2, rejection: { status: 400, code: "too_old", message: "x" } },
+      ],
+    });
+    const s = parseOutbox(legacy);
+    expect(s.entries.map((e) => [e.kind, e.status])).toEqual([["takeoff", "pending"], ["check", "pending"], ["landing", "rejected"]]);
+    for (const e of s.entries) expect(requestFor(s, PLAN, e)).toEqual({ url: `/api/ops/plans/${PLAN}/field-events`, body: toRequestBody(e) });
+  });
+
+  it("E-6：72 時間を超えた行は期限切れ。12 時間以内に超える行があれば残り時間を返す", async () => {
+    const { enqueue, emptyOutbox, isExpired, expiringSoon, OUTBOX_EXPIRY_WARNING } = await import("./ops-outbox");
+    const at = Date.parse("2027-01-05T11:00:00+09:00");
+    const s = enqueue(emptyOutbox(), insp(1) as never);
+    const e = s.entries[0]!;
+    expect(isExpired(e, at + 71 * 3600_000)).toBe(false);
+    expect(isExpired(e, at + 72 * 3600_000 + 60_000)).toBe(true);
+    expect(expiringSoon(s, at + 10 * 3600_000)).toBeNull();
+    expect(expiringSoon(s, at + 61 * 3600_000)).toBe(11);
+    expect(expiringSoon(s, at + 73 * 3600_000)).toBeNull();
+    expect(OUTBOX_EXPIRY_WARNING(11)).toContain("あと 11 時間");
+  });
+
+  it("F-2：キーに利用者の ID が入り、他の利用者の送信待ちは数えない・消える", () => {
+    const st = new MemStorage();
+    const other = "55555555-5555-4555-8555-555555555555";
+    saveOutbox(st, outboxKey(PLAN, PIL), enqueue(emptyOutbox(), insp(1) as never));
+    saveOutbox(st, outboxKey(PLAN, other), enqueue(emptyOutbox(), insp(2) as never));
+    expect(outboxKey(PLAN, PIL).endsWith(`:${PIL}`)).toBe(true);
+    expect(countUnsentForMember(st, PIL).pending).toBe(1);
+    clearOtherUsersOutbox(st, PIL);
+    expect(st.getItem(outboxKey(PLAN, other))).toBeNull();
+    expect(loadOutbox(st, outboxKey(PLAN, PIL)).entries).toHaveLength(1);
+  });
+});

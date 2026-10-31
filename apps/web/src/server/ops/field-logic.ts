@@ -375,16 +375,13 @@ export const outboxAsEvents = (entries: readonly OutboxEntry[]): FieldEventLite[
     .filter((e) => e.status === "pending")
     .map((e, i): FieldEventLite => {
       const at = parseJstMinute(e.occurredAt);
-      return {
+      const common = {
         id: e.clientEventId,
         clientEventId: e.clientEventId,
-        kind: e.kind,
-        item: e.item ?? null,
-        result: e.result ?? null,
-        source: e.source ?? null,
-        docKey: e.docKey ?? null,
-        site: e.site ?? null,
-        targetEventId: e.targetClientEventId ?? e.targetEventId ?? null,
+        result: null,
+        source: null,
+        docKey: null,
+        site: null,
         flightRecordId: null,
         inspectionId: null,
         reportId: null,
@@ -393,6 +390,39 @@ export const outboxAsEvents = (entries: readonly OutboxEntry[]): FieldEventLite[
         recordedKey: `~${String(i).padStart(6, "0")}`,
         queued: true,
         gaps: null,
+      };
+      // Sprint 15：送信待ちの点検は、サーバーが点検と一緒に追記する「計画への結び付き」の行と同じ形にする（飛行後点検の導出に使う）
+      if (e.kind === "inspection") {
+        return { ...common, kind: "check", item: "inspection", result: "done", inspectionId: e.clientEventId, targetEventId: null };
+      }
+      // Sprint 15：送信待ちの日誌は、日誌との結び付き（journal_linked）と同じ形にする（日誌済みとして表示する）
+      if (e.kind === "journal") {
+        return { ...common, kind: "journal_linked", item: null, targetEventId: e.journal?.takeoffRef ?? null, flightRecordId: e.clientEventId };
+      }
+      return {
+        ...common,
+        kind: e.kind,
+        item: e.item ?? null,
+        result: e.result ?? null,
+        source: e.source ?? null,
+        docKey: e.docKey ?? null,
+        site: e.site ?? null,
+        targetEventId: e.targetClientEventId ?? e.targetEventId ?? null,
+      };
+    });
+
+/** Sprint 15：送信待ちの点検を、導出に使う点検の形にする（id は端末の識別子）。 */
+export const outboxAsInspections = (entries: readonly OutboxEntry[]): InspectionLite[] =>
+  entries
+    .filter((e) => e.status === "pending" && e.kind === "inspection" && e.inspection)
+    .map((e) => {
+      const at = parseJstMinute(e.occurredAt);
+      return {
+        id: e.clientEventId,
+        inspectedAt: at ? at.toISOString() : e.occurredAt,
+        date: e.occurredAt.slice(0, 10),
+        timing: e.inspection!.timing,
+        hasAbnormal: Object.values(e.inspection!.items).some((x) => x.result === "abnormal"),
       };
     });
 

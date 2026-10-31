@@ -125,6 +125,8 @@ const KIND_LABEL: Readonly<Record<OutboxEntry["kind"], string>> = {
   takeoff: "離陸",
   landing: "着陸",
   undo: "取り消し",
+  inspection: "日常点検",
+  journal: "日誌",
 };
 
 export function FieldClient({

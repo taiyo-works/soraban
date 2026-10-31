@@ -632,3 +632,28 @@ describe("再評価後のユーザー決定（日誌済みのラウンドの確�
     expect(decideTransition(ev3, state(ev3, { flightRecords: [{ id: "r1", voided: false }] }), { kind: "undo", targetEventId: em2.id }, { planCancelled: false }).ok).toBe(true);
   });
 });
+
+describe("Sprint 15：送信待ちの点検・日誌を導出に足す（圏外の画面）", () => {
+  it("送信待ちの飛行後点検はその飛行の飛行後点検に、送信待ちの日誌は日誌済みに数える", async () => {
+    const { outboxAsInspections } = await import("./field-logic");
+    const t1 = takeoff("13:10");
+    const l1 = landing(t1, "13:30");
+    const KEYS = ["general", "propeller", "frame", "communication", "propulsion", "power", "autopilot", "controller", "battery"];
+    let ob = enqueue(emptyOutbox(), {
+      clientEventId: uid(9001),
+      kind: "inspection",
+      occurredAt: `${DAY}T13:40`,
+      inspection: { timing: "post_flight", aircraftId: uid(1), pilotId: uid(2), items: Object.fromEntries(KEYS.map((k) => [k, { result: "normal" }])) as never },
+    });
+    ob = enqueue(ob, {
+      clientEventId: uid(9002),
+      kind: "journal",
+      occurredAt: `${DAY}T13:45`,
+      journal: { aircraftId: uid(1), pilotId: uid(2), takeoffAt: `${DAY}T13:10`, landingAt: `${DAY}T13:30`, takeoffRef: t1.clientEventId, safetyIssue: false },
+    });
+    const s = state([t1, l1, ...outboxAsEvents(ob.entries)], { inspections: outboxAsInspections(ob.entries) });
+    expect(s.flights[0]!.post).toMatchObject({ done: true, inspectionId: uid(9001) });
+    expect(s.flights[0]!.phase).toBe("journaled");
+    expect(s.pendingJournal).toEqual([]);
+  });
+});
