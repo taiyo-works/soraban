@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PROCEDURE_SECTION_DESCRIPTION } from "@soraban/dips";
 import { PERMIT_VALUE_LABEL, PURPOSE_VALUE_LABEL, SPECIFIC_FLIGHT_FLAG_LABEL, type SpecificFlightFlag } from "@soraban/regulations";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { VoidForm } from "@/components/ops/ops-client";
@@ -8,6 +9,7 @@ import { ProcedureRecordsPanel } from "@/components/ops/procedure-client";
 import { ConfirmPanel, RequestConfirmationButton } from "@/components/ops/plans-client";
 import { Badge, buttonOutlineBrandClass, DetailList, Note, Section } from "@/components/ops/ui";
 import { VersionList } from "@/components/ops/versions";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { unknownCountLabel } from "@/lib/verdict-display";
 import { can } from "@/server/ops/authz";
 import { isDipsPermitValue } from "@/server/ops/permit-logic";
@@ -79,7 +81,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           id="procedures"
           title="手続きの記録"
           aria-label="手続きの記録"
-          description="許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。"
+          description={isApplicationSupportEnabled() ? "許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。" : PROCEDURE_SECTION_DESCRIPTION}
         >
           <ChangeNotice target="procedures" />
           <details data-testid="plan-procedures-details" data-open-on-hash>

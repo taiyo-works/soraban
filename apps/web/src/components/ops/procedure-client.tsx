@@ -1,9 +1,11 @@
 "use client";
 
-// 手続きの「済み」の記録（Sprint 12b 設計 D3・H）：許可・承認の申請（dips_permit）と、小型無人機等飛行禁止法の同意・通報（small_drone_law）。
-// 記録は利用者の申告で、「許可済み」とは出さない（「申請済み（利用者の申告）」）。判断（確認がすべて真か・版・認可）はサーバーが行う。
+// 手続きの「済み」の記録（Sprint 12b 設計 D3・H）：小型無人機等飛行禁止法の同意・通報（small_drone_law）と、許可・承認の申請（dips_permit）。
+// 記録は利用者の申告で、「許可済み」とは出さない。判断（確認がすべて真か・版・認可）はサーバーが行う。
+// 【Sprint 18-2】申請支援のフラグが無効のとき、dips_permit は新しい記録を受け付けない。既存の行があれば legacy（以前の記録）として、
+// フォーム・取り下げのボタンを出さずに状態の札と履歴だけを読み取り専用で出す。
 import { useState } from "react";
-import { PROCEDURE_CHECK_LABEL, PROCEDURE_RECORD_NOTE, PROCEDURE_RECORD_STALE_LABEL, type ProcedureRecordKind } from "@soraban/dips";
+import { PROCEDURE_CHECK_LABEL, PROCEDURE_KIND_DISABLED_MESSAGE, PROCEDURE_NONE_NOTE, PROCEDURE_RECORD_NOTE, PROCEDURE_RECORD_STALE_LABEL, type ProcedureRecordKind } from "@soraban/dips";
 import type { ProcedureRecordDto, ProcedureRecordSummaryDto } from "@/server/ops/report-dto";
 import { fieldErrorsOf, Field, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField } from "./report-parts";
@@ -20,6 +22,7 @@ const call = async (method: string, url: string, body?: unknown): Promise<ApiRes
 const PROCEDURE_ERRORS: Readonly<Record<string, string>> = {
   already_recorded: "同じ判定に対する記録が既にあります。画面を読み込み直してください。",
   voided: "中止した計画には記録できません。",
+  procedure_kind_disabled: PROCEDURE_KIND_DISABLED_MESSAGE,
 };
 
 const failMessage = (r: ApiResult): string => {
@@ -200,7 +203,7 @@ export function ProcedureRecordsPanel({
   if (shown.length === 0) {
     return (
       <p className="text-sm text-sb-ink-3" data-testid="procedure-none">
-        この計画の判定には、DIPS の許可・承認の申請や、小型無人機等飛行禁止法の手続きはありません。
+        {PROCEDURE_NONE_NOTE}
       </p>
     );
   }
@@ -212,7 +215,7 @@ export function ProcedureRecordsPanel({
         const mine = records.filter((r) => r.kind === s.kind);
         const done = s.status === "done";
         return (
-          <article key={s.kind} className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-base" data-testid={`procedure-${s.kind}`} data-status={s.status}>
+          <article key={s.kind} className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-base" data-testid={`procedure-${s.kind}`} data-status={s.status} {...(s.legacy ? { "data-legacy": "true" } : {})}>
             <header className="flex flex-col gap-2.5 border-b border-sb-rule px-3 pb-3 pt-3 sm:px-4">
               <h3 className="text-sm font-medium text-sb-ink">{s.kindLabel}</h3>
               <div className={`flex flex-col gap-1 rounded-sb-m border border-l-4 px-3 py-2.5 ${STATUS_BOX[s.status]}`}>
@@ -241,7 +244,7 @@ export function ProcedureRecordsPanel({
               </div>
             </header>
             <div className="flex flex-col gap-3 px-3 sm:px-4">
-              {canRecord && !voided ? (
+              {s.legacy ? null : canRecord && !voided ? (
                 done ? (
                   <RetractForm planId={planId} planVersion={planVersion} kind={s.kind} />
                 ) : s.applicable ? (

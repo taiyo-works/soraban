@@ -2,7 +2,7 @@
 // handleDiagnosePost の応答は変えない（diagnose-core.test.ts の基準が守る）。
 import { describe, expect, it } from "vitest";
 import { runRegulationCheckWith } from "./check-core";
-import { APPLICATION_SUPPORT_KEYS, applyApplicationSupportFlag, stripPrefillFromResponse } from "./diagnose-response";
+import { APPLICATION_SUPPORT_KEYS, applyApplicationSupportFlag, omitApplicationSupport, stripPrefillFromResponse } from "./diagnose-response";
 import { handleDiagnosePost } from "./handlers";
 import { BASELINE_LOCATIONS, BASELINE_NOW, baselineProvider } from "./sprint11e-baseline";
 
@@ -61,5 +61,19 @@ describe("applyApplicationSupportFlag（A16）", () => {
     );
     const res = await stripPrefillFromResponse(bad);
     expect(res.status).toBe(400);
+  });
+
+  it("omitApplicationSupport（運航管理の判定スナップショットの保存・読み出しでも使う。Sprint 18-2 L8）：3 項目だけ除き、元は変えない", async () => {
+    const full = (await (await original()).json()) as Record<string, unknown>;
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in full, `前提 ${k}`).toBe(true);
+    const frozen = JSON.stringify(full);
+    const out = omitApplicationSupport(full);
+    expect(JSON.stringify(full)).toBe(frozen);
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in out, k).toBe(false);
+    const rest = { ...full };
+    for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
+    expect(out).toEqual(rest);
+    expect(out["verdict"]).toEqual(full["verdict"]);
+    expect(out["evidenceId"]).toBe(full["evidenceId"]);
   });
 });

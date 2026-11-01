@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/icons";
 import { formatDay, formatDaysIn } from "@/lib/ops-day";
 import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
+import { LICENSE_RENEWAL_LABEL } from "@/server/ops/license";
 import { SectionHead } from "@/components/ui/sb-parts";
 import type { DeadlineDto } from "@/server/ops/deadlines-logic";
 import type { TodayBadgeDto, TodayCardDto, TodayDto, TodayRowDto, TodayUpcomingDto } from "@/server/ops/today";
@@ -395,7 +396,7 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
                   <span className="text-[15px] font-bold leading-snug">{d.what}</span>
                   <span className="break-words text-[13px] text-sb-ink-2">
                     {d.subject}
-                    {d.licenseStatus === "renewal_window" ? "　更新の申請期間" : d.licenseStatus === "past_deadline" ? "　更新の申請期限を過ぎています" : d.licenseStatus === "expired" ? "　有効期限切れ" : ""}
+                    {d.licenseStatus ? `　${LICENSE_RENEWAL_LABEL[d.licenseStatus]}` : ""}
                   </span>
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-1">

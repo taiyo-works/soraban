@@ -200,6 +200,13 @@ export type NextActionsInput = {
    * applied は、計画の許可番号に適用された登録が 1 件以上あること。canRegister は運航管理者だけ。
    */
   readonly permits?: { readonly applied: boolean; readonly canRegister: boolean };
+  /**
+   * 申請支援のフラグ（lib/boundary.ts の isApplicationSupportEnabled）。必須（渡し忘れを型で防ぐ。Sprint 18-2）。
+   * false：「許可・承認を申請する」（apply_permit）を出さず、許可・承認の手続きが判定に残り適用できる登録が無いとき
+   *   「取得した許可・承認を登録する」（register_permit）を、申請の記録（dips_permit）に依存せず出す。
+   * true：今までの振る舞い（apply_permit、申請済みのあとの register_permit）。
+   */
+  readonly applicationSupport: boolean;
 };
 
 const PERMIT_PROCEDURE = /^(flight-permission-|flight-approval-)/;
@@ -332,7 +339,7 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
     add("cancel_report", 3, "計画は中止されました。有効な通報が残っています。DIPS で取り消し、結果を記録してください", i.can.record);
   }
 
-  // ---- 許可・承認の申請、警察への通報（利用者の申告の記録） ----
+  // ---- 許可・承認の登録、警察への通報（利用者の申告の記録）。apply_permit は申請支援のフラグが有効のときだけ ----
   if (!voided) {
     const today = jstDate(i.now);
     const procedureAction = (
@@ -364,12 +371,18 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
       const overdue = pick.deadlineDate !== null && pick.deadlineDate < today;
       add(id, overdue ? 2 : 3, stale ? PROCEDURE_RECORD_STALE_LABEL : reason, i.can.record, pick.deadlineLabel);
     };
-    procedureAction(
-      "dips_permit",
-      "apply_permit",
-      i.procedures.filter((p) => PERMIT_PROCEDURE.test(p.procedureId) && !NOT_AN_APPLICATION.has(p.procedureId)),
-      "判定の結論に、DIPS の許可・承認の手続きがあります。申請したら記録します",
-    );
+    const permitList = i.procedures.filter((p) => PERMIT_PROCEDURE.test(p.procedureId) && !NOT_AN_APPLICATION.has(p.procedureId));
+    if (i.applicationSupport) {
+      procedureAction("dips_permit", "apply_permit", permitList, "判定の結論に、DIPS の許可・承認の手続きがあります。申請したら記録します");
+    } else if (permitList.length > 0 && i.permits && !i.permits.applied) {
+      // 申請の記録に依存しない：判定に許可・承認の手続きが残り、適用できる登録が無いとき。期限の文言は付けない（tier 3 固定）。
+      add(
+        "register_permit",
+        3,
+        "判定（補助）に許可・承認の手続きがあります。許可・承認は、利用者本人が DIPS 2.0 で取得します。取得したら控えを登録し、計画の許可番号の欄に番号を入れます",
+        i.permits.canRegister,
+      );
+    }
     procedureAction(
       "small_drone_law",
       "notify_police",

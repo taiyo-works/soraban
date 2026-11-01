@@ -14,8 +14,10 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { diffFingerprintParts, type FingerprintChange } from "@soraban/dips";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { formatJst, jstDate, parseJstMinute, toJstInput } from "@/lib/ops-time";
 import type { DiagnosisRun } from "@/server/diagnose-core";
+import { omitApplicationSupport } from "@/server/diagnose-response";
 import { toEvidenceLogInsert } from "@/server/evidence-log";
 import { can } from "./authz";
 import { runJudge } from "./judge";
@@ -356,6 +358,7 @@ const planDtoParts = (
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const dto: PlanDto = {
     id: r.id,
@@ -436,6 +439,7 @@ const detailExtras = (
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const effective = dto.report.status.effectiveId ? extras.rows.find((x) => x.id === dto.report.status.effectiveId) : undefined;
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
@@ -444,7 +448,7 @@ const detailExtras = (
     reportChanges: effective
       ? diffFingerprintParts(effective.fingerprint_parts as never, currentFingerprintPartsOf(r, reportRegistrationOf(permits)), { flagLabel })
       : [],
-    procedureRecords: summarizeProcedureRecords(extras.records, r),
+    procedureRecords: summarizeProcedureRecords(extras.records, r, isApplicationSupportEnabled()),
   };
 };
 
@@ -605,9 +609,11 @@ export const getSnapshot = async (ctx: OpsContext, planId: string, snapshotId: s
     : null;
   if (!r) throw new OpsError(404, "not_found");
   const input = r.input as { droneWeightG?: number | null; purpose?: string | null };
+  // 保存済みの result に申請支援の出力（旧い行）が残っていても、フラグ無効なら API の応答から除く（行は書き換えない）。
+  const result = isApplicationSupportEnabled() ? r.result : omitApplicationSupport(r.result);
   return {
     ...snapshotListDto(r, plan.current_snapshot_id),
-    result: r.result,
+    result,
     report: reportRequirement({
       input: { droneWeightG: input.droneWeightG ?? null, purpose: input.purpose ?? null },
       result: r.result as never,
@@ -675,6 +681,10 @@ type JudgedWrite = {
  */
 const writeJudged = async (ctx: OpsContext, w: JudgedWrite): Promise<number> => {
   const res = w.run.response;
+  // 申請支援の出力（prefill・deadlines・categoryNote）は、フラグ無効（既定・本番）のとき保存しない（Sprint 18-2 L8）。
+  // /api/diagnose の応答全体がそのまま result に入っていたため。既存の行は追記専用なので書き換えない（読むときに getSnapshot で除く）。
+  // 証跡 ID・内容のハッシュ（DB が result から計算）は、保存する内容に対して決まる。
+  const result = isApplicationSupportEnabled() ? res : omitApplicationSupport(res);
   return store.withTransaction(ctx.db, async (c) => {
     await store.insertEvidenceOn(c, toEvidenceLogInsert(w.run.check, { lat: w.input.lat, lng: w.input.lng }));
     await store.insertSnapshotOn(c, {
@@ -683,7 +693,7 @@ const writeJudged = async (ctx: OpsContext, w: JudgedWrite): Promise<number> => 
       planId: w.planId,
       reason: w.reason,
       input: w.input,
-      result: res,
+      result,
       verdictLevel: res.verdict?.level ?? "needs_procedure",
       verdictUnknownCount: res.verdict?.unknownCount ?? 0,
       category: res.category,

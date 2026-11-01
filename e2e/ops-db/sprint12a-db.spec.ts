@@ -27,7 +27,7 @@ const apiAs = async (who: Who | null): Promise<APIRequestContext> => {
 
 const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて"];
 const DIPS_NOT_SENT = "そらばんは DIPS に送信しません";
-const OFFICIAL = "申請・通報は DIPS 2.0 などの公式の手続きで行ってください";
+const OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います";
 const DISCLAIMER = "判定は入力された情報の範囲での目安です。";
 
 const HQ = { name: "フューチャーテック株式会社 本社", lat: 35.434238, lng: 133.380508 };

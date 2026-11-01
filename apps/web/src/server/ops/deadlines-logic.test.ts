@@ -62,7 +62,7 @@ describe("近づく期限", () => {
     expect(r.map((d) => d.id)).toEqual(["edge"]);
   });
 
-  it("技能証明の状態の語は既存の licenseRenewalStatus に合わせる（更新の申請期間・期限を過ぎた・期限切れ）。許可・承認は null", () => {
+  it("技能証明の状態の語は既存の licenseRenewalStatus に合わせる（更新の時期・期限を過ぎた・期限切れ）。許可・承認は null", () => {
     const r = run([pilot("window", 50), pilot("deadline", 20), pilot("expired", -1)], [permit("p", 10)]);
     const by = Object.fromEntries(r.map((d) => [d.id, d.licenseStatus]));
     expect(by).toEqual({ window: "renewal_window", deadline: "past_deadline", expired: "expired", p: null });

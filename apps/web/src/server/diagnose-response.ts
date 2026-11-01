@@ -5,6 +5,16 @@ import { isApplicationSupportEnabled } from "@/lib/boundary";
 
 export const APPLICATION_SUPPORT_KEYS = ["prefill", "deadlines", "categoryNote"] as const;
 
+/**
+ * オブジェクトから申請支援の項目（APPLICATION_SUPPORT_KEYS）を除いた浅い写しを返す（元は変えない）。
+ * /api/diagnose の応答（stripPrefillFromResponse）と、運航管理の判定スナップショットの保存・読み出し（server/ops/plans.ts。Sprint 18-2 L8）で共通に使う。
+ */
+export const omitApplicationSupport = <T extends object>(o: T): T => {
+  const rest = { ...o } as Record<string, unknown>;
+  for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
+  return rest as T;
+};
+
 /** 応答の JSON から申請支援の項目（APPLICATION_SUPPORT_KEYS）を除く。状態コード・ヘッダーは保つ（本文が変わるので content-length は外す）。JSON でない・失敗の応答はそのまま返す。 */
 export const stripPrefillFromResponse = async (res: Response): Promise<Response> => {
   if (!res.ok) return res;
@@ -19,8 +29,7 @@ export const stripPrefillFromResponse = async (res: Response): Promise<Response>
   if (body === null || typeof body !== "object" || Array.isArray(body)) return res;
   // 申請支援の出力だけを除く：prefill（申請フォームの値）、deadlines（申請の提出期限の逆算）、categoryNote（申請が必要という診断の説明）。
   // 結論（verdict）・手続きの一覧（procedures）・category（判定履歴の保存値）・evidenceId は残す。
-  const rest = { ...(body as Record<string, unknown>) };
-  for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
+  const rest = omitApplicationSupport(body as Record<string, unknown>);
   const headers = new Headers(res.headers);
   headers.delete("content-length");
   return new Response(JSON.stringify(rest), { status: res.status, statusText: res.statusText, headers });

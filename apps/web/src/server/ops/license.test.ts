@@ -34,10 +34,20 @@ describe("licenseRenewalStatus", () => {
   });
 });
 
-describe("更新の文言（満了の 1 か月前までに更新の申請を済ませる）", () => {
-  it("申請期限の言い方で揃える", async () => {
+describe("更新の文言（Sprint 18-2：有効期限の通知だけ。「申請」の語と更新の手順の案内を出さない）", () => {
+  it("札の文言は 1 つの定数。「申請」を含まない", async () => {
     const { LICENSE_RENEWAL_LABEL } = await import("./license");
-    expect(LICENSE_RENEWAL_LABEL.past_deadline).toContain("更新の申請期限");
-    expect(LICENSE_RENEWAL_LABEL.renewal_window).toContain("申請");
+    expect(LICENSE_RENEWAL_LABEL).toEqual({
+      renewal_window: "更新の時期",
+      past_deadline: "更新の期限（満了の 1 か月前）を過ぎています",
+      expired: "有効期限切れ",
+    });
+    for (const v of Object.values(LICENSE_RENEWAL_LABEL)) expect(v).not.toContain("申請");
+  });
+
+  it("ホームの近づく期限の札も同じ定数（4 か所で食い違わない）", async () => {
+    const { LICENSE_RENEWAL_LABEL } = await import("./license");
+    const { LICENSE_STATUS_LABEL } = await import("./deadlines-logic");
+    expect(LICENSE_STATUS_LABEL).toBe(LICENSE_RENEWAL_LABEL);
   });
 });

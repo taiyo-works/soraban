@@ -66,7 +66,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
           data-testid="basis-facts"
           rows={[
             ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="basis-check-evidence">{s.checkEvidenceId}</span>],
-            ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="basis-diagnosis-evidence">{s.diagnosisEvidenceId}</span>],
+            ["飛行の方法を含む判定の証跡 ID", <span key="d" className={mono} data-testid="basis-diagnosis-evidence">{s.diagnosisEvidenceId}</span>],
             ["エンジンの版", <span key="e" className={mono} data-testid="basis-engine">{s.engineVersion}</span>],
             ["判定の日時", <time key="t" dateTime={s.checkedAt} className="sb-num text-xs tnum">{formatJst(new Date(s.checkedAt))}（{s.checkedAt}）</time>],
             [

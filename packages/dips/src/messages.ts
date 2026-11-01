@@ -7,9 +7,16 @@ export const NEEDS_CONFIRMATION_MARK = "※要確認";
 
 // ---- 固定の文言 ----------------------------------------------------
 
+/**
+ * 公式の手続きの案内（Sprint 18-2 B5）。以前は同じ趣旨の文が 4 つの定数に重複していたものを、この 1 つに揃える。
+ * REPORT_NOTICE_MANUAL はこれを連結する。packages/regulations の REPORT_FIXED_NOTE・PLAN_JUDGEMENT_DISCLAIMER は
+ * 同じ文を持ち（パッケージ間の依存を作らないため）、apps/web の単体テストで一致を確かめる。
+ * 「許可・承認の申請」の語は境界の文として許可された使い方（暫定版。専門家確認の前）。「代行」「代理」の語は使わない。
+ */
+export const OFFICIAL_PROCEDURE_NOTE = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います。";
+
 /** 手動のとき、通報の画面の目立つ位置に出す。 */
-export const REPORT_NOTICE_MANUAL =
-  "そらばんは DIPS に送信しません。この内容を DIPS 2.0 で通報し、通報した日時と番号をここに記録してください。記録するまで『通報済み』にはなりません。申請・通報は DIPS 2.0 などの公式の手続きで行ってください。";
+export const REPORT_NOTICE_MANUAL = `そらばんは DIPS に送信しません。この内容を DIPS 2.0 で通報し、通報した日時と番号をここに記録してください。記録するまで『通報済み』にはなりません。${OFFICIAL_PROCEDURE_NOTE}`;
 
 /** 模擬のとき。 */
 export const REPORT_NOTICE_MOCK = "模擬（開発用）です。実際の DIPS には送信されません。";
@@ -26,7 +33,6 @@ export const REPORT_NOTICE_BY_CHANNEL: Readonly<Record<"manual" | "mock", string
 /** 記録は利用者の申告であること。 */
 export const REPORT_SELF_REPORT_NOTE = "記録は利用者の申告です。そらばんが DIPS に送信したものではありません。";
 
-export const OFFICIAL_PROCEDURE_NOTE = "申請・通報は DIPS 2.0 などの公式の手続きで行ってください。";
 
 // ---- 表示名 --------------------------------------------------------
 
@@ -281,7 +287,7 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   cancel_report: "通報を取り消す",
   apply_permit: "許可・承認を申請する",
   notify_police: "警察へ通報する",
-  register_permit: "許可・承認の結果を登録する",
+  register_permit: "取得した許可・承認を登録する",
   consider_report: "通報を検討する（推奨）",
   record_landing: "着陸を記録する",
   do_inspection: "日常点検をする",
@@ -289,7 +295,7 @@ export const NEXT_ACTION_LABEL: Readonly<Record<NextActionId, string>> = {
   do_post_inspection: "飛行後点検をする",
   write_journal: "日誌を記入する",
   review_journal_mismatch: "日誌の食い違いを確認する",
-  renew_license: "技能証明を更新する",
+  renew_license: "技能証明の有効期限を確認する",
   confirm_incident_report: "事故・ヒヤリハットの報告の要否を確認する",
   complete_incident_detail: "事故・ヒヤリハットの詳細を記入する",
 };
@@ -318,8 +324,21 @@ export const PROCEDURE_CHECK_LABEL = {
 } as const;
 
 export const PROCEDURE_RECORD_STALE_LABEL = "前の判定に対する記録です。もう一度確認してください";
-export const PROCEDURE_RECORD_NOTE =
-  "記録は利用者の申告です。許可・承認が下りたことを示すものではありません。申請は DIPS 2.0 などの公式の手続きで行ってください。";
+export const PROCEDURE_RECORD_NOTE = `記録は利用者の申告です。${OFFICIAL_PROCEDURE_NOTE}`;
+
+// 申請支援のフラグが無効のとき、dips_permit の新しい記録は受け付けない（Sprint 18-2）。既存の行は消さず、次の表示で読むだけにする。
+// 上の PROCEDURE_RECORD_KIND_LABEL.dips_permit・PROCEDURE_RECORD_DONE_LABEL.dips_permit・PROCEDURE_CHECK_LABEL.applicationCompleted は、
+// フラグ有効のときの表示に残す（値は変えない）。
+/** 以前の記録（dips_permit）の見出し。 */
+export const PROCEDURE_RECORD_LEGACY_KIND_LABEL = "以前の記録：許可・承認の手続きの申告（受付を停止しています）";
+/** 以前の記録（dips_permit）の「済み」の表示。 */
+export const PROCEDURE_RECORD_LEGACY_DONE_LABEL = "手続き済みの申告（以前の記録）";
+/** dips_permit の新しい記録を受け付けないときの 409 のメッセージ。 */
+export const PROCEDURE_KIND_DISABLED_MESSAGE = "この記録は受け付けていません";
+/** 手続きの記録の対象が無いときの文（procedure-none）。 */
+export const PROCEDURE_NONE_NOTE = "この計画の判定には、記録する手続き（小型無人機等飛行禁止法の同意・通報）はありません。";
+/** 「手続きの記録」の節の説明（フラグ無効）。 */
+export const PROCEDURE_SECTION_DESCRIPTION = "小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。";
 
 // ---- 警告（通報の記録の前） ----------------------------------------
 

@@ -62,6 +62,7 @@ import {
 } from "@soraban/dips";
 import type { ReportRequirement, SpecificFlightFlag } from "@soraban/regulations";
 import { SPECIFIC_FLIGHT_FLAG_LABEL } from "@soraban/regulations";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { formatJst, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { currentFingerprintPartsOf, rowLite, summarizePlanReport, type PlanReportExtras } from "./report-dto";
@@ -468,6 +469,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const status = summary.report.status;
   const eff = effectiveReport(lites);

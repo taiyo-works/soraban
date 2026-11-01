@@ -674,7 +674,7 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
           <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-check-evidence">{r.checkEvidenceId}</span></dd>
         </div>
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5 sm:col-span-4">
-          <dt className="text-xs text-sb-ink-2">申請支援の証跡 ID</dt>
+          <dt className="text-xs text-sb-ink-2">飛行の方法を含む判定の証跡 ID</dt>
           <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-diagnosis-evidence">{r.diagnosisEvidenceId}</span></dd>
         </div>
         {pair("記録した日時", r.createdAtJst, undefined, true)}

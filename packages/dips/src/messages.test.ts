@@ -30,7 +30,7 @@ const strings = (o: unknown, out: string[] = []): string[] => {
 describe("文言", () => {
   it("固定の文言（手動・模擬）が決められたとおり", () => {
     expect(messages.REPORT_NOTICE_MANUAL).toBe(
-      "そらばんは DIPS に送信しません。この内容を DIPS 2.0 で通報し、通報した日時と番号をここに記録してください。記録するまで『通報済み』にはなりません。申請・通報は DIPS 2.0 などの公式の手続きで行ってください。",
+      "そらばんは DIPS に送信しません。この内容を DIPS 2.0 で通報し、通報した日時と番号をここに記録してください。記録するまで『通報済み』にはなりません。許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います。",
     );
     expect(messages.REPORT_NOTICE_MOCK).toBe("模擬（開発用）です。実際の DIPS には送信されません。");
     expect(messages.REPORT_CHANNEL_LABEL).toEqual({ manual: "手動（利用者の申告）", mock: "模擬（開発用）", api: "API" });

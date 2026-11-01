@@ -6,6 +6,7 @@ import { PlanFrame } from "@/components/ops/plan-frame";
 import { RejudgeButton } from "@/components/ops/plans-client";
 import { buttonOutlineBrandClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { VerdictSummary } from "@/components/verdict-summary";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { formatJst } from "@/lib/ops-time";
 import { PERMIT_FORMAT_UNVERIFIED_NOTE } from "@/server/ops/permit-logic";
 import { verdictPermitNotes } from "@/server/ops/permit-page";
@@ -51,7 +52,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
               ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
               ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
-              ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
+              ["飛行の方法を含む判定の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
               ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
             ]}
           />
@@ -127,10 +128,17 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             </div>
           ) : null}
           <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
-            <p>
-              「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、
-              範囲に収まるときだけ判定が変わります。
-            </p>
+            {isApplicationSupportEnabled() ? (
+              <p>
+                「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、
+                範囲に収まるときだけ判定が変わります。
+              </p>
+            ) : (
+              <p>
+                許可・承認は、利用者本人が DIPS 2.0 で取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、
+                範囲に収まるときだけ判定が変わります。
+              </p>
+            )}
             <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
               許可・承認の登録を見る
             </Link>

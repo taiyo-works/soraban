@@ -49,7 +49,7 @@ export default async function SnapshotListPage({ params }: { readonly params: Pr
               <span className="break-all sb-num text-xs tnum text-sb-ink-3">
                 地点判定 {s.checkEvidenceId}
                 <span aria-hidden className="mx-1.5">／</span>
-                申請支援 {s.diagnosisEvidenceId}
+                方法を含む判定 {s.diagnosisEvidenceId}
               </span>
               <span className="break-all sb-num text-xs tnum text-sb-ink-3">{s.engineVersion}</span>
             </Link>
