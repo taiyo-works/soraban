@@ -3,7 +3,9 @@
 // handleDiagnosePost（server/handlers.ts）とその応答の基準のテストは変えず、ルートの層でだけ取り除く。
 import { isApplicationSupportEnabled } from "@/lib/boundary";
 
-/** 応答の JSON から prefill を除く。状態コード・ヘッダーは保つ（本文が変わるので content-length は外す）。JSON でない・失敗の応答はそのまま返す。 */
+export const APPLICATION_SUPPORT_KEYS = ["prefill", "deadlines", "categoryNote"] as const;
+
+/** 応答の JSON から申請支援の項目（APPLICATION_SUPPORT_KEYS）を除く。状態コード・ヘッダーは保つ（本文が変わるので content-length は外す）。JSON でない・失敗の応答はそのまま返す。 */
 export const stripPrefillFromResponse = async (res: Response): Promise<Response> => {
   if (!res.ok) return res;
   const type = res.headers.get("content-type") ?? "";
@@ -14,9 +16,11 @@ export const stripPrefillFromResponse = async (res: Response): Promise<Response>
   } catch {
     return res;
   }
-  if (body === null || typeof body !== "object" || Array.isArray(body) || !("prefill" in body)) return res;
-  const { prefill: _removed, ...rest } = body as Record<string, unknown>;
-  void _removed;
+  if (body === null || typeof body !== "object" || Array.isArray(body)) return res;
+  // 申請支援の出力だけを除く：prefill（申請フォームの値）、deadlines（申請の提出期限の逆算）、categoryNote（申請が必要という診断の説明）。
+  // 結論（verdict）・手続きの一覧（procedures）・category（判定履歴の保存値）・evidenceId は残す。
+  const rest = { ...(body as Record<string, unknown>) };
+  for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
   const headers = new Headers(res.headers);
   headers.delete("content-length");
   return new Response(JSON.stringify(rest), { status: res.status, statusText: res.statusText, headers });

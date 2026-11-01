@@ -4,9 +4,10 @@
 //
 // 【フラグ】申請支援（手続き診断のパネル・書類 PDF・プリフィル・マニュアル骨子・申請の期限のカレンダー）は、
 // 専門家の確認（legal-info-plan.md Q-L2）が出るまで止める。コードは消さずに、このフラグの裏に残す。
-// 真になるのは APPLICATION_SUPPORT_ENABLED が "1" ちょうど、かつ VERCEL_ENV が "production" でないときだけ。
-// 未設定・"0"・"true"・空は偽。本番のデプロイでは、"1" でも常に偽（外部提供しない。戻すときはコードの変更で、記録が残る）。
-// 作法は lib/design-catalog.ts（DESIGN_CATALOG）と同じ。
+// 真になるのは APPLICATION_SUPPORT_ENABLED が "1" ちょうど、かつ Vercel の環境でないとき（VERCEL が未設定で VERCEL_ENV が production でない）だけ。
+// 未設定・"0"・"true"・空は偽。Vercel のどの環境（production・preview を含む）でも "1" は常に偽（外部提供しない。戻すときはコードの変更で、記録が残る）。
+// 理由：preview の URL が保護されていないと外から見え、再ビルドなしの昇格で静的な `/` に有効が残るおそれがあるため（Sprint 18 §12 の追記）。
+// 有効にできるのは Vercel 以外（ローカル・自前ホスト）だけ。Vercel のどの環境にもこの変数を設定しない（docs/runbooks/local-verification.md）。
 //
 // 【評価の時点】公開の `/`（app/page.tsx）は cacheComponents の下で静的に描かれる（ビルドの出力で ◐ Partial Prerender）。
 // page.tsx は process.env を読むだけで動的な API を使わないため、値は **ビルドのとき（next build の環境）に固まる**。
@@ -17,7 +18,8 @@
 
 export const isApplicationSupportEnabled = (
   env: Readonly<Record<string, string | undefined>> = process.env,
-): boolean => env["APPLICATION_SUPPORT_ENABLED"] === "1" && env["VERCEL_ENV"] !== "production";
+): boolean =>
+  env["APPLICATION_SUPPORT_ENABLED"] === "1" && env["VERCEL_ENV"] !== "production" && !env["VERCEL"];
 
 // 境界の文（暫定版。専門家の確認の前。画面には「暫定」と出さない）。
 // 「代行」「代理」の語は使わない（Sprint 18 §6.1 で全面禁止にするため、例外を作らない）。

@@ -1797,7 +1797,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
                         {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${PURPOSE_SHORT[h.ctx.purpose] ?? h.ctx.purpose}` : ""}
                         {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · 許可${h.ctx.pilotPermits.length}件` : ""}
-                        {ds ? ` · ${catShort[ds.category] ?? ds.category}` : ""}
+                        {applicationSupport && ds ? ` · ${catShort[ds.category] ?? ds.category}` : ""}
                         {ds?.didStatus
                           ? ` · DID:${formatDidDetermination(ds.didStatus, ds.didDetail, { droneWeightG: h.ctx?.droneWeightG })}`
                           : ""}

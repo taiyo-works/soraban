@@ -173,7 +173,7 @@ test.describe("Sprint 11f", () => {
     await gotoLatLng(page, QUIET.lat, QUIET.lng);
     await expect(level(page)).toHaveText("手続き不要");
     await expect(latestHistory(page).getByTestId("history-verdict")).toHaveText(/^手続き不要/);
-    await expect(latestHistory(page)).toContainText("cat:");
+    await expect(latestHistory(page)).toContainText("DID:"); // 以前は cat:（診断カテゴリー）。Sprint 18-1 で行から外したので、同じく診断由来の DID の表示で検査する
 
     await page.route("**/api/diagnose", async (route) => {
       await new Promise((r) => setTimeout(r, 4_000));
@@ -194,7 +194,7 @@ test.describe("Sprint 11f", () => {
     await expect(level(page)).toHaveText("要手続き");
     await expect(v).not.toHaveAttribute("data-pending", "true");
     await expect(v).toHaveText(/^要手続き/);
-    await expect(latestHistory(page)).toContainText("cat:");
+    await expect(latestHistory(page)).toContainText("DID:"); // 以前は cat:（診断カテゴリー）。Sprint 18-1 で行から外したので、同じく診断由来の DID の表示で検査する
   });
 
   test("10. 出雲縁結び空港の周辺で 50g：参照先に航空法と航空法施行規則が別々に出る。PDF に両方の URL", async ({ page }) => {
@@ -259,7 +259,7 @@ test.describe("Sprint 11f", () => {
   }) => {
     await openReady(page);
     await gotoLatLng(page, QUIET.lat, QUIET.lng);
-    await expect(latestHistory(page)).toContainText("cat:");
+    await expect(latestHistory(page)).toContainText("DID:"); // 以前は cat:（診断カテゴリー）。Sprint 18-1 で行から外したので、同じく診断由来の DID の表示で検査する
     await page.route("**/api/diagnose", (route) => route.fulfill({ status: 500, body: '{"error":"test"}' }));
     const failed = page.waitForResponse((r) => r.url().endsWith("/api/diagnose"));
     await methodBox(page, "夜間飛行").check();
@@ -282,7 +282,7 @@ test.describe("Sprint 11f", () => {
     await settled(page);
     await expect(level(page)).toHaveText("要手続き");
     await expect(latestHistory(page).getByTestId("history-verdict")).toHaveText(/^要手続き/);
-    await expect(latestHistory(page)).toContainText("cat:");
+    await expect(latestHistory(page)).toContainText("DID:"); // 以前は cat:（診断カテゴリー）。Sprint 18-1 で行から外したので、同じく診断由来の DID の表示で検査する
     await expect(latestHistory(page)).toContainText("手続き");
   });
 });

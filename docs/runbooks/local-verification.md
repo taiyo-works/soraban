@@ -30,3 +30,9 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - `.claude/settings.json` が `rm -rf*` を拒否する。掃除は、新しい名前のディレクトリを使う、または `mv` で退避する。
 - `next start` を動かすと `apps/web/tsconfig.json` が書き換わることがある（`git checkout` で戻す）。古い `apps/web/.next-e2e-fixture/dev` が lint を落とすことがある（退避する）。前の実行の `mock-gsi-server`（ポート 3198）が残っていると、E2E の起動を妨げる（止める）。
 - 作業ツリーには、別のエージェントの途中の変更が入っていることがある。自分のコミットは**パスを指定して**行い、他の変更を巻き込まない。
+
+## 申請支援のフラグ（Sprint 18）
+
+- `APPLICATION_SUPPORT_ENABLED=1` で公開の `/` の申請支援（診断パネル等）と `/api/diagnose` の `prefill`・`deadlines`・`categoryNote` が戻る。**既定は無効**。公開の `/` は静的に描かれ、**値は `next build` のときに固まる**（`next start` の環境変数を変えても効かない。再ビルドが要る）。
+- `VERCEL` が設定されている環境（production・preview を含む Vercel のどこでも）では常に無効。**Vercel のどの環境にもこの変数を設定しない。**
+- E2E（`playwright.config.ts`・`playwright.ops.config.ts`）は `APPLICATION_SUPPORT_ENABLED: ""` で動かす。フラグ有効の E2E は作らない。ビルドの前に `APPLICATION_SUPPORT_ENABLED` をシェルに残さないこと。

@@ -190,11 +190,12 @@ test.describe("B. 地点と飛び方での結果", () => {
     const card = page.getByTestId("regulation-card-aviation-law-did");
     await expect(card).toHaveAttribute("data-status", "red");
     await expect(card).toHaveAttribute("data-verdict", "procedure_done");
-    // DID の手続きは段取り（要手続きの手続き）から外れ、「手続き済み」の項目（verdict-done-item）に同じ手続きが残る。
+    // DID の手続きは段取り（要手続きの手続き）から外れ、判定の「手続き済み（条件付き）」の節（verdict-done）の項目に残る。
     // 以前は申請支援の手続きカード（procedure-card）に印つきで残ることを検査していた。申請支援を止めたので（Sprint 18-1）、
-    // 同じ手続きの id を持つ verdict-done-item で検査する。診断パネル（procedure-card）は出ない。
+    // 判定側の節の見出しと条件の行で検査する（verdict-done-item は item の id を持ち、手続きの id は持たない）。診断パネル（procedure-card）は出ない。
     await expect(procedures(page).filter({ hasText: "飛行許可（DID上空）" })).toHaveCount(0);
-    await expect(done).toContainText("国交省 DIPS：DID 上空の飛行許可");
+    await expect(page.getByTestId("verdict-done")).toContainText("手続き済み（条件付き）");
+    expect(await done.getByTestId("verdict-done-condition").count()).toBeGreaterThanOrEqual(1);
     await expect(page.getByTestId("procedure-card")).toHaveCount(0);
   });
 

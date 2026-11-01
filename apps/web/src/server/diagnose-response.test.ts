@@ -2,7 +2,7 @@
 // handleDiagnosePost の応答は変えない（diagnose-core.test.ts の基準が守る）。
 import { describe, expect, it } from "vitest";
 import { runRegulationCheckWith } from "./check-core";
-import { applyApplicationSupportFlag, stripPrefillFromResponse } from "./diagnose-response";
+import { APPLICATION_SUPPORT_KEYS, applyApplicationSupportFlag, stripPrefillFromResponse } from "./diagnose-response";
 import { handleDiagnosePost } from "./handlers";
 import { BASELINE_LOCATIONS, BASELINE_NOW, baselineProvider } from "./sprint11e-baseline";
 
@@ -26,11 +26,16 @@ describe("applyApplicationSupportFlag（A16）", () => {
     expect(res.headers.get("content-type")).toContain("application/json");
     const after = (await res.json()) as Record<string, unknown>;
     expect("prefill" in after).toBe(false);
+    expect("deadlines" in after).toBe(false);
+    expect("categoryNote" in after).toBe(false);
+    expect(before["deadlines"]).toBeDefined();
+    expect(JSON.stringify(after)).not.toMatch(/開庁日以上前までに提出|提出期限の目安/);
+    expect(after["category"]).toBe(before["category"]);
     expect(after["verdict"]).toBeDefined();
     expect(after["procedures"]).toBeDefined();
     expect(after["evidenceId"]).toBe(before["evidenceId"]);
-    const { prefill: _p, ...rest } = before;
-    void _p;
+    const rest = { ...before };
+    for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
     expect(after).toEqual(rest);
   });
 
@@ -45,7 +50,8 @@ describe("applyApplicationSupportFlag（A16）", () => {
       APPLICATION_SUPPORT_ENABLED: "1",
       VERCEL_ENV: "production",
     });
-    expect("prefill" in ((await res.json()) as object)).toBe(false);
+    const j = (await res.json()) as object;
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in j, k).toBe(false);
   });
 
   it("失敗の応答（400）はそのまま返す", async () => {

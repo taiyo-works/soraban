@@ -182,6 +182,23 @@ test.describe("1-4 /api/diagnose の応答に prefill が無い", () => {
   });
 });
 
+test.describe("1-4b /api/diagnose の応答に申請期限の逆算・診断の説明が無い（レビュー M1）", () => {
+  test("deadlines・categoryNote が無く、「開庁日」「提出期限の目安」が応答のどこにも無い。category・procedures・verdict は残る", async ({ request }) => {
+    const res = await request.post("/api/diagnose", {
+      data: { lat: 35.4278, lng: 133.3314, flags: ["method_night"], plannedDate: "2027-01-14" },
+    });
+    expect(res.status()).toBe(200);
+    const text = await res.text();
+    const j = JSON.parse(text) as Record<string, unknown>;
+    for (const k of ["prefill", "deadlines", "categoryNote"]) expect(k in j, k).toBe(false);
+    expect(text).not.toContain("提出期限の目安");
+    expect(text).not.toContain("開庁日以上前までに提出");
+    expect(typeof j["category"]).toBe("string");
+    expect(Array.isArray(j["procedures"])).toBe(true);
+    expect(j["verdict"]).toBeTruthy();
+  });
+});
+
 test.describe("1-5 文言", () => {
   test("凡例「飛行の方法」・予定日と補助者の説明・常設の免責 DISCLAIMER_JUDGEMENT。「起算日」「提出期限の逆算」「プリフィル」が無い", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -260,6 +277,7 @@ test.describe("1-6 判定履歴", () => {
     // 手続きの件数・進捗・申請支援の語は出ない（行の文字と title）
     await expect(item).not.toContainText(/手続き\s*\d/);
     await expect(item).not.toContainText("申請支援");
+    await expect(item).not.toContainText("cat:"); // 診断カテゴリーの区分（cat:IIA相当 など）も出さない（レビュー L1）
     expect(await item.locator("button").first().getAttribute("title")).not.toContain("申請支援");
     // 他の保存値（診断の証跡 ID・カテゴリー・方法の数・予定日）は今までどおり読める
     await expect(item).toContainText("diag:ev_3ad16b0d5ef51d89");

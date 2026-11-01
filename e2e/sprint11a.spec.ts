@@ -210,8 +210,9 @@ test.describe("D. 過去の履歴は不変", () => {
     const item = page.getByTestId("history-item").filter({ hasText: "緊急用務空域の旧履歴" });
     await expect(item).toHaveCount(1);
     await expect(item).toContainText(`diag:${OLD_DIAG}`);
-    await expect(item).toContainText("cat:IIA相当");
+    await expect(item).not.toContainText("cat:"); // 以前は「cat:IIA相当」。Sprint 18-1 で行から外した（保存値は下で確かめる）
     const stored = await page.evaluate(() => window.localStorage.getItem("soraban:history:v1") ?? "");
     expect(stored).toContain(OLD_DIAG);
+    expect(stored).toContain("II_A"); // 保存値のカテゴリーは書き換えない
   });
 });

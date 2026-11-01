@@ -19,6 +19,12 @@ describe("isApplicationSupportEnabled（Sprint 18-1 §4.1）", () => {
   it('本番のデプロイ（VERCEL_ENV=production）は "1" でも偽', () => {
     expect(isApplicationSupportEnabled({ APPLICATION_SUPPORT_ENABLED: "1", VERCEL_ENV: "production" })).toBe(false);
   });
+  it('Vercel の環境（VERCEL が設定されている）は、production・preview・development のどれでも "1" で偽', () => {
+    for (const v of ["production", "preview", "development", ""]) {
+      expect(isApplicationSupportEnabled({ APPLICATION_SUPPORT_ENABLED: "1", VERCEL: "1", VERCEL_ENV: v }), v).toBe(false);
+    }
+    expect(isApplicationSupportEnabled({ APPLICATION_SUPPORT_ENABLED: "1", VERCEL: "1" })).toBe(false);
+  });
   it("引数を省くと process.env を読む", () => {
     const before = process.env["APPLICATION_SUPPORT_ENABLED"];
     try {

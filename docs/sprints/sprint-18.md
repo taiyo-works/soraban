@@ -419,3 +419,6 @@
 
 - **Q1〜Q6 はすべて推奨で確定**: Q1 公開の `/` の申請支援は専門家確認まで止める／Q2 止めたコードは削除せずフラグの裏に残す（専門家の回答が否定的なら別の PR で削除）／Q3 運航管理の「申請済み」の記録と次にやること `apply_permit` は止め、「取得した許可・承認を登録する」に置き換える／Q4 判定の手続き一覧の期限の列は、判定エンジンの出力なので残す／Q5 免許更新は期限の通知だけにして「申請」の語を外す／Q6 運航管理の「このアプリについて」は 2 タップで届く形を許容する。
 - **順序**: Sprint 18 を Sprint 16-1 の前に行う（同じファイルを触るため）。18-1 → 18-2 → 18-3 の直列。
+- **契約 §4.1 からの意図的な変更（18-1 のレビュー後、オーケストレーターの決定）**: フラグ `isApplicationSupportEnabled` は、`VERCEL` が設定されている環境（production・preview を含む Vercel のどこでも）では常に偽。有効にできるのは Vercel 以外（ローカル・自前ホスト）で `APPLICATION_SUPPORT_ENABLED=1` のときだけ。理由: preview の URL が保護されていないと外から見え、再ビルドなしの昇格で静的な `/` にフラグ有効が残るおそれがあるため。
+- **契約 §4.2 の補足（同レビュー）**: フラグ無効のとき、`/api/diagnose` の応答から `prefill` に加えて `deadlines`（申請の提出期限の逆算）と `categoryNote` も除く（ルートの層 `server/diagnose-response.ts`。`handleDiagnosePost` と SHA の基準は不変）。`category`・`procedures`・`verdict`・`evidenceId` は残す。
+- **契約の誤り（実測）**: §1-3 の「`/ops/plans/[id]/judgement` の `verdict-responsibility`」は、元から出ない（`evidence` prop を渡すのは公開の `/` だけ）。1-3 の E2E-DB は「出ないこと」の検査にした。

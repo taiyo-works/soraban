@@ -211,6 +211,12 @@ export const APPLICATION_SUPPORT_WORDS = [
   "書類の下書き",
   "カテゴリー切り分け",
   "下書きまでを手伝います",
+  "起算日",
+  "開庁日以上前までに提出",
+  "提出期限の目安",
+  "DIPS／DRS 入力",
+  "マニュアル骨子",
+  "手続き窓口",
 ] as const;
 export const APPLICATION_SUPPORT_TESTIDS = [
   "diagnosis-details",

@@ -191,6 +191,15 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
       for (const w of FORBIDDEN) expect(text, `${url}: 「${w}」`).not.toContain(w);
       expect(text, `${url}: OK`).not.toMatch(/\bOK\b/);
     }
+    // Sprint 18-1（契約 1-3 の誤りの訂正）：責任の注記 verdict-responsibility は公開の `/` だけに出る。運航管理の判定の画面には元から出ない。
+    // 旧い注記の語「下書き」「手伝います」は、主画面・/report・/judgement のどこにも無い。
+    for (const url of [base, `${base}/report`, `${base}/judgement`]) {
+      await page.goto(url);
+      const text = await page.locator("main").first().innerText();
+      expect(text, `${url}: 下書き`).not.toContain("下書き");
+      expect(text, `${url}: 手伝います`).not.toContain("手伝います");
+      await expect(page.getByTestId("verdict-responsibility"), url).toHaveCount(0);
+    }
     await page.goto(base);
     await tapAndWait(page, page.getByTestId("plan-judge-link"), /\/judgement$/);
     // 判定からも戻れる（戻る＝通報の状況）
