@@ -40,6 +40,8 @@ as $$
 declare
   a jsonb;
   v jsonb;
+  v_ids text[] := '{}';
+  v_id text;
 begin
   if p_areas is null then
     return true;
@@ -51,21 +53,46 @@ begin
     if jsonb_typeof(a) <> 'object' then
       return false;
     end if;
+    -- id（必須）：英数字・_・- の 1〜64 文字で、範囲の間で重複しない
+    if jsonb_typeof(a->'id') is distinct from 'string' then
+      return false;
+    end if;
+    v_id := a->>'id';
+    if v_id !~ '^[A-Za-z0-9_-]{1,64}$' or v_id = any(v_ids) then
+      return false;
+    end if;
+    v_ids := v_ids || v_id;
+    -- name（任意）：文字で 50 文字以内、制御文字なし
+    if a ? 'name' and (
+      jsonb_typeof(a->'name') is distinct from 'string'
+      or char_length(a->>'name') not between 1 and 50
+      or (a->>'name') ~ '[[:cntrl:]]'
+    ) then
+      return false;
+    end if;
     if a->>'kind' = 'polygon' then
-      if jsonb_typeof(a->'vertices') <> 'array'
+      -- 鍵の欠落と余分な鍵を拒否する（null との比較で検査が素通りしないように、鍵は先に調べる）
+      if exists (select 1 from jsonb_object_keys(a) k where k not in ('id', 'kind', 'name', 'vertices')) or not (a ? 'vertices') then
+        return false;
+      end if;
+      if jsonb_typeof(a->'vertices') is distinct from 'array'
          or jsonb_array_length(a->'vertices') < 3 or jsonb_array_length(a->'vertices') > 100 then
         return false;
       end if;
       for v in select * from jsonb_array_elements(a->'vertices') loop
-        if not flight_areas_position_valid(v) then
+        if not coalesce(flight_areas_position_valid(v), false) then
           return false;
         end if;
       end loop;
     elsif a->>'kind' = 'circle' then
-      if not flight_areas_position_valid(a->'center') then
+      if exists (select 1 from jsonb_object_keys(a) k where k not in ('id', 'kind', 'name', 'center', 'radius_m'))
+         or not (a ? 'center') or not (a ? 'radius_m') then
         return false;
       end if;
-      if jsonb_typeof(a->'radius_m') <> 'number'
+      if not coalesce(flight_areas_position_valid(a->'center'), false) then
+        return false;
+      end if;
+      if jsonb_typeof(a->'radius_m') is distinct from 'number'
          or (a->>'radius_m')::numeric <> trunc((a->>'radius_m')::numeric)
          or (a->>'radius_m')::numeric not between 1 and 10000 then
         return false;
@@ -113,16 +140,22 @@ begin
   end if;
   for a in select * from jsonb_array_elements(p_areas) loop
     if a->>'kind' = 'polygon' then
+      if jsonb_typeof(a->'vertices') is distinct from 'array' then
+        return false;
+      end if;
       for v in select * from jsonb_array_elements(a->'vertices') loop
-        if flight_areas_distance_m(p_lat::double precision, p_lng::double precision,
-                                   (v->>1)::double precision, (v->>0)::double precision) > p_radius_m + 0.01 then
+        if coalesce(flight_areas_distance_m(p_lat::double precision, p_lng::double precision,
+                                            (v->>1)::double precision, (v->>0)::double precision) > p_radius_m + 0.01, true) then
           return false;
         end if;
       end loop;
+    elsif a->>'kind' is distinct from 'circle' then
+      return false;
     else
-      if flight_areas_distance_m(p_lat::double precision, p_lng::double precision,
-                                 (a->'center'->>1)::double precision, (a->'center'->>0)::double precision)
-         + (a->>'radius_m')::double precision > p_radius_m + 0.01 then
+      -- 鍵が欠けていて距離が null になる場合も「覆わない」（null の比較で素通りさせない）
+      if coalesce(flight_areas_distance_m(p_lat::double precision, p_lng::double precision,
+                                          (a->'center'->>1)::double precision, (a->'center'->>0)::double precision)
+                  + (a->>'radius_m')::double precision > p_radius_m + 0.01, true) then
         return false;
       end if;
     end if;
