@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { PLAN_JUDGEMENT_DISCLAIMER, type FlightVerdict } from "@soraban/regulations";
+import { ChangeNotice } from "@/components/ops/change-notice";
 import { PermitDeclaration, PlanPermitList } from "@/components/ops/permit-ui";
 import { PlanFrame } from "@/components/ops/plan-frame";
 import { RejudgeButton } from "@/components/ops/plans-client";
-import { buttonOutlineBrandClass, DetailList, Note, Section } from "@/components/ops/ui";
+import { buttonOutlineBrandClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { VerdictSummary } from "@/components/verdict-summary";
 import { formatJst } from "@/lib/ops-time";
 import { PERMIT_FORMAT_UNVERIFIED_NOTE } from "@/server/ops/permit-logic";
@@ -28,6 +29,8 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
 
   return (
     <PlanFrame plan={plan} eyebrow="判定（補助）" back={{ href: `/ops/plans/${plan.id}`, label: "通報の状況" }}>
+      {/* 再判定の直後の結果の通知（版の一覧は /overview にあるため、ここでも受け取る） */}
+      <ChangeNotice target={VERSION_NOTICE_TARGET} />
       <p className="opx-note" data-testid="plan-disclaimer">
         {PLAN_JUDGEMENT_DISCLAIMER}
       </p>

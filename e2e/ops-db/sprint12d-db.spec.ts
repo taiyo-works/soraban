@@ -498,9 +498,11 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await tid(page, "plan-reason").fill("許可の番号を入れた");
     await tid(page, "plan-submit").click();
     await page.waitForURL(new RegExp(`/ops/plans/${plan.id}$`));
+    await page.goto(`/ops/plans/${plan.id}/judgement`);
     await expect(planRow(page, permit.permitNumber)).toHaveAttribute("data-status", "applied");
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "procedure_done");
     // 同意・通報などの手入力は従来どおり残る
+    await page.goto(`/ops/plans/${plan.id}/overview`);
     await expect(tid(page, "plan-overview")).toContainText("公園管理者");
     expect((await getPlanPermits(manager, plan.id)).permits.grantedValues).toContain("mlit:night");
     await manager.dispose();
