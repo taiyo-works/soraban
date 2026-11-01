@@ -847,7 +847,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
-          className="opx-notice flex flex-col gap-1 !px-4 !py-1 !text-base !font-medium !leading-relaxed"
+          className="opx-notice flex flex-col gap-1 !px-4 !py-1 !text-base !font-medium !leading-snug"
           data-meaning="warn"
           data-testid="report-notice"
           data-adapter={view.adapter.name}
@@ -916,9 +916,11 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details" open={statusOpen}>
           <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm text-sb-ink">
             <ReportBadge report={view.requirement} bare />
-            <ReportStatusBadge status={view.status} bare />
-            {view.deadline.message ? <span className="min-w-0 basis-full text-sm leading-snug text-sb-ink-2">{view.deadline.message}</span> : null}
             <span className="ml-auto font-bold underline underline-offset-2">詳細</span>
+            <span className="flex basis-full flex-wrap items-center gap-x-2 gap-y-0.5">
+              <ReportStatusBadge status={view.status} bare />
+              {view.deadline.message ? <span className="min-w-0 flex-1 text-sm leading-snug text-sb-ink-2">{view.deadline.message}</span> : null}
+            </span>
           </summary>
           <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
             <ReportBox report={view.requirement} />
