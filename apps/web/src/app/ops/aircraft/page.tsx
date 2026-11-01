@@ -41,7 +41,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
       >
         {manager ? null : <Note>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
         {/* 機体の DIPS への登録は利用者本人が行う（Sprint 18-3） */}
-        <p className="text-[13px] leading-relaxed text-sb-ink-3" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
+        <p className="text-base leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />

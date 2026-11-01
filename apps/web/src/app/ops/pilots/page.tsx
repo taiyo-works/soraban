@@ -49,7 +49,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
             : "全桁は、自分に結び付いた操縦者の詳細画面でだけ確認できます。登録・取消は運航管理者だけが行えます。"}
         </Note>
         {/* 操縦者の DIPS への登録は利用者本人が行う（Sprint 18-3） */}
-        <p className="text-[13px] leading-relaxed text-sb-ink-3" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
+        <p className="text-base leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/pilots" includeVoided={includeVoided} />

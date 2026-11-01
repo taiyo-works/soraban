@@ -215,7 +215,7 @@ export default function Home() {
             <h2 id="disclaimer-heading" className="text-sm font-bold text-sb-ink">
               免責事項
             </h2>
-            <p className="max-w-3xl text-[13px] leading-[1.9] text-sb-ink-2">
+            <p className="max-w-3xl text-sm leading-[1.9] text-sb-ink-2">
               {DISCLAIMER_JUDGEMENT}緊急用務空域等の動的情報は反映していません。公式の情報：{" "}
               <a
                 href="https://www.dips.mlit.go.jp/portal/"
@@ -228,7 +228,7 @@ export default function Home() {
               。自治体の条例データの一部は手作業で収録しており、各データに確認日と確からしさ（低・中・高）を付けています。
             </p>
           </div>
-          <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-xs text-sb-ink-3">
+          <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-sm text-sb-ink-3">
             <p className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
             {/* 提供元の 6 項目（Sprint 18-3）と境界の文。値は lib/provider-info.ts・lib/boundary.ts の定数から。 */}
             <ProviderInfo testId="site-provider" className="max-w-3xl" compact />

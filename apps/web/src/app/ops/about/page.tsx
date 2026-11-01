@@ -44,7 +44,7 @@ export default async function OpsAboutPage() {
           </p>
         </div>
       </Section>
-      <p data-testid="about-version" className="text-sm text-sb-ink-3">
+      <p data-testid="about-version" className="text-base text-sb-ink-3">
         判定の版：<span className="sb-num">{ENGINE_VERSION}</span>
       </p>
     </main>

@@ -89,6 +89,12 @@ for (const vp of [
       expect(near).not.toMatch(/平日|土日|祝日|曜日/);
       // ロゴ画像を使っていない（U2：使用ルールが未確認）
       expect(await page.locator("img[src*='futuretec'], img[src*='logo']").count()).toBe(0);
+      // 字の大きさ：フッターの提供元・境界の文・© 行は 14px 以上（不変条件 6。16px にしない理由は sprint-18.md §12.3）
+      for (const sel of ['[data-testid="site-provider"] dd', '[data-testid="site-provider"] dt', '[data-testid="site-boundary"]', "footer p:first-child"]) {
+        const sizes = await page.locator(sel).evaluateAll((els) => els.map((el) => parseFloat(getComputedStyle(el).fontSize)));
+        expect(sizes.length, sel).toBeGreaterThan(0);
+        for (const sz of sizes) expect(sz, sel).toBeGreaterThanOrEqual(14);
+      }
       await noHorizontalScroll(page, `${vp.width}`);
     });
   });

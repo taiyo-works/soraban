@@ -42,7 +42,7 @@ export default async function InspectionNewPage({
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
         {/* 点検の免責（Sprint 18-3）。入力の先頭 */}
-        <p className="text-xs leading-relaxed text-sb-ink-3" data-testid="inspection-disclaimer">{DISCLAIMER_INSPECTION}</p>
+        <p className="text-base leading-relaxed text-sb-ink" data-testid="inspection-disclaimer">{DISCLAIMER_INSPECTION}</p>
       </PageHeader>
       <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} {...(planId ? { planId } : {})} {...(flightTakeoffAt ? { flightTakeoffAt } : {})} />
     </main>

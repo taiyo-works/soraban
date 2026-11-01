@@ -2,6 +2,7 @@ import { expect, request as pwRequest, test, type APIRequestContext, type Locato
 import { BOUNDARY_FULL, BOUNDARY_REGISTRATION } from "../../apps/web/src/lib/boundary";
 import { DISCLAIMER_INSPECTION, DISCLAIMER_JUDGEMENT, DISCLAIMER_RECORD } from "../../apps/web/src/lib/disclaimers";
 import { PROVIDER } from "../../apps/web/src/lib/provider-info";
+import { collectTextSamples } from "../field-checks";
 import { openUserMenu } from "../ops-menu";
 
 // Sprint 18-3 契約（docs/sprints/sprint-18.md §7.3）の E2E-DB：このアプリについて（3-5）、境界の 1 行（3-6）、点検の免責（3-7）、提供元の表記（3-2）。
@@ -114,6 +115,7 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
     for (const path of ["/ops/aircraft", "/ops/pilots"]) {
       await page.goto(path);
       await expect(page.getByTestId("boundary-registration")).toHaveText(BOUNDARY_REGISTRATION);
+      expect(await page.getByTestId("boundary-registration").evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), path).toBeGreaterThanOrEqual(16);
       await noHorizontalScroll(page, path);
     }
     const m = await apiAs(seeded("a-manager"));
@@ -130,6 +132,7 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
     await page.goto(`/ops/plans/${plan.id}/report`);
     await expect(page.getByTestId("report-screen")).toBeVisible();
     await expect(page.getByTestId("boundary-registration")).toHaveText(BOUNDARY_REGISTRATION);
+    expect(await page.getByTestId("boundary-registration").evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), "通報の作業台").toBeGreaterThanOrEqual(16);
     // 主画面には足さない
     await page.goto(`/ops/plans/${plan.id}`);
     await expect(page.locator('[data-testid="plan-tabs"]:visible').first()).toBeVisible();
@@ -151,6 +154,11 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
       expect(dy, who).toBeLessThan(fy);
       // 第一画面（375×812）に入る
       expect(dy + (await d.boundingBox())!.height, who).toBeLessThan(812);
+      // 字の大きさ 16px 以上・通常の文字色（コントラスト 4.5:1 以上）
+      expect(await d.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), who).toBeGreaterThanOrEqual(16);
+      const samples = await collectTextSamples(page, '[data-testid="inspection-disclaimer"]');
+      expect(samples.length).toBeGreaterThan(0);
+      for (const smp of samples) expect(smp.ratio, `${who}: コントラスト`).toBeGreaterThanOrEqual(4.5);
       await noHorizontalScroll(page, `/ops/inspections/new ${who}`);
     }
   });
