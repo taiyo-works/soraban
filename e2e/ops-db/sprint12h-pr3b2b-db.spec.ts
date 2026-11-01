@@ -35,6 +35,9 @@ const SCREENS: readonly Screen[] = [
   { path: "/ops/incidents/new", ready: "incident-new-page", field: false },
   { path: "/ops/incidents/{incidentId}", ready: "incident-detail-page", field: false },
   { path: "/ops/plans/{planId}/report", ready: "report-screen", field: false },
+  { path: "/ops/plans/{planId}/overview", ready: "plan-tabs", field: false },
+  { path: "/ops/plans/{planId}/judgement", ready: "plan-tabs", field: false },
+  { path: "/ops/plans/{planId}/journal", ready: "plan-tabs", field: false },
   { path: "/ops/plans/{planId}/snapshots", ready: "snapshot-list", field: false },
   { path: "/ops/plans/{planId}/snapshots/{snapshotId}", ready: "basis-facts", field: false },
 ];

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { cx } from "@/components/ui/cx";
 import type { PlanDto } from "@/server/ops/plans";
+import { HashScroll } from "./hash-scroll";
 import { PlanStateBadge, StaleBadge } from "./plan-ui";
 import { Note, PageHeader } from "./ui";
 
@@ -71,6 +72,7 @@ export function PlanFrame({
         {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
         <PlanTabs planId={plan.id} {...(current ? { current } : {})} />
       </div>
+      <HashScroll />
       {children}
     </main>
   );

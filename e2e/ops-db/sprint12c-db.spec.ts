@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { gotoPlan } from "./plan-screen";
 import { expandNextActions, openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 
@@ -914,7 +915,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(page.getByTestId("field-flight-row")).toHaveAttribute("data-phase", "journaled");
     await expect(page.getByTestId("field-flight-record-link")).toHaveAttribute("href", `/ops/flights/${flightId}`);
     await expect(page.getByTestId("field-journal-link")).toHaveCount(0);
-    await page.goto(`/ops/plans/${plan.id}/journal`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
     await expect(page.getByTestId("plan-flight-row")).toHaveCount(1);
 
     // 飛行記録を取り消すと、その飛行は日誌待ちに戻る

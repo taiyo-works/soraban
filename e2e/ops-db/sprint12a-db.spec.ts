@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { gotoPlan, onAllPlanScreens } from "./plan-screen";
 
 // Sprint 12a の E2E-DB（契約 2・9・11・13・14・16・17・18・20 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバー（e2e/mock-gsi-server.mjs）を与えた next start に対して実行する。
@@ -148,6 +149,7 @@ const tapAndWait = async (page: Page, link: Locator, url: RegExp): Promise<void>
 
 
 const tapSize = async (page: Page, testId: string) => {
+  await expect(page.getByTestId(testId).first()).toBeVisible();
   const box = await page.getByTestId(testId).first().boundingBox();
   expect(box, testId).not.toBeNull();
   expect(box!.height, `${testId} の高さ`).toBeGreaterThanOrEqual(43.5);
@@ -257,12 +259,12 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await expect(page.getByTestId("plan-report-reasons")).toContainText("夜間飛行に当たるため");
     await expect(page.getByTestId("plan-dips-notice").first()).toContainText(DIPS_NOT_SENT);
     await expect(page.getByTestId("plan-dips-notice").first()).toContainText(OFFICIAL);
-    await expectNoForbiddenWords(page, "計画の詳細");
+    await onAllPlanScreens(page, planId, (l) => expectNoForbiddenWords(page, `計画の詳細（${l}）`));
     await noHorizontalScroll(page, "計画の詳細");
     // 下書き → 確認を依頼（Sprint 17-1：確認は /overview、判定の根拠への入口は /judgement に移った）
-    await page.goto(`/ops/plans/${planId}/judgement`);
+    await gotoPlan(page, `/ops/plans/${planId}/judgement`);
     await tapSize(page, "plan-basis-link");
-    await page.goto(`/ops/plans/${planId}/overview`);
+    await gotoPlan(page, `/ops/plans/${planId}/overview`);
     await expect(page.getByTestId("plan-confirmation-status")).toContainText("下書き");
     for (const id of ["plan-request-confirmation", "plan-edit-link"]) await tapSize(page, id);
     await page.getByTestId("plan-request-confirmation").click();
@@ -289,16 +291,16 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await page.getByTestId("plan-submit").click();
     await page.waitForURL(new RegExp(`/ops/plans/${planId}$`));
     await afterFlash(page, "訂正しました");
-    await page.goto(`/ops/plans/${planId}/overview`);
+    await gotoPlan(page, `/ops/plans/${planId}/overview`);
     const status = page.getByTestId("plan-confirmation-status");
     await expect(status).toContainText("前の版への確認（再確認が必要）");
     await expect(status).not.toContainText("確認済み");
     await expect(page.getByTestId("plan-self-confirmation")).toHaveCount(0);
     // メモの訂正では、判定のスナップショットは増えない
-    await page.goto(`/ops/plans/${planId}/judgement`);
+    await gotoPlan(page, `/ops/plans/${planId}/judgement`);
     await expect(page.getByTestId("plan-snapshot-seq")).toHaveText("1");
     // 再確認できる（確認の履歴は 2 件になる）
-    await page.goto(`/ops/plans/${planId}/overview`);
+    await gotoPlan(page, `/ops/plans/${planId}/overview`);
     await page.getByTestId("plan-confirm-approve").click();
     await expect(page.getByTestId("plan-confirmation-row")).toHaveCount(2);
     await afterFlash(page, "確認を記録しました");
@@ -337,7 +339,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     ];
     for (const c of cases) {
       const plan = await createPlan(manager, c.body);
-      await page.goto(`/ops/plans/${plan.id}`);
+      await gotoPlan(page, `/ops/plans/${plan.id}`);
       await expect(page.getByTestId("plan-report-label"), c.name).toHaveText(c.label);
       await expect(page.getByTestId("plan-report-reasons"), c.name).toContainText(c.reason);
       const text = await bodyText(page);
@@ -369,7 +371,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await login(page, seeded("a-manager"));
     const aircraft = await createAircraft(manager, { maxTakeoffWeightKg: 0.9 });
     const plan = await createPlan(manager, planBody(aircraft.id, selfPilot));
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(page.getByTestId("plan-stale")).toHaveCount(0);
     await expect(page.getByTestId("plan-rejudge")).toBeVisible();
 
@@ -378,7 +380,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     });
     expect(patch.status(), await patch.text()).toBe(200);
 
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(page.getByTestId("plan-stale").first()).toContainText("判定が古い");
     await expect(page.getByTestId("plan-stale-reasons")).toContainText("機体の重量を含む");
     await noHorizontalScroll(page, "判定が古い");
@@ -409,7 +411,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
       manager,
       planBody(aircraft.id, otherPilot, { latitude: DID_AIRPORT_SPOT.lat, longitude: DID_AIRPORT_SPOT.lng, placeName: "境港の試験地点", purpose: "河川の点検" }),
     );
-    await page.goto(`/ops/plans/${plan.id}/journal`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
     await expect(page.getByTestId("plan-flights-empty")).toBeVisible();
     await tapSize(page, "plan-make-flight");
     await tapAndWait(page, page.getByTestId("plan-make-flight"), /\/ops\/flights\/new\?planId=/);
@@ -443,7 +445,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await expect(page.getByTestId("flight-basis-link")).toBeVisible();
 
     // 計画の画面にその記録が並ぶ
-    await page.goto(`/ops/plans/${plan.id}/journal`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
     await expect(page.getByTestId("plan-flight-row")).toHaveCount(1);
 
     // 日誌の一覧 → 詳細（1 タップ）→ 判定の根拠（2 タップ）。証跡 ID・エンジンの版・データセットの版と確認日・手続きデータの版が見える
@@ -686,10 +688,10 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await expect(page.getByTestId("plan-filter-pending")).toHaveCount(0);
     await page.goto("/ops/plans/new");
     await expect(page.getByRole("heading", { name: "権限がありません" })).toBeVisible();
-    await page.goto(`/ops/plans/${mine.id}/overview`);
+    await gotoPlan(page, `/ops/plans/${mine.id}/overview`);
     await expect(page.getByTestId("plan-edit-link")).toHaveCount(0);
     await expect(page.getByTestId("plan-confirm-panel")).toHaveCount(0);
-    await page.goto(`/ops/plans/${mine.id}/journal`);
+    await gotoPlan(page, `/ops/plans/${mine.id}/journal`);
     await expect(page.getByTestId("plan-make-flight")).toHaveCount(0);
     await page.goto(`/ops/plans/${mine.id}/snapshots/${mine.currentSnapshotId}`);
     await expect(page.getByTestId("basis-check-evidence")).toBeVisible();
@@ -699,10 +701,10 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     const pp = await pilotCtx.newPage();
     await noBrowserCache(pp);
     await signIn(pp.request, seeded("a-pilot"));
-    await pp.goto(`/ops/plans/${mine.id}/overview`);
+    await gotoPlan(pp, `/ops/plans/${mine.id}/overview`);
     await expect(pp.getByTestId("plan-edit-link")).toBeVisible();
     await expect(pp.getByTestId("plan-confirm-panel")).toHaveCount(0);
-    await pp.goto(`/ops/plans/${others.id}/overview`);
+    await gotoPlan(pp, `/ops/plans/${others.id}/overview`);
     await expect(pp.getByTestId("plan-edit-link")).toHaveCount(0);
     await pp.goto(`/ops/plans/${others.id}/edit`);
     await expect(pp.getByRole("heading", { name: "権限がありません" })).toBeVisible();
@@ -765,12 +767,12 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
       await noHorizontalScroll(page, label);
       await expectNoForbiddenWords(page, label);
     }
-    await page.goto(`/ops/plans/${plan.id}/overview`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
     // 状態・通報・結論は文字で示す
     await expect(page.getByTestId("plan-confirmation-status").getByTestId("plan-state")).toContainText("下書き");
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     await expect(page.getByTestId("plan-report-label")).toContainText("通報：要");
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(page.getByTestId("verdict-level")).not.toHaveText("");
     await page.goto("/ops/plans/new");
     expect(await bodyText(page)).toContain(DISCLAIMER);

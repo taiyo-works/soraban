@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { gotoPlan, planTab, planTabs } from "./plan-screen";
 
 // Sprint 17-1 の E2E-DB（docs/sprints/sprint-17.md §10 の S-1〜S-3・S-5・S-6・J-1〜J-4 の構造の部分）。
 // 画面の分離：通報の主画面（/ops/plans/[id]）・通報の作業台（/report）・計画（/overview）・日誌（/journal）・判定（/judgement）。
@@ -45,6 +46,22 @@ const tapAndWait = async (page: Page, link: Locator, url: RegExp): Promise<void>
 const afterFlash = async (page: Page, text: string | RegExp) => {
   await expect(page.getByTestId("ops-change-notice").filter({ hasText: text })).toBeVisible();
   await page.waitForFunction(() => document.activeElement !== null && document.activeElement !== document.body);
+};
+
+/** 対象の要素の上端がビューポートの中にある（スクロールされている）。URL や要素の存在だけでは足りない。 */
+const expectInViewport = async (page: Page, id: string, label: string) => {
+  const el = page.locator(`#${id}:visible`).first();
+  await expect(el, `${label}: #${id} が表示される`).toBeVisible();
+  const vh = page.viewportSize()!.height;
+  await expect
+    .poll(
+      async () => {
+        const box = await el.boundingBox();
+        return box !== null && box.y >= 0 && box.y < vh - 48;
+      },
+      { message: `${label}: #${id} がビューポートの中にある`, timeout: 15_000 },
+    )
+    .toBe(true);
 };
 
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
@@ -117,13 +134,13 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     ];
     for (const [url, current] of screens) {
       await page.goto(url);
-      const tabs = page.getByTestId("plan-tabs");
+      const tabs = planTabs(page);
       await expect(tabs, url).toBeVisible();
       await expect(tabs).toHaveAttribute("aria-label", "計画の画面");
       await expect(tabs.locator('[aria-current="page"]'), url).toHaveCount(current ? 1 : 0);
-      if (current) await expect(page.getByTestId(`plan-tab-${current}`), url).toHaveAttribute("aria-current", "page");
+      if (current) await expect(planTab(page, current), url).toHaveAttribute("aria-current", "page");
       for (const key of ["overview", "report", "field", "journal"]) {
-        const box = (await page.getByTestId(`plan-tab-${key}`).boundingBox())!;
+        const box = (await planTab(page, key).boundingBox())!;
         expect(box.height, `${url} ${key}`).toBeGreaterThanOrEqual(44);
         expect(box.width, `${url} ${key}`).toBeGreaterThanOrEqual(80);
       }
@@ -180,30 +197,33 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     await expect(page.getByRole("link", { name: /通報の状況/ })).toHaveAttribute("href", base);
   });
 
-  test("S-6：旧いアンカー 8 つ（#sec-verdict ほか）で通報の主画面を開くと、新しい場所へ移る", async ({ page }) => {
+  test("S-6：旧いアンカー 8 つ（#sec-verdict ほか）で通報の主画面を開くと、新しい場所へ移り、その節までスクロールされる（ビューポート内）", async ({ page }) => {
     await login(page);
     const plan = await activate(await createPlan());
-    const base = `/ops/plans/${plan.id}`;
-    const moves: [string, string][] = [
-      ["#sec-verdict", `${base}/judgement`],
-      ["#permits", `${base}/judgement`],
-      ["#rejudge", `${base}/judgement`],
-      ["#sec-confirm", `${base}/overview`],
-      ["#request-confirmation", `${base}/overview`],
-      ["#confirm", `${base}/overview`],
-      ["#procedures", `${base}/overview`],
+    const draft = await createPlan();
+    const moves: [string, string, string][] = [
+      ["#sec-verdict", "judgement", plan.id],
+      ["#permits", "judgement", plan.id],
+      ["#rejudge", "judgement", plan.id],
+      ["#sec-confirm", "overview", plan.id],
+      ["#request-confirmation", "overview", draft.id],
+      ["#confirm", "overview", plan.id],
+      ["#procedures", "overview", plan.id],
     ];
-    for (const [hash, to] of moves) {
+    for (const [hash, screen, id] of moves) {
+      const base = `/ops/plans/${id}`;
       await page.goto(`${base}${hash}`);
-      await page.waitForURL((u) => u.pathname === to, { timeout: 15_000 });
+      await page.waitForURL((u) => u.pathname === `${base}/${screen}`, { timeout: 15_000 });
       expect(new URL(page.url()).hash, hash).toBe(hash);
+      await expectInViewport(page, hash.slice(1), hash);
     }
     // #sec-report は通報の主画面そのもの（移さない）
+    const base = `/ops/plans/${plan.id}`;
     await page.goto(`${base}#sec-report`);
     await expect(page.getByTestId("plan-report-box")).toBeVisible();
     await page.waitForLoadState("networkidle").catch(() => undefined);
     expect(new URL(page.url()).pathname).toBe(base);
-    await expect(page.locator("#sec-report")).toHaveCount(1);
+    await expectInViewport(page, "sec-report", "#sec-report");
   });
 
   test("S-5・次にやることの行き先：確認・再判定・手続きは新しい画面へ。保存直後と一覧の行は通報の主画面", async ({ page }) => {
@@ -223,6 +243,11 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     const confirmLink = page.locator('[data-testid="next-action"][data-action-id="confirm"]').getByTestId("next-action-link");
     await tapAndWait(page, confirmLink, /\/overview#confirm$/);
     await expect(page.getByTestId("plan-confirm-panel")).toBeVisible();
+    await expectInViewport(page, "confirm", "次にやること（確認）");
+    // 次にやること（手続き）→ /overview#procedures もビューポート内
+    await gotoPlan(page, base);
+    await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="apply_permit"]').getByTestId("next-action-link"), /\/overview#procedures$/);
+    await expectInViewport(page, "procedures", "次にやること（手続き）");
   });
 
   test("J-2（17-1 の範囲）：判定の画面を一度も開かずに、確認の依頼 → 確認 → 通報の記録（新規）→ 変更 → 取消が、主画面・/report・/overview だけで完了する", async ({ page }) => {
@@ -292,7 +317,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     const plan = await activate(await createPlan({ aircraftId: aircraft.id }));
     const patch = await manager.patch(`/api/ops/aircraft/${aircraft.id}`, { data: { maxTakeoffWeightKg: 1.5, expectedVersion: aircraft.version, reason: "重量の訂正" } });
     expect(patch.status(), await patch.text()).toBe(200);
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     await expect(page.getByTestId("plan-stale").first()).toContainText("判定が古い");
     await expect(page.getByTestId("plan-judge-line")).toBeVisible();
     await expect(page.getByTestId("plan-report-label")).toContainText("通報：");
@@ -300,6 +325,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     const rejudge = page.locator('[data-testid="next-action"][data-action-id="rejudge"]').getByTestId("next-action-link");
     await tapAndWait(page, rejudge, /\/judgement#rejudge$/);
     await expect(page.getByTestId("plan-rejudge")).toBeVisible();
+    await expectInViewport(page, "rejudge", "次にやること（再判定）");
     await page.goto(`/ops/plans/${plan.id}/report`);
     await expect(page.getByTestId("report-record-form")).toBeVisible();
     await expect(page.getByTestId("record-submit")).toBeEnabled();

@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { gotoPlan, onAllPlanScreens } from "./plan-screen";
 import { expectNoHorizontalScroll } from "../field-checks";
 
 // Sprint 12d の E2E-DB（契約 12〜15 の画面・通しの部分。契約 16 の通報内容・現場モードは別の describe）。
@@ -359,7 +360,7 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
     // 適用：項目の判定は「手続き済み（条件付き）」。エンジンの注記は登録の文に置き換わる
-    await page.goto(`/ops/plans/${withNumber.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${withNumber.id}/judgement`);
     const sec = tid(page, "plan-permit-list");
     await expect(sec).toBeVisible();
     await expect(planRow(page, SEED.blanket)).toHaveAttribute("data-status", "applied");
@@ -375,13 +376,13 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await expect(tid(page, "plan-permit-format-note")).toContainText("※要確認");
     await expect(tid(page, "plan-permit-applied-note")).toContainText("申請済み");
     await expectNoHorizontalScroll(page, "計画の詳細（許可・承認の照合）");
-    await expectNoForbiddenWords(page, "計画の詳細（適用）");
+    await onAllPlanScreens(page, withNumber.id, (l) => expectNoForbiddenWords(page, `計画の詳細（適用）${l}`));
 
     // 番号なし・未登録：要手続きのまま
-    await page.goto(`/ops/plans/${withoutNumber.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${withoutNumber.id}/judgement`);
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
     await expect(tid(page, "plan-permit-empty")).toBeVisible();
-    await page.goto(`/ops/plans/${unknown.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${unknown.id}/judgement`);
     await expect(planRow(page, "NO-SUCH-NUMBER-9")).toHaveAttribute("data-status", "unregistered");
     await expect(planRow(page, "NO-SUCH-NUMBER-9").getByTestId("plan-permit-status")).toContainText("未登録");
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
@@ -420,21 +421,21 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
     for (const c of cases) {
-      await page.goto(`/ops/plans/${plans[c.label]!.id}/judgement`);
+      await gotoPlan(page, `/ops/plans/${plans[c.label]!.id}/judgement`);
       await expect(planRow(page, c.number)).toHaveAttribute("data-status", "not_applied");
       await expect(planRow(page, c.number).getByTestId("plan-permit-status")).toHaveText("× 適用しない");
       await expect(planRow(page, c.number).locator(`[data-reason="${c.reason}"]`)).toBeVisible();
       await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
       await expect(page.locator('[data-testid="verdict-done-item"]')).toHaveCount(0);
-      await expectNoForbiddenWords(page, `計画（${c.label}）`);
+      await onAllPlanScreens(page, plans[c.label]!.id, (l) => expectNoForbiddenWords(page, `計画（${c.label}）${l}`));
     }
-    await page.goto(`/ops/plans/${plans["indiv"]!.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plans["indiv"]!.id}/judgement`);
     await expect(planRow(page, SEED.individual).locator('[data-reason="aircraft_out_of_scope"]')).toBeVisible();
     await expect(planRow(page, SEED.individual).locator('[data-reason="place_extent_unknown"]')).toBeVisible();
     await expect(itemVerdict(page, "method_bvlos")).toHaveAttribute("data-verdict", "needs_procedure");
 
     // 空港等周辺の個別許可：参考の表示と根拠まで。判定の段は変えない
-    await page.goto(`/ops/plans/${plans["airport"]!.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plans["airport"]!.id}/judgement`);
     await expect(planRow(page, SEED.airport)).toHaveAttribute("data-status", "reference");
     await expect(planRow(page, SEED.airport).getByTestId("plan-permit-status")).toContainText("◇ 参考");
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
@@ -456,11 +457,11 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     expect((await getPlanPermits(manager, plan.id)).permits.numbers[0]!.status).toBe("applied");
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(tid(page, "verdict-no-fly")).toBeVisible();
     await expect(page.locator('[data-testid="verdict-no-fly-item"][data-item-id="airspace_emergency"]')).toBeVisible();
     await expect(tid(page, "verdict-level")).toHaveText(/飛行不可/);
-    await expectNoForbiddenWords(page, "計画（緊急用務空域）");
+    await onAllPlanScreens(page, plan.id, (l) => expectNoForbiddenWords(page, `計画（緊急用務空域）${l}`));
     await manager.dispose();
   });
 
@@ -498,11 +499,11 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await tid(page, "plan-reason").fill("許可の番号を入れた");
     await tid(page, "plan-submit").click();
     await page.waitForURL(new RegExp(`/ops/plans/${plan.id}$`));
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(planRow(page, permit.permitNumber)).toHaveAttribute("data-status", "applied");
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "procedure_done");
     // 同意・通報などの手入力は従来どおり残る
-    await page.goto(`/ops/plans/${plan.id}/overview`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
     await expect(tid(page, "plan-overview")).toContainText("公園管理者");
     expect((await getPlanPermits(manager, plan.id)).permits.grantedValues).toContain("mlit:night");
     await manager.dispose();
@@ -555,16 +556,16 @@ test.describe("Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14）", () 
     const upd = await manager.patch(`/api/ops/permits/${permit.id}`, { data: { expectedVersion: 1, reason: "期間を短縮", validTo: "2027-06-30" } });
     expect(upd.status(), await upd.text()).toBe(200);
     expect(((await upd.json()) as { affectsPlans: { count: number; note: string | null } }).affectsPlans.count).toBe(1);
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(tid(page, "plan-stale-box")).toBeVisible();
     await expect(tid(page, "plan-stale-reasons")).toContainText("許可・承認の登録");
     await expect(tid(page, "plan-permit-stale")).toBeVisible();
     // 古い判定のうちは、登録の文への置き換えを出さない（保存した判定の根拠と今の登録が一致しないため）
     await expect(page.locator('[data-testid="verdict-done-condition"][data-permit-registry="true"]')).toHaveCount(0);
     // Sprint 17-1：次にやること（通報の主画面）と、再判定のボタン（判定の画面）に分かれた
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     await expect(tid(page, "next-actions")).toContainText("判定をやり直す");
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
 
     // 再判定 → 新しいスナップショットが版 2 を根拠にする。古いスナップショットは版 1 を指したまま
     await page.waitForLoadState("networkidle").catch(() => undefined);
@@ -574,7 +575,7 @@ test.describe("Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14）", () 
     await page.goto(`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`);
     await expect(tid(page, "basis-permit-version")).toHaveText("版 1");
     await expect(tid(page, "basis-permit-hash")).toContainText("✓ 版のハッシュが一致します");
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await tapAndWait(page, tid(page, "plan-basis-link"), new RegExp(`/ops/plans/${plan.id}/snapshots/[0-9a-f-]{36}$`));
     expect(page.url()).not.toBe(snap1);
     await expect(tid(page, "basis-permit-version")).toHaveText("版 2");
@@ -603,10 +604,10 @@ test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契�
 
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     // 申請済みは申告で、判定は要手続きのまま。「許可・承認を申請する」は消え、「結果を登録する」が出る
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
     const action = page.locator('[data-testid="next-action"][data-action-id="register_permit"]');
     await expect(action).toHaveCount(1);
@@ -616,7 +617,7 @@ test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契�
 
     // 操縦者（計画の本人）は押せず、運航管理者に依頼する旨が出る
     await signIn(page.request, seeded("a-pilot"));
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     const pilotAction = page.locator('[data-testid="next-action"][data-action-id="register_permit"]');
     await expect(pilotAction).toHaveCount(1);
     await expect(pilotAction.getByTestId("next-action-cannot")).toContainText("運航管理者に依頼してください");
@@ -626,15 +627,15 @@ test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契�
     const upd = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: plan.version, reason: "許可が下りたので番号を入れた", permitNumbers: permit.permitNumber } });
     expect(upd.status(), await upd.text()).toBe(200);
     await signIn(page.request, seeded("a-manager"));
-    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/judgement`);
     await expect(planRow(page, permit.permitNumber)).toHaveAttribute("data-status", "applied");
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "procedure_done");
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="register_permit"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
-    await page.goto(`/ops/plans/${plan.id}/overview`);
+    await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
     await expect(tid(page, "procedure-history-dips_permit")).toBeVisible();
-    await expectNoForbiddenWords(page, "計画（登録後）");
+    await onAllPlanScreens(page, plan.id, (l) => expectNoForbiddenWords(page, `計画（登録後）${l}`));
     await manager.dispose();
   });
 });
