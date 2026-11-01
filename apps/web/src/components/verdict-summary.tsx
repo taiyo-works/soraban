@@ -28,6 +28,7 @@ import {
   VERDICT_SECTION_TITLE,
   VERDICT_TONE,
 } from "@/lib/verdict-display";
+import { BOUNDARY_SHORT } from "@/lib/boundary";
 import { TierGauge } from "./verdict-mark";
 import { PillButton, VERDICT_KEY, VerdictBig, VerdictSign } from "./ui/sb-parts";
 
@@ -67,9 +68,8 @@ type Props = {
   readonly evidence?: { readonly checkedDate: string | undefined; readonly sourced: number };
 };
 
-/** 手続きの責任の線（北極星：本人名義・本人提出）。代行・代理申請と読める語は使わない。 */
-export const RESPONSIBILITY_NOTE =
-  "手続きは、ご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。";
+/** 手続きの責任の線（北極星：本人名義・本人提出）。境界の文（lib/boundary.ts）をそのまま使う。 */
+export const RESPONSIBILITY_NOTE = BOUNDARY_SHORT;
 /** 「手続き済み」は記録の表示であって、そらばんが手続きをしたのではない。 */
 export const DONE_RECORD_NOTE =
   "「手続き済み」は、ご本人が自分で手続きを済ませた記録の表示です。そらばんが手続きを行ったわけではありません。";

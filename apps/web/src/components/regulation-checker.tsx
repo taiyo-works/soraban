@@ -20,7 +20,6 @@ import {
   formatDidDetermination,
   mergeAirspaceFlags,
   SPECIFIC_FLIGHT_FLAG_LABEL,
-  DIAGNOSIS_DISCLAIMER,
   type DiagnosisCategory,
   type FlightContext,
   type ManualChoice,
@@ -39,6 +38,7 @@ import {
 import { candidateToLocation, formatAccuracy, isLowAccuracy, type CurrentLocationCandidate } from "@/lib/current-location";
 import { checkLocation } from "@/lib/check";
 import { diagnoseLocation, type DiagnoseResponse } from "@/lib/diagnose";
+import { DISCLAIMER_JUDGEMENT } from "@/lib/disclaimers";
 import {
   buildRestorePlan,
   clearHistory,
@@ -261,9 +261,14 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
 type RegulationCheckerProps = {
   /** 住所検索の同梱索引（アドレス・ベース・レジストリ）にデータがあるか。空なら ABR の出典と見出しを出さない。 */
   readonly addressIndexAvailable?: boolean;
+  /**
+   * 申請支援（手続き診断のパネル・書類 PDF・プリフィル・マニュアル骨子・申請の期限のカレンダー）を描くか。
+   * フラグ APPLICATION_SUPPORT_ENABLED（lib/boundary.ts。既定・本番は無効）。page.tsx がビルド時の値を渡す。既定は偽。
+   */
+  readonly applicationSupport?: boolean;
 };
 
-export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
+export function RegulationChecker({ addressIndexAvailable = false, applicationSupport = false }: RegulationCheckerProps = {}) {
   // 運航管理が有効でログイン済みのときだけ「この判定で飛行計画を作る」を出す（Sprint 12a J。無効のときは何も出さず通信もしない）。
   const opsEntryAvailable = useOpsEntryAvailable();
   const [lat, setLat] = useState<string>(String(INITIAL_LOCATION.lat));
@@ -816,7 +821,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       if (isAbortError(err) || seq !== diagSeqRef.current) return;
       setDiagPending(false);
       setDiagPendingRunId(null);
-      setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
+      setDiagnoseError(`飛行の方法を含む判定に失敗しました: ${(err as Error).message}`);
       // 履歴に前の診断の判定や地点だけの判定を残さない（判定未確定。差し戻し 2 回目）。
       clearHistoryDiagnosisVerdict(runId);
     }
@@ -1314,13 +1319,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               {shouldWarnConfidence(result.overallConfidence) ? (
                 <div className="sb-note-card is-warn">
                   <span className="font-bold text-sb-ink">確からしさ {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨</span>{" "}
-                  この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。引受・許可申請の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
+                  この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。飛行の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
                 </div>
               ) : null}
 
               {/* disclaimer */}
               <div className="sb-note-card border-l-4 border-sb-ink !text-sb-ink-2">
-                <span className="font-bold text-sb-ink">免責</span> {result.disclaimer}
+                <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
               </div>
 
               {/* per-regulation cards */}
@@ -1548,8 +1553,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             ここではユーザーにしか分からない「飛行方法」と「立入管理措置／第三者上空」「飛行予定日」を集める。 */}
         <fieldset className="flex flex-col gap-3 border-t border-sb-rule pt-5">
           <legend className="sb-eyebrow">
-            飛行方法（申請支援）
-            <span className="ml-2 font-normal text-sb-ink-3">（該当する方法を選ぶと必要手続きを診断）</span>
+            飛行の方法
+            <span className="ml-2 font-normal text-sb-ink-3">（選ぶと判定に反映します）</span>
           </legend>
 
           {/* 空域フラグ（DID・空港等周辺・緊急用務空域）。判定由来の red は自動プリチェック。
@@ -1626,17 +1631,12 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* 飛行予定日 — 提出期限カレンダーの「起算日」。ここから各手続きの期限を逆算する。 */}
+            {/* 飛行予定日 — 判定の条件に使う（申請支援が有効のときは、期限カレンダーの起算日にもなる）。 */}
             <label className="flex flex-col gap-1.5">
-              <span className="sb-field-text flex items-center gap-2">
-                飛行予定日
-                <span aria-hidden className="sb-tag !min-h-6 !px-2 ">
-                  起算日
-                </span>
-              </span>
+              <span className="sb-field-text flex items-center gap-2">飛行予定日</span>
               <input type="date" value={plannedDate} onChange={(e) => setPlannedDate(e.target.value)} className={`${fieldClass} sb-num`} />
               <span className="text-xs leading-relaxed text-sb-ink-3">
-                提出期限の逆算に使用（飛行開始の 10 開庁日以上前。土日・国民の祝日を除いた具体的な期限日を算出）
+                飛行の予定日（判定の条件に使います）
               </span>
             </label>
 
@@ -1661,7 +1661,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 <option value="with">補助者あり</option>
                 <option value="without">補助者なし（より上位の運航要件）</option>
               </select>
-              <span className="text-xs leading-relaxed text-sb-ink-3">補助者の有無で運航条件が変わるため、プリフィル表に反映します</span>
+              <span className="text-xs leading-relaxed text-sb-ink-3">補助者の有無を判定の条件に使います</span>
             </label>
           ) : null}
 
@@ -1702,12 +1702,14 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             「本機能は補助であり最終確認は DIPS／航空局で」を画面に出しておく契約
             （sprint-4：免責を入力前・結果表示・チェックリスト・プリフィルの全画面状態に表示）。 */}
         <p className="sb-note-card border-l-4 border-sb-ink ">
-          <span className="font-bold text-sb-ink">免責</span> {DIAGNOSIS_DISCLAIMER}
+          <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
         </p>
       </section>
 
-      {/* ─── 申請支援 診断（必要手続きチェックリスト） ───────────────────────────────── */}
-      {diagnosis ? (
+      {/* ─── 申請支援 診断（必要手続きチェックリスト） ─────────────────────────────────
+          フラグ APPLICATION_SUPPORT_ENABLED が無効（既定・本番）のときは描かない。/api/diagnose の呼び出しは続ける
+          （4 段の結論はこの応答から作る）。止めたコードは消さない（Sprint 18 §4.5）。 */}
+      {applicationSupport && diagnosis ? (
         <div className="sb-area-wide">
           <DiagnosisPanel
             diagnosis={diagnosis}
@@ -1763,7 +1765,11 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     type="button"
                     onClick={() => restoreFromHistory(h)}
                     className="flex min-h-11 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
-                    title={`証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
+                    title={
+                      applicationSupport
+                        ? `証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`
+                        : `証跡 ${h.evidenceId} を復元して再判定`
+                    }
                   >
                     {vd.level ? (
                       <VerdictSign level={vd.level} />
@@ -1795,7 +1801,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                         {ds?.didStatus
                           ? ` · DID:${formatDidDetermination(ds.didStatus, ds.didDetail, { droneWeightG: h.ctx?.droneWeightG })}`
                           : ""}
-                        {procCount !== undefined
+                        {applicationSupport && procCount !== undefined
                           ? completedCount > 0
                             ? ` · 手続き${completedCount}/${procCount}`
                             : ` · 手続き${procCount}件`

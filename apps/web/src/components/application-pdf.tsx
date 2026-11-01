@@ -610,7 +610,7 @@ export const ApplicationPdfDocument = ({
 
         {/* ④ DIPS／DRS 入力プリフィル表 */}
         <Text style={styles.sectionTitle}>
-          DIPS／DRS 入力プリフィル（{diagnosis.prefill.length} 行）
+          DIPS／DRS 入力プリフィル（{(diagnosis.prefill ?? []).length} 行）
         </Text>
         <View style={styles.tableHead}>
           <MonoText style={[styles.th, styles.colSys]}>系統</MonoText>
@@ -618,7 +618,7 @@ export const ApplicationPdfDocument = ({
           <MonoText style={[styles.th, styles.colValue]}>値</MonoText>
           <MonoText style={[styles.th, styles.colSource]}>出所</MonoText>
         </View>
-        {diagnosis.prefill.map((f, i) => (
+        {(diagnosis.prefill ?? []).map((f, i) => (
           <View key={`${f.dipsFieldLabel}-${i}`} style={styles.tableRow} wrap={false}>
             <View style={styles.colSys}>
               <Text

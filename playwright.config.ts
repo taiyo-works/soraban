@@ -64,6 +64,9 @@ export default defineConfig({
         INDUSTRIAL_DATA_DIR: "",
         DATABASE_URL: "",
         GSI_REVERSE_GEOCODER_ENDPOINT: MOCK_REVERSE_GEOCODER,
+        // Sprint 18-1：申請支援は無効（既定・本番と同じ）。環境の持ち越しで揺れないよう明記する。
+        // 公開の `/` の値はビルドのときに固まる（lib/boundary.ts）ので、ここは /api/diagnose など実行時に読む側のため。
+        APPLICATION_SUPPORT_ENABLED: "",
       },
     },
     {
@@ -85,6 +88,8 @@ export default defineConfig({
         DATABASE_URL: "",
         // Sprint 12g：デザイン見本（/ops/design）を表示するのはこの 2 台目だけ（1 台目は無効＝404 の確認用）。静的なページで、他の設定に依らない。
         DESIGN_CATALOG: "1",
+        // Sprint 18-1：申請支援は無効（上と同じ）。
+        APPLICATION_SUPPORT_ENABLED: "",
       },
     },
   ],

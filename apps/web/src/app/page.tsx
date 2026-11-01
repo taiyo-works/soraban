@@ -10,6 +10,7 @@ import { Suspense } from "react";
 import { BrandDrone, HeroIllustration } from "@/components/hero-illustration";
 import { OpsHomeEntry } from "@/components/ops-home-entry";
 import { RegulationChecker } from "@/components/regulation-checker";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { Disclosure, SectionHead } from "@/components/ui/sb-parts";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -161,7 +162,11 @@ export default function Home() {
             title="地点を判定する"
             note="住所・座標・地図のクリックで地点を指定できます"
           />
-          <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
+          {/* 申請支援の診断パネル等は、フラグ APPLICATION_SUPPORT_ENABLED（既定・本番は無効）の裏。値はビルドのときに固まる（lib/boundary.ts）。 */}
+          <RegulationChecker
+            addressIndexAvailable={ADDRESS_INDEX_AVAILABLE}
+            applicationSupport={isApplicationSupportEnabled()}
+          />
         </section>
 
         {/* ============================ 収録範囲 ============================ */}
