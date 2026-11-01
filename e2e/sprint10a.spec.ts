@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { openDiagnosis } from "./field-checks";
+import { expectNoApplicationSupport } from "./field-checks";
 
 // Sprint 10a 契約（docs/sprints/sprint-10a.md）の E2E。公開面の整備（トップ画面・PDF の表示）。
 // 本番相当サーバー（baseURL）だけを使う。
@@ -162,22 +162,19 @@ test.describe("C. PDF", () => {
     // メタのラベルは字間を空けて組むため、抽出テキストでは「判 定 の 版」になる。字形が無ければ抽出されない
     expect(t).toMatch(/判\s*定\s*の\s*版/);
     expect(t).toContain("免責");
+    // 証跡 ID は日本語のラベルで出す（英字の「Evidence」にしない）。以前は束ね PDF（9）のフッター（証跡 ID ev_…）で検査していた（Sprint 18-1 で移した）。
+    // 地点判定 PDF では、見出しの「証跡 ID（判定と手続き）」の後ろに出る。
+    expect(t).toMatch(/証跡 ID（判定と手続き）ev_[0-9a-f]{16}/);
+    expect(t).not.toMatch(/Evidence ev_/);
     for (const w of PDF_FORBIDDEN) expect(t, `地点判定 PDF に「${w}」が残っている`).not.toContain(w);
   });
 
-  test("9. 申請支援 PDF に運営者・免責・「判定の版」があり、特許・社内向けの語がない", async ({ page }) => {
+  test("9. 申請支援の束ね PDF は出ない（Sprint 18-1。運営者・免責・判定の版は 8 の地点判定 PDF が検査する）", async ({ page }) => {
+    // 以前：束ね PDF の文字列（運営者・判定の版・免責・証跡 ID・禁止語）を検査していた。申請支援を止めたので、出ないことを検査する。
     await openReady(page);
-    const dl = page.waitForEvent("download");
-    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
-    await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
-    const t = await pdfText(await dl);
-    expect(t).toContain(OPERATOR);
-    // メタのラベルは字間を空けて組むため、抽出テキストでは「判 定 の 版」になる。字形が無ければ抽出されない
-    expect(t).toMatch(/判\s*定\s*の\s*版/);
-    expect(t).toContain("免責");
-    // フッターの証跡 ID は日本語のラベルで出す（英字の「Evidence」にしない）
-    expect(t).toMatch(/証跡 ID ev_[0-9a-f]{16}/);
-    expect(t).not.toMatch(/Evidence ev_/);
-    for (const w of PDF_FORBIDDEN) expect(t, `申請支援 PDF に「${w}」が残っている`).not.toContain(w);
+    await expectNoApplicationSupport(page, "10a #9");
+    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toHaveCount(0);
+    // 出る PDF は地点判定の PDF だけ（ボタン名は「PDF 出力」）。
+    await expect(page.getByRole("button", { name: /PDF 出力/ }).first()).toBeVisible();
   });
 });

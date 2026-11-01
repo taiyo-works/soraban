@@ -1,6 +1,7 @@
 import { devices, expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { expectFontSize, openDetails } from "./field-checks";
+import { expectFontSize, expectNoApplicationSupport, openDetails } from "./field-checks";
 import { Meter, type Measure } from "./judge-measure";
+import { BOUNDARY_SHORT } from "../apps/web/src/lib/boundary";
 
 // Sprint 12h PR ②（docs/sprints/sprint-12h-pr2.md）：公開の判定画面 `/` の作り直し（デザインシステム v2）の E2E。
 // 本番相当サーバー（baseURL）だけを使う。DB なし。Q 番号は契約の完了条件。
@@ -892,16 +893,20 @@ test.describe("Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層
 
 // ───────────────────────── B2 縦の長さ：畳んだ状態と開いた状態（評価 B2） ─────────────────────────
 
-test.describe("B2 縦が長すぎない：規制カード・申請支援・収録の一覧は見出し（と要約）だけ、開くと中身", () => {
+test.describe("B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた）", () => {
   test("375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await openReady(page);
-    await expect(page.getByTestId("diagnosis-details")).toBeVisible();
+    // 以前は diagnosis-details（申請の準備）が見えることを待っていた。Sprint 18-1 で止めたので、出ないことを確かめる。
+    // 高さの上限（16,646／13,500）は変えない。画面が短くなる変更なので、上限を下げた検査は足さず、実測値を test-changes に記す。
+    await expect(page.getByTestId("diagnosis-details")).toHaveCount(0);
     const h = await page.evaluate(() => document.documentElement.scrollHeight);
     await testInfo.attach("page-height-375", { body: String(h), contentType: "text/plain" });
     expect(h, "ページ全体の高さ（375px）").toBeLessThanOrEqual(16_646);
     expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);
-    for (const id of ["diagnosis-details", "coverage-details"]) await expect(page.getByTestId(id)).not.toHaveAttribute("open", "");
+    // Sprint 18-1：申請支援を止めて短くなった（前 12,086px → 後 11,244px の実測）。上の 2 つの上限は変えず、短くなった分が戻らないよう上限を足す。
+    expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_000);
+    await expect(page.getByTestId("coverage-details")).not.toHaveAttribute("open", "");
     const cards = page.locator('[data-testid^="regulation-card-"]');
     const n = await cards.count();
     expect(n).toBeGreaterThanOrEqual(3);
@@ -923,16 +928,15 @@ test.describe("B2 縦が長すぎない：規制カード・申請支援・収�
     await expect(page.getByTestId("verdict-sourced")).toContainText("出典つき");
     await expect(page.getByTestId("site-disclaimer")).toBeVisible();
     await expect(page.getByTestId("result-details").getByText("免責").first()).toBeVisible();
-    // 申請支援は、カテゴリー切り分け（出典つき）と免責が畳まずに見え、準備の中身だけが畳まれている
-    await expect(page.getByTestId("diagnosis-category-headline")).toBeVisible();
-    await expect(page.getByTestId("diagnosis-details").locator("summary")).toBeVisible();
-    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeHidden();
+    // 以前は申請支援のカテゴリー切り分けと「申請の準備」の畳みを検査していた。Sprint 18-1 で止めたので、出ないことを検査する。
+    await expectNoApplicationSupport(page, "12h-pr2 B2");
   });
 
   test("開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await openReady(page);
-    const dd = page.getByTestId("diagnosis-details");
+    // 以前は diagnosis-details（申請の準備）で検査していた。同じ部品（Disclosure）の収録の一覧（coverage-details）で続ける（Sprint 18-1）。
+    const dd = page.getByTestId("coverage-details");
     const summary = dd.locator("> summary");
     await summary.scrollIntoViewIfNeeded();
     const hint = async (): Promise<{ text: string; transform: string }> =>
@@ -948,7 +952,7 @@ test.describe("B2 縦が長すぎない：規制カード・申請支援・収�
     const opened = await hint();
     expect(opened.text).toBe('"閉じる"');
     expect(opened.transform, "矢印の向きが変わる（形で分かる）").not.toBe(closed.transform);
-    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeVisible();
+    await expect(dd.locator("li").first()).toBeVisible();
     await summary.focus();
     await page.keyboard.press("Space");
     await expect(dd).not.toHaveAttribute("open", "");
@@ -970,28 +974,30 @@ test.describe("B2 縦が長すぎない：規制カード・申請支援・収�
     await expect(cov.locator("li").first()).toBeVisible();
   });
 
-  test("申請の準備を開くと、必要手続き・提出期限・束ね PDF が出る", async ({ page }) => {
+  test("「申請の準備」は無い：必要手続きのチェックリスト・提出期限・束ね PDF が出ない（Sprint 18-1）", async ({ page }) => {
+    // 以前：「申請の準備」を開くと必要手続き・提出期限・束ね PDF が出ることを検査していた。
     await page.setViewportSize({ width: 1280, height: 900 });
     await openReady(page);
-    const dd = page.getByTestId("diagnosis-details");
-    await openDetails(dd);
-    await expect(dd).toContainText("必要手続きチェックリスト");
-    await expect(dd).toContainText("提出期限");
-    await expect(page.getByRole("button", { name: /束ね PDF を出力/ })).toBeVisible();
+    await expectNoApplicationSupport(page, "12h-pr2 申請の準備");
+    // 畳みを全部開いても出ない
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => ((d as HTMLDetailsElement).open = true)));
+    await expectNoApplicationSupport(page, "12h-pr2 申請の準備（全部開く）");
   });
 });
 
 // ───────────────────────── N1〜N5 非ブロッカー（評価） ─────────────────────────
 
 test.describe("N1 結論の札と責任の注記", () => {
-  test("結論に「確認日」「出典つき」の札と「ご本人の名義で…ご本人が提出します」の注記。代行・代理申請の語がない", async ({ page }) => {
+  test("結論に「確認日」「出典つき」の札と境界の注記（BOUNDARY_SHORT）。代行・代理申請の語がない", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await openReady(page);
     const ev = page.getByTestId("verdict-evidence");
     await expect(ev).toBeVisible();
     await expect(ev.getByTestId("verdict-checked-date")).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);
     await expect(ev.getByTestId("verdict-sourced")).toContainText(/出典つき（\d+ 件）/);
-    await expect(page.getByTestId("verdict-responsibility")).toContainText("ご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。");
+    // 以前は「ご本人の名義で作成し、ご本人が提出します。そらばんは入力項目の下書きまでを手伝います。」を固定していた。Sprint 18-1 で境界の文（BOUNDARY_SHORT）に差し替えた。
+    await expect(page.getByTestId("verdict-responsibility")).toContainText(BOUNDARY_SHORT);
+    await expect(page.getByTestId("verdict-responsibility")).not.toContainText("下書き");
     await page.evaluate(() => document.querySelectorAll("details").forEach((d) => ((d as HTMLDetailsElement).open = true)));
     const text = await page.locator("main").innerText();
     expect(text).not.toMatch(/代行|代理申請|代理で申請/);

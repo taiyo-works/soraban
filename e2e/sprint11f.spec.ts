@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { openDiagnosis } from "./field-checks";
+import { expectNoApplicationSupport } from "./field-checks";
 
 // Sprint 11f 契約（docs/sprints/sprint-11f.md）の E2E。判定の表示の軽微な直し：
 // 100g 未満で DID 内の地点の表示、診断待ちの履歴、参照先の分割、未収録の市町村の題名。
@@ -74,9 +74,9 @@ const toggle = async (box: Locator, page: Page, on: boolean, withCheck = true): 
   await settled(page);
 };
 
-/** 飛行方法のチェック（06 の中。申請支援の診断だけをやり直す）。 */
+/** 飛行の方法のチェック（06 の中。判定だけをやり直す）。凡例は Sprint 18-1 で「飛行方法（申請支援）」から「飛行の方法」に変えた。 */
 const methodBox = (page: Page, label: string) =>
-  page.locator("fieldset", { hasText: "飛行方法（申請支援）" }).getByRole("checkbox", { name: label, exact: true });
+  page.locator("fieldset", { hasText: "飛行の方法（選ぶと判定に反映します）" }).getByRole("checkbox", { name: label, exact: true });
 
 const setPlannedDate = async (page: Page, iso: string): Promise<void> => {
   const diag = waitDiagnose(page);
@@ -126,19 +126,13 @@ const setWeight = async (page: Page, w: string): Promise<void> => {
 };
 
 const latestHistory = (page: Page) => page.getByTestId("history-item").first();
-const bundledPdf = async (page: Page): Promise<string> => {
-  const dl = page.waitForEvent("download");
-  await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
-  await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
-  return pdfText(await dl);
-};
-
 test.describe("Sprint 11f", () => {
   test("3・4. 米子市役所：50g は DID を対象外（模型航空機）と出し、900g は該当のまま", async ({ page }) => {
     await openReady(page);
     await setWeight(page, "50");
     const body50 = page.locator("body");
-    await expect(page.getByTestId("diagnosis-did-status")).toContainText(`DID（人口集中地区）: ${MODEL}`);
+    // 以前は申請支援の diagnosis-did-status（DID（人口集中地区）: …）も検査していた。DID 自動判定（did-status）で同じ値を検査する（Sprint 18-1）。
+    await expect(page.getByTestId("did-status")).toContainText(MODEL);
     await expect(body50).toContainText(`DID 自動判定：${MODEL}`);
     await expect(item(page, "aviation-law-did")).toContainText(MODEL);
     const card = page.getByTestId("regulation-card-aviation-law-did");
@@ -152,9 +146,8 @@ test.describe("Sprint 11f", () => {
     expect(text).not.toContain("DID:非該当");
     expect(text).not.toMatch(/飛行可能|要確認・要許可/);
 
-    const app = await bundledPdf(page);
-    expect(squash(app)).toContain(squash(`DID（人口集中地区）: ${MODEL}`));
-    expect(squash(app)).not.toContain(squash("DID（人口集中地区）: 非該当"));
+    // 以前は束ね PDF の DID の行を検査していた。束ね PDF は出ない（Sprint 18-1）。
+    await expectNoApplicationSupport(page, "11f #3・4");
     const reg = await exportPdf(page);
     expect(squash(reg)).toContain(squash(MODEL));
     expect(squash(reg)).toContain(squash("例外前の判定：該当"));
@@ -162,8 +155,8 @@ test.describe("Sprint 11f", () => {
     expect(squash(reg)).not.toContain(squash("DID（人口集中地区）: 非該当"));
 
     await setWeight(page, "900");
-    await expect(page.getByTestId("diagnosis-did-status")).toContainText("DID（人口集中地区）: 該当");
-    await expect(page.getByTestId("diagnosis-did-status")).not.toContainText("模型航空機");
+    await expect(page.getByTestId("did-status")).toContainText("DID 自動判定：該当");
+    await expect(page.getByTestId("did-status")).not.toContainText("模型航空機");
     await expect(item(page, "aviation-law-did")).toContainText("該当");
     await expect(item(page, "aviation-law-did")).not.toContainText(MODEL);
     await expect(latestHistory(page)).toContainText("DID:該当");

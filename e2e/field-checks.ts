@@ -196,7 +196,33 @@ export const openDetails = async (details: Locator): Promise<void> => {
   await expect(details).toHaveAttribute("open", "");
 };
 
-/** 申請支援の「申請の準備」（必要手続き・提出期限・プリフィル・書類の下書き・束ね PDF）を開く。 */
-export const openDiagnosis = async (page: Page): Promise<void> => {
-  await openDetails(page.getByTestId("diagnosis-details"));
+/**
+ * 申請支援（Sprint 18-1）：フラグ APPLICATION_SUPPORT_ENABLED が無効（既定・本番）では、公開の `/` に出ない語と部品。
+ * 以前の「申請の準備」を開く補助（openDiagnosis）は、この検査に置き換えた（docs/evaluations/sprint-18-test-changes.md）。
+ */
+export const APPLICATION_SUPPORT_WORDS = [
+  "申請支援",
+  "申請の準備",
+  "必要手続きチェックリスト",
+  "提出期限",
+  "プリフィル",
+  "束ね PDF",
+  "飛行マニュアル",
+  "書類の下書き",
+  "カテゴリー切り分け",
+  "下書きまでを手伝います",
+] as const;
+export const APPLICATION_SUPPORT_TESTIDS = [
+  "diagnosis-details",
+  "diagnosis-category-headline",
+  "diagnosis-did-status",
+  "procedure-card",
+] as const;
+
+/** 申請支援が画面に無いこと（本文 textContent に語が 0 件、部品が 0 個）。畳み・非表示の中も含めて調べる。 */
+export const expectNoApplicationSupport = async (page: Page, label = "公開の /"): Promise<void> => {
+  const text = await page.evaluate(() => document.body.textContent ?? "");
+  for (const w of APPLICATION_SUPPORT_WORDS) expect(text, `${label}: 「${w}」が残っている`).not.toContain(w);
+  for (const id of APPLICATION_SUPPORT_TESTIDS) await expect(page.getByTestId(id), `${label}: ${id}`).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /束ね PDF/ }), `${label}: 束ね PDF のボタン`).toHaveCount(0);
 };

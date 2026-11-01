@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
-import { openDiagnosis, openDetails } from "./field-checks";
+import { expectNoApplicationSupport, openDetails } from "./field-checks";
 
 // Sprint 7 契約（docs/sprints/sprint-7.md）の E2E。
 //   - 本番相当サーバー（baseURL、DID_DATA_DIR・INDUSTRIAL_DATA_DIR なし）：飛行禁止法・出典表示・PDF
@@ -95,23 +95,28 @@ test.describe("A. 小型無人機等飛行禁止法（本番相当サーバー�
     expect(text).toContain("免責");
   });
 
-  test("飛行禁止法が red の地点で申請支援に『同意＋事前通報』が出典リンク付きで出る。green の地点では出ない", async ({
+  test("飛行禁止法が red の地点で判定の手続きに『同意＋事前通報』が出て、規制カードに出典リンクがある。green の地点では出ない", async ({
     page,
   }) => {
-    const title = "施設管理者の同意 ＋ 都道府県公安委員会への事前通報（飛行の 48 時間前まで）";
+    // 以前は申請支援の診断パネル（article）の『同意＋事前通報』と、その出典リンク（npa.go.jp の通報のページ）を検査していた。
+    // 申請支援を止めたので（Sprint 18-1）、判定の「要手続きの手続き」の行と、規制カードの出典リンク（npa.go.jp）で検査する。
+    // 診断パネルの出典（tsuhou.html）は画面に出なくなった。手続きのデータは sprint12a-diagnose-baseline.json（応答全文の基準）が守る。
+    const consent = page.locator('[data-testid="verdict-procedure"][data-procedure-id="verdict-small-drone-consent"]');
+    const notice = page.locator('[data-testid="verdict-procedure"][data-procedure-id="verdict-small-drone-notice"]');
     await page.goto("/");
     await gotoCoords(page, MIHO_700M);
-    const proc = page.locator("article", { hasText: title });
-    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
-    await expect(proc).toBeVisible();
-    await expect(proc.getByRole("link", { name: /出典/ })).toHaveAttribute(
+    await expect(consent).toContainText("施設管理者の同意と都道府県公安委員会への事前通報（飛行の 48 時間前まで）");
+    await expect(notice).toBeVisible();
+    await expect(card(page, "small-drone-law").getByRole("link", { name: /出典/ })).toHaveAttribute(
       "href",
-      "https://www.npa.go.jp/bureau/security/kogatamujinki/tsuhou.html",
+      "https://www.npa.go.jp/bureau/security/kogatamujinki/index.html",
     );
+    await expectNoApplicationSupport(page, "7 #98");
 
     await gotoCoords(page, OUTSIDE_COVERAGE);
     await expect(card(page, "small-drone-law")).toHaveAttribute("data-status", "green");
-    await expect(page.locator("article", { hasText: title })).toHaveCount(0);
+    await expect(consent).toHaveCount(0);
+    await expect(notice).toHaveCount(0);
   });
 });
 
@@ -143,7 +148,7 @@ test.describe("C. 工業専用地域の除外（本番相当サーバー・実�
       "href",
       "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
     );
-    await expect(page.getByTestId("diagnosis-did-status")).toContainText("非該当（工業専用地域）");
+    await expect(page.getByTestId("did-status")).toContainText("非該当（工業専用地域）"); // 以前は申請支援の diagnosis-did-status（Sprint 18-1 で did-status に）
   });
 });
 
@@ -178,7 +183,7 @@ test.describe("C. 工業専用地域の除外（フィクスチャ用サーバ�
       "href",
       "https://www.mlit.go.jp/koku/koku_fr10_000041.html",
     );
-    await expect(page.getByTestId("diagnosis-did-status")).toContainText("非該当（工業専用地域）");
+    await expect(page.getByTestId("did-status")).toContainText("非該当（工業専用地域）"); // 以前は申請支援の diagnosis-did-status（Sprint 18-1 で did-status に）
   });
 });
 
@@ -196,20 +201,17 @@ test.describe("D. データ出典と確認日（本番相当サーバー）", ()
     await expect(sdl).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);
   });
 
-  test("地点判定 PDF と申請支援 PDF にデータ名・確認日・反映済みの改正が入る", async ({ page }) => {
+  test("地点判定 PDF にデータ名・確認日・反映済みの改正が入る（申請支援の束ね PDF は出ない）", async ({ page }) => {
     await page.goto("/");
     await selectPreset(page, "米子市役所");
 
     const dl1 = page.waitForEvent("download");
     await page.getByRole("button", { name: /PDF 出力/ }).first().click();
     const t1 = await pdfText(await dl1);
+    // 以前は申請支援の束ね PDF（t2）も同じ項目を検査していた。Sprint 18-1 で束ね PDF を止めたので、出ないことを検査する。
+    await expectNoApplicationSupport(page, "7 #199");
 
-    const dl2 = page.waitForEvent("download");
-    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
-    await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
-    const t2 = await pdfText(await dl2);
-
-    for (const t of [t1, t2]) {
+    for (const t of [t1]) {
       expect(t).toContain("国土数値情報 人口集中地区データ（A16）令和2年");
       expect(t).toMatch(/確認日 \d{4}-\d{2}-\d{2}/);
       expect(t).toContain("国土交通省告示第435号");

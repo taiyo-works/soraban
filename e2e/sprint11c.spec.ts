@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { openDiagnosis } from "./field-checks";
+import { expectNoApplicationSupport } from "./field-checks";
 
 // Sprint 11c 契約（docs/sprints/sprint-11c.md）の E2E。許可の入力の不具合修正
 // （飛行禁止法の「同意」と「通報」を分ける、「国交省 DIPS」の説明を動きに合わせる）。
@@ -147,21 +147,30 @@ test.describe("A. 飛行禁止法の同意と通報", () => {
     await expect(pref).toContainText("施設管理者・自治体担当部署と事前調整し、合意を得た場合");
   });
 
-  test("6. 申請支援の『同意＋事前通報』は同意・通報のチェックの有無にかかわらず美保基地の周辺で出る", async ({
+  test("6. 判定の『同意＋事前通報』は同意・通報のチェックの有無にかかわらず美保基地の周辺で出る（診断パネルは出ない）", async ({
     page,
   }) => {
+    // 以前は診断パネルの article（手続きカード「施設管理者の同意 ＋ … 事前通報」）が常に出ることを検査していた。
+    // 申請支援を止めたので（Sprint 18-1）、判定の画面の同じ内容で検査する：未入力のときは「要手続きの手続き」の同意・通報の 2 行、
+    // 入力したあとは手続き済み（verdict-done-item）か残りの行のどちらかに必ず出る（小型無人機等飛行禁止法が画面から消えない）。
     await openReady(page);
     await selectPreset(page, MIHO);
-    const proc = page.locator("article", { hasText: PROC_TITLE });
-    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
-    await expect(proc).toBeVisible();
+    const consentRow = page.locator('[data-testid="verdict-procedure"][data-procedure-id="verdict-small-drone-consent"]');
+    const noticeRow = page.locator('[data-testid="verdict-procedure"][data-procedure-id="verdict-small-drone-notice"]');
+    await expect(consentRow).toContainText("施設管理者の同意と都道府県公安委員会への事前通報（飛行の 48 時間前まで）");
+    await expect(noticeRow).toBeVisible();
+    await expect(page.locator("article", { hasText: PROC_TITLE })).toHaveCount(0);
+    await expectNoApplicationSupport(page, "11c #6");
+    const smallDrone = page.locator(
+      '[data-testid="verdict-procedure"][data-procedure-id^="verdict-small-drone"], [data-testid="verdict-done-item"][data-item-id="small-drone-law"]',
+    );
     await openConditions(page);
     await toggle(consent(page), page, true);
-    await expect(proc).toBeVisible();
+    await expect(smallDrone.first()).toBeVisible();
     await toggle(notice(page), page, true);
-    await expect(proc).toBeVisible();
+    await expect(smallDrone.first()).toBeVisible();
     await toggle(consent(page), page, false);
-    await expect(proc).toBeVisible();
+    await expect(smallDrone.first()).toBeVisible();
   });
 });
 
