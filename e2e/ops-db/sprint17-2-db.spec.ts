@@ -459,7 +459,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       cur = await getPlan(plan.id);
     }
     // 飛行記録：他の検査の時間帯と重ならないよう、過去の日付をずらして作る（繰り返しの実行でも重ならない）
-    const day0 = Math.floor(Math.random() * 3000) * 8;
+    const day0 = Math.floor(Math.random() * 400) * 8;
     for (let i = 0; i < 8; i++) {
       const d = new Date(Date.UTC(2010, 0, 1) + (day0 + i) * 86_400_000).toISOString().slice(0, 10);
       const f = await manager.post("/api/ops/flights", {
