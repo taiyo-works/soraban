@@ -42,20 +42,29 @@ export type PrimaryActionInput = {
   readonly hasEffective: boolean;
   /** 次にやることのうち、操作できるか（id → canAct）。無い id は「操作できる」とみなす。 */
   readonly canAct: Readonly<Record<string, boolean>>;
+  /** 次にやることに「通報」(report)がある（取消済みでも、通報がまだ必要なとき）。 */
+  readonly reportDue?: boolean;
 };
 
 export type PrimaryAction = { readonly id: string; readonly label: string; readonly href: string };
 
-/** 中止した計画で、取消の対応が要る状態（有効な通報が残っている、または通報の結果が分からない）。 */
-export const voidedNeedsCancel = (i: Pick<PrimaryActionInput, "voided" | "statusCode" | "hasEffective">): boolean =>
-  i.voided && i.statusCode !== "cancelled" && (i.hasEffective || i.statusCode === "cancel_needed" || i.statusCode === "failed" || i.statusCode === "unknown" || i.statusCode === "sending");
+/** 中止した計画で、有効な通報が DIPS に残っている(取消が必要な)状態。 */
+export const voidedCancelRequired = (i: Pick<PrimaryActionInput, "voided" | "statusCode" | "hasEffective">): boolean =>
+  i.voided && i.statusCode !== "cancelled" && (i.hasEffective || i.statusCode === "cancel_needed");
 
-/** 状況カードに明示する、中止後の取消の案内（無ければ null）。有効な通報が残るときは「取消が必要です」と書く。 */
+/** 状況カードに明示する、中止後の案内（無ければ null）。有効な通報が残るときは「取消が必要です」と書く。 */
 export const voidedCancelNotice = (i: Pick<PrimaryActionInput, "voided" | "statusCode" | "hasEffective">): string | null => {
-  if (!voidedNeedsCancel(i)) return null;
-  return i.hasEffective || i.statusCode === "cancel_needed"
-    ? "取消が必要です。この計画は中止されましたが、DIPS に通報が残っているおそれがあります。DIPS で取り消し、取消の結果を記録してください。"
-    : "この計画は中止されました。通報の結果が分かりません。DIPS の画面で通報の有無を確かめ、通報が残っていれば取り消して、結果を記録してください。";
+  if (!i.voided || i.statusCode === "cancelled") return null;
+  if (voidedCancelRequired(i)) {
+    return "取消が必要です。この計画は中止されましたが、DIPS に通報が残っているおそれがあります。DIPS で取り消し、取消の結果を記録してください。";
+  }
+  if (i.statusCode === "unknown" || i.statusCode === "sending") {
+    return "この計画は中止されました。通報の結果が分かりません。DIPS の画面で通報の有無を確かめ、履歴の「結果不明を確定する」で結果を記録してください。";
+  }
+  if (i.statusCode === "failed") {
+    return "この計画は中止されました。通報は失敗のままで、再送や新しい記録はできません。DIPS に通報が残っていないかは、DIPS の画面で確かめてください。";
+  }
+  return null;
 };
 
 /** 中止・記録なしのときの 1 行（そらばんでは取消を記録できない旨）。 */
@@ -78,12 +87,12 @@ export const primaryActionOf = (i: PrimaryActionInput): PrimaryAction => {
   const denied = (id: string): boolean => i.canAct[id] === false;
   if (i.voided) {
     if (i.statusCode === "cancelled") return history;
-    if (voidedNeedsCancel(i)) {
-      if (i.hasEffective || i.statusCode === "cancel_needed") {
-        return denied("cancel_report") ? history : { id: "record_cancel", label: "取消の結果を記録する", href: `${base}/report?kind=cancel#record` };
-      }
-      return denied("record_result") ? history : { id: "record_result", label: "結果を記録する", href: `${base}/report#record` };
+    if (voidedCancelRequired(i)) {
+      return denied("cancel_report") ? history : { id: "record_cancel", label: "取消の結果を記録する", href: `${base}/report?kind=cancel#record` };
     }
+    // 中止した計画は新しい記録ができない。結果不明の確定は履歴の行にある
+    if (i.statusCode === "unknown") return { id: "settle_unknown", label: "結果不明を確定する", href: `${base}/report#history` };
+    if (i.statusCode === "sending" || i.statusCode === "failed") return history;
     if (i.statusCode === "no_record") return { id: "view_plan", label: "計画の内容を見る", href: `${base}/overview` };
     return history;
   }
@@ -109,7 +118,8 @@ export const primaryActionOf = (i: PrimaryActionInput): PrimaryAction => {
     case "reported":
       return { id: "view_result", label: "通報の結果を見る", href: `${base}/report#history` };
     case "cancelled":
-      return history;
+      // 中止していない計画の取消済み：通報がまだ必要なら「通報する」(済みと読ませない)
+      return i.reportDue === true ? { id: "view_report", label: "通報する", href: `${base}/report` } : history;
     case "not_applicable_model":
     case "sending":
       return viewOnly;
@@ -127,15 +137,19 @@ export const cardHeading = (i: {
   readonly statusCode: ReportStatusCode;
   readonly hasEffective: boolean;
   readonly requirementLabel: string;
+  /** 通報済みのときの言い方(経路に応じた status.label の「：」より前)。無ければ「通報済み」。 */
+  readonly reportedLabel?: string;
+  readonly reportDue?: boolean;
 }): string => {
   if (i.voided && i.statusCode === "no_record") return VOIDED_NO_RECORD_LABEL;
   if (i.voided) {
     if (i.statusCode === "cancelled") return "取消済み（利用者の申告）";
-    if (i.hasEffective || i.statusCode === "cancel_needed") return "取消の結果を記録してください";
-    if (i.statusCode === "failed" || i.statusCode === "unknown" || i.statusCode === "sending") return "中止（通報の結果を確かめてください）";
+    if (voidedCancelRequired(i)) return "取消の結果を記録してください";
+    if (i.statusCode === "failed") return "中止（通報は失敗のままです）";
+    if (i.statusCode === "unknown" || i.statusCode === "sending") return "中止（通報の結果を確かめてください）";
     return i.requirementLabel;
   }
-  if (i.statusCode === "reported") return "通報済み（利用者の申告・手動記録）";
-  if (i.statusCode === "cancelled") return "取消済み（利用者の申告）";
+  if (i.statusCode === "reported") return i.reportedLabel && i.reportedLabel.length > 0 ? i.reportedLabel : "通報済み";
+  if (i.statusCode === "cancelled") return i.reportDue === true ? `${i.requirementLabel}（前の通報は取消済み）` : "取消済み（利用者の申告）";
   return i.requirementLabel;
 };

@@ -58,11 +58,17 @@ describe("主操作（1 つ。状態で決まる）", () => {
     }
     expect(voidedCancelNotice({ voided: true, statusCode: "cancel_needed", hasEffective: true })).toContain("取消が必要です");
   });
-  it("中止 × 有効な通報なしの失敗・結果不明・送信中 → 結果を記録する（確かめる案内）", () => {
-    for (const c of ["failed", "unknown", "sending"] as const) {
-      expect(act(c, V), c).toMatchObject({ id: "record_result", href: "/ops/plans/P/report#record" });
-      expect(voidedCancelNotice({ voided: true, statusCode: c, hasEffective: false }), c).toContain("通報の結果が分かりません");
-    }
+  it("中止 × 有効な通報なし：unknown は履歴の確定、sending・failed は履歴(新しい記録はできない)", () => {
+    expect(act("unknown", V)).toMatchObject({ id: "settle_unknown", href: "/ops/plans/P/report#history" });
+    expect(act("sending", V)).toMatchObject({ id: "view_history", href: "/ops/plans/P/report#history" });
+    expect(act("failed", V)).toMatchObject({ id: "view_history", href: "/ops/plans/P/report#history" });
+    expect(voidedCancelNotice({ voided: true, statusCode: "unknown", hasEffective: false })).toContain("結果が分かりません");
+    expect(voidedCancelNotice({ voided: true, statusCode: "failed", hasEffective: false })).toContain("再送や新しい記録はできません");
+  });
+  it("中止していない計画の取消済み：通報がまだ必要なら「通報する」(済みと読ませない)", () => {
+    expect(act("cancelled", { reportDue: true })).toMatchObject({ id: "view_report", label: "通報する", href: "/ops/plans/P/report" });
+    expect(act("cancelled").id).toBe("view_history");
+    expect(act("cancelled", { voided: true, reportDue: true }).id).toBe("view_history");
   });
   it("中止 × 記録なしは計画を見る、取消済みは履歴。案内は出さない", () => {
     expect(act("no_record", V)).toMatchObject({ id: "view_plan", href: "/ops/plans/P/overview" });
@@ -106,13 +112,18 @@ describe("状況カードの見出し（R-2）", () => {
     expect(h("no_record")).toBe(req);
     expect(h("change_review")).toBe(req);
     expect(h("reported")).toContain("通報済み");
+    expect(cardHeading({ voided: false, statusCode: "reported", hasEffective: true, requirementLabel: req, reportedLabel: "模擬で通報済み（開発用）" })).toBe("模擬で通報済み（開発用）");
     expect(h("cancelled")).toContain("取消済み");
+  });
+  it("取消済みでも通報が必要なら、要否の言葉に「前の通報は取消済み」を添える", () => {
+    expect(cardHeading({ voided: false, statusCode: "cancelled", hasEffective: false, requirementLabel: req, reportDue: true })).toBe("通報：要（前の通報は取消済み）");
   });
   it("中止：記録なしは事実、取消待ちは取消の記録を促す", () => {
     expect(h("no_record", true)).toBe("中止（通報の記録はありません）");
     expect(h("cancel_needed", true, true)).toBe("取消の結果を記録してください");
     expect(h("failed", true, true)).toBe("取消の結果を記録してください");
-    expect(h("failed", true, false)).toContain("確かめてください");
+    expect(h("unknown", true, false)).toContain("確かめてください");
+    expect(h("failed", true, false)).toContain("失敗のまま");
     expect(h("cancelled", true)).toContain("取消済み");
   });
   it("禁止語を含まない", () => {

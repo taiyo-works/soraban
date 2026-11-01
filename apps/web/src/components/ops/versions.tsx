@@ -57,9 +57,9 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
     <Section
       title="版の一覧"
       aria-label="版の一覧"
-      description={recent === undefined ? "登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。" : undefined}
+      description={recent === undefined ? "登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。" : "前の版は書き換えられず、追記されます。"}
     >
-      <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-row"]:last-child' />
+      <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-list"] > [data-testid="version-row"]:last-child' />
       {older.length > 0 ? (
         <details data-testid="version-list-older">
           <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い版 {older.length} 件を見る（最新 {shown.length} 件は下に出ています）</summary>

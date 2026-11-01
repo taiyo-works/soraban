@@ -327,6 +327,10 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
     case "not_applicable_model":
       break;
   }
+  // 中止した計画に有効な通報が残るとき（取消の行が失敗・結果不明・送信中でも）、取消の結果を記録する必要は変わらない
+  if (voided && i.status.effectiveId !== null && i.status.code !== "cancelled" && !out.some((a) => a.id === "cancel_report")) {
+    add("cancel_report", 3, "計画は中止されました。有効な通報が残っています。DIPS で取り消し、結果を記録してください", i.can.record);
+  }
 
   // ---- 許可・承認の申請、警察への通報（利用者の申告の記録） ----
   if (!voided) {

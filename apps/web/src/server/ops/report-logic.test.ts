@@ -199,6 +199,13 @@ describe("planNextActions：通報", () => {
     expect(planNextActions(build({ nowMs: START.getTime() + 1 }).input)[0]!.dueLabel).toContain("通報の記録がありません");
   });
 
+  it("中止した計画に有効な通報が残るとき、後の行が失敗でも「通報を取り消す」が出る", () => {
+    const rows = [row(1, "new", "reported_manual"), row(2, "change", "failed")];
+    expect(ids({ rows, planState: "voided" })).toContain("cancel_report");
+    // 有効な通報が無ければ足さない
+    expect(ids({ rows: [row(1, "new", "failed")], planState: "voided" })).not.toContain("cancel_report");
+  });
+
   it("推奨は tier 5 の「通報を検討する（推奨）」だけで、警告にならない（飛行開始後でも tier 5）", () => {
     for (const ms of [GUIDE.getTime() - 1, GUIDE.getTime() + 1, START.getTime() + 1]) {
       const list = planNextActions(build({ kind: "recommended", nowMs: ms }).input);

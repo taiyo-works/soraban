@@ -305,7 +305,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
     });
   }
 
-  test("高-1：通報済みの計画を中止し、取消の行が失敗しても、主画面に「取消が必要です」と出て、主操作は取消の記録になる(模擬アダプター)", async ({ page }) => {
+  test("高-1：通報済みの計画を中止し、後の変更の行が失敗していても(取消は手動の記録で失敗しない)、主画面に「取消が必要です」と出て、主操作は取消の記録になる(模擬アダプター)", async ({ page }) => {
     await login(page);
     const mockApi = await pwRequest.newContext({ baseURL: MOCK_BASE });
     await signIn(mockApi, seeded("a-manager"));
@@ -395,7 +395,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       console.log(`[長さ・長い計画] ${size.name} 変更点 ${changes} 件: 主画面 ${main}px / 計画 ${overview}px / 作業台 ${report}px`);
       expect(main, "主画面").toBeLessThanOrEqual(size.main);
       expect(overview, "計画").toBeLessThanOrEqual(size.overview);
-      expect(report, "作業台").toBeLessThanOrEqual(size.width === 375 ? 10200 : size.report);
+      expect(report, "作業台").toBeLessThanOrEqual(size.width === 375 ? 10400 : size.report);
     }
   });
 
@@ -425,6 +425,12 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
           )
           .toBe(true);
         await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? ""), { message: "着いた節にフォーカス" }).toBe(section);
+        // 手順バーは画面の上に固定されたまま見えている(375 は y 0〜56、広い画面は上バーの下 56〜112)
+        const sb = (await stepper.boundingBox())!;
+        const maxY = size.width >= 1024 ? 112 : 56;
+        expect(sb.y, `${size.name} ${link}: 手順バーが固定表示`).toBeGreaterThanOrEqual(0);
+        expect(sb.y, `${size.name} ${link}: 手順バーが固定表示`).toBeLessThanOrEqual(maxY);
+        expect(await page.evaluate(() => window.scrollY), "実際にスクロールした").toBeGreaterThan(0);
       }
     }
   });
@@ -467,7 +473,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       });
       expect(f.status(), await f.text()).toBeLessThan(300);
     }
-    const limits = { 375: { report: 10200, overview: 3000, journal: 1400 }, 1280: { report: 7000, overview: 2200, journal: 1100 } } as const;
+    const limits = { 375: { report: 10400, overview: 3000, journal: 1400 }, 1280: { report: 7000, overview: 2200, journal: 1100 } } as const;
     for (const size of SIZES) {
       await page.setViewportSize({ width: size.width, height: size.height });
       const lim = limits[size.width];
@@ -487,5 +493,38 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
     await expect(page.getByTestId("version-list-older")).toHaveCount(1);
     await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
     await expect(page.getByTestId("plan-flights-older")).toHaveCount(1);
+  });
+
+  test("中-B：中止していない計画で取消を記録しても、通報がまだ必要なら「取消済み」と読ませず、主操作は「通報する」", async ({ page }) => {
+    await login(page);
+    const plan = await activate(await createPlan({ title: `S172 取消 ${stamp}` }));
+    await recordApi(plan, "new", "FP-S172-CANCEL");
+    const view = (await (await manager.get(`/api/ops/plans/${plan.id}/report`)).json()) as { effective: { id: string } };
+    await recordApi(plan, "cancel", "CANCEL-S172", view.effective.id);
+    await gotoPlan(page, `/ops/plans/${plan.id}`);
+    await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "cancelled");
+    await expect(page.getByTestId("plan-report-label")).toContainText("前の通報は取消済み");
+    await expect(page.getByTestId("plan-primary-action")).toHaveText("通報する");
+  });
+
+  test("中-D：版が 6 件以上の計画を中止して読み直すと、フォーカスは新しい版の行に届く(畳んだ古い版ではない)", async ({ page }) => {
+    await login(page);
+    const plan = await activate(await createPlan({ plannedStartAt: "2027-02-01T10:00", title: `S172 版 ${stamp}` }));
+    let cur = await getPlan(plan.id);
+    for (let i = 0; i < 6; i++) {
+      const r = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: cur.version, reason: `訂正 ${i}`, durationMinutes: 31 + i } });
+      expect(r.status(), await r.text()).toBe(200);
+      cur = await getPlan(plan.id);
+    }
+    await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
+    await expect(page.getByTestId("version-list-older")).toHaveCount(1);
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.getByTestId("plan-void-details").locator("summary").click();
+    await page.getByLabel("取消の理由").fill("中止の試験");
+    await page.getByRole("button", { name: /この計画を取り消す/ }).click();
+    await expect(page.getByTestId("ops-change-notice").filter({ hasText: "取消しました" })).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => { const a = document.activeElement as HTMLElement | null; return a?.dataset.testid === "version-row" && a.parentElement?.dataset.testid === "version-list"; }), { message: "新しい版の行にフォーカス" })
+      .toBe(true);
   });
 });

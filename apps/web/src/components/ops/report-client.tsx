@@ -844,11 +844,10 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
 
   return (
     <div className="flex flex-col gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
-      <div className="flex flex-col gap-3 sm:gap-6" data-testid="report-top">
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
-          className="opx-notice flex flex-col gap-1 !px-4 !py-1.5 !text-base !font-medium !leading-relaxed"
+          className="opx-notice flex flex-col gap-1 !px-4 !py-1 !text-base !font-medium !leading-relaxed"
           data-meaning="warn"
           data-testid="report-notice"
           data-adapter={view.adapter.name}
@@ -880,7 +879,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       {voidedNone ? null : (
       <nav
           aria-label="通報の手順"
-          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 lg:top-14"
+          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 max-sm:-mt-3 lg:top-14"
           data-testid="report-stepper"
         >
           {[
@@ -888,13 +887,14 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             ["#items", "② DIPS に入力", "report-step-items"],
             ["#record", "③ 結果を記録", "report-step-record"],
           ].map(([href, label, id]) => (
-            <a key={id} href={href} data-testid={id} className="flex min-h-12 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
+            <a key={id} href={href} data-testid={id} className="flex min-h-11 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
               {label}
             </a>
           ))}
         </nav>
       )}
 
+      <div className="flex flex-col gap-3 sm:gap-6 max-sm:-mt-3" data-testid="report-status-and-kinds">
       {voidedNone ? (
         <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2 rounded-sb-l bg-sb-base px-4 py-3 opx-shadow" data-testid="report-status-line" data-voided-none="1">
           <p className="text-base font-bold text-sb-ink">{VOIDED_NO_RECORD_LABEL}</p>
@@ -916,8 +916,9 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details" open={statusOpen}>
           <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm text-sb-ink">
             <ReportBadge report={view.requirement} bare />
-            <span className="flex-1" />
-            <span className="font-bold underline underline-offset-2">状況・期限の詳細</span>
+            <ReportStatusBadge status={view.status} bare />
+            {view.deadline.message ? <span className="min-w-0 basis-full text-sm leading-snug text-sb-ink-2">{view.deadline.message}</span> : null}
+            <span className="ml-auto font-bold underline underline-offset-2">詳細</span>
           </summary>
           <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
             <ReportBox report={view.requirement} />

@@ -60,7 +60,7 @@ export const planTabs = (page: Page) => page.locator('[data-testid="plan-tabs"]:
 export const planTab = (page: Page, key: string) => page.locator(`[data-testid="plan-tab-${key}"]:visible`);
 
 /** 禁止語の走査は、畳んだ中（display:none・閉じた details）も含む textContent でも行う（innerText は畳みの中を読まない）。 */
-export const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて", "問題なし", "大丈夫", "完璧", "代行"];
+export const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて", "問題なし", "大丈夫", "完璧", "代行", "保証", "必ず", "代理"];
 export const expectNoForbiddenTextContent = async (page: Page, label: string): Promise<void> => {
   const text = await page.locator("main").first().evaluate((el) => el.textContent ?? "");
   for (const w of FORBIDDEN_WORDS) expect(text, `${label}: textContent に「${w}」`).not.toContain(w);
