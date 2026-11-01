@@ -36,3 +36,4 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - `APPLICATION_SUPPORT_ENABLED=1` で公開の `/` の申請支援（診断パネル等）と `/api/diagnose` の `prefill`・`deadlines`・`categoryNote` が戻る。**既定は無効**。公開の `/` は静的に描かれ、**値は `next build` のときに固まる**（`next start` の環境変数を変えても効かない。再ビルドが要る）。
 - `VERCEL` が設定されている環境（production・preview を含む Vercel のどこでも）では常に無効。**Vercel のどの環境にもこの変数を設定しない。**
 - E2E（`playwright.config.ts`・`playwright.ops.config.ts`）は `APPLICATION_SUPPORT_ENABLED: ""` で動かす。フラグ有効の E2E は作らない。ビルドの前に `APPLICATION_SUPPORT_ENABLED` をシェルに残さないこと。
+- Sprint 18-2：運航管理の `dips_permit`（許可・承認の「申請済み」の記録。無効のとき新規は 409 `procedure_kind_disabled`、既存の行は読み取り専用の「以前の記録」）と次にやること `apply_permit` も同じフラグで切り替わる。フラグ有効側の回帰は DB テスト・単体で `vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1")`（または `applicationSupport: true`）にして守る（E2E-DB は常に無効）。

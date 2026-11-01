@@ -21,3 +21,20 @@
 フラグを有効にした E2E は作らない（公開の `/` はビルドのときに値が固まり、別のビルドが要るため。契約 §4.1）。
 診断パネル側の回帰は、`packages/regulations` の既存の単体テスト（診断・プリフィル・マニュアル骨子・期限）と、
 `apps/web/src/server/diagnose-response.test.ts`（有効のとき `prefill` が残る）が守る。
+
+---
+
+# Sprint 18-2: 画面に出なくなった data-testid の対応表（運航管理）
+
+フラグ `APPLICATION_SUPPORT_ENABLED` が無効（既定・本番）のとき、運航管理の許可・承認の「申請済み」の記録（`dips_permit`）の入口を描かない。
+コードは残しているので、基準の一覧から消える識別子は 0（`node scripts/testids.mjs --check` が「消えた識別子は 0」。`--write --reason` は使っていない）。
+
+| 識別子 | 前の画面 | フラグ無効での扱い | 同等の検査先 |
+|---|---|---|---|
+| `procedure-form-dips_permit`・`procedure-done-at-dips_permit-*`・`procedure-reference-dips_permit`・`procedure-check-dips_permit-applicationCompleted`・`procedure-submit-dips_permit` | `/ops/plans/[id]/overview` の手続きの記録（許可・承認） | 描かない（0 個）。API も 409 | 「無いこと」: `sprint12b-db` #17、`sprint18-2-db` 2-1。フラグ有効の流れ: `reports.db.test.ts` 契約 17 |
+| `procedure-dips_permit`（状態の札・履歴の箱）、`procedure-status-dips_permit`、`procedure-deadline-dips_permit` | 同上 | **既存の行が無い計画では描かない**。既存の行があれば `data-legacy="true"` の「以前の記録」として読み取り専用で描く（`procedure-status-*`・`procedure-history-*` あり。`procedure-deadline-*` は出さない） | DB テスト 2-3（要約の `legacy`）。E2E では行を作れない（フラグ有効の操作が要る）ため、DB テストで守る |
+| `procedure-retract-open-dips_permit`・`procedure-retract-form-dips_permit`・`procedure-retract-reason-dips_permit`・`procedure-retract-dips_permit` | 同上 | 以前の記録でも描かない（取り下げも 409） | DB テスト 2-3 |
+| `next-action`（`data-action-id="apply_permit"`）と `next-action-label`・`next-action-link` | 計画の主画面・ホームの次にやること | 出さない | `sprint12b-db` #17、`sprint12d-db` #15、`sprint17-db` S-5、`sprint18-2-db` 2-1（`apply_permit` が 0）。単体 `report-logic.test.ts` |
+| `next-action`（`data-action-id="register_permit"`）の名前 | 同上 | 名前が「取得した許可・承認を登録する」（識別子は同じ）。記録に依存せず出る | `sprint12b-db` #17、`sprint12d-db` #15、`sprint17-db` S-5 |
+
+残す識別子（変えていない）: `procedure-small_drone_law`・`procedure-form-small_drone_law`・`procedure-check-small_drone_law-*`・`procedure-submit-small_drone_law`・`procedure-history-small_drone_law` ほか、`plan-procedures`・`plan-procedures-details`・`procedure-none`（文だけ変更）、`plan-permit-applied-note`（文だけ変更）、`plan-diagnosis-evidence`・`basis-diagnosis-evidence`・`report-row-diagnosis-evidence`（見出しだけ変更）、`license-renewal-status`・`flight-license`。

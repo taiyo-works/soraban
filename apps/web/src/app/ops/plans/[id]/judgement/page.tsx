@@ -134,10 +134,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
                 範囲に収まるときだけ判定が変わります。
               </p>
             ) : (
-              <p>
-                許可・承認は、利用者本人が DIPS 2.0 で取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、
-                範囲に収まるときだけ判定が変わります。
-              </p>
+              <p>許可・承認は、利用者本人が DIPS 2.0 で取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。</p>
             )}
             <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
               許可・承認の登録を見る

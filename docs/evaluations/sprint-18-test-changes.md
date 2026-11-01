@@ -54,3 +54,68 @@
 - **M2（契約の誤り）**: `/ops/plans/[id]/judgement` と `snapshots/[sid]` には `verdict-responsibility` が**元から出ない**（`evidence` prop を渡すのは公開の `/` だけ）。契約 1-3 の「`/judgement` で `BOUNDARY_SHORT`」の E2E-DB は足さない。代わりに `sprint17-db` の J-4 に「主画面・`/report`・`/judgement` に旧い注記の文「入力項目の下書き」「手伝います」が 0 件（`/report` には別の意味の「下書き」が元からあるため、語でなく文で検査）、`/judgement` に `verdict-responsibility` が 0 個」を足した。
 - **語の一覧**: `APPLICATION_SUPPORT_WORDS` に「起算日」「開庁日以上前までに提出」「提出期限の目安」「DIPS／DRS 入力」「マニュアル骨子」「手続き窓口」を追加（公開の `/` の全体の走査として強くなる）。
 - **L2**: `sprint11d` #6 の重複した検査を、`verdict-done` の見出しと `verdict-done-condition` の件数に置き換えた。
+
+---
+
+# Sprint 18-2: 運航管理の「申請」に見える機能・文言（既存テストの変更と理由）
+
+意図の変更は、運航管理の「許可・承認の申請済み」の記録（`dips_permit`）と次にやること「許可・承認を申請する」（`apply_permit`）を、
+フラグ `APPLICATION_SUPPORT_ENABLED`（既定・本番は無効。`isApplicationSupportEnabled()`）の裏に止めたこと。
+**フラグ有効側の振る舞いは DB テスト・単体で期待値を変えずに守り**（`vi.stubEnv("APPLICATION_SUPPORT_ENABLED","1")` または引数 `applicationSupport: true`）、
+無効側（既定）の新しい期待は E2E-DB と DB テスト・単体で明示した。変えた期待値は `register_permit` の名前（契約どおり）だけ。
+マイグレーション・`packages/**` のデータ・判定エンジン・証跡 ID・`evidence_log` は無変更。基準の一覧から消える識別子は 0（`node scripts/testids.mjs --check` が「消えた識別子は 0」）。
+
+## 置き換えた E2E-DB
+
+| テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|
+| `sprint12b-db` #17 手続きの記録 | `dips_permit` を画面で記録・取り下げ・再記録・「前の判定に対する記録」、`apply_permit` の出入り、そのあと `small_drone_law` を 1 回記録 | **前半**：`apply_permit` が 0、`register_permit`（名前「取得した許可・承認を登録する」・期限の文言なし）、`procedure-dips_permit`・`procedure-form-dips_permit`・`procedure-submit-dips_permit` が 0、`procedure-none` が新しい文、API は done・retract とも 409 `procedure_kind_disabled` で行が増えない、「許可済み」「申請済み」が 4 画面に無い。**後半**：`small_drone_law` で、元の `dips_permit` の流れと同じ検査（確認が欠けると記録できない・記録・取り下げ・記録し直し・計画の訂正で「前の判定に対する記録です」・`notify_police` の出入り・禁止語の走査）を行う | 契約 §7.2 の対応表。`dips_permit` の流れの検査はフラグ有効側の DB テスト（`reports.db.test.ts` 契約 17）が期待値を変えずに守る |
+| `sprint12d-db` #15 | `dips_permit` を API で記録（201）→ `register_permit`（「結果を登録する」）、最後に `procedure-history-dips_permit` が見える | 記録を作らず（API は 409）`register_permit` が出る（`next-action-due` なし）。操縦者は押せない。番号を入れて判定が手続き済みになると消える。`procedure-dips_permit` と `procedure-form-dips_permit` は 0 | 申請の記録に依存しない（契約 2-4）。後半（番号で手続き済み）は同じ |
+| `sprint12d-db` 計画の照合（`plan-permit-applied-note`） | 「申請済み」を含む | 「利用者本人が DIPS 2.0 で取得します」を含み、「申請済み」を含まない | 契約 §4.3-5 |
+| `sprint17-db` S-5 | `apply_permit` の `href` が `/overview#procedures`、押して `/overview#procedures` に移りビューポートに入る | `apply_permit` が無い、`register_permit` の `href` が `/ops/permits/new`（押して移る）。手続きの記録への移動の検査は、美保基地の周辺の計画の `notify_police`（`href` `/overview#procedures`、押して移りビューポートに入る）に移した | 契約 §7.2。同じ「手続きの節へ移る」検査は残る |
+| `sprint17-db` S-1 | 計画（/overview）の部品に `plan-procedures`（手続きの記録の中身）が 1 個 | `plan-procedures-details`（節の畳み）が 1 個、`procedure-none` が 1 個（この計画は夜間飛行で飛行禁止法の手続きが無く、許可・承認の記録は受け付けないため、記録の対象が無い旨の文が出る） | 以前は `dips_permit` の記録の対象があったため `plan-procedures` が出ていた。節自体が /overview にあることの検査は残る |
+| `sprint11a-db` #22 | 一覧と詳細の札が「更新の申請期間」 | 「更新の時期」 | 契約 §4.3-3 |
+| `sprint12a-db`・`sprint12b-db` の `OFFICIAL` | 「申請・通報は DIPS 2.0 などの公式の手続きで行ってください」 | 「許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います」 | 契約 B5（4 定数を 1 文に） |
+
+## 置き換えた DB テスト・単体
+
+| テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|
+| `reports.db.test.ts` 契約 9（権限・追記専用の 2 件） | `dips_permit` を記録して追記専用を確かめる | 同じ。各テストの前にフラグ有効を設定（`vi.stubEnv`） | 検査の主題は権限・追記専用で、フラグ有効側で今までどおり守る |
+| `reports.db.test.ts` 契約 17（8 件） | `dips_permit` の記録・取り下げ・訂正・版・認可、`apply_permit` | 同じ期待値のまま、フラグ有効を設定して実行 | 契約 2-5（期待値を変えずに通す） |
+| `permits.db.test.ts` 契約 15 | `dips_permit` の記録のあと `register_permit`（名前「許可・承認の結果を登録する」） | 2 件：フラグ有効＝同じ流れで名前だけ「取得した許可・承認を登録する」／フラグ無効（既定）＝記録なしで `register_permit` が出て（tier 3・期限なし）、登録を作って番号を入れると消え、`dips_permit` の記録は作られない | 契約 2-4・2-5 |
+| `report-logic.test.ts` | `apply_permit`・`register_permit`（引数なし） | `Build` の `applicationSupport` 既定を `true`（既存の期待値は無変更。`register_permit` の名前のみ更新）。無効側は新しい `describe`（`apply_permit` が出ない・`register_permit` は記録に依存せず出る・tier 3・期限なし・`canAct`・適用済みで消える・`notify_police` は同じ） | 契約 2-4・2-5 |
+| `license.test.ts` | 札の文言に「更新の申請期限」「申請」 | 札の文言を 1 つの定数に（「更新の時期」「更新の期限（満了の 1 か月前）を過ぎています」「有効期限切れ」）。「申請」を含まない。ホームの近づく期限の定数も同一であること | 契約 2-6 |
+| `today-logic.test.ts` | `renew_license` の名前「技能証明を更新する」 | 「技能証明の有効期限を確認する」 | 契約 §4.3-3（識別子・`href`・tier は無変更） |
+| `messages.test.ts`・`report-requirement.test.ts` | 公式の手続きの文（旧） | 新しい 1 文 | 契約 B5 |
+| `field.db.test.ts` | `renew_license` の表示名を見ない | 表示名が新しい名前であることを足した | 契約 2-6 |
+
+## 追加したテスト
+
+- `e2e/ops-db/sprint18-2-db.spec.ts`: 2-1・2-8（許可・承認のフォームが無い、`small_drone_law` は記録できる、説明文と `procedure-none`）、2-7・2-9（証跡 ID の見出し 3 画面、公式の手続きの文、`/judgement` の注記）、2-10（運航管理の 21 画面の `main` に、「許可・承認を申請する」「申請済み」「申請の準備」「申請支援」「更新の申請」と旧い公式の文が 0）。
+- DB `reports.db.test.ts` の「Sprint 18-2」: 2-2（done・retract とも 409 で行が増えない・権限が先・`small_drone_law` の流れ）、2-3（既存の行が消えず「以前の記録」になる・行数とハッシュの列が同じ・取り下げも 409・行が無い計画には出ない）、2-4、L8（下記）。
+- 単体: `lib/official-note.test.ts`（4 定数の末尾が `OFFICIAL_PROCEDURE_NOTE` と一致・旧い文が無い・「代行」「代理」が無い）、`server/diagnose-response.test.ts`（`omitApplicationSupport`）。
+
+## L8: 判定スナップショットの `result` に申請支援の出力が保存・返却されるか（実測）
+
+18-1 のレビューからの申し送り。**保存・返却される（実測）**:
+
+- `writeJudged`（`server/ops/plans.ts`）が `DiagnosisRun.response`（`/api/diagnose` の応答そのもの）をそのまま `judgement_snapshots.result` に保存していた。応答には `prefill`・`deadlines`・`categoryNote` が含まれる（`diagnose-core.ts` の `runDiagnosis`）。
+- `GET /api/ops/plans/[id]/snapshots/[sid]`（`plans.getSnapshot`）が `result: r.result` として返していた（判定の画面は `snapshot.result` を VerdictSummary に渡すが、画面に `prefill` を出す所は無い）。一覧 `GET …/snapshots` は `result` を返さない。`snapshot_result_slim`（計画の取得）は `category`・`flags`・手続きの id と期限だけを取り出す SQL で、3 項目を含まない。
+
+対処（フラグ無効のとき。有効なら今までどおり）:
+
+1. **保存前に取り除く**: `writeJudged` が `omitApplicationSupport(res)`（`server/diagnose-response.ts`。`/api/diagnose` のルートの層と同じ関数・同じ 3 項目）を通して保存する。`category`・`verdict`・`procedures`・`evidenceId`・`checkEvidenceId`・`engineVersion` など他の項目は同一。証跡 ID は判定の入力から決まるので変わらない。内容のハッシュ（`soraban-snapshot-v1`）は DB が保存された `result` から計算するため整合する（`verify_judgement_snapshots` が 0 行）。
+2. **既存の行は書き換えない**（追記専用）。`getSnapshot` の応答の DTO の層で、フラグ無効のとき `result` から 3 項目を除く。`reportRequirement` には元の `result` を渡す（要否の計算は 3 項目を使わず、変えない）。
+3. 運航管理でも `server/diagnose-response.ts` の層を再利用できた（`omitApplicationSupport` を共通化。`stripPrefillFromResponse` もこれを使う）。
+
+DB テスト（`reports.db.test.ts` L8）: 有効のとき保存される／無効のとき新しい行に 3 項目が無く他のキーは同じ／旧い行（有効のときに書いた行）は無効の `getSnapshot` で 3 項目が除かれ、有効なら含まれる／行の `result`・`content_hash` は読む前後で同一／`verify_judgement_snapshots` が両方の計画で 0 行／`diagnosisEvidenceId` が行の `evidenceId` と一致。
+
+## 画面に出なくなった識別子（フラグ無効）
+
+`sprint-18-testid-map.md` の 18-2 の節に追記。基準の一覧から消える識別子は 0。
+
+## リスク②（圏外の先読みの束）
+
+Sprint 15 の先読みの束（`server/ops/field-compose.ts` が組み立てる field-bundle）に次にやることの名前は**含まれない**（実測：`nextActions`・`NEXT_ACTION_LABEL` を参照しない。入るのは現場の確認項目・携行書類・ギャップの文言など）。
+このため、古い束を開いたときに旧い「許可・承認を申請する」「技能証明を更新する」が出ることは無い。ホーム（今日）の圏外の殻（`/ops/offline/today`）は、次にやることを持たない殻である（コードの検索の範囲。実機の圏外では確かめていない）。

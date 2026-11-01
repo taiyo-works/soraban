@@ -25,7 +25,7 @@ const signInManager = async (page: Page): Promise<void> => {
 test.describe.configure({ mode: "serial" });
 
 test.describe("Sprint 11a E2E-DB：技能証明の有効期限の注意", () => {
-  test("22. 有効期限が 3 か月後の操縦者は一覧と詳細に「更新の申請期間」が出て、未入力の操縦者には出ない", async ({
+  test("22. 有効期限が 3 か月後の操縦者は一覧と詳細に「更新の時期」が出て、未入力の操縦者には出ない", async ({
     page,
   }) => {
     await signInManager(page);
@@ -48,13 +48,13 @@ test.describe("Sprint 11a E2E-DB：技能証明の有効期限の注意", () => 
 
     await page.goto("/ops/pilots");
     const soonRow = page.getByTestId("pilot-list").locator("li", { hasText: soonName });
-    await expect(soonRow.getByTestId("license-renewal-status")).toContainText("更新の申請期間");
+    await expect(soonRow.getByTestId("license-renewal-status")).toContainText("更新の時期");
     const noneRow = page.getByTestId("pilot-list").locator("li", { hasText: noneName });
     await expect(noneRow).toBeVisible();
     await expect(noneRow.getByTestId("license-renewal-status")).toHaveCount(0);
 
     await page.goto(`/ops/pilots/${soon.id}`);
-    await expect(page.getByTestId("pilot-detail").getByTestId("license-renewal-status")).toContainText("更新の申請期間");
+    await expect(page.getByTestId("pilot-detail").getByTestId("license-renewal-status")).toContainText("更新の時期");
     await expect(page.getByRole("link", { name: /更新の手続き/ })).toHaveAttribute(
       "href",
       "https://www.mlit.go.jp/koku/level4/license/",

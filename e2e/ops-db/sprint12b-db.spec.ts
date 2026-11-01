@@ -600,70 +600,38 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await expect(page.locator('[data-testid="next-action"][data-action-id="report"]')).toHaveCount(0);
   });
 
-  test("17. 手続きの記録：許可・承認の申請と飛行禁止法の同意・通報を、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録", async ({ page }) => {
+  test("17. 手続きの記録（Sprint 18-2）：許可・承認の「申請済み」の記録は止める（フォーム無し・API は 409・apply_permit は出ない）。飛行禁止法の同意・通報は、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録", async ({ page }) => {
     await login(page, seeded("a-manager"));
     const plan = await activate(manager, await createPlan(manager, planBody(aircraft.id, selfPilot, { title: `手続き 許可 ${stamp}` })));
     await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
-    const apply = page.locator('[data-testid="next-action"][data-action-id="apply_permit"]');
-    await expect(apply.getByTestId("next-action-label")).toHaveText("許可・承認を申請する");
-    await expect(apply.getByTestId("next-action-due")).toContainText("まで");
-    // 次にやることを押すと、手続きの記録の節へ移る（Sprint 17-1：手続きの記録は /overview に移った）
-    await tapAndWait(page, apply.getByTestId("next-action-link"), /\/overview#procedures$/);
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "none");
-    await expect(page.getByTestId("procedure-deadline-dips_permit")).toContainText("開庁日以上前");
-    await expect(page.getByTestId("procedure-form-dips_permit")).toBeVisible();
-
-    // 確認が欠けていると記録できない（画面でも API でも）
-    await page.waitForLoadState("networkidle").catch(() => undefined);
-    await page.getByTestId("procedure-done-at-dips_permit-date").fill("2027-01-05");
-    await page.getByTestId("procedure-done-at-dips_permit-time").fill("09:00");
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await expect(page.getByTestId("procedure-form-dips_permit").getByRole("alert").first()).toBeVisible();
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "none");
-    const bad = await manager.post(`/api/ops/plans/${plan.id}/procedure-records`, { data: { kind: "dips_permit", action: "done", doneAt: "2027-01-05T09:00", checks: { applicationCompleted: false } } });
-    expect(bad.status()).toBe(400);
-
-    // 記録する → 「申請済み（利用者の申告）」。「許可済み」とは出ない。次にやることから消える
-    await page.getByTestId("procedure-check-dips_permit-applicationCompleted").check();
-    await page.getByTestId("procedure-reference-dips_permit").fill("APPLY-0001");
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await afterFlash(page, "手続きの記録を残しました");
-    await expect(page.getByTestId("procedure-status-dips_permit")).toHaveText(/申請済み（利用者の申告）/);
-    expect(await page.getByTestId("plan-procedures").innerText()).not.toContain("許可済み");
-    // Sprint 17-1：元の計画の詳細にあった内容の移動先すべて（主画面・計画・判定・日誌）で「許可済み」が出ない
-    await onAllPlanScreens(page, plan.id, async (l) => {
-      expect(await bodyText(page), `${l}: 許可済み`).not.toContain("許可済み");
-    });
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
+    // 「許可・承認を申請する」は出ない。代わりに「取得した許可・承認を登録する」（申請の記録に依存しない・期限の文言なし）
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
+    const register = page.locator('[data-testid="next-action"][data-action-id="register_permit"]');
+    await expect(register.getByTestId("next-action-label")).toHaveText("取得した許可・承認を登録する");
+    await expect(register.getByTestId("next-action-due")).toHaveCount(0);
+    // 手続きの記録の節には、許可・承認の記録（フォーム・状態・取り下げ）が無い。行が無いので「以前の記録」も出ない
     await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
-
-    // 取り下げ（理由つき）→ 取り下げた行として残り、次にやることに戻る
-    await page.getByTestId("procedure-retract-open-dips_permit").click();
-    await page.getByTestId("procedure-retract-reason-dips_permit").fill("申請していなかった");
-    await page.getByTestId("procedure-retract-dips_permit").click();
-    await afterFlash(page, "記録を取り下げました");
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "retracted");
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
-    await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(1);
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
-    await expect(page.getByTestId("procedure-history-dips_permit").getByTestId("procedure-history-row")).toHaveCount(2);
-
-    // 記録し直したあと、計画の訂正（判定が変わる）で「前の判定に対する記録です」と出て、次にやることに戻る
-    await page.getByTestId("procedure-done-at-dips_permit-date").fill("2027-01-05");
-    await page.getByTestId("procedure-done-at-dips_permit-time").fill("09:30");
-    await page.getByTestId("procedure-check-dips_permit-applicationCompleted").check();
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await afterFlash(page, "手続きの記録を残しました");
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "done");
-    const patched = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: (await getPlan(manager, plan.id)).version, reason: "日の変更", plannedStartAt: "2027-01-14T10:00" } });
-    expect(patched.status(), await patched.text()).toBe(200);
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "stale");
-    await expect(page.getByTestId("procedure-stale-dips_permit")).toContainText("前の判定に対する記録です");
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
-    await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(1);
-    await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
+    await expect(page.getByTestId("procedure-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-form-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-submit-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-none")).toHaveText("この計画の判定には、記録する手続き（小型無人機等飛行禁止法の同意・通報）はありません。");
+    // API：done・retract とも 409 procedure_kind_disabled。行は増えない
+    const rowsBefore = (await (await manager.get(`/api/ops/plans/${plan.id}/procedure-records`)).json()) as { records: unknown[] };
+    for (const data of [
+      { kind: "dips_permit", action: "done", doneAt: "2027-01-05T09:00", checks: { applicationCompleted: true } },
+      { kind: "dips_permit", action: "retract", reason: "x" },
+    ]) {
+      const r = await manager.post(`/api/ops/plans/${plan.id}/procedure-records`, { data });
+      expect(r.status(), await r.text()).toBe(409);
+      expect(((await r.json()) as { error: string }).error).toBe("procedure_kind_disabled");
+    }
+    const rowsAfter = (await (await manager.get(`/api/ops/plans/${plan.id}/procedure-records`)).json()) as { records: unknown[] };
+    expect(rowsAfter.records).toHaveLength(rowsBefore.records.length);
+    await onAllPlanScreens(page, plan.id, async (l) => {
+      const text = await bodyText(page);
+      expect(text, `${l}: 許可済み`).not.toContain("許可済み");
+      expect(text, `${l}: 申請済み`).not.toContain("申請済み");
+    });
     await noHorizontalScroll(page, "手続きの記録");
     await onAllPlanScreens(page, plan.id, (l) => expectNoForbiddenWords(page, `手続きの記録（${l}）`));
 
@@ -683,8 +651,40 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await page.getByTestId("procedure-submit-small_drone_law").click();
     await afterFlash(page, "手続きの記録を残しました");
     await expect(page.getByTestId("procedure-status-small_drone_law")).toHaveText(/同意・通報を記録済み（利用者の申告）/);
+    expect(await page.getByTestId("plan-procedures").innerText()).not.toContain("許可済み");
     await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(0);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+
+    // 取り下げ（理由つき）→ 取り下げた行として残り、次にやること（警察へ通報する）に戻る
+    await page.getByTestId("procedure-retract-open-small_drone_law").click();
+    await page.getByTestId("procedure-retract-reason-small_drone_law").fill("通報していなかった");
+    await page.getByTestId("procedure-retract-small_drone_law").click();
+    await afterFlash(page, "記録を取り下げました");
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "retracted");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
+    await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(1);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await expect(page.getByTestId("procedure-history-small_drone_law").getByTestId("procedure-history-row")).toHaveCount(2);
+
+    // 記録し直したあと、計画の訂正（判定が変わる）で「前の判定に対する記録です」と出て、次にやることに戻る
+    await page.getByTestId("procedure-done-at-small_drone_law-date").fill("2027-01-05");
+    await page.getByTestId("procedure-done-at-small_drone_law-time").fill("09:30");
+    await page.getByTestId("procedure-check-small_drone_law-facilityConsentObtained").check();
+    await page.getByTestId("procedure-check-small_drone_law-policeNoticeDone").check();
+    await page.getByTestId("procedure-submit-small_drone_law").click();
+    await afterFlash(page, "手続きの記録を残しました");
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "done");
+    const patched = await manager.patch(`/api/ops/plans/${miho.id}`, { data: { expectedVersion: (await getPlan(manager, miho.id)).version, reason: "日の変更", plannedStartAt: "2027-01-14T10:00" } });
+    expect(patched.status(), await patched.text()).toBe(200);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "stale");
+    await expect(page.getByTestId("procedure-stale-small_drone_law")).toContainText("前の判定に対する記録です");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
+    await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(1);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await noHorizontalScroll(page, "手続きの記録（飛行禁止法）");
+    await onAllPlanScreens(page, miho.id, (l) => expectNoForbiddenWords(page, `手続きの記録（飛行禁止法・${l}）`));
 
     // 閲覧者は 403、他の組織は 404
     const viewer = await apiAs(seeded("a-viewer"));

@@ -172,10 +172,13 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     for (const id of away) await expect(page.getByTestId(id), `主画面 ${id}`).toHaveCount(0);
     await expect(page.getByTestId("plan-confirmations")).toHaveCount(0);
     await page.goto(`${base}/overview`);
-    for (const id of ["plan-overview", "plan-start", "plan-pilot-name", "plan-permit-numbers-text", "plan-edit-link", "plan-confirmation-status", "plan-confirm-facts", "plan-unknown-count", "plan-stale-sources", "version-list", "plan-procedures"]) {
+    for (const id of ["plan-overview", "plan-start", "plan-pilot-name", "plan-permit-numbers-text", "plan-edit-link", "plan-confirmation-status", "plan-confirm-facts", "plan-unknown-count", "plan-stale-sources", "version-list", "plan-procedures-details"]) {
       await expect(page.getByTestId(id), `計画 ${id}`).toHaveCount(1);
     }
     await expect(page.getByTestId("plan-confirmation-status").getByTestId("plan-state")).toHaveCount(1);
+    // Sprint 18-2：この計画（夜間飛行。飛行禁止法の手続きなし）は、許可・承認の記録を受け付けないため、記録の対象が無い旨の文が出る
+    // （以前は plan-procedures の中に dips_permit の記録のフォームが出ていた）。手続きの記録の節（plan-procedures-details）は残る
+    await expect(page.getByTestId("procedure-none")).toHaveCount(1);
     await page.goto(`${base}/journal`);
     await expect(page.getByTestId("plan-flights-empty")).toBeVisible();
     await expect(page.getByTestId("incident-linked")).toBeVisible();
@@ -242,7 +245,12 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     expect(draft.nextActions.find((a) => a.id === "request_confirmation")?.href).toBe(`${base}/overview#request-confirmation`);
     const pending = await activate(draft);
     expect(pending.nextActions.find((a) => a.id === "confirm")?.href).toBe(`${base}/overview#confirm`);
-    expect(pending.nextActions.find((a) => a.id === "apply_permit")?.href).toBe(`${base}/overview#procedures`);
+    // Sprint 18-2：apply_permit は出ない。許可・承認の手続きが残る計画には register_permit（/ops/permits/new）が出る。
+    // 手続きの記録への移動は notify_police（美保基地の周辺の計画。飛行禁止法の同意・通報）で検査する
+    expect(pending.nextActions.find((a) => a.id === "apply_permit")).toBeUndefined();
+    expect(pending.nextActions.find((a) => a.id === "register_permit")?.href).toBe("/ops/permits/new");
+    const miho = await activate(await createPlan({ latitude: 35.4936, longitude: 133.2361, flags: [] }));
+    expect(miho.nextActions.find((a) => a.id === "notify_police")?.href).toBe(`/ops/plans/${miho.id}/overview#procedures`);
     // 計画の一覧の行 → 通報の主画面
     await page.goto("/ops/plans");
     await expect(page.getByTestId("plan-row").first()).toBeVisible();
@@ -254,9 +262,12 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     await expect(page.getByTestId("plan-confirm-panel")).toBeVisible();
     await expectInViewport(page, "confirm", "次にやること（確認）");
     // 次にやること（手続き）→ /overview#procedures もビューポート内
-    await gotoPlanOpen(page, base);
-    await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="apply_permit"]').getByTestId("next-action-link"), /\/overview#procedures$/);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
+    await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="notify_police"]').getByTestId("next-action-link"), /\/overview#procedures$/);
     await expectInViewport(page, "procedures", "次にやること（手続き）");
+    // 許可・承認を登録する → 登録の新規入力へ
+    await gotoPlanOpen(page, base);
+    await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="register_permit"]').getByTestId("next-action-link"), /\/ops\/permits\/new$/);
   });
 
   test("J-2（17-1 の範囲）：判定の画面を一度も開かずに、確認の依頼 → 確認 → 通報の記録（新規）→ 変更 → 取消が、主画面・/report・/overview だけで完了する", async ({ page }) => {

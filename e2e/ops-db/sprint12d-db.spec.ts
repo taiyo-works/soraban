@@ -374,7 +374,8 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await expect(done).toContainText("許可書で確認してください");
     await expect(done).not.toContainText("範囲と有効期間は照合していません");
     await expect(tid(page, "plan-permit-format-note")).toContainText("※要確認");
-    await expect(tid(page, "plan-permit-applied-note")).toContainText("申請済み");
+    await expect(tid(page, "plan-permit-applied-note")).toContainText("利用者本人が DIPS 2.0 で取得します");
+    await expect(tid(page, "plan-permit-applied-note")).not.toContainText("申請済み");
     await expectNoHorizontalScroll(page, "計画の詳細（許可・承認の照合）");
     await onAllPlanScreens(page, withNumber.id, (l) => expectNoForbiddenWords(page, `計画の詳細（適用）${l}`));
 
@@ -591,28 +592,30 @@ test.describe("Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14）", () 
 });
 
 test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契約 15）", () => {
-  test("15. 申請済みの記録は判定を変えない。登録がなければ「許可・承認の結果を登録する」が出て（運航管理者のみ操作）、番号を入れて判定が手続き済みになると消える", async ({ page }) => {
+  test("15. 申請の記録に依存せず、登録がなければ「取得した許可・承認を登録する」が出て（運航管理者のみ操作）、番号を入れて判定が手続き済みになると消える（Sprint 18-2）", async ({ page }) => {
     const manager = await apiAs(seeded("a-manager"));
     const aircraft = await createAircraft(manager);
     const pilotId = await pilotIdOf(seeded("a-pilot"));
     const permit = await createPermit(manager, uniqueNumber("NEXT"));
-    // 夜間飛行（申請が要る地点）。許可番号は入れない
+    // 夜間飛行（許可・承認の手続きが残る地点）。許可番号は入れない。申請の記録（dips_permit）は作らない（作れない）
     const plan = await createPlan(manager, planBody(aircraft.id, pilotId, { latitude: NIGHT_SPOT.lat, longitude: NIGHT_SPOT.lng }));
     const rec = await manager.post(`/api/ops/plans/${plan.id}/procedure-records`, {
       data: { kind: "dips_permit", action: "done", doneAt: `${DAY}T09:00`, checks: { applicationCompleted: true }, reference: "APPLY-12D" },
     });
-    expect(rec.status(), await rec.text()).toBe(201);
+    expect(rec.status(), await rec.text()).toBe(409);
+    expect(((await rec.json()) as { error: string }).error).toBe("procedure_kind_disabled");
 
     await signIn(page.request, seeded("a-manager"));
     await fixClock(page, "12:00:10");
     await gotoPlanOpen(page, `/ops/plans/${plan.id}/judgement`);
-    // 申請済みは申告で、判定は要手続きのまま。「許可・承認を申請する」は消え、「結果を登録する」が出る
+    // 判定は要手続きのまま。「許可・承認を申請する」は出ず、「取得した許可・承認を登録する」が出る
     await expect(itemVerdict(page, "method_night")).toHaveAttribute("data-verdict", "needs_procedure");
     await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
     const action = page.locator('[data-testid="next-action"][data-action-id="register_permit"]');
     await expect(action).toHaveCount(1);
-    await expect(action).toContainText("許可・承認の結果を登録する");
+    await expect(action).toContainText("取得した許可・承認を登録する");
+    await expect(action.getByTestId("next-action-due")).toHaveCount(0);
     await tapAndWait(page, action.getByTestId("next-action-link"), /\/ops\/permits\/new$/);
     await expect(tid(page, "permit-form")).toBeVisible();
 
@@ -624,7 +627,7 @@ test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契�
     await expect(pilotAction.getByTestId("next-action-cannot")).toContainText("運航管理者に依頼してください");
     await expect(pilotAction.locator("a")).toHaveCount(0);
 
-    // 番号を入れて保存すると、判定が手続き済み（条件付き）になり、次にやることは消える。申請済みの記録は履歴に残る
+    // 番号を入れて保存すると、判定が手続き済み（条件付き）になり、次にやることは消える
     const upd = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: plan.version, reason: "許可が下りたので番号を入れた", permitNumbers: permit.permitNumber } });
     expect(upd.status(), await upd.text()).toBe(200);
     await signIn(page.request, seeded("a-manager"));
@@ -635,7 +638,9 @@ test.describe("Sprint 12d E2E-DB：12b との関係と次にやること（契�
     await expect(page.locator('[data-testid="next-action"][data-action-id="register_permit"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
     await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
-    await expect(tid(page, "procedure-history-dips_permit")).toBeVisible();
+    // 申請の記録は無い（フォーム・以前の記録のどちらも出ない）
+    await expect(tid(page, "procedure-dips_permit")).toHaveCount(0);
+    await expect(tid(page, "procedure-form-dips_permit")).toHaveCount(0);
     await onAllPlanScreens(page, plan.id, (l) => expectNoForbiddenWords(page, `計画（登録後）${l}`));
     await manager.dispose();
   });
