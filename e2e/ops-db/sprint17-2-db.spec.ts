@@ -463,7 +463,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
     for (let i = 0; i < 8; i++) {
       const d = new Date(Date.UTC(2010, 0, 1) + (day0 + i) * 86_400_000).toISOString().slice(0, 10);
       const f = await manager.post("/api/ops/flights", {
-        data: { aircraftId, pilotId, planId: plan.id, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `${d}T09:00`, landingAt: `${d}T09:20` },
+        data: { aircraftId, pilotId, flightPlanId: plan.id, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `${d}T09:00`, landingAt: `${d}T09:20` },
       });
       expect(f.status(), await f.text()).toBeLessThan(300);
     }
