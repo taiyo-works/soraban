@@ -50,6 +50,7 @@
 | 17-1 | 計画の共通の枠（タブ「計画｜通報｜当日｜日誌」）、判定・概要・日誌の画面の分離、旧アンカーの互換、識別子の基準の一覧と差分検査 | 評価合格（2026-11-01、`docs/evaluations/sprint-17-1-eval.md`・`-reeval.md`）。PR #49 に含む。main へは未マージ | ブランチ `claude/vigilant-fermi-g54nho` | `sprint-17.md` |
 | 17-2 | 通報の主画面（状況カード・主操作 1 つ・手順 3 つ・判定の 1 行）、通報の作業台の再構成、画面の長さの検査 | 評価・独立レビューを経て完了（2026-11-01、CI 成功 `b74d167`）。`docs/evaluations/sprint-17-2-eval.md`。デザインの磨き込みは Sprint 16 に統合。PR #49 に含む | ブランチ `claude/vigilant-fermi-g54nho` | `sprint-17.md` |
 | 18-1 | 公開の `/` の申請支援を止める（フラグ `APPLICATION_SUPPORT_ENABLED`、Vercel のどの環境でも常にオフ。コードは残す）、診断 API の応答から申請支援の出力を除く、責任の注記の差し替え | 評価・独立レビューを経て完了（2026-11-01、CI 成功 `90d8097`）。`docs/evaluations/sprint-18-1-eval.md`。PR #49 に含む | ブランチ `claude/vigilant-fermi-g54nho` | `sprint-18.md` |
+| 18-2 | 運航管理の「許可・承認の申請済み」の新規記録を止める（既存の行は読み取り専用）、次にやること `apply_permit` を `register_permit` に置換、免許更新・見出し・公式の手続きの文の整理、判定スナップショットから申請支援の出力を除く | 評価・独立レビューを経て完了（2026-11-01、CI 成功）。`docs/evaluations/sprint-18-2-eval.md`。PR #49 に含む | ブランチ `claude/vigilant-fermi-g54nho` | `sprint-18.md` |
 | 16 | 白基調のデザインの統一（12h ④を吸収）。16-1 トークンと見本 → 16-2 現場と圏外 → 16-3 後始末と一貫性 | 契約承認済み（2026-10-31）。Sprint 14・15 と PR #47 のマージの後に着手 | 未作成 | `sprint-16.md` |
 | 17〜28 | 点検整備、日誌の確定と PDF、携行資料、通報の接続、報告まで、社外へ（R1〜R4） | 計画のみ。番号は仮（2026-10-31 に 16〜27 から 1 つずらした。`ops-field-redesign-plan.md` の表の番号は旧番号のまま読む） | 未作成 | `ops-field-redesign-plan.md`（旧 12f の期限一覧は 24 に吸収） |
 
