@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlan, onAllPlanScreens } from "./plan-screen";
+import { gotoPlan, onAllPlanScreens, openReportFolds } from "./plan-screen";
 
 // Sprint 12b の E2E-DB（契約 1・4・5・13・16・17・18 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバーを与えた next start に対して実行する。
@@ -189,6 +189,7 @@ const openReport = async (page: Page, planId: string, query = "") => {
   await page.goto(`/ops/plans/${planId}/report${query}`);
   await expect(page.getByTestId("report-screen")).toBeVisible();
   await page.waitForLoadState("networkidle").catch(() => undefined);
+  await openReportFolds(page); // Sprint 17-2：状況の詳細・履歴・監査は折りたたんである
 };
 
 const fieldsData = JSON.parse(readFileSync(path.join(__dirname, "..", "..", "packages", "dips", "data", "report-fields.json"), "utf8")) as {

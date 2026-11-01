@@ -20,6 +20,8 @@ export function HashScroll() {
       const tryScroll = (): void => {
         const el = document.getElementById(id);
         if (el && el.getClientRects().length > 0) {
+          // 折りたたんだ中身を指す hash（例：#procedures）は、先に開く
+          for (const d of el.querySelectorAll("details[data-open-on-hash]")) (d as HTMLDetailsElement).open = true;
           // 描画が落ち着く（流し込みで高さが変わる）まで 1 回待ってから、実際の位置へ
           window.requestAnimationFrame(() => {
             const top = el.getBoundingClientRect().top + window.scrollY - TOP_OFFSET_PX;

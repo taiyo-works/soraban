@@ -82,7 +82,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           description="許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。"
         >
           <ChangeNotice target="procedures" />
-          <details data-testid="plan-procedures-details">
+          <details data-testid="plan-procedures-details" data-open-on-hash>
             <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">手続きの記録を開く</summary>
           <ProcedureRecordsPanel
             planId={plan.id}
@@ -112,7 +112,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
                 {plan.staleSources.length === 0 ? (
                   "ありません"
                 ) : (
-                  <details>
+                  <details data-testid="plan-stale-sources-details">
                     <summary className="flex min-h-11 cursor-pointer select-none items-center font-medium text-sb-ink">{plan.staleSources.length} 件あります（開く）</summary>
                     <ul className="flex list-disc flex-col gap-1 pl-5">
                       {plan.staleSources.map((s) => (

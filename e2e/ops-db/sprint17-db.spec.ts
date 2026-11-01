@@ -239,7 +239,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     await expect(page.getByTestId("plan-row").first()).toBeVisible();
     expect(await page.locator(`[data-testid="plan-row"][href="${base}"]`).count()).toBe(1);
     // 主画面の「次にやること」→ 計画（確認）の画面
-    await page.goto(base);
+    await gotoPlan(page, base);
     const confirmLink = page.locator('[data-testid="next-action"][data-action-id="confirm"]').getByTestId("next-action-link");
     await tapAndWait(page, confirmLink, /\/overview#confirm$/);
     await expect(page.getByTestId("plan-confirm-panel")).toBeVisible();
@@ -259,7 +259,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     const plan = await createPlan({ plannedStartAt: "2027-01-10T10:00" });
     const base = `/ops/plans/${plan.id}`;
     // 下書き → 主画面の次にやること → 確認の依頼（/overview）
-    await page.goto(base);
+    await gotoPlan(page, base);
     await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="request_confirmation"]').getByTestId("next-action-link"), /\/overview#request-confirmation$/);
     await page.waitForLoadState("networkidle").catch(() => undefined);
     await page.getByTestId("plan-request-confirmation").click();
@@ -269,7 +269,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     await page.getByTestId("plan-confirm-approve").click();
     await expect(page.getByTestId("plan-confirmation-status")).toContainText("確認済み");
     // 通報の記録（新規）：主画面の次にやること → /report
-    await page.goto(base);
+    await gotoPlan(page, base);
     await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="report"]').getByTestId("next-action-link"), /\/report$/);
     await expect(page.getByTestId("report-screen")).toBeVisible();
     await page.waitForLoadState("networkidle").catch(() => undefined);
@@ -288,7 +288,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     const cur = await getPlan(plan.id);
     const patched = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: cur.version, reason: "時刻の変更", plannedStartAt: "2027-01-10T13:00", durationMinutes: 45 } });
     expect(patched.status(), await patched.text()).toBe(200);
-    await page.goto(base);
+    await gotoPlan(page, base);
     await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="change_report"]').getByTestId("next-action-link"), /\/report\?kind=change/);
     await expect(page.getByTestId("report-screen")).toHaveAttribute("data-kind", "change");
     await page.waitForLoadState("networkidle").catch(() => undefined);
@@ -297,7 +297,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     // 中止 → 取消の記録
     const v = await getPlan(plan.id);
     expect((await manager.post(`/api/ops/plans/${plan.id}/void`, { data: { expectedVersion: v.version, reason: "中止" } })).status()).toBe(200);
-    await page.goto(base);
+    await gotoPlan(page, base);
     await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "cancel_needed");
     await tapAndWait(page, page.locator('[data-testid="next-action"][data-action-id="cancel_report"]').getByTestId("next-action-link"), /\/report\?kind=cancel/);
     await page.waitForLoadState("networkidle").catch(() => undefined);

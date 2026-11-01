@@ -1,5 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlan } from "./plan-screen";
+import { gotoPlanFolded as gotoPlan } from "./plan-screen";
 
 // Sprint 17-2 の E2E-DB（長さ L・主画面 J・通報の作業台 S-4）。元は 17-1 の E2E-DB（docs/sprints/sprint-17.md §10 の S-1〜S-3・S-5・S-6・J-1〜J-4 の構造の部分）。
 // 画面の分離：通報の主画面（/ops/plans/[id]）・通報の作業台（/report）・計画（/overview）・日誌（/journal）・判定（/judgement）。

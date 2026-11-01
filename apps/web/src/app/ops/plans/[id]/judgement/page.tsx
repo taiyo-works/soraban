@@ -92,7 +92,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
             空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
           </Note>
-          <details>
+          <details data-testid="plan-permit-format-details">
             <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">許可番号の形式について（※要再確認）</summary>
             <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
           </details>

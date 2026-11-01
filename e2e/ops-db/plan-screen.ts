@@ -9,7 +9,31 @@ import { expect, type Page } from "@playwright/test";
 export const gotoPlan = async (page: Page, url: string): Promise<void> => {
   await page.goto(url);
   await expectPlanScreenReady(page);
+  await openPlanFolds(page);
 };
+
+/**
+ * Sprint 17-2：計画の画面は、長さを詰めるため一部を折りたたんでいる（次にやることの「ほか N 件」・手続きの記録・判定の記録・
+ * 許可番号の形式・中止のフォーム）。既存の検査は折りたたまれた中の部品を読む・押すので、開く操作をここで行う（期待値は変えない）。
+ * 折りたたみを試験する検査（sprint17-2-db.spec.ts）は gotoPlan の代わりに gotoPlanFolded を使う。
+ */
+export const PLAN_FOLDS = ["next-actions-more", "plan-procedures-details", "plan-judgement-details", "plan-permit-format-details", "plan-void-details", "plan-stale-sources-details"] as const;
+export const openFolds = async (page: Page, testIds: readonly string[]): Promise<void> => {
+  await page.evaluate((ids) => {
+    for (const id of ids) for (const el of document.querySelectorAll(`details[data-testid="${id}"]`)) (el as HTMLDetailsElement).open = true;
+  }, testIds);
+};
+export const openPlanFolds = (page: Page): Promise<void> => openFolds(page, PLAN_FOLDS);
+
+/** 折りたたんだままで開く（折りたたみそのものを試験する検査用）。 */
+export const gotoPlanFolded = async (page: Page, url: string): Promise<void> => {
+  await page.goto(url);
+  await expectPlanScreenReady(page);
+};
+
+/** 通報の作業台（/report）の折りたたみ（状況の詳細・固定の文言の全文・過去の記録・監査・項目の対応表）を開く。 */
+export const REPORT_FOLDS = ["report-status-details", "report-history-older", "report-audit-details", "report-map-details"] as const;
+export const openReportFolds = (page: Page): Promise<void> => openFolds(page, REPORT_FOLDS);
 
 export const expectPlanScreenReady = async (page: Page): Promise<void> => {
   await expect(page.locator('[data-testid="plan-tabs"]:visible').first()).toBeVisible();

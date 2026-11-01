@@ -1,5 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlan, onAllPlanScreens } from "./plan-screen";
+import { gotoPlan, onAllPlanScreens, openPlanFolds } from "./plan-screen";
 import { expectNoHorizontalScroll } from "../field-checks";
 
 // Sprint 12d の E2E-DB（契約 12〜15 の画面・通しの部分。契約 16 の通報内容・現場モードは別の describe）。
@@ -571,6 +571,7 @@ test.describe("Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14）", () 
     await page.waitForLoadState("networkidle").catch(() => undefined);
     await tid(page, "plan-rejudge").click();
     await expect(tid(page, "plan-stale-box")).toHaveCount(0);
+    await openPlanFolds(page); // 再判定の後の再読み込みで、判定の記録の折りたたみは閉じる
     await expect(tid(page, "plan-snapshot-seq")).toHaveText("2");
     await page.goto(`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`);
     await expect(tid(page, "basis-permit-version")).toHaveText("版 1");

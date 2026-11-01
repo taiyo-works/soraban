@@ -833,7 +833,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
-          className="opx-notice flex flex-col gap-1 !px-4 !py-3 !text-base !font-medium !leading-relaxed"
+          className="opx-notice flex flex-col gap-1 !px-4 !py-2 !text-base !font-medium !leading-relaxed"
           data-meaning="warn"
           data-testid="report-notice"
           data-adapter={view.adapter.name}
