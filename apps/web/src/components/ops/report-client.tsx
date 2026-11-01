@@ -837,18 +837,28 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
 
   return (
     <div className="flex flex-col gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:gap-6" data-testid="report-top">
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
-          className="opx-notice flex flex-col gap-1 !px-4 !py-2 !text-base !font-medium !leading-relaxed"
+          className="opx-notice flex flex-col gap-1 !px-4 !py-1.5 !text-base !font-medium !leading-relaxed"
           data-meaning="warn"
           data-testid="report-notice"
           data-adapter={view.adapter.name}
         >
           <span data-testid="report-notice-short">{view.adapter.name === "mock" ? REPORT_NOTICE_BY_CHANNEL.mock : REPORT_NOTE_SHORT}</span>
           <details>
-            <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-normal text-sb-ink underline-offset-2 hover:underline">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</summary>
+            <summary className="flex min-h-11 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
+              <span className="underline underline-offset-2">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</span>
+              <span className="ml-auto flex items-center gap-x-2 text-xs text-sb-ink-2">
+                <span>送信元：</span>
+                <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
+                  {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}
+                  {view.adapter.label}
+                </Badge>
+                <span data-testid="report-adapter-mode">{view.adapter.modeLabel}</span>
+              </span>
+            </summary>
             <div className="flex flex-col gap-2 pb-1">
               <span>{notice}</span>
               {view.adapter.name === "mock" ? (
@@ -859,15 +869,6 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             </div>
           </details>
         </div>
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-sb-ink-2">
-          <span>送信元：</span>
-          <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
-            {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}
-            {view.adapter.label}
-          </Badge>
-          <span data-testid="report-adapter-mode">{view.adapter.modeLabel}</span>
-        </p>
-      </div>
 
       <nav
         aria-label="通報の手順"
@@ -926,6 +927,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           </button>
         ))}
       </nav>
+      </div>
 
       {!isCancel ? (
         <>
