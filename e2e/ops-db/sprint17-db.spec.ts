@@ -192,11 +192,11 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
       expect(text, `${url}: OK`).not.toMatch(/\bOK\b/);
     }
     // Sprint 18-1（契約 1-3 の誤りの訂正）：責任の注記 verdict-responsibility は公開の `/` だけに出る。運航管理の判定の画面には元から出ない。
-    // 旧い注記の語「下書き」「手伝います」は、主画面・/report・/judgement のどこにも無い。
+    // 旧い注記の文「入力項目の下書きまでを手伝います」は、主画面・/report・/judgement のどこにも無い（/report には別の意味の「下書き」が元からあるので、文で検査する）。
     for (const url of [base, `${base}/report`, `${base}/judgement`]) {
       await page.goto(url);
       const text = await page.locator("main").first().innerText();
-      expect(text, `${url}: 下書き`).not.toContain("下書き");
+      expect(text, `${url}: 入力項目の下書き`).not.toContain("入力項目の下書き");
       expect(text, `${url}: 手伝います`).not.toContain("手伝います");
       await expect(page.getByTestId("verdict-responsibility"), url).toHaveCount(0);
     }

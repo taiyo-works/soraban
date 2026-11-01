@@ -51,6 +51,6 @@
 - **M1**: フラグ無効のとき `/api/diagnose` の応答から `prefill` に加え `deadlines`（申請の提出期限の逆算）・`categoryNote` も除く（`server/diagnose-response.ts`）。`category`（履歴の保存値）・`procedures`・`verdict`・`evidenceId` は残す。単体: 無効なら 3 項目が無く文字列に「開庁日以上前までに提出」「提出期限の目安」が無い／有効なら無変更／本番・Vercel は有効でも除く。E2E: `sprint18-1.spec.ts` 1-4b。
 - **L1**: 判定履歴の行の `cat:IIA相当` などを、フラグ無効では出さない（保存値は不変）。既存の E2E の変更: `sprint11a` #21（`cat:IIA相当` → `cat:` が無いこと＋保存値に `II_A` が残ること）、`sprint11f`（正の検査 `cat:` 4 か所 → 診断由来で残る `DID:`。負の検査 `not cat:` はそのまま）。
 - **L5**: フラグは `VERCEL` が設定された環境では常に偽（`boundary.test.ts` を更新）。契約 §12 に追記、`docs/runbooks/local-verification.md` に運用の注意。
-- **M2（契約の誤り）**: `/ops/plans/[id]/judgement` と `snapshots/[sid]` には `verdict-responsibility` が**元から出ない**（`evidence` prop を渡すのは公開の `/` だけ）。契約 1-3 の「`/judgement` で `BOUNDARY_SHORT`」の E2E-DB は足さない。代わりに `sprint17-db` の J-4 に「主画面・`/report`・`/judgement` に『下書き』『手伝います』が 0 件、`/judgement` に `verdict-responsibility` が 0 個」を足した。
+- **M2（契約の誤り）**: `/ops/plans/[id]/judgement` と `snapshots/[sid]` には `verdict-responsibility` が**元から出ない**（`evidence` prop を渡すのは公開の `/` だけ）。契約 1-3 の「`/judgement` で `BOUNDARY_SHORT`」の E2E-DB は足さない。代わりに `sprint17-db` の J-4 に「主画面・`/report`・`/judgement` に旧い注記の文「入力項目の下書き」「手伝います」が 0 件（`/report` には別の意味の「下書き」が元からあるため、語でなく文で検査）、`/judgement` に `verdict-responsibility` が 0 個」を足した。
 - **語の一覧**: `APPLICATION_SUPPORT_WORDS` に「起算日」「開庁日以上前までに提出」「提出期限の目安」「DIPS／DRS 入力」「マニュアル骨子」「手続き窓口」を追加（公開の `/` の全体の走査として強くなる）。
 - **L2**: `sprint11d` #6 の重複した検査を、`verdict-done` の見出しと `verdict-done-condition` の件数に置き換えた。
