@@ -374,7 +374,7 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     await expect(done).toContainText("許可書で確認してください");
     await expect(done).not.toContainText("範囲と有効期間は照合していません");
     await expect(tid(page, "plan-permit-format-note")).toContainText("※要確認");
-    await expect(tid(page, "plan-permit-applied-note")).toContainText("利用者本人が DIPS 2.0 で取得します");
+    await expect(tid(page, "plan-permit-applied-note")).toContainText("利用者本人が DIPS 2.0 などの公式の手続きで取得します");
     await expect(tid(page, "plan-permit-applied-note")).not.toContainText("申請済み");
     await expectNoHorizontalScroll(page, "計画の詳細（許可・承認の照合）");
     await onAllPlanScreens(page, withNumber.id, (l) => expectNoForbiddenWords(page, `計画の詳細（適用）${l}`));

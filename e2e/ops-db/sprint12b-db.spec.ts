@@ -33,7 +33,7 @@ const apiAs = async (who: Who | null, base = BASE): Promise<APIRequestContext> =
 const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて"];
 const NOT_SENT = "そらばんは DIPS に送信しません";
 const NOT_REPORTED_UNTIL_RECORD = "記録するまで『通報済み』にはなりません";
-const OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います";
+const OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います";
 const REPORTED_LABEL = "DIPS で通報済み（利用者の申告・手動記録）";
 
 /** 夜間飛行の地点（皆生）／判定不能が残る運営拠点／判定不能が無く特定飛行に当たらない地点（鳥取市の工業専用地域内）／美保基地（小型無人機等飛行禁止法）。 */

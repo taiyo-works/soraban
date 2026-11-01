@@ -278,7 +278,13 @@ export const summarizeProcedureRecords = (
       legacy,
       status,
       statusLabel:
-        status === "done" ? latest!.label : status === "stale" ? PROCEDURE_RECORD_STALE_LABEL : status === "retracted" ? PROCEDURE_RECORD_RETRACTED_LABEL : PROCEDURE_RECORD_NONE_LABEL,
+        legacy && (status === "done" || status === "stale")
+          ? PROCEDURE_RECORD_LEGACY_DONE_LABEL
+          : status === "done"
+            ? latest!.label
+            : status === "stale"
+              ? PROCEDURE_RECORD_STALE_LABEL
+              : status === "retracted" ? PROCEDURE_RECORD_RETRACTED_LABEL : PROCEDURE_RECORD_NONE_LABEL,
       latest,
       deadlineLabel: legacy ? null : ((dated ?? applicable[kind][0])?.deadlineLabel ?? null),
     });

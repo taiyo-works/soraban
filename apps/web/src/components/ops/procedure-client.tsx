@@ -220,8 +220,9 @@ export function ProcedureRecordsPanel({
               <h3 className="text-sm font-medium text-sb-ink">{s.kindLabel}</h3>
               <div className={`flex flex-col gap-1 rounded-sb-m border border-l-4 px-3 py-2.5 ${STATUS_BOX[s.status]}`}>
                 <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-                  <Badge tone={STATUS_TONE[s.status]} data-testid={`procedure-status-${s.kind}`} data-status={s.status}>
-                    <span aria-hidden className="mr-1">{STATUS_GLYPH[s.status]}</span>
+                  <Badge tone={s.legacy ? "mute" : STATUS_TONE[s.status]} data-testid={`procedure-status-${s.kind}`} data-status={s.status}>
+                    {/* 以前の記録は中立の札（緑の ✓ を使わない。判定の「手続き済み」と紛れさせない） */}
+                    <span aria-hidden className="mr-1">{s.legacy && s.status !== "retracted" ? "－" : STATUS_GLYPH[s.status]}</span>
                     {s.statusLabel}
                   </Badge>
                   {s.latest && done ? (
@@ -236,7 +237,7 @@ export function ProcedureRecordsPanel({
                     {s.deadlineLabel}
                   </p>
                 ) : null}
-                {s.status === "stale" ? (
+                {s.status === "stale" && !s.legacy ? (
                   <p className="text-xs leading-relaxed text-sb-ink" data-testid={`procedure-stale-${s.kind}`}>
                     {PROCEDURE_RECORD_STALE_LABEL}
                   </p>
@@ -269,7 +270,7 @@ export function ProcedureRecordsPanel({
                     </span>
                     {r.reference ? <span className="break-all">控え：{r.reference}</span> : null}
                     {r.reason ? <span className="break-all">理由：{r.reason}</span> : null}
-                    {!r.forCurrentSnapshot && r.action === "done" ? <span className="text-sb-ink-3">前の判定に対する記録です。</span> : null}
+                    {!r.forCurrentSnapshot && r.action === "done" && !s.legacy ? <span className="text-sb-ink-3">前の判定に対する記録です。</span> : null}
                   </li>
                 ))}
               </ol>

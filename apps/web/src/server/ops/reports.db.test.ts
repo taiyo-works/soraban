@@ -1619,11 +1619,11 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
         applicable: false,
         status: "done",
         kindLabel: "以前の記録：許可・承認の手続きの申告（受付を停止しています）",
-        statusLabel: "手続き済みの申告（以前の記録）",
+        statusLabel: "以前の申告（許可・承認の取得を示すものではありません）",
         deadlineLabel: null,
       });
       expect(view.summary.find((s) => s.kind === "small_drone_law")).toMatchObject({ legacy: false });
-      expect(view.records.find((r) => r.kind === "dips_permit")).toMatchObject({ action: "done", label: "手続き済みの申告（以前の記録）", doneAtJst: "2027-01-05 11:00" });
+      expect(view.records.find((r) => r.kind === "dips_permit")).toMatchObject({ action: "done", label: "以前の申告（許可・承認の取得を示すものではありません）", doneAtJst: "2027-01-05 11:00" });
       // 行は消えず、ハッシュの列も変わらない
       expect((await procRows(plan.id)).rows).toEqual(before);
       expect(before).toHaveLength(1);
@@ -1649,7 +1649,7 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       expect(d.nextActions.map((x) => x.id)).not.toContain("apply_permit");
       const reg = d.nextActions.find((x) => x.id === "register_permit")!;
       expect(reg).toMatchObject({ label: "取得した許可・承認を登録する", tier: 3, dueLabel: null, canAct: true, href: "/ops/permits/new" });
-      expect(reg.reason).toContain("利用者本人が DIPS 2.0 で取得します");
+      expect(reg.reason).toContain("利用者本人が DIPS 2.0 などの公式の手続きで取得します");
       // 期限が過ぎても tier 3 のまま
       const later = await plans.getPlan(mgr({ now: () => new Date("2027-02-05T03:00:00Z") }), plan.id);
       expect(later.nextActions.find((x) => x.id === "register_permit")).toMatchObject({ tier: 3, dueLabel: null });

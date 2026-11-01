@@ -27,10 +27,10 @@ const STAGE_LABEL: Readonly<Record<Stage, string>> = LICENSE_RENEWAL_LABEL;
 const stageDetail = (stage: Stage, expiresOn: string): string => {
   const deadline = subtractCalendarMonths(expiresOn, 1) ?? "";
   if (stage === "renewal_window") {
-    return `満了の 1 か月前（${deadline}）が更新の期限です。更新の手続きは、操縦者本人が DIPS 2.0 で行います。`;
+    return `満了の 1 か月前（${deadline}）が更新の期限です。更新の手続きは、操縦者本人が公式の手続きで行います。`;
   }
   if (stage === "past_deadline") {
-    return `更新の期限（満了の 1 か月前、${deadline}）を過ぎています。更新の手続きは、操縦者本人が DIPS 2.0 で行います。`;
+    return `更新の期限（満了の 1 か月前、${deadline}）を過ぎています。`;
   }
   return `有効期限（${expiresOn}）が切れています。`;
 };

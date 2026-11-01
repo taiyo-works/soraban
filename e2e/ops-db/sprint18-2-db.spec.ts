@@ -28,7 +28,7 @@ type PlanJson = { id: string; version: number; currentSnapshotId: string; nextAc
 // 契約 2-10：運航管理の画面の本文に出してはいけない語（申請の記録・申請支援・更新の申請）。
 const BANNED = ["許可・承認を申請する", "申請済み", "申請の準備", "申請支援", "更新の申請"];
 const OLD_OFFICIAL = "申請・通報は DIPS 2.0 などの公式の手続きで行ってください";
-const NEW_OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います";
+const NEW_OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います";
 
 const mainText = (page: Page): Promise<string> => page.locator("main").first().evaluate((el) => el.textContent ?? "");
 
@@ -137,7 +137,7 @@ test.describe("Sprint 18-2 E2E-DB：運航管理の「申請」に見える機�
     await expect(page.locator("main").first()).toContainText(NEW_OFFICIAL);
     // 判定の画面の注記
     await gotoPlanOpen(page, `${base}/judgement`);
-    await expect(page.getByTestId("plan-permit-applied-note")).toContainText("許可・承認は、利用者本人が DIPS 2.0 で取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。");
+    await expect(page.getByTestId("plan-permit-applied-note")).toContainText("許可・承認は、利用者本人が DIPS 2.0 などの公式の手続きで取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。");
     await expect(page.getByTestId("plan-permit-applied-note")).not.toContainText("申請済み");
   });
 

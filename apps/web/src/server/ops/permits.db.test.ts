@@ -958,5 +958,25 @@ describe.skipIf(!ADMIN_URL)("許可・承認の登録・計画への適用・ス
       // 申請の記録（dips_permit）は一度も作られていない。期待は「申請の記録に依存しない」こと
       expect(after.procedureRecords.some((r) => r.kind === "dips_permit")).toBe(false);
     });
+
+    it("【フラグ無効 §12.1 中-1】一部だけ登録（夜間の登録だけで 30m の承認が残る）でも register_permit が出続ける。全部の登録で判定の手続きが空になると消える", async () => {
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      const two = { flags: ["method_night", "method_30m"] };
+      const plan = await plans.requestConfirmation(mgr(), (await newPlan({ ...MIHO, ...two, plannedStartAt: "2027-02-10T09:00" })).id, {});
+      const first = await plans.getPlan(mgr(), plan.id);
+      expect(first.nextActions.map((a) => a.id)).toContain("register_permit");
+      // 夜間だけの登録を番号に入れる → applied は 1 件だが、30m の承認の手続きが判定に残る
+      await newPermit({ permitNumber: "PART-18-2A", kinds: ["night"], validFrom: "2027-02-01", validTo: "2027-02-28" });
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: first.version, reason: "夜間の許可番号", permitNumbers: "PART-18-2A" });
+      const partial = await plans.getPlan(mgr(), plan.id);
+      expect(partial.permits.appliedCount).toBe(1);
+      expect(partial.nextActions.map((a) => a.id)).toContain("register_permit");
+      expect(partial.nextActions.map((a) => a.id)).not.toContain("apply_permit");
+      // もう一つの種類も登録して番号に足す → 判定の手続きが空になり消える
+      await newPermit({ permitNumber: "PART-18-2B", kinds: ["30m"], validFrom: "2027-02-01", validTo: "2027-02-28" });
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: partial.version, reason: "30m の許可番号", permitNumbers: "PART-18-2A, PART-18-2B" });
+      const full = await plans.getPlan(mgr(), plan.id);
+      expect(full.nextActions.map((a) => a.id)).not.toContain("register_permit");
+    });
   });
 });

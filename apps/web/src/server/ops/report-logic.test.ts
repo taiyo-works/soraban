@@ -146,6 +146,7 @@ type Build = {
   procedures?: SnapshotProcedureLite[];
   records?: NextActionsInput["procedureRecords"];
   can?: Partial<NextActionsInput["can"]>;
+  permits?: NextActionsInput["permits"];
   /** 申請支援のフラグ。既定 true（Sprint 18 より前の振る舞いを守る既存のテストのため）。無効側は専用の describe で検査する。 */
   applicationSupport?: boolean;
 };
@@ -174,6 +175,8 @@ const build = (b: Build = {}): { input: NextActionsInput; status: ReportStatusRe
       procedures: b.procedures ?? [],
       procedureRecords: b.records ?? {},
       can: { update: true, confirm: true, record: true, ...(b.can ?? {}) },
+      // 既定は applied:true（フラグ有効の既存の期待値を変えない：適用された登録があれば register_permit は出ない）。必須の引数（低-1）
+      permits: b.permits ?? { applied: true, canRegister: true },
       applicationSupport: b.applicationSupport ?? true,
     },
   };
@@ -358,7 +361,7 @@ describe("planNextActions：許可・承認の結果の登録（Sprint 12d 契�
     expect(withPermits(false, true, { procedures: [permit], records: { dips_permit: { action: "done", snapshotId: "other" } } }).map((a) => a.id)).toEqual(["apply_permit"]);
   });
 
-  it("permits を渡さない導出（12b のまま）では出ない。期限が過ぎていれば tier 2", () => {
+  it("適用された登録がある（既定）ときは出ない。期限が過ぎていれば tier 2（フラグ有効）", () => {
     expect(ids({ ...base, procedures: [permit], records: done })).toEqual([]);
     const late = build({ ...base, procedures: [permit], records: done, nowMs: Date.parse("2027-01-28T03:00:00Z") });
     expect(planNextActions({ ...late.input, permits: { applied: false, canRegister: true } })[0]).toMatchObject({ id: "register_permit", tier: 2 });
@@ -369,10 +372,8 @@ describe("planNextActions：申請支援のフラグが無効（既定・本番�
   const permit: SnapshotProcedureLite = { procedureId: "flight-approval-night", deadlineLabel: "2027-01-27 まで（10 開庁日以上前）", deadlineDate: "2027-01-27" };
   const police: SnapshotProcedureLite = { procedureId: "small-drone-law-consent-notice", deadlineLabel: "飛行開始の 48 時間前まで", deadlineDate: "2027-01-12" };
   const base = { kind: "not_applicable_model" as const, applicationSupport: false };
-  const off = (b: Build, permits?: { applied: boolean; canRegister: boolean }) => {
-    const built = build({ ...base, ...b });
-    return planNextActions(permits ? { ...built.input, permits } : built.input);
-  };
+  const off = (b: Build, permits: { applied: boolean; canRegister: boolean } = { applied: false, canRegister: true }) =>
+    planNextActions(build({ ...base, ...b, permits }).input);
 
   it("apply_permit は出ない（許可・承認の手続きがあっても。申請の記録があっても無くても）", () => {
     const records = { dips_permit: { action: "done" as const, snapshotId: SNAP } };
@@ -393,7 +394,7 @@ describe("planNextActions：申請支援のフラグが無効（既定・本番�
         href: "/ops/permits/new",
         dueLabel: null,
       });
-      expect(list[0]!.reason).toContain("利用者本人が DIPS 2.0 で取得します");
+      expect(list[0]!.reason).toContain("利用者本人が DIPS 2.0 などの公式の手続きで取得します");
       expect(list[0]!.reason).not.toContain("申請");
     }
     // 期限が過ぎていても tier 3 のまま（期限の逆算を案内しない）
@@ -401,14 +402,21 @@ describe("planNextActions：申請支援のフラグが無効（既定・本番�
     expect(late[0]).toMatchObject({ id: "register_permit", tier: 3, dueLabel: null });
   });
 
-  it("操縦者（登録できない役割）は canAct false。適用された登録があれば消える。手続きが無い・緊急用務空域・permits を渡さないときは出ない", () => {
+  it("操縦者（登録できない役割）は canAct false。手続きが残らない入力（手続きが無い・緊急用務空域だけ）では出ない", () => {
     expect(off({ procedures: [permit] }, { applied: false, canRegister: false })[0]).toMatchObject({ id: "register_permit", canAct: false });
-    expect(off({ procedures: [permit] }, { applied: true, canRegister: true })).toEqual([]);
     expect(off({ procedures: [] }, { applied: false, canRegister: true })).toEqual([]);
     expect(off({ procedures: [{ procedureId: "flight-permission-emergency-airspace", deadlineLabel: null, deadlineDate: null }] }, { applied: false, canRegister: true })).toEqual([]);
-    expect(off({ procedures: [permit] })).toEqual([]);
     // 中止した計画には出ない
     expect(off({ planState: "voided", procedures: [permit] }, { applied: false, canRegister: true })).toEqual([]);
+  });
+
+  it("一部だけ登録（applied=true でも判定に手続きが残る。DID だけの登録で夜間の承認が残る）なら register_permit が出続ける。手続きが空になれば消える（§12.1 中-1）", () => {
+    const did: SnapshotProcedureLite = { procedureId: "flight-permission-did", deadlineLabel: null, deadlineDate: null };
+    const partial = off({ procedures: [permit] }, { applied: true, canRegister: true });
+    expect(partial.map((a) => a.id)).toEqual(["register_permit"]);
+    expect(off({ procedures: [did, permit] }, { applied: true, canRegister: true }).map((a) => a.id)).toEqual(["register_permit"]);
+    // 全部の手続きが登録で満たされると、判定の手続きが空になり消える
+    expect(off({ procedures: [] }, { applied: true, canRegister: true })).toEqual([]);
   });
 
   it("notify_police は今までどおり（記録で消え、取り下げで戻る）", () => {

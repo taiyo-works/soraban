@@ -196,13 +196,13 @@ export type NextActionsInput = {
   readonly procedureRecords: Readonly<Partial<Record<ProcedureRecordKind, ProcedureRecordLite>>>;
   readonly can: { readonly update: boolean; readonly confirm: boolean; readonly record: boolean };
   /**
-   * 許可・承認の登録との関係（Sprint 12d）。指定しないとき（12b の導出だけを使うとき）は「許可・承認の結果を登録する」を出さない。
+   * 許可・承認の登録との関係（Sprint 12d）。必須（Sprint 18-2 低-1）。
    * applied は、計画の許可番号に適用された登録が 1 件以上あること。canRegister は運航管理者だけ。
    */
-  readonly permits?: { readonly applied: boolean; readonly canRegister: boolean };
+  readonly permits: { readonly applied: boolean; readonly canRegister: boolean };
   /**
    * 申請支援のフラグ（lib/boundary.ts の isApplicationSupportEnabled）。必須（渡し忘れを型で防ぐ。Sprint 18-2）。
-   * false：「許可・承認を申請する」（apply_permit）を出さず、許可・承認の手続きが判定に残り適用できる登録が無いとき
+   * false：「許可・承認を申請する」（apply_permit）を出さず、許可・承認の手続きが判定に残っているとき（適用された登録の有無では判断しない。§12.1 中-1）
    *   「取得した許可・承認を登録する」（register_permit）を、申請の記録（dips_permit）に依存せず出す。
    * true：今までの振る舞い（apply_permit、申請済みのあとの register_permit）。
    */
@@ -374,12 +374,13 @@ export const planNextActions = (i: NextActionsInput): NextAction[] => {
     const permitList = i.procedures.filter((p) => PERMIT_PROCEDURE.test(p.procedureId) && !NOT_AN_APPLICATION.has(p.procedureId));
     if (i.applicationSupport) {
       procedureAction("dips_permit", "apply_permit", permitList, "判定の結論に、DIPS の許可・承認の手続きがあります。申請したら記録します");
-    } else if (permitList.length > 0 && i.permits && !i.permits.applied) {
-      // 申請の記録に依存しない：判定に許可・承認の手続きが残り、適用できる登録が無いとき。期限の文言は付けない（tier 3 固定）。
+    } else if (permitList.length > 0) {
+      // 申請の記録に依存しない：判定に許可・承認の手続きが残っているとき（Sprint 18 §12.1 中-1）。permits.applied は「必要な種類の 1 つでも合えば真」で、
+      // 一部だけ登録された計画（DID だけの登録で夜間が残る）でも手続きは残るため、applied では判断しない。期限の文言は付けない（tier 3 固定）。
       add(
         "register_permit",
         3,
-        "判定（補助）に許可・承認の手続きがあります。許可・承認は、利用者本人が DIPS 2.0 で取得します。取得したら控えを登録し、計画の許可番号の欄に番号を入れます",
+        "判定（補助）に許可・承認の手続きがあります。許可・承認は、利用者本人が DIPS 2.0 などの公式の手続きで取得します。取得したら控えを登録し、計画の許可番号の欄に番号を入れます",
         i.permits.canRegister,
       );
     }

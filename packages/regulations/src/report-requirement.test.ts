@@ -268,7 +268,7 @@ describe("表示用の定数に禁止語がない", () => {
 
   it("固定の文言は、DIPS に送信しないことと、公式の手続きで行うことを含む", () => {
     expect(REPORT_FIXED_NOTE).toContain("そらばんは DIPS に送信しません");
-    expect(REPORT_FIXED_NOTE).toContain("許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います");
-    expect(PLAN_JUDGEMENT_DISCLAIMER).toBe("判定は入力された情報の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います。");
+    expect(REPORT_FIXED_NOTE).toContain("許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います");
+    expect(PLAN_JUDGEMENT_DISCLAIMER).toBe("判定は入力された情報の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います。");
   });
 });
