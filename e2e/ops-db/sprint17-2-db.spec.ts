@@ -458,10 +458,12 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       expect(r.status(), await r.text()).toBe(200);
       cur = await getPlan(plan.id);
     }
+    // 飛行記録：他の検査の時間帯と重ならないよう、過去の日付をずらして作る（繰り返しの実行でも重ならない）
+    const day0 = Math.floor(Math.random() * 3000) * 8;
     for (let i = 0; i < 8; i++) {
-      const hh = String(1 + i).padStart(2, "0");
+      const d = new Date(Date.UTC(2010, 0, 1) + (day0 + i) * 86_400_000).toISOString().slice(0, 10);
       const f = await manager.post("/api/ops/flights", {
-        data: { aircraftId, pilotId, planId: plan.id, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `2027-01-05T${hh}:00`, landingAt: `2027-01-05T${hh}:20` },
+        data: { aircraftId, pilotId, planId: plan.id, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `${d}T09:00`, landingAt: `${d}T09:20` },
       });
       expect(f.status(), await f.text()).toBeLessThan(300);
     }
