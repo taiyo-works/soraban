@@ -13,7 +13,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
   const row = (v: VersionDto) => (
     <li
           key={v.versionNo}
-            className="grid scroll-mt-24 grid-cols-1 gap-2 border-b border-sb-rule py-3 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
+            className="grid scroll-mt-24 grid-cols-1 gap-1 border-b border-sb-rule py-2 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
             data-testid="version-row"
             tabIndex={-1}
           >
@@ -57,7 +57,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
     <Section
       title="版の一覧"
       aria-label="版の一覧"
-      description="登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。"
+      description={recent === undefined ? "登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。" : undefined}
     >
       <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-row"]:last-child' />
       {older.length > 0 ? (

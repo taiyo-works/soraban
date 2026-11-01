@@ -32,7 +32,7 @@ export const openPlanFolds = (page: Page): Promise<void> => openFolds(page, PLAN
 
 
 /** 通報の作業台（/report）の折りたたみ（状況の詳細・固定の文言の全文・過去の記録・監査・項目の対応表）を開く。 */
-export const REPORT_FOLDS = ["report-status-details", "report-history-older", "report-audit-details", "report-map-details"] as const;
+export const REPORT_FOLDS = ["report-status-details", "report-history-older", "report-audit-details", "report-map-details", "report-row-details"] as const;
 export const openReportFolds = (page: Page): Promise<void> => openFolds(page, REPORT_FOLDS);
 
 export const expectPlanScreenReady = async (page: Page): Promise<void> => {

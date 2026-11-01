@@ -662,6 +662,9 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
             {r.dipsNumber ?? (r.numberUnavailable ? "番号なし（表示されなかった）" : "—")}
           </dd>
         </div>
+        <details className="col-span-2 sm:col-span-4" data-testid="report-row-details">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pb-2 sm:grid-cols-4">
         {pair("記録の版", r.version, "report-row-version")}
         {pair("計画の版", r.planVersion, "report-row-plan-version")}
         {pair("対応表の版", r.mapRevision, "report-row-map-revision")}
@@ -675,6 +678,8 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
           <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-diagnosis-evidence">{r.diagnosisEvidenceId}</span></dd>
         </div>
         {pair("記録した日時", r.createdAtJst, undefined, true)}
+          </div>
+        </details>
       </dl>
       {r.memo ? <p className="break-all opx-note text-xs leading-relaxed text-sb-ink-2" data-testid="report-row-memo">メモ：{r.memo}</p> : null}
       {r.errorMessage ? (
