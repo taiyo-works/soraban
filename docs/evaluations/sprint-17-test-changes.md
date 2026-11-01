@@ -45,3 +45,4 @@
 | 非 DB の 404 の一覧に `/overview`・`/journal`・`/judgement` を追加 | `e2e/sprint12a.spec.ts` | `OPS_ENABLED` 無効で新ルートも 404 |
 | 基準の一覧の件数の下限（1,996）とハッシュを単体テストで固定。`--write` は `--reason` が必須で、記録 `sprint-17-testids-baseline-log.txt` に追記。収集前にコメントを除く | `scripts/testids.mjs`、`testids-baseline.test.ts` | 黙って書き直せないようにする |
 | 許可・承認の登録の「この登録を根拠にしている計画」の行き先を `/judgement` に | `permit-ui.tsx` | 行の内容（根拠の版・判定が古い）は判定の情報のため。既存の E2E は行き先を検査していない |
+| 点検の行のクリックを押し直し付きにした（期待は同じ） | `sprint12h-pr3-db.spec.ts` P3a-4 | CI（run 41268733165）で `waitForURL` のタイムアウトで失敗した既知の不安定。17-1 とは無関係。描画直後のクリックが遷移しないため、`tapAndWait` と同じ作法で押し直す |
