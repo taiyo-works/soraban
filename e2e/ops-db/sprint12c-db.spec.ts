@@ -914,7 +914,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(page.getByTestId("field-flight-row")).toHaveAttribute("data-phase", "journaled");
     await expect(page.getByTestId("field-flight-record-link")).toHaveAttribute("href", `/ops/flights/${flightId}`);
     await expect(page.getByTestId("field-journal-link")).toHaveCount(0);
-    await page.goto(`/ops/plans/${plan.id}`);
+    await page.goto(`/ops/plans/${plan.id}/journal`);
     await expect(page.getByTestId("plan-flight-row")).toHaveCount(1);
 
     // 飛行記録を取り消すと、その飛行は日誌待ちに戻る
