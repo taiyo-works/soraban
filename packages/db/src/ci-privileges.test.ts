@@ -34,6 +34,12 @@ describe("CI の権限の確認", () => {
     expect(CI).toMatch(/has_function_privilege\('soraban_app', 'verify_incident_report_records\(uuid\)', 'EXECUTE'\)"\)" = "f"/);
   });
 
+  it("Sprint 19-1b：flight_plans は参照だけ。verify_flight_areas は実行できない", () => {
+    expect(expectOf("flight_plans", "SELECT")).toBe("t");
+    for (const p of ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]) expect(expectOf("flight_plans", p), p).toBe("f");
+    expect(CI).toMatch(/has_function_privilege\('soraban_app', 'verify_flight_areas\(uuid\)', 'EXECUTE'\)"\)" = "f"/);
+  });
+
   it("12a・12b の追記専用の表の確認も残っている", () => {
     for (const t of ["judgement_snapshots", "plan_confirmations", "flight_report_attempts", "plan_procedure_records"]) {
       expect(CI, t).toContain(t);
