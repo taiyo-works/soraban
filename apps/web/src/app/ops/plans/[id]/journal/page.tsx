@@ -37,13 +37,13 @@ export default async function PlanJournalPage({ params }: { readonly params: Pro
             <p className="text-sm text-sb-ink-3" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
           ) : (
             <>
-              <ul className="flex flex-col border-t border-sb-rule" data-testid="plan-flights">
+              <ul className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8" data-testid="plan-flights">
                 {shown.map(flightRow)}
               </ul>
               {older.length > 0 ? (
                 <details data-testid="plan-flights-older">
                   <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い飛行記録 {older.length} 件を見る（最新 {shown.length} 件は上に出ています）</summary>
-                  <ul className="flex flex-col border-t border-sb-rule">{older.map(flightRow)}</ul>
+                  <ul className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(flightRow)}</ul>
                 </details>
               ) : null}
             </>
