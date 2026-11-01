@@ -90,14 +90,14 @@ const scanText = (
 export const MIN_OUTSIDE_CHARS = 150;
 
 /** 現在のページを走査して記録を返す。 */
-export const scanPage = async (page: Page, route: string, state = "初期"): Promise<ScanRecord[]> => {
+export const scanPage = async (page: Page, route: string, state = "初期", minChars = MIN_OUTSIDE_CHARS): Promise<ScanRecord[]> => {
   const c = await collectPageText(page);
   const out: ScanRecord[] = [];
   // 印を付けてよい要素の一覧（契約 §6.1）の外に印があれば違反（検査を止める使い方を防ぐ）
   for (const id of c.scopeIds) {
     if (!SCOPE_ALLOWED_TESTIDS.includes(id)) out.push({ kind: "violation", route, state, word: "data-wording-scope", sentence: `印を付けてよい要素の一覧にない要素：${id}` });
   }
-  if (c.outside.replace(/\s+/g, "").length < MIN_OUTSIDE_CHARS) out.push({ kind: "violation", route, state, word: "走査の空振り", sentence: `印の外の文字が ${c.outside.replace(/\s+/g, "").length} 文字しかない（${MIN_OUTSIDE_CHARS} 文字未満）` });
+  if (c.outside.replace(/\s+/g, "").length < minChars) out.push({ kind: "violation", route, state, word: "走査の空振り", sentence: `印の外の文字が ${c.outside.replace(/\s+/g, "").length} 文字しかない（${minChars} 文字未満）` });
   scanText(route, state, c.outside, false, out, c.outsideJoined);
   for (const s of c.scoped) scanText(route, state, s.text, true, out, s.joined);
   // 属性・title・meta は印の外として扱う（属性に判定の文言は出さない）

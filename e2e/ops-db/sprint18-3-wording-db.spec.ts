@@ -110,7 +110,7 @@ test.describe("Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管�
 
   const all: Record<string, ScanRecord[]> = {};
   /** 画面を開いて走査する（計画の画面は本文が出るまで待ち、畳みを開く）。 */
-  const visit = async (page: Page, bucket: string, route: string, state: string, planScreen = false): Promise<void> => {
+  const visit = async (page: Page, bucket: string, route: string, state: string, planScreen = false, minChars?: number): Promise<void> => {
     if (planScreen) await gotoPlanOpen(page, route);
     else {
       const res = await page.goto(route);
@@ -119,7 +119,7 @@ test.describe("Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管�
     }
     // 見出し（または本文）が出るまで待つ
     await expect(page.locator("main, [data-testid]").first()).toBeAttached();
-    (all[bucket] ??= []).push(...(await scanPage(page, route.replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, "[id]"), state)));
+    (all[bucket] ??= []).push(...(await scanPage(page, route.replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, "[id]"), state, minChars)));
   };
   const finish = (bucket: string): void => {
     saveScan(`ops-${bucket}`, all[bucket] ?? []);
@@ -195,7 +195,7 @@ test.describe("Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管�
   test("D：圏外の殻（5 つ）・マニフェスト・操縦者と閲覧者のこのアプリについて", async ({ page }) => {
     test.setTimeout(240_000);
     await signIn(page.request, seeded("a-manager"));
-    for (const shell of ["today", "field", "inspection", "journal", "unavailable"]) await visit(page, "D", `/ops/offline/${shell}`, `圏外の殻（${shell}）`);
+    for (const shell of ["today", "field", "inspection", "journal", "unavailable"]) await visit(page, "D", `/ops/offline/${shell}`, `圏外の殻（${shell}）`, false, 60); // 殻は短い（端末のデータから描く）。空でないことだけ確かめる
     // マニフェストの JSON の全文字列（ネットワークの応答）
     const res = await page.request.get("/ops/manifest.webmanifest");
     expect(res.status()).toBe(200);
