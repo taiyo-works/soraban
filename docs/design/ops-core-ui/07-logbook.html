@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
 <title>日誌・飛行時間 | そらばん（UI 設計プロトタイプ）</title>
 <link rel="stylesheet" href="tokens.css">
 </head>
@@ -28,7 +29,7 @@
 <div>
  <section class="hero" aria-labelledby="pend-h" style="margin-top:8px">
   <div class="eyebrow">確定待ち 2 件のうち、最初の 1 件</div>
-  <div class="when"><span class="t num" id="pend-h">09:00–09:24</span><span class="u">10月31日（土）</span></div>
+  <div class="when"><span class="t rng num" id="pend-h">09:00–09:24</span><span class="u">10月31日（土）</span></div>
   <div class="what">架空町 公民館 北側 ・ 飛行時間 <span class="num">0:24</span></div>
   <div class="meta">機体 01（例） ・ 操縦者 見本 一郎 ・ 点検 前後とも済み</div>
   <div class="actions sp-t2"><a class="btn btn-primary" href="#detail"><span>内容を見て確定する</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></a></div>
@@ -72,11 +73,17 @@
   <div class="field"><label for="why">理由（変えるとき）</label><input id="why" class="in" placeholder="例: 着陸のボタンが遅れた"></div>
   <p class="note">ボタンで測った元の時刻は、版として残ります。</p>
  </section>
- <div class="sticky-act" style="margin-top:20px"><button class="btn btn-primary" type="button"><span>この記録を確定する</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></button><span class="note">確定したあとは書き換えません。直すときは、理由を付けた新しい版になります。</span></div>
+ <div class="sticky-act inline"><button class="btn btn-primary" type="button" data-sheet="confirm-sheet"><span>この記録を確定する</span><span class="go"><svg class="i " aria-hidden="true"><use href="#i-arrow"/></svg></span></button><span class="note">確定したあとは書き換えません。直すときは、理由を付けた新しい版になります。</span></div>
  <div class="row-flex sp-t2"><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-ext"/></svg>PDF</button><button class="btn sm"><svg class="i sm" aria-hidden="true"><use href="#i-list"/></svg>CSV</button><span class="note">期間・機体・操縦者で絞って出力します</span></div>
 </div>
 </div>
 </main>
+<dialog class="sheet" id="confirm-sheet" aria-labelledby="cs-h"><div class="grab" aria-hidden="true"></div><div class="sh-body">
+ <h2 id="cs-h">この記録を確定しますか</h2>
+ <p class="note">確定したあとは書き換えません。訂正は、理由をつけた新しい版として残ります。</p>
+ <dl class="kv"><dt>飛行時間</dt><dd class="num">0:23</dd><dt>点検</dt><dd>飛行前・飛行後とも記録済み</dd></dl>
+ <div class="sh-act"><button class="btn btn-primary" type="button" data-close data-haptic><span>確定する</span></button><button class="btn" type="button" data-close>戻る</button></div>
+</div></dialog>
 <footer class="foot">提供: フューチャーテック株式会社 ・ これは設計用の静的プロトタイプです（保存・送信はしません）。</footer>
 <nav class="tabbar" aria-label="メニュー"><a href="01-home-today.html"><svg class="i " aria-hidden="true"><use href="#i-sun"/></svg><span>今日</span></a><a href="#cases"><svg class="i " aria-hidden="true"><use href="#i-folder"/></svg><span>案件</span></a><a class="create" href="02-report-new.html"><span class="plus"><svg class="i " aria-hidden="true"><use href="#i-plus"/></svg></span><span>通報を作る</span></a><a href="07-logbook.html" aria-current="page"><svg class="i " aria-hidden="true"><use href="#i-book"/></svg><span>日誌</span></a><a href="08-aircraft-inspection.html"><svg class="i " aria-hidden="true"><use href="#i-drone"/></svg><span>機体</span></a></nav>
 </div>

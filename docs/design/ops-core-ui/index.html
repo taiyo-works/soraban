@@ -1,0 +1,51 @@
+<title>そらばん 画面見本 v3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{
+  --paper:#FBFAF8; --ink:#1F1B16; --ink-2:#5A524A; --line:#E4DED6; --orange:#EBA15C; --card:#FFFFFF;
+  --font:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+/* 構成: 1 列の目次。画面名を大きく、説明を小さく。橙は番号の丸と上の短い棒だけ。見本は常に明るい表示 */
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+main{max-width:640px;margin:0 auto}
+.bar{width:36px;height:4px;background:var(--orange);margin:0 0 14px}
+h1{font-size:1.5rem;margin:0 0 6px;text-wrap:balance;letter-spacing:.02em}
+.lead{color:var(--ink-2);margin:0 0 20px;font-size:.95rem}
+.note{border:1px solid var(--line);background:var(--card);padding:12px 14px;font-size:.9rem;margin:0 0 24px}
+ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+li{border-bottom:1px solid var(--line)}
+a.row{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;padding:16px 4px;min-height:48px;color:inherit;text-decoration:none}
+a.row:focus-visible{outline:3px solid var(--ink);outline-offset:-3px}
+a.row:hover{background:var(--card)}
+.n{width:32px;height:32px;border-radius:50%;background:var(--orange);color:var(--ink);font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.t{font-weight:700;font-size:1.05rem}
+.d{color:var(--ink-2);font-size:.88rem}
+h2{font-size:1rem;margin:28px 0 8px}
+ul{margin:0;padding-left:1.2em;color:var(--ink-2);font-size:.9rem}
+.foot{margin-top:28px;color:var(--ink-2);font-size:.8rem}
+</style>
+<main>
+  <h1>そらばん 画面見本（v3 ミニマル）</h1>
+  <p class="lead">飛行計画の通報、飛行前・飛行後の点検、日誌と飛行時間の記録。スマホで開いて、実際に触って確かめてください。</p>
+  <p class="note">見本の画面はすべて<strong>架空のデータ</strong>です。通報の送信や保存は行いません。地図の範囲選択、点検の「異常なし／あり」、離陸・着陸の切り替えは動きます。</p>
+  <ol>
+    <li><a class="row" href="01-home-today.html"><span class="n">1</span><span><span class="t">今日</span><br><span class="d">今日の飛行と、次にやること。通報の状態が一目で分かる。</span></span></a></li>
+    <li><a class="row" href="02-report-new.html"><span class="n">2</span><span><span class="t">通報の新規登録</span><br><span class="d">6 つの手順。最初は地図で範囲を選ぶ。頂点の移動・追加・削除、円、取り消し。</span></span></a></li>
+    <li><a class="row" href="03-report-confirm.html"><span class="n">3</span><span><span class="t">通報の確認</span><br><span class="d">要確認の項目を先に。DIPS で出して、受付番号を記録する 2 段。</span></span></a></li>
+    <li><a class="row" href="04-preflight.html"><span class="n">4</span><span><span class="t">飛行前点検</span><br><span class="d">項目ごとに異常なし／あり。未選択を一括で「異常なし」に。</span></span></a></li>
+    <li><a class="row" href="05-flight.html"><span class="n">5</span><span><span class="t">飛行中</span><br><span class="d">離陸・着陸の大きなボタンと経過時間。圏外の表示。</span></span></a></li>
+    <li><a class="row" href="06-postflight.html"><span class="n">6</span><span><span class="t">飛行後点検</span><br><span class="d">飛行前と同じ部品。異常ありの項目だけ内容と写真。</span></span></a></li>
+    <li><a class="row" href="07-logbook.html"><span class="n">7</span><span><span class="t">日誌・飛行時間</span><br><span class="d">飛行記録、飛行時間、総飛行時間。確定と訂正。</span></span></a></li>
+    <li><a class="row" href="08-aircraft-inspection.html"><span class="n">8</span><span><span class="t">機体の点検・整備</span><br><span class="d">機体ごとの点検と整備の記録。</span></span></a></li>
+    <li><a class="row" href="09-states.html"><span class="n">9</span><span><span class="t">空・読み込み・エラー・シート</span><br><span class="d">部品の見本。ボトムシートは開けます。</span></span></a></li>
+  </ol>
+  <h2>見ていただきたい点</h2>
+  <ul>
+    <li>画面は短く、一番大事なものが一番大きいか。</li>
+    <li>橙は「次の 1 つの操作」と現在地の丸だけに絞った。少なすぎないか、足りているか。</li>
+    <li>通報の手順は、1 手順 1 画面でよいか。</li>
+    <li>離陸・着陸のボタンは、橙の面でよいか。</li>
+  </ul>
+  <p class="foot">v3: 余白と大きなタイトル、細い罫、面で示す主ブロック、シート、画面遷移。 提供元: フューチャーテック株式会社。この見本は設計の確認用で、公開版ではありません。</p>
+</main>

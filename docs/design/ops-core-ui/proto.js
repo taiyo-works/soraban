@@ -235,3 +235,26 @@
     tick(); setInterval(tick, 1000);
   }
 })();
+
+/* ---------- v3 追加: 縮むヘッダー・ボトムシート・触覚（対応端末のみ） ---------- */
+(function () {
+  "use strict";
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  /* 縮むヘッダー: 大きなタイトルが画面から出たら、上の帯に小さなタイトルを出す */
+  var bar = $(".topbar"), h1 = $(".title h1:not(.sr)") || $(".stepname b");
+  if (bar && h1 && "IntersectionObserver" in window) {
+    var t = document.createElement("span"); t.className = "ttl"; t.setAttribute("aria-hidden", "true"); t.textContent = h1.textContent; bar.appendChild(t);
+    new IntersectionObserver(function (e) { document.body.classList.toggle("scrolled", !e[0].isIntersecting && e[0].boundingClientRect.top < 0); }, { rootMargin: "-56px 0px 0px 0px" }).observe(h1);
+  } else if (bar) {
+    window.addEventListener("scroll", function () { document.body.classList.toggle("scrolled", window.scrollY > 8); }, { passive: true });
+  }
+  /* ボトムシート: <dialog class="sheet"> を [data-sheet="id"] で開き、[data-close] か背景で閉じる */
+  $$("[data-sheet]").forEach(function (b) { b.addEventListener("click", function (e) { e.preventDefault(); var d = document.getElementById(b.dataset.sheet); if (d && d.showModal) d.showModal(); }); });
+  $$("dialog.sheet").forEach(function (d) {
+    $$("[data-close]", d).forEach(function (b) { b.addEventListener("click", function () { d.close(); }); });
+    d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
+  });
+  /* 触覚: 離陸・着陸などの確定操作だけ。Vibration API は非対応の端末（iOS Safari 等）では何も起きない。音・振動に頼らず、画面の変化でも伝える */
+  $$("[data-haptic], [data-setstate]").forEach(function (b) { b.addEventListener("click", function () { try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {} }); });
+})();
