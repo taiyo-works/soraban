@@ -285,7 +285,7 @@ export function PlanDigest({
   return (
     <nav aria-label="ほかの要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
       <a href={`/ops/plans/${planId}/judgement`} className={row} data-testid="plan-judge-link">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="plan-judge-line">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="plan-judge-line" data-wording-scope="judgement">
           <span className="text-sm text-sb-ink-2">{JUDGE_LINE_PREFIX}</span>
           {m.kind === "ok" ? <VerdictBadge level={m.level} unknownCount={m.unknownCount} bare /> : <span className="text-sm font-bold text-sb-ink">{JUDGE_UNREADABLE}</span>}
           {m.stale ? <StaleBadge bare /> : null}

@@ -78,3 +78,13 @@ describe("F-3 端末に保存する内容の説明", () => {
     expect(t).not.toMatch(/代行|代理|通報不要/);
   });
 });
+
+describe("Sprint 18-3 §5.4 マニフェストの説明に通報の記録と提供元が入る", () => {
+  it("description は通報・点検・飛行日誌と提供元（定数から）を含み、name・short_name は変えない", async () => {
+    const { PROVIDER } = await import("./provider-info");
+    const m = pwaManifest();
+    expect(m.description).toBe(`ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌を、電波の弱い現場でも扱えます。提供元：${PROVIDER.name}`);
+    expect(m.name).toBe("そらばん 運航管理");
+    expect(m.short_name).toBe("そらばん");
+  });
+});

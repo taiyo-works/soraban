@@ -1234,7 +1234,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
       {/* ─── RESULT（結論）：入力の直下。判定したら、ここへ移る（見出しにフォーカスも移す） ─── */}
       {result || checkError ? (
-        <section className="sb-area-result flex flex-col gap-6" aria-live="polite" data-testid="result-section">
+        <section className="sb-area-result flex flex-col gap-6" aria-live="polite" data-testid="result-section" data-wording-scope="judgement">
           {/* 結論（4 段の判定）と段取り（Sprint 11d D1） */}
           <VerdictSummary
             part="conclusion"
@@ -1304,7 +1304,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
       {/* ─── 手続き・規制ごとの判定・証跡（地図の下） ─── */}
       {result || checkError ? (
-        <section className="sb-area-wide flex flex-col gap-6" data-testid="result-details" aria-label="手続きと規制ごとの判定">
+        <section className="sb-area-wide flex flex-col gap-6" data-testid="result-details" data-wording-scope="judgement" aria-label="手続きと規制ごとの判定">
           <VerdictSummary part="details" verdict={screenVerdict} pending={verdictPending} failed={conclusionFailed} />
 
           {!showResultDetail ? (
@@ -1585,7 +1585,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             </div>
             {/* DID 該当の三値（該当／非該当／未確認）。未確認は「申請不要」と判断しない。 */}
             {autoDidStatus !== undefined ? (
-              <div className="sb-note-card flex flex-col gap-1.5" data-testid="did-status">
+              <div className="sb-note-card flex flex-col gap-1.5" data-testid="did-status" data-wording-scope="judgement">
                 <span>
                   DID 自動判定：
                   <span

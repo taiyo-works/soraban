@@ -92,3 +92,64 @@ export const findLimited = (text: string, extraAllowed: readonly string[] = []):
 };
 
 export const findPlaceholders = (text: string): WordingHit[] => hits(text, PLACEHOLDER_WORDS);
+
+/** index を含む 1 文（「。」と改行で区切る）。走査の記録用。 */
+export const sentenceAround = (text: string, index: number): string => {
+  const cut = (c: string, from: number): number => text.lastIndexOf(c, from);
+  const start = Math.max(cut("。", index - 1) + 1, cut("\n", index - 1) + 1);
+  const ends = [text.indexOf("。", index), text.indexOf("\n", index)].filter((n) => n >= 0);
+  const end = ends.length === 0 ? text.length : Math.min(...ends) + 1;
+  return text.slice(start, end).replace(/\s+/g, " ").trim();
+};
+
+export type LimitedHit = {
+  readonly word: string;
+  readonly index: number;
+  /** allowed＝許可リストの文の中、other＝その外。 */
+  readonly kind: "allowed" | "other";
+  /** allowed のとき許可リストの文、other のとき出現を含む 1 文（joined から取る）。 */
+  readonly sentence: string;
+  readonly source?: string;
+};
+
+/**
+ * 限定語の出現を、許可リストの文の中か外かに分ける（走査の記録用）。
+ * text は textContent、joined は同じ文字列にブロックの境目の改行を足したもの（文の取り出し用。省略すると text）。
+ * 同じ語の n 番目の出現は、joined でも n 番目になる（足すのは改行だけ）。
+ */
+export const classifyLimited = (text: string, joined: string = text): LimitedHit[] => {
+  const ranges: { from: number; to: number; sentence: string; source: string }[] = [];
+  for (const a of ALLOWED_SENTENCES) {
+    let from = 0;
+    for (;;) {
+      const i = text.indexOf(a.sentence, from);
+      if (i < 0) break;
+      ranges.push({ from: i, to: i + a.sentence.length, sentence: a.sentence, source: a.source });
+      from = i + a.sentence.length;
+    }
+  }
+  const out: LimitedHit[] = [];
+  for (const word of LIMITED_WORDS) {
+    let from = 0;
+    let n = 0;
+    for (;;) {
+      const i = text.indexOf(word, from);
+      if (i < 0) break;
+      const r = ranges.find((x) => i >= x.from && i < x.to);
+      if (r) out.push({ word, index: i, kind: "allowed", sentence: r.sentence, source: r.source });
+      else {
+        // joined の中の n 番目の出現
+        let j = -1;
+        let at = 0;
+        for (let k = 0; k <= n; k++) {
+          j = joined.indexOf(word, at);
+          at = j + word.length;
+        }
+        out.push({ word, index: i, kind: "other", sentence: j < 0 ? text.slice(Math.max(0, i - 20), i + 20) : sentenceAround(joined, j) });
+      }
+      n++;
+      from = i + word.length;
+    }
+  }
+  return out;
+};
