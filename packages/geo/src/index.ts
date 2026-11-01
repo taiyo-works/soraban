@@ -194,3 +194,5 @@ export const circlePolygon = (
   }
   return ring;
 };
+
+export * from "./area";
