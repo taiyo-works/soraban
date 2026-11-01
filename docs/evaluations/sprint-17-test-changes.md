@@ -58,3 +58,14 @@
 | 再判定の後の再読み込みのあとに `openPlanFolds` | `sprint12d-db.spec.ts`（契約 14） | `:visible` で読む `plan-snapshot-seq` が、判定の記録の折りたたみの中に入った |
 | 主画面の次にやることを押す検査の `page.goto` を `gotoPlan` に | `sprint17-db.spec.ts` | 3 件目以降が「ほか N 件」の中に入った |
 | 主画面の `plan-report-box`・`plan-report-reasons` は根拠が折りたたみ内。`plan-report-label` は中止・記録なしのとき「中止（通報の記録はありません）」（ユーザーの判断。オーケストレーターが代行） | — | 既存の検査に、中止・記録なしの主画面を見るものは無かった |
+
+## Sprint 17-2 差し戻し 1 回目（2026-11-01）での追加・変更
+
+期待値は弱めていない。
+
+| 内容 | ファイル | 理由 |
+|---|---|---|
+| `gotoPlan` が畳みを**開かない**形に戻し、畳んだ中身を読む・押す検査だけ `gotoPlanOpen`（`gotoPlan` ＋ `openPlanFolds`）に明示的に替えた（12a〜12e・17-1。呼び出し名を機械的に置換） | `plan-screen.ts`、各 spec | 一律に開くと「既定で見えるか」を検査できず、畳みの退行を見逃す（レビュー中-3）。`onAllPlanScreens` は禁止語の走査なので、畳みの中も読むため開く |
+| `openReport` に `{ folds: false }` を足し、12b 契約 16 の「飛行開始後」「目安超過」の検査は開かずに `toBeVisible`（`plan-report-deadline`・`plan-report-penalty`・`plan-report-deadline-message`） | `sprint12b-db.spec.ts` | 警告・期限が既定で見えることを検査する（中-2） |
+| 17-2 の L-2 に `plan-report-status` の第一画面の検査を戻した（中止・記録なしだけは状況の行を出さず `plan-report-label` に代える。理由：事実の 1 行を示すため。契約 §3.2 の「通報の状況」を、記録が無い中止では事実の 1 行で示す、というユーザーの判断による） | `sprint17-2-db.spec.ts` | 前の版で差し替えていた穴を埋める（中-4c） |
+| 新規：中止 × 失敗の取消が主画面に出る（模擬アダプター）、期限超過が開かずに見える・状況の詳細がキーボードで開閉できる、変更点が多い計画の長さ | `sprint17-2-db.spec.ts` | 高-1、中-2、中-4b、低-5 |
