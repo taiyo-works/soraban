@@ -208,7 +208,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
 
   test("S-5・次にやることの行き先：確認・再判定・手続きは新しい画面へ。保存直後と一覧の行は通報の主画面", async ({ page }) => {
     await login(page);
-    const draft = await createPlan();
+    const draft = await getPlan((await createPlan()).id);
     const base = `/ops/plans/${draft.id}`;
     expect(draft.nextActions.find((a) => a.id === "request_confirmation")?.href).toBe(`${base}/overview#request-confirmation`);
     const pending = await activate(draft);
