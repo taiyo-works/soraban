@@ -39,6 +39,7 @@ import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictMark } from "./pdf-verdict";
 import { doneByProcedureId, isModelAircraftDiagnosis, VERDICT_LABEL, VERDICT_PDF_COLOR } from "@/lib/verdict-display";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
+import { PROVIDER } from "@/lib/provider-info";
 
 // 束ね PDF（申請支援サマリ）。既存 regulation-pdf.tsx の作法に合わせる:
 //   - 日本語グリフは self-host の Noto Sans JP（apps/web/public/fonts/*.ttf）を登録。
@@ -721,7 +722,7 @@ export const ApplicationPdfDocument = ({
 
         {/* FOOTER（evidenceId を全ページに固定） */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
+          <MonoText>{`© 2026 ${PROVIDER.name}`}</MonoText>
           <MonoText>証跡 ID {diagnosis.evidenceId}</MonoText>
         </View>
       </Page>

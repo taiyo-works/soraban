@@ -6,8 +6,9 @@ import { expectNoApplicationSupport } from "./field-checks";
 // 本番相当サーバー（baseURL）だけを使う。
 
 const OPERATOR = "フューチャーテック株式会社";
-const TITLE = "そらばん — ドローン飛行の可否判定と運航管理";
-const PURPOSE = "ドローン飛行の可否判定と運航管理";
+// Sprint 18-3：位置づけを「飛行計画の通報・点検・飛行日誌」に改めた（判定は補助）。題名・見出しの副題の期待値を新しい値にした（理由は docs/evaluations/sprint-18-test-changes.md）。
+const TITLE = "そらばん — ドローンの飛行計画の通報・点検・飛行日誌";
+const PURPOSE = "ドローンの飛行計画の通報・点検・飛行日誌";
 
 // 契約 1：画面テキストに出してはいけない語。
 const SCREEN_FORBIDDEN = [
@@ -92,9 +93,10 @@ test.describe("A. トップ画面の文言", () => {
     expect(text).not.toContain("Engine");
   });
 
-  test("3. site-facts に運営者と利用の範囲がある", async ({ page }) => {
+  test("3. site-facts に提供元（旧「運営者」）と利用の範囲がある", async ({ page }) => {
     await openReady(page);
     const facts = page.getByTestId("site-facts");
+    await expect(facts).toContainText("提供元");
     await expect(facts).toContainText(OPERATOR);
     await expect(facts).toContainText("現在は社内での試験運用中");
   });

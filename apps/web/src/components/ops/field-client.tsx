@@ -82,6 +82,7 @@ import {
   type OutboxEntry,
   type OutboxState,
 } from "@/lib/ops-outbox";
+import { DISCLAIMER_INSPECTION } from "@/lib/disclaimers";
 import { jstDate, jstTime, nowJstInput } from "@/lib/ops-time";
 import { DEVICE_STORAGE_NOTES } from "@/lib/pwa";
 import { WakeLockController, wakeLockNote, type WakeLockStatus } from "@/lib/wake-lock";
@@ -871,9 +872,15 @@ export function FieldClient({
                       点検の記録を見る
                     </a>
                   ) : view.canInspect ? (
-                    <a href={inspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-inspection-link">
-                      {FIELD_CHECK_ACTION_LABEL.inspection}
-                    </a>
+                    <>
+                      {/* 点検の免責（Sprint 18-3）。点検の入力（/ops/inspections/new）の先頭にも同じ文が出る */}
+                      <p className="leading-relaxed" data-testid="inspection-disclaimer">
+                        {DISCLAIMER_INSPECTION}
+                      </p>
+                      <a href={inspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-inspection-link">
+                        {FIELD_CHECK_ACTION_LABEL.inspection}
+                      </a>
+                    </>
                   ) : (
                     <p>今日の飛行前の点検がありません。点検できる人に依頼してください。</p>
                   )}

@@ -116,7 +116,8 @@ test.describe("B. トップの意図", () => {
     await openReady(page);
     const lead = hero(page).getByTestId("site-lead");
     const t = await lead.innerText();
-    for (const w of ["業務でドローンを飛ばす事業者・操縦者", "飛ばす前に", "法令・条例", "手続き", "出典", "記録"]) {
+    // Sprint 18-3：主役は通報・点検・日誌で、判定は補助。文言を新しい値にした（飛ばす前に・手続き・記録 → 補助）。
+    for (const w of ["業務でドローンを飛ばす事業者・操縦者", "法令・条例", "出典", "判定は補助"]) {
       expect(t).toContain(w);
     }
     const h1 = await hero(page).locator("h1").innerText();
@@ -131,6 +132,7 @@ test.describe("B. トップの意図", () => {
     const note = await hero(page).getByTestId("site-ops-note").innerText();
     expect(note).toContain("運航管理");
     expect(note).toContain("社内で試験運用");
+    for (const w of ["通報", "点検", "飛行日誌"]) expect(note).toContain(w);
     const header = await hero(page).innerText();
     for (const w of ["唯一", "業界初", "No.1", "最適", "完全", "自動で申請", "一括申請", "AI"]) {
       expect(header, `見出し領域に「${w}」`).not.toContain(w);

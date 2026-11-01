@@ -10,6 +10,8 @@
 // 新しい版（ビルド）を配ったとき：新しい Service Worker は待機し、入力中の画面を勝手に再読み込みしない。利用者が「更新する」を
 // 押したとき（SKIP_WAITING）か、すべての画面を閉じて次に開いたときに切り替わる（契約 A-4）。背景同期（Background Sync）は使わない。
 
+import { PROVIDER } from "./provider-info";
+
 export const SW_URL = "/ops/sw.js";
 export const SW_SCOPE = "/ops";
 export const SW_CACHE_PREFIX = "soraban-ops-";
@@ -158,7 +160,8 @@ export const pwaManifest = () => ({
   id: "/ops",
   name: "そらばん 運航管理",
   short_name: "そらばん",
-  description: "ドローンの飛行前の確認・離着陸・点検・日誌を、電波の弱い現場でも記録します。",
+  // Sprint 18-3 §5.4：通報の記録を含める。提供元の名称は lib/provider-info.ts の定数から。
+  description: `ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌を、電波の弱い現場でも扱えます。提供元：${PROVIDER.name}`,
   lang: "ja",
   start_url: "/ops",
   scope: "/ops",

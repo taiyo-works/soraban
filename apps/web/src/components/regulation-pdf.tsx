@@ -35,6 +35,8 @@ import {
 import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictDetails } from "./pdf-verdict";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
+import { DISCLAIMER_JUDGEMENT } from "@/lib/disclaimers";
+import { PROVIDER } from "@/lib/provider-info";
 
 // 日本語グリフを含むフォントを登録。@react-pdf/renderer のデフォルトは
 // Helvetica で日本語が出ないため、Noto Sans JP / IBM Plex Mono を 2 ウェイトずつ使う。
@@ -641,12 +643,13 @@ export const RegulationPdfDocument = ({
         {/* DISCLAIMER */}
         <Text style={styles.disclaimer}>
           <Text style={{ fontWeight: 700 }}>免責 — </Text>
-          {keepSpaces(result.disclaimer)}
+          {/* 画面の免責（DISCLAIMER_JUDGEMENT）と揃える（Sprint 18-3）。API の result.disclaimer（判定エンジンの文言）は変えない。 */}
+          {keepSpaces(DISCLAIMER_JUDGEMENT)}
         </Text>
 
         {/* FOOTER */}
         <View style={styles.footer} fixed>
-          <MonoText>© 2026 フューチャーテック株式会社</MonoText>
+          <MonoText>{`© 2026 ${PROVIDER.name}`}</MonoText>
           <MonoText>
             出典: 国交省 国土数値情報 / 国土地理院 / 警察庁・防衛省 / 各自治体例規集
           </MonoText>

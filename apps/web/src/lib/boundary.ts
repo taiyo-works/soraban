@@ -26,3 +26,10 @@ export const isApplicationSupportEnabled = (
 /** 判定の結論の直下（責任の注記）に出す短い文。 */
 export const BOUNDARY_SHORT =
   "許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。";
+
+/** このアプリについて（/ops/about）に出す、境界の全文（Sprint 18-3 §5.2）。 */
+export const BOUNDARY_FULL =
+  "そらばんは、許可・承認、機体登録、操縦者登録などの申請の作成・提出とその支援を行いません。飛行計画の通報は、利用者本人が DIPS 2.0 の認証と最終確認のもとで行います。そらばんは、通報の内容の整理と、通報した結果の記録を扱います。";
+
+/** 機体・操縦者の一覧と、通報の作業台に出す 1 行（Sprint 18-3 §5.2）。 */
+export const BOUNDARY_REGISTRATION = "機体・操縦者の DIPS への登録は、利用者本人が DIPS で行います。";

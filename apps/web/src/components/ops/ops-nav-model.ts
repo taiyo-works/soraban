@@ -64,7 +64,7 @@ export const navHiddenOn = (pathname: string): boolean =>
 
 /**
  * どの項目が現在地か。
- *   点検：/ops/inspections*／日誌：飛行記録・日誌・事故・ヒヤリハット／計画：/ops/plans*（現場モードを除く）／登録：登録・機体・操縦者・許可・承認・地点・利用者。
+ *   点検：/ops/inspections*／日誌：飛行記録・日誌・事故・ヒヤリハット／計画：/ops/plans*（現場モードを除く）／登録：登録・機体・操縦者・許可・承認・地点・利用者・このアプリについて。
  *   `/` は判定（左メニューの現在地）。下タブには判定がないので、`/` では下タブのどれも現在地にならない。
  */
 export const currentNavKey = (pathname: string): NavKey | null => {
@@ -73,7 +73,7 @@ export const currentNavKey = (pathname: string): NavKey | null => {
   if (pathname.startsWith("/ops/plans")) return "plans";
   if (pathname.startsWith("/ops/inspections")) return "inspections";
   if (/^\/ops\/(flights|journal|incidents)/.test(pathname)) return "journal";
-  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members)/.test(pathname)) return "more";
+  if (pathname.startsWith("/ops/more") || /^\/ops\/(aircraft|pilots|places|permits|members|about)/.test(pathname)) return "more";
   return null;
 };
 
@@ -114,6 +114,7 @@ export const BACK_TABLE: readonly { readonly screen: string; readonly back: Back
   { screen: "/ops/permits", back: BACK_TO.register },
   { screen: "/ops/places", back: BACK_TO.register },
   { screen: "/ops/members", back: BACK_TO.register },
+  { screen: "/ops/about", back: BACK_TO.register },
   { screen: "/ops/flights", back: BACK_TO.journal },
   { screen: "/ops/incidents", back: BACK_TO.journal },
   // 各詳細・入力・訂正・通報・判定の記録は、自分の一覧／計画の詳細へ（変更なし）

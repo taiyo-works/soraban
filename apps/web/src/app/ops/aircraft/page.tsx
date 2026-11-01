@@ -14,6 +14,7 @@ import {
 import { listAircraft } from "@/server/ops/service";
 import { AIRCRAFT_STATUS_LABELS, formatMinutes, requireOpsMember } from "@/server/ops/page";
 import { BACK_TO } from "@/components/ops/ops-nav-model";
+import { BOUNDARY_REGISTRATION } from "@/lib/boundary";
 
 const GRID = "sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_6rem_minmax(0,9rem)]";
 
@@ -39,6 +40,8 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
         }
       >
         {manager ? null : <Note>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
+        {/* 機体の DIPS への登録は利用者本人が行う（Sprint 18-3） */}
+        <p className="text-[13px] leading-relaxed text-sb-ink-3" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />

@@ -27,6 +27,7 @@ import {
   type ReportInputs,
   type ReportKind,
 } from "@soraban/dips";
+import { BOUNDARY_REGISTRATION } from "@/lib/boundary";
 import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports";
 import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
 import { REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE } from "@/lib/plan-main";
@@ -1128,6 +1129,8 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           <AuditList audit={view.audit} />
         </details>
       </Section>
+      {/* 機体・操縦者の DIPS への登録は利用者本人が行う（Sprint 18-3）。作業台の末尾に 1 行。第一画面の並びは変えない */}
+      <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
     </div>
   );
 }
