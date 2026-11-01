@@ -84,7 +84,7 @@ import {
 import { collectMatching } from "./paging";
 import * as store from "./store";
 import { OpsError, type PlanWithJoins, type SnapshotFullRow, type SnapshotListRow } from "./store";
-import { areasOfPlanRow, storedToInput, type AreaDto, type AreaState } from "./flight-areas";
+import { AREAS_PRESENT_MESSAGE, JUDGEMENT_SCOPE, areasOfPlanRow, storedToInput, type AreaDto, type AreaState } from "./flight-areas";
 import { PLAN_FIELDS, validatePlan, type PlanInputData } from "./validate-plan";
 import { parseClientRequestId } from "./validate-records";
 import { validateChangeMeta } from "./validate";
@@ -162,6 +162,8 @@ export type PlanDto = {
    */
   readonly areaState: AreaState;
   readonly areas: readonly AreaDto[];
+  /** 判定が見る範囲。常に代表点だけ（範囲全体では判定していない）。範囲があるときは JUDGEMENT_AREA_NOTE を出す。 */
+  readonly judgementScope: typeof JUDGEMENT_SCOPE;
   readonly savedPlaceId: string | null;
   readonly maxAltitudeM: number | null;
   readonly flags: readonly string[];
@@ -387,6 +389,7 @@ const planDtoParts = (
     radiusM: r.radius_m,
     areaState: areasOfPlanRow(r).state,
     areas: areasOfPlanRow(r).areas,
+    judgementScope: JUDGEMENT_SCOPE,
     savedPlaceId: r.saved_place_id,
     maxAltitudeM: r.max_altitude_m,
     flags: r.flags,
@@ -814,6 +817,14 @@ export const updatePlan = async (ctx: OpsContext, id: string, body: unknown): Pr
   // 12c までの計画に残る DIPS の手入力値は、判定に使わないため、訂正で外す（本文に DIPS の値があれば検査が 400 にする）
   if (!("pilotPermits" in input) && Array.isArray(merged["pilotPermits"])) {
     merged["pilotPermits"] = (merged["pilotPermits"] as unknown[]).filter((p) => typeof p !== "string" || !isDipsPermitValue(p));
+  }
+  // 範囲がある計画への、緯度・経度・半径だけの訂正（areas 無し）で保存値と違う値は、黙って捨てず 422 にする。
+  // 保存値と同じ値なら通す（フォームは同じ値を送り返す）。範囲を外すときは areas: null を送る。
+  if (!("areas" in input) && Array.isArray(current.flight_areas) && current.flight_areas.length > 0) {
+    const same = (key: string, stored: number | null): boolean => !(key in input) || (input[key] === null || input[key] === "" ? stored === null : Number(input[key]) === stored);
+    if (!same("latitude", Number(current.latitude)) || !same("longitude", Number(current.longitude)) || !same("radiusM", current.radius_m)) {
+      throw new OpsError(422, "areas_present", { areas: AREAS_PRESENT_MESSAGE }, { areas: "areas_present" });
+    }
   }
   const v = validatePlan(merged);
   if (!meta.ok || !v.ok) return invalid(v, meta.ok ? undefined : { errors: { ...meta.errors }, codes: {} });

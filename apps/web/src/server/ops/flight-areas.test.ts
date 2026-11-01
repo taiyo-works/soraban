@@ -105,6 +105,7 @@ describe("parseAreasInput", () => {
     expect(reason([{ kind: "circle", center: [133.3, 35.4], radiusM: 10.5 }])).toBe("radius_not_integer");
     expect(reason([{ kind: "circle", center: [133.3123456, 35.4], radiusM: 10 }])).toBe("coordinate_too_precise");
     expect(reason([{ id: "x", kind: "circle", center: [133.3, 35.4], radiusM: 10 }, { id: "x", kind: "circle", center: [133.3, 35.4], radiusM: 10 }])).toBe("area_id_duplicate");
+    expect(reason([{ name: "a\nb", kind: "circle", center: [133.3, 35.4], radiusM: 10 }])).toBe("area_name_invalid");
     expect(reason([{ id: "bad id!", kind: "circle", center: [133.3, 35.4], radiusM: 10 }])).toBe("area_id_invalid");
   });
 

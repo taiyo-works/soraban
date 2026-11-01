@@ -17,7 +17,9 @@ import { baselineProvider } from "../sprint11e-baseline";
 import { fingerprintAreasOfRow } from "./flight-areas";
 import type { Judge } from "./judge";
 import { toDiagnosisRunInput } from "./plan-logic";
+import * as permits from "./permits";
 import * as plans from "./plans";
+import * as reports from "./reports";
 import { currentFingerprintOf } from "./report-dto";
 import * as svc from "./service";
 import { OpsError, type OpsContext } from "./service";
@@ -214,10 +216,16 @@ describe.skipIf(!ADMIN_URL)("飛行範囲（flight_areas）の保存・照合・
     const u2 = await plans.updatePlan(ctx(), p.id, { expectedVersion: u.record.version, reason: "訂正", areas: [{ kind: "polygon", vertices: TRI }] });
     expect(u2.record.areaState).toBe("areas");
     expect(await verifyAreas(p.id)).toEqual([]);
-    // 範囲がある計画への緯度・経度・半径だけの訂正は、範囲が優先される（リクエストの値は使わない）
-    const u3 = await plans.updatePlan(ctx(), p.id, { expectedVersion: u2.record.version, reason: "訂正", latitude: 10, longitude: 10, radiusM: 5, notes: "メモ" });
+    // 範囲がある計画への、保存値と違う緯度・経度・半径だけの訂正（areas 無し）は 422 areas_present（黙って捨てない）。
+    // 以前は 200 で送った値を無視していた。意図の変更：範囲を直したいのに直っていないことを利用者に知らせる。
+    const e = await err(plans.updatePlan(ctx(), p.id, { expectedVersion: u2.record.version, reason: "訂正", latitude: 10, longitude: 10, radiusM: 5, notes: "メモ" }));
+    expect([e.status, e.code, e.fieldCodes?.["areas"]]).toEqual([422, "areas_present", "areas_present"]);
+    expect(e.fieldErrors?.["areas"]).toBe("範囲がある計画は、範囲で直してください");
+    // 保存値と同じ値を送り返すフォームは通る（範囲は変わらない）
+    const u3 = await plans.updatePlan(ctx(), p.id, { expectedVersion: u2.record.version, reason: "訂正", latitude: u2.record.latitude, longitude: u2.record.longitude, radiusM: u2.record.radiusM, notes: "メモ" });
     expect(u3.record.latitude).toBe(u2.record.latitude);
     expect(u3.record.radiusM).toBe(u2.record.radiusM);
+    expect(u3.record.areas).toEqual(u2.record.areas);
   });
 
   it("B1-5：areas 無しの計画の読み出し。半径ありは円 1 つ、半径なしは点だけ。DB の行は書き換えない（flight_areas は null のまま）", async () => {
@@ -298,8 +306,69 @@ describe.skipIf(!ADMIN_URL)("飛行範囲（flight_areas）の保存・照合・
     await expect(next({ flight_areas: [{ id: "a1", kind: "square" }] })).rejects.toMatchObject({ code: "23514" });
     await expect(next({ flight_areas: [{ id: "a1", kind: "circle", center: [133.3123456, 35.4], radius_m: 5 }] })).rejects.toMatchObject({ code: "23514" });
     await expect(next({ flight_areas: [{ id: "a1", kind: "circle", center: [133.3, 35.4], radius_m: 20000 }] })).rejects.toMatchObject({ code: "23514" });
+    // 鍵の欠落（radius_m なしの円・vertices なしの多角形・center なしの円）と余分な鍵、id・name の不正
+    const bad: Record<string, unknown>[][] = [
+      [{ id: "a1", kind: "circle", center: [133.3, 35.4] }],
+      [{ id: "a1", kind: "polygon" }],
+      [{ id: "a1", kind: "circle", radius_m: 5 }],
+      [{ id: "a1", kind: "circle", center: [133.3, 35.4], radius_m: 5, extra: 1 }],
+      [{ id: "a1", kind: "polygon", vertices: TRI, radius_m: 5 }],
+      [{ kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: "bad id", kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: 1, kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: "a1", name: "a\nb", kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: "a1", name: "x".repeat(51), kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: "a1", name: 5, kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+      [{ id: "a1", kind: "circle", center: [133.3, 35.4], radius_m: 5 }, { id: "a1", kind: "circle", center: [133.3, 35.4], radius_m: 5 }],
+    ];
+    for (const areas of bad) {
+      expect((await owner.query("select flight_areas_valid($1::jsonb) as ok", [JSON.stringify(areas)])).rows[0].ok, JSON.stringify(areas)).toBe(false);
+      await expect(next({ flight_areas: areas }), JSON.stringify(areas)).rejects.toMatchObject({ code: "23514" });
+    }
+    // 覆いの検査も、鍵が欠けた範囲を「覆う」としない
+    expect((await owner.query("select flight_areas_covered(35.4, 133.3, 100, $1::jsonb) as ok", [JSON.stringify([{ id: "a1", kind: "circle", center: [133.3, 35.4] }])])).rows[0].ok).toBe(false);
+    expect((await owner.query("select flight_areas_covered(35.4, 133.3, 100, $1::jsonb) as ok", [JSON.stringify([{ id: "a1", kind: "polygon" }])])).rows[0].ok).toBe(false);
+    // 正しい名前つきは通る
+    expect((await owner.query("select flight_areas_valid($1::jsonb) as ok", [JSON.stringify([{ id: "a-1_x", name: "北側", kind: "circle", center: [133.3, 35.4], radius_m: 5 }])])).rows[0].ok).toBe(true);
     expect(await count("record_versions")).toBe(n);
     expect(await verifyAreas(p.id)).toEqual([]);
+  });
+
+  it("B1-7：許可の登録＋多角形の計画：覆う円が許可の円に収まらないと place_out_of_scope、収まると通る", async () => {
+    const polys = [{ kind: "polygon", vertices: TRI }, FAR];
+    const probe = await create({ areas: polys });
+    const centre = { lat: probe.latitude, lng: probe.longitude };
+    const reg = async (radiusM: number, n: string) =>
+      permits.createPermit(ctx(), {
+        permitNumber: n, coverage: "blanket", kinds: ["did", "night"], issuedOn: "2026-09-25", validFrom: "2026-10-01", validTo: "2027-09-30",
+        placeScope: { type: "circles", circles: [{ lat: centre.lat, lng: centre.lng, radiusM }] }, aircraftScope: { type: "any" }, pilotScope: { type: "any" },
+      });
+    await reg(probe.radiusM! + 10, "B17-OK");
+    await reg(probe.radiusM! - 1, "B17-NG");
+    const ok = await create({ areas: polys, flags: ["method_night"], permitNumbers: "B17-OK" });
+    const ng = await create({ areas: polys, flags: ["method_night"], permitNumbers: "B17-NG" });
+    expect(ok.permits.numbers[0]!.reasons.map((r) => r.code)).not.toContain("place_out_of_scope");
+    expect(ok.permits.numbers[0]!.status).toBe("applied");
+    expect(ng.permits.numbers[0]!.reasons.map((r) => r.code)).toContain("place_out_of_scope");
+    expect(ng.permits.numbers[0]!.status).not.toBe("applied");
+  });
+
+  it("19-1c まで暫定：多角形がある／範囲が 2 件以上の計画の通報の準備は 409 areas_report_unsupported。円 1 つ・点は従来どおり", async () => {
+    const poly = await create({ areas: [{ kind: "polygon", vertices: TRI }] });
+    const two = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }, { kind: "circle", center: [133.331, 35.42], radiusM: 20 }] });
+    for (const pl of [poly, two]) {
+      const e = await err(reports.getPlanReport(ctx(), pl.id));
+      expect([e.status, e.code]).toEqual([409, "areas_report_unsupported"]);
+    }
+    const one = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }] });
+    const pt = await create({ latitude: 35.4, longitude: 133.3 });
+    for (const pl of [one, pt]) await expect(reports.getPlanReport(ctx(), pl.id)).resolves.toBeDefined();
+  });
+
+  it("PlanDto.judgementScope は常に representative_point", async () => {
+    const p = await create({ areas: [{ kind: "polygon", vertices: TRI }] });
+    expect(p.judgementScope).toBe("representative_point");
+    expect((await create({ latitude: 35.4, longitude: 133.3 })).judgementScope).toBe("representative_point");
   });
 
   it("権限：soraban_app は flight_plans を更新できず、verify_flight_areas を実行できない。追記専用は変わらない", async () => {

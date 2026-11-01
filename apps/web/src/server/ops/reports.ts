@@ -24,6 +24,7 @@ import {
   CORRECTABLE_STATES,
   DIPS_CONFIG_ERROR_MESSAGE,
   diffFingerprintParts,
+  fingerprintAreasOf,
   effectiveReport,
   effectiveState,
   externalStatusLabel,
@@ -299,6 +300,11 @@ const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> 
 
 const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs): Promise<PlanForReport> => {
   const { plan } = b;
+  // 19-1c が終わるまで暫定：多角形がある、または範囲が 2 件以上の計画は、通報に出す形式がまだ無いため準備を止める。
+  // 円 1 つ・点の計画は従来どおり。外す条件：19-1c（DIPS 形式への変換と通報の整形）の完了後に、この判定ごと削除する。
+  if (fingerprintAreasOf(fingerprintAreasOfRow(plan)) !== undefined) {
+    throw new OpsError(409, "areas_report_unsupported", { areas: "この範囲の形式は、まだ通報に出せません" }, { areas: "areas_report_unsupported" });
+  }
   const org = ctx.member.org_id;
   const aircraft = await store.getAircraft(ctx.db, org, plan.aircraft_id);
   const pilot = await store.getPilot(ctx.db, org, plan.pilot_id);

@@ -38,7 +38,8 @@ export type AreaRejectReason =
   | "area_id_invalid"
   | "area_id_duplicate"
   | "area_name_invalid"
-  | "area_too_large";
+  | "area_too_large"
+  | "areas_present";
 
 export type AreasParsed =
   | { readonly ok: true; readonly stored: readonly StoredArea[]; readonly latitude: number; readonly longitude: number; readonly radiusM: number }
@@ -65,6 +66,7 @@ const REASON_MESSAGE: Readonly<Record<AreaRejectReason, string>> = {
   area_id_invalid: "範囲の識別子が正しくありません",
   area_id_duplicate: "範囲の識別子が重複しています",
   area_name_invalid: `範囲の名前は ${MAX_AREA_NAME} 文字以内の文字にしてください`,
+  areas_present: "範囲がある計画は、範囲で直してください",
   area_too_large: `範囲全体を覆う円の半径が ${MAX_AREA_RADIUS_M} m を超えます。計画を分けてください`,
 };
 
@@ -117,7 +119,7 @@ export const parseAreasInput = (raw: unknown): AreasParsed => {
     const nameRaw = item["name"];
     let name: string | undefined;
     if (nameRaw !== undefined && nameRaw !== null) {
-      if (typeof nameRaw !== "string" || nameRaw.trim().length > MAX_AREA_NAME) return fail("area_name_invalid", i);
+      if (typeof nameRaw !== "string" || nameRaw.trim().length > MAX_AREA_NAME || /[\u0000-\u001f\u007f-\u009f]/.test(nameRaw)) return fail("area_name_invalid", i);
       name = nameRaw.trim() || undefined;
     }
     let candidate: unknown;
@@ -184,6 +186,9 @@ export const areasOfPlanRow = (r: {
   };
 };
 
+/** 範囲がある計画への、緯度・経度・半径だけの訂正を拒むときの文（422 areas_present）。 */
+export const AREAS_PRESENT_MESSAGE = REASON_MESSAGE.areas_present;
+
 /** 判定の範囲の注記（画面への表示は 19-2b）。判定は代表点だけで行う。 */
 export const JUDGEMENT_AREA_NOTE = "判定は範囲の中の 1 か所（代表点）で行っています。範囲の全体は確認していません。";
 
@@ -194,3 +199,9 @@ export const fingerprintAreasOfRow = (r: { readonly flight_areas: unknown }): im
     a.kind === "polygon" ? { kind: "polygon", vertices: a.vertices } : { kind: "circle", center: a.center, radiusM: a.radius_m },
   );
 };
+
+/** 判定が見る範囲。判定は代表点だけで行う（範囲があるとき、画面は JUDGEMENT_AREA_NOTE を必ず出す。表示は 19-2a/2b）。 */
+export const JUDGEMENT_SCOPE = "representative_point" as const;
+
+/** DB の 23514（flight_areas_*）を写す専用コード。 */
+export const FLIGHT_AREAS_DB_REASONS = ["flight_areas_invalid", "flight_areas_not_covered"] as const;

@@ -75,6 +75,11 @@ describe("指紋と飛行範囲", () => {
     const d = diffFingerprintParts(before, after);
     expect(d.map((x) => x.key)).toContain("areas");
     expect(d.find((x) => x.key === "areas")?.after).toBe("1 件（多角形 1・円 0）");
+    // 頂点だけ動いたとき
+    const moved = diffFingerprintParts(after, fingerprintPartsOf({ ...base, areas: [tri(0.000001)] }));
+    expect(moved.find((x) => x.key === "areas")?.after).toBe("1 件（多角形 1・円 0）・頂点の位置が変わりました");
+    // 範囲なしの表示
+    expect(diffFingerprintParts(after, before).find((x) => x.key === "areas")?.after).toBe("円・点（範囲の指定なし）");
     expect(computeFingerprint(after)).not.toBe(computeFingerprint(before));
   });
 });

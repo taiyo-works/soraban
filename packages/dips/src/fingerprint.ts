@@ -167,7 +167,7 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
       return "（変更前の操縦者）";
     case "areas": {
       const a = p.areas;
-      if (!a) return "なし";
+      if (!a) return "円・点（範囲の指定なし）";
       const poly = a.filter((x) => x.kind === "polygon").length;
       return `${a.length} 件（多角形 ${poly}・円 ${a.length - poly}）`;
     }
@@ -181,7 +181,12 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
 /** 比べる値（flags は順を揃え、permit は jsonb でキーの順が変わっても同じになるよう固定の並びにする）。 */
 const comparable = (key: keyof FingerprintParts, p: FingerprintParts): string => {
   if (key === "flags") return JSON.stringify(normalizeFlags(p.flags));
-  if (key === "areas") return JSON.stringify(p.areas ?? null);
+  if (key === "areas") {
+    // 固定の配列で比べる（オブジェクトの鍵の順に左右されない）
+    return JSON.stringify(
+      p.areas ? p.areas.map((a) => (a.kind === "polygon" ? ["p", a.vertices] : ["c", a.center, a.radiusM])) : null,
+    );
+  }
   if (key === "permit") {
     const q = p.permit;
     return JSON.stringify(q ? [q.registrationId.toLowerCase(), q.versionNo, q.issuedOn, q.validFrom, q.validTo] : null);
@@ -205,7 +210,9 @@ export const diffFingerprintParts = (
     const b = comparable(key, after);
     if (a === b) continue;
     const afterText =
-      key === "aircraftId" ? "（変更後の機体）" : key === "pilotId" ? "（変更後の操縦者）" : show(key, after, flagLabel);
+      key === "areas" && before.areas && after.areas && before.areas.length === after.areas.length && before.areas.every((x, i) => x.kind === after.areas![i]!.kind)
+        ? `${show(key, after, flagLabel)}・${after.areas!.some((x) => x.kind === "polygon") ? "頂点の位置が変わりました" : "円の中心・半径が変わりました"}`
+        : key === "aircraftId" ? "（変更後の機体）" : key === "pilotId" ? "（変更後の操縦者）" : show(key, after, flagLabel);
     out.push({ key, label: FINGERPRINT_PART_LABEL[key], before: show(key, before, flagLabel), after: afterText });
   }
   return out;
