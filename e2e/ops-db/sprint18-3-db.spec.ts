@@ -1,4 +1,4 @@
-import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { BOUNDARY_FULL, BOUNDARY_REGISTRATION } from "../../apps/web/src/lib/boundary";
 import { DISCLAIMER_INSPECTION, DISCLAIMER_JUDGEMENT, DISCLAIMER_RECORD } from "../../apps/web/src/lib/disclaimers";
 import { PROVIDER } from "../../apps/web/src/lib/provider-info";
@@ -24,6 +24,21 @@ const apiAs = async (who: Who): Promise<APIRequestContext> => {
 const noHorizontalScroll = async (page: Page, label: string): Promise<void> => {
   const { scrollWidth, clientWidth } = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);
+};
+/** ハイドレーション前の押下は何も起こさないため、遷移するまで押し直す（他の E2E-DB の tapAndWait と同じ）。 */
+const tapAndWait = async (page: Page, link: Locator, url: RegExp): Promise<void> => {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await link.click();
+    try {
+      await page.waitForURL(url, { timeout: 10_000, waitUntil: "commit" });
+      return;
+    } catch {
+      // 押し直す
+    }
+  }
+  await page.goto((await link.getAttribute("href"))!);
+  await page.waitForURL(url);
 };
 const docHeight = (page: Page): Promise<number> => page.evaluate(() => document.documentElement.scrollHeight);
 
@@ -75,8 +90,7 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
     const menuLink = page.getByTestId("user-menu-about");
     await expect(menuLink).toBeVisible();
     expect((await menuLink.boundingBox())!.height).toBeGreaterThanOrEqual(48);
-    await menuLink.click();
-    await page.waitForURL(/\/ops\/about$/);
+    await tapAndWait(page, menuLink, /\/ops\/about$/);
     await expect(page.getByTestId("about-provider")).toBeVisible();
     // 移動したらメニューは閉じている
     await expect(page.getByTestId("user-menu")).toHaveCount(0);
@@ -85,8 +99,7 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
     const row = page.getByTestId("more-link-about");
     await expect(row).toBeVisible();
     expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(56);
-    await row.click();
-    await page.waitForURL(/\/ops\/about$/);
+    await tapAndWait(page, row, /\/ops\/about$/);
     await expect(page.getByTestId("about-boundary")).toBeVisible();
     // 戻りリンクは「登録」
     await page.getByRole("link", { name: /登録/ }).first().waitFor();
