@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { PlanDetailDto } from "@/server/ops/plans";
-import { primaryActionOf } from "@/lib/plan-main";
+import { primaryActionOf, voidedCancelNotice } from "@/lib/plan-main";
 import { DeadlineBox, ReportBox, ReportStatusBox } from "./plan-ui";
 import { buttonPrimaryClass } from "./ui";
 
@@ -12,7 +12,9 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
   const voidedNoRecord = plan.voided && status.code === "no_record";
   const canAct: Record<string, boolean> = {};
   for (const a of plan.nextActions as readonly import("@/server/ops/report-logic").NextAction[]) canAct[a.id] = a.canAct;
-  const action = primaryActionOf({ planId: plan.id, voided: plan.voided, state: plan.state, statusCode: status.code, canAct });
+  const hasEffective = status.effectiveId !== null;
+  const action = primaryActionOf({ planId: plan.id, voided: plan.voided, state: plan.state, statusCode: status.code, hasEffective, canAct });
+  const cancelNotice = voidedCancelNotice({ voided: plan.voided, statusCode: status.code, hasEffective });
   return (
     <section
       id="sec-report"
@@ -25,6 +27,12 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
       <a href={action.href} className={`${buttonPrimaryClass} w-full`} data-testid="plan-primary-action" data-action-id={action.id}>
         {action.label}
       </a>
+      {cancelNotice ? (
+        <p className="rounded-sb-m border-[1.5px] border-sb-v-no-fg bg-sb-base px-3 py-2 text-sm font-bold leading-relaxed text-sb-ink" data-testid="plan-cancel-needed">
+          <span aria-hidden className="mr-1">!!</span>
+          {cancelNotice}
+        </p>
+      ) : null}
       {voidedNoRecord ? null : <ReportStatusBox status={status} changes={plan.reportChanges} />}
       <DeadlineBox deadline={plan.report.deadline} compact />
       <ReportBox report={plan.report} compact part="body" voidedNoRecord={voidedNoRecord} />
@@ -58,7 +66,7 @@ export function PlanSteps({ planId, statusLabel, missing }: { readonly planId: s
     <section aria-label="通報の手順" className="flex flex-col gap-2" data-testid="plan-steps">
       <h2 className="opx-eyebrow">通報の手順</h2>
       <ol className="flex flex-col divide-y divide-sb-rule overflow-hidden rounded-sb-l bg-sb-base opx-shadow">
-        <Step n={1} href={`${base}#inputs`} title="内容を確認" state={missing === null ? "確認する" : missing > 0 ? `未入力の必須 ${missing} 件` : "未入力の必須 0 件"}>
+        <Step n={1} href={`${base}#inputs`} title="内容を確認" state={missing === null ? "確認する" : `計画の内容から未入力の必須 ${missing} 件`}>
           通報する内容と、未入力・要確認の項目を確かめます。
         </Step>
         <Step n={2} href={`${base}#items`} title="DIPS で本人が通報" state="本人の操作">

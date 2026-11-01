@@ -28,7 +28,7 @@ import {
   type ReportKind,
 } from "@soraban/dips";
 import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports";
-import { DeadlineBox, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
+import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
 import { REPORT_NOTE_SHORT } from "@/lib/plan-main";
 import { loadDraft, saveDraft, clearDraft, reportDraftKey } from "./drafts";
 import { Field, fieldErrorsOf, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
@@ -785,7 +785,15 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   const kindLabels: Record<ReportKind, string> = { new: "新規の通報", change: "変更の通報", cancel: "取消の記録" };
   const maskedLicense = !view.permissions.revealLicenseNumber;
   const notice = REPORT_NOTICE_BY_CHANNEL[view.adapter.name];
-  const olderReports = view.reports.filter((r, i) => !(i === 0 || r.id === view.effective?.id));
+  // 期限の警告・通報時からの変更点・対応が要る状況のときは、状況の詳細を開いたままにする
+  const statusOpen =
+    view.deadline.state === "overdue_started" ||
+    view.deadline.state === "past_guide" ||
+    view.fingerprintChanges.length > 0 ||
+    ["cancel_needed", "change_review", "unknown", "failed"].includes(view.status.code);
+  const keepVisibleIds = new Set([view.effective?.id, view.status.latestId].filter((x): x is string => !!x));
+  const isShownRow = (r: ReportDto, i: number): boolean => i === 0 || keepVisibleIds.has(r.id);
+  const olderReports = view.reports.filter((r, i) => !isShownRow(r, i));
 
   // ---- 記録（手動／取消）
   const [m, setM] = useState<ManualFields>(EMPTY_MANUAL);
@@ -840,7 +848,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         >
           <span data-testid="report-notice-short">{view.adapter.name === "mock" ? REPORT_NOTICE_BY_CHANNEL.mock : REPORT_NOTE_SHORT}</span>
           <details>
-            <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-normal text-sb-ink underline-offset-2 hover:underline">固定の文言の全文</summary>
+            <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm font-normal text-sb-ink underline-offset-2 hover:underline">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</summary>
             <div className="flex flex-col gap-2 pb-1">
               <span>{notice}</span>
               {view.adapter.name === "mock" ? (
@@ -878,25 +886,27 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       </nav>
 
       <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2" data-testid="report-status-line">
-        <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details">
+        {/* 記録の前に読むべき警告は、畳まずに 1 行ずつ出す */}
+        {view.warnings.length > 0 ? (
+          <ul className="flex flex-col gap-1.5" data-testid="report-warnings">
+            {view.warnings.map((w) => (
+              <li key={w.code} className="opx-note text-sm leading-relaxed text-sb-ink" data-code={w.code}>
+                {w.message}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details" open={statusOpen}>
           <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm text-sb-ink">
+            <ReportBadge report={view.requirement} bare />
             <ReportStatusBadge status={view.status} bare />
-            <span className="min-w-0 flex-1">{view.deadline.message ?? view.requirement.label}</span>
+            {view.deadline.message ? <span className="min-w-0 flex-1">{view.deadline.message}</span> : <span className="flex-1" />}
             <span className="font-bold underline underline-offset-2">詳細</span>
           </summary>
           <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
             <ReportBox report={view.requirement} />
             <ReportStatusBox status={view.status} changes={view.fingerprintChanges} />
             <DeadlineBox deadline={view.deadline} />
-            {view.warnings.length > 0 ? (
-              <ul className="flex flex-col gap-1.5" data-testid="report-warnings">
-                {view.warnings.map((w) => (
-                  <li key={w.code} className="opx-note text-xs leading-relaxed text-sb-ink-2" data-code={w.code}>
-                    {w.message}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
           </div>
         </details>
       </section>
@@ -930,7 +940,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             description="項目ごとに「コピー」を押して、DIPS 2.0 の通報画面に貼り付けます。そらばんが持たない項目は、DIPS で入力してください。"
           >
             <details data-testid="report-map-details">
-              <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">項目の対応表について（版 {view.prepared.mapRevision}）</summary>
+              <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">項目の対応表について（版 {view.prepared.mapRevision}）・DIPS の通報画面の入力順とは照合していません</summary>
             <div className="flex flex-col gap-1.5 text-xs leading-relaxed text-sb-ink-2" data-testid="report-map-info" >
               <p>
                 項目の対応表：版 <span className="sb-num tnum" data-testid="report-map-revision">{view.prepared.mapRevision}</span>・確認日{" "}
@@ -1074,7 +1084,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           </p>
         ) : (
           <ol className="flex flex-col border-t border-sb-rule" data-testid="report-history">
-            {view.reports.filter((r, i) => i === 0 || r.id === view.effective?.id).map((r) => (
+            {view.reports.filter((r, i) => isShownRow(r, i)).map((r) => (
               <ReportRow key={r.id} r={r} />
             ))}
           </ol>

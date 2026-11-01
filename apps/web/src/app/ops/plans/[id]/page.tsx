@@ -7,6 +7,7 @@ import { PlanFrame } from "@/components/ops/plan-frame";
 import { PlanSteps, ReportStatusCard } from "@/components/ops/plan-main-ui";
 import { buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { getPlanReport } from "@/server/ops/reports";
+import { OpsError } from "@/server/ops/service";
 import { loadPlan } from "./_load";
 
 // 通報の主画面（Sprint 17-2）：通報の状況カード（状況・期限・主操作 1 つ）→ 通報の手順（3 つ）→ ほかの要点（判定の 1 行・確認の 1 行）→
@@ -17,10 +18,13 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
   const j = plan.judgement;
   // 手順 ① の件数（未入力の必須項目）。読めなくても画面は止めない。
   let missing: number | null = null;
-  if (!plan.voided) {
+  // 通報済み・取消済みの計画では、件数を出さない（記録の後も出続けて紛らわしいため）
+  if (!plan.voided && plan.report.status.code !== "reported" && plan.report.status.code !== "cancelled") {
     try {
       missing = (await getPlanReport(ctx, id)).prepared.missingRequiredCount;
-    } catch {
+    } catch (e) {
+      // 権限が無い・見つからないのは想定内。それ以外はログに残す
+      if (!(e instanceof OpsError && (e.status === 403 || e.status === 404))) console.error("通報の主画面：未入力の件数を読めませんでした", e);
       missing = null;
     }
   }

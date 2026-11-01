@@ -9,7 +9,7 @@ import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
 import { VerdictTag } from "@/components/ui/sb-parts";
 import { cx } from "@/components/ui/cx";
 import { Icon, type IconName } from "@/components/ui/icons";
-import { JUDGE_LINE_PREFIX, JUDGE_UNREADABLE, REPORT_NOTE_SHORT, SOURCE_STALE_LABEL, VOIDED_NO_RECORD_LABEL, judgeLineModel } from "@/lib/plan-main";
+import { JUDGE_LINE_PREFIX, JUDGE_UNREADABLE, REPORT_NOTE_SHORT, SOURCE_STALE_LABEL, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE, judgeLineModel, splitNextActions } from "@/lib/plan-main";
 import { type Tone } from "./ui";
 
 // 飛行計画の画面で共通に使う小さな部品（サーバー・クライアントのどちらからも使える）。
@@ -124,7 +124,7 @@ export function ReportBox({
     const tone: Tone = voidedNoRecord ? "mute" : REPORT_TONE[report.kind];
     const glyph = voidedNoRecord ? "×" : REPORT_GLYPH[report.kind];
     const head = part !== "body";
-    const body = part !== "head" && !voidedNoRecord;
+    const body = part !== "head";
     return (
       <div className="flex flex-col gap-2" {...(head ? { "data-testid": "plan-report-box" } : { "data-testid": "plan-report-box-body" })} data-kind={report.kind}>
         {head ? (
@@ -135,7 +135,16 @@ export function ReportBox({
           <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : report.label}</span>
         </p>
         ) : null}
-        {!body ? null : (
+        {!body ? null : voidedNoRecord ? (
+          <>
+            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+              {REPORT_NOTE_SHORT}
+            </p>
+            <p className="pl-10 text-sm font-medium leading-relaxed text-sb-ink" data-testid="plan-voided-no-record-note">
+              {VOIDED_NO_RECORD_NOTE}
+            </p>
+          </>
+        ) : (
           <>
             {report.reasons.length > 0 ? (
               <details className="pl-10">
@@ -430,8 +439,7 @@ export function NextActionItem({
 
 /** 計画の詳細の「次にやること」。保存した状態ではなく、毎回導出した一覧。 */
 export function NextActionsList({ actions, limit }: { readonly actions: readonly NextAction[]; readonly limit?: number }) {
-  const shown = limit === undefined ? actions : actions.slice(0, limit);
-  const rest = limit === undefined ? [] : actions.slice(limit);
+  const { shown, rest } = limit === undefined ? { shown: actions, rest: [] as readonly NextAction[] } : splitNextActions(actions, limit);
   const li = (a: NextAction) => (
     <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
       <NextActionItem action={a} />

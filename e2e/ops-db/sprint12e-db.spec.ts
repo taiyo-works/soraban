@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlan } from "./plan-screen";
+import { gotoPlanOpen } from "./plan-screen";
 import { expandNextActions, openUserMenu } from "../ops-menu";
 import { collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets } from "../field-checks";
 import {
@@ -704,7 +704,7 @@ test.describe("Sprint 12e E2E-DB：事故・ヒヤリハット", () => {
     // 計画に結び付いた記録（計画から機体・操縦者・スナップショットを引き継ぐ）
     const linked = await createIncident(bm, fullBody({ planId: plan.id, summary: `計画の記録 ${stamp}` }));
     expect(linked.snapshotId).toBe(plan.currentSnapshotId);
-    await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}/journal`);
     const sec = tid(page, "incident-linked");
     await expect(sec).toBeVisible();
     await expect(tid(page, "incident-linked-count")).toHaveAttribute("data-count", "1");

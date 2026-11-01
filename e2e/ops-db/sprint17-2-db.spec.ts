@@ -1,5 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlanFolded as gotoPlan } from "./plan-screen";
+import { gotoPlan } from "./plan-screen";
 
 // Sprint 17-2 の E2E-DB（長さ L・主画面 J・通報の作業台 S-4）。元は 17-1 の E2E-DB（docs/sprints/sprint-17.md §10 の S-1〜S-3・S-5・S-6・J-1〜J-4 の構造の部分）。
 // 画面の分離：通報の主画面（/ops/plans/[id]）・通報の作業台（/report）・計画（/overview）・日誌（/journal）・判定（/judgement）。
@@ -7,6 +7,7 @@ import { gotoPlanFolded as gotoPlan } from "./plan-screen";
 // サーバーの時計は OPS_TEST_NOW で JST 2027-01-05 12:00 に固定している。
 
 const BASE = `http://127.0.0.1:${process.env.E2E_OPS_PORT ?? 3300}`;
+const MOCK_BASE = `http://127.0.0.1:${process.env.E2E_OPS_MOCK_ADAPTER_PORT ?? 3302}`;
 const stamp = Date.now().toString(36).toUpperCase();
 let seq = 0;
 
@@ -178,7 +179,9 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
         console.log(`[長さ] 主画面 ${size.name} ${key}: ${h}px`);
         expect(h, `${key}: 主画面の長さ`).toBeLessThanOrEqual(size.main);
         // L-2：スクロールなしで、タイトル・タブ・状況・主操作が入る
-        for (const id of ["plan-title-heading", "plan-tabs", "plan-report-label", "plan-primary-action"]) {
+        // 契約どおり plan-report-status も（中止・記録なしでは状況の行を出さず、事実の 1 行 plan-report-label に代える）
+        const firstScreenIds = ["plan-title-heading", "plan-tabs", "plan-report-label", "plan-primary-action", ...(key === "voidedNone" ? [] : ["plan-report-status"])];
+        for (const id of firstScreenIds) {
           const box = await page.getByTestId(id).first().boundingBox();
           expect(box, `${key} ${id}`).not.toBeNull();
           expect(box!.y + box!.height, `${key} ${id} の下端`).toBeLessThanOrEqual(size.firstScreen);
@@ -300,4 +303,98 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       }
     });
   }
+
+  test("高-1：通報済みの計画を中止し、取消の行が失敗しても、主画面に「取消が必要です」と出て、主操作は取消の記録になる(模擬アダプター)", async ({ page }) => {
+    await login(page);
+    const mockApi = await pwRequest.newContext({ baseURL: MOCK_BASE });
+    await signIn(mockApi, seeded("a-manager"));
+    const mk = async (extra: object = {}) => {
+      const r = await mockApi.post("/api/ops/plans", {
+        data: { title: `S172M ${stamp}-${seq++}`, aircraftId, pilotId, plannedStartAt: "2027-01-12T10:00", durationMinutes: 30, purpose: "空撮", placeName: "試験地点", latitude: NIGHT_SPOT.lat, longitude: NIGHT_SPOT.lng, radiusM: 200, maxAltitudeM: 100, flags: ["method_night"], ...extra },
+      });
+      expect(r.status(), await r.text()).toBe(201);
+      return (await r.json()) as PlanJson;
+    };
+    const plan = await mk();
+    expect((await mockApi.post(`/api/ops/plans/${plan.id}/request-confirmation`, { data: { expectedVersion: plan.version } })).status()).toBe(200);
+    const ver = async () => ((await (await mockApi.get(`/api/ops/plans/${plan.id}`)).json()) as PlanJson).version;
+    const sent = await mockApi.post(`/api/ops/plans/${plan.id}/reports`, { data: { kind: "new", expectedPlanVersion: await ver(), confirmSend: true, mockScenario: "ok" } });
+    expect(sent.status(), await sent.text()).toBeLessThan(300);
+    const effId = ((await sent.json()) as { report: { id: string } }).report.id;
+    const failedChange = await mockApi.post(`/api/ops/plans/${plan.id}/reports`, { data: { kind: "change", baseReportId: effId, expectedPlanVersion: await ver(), confirmSend: true, mockScenario: "rejected" } });
+    expect(failedChange.status(), await failedChange.text()).toBeLessThan(300);
+    expect((await mockApi.post(`/api/ops/plans/${plan.id}/void`, { data: { expectedVersion: await ver(), reason: "中止" } })).status()).toBe(200);
+    await mockApi.dispose();
+    await gotoPlan(page, `${MOCK_BASE}/ops/plans/${plan.id}`);
+    await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "failed");
+    await expect(page.getByTestId("plan-cancel-needed")).toBeVisible();
+    await expect(page.getByTestId("plan-cancel-needed")).toContainText("取消が必要です");
+    const primary = page.getByTestId("plan-primary-action");
+    await expect(primary).toHaveText("取消の結果を記録する");
+    await expect(primary).toHaveAttribute("href", `/ops/plans/${plan.id}/report?kind=cancel#record`);
+    const box = (await primary.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(812);
+  });
+
+  test("中-2・中-3：期限超過の警告は /report と主画面で開く操作なしに見える。状況の詳細はキーボードで開閉できる", async ({ page }) => {
+    await login(page);
+    const overdue = await activate(await createPlan({ plannedStartAt: "2027-01-05T10:00", title: `S172 期限 ${stamp}` }));
+    await gotoPlan(page, `/ops/plans/${overdue.id}`);
+    await expect(page.getByTestId("plan-report-deadline")).toHaveAttribute("data-state", "overdue_started");
+    await expect(page.getByTestId("plan-report-deadline-message")).toBeVisible();
+    await expect(page.getByTestId("plan-report-penalty")).toBeVisible();
+    await page.goto(`/ops/plans/${overdue.id}/report`);
+    await expect(page.getByTestId("report-screen")).toBeVisible();
+    await expect(page.getByTestId("report-status-details")).toHaveAttribute("open", "");
+    await expect(page.getByTestId("plan-report-deadline")).toBeVisible();
+    await expect(page.getByTestId("plan-report-penalty")).toBeVisible();
+    // 通常の計画では閉じている。summary にフォーカスして Enter で開閉できる
+    await page.goto(`/ops/plans/${plans.pending.id}/report`);
+    await expect(page.getByTestId("report-screen")).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    const details = page.getByTestId("report-status-details");
+    await expect(details).not.toHaveAttribute("open", "");
+    await details.locator("summary").focus();
+    await page.keyboard.press("Enter");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(page.getByTestId("plan-report-status")).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(details).not.toHaveAttribute("open", "");
+  });
+
+  test("低-5：変更点が多く、通報の記録・版が多い計画でも、主画面・計画・作業台の長さを測る(上限を超えたら報告)", async ({ page }) => {
+    await login(page);
+    const plan = await activate(await createPlan({ plannedStartAt: "2027-01-20T10:00", title: `S172 長い ${stamp}` }));
+    await recordApi(plan, "new", "FP-S172-LONG");
+    let cur = await getPlan(plan.id);
+    const edits: object[] = [
+      { plannedStartAt: "2027-01-20T11:00", durationMinutes: 40 },
+      { maxAltitudeM: 80, radiusM: 150 },
+      { purpose: "点検", placeName: "試験地点 2" },
+      { plannedStartAt: "2027-01-20T12:00", durationMinutes: 50, maxAltitudeM: 60 },
+    ];
+    for (const e of edits) {
+      const r = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: cur.version, reason: "訂正", ...e } });
+      expect(r.status(), await r.text()).toBe(200);
+      cur = await getPlan(plan.id);
+    }
+    for (const size of SIZES) {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      await gotoPlan(page, `/ops/plans/${plan.id}`);
+      await expect(page.getByTestId("plan-report-changes")).toBeVisible();
+      const changes = await page.getByTestId("plan-report-change-row").count();
+      const main = await height(page);
+      await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      const overview = await height(page);
+      await page.goto(`/ops/plans/${plan.id}/report`);
+      await expect(page.getByTestId("report-screen")).toBeVisible();
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      const report = await height(page);
+      console.log(`[長さ・長い計画] ${size.name} 変更点 ${changes} 件: 主画面 ${main}px / 計画 ${overview}px / 作業台 ${report}px`);
+      expect(main, "主画面").toBeLessThanOrEqual(size.main);
+      expect(overview, "計画").toBeLessThanOrEqual(size.overview);
+      expect(report, "作業台").toBeLessThanOrEqual(size.report);
+    }
+  });
 });
