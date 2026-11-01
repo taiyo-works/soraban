@@ -144,10 +144,11 @@ export function Notice({
 /** 詳細画面の項目の並び（狭い画面では見出しの下に値、広い画面では 2 列）。白いカードの中に置く。 */
 export function DetailList({
   rows,
+  compact = false,
   ...rest
-}: { readonly rows: readonly (readonly [string, ReactNode])[] } & Record<`data-${string}`, string>) {
+}: { readonly rows: readonly (readonly [string, ReactNode])[]; readonly compact?: boolean } & Record<`data-${string}`, string>) {
   return (
-    <dl {...rest} className="opx-card opx-detail">
+    <dl {...rest} className={`opx-card opx-detail${compact ? " opx-detail-compact" : ""}`}>
       {rows.map(([k, v]) => (
         <div key={k}>
           <dt>{k}</dt>

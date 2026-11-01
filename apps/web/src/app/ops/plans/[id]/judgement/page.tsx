@@ -42,7 +42,10 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           description="結論と、判定の根拠です。計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。"
         >
           <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={permitNotes} />
+          <details data-testid="plan-judgement-details">
+            <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">判定の記録（通し番号・日時・証跡 ID・エンジンの版）</summary>
           <DetailList
+            compact
             data-testid="plan-judgement"
             rows={[
               ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
@@ -52,6 +55,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
             ]}
           />
+          </details>
           {plan.freshness.stale ? (
             <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
               <p className="text-sm font-medium text-sb-ink">判定が古くなっています</p>
@@ -88,7 +92,10 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
             空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
           </Note>
-          <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+          <details>
+            <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">許可番号の形式について（※要再確認）</summary>
+            <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+          </details>
           {planPermits.permits.window ? (
             <p className="sb-num text-xs tnum text-sb-ink-2" data-testid="plan-permit-window">
               照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}

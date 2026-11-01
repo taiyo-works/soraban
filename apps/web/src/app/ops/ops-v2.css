@@ -409,6 +409,32 @@ html:has(.ops-v2) body {
   }
 }
 
+/* 項目の並び（compact）：狭い画面でも項目名を左・値を右の 2 列にして、縦を詰める（Sprint 17-2） */
+.opx-detail-compact > div {
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 6px 0;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.45;
+}
+@media (min-width: 640px) {
+  .opx-detail-compact > div {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+}
+/* 広い画面では 2 列に並べる（縦を詰める。順序は左列→右列ではなく、行ごとに左→右） */
+@media (min-width: 1024px) {
+  .opx-detail-compact {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+  .opx-detail-compact > div {
+    grid-template-columns: 9rem minmax(0, 1fr);
+  }
+}
+
 /* 範囲の切り替え（チップ。現在地は実線＋太字、ほかは破線） */
 .opx-seg {
   display: flex;

@@ -56,7 +56,7 @@ export function PlanFrame({
   readonly children: ReactNode;
 }) {
   return (
-    <main className="flex flex-col gap-10">
+    <main className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <PageHeader
           eyebrow={eyebrow}

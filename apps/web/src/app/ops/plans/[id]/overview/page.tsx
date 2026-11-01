@@ -64,7 +64,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
   return (
     <PlanFrame plan={plan} current="overview" eyebrow="計画">
         <Section title="概要" aria-label="概要">
-          <DetailList rows={overview} data-testid="plan-overview" />
+          <DetailList rows={overview} compact data-testid="plan-overview" />
         </Section>
 
         {updatable ? (
@@ -82,6 +82,8 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           description="許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。"
         >
           <ChangeNotice target="procedures" />
+          <details data-testid="plan-procedures-details">
+            <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">手続きの記録を開く</summary>
           <ProcedureRecordsPanel
             planId={plan.id}
             planVersion={plan.version}
@@ -90,6 +92,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
             canRecord={procedureView.canRecord}
             voided={plan.voided}
           />
+          </details>
         </Section>
 
         <Section id="sec-confirm" title="確認の状況" aria-label="確認の状況" description="運航管理者が、計画と判定を確認します。確認は、確認した版に対するものです。">
@@ -99,24 +102,27 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
             {plan.selfConfirmation ? <Badge tone="amber" data-testid="plan-self-confirmation">{SELF_CONFIRMATION_LABEL}</Badge> : null}
           </div>
           <dl className="flex flex-col border-t border-sb-rule text-sm" data-testid="plan-confirm-facts">
-            <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+            <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-xs text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
               <dd data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
             </div>
-            <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+            <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-xs text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
               <dd data-testid="plan-stale-sources">
                 {plan.staleSources.length === 0 ? (
                   "ありません"
                 ) : (
-                  <ul className="flex list-disc flex-col gap-1 pl-5">
-                    {plan.staleSources.map((s) => (
-                      <li key={s.id}>
-                        {s.name}：確認日 {s.verifiedAt}
-                        {s.ageDays !== null ? `（${s.ageDays} 日前）` : ""}
-                      </li>
-                    ))}
-                  </ul>
+                  <details>
+                    <summary className="flex min-h-11 cursor-pointer select-none items-center font-medium text-sb-ink">{plan.staleSources.length} 件あります（開く）</summary>
+                    <ul className="flex list-disc flex-col gap-1 pl-5">
+                      {plan.staleSources.map((s) => (
+                        <li key={s.id}>
+                          {s.name}：確認日 {s.verifiedAt}
+                          {s.ageDays !== null ? `（${s.ageDays} 日前）` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
                 )}
               </dd>
             </div>
@@ -164,7 +170,10 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
             tone="danger"
             description="計画を中止します。削除ではありません。中止した計画は訂正・確認・再判定・飛行記録の紐付けができなくなり、記載内容と版の一覧は残ります。"
           >
-            <VoidForm url={`/api/ops/plans/${plan.id}/void`} version={plan.version} label="この計画" />
+            <details data-testid="plan-void-details">
+              <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">この計画を中止する（開く）</summary>
+              <VoidForm url={`/api/ops/plans/${plan.id}/void`} version={plan.version} label="この計画" />
+            </details>
           </Section>
         ) : null}
     </PlanFrame>
