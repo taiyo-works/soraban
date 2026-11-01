@@ -9,6 +9,7 @@
 //   - 外部（模擬）を呼ぶ間、トランザクションを開けておかない：①prepared の行と監査を書く → ②アダプターを呼ぶ（上限 10 秒）→
 //     ③結果の版と監査を書く。③が失敗しても②の結果で再送しない（prepared のまま「結果不明」として扱う）。
 //   - 監査（flight_report_attempts）に、秘密・トークン・技能証明書番号・氏名・内容の全文を入れない（内容はハッシュと要約）。
+import { fingerprintAreasOfRow } from "./flight-areas";
 import { randomUUID } from "node:crypto";
 import type { PilotRow } from "@soraban/db";
 import {
@@ -315,6 +316,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
     latitude: Number(plan.latitude),
     longitude: Number(plan.longitude),
     radiusM: plan.radius_m,
+    areas: fingerprintAreasOfRow(plan),
     maxAltitudeM: plan.max_altitude_m,
     accessControl: plan.access_control,
     permitNumbers: plan.permit_numbers,

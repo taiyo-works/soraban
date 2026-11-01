@@ -84,6 +84,7 @@ import {
 import { collectMatching } from "./paging";
 import * as store from "./store";
 import { OpsError, type PlanWithJoins, type SnapshotFullRow, type SnapshotListRow } from "./store";
+import { areasOfPlanRow, storedToInput, type AreaDto, type AreaState } from "./flight-areas";
 import { PLAN_FIELDS, validatePlan, type PlanInputData } from "./validate-plan";
 import { parseClientRequestId } from "./validate-records";
 import { validateChangeMeta } from "./validate";
@@ -155,6 +156,12 @@ export type PlanDto = {
   readonly latitude: number;
   readonly longitude: number;
   readonly radiusM: number | null;
+  /**
+   * 飛行範囲（Sprint 19-1b）。areaState: areas＝範囲あり／circle＝範囲なしで半径あり（円 1 つとして読み替え。DB の行は書き換えない）／
+   * point＝範囲なしで半径なし（点だけ。円ではない）。latitude・longitude・radiusM は範囲を覆う円（範囲があるときはサーバーの計算値）。
+   */
+  readonly areaState: AreaState;
+  readonly areas: readonly AreaDto[];
   readonly savedPlaceId: string | null;
   readonly maxAltitudeM: number | null;
   readonly flags: readonly string[];
@@ -378,6 +385,8 @@ const planDtoParts = (
     latitude: Number(r.latitude),
     longitude: Number(r.longitude),
     radiusM: r.radius_m,
+    areaState: areasOfPlanRow(r).state,
+    areas: areasOfPlanRow(r).areas,
     savedPlaceId: r.saved_place_id,
     maxAltitudeM: r.max_altitude_m,
     flags: r.flags,
@@ -638,6 +647,8 @@ const mustMayCreate = async (ctx: OpsContext): Promise<PilotRow | null> => {
 const planInputFromData = (d: Readonly<Record<string, unknown>>): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
   for (const [api, col] of Object.entries(PLAN_FIELDS)) out[api] = d[col];
+  // 範囲は保存の形（snake_case）から入力の形へ。範囲が無い版は areas を持たない（緯度・経度・半径から読む）
+  out["areas"] = storedToInput(d["flight_areas"]);
   return out;
 };
 

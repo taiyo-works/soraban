@@ -1,5 +1,6 @@
 // 計画の応答に載せる通報の状況・期限・次にやること（Sprint 12b 設計 E・G）。plans.ts（計画の DTO）と reports.ts（通報の API）が使う。
 // 状態は保存せず、通報の行（flight_reports）・手続きの記録（plan_procedure_records）・コピーの監査から毎回導出する。
+import { fingerprintAreasOfRow } from "./flight-areas";
 import { reportRegistrationOf, type PermitMatchResult, type PermitRegistration } from "./permit-logic";
 import type { PlanProcedureRecordRow } from "@soraban/db";
 import {
@@ -90,6 +91,7 @@ export const currentFingerprintPartsOf = (r: PlanWithJoins, registration: Permit
     latitude: Number(r.latitude),
     longitude: Number(r.longitude),
     radiusM: r.radius_m,
+    areas: fingerprintAreasOfRow(r),
     maxAltitudeM: r.max_altitude_m,
     aircraftId: r.aircraft_id,
     pilotId: r.pilot_id,

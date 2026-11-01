@@ -4,7 +4,7 @@
 // 通報の画面で入力する項目（速度など）は指紋に含めない（変えたときは利用者が「通報を変更する」を選ぶ）。
 // 含める項目を足すときは、指紋の版（FINGERPRINT_VERSION）を上げる。
 import { sha256Hex } from "./sha256";
-import type { FingerprintParts, PlanForReport, ReportKind } from "./types";
+import type { FingerprintArea, FingerprintParts, PlanForReport, ReportKind } from "./types";
 
 export const FINGERPRINT_VERSION = "soraban-report-fp-v1";
 export const IDEMPOTENCY_VERSION = "soraban-report-idem-v1";
@@ -32,19 +32,37 @@ export const normalizeFlags = (flags: readonly string[]): string[] => {
   return [...known, ...unknown];
 };
 
+/**
+ * 指紋に入れる範囲。多角形が 1 つでもあるか、2 件以上のときだけ返す（円 1 つ・無しは undefined ＝ 従来の指紋のまま）。
+ * 座標は小数 6 桁に丸める。並びは入力の順（順を変える編集も変更として検知する）。識別子・名前は入れない。
+ */
+export const fingerprintAreasOf = (areas: readonly FingerprintArea[] | null | undefined): FingerprintArea[] | undefined => {
+  if (!areas || areas.length === 0) return undefined;
+  if (areas.length < 2 && areas.every((a) => a.kind === "circle")) return undefined;
+  const pos = (p: readonly [number, number]): [number, number] => [round6(p[0]), round6(p[1])];
+  return areas.map((a) =>
+    a.kind === "polygon"
+      ? { kind: "polygon", vertices: a.vertices.map(pos) }
+      : { kind: "circle", center: pos(a.center), radiusM: a.radiusM },
+  );
+};
+
 /** 指紋の元の値を取り出して正規化する。 */
 export const fingerprintPartsOf = (
   plan: Pick<
     PlanForReport,
     "startAt" | "durationMinutes" | "latitude" | "longitude" | "radiusM" | "maxAltitudeM" | "aircraftId" | "pilotId"
   > & {
+    readonly areas?: PlanForReport["areas"];
     readonly snapshot: { readonly flags: readonly string[] };
     readonly permitRegistration?: Pick<
       NonNullable<PlanForReport["permitRegistration"]>,
       "registrationId" | "versionNo" | "issuedOn" | "validFrom" | "validTo"
     > | null;
   },
-): FingerprintParts => ({
+): FingerprintParts => {
+  const areas = fingerprintAreasOf(plan.areas);
+  return {
   startAt: plan.startAt,
   durationMinutes: plan.durationMinutes,
   lat: round6(plan.latitude),
@@ -54,6 +72,8 @@ export const fingerprintPartsOf = (
   aircraftId: plan.aircraftId.toLowerCase(),
   pilotId: plan.pilotId.toLowerCase(),
   flags: normalizeFlags(plan.snapshot.flags),
+  // 範囲があるときだけ足す（円 1 つ・点だけの計画の指紋・冪等性キーは従来と一致する）
+  ...(areas ? { areas } : {}),
   // 登録があるときだけ足す（無い通報の指紋・冪等性キーは従来と一致する）
   ...(plan.permitRegistration
     ? {
@@ -66,7 +86,8 @@ export const fingerprintPartsOf = (
         },
       }
     : {}),
-});
+  };
+};
 
 /** 元の値から指紋（SHA-256、16 進小文字 64 桁）を求める。 */
 export const computeFingerprint = (p: FingerprintParts): string =>
@@ -84,6 +105,8 @@ export const computeFingerprint = (p: FingerprintParts): string =>
       normalizeFlags(p.flags),
       // 登録があるときだけ末尾に足す（FINGERPRINT_VERSION は上げない：登録の無い指紋は従来の値のまま）
       ...(p.permit ? [[p.permit.registrationId.toLowerCase(), p.permit.versionNo, p.permit.issuedOn, p.permit.validFrom, p.permit.validTo]] : []),
+      // 範囲があるときだけ、先頭の "areas" で見分けて末尾に足す（FINGERPRINT_VERSION は上げない：範囲の無い指紋は従来の値のまま）
+      ...(p.areas ? [["areas", ...p.areas.map((a) => (a.kind === "polygon" ? ["p", a.vertices] : ["c", a.center, a.radiusM]))]] : []),
     ]),
   );
 
@@ -106,6 +129,7 @@ export const FINGERPRINT_PART_LABEL: Readonly<Record<keyof FingerprintParts, str
   aircraftId: "機体",
   pilotId: "操縦者",
   flags: "飛行の方法・空域",
+  areas: "飛行範囲",
   permit: "許可・承認の登録",
 };
 
@@ -119,6 +143,7 @@ const PART_KEYS: readonly (keyof FingerprintParts)[] = [
   "aircraftId",
   "pilotId",
   "flags",
+  "areas",
   "permit",
 ];
 
@@ -140,6 +165,12 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
       return "（変更前の機体）";
     case "pilotId":
       return "（変更前の操縦者）";
+    case "areas": {
+      const a = p.areas;
+      if (!a) return "なし";
+      const poly = a.filter((x) => x.kind === "polygon").length;
+      return `${a.length} 件（多角形 ${poly}・円 ${a.length - poly}）`;
+    }
     case "permit":
       return p.permit ? `登録の版 ${p.permit.versionNo}（発行日 ${p.permit.issuedOn}・期間 ${p.permit.validFrom}〜${p.permit.validTo}）` : "なし";
     case "flags":
@@ -150,6 +181,7 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
 /** 比べる値（flags は順を揃え、permit は jsonb でキーの順が変わっても同じになるよう固定の並びにする）。 */
 const comparable = (key: keyof FingerprintParts, p: FingerprintParts): string => {
   if (key === "flags") return JSON.stringify(normalizeFlags(p.flags));
+  if (key === "areas") return JSON.stringify(p.areas ?? null);
   if (key === "permit") {
     const q = p.permit;
     return JSON.stringify(q ? [q.registrationId.toLowerCase(), q.versionNo, q.issuedOn, q.validFrom, q.validTo] : null);

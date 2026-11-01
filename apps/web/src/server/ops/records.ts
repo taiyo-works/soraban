@@ -46,6 +46,8 @@ export const nowOf = (ctx: OpsContext): Date => (ctx.now ? ctx.now() : new Date(
 export const invalid = <T>(v: RecordValidated<T>, extra?: { errors: Record<string, string>; codes: Record<string, string> }): never => {
   const errors = { ...(extra?.errors ?? {}), ...(v.ok ? {} : v.errors) };
   const codes = { ...(extra?.codes ?? {}), ...(v.ok ? {} : v.codes) };
+  // 飛行範囲（areas）の不正は 422。error は理由のコード（例：area_too_large、vertices_too_many）
+  if (codes["areas"] !== undefined) throw new OpsError(422, codes["areas"], errors, codes);
   throw new OpsError(400, "invalid_input", errors, codes);
 };
 

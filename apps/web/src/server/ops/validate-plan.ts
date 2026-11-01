@@ -5,6 +5,7 @@
 import { SPECIFIC_FLIGHT_FLAG_LABEL, type SpecificFlightFlag } from "@soraban/regulations";
 import { parseJstMinute, TIME_ERROR_MESSAGES, checkCoordinate } from "@/lib/ops-time";
 import { DIPS_PERMIT_FROM_REGISTRY_MESSAGE, isDipsPermitValue } from "./permit-logic";
+import { parseAreasInput, type StoredArea } from "./flight-areas";
 import { COORD_MESSAGES, collector, present, type RecordValidated } from "./validate-records";
 
 type Input = Readonly<Record<string, unknown>>;
@@ -50,6 +51,8 @@ export type PlanInputData = {
   readonly latitude: number;
   readonly longitude: number;
   readonly radius_m: number | null;
+  /** 飛行範囲（Sprint 19-1b）。あるときだけ入れる（無い計画の版の data は従来と同じ）。latitude・longitude・radius_m は範囲を覆う円。 */
+  readonly flight_areas?: readonly StoredArea[];
   readonly saved_place_id: string | null;
   readonly max_altitude_m: number | null;
   readonly flags: readonly SpecificFlightFlag[];
@@ -74,6 +77,7 @@ export const PLAN_FIELDS = {
   latitude: "latitude",
   longitude: "longitude",
   radiusM: "radius_m",
+  areas: "flight_areas",
   savedPlaceId: "saved_place_id",
   maxAltitudeM: "max_altitude_m",
   flags: "flags",
@@ -98,6 +102,7 @@ export const PLAN_FIELD_LABELS: Readonly<Record<string, string>> = {
   latitude: "緯度",
   longitude: "経度",
   radius_m: "範囲の半径",
+  flight_areas: "飛行範囲",
   saved_place_id: "よく使う地点",
   max_altitude_m: "最大高度",
   flags: "飛行の方法・空域",
@@ -180,20 +185,35 @@ export const validatePlan = (input: Input): RecordValidated<PlanInputData> => {
 
   let lat: number | null = null;
   let lng: number | null = null;
-  if (!present(input["latitude"])) c.fail("latitude", "required", "緯度を入力してください");
-  else {
-    const a = checkCoordinate(input["latitude"], "lat");
-    if (!a.ok) c.fail("latitude", a.code, `緯度：${COORD_MESSAGES[a.code]}`);
-    else lat = a.value;
+  let radius: number | null = null;
+  let flightAreas: readonly StoredArea[] | undefined;
+  // 飛行範囲（areas）があるときは、緯度・経度・半径をサーバーが範囲から求める（リクエストの値は使わない）。
+  // areas が null／未指定のときだけ、従来どおり緯度・経度・半径を読む。
+  const rawAreas = input["areas"];
+  if (rawAreas !== undefined && rawAreas !== null) {
+    const parsed = parseAreasInput(rawAreas);
+    if (!parsed.ok) c.fail("areas", parsed.reason, parsed.message);
+    else {
+      flightAreas = parsed.stored;
+      lat = parsed.latitude;
+      lng = parsed.longitude;
+      radius = parsed.radiusM;
+    }
+  } else {
+    if (!present(input["latitude"])) c.fail("latitude", "required", "緯度を入力してください");
+    else {
+      const a = checkCoordinate(input["latitude"], "lat");
+      if (!a.ok) c.fail("latitude", a.code, `緯度：${COORD_MESSAGES[a.code]}`);
+      else lat = a.value;
+    }
+    if (!present(input["longitude"])) c.fail("longitude", "required", "経度を入力してください");
+    else {
+      const b = checkCoordinate(input["longitude"], "lng");
+      if (!b.ok) c.fail("longitude", b.code, `経度：${COORD_MESSAGES[b.code]}`);
+      else lng = b.value;
+    }
+    radius = intIn(c, input, "radiusM", "範囲の半径（m）", 1, 10_000, false);
   }
-  if (!present(input["longitude"])) c.fail("longitude", "required", "経度を入力してください");
-  else {
-    const b = checkCoordinate(input["longitude"], "lng");
-    if (!b.ok) c.fail("longitude", b.code, `経度：${COORD_MESSAGES[b.code]}`);
-    else lng = b.value;
-  }
-
-  const radius = intIn(c, input, "radiusM", "範囲の半径（m）", 1, 10_000, false);
   const savedPlaceId = c.uuid(input, "savedPlaceId", "よく使う地点", false);
   const maxAltitude = intIn(c, input, "maxAltitudeM", "最大高度（m）", 0, 2000, false);
 
@@ -253,6 +273,7 @@ export const validatePlan = (input: Input): RecordValidated<PlanInputData> => {
     latitude: lat!,
     longitude: lng!,
     radius_m: radius,
+    ...(flightAreas ? { flight_areas: flightAreas } : {}),
     saved_place_id: savedPlaceId,
     max_altitude_m: maxAltitude,
     flags,
