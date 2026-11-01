@@ -43,7 +43,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           description="結論と、判定の根拠です。計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。"
         >
           {/* 判定エンジンの文言を出す領域の印（Sprint 18-3。限定語の検査から外す。lib/wording-policy.ts） */}
-          <div data-wording-scope="judgement">
+          <div data-wording-scope="judgement" data-testid="judgement-scope-plan">
             <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={permitNotes} />
           </div>
           <details data-testid="plan-judgement-details">

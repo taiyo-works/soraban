@@ -21,30 +21,30 @@ export default async function OpsAboutPage() {
       <PageHeader title="このアプリについて" back={BACK_TO.register} />
       <Section title="提供元">
         <div className="sb-block">
-          <ProviderInfo testId="about-provider" />
+          <ProviderInfo testId="about-provider" links />
         </div>
       </Section>
       <Section title="このアプリの範囲">
         <div className="sb-block">
-          <p data-testid="about-boundary" className="text-[15px] leading-relaxed text-sb-ink">
+          <p data-testid="about-boundary" className="text-base leading-relaxed text-sb-ink">
             {BOUNDARY_FULL}
           </p>
         </div>
       </Section>
       <Section title="免責">
         <div className="sb-block flex flex-col gap-3" data-testid="about-disclaimer">
-          <p data-testid="about-disclaimer-judgement" className="text-[15px] leading-relaxed text-sb-ink">
+          <p data-testid="about-disclaimer-judgement" className="text-base leading-relaxed text-sb-ink">
             {DISCLAIMER_JUDGEMENT}
           </p>
-          <p data-testid="about-disclaimer-inspection" className="text-[15px] leading-relaxed text-sb-ink">
+          <p data-testid="about-disclaimer-inspection" className="text-base leading-relaxed text-sb-ink">
             {DISCLAIMER_INSPECTION}
           </p>
-          <p data-testid="about-disclaimer-record" className="text-[15px] leading-relaxed text-sb-ink">
+          <p data-testid="about-disclaimer-record" className="text-base leading-relaxed text-sb-ink">
             {DISCLAIMER_RECORD}
           </p>
         </div>
       </Section>
-      <p data-testid="about-version" className="text-[13px] text-sb-ink-3">
+      <p data-testid="about-version" className="text-sm text-sb-ink-3">
         判定の版：<span className="sb-num">{ENGINE_VERSION}</span>
       </p>
     </main>

@@ -1,4 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { BOUNDARY_FULL } from "../../apps/web/src/lib/boundary";
 import { saveScan, scanPage, scanPlaceholders, scanString, violationsOf, type ScanRecord } from "../wording-scan";
 import { gotoPlanOpen } from "./plan-screen";
 
@@ -186,6 +187,8 @@ test.describe("Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管�
     // 3-3：載せない語（未定・準備中・TBD・要記入・xxx・ダミー・example・法人番号・適格請求書）は /ops/about とマニフェストで 0 件
     // （ほかの画面には「飛行の準備中」「@example.test」など、別の意味の語が正当に出るため、対象にしない）
     (all.C ??= []).push(...(await scanPlaceholders(page, "/ops/about")));
+    // 空振りでないこと：/ops/about の記録に境界の全文が許可リストの文として入っている
+    expect(all.C!.some((r) => r.kind === "allowed" && r.route === "/ops/about" && r.sentence === BOUNDARY_FULL), "BOUNDARY_FULL が /ops/about の記録にある").toBe(true);
     finish("C");
   });
 
@@ -197,16 +200,18 @@ test.describe("Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管�
     const res = await page.request.get("/ops/manifest.webmanifest");
     expect(res.status()).toBe(200);
     const manifest = await res.text();
-    (all.D ??= []).push(...scanString("/ops/manifest.webmanifest", "JSON の全文字列", manifest, false));
+    (all.D ??= []).push(...scanString("/ops/manifest.webmanifest", "JSON の全文字列", manifest));
     const manifestJson = JSON.parse(manifest) as { description: string };
-    expect(manifestJson.description).toContain("通報");
+    expect(manifestJson.description).toBe("ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめます。点検と飛行日誌は、電波の弱い現場でも記録できます。提供元：フューチャーテック株式会社");
+    // 圏外で使えると読める言い方を通報の記録にしない
+    expect(manifestJson.description).not.toMatch(/通報[^。]*電波の弱い/);
     for (const w of ["未定", "準備中", "TBD", "要記入", "xxx", "ダミー", "example", "法人番号", "適格請求書"]) expect(manifest, w).not.toContain(w);
     // 操縦者・閲覧者でも読める
     for (const who of ["a-pilot", "a-viewer"]) {
       const ctx = await apiAs(seeded(who));
       const p = await ctx.get("/ops/about");
       expect(p.status(), who).toBe(200);
-      (all.D ??= []).push(...scanString(`/ops/about（${who}）`, "HTML", await p.text(), false).filter((r) => r.kind === "forbidden"));
+      (all.D ??= []).push(...scanString(`/ops/about（${who}）`, "HTML", await p.text()).filter((r) => r.kind === "forbidden"));
       await ctx.dispose();
     }
     finish("D");

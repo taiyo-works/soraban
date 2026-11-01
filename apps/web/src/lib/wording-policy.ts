@@ -5,17 +5,27 @@
 //   「代行」「代理」は境界の文に使わない（boundary.ts）ため、例外を作らない。専門家が「申請の代行はしません」という書き方を求めた場合は、
 //   その全文だけを ALLOWED_SENTENCES に足す（語の全面禁止は外さない）。
 // 【限定語】許可リスト（ALLOWED_SENTENCES）の文の中だけ許す。判定の領域の印の中は検査しない（判定エンジン由来の文言は変えない：sprint-18.md §4.6）。
-// 【判定の領域の印】印を付ける要素は下の一覧に固定する。増やすときは、理由をここと docs/evaluations/sprint-18-test-changes.md に書く。
+// 【判定の領域の印】印を付けてよい要素は、下の SCOPE_ALLOWED_TESTIDS の 6 か所に固定する（契約 §6.1）。走査のたびに、印の付いた要素の data-testid が
+//   この一覧に入っているかを検査する（大きな要素に印を付けて検査を止めることを防ぐ）。増やすときは、理由をここと docs/evaluations/sprint-18-test-changes.md に書く。
 //   - 公開の `/`：result-section、result-details、did-status（VerdictSummary と規制カード）
-//   - /ops/plans/[id]/judgement の VerdictSummary
-//   - /ops/plans/[id]/snapshots/[sid] の判定の本文
-//   - 計画の主画面の判定の 1 行（plan-main の判定の行）
-//   - 公開の `/` の判定の注記（regulation-checker の結果の注記・都市公園条例の説明）
+//   - /ops/plans/[id]/judgement の VerdictSummary を包む要素（judgement-scope-plan）
+//   - /ops/plans/[id]/snapshots/[sid] の判定の本文を包む要素（judgement-scope-snapshot）
+//   - 計画の主画面の判定の 1 行（plan-judge-line）
 import { BOUNDARY_FULL, BOUNDARY_SHORT } from "./boundary";
 
 export const JUDGEMENT_SCOPE_ATTR = "data-wording-scope";
 export const JUDGEMENT_SCOPE_VALUE = "judgement";
 export const JUDGEMENT_SCOPE_SELECTOR = `[${JUDGEMENT_SCOPE_ATTR}="${JUDGEMENT_SCOPE_VALUE}"]`;
+
+/** 判定の領域の印を付けてよい要素の data-testid（契約 §6.1 の 6 か所）。 */
+export const SCOPE_ALLOWED_TESTIDS: readonly string[] = [
+  "result-section",
+  "result-details",
+  "did-status",
+  "judgement-scope-plan",
+  "judgement-scope-snapshot",
+  "plan-judge-line",
+];
 
 /** 全面禁止語（印の中も含め、どこでも 0 件）。 */
 export const FORBIDDEN_ALL_WORDS: readonly string[] = [
@@ -117,14 +127,24 @@ export type LimitedHit = {
  * text は textContent、joined は同じ文字列にブロックの境目の改行を足したもの（文の取り出し用。省略すると text）。
  * 同じ語の n 番目の出現は、joined でも n 番目になる（足すのは改行だけ）。
  */
-export const classifyLimited = (text: string, joined: string = text): LimitedHit[] => {
+export const classifyLimited = (
+  text: string,
+  joined: string = text,
+  opts: { readonly extraAllowed?: readonly string[]; readonly squash?: boolean } = {},
+): LimitedHit[] => {
+  // squash：空白を除いた文字列どうしで照合する（PDF の文字列は空白が揃わない）。extraAllowed：同じ走査で画面の印の中に出た判定の文
+  const norm = (x: string): string => (opts.squash ? x.replace(/\s+/g, "") : x);
+  const allowed = [
+    ...ALLOWED_SENTENCES.map((a) => ({ sentence: norm(a.sentence), shown: a.sentence, source: a.source })),
+    ...(opts.extraAllowed ?? []).filter((x) => x.length >= 8).map((x) => ({ sentence: norm(x), shown: x, source: "画面の印の中で記録した判定の文" })),
+  ];
   const ranges: { from: number; to: number; sentence: string; source: string }[] = [];
-  for (const a of ALLOWED_SENTENCES) {
+  for (const a of allowed) {
     let from = 0;
     for (;;) {
       const i = text.indexOf(a.sentence, from);
       if (i < 0) break;
-      ranges.push({ from: i, to: i + a.sentence.length, sentence: a.sentence, source: a.source });
+      ranges.push({ from: i, to: i + a.sentence.length, sentence: a.shown, source: a.source });
       from = i + a.sentence.length;
     }
   }
@@ -153,3 +173,9 @@ export const classifyLimited = (text: string, joined: string = text): LimitedHit
   }
   return out;
 };
+
+/**
+ * 判定の表示の自前の見出し（lib/verdict-display.ts の VERDICT_SECTION_TITLE.duties）。判定エンジンの文言ではなく、アプリ側の見出し。
+ * 棚卸し（docs/legal/screen-wording-inventory.md）で「判定エンジン由来」と分けて載せる。
+ */
+export const JUDGEMENT_OWN_HEADINGS: readonly string[] = ["飛行の前後に必ず行うこと"];

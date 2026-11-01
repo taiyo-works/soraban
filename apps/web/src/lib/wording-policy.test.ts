@@ -23,6 +23,8 @@ import {
   LIMITED_WORDS,
   OFFICIAL_PROCEDURE_NOTE_TEXT,
   OLD_NAMES,
+  SCOPE_ALLOWED_TESTIDS,
+  JUDGEMENT_OWN_HEADINGS,
   PLACEHOLDER_WORDS,
   classifyLimited,
   findForbidden,
@@ -111,6 +113,22 @@ describe("語の一覧（lib/wording-policy.ts）", () => {
   });
   it("全面禁止語に 代行・代理・問題ありません・大丈夫 が入っている（契約 §6.1）", () => {
     for (const w of ["代行", "代理", "問題なし", "問題ありません", "大丈夫", "完璧", "通報不要", "保証します"]) expect(FORBIDDEN_ALL_WORDS).toContain(w);
+  });
+});
+
+describe("判定の領域の印（契約 §6.1）", () => {
+  it("印（data-wording-scope=\"judgement\"）を付けた箇所は、許可された 6 か所だけ（コードの検索）", () => {
+    const files = walk(SRC).filter((f) => /\.tsx$/.test(f) && !isTest(f));
+    const found: string[] = [];
+    for (const f of files) {
+      const t = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n");
+      for (const m of t.matchAll(/data-wording-scope="judgement"/g)) found.push(`${path.relative(SRC, f)}@${m.index}`);
+    }
+    expect(found.length).toBe(6);
+    expect(SCOPE_ALLOWED_TESTIDS.length).toBe(6);
+  });
+  it("自前の見出しは verdict-display の VERDICT_SECTION_TITLE.duties と同じ", () => {
+    expect(JUDGEMENT_OWN_HEADINGS).toContain(VERDICT_DISPLAY.VERDICT_SECTION_TITLE.duties);
   });
 });
 

@@ -39,6 +39,17 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
       const prov = page.getByTestId("about-provider");
       for (const v of [PROVIDER.name, PROVIDER.representative, `〒${PROVIDER.postalCode} ${PROVIDER.address}`, PROVIDER.phone, PROVIDER.email, PROVIDER.hours]) await expect(prov, v).toContainText(v);
       expect(await prov.locator("[data-testid^='provider-']").count()).toBe(6);
+      // 電話・メールは 48px 以上の tel:・mailto: の行
+      for (const [href, v] of [[`tel:${PROVIDER.phone}`, PROVIDER.phone], [`mailto:${PROVIDER.email}`, PROVIDER.email]] as const) {
+        const link = prov.locator(`a[href="${href}"]`);
+        await expect(link, v).toHaveText(v);
+        expect((await link.boundingBox())!.height, v).toBeGreaterThanOrEqual(48);
+      }
+      // 本文は 16px 以上（不変条件 6）
+      for (const id of ["about-provider", "about-boundary", "about-disclaimer-judgement", "about-disclaimer-inspection", "about-disclaimer-record"]) {
+        const fs = await page.getByTestId(id).evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+        expect(fs, id).toBeGreaterThanOrEqual(16);
+      }
       await expect(page.getByTestId("about-boundary")).toHaveText(BOUNDARY_FULL);
       const d = page.getByTestId("about-disclaimer");
       await expect(page.getByTestId("about-disclaimer-judgement")).toHaveText(DISCLAIMER_JUDGEMENT);
@@ -130,4 +141,29 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
       await noHorizontalScroll(page, `/ops/inspections/new ${who}`);
     }
   });
+
+  test("3-7：現場モードの点検の段（点検がまだのとき）にも inspection-disclaimer が出る。文は DISCLAIMER_INSPECTION", async ({ page }) => {
+    const m = await apiAs(seeded("a-manager"));
+    const mark = `JUS183F${stamp}`;
+    const a = await m.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "S18-3 試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+    expect(a.status(), await a.text()).toBe(201);
+    const aircraftId = ((await a.json()) as { id: string }).id;
+    const pilotId = ((await (await (await apiAs(seeded("a-pilot"))).get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    // サーバーの時計は JST 2027-01-05 12:00。当日の計画を確認依頼して現場モードを開く
+    const p = await m.post("/api/ops/plans", {
+      data: { title: `S18-3 現場 ${stamp}`, aircraftId, pilotId, plannedStartAt: "2027-01-05T14:00", durationMinutes: 30, purpose: "空撮", placeName: "試験地点", latitude: 35.44, longitude: 133.35, radiusM: 200, maxAltitudeM: 100, flags: ["method_night"] },
+    });
+    expect(p.status(), await p.text()).toBe(201);
+    const plan = (await p.json()) as { id: string; version: number };
+    const c = await m.post(`/api/ops/plans/${plan.id}/request-confirmation`, { data: { expectedVersion: plan.version } });
+    expect(c.status(), await c.text()).toBe(200);
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto(`/ops/plans/${plan.id}/field`);
+    await expect(page.getByTestId("field-item-inspection")).toBeVisible();
+    await expect(page.getByTestId("field-inspection-link")).toBeVisible();
+    await expect(page.getByTestId("inspection-disclaimer")).toHaveText(DISCLAIMER_INSPECTION);
+    await noHorizontalScroll(page, "現場");
+    await m.dispose();
+  });
 });
+

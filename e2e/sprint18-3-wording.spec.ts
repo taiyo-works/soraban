@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
-import { BOUNDARY_FULL } from "../apps/web/src/lib/boundary";
+import { BOUNDARY_FULL, BOUNDARY_SHORT } from "../apps/web/src/lib/boundary";
 import { DISCLAIMER_JUDGEMENT } from "../apps/web/src/lib/disclaimers";
 import { PROVIDER } from "../apps/web/src/lib/provider-info";
 import { saveScan, scanPage, scanPlaceholders, scanString, violationsOf, type ScanRecord } from "./wording-scan";
@@ -114,14 +114,59 @@ test.describe("3-8 禁止語・限定語の走査（公開の /）", () => {
     await diag;
     await settled(page);
     all.push(...(await scanPage(page, "/", "緊急用務空域を手で選んだ")));
+    // 市町村を特定できない地点（収録外。逆ジオコーダが答えない遠い地点）：DID を確認できない旨の注記（check-core の UNRESOLVED_PREF_NOTE）が出るかを記録する
+    const far = waitCheck(page);
+    const farDiag = waitDiagnose(page);
+    await page.getByLabel("座標または Google マップの URL").fill("34.9, 133.0");
+    await page.getByRole("button", { name: "反映", exact: true }).click();
+    await Promise.all([far, farDiag]);
+    await settled(page);
+    all.push(...(await scanPage(page, "/", "市町村を特定できない地点（収録外）")));
     // 地点判定の PDF（判定の結果の再掲。限定語は記録だけ、全面禁止語は 0）
     const dl = page.waitForEvent("download");
     await page.getByRole("button", { name: /PDF 出力/ }).first().click();
     const t = await pdfText(await dl);
     expect(t).toContain(DISCLAIMER_JUDGEMENT.replace(/\s/g, "").slice(0, 20));
     expect(t).not.toContain("許可申請");
-    all.push(...scanString("PDF（地点判定）", "米子市役所＋緊急用務空域", t.replace(/\s+/g, ""), true));
+    const screenJudgement = [...new Set(all.filter((r) => r.kind === "judgement").map((r) => r.sentence))];
+    all.push(...scanString("PDF（地点判定）", "米子市役所＋緊急用務空域", t.replace(/\s+/g, ""), { extraAllowed: screenJudgement, squash: true }));
     saveScan("public", all);
     expect(violationsOf(all)).toEqual([]);
+    // 空振りでないこと：`/` の記録に、境界の文（印の外・全文）と BOUNDARY_SHORT（判定の結論の直下。印の中）が許可リストの文として入っている
+    const allowedOn = (sentence: string) => all.some((r) => r.kind === "allowed" && r.route === "/" && r.sentence === sentence);
+    expect(allowedOn(BOUNDARY_FULL), "BOUNDARY_FULL が / の記録にある").toBe(true);
+    expect(allowedOn(BOUNDARY_SHORT), "BOUNDARY_SHORT が / の記録にある").toBe(true);
+    // 判定エンジン由来の限定語も記録されている（印の中を集められている）
+    expect(all.filter((r) => r.kind === "judgement" && r.route === "/").length).toBeGreaterThan(0);
+  });
+
+  test("走査が働いていること：印の外に「申請します」、印の中に「代行」を差し込むと、それぞれ違反・全面禁止語になる。印を大きな要素に付けると違反になる", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const clean = await scanPage(page, "/", "差し込み前");
+    expect(violationsOf(clean)).toEqual([]);
+    await page.evaluate(() => {
+      const outside = document.createElement("p");
+      outside.textContent = "許可を申請します";
+      document.body.appendChild(outside);
+      const inside = document.createElement("span");
+      inside.textContent = "手続きは代行します";
+      document.querySelector('[data-testid="result-section"]')!.appendChild(inside);
+    });
+    const dirty = await scanPage(page, "/", "差し込み後");
+    expect(dirty.some((r) => r.kind === "violation" && r.word === "申請" && r.sentence.includes("許可を申請します")), "印の外の「申請」が違反になる").toBe(true);
+    expect(dirty.some((r) => r.kind === "forbidden" && r.word === "代行"), "印の中の「代行」が全面禁止語になる").toBe(true);
+    // 印の中の限定語は違反にならない（判定エンジン由来として記録）
+    await page.evaluate(() => {
+      const inside = document.createElement("span");
+      inside.textContent = "事前に申請してください";
+      document.querySelector('[data-testid="result-section"]')!.appendChild(inside);
+    });
+    const scoped = await scanPage(page, "/", "印の中の限定語");
+    expect(scoped.some((r) => r.kind === "judgement" && r.sentence.includes("事前に申請してください"))).toBe(true);
+    // 印を大きな要素（main）に付けると、一覧にない要素として違反になる
+    await page.evaluate(() => document.querySelector("main")!.setAttribute("data-wording-scope", "judgement"));
+    const wide = await scanPage(page, "/", "main に印");
+    expect(wide.some((r) => r.kind === "violation" && r.word === "data-wording-scope"), "一覧にない要素への印が違反になる").toBe(true);
   });
 });

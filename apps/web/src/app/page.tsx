@@ -130,7 +130,7 @@ export default function Home() {
             {/* 誰のための道具で、使うと何が得られるか（Sprint 11a B1）。地域名はここに書かず site-facts の対象地域にだけ書く。 */}
             <p data-testid="site-lead" className="sb-lead">
               <strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>
-              地点がどの法令・条例に当たるかを出典つきで確かめられます（判定は補助）。
+              このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
             <p data-testid="site-ops-note" className="sb-ops-note">
@@ -232,7 +232,7 @@ export default function Home() {
             <p className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
             {/* 提供元の 6 項目（Sprint 18-3）と境界の文。値は lib/provider-info.ts・lib/boundary.ts の定数から。 */}
             <ProviderInfo testId="site-provider" className="max-w-3xl" compact />
-            <p data-testid="site-boundary" className="max-w-3xl leading-relaxed text-sb-ink-2">
+            <p data-testid="site-boundary" className="max-w-3xl text-sm leading-relaxed text-sb-ink-2">
               {BOUNDARY_FULL}
             </p>
             <p className="max-w-3xl leading-relaxed">

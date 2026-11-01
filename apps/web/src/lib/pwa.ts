@@ -160,8 +160,9 @@ export const pwaManifest = () => ({
   id: "/ops",
   name: "そらばん 運航管理",
   short_name: "そらばん",
-  // Sprint 18-3 §5.4：通報の記録を含める。提供元の名称は lib/provider-info.ts の定数から。
-  description: `ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌を、電波の弱い現場でも扱えます。提供元：${PROVIDER.name}`,
+  // Sprint 18-3 §5.4（§12.3 で変更）：圏外で使えるのは点検と飛行日誌（OFFLINE_SHELLS）。通報の作業台は圏外では使えないので、
+  // 「通報の記録をまとめる」と「点検と日誌は圏外でも記録できる」を分けて書く。提供元の名称は lib/provider-info.ts の定数から。
+  description: `ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめます。点検と飛行日誌は、電波の弱い現場でも記録できます。提供元：${PROVIDER.name}`,
   lang: "ja",
   start_url: "/ops",
   scope: "/ops",
