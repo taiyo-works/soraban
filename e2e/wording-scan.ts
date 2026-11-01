@@ -20,7 +20,7 @@ export type ScanRecord = {
   readonly count?: number;
 };
 
-type Collected = { readonly outside: string; readonly scoped: { readonly text: string; readonly joined: string }[]; readonly attrs: string[] };
+type Collected = { readonly outside: string; readonly outsideJoined: string; readonly scoped: { readonly text: string; readonly joined: string }[]; readonly attrs: string[] };
 
 export const collectPageText = (page: Page): Promise<Collected> =>
   page.evaluate((scopeSel) => {
@@ -56,7 +56,10 @@ export const collectPageText = (page: Page): Promise<Collected> =>
       const c = m.getAttribute("content");
       if (c) attrs.push(`meta=${c}`);
     }
-    return { outside: clone.textContent ?? "", scoped, attrs };
+    const outsideParts: string[] = [];
+    const w2 = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+    for (let n = w2.nextNode(); n; n = w2.nextNode()) if ((n.nodeValue ?? "").trim()) outsideParts.push(n.nodeValue ?? "");
+    return { outside: clone.textContent ?? "", outsideJoined: outsideParts.join("\n"), scoped, attrs };
   }, JUDGEMENT_SCOPE_SELECTOR);
 
 /** 文字列を検査して記録に足す。scoped=true（判定の領域の印の中）は、許可リストの外の限定語を「判定エンジン由来」として記録するだけで違反にしない。 */
@@ -72,7 +75,7 @@ const scanText = (route: string, state: string, text: string, scoped: boolean, o
 export const scanPage = async (page: Page, route: string, state = "初期"): Promise<ScanRecord[]> => {
   const c = await collectPageText(page);
   const out: ScanRecord[] = [];
-  scanText(route, state, c.outside, false, out);
+  scanText(route, state, c.outside, false, out, c.outsideJoined);
   for (const s of c.scoped) scanText(route, state, s.text, true, out, s.joined);
   // 属性・title・meta は印の外として扱う（属性に判定の文言は出さない）
   scanText(route, `${state}（属性・題名・meta）`, c.attrs.join("\n"), false, out);

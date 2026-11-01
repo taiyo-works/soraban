@@ -96,7 +96,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
         error={errors["doneAt"]}
         testId={`procedure-done-at-${kind}`}
       />
-      <Field label="控えの番号（申請受付番号など）" required={false} error={errors["reference"]} hint="100 文字以内。任意です。">
+      <Field label={kind === "dips_permit" ? "控えの番号（申請受付番号など）" : "控えの番号"} required={false} error={errors["reference"]} hint="100 文字以内。任意です。">
         <input className={`${inputClass} min-h-12`} value={reference} onChange={(e) => setReference(e.target.value)} data-testid={`procedure-reference-${kind}`} />
       </Field>
       <fieldset className="flex flex-col gap-2">
