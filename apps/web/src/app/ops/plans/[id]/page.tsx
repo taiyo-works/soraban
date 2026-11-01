@@ -1,117 +1,29 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { PLAN_JUDGEMENT_DISCLAIMER, PERMIT_VALUE_LABEL, PURPOSE_VALUE_LABEL, SPECIFIC_FLIGHT_FLAG_LABEL, type FlightVerdict, type SpecificFlightFlag } from "@soraban/regulations";
+import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { ChangeNotice } from "@/components/ops/change-notice";
-import { VoidForm } from "@/components/ops/ops-client";
-import { DeadlineBox, NextActionsList, PlanDigest, PlanStateBadge, ReportBox, ReportStatusBox, StaleBadge } from "@/components/ops/plan-ui";
-import { LinkedIncidentsSection } from "@/components/ops/incident-ui";
-import { ProcedureRecordsPanel } from "@/components/ops/procedure-client";
-import { PermitDeclaration, PlanPermitList } from "@/components/ops/permit-ui";
-import { ConfirmPanel, RejudgeButton, RequestConfirmationButton } from "@/components/ops/plans-client";
-import { Badge, buttonOutlineBrandClass, DetailList, Note, PageHeader, Section } from "@/components/ops/ui";
-import { VersionList } from "@/components/ops/versions";
-import { VerdictSummary } from "@/components/verdict-summary";
-import { formatJst } from "@/lib/ops-time";
-import { unknownCountLabel } from "@/lib/verdict-display";
-import { can } from "@/server/ops/authz";
-import { PERMIT_FORMAT_UNVERIFIED_NOTE, isDipsPermitValue } from "@/server/ops/permit-logic";
-import { verdictPermitNotes } from "@/server/ops/permit-page";
-import { listPlanIncidents } from "@/server/ops/incidents";
-import { getPlanPermits } from "@/server/ops/permits";
-import { requireOpsMember } from "@/server/ops/page";
-import { SELF_CONFIRMATION_LABEL } from "@/server/ops/plan-logic";
-import { canUpdatePlan } from "@/server/ops/plan-page";
-import { listProcedureRecords } from "@/server/ops/procedure-records";
-import { getPlan, getSnapshot, listPlanVersions } from "@/server/ops/plans";
-import { recordCreateDenied } from "@/server/ops/record-page";
-import { OpsError } from "@/server/ops/service";
-import { JUDGEMENT_LINK_MISSING_LABEL } from "@/server/ops/records";
+import { DeadlineBox, NextActionsList, PlanDigest, ReportBox, ReportStatusBox } from "@/components/ops/plan-ui";
+import { PlanAnchorCompat } from "@/components/ops/plan-anchor-compat";
+import { PlanFrame } from "@/components/ops/plan-frame";
+import { buttonOutlineBrandClass, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
+import { loadPlan } from "./_load";
 
-const DECISION_LABEL = { approved: "確認", returned: "差し戻し" } as const;
-const mono = "sb-num text-xs tnum break-all";
-
-// 飛行計画の詳細：概要／判定の要約／通報の要否／確認の状況／この計画の飛行記録／版の履歴（Sprint 12a 設計 F）。
+// 通報の主画面（Sprint 17-1。暫定）：通報の要否 ＋ 次にやること。判定は /judgement、計画（概要・確認・手続き・版・中止）は /overview、
+// 飛行記録・事故は /journal へ移した。通報の状況カード・手順・判定の 1 行は 17-2 で作り込む。
 export default async function PlanDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
-  const { ctx, me } = await requireOpsMember();
-  const { id } = await params;
-  let plan;
-  try {
-    plan = await getPlan(ctx, id);
-  } catch (e) {
-    if (e instanceof OpsError && e.status === 404) notFound();
-    throw e;
-  }
-  const [snapshot, versions, procedureView, planPermits, planIncidents] = await Promise.all([
-    getSnapshot(ctx, id, plan.currentSnapshotId),
-    listPlanVersions(ctx, id),
-    listProcedureRecords(ctx, id),
-    getPlanPermits(ctx, id),
-    listPlanIncidents(ctx, id),
-  ]);
-  // 判定の項目への表示の置き換えは、保存した判定（現在のスナップショット）が根拠にした登録だけに限る（登録が変わって古い判定には出さない）
-  const permitNotes = planPermits.judgementUpToDate ? verdictPermitNotes(planPermits.permits) : { applied: {}, item: {} };
-  const verdict = (snapshot.result as { verdict?: FlightVerdict }).verdict;
-  const updatable = !plan.voided && canUpdatePlan(me, plan.isSelf);
-  const manager = me.member.role === "manager";
-  const cancellable = !plan.voided && can(me.member.role, "plan.cancel", { isSelf: plan.isSelf });
-  const canConfirm = !plan.voided && can(me.member.role, "plan.confirm") && plan.status === "active" && plan.state !== "approved";
-  const canMakeFlight = !plan.voided && recordCreateDenied(me) === null;
+  const { id, plan } = await loadPlan(params);
   const j = plan.judgement;
 
-  const overview: [string, React.ReactNode][] = [
-    ["予定開始（日本時間）", <span key="s" className="sb-num tnum" data-testid="plan-start">{plan.plannedStartAtJst}</span>],
-    ["所要時間", `${plan.durationMinutes} 分`],
-    ["機体", <span key="a" className="sb-num">{plan.registrationMark}（{plan.modelName}）</span>],
-    ["操縦者", <span key="p" data-testid="plan-pilot-name">{plan.pilotName}</span>],
-    ["飛行の目的", plan.purpose],
-    [
-      "場所",
-      <span key="pl" className="flex flex-col">
-        <span>{plan.placeName}</span>
-        <span className="sb-num text-xs tnum text-sb-ink-2">
-          {plan.latitude}, {plan.longitude}（WGS84）{plan.radiusM !== null ? `／半径 ${plan.radiusM} m` : ""}
-        </span>
-      </span>,
-    ],
-    ["最大高度", plan.maxAltitudeM === null ? "—" : `${plan.maxAltitudeM} m`],
-    [
-      "飛行の方法・空域（選択）",
-      plan.flags.length === 0 ? "なし" : plan.flags.map((f) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f).join("、"),
-    ],
-    [
-      "同意・通報・許可（DIPS を除く）",
-      (() => {
-        const manual = plan.pilotPermits.filter((p) => !isDipsPermitValue(p));
-        return manual.length === 0 ? "なし" : manual.map((p) => PERMIT_VALUE_LABEL[p] ?? p).join("、");
-      })(),
-    ],
-    ["運航の目的（例外）", plan.judgementPurpose ? (PURPOSE_VALUE_LABEL[plan.judgementPurpose] ?? plan.judgementPurpose) : "通常運航"],
-    ["許可・承認の番号", <span key="pn" className="break-all sb-num text-xs" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
-    ["メモ", plan.notes ?? "—"],
-  ];
-
   return (
-    <main className="flex flex-col gap-10">
+    <PlanFrame plan={plan} current="report" eyebrow="飛行計画の詳細">
+      <PlanAnchorCompat planId={plan.id} />
       <div className="flex flex-col gap-4">
-        <PageHeader
-          eyebrow="飛行計画の詳細"
-          back={{ href: "/ops/plans", label: "飛行計画の一覧" }}
-          title={<span className="break-words" data-testid="plan-title-heading">{plan.title}</span>}
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <PlanStateBadge state={plan.state} label={plan.stateLabel} />
-            {plan.freshness.stale ? <StaleBadge /> : null}
-            <span className="sb-num text-[12px] tnum text-sb-ink-3">版 {plan.version}</span>
-          </div>
-        </PageHeader>
-        {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
-        <p
-          className="opx-note"
-          data-testid="plan-disclaimer"
-        >
+        {/* 保存・訂正の直後の結果の通知（版の一覧は /overview にあるため、ここでも受け取る） */}
+        <ChangeNotice target={VERSION_NOTICE_TARGET} />
+        <p className="opx-note" data-testid="plan-disclaimer">
           {PLAN_JUDGEMENT_DISCLAIMER}
         </p>
         <PlanDigest
+          planId={id}
           verdictLevel={j.verdictLevel}
           unknownCount={j.verdictUnknownCount}
           report={plan.report}
@@ -125,18 +37,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             現場モードを開く
           </Link>
         </div>
-        {updatable ? (
-          <div className="flex flex-wrap gap-3">
-            <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={buttonOutlineBrandClass} data-testid="plan-edit-link">
-              計画を訂正する
-            </Link>
-          </div>
-        ) : null}
       </div>
-
-      <Section title="概要" aria-label="概要">
-        <DetailList rows={overview} data-testid="plan-overview" />
-      </Section>
 
       <Section id="sec-report" title="通報の要否" aria-label="通報の要否" description="通報そのものは DIPS 2.0 で行います。そらばんは送信しません。">
         <ReportBox report={plan.report} />
@@ -149,225 +50,6 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
           </a>
         </div>
       </Section>
-
-      <Section
-        id="procedures"
-        title="手続きの記録"
-        aria-label="手続きの記録"
-        description="許可・承認の申請と、小型無人機等飛行禁止法の同意・通報を、済んだら記録します。記録は利用者の申告です。"
-      >
-        <ChangeNotice target="procedures" />
-        <ProcedureRecordsPanel
-          planId={plan.id}
-          planVersion={plan.version}
-          summary={procedureView.summary}
-          records={procedureView.records}
-          canRecord={procedureView.canRecord}
-          voided={plan.voided}
-        />
-      </Section>
-
-      <Section id="sec-confirm" title="確認の状況" aria-label="確認の状況" description="運航管理者が、計画と判定を確認します。確認は、確認した版に対するものです。">
-        <ChangeNotice target="confirmations" />
-        <div className="flex flex-wrap items-center gap-3" data-testid="plan-confirmation-status">
-          <PlanStateBadge state={plan.state} label={plan.stateLabel} />
-          {plan.selfConfirmation ? <Badge tone="amber" data-testid="plan-self-confirmation">{SELF_CONFIRMATION_LABEL}</Badge> : null}
-        </div>
-        <dl className="flex flex-col border-t border-sb-rule text-sm" data-testid="plan-confirm-facts">
-          <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-            <dt className="text-xs text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
-            <dd data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
-          </div>
-          <div className="grid grid-cols-1 gap-0.5 border-b border-sb-rule py-2.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-            <dt className="text-xs text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
-            <dd data-testid="plan-stale-sources">
-              {plan.staleSources.length === 0 ? (
-                "ありません"
-              ) : (
-                <ul className="flex list-disc flex-col gap-1 pl-5">
-                  {plan.staleSources.map((s) => (
-                    <li key={s.id}>
-                      {s.name}：確認日 {s.verifiedAt}
-                      {s.ageDays !== null ? `（${s.ageDays} 日前）` : ""}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </dd>
-          </div>
-        </dl>
-        {plan.state === "draft" ? (
-          <div id="request-confirmation" className="flex scroll-mt-4 flex-col gap-2">
-            <Note>下書きです。確認を依頼すると、運航管理者が確認できます。</Note>
-            {updatable ? <RequestConfirmationButton planId={plan.id} version={plan.version} /> : null}
-          </div>
-        ) : null}
-        {plan.confirmations.length === 0 ? (
-          plan.state !== "draft" && !plan.voided ? <p className="text-sm text-sb-ink-3">確認の記録はまだありません。</p> : null
-        ) : (
-          <ol className="flex flex-col border-t border-sb-rule" data-testid="plan-confirmations">
-            {[...plan.confirmations].reverse().map((c) => (
-              <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-sb-rule py-3 pl-3 text-sm ${c.decision === "approved" ? "border-l-sb-ink" : "border-l-sb-v-no-fg"}`} data-testid="plan-confirmation-row">
-                <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <Badge tone={c.decision === "approved" ? "green" : "red"} data-testid="plan-confirmation-decision">
-                    <span aria-hidden className="mr-1">{c.decision === "approved" ? "✓" : "↩"}</span>
-                    {DECISION_LABEL[c.decision]}
-                  </Badge>
-                  {c.selfConfirmation ? <Badge tone="amber">{SELF_CONFIRMATION_LABEL}</Badge> : null}
-                  <span className="sb-num text-xs tnum text-sb-ink-3">版 {c.planVersion}</span>
-                  <time dateTime={c.createdAt} className="sb-num text-xs tnum text-sb-ink-2">{c.createdAtJst}</time>
-                  <span>{c.confirmerName}</span>
-                </p>
-                {c.reason ? <p className="break-all text-sb-ink-2">理由：{c.reason}</p> : null}
-              </li>
-            ))}
-          </ol>
-        )}
-        {canConfirm ? (
-          <div id="confirm" className="scroll-mt-4">
-            <ConfirmPanel planId={plan.id} version={plan.version} stale={plan.freshness.stale} />
-          </div>
-        ) : null}
-        {!manager && plan.status === "active" && !plan.voided ? <Note>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
-      </Section>
-
-      <Section
-        id="sec-verdict"
-        title="判定の要約"
-        aria-label="判定の要約"
-        description="結論と、判定の根拠です。計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。"
-      >
-        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={permitNotes} />
-        <DetailList
-          data-testid="plan-judgement"
-          rows={[
-            ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-            ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
-            ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
-            ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
-            ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
-          ]}
-        />
-        {plan.freshness.stale ? (
-          <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
-            <p className="text-sm font-medium text-sb-ink">判定が古くなっています</p>
-            <ul className="list-disc pl-5 text-sm text-sb-ink-2" data-testid="plan-stale-reasons">
-              {plan.freshness.reasons.map((r) => (
-                <li key={r.code}>{r.label}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-3">
-          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
-            判定の根拠を見る
-          </Link>
-          <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-sb-ink underline underline-offset-2" data-testid="plan-snapshots-link">
-            判定の履歴を見る
-          </Link>
-        </div>
-        {updatable ? (
-          <div id="rejudge" className="scroll-mt-4">
-            <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} />
-          </div>
-        ) : null}
-      </Section>
-
-      <Section
-        id="permits"
-        title="許可・承認の照合"
-        aria-label="許可・承認の照合"
-        description="計画の許可番号の欄に入れた番号を、登録した許可・承認に結びつけ、計画の日時・場所・飛行の方法・機体・操縦者が範囲に収まるものだけを判定に使います。"
-      >
-        <PermitDeclaration declaration={planPermits.declaration} noDipsNote={planPermits.noDipsNote} />
-        <Note tone="red">
-          範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
-          空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
-        </Note>
-        <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
-        {planPermits.permits.window ? (
-          <p className="sb-num text-xs tnum text-sb-ink-2" data-testid="plan-permit-window">
-            照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}
-          </p>
-        ) : null}
-        {!planPermits.judgementUpToDate ? (
-          <p className="opx-note" data-testid="plan-permit-stale">
-            ! 登録（または許可番号）が、判定した時点から変わっています。判定をやり直すと、現在の登録で照合し直します。
-          </p>
-        ) : null}
-        <PlanPermitList summary={planPermits.permits} />
-        {planPermits.candidates.length > 0 ? (
-          <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
-            <p className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
-            <p className="text-xs leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
-            <ul className="flex flex-col border-t border-sb-rule">
-              {planPermits.candidates.map((c) => (
-                <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
-                  <span className="break-all sb-num text-[13px] text-sb-ink">{c.permitNumber}</span>
-                  <span className="text-xs text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
-                </li>
-              ))}
-            </ul>
-            {updatable ? (
-              <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={`${buttonOutlineBrandClass} self-start`} data-testid="plan-permit-edit-link">
-                計画を訂正して番号を入れる
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
-        <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
-          <p>
-            「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、
-            範囲に収まるときだけ判定が変わります。
-          </p>
-          <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
-            許可・承認の登録を見る
-          </Link>
-        </div>
-      </Section>
-
-      <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">
-        {plan.flights.length === 0 ? (
-          <p className="text-sm text-sb-ink-3" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
-        ) : (
-          <ul className="flex flex-col border-t border-sb-rule" data-testid="plan-flights">
-            {plan.flights.map((f) => (
-              <li key={f.id} className="border-b border-sb-rule">
-                <Link prefetch={false} href={`/ops/flights/${f.id}`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 py-2.5 text-sm hover:bg-sb-surface" data-testid="plan-flight-row">
-                  <span className="sb-num tnum">{f.flightDate}</span>
-                  <span className="sb-num tnum">{f.takeoffAtJst.slice(11)}–{f.landingAtJst}</span>
-                  <span className="sb-num text-sb-ink-2">{f.registrationMark}</span>
-                  <span>{f.pilotName}</span>
-                  {f.voided ? <Badge tone="red">取消済み</Badge> : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {canMakeFlight ? (
-          <div className="flex flex-col gap-2">
-            <Link prefetch={false} href={`/ops/flights/new?planId=${plan.id}`} className={`${buttonOutlineBrandClass} self-start`} data-testid="plan-make-flight">
-              飛行記録を作る
-            </Link>
-            <p className="text-xs text-sb-ink-3">機体・操縦者・目的・場所・特定飛行の形態を引き継ぎます。離陸・着陸の時刻は、実際の時刻を入れてください。</p>
-          </div>
-        ) : null}
-        <p className="text-xs text-sb-ink-3">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
-      </Section>
-
-      <LinkedIncidentsSection dto={planIncidents} />
-
-      <VersionList versions={versions} />
-
-      {cancellable ? (
-        <Section
-          title="中止"
-          tone="danger"
-          description="計画を中止します。削除ではありません。中止した計画は訂正・確認・再判定・飛行記録の紐付けができなくなり、記載内容と版の一覧は残ります。"
-        >
-          <VoidForm url={`/api/ops/plans/${plan.id}/void`} version={plan.version} label="この計画" />
-        </Section>
-      ) : null}
-    </main>
+    </PlanFrame>
   );
 }

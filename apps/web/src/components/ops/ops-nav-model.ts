@@ -134,7 +134,10 @@ export const BACK_TABLE: readonly { readonly screen: string; readonly back: Back
   { screen: "/ops/plans/new", back: { href: "/ops/plans", label: "飛行計画の一覧" } },
   { screen: `/ops/plans/${ID}`, back: { href: "/ops/plans", label: "飛行計画の一覧" } },
   { screen: `/ops/plans/${ID}/edit`, back: { href: `/ops/plans/${ID}`, label: "飛行計画の詳細" } },
-  { screen: `/ops/plans/${ID}/snapshots`, back: { href: `/ops/plans/${ID}`, label: "飛行計画の詳細" } },
+  { screen: `/ops/plans/${ID}/snapshots`, back: { href: `/ops/plans/${ID}/judgement`, label: "判定" } },
   { screen: `/ops/plans/${ID}/snapshots/${ID}`, back: { href: `/ops/plans/${ID}/snapshots`, label: "判定の履歴" } },
+  { screen: `/ops/plans/${ID}/overview`, back: { href: "/ops/plans", label: "飛行計画の一覧" } },
+  { screen: `/ops/plans/${ID}/journal`, back: { href: "/ops/plans", label: "飛行計画の一覧" } },
+  { screen: `/ops/plans/${ID}/judgement`, back: { href: `/ops/plans/${ID}`, label: "通報の状況" } },
   { screen: `/ops/plans/${ID}/report`, back: { href: `/ops/plans/${ID}`, label: "飛行計画の詳細" } },
 ];

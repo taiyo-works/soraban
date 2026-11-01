@@ -281,7 +281,7 @@ describe("planNextActions：許可・承認の申請と警察への通報", () =
   it("手続きにあり、有効な記録が現在のスナップショットに対して無いとき出る。期限の文言と日付はスナップショットのまま", () => {
     const list = planNextActions(build({ ...base, procedures: [permit, police] }).input);
     expect(list.map((a) => a.id)).toEqual(["apply_permit", "notify_police"]);
-    expect(list[0]).toMatchObject({ label: "許可・承認を申請する", dueLabel: permit.deadlineLabel, tier: 3, href: `/ops/plans/${PLAN_ID}#procedures` });
+    expect(list[0]).toMatchObject({ label: "許可・承認を申請する", dueLabel: permit.deadlineLabel, tier: 3, href: `/ops/plans/${PLAN_ID}/overview#procedures` });
     expect(list[1]).toMatchObject({ label: "警察へ通報する", dueLabel: police.deadlineLabel });
     // 手続きが無ければ出ない。緊急用務空域は申請する手続きでない
     expect(ids({ ...base, procedures: [] })).toEqual([]);

@@ -22,7 +22,7 @@ export default async function SnapshotListPage({ params }: { readonly params: Pr
   const list = await listSnapshots(ctx, id);
   return (
     <main className="flex flex-col gap-6">
-      <PageHeader title="判定の履歴" eyebrow={plan.title} back={{ href: `/ops/plans/${id}`, label: "飛行計画の詳細" }}>
+      <PageHeader title="判定の履歴" eyebrow={plan.title} back={{ href: `/ops/plans/${id}/judgement`, label: "判定" }}>
         <Note>判定をやり直しても、前の判定は書き換えられず、ここに残ります。</Note>
       </PageHeader>
       <ol className="flex flex-col gap-3" data-testid="snapshot-list">

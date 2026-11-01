@@ -211,13 +211,13 @@ export const planHref = (planId: string, id: NextActionId): string => {
   const base = `/ops/plans/${planId}`;
   switch (id) {
     case "request_confirmation":
-      return `${base}#request-confirmation`;
+      return `${base}/overview#request-confirmation`;
     case "confirm":
-      return `${base}#confirm`;
+      return `${base}/overview#confirm`;
     case "fix_returned":
       return `${base}/edit`;
     case "rejudge":
-      return `${base}#rejudge`;
+      return `${base}/judgement#rejudge`;
     case "report":
     case "consider_report":
       return `${base}/report`;
@@ -229,7 +229,7 @@ export const planHref = (planId: string, id: NextActionId): string => {
       return `${base}/report?kind=cancel#record`;
     case "apply_permit":
     case "notify_police":
-      return `${base}#procedures`;
+      return `${base}/overview#procedures`;
     // Sprint 12d：許可・承認の登録の新規入力へ
     case "register_permit":
       return "/ops/permits/new";

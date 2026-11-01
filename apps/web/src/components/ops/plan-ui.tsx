@@ -177,6 +177,7 @@ export function StaleBadge({ bare }: { readonly bare?: boolean }) {
  * 詳細は下の節にあるため、ここは札だけを置く（testid は節の側にあり、ここでは重ねない）。
  */
 export function PlanDigest({
+  planId,
   verdictLevel,
   unknownCount,
   report,
@@ -184,6 +185,7 @@ export function PlanDigest({
   stateLabel,
   stale,
 }: {
+  readonly planId: string;
   readonly verdictLevel: string;
   readonly unknownCount: number;
   readonly report: ReportRequirement;
@@ -191,16 +193,16 @@ export function PlanDigest({
   readonly stateLabel: string;
   readonly stale: boolean;
 }) {
-  const row = "grid min-h-12 grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
+  const row = "grid min-h-12 grid-cols-[6.5rem_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
   return (
     <nav aria-label="要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
-      <a href="#sec-verdict" className={row}>
-        <span className="text-xs text-sb-ink-3">結論</span>
-        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <a href={`/ops/plans/${planId}/judgement`} className={row} data-testid="plan-judge-link">
+        <span className="text-xs text-sb-ink-3">判定（補助）</span>
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="plan-judge-line">
           <VerdictBadge level={verdictLevel} unknownCount={unknownCount} bare />
           {stale ? <StaleBadge bare /> : null}
         </span>
-        <span aria-hidden className="text-sb-ink-3">↓</span>
+        <span aria-hidden className="text-sb-ink-3">→</span>
       </a>
       <a href="#sec-report" className={row}>
         <span className="text-xs text-sb-ink-3">通報</span>
@@ -209,12 +211,12 @@ export function PlanDigest({
         </span>
         <span aria-hidden className="text-sb-ink-3">↓</span>
       </a>
-      <a href="#sec-confirm" className={row}>
+      <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row}>
         <span className="text-xs text-sb-ink-3">確認</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span aria-hidden className="text-sb-ink-3">↓</span>
+        <span aria-hidden className="text-sb-ink-3">→</span>
       </a>
     </nav>
   );

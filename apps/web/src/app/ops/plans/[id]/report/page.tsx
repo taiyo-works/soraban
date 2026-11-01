@@ -1,6 +1,7 @@
 import { safeReturnTo } from "@/lib/ops-return";
 import { notFound } from "next/navigation";
 import { ChangeNotice } from "@/components/ops/change-notice";
+import { PlanTabs } from "@/components/ops/plan-frame";
 import { Note, PageHeader } from "@/components/ops/ui";
 import { ReportScreen } from "@/components/ops/report-client";
 import { requireOpsMember } from "@/server/ops/page";
@@ -44,6 +45,7 @@ export default async function PlanReportPage({
         back={safeReturnTo(sp["returnTo"]) ? { href: safeReturnTo(sp["returnTo"])!, label: "現場モードへ戻る" } : { href: `/ops/plans/${view.planId}`, label: "飛行計画の詳細" }}
         title={<span className="break-words" data-testid="report-plan-title">{view.planTitle}</span>}
       />
+      <PlanTabs planId={view.planId} current="report" />
       <ChangeNotice target="report" />
       <ReportScreen key={`${view.planVersion}-${view.reports.length}-${view.reports[0]?.version ?? 0}`} initial={view} memberId={me.member.id} />
     </main>
