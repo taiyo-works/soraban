@@ -13,7 +13,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
   const row = (v: VersionDto) => (
     <li
           key={v.versionNo}
-            className="grid scroll-mt-24 grid-cols-1 gap-1 border-b border-sb-rule py-2 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
+            className="grid scroll-mt-24 grid-cols-1 gap-1 border-b border-sb-rule py-1.5 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
             data-testid="version-row"
             tabIndex={-1}
           >
