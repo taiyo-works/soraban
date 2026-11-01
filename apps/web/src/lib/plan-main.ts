@@ -117,3 +117,25 @@ export const primaryActionOf = (i: PrimaryActionInput): PrimaryAction => {
       return denied("report") ? viewOnly : { id: "view_report", label: "通報の内容を見る・通報する", href: `${base}/report` };
   }
 };
+
+/**
+ * 状況カードの見出し。通報の状況に応じて変える（通報済みなのに「通報：要」のままにしない）。
+ * 通報の要否の言葉（requirementLabel）は、記録が無いうち（または結果待ちでないとき）にだけ使う。
+ */
+export const cardHeading = (i: {
+  readonly voided: boolean;
+  readonly statusCode: ReportStatusCode;
+  readonly hasEffective: boolean;
+  readonly requirementLabel: string;
+}): string => {
+  if (i.voided && i.statusCode === "no_record") return VOIDED_NO_RECORD_LABEL;
+  if (i.voided) {
+    if (i.statusCode === "cancelled") return "取消済み（利用者の申告）";
+    if (i.hasEffective || i.statusCode === "cancel_needed") return "取消の結果を記録してください";
+    if (i.statusCode === "failed" || i.statusCode === "unknown" || i.statusCode === "sending") return "中止（通報の結果を確かめてください）";
+    return i.requirementLabel;
+  }
+  if (i.statusCode === "reported") return "通報済み（利用者の申告・手動記録）";
+  if (i.statusCode === "cancelled") return "取消済み（利用者の申告）";
+  return i.requirementLabel;
+};

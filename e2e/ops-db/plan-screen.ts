@@ -49,6 +49,7 @@ export const onAllPlanScreens = async (page: Page, planId: string, check: (label
   const back = page.url();
   for (const s of ALL_PLAN_SCREENS) {
     await gotoPlanOpen(page, `/ops/plans/${planId}${s}`);
+    await expectNoForbiddenTextContent(page, s === "" ? "通報の主画面" : s);
     await check(s === "" ? "通報の主画面" : s);
   }
   await gotoPlanOpen(page, back);
@@ -57,3 +58,11 @@ export const onAllPlanScreens = async (page: Page, planId: string, check: (label
 /** 表示中のタブ。クライアント遷移の後は前の画面の plan-tabs が display:none で残る（支援技術には出ない）ので、strict な getByTestId の代わりに使う。 */
 export const planTabs = (page: Page) => page.locator('[data-testid="plan-tabs"]:visible');
 export const planTab = (page: Page, key: string) => page.locator(`[data-testid="plan-tab-${key}"]:visible`);
+
+/** 禁止語の走査は、畳んだ中（display:none・閉じた details）も含む textContent でも行う（innerText は畳みの中を読まない）。 */
+export const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて", "問題なし", "大丈夫", "完璧", "代行"];
+export const expectNoForbiddenTextContent = async (page: Page, label: string): Promise<void> => {
+  const text = await page.locator("main").first().evaluate((el) => el.textContent ?? "");
+  for (const w of FORBIDDEN_WORDS) expect(text, `${label}: textContent に「${w}」`).not.toContain(w);
+  expect(text, `${label}: textContent に OK`).not.toMatch(/\bOK\b/);
+};

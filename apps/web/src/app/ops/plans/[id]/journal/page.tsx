@@ -13,15 +13,13 @@ export default async function PlanJournalPage({ params }: { readonly params: Pro
   const planIncidents = await listPlanIncidents(ctx, id);
   const canMakeFlight = !plan.voided && recordCreateDenied(me) === null;
 
-  return (
-    <PlanFrame plan={plan} current="journal" eyebrow="日誌">
-        <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">
-          {plan.flights.length === 0 ? (
-            <p className="text-sm text-sb-ink-3" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
-          ) : (
-            <ul className="flex flex-col border-t border-sb-rule" data-testid="plan-flights">
-              {plan.flights.map((f) => (
-                <li key={f.id} className="border-b border-sb-rule">
+  // 飛行記録は、新しい順の最新 5 件だけ出し、古い記録は畳む（件数を summary に出す）
+  const RECENT = 5;
+  const sorted = plan.flights; // 離陸の新しい順（store の並び）
+  const shown = sorted.slice(0, RECENT);
+  const older = sorted.slice(RECENT);
+  const flightRow = (f: (typeof plan.flights)[number]) => (
+    <li key={f.id} className="border-b border-sb-rule">
                   <Link prefetch={false} href={`/ops/flights/${f.id}`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 py-2.5 text-sm hover:bg-sb-surface" data-testid="plan-flight-row">
                     <span className="sb-num tnum">{f.flightDate}</span>
                     <span className="sb-num tnum">{f.takeoffAtJst.slice(11)}–{f.landingAtJst}</span>
@@ -30,8 +28,25 @@ export default async function PlanJournalPage({ params }: { readonly params: Pro
                     {f.voided ? <Badge tone="red">取消済み</Badge> : null}
                   </Link>
                 </li>
-              ))}
-            </ul>
+  );
+
+  return (
+    <PlanFrame plan={plan} current="journal" eyebrow="日誌">
+        <Section title="この計画の飛行記録" aria-label="この計画の飛行記録">
+          {plan.flights.length === 0 ? (
+            <p className="text-sm text-sb-ink-3" data-testid="plan-flights-empty">結びついた飛行記録はありません。</p>
+          ) : (
+            <>
+              <ul className="flex flex-col border-t border-sb-rule" data-testid="plan-flights">
+                {shown.map(flightRow)}
+              </ul>
+              {older.length > 0 ? (
+                <details data-testid="plan-flights-older">
+                  <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い飛行記録 {older.length} 件を見る（最新 {shown.length} 件は上に出ています）</summary>
+                  <ul className="flex flex-col border-t border-sb-rule">{older.map(flightRow)}</ul>
+                </details>
+              ) : null}
+            </>
           )}
           {canMakeFlight ? (
             <div className="flex flex-col gap-2">

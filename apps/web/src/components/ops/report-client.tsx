@@ -29,7 +29,7 @@ import {
 } from "@soraban/dips";
 import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports";
 import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
-import { REPORT_NOTE_SHORT } from "@/lib/plan-main";
+import { REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE } from "@/lib/plan-main";
 import { loadDraft, saveDraft, clearDraft, reportDraftKey } from "./drafts";
 import { Field, fieldErrorsOf, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField, splitJst } from "./report-parts";
@@ -785,6 +785,8 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   const kindLabels: Record<ReportKind, string> = { new: "新規の通報", change: "変更の通報", cancel: "取消の記録" };
   const maskedLicense = !view.permissions.revealLicenseNumber;
   const notice = REPORT_NOTICE_BY_CHANNEL[view.adapter.name];
+  // 中止した計画で通報の記録が無い：手順バー・入力の案内は出さず、事実だけを示す（主画面と同じ文言）
+  const voidedNone = view.planVoided && view.status.code === "no_record";
   // 期限の警告・通報時からの変更点・対応が要る状況のときは、状況の詳細を開いたままにする
   const statusOpen =
     view.deadline.state === "overdue_started" ||
@@ -870,22 +872,31 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           </details>
         </div>
 
+      {voidedNone ? null : (
       <nav
-        aria-label="通報の手順"
-        className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 lg:top-14"
-        data-testid="report-stepper"
-      >
-        {[
-          ["#inputs", "① 内容を整える", "report-step-inputs"],
-          ["#items", "② DIPS に入力", "report-step-items"],
-          ["#record", "③ 結果を記録", "report-step-record"],
-        ].map(([href, label, id]) => (
-          <a key={id} href={href} data-testid={id} className="flex min-h-12 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
-            {label}
-          </a>
-        ))}
-      </nav>
+          aria-label="通報の手順"
+          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 lg:top-14"
+          data-testid="report-stepper"
+        >
+          {[
+            ["#inputs", "① 内容を整える", "report-step-inputs"],
+            ["#items", "② DIPS に入力", "report-step-items"],
+            ["#record", "③ 結果を記録", "report-step-record"],
+          ].map(([href, label, id]) => (
+            <a key={id} href={href} data-testid={id} className="flex min-h-12 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
+              {label}
+            </a>
+          ))}
+        </nav>
+      )}
 
+      {voidedNone ? (
+        <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2 rounded-sb-l bg-sb-base px-4 py-3 opx-shadow" data-testid="report-status-line" data-voided-none="1">
+          <p className="text-base font-bold text-sb-ink">{VOIDED_NO_RECORD_LABEL}</p>
+          <p className="text-sm leading-relaxed text-sb-ink-2">{VOIDED_NO_RECORD_NOTE}</p>
+        </section>
+      ) : null}
+      {voidedNone ? null : (
       <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2" data-testid="report-status-line">
         {/* 記録の前に読むべき警告は、畳まずに 1 行ずつ出す */}
         {view.warnings.length > 0 ? (
@@ -900,9 +911,8 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details" open={statusOpen}>
           <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm text-sb-ink">
             <ReportBadge report={view.requirement} bare />
-            <ReportStatusBadge status={view.status} bare />
-            {view.deadline.message ? <span className="min-w-0 flex-1">{view.deadline.message}</span> : <span className="flex-1" />}
-            <span className="font-bold underline underline-offset-2">詳細</span>
+            <span className="flex-1" />
+            <span className="font-bold underline underline-offset-2">状況・期限の詳細</span>
           </summary>
           <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
             <ReportBox report={view.requirement} />
@@ -911,6 +921,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           </div>
         </details>
       </section>
+      )}
 
       <nav aria-label="通報の種別" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap" data-testid="report-kind-tabs">
         {(["new", "change", "cancel"] as const).map((k) => (
@@ -920,7 +931,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             disabled={!kindAvailable[k]}
             aria-pressed={kind === k}
             onClick={() => setKind(k)}
-            className={`${kind === k ? buttonPrimaryClass : buttonGhostClass} !px-1.5 sm:!px-5`}
+            className={`${buttonGhostClass} !px-1.5 sm:!px-5 ${kind === k ? "!border-transparent !bg-sb-inverse !text-sb-inverse-fg" : ""}`}
             data-testid={`report-kind-${k}`}
           >
             {kindLabels[k]}
@@ -929,7 +940,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       </nav>
       </div>
 
-      {!isCancel ? (
+      {voidedNone ? null : !isCancel ? (
         <>
           <Section id="inputs" title="通報の画面で入力する項目" aria-label="通報の画面で入力する項目">
             <InputsPanel form={form} setForm={setForm} errors={inputErrors} preview={preview} />

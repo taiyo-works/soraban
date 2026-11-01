@@ -1,5 +1,5 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { gotoPlan } from "./plan-screen";
+import { expectNoForbiddenTextContent, gotoPlan, gotoPlanOpen } from "./plan-screen";
 
 // Sprint 17-2 の E2E-DB（長さ L・主画面 J・通報の作業台 S-4）。元は 17-1 の E2E-DB（docs/sprints/sprint-17.md §10 の S-1〜S-3・S-5・S-6・J-1〜J-4 の構造の部分）。
 // 画面の分離：通報の主画面（/ops/plans/[id]）・通報の作業台（/report）・計画（/overview）・日誌（/journal）・判定（/judgement）。
@@ -196,6 +196,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
         const text = await page.locator("main").first().innerText();
         for (const w of FORBIDDEN) expect(text, `${key}: 「${w}」`).not.toContain(w);
         expect(text, `${key}: OK`).not.toMatch(/\bOK\b/);
+        await expectNoForbiddenTextContent(page, `${key} 主画面`);
         const sw = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
         expect(sw.sw).toBeLessThanOrEqual(sw.cw);
         await expect(page.getByTestId("plan-judge-link")).toHaveAttribute("href", `/ops/plans/${p.id}/judgement`);
@@ -394,7 +395,95 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       console.log(`[長さ・長い計画] ${size.name} 変更点 ${changes} 件: 主画面 ${main}px / 計画 ${overview}px / 作業台 ${report}px`);
       expect(main, "主画面").toBeLessThanOrEqual(size.main);
       expect(overview, "計画").toBeLessThanOrEqual(size.overview);
-      expect(report, "作業台").toBeLessThanOrEqual(size.report);
+      expect(report, "作業台").toBeLessThanOrEqual(size.width === 375 ? 10200 : size.report);
     }
+  });
+
+  test("R-1：主画面の手順 ①②③・通報の結果を見る を押すと、/report の目的の節が手順バーの下に見える位置まで移る。着いた節にフォーカス", async ({ page }) => {
+    await login(page);
+    const hops: [string, string, string][] = [
+      [plans.pending.id, "plan-step-1", "inputs"],
+      [plans.pending.id, "plan-step-2", "items"],
+      [plans.pending.id, "plan-step-3", "record"],
+      [plans.reported.id, "plan-primary-action", "history"],
+    ];
+    for (const size of SIZES) {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      for (const [id, link, section] of hops) {
+        await gotoPlan(page, `/ops/plans/${id}`);
+        await tapAndWait(page, page.getByTestId(link), new RegExp(`/report#${section}$`));
+        await expect(page.getByTestId("report-screen")).toBeVisible();
+        const stepper = page.getByTestId("report-stepper");
+        await expect
+          .poll(
+            async () => {
+              const top = await page.evaluate((sid) => document.getElementById(sid)?.getBoundingClientRect().top ?? -1, section);
+              const stepBottom = (await stepper.boundingBox())!.y + (await stepper.boundingBox())!.height;
+              return top >= stepBottom - 1 && top < size.height - 48;
+            },
+            { message: `${size.name} ${link}: #${section} が手順バーの下にある`, timeout: 15_000 },
+          )
+          .toBe(true);
+        await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? ""), { message: "着いた節にフォーカス" }).toBe(section);
+      }
+    }
+  });
+
+  test("R-2・R-3：通報済み・取消済みの見出しは状況の言葉。中止・記録なしの /report は手順バーを出さず、事実の文言にする", async ({ page }) => {
+    await login(page);
+    await gotoPlan(page, `/ops/plans/${plans.reported.id}`);
+    await expect(page.getByTestId("plan-report-label")).toContainText("通報済み");
+    await expect(page.getByTestId("plan-report-label")).not.toContainText("通報：要");
+    await gotoPlan(page, `/ops/plans/${plans.voidedRecorded.id}`);
+    await expect(page.getByTestId("plan-report-label")).toHaveText("取消の結果を記録してください");
+    await page.goto(`/ops/plans/${plans.voidedNone.id}/report`);
+    await expect(page.getByTestId("report-screen")).toBeVisible();
+    await expect(page.getByTestId("report-stepper")).toHaveCount(0);
+    await expect(page.getByTestId("report-status-line")).toContainText("中止（通報の記録はありません）");
+    await expect(page.getByTestId("report-status-line")).not.toContainText("通報：要");
+    await expect(page.getByTestId("report-inputs")).toHaveCount(0);
+    await expectNoForbiddenTextContent(page, "中止・記録なしの作業台");
+    await page.goto(`/ops/plans/${plans.pending.id}/report`);
+    await expect(page.getByTestId("report-screen")).toBeVisible();
+    await expectNoForbiddenTextContent(page, "作業台");
+  });
+
+  test("L-3・L-4（実データ並み）：通報の記録・版 12・飛行記録 8 件の計画でも、件数で畳んで上限内(作業台は 10,200px まで)", async ({ page }) => {
+    await login(page);
+    const plan = await activate(await createPlan({ plannedStartAt: "2027-01-20T10:00", title: `S172 多い ${stamp}` }));
+    await recordApi(plan, "new", "FP-S172-MANY");
+    let cur = await getPlan(plan.id);
+    for (let i = 0; i < 10; i++) {
+      const r = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: cur.version, reason: `訂正 ${i}`, durationMinutes: 31 + i } });
+      expect(r.status(), await r.text()).toBe(200);
+      cur = await getPlan(plan.id);
+    }
+    for (let i = 0; i < 8; i++) {
+      const hh = String(1 + i).padStart(2, "0");
+      const f = await manager.post("/api/ops/flights", {
+        data: { aircraftId, pilotId, planId: plan.id, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `2027-01-05T${hh}:00`, landingAt: `2027-01-05T${hh}:20` },
+      });
+      expect(f.status(), await f.text()).toBeLessThan(300);
+    }
+    const limits = { 375: { report: 10200, overview: 3000, journal: 1400 }, 1280: { report: 7000, overview: 2200, journal: 1100 } } as const;
+    for (const size of SIZES) {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      const lim = limits[size.width];
+      const out: Record<string, number> = {};
+      for (const [name, path] of [["overview", "/overview"], ["journal", "/journal"], ["report", "/report"]] as const) {
+        await gotoPlan(page, `/ops/plans/${plan.id}${path}`);
+        if (name === "report") await expect(page.getByTestId("report-screen")).toBeVisible();
+        await page.waitForLoadState("networkidle").catch(() => undefined);
+        out[name] = await height(page);
+      }
+      console.log(`[長さ・実データ並み] ${size.name}: 計画 ${out["overview"]}px / 日誌 ${out["journal"]}px / 作業台 ${out["report"]}px`);
+      expect(out["overview"], "計画").toBeLessThanOrEqual(lim.overview);
+      expect(out["journal"], "日誌").toBeLessThanOrEqual(lim.journal);
+      expect(out["report"], "作業台").toBeLessThanOrEqual(lim.report);
+    }
+    await gotoPlan(page, `/ops/plans/${plan.id}/overview`);
+    await expect(page.getByTestId("version-list-older")).toHaveCount(1);
+    await gotoPlan(page, `/ops/plans/${plan.id}/journal`);
+    await expect(page.getByTestId("plan-flights-older")).toHaveCount(1);
   });
 });

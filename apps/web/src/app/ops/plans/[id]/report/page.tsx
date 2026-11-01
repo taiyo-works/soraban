@@ -1,6 +1,7 @@
 import { safeReturnTo } from "@/lib/ops-return";
 import { notFound } from "next/navigation";
 import { ChangeNotice } from "@/components/ops/change-notice";
+import { HashScroll } from "@/components/ops/hash-scroll";
 import { PlanTabs } from "@/components/ops/plan-frame";
 import { Note, PageHeader } from "@/components/ops/ui";
 import { ReportScreen } from "@/components/ops/report-client";
@@ -8,6 +9,10 @@ import { requireOpsMember } from "@/server/ops/page";
 import { getPlanReport } from "@/server/ops/reports";
 import { OpsError } from "@/server/ops/service";
 import type { ReportKind } from "@soraban/dips";
+
+// 固定の手順バー（約 56px ＋余白）の下に節の見出しが隠れない余白
+const REPORT_SCROLL_OFFSET_PX = 80;
+const REPORT_SCROLL_OFFSET_LG_PX = 136; // 広い画面は上バー（56px）も固定
 
 // 通報の画面（Sprint 12b 設計 H）：通報内容を DIPS の入力順に並べて項目ごとにコピーし、通報の結果を記録する。
 // そらばんは DIPS に送信しない。記録するまで「通報済み」とは出さない。表示用の文言は @soraban/dips の定数だけを使う。
@@ -46,6 +51,7 @@ export default async function PlanReportPage({
         title={<span className="break-words" data-testid="report-plan-title">{view.planTitle}</span>}
       />
       <PlanTabs planId={view.planId} current="report" />
+      <HashScroll offset={REPORT_SCROLL_OFFSET_PX} offsetLg={REPORT_SCROLL_OFFSET_LG_PX} />
       <ChangeNotice target="report" />
       <ReportScreen key={`${view.planVersion}-${view.reports.length}-${view.reports[0]?.version ?? 0}`} initial={view} memberId={me.member.id} />
     </main>

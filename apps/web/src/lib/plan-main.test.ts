@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ReportStatusCode } from "@soraban/dips";
-import { judgeLineModel, JUDGE_UNREADABLE, primaryActionOf, REPORT_NOTE_SHORT, splitNextActions, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE, voidedCancelNotice } from "./plan-main";
+import { cardHeading, judgeLineModel, JUDGE_UNREADABLE, primaryActionOf, REPORT_NOTE_SHORT, splitNextActions, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE, voidedCancelNotice } from "./plan-main";
 
 const FORBIDDEN = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて", "問題なし", "OK", "大丈夫", "完璧", "保証", "必ず", "代行", "代理"];
 
@@ -96,5 +96,27 @@ describe("次にやることの表示（期限超過は畳まない）", () => {
 describe("新しい文言に禁止語が無い", () => {
   it("短い固定の文言・中止の表示", () => {
     for (const t of [REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE, JUDGE_UNREADABLE, voidedCancelNotice({ voided: true, statusCode: "failed", hasEffective: true }) ?? "", voidedCancelNotice({ voided: true, statusCode: "failed", hasEffective: false }) ?? ""]) for (const w of FORBIDDEN) expect(t).not.toContain(w);
+  });
+});
+
+describe("状況カードの見出し（R-2）", () => {
+  const req = "通報：要";
+  const h = (statusCode: ReportStatusCode, voided = false, hasEffective = false) => cardHeading({ voided, statusCode, hasEffective, requirementLabel: req });
+  it("記録が無いうちは通報の要否、通報済み・取消済みは状況の言葉", () => {
+    expect(h("no_record")).toBe(req);
+    expect(h("change_review")).toBe(req);
+    expect(h("reported")).toContain("通報済み");
+    expect(h("cancelled")).toContain("取消済み");
+  });
+  it("中止：記録なしは事実、取消待ちは取消の記録を促す", () => {
+    expect(h("no_record", true)).toBe("中止（通報の記録はありません）");
+    expect(h("cancel_needed", true, true)).toBe("取消の結果を記録してください");
+    expect(h("failed", true, true)).toBe("取消の結果を記録してください");
+    expect(h("failed", true, false)).toContain("確かめてください");
+    expect(h("cancelled", true)).toContain("取消済み");
+  });
+  it("禁止語を含まない", () => {
+    for (const c of ["no_record", "reported", "cancelled", "failed", "cancel_needed"] as const)
+      for (const v of [true, false]) for (const w of ["通報不要", "問題なし", "OK", "必ず", "保証"]) expect(h(c, v, true)).not.toContain(w);
   });
 });

@@ -112,12 +112,15 @@ export function ReportBox({
   report,
   compact = false,
   voidedNoRecord = false,
+  heading,
   part,
 }: {
   readonly report: ReportRequirement;
   readonly compact?: boolean;
   /** compact のとき、見出しだけ（head）か、根拠・固定の文言だけ（body）を出す。主操作を最初の画面に入れるため、カードの中で分けて置く。 */
   readonly part?: "head" | "body";
+  /** 見出しの文言（通報の状況に応じた言い方。無ければ通報の要否の見出し）。 */
+  readonly heading?: string;
   readonly voidedNoRecord?: boolean;
 }) {
   if (compact) {
@@ -132,7 +135,7 @@ export function ReportBox({
           <span aria-hidden className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
             {glyph}
           </span>
-          <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : report.label}</span>
+          <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
         </p>
         ) : null}
         {!body ? null : voidedNoRecord ? (

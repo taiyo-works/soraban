@@ -9,7 +9,7 @@ import { useEffect } from "react";
 const TOP_OFFSET_PX = 64; // 上バー（48px）の下に見出しが隠れない余白
 const GIVE_UP_MS = 6000;
 
-export function HashScroll() {
+export function HashScroll({ offset = TOP_OFFSET_PX, offsetLg }: { readonly offset?: number; readonly offsetLg?: number } = {}) {
   useEffect(() => {
     let timer = 0;
     const run = (): void => {
@@ -30,7 +30,7 @@ export function HashScroll() {
           for (const d of el.querySelectorAll("details[data-open-on-hash]")) (d as HTMLDetailsElement).open = true;
           // 描画が落ち着く（流し込みで高さが変わる）まで 1 回待ってから、実際の位置へ
           window.requestAnimationFrame(() => {
-            const top = el.getBoundingClientRect().top + window.scrollY - TOP_OFFSET_PX;
+            const top = el.getBoundingClientRect().top + window.scrollY - (offsetLg !== undefined && window.matchMedia("(min-width: 1024px)").matches ? offsetLg : offset);
             window.scrollTo({ top: Math.max(0, top) });
             // 節に着いたことをキーボード・スクリーンリーダーに伝える（見た目は変えない）
             if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
@@ -48,6 +48,6 @@ export function HashScroll() {
       window.clearTimeout(timer);
       window.removeEventListener("hashchange", run);
     };
-  }, []);
+  }, [offset, offsetLg]);
   return null;
 }

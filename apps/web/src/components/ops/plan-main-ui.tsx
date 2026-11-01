@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { PlanDetailDto } from "@/server/ops/plans";
-import { primaryActionOf, voidedCancelNotice } from "@/lib/plan-main";
+import { cardHeading, primaryActionOf, voidedCancelNotice } from "@/lib/plan-main";
 import { DeadlineBox, ReportBox, ReportStatusBox } from "./plan-ui";
 import { buttonPrimaryClass } from "./ui";
 
@@ -23,7 +23,7 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
       data-testid="plan-report-card"
       data-code={status.code}
     >
-      <ReportBox report={plan.report} compact part="head" voidedNoRecord={voidedNoRecord} />
+      <ReportBox report={plan.report} compact part="head" voidedNoRecord={voidedNoRecord} heading={cardHeading({ voided: plan.voided, statusCode: status.code, hasEffective, requirementLabel: plan.report.label })} />
       <a href={action.href} className={`${buttonPrimaryClass} w-full`} data-testid="plan-primary-action" data-action-id={action.id}>
         {action.label}
       </a>
