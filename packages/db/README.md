@@ -73,6 +73,7 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0015 | 運航管理（Sprint 12d）：`permit_registrations`（許可・承認の登録のヘッド表。`record_versions` の `entity_type = permit_registration` から DB が作る。登録は利用者の申告）、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0012 の定義に `permit_registration` の分岐を足す）、`judgement_snapshots` への追加前のトリガー `judgement_snapshots_permit_basis`（`input.permitBasis` の各要素が同じ組織の実在の版とハッシュに一致すること。`SB409` `permit_basis_invalid`）、アプリ用ロールへの権限付与（参照だけ） |
 | 0016 | 運航管理（Sprint 12e）：`incident_records`（事故・ヒヤリハットの記録のヘッド表。`record_versions` の `entity_type = incident_record` から DB が作る）、`incident_report_records`（国への報告の記録。追記専用。利用者の申告）・`incident_report_record_hash`・`verify_incident_report_records`、`record_versions` のトリガー関数と `verify_record_chain` の置き換え（0015 の定義に `incident_record` の分岐を足す）、アプリ用ロールへの権限付与（`incident_records` は参照だけ、`incident_report_records` は参照と追加だけ） |
 | 0017 | 運航管理（Sprint 14）：`flight_field_events` に確認項目 `docs_confirm`・`flight_restriction`・`site_conditions` と、構造化された列（`doc_key`、`site_third_party`・`site_other_aircraft`・`site_rain`・`site_visibility`・`site_wind_ms`・`site_temp_c`）を追加（追記専用・冪等性・取り消しは 0014 のまま）、`flight_field_event_hash_v2`、追加前のトリガーの置き換え |
+| 0018 | 運航管理（Sprint 19-1b）：`flight_plans.flight_areas`（jsonb・null 可。飛行範囲の配列。座標は [経度, 緯度]・小数 6 桁）、形の検査 `flight_areas_valid`、代表点＋半径の円が範囲を覆うことの検査 `flight_areas_covered`、追加後の小さなトリガー `record_versions_after_insert_flight_areas`（0016 の大きなトリガー関数は再定義しない）、照合 `verify_flight_areas(plan_id)`（アプリ用ロールは実行不可）。上限（範囲 20・頂点 100）は暫定（※要再確認） |
 
 ### ランナー
 
