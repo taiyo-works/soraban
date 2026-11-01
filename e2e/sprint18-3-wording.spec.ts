@@ -75,8 +75,8 @@ for (const vp of [
         expect(d, sel).toBe(`ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめる運航管理アプリです。地点の判定は補助の機能です。提供元：${PROVIDER.name}。現在は社内での試験運用中です。`);
       }
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", TITLE);
-      await expect(page.getByTestId("site-lead")).toContainText("判定は補助の情報です");
-      await expect(page.getByTestId("site-ops-note")).toHaveText("飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。");
+      await expect(page.getByTestId("site-lead")).toContainText("判定は補助");
+      await expect(page.getByTestId("site-ops-note")).toHaveText("通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。");
       // 3-3：載せない語
       const ph = await scanPlaceholders(page, "/");
       expect(violationsOf(ph)).toEqual([]);

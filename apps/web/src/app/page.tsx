@@ -130,11 +130,11 @@ export default function Home() {
             {/* 誰のための道具で、使うと何が得られるか（Sprint 11a B1）。地域名はここに書かず site-facts の対象地域にだけ書く。 */}
             <p data-testid="site-lead" className="sb-lead">
               <strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>
-              このページでは、地点がどの法令・条例に当たるかを、出典つきで確かめられます（判定は補助の情報です）。
+              地点がどの法令・条例に当たるかを出典つきで確かめられます（判定は補助）。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
             <p data-testid="site-ops-note" className="sb-ops-note">
-              飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。
+              通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。
             </p>
             {/* 運航管理が有効でログイン済みの利用者にだけ出す入口（Sprint 12a J）。動的な部分は Suspense の内側に閉じ込め、
                 `/` の静的なシェルは変えない。無効のとき（本番）は何も描かず、追加の通信もしない。 */}
@@ -231,7 +231,7 @@ export default function Home() {
           <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-xs text-sb-ink-3">
             <p className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
             {/* 提供元の 6 項目（Sprint 18-3）と境界の文。値は lib/provider-info.ts・lib/boundary.ts の定数から。 */}
-            <ProviderInfo testId="site-provider" className="max-w-3xl" />
+            <ProviderInfo testId="site-provider" className="max-w-3xl" compact />
             <p data-testid="site-boundary" className="max-w-3xl leading-relaxed text-sb-ink-2">
               {BOUNDARY_FULL}
             </p>
