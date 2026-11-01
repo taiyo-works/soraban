@@ -3,6 +3,7 @@ import {
   MAX_AREA_VERTICES,
   areaSquareMeters,
   circumscribedRadiusMeters,
+  coveringCircle,
   haversineMeters,
   latLngToPosition,
   offsetMeters,
@@ -18,6 +19,7 @@ import {
   validateFlightArea,
   type FlightArea,
   type LatLng,
+  type PolygonArea,
 } from "./index";
 
 const rect = (origin: LatLng, eastM: number, northM: number): LatLng[] => [
@@ -161,6 +163,60 @@ describe("validateFlightArea: 円", () => {
     expect(circle(10000, { lat: 0, lng: 179.99 })).toEqual({ ok: false, reason: "antimeridian_crossing" });
     expect(circle(10000, { lat: 0, lng: -179.99 })).toEqual({ ok: false, reason: "antimeridian_crossing" });
     expect(circle(10000, { lat: 24.3, lng: 179.8 }).ok).toBe(true);
+  });
+});
+
+describe("小数 6 桁の判定と形の検査", () => {
+  const r6 = (x: number) => Math.round(x * 1e6) / 1e6;
+  const tri = (lat: number, lng: number) => [
+    { lat, lng },
+    { lat: r6(lat > 0 ? lat - 0.01 : lat + 0.01), lng },
+    { lat, lng: r6(lng > 0 ? lng - 0.01 : lng + 0.01) },
+  ];
+  const v = (vertices: unknown) => validateFlightArea({ kind: "polygon", vertices });
+
+  it("7 桁以上を拒否する（微小な桁も）", () => {
+    expect(v(tri(35.123456000001, 133.3))).toMatchObject({ reason: "coordinate_too_precise" });
+    expect(v(tri(35, 168.12345600049))).toMatchObject({ reason: "coordinate_too_precise" });
+  });
+
+  it("6 桁ちょうどの値は拒否しない（全国）", () => {
+    const pts: Array<[number, number]> = [
+      [45.123456, 141.654321],
+      [43.062096, 141.354376],
+      [26.212401, 127.680932],
+      [36.200001, 133.300007],
+      [24.300001, 179.123457],
+      [0.000001, 179.999989],
+      [-33.123459, -179.123459],
+    ];
+    for (const [lat, lng] of pts) expect(v(tri(lat, lng)).ok).toBe(true);
+  });
+
+  it("先頭＝末尾の閉じた環は ring_closed、隣り合う重複頂点は vertex_duplicate", () => {
+    const t = tri(35, 133);
+    expect(v([...t, t[0]])).toEqual({ ok: false, reason: "ring_closed", vertexIndex: 3 });
+    expect(v([t[0], t[1], t[1], t[2]])).toEqual({ ok: false, reason: "vertex_duplicate", vertexIndex: 2 });
+  });
+
+  it("面積 0（一直線）は area_degenerate", () => {
+    expect(v([{ lat: 35, lng: 133 }, { lat: 35, lng: 133.01 }, { lat: 35, lng: 133.02 }])).toEqual({
+      ok: false,
+      reason: "area_degenerate",
+    });
+    expect(v([{ lat: 35, lng: 133 }, { lat: 35.01, lng: 133.01 }, { lat: 35.02, lng: 133.02 }])).toMatchObject({
+      reason: "area_degenerate",
+    });
+  });
+
+  it("polygonFromPositions は全件を回す前に件数の上限を見る", () => {
+    const huge = new Proxy(new Array(MAX_AREA_VERTICES + 2).fill(0), {
+      get(t, p, r) {
+        if (typeof p === "string" && /^\d+$/.test(p)) throw new Error("要素を読んだ");
+        return Reflect.get(t, p, r);
+      },
+    });
+    expect(polygonFromPositions(huge)).toEqual({ ok: false, reason: "vertices_too_many" });
   });
 });
 
@@ -376,12 +432,8 @@ describe("外接半径", () => {
         expect(r - far).toBeLessThan(1);
       } else {
         expect(r).toBe(Math.ceil(area.radiusM + haversineMeters(c, area.center)));
-        // 縁のどの方位の点も内側。
-        for (let deg = 0; deg < 360; deg += 15) {
-          const a = (deg * Math.PI) / 180;
-          const edge = offsetMeters(area.center, area.radiusM * Math.cos(a), area.radiusM * Math.sin(a));
-          expect(haversineMeters(c, edge)).toBeLessThanOrEqual(r + 1);
-        }
+        // 三角不等式により 代表点から中心まで＋半径 以上なら縁のどの点も覆う。
+        expect(r).toBeGreaterThanOrEqual(haversineMeters(c, area.center) + area.radiusM);
       }
     });
   }
@@ -394,6 +446,56 @@ describe("外接半径", () => {
     const area = polygon(rect(PLACES["米子"]!, 1000, 1000));
     const other = offsetMeters(PLACES["米子"]!, -2000, 0);
     expect(circumscribedRadiusMeters(area, other)).toBeGreaterThan(circumscribedRadiusMeters(area));
+    if (area.kind === "polygon") {
+      const r = circumscribedRadiusMeters(area, other);
+      for (const v of area.vertices) expect(haversineMeters(other, v)).toBeLessThanOrEqual(r);
+    }
+  });
+});
+
+describe("coveringCircle", () => {
+  const o = PLACES["米子"]!;
+
+  it("空は null", () => {
+    expect(coveringCircle([])).toBeNull();
+  });
+
+  it("1 つの範囲は代表点と外接半径", () => {
+    const a = polygon(rect(o, 1000, 600));
+    expect(coveringCircle([a])).toEqual({ center: representativePoint(a), radiusM: circumscribedRadiusMeters(a) });
+  });
+
+  it("複数の範囲（多角形と円）をすべて覆う。中心は 1 つ目の代表点", () => {
+    const a = polygon(rect(o, 500, 500));
+    const b = polygon(rect(offsetMeters(o, 3000, 2000), 800, 400));
+    const c: FlightArea = { kind: "circle", center: offsetMeters(o, -2500, 1000), radiusM: 700 };
+    const cov = coveringCircle([a, b, c])!;
+    expect(cov.center).toEqual(representativePoint(a));
+    for (const v of (b as PolygonArea).vertices) {
+      expect(haversineMeters(cov.center, v)).toBeLessThanOrEqual(cov.radiusM);
+    }
+    for (let deg = 0; deg < 360; deg += 10) {
+      const t = (deg * Math.PI) / 180;
+      const edge = offsetMeters(c.center, 700 * Math.cos(t), 700 * Math.sin(t));
+      expect(haversineMeters(cov.center, edge)).toBeLessThanOrEqual(cov.radiusM);
+    }
+  });
+
+  it("辺を細かく分けた点も覆う", () => {
+    const a = polygon(rect(o, 4000, 1500));
+    const b = polygon(rect(offsetMeters(o, 2000, 1000), 1200, 900));
+    const cov = coveringCircle([a, b])!;
+    for (const area of [a, b]) {
+      const vs = (area as PolygonArea).vertices;
+      for (let i = 0; i < vs.length; i++) {
+        const p = vs[i]!;
+        const q = vs[(i + 1) % vs.length]!;
+        for (let t = 0; t <= 1; t += 0.05) {
+          const pt = { lat: p.lat + (q.lat - p.lat) * t, lng: p.lng + (q.lng - p.lng) * t };
+          expect(haversineMeters(cov.center, pt)).toBeLessThanOrEqual(cov.radiusM);
+        }
+      }
+    }
   });
 });
 

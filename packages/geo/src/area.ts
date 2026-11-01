@@ -4,9 +4,9 @@
 //   （`positionToLatLng` / `latLngToPosition` / `polygonFromPositions`）。
 // - 小さな範囲（半径 10km 程度まで）の利用を前提にする。日付変更線をまたぐ範囲は検証で拒否する。
 // - ネットワーク・時刻・乱数を使わない。同じ入力は同じ値を返す。
-import { haversineMeters, pointInPolygon, type LatLng } from "./index";
+import { haversineMeters, pointInPolygon, type LatLng } from "./base";
 
-/** 多角形の頂点数の下限・暫定の上限（上限は DIPS の仕様が確定するまで※要再確認。定数はここ 1 か所）。 */
+/** 多角形の頂点数の下限・暫定の上限。上限は DIPS の仕様が確定するまで※要再確認（定数はここ 1 か所。保存・API は超過を拒否、画面は上限に近づく前に警告する方針）。 */
 export const MIN_POLYGON_VERTICES = 3;
 export const MAX_AREA_VERTICES = 100;
 /** 円の半径の範囲（m、整数）。既存の計画の `radius_m`（1〜10000）に合わせる。 */
@@ -40,7 +40,10 @@ export type AreaInvalidReason =
   | "coordinate_too_precise"
   | "radius_out_of_range"
   | "radius_not_integer"
-  | "antimeridian_crossing";
+  | "antimeridian_crossing"
+  | "ring_closed"
+  | "vertex_duplicate"
+  | "area_degenerate";
 
 export type AreaValidation =
   | { readonly ok: true; readonly area: FlightArea }
@@ -61,10 +64,8 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 type CoordCheck = { ok: true; point: LatLng } | { ok: false; reason: AreaInvalidReason };
 
-const hasTooManyDecimals = (v: number): boolean => {
-  const scaled = v * 10 ** AREA_COORD_DECIMALS;
-  return Math.abs(scaled - Math.round(scaled)) > 1e-3;
-};
+// 小数 6 桁に丸めても値が変わらないこと（7 桁以上は拒否）。
+const hasTooManyDecimals = (v: number): boolean => Number(v.toFixed(AREA_COORD_DECIMALS)) !== v;
 
 const checkCoordinate = (input: unknown): CoordCheck => {
   if (!isRecord(input)) return { ok: false, reason: "shape_invalid" };
@@ -78,6 +79,19 @@ const checkCoordinate = (input: unknown): CoordCheck => {
     return { ok: false, reason: "coordinate_too_precise" };
   }
   return { ok: true, point: { lat, lng } };
+};
+
+/** すべての頂点が一直線上（面積 0）か。直線からの距離が 5 cm 未満なら一直線とみなす。 */
+const isCollinear = (vertices: readonly LatLng[]): boolean => {
+  const o = vertices[0]!;
+  const k = Math.cos(toRad(o.lat));
+  const mPerDeg = (EARTH_RADIUS_M * Math.PI) / 180;
+  const pts = vertices.map((v) => ({ x: (v.lng - o.lng) * k * mPerDeg, y: (v.lat - o.lat) * mPerDeg }));
+  let far = pts[1]!;
+  for (const p of pts) if (p.x * p.x + p.y * p.y > far.x * far.x + far.y * far.y) far = p;
+  const len = Math.hypot(far.x, far.y);
+  if (len === 0) return true;
+  return pts.every((p) => Math.abs(far.x * p.y - far.y * p.x) / len < 0.05);
 };
 
 /**
@@ -98,12 +112,24 @@ export const validateFlightArea = (input: unknown): AreaValidation => {
       if (!c.ok) return { ok: false, reason: c.reason, vertexIndex: i };
       vertices.push(c.point);
     }
+    const first = vertices[0]!;
+    const last = vertices[vertices.length - 1]!;
+    if (first.lat === last.lat && first.lng === last.lng) {
+      return { ok: false, reason: "ring_closed", vertexIndex: vertices.length - 1 };
+    }
+    for (let i = 0; i + 1 < vertices.length; i++) {
+      const b = vertices[i + 1]!;
+      if (b.lat === vertices[i]!.lat && b.lng === vertices[i]!.lng) {
+        return { ok: false, reason: "vertex_duplicate", vertexIndex: i + 1 };
+      }
+    }
     for (let i = 0; i < vertices.length; i++) {
       const next = vertices[(i + 1) % vertices.length]!;
       if (Math.abs(next.lng - vertices[i]!.lng) > 180) {
         return { ok: false, reason: "antimeridian_crossing", vertexIndex: i };
       }
     }
+    if (isCollinear(vertices)) return { ok: false, reason: "area_degenerate" };
     return { ok: true, area: { kind: "polygon", vertices } };
   }
 
@@ -145,6 +171,8 @@ export const latLngToPosition = (p: LatLng): [number, number] => [p.lng, p.lat];
  */
 export const polygonFromPositions = (positions: unknown): AreaValidation => {
   if (!Array.isArray(positions)) return { ok: false, reason: "shape_invalid" };
+  // 閉じた環は末尾が 1 つ多い。全件を回す前に件数を見る。
+  if (positions.length > MAX_AREA_VERTICES + 1) return { ok: false, reason: "vertices_too_many" };
   const vertices: unknown[] = [];
   for (const pos of positions) {
     const p = positionToLatLng(pos);
@@ -298,6 +326,21 @@ export const circumscribedRadiusMeters = (area: FlightArea, center: LatLng = rep
   let max = 0;
   for (const v of area.vertices) max = Math.max(max, haversineMeters(center, v));
   return Math.ceil(max);
+};
+
+/**
+ * 複数の範囲を覆う 1 つの円。中心は 1 つ目の範囲の代表点、半径は全範囲について
+ * 同じ中心から `circumscribedRadiusMeters` を求めた最大値。範囲が空なら null。
+ */
+export const coveringCircle = (
+  areas: readonly FlightArea[],
+): { readonly center: LatLng; readonly radiusM: number } | null => {
+  const first = areas[0];
+  if (!first) return null;
+  const center = representativePoint(first);
+  let radiusM = 0;
+  for (const a of areas) radiusM = Math.max(radiusM, circumscribedRadiusMeters(a, center));
+  return { center, radiusM };
 };
 
 // ── 自己交差 ──
