@@ -14,7 +14,13 @@ export function HashScroll() {
     let timer = 0;
     const run = (): void => {
       window.clearTimeout(timer);
-      const id = decodeURIComponent(window.location.hash.slice(1));
+      // 壊れた % 表記（#%zz など）は URIError になる。何もしない（スクロールしない）
+      let id = "";
+      try {
+        id = decodeURIComponent(window.location.hash.slice(1));
+      } catch {
+        return;
+      }
       if (!id) return;
       const startedAt = Date.now();
       const tryScroll = (): void => {
@@ -26,6 +32,9 @@ export function HashScroll() {
           window.requestAnimationFrame(() => {
             const top = el.getBoundingClientRect().top + window.scrollY - TOP_OFFSET_PX;
             window.scrollTo({ top: Math.max(0, top) });
+            // 節に着いたことをキーボード・スクリーンリーダーに伝える（見た目は変えない）
+            if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+            el.focus({ preventScroll: true });
           });
           return;
         }

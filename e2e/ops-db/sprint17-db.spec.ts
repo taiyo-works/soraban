@@ -330,4 +330,19 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
     await expect(page.getByTestId("report-record-form")).toBeVisible();
     await expect(page.getByTestId("record-submit")).toBeEnabled();
   });
+
+  test("R-1：壊れた % 表記の hash（#%zz・#%E0%A4%A）でも計画の画面が出る。#a%20b と # も正常", async ({ page }) => {
+    await login(page);
+    const plan = await activate(await createPlan());
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    for (const sub of ["", "/overview", "/judgement", "/journal"]) {
+      for (const hash of ["#%zz", "#%E0%A4%A", "#a%20b", "#"]) {
+        await gotoPlan(page, `/ops/plans/${plan.id}${sub}${hash}`);
+        await expect(page.getByTestId("plan-title-heading"), `${sub}${hash}`).toBeVisible();
+        await expect(page.getByText("This page couldn't load")).toHaveCount(0);
+      }
+    }
+    expect(errors).toEqual([]);
+  });
 });
