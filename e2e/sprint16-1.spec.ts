@@ -79,23 +79,22 @@ test.describe("B. 白基調（H-1・H-2・U-4）", () => {
     });
   }
 
-  test("5. `/`：ページの地は白（帯の交互のベージュ・オフホワイトが無い）。見出しの背後の大きな数字が無い。ブロックは罫で分け、影が無い", async ({ page }) => {
+  test("5. `/`：ページの地は白（帯の交互のベージュ・オフホワイトが無い）。見出しの背後の大きな数字が無い。ブロックは罫（内側の 1px の輪）で分け、外へ広がる影が無い", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`${MAIN}/`);
     await expect(page.getByTestId("hero-art")).toBeVisible();
     const v = await page.evaluate(() => {
       const bands = [...document.querySelectorAll<HTMLElement>(".sb-band")].map((e) => getComputedStyle(e).backgroundColor);
-      const blocks = [...document.querySelectorAll<HTMLElement>(".sb-block")].map((e) => ({ shadow: getComputedStyle(e).boxShadow, border: getComputedStyle(e).borderTopWidth }));
+      const blocks = [...document.querySelectorAll<HTMLElement>(".sb-block")].map((e) => ({ shadow: getComputedStyle(e).boxShadow }));
       return { body: getComputedStyle(document.body).backgroundColor, bands, blocks, nums: document.querySelectorAll(".sb-sec-num").length };
     });
     expect(v.body).toBe(WHITE);
     expect(v.bands.length).toBeGreaterThan(1);
     for (const b of v.bands) expect(b).toBe(WHITE);
     expect(v.nums).toBe(0);
-    for (const b of v.blocks) {
-      expect(b.shadow).toBe("none");
-      expect(b.border).toBe("1px");
-    }
+    // 罫は内側の 1px の輪（inset。レイアウトの寸法を変えない）。外へ広がる影は無い
+    expect(v.blocks.length).toBeGreaterThan(0);
+    for (const b of v.blocks) expect(b.shadow).toBe("rgb(196, 196, 196) 0px 0px 0px 1px inset");
   });
 });
 

@@ -371,9 +371,9 @@ html:has(.ops-v2) body {
 .opx-card {
   min-width: 0;
   padding: 20px 16px;
-  border: var(--sb-rule-w) solid var(--sb-rule);
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .opx-card {
@@ -475,9 +475,9 @@ html:has(.ops-v2) body {
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 14px 16px;
-  border: var(--sb-rule-w) solid var(--sb-rule);
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   font-size: 14px;
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);
@@ -506,7 +506,6 @@ html:has(.ops-v2) body {
     gap: 16px;
     min-height: 56px;
     padding: 8px 16px;
-    border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;

@@ -139,8 +139,8 @@
 @media (min-width: 640px) {
   .opx-table {
     background: var(--sb-base);
-    border: var(--sb-rule-w) solid var(--sb-rule);
     border-radius: var(--sb-r-l);
+    box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   }
   .opx-table > .opx-listhead {
     border-radius: var(--sb-r-l) var(--sb-r-l) 0 0;
@@ -251,9 +251,10 @@
 .opx-row.opx-row-card {
   align-items: start;
   padding: 14px 16px;
-  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-bottom: 0;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
@@ -262,9 +263,10 @@
 .opx-form > fieldset {
   min-width: 0;
   padding: 20px 16px;
-  border: var(--sb-rule-w) solid var(--sb-rule);
+  border: 0;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .opx-form > section,
