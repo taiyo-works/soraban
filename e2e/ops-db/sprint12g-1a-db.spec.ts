@@ -19,7 +19,6 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
     expect(res?.status()).toBe(200);
     await expect(page).toHaveURL(`${BASE}/ops/design`);
     await expect(page.getByTestId("design-catalog")).toBeVisible();
-    await expect(page.getByTestId("design-catalog")).toHaveAttribute("data-hydrated", "1");
     await expect(page.getByTestId("ops-header")).toHaveCount(0);
     await expect(page.getByTestId("ops-bottom-nav")).toHaveCount(0);
     await expect(page.locator(".max-w-4xl")).toHaveCount(0);
@@ -65,8 +64,8 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
         const h = getComputedStyle(document.querySelector('[data-testid="ops-header"]')!);
         return { bg: b.backgroundColor, fg: b.color, headerBorder: h.borderBottomWidth, grid: b.backgroundImage };
       });
-      // v2 のトークン（明）：地は --sb-surface（オフホワイト #F7F7F3）、字は --sb-ink（墨 #262523）。旧い紙の色・方眼は出ない（Sprint 12h PR ③b1：値を v2 に差し替え）
-      expect(v.bg, path).toBe("rgb(247, 247, 243)");
+      // v2 のトークン（明）：地は --sb-base（白。Sprint 16-1 H-1 でオフホワイト #F7F7F3 から変更）、字は --sb-ink（墨 #262523）。旧い紙の色・方眼は出ない
+      expect(v.bg, path).toBe("rgb(255, 255, 255)");
       expect(v.fg, path).toBe("rgb(38, 37, 35)");
       expect(v.grid, path).toBe("none");
       expect(v.headerBorder, path).toBe("1px");

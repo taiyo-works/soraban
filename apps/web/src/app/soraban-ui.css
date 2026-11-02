@@ -62,6 +62,14 @@
   line-gap-override: 0%;
 }
 
+/* ===== 常に明るい表示（Sprint 16 D-1）：OS が暗でも、入力欄・選択欄・スクロールバーを含めて明で描く。強制の暗（休眠）だけ暗 ===== */
+:root {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 /* ===== ページの骨格 ===== */
 .sb-page {
   color: var(--sb-ink);
