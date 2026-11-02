@@ -79,7 +79,17 @@ describe("指紋と飛行範囲", () => {
     const moved = diffFingerprintParts(after, fingerprintPartsOf({ ...base, areas: [tri(0.000001)] }));
     expect(moved.find((x) => x.key === "areas")?.after).toBe("1 件（多角形 1・円 0）・頂点の位置が変わりました");
     // 範囲なしの表示
-    expect(diffFingerprintParts(after, before).find((x) => x.key === "areas")?.after).toBe("円・点（範囲の指定なし）");
+    expect(diffFingerprintParts(after, before).find((x) => x.key === "areas")?.after).toBe("円・点（多角形の指定なし）");
     expect(computeFingerprint(after)).not.toBe(computeFingerprint(before));
+  });
+
+  it("変更点の文言は、動いた範囲の種類で選ぶ（多角形を含む計画で円だけ動いたとき「頂点」と出さない）", () => {
+    const c2: FingerprintArea = { kind: "circle", center: [133.4, 35.4], radiusM: 50 };
+    const c2moved: FingerprintArea = { kind: "circle", center: [133.4, 35.4], radiusM: 60 };
+    const text = (a: FingerprintArea[], b: FingerprintArea[]) =>
+      diffFingerprintParts(fingerprintPartsOf({ ...base, areas: a }), fingerprintPartsOf({ ...base, areas: b })).find((x) => x.key === "areas")?.after;
+    expect(text([tri(), c2], [tri(), c2moved])).toBe("2 件（多角形 1・円 1）・円の中心・半径が変わりました");
+    expect(text([tri(), c2], [tri(0.000001), c2])).toBe("2 件（多角形 1・円 1）・頂点の位置が変わりました");
+    expect(text([tri(), c2], [tri(0.000001), c2moved])).toBe("2 件（多角形 1・円 1）・頂点の位置と円の中心・半径が変わりました");
   });
 });

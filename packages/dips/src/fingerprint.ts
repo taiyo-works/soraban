@@ -167,7 +167,7 @@ const show = (key: keyof FingerprintParts, p: FingerprintParts, flagLabel: (f: s
       return "（変更前の操縦者）";
     case "areas": {
       const a = p.areas;
-      if (!a) return "円・点（範囲の指定なし）";
+      if (!a) return "円・点（多角形の指定なし）";
       const poly = a.filter((x) => x.kind === "polygon").length;
       return `${a.length} 件（多角形 ${poly}・円 ${a.length - poly}）`;
     }
@@ -194,6 +194,16 @@ const comparable = (key: keyof FingerprintParts, p: FingerprintParts): string =>
   return JSON.stringify(p[key]);
 };
 
+/** 範囲の件数と種類が同じとき、動いた範囲の種類から文言を選ぶ（多角形を含む計画で円だけ動いたとき「頂点」と言わない）。 */
+const areasChangeText = (before: readonly FingerprintArea[], after: readonly FingerprintArea[]): string => {
+  const moved = (kind: "polygon" | "circle"): boolean =>
+    after.some((a, i) => a.kind === kind && JSON.stringify(a) !== JSON.stringify(before[i]));
+  const poly = moved("polygon");
+  const circle = moved("circle");
+  if (poly && circle) return "頂点の位置と円の中心・半径が変わりました";
+  return poly ? "頂点の位置が変わりました" : "円の中心・半径が変わりました";
+};
+
 /**
  * 通報時の元の値と現在の元の値を比べ、どの項目がどう変わったかを返す（変更点の表示）。
  * 機体・操縦者は ID を見せず「変更前の…」「変更後の…」とする（名前の解決は呼び出し側）。
@@ -211,7 +221,7 @@ export const diffFingerprintParts = (
     if (a === b) continue;
     const afterText =
       key === "areas" && before.areas && after.areas && before.areas.length === after.areas.length && before.areas.every((x, i) => x.kind === after.areas![i]!.kind)
-        ? `${show(key, after, flagLabel)}・${after.areas!.some((x) => x.kind === "polygon") ? "頂点の位置が変わりました" : "円の中心・半径が変わりました"}`
+        ? `${show(key, after, flagLabel)}・${areasChangeText(before.areas, after.areas)}`
         : key === "aircraftId" ? "（変更後の機体）" : key === "pilotId" ? "（変更後の操縦者）" : show(key, after, flagLabel);
     out.push({ key, label: FINGERPRINT_PART_LABEL[key], before: show(key, before, flagLabel), after: afterText });
   }

@@ -1,6 +1,7 @@
 // 通報ゲートウェイ（ポート。Sprint 12b 設計 B）。通報の送信を 1 つの抽象の裏に置く。
 // 画面とデータモデルは、アダプターが手動でも模擬でも（将来の API でも）同じ。画面は capabilities().mode だけで分岐する：
 //   user_reported なら「コピー → 記録」、direct なら「送信内容の確認 → 送信」。
+import { PREPARE_WARNING_MESSAGE } from "./messages";
 import type {
   CancelContext,
   CancelResult,
@@ -40,6 +41,21 @@ export class GatewayInputError extends Error {
     super("invalid input");
   }
 }
+
+/**
+ * 送信（記録）の前段の共通の検査。範囲が 2 つ以上で経路を出せない通報（route_multiple_areas）は、新規・変更として受け付けない
+ * （1 つ目だけを出すと、通報が実際の範囲より狭くなるため）。取消は通す（DIPS で取り消した結果を記録できないと、
+ * そらばん上が「有効な通報あり」のまま残るため）。
+ */
+export const assertSubmittable = (prepared: PreparedReport): void => {
+  if (prepared.kind === "cancel") return;
+  if (prepared.warnings.some((w) => w.code === "route_multiple_areas")) {
+    throw new GatewayInputError(
+      { route: PREPARE_WARNING_MESSAGE.route_multiple_areas },
+      { route: "route_multiple_areas" },
+    );
+  }
+};
 
 /** 記録の根拠（どのアダプターの結果にも付ける）。 */
 export const traceOf = (prepared: PreparedReport, channel: ReportChannel): ResultTrace => ({

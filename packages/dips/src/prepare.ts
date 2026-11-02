@@ -226,8 +226,9 @@ const draftFor = (field: ReportField, { plan, fields }: Ctx): Draft | null => {
           status: "route",
           value: `範囲 ${areas.length} 件（DIPS に出す範囲は 1 つです）`,
           apiValue: null,
-          missing: false,
-          required: false,
+          // 経路を出せないので、未入力の必須項目として数える（通報の準備が整っていないことを件数にも出す）
+          missing: true,
+          required: true,
           copyable: false,
           copyText: null,
           warnings: [warn("route_multiple_areas")],

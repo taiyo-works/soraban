@@ -155,13 +155,18 @@ describe("C1-5 prepare の経路（多角形・複数・頂点数）", () => {
       expect(r.apiValue).toBeNull();
       expect(r.copyable).toBe(false);
       expect(r.warnings.map((w) => w.code)).toEqual(["route_multiple_areas"]);
-      expect(r.warnings[0]!.message).toContain("DIPS に出す範囲は 1 つです");
+      // 経路を出せないので、未入力の必須項目として数える
+      expect([r.missing, r.required]).toEqual([true, true]);
+      expect(r.warnings[0]!.message).toContain("そらばんから DIPS に出す範囲は 1 つにしています");
       expect(r.warnings[0]!.message).toContain("計画を分けるか、1 つにまとめてください");
-      expect(r.warnings[0]!.message).toContain("複数を出せるかは確認していません");
+      expect(r.warnings[0]!.message).toContain("DIPS が複数を受け付けるかは確認していません");
       expect(r.value).toContain(`範囲 ${areas.length} 件`);
     }
     // 全体の警告にも出る
-    expect(prepareReport(basePlan({ areas: [poly(), circleArea] }), "new").warnings.map((w) => w.code)).toContain("route_multiple_areas");
+    const multi = prepareReport(basePlan({ areas: [poly(), circleArea] }), "new");
+    expect(multi.warnings.map((w) => w.code)).toContain("route_multiple_areas");
+    const single = prepareReport(basePlan({ areas: [poly()] }), "new");
+    expect(multi.missingRequiredCount).toBe(single.missingRequiredCount + 1);
   });
 
   it("頂点数が MAX_AREA_VERTICES 以下なら警告なし、超えると route_too_many_vertices（DIPS の値でないと明記）", () => {

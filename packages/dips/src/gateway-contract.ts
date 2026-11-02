@@ -105,6 +105,22 @@ export const GATEWAY_CONTRACT_CASES: readonly Case[] = [
     },
   },
   {
+    title: "submit（範囲が複数）：新規・変更は受け付けず（route_multiple_areas）、取消は通す。外部には何も送らない",
+    run: async (a) => {
+      const g = a.make();
+      const tri = { kind: "polygon", vertices: [[133.33, 35.42], [133.34, 35.42], [133.335, 35.43]] } as const;
+      const many = basePlan({ areas: [tri, { kind: "circle", center: [133.2, 35.1], radiusM: 50 }] });
+      for (const kind of ["new", "change"] as const) {
+        const prepared = g.prepare(many, kind);
+        await expect(g.submit(prepared, a.ctx(KEY))).rejects.toMatchObject({ name: "GatewayInputError", fieldCodes: { route: "route_multiple_areas" } });
+      }
+      if (g.capabilities().mode === "user_reported") {
+        const r = await g.submit(g.prepare(many, "cancel"), { idempotencyKey: KEY, actor: ACTOR, now: NOW, manualResult: MANUAL });
+        expect(r.state).toBe("reported_manual");
+      }
+    },
+  },
+  {
     title: "submit：結果が遷移表の許す状態で、証跡 ID・指紋・対応表の版・送信元を持つ",
     run: async (a) => {
       const g = a.make();

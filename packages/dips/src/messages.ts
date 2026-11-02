@@ -147,7 +147,7 @@ export const PREPARE_WARNING_MESSAGE = {
   emergency_airspace: "緊急用務空域は通報の項目にありません。この判定は飛行できない判定です",
   radius_missing: "範囲の半径が未入力のため、経路（円）を作れません。DIPS の地図で描いてください",
   route_multiple_areas:
-    "DIPS に出す範囲は 1 つです。計画を分けるか、1 つにまとめてください（複数を出せるかは確認していません）",
+    "そらばんから DIPS に出す範囲は 1 つにしています。計画を分けるか、1 つにまとめてください（DIPS が複数を受け付けるかは確認していません）",
   route_too_many_vertices: `頂点が ${MAX_AREA_VERTICES} 点を超えています。この上限はそらばんの暫定の設計値で、DIPS の値ではありません（DIPS の上限は確認していません）。頂点を減らしてください`,
   max_time_invalid: "航続可能時間は 5 分単位で 5〜1440 分です",
   speed_invalid: "飛行速度は 1〜999 km/h の整数です",
