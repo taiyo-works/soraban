@@ -231,7 +231,7 @@ const lowContrastText = (page: Page) =>
       return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
     };
     const root = getComputedStyle(document.documentElement);
-    const skyColors = [root.getPropertyValue("--sb-art-sky").trim(), root.getPropertyValue("--sb-art-sky-warm").trim()].map((c) => toRgba(c));
+    const skyColors = [root.getPropertyValue("--sb-art-sky").trim()].map((c) => toRgba(c));
     const bgOf = (el: Element): number[] | "art" | "map" => {
       // 後ろの色：祖先を上へたどり、不透明な背景に着くまで重ねる
       const layers: Array<[number, number, number, number]> = [];
