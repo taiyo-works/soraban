@@ -1,6 +1,8 @@
 // 実行: node docs/design/tokens-v2/check-contrast-v2.mjs [--md] [トークンの CSS のパス]
 // 既定ではアプリの実ファイル apps/web/src/app/soraban-tokens.css を読み（値の正）、通常・現場・暗・現場の暗の 4 通りでコントラストと寸法の下限を検査する。満たさない組があれば終了コード 1。
-// 暗は「OS 設定（@media の :root:not([data-theme="light"])）」と「強制（:root[data-theme="dark"]）」の宣言の一致も検査する。
+// Sprint 16-1：暗は強制（:root[data-theme="dark"]）だけ。OS の暗い設定には従わない（@media (prefers-color-scheme: dark) の宣言が残っていないことも検査する）。
+// 日差しの模擬（S-1）：明の 2 通り（通常・現場）で、画面に当たる外光の反射 g（画面の白の明るさに対する割合）を両方の相対輝度に足した比
+//   (L1 + 0.05 + g) / (L2 + 0.05 + g) を求める。g = 0.10 を合否に使い（文字は 3.0 以上、現場の文字は 4.5 以上［橙の面の上を除く］、押せる部品の境界・判定の印の輪郭は 2.0 以上）、g = 0.25 は記録だけ。
 // 参考：docs/design/tokens/check-contrast.mjs（v1。暗の一致検査の考え方を踏襲）。外部通信・依存なし。
 import fs from "fs";
 import path from "path";
@@ -39,17 +41,18 @@ const DARK_MEDIA = "@media (prefers-color-scheme: dark)";
 const pick = (sel, media = null) => { const r = rules.find((x) => x.selector === sel && x.media === media); if (!r) throw new Error("セレクタが見つからない: " + sel + (media ? " in " + media : "")); return r.decls; };
 const ROOT = pick(":root");
 const FIELD = pick(':root[data-mode="field"]');
-const DM = pick(':root:not([data-theme="light"])', DARK_MEDIA);
-const DMF = pick(':root:not([data-theme="light"])[data-mode="field"]', DARK_MEDIA);
-const DF = pick(':root[data-theme="dark"]');
-const DFF = pick(':root[data-theme="dark"][data-mode="field"]');
-// カスケードの順（特異性が同じ組は後ろの宣言が勝つ）：明 → 現場 → 暗 → 現場の暗
+const DM = pick(':root[data-theme="dark"]');
+const DMF = pick(':root[data-theme="dark"][data-mode="field"]');
+// カスケードの順（特異性が同じ組は後ろの宣言が勝つ）：明 → 現場 → 暗 → 現場の暗。暗は強制（data-theme="dark"）だけ
 const MODES = [["通常", [ROOT]], ["現場", [ROOT, FIELD]], ["暗", [ROOT, DM]], ["現場・暗", [ROOT, FIELD, DM, DMF]]];
 const FIELD_MODES = ["現場", "現場・暗"], DARK_MODES = ["暗", "現場・暗"], LIGHT_MODES = ["通常", "現場"];
 
 const hex = (s) => { const m = /^#([0-9a-f]{6})$/i.exec(s); if (!m) throw new Error("6 桁の HEX ではない: " + s); return [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)); };
 const lum = (h) => { const [r, g, b] = hex(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
 const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+// 日差しの模擬（S-1）：外光の反射 g を両方の輝度に足す
+const veiled = (a, b, g) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05 + g) / (Math.min(x, y) + 0.05 + g); };
+const G_PASS = 0.10, G_NOTE = 0.25;
 
 // [区分, 名前, 前景, 背景, 通常の要, 現場の要, 対象の通り（省略で全部）]
 const V = ["no", "needs", "done", "none", "unknown"];
@@ -69,6 +72,12 @@ P("橙", "主ボタンの墨の丸の上の白い矢印（橙の面の上は明�
 P("橙", "主ボタンのホバーの白い丸の上の墨の矢印", "on-orange", "on-orange-fg", 3, 4.5);
 // 輪は要素から 3px 離して描く（outline-offset）ので、橙の面には接せず地に接する。暗では輪が明るく橙の面とは 3:1 にならないため、明の通りだけ検査する
 P("橙", "フォーカスの輪 / 橙の面", "focus", "orange", 3, 4.5, LIGHT_MODES);
+// H-3：橙の面を押せる部品に使うときは墨の縁を付ける。面だけでは白の地との境界が 2.15 しかないため、境界は縁（墨）が担う
+// 縁の色は --sb-on-orange（墨。暗でも同じ値）。地との境界は明の通りだけ検査する（暗は橙の面そのものが暗い地から離れる）
+for (const bg of GROUNDS) P("橙", `主ボタンの墨の縁 / ${bg}（橙の面だけでは足りない境界）`, "on-orange", bg, 3, 4.5, LIGHT_MODES);
+P("橙", "主ボタンの墨の縁 / 橙の面", "on-orange", "orange", 3, 4.5);
+P("橙", "主ボタンの墨の縁 / 橙のホバー面", "on-orange", "orange-hover", 3, 4.5);
+P("押せる部品", "選択中・ホバーの面（橙の薄い面）の縁", "edge", "hover", 3, 4.5);
 for (const bg of GROUNDS) P("橙", `フォーカスの輪 / ${bg}`, "focus", bg, 3, 4.5);
 for (const bg of GROUNDS) P("押せる部品", `縁（入力欄・OFF チップ・チェック枠）/ ${bg}`, "edge", bg, 3, 4.5);
 P("押せる部品", "副ボタン・ON チップの面の上の本文", "ink", "control", 4.5, 7);
@@ -88,17 +97,16 @@ for (const v of V) {
   // 暗は塗りが明るく、琥珀も地に 3:1 以上あるので、枠なしでも印の輪郭が地から離れる（暗は 3 つの地すべてで確かめる）
   if (v === "needs") for (const bg of GROUNDS) P("判定", `${VN[v]}：塗り / ${bg}（暗の印の輪郭）`, `v-${v}-fill`, bg, 3, 4.5, DARK_MODES);
 }
-P("挿絵の上", "本文（ヒーローの文字）/ 空の淡い水色", "ink", "art-sky", 4.5, 7);
-P("挿絵の上", "本文（ヒーローの文字）/ 空の暖色", "ink", "art-sky-warm", 4.5, 7);
-P("挿絵の上", "第二の文字 / 空の淡い水色", "ink-2", "art-sky", 4.5, 7);
-P("挿絵の上", "第二の文字 / 空の暖色", "ink-2", "art-sky-warm", 4.5, 7);
+P("挿絵の上", "本文（ヒーローの文字）/ 空（白）", "ink", "art-sky", 4.5, 7);
+P("挿絵の上", "第二の文字 / 空（白）", "ink-2", "art-sky", 4.5, 7);
 // 記録のみ（要件なし。実測値を表に残す）
 P("記録のみ", "罫（区切り専用）/ 白", "rule", "base", null, null);
 P("記録のみ", "橙の面 / 白（面専用。線と文字には使わない）", "orange", "base", null, null);
 P("記録のみ", "桃 #CC6595 の上の墨（不採用の根拠）", "ink", "pink-rejected", null, null, LIGHT_MODES);
-P("記録のみ", "挿絵の線 / 空の淡い水色（暗は暗い空の上の明るい線）", "art-line", "art-sky", null, null);
+P("記録のみ", "挿絵の線 / 空（暗は暗い空の上の明るい線）", "art-line", "art-sky", null, null);
 
 const results = [];
+const veil = [];
 const problems = [];
 for (const [mode, layers] of MODES) {
   const t = Object.assign({}, ...layers);
@@ -111,6 +119,18 @@ for (const [mode, layers] of MODES) {
     const need = isField ? p.fr : p.nr;
     results.push({ ...p, mode, ratio: r, need, ok: need == null || r >= need - 1e-9 });
   }
+  if (LIGHT_MODES.includes(mode)) {
+    for (const p of pairs) {
+      if (p.only && !p.only.includes(mode)) continue;
+      if (p.nr == null) continue;
+      const text = p.nr === 4.5;
+      // 橙の面の上、および判定の塗り（値を変えない判定色。現場では 20px 以上の太字で使う）の上の文字は、日差しの模擬では 3.0 以上
+      const relaxed = p.bg === "orange" || p.bg === "orange-hover" || /^v-.+-fill$/.test(p.bg);
+      const need = text ? (isField && !relaxed ? 4.5 : 3.0) : 2.0;
+      const r = veiled(col(p.fg), col(p.bg), G_PASS);
+      veil.push({ ...p, mode, ratio: r, need, ok: r >= need - 1e-9, note: veiled(col(p.fg), col(p.bg), G_NOTE) });
+    }
+  }
   const px = (k) => parseFloat(t["--sb-" + k]);
   const chk = (name, ok, msg) => { if (!ok) problems.push(`${mode}: ${name} ${msg}`); };
   chk("--sb-hit-min", px("hit-min") >= (isField ? 56 : 44), `${px("hit-min")}px が下限未満`);
@@ -122,13 +142,12 @@ for (const [mode, layers] of MODES) {
   chk("--sb-dur", !isField || px("dur") === 0, "現場は 0 のはず");
   chk("--sb-dur-rise", !isField || px("dur-rise") === 0, "現場は 0 のはず");
   chk("--sb-shadow", !isField || t["--sb-shadow"] === "none", "現場は none のはず");
+  if (!isDark) chk("--sb-shadow", t["--sb-shadow"] === "none", "明は none のはず（影は日差しで見えない）");
   if (isDark && !isField) chk("--sb-shadow", /^0 0 0 1px #[0-9a-f]{6}$/i.test(t["--sb-shadow"]), "暗は影（ぼかし）を使わず 1px の輪郭のはず：" + t["--sb-shadow"]);
   chk("--sb-r-l", px("r-l") === 16 && px("r-m") === 8 && px("r-s") === 4, "角丸は 16/8/4");
 }
-// 暗の構造の検査（v1 の check-contrast.mjs と design-tokens.test.ts の考え方）
-const same = (a, b) => { const ka = Object.keys(a).sort(), kb = Object.keys(b).sort(); return ka.length === kb.length && ka.every((k, i) => k === kb[i] && a[k] === b[k]); };
-if (!same(DM, DF)) problems.push("暗（OS 設定）と暗（強制）の宣言が一致しない");
-if (!same(DMF, DFF)) problems.push("暗の現場（OS 設定）と暗の現場（強制）の宣言が一致しない");
+// 暗の構造の検査。暗は休眠（強制の data-theme="dark" だけ）：OS の暗い設定に従う宣言が残っていないこと
+if (rules.some((x) => x.media && x.media.includes("prefers-color-scheme"))) problems.push("@media (prefers-color-scheme: …) の宣言が残っている（Sprint 16：常に明るい表示）");
 // 暗は明のトークンを引きずらない：色を持つトークンは、明と同じでよいと明示したもの以外すべて暗で再定義する
 const SAME_IN_DARK = new Set(["--sb-orange", "--sb-orange-hover", "--sb-orange-deep", "--sb-on-orange", "--sb-on-orange-fg"]);
 const isColor = (v) => /^(#[0-9a-f]{6}|rgba?\()/i.test(v);
@@ -137,6 +156,11 @@ for (const k of Object.keys(ROOT)) {
 }
 for (const k of SAME_IN_DARK) if (k in DM) problems.push(`暗で変えないはずのトークンを暗が再定義している: ${k}`);
 for (const k of Object.keys(FIELD)) if (isColor(FIELD[k]) && !(k in DM)) problems.push(`現場の色が暗で再定義されていない（明の現場の値が暗に漏れる）: ${k}`);
+// 明（白基調）：ページの地は白、面はごく薄いグレー、影なし、装飾のトークンなし
+if (ROOT["--sb-base"].toUpperCase() !== "#FFFFFF") problems.push("明：--sb-base（ページの地）が白ではない: " + ROOT["--sb-base"]);
+if (ROOT["--sb-shadow"] !== "none") problems.push("明：--sb-shadow は none のはず: " + ROOT["--sb-shadow"]);
+for (const gone of ["--sb-sec-num", "--sb-halo", "--sb-contour", "--sb-contour-major"]) if (gone in ROOT) problems.push(`装飾のトークンが残っている: ${gone}`);
+for (const g of ["surface", "sunken"]) { const [r, gg, b2] = hex(ROOT["--sb-" + g]); if (!(Math.abs(r - gg) <= 4 && Math.abs(gg - b2) <= 4)) problems.push(`明：--sb-${g} ${ROOT["--sb-" + g]} は無彩色に近い薄いグレーのはず（ベージュ・生成りは使わない）`); }
 // 暗の地：純黒にしない、温かい（赤 ≥ 青）
 for (const [nm, d] of [["暗", DM], ["現場・暗", Object.assign({}, DM, DMF)]]) {
   for (const g of GROUNDS) {
@@ -152,6 +176,7 @@ const rm = rules.find((x) => x.media && x.media.includes("reduce"));
 if (!rm || rm.decls["--sb-dur"] !== "0ms" || rm.decls["--sb-dur-rise"] !== "0ms") problems.push("prefers-reduced-motion で動きが 0 にならない");
 
 const fails = results.filter((r) => !r.ok);
+const veilFails = veil.filter((r) => !r.ok);
 const f2 = (n) => n.toFixed(2);
 if (process.argv.includes("--md")) {
   const rows = ["| 区分 | 組 | 要（通常／現場） | 通常 | 現場 | 暗 | 現場・暗 |", "|---|---|---|---|---|---|---|"];
@@ -174,6 +199,13 @@ for (const [m] of MODES) {
   console.log(`最小余裕（${m}）: ${f2(w.ratio)}（要 ${w.need}）${w.g} ${w.n}`);
 }
 for (const p of problems) console.log("NG  " + p);
+for (const r of veilFails) console.log(`NG  日差し g=${G_PASS} ${r.mode}  ${r.g}  ${r.n}  ${f2(r.ratio)} < ${r.need}  (--sb-${r.fg} / --sb-${r.bg})`);
+for (const [m] of MODES.filter(([m2]) => LIGHT_MODES.includes(m2))) {
+  const xs = veil.filter((r) => r.mode === m);
+  const w = xs.reduce((a, b) => (b.ratio / b.need < a.ratio / a.need ? b : a));
+  const w25 = xs.reduce((a, b) => (b.note / b.need < a.note / a.need ? b : a));
+  console.log(`日差しの模擬（${m}。g=${G_PASS} が合否、g=${G_NOTE} は記録）: ${xs.length} 件。最小余裕 ${f2(w.ratio)}（要 ${w.need}）${w.n}／g=${G_NOTE}: ${f2(w25.note)}（要 ${w25.need}。記録のみ）${w25.n}`);
+}
 const perMode = MODES.map(([m]) => `${m} ${results.filter((r) => r.mode === m).length}`).join("／");
-console.log(`組 ${pairs.length}（${perMode}）= 計 ${results.length} 件と、寸法・動き・暗の構造を検査。満たさない: ${fails.length + problems.length}`);
-process.exit(fails.length + problems.length ? 1 : 0);
+console.log(`組 ${pairs.length}（${perMode}）= 計 ${results.length} 件と、寸法・動き・暗の構造を検査。日差しの模擬 ${veil.length} 件。満たさない: ${fails.length + problems.length + veilFails.length}`);
+process.exit(fails.length + problems.length + veilFails.length ? 1 : 0);

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { DEVICE_STORAGE_NOTES, OFFLINE_SHELLS, isCacheableStatic, isNeverCache, pwaManifest, serviceWorkerSource, shellForPath, staticAssetsIn } from "./pwa";
+import { DEVICE_STORAGE_NOTES, OFFLINE_SHELLS, PWA_BACKGROUND_COLOR, PWA_THEME_COLOR, isCacheableStatic, isNeverCache, pwaManifest, serviceWorkerSource, shellForPath, staticAssetsIn } from "./pwa";
 
 const WEB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -13,6 +13,19 @@ const pngSize = (file: string): [number, number] => {
   expect(b.subarray(1, 4).toString("ascii")).toBe("PNG");
   return [b.readUInt32BE(16), b.readUInt32BE(20)];
 };
+
+describe("Sprint 16 T-5・H-9 PWA の色は白基調（--sb-base の明の値）と一致する", () => {
+  it("PWA_THEME_COLOR・PWA_BACKGROUND_COLOR・マニフェストの theme_color・background_color が、soraban-tokens.css の :root の --sb-base と同じ", () => {
+    const css = readFileSync(path.join(WEB, "src", "app", "soraban-tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const root = /(?:^|\n):root\s*\{([^}]*)\}/.exec(css)![1]!;
+    const base = /--sb-base:\s*(#[0-9a-fA-F]{6})\s*;/.exec(root)![1]!;
+    expect(PWA_THEME_COLOR.toUpperCase()).toBe(base.toUpperCase());
+    expect(PWA_BACKGROUND_COLOR.toUpperCase()).toBe(base.toUpperCase());
+    const m = pwaManifest();
+    expect(m.theme_color.toUpperCase()).toBe(base.toUpperCase());
+    expect(m.background_color.toUpperCase()).toBe(base.toUpperCase());
+  });
+});
 
 describe("A-1 マニフェスト", () => {
   it("名称・アイコン（192・512）・display・開始 URL（/ops）・theme_color が揃う。scope は /ops（公開の / を含めない）", () => {

@@ -92,11 +92,13 @@
 .sb-band-white {
   background: var(--sb-base);
 }
-.sb-band-off {
-  background: var(--sb-surface);
-}
+/* Sprint 16 H-1：ページの地は白。帯の交互の敷き分け（オフホワイト・ベージュ）はやめ、帯の区切りは罫と余白で */
+.sb-band-off,
 .sb-band-beige {
-  background: var(--sb-sunken);
+  background: var(--sb-base);
+}
+.sb-band + .sb-band {
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .sb-band {
@@ -104,7 +106,7 @@
   }
 }
 
-/* 見出し：左 5px の橙線＋背後の大きな薄い数字（装飾） */
+/* 見出し：左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
   margin-bottom: 16px;
@@ -124,19 +126,6 @@
   letter-spacing: 0.06em;
   font-weight: 700;
 }
-.sb-sec-num {
-  position: absolute;
-  right: 0;
-  top: -30px;
-  font-size: 96px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: var(--sb-sec-num);
-  font-family: var(--font-num), sans-serif;
-  pointer-events: none;
-  user-select: none;
-}
 .sb-sec-note {
   position: relative;
   z-index: 1;
@@ -148,17 +137,13 @@
   .sb-sec-head h2 {
     font-size: 26px;
   }
-  .sb-sec-num {
-    font-size: 140px;
-    top: -48px;
-  }
 }
 
-/* ブロック（影は 1 種類）。白の帯の中ではオフホワイト、他では白 */
+/* ブロック（影なし。罫で分ける：Sprint 16 H-2）。白の帯の中ではごく薄いグレー、他では白 */
 .sb-block {
   background: var(--sb-base);
   border-radius: var(--sb-r-l);
-  box-shadow: var(--sb-shadow);
+  border: var(--sb-rule-w) solid var(--sb-rule);
   padding: 20px 16px;
   min-width: 0;
 }
@@ -167,6 +152,7 @@
 }
 .sb-block-soft {
   border-radius: var(--sb-r-l);
+  border: var(--sb-rule-w) solid var(--sb-rule);
   background: var(--sb-surface);
   padding: 14px 16px;
 }
@@ -239,8 +225,10 @@
 .sb-pill:focus-visible .sb-a2 {
   transform: none;
 }
+/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁で境界を持たせる（現場は .sb-pill の縁の太さを上書きしない） */
 .sb-pill-primary {
   background: var(--sb-orange);
+  border-color: var(--sb-on-orange);
   color: var(--sb-on-orange);
   min-height: var(--sb-hit-primary);
   font-size: 16px;
@@ -608,6 +596,8 @@ input.sb-check:disabled {
 }
 .sb-check-row.is-on {
   background: var(--sb-hover);
+  /* 橙の薄い面は白の地との差が小さい（1.59:1）ので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
 .sb-check-row:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
@@ -661,7 +651,6 @@ input.sb-check:disabled {
   border-radius: var(--sb-pill);
   background: var(--sb-orange);
   color: var(--sb-on-orange);
-  box-shadow: 0 0 0 4px var(--sb-halo);
 }
 .sb-brand-mark svg {
   width: 30px;
@@ -751,10 +740,6 @@ input.sb-check:disabled {
   }
   .sb-band-first .sb-sec-head h2 {
     font-size: 20px;
-  }
-  .sb-band-first .sb-sec-num {
-    font-size: 72px;
-    top: -18px;
   }
   .sb-block {
     padding: 12px 14px 14px;
@@ -981,7 +966,7 @@ input.sb-check:disabled {
 .sb-item-card {
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  border: var(--sb-rule-w) solid var(--sb-rule);
   padding: 16px;
   min-width: 0;
 }

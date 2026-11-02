@@ -161,7 +161,6 @@ export default function Home() {
         <section aria-labelledby="checker-heading" className="sb-band sb-band-off sb-band-first">
           <SectionHead
             id="checker-heading"
-            num="01"
             title="地点を判定する"
             note="住所・座標・地図のクリックで地点を指定できます"
           />
@@ -176,7 +175,6 @@ export default function Home() {
         <section aria-labelledby="coverage-heading" className="sb-band sb-band-white">
           <SectionHead
             id="coverage-heading"
-            num="02"
             title="収録している規制とデータ"
             note="件数と確認日は現在の収録内容から表示しています"
           />

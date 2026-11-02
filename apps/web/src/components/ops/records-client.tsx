@@ -83,17 +83,12 @@ const choiceInputClass = "h-6 w-6 shrink-0 cursor-pointer";
 const brandAccent = "accent-sb-orange";
 
 /**
- * 入力の段（番号と見出し）。白いカードで、見出し（左 5px の橙線）の背後に大きな薄い番号（装飾）を置く。fieldset の名前は legend。
+ * 入力の段（見出し）。白いカードで、見出しは左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
  */
-function Step({ no, title, children }: { readonly no: string; readonly title: string; readonly children: ReactNode }) {
+function Step({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (
     <fieldset className="opx-step flex min-w-0 flex-col gap-4">
-      <legend>
-        <span aria-hidden className="opx-step-num">
-          {no}
-        </span>
-        {title}
-      </legend>
+      <legend>{title}</legend>
       {children}
     </fieldset>
   );
@@ -956,7 +951,7 @@ export function FlightForm({
         />
       ) : null}
 
-      <Step no="01" title="機体・操縦者・日常点検">
+      <Step title="機体・操縦者・日常点検">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。誤った場合は取り消して作り直してください。" : undefined}>
           <select
             className={`${inputClass} min-h-12`}
@@ -1010,7 +1005,7 @@ export function FlightForm({
         ) : null}
       </Step>
 
-      <Step no="02" title="離陸">
+      <Step title="離陸">
         <PlaceInput
           label="離陸場所"
           name={v.takeoffPlace}
@@ -1035,7 +1030,7 @@ export function FlightForm({
         />
       </Step>
 
-      <Step no="03" title="着陸">
+      <Step title="着陸">
         <DateTimeInput
           label="着陸時刻"
           nowLabel="着陸：今"
@@ -1090,7 +1085,7 @@ export function FlightForm({
         ) : null}
       </Step>
 
-      <Step no="04" title="飛行概要">
+      <Step title="飛行概要">
         <Field label="飛行の目的" required error={errors["purpose"]} hint="例：空撮、インフラ点検、測量（100 文字以内）">
           <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} />
         </Field>
@@ -1129,7 +1124,7 @@ export function FlightForm({
         </fieldset>
       </Step>
 
-      <Step no="05" title="安全に影響のあった事項・不具合">
+      <Step title="安全に影響のあった事項・不具合">
         <ChoiceGroup
           legend="飛行の安全に影響のあった事項"
           required
@@ -1487,7 +1482,7 @@ export function InspectionForm({
         />
       ) : null}
 
-      <Step no="01" title="機体・実施者・日時・場所">
+      <Step title="機体・実施者・日時・場所">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
           <select className={`${inputClass} min-h-12`} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
             <option value="">選んでください</option>
@@ -1546,7 +1541,7 @@ export function InspectionForm({
         />
       </Step>
 
-      <Step no="02" title="点検項目（様式2）">
+      <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-relaxed text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。

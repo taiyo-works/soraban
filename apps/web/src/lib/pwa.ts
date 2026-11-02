@@ -148,9 +148,12 @@ self.addEventListener("fetch", (event) => {
 `;
 };
 
-/** テーマの色（ロゴの藍。icon.svg の背景と同じ）。 */
-export const PWA_THEME_COLOR = "#1d3557";
-export const PWA_BACKGROUND_COLOR = "#f5f2ea";
+/**
+ * ステータスバーと起動画面の色（Sprint 16 H-9：白基調）。--sb-base（soraban-tokens.css の明の値）と同じ値で、単体テスト（pwa.test.ts）が一致を確かめる。
+ * アイコンの画像（藍の地）はブランドの刷新で作り直すため、ここでは替えない（docs/sprints/brand-visual-plan.md）。
+ */
+export const PWA_THEME_COLOR = "#FFFFFF";
+export const PWA_BACKGROUND_COLOR = "#FFFFFF";
 
 /**
  * Web アプリマニフェスト（契約 A-1）。開始 URL は /ops（ホームの「今日」）、scope は /ops（公開の判定画面 / は含めない）。

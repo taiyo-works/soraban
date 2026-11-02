@@ -1,9 +1,11 @@
 /*
- * 判定のトップの挿絵（丘 3 層・雲・日の出・ドローンの線画）。デザインシステム v2 §4。独自の SVG で、トップ（`/`）だけに置く。
+ * 判定のトップの挿絵（丘の稜線・雲・日の出・ドローンの線画）。独自の SVG で、トップ（`/`）だけに置く。
+ * Sprint 16 Q2（ユーザー決定）：塗りを外して線画に。線は墨（--sb-art-line）、日の出だけ橙、地は白。構図・高さ・位置は変えない。
+ * 丘と雲の内側の白（--sb-art-cloud）は背後の線を隠すだけで、塗りの色ではない。ブランドの刷新で作り直す暫定の絵（docs/sprints/brand-visual-plan.md I-1）。
  *
  * - インライン SVG：画像の要求は 0 件。img ではないので LCP の要素にならない。優先読み込みもない。
- * - 装飾：aria-hidden、textContent なし。文字は丘の上に置かない（文字は挿絵の淡い空の上だけ）。
- * - 色は --sb-art-*（挿絵専用）と --sb-orange・--sb-base だけ。暗は同じトークンが暗の値になる（昼の景色が夜になる）。
+ * - 装飾：aria-hidden、textContent なし。文字は丘の上に置かない（文字は挿絵の空の上だけ）。
+ * - 色は --sb-art-*（挿絵専用）と --sb-orange・--sb-base だけ。
  * - 高さはスマホ 232px、PC 320px（soraban-ui.css の .sb-hero）。スマホ用と PC 用の 2 枚を CSS で切り替える。
  * 状態・効果・アニメーションを持たないサーバーコンポーネント。
  */
@@ -55,61 +57,25 @@ export function HeroIllustration() {
     <div className="sb-hero-art" aria-hidden="true" data-testid="hero-art">
       <div className="sb-art-m">
         <svg viewBox="0 22 390 128" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="sb-sky-m" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--sb-art-sky)" />
-              <stop offset=".62" stopColor="var(--sb-art-sky-warm)" />
-              <stop offset="1" stopColor="var(--sb-art-sky-low)" />
-            </linearGradient>
-            <path id="sb-crest-m" d="M0 112 C60 96 130 104 200 116 S330 124 390 104" fill="none" />
-            <clipPath id="sb-clip-m">
-              <path d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" />
-            </clipPath>
-          </defs>
-          <rect y="22" width="390" height="128" fill="url(#sb-sky-m)" />
           <circle cx="330" cy="104" r="22" fill="var(--sb-orange)" />
-          <circle cx="330" cy="104" r="34" fill="none" stroke="var(--sb-orange)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
           <Cloud x={204} y={46} scale={0.3} stroke={6.7} />
           <Cloud x={340} y={58} scale={0.26} stroke={7.5} />
-          <path d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" fill="var(--sb-art-hill-far)" />
-          <g clipPath="url(#sb-clip-m)" fill="none" stroke="var(--sb-art-line)" strokeOpacity=".28" strokeWidth="1.6">
-            <use href="#sb-crest-m" y="8" />
-            <use href="#sb-crest-m" y="18" />
-            <use href="#sb-crest-m" y="28" />
-          </g>
-          <path d="M0 132 C80 112 170 126 250 136 S350 130 390 120 V150 H0Z" fill="var(--sb-art-hill-mid)" />
-          <path d="M0 146 C90 136 180 142 270 148 S360 145 390 141 V150 H0Z" fill="var(--sb-base)" />
+          <path d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinejoin="round" />
+          <path d="M0 132 C80 112 170 126 250 136 S350 130 390 120 V150 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinejoin="round" />
+          <path d="M0 146 C90 136 180 142 270 148 S360 145 390 141" fill="none" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinecap="round" />
           <DroneLine x={250} y={26} width={74} height={44} />
         </svg>
       </div>
       <div className="sb-art-p">
         <svg viewBox="0 40 1280 280" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="sb-sky-p" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--sb-art-sky)" />
-              <stop offset=".62" stopColor="var(--sb-art-sky-warm)" />
-              <stop offset="1" stopColor="var(--sb-art-sky-low)" />
-            </linearGradient>
-            <path id="sb-crest-p" d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194" fill="none" />
-            <clipPath id="sb-clip-p">
-              <path d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" />
-            </clipPath>
-          </defs>
-          <rect y="40" width="1280" height="280" fill="url(#sb-sky-p)" />
           <circle cx="1060" cy="168" r="56" fill="var(--sb-orange)" />
-          <circle cx="1060" cy="168" r="84" fill="none" stroke="var(--sb-orange)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
           <Cloud x={1110} y={52} scale={0.95} stroke={2.1} />
           <Cloud x={700} y={96} scale={0.62} stroke={3.2} />
           <Cloud x={1190} y={150} scale={0.55} stroke={3.6} />
           <path d="M690 258 C760 210 830 150 905 92" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeDasharray="2 9" strokeLinecap="round" />
-          <path d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" fill="var(--sb-art-hill-far)" />
-          <g clipPath="url(#sb-clip-p)" fill="none" stroke="var(--sb-art-line)" strokeOpacity=".28" strokeWidth="1.6">
-            <use href="#sb-crest-p" y="10" />
-            <use href="#sb-crest-p" y="24" />
-            <use href="#sb-crest-p" y="38" />
-          </g>
-          <path d="M0 290 C240 268 460 294 700 274 S1070 228 1280 248 V320 H0Z" fill="var(--sb-art-hill-mid)" />
-          <path d="M0 313 C300 297 560 313 820 301 S1150 283 1280 295 V320 H0Z" fill="var(--sb-base)" />
+          <path d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinejoin="round" />
+          <path d="M0 290 C240 268 460 294 700 274 S1070 228 1280 248 V320 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinejoin="round" />
+          <path d="M0 313 C300 297 560 313 820 301 S1150 283 1280 295" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinecap="round" />
           <DroneLine x={880} y={48} width={150} height={90} />
         </svg>
       </div>

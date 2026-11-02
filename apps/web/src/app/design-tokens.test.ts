@@ -53,24 +53,21 @@ function parseRules(css: string): Rule[] {
 const RULES = parseRules(CSS);
 
 type Ctx = { readonly theme: "light" | "dark"; readonly field: boolean };
-type DarkVariant = "media" | "attr";
-
-/** Resolve token values for a context by applying matching rules in source order. */
-function resolve(ctx: Ctx, variant: DarkVariant = "media"): Record<string, string> {
+/**
+ * Resolve token values for a context by applying matching rules in source order.
+ * Sprint 16: dark exists only as the forced theme (:root[data-theme="dark"]); there is no OS-dark rule to follow.
+ */
+function resolve(ctx: Ctx): Record<string, string> {
   const out: Record<string, string> = {};
-  const darkRoot = variant === "media" ? ':root:not([data-theme="light"])' : ':root[data-theme="dark"]';
+  const darkRoot = ':root[data-theme="dark"]';
   for (const r of RULES) {
     const sel = r.selector;
     let applies = false;
     if (!r.inDarkMedia && sel === ":root") applies = true;
     else if (!r.inDarkMedia && sel === ":root .field") applies = ctx.field;
-    else if (ctx.theme === "dark") {
-      const fromMedia = r.inDarkMedia && variant === "media";
-      const fromAttr = !r.inDarkMedia && variant === "attr";
-      if (fromMedia || fromAttr) {
-        if (sel === darkRoot) applies = true;
-        else if (sel === `${darkRoot} .field`) applies = ctx.field;
-      }
+    else if (ctx.theme === "dark" && !r.inDarkMedia) {
+      if (sel === darkRoot) applies = true;
+      else if (sel === `${darkRoot} .field`) applies = ctx.field;
     }
     if (applies) Object.assign(out, r.vars);
   }
@@ -140,25 +137,20 @@ function pairs(t: Record<string, string>, field: boolean): Check[] {
 }
 
 describe("1a-1 トークンの構造", () => {
-  it("明・現場（明）・暗・現場（暗）の規則がある。暗は OS 設定の版と data-theme の版の両方。配色案の規則はない", () => {
+  it("明・現場（明）・暗（強制のみ）・現場（暗）の規則がある。OS の暗い設定に従う規則はない（Sprint 16）。配色案の規則はない", () => {
     const sels = RULES.map((r) => `${r.inDarkMedia ? "@dark " : ""}${r.selector}`);
-    for (const s of [
-      ":root",
-      ":root .field",
-      '@dark :root:not([data-theme="light"])',
-      '@dark :root:not([data-theme="light"]) .field',
-      ':root[data-theme="dark"]',
-      ':root[data-theme="dark"] .field',
-    ]) {
+    for (const s of [":root", ":root .field", ':root[data-theme="dark"]', ':root[data-theme="dark"] .field']) {
       expect(sels, s).toContain(s);
     }
+    expect(sels.filter((x) => x.startsWith("@dark"))).toEqual([]);
     expect(sels.filter((x) => x.includes("data-palette"))).toEqual([]);
     expect(CSS).not.toMatch(/data-palette/);
   });
 
-  it("暗の 2 つの版（prefers-color-scheme と data-theme=dark）は、同じ宣言を持つ", () => {
-    for (const ctx of CONTEXTS.concat(FIELD_CONTEXTS).map(([, c]) => c).filter((c) => c.theme === "dark")) {
-      expect(resolve(ctx, "media"), JSON.stringify(ctx)).toEqual(resolve(ctx, "attr"));
+  it("OS の暗い設定（prefers-color-scheme）に従う宣言が、globals.css・soraban-tokens.css・soraban-ui.css・proxy.ts にない（常に明るい表示）", () => {
+    const strip = (t: string): string => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const f of ["./globals.css", "./soraban-tokens.css", "./soraban-ui.css", "../proxy.ts"]) {
+      expect(strip(readFileSync(new URL(f, import.meta.url), "utf8")), f).not.toMatch(/@media\s*\(\s*prefers-color-scheme\s*:\s*dark/);
     }
   });
 
@@ -175,11 +167,11 @@ describe("1a-1 トークンの構造", () => {
   });
 
   it("現場モードの規則は、基本の規則と同じトークンの組をすべて上書きする（下の層の値が漏れない）", () => {
-    const keysOf = (sel: string, dark: boolean): string[] => Object.keys(RULES.find((r) => r.selector === sel && r.inDarkMedia === dark)!.vars).sort();
+    const keysOf = (sel: string): string[] => Object.keys(RULES.find((r) => r.selector === sel && !r.inDarkMedia)!.vars).sort();
     const need = ["--bg-app", "--bg-surface", "--bg-sunken", "--fg", "--fg-soft", "--fg-mute", "--line", "--line-strong", "--accent", "--accent-soft", "--accent-solid", "--accent-solid-hover", "--accent-fg", ...MEANINGS.flatMap((m) => [`--${m}-fg`, `--${m}-bg`, `--${m}-line`])];
     for (const dark of [false, true]) {
-      const field = dark ? ':root:not([data-theme="light"]) .field' : ":root .field";
-      const kf = keysOf(field, dark);
+      const field = dark ? ':root[data-theme="dark"] .field' : ":root .field";
+      const kf = keysOf(field);
       for (const k of need) expect(kf, `${dark ? "dark" : "light"} field ${k}`).toContain(k);
     }
   });
@@ -218,20 +210,21 @@ describe("1a-1 トークンの構造", () => {
     expect(resolve({ theme: "dark", field: true })["--accent-solid"]).toBe("#a6c0f4");
   });
 
-  it("color-scheme：自動のときだけ `light dark`。強制したテーマ（明・暗）では単一の値（現場モードも同じ）", () => {
+  it("color-scheme：常に `light`（OS が暗でも明るく描く）。強制したテーマ（明・暗）では単一の値（現場モードも同じ）", () => {
     const block = (selector: string): string => {
       const i = CSS.indexOf(`${selector} {`);
       expect(i, selector).toBeGreaterThanOrEqual(0);
       return CSS.slice(i, CSS.indexOf("}", i));
     };
-    expect(block(".ds")).toMatch(/color-scheme:\s*light dark;/);
+    expect(block(".ds")).toMatch(/color-scheme:\s*light;/);
+    expect(block(".ds")).not.toMatch(/color-scheme:\s*light dark/);
     for (const theme of ["light", "dark"] as const) {
       const sel = `:root[data-theme="${theme}"] .ds`;
       expect(block(sel), theme).toMatch(new RegExp(`color-scheme:\\s*${theme};`));
       // the html element follows too (root scrollbars / canvas)
       expect(CSS).toMatch(new RegExp(`:root\\[data-theme="${theme}"\\],\\s*:root\\[data-theme="${theme}"\\] \\.ds \\{`));
     }
-    // field mode never sets its own color-scheme, so it inherits the single value above (and `light dark` in auto)
+    // field mode never sets its own color-scheme, so it inherits the single value above
     expect(CSS).not.toMatch(/\.field[^{}]*\{[^}]*color-scheme/);
     // nothing outside `.ds` / a forced theme declares one
     const all = [...CSS.matchAll(/([^{}]+)\{[^}]*color-scheme/g)].map((m) => m[1]!.trim().replace(/\s+/g, " "));
@@ -242,8 +235,8 @@ describe("1a-1 トークンの構造", () => {
     ]);
   });
 
-  it("`.ds` は color-scheme: light dark を宣言し、旧名のトークンは `.ds` の下でだけ新しい値へ写像される", () => {
-    expect(CSS).toMatch(/\.ds\s*\{[^}]*color-scheme:\s*light dark/);
+  it("`.ds` は color-scheme: light を宣言し、旧名のトークンは `.ds` の下でだけ新しい値へ写像される", () => {
+    expect(CSS).toMatch(/\.ds\s*\{[^}]*color-scheme:\s*light;/);
     const ds = RULES.find((r) => r.selector === ".ds, .ds .field")!;
     expect(ds.vars["--color-paper"]).toBe("var(--bg-surface)");
     expect(ds.vars["--color-ink"]).toBe("var(--fg)");
@@ -309,14 +302,14 @@ const sbVars = (selector: string, inDark: boolean): Record<string, string> => {
   if (!r) throw new Error(`rule not found: ${selector}`);
   return r.vars;
 };
-const SB_DARK = ':root:not([data-theme="light"])';
+const SB_DARK = ':root[data-theme="dark"]';
 const SB_MODES: readonly (readonly [string, Record<string, string>[]])[] = [
   ["明", [sbVars(":root", false)]],
-  ["暗", [sbVars(":root", false), sbVars(SB_DARK, true)]],
+  ["暗", [sbVars(":root", false), sbVars(SB_DARK, false)]],
   ["現場・明", [sbVars(":root", false), sbVars(':root[data-mode="field"]', false)]],
   [
     "現場・暗",
-    [sbVars(":root", false), sbVars(':root[data-mode="field"]', false), sbVars(SB_DARK, true), sbVars(`${SB_DARK}[data-mode="field"]`, true)],
+    [sbVars(":root", false), sbVars(':root[data-mode="field"]', false), sbVars(SB_DARK, false), sbVars(`${SB_DARK}[data-mode="field"]`, false)],
   ],
 ];
 const sbResolve = (layers: Record<string, string>[]): Record<string, string> => Object.assign({}, ...layers);
@@ -341,14 +334,17 @@ const DOCS_TOKENS = parseRules(
 );
 
 describe("12h P1-6 新トークンのコントラストと暗の一致（v2）", () => {
-  it("check-contrast-v2.mjs（アプリの実ファイルを読む）が 4 通り・274 件すべてを満たす（終了コード 0）", () => {
+  it("check-contrast-v2.mjs（アプリの実ファイルを読む）が 4 通り・284 件と、日差しの模擬 136 件をすべて満たす（終了コード 0）", () => {
     const out = execFileSync(process.execPath, [new URL("../../../../docs/design/tokens-v2/check-contrast-v2.mjs", import.meta.url).pathname], { encoding: "utf8" });
-    expect(out).toContain("組 71（通常 68／現場 68／暗 69／現場・暗 69）= 計 274 件と、寸法・動き・暗の構造を検査。満たさない: 0");
+    expect(out).toContain("組 75（通常 72／現場 72／暗 70／現場・暗 70）= 計 284 件と、寸法・動き・暗の構造を検査。日差しの模擬 136 件。満たさない: 0");
+    expect(out).toContain("日差しの模擬（通常。g=0.1 が合否");
+    expect(out).toContain("日差しの模擬（現場。g=0.1 が合否");
   });
 
-  it("暗（OS 設定）と暗（強制）の宣言が一致する。現場の暗も同じ", () => {
-    expect(sbVars(':root[data-theme="dark"]', false)).toEqual(sbVars(SB_DARK, true));
-    expect(sbVars(':root[data-theme="dark"][data-mode="field"]', false)).toEqual(sbVars(`${SB_DARK}[data-mode="field"]`, true));
+  it("暗は強制（data-theme=dark）の 2 つの規則だけ（OS 設定の版は持たない）。暗は明のトークンを引きずらない（検査スクリプトが確かめる）", () => {
+    const sels = SB_RULES.map((r) => `${r.inDarkMedia ? "@dark " : ""}${r.selector}`);
+    expect(sels.filter((x) => x.includes("data-theme"))).toEqual([':root[data-theme="dark"]', ':root[data-theme="dark"][data-mode="field"]']);
+    expect(sels.filter((x) => x.startsWith("@dark"))).toEqual([]);
   });
 });
 
@@ -361,13 +357,11 @@ describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2�
   const SELECTORS: ReadonlyArray<readonly [string, boolean]> = [
     [":root", false],
     [':root[data-mode="field"]', false],
-    [SB_DARK, true],
-    [`${SB_DARK}[data-mode="field"]`, true],
     [':root[data-theme="dark"]', false],
     [':root[data-theme="dark"][data-mode="field"]', false],
   ];
 
-  it("6 つの規則（明・現場・暗 OS・現場の暗 OS・暗 強制・現場の暗 強制）の宣言が、見本と 1 つ残らず一致する", () => {
+  it("4 つの規則（明・現場・暗 強制・現場の暗 強制）の宣言が、見本と 1 つ残らず一致する", () => {
     const bad: string[] = [];
     for (const [sel, dark] of SELECTORS) {
       const app = sbVars(sel, dark);
@@ -379,7 +373,7 @@ describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2�
     expect(bad).toEqual([]);
   });
 
-  it("値の要点：橙が主役、角丸 16/8/4/ピル、影は 1 種類、押す部品 44/48/56（現場 56/56/64）、暗は温かい黒、v1 の角丸の名前は残っていない", () => {
+  it("値の要点：橙が主役、角丸 16/8/4/ピル、影なし（明も）、押す部品 44/48/56（現場 56/56/64）、暗は温かい黒、v1 の角丸の名前は残っていない", () => {
     for (const [mode, layers] of SB_MODES) {
       const t = sbResolve(layers);
       expect(t["--sb-orange"], mode).toBe("#F89B48");
@@ -394,10 +388,11 @@ describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2�
     const dark = sbResolve(SB_MODES[1]![1]);
     const field = sbResolve(SB_MODES[2]![1]);
     const fieldDark = sbResolve(SB_MODES[3]![1]);
-    expect([light["--sb-base"], light["--sb-surface"], light["--sb-sunken"]]).toEqual(["#FFFFFF", "#F7F7F3", "#EDEDE5"]);
+    // Sprint 16-1（H-1）：ページの地は白、面はごく薄いグレー、くぼみは 1 段濃いグレー。ベージュ・温かいオフホワイトは使わない
+    expect([light["--sb-base"], light["--sb-surface"], light["--sb-sunken"]]).toEqual(["#FFFFFF", "#F6F7F7", "#EEF0F0"]);
     expect([dark["--sb-base"], dark["--sb-surface"], dark["--sb-sunken"]]).toEqual(["#1B1A18", "#252421", "#121110"]);
     expect(fieldDark["--sb-ink"]).toBe("#F8F6F1");
-    expect(light["--sb-shadow"]).toBe("0 0 24px rgba(0, 0, 0, 0.1)");
+    expect(light["--sb-shadow"]).toBe("none"); // H-2：影をやめ、面は罫で分ける
     expect(dark["--sb-shadow"]).toBe("0 0 0 1px #3A3834");
     expect(field["--sb-shadow"]).toBe("none");
     expect([light["--sb-hit-min"], light["--sb-hit"], light["--sb-hit-primary"]]).toEqual(["44px", "48px", "56px"]);

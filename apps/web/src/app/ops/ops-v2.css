@@ -7,7 +7,7 @@
 
 /* ===== 1 旧い名前を v2 の値へ（運航管理の枠 .ops-v2 の中だけ。見本ページ /ops/design は枠を持たないので影響しない） ===== */
 .ds.ops-v2 {
-  --bg-app: var(--sb-surface);
+  --bg-app: var(--sb-base);
   --bg-surface: var(--sb-base);
   --bg-sunken: var(--sb-sunken);
   --fg: var(--sb-ink);
@@ -54,13 +54,13 @@
 
 /* ===== 2 ページの骨格 ===== */
 .ds.ops-v2 {
-  background: var(--sb-surface);
+  background: var(--sb-base);
   color: var(--sb-ink);
   letter-spacing: 0.02em;
 }
 html:has(.ops-v2),
 html:has(.ops-v2) body {
-  background: var(--sb-surface);
+  background: var(--sb-base);
 }
 html:has(.ops-v2) body {
   color: var(--sb-ink);
@@ -134,10 +134,11 @@ html:has(.ops-v2) body {
 .opx-btn:active {
   background: var(--sb-hover);
 }
+/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁（通常 1px、現場 1.5px）で境界を持たせる。縁の色は暗でも墨の --sb-on-orange */
 .opx-btn-primary {
   min-height: var(--sb-hit-primary);
   padding: 4px 4px 4px 26px;
-  border-color: transparent;
+  border: var(--sb-rule-w) solid var(--sb-on-orange);
   background: var(--sb-orange);
   color: var(--sb-on-orange);
   font-size: 16px;
@@ -361,18 +362,18 @@ html:has(.ops-v2) body {
   color: var(--sb-ink);
 }
 
-/* 影は 1 種類（--sb-shadow）。Tailwind の shadow-* は複数の影を重ねて出すため使わない */
+/* 影は使わない（--sb-shadow は none。浮かせる部品だけが参照する）。Tailwind の shadow-* は複数の影を重ねて出すため使わない */
 .opx-shadow {
   box-shadow: var(--sb-shadow);
 }
 
-/* 白いカード（影は 1 種類） */
+/* 白いカード（影なし。罫で分ける：Sprint 16 H-2） */
 .opx-card {
   min-width: 0;
   padding: 20px 16px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
 }
 @media (min-width: 1024px) {
   .opx-card {
@@ -474,9 +475,9 @@ html:has(.ops-v2) body {
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 14px 16px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
   font-size: 14px;
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);
@@ -505,6 +506,7 @@ html:has(.ops-v2) body {
     gap: 16px;
     min-height: 56px;
     padding: 8px 16px;
+    border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;

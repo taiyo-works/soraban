@@ -13,8 +13,7 @@ import { runNeonAuthProxy } from "@/server/ops/neon-proxy";
 
 // 503 の画面はアプリの描画を通らないため、判定画面の配色（紙・インク・藍）を最小限のインラインの CSS で写す。
 const PAGE_503_STYLE =
-  ":root{color-scheme:light dark;--paper:#f5f2ea;--ink:#0e1421;--mute:#5b6170;--rule:#c9c2ad;--brand:#1d3557}" +
-  "@media (prefers-color-scheme:dark){:root{--paper:#0c1320;--ink:#e7e2d2;--mute:#8a8a85;--rule:#2c3550;--brand:#c3cedc}}" +
+  ":root{color-scheme:light;--paper:#f5f2ea;--ink:#0e1421;--mute:#5b6170;--rule:#c9c2ad;--brand:#1d3557}" +
   "body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;line-height:1.8}" +
   "main{max-width:36rem;margin:0 auto;padding:2.5rem 1rem}" +
   ".eyebrow{margin:0;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-style:italic;color:var(--mute)}" +

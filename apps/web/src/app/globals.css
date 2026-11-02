@@ -64,43 +64,6 @@
   --hairline: 1px;
 }
 
-/* Dark mode = "blueprint" inverse */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: #0c1320;
-    --color-paper-soft: #131c2c;
-    --color-paper-deep: #1a2438;
-    --color-ink: #e7e2d2;
-    --color-ink-soft: #c3bfb1;
-    --color-ink-mute: #8a8a85;
-    --color-rule: #2c3550;
-    --color-rule-soft: #1f263a;
-
-    --color-indigo-50: #1a2438;
-    --color-indigo-100: #243352;
-    --color-indigo-300: #6c83a4;
-    --color-indigo-500: #8aa4c6;
-    --color-indigo-700: #c3cedc;
-    --color-indigo-900: #e9edf3;
-
-    --color-signal-red: #d05959;
-    --color-signal-red-soft: #3a1818;
-    --color-signal-amber: #d29c3a;
-    --color-signal-amber-soft: #3a2a10;
-    --color-signal-green: #5fa275;
-    --color-signal-green-soft: #1a2a1f;
-    --color-signal-mute: #5b6170;
-    --color-signal-mute-soft: #1c2438;
-
-    /* 実測（紙 #0C1320）：6.43 / 8.77 / 9.81 / 8.01 / 7.33 */
-    --color-verdict-no-fly: #e27a72;
-    --color-verdict-needs: #dcaa4e;
-    --color-verdict-done: #a9bedc;
-    --color-verdict-clear: #74b98a;
-    --color-verdict-unknown: #a3a39c;
-  }
-}
-
 @theme inline {
   /* Surfaces */
   --color-paper: var(--color-paper);
@@ -290,8 +253,8 @@ html:has(body.has-bottom-nav) {
  * Structure (the cascade order below is relied on by design-tokens.test.ts):
  *   1. :root                                  light (paper, ink, indigo, meanings, verdict)
  *   2. :root .field                           field mode (light), 7:1 body
- *   3. @media dark  :root:not([data-theme="light"]) ...   dark (OS preference unless forced light)
- *   4. :root[data-theme="dark"] ...           dark (forced). Same declarations as 3 (a test compares them)
+ *   3. (removed in Sprint 16: no OS-dark rules; the page is always light)
+ *   4. :root[data-theme="dark"] ...           dark (forced only; dormant)
  * Dark is its own set (a deep blue-black ground, paper-white text dimmed), not the light set inverted.
  * ============================================================ */
 
@@ -377,81 +340,7 @@ html:has(body.has-bottom-nav) {
   --neutral-line: #2f3542;
 }
 
-/* 3. dark (OS preference, unless the user forced light) */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg-app: #0d1118;
-    --bg-surface: #151b25;
-    --bg-sunken: #1f2733;
-    --fg: #ebe7da;
-    --fg-soft: #cfcbbf;
-    --fg-mute: #9ea3ad;
-    --line: #2b3444;
-    --line-strong: #7e8aa0;
-
-    --accent: #8fb0f0;
-    --accent-soft: #16213a;
-    --accent-solid: #4a72c4;
-    --accent-solid-hover: #3f66b8;
-    --accent-fg: #ffffff;
-
-    --ok-fg: #6fd38f;
-    --ok-bg: #10261a;
-    --ok-line: #3fa564;
-    --warn-fg: #f0c060;
-    --warn-bg: #2b200a;
-    --warn-line: #c18f2a;
-    --danger-fg: #ff9f98;
-    --danger-bg: #321412;
-    --danger-line: #e5645b;
-    --info-fg: #8cb8ff;
-    --info-bg: #0f1d36;
-    --info-line: #4e8fe8;
-    --neutral-fg: #d1d1d6;
-    --neutral-bg: #2c2c2e;
-    --neutral-line: #8e8e93;
-
-    --verdict-no-fly: #e27a72;
-    --verdict-needs: #dcaa4e;
-    --verdict-done: #a9bedc;
-    --verdict-clear: #74b98a;
-    --verdict-unknown: #a3a39c;
-
-    --scrim: rgb(0 0 0 / 0.6);
-  }
-  :root:not([data-theme="light"]) .field {
-    --bg-app: #000000;
-    --bg-surface: #1c1c1e;
-    --bg-sunken: #2c2c2e;
-    --fg: #ffffff;
-    --fg-soft: #e5e5ea;
-    --fg-mute: #b8b8be;
-    --line: #48484a;
-    --line-strong: #a1a1a6;
-    --accent: #a6c0f4;
-    --accent-soft: #16213a;
-    --accent-solid: #a6c0f4;
-    --accent-solid-hover: #bccff7;
-    --accent-fg: #0b0d10;
-    --ok-fg: #6fd38f;
-    --ok-bg: #10261a;
-    --ok-line: #6fd38f;
-    --warn-fg: #f0c060;
-    --warn-bg: #2b200a;
-    --warn-line: #f0c060;
-    --danger-fg: #ff9f98;
-    --danger-bg: #321412;
-    --danger-line: #ff9f98;
-    --info-fg: #8cb8ff;
-    --info-bg: #0f1d36;
-    --info-line: #8cb8ff;
-    --neutral-fg: #e5e5ea;
-    --neutral-bg: #2c2c2e;
-    --neutral-line: #e5e5ea;
-  }
-}
-
-/* 4. dark (forced). Keep identical to block 3. */
+/* 4. dark (forced only; dormant — no screen switches to it, and the OS dark setting is not followed). */
 :root[data-theme="dark"] {
   --bg-app: #0d1118;
   --bg-surface: #151b25;
@@ -587,10 +476,9 @@ html:has(body.has-bottom-nav) {
  * `.ds` — the scope in which the new system applies.
  * ---------------------------------------------------------- */
 .ds {
-  /* Automatic: browser-drawn parts (select popups, scrollbars, form controls) follow the OS. A forced theme
-   * (html[data-theme]) sets a single value right below, so they match the page. Field mode follows the theme too
-   * (it has a light and a dark set above). */
-  color-scheme: light dark;
+  /* Sprint 16: always light. Browser-drawn parts (select popups, scrollbars, form controls) are drawn light even when the OS is dark.
+   * A forced theme (html[data-theme="dark"], used only by the design catalog and checks) sets a single value right below. */
+  color-scheme: light;
   --ds-font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
     "Yu Gothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
   --ds-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace;

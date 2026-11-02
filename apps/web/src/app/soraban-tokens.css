@@ -1,15 +1,16 @@
 /*
- * そらばん デザイントークン v2。値の説明は docs/design/design-system-v2-draft.md（§2 配色、§9 暗）。
- * 土台は FINESYSTEM（fg-finesystem.co.jp）：橙が主役、白とオフホワイトを交互、ピルボタン＋右端の墨の丸、角丸 16/8/4、影は 0 0 24px 黒 10% のみ。
- * 名前は v1 の --sb-* を引き継ぎ、意味が変わるものは設計書の「v1 との差分」にある。このファイルが値の正で、検査は docs/design/tokens-v2/check-contrast-v2.mjs が読む。
- * 構成：1 :root（明）、2 :root[data-mode="field"]（現場・明）、3 @media (prefers-color-scheme: dark) の :root:not([data-theme="light"]) と同 [data-mode="field"]（OS の暗）、
- * 4 :root[data-theme="dark"] と同 [data-mode="field"]（強制の暗。3 と同じ宣言。検査が一致を確かめる）、5 動きを減らす設定。
+ * そらばん デザイントークン v2（Sprint 16-1：白基調）。値の説明は docs/design/design-system-v2-draft.md と docs/sprints/sprint-16.md §4。
+ * 方針：ページの地は白。面は「白」と「ごく薄いグレー（surface）」の 2 段、くぼみ（sunken）は 1 段濃いグレー。ベージュ・温かいオフホワイトは使わない。
+ * 面の区別は影ではなく罫（--sb-rule）。橙は操作（主ボタン・現在地）だけで、橙の面を押せる部品に使うときは墨の縁を付ける。判定色は別系統（値・形・言葉は変えない）。
+ * 名前は v1 の --sb-* を引き継ぐ。このファイルが値の正で、検査は docs/design/tokens-v2/check-contrast-v2.mjs が読む。
+ * 構成：1 :root（明）、2 :root[data-mode="field"]（現場・明）、3 :root[data-theme="dark"] と同 [data-mode="field"]（強制の暗。休眠：画面から切り替えられず、
+ * OS の暗い設定にも従わない。夜間用の手動の切替を後で作るときの土台で、検査だけ続ける）、4 動きを減らす設定。
  */
 :root {
-  /* 帯の地：白・オフホワイト・ベージュを交互に敷く。ブロックは帯の地と逆の明るさにする */
+  /* 地：ページの地は白（base）。面は surface（ごく薄いグレー）、くぼみ（入力欄の地・表の見出し・注記）は sunken。帯の交互の敷き分けはしない */
   --sb-base: #FFFFFF;
-  --sb-surface: #F7F7F3;
-  --sb-sunken: #EDEDE5;
+  --sb-surface: #F6F7F7;
+  --sb-sunken: #EEF0F0;
 
   /* 部品の面（暗で値が変わるため名前を持たせた。明は従来の #FFFFFF／橙の薄い面と同じ値） */
   --sb-control: #FFFFFF;         /* 副ボタン・チップ（ON）・小さなタグの面 */
@@ -17,7 +18,7 @@
   --sb-hover: #FFC189;           /* 押せる部品のホバー面（チップ・メニュー）。文字は ink */
   --sb-mark-bg: #FFC189;         /* 本文の強調（蛍光ペン風の下線の面）。文字は ink */
   --sb-inverse-bg: #262523;      /* 反転タグ・ラベル（墨の面） */
-  --sb-inverse-fg: #F7F7F3;
+  --sb-inverse-fg: #F6F7F7;
   --sb-on-dot: #FFFFFF;          /* 墨の丸（ピルの右端・番号・行の矢印）の上の矢印・数字。暗では丸が明るくなり、これが墨になる */
 
   /* 文字 */
@@ -41,31 +42,22 @@
   /* 判定：橙とは別系統。形（×△○）と言葉を併用する。fill=印・タグの面、on=その上の文字、fg=面の上の文字・線 */
   --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
   --sb-v-needs-fill: #EDB800;    --sb-v-needs-on: #262523;    --sb-v-needs-fg: #6B5800;
-  --sb-v-done-fill: #262523;     --sb-v-done-on: #F7F7F3;     --sb-v-done-fg: #262523;
+  --sb-v-done-fill: #262523;     --sb-v-done-on: #F6F7F7;     --sb-v-done-fg: #262523;
   --sb-v-none-fill: #225F36;     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: #225F36;
   --sb-v-unknown-fill: #FFFFFF;  --sb-v-unknown-on: #4F5762;  --sb-v-unknown-fg: #4F5762;
 
-  /* 挿絵専用（判定画面のトップだけ。文字は載せない。UI の部品には使わない） */
-  --sb-art-sky: #DEF3F4;
-  --sb-art-sky-warm: #FFF1DE;
-  --sb-art-hill-far: #FFC189;
-  --sb-art-hill-mid: #2EBEC4;
-  --sb-art-hill-near: #0F6B70;
-  --sb-art-cloud: #FFFFFF;
-  --sb-art-sky-low: #FFE3C7;     /* 空の地平線側の色 */
-  --sb-art-line: #262523;        /* 挿絵の線（ドローン・雲・航跡・丘の等高線） */
-  --sb-contour: rgba(233, 147, 71, 0.38);
-  --sb-contour-major: rgba(233, 147, 71, 0.7);
-  --sb-halo: rgba(255, 255, 255, 0.7);   /* ブランドの丸の外側の輪（装飾） */
-  --sb-sec-num: rgba(248, 155, 72, 0.2); /* 見出しの背後の大きな数字（装飾） */
-  --sb-tile-filter: none;        /* 地図タイルにだけ掛ける明るさ調整（暗で眩しさを抑える案） */
+  /* 挿絵専用（`/` のトップだけ。線画：線は墨、日の出だけ橙、地は白。文字は載せない。UI の部品には使わない） */
+  --sb-art-sky: #FFFFFF;
+  --sb-art-cloud: #FFFFFF;       /* 雲・丘の内側（背後の線を隠すだけの白。塗りの色ではない） */
+  --sb-art-line: #262523;        /* 挿絵の線（ドローン・雲・航跡・丘の稜線） */
+  --sb-tile-filter: none;        /* 地図タイルにだけ掛ける明るさ調整。明では掛けない */
 
   /* 形 */
   --sb-r-l: 16px;                /* ブロック・カード・地図の枠 */
   --sb-r-m: 8px;                 /* 入力欄・小さな面 */
   --sb-r-s: 4px;                 /* 判定の印の角・小さな部品 */
   --sb-pill: 9999px;             /* ボタン・チップ・タグ・丸いバッジ */
-  --sb-shadow: 0 0 24px rgba(0, 0, 0, 0.1);
+  --sb-shadow: none;             /* 影は使わない（日差しで見えない）。面は罫で分ける */
   --sb-rule-w: 1px;
   --sb-mark-w: 2px;
 
@@ -111,69 +103,12 @@
 }
 
 /*
- * 暗（OS の暗い設定）。v1 と同じ形式：@media の中が OS 設定、:root[data-theme="dark"] が強制。2 組の宣言は同じ（検査が一致を確かめる）。
+ * 暗（強制の暗。休眠）。画面からは切り替えられず、OS の暗い設定にも従わない（Sprint 16 の決定：常に明るい表示）。
+ * 見本（/ops/design?theme=dark）と検査だけが data-theme="dark" を付ける。夜間用の手動の切替を後で作るときの土台として、値と検査を残す。
  * 考え方：温かい黒の 3 層（地は純黒にしない）／橙は暗でも主役で、橙の面の上の文字は墨のまま／ピルの丸は明るい丸＋墨の矢印に反転／
  * 影は使わず 1px の輪郭で面を分ける／判定は「明るい塗り＋暗い文字」に反転して形と言葉を併用／現場の暗は 7:1 を満たす値。
  * 暗で値を持たない（明と同じ）トークン：橙 3 種、on-orange、on-orange-fg、形（角丸・線の太さ）、寸法、動き。
  */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --sb-base: #1B1A18;
-    --sb-surface: #252421;
-    --sb-sunken: #121110;
-    --sb-control: #34322F;
-    --sb-field: #121110;
-    --sb-hover: #4A3220;
-    --sb-mark-bg: #6B4527;
-    --sb-inverse-bg: #F1EEE7;
-    --sb-inverse-fg: #1B1A18;
-    --sb-on-dot: #1B1A18;
-    --sb-ink: #F1EEE7;
-    --sb-ink-2: #D3CFC5;
-    --sb-ink-3: #ADA99F;
-    --sb-ph: #A29E94;
-    --sb-rule: #45433F;
-    --sb-edge: #9A968C;
-    --sb-focus: #F1EEE7;
-    --sb-v-no-fill: #F4797F;       --sb-v-no-on: #1B1A18;       --sb-v-no-fg: #F4797F;
-    --sb-v-needs-fill: #E6C64A;    --sb-v-needs-on: #1B1A18;    --sb-v-needs-fg: #E6C64A;
-    --sb-v-done-fill: #CDD4DF;     --sb-v-done-on: #1B1A18;     --sb-v-done-fg: #CDD4DF;
-    --sb-v-none-fill: #86C88A;     --sb-v-none-on: #1B1A18;     --sb-v-none-fg: #86C88A;
-    --sb-v-unknown-fill: #1B1A18;  --sb-v-unknown-on: #ADB3BD;  --sb-v-unknown-fg: #ADB3BD;
-    --sb-art-sky: #1F2A2D;
-    --sb-art-sky-warm: #2B2622;
-    --sb-art-sky-low: #3A2B1E;
-    --sb-art-hill-far: #6F4526;
-    --sb-art-hill-mid: #1A5559;
-    --sb-art-hill-near: #123F42;
-    --sb-art-cloud: #34322F;
-    --sb-art-line: #D3CFC5;
-    --sb-contour: rgba(233, 147, 71, 0.26);
-    --sb-contour-major: rgba(233, 147, 71, 0.5);
-    --sb-halo: rgba(241, 238, 231, 0.16);
-    --sb-sec-num: rgba(248, 155, 72, 0.16);
-    --sb-tile-filter: brightness(0.8);
-    --sb-shadow: 0 0 0 1px #3A3834;
-  }
-  :root:not([data-theme="light"])[data-mode="field"] {
-    --sb-base: #141312;
-    --sb-surface: #1F1E1B;
-    --sb-sunken: #0A0A09;
-    --sb-control: #2A2825;
-    --sb-field: #0A0A09;
-    --sb-ink: #F8F6F1;
-    --sb-ink-2: #E4E0D7;
-    --sb-ink-3: #CCC8BE;
-    --sb-ph: #C0BCB2;
-    --sb-rule: #85827A;
-    --sb-edge: #BDB9AF;
-    --sb-v-no-fill: #F6A0A5;
-    --sb-v-no-fg: #F6A0A5;
-    --sb-contour: rgba(233, 147, 71, 0.2);
-    --sb-contour-major: rgba(233, 147, 71, 0.4);
-    --sb-shadow: none;
-  }
-}
 :root[data-theme="dark"] {
   --sb-base: #1B1A18;
   --sb-surface: #252421;
@@ -198,17 +133,8 @@
   --sb-v-none-fill: #86C88A;     --sb-v-none-on: #1B1A18;     --sb-v-none-fg: #86C88A;
   --sb-v-unknown-fill: #1B1A18;  --sb-v-unknown-on: #ADB3BD;  --sb-v-unknown-fg: #ADB3BD;
   --sb-art-sky: #1F2A2D;
-  --sb-art-sky-warm: #2B2622;
-  --sb-art-sky-low: #3A2B1E;
-  --sb-art-hill-far: #6F4526;
-  --sb-art-hill-mid: #1A5559;
-  --sb-art-hill-near: #123F42;
   --sb-art-cloud: #34322F;
   --sb-art-line: #D3CFC5;
-  --sb-contour: rgba(233, 147, 71, 0.26);
-  --sb-contour-major: rgba(233, 147, 71, 0.5);
-  --sb-halo: rgba(241, 238, 231, 0.16);
-  --sb-sec-num: rgba(248, 155, 72, 0.16);
   --sb-tile-filter: brightness(0.8);
   --sb-shadow: 0 0 0 1px #3A3834;
 }
@@ -226,8 +152,6 @@
   --sb-edge: #BDB9AF;
   --sb-v-no-fill: #F6A0A5;
   --sb-v-no-fg: #F6A0A5;
-  --sb-contour: rgba(233, 147, 71, 0.2);
-  --sb-contour-major: rgba(233, 147, 71, 0.4);
   --sb-shadow: none;
 }
 

@@ -160,28 +160,21 @@ export function VerdictBig({ level }: { readonly level: ItemVerdict }) {
   );
 }
 
-// ── 見出し（左 5px の橙線＋背後の大きな薄い数字。数字は装飾）──
+// ── 見出し（左 5px の橙線だけ。Sprint 16 H-5：背後の大きな薄い数字をやめた）──
 
 export function SectionHead({
   id,
   title,
   note,
-  num,
   as: Tag = "h2",
 }: {
   readonly id: string;
   readonly title: string;
   readonly note?: string;
-  readonly num?: string;
   readonly as?: "h2" | "h3";
 }) {
   return (
     <div className="sb-sec-head">
-      {num ? (
-        <span className="sb-sec-num" aria-hidden="true">
-          {num}
-        </span>
-      ) : null}
       <Tag id={id}>{title}</Tag>
       {note ? <p className="sb-sec-note">{note}</p> : null}
     </div>
