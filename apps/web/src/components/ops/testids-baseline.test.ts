@@ -6,8 +6,8 @@ import { BASELINE, collect, missing, readBaseline } from "../../../../../scripts
 // Sprint 17 T-1：着手時の data-testid の一覧（docs/evaluations/sprint-17-testids-baseline.txt）から消えたものが 0。
 // 一覧そのものは、件数の下限とハッシュで固定する（黙って書き直して「消えていない」ことにできない）。
 // 書き直すときは `node scripts/testids.mjs --write --reason "理由"` で記録を残し、ここの値を意図して更新する。
-const BASELINE_MIN_COUNT = 1996;
-const BASELINE_SHA256 = "84d11a87f10d8b45b80fa95798d31f293e51aaac6ed262c0c557c2c7f3a83916";
+const BASELINE_MIN_COUNT = 1877; // Sprint 16-1: 旧い見本の 265 件を除き、その後に増えた識別子を含めて書き直した（理由は sprint-17-testids-baseline-log.txt）
+const BASELINE_SHA256 = "633c42753191f8d4adff4852ca8ed890fb3a8bf851da5cf0aa3df75a038e3dfc";
 
 describe("data-testid の基準の一覧", () => {
   it("基準の一覧は固定されている（件数の下限とハッシュ）", () => {

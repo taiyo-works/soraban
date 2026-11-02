@@ -1,0 +1,118 @@
+/* デザイン見本 /ops/design（Sprint 16-1。白基調の v2 の見本）。値は持たず、soraban-tokens.css の --sb-* だけを使う。見本のためだけの CSS（本番の画面は読まない）。 */
+html:has(.sbx-catalog),
+html:has(.sbx-catalog) body {
+  background: var(--sb-base);
+  color: var(--sb-ink);
+}
+.sbx-catalog {
+  color-scheme: light;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 96px;
+  font-size: max(16px, var(--sb-fs-body));
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+html[data-theme="dark"] .sbx-catalog {
+  color-scheme: dark;
+}
+.sbx-catalog *:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sbx-catalog h1 {
+  font-size: 26px;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.sbx-catalog h2 {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.sbx-note {
+  font-size: max(14px, var(--sb-fs-note));
+  color: var(--sb-ink-3);
+}
+.sbx-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+.sbx-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+.sbx-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.sbx-ground {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-l);
+}
+.sbx-ground[data-ground="base"] { background: var(--sb-base); }
+.sbx-ground[data-ground="surface"] { background: var(--sb-surface); }
+.sbx-ground[data-ground="sunken"] { background: var(--sb-sunken); }
+.sbx-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.sbx-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--sb-hit);
+  padding: 0 14px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-r-m);
+  background: var(--sb-field);
+  color: var(--sb-ink);
+  font-size: 16px;
+}
+.sbx-input::placeholder {
+  color: var(--sb-ph);
+}
+.sbx-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--sb-orange);
+  border: var(--sb-rule-w) solid var(--sb-on-orange);
+}
+.sbx-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 8px 4px;
+  border-bottom: 2px solid var(--sb-edge);
+  background: var(--sb-base);
+  font-size: max(18px, var(--sb-fs-body));
+  line-height: 1.5;
+}
+.sbx-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+.sbx-swatch {
+  height: 40px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-m);
+}

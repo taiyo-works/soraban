@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { parseConfig } from "@/components/ui/catalog/config";
-import { DesignCatalog } from "@/components/ui/catalog/design-catalog";
-import { isStyleView, parseStyleConfig } from "@/components/ui/catalog/style-config";
-import { StyleTrial } from "@/components/ui/catalog/style-trial";
 import { isDesignCatalogEnabled } from "@/lib/design-catalog";
+import { DesignCatalogV2, parseCatalogConfig } from "./catalog";
 
-// Design catalog (Sprint 12g stage 1a). No auth, no DB, no external calls.
-// The env check runs per request (connection()) so the build output does not bake the flag in.
-// proxy.ts answers 404 first when the flag is off; notFound() here is the second line of defence.
+// デザイン見本（Sprint 12g で作り、Sprint 16-1 で白基調の v2 の見本に作り直した）。認証・DB・外部通信なし。
+// 環境の確認は要求ごと（connection()）なので、ビルドの出力にフラグが焼き込まれない。
+// proxy.ts がフラグ無効のとき先に 404 を返す。ここの notFound() は二重の防御。
 export const metadata: Metadata = {
   title: { absolute: "デザイン見本 — そらばん" },
   robots: { index: false, follow: false },
@@ -18,18 +15,13 @@ export const metadata: Metadata = {
 export default async function DesignCatalogPage({ searchParams }: { readonly searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await connection();
   if (!isDesignCatalogEnabled(process.env)) notFound();
-  const query = await searchParams;
-  // ?view=style: the style trial (five palettes, square corners). A separate server component; the default view below is untouched.
-  if (isStyleView(query)) return <StyleTrial config={parseStyleConfig(query)} />;
-  // The configuration (theme, field mode, density, screen) comes from the query string so a view can be shared as a link.
-  const initial = parseConfig(query);
-  // A forced theme must be on <html> before the first paint (html[data-theme] drives the tokens and color-scheme). The
-  // client effect only handles later changes. This inline script runs while the document is parsed, before the
-  // stylesheet-dependent content paints; its value is one of two fixed words (the parsed enum), never the raw query.
+  const config = parseCatalogConfig(await searchParams);
+  // 現場の値・強制の暗は <html> の属性で効く。最初の描画から効かせるため、固定の語だけを文書の解析中に付ける（生のクエリは入れない）。
+  const attrs = [config.mode ? `r.dataset.mode="field"` : "", config.theme ? `r.dataset.theme="dark"` : ""].filter(Boolean).join(";");
   return (
     <>
-      {initial.theme === "auto" ? null : <script dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme="${initial.theme}"` }} />}
-      <DesignCatalog initial={initial} />
+      {attrs ? <script dangerouslySetInnerHTML={{ __html: `(function(){var r=document.documentElement;${attrs}})()` }} /> : null}
+      <DesignCatalogV2 config={config} />
     </>
   );
 }
