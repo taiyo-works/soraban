@@ -56,6 +56,11 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       <header className="flex flex-col gap-2">
         <h1>デザイン見本（白基調）</h1>
         <p className="sbx-note">地は白、面はごく薄いグレー、くぼみは一段濃いグレー。影は使わず罫で分ける。橙は操作と現在地だけで、橙の面の押せる部品には墨の縁を付ける。判定色は値・形・言葉を変えない。</p>
+        {config.mode ? (
+          <p className="sbx-note" data-testid="cat-field-note">
+            現場の見本：色・罫・押す部品の大きさ・文字の大きさ（本文 18px、状態の語 20px）を現場の基準に合わせて並べています。挿絵や帯など一部の部品は通常と同じ寸法のままなので、現場の最終の見え方は実画面で確かめてください。
+          </p>
+        ) : null}
         <nav aria-label="見本の設定" className="sbx-nav" data-testid="cat-nav">
           <a className="sb-pill sb-pill-sm sb-pill-secondary" href={href(config, { mode: null })} aria-current={config.mode ? undefined : "true"} data-testid="cat-normal">
             <span className="sb-pill-label">通常</span>

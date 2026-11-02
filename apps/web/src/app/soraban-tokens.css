@@ -18,7 +18,7 @@
   --sb-hover: #FFC189;           /* 押せる部品のホバー面（チップ・メニュー）。文字は ink */
   --sb-mark-bg: #FFC189;         /* 本文の強調（蛍光ペン風の下線の面）。文字は ink */
   --sb-inverse-bg: #262523;      /* 反転タグ・ラベル（墨の面） */
-  --sb-inverse-fg: #F6F7F7;
+  --sb-inverse-fg: #F7F7F3;
   --sb-on-dot: #FFFFFF;          /* 墨の丸（ピルの右端・番号・行の矢印）の上の矢印・数字。暗では丸が明るくなり、これが墨になる */
 
   /* 文字 */
@@ -42,7 +42,7 @@
   /* 判定：橙とは別系統。形（×△○）と言葉を併用する。fill=印・タグの面、on=その上の文字、fg=面の上の文字・線 */
   --sb-v-no-fill: #A81D28;       --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: #9A1A24;
   --sb-v-needs-fill: #EDB800;    --sb-v-needs-on: #262523;    --sb-v-needs-fg: #6B5800;
-  --sb-v-done-fill: #262523;     --sb-v-done-on: #F6F7F7;     --sb-v-done-fg: #262523;
+  --sb-v-done-fill: #262523;     --sb-v-done-on: #F7F7F3;     --sb-v-done-fg: #262523;
   --sb-v-none-fill: #225F36;     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: #225F36;
   --sb-v-unknown-fill: #FFFFFF;  --sb-v-unknown-on: #4F5762;  --sb-v-unknown-fg: #4F5762;
 

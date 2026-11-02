@@ -132,8 +132,22 @@ test.describe("C. 橙の主ボタンの墨の縁（H-3・C-4）", () => {
     expect(s.td.split(",").every((d) => parseFloat(d) === 0)).toBe(true);
   });
 
+  test("7b. 見本（現場）：判定の札は状態の語 20px 以上・56px 以上、本文 18px、押す部品 56px 以上", async ({ page }) => {
+    await open(page, "mode=field");
+    const v = await page.evaluate(() => ({
+      body: parseFloat(getComputedStyle(document.querySelector('[data-testid="design-catalog"]')!).fontSize),
+      tags: [...document.querySelectorAll<HTMLElement>('[data-testid^="cat-verdict-"]')].map((e) => ({ fs: parseFloat(getComputedStyle(e).fontSize), h: e.getBoundingClientRect().height })),
+      btns: [...document.querySelectorAll<HTMLElement>('[data-testid="cat-buttons"] button')].map((e) => ({ fs: parseFloat(getComputedStyle(e).fontSize), h: e.getBoundingClientRect().height })),
+    }));
+    expect(v.body).toBeGreaterThanOrEqual(18);
+    for (const t of v.tags) { expect(t.fs).toBeGreaterThanOrEqual(20); expect(t.h).toBeGreaterThanOrEqual(55.5); }
+    for (const b of v.btns) { expect(b.fs).toBeGreaterThanOrEqual(18); expect(b.h).toBeGreaterThanOrEqual(55.5); }
+    await expect(page.getByTestId("cat-field-note")).toBeVisible();
+  });
+
   test("8. `/` の主ボタン（.sb-pill-primary）にも墨の縁がある", async ({ page }) => {
     await page.goto(`${MAIN}/`);
+    await page.locator(".sb-pill-primary:not(:disabled)").first().waitFor();
     const n = await page.locator(".sb-pill-primary").count();
     expect(n).toBeGreaterThan(0);
     const bs = await page.locator(".sb-pill-primary").evaluateAll((els) => els.map((el) => ({ c: getComputedStyle(el).borderTopColor, w: getComputedStyle(el).borderTopWidth, bg: getComputedStyle(el).backgroundColor })));

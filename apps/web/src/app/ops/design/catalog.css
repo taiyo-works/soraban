@@ -135,3 +135,30 @@ html[data-theme="dark"] .sbx-catalog {
   border: var(--sb-rule-w) solid var(--sb-rule);
   border-radius: var(--sb-r-m);
 }
+
+/* 現場モードの見本（?mode=field）：文字の大きさも現場の基準に合わせる（本文 18px・状態の語 20px 以上・押す部品 56px 以上・補助 14px 以上）。
+ * G-1 で現場の見え方を誤って判断させないため。実画面の部品の寸法は 16-2 で現場に合わせる。 */
+html[data-mode="field"] .sbx-catalog {
+  font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sb-vtag {
+  min-height: 56px;
+  padding: 4px 16px 4px 10px;
+  font-size: 20px;
+}
+html[data-mode="field"] .sbx-catalog .sb-vtag .sb-vm {
+  width: 28px;
+  height: 28px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill,
+html[data-mode="field"] .sbx-catalog .opx-btn,
+html[data-mode="field"] .sbx-catalog .sbx-input {
+  font-size: 18px;
+  min-height: 56px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill-label {
+  font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sbx-note {
+  font-size: 16px;
+}
