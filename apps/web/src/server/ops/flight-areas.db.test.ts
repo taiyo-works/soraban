@@ -353,16 +353,26 @@ describe.skipIf(!ADMIN_URL)("飛行範囲（flight_areas）の保存・照合・
     expect(ng.permits.numbers[0]!.status).not.toBe("applied");
   });
 
-  it("19-1c まで暫定：多角形がある／範囲が 2 件以上の計画の通報の準備は 409 areas_report_unsupported。円 1 つ・点は従来どおり", async () => {
-    const poly = await create({ areas: [{ kind: "polygon", vertices: TRI }] });
+  it("通報の準備（19-1c）：範囲が 2 つ以上は 409 route_multiple_areas で止める（1 つ目だけを出さない）。多角形 1 つ・円 1 つ・点は通る", async () => {
     const two = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }, { kind: "circle", center: [133.331, 35.42], radiusM: 20 }] });
-    for (const pl of [poly, two]) {
+    const polyAndCircle = await create({ areas: [{ kind: "polygon", vertices: TRI }, FAR] });
+    for (const pl of [two, polyAndCircle]) {
       const e = await err(reports.getPlanReport(ctx(), pl.id));
-      expect([e.status, e.code]).toEqual([409, "areas_report_unsupported"]);
+      expect([e.status, e.code]).toEqual([409, "route_multiple_areas"]);
+      expect(e.fieldCodes).toEqual({ areas: "route_multiple_areas" });
     }
     const one = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }] });
     const pt = await create({ latitude: 35.4, longitude: 133.3 });
     for (const pl of [one, pt]) await expect(reports.getPlanReport(ctx(), pl.id)).resolves.toBeDefined();
+    // 多角形 1 つ：経路は多角形の GeoJSON（開いた環・小数 6 桁）。指紋は円・点の計画と別の値
+    const poly = await create({ areas: [{ kind: "polygon", vertices: TRI }] });
+    const view = await reports.getPlanReport(ctx(), poly.id);
+    const route = view.prepared.items.find((i) => i.key === "route")!;
+    expect(route.value).toBe("多角形・頂点 3");
+    const g = JSON.parse(route.apiValue!);
+    expect(g.features[0].geometry).toEqual({ type: "Polygon", coordinates: [TRI] });
+    expect(g.features[0].properties).toEqual({});
+    expect(route.warnings).toEqual([]);
   });
 
   it("PlanDto.judgementScope は常に representative_point", async () => {

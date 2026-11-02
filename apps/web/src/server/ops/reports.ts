@@ -24,7 +24,6 @@ import {
   CORRECTABLE_STATES,
   DIPS_CONFIG_ERROR_MESSAGE,
   diffFingerprintParts,
-  fingerprintAreasOf,
   effectiveReport,
   effectiveState,
   externalStatusLabel,
@@ -35,6 +34,7 @@ import {
   latestLiveReport,
   ManualGateway,
   MockGateway,
+  PREPARE_WARNING_MESSAGE,
   REPORT_CHANNEL_LABEL,
   REPORT_ERROR_KIND_LABEL,
   REPORT_FIELDS,
@@ -300,10 +300,12 @@ const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> 
 
 const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs): Promise<PlanForReport> => {
   const { plan } = b;
-  // 19-1c が終わるまで暫定：多角形がある、または範囲が 2 件以上の計画は、通報に出す形式がまだ無いため準備を止める。
-  // 円 1 つ・点の計画は従来どおり。外す条件：19-1c（DIPS 形式への変換と通報の整形）の完了後に、この判定ごと削除する。
-  if (fingerprintAreasOf(fingerprintAreasOfRow(plan)) !== undefined) {
-    throw new OpsError(409, "areas_report_unsupported", { areas: "この範囲の形式は、まだ通報に出せません" }, { areas: "areas_report_unsupported" });
+  // 範囲が 2 つ以上の計画は、通報の準備を止める（DIPS に出すジオメトリは 1 つ。1 つ目だけを出すと、通報が実際の範囲より
+  // 狭くなる経路になるため出さない。複数を出せるかは文書に記載なし。※要再確認・検証環境）。
+  // 外す条件：DIPS の検証環境で複数のジオメトリの受理を確かめ、設定 routeFormat.multiArea に複数を出す値を足すとき。
+  // 多角形 1 つ・円 1 つ・点だけは止めない（19-1c で整形を実装済み）。
+  if ((fingerprintAreasOfRow(plan)?.length ?? 0) >= 2) {
+    throw new OpsError(409, "route_multiple_areas", { areas: PREPARE_WARNING_MESSAGE.route_multiple_areas }, { areas: "route_multiple_areas" });
   }
   const org = ctx.member.org_id;
   const aircraft = await store.getAircraft(ctx.db, org, plan.aircraft_id);
