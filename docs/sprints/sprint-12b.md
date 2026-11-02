@@ -122,7 +122,7 @@ interface NotificationGateway {
 | `plannedFlightTime` 所要時間 | 計画の所要時間 | 分。**5 分単位に切り上げる**（終了日時は所要時間から計算されるため、切り上げが安全側）。5〜1440（1→5、5→5、6→10、1438→1440、1440→1440）。切り上げたときは理由を表示 |
 | `flightSpeed` 飛行速度 | 通報の画面で入力 | km/h、整数 1〜999 |
 | `flightAltitude` 飛行する高度 | 計画の最大高度 | m（AGL）、整数 1〜999。未入力・0・999 超は**値を変えずに警告**（計画は 0〜2000m を持てるため） |
-| `flyRoute` 飛行の経路 | 計画の座標と半径 | **GeoJSON の文字列**。Circle（中心 `[経度, 緯度]`、半径 m）または 3 点以上の Polygon。計画は点と半径だけなので Circle のみ。半径が未入力なら経路を作れないと警告。原本のサンプルは半径を `properties.radius` に置く一方、項目表は geometry の `radius` とする不一致がある（精読結果の気づき 5）。**コピー画面では座標（中心の経度・緯度と半径）を表示し、GeoJSON は API 形式として併記するだけ**。形は API 接続時に検証環境で確かめる（※要確認）。地図は DIPS の画面で描く |
+| `flyRoute` 飛行の経路 | 計画の座標と半径 | **GeoJSON の文字列**。Circle（中心 `[経度, 緯度]`、半径 m）または 3 点以上の Polygon。計画は点と半径だけなので Circle のみ。半径が未入力なら経路を作れないと警告。リクエストのサンプル（p53）は半径を `properties.radius` に置き、レスポンスの説明（p60）は geometry 内（精読結果の気づき 5）。項目表（項番 21）の階層は精読記録に無く、リクエストでどちらを受け付けるかは文書だけでは確定しない（Sprint 19-1c の確認台帳 D-1 で訂正）。**コピー画面では座標（中心の経度・緯度と半径）を表示し、GeoJSON は API 形式として併記するだけ**。形は API 接続時に検証環境で確かめる（※要確認）。地図は DIPS の画面で描く |
 | 立入管理措置など | `accessControl`（計画）。`riskMitigationOnsiteControlL3`・`L35`・`riskMitigationOnsiteControl2`・`exceptionalConditionsMooring` は通報の画面で入力 | 文字列 `"1"`（講じる・行う）／`"0"`。未選択は未入力として警告 |
 | 機体 | 機体：登録記号→`symbol`、型式→`model`、製造者→`maker`、機体認証の区分→`certification1`／`certification2`、認証番号→`certificationNum`、最大離陸重量→`maxWeight`（kg。原本は「通報を行う飛行形態の総重量。困難な場合は最大離陸重量」） | 機体の種類（`type` 1〜6）は持たないため `dips_only` |
 | 操縦者 | 氏名、技能証明の区分→`firstClass`／`secondClass`（`"1"`／`"0"`）、技能証明書番号→`skillCertificationNumber`、代表機体の製造者・型式→`maker`・`model` | `personal`。連絡先・`privateLicense`（将来廃止予定。p51）は `dips_only` |
