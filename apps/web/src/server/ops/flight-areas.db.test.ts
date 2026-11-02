@@ -179,12 +179,19 @@ describe.skipIf(!ADMIN_URL)("飛行範囲（flight_areas）の保存・照合・
       [[{ kind: "circle", center: [35.4, 133.3], radiusM: 10 }], "lat_out_of_range"],
       [[{ kind: "circle", center: [133.3, 35.4], radiusM: 6000 }, { kind: "circle", center: [133.5, 35.4], radiusM: 6000 }], "area_too_large"],
       [[], "areas_empty"],
+      [[{ kind: "circle", center: [133.3, 35.4], radiusM: 10, evil: "x" }], "shape_invalid"],
+      [[{ kind: "polygon", vertices: TRI, altitude: 100 }], "shape_invalid"],
     ];
     for (const [areas, code] of cases) {
       const e = await err(plans.createPlan(ctx(), input({ areas })));
       expect([e.status, e.code, e.fieldCodes?.["areas"]], code).toEqual([422, code, code]);
     }
     expect([await count("record_versions"), await count("flight_plans"), await count("judgement_snapshots"), await count("evidence_log")]).toEqual(before);
+  });
+
+  it("B1-3：許す鍵（id・name・kind・vertices・center・radiusM）は通る", async () => {
+    const p = await create({ areas: [{ id: "x1", name: "北側", kind: "polygon", vertices: TRI }, { id: "x2", kind: "circle", center: [133.34, 35.43], radiusM: 20 }] });
+    expect(p.id).toBeTruthy();
   });
 
   it("B1-4：訂正は新しい版になり、前の版の data は変わらない。表を直接書き換えると照合が偽になる", async () => {

@@ -102,6 +102,9 @@ export const coveringOfStored = (stored: readonly StoredArea[]): { latitude: num
  * API の `areas` を検査し、保存の形と、全体を覆う円（緯度・経度・半径）を返す。
  * 座標の順は [経度, 緯度]。位置の形が違う頂点は shape_invalid。外接半径が 10000 m を超えると area_too_large。
  */
+/** 範囲 1 件に許す鍵。 */
+const ALLOWED_AREA_KEYS: ReadonlySet<string> = new Set(["id", "name", "kind", "vertices", "center", "radiusM"]);
+
 export const parseAreasInput = (raw: unknown): AreasParsed => {
   if (!Array.isArray(raw)) return fail("areas_not_array");
   if (raw.length === 0) return fail("areas_empty");
@@ -112,6 +115,8 @@ export const parseAreasInput = (raw: unknown): AreasParsed => {
   for (let i = 0; i < raw.length; i++) {
     const item = raw[i];
     if (!isRecord(item)) return fail("shape_invalid", i);
+    // 未知の鍵（evil・altitude など）は受けない（DB の検査も拒否する。ここで 422 にして理由を返す）
+    if (Object.keys(item).some((k) => !ALLOWED_AREA_KEYS.has(k))) return fail("shape_invalid", i);
     const id = item["id"] === undefined || item["id"] === null ? `a${i + 1}` : item["id"];
     if (typeof id !== "string" || !ID_RE.test(id)) return fail("area_id_invalid", i);
     if (ids.has(id)) return fail("area_id_duplicate", i);

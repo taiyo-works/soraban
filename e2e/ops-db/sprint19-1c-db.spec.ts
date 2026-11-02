@@ -127,6 +127,12 @@ test.describe("Sprint 19-1c E2E-DB：多角形の通報の整形", () => {
     await expect(page.getByTestId("report-route-geojson")).toHaveCount(0);
     await expect(page.getByTestId("report-record-blocked")).toHaveAttribute("data-reason", "multiple_areas");
     await expect(page.getByTestId("report-record-form")).toHaveCount(0);
+    // 案内の文は本文として 16px 以上。取り消せる有効な通報が無いので「取消の記録はできます」は出さない
+    const guide = page.getByTestId("report-record-blocked").locator("p");
+    await expect(guide).toContainText("新規・変更の通報の記録はできません");
+    expect(await guide.innerText()).not.toContain("取消の記録はできます");
+    const px = await guide.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(px).toBeGreaterThanOrEqual(16);
     const scroll = await page.evaluate(() => ({ s: document.documentElement.scrollWidth, c: document.documentElement.clientWidth }));
     expect(scroll.s).toBeLessThanOrEqual(scroll.c);
   });
