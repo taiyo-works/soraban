@@ -5,9 +5,12 @@
 //   - 名称は 30 文字（コードポイント）まで。超えるときは切り詰めずに警告する。
 //   - 所要時間は 5 分単位に切り上げる（終了日時は所要時間から計算されるため、切り上げが安全側）。
 //   - 高度は 1〜999 m。未入力・0・999 超は値を変えずに警告する。
-//   - 経路は円（Circle）の GeoJSON 文字列だけ。半径が無ければ警告する。コピー対象にしない（座標を表示する）。
+//   - 経路は円（Circle）または多角形（Polygon）の GeoJSON 文字列。コピー対象にしない（座標を表示する）。
+//     円は半径が無ければ警告する。範囲が 2 つ以上の計画は、1 つ目だけを出さずに準備を止める（警告 route_multiple_areas。
+//     通報が実際の範囲より狭くなる経路を作らないため）。複数のジオメトリを出せるかは文書に記載なし（※要再確認・検証環境）。
 //   - 未入力があっても記録はできる（件数は警告として出す）。
 //   - 個人情報（技能証明書番号・氏名）は personal の印を付け、通報の記録の写しには入れない（contentOf）。
+import { MAX_AREA_VERTICES } from "@soraban/geo";
 import { computeFingerprint, fingerprintPartsOf } from "./fingerprint";
 import {
   displayFields,
@@ -105,6 +108,27 @@ export const buildCircleGeoJson = (
   });
 };
 
+const round6 = (n: number): number => Number(n.toFixed(6));
+
+/**
+ * 多角形の経路の GeoJSON 文字列。頂点は [経度, 緯度]、環を閉じない並び。
+ * 座標は小数 6 桁に丸める（そらばんの設計の選択で、DIPS の指定ではない）。
+ * ring: "open"（既定）は項番 23・サンプル p56〜58 の形（始点を末尾に繰り返さない）。"closed" は始点を末尾に足すが、
+ * 閉じた環を送った場合の扱いは文書に記載なし（※要再確認・検証環境）。確かめるまで使わない。
+ */
+export const buildPolygonGeoJson = (
+  vertices: readonly (readonly [number, number])[],
+  ring: ReportFieldsData["routeFormat"]["polygonRing"] = "open",
+): string => {
+  const ps = vertices.map((v): [number, number] => [round6(v[0]), round6(v[1])]);
+  const first = ps[0];
+  const coordinates = ring === "closed" && first ? [...ps, first] : ps;
+  return JSON.stringify({
+    type: "FeatureCollection",
+    features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [coordinates] } }],
+  });
+};
+
 const codeText = (field: ReportField, code: string | number): string => {
   const label = field.codes?.[String(code)];
   return label ? `${code} ${label}` : String(code);
@@ -195,6 +219,35 @@ const draftFor = (field: ReportField, { plan, fields }: Ctx): Draft | null => {
       return filled(String(a), String(a), a < 1 || a > 999 ? { warnings: [warn("altitude_out_of_range", `計画の最大高度は ${a} m`)] } : {});
     }
     case "route": {
+      const areas = plan.areas ?? [];
+      // 範囲が 2 つ以上：1 つ目だけを出さない（通報が実際の範囲より狭くなるため）。準備を止め、案内を出す
+      if (areas.length >= 2) {
+        return {
+          status: "route",
+          value: `範囲 ${areas.length} 件（DIPS に出す範囲は 1 つです）`,
+          apiValue: null,
+          missing: false,
+          required: false,
+          copyable: false,
+          copyText: null,
+          warnings: [warn("route_multiple_areas")],
+        };
+      }
+      const only = areas[0];
+      if (only?.kind === "polygon") {
+        const n = only.vertices.length;
+        return {
+          status: "route",
+          value: `多角形・頂点 ${n}`,
+          apiValue: buildPolygonGeoJson(only.vertices, fields.routeFormat.polygonRing),
+          missing: false,
+          required: false,
+          copyable: false,
+          copyText: null,
+          ...(n > MAX_AREA_VERTICES ? { warnings: [warn("route_too_many_vertices", `頂点 ${n} 点`)] } : {}),
+        };
+      }
+      // 円 1 つ・点だけ：従来どおり（出力は変えない）
       const lat = plan.latitude;
       const lng = plan.longitude;
       const center = `中心 経度 ${lng}・緯度 ${lat}`;

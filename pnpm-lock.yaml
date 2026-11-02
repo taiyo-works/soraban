@@ -121,6 +121,10 @@ importers:
         version: 5.9.3
 
   packages/dips:
+    dependencies:
+      '@soraban/geo':
+        specifier: workspace:*
+        version: link:../geo
     devDependencies:
       '@types/node':
         specifier: ^20.19.39

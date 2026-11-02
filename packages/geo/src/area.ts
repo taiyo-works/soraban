@@ -6,7 +6,7 @@
 // - ネットワーク・時刻・乱数を使わない。同じ入力は同じ値を返す。
 import { haversineMeters, pointInPolygon, type LatLng } from "./base";
 
-/** 多角形の頂点数の下限・暫定の上限。上限は DIPS の仕様が確定するまで※要再確認（定数はここ 1 か所。保存・API は超過を拒否、画面は上限に近づく前に警告する方針）。 */
+/** 多角形の頂点数の下限・暫定の上限。上限は**そらばんの暫定の設計値で、DIPS の値ではない**（DIPS の上限は記載なし。※要再確認・検証環境）。定数はここ 1 か所。保存・API は超過を拒否、通報の整形も警告 route_too_many_vertices を出す（防御）、画面は上限に近づく前に警告する方針。 */
 export const MIN_POLYGON_VERTICES = 3;
 export const MAX_AREA_VERTICES = 100;
 /** 円の半径の範囲（m、整数）。既存の計画の `radius_m`（1〜10000）に合わせる。 */
