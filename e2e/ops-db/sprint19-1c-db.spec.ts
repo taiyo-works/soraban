@@ -113,8 +113,9 @@ test.describe("Sprint 19-1c E2E-DB：多角形の通報の整形", () => {
     expect(text).toContain("route_multiple_areas");
     expect(text).not.toContain("FeatureCollection");
     // 記録は 409
+    const cur = (await (await manager.get(`/api/ops/plans/${created.id}`)).json()) as { version: number };
     const rec = await manager.post(`/api/ops/plans/${created.id}/reports`, {
-      data: { kind: "new", manual: { reportedAt: "2027-01-05T11:30", dipsNumber: "FP-1", confirmedDipsDone: true, confirmedMatchesLatest: true }, inputs: { flightPurposes: [1] } },
+      data: { kind: "new", expectedPlanVersion: cur.version, manual: { reportedAt: "2027-01-05T11:30", dipsNumber: "FP-1", confirmedDipsDone: true, confirmedMatchesLatest: true }, inputs: { flightPurposes: [1] } },
     });
     expect(rec.status(), await rec.text()).toBe(409);
     expect(await rec.text()).toContain("route_multiple_areas");
