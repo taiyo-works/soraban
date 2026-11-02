@@ -75,7 +75,9 @@ Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1、プロジェクト `so
 | 0017 | 運航管理（Sprint 14）：`flight_field_events` に確認項目 `docs_confirm`・`flight_restriction`・`site_conditions` と、構造化された列（`doc_key`、`site_third_party`・`site_other_aircraft`・`site_rain`・`site_visibility`・`site_wind_ms`・`site_temp_c`）を追加（追記専用・冪等性・取り消しは 0014 のまま）、`flight_field_event_hash_v2`、追加前のトリガーの置き換え |
 | 0018 | 運航管理（Sprint 19-1b）：`flight_plans.flight_areas`（jsonb・null 可。飛行範囲の配列。座標は [経度, 緯度]・小数 6 桁）、形の検査 `flight_areas_valid`、代表点＋半径の円が範囲を覆うことの検査 `flight_areas_covered`、追加後の小さなトリガー `record_versions_after_insert_flight_areas`（0016 の大きなトリガー関数は再定義しない）、照合 `verify_flight_areas(plan_id)`（アプリ用ロールは実行不可）。上限（範囲 20・頂点 100）は暫定（※要再確認） |
 
-> 0018 と通報の準備（Sprint 19-1c）：多角形 1 つ・円 1 つ・点だけの計画は、通報の準備で DIPS の形式（多角形は `Polygon`、環は開いたまま）に整える。**範囲が 2 つ以上の計画だけ**、通報の準備を 409 `route_multiple_areas` で止める（`apps/web/src/server/ops/reports.ts` の `buildPlanForReport`。1 つ目だけを出すと通報が実際の範囲より狭くなるため）。複数のジオメトリを DIPS が受け付けるかは文書に記載がなく、検証環境で確かめるまでこの判定は外さない（設定は `packages/dips/data/report-fields.json` の `routeFormat.multiArea`、値は `single_only` のみ）。
+> 0018 と通報の準備（Sprint 19-1c）：多角形 1 つ・円 1 つ・点だけの計画は、通報の準備で DIPS の形式（多角形は `Polygon`、環は開いたまま）に整える。**範囲が 2 つ以上の計画だけ**、新規・変更の通報の記録と再送を 409 `route_multiple_areas` で止める（画面の読み出しと取消の記録は止めない）（`apps/web/src/server/ops/reports.ts` の `buildPlanForReport`。1 つ目だけを出すと通報が実際の範囲より狭くなるため）。複数のジオメトリを DIPS が受け付けるかは文書に記載がなく、検証環境で確かめるまでこの判定は外さない（設定は `packages/dips/data/report-fields.json` の `routeFormat.multiArea`、値は `single_only` のみ）。
+
+> 0018 の修正（Sprint 19-1b のレビュー対応）は、0018 を main に入れる前だけ 0018 を直接直した。**0018 を main に入れたあとの修正は、0019 以降の新しいマイグレーションで行う**（適用済みの DB はチェックサム不一致で止まる）。
 
 ### ランナー
 
