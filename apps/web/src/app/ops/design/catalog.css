@@ -154,6 +154,10 @@ html[data-mode="field"] .sbx-catalog .sb-pill,
 html[data-mode="field"] .sbx-catalog .opx-btn,
 html[data-mode="field"] .sbx-catalog .sbx-input {
   font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill:not(.sb-pill-primary),
+html[data-mode="field"] .sbx-catalog .opx-btn:not(.opx-btn-primary),
+html[data-mode="field"] .sbx-catalog .sbx-input {
   min-height: 56px;
 }
 html[data-mode="field"] .sbx-catalog .sb-pill-label {
