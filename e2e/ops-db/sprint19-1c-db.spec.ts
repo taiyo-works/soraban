@@ -97,16 +97,36 @@ test.describe("Sprint 19-1c E2E-DB：多角形の通報の整形", () => {
     expect(text).toBe('{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"radius":150},"geometry":{"type":"Circle","center":[133.35,35.44]}}]}');
   });
 
-  test("範囲が 2 つ：通報の準備を止める（API は 409 route_multiple_areas）。1 つ目だけの GeoJSON を返さない", async () => {
-    const plan = await create(
-      body([{ kind: "polygon", vertices: TRI }, { kind: "circle", center: [133.352, 35.44], radiusM: 50 }], "複数の通報"),
-    );
-    const r = await manager.get(`/api/ops/plans/${plan.id}/report`);
-    expect(r.status()).toBe(409);
+  test("範囲が 2 つ：報告画面はエラーにならず案内を出す。経路の GeoJSON は出さず、新規・変更の記録はできない（API は 409 route_multiple_areas）", async ({ page }) => {
+    const draft = await manager.post("/api/ops/plans", {
+      data: body([{ kind: "polygon", vertices: TRI }, { kind: "circle", center: [133.352, 35.44], radiusM: 50 }], "複数の通報"),
+    });
+    expect(draft.status(), await draft.text()).toBe(201);
+    const created = (await draft.json()) as { id: string; version: number };
+    const act = await manager.post(`/api/ops/plans/${created.id}/request-confirmation`, { data: { expectedVersion: created.version } });
+    expect(act.status(), await act.text()).toBe(200);
+
+    // 読み出しは通る（GeoJSON は返さない）
+    const r = await manager.get(`/api/ops/plans/${created.id}/report`);
+    expect(r.status()).toBe(200);
     const text = await r.text();
     expect(text).toContain("route_multiple_areas");
-    expect(text).toContain("DIPS に出す範囲は 1 つです");
-    expect(text).not.toContain("Polygon");
     expect(text).not.toContain("FeatureCollection");
+    // 記録は 409
+    const rec = await manager.post(`/api/ops/plans/${created.id}/reports`, {
+      data: { kind: "new", manual: { reportedAt: "2027-01-05T11:30", dipsNumber: "FP-1", confirmedDipsDone: true, confirmedMatchesLatest: true }, inputs: { flightPurposes: [1] } },
+    });
+    expect(rec.status(), await rec.text()).toBe(409);
+    expect(await rec.text()).toContain("route_multiple_areas");
+
+    // 画面：案内が出て、GeoJSON は無く、記録のフォームは出ない
+    await openReport(page, created.id);
+    await expect(page.getByTestId("report-warnings").locator('[data-code="route_multiple_areas"]')).toContainText("そらばんから DIPS に出す範囲は 1 つにしています");
+    await expect(page.getByTestId("report-item-warnings-route")).toContainText("計画を分けるか、1 つにまとめてください");
+    await expect(page.getByTestId("report-route-geojson")).toHaveCount(0);
+    await expect(page.getByTestId("report-record-blocked")).toHaveAttribute("data-reason", "multiple_areas");
+    await expect(page.getByTestId("report-record-form")).toHaveCount(0);
+    const scroll = await page.evaluate(() => ({ s: document.documentElement.scrollWidth, c: document.documentElement.clientWidth }));
+    expect(scroll.s).toBeLessThanOrEqual(scroll.c);
   });
 });

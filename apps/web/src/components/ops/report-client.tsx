@@ -11,6 +11,7 @@ import {
   DIPS_ONLY_LABEL,
   fieldByKey,
   LICENSE_MASKED_NOTE,
+  PREPARE_WARNING_MESSAGE,
   MANUAL_CONFIRM_DIPS_DONE,
   MANUAL_CONFIRM_MATCHES_LATEST,
   MANUAL_NUMBER_UNAVAILABLE_LABEL,
@@ -1037,11 +1038,15 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         {!view.permissions.record ? (
           <Note>記録は、運航管理者と、この計画の操縦者本人だけが行えます。</Note>
         ) : !view.recordable.allowed ? (
-          <Note>
-            {view.recordable.reason === "draft"
-              ? "計画が下書きのため、通報の記録はできません。先に確認を依頼してください。"
-              : "計画は中止されています。通報の記録はできません（取消の記録はできます）。"}
-          </Note>
+          <div data-testid="report-record-blocked" data-reason={view.recordable.reason ?? ""}>
+            <Note>
+              {view.recordable.reason === "draft"
+                ? "計画が下書きのため、通報の記録はできません。先に確認を依頼してください。"
+                : view.recordable.reason === "multiple_areas"
+                  ? `${PREPARE_WARNING_MESSAGE.route_multiple_areas}。範囲が複数の間は、新規・変更の通報の記録はできません（取消の記録はできます）。`
+                  : "計画は中止されています。通報の記録はできません（取消の記録はできます）。"}
+            </Note>
+          </div>
         ) : isCancel && !view.effective ? (
           <Note>取り消せる有効な通報がありません。</Note>
         ) : (

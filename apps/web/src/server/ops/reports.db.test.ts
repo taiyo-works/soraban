@@ -1874,4 +1874,73 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       expect((await plans.getPlan(at("2027-01-14T01:00:00Z"), plan.id)).report.deadline.state).toBe("none");
     });
   });
+  // ================================================================
+  // Sprint 19-1c（レビュー指摘 1）：範囲が 2 つ以上の計画。新規・変更の記録と再送は止め、画面の読み出し・取消の記録は通す
+  // ================================================================
+  describe("Sprint 19-1c：範囲が 2 つ以上の計画の通報", () => {
+    const TRI_HQ = [
+      [133.3805, 35.4342],
+      [133.3815, 35.4342],
+      [133.381, 35.4352],
+    ];
+    const CIRCLE_HQ = { kind: "circle", center: [133.383, 35.4342], radiusM: 40 };
+    const TWO = [{ kind: "polygon", vertices: TRI_HQ }, CIRCLE_HQ];
+
+    /** 多角形 1 つの計画に通報を 1 件記録してから、範囲を 2 つに訂正する。 */
+    const withReportThenTwoAreas = async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const first = await recordNew(mgr(), plan);
+      const upd = await plans.updatePlan(mgr(), plan.id, { expectedVersion: plan.version, reason: "範囲を 2 つにした", areas: TWO });
+      return { plan, first, version: upd.record.version };
+    };
+
+    it("画面の読み出し（getPlanReport）は止めない：警告 route_multiple_areas・経路は出さない・新規/変更は記録できない。履歴は見られる", async () => {
+      const { plan, first } = await withReportThenTwoAreas();
+      const view = await reports.getPlanReport(mgr(), plan.id);
+      const route = view.prepared.items.find((i) => i.key === "route")!;
+      expect(route.apiValue).toBeNull();
+      expect(route.warnings.map((w) => w.code)).toEqual(["route_multiple_areas"]);
+      expect(view.warnings.map((w) => w.code)).toContain("route_multiple_areas");
+      expect(view.recordable).toEqual({ allowed: false, reason: "multiple_areas" });
+      expect(view.reports.map((r) => r.id)).toContain(first.report.id);
+      expect(view.effective?.id).toBe(first.report.id);
+      // 取消の見え方では、記録できる
+      const cancelView = await reports.getPlanReport(mgr(), plan.id, { kind: "cancel" });
+      expect(cancelView.recordable).toEqual({ allowed: true, reason: null });
+      expect(cancelView.warnings.map((w) => w.code)).not.toContain("route_multiple_areas");
+    });
+
+    it("新規・変更の記録は 409 route_multiple_areas（行も試行も増えない）。取消の記録は通る", async () => {
+      const { plan, first, version } = await withReportThenTwoAreas();
+      const rowsBefore = (await reportRows(plan.id)).length;
+      const e1 = await reports.createReport(mgr(), plan.id, { kind: "change", expectedPlanVersion: version, manual: manual(), inputs: FULL_INPUTS }).then(() => null, (x: unknown) => x);
+      expect(e1).toMatchObject({ status: 409, code: "route_multiple_areas", fieldCodes: { areas: "route_multiple_areas" } });
+      await expectOpsError(reports.createReport(mgr(), plan.id, { kind: "new", expectedPlanVersion: version, manual: manual(), inputs: FULL_INPUTS }), 409, "route_multiple_areas");
+      expect((await reportRows(plan.id)).length).toBe(rowsBefore);
+      // 取消：DIPS で取り消した結果を記録できる（有効な通報が残らない）
+      const cancel = await reports.createReport(mgr(), plan.id, { kind: "cancel", baseReportId: first.report.id, manual: manual({ dipsNumber: "CX-19" }) });
+      expect(cancel.created).toBe(true);
+      expect(cancel.report).toMatchObject({ kind: "cancel", status: "reported_manual" });
+      expect((await reports.getPlanReport(mgr(), plan.id)).effective).toBeNull();
+    });
+
+    it("再送（retryReport）は 409 route_multiple_areas。送信は呼ばれない", async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const spy = new SpyMock();
+      const failed = await send(mockCtx({ gateway: spy }), plan, { mockScenario: "rejected" });
+      expect(failed.report.status).toBe("failed");
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: plan.version, reason: "範囲を 2 つにした", areas: TWO });
+      await expectOpsError(reports.retryReport(mockCtx({ gateway: spy }), plan.id, failed.report.id, { confirmSend: true, mockScenario: "ok" }), 409, "route_multiple_areas");
+      expect(spy.calls).toBe(1);
+    });
+
+    it("多角形 1 つの計画は、通常どおり記録できる", async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const r = await recordNew(mgr(), plan);
+      expect(r.created).toBe(true);
+      const route = r.view.prepared.items.find((i) => i.key === "route")!;
+      expect(JSON.parse(route.apiValue!).features[0].geometry.type).toBe("Polygon");
+      expect(r.view.recordable).toMatchObject({ allowed: true });
+    });
+  });
 });

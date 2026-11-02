@@ -353,13 +353,15 @@ describe.skipIf(!ADMIN_URL)("飛行範囲（flight_areas）の保存・照合・
     expect(ng.permits.numbers[0]!.status).not.toBe("applied");
   });
 
-  it("通報の準備（19-1c）：範囲が 2 つ以上は 409 route_multiple_areas で止める（1 つ目だけを出さない）。多角形 1 つ・円 1 つ・点は通る", async () => {
+  it("通報の準備（19-1c）：範囲が 2 つ以上は、画面の読み出しは通すが経路を出さず（警告 route_multiple_areas。新規・変更の記録と再送の停止は reports.db.test.ts で検査）。多角形 1 つ・円 1 つ・点は通る", async () => {
     const two = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }, { kind: "circle", center: [133.331, 35.42], radiusM: 20 }] });
     const polyAndCircle = await create({ areas: [{ kind: "polygon", vertices: TRI }, FAR] });
     for (const pl of [two, polyAndCircle]) {
-      const e = await err(reports.getPlanReport(ctx(), pl.id));
-      expect([e.status, e.code]).toEqual([409, "route_multiple_areas"]);
-      expect(e.fieldCodes).toEqual({ areas: "route_multiple_areas" });
+      const v = await reports.getPlanReport(ctx(), pl.id);
+      const route = v.prepared.items.find((i) => i.key === "route")!;
+      expect(route.apiValue).toBeNull();
+      expect(route.warnings.map((w) => w.code)).toEqual(["route_multiple_areas"]);
+      expect(v.recordable.reason === "multiple_areas" || v.recordable.reason === "draft").toBe(true);
     }
     const one = await create({ areas: [{ kind: "circle", center: [133.33, 35.42], radiusM: 20 }] });
     const pt = await create({ latitude: 35.4, longitude: 133.3 });
