@@ -21,25 +21,44 @@ html[data-theme="dark"] .sbx-catalog {
   outline-offset: 3px;
 }
 .sbx-catalog h1 {
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1.4;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
 }
+/* 節の見出し：橙の短い面（8px の丸い角ではなく 5px×1 行の棒）を頭に置いて、節の始まりを示す（装飾の絵は足さない） */
 .sbx-catalog h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 20px;
   line-height: 1.4;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  font-feature-settings: "palt" 1;
+}
+.sbx-catalog h2::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 1.2em;
+  background: var(--sb-orange);
 }
 .sbx-note {
   font-size: max(14px, var(--sb-fs-note));
   color: var(--sb-ink-3);
+  text-wrap: pretty;
+}
+.sbx-catalog header > .sbx-note {
+  max-width: 44em;
 }
 .sbx-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 24px 0;
+  padding: 32px 0;
   border-top: var(--sb-rule-w) solid var(--sb-rule);
 }
 .sbx-nav {

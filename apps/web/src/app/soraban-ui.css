@@ -134,6 +134,16 @@
   letter-spacing: 0.06em;
   font-weight: 700;
 }
+/* 仕上げ：見出しは字間を詰める（palt）＋行を均す（balance）。本文は行末の孤立を避ける（pretty）。数字は桁をそろえる */
+.sb-sec-head h2 {
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
+.sb-sec-note,
+.opx-notice,
+.sb-block p {
+  text-wrap: pretty;
+}
 .sb-sec-note {
   position: relative;
   z-index: 1;

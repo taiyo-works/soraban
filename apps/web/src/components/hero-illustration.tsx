@@ -6,6 +6,7 @@
  * - インライン SVG：画像の要求は 0 件。img ではないので LCP の要素にならない。優先読み込みもない。
  * - 装飾：aria-hidden、textContent なし。文字は丘の上に置かない（文字は挿絵の空の上だけ）。
  * - 色は --sb-art-*（挿絵専用）と --sb-orange・--sb-base だけ。
+ * - 稜線は奥から手前へ線を太くする（奥 1.4〜1.6、中 1.8〜2、手前 2.4〜2.8）。丘の内側は白で、線は稜線だけ（縁に縦横の線を出さない）。
  * - 高さはスマホ 232px、PC 320px（soraban-ui.css の .sb-hero）。スマホ用と PC 用の 2 枚を CSS で切り替える。
  * 状態・効果・アニメーションを持たないサーバーコンポーネント。
  */
@@ -17,6 +18,16 @@ function Cloud({ x, y, scale, stroke }: { readonly x: number; readonly y: number
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
       <path d={CLOUD_PATH} fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth={stroke} strokeLinejoin="round" />
     </g>
+  );
+}
+
+/** 丘：内側は背後の線を隠す白だけ（線なし）。線は稜線だけに引き、画面の左右・下の縁に縦横の線を出さない。 */
+function Hill({ d, ridge, w }: { readonly d: string; readonly ridge: string; readonly w: number }) {
+  return (
+    <>
+      <path d={d} fill="var(--sb-art-cloud)" />
+      <path d={ridge} fill="none" stroke="var(--sb-art-line)" strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" />
+    </>
   );
 }
 
@@ -60,9 +71,9 @@ export function HeroIllustration() {
           <circle cx="330" cy="104" r="22" fill="var(--sb-orange)" />
           <Cloud x={204} y={46} scale={0.3} stroke={6.7} />
           <Cloud x={340} y={58} scale={0.26} stroke={7.5} />
-          <path d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M0 132 C80 112 170 126 250 136 S350 130 390 120 V150 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M0 146 C90 136 180 142 270 148 S360 145 390 141" fill="none" stroke="var(--sb-art-line)" strokeWidth="2" strokeLinecap="round" />
+          <Hill d="M0 112 C60 96 130 104 200 116 S330 124 390 104 V150 H0Z" ridge="M0 112 C60 96 130 104 200 116 S330 124 390 104" w={1.4} />
+          <Hill d="M0 132 C80 112 170 126 250 136 S350 130 390 120 V150 H0Z" ridge="M0 132 C80 112 170 126 250 136 S350 130 390 120" w={1.8} />
+          <path d="M0 146 C90 136 180 142 270 148 S360 145 390 141" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinecap="round" />
           <DroneLine x={250} y={26} width={74} height={44} />
         </svg>
       </div>
@@ -73,9 +84,9 @@ export function HeroIllustration() {
           <Cloud x={700} y={96} scale={0.62} stroke={3.2} />
           <Cloud x={1190} y={150} scale={0.55} stroke={3.6} />
           <path d="M690 258 C760 210 830 150 905 92" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeDasharray="2 9" strokeLinecap="round" />
-          <path d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinejoin="round" />
-          <path d="M0 290 C240 268 460 294 700 274 S1070 228 1280 248 V320 H0Z" fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinejoin="round" />
-          <path d="M0 313 C300 297 560 313 820 301 S1150 283 1280 295" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.4" strokeLinecap="round" />
+          <Hill d="M0 262 C200 252 420 260 640 236 S1010 172 1280 194 V320 H0Z" ridge="M0 262 C200 252 420 260 640 236 S1010 172 1280 194" w={1.6} />
+          <Hill d="M0 290 C240 268 460 294 700 274 S1070 228 1280 248 V320 H0Z" ridge="M0 290 C240 268 460 294 700 274 S1070 228 1280 248" w={2} />
+          <path d="M0 313 C300 297 560 313 820 301 S1150 283 1280 295" fill="none" stroke="var(--sb-art-line)" strokeWidth="2.8" strokeLinecap="round" />
           <DroneLine x={880} y={48} width={150} height={90} />
         </svg>
       </div>

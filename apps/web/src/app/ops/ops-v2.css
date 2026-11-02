@@ -237,6 +237,10 @@ html:has(.ops-v2) body {
   letter-spacing: 0.06em;
   color: var(--sb-ink);
 }
+.opx-h1 {
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
 .opx-eyebrow {
   font-size: 13px;
   font-weight: 700;

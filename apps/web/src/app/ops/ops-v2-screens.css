@@ -308,6 +308,18 @@
 .sb-sec-head[data-tone="danger"] {
   border-left-color: var(--sb-v-no-fg);
 }
+/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、橙の線も題の 1 行分に収める */
+.ops-v2 .sb-sec-head {
+  min-height: 40px;
+}
+.ops-v2 .sb-sec-head h2 {
+  font-size: 20px;
+}
+@media (min-width: 1024px) {
+  .ops-v2 .sb-sec-head h2 {
+    font-size: 22px;
+  }
+}
 /* 見出しの右に件数（次にやること） */
 .sb-sec-head.sb-sec-row {
   flex-direction: row;
