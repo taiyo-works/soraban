@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ヘッダー案 C（経路）</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* C 経路：地図の格子（薄い灰）の帯の上を、橙の太い経路線が離陸点から着陸点へ。経由点は墨の輪。 */
+.hd { height: 128px; }
+.in { padding-top: 14px; }
+.map { left: 0; right: 0; bottom: 0; height: 40px; background: var(--surface); border-top: 1.5px solid var(--ink); }
+.map .g { stroke: #DAD8CE; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.map .route { fill: none; stroke: var(--orange); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.map .wp { fill: #fff; stroke: var(--ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.map .end { fill: var(--ink); }
+@media (min-width: 1024px) {
+  .hd { height: 240px; }
+  .in { padding-top: 40px; }
+  .map { height: 84px; }
+}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="drone" viewBox="0 0 160 96"><g fill="none" stroke="currentColor" style="stroke-width:var(--sw,3)" stroke-linecap="round" stroke-linejoin="round"><rect x="62" y="38" width="36" height="18" rx="9"/><circle cx="80" cy="47" r="4.5"/><path d="M64 42 L36 28 M96 42 L124 28 M64 52 L36 66 M96 52 L124 66"/><ellipse cx="30" cy="24" rx="22" ry="4.5"/><ellipse cx="130" cy="24" rx="22" ry="4.5"/><ellipse cx="30" cy="70" rx="22" ry="4.5"/><ellipse cx="130" cy="70" rx="22" ry="4.5"/><path d="M30 24 V28 M130 24 V28 M30 66 V70 M130 66 V70 M70 58 V68 M90 58 V68 M64 68 H76 M84 68 H96"/></g></symbol></defs></svg>
+<header class="hd" aria-label="そらばん">
+  <div class="in"><h1><span class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 160 96"><use href="#drone"/></svg></span> そらばん</span><span class="sub" style="display:block">ドローンの飛行計画の通報・点検・飛行日誌</span></h1></div>
+  <div class="art map m"><svg viewBox="0 0 375 40" preserveAspectRatio="none">
+    <path class="g" d="M0 12 H375 M0 28 H375"/><path class="g" d="M60 0 V40 M140 0 V40 M220 0 V40 M300 0 V40"/>
+    <path class="route" d="M18 31 L96 31 L140 12 L236 12 L286 26 L350 26"/>
+  </svg></div>
+  <div class="art map pc"><svg viewBox="0 0 1280 84" preserveAspectRatio="none">
+    <path class="g" d="M0 28 H1280 M0 56 H1280"/><path class="g" d="M160 0 V84 M320 0 V84 M480 0 V84 M640 0 V84 M800 0 V84 M960 0 V84 M1120 0 V84"/>
+    <path class="route" d="M40 66 L300 66 L420 26 L760 26 L900 54 L1180 54"/>
+  </svg></div>
+  <!-- 経由点とドローンは、帯の座標に合わせて重ねる（伸縮で楕円にならないよう別の要素） -->
+  <span class="m" style="position:absolute;left:133px;bottom:21px;width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid var(--ink)" aria-hidden="true"></span>
+  <span class="m" style="position:absolute;left:279px;bottom:7px;width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid var(--ink)" aria-hidden="true"></span>
+  <span class="m" style="position:absolute;left:316px;bottom:10px;width:52px;color:var(--ink)" aria-hidden="true"><svg viewBox="0 0 160 96" style="display:block;width:100%;height:auto"><use href="#drone"/></svg></span>
+  <span class="pc" style="position:absolute;left:292px;bottom:10px;width:16px;height:16px;border-radius:50%;background:#fff;border:2.5px solid var(--ink)" aria-hidden="true"></span>
+  <span class="pc" style="position:absolute;left:752px;bottom:50px;width:16px;height:16px;border-radius:50%;background:#fff;border:2.5px solid var(--ink)" aria-hidden="true"></span>
+  <span class="pc" style="position:absolute;left:1116px;bottom:22px;width:88px;color:var(--ink)" aria-hidden="true"><svg viewBox="0 0 160 96" style="display:block;width:100%;height:auto"><use href="#drone"/></svg></span>
+</header>
+<div class="intro"><p class="lead"><strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。</p><p class="note">通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。</p></div><div class="sec"><h2>地点を判定する</h2></div>
+<span class="tag">案 C 経路</span>
+</body></html>
