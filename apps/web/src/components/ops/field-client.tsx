@@ -112,7 +112,7 @@ const BTN_OUTLINE = BTN;
 // 選択中・現在地の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
 const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
-const BTN_FLIGHT = "opx-btn opx-btn-primary opx-btn-field w-full min-h-24 text-4xl tracking-[0.2em]";
+const BTN_FLIGHT = "opx-btn opx-btn-primary opx-btn-field w-full min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
 // Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い地・左寄せ・
 // 太字にしない帯にする（高さ 56px・全幅・文字 18px は保つ）。行き先は右端の矢印で示す。
 const BAND_INCIDENT = "opx-band";

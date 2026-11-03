@@ -137,12 +137,13 @@ html:has(.ops-v2) body {
 /* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁（通常 1px、現場 1.5px）で境界を持たせる。縁の色は暗でも墨の --sb-on-orange */
 .opx-btn-primary {
   min-height: var(--sb-hit-primary);
-  padding: 4px 4px 4px 26px;
+  /* 文字は面の中央：右端の丸（48px）と gap（12px）の分だけ左にも余白を取り、左右を対称にする（以前は左 26px で文字が丸の分だけ左に寄っていた） */
+  padding: 4px 4px 4px calc(4px + 48px + 12px);
   border: var(--sb-rule-w) solid var(--sb-on-orange);
   background: var(--sb-orange);
   color: var(--sb-on-orange);
   font-size: 16px;
-  justify-content: space-between;
+  justify-content: center;
 }
 .opx-btn-primary {
   position: relative;
