@@ -178,14 +178,14 @@ test.describe("Q-9 判定の 5 段（形と語。橙は使わない）", () => {
       expect(new Set(info.map((i) => i.key)).size).toBe(5);
       for (const i of info) {
         expect(i.shape.length, `${i.text} の形`).toBeGreaterThan(20);
-        expect(i.bg, `${i.text} は橙の塗りでない`).not.toBe("rgb(248, 155, 72)");
-        expect(i.bg).not.toBe("rgb(255, 193, 137)");
+        expect(i.bg, `${i.text} は橙の塗りでない`).not.toBe("rgb(235, 161, 92)");
+        expect(i.bg).not.toBe("rgb(245, 203, 160)");
       }
       // 結論の大きな印・規制ごとの札も橙でない
       const orange = await page.evaluate(() =>
         Array.from(document.querySelectorAll(".sb-vtag, .sb-v-big, [data-testid='regulation-verdict']")).filter((e) => {
           const c = getComputedStyle(e).backgroundColor;
-          return c === "rgb(248, 155, 72)" || c === "rgb(255, 193, 137)";
+          return c === "rgb(235, 161, 92)" || c === "rgb(245, 203, 160)";
         }).length,
       );
       expect(orange).toBe(0);

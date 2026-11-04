@@ -15,8 +15,8 @@
   /* 部品の面（暗で値が変わるため名前を持たせた。明は従来の #FFFFFF／橙の薄い面と同じ値） */
   --sb-control: #FFFFFF;         /* 副ボタン・チップ（ON）・小さなタグの面 */
   --sb-field: #FFFFFF;           /* 入力欄・選択欄の面（暗では地より深いくぼみ） */
-  --sb-hover: #FFC189;           /* 押せる部品のホバー面（チップ・メニュー）。文字は ink */
-  --sb-mark-bg: #FFC189;         /* 本文の強調（蛍光ペン風の下線の面）。文字は ink */
+  --sb-hover: #F5CBA0;           /* 押せる部品のホバー面（チップ・メニュー）。文字は ink */
+  --sb-mark-bg: #F5CBA0;         /* 本文の強調（蛍光ペン風の下線の面）。文字は ink */
   --sb-inverse-bg: #262523;      /* 反転タグ・ラベル（墨の面） */
   --sb-inverse-fg: #F7F7F3;
   --sb-on-dot: #FFFFFF;          /* 墨の丸（ピルの右端・番号・行の矢印）の上の矢印・数字。暗では丸が明るくなり、これが墨になる */
@@ -33,9 +33,9 @@
   --sb-focus: #262523;
 
   /* 橙：操作の色（面・線・ホバー）。橙の面に載せる文字は墨。橙の細い文字は作らない */
-  --sb-orange: #F89B48;
-  --sb-orange-hover: #FFC189;
-  --sb-orange-deep: #E99347;
+  --sb-orange: #EBA15C;
+  --sb-orange-hover: #F5CBA0;
+  --sb-orange-deep: #DD995B;
   --sb-on-orange: #262523;
   --sb-on-orange-fg: #FFFFFF;   /* 橙の面の上の墨の丸に載る矢印（明暗とも固定の白） */
 

@@ -376,7 +376,7 @@ describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2�
   it("値の要点：橙が主役、角丸 16/8/4/ピル、影なし（明も）、押す部品 44/48/56（現場 56/56/64）、暗は温かい黒、v1 の角丸の名前は残っていない", () => {
     for (const [mode, layers] of SB_MODES) {
       const t = sbResolve(layers);
-      expect(t["--sb-orange"], mode).toBe("#F89B48");
+      expect(t["--sb-orange"], mode).toBe("#EBA15C");
       expect(t["--sb-on-orange"], mode).toBe("#262523");
       expect(t["--sb-r-l"], mode).toBe("16px");
       expect(t["--sb-r-m"], mode).toBe("8px");

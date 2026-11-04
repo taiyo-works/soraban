@@ -8,7 +8,7 @@ const CATALOG = process.env["E2E_CATALOG_URL"] ?? `http://127.0.0.1:${process.en
 
 const WHITE = "rgb(255, 255, 255)";
 const INK = "rgb(38, 37, 35)";
-const ORANGE = "rgb(248, 155, 72)";
+const ORANGE = "rgb(235, 161, 92)";
 
 const open = async (page: Page, query = ""): Promise<void> => {
   await page.goto(`${CATALOG}/ops/design${query ? `?${query}` : ""}`);
@@ -214,8 +214,8 @@ test.describe("E. `/` の挿絵（Q2：線画）", () => {
         return { fills: [...fills], gradients: root.querySelectorAll("linearGradient, radialGradient").length };
       });
       expect(v.gradients).toBe(0);
-      for (const f of v.fills) expect(["rgb(248, 155, 72)", WHITE, "rgb(38, 37, 35)"], `塗り ${f}`).toContain(f);
-      expect(v.fills).toContain("rgb(248, 155, 72)");
+      for (const f of v.fills) expect(["rgb(235, 161, 92)", WHITE, "rgb(38, 37, 35)"], `塗り ${f}`).toContain(f);
+      expect(v.fills).toContain("rgb(235, 161, 92)");
     });
   }
 });
