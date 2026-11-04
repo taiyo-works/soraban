@@ -76,6 +76,49 @@ import { PillButton, PillLink, VerdictSign, VerdictTag } from "./ui/sb-parts";
 // （段階の説明は @soraban/regulations の VERDICT_HELP）。
 
 // 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
+// 結論の着地を確定させる。判定中の間に始めた滑らかなスクロールは、下の詳細が流れ込んで頁の高さが変わる間や、
+// 結論のカードが立ち上がる動き（transform）の間に、途中で止まる・数十 px ずれることがある（実測：地図のクリック後に約 3 割）。
+// 動きが終わってから、上端が着地の位置（scroll-margin-top）から外れていれば、その場で合わせ直す。
+// 利用者が自分でスクロール・タッチ・キー操作をしたときは、合わせ直さない。
+const SETTLE_MAX_MS = 1500;
+const settleConclusion = (box: HTMLElement): (() => void) => {
+  let cancelled = false;
+  const touched = (): void => {
+    cancelled = true;
+  };
+  const events = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+  for (const e of events) window.addEventListener(e, touched, { passive: true, once: true });
+  const finish = (): void => {
+    for (const e of events) window.removeEventListener(e, touched);
+  };
+  const animations = box.getAnimations().map((a) => a.finished.catch(() => undefined));
+  const cap = new Promise<void>((resolve) => window.setTimeout(resolve, SETTLE_MAX_MS));
+  void Promise.race([Promise.all(animations), cap]).then(() => {
+    // 滑らかなスクロールがまだ続いていれば、止まるのを少し待つ（位置が動かなくなるまで）
+    let prev = Number.NaN;
+    let stable = 0;
+    const started = performance.now();
+    const tick = (): void => {
+      if (cancelled || !box.isConnected) return finish();
+      const top = box.getBoundingClientRect().top;
+      stable = top === prev ? stable + 1 : 0;
+      prev = top;
+      if (stable < 3 && performance.now() - started < SETTLE_MAX_MS) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
+      if (Math.abs(top - margin) > 2) box.scrollIntoView({ block: "start", behavior: "auto" });
+      finish();
+    };
+    requestAnimationFrame(tick);
+  });
+  return () => {
+    cancelled = true;
+    finish();
+  };
+};
+
 const sameFlagSet = (
   a: readonly SpecificFlightFlag[],
   b: readonly SpecificFlightFlag[],
@@ -653,6 +696,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
   const conclusionRequestRef = useRef<boolean>(false);
   const conclusionScrolledRef = useRef<boolean>(false);
   const conclusionSawPendingRef = useRef<boolean>(false);
+  const conclusionSettleCancelRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => conclusionSettleCancelRef.current?.(), []);
   const [conclusionTick, setConclusionTick] = useState<number>(0);
   const requestConclusion = (): void => {
     conclusionRequestRef.current = true;
@@ -925,6 +970,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
     if (conclusionFailed || (conclusionSawPendingRef.current && screenVerdict !== undefined && !verdictPending)) {
       document.getElementById("verdict-heading")?.focus({ preventScroll: true });
       conclusionRequestRef.current = false;
+      conclusionSettleCancelRef.current?.();
+      conclusionSettleCancelRef.current = settleConclusion(box);
     }
   }, [conclusionTick, conclusionFailed, screenVerdict, verdictPending, result, checkError]);
 
