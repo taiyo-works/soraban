@@ -464,7 +464,7 @@ test.describe("B1 判定したあと、結論が画面に入る（スクロー�
       const page = await ctx.newPage();
       await openReady(page);
       if (mode === "field") await page.evaluate(() => document.documentElement.setAttribute("data-mode", "field"));
-      // scrollIntoView の behavior を記録する（instant＝auto）
+      // scrollIntoView の behavior を記録する（html の scroll-behavior: smooth に従わせないため、instant を明示する）
       await page.evaluate(() => {
         const orig = Element.prototype.scrollIntoView;
         (window as unknown as { __behaviors: string[] }).__behaviors = [];
@@ -479,9 +479,60 @@ test.describe("B1 判定したあと、結論が画面に入る（スクロー�
       await check;
       await expect(page.locator("#verdict-heading")).toBeFocused();
       const behaviors = await page.evaluate(() => (window as unknown as { __behaviors: string[] }).__behaviors);
-      expect(behaviors, mode).toEqual(["auto"]);
+      expect(behaviors, mode).toEqual(["instant"]);
       await ctx.close();
     }
+  });
+
+  test("判定の応答を待つ間に利用者がスクロールしたら、結論が出たあとに引き戻さない", async ({ browser }) => {
+    const ctx = await browser.newContext({ ...devices["Pixel 5"] });
+    const page = await ctx.newPage();
+    await openReady(page);
+    await page.route("**/api/diagnose", async (route) => {
+      await new Promise((r) => setTimeout(r, 2500));
+      await route.continue();
+    });
+    await page.getByLabel("住所または緯度・経度").fill("35.4278, 133.3314");
+    const diag = waitDiagnose(page);
+    await page.getByRole("button", { name: "この地点を判定する" }).click();
+    await page.waitForTimeout(1200); // 最初の滑らかなスクロールが終わるのを待つ
+    await page.mouse.move(100, 300);
+    await page.mouse.wheel(0, -400);
+    await page.waitForTimeout(500);
+    const before = await page.evaluate(() => window.scrollY);
+    await diag;
+    await expect(page.locator("#verdict-heading")).toBeFocused();
+    await page.waitForTimeout(3000); // 立ち上がりの動きと合わせ直しの待ちより長く
+    expect(await page.evaluate(() => window.scrollY), "引き戻されない").toBeCloseTo(before, 0);
+    await ctx.close();
+  });
+
+  test("現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない）", async ({ browser }) => {
+    const ctx = await browser.newContext({ ...devices["Pixel 5"] });
+    const page = await ctx.newPage();
+    await openReady(page);
+    await page.evaluate(() => document.documentElement.setAttribute("data-mode", "field"));
+    await page.getByLabel("住所または緯度・経度").fill("35.4278, 133.3314");
+    await page.evaluate(() => {
+      const w = window as unknown as { __ys: number[] };
+      w.__ys = [];
+      const loop = (): void => {
+        w.__ys.push(window.scrollY);
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    });
+    const check = waitCheck(page);
+    await page.getByRole("button", { name: "この地点を判定する" }).click();
+    await check;
+    await expect(page.locator("#verdict-heading")).toBeFocused();
+    const ys = await page.evaluate(() => (window as unknown as { __ys: number[] }).__ys);
+    const first = ys.findIndex((y, i) => i > 0 && y !== ys[0]);
+    expect(first, "スクロールした").toBeGreaterThan(0);
+    const settled = ys[ys.length - 1];
+    // 動き始めた次のフレームで、最後の位置（±2px）に着いている
+    expect(Math.abs(ys[first] - settled), "1 フレームで確定").toBeLessThanOrEqual(2);
+    await ctx.close();
   });
 
   test("通常は滑らかに移る（smooth）。初回の自動判定では動かさない", async ({ browser }) => {

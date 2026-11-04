@@ -78,47 +78,76 @@ import { PillButton, PillLink, VerdictSign, VerdictTag } from "./ui/sb-parts";
 // 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
 // 結論の着地を確定させる。判定中の間に始めた滑らかなスクロールは、下の詳細が流れ込んで頁の高さが変わる間や、
 // 結論のカードが立ち上がる動き（transform）の間に、途中で止まる・数十 px ずれることがある（実測：地図のクリック後に約 3 割）。
-// 動きが終わってから、上端が着地の位置（scroll-margin-top）から外れていれば、その場で合わせ直す。
-// 利用者が自分でスクロール・タッチ・キー操作をしたときは、合わせ直さない。
+// 動きが終わって位置が落ち着いたあと、上端が着地の位置（scroll-margin-top）から外れていれば、その場で合わせ直す。
+// 利用者が要求のあとにスクロール・タッチ・キー操作をしたときは、合わせ直さない（要求の時点から監視する）。
+// 待ちは開始から SETTLE_MAX_MS で打ち切り、立ち上がりの動きが終わっていなければ合わせ直しを諦める（触らない方を選ぶ）。
+// 失敗しても結論の表示は落とさない（getAnimations が無い環境では何もしない）。
 const SETTLE_MAX_MS = 1500;
-const settleConclusion = (box: HTMLElement): (() => void) => {
-  let cancelled = false;
-  const touched = (): void => {
-    cancelled = true;
+const INPUT_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+type ConclusionWatch = { readonly touched: () => boolean; readonly stop: () => void };
+const watchUserInput = (): ConclusionWatch => {
+  let touched = false;
+  const on = (): void => {
+    touched = true;
   };
-  const events = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
-  for (const e of events) window.addEventListener(e, touched, { passive: true, once: true });
-  const finish = (): void => {
-    for (const e of events) window.removeEventListener(e, touched);
-  };
-  const animations = box.getAnimations().map((a) => a.finished.catch(() => undefined));
-  const cap = new Promise<void>((resolve) => window.setTimeout(resolve, SETTLE_MAX_MS));
-  void Promise.race([Promise.all(animations), cap]).then(() => {
-    // 滑らかなスクロールがまだ続いていれば、止まるのを少し待つ（位置が動かなくなるまで）
-    let prev = Number.NaN;
-    let stable = 0;
-    const started = performance.now();
-    const tick = (): void => {
-      if (cancelled || !box.isConnected) return finish();
-      const top = box.getBoundingClientRect().top;
-      stable = top === prev ? stable + 1 : 0;
-      prev = top;
-      if (stable < 3 && performance.now() - started < SETTLE_MAX_MS) {
-        requestAnimationFrame(tick);
-        return;
-      }
-      const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
-      if (Math.abs(top - margin) > 2) box.scrollIntoView({ block: "start", behavior: "auto" });
-      finish();
-    };
-    requestAnimationFrame(tick);
-  });
-  return () => {
-    cancelled = true;
-    finish();
+  for (const e of INPUT_EVENTS) window.addEventListener(e, on, { passive: true, capture: true });
+  return {
+    touched: () => touched,
+    stop: () => {
+      for (const e of INPUT_EVENTS) window.removeEventListener(e, on, { capture: true });
+    },
   };
 };
+const settleConclusion = (box: HTMLElement, watch: ConclusionWatch): (() => void) => {
+  let cancelled = false;
+  let timer: number | undefined;
+  let raf: number | undefined;
+  const finish = (): void => {
+    cancelled = true;
+    if (timer !== undefined) window.clearTimeout(timer);
+    if (raf !== undefined) cancelAnimationFrame(raf);
+  };
+  try {
+    if (typeof box.getAnimations !== "function") return finish;
+    const started = performance.now();
+    const running = box.getAnimations().filter((a) => a.playState === "running");
+    const animationsDone = Promise.all(running.map((a) => a.finished.then(() => true, () => false)));
+    const cap = new Promise<boolean>((resolve) => {
+      timer = window.setTimeout(() => resolve(false), SETTLE_MAX_MS);
+    });
+    void Promise.race([animationsDone, cap])
+      .then((done) => {
+        if (cancelled || !done) return;
+        let prev = Number.NaN;
+        let stable = 0;
+        const tick = (): void => {
+          try {
+            if (cancelled || watch.touched() || !box.isConnected) return;
+            const top = box.getBoundingClientRect().top;
+            stable = top === prev ? stable + 1 : 0;
+            prev = top;
+            if (stable < 3) {
+              if (performance.now() - started >= SETTLE_MAX_MS) return;
+              raf = requestAnimationFrame(tick);
+              return;
+            }
+            const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
+            // html の scroll-behavior: smooth に従わせないため、instant を明示する
+            if (Math.abs(top - margin) > 2) box.scrollIntoView({ block: "start", behavior: "instant" });
+          } catch {
+            /* 合わせ直しに失敗しても、結論の表示は落とさない */
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      })
+      .catch(() => undefined);
+  } catch {
+    /* 同上 */
+  }
+  return finish;
+};
 
+// 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
 const sameFlagSet = (
   a: readonly SpecificFlightFlag[],
   b: readonly SpecificFlightFlag[],
@@ -697,9 +726,20 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
   const conclusionScrolledRef = useRef<boolean>(false);
   const conclusionSawPendingRef = useRef<boolean>(false);
   const conclusionSettleCancelRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => conclusionSettleCancelRef.current?.(), []);
+  const conclusionWatchRef = useRef<ConclusionWatch | null>(null);
+  useEffect(
+    () => () => {
+      conclusionSettleCancelRef.current?.();
+      conclusionWatchRef.current?.stop();
+    },
+    [],
+  );
   const [conclusionTick, setConclusionTick] = useState<number>(0);
   const requestConclusion = (): void => {
+    conclusionSettleCancelRef.current?.();
+    conclusionSettleCancelRef.current = null;
+    conclusionWatchRef.current?.stop();
+    conclusionWatchRef.current = watchUserInput();
     conclusionRequestRef.current = true;
     conclusionScrolledRef.current = false;
     conclusionSawPendingRef.current = false;
@@ -962,7 +1002,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
       window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.getAttribute("data-mode") === "field";
     if (!conclusionScrolledRef.current) {
       conclusionScrolledRef.current = true;
-      box.scrollIntoView({ block: "start", behavior: instant ? "auto" : "smooth" });
+      box.scrollIntoView({ block: "start", behavior: instant ? "instant" : "smooth" });
     }
     // 判定中を一度見てから、結論が出た（または失敗が確定した）ら、見出しへフォーカスを移して要求を終える
     // （判定中の表示は別の要素なので、先に移すと、結論が出たときにフォーカスが外れる）
@@ -970,8 +1010,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
     if (conclusionFailed || (conclusionSawPendingRef.current && screenVerdict !== undefined && !verdictPending)) {
       document.getElementById("verdict-heading")?.focus({ preventScroll: true });
       conclusionRequestRef.current = false;
-      conclusionSettleCancelRef.current?.();
-      conclusionSettleCancelRef.current = settleConclusion(box);
+      const watch = conclusionWatchRef.current;
+      if (watch) conclusionSettleCancelRef.current = settleConclusion(box, watch);
     }
   }, [conclusionTick, conclusionFailed, screenVerdict, verdictPending, result, checkError]);
 
