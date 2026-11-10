@@ -75,26 +75,55 @@ import { PillButton, PillLink, VerdictSign, VerdictTag } from "./ui/sb-parts";
 // Sprint 11d：結論は 4 段の判定（VerdictSummary）。信号の 3 灯と STATUS_LABEL・overallHelp は廃止した
 // （段階の説明は @soraban/regulations の VERDICT_HELP）。
 
-// 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
 // 結論の着地を確定させる。判定中の間に始めた滑らかなスクロールは、下の詳細が流れ込んで頁の高さが変わる間や、
 // 結論のカードが立ち上がる動き（transform）の間に、途中で止まる・数十 px ずれることがある（実測：地図のクリック後に約 3 割）。
 // 動きが終わって位置が落ち着いたあと、上端が着地の位置（scroll-margin-top）から外れていれば、その場で合わせ直す。
 // 利用者が要求のあとにスクロール・タッチ・キー操作をしたときは、合わせ直さない（要求の時点から監視する）。
+// 入力の種類に依らず、頁が結論から離れる向きにスクロールされたとき（スクロールバーのドラッグ、ページ内の移動、
+// スクリプトによる移動など）も、別の誰かが頁を動かしたとみなして合わせ直さない。結論へ向かう滑らかなスクロールは
+// 離れる向きに動かないので、これで止まらない。立ち上がりの動き（24px）や頁の高さの変化による数 px の揺れは、
+// 離れた量の合計が SCROLL_AWAY_PX を超えるまで数えない。
 // 待ちは開始から SETTLE_MAX_MS で打ち切り、立ち上がりの動きが終わっていなければ合わせ直しを諦める（触らない方を選ぶ）。
 // 失敗しても結論の表示は落とさない（getAnimations が無い環境では何もしない）。
 const SETTLE_MAX_MS = 1500;
+const SCROLL_AWAY_PX = 48;
 const INPUT_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+const CONCLUSION_SELECTOR = '[data-testid="verdict-conclusion"]';
 type ConclusionWatch = { readonly touched: () => boolean; readonly stop: () => void };
 const watchUserInput = (): ConclusionWatch => {
   let touched = false;
   const on = (): void => {
     touched = true;
   };
+  // 頁のスクロールが、結論の着地の位置から離れる向きに動いた量の合計を数える（要素の中のスクロールは window.scrollY が動かないので数えない）
+  let prevY = window.scrollY;
+  let away = 0;
+  const onScroll = (): void => {
+    try {
+      const y = window.scrollY;
+      const dy = y - prevY;
+      const box = document.querySelector<HTMLElement>(CONCLUSION_SELECTOR);
+      if (dy !== 0 && box) {
+        const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
+        const target = y + box.getBoundingClientRect().top - margin;
+        const toward = Math.sign(target - prevY);
+        if (toward !== 0 && Math.sign(dy) !== toward) {
+          away += Math.abs(dy);
+          if (away > SCROLL_AWAY_PX) touched = true;
+        }
+      }
+      prevY = y;
+    } catch {
+      /* 監視に失敗しても、結論の表示は落とさない */
+    }
+  };
   for (const e of INPUT_EVENTS) window.addEventListener(e, on, { passive: true, capture: true });
+  window.addEventListener("scroll", onScroll, { passive: true, capture: true });
   return {
     touched: () => touched,
     stop: () => {
       for (const e of INPUT_EVENTS) window.removeEventListener(e, on, { capture: true });
+      window.removeEventListener("scroll", onScroll, { capture: true });
     },
   };
 };
@@ -102,13 +131,18 @@ const settleConclusion = (box: HTMLElement, watch: ConclusionWatch): (() => void
   let cancelled = false;
   let timer: number | undefined;
   let raf: number | undefined;
+  // 打ち切り・合わせ直しの完了・取り消しのどれでも、利用者の操作の監視も外す
   const finish = (): void => {
     cancelled = true;
     if (timer !== undefined) window.clearTimeout(timer);
     if (raf !== undefined) cancelAnimationFrame(raf);
+    watch.stop();
   };
   try {
-    if (typeof box.getAnimations !== "function") return finish;
+    if (typeof box.getAnimations !== "function") {
+      finish();
+      return finish;
+    }
     const started = performance.now();
     const running = box.getAnimations().filter((a) => a.playState === "running");
     const animationsDone = Promise.all(running.map((a) => a.finished.then(() => true, () => false)));
@@ -117,32 +151,44 @@ const settleConclusion = (box: HTMLElement, watch: ConclusionWatch): (() => void
     });
     void Promise.race([animationsDone, cap])
       .then((done) => {
-        if (cancelled || !done) return;
+        if (cancelled || !done) {
+          finish();
+          return;
+        }
         let prev = Number.NaN;
         let stable = 0;
         const tick = (): void => {
           try {
-            if (cancelled || watch.touched() || !box.isConnected) return;
+            if (cancelled || watch.touched() || !box.isConnected) {
+              finish();
+              return;
+            }
             const top = box.getBoundingClientRect().top;
             stable = top === prev ? stable + 1 : 0;
             prev = top;
             if (stable < 3) {
-              if (performance.now() - started >= SETTLE_MAX_MS) return;
+              if (performance.now() - started >= SETTLE_MAX_MS) {
+                finish();
+                return;
+              }
               raf = requestAnimationFrame(tick);
               return;
             }
             const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
             // html の scroll-behavior: smooth に従わせないため、instant を明示する
             if (Math.abs(top - margin) > 2) box.scrollIntoView({ block: "start", behavior: "instant" });
+            finish();
           } catch {
             /* 合わせ直しに失敗しても、結論の表示は落とさない */
+            finish();
           }
         };
         raf = requestAnimationFrame(tick);
       })
-      .catch(() => undefined);
+      .catch(() => finish());
   } catch {
     /* 同上 */
+    finish();
   }
   return finish;
 };
@@ -996,7 +1042,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
   useEffect(() => {
     if (!conclusionRequestRef.current) return;
-    const box = document.querySelector<HTMLElement>('[data-testid="verdict-conclusion"]');
+    const box = document.querySelector<HTMLElement>(CONCLUSION_SELECTOR);
     if (!box) return;
     const instant =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.getAttribute("data-mode") === "field";
