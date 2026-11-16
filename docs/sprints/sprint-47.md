@@ -1,6 +1,6 @@
 # Sprint 47: 初回の操作説明と、はじめの準備（drone-ops ⑥）
 
-> 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
+> 状態: **承認済み（2026-11-16、ユーザー。質問 Q1〜Q12 は推奨どおり）。実装は未着手。** 2026-11-16、作成: planner。実装はしていない。
 > 親: `drone-ops-integration-roadmap.md`（§3 ⑥、§6 の「はじめの準備」）、`sprint-37.md`（基準 U）、`sprint-38.md`。drone-ops の `src/lib/tour.ts`・`src/lib/tour-pending.ts`・`src/server/tour.ts`・`docs/guide-new-pilot.md`（読むだけ）。
 > 依存: PR #49 のマージ（16-1 を含む。2026-11-16 に済み）、Sprint 38〜46（画面が固まった後。説明の対象が変わると作り直しになるため）。
 > 読み方: 【確認】はコードで確かめた事実。【推測】は見立て。

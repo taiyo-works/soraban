@@ -1,6 +1,6 @@
 # Sprint 43: 書き出し（43-1 CSV・JSON／43-2 KML の書き出しと読み込み。drone-ops ③④）
 
-> 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
+> 状態: **承認済み（2026-11-16、ユーザー。質問 Q1〜Q12 は推奨どおり）。実装は未着手。** 2026-11-16、作成: planner。実装はしていない。
 > 親: `drone-ops-integration-roadmap.md`（§3 ③④、Q2）、`sprint-11.md`（様式 1・2）、`sprint-19.md`（範囲の型・端末に残さない）、`sprint-37.md`（基準 U）、`ops-completion-plan.md` §6 の 23（日誌の確定と様式の PDF・CSV。仮番号）。drone-ops の `src/server/export.ts`・`src/lib/map/kml.ts` とそのテスト（読むだけ）。
 > 依存: PR #49 のマージ（16-1 を含む。2026-11-16 に済み）。43-2 の読み込みは 19-2a（`/ops` の地図）の後。
 > 読み方: 【確認】はコードで確かめた事実。【推測】は見立て。

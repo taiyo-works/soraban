@@ -1,6 +1,6 @@
 # Sprint 46: 計画の関係者調整の記録（drone-ops ⑨）
 
-> 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
+> 状態: **承認済み（2026-11-16、ユーザー。質問 Q1〜Q12 は推奨どおり）。実装は未着手。** 2026-11-16、作成: planner。実装はしていない。
 > 親: `drone-ops-integration-roadmap.md`（§3 ⑨、Q12、専門家への論点 Q-L 追加 2）、`sprint-12b.md`（手続きの記録 `plan_procedure_records`）、`sprint-18.md` §2（境界）、`sprint-37.md`（基準 U）。drone-ops の `src/lib/coordination.ts`・`src/server/coordinations.ts` とそのテスト（読むだけ）。
 > 依存: PR #49 のマージ（16-1 を含む。2026-11-16 に済み）、Sprint 38。
 > 読み方: 【確認】はコードで確かめた事実。【推測】は見立て。

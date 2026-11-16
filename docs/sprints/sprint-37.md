@@ -1,6 +1,6 @@
 # Sprint 37: ユーザビリティの基準と測定の土台（横断の契約）
 
-> 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
+> 状態: **承認済み（2026-11-16、ユーザー。質問 Q1〜Q12 は推奨どおり）。実装は未着手。** 2026-11-16、作成: planner。実装はしていない。
 > ユーザーの指示（2026-11-16、要旨）: 運航アプリとしての UI と UX について、徹底的にユーザビリティを追求する。
 > 親: `drone-ops-integration-roadmap.md`（§5）、`sprint-13.md` §7、`ops-completion-plan.md` §D（評価基準 7 つ）、`sprint-17.md`（画面の長さ L-4）、`docs/design/design-system.md` §10、`docs/design/ux-audit.md` §2、`docs/design/sprint-13-ux-benchmark.md` §5、`docs/design/ops-core-ui/DESIGN-V3.md`。drone-ops の `docs/ux.md`・`usability-2026-10.md`・`design-direction-2026-11.md`・`ui-wording.md`・`review-2026-10-21.md`（読むだけ）。
 > 読み方: 【確認】はファイルで確かめた事実。【推測】は見立て。目標値は**仮説**で、37-2 の実測で現状を確定してから、ユーザーの承認で確定する。
