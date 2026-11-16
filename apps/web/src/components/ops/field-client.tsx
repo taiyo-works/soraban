@@ -771,7 +771,7 @@ export function FieldClient({
                 step="0.1"
                 min={SITE_WIND_RANGE.min}
                 max={SITE_WIND_RANGE.max}
-                className="sb-input !min-h-14 w-full px-3 text-lg font-normal"
+                className="sb-input !min-h-14 w-full px-3 !text-lg font-normal"
                 value={siteWind}
                 onChange={(e) => setSiteWind(e.target.value)}
                 data-testid="field-site-wind"
@@ -786,7 +786,7 @@ export function FieldClient({
                 step="0.1"
                 min={SITE_TEMP_RANGE.min}
                 max={SITE_TEMP_RANGE.max}
-                className="sb-input !min-h-14 w-full px-3 text-lg font-normal"
+                className="sb-input !min-h-14 w-full px-3 !text-lg font-normal"
                 value={siteTemp}
                 onChange={(e) => setSiteTemp(e.target.value)}
                 data-testid="field-site-temp"
@@ -799,7 +799,7 @@ export function FieldClient({
               id="field-site-note"
               rows={2}
               maxLength={SITE_NOTE_MAX}
-              className="sb-input !min-h-14 w-full px-3 py-2 text-lg font-normal"
+              className="sb-input !min-h-14 w-full px-3 py-2 !text-lg font-normal"
               value={siteNote}
               onChange={(e) => setSiteNote(e.target.value)}
               aria-required={draftAttention}
@@ -917,7 +917,7 @@ export function FieldClient({
                       </label>
                       <select
                         id="field-em-source"
-                        className="sb-input !min-h-14 w-full text-lg"
+                        className="sb-input !min-h-14 w-full !text-lg"
                         value={emSource}
                         onChange={(e) => setEmSource(e.target.value)}
                         data-testid="field-em-source"
