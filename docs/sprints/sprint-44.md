@@ -2,7 +2,7 @@
 
 > 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
 > 親: `drone-ops-integration-roadmap.md`（§3 ⑦、Q2、H-5）、`sprint-11.md`（様式 1・2）、`sprint-43.md`（同じ抽出）、`sprint-37.md`（基準 U）。drone-ops の `src/app/(app)/logbook/print/page.tsx`（読むだけ）。
-> 依存: PR #49 のマージ、16-1 のマージ、Sprint 43-1。
+> 依存: PR #49 のマージ（16-1 を含む。2026-11-16 に済み）、Sprint 43-1。
 > 読み方: 【確認】はコードで確かめた事実。【推測】は見立て。
 
 ## 0. 要点

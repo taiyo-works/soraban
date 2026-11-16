@@ -2,7 +2,7 @@
 
 > 状態: **案（ユーザーの承認待ち）。** 2026-11-16、作成: planner。実装はしていない。
 > 親: `drone-ops-integration-roadmap.md`（§4 の A・C）、`sprint-12a.md`（計画・判定のスナップショット・確認）、`sprint-12b.md`（通報の指紋）、`sprint-18.md` §2（境界）、`sprint-19.md`（範囲の指紋）、`sprint-37.md`（基準 U）。drone-ops の `src/lib/rules/change-impact.ts`・`src/lib/audit-diff.ts` とそのテスト（読むだけ）。
-> 依存: PR #49 のマージ、16-1 のマージ、Sprint 38。
+> 依存: PR #49 のマージ（16-1 を含む。2026-11-16 に済み）、Sprint 38。
 > 読み方: 【確認】はコードで確かめた事実。【推測】は見立て。※要再確認は制度の事実で一次資料を照合していないもの。
 
 ## 0. 要点
