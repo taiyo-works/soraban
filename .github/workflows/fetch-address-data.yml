@@ -3,11 +3,11 @@ name: Fetch address data
 # 住所検索の同梱索引（アドレス・ベース・レジストリ、鳥取県・島根県）を取得・変換する（Sprint 9）。
 # ダウンロード URL はデジタル庁の DCAT フィードから選ぶ（推測しない）。
 # 処理本体：packages/regulations/scripts/fetch-address-data.mjs → build-address-index.mjs
+#
+# 手動実行のみ（Actions の消費を抑えるため、ブランチへの push では動かさない）。ブランチを選んで実行できる:
+#   gh workflow run fetch-address-data.yml --ref <ブランチ> -f output=commit
 
 on:
-  # data-fetch/address- で始まるブランチへの push で実行し、生成物と ADDRESS_FETCH_REPORT.md を同じブランチにコミットする。
-  push:
-    branches: ['data-fetch/address-**']
   workflow_dispatch:
     inputs:
       output:
@@ -122,8 +122,7 @@ jobs:
     needs: fetch
     if: >-
       always() && needs.fetch.result != 'cancelled' &&
-      ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/data-fetch/address-')) ||
-       (github.event_name == 'workflow_dispatch' && inputs.output == 'commit'))
+      github.event_name == 'workflow_dispatch' && inputs.output == 'commit'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
