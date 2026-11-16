@@ -140,7 +140,7 @@
   .opx-table {
     background: var(--sb-base);
     border-radius: var(--sb-r-l);
-    box-shadow: var(--sb-shadow);
+    box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   }
   .opx-table > .opx-listhead {
     border-radius: var(--sb-r-l) var(--sb-r-l) 0 0;
@@ -254,7 +254,7 @@
   border-bottom: 0;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
@@ -266,7 +266,7 @@
   border: 0;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .opx-form > section,
@@ -299,20 +299,6 @@
   position: relative;
   box-sizing: border-box;
 }
-/* 見出しの背後の大きな薄い番号（装飾。読み上げない） */
-.opx-step-num {
-  position: absolute;
-  right: 0;
-  top: -18px;
-  font-family: var(--font-num), sans-serif;
-  font-size: 72px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0;
-  color: var(--sb-sec-num);
-  pointer-events: none;
-  user-select: none;
-}
 .opx-form > fieldset > legend {
   z-index: 1;
 }
@@ -321,6 +307,18 @@
 /* ===== 共通の .sb-*（unlayered）の上書き ===== */
 .sb-sec-head[data-tone="danger"] {
   border-left-color: var(--sb-v-no-fg);
+}
+/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、橙の線も題の 1 行分に収める */
+.ops-v2 .sb-sec-head {
+  min-height: 40px;
+}
+.ops-v2 .sb-sec-head h2 {
+  font-size: 20px;
+}
+@media (min-width: 1024px) {
+  .ops-v2 .sb-sec-head h2 {
+    font-size: 22px;
+  }
 }
 /* 見出しの右に件数（次にやること） */
 .sb-sec-head.sb-sec-row {

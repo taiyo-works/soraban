@@ -184,7 +184,7 @@ test.describe("B. 装飾としての扱い", () => {
   });
 });
 
-/** 見出し（h1）の文字色と、挿絵の空の色（淡い水色・暖色）のコントラスト比。色は --sb-art-*（挿絵専用）と --sb-ink から引く。 */
+/** 見出し（h1）の文字色と、挿絵の空の色（Sprint 16-1 から白。線画）のコントラスト比。色は --sb-art-*（挿絵専用）と --sb-ink から引く。 */
 const measureHeroText = (page: Page) =>
   page.evaluate(() => {
     const ctx = document.createElement("canvas").getContext("2d")!;
@@ -209,34 +209,29 @@ const measureHeroText = (page: Page) =>
     };
     const root = getComputedStyle(document.documentElement);
     const sky = toRgb(root.getPropertyValue("--sb-art-sky").trim());
-    const warm = toRgb(root.getPropertyValue("--sb-art-sky-warm").trim());
     const h1 = toRgb(getComputedStyle(document.querySelector("h1")!).color);
-    const stop = document.querySelector('[data-testid="hero-art"] linearGradient stop');
     return {
       sky: sky.join(","),
       h1: h1.join(","),
       onSky: ratio(h1, sky),
-      onWarm: ratio(h1, warm),
       skyLum: lum(sky),
-      stopColor: stop ? getComputedStyle(stop).stopColor : null,
     };
   });
 
 test.describe("C. 色とダークモード", () => {
+  // Sprint 16-1：OS が暗でも常に明るい表示。空は白（線画）で、空のグラデーションは無い（暖色の空の検査は、空の色が 1 つになったので外した）
   for (const scheme of ["light", "dark"] as const) {
-    test(`6. ${scheme}：見出しの文字が挿絵の空の上で 4.5:1 以上。挿絵の色は --sb-art-* から来る`, async ({ page }) => {
+    test(`6. ${scheme}：見出しの文字が挿絵の空の上で 4.5:1 以上。挿絵の空の色は --sb-art-sky から来る`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto("/");
       await expect(art(page)).toBeVisible();
       const m = await measureHeroText(page);
       expect(m.onSky, `${scheme} 空の淡い色の上 ${m.onSky.toFixed(2)}`).toBeGreaterThanOrEqual(4.5);
-      expect(m.onWarm, `${scheme} 空の暖色の上 ${m.onWarm.toFixed(2)}`).toBeGreaterThanOrEqual(4.5);
-      expect(m.stopColor, "空のグラデーションがトークンの色").not.toBeNull();
     });
   }
 
-  test("7. ライトとダークで空の色が異なり、ダークの空は暗い（昼の景色が夜になる）", async ({ page }) => {
+  test("7. OS が暗でも挿絵の空は明るいまま（常に明るい表示。昼の景色が夜にならない）", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
@@ -244,8 +239,8 @@ test.describe("C. 色とダークモード", () => {
     const light = await measureHeroText(page);
     await page.emulateMedia({ colorScheme: "dark" });
     const dark = await measureHeroText(page);
-    expect(light.sky).not.toBe(dark.sky);
-    expect(dark.skyLum, "ダークの空の相対輝度").toBeLessThan(0.05);
+    expect(dark.sky).toBe(light.sky);
+    expect(dark.skyLum, "OS が暗のときの空の相対輝度").toBeGreaterThan(0.7);
     expect(light.skyLum, "ライトの空の相対輝度").toBeGreaterThan(0.7);
   });
 });

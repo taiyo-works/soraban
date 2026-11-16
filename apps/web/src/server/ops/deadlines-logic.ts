@@ -9,7 +9,7 @@
 //   - 取消済みの操縦者・許可・承認、失効・取消済みの許可・承認は出さない。期限が未入力（null）の技能証明は出さない。
 //   - 状態の語は既存の licenseRenewalStatus（更新の受付期間・期限を過ぎた・期限切れ）に合わせる。
 import { daysBetween } from "./today-logic";
-import { licenseRenewalStatus, type LicenseRenewalStatus } from "./license";
+import { LICENSE_RENEWAL_LABEL, licenseRenewalStatus, type LicenseRenewalStatus } from "./license";
 import { effectiveLastDate, type PermitRegistration } from "./permit-logic";
 
 /** 窓の日数（ホーム）。12c の「技能証明を更新する」（次にやること）の 60 日と揃える。 */
@@ -50,11 +50,7 @@ export type DeadlineDto = {
   readonly href: string;
 };
 
-export const LICENSE_STATUS_LABEL: Readonly<Record<Exclude<LicenseRenewalStatus, "none">, string>> = {
-  renewal_window: "更新の申請期間",
-  past_deadline: "更新の申請期限を過ぎています",
-  expired: "有効期限切れ",
-};
+export const LICENSE_STATUS_LABEL: Readonly<Record<Exclude<LicenseRenewalStatus, "none">, string>> = LICENSE_RENEWAL_LABEL;
 
 export const leftLabelOf = (daysLeft: number): string =>
   daysLeft > 0 ? `あと ${daysLeft} 日` : daysLeft === 0 ? "今日まで" : `${-daysLeft} 日過ぎ`;

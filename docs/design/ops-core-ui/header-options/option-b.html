@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ヘッダー案 B（幾何）</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* B 幾何：橙の円（日）を中心に、等高線を抽象した同心円（薄い灰の線）。円の 1 本にドローンが乗る。円と直線だけ。 */
+.hd { height: 128px; }
+.in { padding-top: 14px; }
+.geo { inset: 0; }
+.geo .ring { fill: none; stroke: #D9D7CD; stroke-width: 1.5; }
+.geo .sun { fill: var(--orange); }
+.geo .axis { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.drone { position: absolute; z-index: 3; width: 44px; color: var(--ink); }
+.drone svg { display: block; width: 100%; height: auto; }
+@media (min-width: 1024px) {
+  .hd { height: 240px; }
+  .in { padding-top: 40px; }
+}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="drone" viewBox="0 0 160 96"><g fill="none" stroke="currentColor" style="stroke-width:var(--sw,3)" stroke-linecap="round" stroke-linejoin="round"><rect x="62" y="38" width="36" height="18" rx="9"/><circle cx="80" cy="47" r="4.5"/><path d="M64 42 L36 28 M96 42 L124 28 M64 52 L36 66 M96 52 L124 66"/><ellipse cx="30" cy="24" rx="22" ry="4.5"/><ellipse cx="130" cy="24" rx="22" ry="4.5"/><ellipse cx="30" cy="70" rx="22" ry="4.5"/><ellipse cx="130" cy="70" rx="22" ry="4.5"/><path d="M30 24 V28 M130 24 V28 M30 66 V70 M130 66 V70 M70 58 V68 M90 58 V68 M64 68 H76 M84 68 H96"/></g></symbol></defs></svg>
+<header class="hd" aria-label="そらばん">
+  <div class="art geo m"><svg viewBox="0 0 375 128" preserveAspectRatio="xMaxYMid slice">
+    <circle class="ring" cx="318" cy="44" r="112"/><circle class="ring" cx="318" cy="44" r="84"/><circle class="ring" cx="318" cy="44" r="58"/>
+    <circle class="sun" cx="318" cy="44" r="30"/>
+    <path class="axis" d="M0 127 H375"/>
+  </svg></div>
+  <span class="drone m" style="left:212px;top:31px" aria-hidden="true"><svg viewBox="0 0 160 96"><use href="#drone"/></svg></span>
+  <div class="art geo pc"><svg viewBox="0 0 1280 240" preserveAspectRatio="xMaxYMid slice">
+    <circle class="ring" cx="1030" cy="110" r="260"/><circle class="ring" cx="1030" cy="110" r="200"/><circle class="ring" cx="1030" cy="110" r="140"/><circle class="ring" cx="1030" cy="110" r="84"/>
+    <circle class="sun" cx="1030" cy="110" r="52"/>
+    <path class="axis" d="M0 239 H1280"/>
+  </svg></div>
+  <span class="drone pc" style="left:850px;top:86px;width:80px" aria-hidden="true"><svg viewBox="0 0 160 96"><use href="#drone"/></svg></span>
+  <div class="in"><h1><span class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 160 96"><use href="#drone"/></svg></span> そらばん</span><span class="sub" style="display:block">ドローンの飛行計画の通報・点検・飛行日誌</span></h1></div>
+</header>
+<div class="intro"><p class="lead"><strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。</p><p class="note">通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。</p></div><div class="sec"><h2>地点を判定する</h2></div>
+<span class="tag">案 B 幾何</span>
+</body></html>

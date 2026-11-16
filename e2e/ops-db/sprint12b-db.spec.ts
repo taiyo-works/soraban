@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { gotoPlanOpen, onAllPlanScreens, openReportFolds } from "./plan-screen";
 
 // Sprint 12b の E2E-DB（契約 1・4・5・13・16・17・18 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバーを与えた next start に対して実行する。
@@ -32,7 +33,7 @@ const apiAs = async (who: Who | null, base = BASE): Promise<APIRequestContext> =
 const FORBIDDEN_WORDS = ["通報不要", "通報は不要", "通報の必要はありません", "通報しなくて"];
 const NOT_SENT = "そらばんは DIPS に送信しません";
 const NOT_REPORTED_UNTIL_RECORD = "記録するまで『通報済み』にはなりません";
-const OFFICIAL = "申請・通報は DIPS 2.0 などの公式の手続きで行ってください";
+const OFFICIAL = "許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います";
 const REPORTED_LABEL = "DIPS で通報済み（利用者の申告・手動記録）";
 
 /** 夜間飛行の地点（皆生）／判定不能が残る運営拠点／判定不能が無く特定飛行に当たらない地点（鳥取市の工業専用地域内）／美保基地（小型無人機等飛行禁止法）。 */
@@ -184,10 +185,11 @@ const tapAndWait = async (page: Page, link: Locator, url: RegExp): Promise<void>
 };
 
 /** 通報の画面を開き、描画と水和が済むのを待つ。 */
-const openReport = async (page: Page, planId: string, query = "") => {
+const openReport = async (page: Page, planId: string, query = "", opts: { folds?: boolean } = {}) => {
   await page.goto(`/ops/plans/${planId}/report${query}`);
   await expect(page.getByTestId("report-screen")).toBeVisible();
   await page.waitForLoadState("networkidle").catch(() => undefined);
+  if (opts.folds !== false) await openReportFolds(page); // Sprint 17-2：状況の詳細・履歴・監査は折りたたんである（既定の見え方を試験する検査は folds:false）
 };
 
 const fieldsData = JSON.parse(readFileSync(path.join(__dirname, "..", "..", "packages", "dips", "data", "report-fields.json"), "utf8")) as {
@@ -240,11 +242,11 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     expect(confirmPlan.report.kind).toBe("confirm");
     expect(recommended.report.kind).toBe("recommended");
 
-    await page.goto(`/ops/plans/${confirmPlan.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${confirmPlan.id}`);
     await expect(page.getByTestId("plan-report-label")).toHaveText("通報：要確認（要として扱います）");
     await expect(page.getByTestId("plan-report-reasons")).toContainText("判定不能");
     expect(await bodyText(page)).not.toContain("次の版で追加します");
-    await page.goto(`/ops/plans/${recommended.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${recommended.id}`);
     await expect(page.getByTestId("plan-report-label")).toHaveText("通報：義務ではないが推奨");
     expect(await bodyText(page)).not.toContain("次の版で追加します");
     await expectNoForbiddenWords(page, "推奨の計画");
@@ -414,7 +416,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     // 計画を変更（予定開始 10:00 → 15:00）→ 「通報を変更する」と変更点
     const patch = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: plan.version, reason: "開始時刻の変更", plannedStartAt: "2027-01-10T15:00" } });
     expect(patch.status(), await patch.text()).toBe(200);
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
     await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "change_review");
     await expect(page.getByTestId("plan-report-changes")).toContainText("予定開始");
     await expect(page.getByTestId("plan-report-changes")).toContainText("2027-01-10 10:00");
@@ -440,7 +442,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     // 計画を中止 → 「通報を取り消す」→ 取消の結果を記録 → 取消済み
     const voided = await manager.post(`/api/ops/plans/${plan.id}/void`, { data: { expectedVersion: (await getPlan(manager, plan.id)).version, reason: "中止" } });
     expect(voided.status(), await voided.text()).toBe(200);
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
     await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "cancel_needed");
     const cancelAction = page.getByTestId("next-action").filter({ has: page.locator('[data-action-id="cancel_report"]') });
     await expect(cancelAction.getByTestId("next-action-label")).toHaveText("通報を取り消す");
@@ -519,8 +521,11 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     );
 
     // 飛行開始後で記録なし：最上位の警告（罰則の文言は「※要確認」付き、金額なし）
-    await openReport(page, overdue.id);
+    await openReport(page, overdue.id, "", { folds: false });
     const od = page.getByTestId("plan-report-deadline");
+    // 開く操作なしで見える（飛行開始後の警告は、既定で開いている）
+    await expect(od).toBeVisible();
+    await expect(page.getByTestId("plan-report-penalty")).toBeVisible();
     await expect(od).toHaveAttribute("data-state", "overdue_started");
     await expect(page.getByTestId("plan-report-penalty")).toContainText("罰則の対象になりえます");
     await expect(page.getByTestId("plan-report-penalty")).toContainText("※要確認");
@@ -530,7 +535,8 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     expect(odPlan.nextActions.find((a) => a.id === "report")?.tier).toBe(1);
 
     // 目安を過ぎた：警告（tier 2）
-    await openReport(page, pastGuide.id);
+    await openReport(page, pastGuide.id, "", { folds: false });
+    await expect(page.getByTestId("plan-report-deadline-message")).toBeVisible();
     await expect(page.getByTestId("plan-report-deadline")).toHaveAttribute("data-state", "past_guide");
     await expect(page.getByTestId("plan-report-deadline-message")).toContainText("社内の目安（飛行開始の 24 時間前）を過ぎています");
     expect((await getPlan(manager, pastGuide.id)).nextActions.find((a) => a.id === "report")?.tier).toBe(2);
@@ -553,12 +559,12 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await expect(page.getByTestId("plan-report-deadline-message")).toHaveText("通報を行うことを推奨します");
 
     // 詳細：次にやることが動詞で始まる 1 行で出て、押すと通報内容へ移る
-    await page.goto(`/ops/plans/${overdue.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${overdue.id}`);
     const first = page.getByTestId("next-action").first();
     await expect(first).toHaveAttribute("data-action-id", "report");
     await expect(first).toHaveAttribute("data-tier", "1");
     await expect(first.getByTestId("next-action-label")).toHaveText("飛行計画を DIPS で通報する");
-    await expectNoForbiddenWords(page, "計画の詳細");
+    await onAllPlanScreens(page, overdue.id, (l) => expectNoForbiddenWords(page, `計画の詳細（${l}）`));
     await tapAndWait(page, first.getByTestId("next-action-link"), new RegExp(`/ops/plans/${overdue.id}/report$`));
     await expect(page.getByTestId("report-screen")).toBeVisible();
 
@@ -590,72 +596,50 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     const done = await getPlan(manager, pastGuide.id);
     expect(done.nextActions.map((a) => a.id)).not.toContain("report");
     expect(done.report.deadline.state).toBe("none");
-    await page.goto(`/ops/plans/${pastGuide.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${pastGuide.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="report"]')).toHaveCount(0);
   });
 
-  test("17. 手続きの記録：許可・承認の申請と飛行禁止法の同意・通報を、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録", async ({ page }) => {
+  test("17. 手続きの記録（Sprint 18-2）：許可・承認の「申請済み」の記録は止める（フォーム無し・API は 409・apply_permit は出ない）。飛行禁止法の同意・通報は、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録", async ({ page }) => {
     await login(page, seeded("a-manager"));
     const plan = await activate(manager, await createPlan(manager, planBody(aircraft.id, selfPilot, { title: `手続き 許可 ${stamp}` })));
-    await page.goto(`/ops/plans/${plan.id}`);
-    const apply = page.locator('[data-testid="next-action"][data-action-id="apply_permit"]');
-    await expect(apply.getByTestId("next-action-label")).toHaveText("許可・承認を申請する");
-    await expect(apply.getByTestId("next-action-due")).toContainText("まで");
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "none");
-    await expect(page.getByTestId("procedure-deadline-dips_permit")).toContainText("開庁日以上前");
-    // 次にやることを押すと、手続きの記録の節へ移る
-    await tapAndWait(page, apply.getByTestId("next-action-link"), /#procedures$/);
-    await expect(page.getByTestId("procedure-form-dips_permit")).toBeVisible();
-
-    // 確認が欠けていると記録できない（画面でも API でも）
-    await page.waitForLoadState("networkidle").catch(() => undefined);
-    await page.getByTestId("procedure-done-at-dips_permit-date").fill("2027-01-05");
-    await page.getByTestId("procedure-done-at-dips_permit-time").fill("09:00");
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await expect(page.getByTestId("procedure-form-dips_permit").getByRole("alert").first()).toBeVisible();
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "none");
-    const bad = await manager.post(`/api/ops/plans/${plan.id}/procedure-records`, { data: { kind: "dips_permit", action: "done", doneAt: "2027-01-05T09:00", checks: { applicationCompleted: false } } });
-    expect(bad.status()).toBe(400);
-
-    // 記録する → 「申請済み（利用者の申告）」。「許可済み」とは出ない。次にやることから消える
-    await page.getByTestId("procedure-check-dips_permit-applicationCompleted").check();
-    await page.getByTestId("procedure-reference-dips_permit").fill("APPLY-0001");
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await afterFlash(page, "手続きの記録を残しました");
-    await expect(page.getByTestId("procedure-status-dips_permit")).toHaveText(/申請済み（利用者の申告）/);
-    expect(await page.getByTestId("plan-procedures").innerText()).not.toContain("許可済み");
-    expect(await bodyText(page)).not.toContain("許可済み");
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}`);
+    // 「許可・承認を申請する」は出ない。代わりに「取得した許可・承認を登録する」（申請の記録に依存しない・期限の文言なし）
     await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(0);
-
-    // 取り下げ（理由つき）→ 取り下げた行として残り、次にやることに戻る
-    await page.getByTestId("procedure-retract-open-dips_permit").click();
-    await page.getByTestId("procedure-retract-reason-dips_permit").fill("申請していなかった");
-    await page.getByTestId("procedure-retract-dips_permit").click();
-    await afterFlash(page, "記録を取り下げました");
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "retracted");
-    await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(1);
-    await expect(page.getByTestId("procedure-history-dips_permit").getByTestId("procedure-history-row")).toHaveCount(2);
-
-    // 記録し直したあと、計画の訂正（判定が変わる）で「前の判定に対する記録です」と出て、次にやることに戻る
-    await page.getByTestId("procedure-done-at-dips_permit-date").fill("2027-01-05");
-    await page.getByTestId("procedure-done-at-dips_permit-time").fill("09:30");
-    await page.getByTestId("procedure-check-dips_permit-applicationCompleted").check();
-    await page.getByTestId("procedure-submit-dips_permit").click();
-    await afterFlash(page, "手続きの記録を残しました");
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "done");
-    const patched = await manager.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: (await getPlan(manager, plan.id)).version, reason: "日の変更", plannedStartAt: "2027-01-14T10:00" } });
-    expect(patched.status(), await patched.text()).toBe(200);
-    await page.goto(`/ops/plans/${plan.id}`);
-    await expect(page.getByTestId("procedure-dips_permit")).toHaveAttribute("data-status", "stale");
-    await expect(page.getByTestId("procedure-stale-dips_permit")).toContainText("前の判定に対する記録です");
-    await expect(page.locator('[data-testid="next-action"][data-action-id="apply_permit"]')).toHaveCount(1);
+    const register = page.locator('[data-testid="next-action"][data-action-id="register_permit"]');
+    await expect(register.getByTestId("next-action-label")).toHaveText("取得した許可・承認を登録する");
+    await expect(register.getByTestId("next-action-due")).toHaveCount(0);
+    // 手続きの記録の節には、許可・承認の記録（フォーム・状態・取り下げ）が無い。行が無いので「以前の記録」も出ない
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}/overview`);
+    await expect(page.getByTestId("procedure-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-form-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-submit-dips_permit")).toHaveCount(0);
+    await expect(page.getByTestId("procedure-none")).toHaveText("この計画の判定には、記録する手続き（小型無人機等飛行禁止法の同意・通報）はありません。");
+    // API：done・retract とも 409 procedure_kind_disabled。行は増えない
+    const rowsBefore = (await (await manager.get(`/api/ops/plans/${plan.id}/procedure-records`)).json()) as { records: unknown[] };
+    for (const data of [
+      { kind: "dips_permit", action: "done", doneAt: "2027-01-05T09:00", checks: { applicationCompleted: true } },
+      { kind: "dips_permit", action: "retract", reason: "x" },
+    ]) {
+      const r = await manager.post(`/api/ops/plans/${plan.id}/procedure-records`, { data });
+      expect(r.status(), await r.text()).toBe(409);
+      expect(((await r.json()) as { error: string }).error).toBe("procedure_kind_disabled");
+    }
+    const rowsAfter = (await (await manager.get(`/api/ops/plans/${plan.id}/procedure-records`)).json()) as { records: unknown[] };
+    expect(rowsAfter.records).toHaveLength(rowsBefore.records.length);
+    await onAllPlanScreens(page, plan.id, async (l) => {
+      const text = await bodyText(page);
+      expect(text, `${l}: 許可済み`).not.toContain("許可済み");
+      expect(text, `${l}: 申請済み`).not.toContain("申請済み");
+    });
     await noHorizontalScroll(page, "手続きの記録");
-    await expectNoForbiddenWords(page, "手続きの記録");
+    await onAllPlanScreens(page, plan.id, (l) => expectNoForbiddenWords(page, `手続きの記録（${l}）`));
 
     // 飛行禁止法の同意・通報（美保基地）：二つの確認が要る
     const miho = await activate(manager, await createPlan(manager, planBody(aircraft.id, selfPilot, { title: `手続き 警察 ${stamp}`, latitude: MIHO_SPOT.lat, longitude: MIHO_SPOT.lng, flags: [] })));
-    await page.goto(`/ops/plans/${miho.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]').getByTestId("next-action-label")).toHaveText("警察へ通報する");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
     await page.waitForLoadState("networkidle").catch(() => undefined);
     await page.getByTestId("procedure-done-at-small_drone_law-date").fill("2027-01-05");
     await page.getByTestId("procedure-done-at-small_drone_law-time").fill("09:00");
@@ -667,7 +651,40 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await page.getByTestId("procedure-submit-small_drone_law").click();
     await afterFlash(page, "手続きの記録を残しました");
     await expect(page.getByTestId("procedure-status-small_drone_law")).toHaveText(/同意・通報を記録済み（利用者の申告）/);
+    expect(await page.getByTestId("plan-procedures").innerText()).not.toContain("許可済み");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
     await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(0);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+
+    // 取り下げ（理由つき）→ 取り下げた行として残り、次にやること（警察へ通報する）に戻る
+    await page.getByTestId("procedure-retract-open-small_drone_law").click();
+    await page.getByTestId("procedure-retract-reason-small_drone_law").fill("通報していなかった");
+    await page.getByTestId("procedure-retract-small_drone_law").click();
+    await afterFlash(page, "記録を取り下げました");
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "retracted");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
+    await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(1);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await expect(page.getByTestId("procedure-history-small_drone_law").getByTestId("procedure-history-row")).toHaveCount(2);
+
+    // 記録し直したあと、計画の訂正（判定が変わる）で「前の判定に対する記録です」と出て、次にやることに戻る
+    await page.getByTestId("procedure-done-at-small_drone_law-date").fill("2027-01-05");
+    await page.getByTestId("procedure-done-at-small_drone_law-time").fill("09:30");
+    await page.getByTestId("procedure-check-small_drone_law-facilityConsentObtained").check();
+    await page.getByTestId("procedure-check-small_drone_law-policeNoticeDone").check();
+    await page.getByTestId("procedure-submit-small_drone_law").click();
+    await afterFlash(page, "手続きの記録を残しました");
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "done");
+    const patched = await manager.patch(`/api/ops/plans/${miho.id}`, { data: { expectedVersion: (await getPlan(manager, miho.id)).version, reason: "日の変更", plannedStartAt: "2027-01-14T10:00" } });
+    expect(patched.status(), await patched.text()).toBe(200);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "stale");
+    await expect(page.getByTestId("procedure-stale-small_drone_law")).toContainText("前の判定に対する記録です");
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}`);
+    await expect(page.locator('[data-testid="next-action"][data-action-id="notify_police"]')).toHaveCount(1);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
+    await noHorizontalScroll(page, "手続きの記録（飛行禁止法）");
+    await onAllPlanScreens(page, miho.id, (l) => expectNoForbiddenWords(page, `手続きの記録（飛行禁止法・${l}）`));
 
     // 閲覧者は 403、他の組織は 404
     const viewer = await apiAs(seeded("a-viewer"));
@@ -680,7 +697,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await other.dispose();
     // 閲覧者の画面には記録のフォームが出ない
     await login(page, seeded("a-viewer"));
-    await page.goto(`/ops/plans/${miho.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${miho.id}/overview`);
     await expect(page.getByTestId("procedure-small_drone_law")).toBeVisible();
     await expect(page.getByTestId("procedure-form-small_drone_law")).toHaveCount(0);
     await expect(page.getByTestId("procedure-retract-open-small_drone_law")).toHaveCount(0);
@@ -690,7 +707,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await login(page, seeded("a-manager"));
     const plan = await activate(manager, await createPlan(manager, planBody(aircraft.id, selfPilot, { title: `表示 ${stamp}` })));
     // ① 判定の日時
-    await page.goto(`/ops/plans/${plan.id}`);
+    await gotoPlanOpen(page, `/ops/plans/${plan.id}/judgement`);
     const judgedAt = page.getByTestId("plan-judged-at");
     await expect(judgedAt).toHaveText(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
     const iso = (await judgedAt.getAttribute("datetime"))!;
@@ -727,7 +744,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
       expect(checked, `${label}: 走査した部品がない`).toBeGreaterThan(0);
       expect(found, `${label}: 44px 未満の部品`).toEqual([]);
     };
-    for (const url of ["/ops/places", "/ops/plans", `/ops/plans/${plan.id}`, `/ops/plans/${plan.id}/report`, "/ops/flights", "/ops/inspections", "/ops/members"]) {
+    for (const url of ["/ops/places", "/ops/plans", `/ops/plans/${plan.id}`, `/ops/plans/${plan.id}/overview`, `/ops/plans/${plan.id}/judgement`, `/ops/plans/${plan.id}/journal`, `/ops/plans/${plan.id}/report`, "/ops/flights", "/ops/inspections", "/ops/members"]) {
       await page.goto(url);
       await expect(page.locator("main").first()).toBeVisible();
       await page.waitForLoadState("networkidle").catch(() => undefined);

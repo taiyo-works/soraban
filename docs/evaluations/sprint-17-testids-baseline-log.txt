@@ -1,0 +1,2 @@
+2026-11-01T00:00:00.000Z	1996	Sprint 17-1 着手時の基準（最初の作成）
+2026-11-02T02:56:25.866Z	1877	Sprint 16-1: 旧い見本（components/ui/catalog）の削除により、その見本だけが持つ 265 件を除く（一覧は sprint-16-removed-catalog-testids.txt）。実画面の識別子は消えていない

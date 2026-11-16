@@ -6,19 +6,14 @@ import { Badge, OP_TONE, Section, VERSION_NOTICE_TARGET } from "./ui";
 // 詳細画面の版の一覧（版番号、操作、訂正者、日時（JST、分まで）、理由、変わった項目名）。
 // 狭い画面でも横スクロールしないよう、表ではなく項目の並びで示す。古い版から順に並べる（台帳と同じ向き）。
 // 登録・訂正・取消で読み直した直後は、結果を示して新しい行（最後の行）へスクロールし、フォーカスを移す。
-export function VersionList({ versions }: { readonly versions: readonly VersionDto[] }) {
-  return (
-    <Section
-      title="版の一覧"
-      aria-label="版の一覧"
-      description="登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。"
-    >
-      <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-row"]:last-child' />
-      <ol className="flex flex-col border-t border-sb-rule" data-testid="version-list">
-        {versions.map((v) => (
-          <li
-            key={v.versionNo}
-            className="grid scroll-mt-24 grid-cols-1 gap-2 border-b border-sb-rule py-3 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
+export function VersionList({ versions, recent }: { readonly versions: readonly VersionDto[]; readonly recent?: number }) {
+  // recent：最新の N 件だけ出し、古い版は畳む（件数を summary に出す。DOM の順は古い版から新しい版のまま）
+  const older = recent !== undefined && versions.length > recent ? versions.slice(0, versions.length - recent) : [];
+  const shown = older.length > 0 ? versions.slice(older.length) : versions;
+  const row = (v: VersionDto) => (
+    <li
+          key={v.versionNo}
+            className="grid scroll-mt-24 grid-cols-1 gap-1 border-b border-sb-rule py-1.5 text-sm outline-none focus-visible:bg-sb-hover focus-visible:ring-2 focus-visible:ring-sb-focus sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-4"
             data-testid="version-row"
             tabIndex={-1}
           >
@@ -57,7 +52,22 @@ export function VersionList({ versions }: { readonly versions: readonly VersionD
               ) : null}
             </div>
           </li>
-        ))}
+  );
+  return (
+    <Section
+      title="版の一覧"
+      aria-label="版の一覧"
+      description={recent === undefined ? "登録・訂正・取消のたびに版が 1 つ増えます。前の版は書き換えられず、誰がいつ何を変えたかが残ります。" : "前の版は書き換えられず、追記されます。"}
+    >
+      <ChangeNotice target={VERSION_NOTICE_TARGET} focusSelector='[data-testid="version-list"] > [data-testid="version-row"]:last-child' />
+      {older.length > 0 ? (
+        <details data-testid="version-list-older">
+          <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い版 {older.length} 件を見る（最新 {shown.length} 件は下に出ています）</summary>
+          <ol className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(row)}</ol>
+        </details>
+      ) : null}
+      <ol className={`flex flex-col border-t border-sb-rule${recent !== undefined ? " lg:grid lg:grid-cols-2 lg:gap-x-8" : ""}`} data-testid="version-list">
+        {shown.map(row)}
       </ol>
     </Section>
   );

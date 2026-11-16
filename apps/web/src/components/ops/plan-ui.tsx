@@ -9,6 +9,7 @@ import { STALE_JUDGEMENT_LABEL, type PlanState } from "@/server/ops/plan-logic";
 import { VerdictTag } from "@/components/ui/sb-parts";
 import { cx } from "@/components/ui/cx";
 import { Icon, type IconName } from "@/components/ui/icons";
+import { JUDGE_LINE_PREFIX, JUDGE_UNREADABLE, REPORT_NOTE_SHORT, SOURCE_STALE_LABEL, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE, judgeLineModel, splitNextActions } from "@/lib/plan-main";
 import { type Tone } from "./ui";
 
 // 飛行計画の画面で共通に使う小さな部品（サーバー・クライアントのどちらからも使える）。
@@ -102,8 +103,85 @@ export function ReportBadge({ report, bare }: { readonly report: ReportRequireme
   );
 }
 
-/** 通報の要否（根拠つき）。固定の文言（そらばんは DIPS に送信しません…）を必ず添える。 */
-export function ReportBox({ report }: { readonly report: ReportRequirement }) {
+/**
+ * 通報の要否（根拠つき）。固定の文言（そらばんは DIPS に送信しません…）を添える。
+ * compact（通報の主画面の状況カード）：見出しの 1 行と固定の文言の短い版だけを出し、根拠と全文は 1 回で開く（DOM には残る）。
+ * voidedNoRecord：中止した計画で通報の記録が無いときは「中止（通報の記録はありません）」と事実を示す（要否は出さない）。
+ */
+export function ReportBox({
+  report,
+  compact = false,
+  voidedNoRecord = false,
+  heading,
+  part,
+}: {
+  readonly report: ReportRequirement;
+  readonly compact?: boolean;
+  /** compact のとき、見出しだけ（head）か、根拠・固定の文言だけ（body）を出す。主操作を最初の画面に入れるため、カードの中で分けて置く。 */
+  readonly part?: "head" | "body";
+  /** 見出しの文言（通報の状況に応じた言い方。無ければ通報の要否の見出し）。 */
+  readonly heading?: string;
+  readonly voidedNoRecord?: boolean;
+}) {
+  if (compact) {
+    const tone: Tone = voidedNoRecord ? "mute" : REPORT_TONE[report.kind];
+    const glyph = voidedNoRecord ? "×" : REPORT_GLYPH[report.kind];
+    const head = part !== "body";
+    const body = part !== "head";
+    return (
+      <div className="flex flex-col gap-2" {...(head ? { "data-testid": "plan-report-box" } : { "data-testid": "plan-report-box-body" })} data-kind={report.kind}>
+        {head ? (
+        <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
+          <span aria-hidden className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
+            {glyph}
+          </span>
+          <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
+        </p>
+        ) : null}
+        {!body ? null : voidedNoRecord ? (
+          <>
+            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+              {REPORT_NOTE_SHORT}
+            </p>
+            <p className="pl-10 text-sm font-medium leading-relaxed text-sb-ink" data-testid="plan-voided-no-record-note">
+              {VOIDED_NO_RECORD_NOTE}
+            </p>
+          </>
+        ) : (
+          <>
+            {report.reasons.length > 0 ? (
+              <details className="pl-10">
+                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+                  根拠を見る（{report.reasons.length} 件）
+                </summary>
+                <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
+                  {report.reasons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+            {report.exceptionNote ? (
+              <p className="opx-note ml-10" data-testid="plan-report-exception">
+                {report.exceptionNote}
+              </p>
+            ) : null}
+            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+              {REPORT_NOTE_SHORT}
+            </p>
+            <details className="pl-10">
+              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+                固定の文言の全文
+              </summary>
+              <div className="pb-2">
+                <DipsNotice text={report.note} />
+              </div>
+            </details>
+          </>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       className="flex flex-col gap-3 rounded-sb-l bg-sb-base px-4 py-4 opx-shadow"
@@ -172,49 +250,55 @@ export function StaleBadge({ bare }: { readonly bare?: boolean }) {
   );
 }
 
+/** 「出典が古い」の札（出典・確認日が 90 日超の項目がある。判定の古さ（判定が古い）とは別）。 */
+export function SourceStaleBadge() {
+  return (
+    <Chip tone="amber" glyph="!" data-testid="plan-source-stale">
+      {SOURCE_STALE_LABEL}
+    </Chip>
+  );
+}
+
 /**
- * 詳細の先頭の要点：結論 → 通報の要否 → 確認の状況（情報の優先順位）。各行は該当の節へ飛ぶ（タップの的は 44px 以上）。
- * 詳細は下の節にあるため、ここは札だけを置く（testid は節の側にあり、ここでは重ねない）。
+ * 通報の主画面の「ほかの要点」：判定の 1 行（補助。常に出す）と確認の 1 行。押す面は 48px 以上。
+ * 判定の行は必ず「判定（補助）：」で始め、通報の要否と混ざらないようにする。結論の段が読めないときは要として扱う。
  */
 export function PlanDigest({
+  planId,
   verdictLevel,
   unknownCount,
-  report,
   state,
   stateLabel,
   stale,
+  sourcesStale,
 }: {
-  readonly verdictLevel: string;
-  readonly unknownCount: number;
-  readonly report: ReportRequirement;
+  readonly planId: string;
+  readonly verdictLevel: string | null | undefined;
+  readonly unknownCount: number | null | undefined;
   readonly state: PlanState;
   readonly stateLabel: string;
   readonly stale: boolean;
+  readonly sourcesStale: boolean;
 }) {
-  const row = "grid min-h-12 grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
+  const row = "flex min-h-12 items-center justify-between gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
+  const m = judgeLineModel({ level: verdictLevel, unknownCount, stale, sourcesStale });
   return (
-    <nav aria-label="要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
-      <a href="#sec-verdict" className={row}>
-        <span className="text-xs text-sb-ink-3">結論</span>
-        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <VerdictBadge level={verdictLevel} unknownCount={unknownCount} bare />
-          {stale ? <StaleBadge bare /> : null}
+    <nav aria-label="ほかの要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
+      <a href={`/ops/plans/${planId}/judgement`} className={row} data-testid="plan-judge-link">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="plan-judge-line" data-wording-scope="judgement">
+          <span className="text-sm text-sb-ink-2">{JUDGE_LINE_PREFIX}</span>
+          {m.kind === "ok" ? <VerdictBadge level={m.level} unknownCount={m.unknownCount} bare /> : <span className="text-sm font-bold text-sb-ink">{JUDGE_UNREADABLE}</span>}
+          {m.stale ? <StaleBadge bare /> : null}
+          {m.sourcesStale ? <SourceStaleBadge /> : null}
         </span>
-        <span aria-hidden className="text-sb-ink-3">↓</span>
+        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
       </a>
-      <a href="#sec-report" className={row}>
-        <span className="text-xs text-sb-ink-3">通報</span>
-        <span className="flex flex-wrap items-center gap-1.5">
-          <ReportBadge report={report} bare />
-        </span>
-        <span aria-hidden className="text-sb-ink-3">↓</span>
-      </a>
-      <a href="#sec-confirm" className={row}>
-        <span className="text-xs text-sb-ink-3">確認</span>
-        <span className="flex flex-wrap items-center gap-1.5">
+      <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row} data-testid="plan-confirm-link">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm text-sb-ink-2">確認：</span>
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span aria-hidden className="text-sb-ink-3">↓</span>
+        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
       </a>
     </nav>
   );
@@ -357,7 +441,13 @@ export function NextActionItem({
 }
 
 /** 計画の詳細の「次にやること」。保存した状態ではなく、毎回導出した一覧。 */
-export function NextActionsList({ actions }: { readonly actions: readonly NextAction[] }) {
+export function NextActionsList({ actions, limit }: { readonly actions: readonly NextAction[]; readonly limit?: number }) {
+  const { shown, rest } = limit === undefined ? { shown: actions, rest: [] as readonly NextAction[] } : splitNextActions(actions, limit);
+  const li = (a: NextAction) => (
+    <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
+      <NextActionItem action={a} />
+    </li>
+  );
   return (
     <section aria-label="次にやること" className="flex flex-col gap-2" data-testid="next-actions">
       <h2 className="opx-eyebrow">
@@ -369,13 +459,15 @@ export function NextActionsList({ actions }: { readonly actions: readonly NextAc
           {NEXT_ACTIONS_EMPTY_LABEL}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-sb-rule overflow-hidden rounded-sb-l bg-sb-base opx-shadow">
-          {actions.map((a) => (
-            <li key={a.id} data-testid="next-action" data-action-id={a.id} data-tier={String(a.tier)}>
-              <NextActionItem action={a} />
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow">
+          <ul className="flex flex-col divide-y divide-sb-rule">{shown.map(li)}</ul>
+          {rest.length > 0 ? (
+            <details className="border-t border-sb-rule" data-testid="next-actions-more">
+              <summary className="flex min-h-12 cursor-pointer select-none items-center px-4 text-sm font-bold text-sb-ink">ほか {rest.length} 件を見る</summary>
+              <ul className="flex flex-col divide-y divide-sb-rule border-t border-sb-rule">{rest.map(li)}</ul>
+            </details>
+          ) : null}
+        </div>
       )}
     </section>
   );
@@ -408,9 +500,43 @@ const DEADLINE_GLYPH: Readonly<Record<DeadlineState["state"], string>> = {
  * 上から「いまの状態（記号の札＋文）」「社内の目安の時刻」「注記」の順。飛行開始後は最上位の警告（赤の線と背景＋「!!」）。
  * 罰則の文言は注記の側に小さく置く（目立たせすぎない。※要確認が付く）。
  */
-export function DeadlineBox({ deadline }: { readonly deadline: DeadlineState }) {
+export function DeadlineBox({ deadline, compact = false }: { readonly deadline: DeadlineState; readonly compact?: boolean }) {
   if (deadline.state === "none" || !deadline.message) return null;
   const started = deadline.state === "overdue_started";
+  if (compact) {
+    return (
+      <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 text-sm ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
+        <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
+          <span aria-hidden className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[13px] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
+            {DEADLINE_GLYPH[deadline.state]}
+          </span>
+          <span className="pt-0.5" data-testid="plan-report-deadline-message">{deadline.message}</span>
+        </p>
+        {deadline.guideAtJst ? (
+          <p className="pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
+            社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
+          </p>
+        ) : null}
+        <details className="pl-11" {...(started ? { open: true } : {})}>
+          <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
+          <div className="flex flex-col gap-1.5 pb-2">
+            {deadline.guideNote ? (
+              <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
+                {deadline.guideNote}
+              </p>
+            ) : null}
+            {deadline.penaltyNote ? (
+              <p className="text-[12px] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+                {deadline.penaltyNote}
+              </p>
+            ) : null}
+            {deadline.outageNote ? <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+            <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+          </div>
+        </details>
+      </div>
+    );
+  }
   return (
     <div
       className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 text-sm ${DEADLINE_BAR[deadline.state]}`}

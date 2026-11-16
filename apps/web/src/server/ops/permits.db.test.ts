@@ -3,7 +3,7 @@
 // 判定は本物の runDiagnosis（同梱の規制データ・市町村コード固定）。DIPS・外部には接続しない。
 import { randomUUID } from "node:crypto";
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { MemberRow, PilotRow } from "@soraban/db";
 import { createTempDatabase, runCli, withClient, type TempDatabase } from "../../../../../packages/db/src/test-db-helpers";
 import { resolveTestDatabaseUrl } from "../../../../../packages/db/src/test-db-env";
@@ -904,11 +904,14 @@ describe.skipIf(!ADMIN_URL)("許可・承認の登録・計画への適用・ス
   });
 
   // ================================================================
-  // 契約 15：次にやること「許可・承認の結果を登録する」（12b との関係）
+  // 契約 15：次にやること「取得した許可・承認を登録する」（12b との関係）
   // ================================================================
-  describe("契約 15：許可・承認の結果を登録する", () => {
+  describe("契約 15：取得した許可・承認を登録する", () => {
     const MIHO = { latitude: 35.4936, longitude: 133.2361 };
-    it("申請済みの記録があり、判定に許可の手続きが残り、適用された登録がないとき出る（運航管理者だけ canAct）。登録を作って番号を入れると消える", async () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    it("【フラグ有効】申請済みの記録があり、判定に許可の手続きが残り、適用された登録がないとき出る（運航管理者だけ canAct）。登録を作って番号を入れると消える", async () => {
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1");
       const plan = await plans.requestConfirmation(mgr(), (await newPlan({ ...MIHO, ...NIGHT, plannedStartAt: "2027-02-10T09:00" })).id, {});
       const before = await plans.getPlan(mgr(), plan.id);
       expect(before.nextActions.map((a) => a.id)).toContain("apply_permit");
@@ -918,7 +921,7 @@ describe.skipIf(!ADMIN_URL)("許可・承認の登録・計画への適用・ス
       const ids = asked.nextActions.map((a) => a.id);
       expect(ids).toContain("register_permit");
       expect(ids).not.toContain("apply_permit");
-      expect(asked.nextActions.find((a) => a.id === "register_permit")).toMatchObject({ label: "許可・承認の結果を登録する", canAct: true, href: "/ops/permits/new" });
+      expect(asked.nextActions.find((a) => a.id === "register_permit")).toMatchObject({ label: "取得した許可・承認を登録する", canAct: true, href: "/ops/permits/new" });
       // 運航管理者以外は依頼（canAct false）
       const asPilot = await plans.getPlan(ctxOf(pilotMember), plan.id);
       expect(asPilot.nextActions.find((a) => a.id === "register_permit")).toMatchObject({ canAct: false });
@@ -931,6 +934,49 @@ describe.skipIf(!ADMIN_URL)("許可・承認の登録・計画への適用・ス
       expect(after.nextActions.map((a) => a.id)).not.toContain("register_permit");
       expect(after.nextActions.map((a) => a.id)).not.toContain("apply_permit");
       expect(after.procedureRecords.some((r) => r.kind === "dips_permit")).toBe(true);
+    });
+
+    it("【フラグ無効（既定）Sprint 18-2】記録なしで register_permit が出る（apply_permit は出ない）。登録を作って番号を入れると消える。申請の記録は作られない", async () => {
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      const plan = await plans.requestConfirmation(mgr(), (await newPlan({ ...MIHO, ...NIGHT, plannedStartAt: "2027-02-10T09:00" })).id, {});
+      const asked = await plans.getPlan(mgr(), plan.id);
+      const ids = asked.nextActions.map((a) => a.id);
+      expect(ids).toContain("register_permit");
+      expect(ids).not.toContain("apply_permit");
+      const next = asked.nextActions.find((a) => a.id === "register_permit")!;
+      expect(next).toMatchObject({ label: "取得した許可・承認を登録する", canAct: true, href: "/ops/permits/new", tier: 3, dueLabel: null });
+      expect(JSON.stringify(asked.nextActions)).not.toContain("申請");
+      // 運航管理者以外は依頼（canAct false）
+      expect((await plans.getPlan(ctxOf(pilotMember), plan.id)).nextActions.find((a) => a.id === "register_permit")).toMatchObject({ canAct: false });
+      // 登録を作り、番号を計画に入れて再判定 → 判定が手続き済み（条件付き）になり、この項目も消える
+      await newPermit({ permitNumber: "NEXT-18-2", kinds: ["did", "night"], validFrom: "2027-02-01", validTo: "2027-02-28" });
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: asked.version, reason: "許可番号", permitNumbers: "NEXT-18-2" });
+      const after = await plans.getPlan(mgr(), plan.id);
+      expect(after.permits.appliedCount).toBe(1);
+      expect(after.nextActions.map((a) => a.id)).not.toContain("register_permit");
+      expect(after.nextActions.map((a) => a.id)).not.toContain("apply_permit");
+      // 申請の記録（dips_permit）は一度も作られていない。期待は「申請の記録に依存しない」こと
+      expect(after.procedureRecords.some((r) => r.kind === "dips_permit")).toBe(false);
+    });
+
+    it("【フラグ無効 §12.1 中-1】一部だけ登録（夜間の登録だけで 30m の承認が残る）でも register_permit が出続ける。全部の登録で判定の手続きが空になると消える", async () => {
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      const two = { flags: ["method_night", "method_30m"] };
+      const plan = await plans.requestConfirmation(mgr(), (await newPlan({ ...MIHO, ...two, plannedStartAt: "2027-02-10T09:00" })).id, {});
+      const first = await plans.getPlan(mgr(), plan.id);
+      expect(first.nextActions.map((a) => a.id)).toContain("register_permit");
+      // 夜間だけの登録を番号に入れる → applied は 1 件だが、30m の承認の手続きが判定に残る
+      await newPermit({ permitNumber: "PART-18-2A", kinds: ["night"], validFrom: "2027-02-01", validTo: "2027-02-28" });
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: first.version, reason: "夜間の許可番号", permitNumbers: "PART-18-2A" });
+      const partial = await plans.getPlan(mgr(), plan.id);
+      expect(partial.permits.appliedCount).toBe(1);
+      expect(partial.nextActions.map((a) => a.id)).toContain("register_permit");
+      expect(partial.nextActions.map((a) => a.id)).not.toContain("apply_permit");
+      // もう一つの種類も登録して番号に足す → 判定の手続きが空になり消える
+      await newPermit({ permitNumber: "PART-18-2B", kinds: ["30m"], validFrom: "2027-02-01", validTo: "2027-02-28" });
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: partial.version, reason: "30m の許可番号", permitNumbers: "PART-18-2A, PART-18-2B" });
+      const full = await plans.getPlan(mgr(), plan.id);
+      expect(full.nextActions.map((a) => a.id)).not.toContain("register_permit");
     });
   });
 });

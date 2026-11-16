@@ -3,7 +3,7 @@
 // 理由と skip の件数をテスト出力に表示する（通っていないことを隠さない）。
 // サービス層の契約（冪等性・取消・再送・外部の呼び出しの間にトランザクションを開けない 等）は、同じようにアダプターを
 // 差し替えて DB で流す（apps/web の reports.db.test.ts）。
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { NotificationGateway } from "./gateway";
 import { prepareReport } from "./prepare";
 import { basePlan } from "./test-fixtures";
@@ -73,6 +73,50 @@ export const GATEWAY_CONTRACT_CASES: readonly Case[] = [
         const first = g.prepare(plan, kind);
         expect(g.prepare(plan, kind)).toEqual(first);
         expect(first).toEqual(prepareReport(plan, kind));
+      }
+    },
+  },
+  {
+    title: "prepare（多角形・複数の範囲）：どのアダプターでも基準の整形と同じ結果。複数は 1 つ目だけを出さず、ネットワークを呼ばない（19-1c）",
+    run: async (a) => {
+      const g = a.make();
+      const fetchSpy = vi.fn(() => {
+        throw new Error("network call");
+      });
+      vi.stubGlobal("fetch", fetchSpy);
+      try {
+        const tri = { kind: "polygon", vertices: [[133.33, 35.42], [133.34, 35.42], [133.335, 35.43]] } as const;
+        const one = basePlan({ areas: [tri] });
+        const many = basePlan({ areas: [tri, { kind: "circle", center: [133.2, 35.1], radiusM: 50 }] });
+        for (const plan of [one, many]) {
+          const first = g.prepare(plan, "new");
+          expect(g.prepare(plan, "new")).toEqual(first);
+          expect(first).toEqual(prepareReport(plan, "new"));
+        }
+        const polyRoute = g.prepare(one, "new").items.find((i) => i.key === "route")!;
+        expect(JSON.parse(polyRoute.apiValue!).features[0].geometry.type).toBe("Polygon");
+        const manyRoute = g.prepare(many, "new").items.find((i) => i.key === "route")!;
+        expect(manyRoute.apiValue).toBeNull();
+        expect(manyRoute.warnings.map((w) => w.code)).toEqual(["route_multiple_areas"]);
+        expect(fetchSpy).not.toHaveBeenCalled();
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    },
+  },
+  {
+    title: "submit（範囲が複数）：新規・変更は受け付けず（route_multiple_areas）、取消は通す。外部には何も送らない",
+    run: async (a) => {
+      const g = a.make();
+      const tri = { kind: "polygon", vertices: [[133.33, 35.42], [133.34, 35.42], [133.335, 35.43]] } as const;
+      const many = basePlan({ areas: [tri, { kind: "circle", center: [133.2, 35.1], radiusM: 50 }] });
+      for (const kind of ["new", "change"] as const) {
+        const prepared = g.prepare(many, kind);
+        await expect(g.submit(prepared, a.ctx(KEY))).rejects.toMatchObject({ name: "GatewayInputError", fieldCodes: { route: "route_multiple_areas" } });
+      }
+      if (g.capabilities().mode === "user_reported") {
+        const r = await g.submit(g.prepare(many, "cancel"), { idempotencyKey: KEY, actor: ACTOR, now: NOW, manualResult: MANUAL });
+        expect(r.state).toBe("reported_manual");
       }
     },
   },

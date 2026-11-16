@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { PROVIDER } from "@/lib/provider-info";
 
 // 書体は 2 つだけ（デザインシステム v2）。どちらも next/font でビルド時に取得して自前配信する（外部への通信なし）。
 // - 和文：Noto Sans JP。太さは 400・500・700。日本語の分割ファイルは先読みしない（preload: false）。使う文字を含む分割だけが
@@ -28,9 +29,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const SITE_TITLE = "そらばん — ドローン飛行の可否判定と運航管理";
-const SITE_DESCRIPTION =
-  "ドローン飛行の可否判定と運航管理。運営：フューチャーテック株式会社。現在は社内での試験運用中です。";
+// 題名・説明（Sprint 18-3 §5.4）。主役は飛行計画の通報・点検・飛行日誌。地点の判定は補助の機能。提供元の名称は lib/provider-info.ts の定数から。
+const SITE_TITLE = "そらばん — ドローンの飛行計画の通報・点検・飛行日誌";
+const SITE_DESCRIPTION = `ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめる運航管理アプリです。地点の判定は補助の機能です。提供元：${PROVIDER.name}。現在は社内での試験運用中です。`;
 
 // アイコンは app/icon.svg・app/favicon.ico（算盤の珠と梁の単純な図形）。共有時の表示（OG）は文字情報のみ。
 // 題名のテンプレートは、子の区間（/ops 以下）の title に「 — そらばん」を付ける。`/` は default のまま（SITE_TITLE）。

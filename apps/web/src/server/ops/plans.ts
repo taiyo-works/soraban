@@ -14,8 +14,10 @@ import {
   type SpecificFlightFlag,
 } from "@soraban/regulations";
 import { diffFingerprintParts, type FingerprintChange } from "@soraban/dips";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { formatJst, jstDate, parseJstMinute, toJstInput } from "@/lib/ops-time";
 import type { DiagnosisRun } from "@/server/diagnose-core";
+import { omitApplicationSupport } from "@/server/diagnose-response";
 import { toEvidenceLogInsert } from "@/server/evidence-log";
 import { can } from "./authz";
 import { runJudge } from "./judge";
@@ -82,6 +84,7 @@ import {
 import { collectMatching } from "./paging";
 import * as store from "./store";
 import { OpsError, type PlanWithJoins, type SnapshotFullRow, type SnapshotListRow } from "./store";
+import { AREAS_PRESENT_MESSAGE, JUDGEMENT_SCOPE, areasOfPlanRow, storedToInput, type AreaDto, type AreaState } from "./flight-areas";
 import { PLAN_FIELDS, validatePlan, type PlanInputData } from "./validate-plan";
 import { parseClientRequestId } from "./validate-records";
 import { validateChangeMeta } from "./validate";
@@ -153,6 +156,14 @@ export type PlanDto = {
   readonly latitude: number;
   readonly longitude: number;
   readonly radiusM: number | null;
+  /**
+   * 飛行範囲（Sprint 19-1b）。areaState: areas＝範囲あり／circle＝範囲なしで半径あり（円 1 つとして読み替え。DB の行は書き換えない）／
+   * point＝範囲なしで半径なし（点だけ。円ではない）。latitude・longitude・radiusM は範囲を覆う円（範囲があるときはサーバーの計算値）。
+   */
+  readonly areaState: AreaState;
+  readonly areas: readonly AreaDto[];
+  /** 判定が見る範囲。常に代表点だけ（範囲全体では判定していない）。範囲があるときは JUDGEMENT_AREA_NOTE を出す。 */
+  readonly judgementScope: typeof JUDGEMENT_SCOPE;
   readonly savedPlaceId: string | null;
   readonly maxAltitudeM: number | null;
   readonly flags: readonly string[];
@@ -356,6 +367,7 @@ const planDtoParts = (
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const dto: PlanDto = {
     id: r.id,
@@ -375,6 +387,9 @@ const planDtoParts = (
     latitude: Number(r.latitude),
     longitude: Number(r.longitude),
     radiusM: r.radius_m,
+    areaState: areasOfPlanRow(r).state,
+    areas: areasOfPlanRow(r).areas,
+    judgementScope: JUDGEMENT_SCOPE,
     savedPlaceId: r.saved_place_id,
     maxAltitudeM: r.max_altitude_m,
     flags: r.flags,
@@ -436,6 +451,7 @@ const detailExtras = (
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const effective = dto.report.status.effectiveId ? extras.rows.find((x) => x.id === dto.report.status.effectiveId) : undefined;
   const flagLabel = (f: string) => SPECIFIC_FLIGHT_FLAG_LABEL[f as SpecificFlightFlag] ?? f;
@@ -444,7 +460,7 @@ const detailExtras = (
     reportChanges: effective
       ? diffFingerprintParts(effective.fingerprint_parts as never, currentFingerprintPartsOf(r, reportRegistrationOf(permits)), { flagLabel })
       : [],
-    procedureRecords: summarizeProcedureRecords(extras.records, r),
+    procedureRecords: summarizeProcedureRecords(extras.records, r, isApplicationSupportEnabled()),
   };
 };
 
@@ -605,9 +621,11 @@ export const getSnapshot = async (ctx: OpsContext, planId: string, snapshotId: s
     : null;
   if (!r) throw new OpsError(404, "not_found");
   const input = r.input as { droneWeightG?: number | null; purpose?: string | null };
+  // 保存済みの result に申請支援の出力（旧い行）が残っていても、フラグ無効なら API の応答から除く（行は書き換えない）。
+  const result = isApplicationSupportEnabled() ? r.result : omitApplicationSupport(r.result);
   return {
     ...snapshotListDto(r, plan.current_snapshot_id),
-    result: r.result,
+    result,
     report: reportRequirement({
       input: { droneWeightG: input.droneWeightG ?? null, purpose: input.purpose ?? null },
       result: r.result as never,
@@ -632,6 +650,8 @@ const mustMayCreate = async (ctx: OpsContext): Promise<PilotRow | null> => {
 const planInputFromData = (d: Readonly<Record<string, unknown>>): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
   for (const [api, col] of Object.entries(PLAN_FIELDS)) out[api] = d[col];
+  // 範囲は保存の形（snake_case）から入力の形へ。範囲が無い版は areas を持たない（緯度・経度・半径から読む）
+  out["areas"] = storedToInput(d["flight_areas"]);
   return out;
 };
 
@@ -675,6 +695,10 @@ type JudgedWrite = {
  */
 const writeJudged = async (ctx: OpsContext, w: JudgedWrite): Promise<number> => {
   const res = w.run.response;
+  // 申請支援の出力（prefill・deadlines・categoryNote）は、フラグ無効（既定・本番）のとき保存しない（Sprint 18-2 L8）。
+  // /api/diagnose の応答全体がそのまま result に入っていたため。既存の行は追記専用なので書き換えない（読むときに getSnapshot で除く）。
+  // 証跡 ID・内容のハッシュ（DB が result から計算）は、保存する内容に対して決まる。
+  const result = isApplicationSupportEnabled() ? res : omitApplicationSupport(res);
   return store.withTransaction(ctx.db, async (c) => {
     await store.insertEvidenceOn(c, toEvidenceLogInsert(w.run.check, { lat: w.input.lat, lng: w.input.lng }));
     await store.insertSnapshotOn(c, {
@@ -683,7 +707,7 @@ const writeJudged = async (ctx: OpsContext, w: JudgedWrite): Promise<number> => 
       planId: w.planId,
       reason: w.reason,
       input: w.input,
-      result: res,
+      result,
       verdictLevel: res.verdict?.level ?? "needs_procedure",
       verdictUnknownCount: res.verdict?.unknownCount ?? 0,
       category: res.category,
@@ -793,6 +817,14 @@ export const updatePlan = async (ctx: OpsContext, id: string, body: unknown): Pr
   // 12c までの計画に残る DIPS の手入力値は、判定に使わないため、訂正で外す（本文に DIPS の値があれば検査が 400 にする）
   if (!("pilotPermits" in input) && Array.isArray(merged["pilotPermits"])) {
     merged["pilotPermits"] = (merged["pilotPermits"] as unknown[]).filter((p) => typeof p !== "string" || !isDipsPermitValue(p));
+  }
+  // 範囲がある計画への、緯度・経度・半径だけの訂正（areas 無し）で保存値と違う値は、黙って捨てず 422 にする。
+  // 保存値と同じ値なら通す（フォームは同じ値を送り返す）。範囲を外すときは areas: null を送る。
+  if (!("areas" in input) && Array.isArray(current.flight_areas) && current.flight_areas.length > 0) {
+    const same = (key: string, stored: number | null): boolean => !(key in input) || (input[key] === null || input[key] === "" ? stored === null : Number(input[key]) === stored);
+    if (!same("latitude", Number(current.latitude)) || !same("longitude", Number(current.longitude)) || !same("radiusM", current.radius_m)) {
+      throw new OpsError(422, "areas_present", { areas: AREAS_PRESENT_MESSAGE }, { areas: "areas_present" });
+    }
   }
   const v = validatePlan(merged);
   if (!meta.ok || !v.ok) return invalid(v, meta.ok ? undefined : { errors: { ...meta.errors }, codes: {} });

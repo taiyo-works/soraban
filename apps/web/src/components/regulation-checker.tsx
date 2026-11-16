@@ -20,7 +20,6 @@ import {
   formatDidDetermination,
   mergeAirspaceFlags,
   SPECIFIC_FLIGHT_FLAG_LABEL,
-  DIAGNOSIS_DISCLAIMER,
   type DiagnosisCategory,
   type FlightContext,
   type ManualChoice,
@@ -39,6 +38,7 @@ import {
 import { candidateToLocation, formatAccuracy, isLowAccuracy, type CurrentLocationCandidate } from "@/lib/current-location";
 import { checkLocation } from "@/lib/check";
 import { diagnoseLocation, type DiagnoseResponse } from "@/lib/diagnose";
+import { DISCLAIMER_JUDGEMENT } from "@/lib/disclaimers";
 import {
   buildRestorePlan,
   clearHistory,
@@ -74,6 +74,124 @@ import { PillButton, PillLink, VerdictSign, VerdictTag } from "./ui/sb-parts";
 
 // Sprint 11d：結論は 4 段の判定（VerdictSummary）。信号の 3 灯と STATUS_LABEL・overallHelp は廃止した
 // （段階の説明は @soraban/regulations の VERDICT_HELP）。
+
+// 結論の着地を確定させる。判定中の間に始めた滑らかなスクロールは、下の詳細が流れ込んで頁の高さが変わる間や、
+// 結論のカードが立ち上がる動き（transform）の間に、途中で止まる・数十 px ずれることがある（実測：地図のクリック後に約 3 割）。
+// 動きが終わって位置が落ち着いたあと、上端が着地の位置（scroll-margin-top）から外れていれば、その場で合わせ直す。
+// 利用者が要求のあとにスクロール・タッチ・キー操作をしたときは、合わせ直さない（要求の時点から監視する）。
+// 入力の種類に依らず、頁が結論から離れる向きにスクロールされたとき（スクロールバーのドラッグ、ページ内の移動、
+// スクリプトによる移動など）も、別の誰かが頁を動かしたとみなして合わせ直さない。結論へ向かう滑らかなスクロールは
+// 離れる向きに動かないので、これで止まらない。立ち上がりの動き（24px）や頁の高さの変化による数 px の揺れは、
+// 離れた量の合計が SCROLL_AWAY_PX を超えるまで数えない。
+// 待ちは開始から SETTLE_MAX_MS で打ち切り、立ち上がりの動きが終わっていなければ合わせ直しを諦める（触らない方を選ぶ）。
+// 失敗しても結論の表示は落とさない（getAnimations が無い環境では何もしない）。
+const SETTLE_MAX_MS = 1500;
+const SCROLL_AWAY_PX = 48;
+const INPUT_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+const CONCLUSION_SELECTOR = '[data-testid="verdict-conclusion"]';
+type ConclusionWatch = { readonly touched: () => boolean; readonly stop: () => void };
+const watchUserInput = (): ConclusionWatch => {
+  let touched = false;
+  const on = (): void => {
+    touched = true;
+  };
+  // 頁のスクロールが、結論の着地の位置から離れる向きに動いた量の合計を数える（要素の中のスクロールは window.scrollY が動かないので数えない）
+  let prevY = window.scrollY;
+  let away = 0;
+  const onScroll = (): void => {
+    try {
+      const y = window.scrollY;
+      const dy = y - prevY;
+      const box = document.querySelector<HTMLElement>(CONCLUSION_SELECTOR);
+      if (dy !== 0 && box) {
+        const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
+        const target = y + box.getBoundingClientRect().top - margin;
+        const toward = Math.sign(target - prevY);
+        if (toward !== 0 && Math.sign(dy) !== toward) {
+          away += Math.abs(dy);
+          if (away > SCROLL_AWAY_PX) touched = true;
+        }
+      }
+      prevY = y;
+    } catch {
+      /* 監視に失敗しても、結論の表示は落とさない */
+    }
+  };
+  for (const e of INPUT_EVENTS) window.addEventListener(e, on, { passive: true, capture: true });
+  window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+  return {
+    touched: () => touched,
+    stop: () => {
+      for (const e of INPUT_EVENTS) window.removeEventListener(e, on, { capture: true });
+      window.removeEventListener("scroll", onScroll, { capture: true });
+    },
+  };
+};
+const settleConclusion = (box: HTMLElement, watch: ConclusionWatch): (() => void) => {
+  let cancelled = false;
+  let timer: number | undefined;
+  let raf: number | undefined;
+  // 打ち切り・合わせ直しの完了・取り消しのどれでも、利用者の操作の監視も外す
+  const finish = (): void => {
+    cancelled = true;
+    if (timer !== undefined) window.clearTimeout(timer);
+    if (raf !== undefined) cancelAnimationFrame(raf);
+    watch.stop();
+  };
+  try {
+    if (typeof box.getAnimations !== "function") {
+      finish();
+      return finish;
+    }
+    const started = performance.now();
+    const running = box.getAnimations().filter((a) => a.playState === "running");
+    const animationsDone = Promise.all(running.map((a) => a.finished.then(() => true, () => false)));
+    const cap = new Promise<boolean>((resolve) => {
+      timer = window.setTimeout(() => resolve(false), SETTLE_MAX_MS);
+    });
+    void Promise.race([animationsDone, cap])
+      .then((done) => {
+        if (cancelled || !done) {
+          finish();
+          return;
+        }
+        let prev = Number.NaN;
+        let stable = 0;
+        const tick = (): void => {
+          try {
+            if (cancelled || watch.touched() || !box.isConnected) {
+              finish();
+              return;
+            }
+            const top = box.getBoundingClientRect().top;
+            stable = top === prev ? stable + 1 : 0;
+            prev = top;
+            if (stable < 3) {
+              if (performance.now() - started >= SETTLE_MAX_MS) {
+                finish();
+                return;
+              }
+              raf = requestAnimationFrame(tick);
+              return;
+            }
+            const margin = parseFloat(getComputedStyle(box).scrollMarginTop) || 0;
+            // html の scroll-behavior: smooth に従わせないため、instant を明示する
+            if (Math.abs(top - margin) > 2) box.scrollIntoView({ block: "start", behavior: "instant" });
+            finish();
+          } catch {
+            /* 合わせ直しに失敗しても、結論の表示は落とさない */
+            finish();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      })
+      .catch(() => finish());
+  } catch {
+    /* 同上 */
+    finish();
+  }
+  return finish;
+};
 
 // 空域フラグ集合の順序非依存比較（等しければ state 更新をスキップする）。
 const sameFlagSet = (
@@ -261,9 +379,14 @@ const EXAMPLE_LOCATIONS: readonly DemoPreset[] = [
 type RegulationCheckerProps = {
   /** 住所検索の同梱索引（アドレス・ベース・レジストリ）にデータがあるか。空なら ABR の出典と見出しを出さない。 */
   readonly addressIndexAvailable?: boolean;
+  /**
+   * 申請支援（手続き診断のパネル・書類 PDF・プリフィル・マニュアル骨子・申請の期限のカレンダー）を描くか。
+   * フラグ APPLICATION_SUPPORT_ENABLED（lib/boundary.ts。既定・本番は無効）。page.tsx がビルド時の値を渡す。既定は偽。
+   */
+  readonly applicationSupport?: boolean;
 };
 
-export function RegulationChecker({ addressIndexAvailable = false }: RegulationCheckerProps = {}) {
+export function RegulationChecker({ addressIndexAvailable = false, applicationSupport = false }: RegulationCheckerProps = {}) {
   // 運航管理が有効でログイン済みのときだけ「この判定で飛行計画を作る」を出す（Sprint 12a J。無効のときは何も出さず通信もしない）。
   const opsEntryAvailable = useOpsEntryAvailable();
   const [lat, setLat] = useState<string>(String(INITIAL_LOCATION.lat));
@@ -648,8 +771,21 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
   const conclusionRequestRef = useRef<boolean>(false);
   const conclusionScrolledRef = useRef<boolean>(false);
   const conclusionSawPendingRef = useRef<boolean>(false);
+  const conclusionSettleCancelRef = useRef<(() => void) | null>(null);
+  const conclusionWatchRef = useRef<ConclusionWatch | null>(null);
+  useEffect(
+    () => () => {
+      conclusionSettleCancelRef.current?.();
+      conclusionWatchRef.current?.stop();
+    },
+    [],
+  );
   const [conclusionTick, setConclusionTick] = useState<number>(0);
   const requestConclusion = (): void => {
+    conclusionSettleCancelRef.current?.();
+    conclusionSettleCancelRef.current = null;
+    conclusionWatchRef.current?.stop();
+    conclusionWatchRef.current = watchUserInput();
     conclusionRequestRef.current = true;
     conclusionScrolledRef.current = false;
     conclusionSawPendingRef.current = false;
@@ -816,7 +952,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
       if (isAbortError(err) || seq !== diagSeqRef.current) return;
       setDiagPending(false);
       setDiagPendingRunId(null);
-      setDiagnoseError(`申請支援の診断に失敗しました: ${(err as Error).message}`);
+      setDiagnoseError(`飛行の方法を含む判定に失敗しました: ${(err as Error).message}`);
       // 履歴に前の診断の判定や地点だけの判定を残さない（判定未確定。差し戻し 2 回目）。
       clearHistoryDiagnosisVerdict(runId);
     }
@@ -906,13 +1042,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
   useEffect(() => {
     if (!conclusionRequestRef.current) return;
-    const box = document.querySelector<HTMLElement>('[data-testid="verdict-conclusion"]');
+    const box = document.querySelector<HTMLElement>(CONCLUSION_SELECTOR);
     if (!box) return;
     const instant =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.getAttribute("data-mode") === "field";
     if (!conclusionScrolledRef.current) {
       conclusionScrolledRef.current = true;
-      box.scrollIntoView({ block: "start", behavior: instant ? "auto" : "smooth" });
+      box.scrollIntoView({ block: "start", behavior: instant ? "instant" : "smooth" });
     }
     // 判定中を一度見てから、結論が出た（または失敗が確定した）ら、見出しへフォーカスを移して要求を終える
     // （判定中の表示は別の要素なので、先に移すと、結論が出たときにフォーカスが外れる）
@@ -920,6 +1056,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
     if (conclusionFailed || (conclusionSawPendingRef.current && screenVerdict !== undefined && !verdictPending)) {
       document.getElementById("verdict-heading")?.focus({ preventScroll: true });
       conclusionRequestRef.current = false;
+      const watch = conclusionWatchRef.current;
+      if (watch) conclusionSettleCancelRef.current = settleConclusion(box, watch);
     }
   }, [conclusionTick, conclusionFailed, screenVerdict, verdictPending, result, checkError]);
 
@@ -1229,7 +1367,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
       {/* ─── RESULT（結論）：入力の直下。判定したら、ここへ移る（見出しにフォーカスも移す） ─── */}
       {result || checkError ? (
-        <section className="sb-area-result flex flex-col gap-6" aria-live="polite" data-testid="result-section">
+        <section className="sb-area-result flex flex-col gap-6" aria-live="polite" data-testid="result-section" data-wording-scope="judgement">
           {/* 結論（4 段の判定）と段取り（Sprint 11d D1） */}
           <VerdictSummary
             part="conclusion"
@@ -1299,7 +1437,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
 
       {/* ─── 手続き・規制ごとの判定・証跡（地図の下） ─── */}
       {result || checkError ? (
-        <section className="sb-area-wide flex flex-col gap-6" data-testid="result-details" aria-label="手続きと規制ごとの判定">
+        <section className="sb-area-wide flex flex-col gap-6" data-testid="result-details" data-wording-scope="judgement" aria-label="手続きと規制ごとの判定">
           <VerdictSummary part="details" verdict={screenVerdict} pending={verdictPending} failed={conclusionFailed} />
 
           {!showResultDetail ? (
@@ -1314,13 +1452,13 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
               {shouldWarnConfidence(result.overallConfidence) ? (
                 <div className="sb-note-card is-warn">
                   <span className="font-bold text-sb-ink">確からしさ {CONFIDENCE_LABEL[result.overallConfidence]} — 現地での再確認を推奨</span>{" "}
-                  この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。引受・許可申請の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
+                  この判定には、区域の位置または条文の読み取りの確からしさが低いデータが含まれます。飛行の前に、該当条文の原本（出典リンク）と現地状況をご確認ください。
                 </div>
               ) : null}
 
               {/* disclaimer */}
               <div className="sb-note-card border-l-4 border-sb-ink !text-sb-ink-2">
-                <span className="font-bold text-sb-ink">免責</span> {result.disclaimer}
+                <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
               </div>
 
               {/* per-regulation cards */}
@@ -1548,8 +1686,8 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             ここではユーザーにしか分からない「飛行方法」と「立入管理措置／第三者上空」「飛行予定日」を集める。 */}
         <fieldset className="flex flex-col gap-3 border-t border-sb-rule pt-5">
           <legend className="sb-eyebrow">
-            飛行方法（申請支援）
-            <span className="ml-2 font-normal text-sb-ink-3">（該当する方法を選ぶと必要手続きを診断）</span>
+            飛行の方法
+            <span className="ml-2 font-normal text-sb-ink-3">（選ぶと判定に反映します）</span>
           </legend>
 
           {/* 空域フラグ（DID・空港等周辺・緊急用務空域）。判定由来の red は自動プリチェック。
@@ -1580,7 +1718,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             </div>
             {/* DID 該当の三値（該当／非該当／未確認）。未確認は「申請不要」と判断しない。 */}
             {autoDidStatus !== undefined ? (
-              <div className="sb-note-card flex flex-col gap-1.5" data-testid="did-status">
+              <div className="sb-note-card flex flex-col gap-1.5" data-testid="did-status" data-wording-scope="judgement">
                 <span>
                   DID 自動判定：
                   <span
@@ -1626,17 +1764,12 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* 飛行予定日 — 提出期限カレンダーの「起算日」。ここから各手続きの期限を逆算する。 */}
+            {/* 飛行予定日 — 判定の条件に使う（申請支援が有効のときは、期限カレンダーの起算日にもなる）。 */}
             <label className="flex flex-col gap-1.5">
-              <span className="sb-field-text flex items-center gap-2">
-                飛行予定日
-                <span aria-hidden className="sb-tag !min-h-6 !px-2 ">
-                  起算日
-                </span>
-              </span>
+              <span className="sb-field-text flex items-center gap-2">飛行予定日</span>
               <input type="date" value={plannedDate} onChange={(e) => setPlannedDate(e.target.value)} className={`${fieldClass} sb-num`} />
               <span className="text-xs leading-relaxed text-sb-ink-3">
-                提出期限の逆算に使用（飛行開始の 10 開庁日以上前。土日・国民の祝日を除いた具体的な期限日を算出）
+                飛行の予定日（判定の条件に使います）
               </span>
             </label>
 
@@ -1661,7 +1794,7 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                 <option value="with">補助者あり</option>
                 <option value="without">補助者なし（より上位の運航要件）</option>
               </select>
-              <span className="text-xs leading-relaxed text-sb-ink-3">補助者の有無で運航条件が変わるため、プリフィル表に反映します</span>
+              <span className="text-xs leading-relaxed text-sb-ink-3">補助者の有無を判定の条件に使います</span>
             </label>
           ) : null}
 
@@ -1702,12 +1835,14 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
             「本機能は補助であり最終確認は DIPS／航空局で」を画面に出しておく契約
             （sprint-4：免責を入力前・結果表示・チェックリスト・プリフィルの全画面状態に表示）。 */}
         <p className="sb-note-card border-l-4 border-sb-ink ">
-          <span className="font-bold text-sb-ink">免責</span> {DIAGNOSIS_DISCLAIMER}
+          <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
         </p>
       </section>
 
-      {/* ─── 申請支援 診断（必要手続きチェックリスト） ───────────────────────────────── */}
-      {diagnosis ? (
+      {/* ─── 申請支援 診断（必要手続きチェックリスト） ─────────────────────────────────
+          フラグ APPLICATION_SUPPORT_ENABLED が無効（既定・本番）のときは描かない。/api/diagnose の呼び出しは続ける
+          （4 段の結論はこの応答から作る）。止めたコードは消さない（Sprint 18 §4.5）。 */}
+      {applicationSupport && diagnosis ? (
         <div className="sb-area-wide">
           <DiagnosisPanel
             diagnosis={diagnosis}
@@ -1763,7 +1898,11 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                     type="button"
                     onClick={() => restoreFromHistory(h)}
                     className="flex min-h-11 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
-                    title={`証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`}
+                    title={
+                      applicationSupport
+                        ? `証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`
+                        : `証跡 ${h.evidenceId} を復元して再判定`
+                    }
                   >
                     {vd.level ? (
                       <VerdictSign level={vd.level} />
@@ -1791,11 +1930,11 @@ export function RegulationChecker({ addressIndexAvailable = false }: RegulationC
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
                         {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${PURPOSE_SHORT[h.ctx.purpose] ?? h.ctx.purpose}` : ""}
                         {h.ctx?.pilotPermits && h.ctx.pilotPermits.length > 0 ? ` · 許可${h.ctx.pilotPermits.length}件` : ""}
-                        {ds ? ` · ${catShort[ds.category] ?? ds.category}` : ""}
+                        {applicationSupport && ds ? ` · ${catShort[ds.category] ?? ds.category}` : ""}
                         {ds?.didStatus
                           ? ` · DID:${formatDidDetermination(ds.didStatus, ds.didDetail, { droneWeightG: h.ctx?.droneWeightG })}`
                           : ""}
-                        {procCount !== undefined
+                        {applicationSupport && procCount !== undefined
                           ? completedCount > 0
                             ? ` · 手続き${completedCount}/${procCount}`
                             : ` · 手続き${procCount}件`

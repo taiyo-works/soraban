@@ -87,8 +87,17 @@ const B2B_FILES = [
   "components/ops/ops-frame.tsx",
 ];
 
+/** Sprint 17-1 で足した計画の共通の枠と新しい画面（D-1：v2 のトークンだけ） */
+const S17_FILES = [
+  "components/ops/plan-frame.tsx",
+  "components/ops/plan-anchor-compat.tsx",
+  "app/ops/plans/[id]/overview/page.tsx",
+  "app/ops/plans/[id]/journal/page.tsx",
+  "app/ops/plans/[id]/judgement/page.tsx",
+];
+
 describe("Q-9 ③b1・Q-5 ③b2a／③b2b の画面・部品は v2 のトークンだけ", () => {
-  for (const f of [...B1_FILES, ...B2A_FILES, ...B2B_FILES]) {
+  for (const f of [...B1_FILES, ...B2A_FILES, ...B2B_FILES, ...S17_FILES]) {
     it(`${f}：旧トークンの参照・色の直書きが 0`, () => {
       const src = stripComments(read(f));
       expect(src.match(LEGACY)?.[0] ?? null).toBeNull();

@@ -1,0 +1,1878 @@
+# Sprint 17 着手時の data-testid の一覧（apps/web/src。node scripts/testids.mjs --write で生成）。消さない・名前を変えない。
+about-boundary
+about-disclaimer
+about-disclaimer-inspection
+about-disclaimer-judgement
+about-disclaimer-record
+about-version
+aircraft-detail
+aircraft-list
+aircraft-total
+airport-mlit-note
+basis-check-evidence
+basis-dataset
+basis-datasets
+basis-diagnosis-evidence
+basis-engine
+basis-facts
+basis-hash
+basis-heading
+basis-input
+basis-permit
+basis-permit-applied
+basis-permit-hash
+basis-permit-hash-value
+basis-permit-link
+basis-permit-number
+basis-permit-period
+basis-permit-version
+basis-permits
+basis-permits-empty
+basis-plan-link
+basis-procedures
+boundary-registration
+cat-art-section
+cat-band
+cat-band-section
+cat-block
+cat-block-soft
+cat-buttons
+cat-disabled
+cat-field
+cat-forms
+cat-grounds
+cat-input
+cat-nav
+cat-normal
+cat-opx-danger
+cat-opx-primary
+cat-opx-secondary
+cat-orange
+cat-primary
+cat-secondary
+cat-selected
+cat-veil
+cat-veil-toggle
+cat-verdict
+create-plan-from-verdict
+current-location
+current-location-button
+current-location-candidate
+current-location-error
+current-location-privacy
+deadline-link
+deadline-row
+defect-row
+design-catalog
+detail-block
+diagnosis-category-headline
+diagnosis-did-status
+did-detail
+did-status
+dips-note
+dips-permits
+draft-refresh-note
+draft-stale-note
+draft-status
+evidence-id
+field-after-entry
+field-auth-required
+field-auth-signin
+field-back
+field-banner
+field-banner-text
+field-banner-undo
+field-cancelled
+field-carry-submit
+field-device-storage
+field-docs
+field-docs-note
+field-elapsed
+field-em-hint
+field-em-source
+field-em-submit
+field-emergency-link
+field-emergency-note
+field-emergency-result
+field-emergency-warning
+field-expiry-warning
+field-flight
+field-flight-button
+field-flight-gaps
+field-flight-gaps-notice
+field-flight-record-link
+field-flight-row
+field-flights
+field-in-flight
+field-incident-link
+field-inspection-abnormal
+field-inspection-link
+field-inspection-view
+field-journal
+field-journal-link
+field-journal-none
+field-next-flight
+field-offline-note
+field-outbox-unsaved
+field-permit-state
+field-permit-states
+field-permits
+field-plan-time
+field-plan-title
+field-plan-who
+field-post
+field-post-defect
+field-post-later
+field-post-link
+field-post-link-later
+field-post-noaccess
+field-post-none
+field-post-pending
+field-post-row
+field-post-state
+field-post-view
+field-preflight
+field-readonly
+field-recheck-submit
+field-rejected
+field-rejected-after-entry
+field-rejected-discard
+field-rejected-reason
+field-rejected-row
+field-report-detail
+field-report-not-required
+field-report-open
+field-report-record-before-takeoff
+field-report-status
+field-report-warning
+field-restriction
+field-restriction-link
+field-restriction-note
+field-restriction-state
+field-restriction-submit
+field-restriction-undo
+field-root
+field-round-label
+field-same-day
+field-same-day-link
+field-send-now
+field-sent-warning
+field-sent-warnings
+field-site
+field-site-error
+field-site-form
+field-site-hint
+field-site-note
+field-site-note-required
+field-site-recorded-note
+field-site-state
+field-site-submit
+field-site-temp
+field-site-threshold-note
+field-site-undo
+field-site-values
+field-site-wind
+field-status-band
+field-status-connection
+field-status-prefetch
+field-status-prefetch-stale
+field-status-saved
+field-status-unsent
+field-steps
+field-takeoff-blocked
+field-takeoff-preview
+field-undo-landing
+field-undo-takeoff
+field-unsent
+field-wake-note
+field-window-notice
+filter-count
+flight-basis-link
+flight-date
+flight-detail
+flight-field-link
+flight-from-field
+flight-from-plan
+flight-judgement-missing
+flight-landing
+flight-license
+flight-list
+flight-minutes
+flight-minutes-detail
+flight-mismatch
+flight-mismatches
+flight-pilot-name
+flight-plan-link
+flight-plan-link-box
+flight-takeoff
+flight-takeoff-gap
+flight-takeoff-gaps
+flight-takeoff-gaps-box
+flight-takeoff-gaps-none
+flight-total
+geocode-attribution
+geocode-result
+hero-art
+history-item
+history-verdict
+home-deadlines
+home-deadlines-empty
+home-deadlines-note
+home-ops-link
+home-today-band
+home-today-empty
+home-today-flight
+home-upcoming
+home-upcoming-empty
+incident-actions
+incident-aircraft
+incident-consult-check
+incident-consult-details
+incident-consult-form
+incident-consult-note
+incident-consult-open
+incident-consult-submit
+incident-correct-denied
+incident-count
+incident-detail
+incident-detail-damage
+incident-detail-event-types
+incident-detail-fill
+incident-detail-flight
+incident-detail-follow-up
+incident-detail-injury
+incident-detail-kind
+incident-detail-page
+incident-detail-pending
+incident-detail-plan
+incident-detail-snapshot
+incident-detail-summary
+incident-detail-time
+incident-detail-version
+incident-details
+incident-empty
+incident-event-type
+incident-event-type-notice
+incident-event-types
+incident-event-types-exclusive
+incident-event-types-fact-only
+incident-event-types-possible
+incident-fact-notice
+incident-factors
+incident-filter
+incident-filter-follow-up
+incident-filter-kind
+incident-filter-pending
+incident-filter-report
+incident-filter-submit
+incident-follow-up-form
+incident-follow-up-on
+incident-follow-up-update-on
+incident-follow-up-update-reason
+incident-follow-up-update-submit
+incident-form
+incident-injured-count
+incident-kind-notice
+incident-linked
+incident-linked-count
+incident-linked-fact
+incident-linked-new
+incident-linked-safety
+incident-list
+incident-list-page
+incident-live-guidance-empty
+incident-new-forbidden
+incident-new-link
+incident-new-page
+incident-official-notice
+incident-personal-notice
+incident-phase
+incident-pilot
+incident-place
+incident-plan
+incident-prevention
+incident-quick-back
+incident-quick-back-field
+incident-quick-detail
+incident-quick-detail-note
+incident-quick-hint
+incident-quick-later
+incident-quick-plan
+incident-quick-readonly
+incident-quick-rejected
+incident-quick-rejected-after-entry
+incident-quick-rejected-discard
+incident-quick-rejected-reason
+incident-quick-rejected-row
+incident-quick-root
+incident-quick-saved
+incident-quick-saved-message
+incident-quick-saved-time
+incident-quick-submit
+incident-quick-time
+incident-quick-unsaved
+incident-quick-unsent
+incident-reason
+incident-report-channel-note
+incident-report-check
+incident-report-denied
+incident-report-details
+incident-report-form
+incident-report-note
+incident-report-open
+incident-report-record
+incident-report-record-action
+incident-report-record-detail
+incident-report-record-notice
+incident-report-records
+incident-report-records-empty
+incident-report-reference
+incident-report-reference-absent
+incident-report-submit
+incident-retract-form
+incident-retract-open
+incident-retract-reason
+incident-retract-submit
+incident-row
+incident-row-follow-up
+incident-row-guidance
+incident-row-kind
+incident-row-pending
+incident-row-summary
+incident-row-time
+incident-row-voided
+incident-safety-first
+incident-safety-first-line
+incident-submit
+incident-summary
+incident-title
+incident-voided
+input-block
+inspection-count
+inspection-detail
+inspection-disclaimer
+inspection-empty
+inspection-list
+inspection-new
+inspection-pending
+inspection-pending-cannot
+inspection-pending-empty
+inspection-pending-link
+inspection-pending-list
+inspection-pending-row
+inspection-pending-scope
+inspection-pending-title
+inspection-records
+inspection-row
+inspection-select
+inspection-timing-filter
+journal-empty
+journal-flights-link
+journal-inspection-new
+journal-inspections-link
+journal-list
+journal-new-flight
+journal-new-incident
+journal-new-inspection
+journal-range
+journal-row
+journal-row-link
+journal-tabs
+journal-to-inspections
+judge-pill-here
+judge-pill-search
+judgement-scope-plan
+judgement-scope-snapshot
+layer-list
+layer-no-map-row
+legend-zones
+license-renewal-status
+location-note
+map-block
+map-pick-hint
+member-list
+mock-notice
+model-aircraft-references
+model-aircraft-tag
+model-aircraft-weight-note
+more-about
+more-admin
+more-link-about
+more-link-members
+more-menu
+next-action
+next-actions
+next-actions-empty
+next-actions-more
+offline-back
+offline-banner
+offline-inspection-all-normal
+offline-inspection-count
+offline-inspection-error
+offline-inspection-last
+offline-inspection-noaccess
+offline-inspection-plan
+offline-inspection-save
+offline-inspection-storage-note
+offline-journal-error
+offline-journal-flight
+offline-journal-inspection
+offline-journal-no-flight
+offline-journal-noaccess
+offline-journal-safety-detail
+offline-journal-save
+offline-journal-times
+offline-journal-warning-note
+offline-loading
+offline-root
+offline-today-empty
+offline-today-link
+offline-today-plan
+offline-unavailable
+offline-unavailable-back
+ops-about
+ops-bottom-nav
+ops-brand
+ops-brand-mark
+ops-change-notice
+ops-enter-flight
+ops-enter-inspection
+ops-enter-plan
+ops-header
+ops-inspections
+ops-journal
+ops-logo
+ops-me-email
+ops-me-name
+ops-me-role
+ops-more
+ops-no-access
+ops-root
+ops-sidebar
+ops-today
+permit-affects-note
+permit-airport-names
+permit-basis-count
+permit-basis-plan
+permit-basis-plans
+permit-circle
+permit-circle-add
+permit-circle-lat
+permit-circle-lng
+permit-circle-name
+permit-circle-radius
+permit-circle-remove
+permit-circles
+permit-conditions
+permit-count
+permit-coverage
+permit-declaration
+permit-declaration-text
+permit-detail
+permit-detail-kinds
+permit-detail-number
+permit-detail-period
+permit-detail-place
+permit-detail-version
+permit-empty
+permit-filter
+permit-filter-q
+permit-filter-submit
+permit-filter-validity
+permit-form
+permit-format-note
+permit-issued-on
+permit-kinds
+permit-list
+permit-max-altitude
+permit-max-weight
+permit-new-link
+permit-no-dips-note
+permit-note
+permit-number
+permit-place
+permit-place-text
+permit-reason
+permit-requires-access
+permit-requires-observer
+permit-revoke-form
+permit-revoke-reason
+permit-revoke-submit
+permit-revoked-on
+permit-row
+permit-row-kinds
+permit-row-number
+permit-row-period
+permit-row-scope
+permit-submit
+permit-text-note
+permit-title
+permit-valid-from
+permit-valid-to
+permit-validity
+permit-version-changed
+permit-version-content
+permit-version-hash
+permit-version-highlight
+permit-version-list
+permit-version-op
+permit-version-row
+permit-void-form
+permit-void-reason
+permit-void-submit
+pilot-detail
+pilot-list
+pilot-recorded-total
+place-address
+place-coords
+place-detail
+place-form
+place-lat
+place-list
+place-lng
+place-name
+place-new-link
+place-note
+place-reason
+place-row
+place-row-name
+place-submit
+place-title
+plan-access
+plan-address-q
+plan-address-results
+plan-address-search
+plan-aircraft
+plan-aircraft-readonly
+plan-aircraft-text
+plan-altitude
+plan-basis-link
+plan-cancel-needed
+plan-candidate
+plan-check-evidence
+plan-confirm-approve
+plan-confirm-facts
+plan-confirm-link
+plan-confirm-panel
+plan-confirm-reason
+plan-confirm-return
+plan-confirmation-decision
+plan-confirmation-row
+plan-confirmation-status
+plan-confirmations
+plan-count
+plan-diagnosis-evidence
+plan-digest
+plan-dips-notice
+plan-disclaimer
+plan-duration
+plan-edit-link
+plan-field-link
+plan-filter-attention
+plan-filter-pending
+plan-flags
+plan-flight-row
+plan-flights
+plan-flights-empty
+plan-flights-older
+plan-form
+plan-handoff-note
+plan-judge-line
+plan-judge-link
+plan-judged-at
+plan-judgement
+plan-judgement-details
+plan-judgement-purpose
+plan-judging
+plan-lat
+plan-list
+plan-lng
+plan-loc-status
+plan-locate
+plan-make-flight
+plan-new-link
+plan-notes
+plan-observer
+plan-overview
+plan-permit-applied-note
+plan-permit-candidate
+plan-permit-candidates
+plan-permit-conditions
+plan-permit-edit-link
+plan-permit-empty
+plan-permit-format-details
+plan-permit-format-note
+plan-permit-helper
+plan-permit-input-state
+plan-permit-input-states
+plan-permit-insert
+plan-permit-kinds
+plan-permit-link
+plan-permit-list
+plan-permit-number
+plan-permit-numbers
+plan-permit-numbers-text
+plan-permit-reasons
+plan-permit-registry-note
+plan-permit-row
+plan-permit-stale
+plan-permit-status
+plan-permit-unregistered
+plan-permit-version
+plan-permit-window
+plan-permits
+plan-permits-link
+plan-pilot
+plan-pilot-name
+plan-place-helper
+plan-place-name
+plan-place-section
+plan-primary-action
+plan-procedures
+plan-procedures-details
+plan-purpose
+plan-radius
+plan-reason
+plan-rejudge
+plan-report-box
+plan-report-card
+plan-report-change-row
+plan-report-changes
+plan-report-deadline
+plan-report-deadline-message
+plan-report-exception
+plan-report-guide-at
+plan-report-guide-note
+plan-report-label
+plan-report-link
+plan-report-note-short
+plan-report-penalty
+plan-report-reasons
+plan-report-status
+plan-report-status-label
+plan-request-confirmation
+plan-row
+plan-row-next
+plan-row-next-count
+plan-row-start
+plan-row-title
+plan-saved-place
+plan-self-confirmation
+plan-snapshot-seq
+plan-snapshots-link
+plan-source-stale
+plan-stale-box
+plan-stale-reasons
+plan-stale-sources
+plan-stale-sources-details
+plan-start
+plan-start-date
+plan-start-time
+plan-steps
+plan-submit
+plan-tabs
+plan-title
+plan-title-heading
+plan-unknown-count
+plan-use-candidate
+plan-void-details
+plan-voided-no-record-note
+plan-weight-unknown
+procedure-card
+procedure-history-row
+procedure-none
+procedure-verdict-done
+prop: about-boundary
+prop: about-disclaimer
+prop: about-disclaimer-inspection
+prop: about-disclaimer-judgement
+prop: about-disclaimer-record
+prop: about-provider
+prop: about-version
+prop: aircraft-detail
+prop: aircraft-list
+prop: aircraft-total
+prop: airport-mlit-note
+prop: basis-check-evidence
+prop: basis-dataset
+prop: basis-datasets
+prop: basis-diagnosis-evidence
+prop: basis-engine
+prop: basis-facts
+prop: basis-hash
+prop: basis-heading
+prop: basis-input
+prop: basis-permit
+prop: basis-permit-applied
+prop: basis-permit-hash
+prop: basis-permit-hash-value
+prop: basis-permit-link
+prop: basis-permit-number
+prop: basis-permit-period
+prop: basis-permit-version
+prop: basis-permits
+prop: basis-permits-empty
+prop: basis-plan-link
+prop: basis-procedures
+prop: boundary-registration
+prop: cat-art-section
+prop: cat-band
+prop: cat-band-section
+prop: cat-block
+prop: cat-block-soft
+prop: cat-buttons
+prop: cat-disabled
+prop: cat-field
+prop: cat-forms
+prop: cat-grounds
+prop: cat-input
+prop: cat-nav
+prop: cat-normal
+prop: cat-opx-danger
+prop: cat-opx-primary
+prop: cat-opx-secondary
+prop: cat-orange
+prop: cat-primary
+prop: cat-secondary
+prop: cat-selected
+prop: cat-veil
+prop: cat-veil-toggle
+prop: cat-verdict
+prop: command-palette
+prop: coverage-details
+prop: create-plan-from-verdict
+prop: current-location
+prop: current-location-button
+prop: current-location-candidate
+prop: current-location-error
+prop: current-location-privacy
+prop: deadline-link
+prop: deadline-row
+prop: defect-row
+prop: design-catalog
+prop: detail-block
+prop: diagnosis-category-headline
+prop: diagnosis-details
+prop: diagnosis-did-status
+prop: did-detail
+prop: did-status
+prop: dips-note
+prop: dips-permits
+prop: draft-refresh-note
+prop: draft-stale-note
+prop: draft-status
+prop: evidence-id
+prop: field-after-entry
+prop: field-auth-required
+prop: field-auth-signin
+prop: field-back
+prop: field-banner
+prop: field-banner-text
+prop: field-banner-undo
+prop: field-cancelled
+prop: field-carry-submit
+prop: field-device-storage
+prop: field-docs
+prop: field-docs-note
+prop: field-elapsed
+prop: field-em-hint
+prop: field-em-source
+prop: field-em-submit
+prop: field-emergency-link
+prop: field-emergency-note
+prop: field-emergency-result
+prop: field-emergency-warning
+prop: field-expiry-warning
+prop: field-flight
+prop: field-flight-button
+prop: field-flight-gaps
+prop: field-flight-gaps-notice
+prop: field-flight-record-link
+prop: field-flight-row
+prop: field-flights
+prop: field-in-flight
+prop: field-incident-link
+prop: field-inspection-abnormal
+prop: field-inspection-link
+prop: field-inspection-view
+prop: field-journal
+prop: field-journal-link
+prop: field-journal-none
+prop: field-next-flight
+prop: field-offline-note
+prop: field-outbox-unsaved
+prop: field-permit-state
+prop: field-permit-states
+prop: field-permits
+prop: field-plan-time
+prop: field-plan-title
+prop: field-plan-who
+prop: field-post
+prop: field-post-defect
+prop: field-post-later
+prop: field-post-link
+prop: field-post-link-later
+prop: field-post-noaccess
+prop: field-post-none
+prop: field-post-pending
+prop: field-post-row
+prop: field-post-state
+prop: field-post-view
+prop: field-preflight
+prop: field-readonly
+prop: field-recheck-submit
+prop: field-rejected
+prop: field-rejected-after-entry
+prop: field-rejected-discard
+prop: field-rejected-reason
+prop: field-rejected-row
+prop: field-report-detail
+prop: field-report-not-required
+prop: field-report-open
+prop: field-report-record-before-takeoff
+prop: field-report-status
+prop: field-report-warning
+prop: field-restriction
+prop: field-restriction-link
+prop: field-restriction-note
+prop: field-restriction-state
+prop: field-restriction-submit
+prop: field-restriction-undo
+prop: field-root
+prop: field-round-label
+prop: field-same-day
+prop: field-same-day-link
+prop: field-send-now
+prop: field-sent-warning
+prop: field-sent-warnings
+prop: field-site
+prop: field-site-error
+prop: field-site-form
+prop: field-site-hint
+prop: field-site-note
+prop: field-site-note-required
+prop: field-site-recorded-note
+prop: field-site-state
+prop: field-site-submit
+prop: field-site-temp
+prop: field-site-threshold-note
+prop: field-site-undo
+prop: field-site-values
+prop: field-site-wind
+prop: field-status-band
+prop: field-status-connection
+prop: field-status-prefetch
+prop: field-status-prefetch-stale
+prop: field-status-saved
+prop: field-status-unsent
+prop: field-steps
+prop: field-takeoff-blocked
+prop: field-takeoff-preview
+prop: field-undo-landing
+prop: field-undo-takeoff
+prop: field-unsent
+prop: field-wake-note
+prop: field-window-notice
+prop: filter-count
+prop: flight-basis-link
+prop: flight-date
+prop: flight-detail
+prop: flight-field-link
+prop: flight-from-field
+prop: flight-from-plan
+prop: flight-judgement-missing
+prop: flight-landing
+prop: flight-license
+prop: flight-list
+prop: flight-minutes
+prop: flight-minutes-detail
+prop: flight-mismatch
+prop: flight-mismatches
+prop: flight-pilot-name
+prop: flight-plan-link
+prop: flight-plan-link-box
+prop: flight-takeoff
+prop: flight-takeoff-gap
+prop: flight-takeoff-gaps
+prop: flight-takeoff-gaps-box
+prop: flight-takeoff-gaps-none
+prop: flight-total
+prop: geocode-attribution
+prop: geocode-result
+prop: hero-art
+prop: history-item
+prop: history-verdict
+prop: home-deadlines
+prop: home-deadlines-empty
+prop: home-deadlines-note
+prop: home-ops-link
+prop: home-today-band
+prop: home-today-empty
+prop: home-today-flight
+prop: home-upcoming
+prop: home-upcoming-empty
+prop: incident-actions
+prop: incident-aircraft
+prop: incident-consult-check
+prop: incident-consult-details
+prop: incident-consult-done
+prop: incident-consult-form
+prop: incident-consult-note
+prop: incident-consult-open
+prop: incident-consult-submit
+prop: incident-correct-denied
+prop: incident-count
+prop: incident-detail
+prop: incident-detail-damage
+prop: incident-detail-event-types
+prop: incident-detail-fill
+prop: incident-detail-flight
+prop: incident-detail-follow-up
+prop: incident-detail-injury
+prop: incident-detail-kind
+prop: incident-detail-page
+prop: incident-detail-pending
+prop: incident-detail-plan
+prop: incident-detail-snapshot
+prop: incident-detail-summary
+prop: incident-detail-time
+prop: incident-detail-version
+prop: incident-details
+prop: incident-empty
+prop: incident-event-type
+prop: incident-event-type-notice
+prop: incident-event-types
+prop: incident-event-types-error
+prop: incident-event-types-exclusive
+prop: incident-event-types-fact-only
+prop: incident-event-types-possible
+prop: incident-fact-notice
+prop: incident-factors
+prop: incident-filter
+prop: incident-filter-follow-up
+prop: incident-filter-kind
+prop: incident-filter-pending
+prop: incident-filter-report
+prop: incident-filter-submit
+prop: incident-follow-up-form
+prop: incident-follow-up-on
+prop: incident-follow-up-update-on
+prop: incident-follow-up-update-reason
+prop: incident-follow-up-update-submit
+prop: incident-form
+prop: incident-guidance
+prop: incident-injured-count
+prop: incident-kind-notice
+prop: incident-linked
+prop: incident-linked-count
+prop: incident-linked-fact
+prop: incident-linked-new
+prop: incident-linked-safety
+prop: incident-list
+prop: incident-list-page
+prop: incident-live-guidance
+prop: incident-live-guidance-empty
+prop: incident-new-forbidden
+prop: incident-new-link
+prop: incident-new-page
+prop: incident-occurred
+prop: incident-official-notice
+prop: incident-personal-notice
+prop: incident-phase
+prop: incident-pilot
+prop: incident-place
+prop: incident-plan
+prop: incident-prevention
+prop: incident-quick-back
+prop: incident-quick-back-field
+prop: incident-quick-detail
+prop: incident-quick-detail-note
+prop: incident-quick-hint
+prop: incident-quick-later
+prop: incident-quick-plan
+prop: incident-quick-readonly
+prop: incident-quick-rejected
+prop: incident-quick-rejected-after-entry
+prop: incident-quick-rejected-discard
+prop: incident-quick-rejected-reason
+prop: incident-quick-rejected-row
+prop: incident-quick-root
+prop: incident-quick-saved
+prop: incident-quick-saved-message
+prop: incident-quick-saved-time
+prop: incident-quick-submit
+prop: incident-quick-time
+prop: incident-quick-unsaved
+prop: incident-quick-unsent
+prop: incident-reason
+prop: incident-report-channel-note
+prop: incident-report-check
+prop: incident-report-denied
+prop: incident-report-details
+prop: incident-report-done
+prop: incident-report-form
+prop: incident-report-note
+prop: incident-report-open
+prop: incident-report-record
+prop: incident-report-record-action
+prop: incident-report-record-detail
+prop: incident-report-record-notice
+prop: incident-report-records
+prop: incident-report-records-empty
+prop: incident-report-reference
+prop: incident-report-reference-absent
+prop: incident-report-state
+prop: incident-report-submit
+prop: incident-retract-form
+prop: incident-retract-open
+prop: incident-retract-reason
+prop: incident-retract-submit
+prop: incident-row
+prop: incident-row-follow-up
+prop: incident-row-guidance
+prop: incident-row-kind
+prop: incident-row-pending
+prop: incident-row-report
+prop: incident-row-summary
+prop: incident-row-time
+prop: incident-row-voided
+prop: incident-safety-first
+prop: incident-safety-first-line
+prop: incident-submit
+prop: incident-summary
+prop: incident-title
+prop: incident-voided
+prop: input-block
+prop: inspected
+prop: inspection-after-takeoff
+prop: inspection-count
+prop: inspection-detail
+prop: inspection-disclaimer
+prop: inspection-empty
+prop: inspection-list
+prop: inspection-new
+prop: inspection-pending
+prop: inspection-pending-cannot
+prop: inspection-pending-count
+prop: inspection-pending-empty
+prop: inspection-pending-link
+prop: inspection-pending-list
+prop: inspection-pending-row
+prop: inspection-pending-scope
+prop: inspection-pending-title
+prop: inspection-records
+prop: inspection-row
+prop: inspection-select
+prop: inspection-timing-filter
+prop: journal-empty
+prop: journal-flights-link
+prop: journal-inspection-new
+prop: journal-inspections-link
+prop: journal-list
+prop: journal-new-flight
+prop: journal-new-incident
+prop: journal-new-inspection
+prop: journal-range
+prop: journal-row
+prop: journal-row-link
+prop: journal-tabs
+prop: journal-to-inspections
+prop: judge-pill-here
+prop: judge-pill-search
+prop: judge-pills
+prop: judgement-scope-plan
+prop: judgement-scope-snapshot
+prop: landing
+prop: layer-list
+prop: layer-no-map-row
+prop: legend-zones
+prop: license-renewal-status
+prop: location-note
+prop: map-block
+prop: map-pick-hint
+prop: member-list
+prop: mock-notice
+prop: model-aircraft-references
+prop: model-aircraft-tag
+prop: model-aircraft-weight-note
+prop: more-about
+prop: more-admin
+prop: more-link-about
+prop: more-link-members
+prop: more-menu
+prop: more-rows
+prop: next-action
+prop: next-actions
+prop: next-actions-empty
+prop: next-actions-more
+prop: offline-back
+prop: offline-banner
+prop: offline-inspection-all-normal
+prop: offline-inspection-count
+prop: offline-inspection-error
+prop: offline-inspection-last
+prop: offline-inspection-noaccess
+prop: offline-inspection-plan
+prop: offline-inspection-save
+prop: offline-inspection-storage-note
+prop: offline-journal-error
+prop: offline-journal-flight
+prop: offline-journal-inspection
+prop: offline-journal-no-flight
+prop: offline-journal-noaccess
+prop: offline-journal-safety-detail
+prop: offline-journal-save
+prop: offline-journal-times
+prop: offline-journal-warning-note
+prop: offline-loading
+prop: offline-no-member
+prop: offline-not-saved
+prop: offline-root
+prop: offline-today-empty
+prop: offline-today-link
+prop: offline-today-plan
+prop: offline-unavailable
+prop: offline-unavailable-back
+prop: ops-about
+prop: ops-bottom-nav
+prop: ops-brand
+prop: ops-brand-mark
+prop: ops-change-notice
+prop: ops-enter-flight
+prop: ops-enter-inspection
+prop: ops-enter-plan
+prop: ops-header
+prop: ops-inspections
+prop: ops-journal
+prop: ops-logo
+prop: ops-me-email
+prop: ops-me-name
+prop: ops-me-role
+prop: ops-more
+prop: ops-no-access
+prop: ops-root
+prop: ops-sidebar
+prop: ops-today
+prop: permit-affects-note
+prop: permit-aircraft-scope
+prop: permit-airport-names
+prop: permit-basis-count
+prop: permit-basis-plan
+prop: permit-basis-plans
+prop: permit-circle
+prop: permit-circle-add
+prop: permit-circle-lat
+prop: permit-circle-lng
+prop: permit-circle-name
+prop: permit-circle-radius
+prop: permit-circle-remove
+prop: permit-circles
+prop: permit-conditions
+prop: permit-count
+prop: permit-coverage
+prop: permit-declaration
+prop: permit-declaration-text
+prop: permit-detail
+prop: permit-detail-kinds
+prop: permit-detail-number
+prop: permit-detail-period
+prop: permit-detail-place
+prop: permit-detail-version
+prop: permit-empty
+prop: permit-filter
+prop: permit-filter-q
+prop: permit-filter-submit
+prop: permit-filter-validity
+prop: permit-form
+prop: permit-format-note
+prop: permit-issued-on
+prop: permit-kinds
+prop: permit-list
+prop: permit-max-altitude
+prop: permit-max-weight
+prop: permit-new-link
+prop: permit-no-dips-note
+prop: permit-note
+prop: permit-number
+prop: permit-pilot-scope
+prop: permit-place
+prop: permit-place-text
+prop: permit-reason
+prop: permit-requires-access
+prop: permit-requires-observer
+prop: permit-revoke-form
+prop: permit-revoke-reason
+prop: permit-revoke-submit
+prop: permit-revoked-on
+prop: permit-row
+prop: permit-row-kinds
+prop: permit-row-number
+prop: permit-row-period
+prop: permit-row-scope
+prop: permit-submit
+prop: permit-text-note
+prop: permit-title
+prop: permit-valid-from
+prop: permit-valid-to
+prop: permit-validity
+prop: permit-version-changed
+prop: permit-version-content
+prop: permit-version-hash
+prop: permit-version-highlight
+prop: permit-version-list
+prop: permit-version-op
+prop: permit-version-row
+prop: permit-void-form
+prop: permit-void-reason
+prop: permit-void-submit
+prop: pilot-detail
+prop: pilot-list
+prop: pilot-recorded-total
+prop: place-address
+prop: place-coords
+prop: place-detail
+prop: place-form
+prop: place-lat
+prop: place-list
+prop: place-lng
+prop: place-name
+prop: place-new-link
+prop: place-note
+prop: place-reason
+prop: place-row
+prop: place-row-name
+prop: place-submit
+prop: place-title
+prop: plan-access
+prop: plan-address-q
+prop: plan-address-results
+prop: plan-address-search
+prop: plan-aircraft
+prop: plan-aircraft-readonly
+prop: plan-aircraft-text
+prop: plan-altitude
+prop: plan-basis-link
+prop: plan-cancel-needed
+prop: plan-candidate
+prop: plan-check-evidence
+prop: plan-confirm-approve
+prop: plan-confirm-facts
+prop: plan-confirm-link
+prop: plan-confirm-panel
+prop: plan-confirm-reason
+prop: plan-confirm-return
+prop: plan-confirmation-decision
+prop: plan-confirmation-row
+prop: plan-confirmation-status
+prop: plan-confirmations
+prop: plan-count
+prop: plan-diagnosis-evidence
+prop: plan-digest
+prop: plan-dips-notice
+prop: plan-disclaimer
+prop: plan-duration
+prop: plan-edit-link
+prop: plan-field-link
+prop: plan-filter-attention
+prop: plan-filter-pending
+prop: plan-flags
+prop: plan-flight-row
+prop: plan-flights
+prop: plan-flights-empty
+prop: plan-flights-older
+prop: plan-form
+prop: plan-handoff-note
+prop: plan-judge-line
+prop: plan-judge-link
+prop: plan-judged-at
+prop: plan-judgement
+prop: plan-judgement-details
+prop: plan-judgement-purpose
+prop: plan-judging
+prop: plan-lat
+prop: plan-list
+prop: plan-lng
+prop: plan-loc-status
+prop: plan-locate
+prop: plan-make-flight
+prop: plan-new-link
+prop: plan-notes
+prop: plan-observer
+prop: plan-overview
+prop: plan-permit-applied-note
+prop: plan-permit-candidate
+prop: plan-permit-candidates
+prop: plan-permit-conditions
+prop: plan-permit-edit-link
+prop: plan-permit-empty
+prop: plan-permit-format-details
+prop: plan-permit-format-note
+prop: plan-permit-helper
+prop: plan-permit-input-state
+prop: plan-permit-input-states
+prop: plan-permit-insert
+prop: plan-permit-kinds
+prop: plan-permit-link
+prop: plan-permit-list
+prop: plan-permit-number
+prop: plan-permit-numbers
+prop: plan-permit-numbers-text
+prop: plan-permit-reasons
+prop: plan-permit-registry-note
+prop: plan-permit-row
+prop: plan-permit-stale
+prop: plan-permit-status
+prop: plan-permit-unregistered
+prop: plan-permit-version
+prop: plan-permit-window
+prop: plan-permits
+prop: plan-permits-link
+prop: plan-pilot
+prop: plan-pilot-name
+prop: plan-place-helper
+prop: plan-place-name
+prop: plan-place-section
+prop: plan-primary-action
+prop: plan-procedures
+prop: plan-procedures-details
+prop: plan-purpose
+prop: plan-radius
+prop: plan-reason
+prop: plan-rejudge
+prop: plan-report-box
+prop: plan-report-card
+prop: plan-report-change-row
+prop: plan-report-changes
+prop: plan-report-deadline
+prop: plan-report-deadline-message
+prop: plan-report-exception
+prop: plan-report-guide-at
+prop: plan-report-guide-note
+prop: plan-report-label
+prop: plan-report-link
+prop: plan-report-note-short
+prop: plan-report-penalty
+prop: plan-report-reasons
+prop: plan-report-status
+prop: plan-report-status-label
+prop: plan-request-confirmation
+prop: plan-row
+prop: plan-row-next
+prop: plan-row-next-action
+prop: plan-row-next-count
+prop: plan-row-start
+prop: plan-row-title
+prop: plan-saved-place
+prop: plan-self-confirmation
+prop: plan-snapshot-seq
+prop: plan-snapshots-link
+prop: plan-source-stale
+prop: plan-stale-box
+prop: plan-stale-reasons
+prop: plan-stale-sources
+prop: plan-stale-sources-details
+prop: plan-start
+prop: plan-start-date
+prop: plan-start-time
+prop: plan-steps
+prop: plan-submit
+prop: plan-tabs
+prop: plan-title
+prop: plan-title-heading
+prop: plan-unknown-count
+prop: plan-use-candidate
+prop: plan-void-details
+prop: plan-voided-no-record-note
+prop: plan-weight-unknown
+prop: procedure-card
+prop: procedure-history-row
+prop: procedure-none
+prop: procedure-verdict-done
+prop: provider-address
+prop: provider-email
+prop: provider-hours
+prop: provider-name
+prop: provider-phone
+prop: provider-representative
+prop: pwa-install-guide
+prop: pwa-prefetch-status
+prop: pwa-update
+prop: pwa-update-button
+prop: record-warnings
+prop: regulation-applied-permits
+prop: regulation-base-status
+prop: regulation-data-verified
+prop: regulation-datasets
+prop: regulation-detail
+prop: regulation-exceptions
+prop: regulation-excluded
+prop: regulation-map
+prop: regulation-status-before-exclusion
+prop: regulation-summary
+prop: regulation-verdict
+prop: regulation-verdict-line
+prop: regulation-verdict-provisional
+prop: regulations-unavailable
+prop: report-actions
+prop: report-adapter
+prop: report-adapter-mode
+prop: report-audit
+prop: report-audit-details
+prop: report-audit-empty
+prop: report-audit-row
+prop: report-cancel-info
+prop: report-groups
+prop: report-history
+prop: report-history-empty
+prop: report-history-older
+prop: report-inputs
+prop: report-kind-tabs
+prop: report-license-masked-note
+prop: report-map-details
+prop: report-map-info
+prop: report-map-revision
+prop: report-map-verified
+prop: report-missing-count
+prop: report-mock-assumption
+prop: report-notice
+prop: report-notice-short
+prop: report-plan-title
+prop: report-prepare-warnings
+prop: report-preview-busy
+prop: report-purpose-count
+prop: report-record-blocked
+prop: report-record-form
+prop: report-resolve-outcome
+prop: report-retry-confirm
+prop: report-retry-scenario
+prop: report-route
+prop: report-route-geojson
+prop: report-route-guide
+prop: report-row
+prop: report-row-channel
+prop: report-row-check-evidence
+prop: report-row-details
+prop: report-row-diagnosis-evidence
+prop: report-row-effective
+prop: report-row-error
+prop: report-row-external-status
+prop: report-row-kind
+prop: report-row-memo
+prop: report-row-number
+prop: report-row-reported-at
+prop: report-row-stale
+prop: report-row-state
+prop: report-row-status
+prop: report-screen
+prop: report-status-and-kinds
+prop: report-status-details
+prop: report-status-line
+prop: report-stepper
+prop: report-unavailable
+prop: report-warnings
+prop: result-details
+prop: result-section
+prop: route
+prop: send-confirm
+prop: send-scenario
+prop: shortcut-sheet
+prop: signout
+prop: signout-cancel
+prop: signout-discard
+prop: signout-keep
+prop: signout-send
+prop: signout-warning
+prop: site-boundary
+prop: site-disclaimer
+prop: site-facts
+prop: site-lead
+prop: site-ops-note
+prop: site-provider
+prop: skip-to-main
+prop: snapshot-current
+prop: snapshot-list
+prop: snapshot-past
+prop: snapshot-reason
+prop: snapshot-row
+prop: snapshot-seq
+prop: takeoff
+prop: toast
+prop: toast-region
+prop: today-badge
+prop: today-card
+prop: today-card-aircraft
+prop: today-card-confirmation
+prop: today-card-date
+prop: today-card-next
+prop: today-card-next-link
+prop: today-card-pilot
+prop: today-card-primary
+prop: today-card-reason
+prop: today-card-report
+prop: today-card-route
+prop: today-card-route-count
+prop: today-card-time
+prop: today-card-title
+prop: today-card-verdict
+prop: today-date
+prop: today-disclaimer
+prop: today-empty
+prop: today-empty-action
+prop: today-empty-message
+prop: today-heading
+prop: today-next-action
+prop: today-next-action-cannot
+prop: today-next-action-due
+prop: today-next-action-label
+prop: today-next-action-link
+prop: today-next-action-plan
+prop: today-next-actions
+prop: today-next-actions-empty
+prop: today-next-more
+prop: today-plans-link
+prop: today-rest
+prop: today-rest-link
+prop: today-rest-row
+prop: upcoming-link
+prop: upcoming-row
+prop: user-menu
+prop: user-menu-about
+prop: user-menu-button
+prop: verdict-checked-date
+prop: verdict-conclusion
+prop: verdict-conditional
+prop: verdict-done
+prop: verdict-done-condition
+prop: verdict-done-item
+prop: verdict-duties
+prop: verdict-duties-section
+prop: verdict-duty
+prop: verdict-evidence
+prop: verdict-failed
+prop: verdict-failed-note
+prop: verdict-item
+prop: verdict-item-permit-note
+prop: verdict-item-reason
+prop: verdict-items
+prop: verdict-legend
+prop: verdict-level
+prop: verdict-mark
+prop: verdict-no-fly
+prop: verdict-no-fly-item
+prop: verdict-pending
+prop: verdict-procedure
+prop: verdict-procedure-deadline
+prop: verdict-procedures
+prop: verdict-procedures-section
+prop: verdict-responsibility
+prop: verdict-retry
+prop: verdict-sourced
+prop: verdict-unknown-count
+prop: version-actor
+prop: version-changed
+prop: version-list
+prop: version-list-older
+prop: version-op
+prop: version-reason
+prop: version-row
+prop: version-time
+prop: workspace-handle
+prop: workspace-input
+prop: workspace-map
+prop: workspace-maximize
+prop: workspace-peek
+prop: workspace-result
+prop: workspace-sheet
+prop: workspace-tabs
+pwa-install-guide
+pwa-prefetch-status
+pwa-update
+pwa-update-button
+regulation-applied-permits
+regulation-base-status
+regulation-data-verified
+regulation-datasets
+regulation-exceptions
+regulation-excluded
+regulation-map
+regulation-status-before-exclusion
+regulation-summary
+regulation-verdict-line
+regulation-verdict-provisional
+regulations-unavailable
+report-actions
+report-adapter
+report-adapter-mode
+report-audit
+report-audit-details
+report-audit-empty
+report-audit-row
+report-cancel-info
+report-groups
+report-history
+report-history-empty
+report-history-older
+report-inputs
+report-kind-tabs
+report-license-masked-note
+report-map-details
+report-map-info
+report-map-revision
+report-map-verified
+report-missing-count
+report-mock-assumption
+report-notice
+report-notice-short
+report-plan-title
+report-prepare-warnings
+report-preview-busy
+report-purpose-count
+report-record-blocked
+report-record-form
+report-resolve-outcome
+report-retry-confirm
+report-retry-scenario
+report-route
+report-route-geojson
+report-route-guide
+report-row
+report-row-channel
+report-row-check-evidence
+report-row-details
+report-row-diagnosis-evidence
+report-row-effective
+report-row-error
+report-row-external-status
+report-row-kind
+report-row-memo
+report-row-number
+report-row-reported-at
+report-row-stale
+report-row-state
+report-row-status
+report-screen
+report-status-and-kinds
+report-status-details
+report-status-line
+report-stepper
+report-unavailable
+report-warnings
+result-details
+result-section
+route
+send-confirm
+send-scenario
+signout
+signout-cancel
+signout-discard
+signout-keep
+signout-send
+signout-warning
+site-boundary
+site-disclaimer
+site-facts
+site-lead
+site-ops-note
+skip-to-main
+snapshot-current
+snapshot-list
+snapshot-past
+snapshot-reason
+snapshot-row
+snapshot-seq
+toast
+toast-region
+today-badge
+today-card
+today-card-aircraft
+today-card-confirmation
+today-card-date
+today-card-next
+today-card-next-link
+today-card-pilot
+today-card-primary
+today-card-reason
+today-card-report
+today-card-route
+today-card-route-count
+today-card-time
+today-card-title
+today-card-verdict
+today-date
+today-disclaimer
+today-empty
+today-empty-action
+today-empty-message
+today-heading
+today-next-action
+today-next-action-cannot
+today-next-action-due
+today-next-action-label
+today-next-action-link
+today-next-action-plan
+today-next-actions
+today-next-actions-empty
+today-next-more
+today-plans-link
+today-rest
+today-rest-link
+today-rest-row
+upcoming-link
+upcoming-row
+user-menu
+user-menu-about
+user-menu-button
+verdict-checked-date
+verdict-conclusion
+verdict-conditional
+verdict-done
+verdict-done-condition
+verdict-done-item
+verdict-duties
+verdict-duties-section
+verdict-duty
+verdict-evidence
+verdict-failed
+verdict-failed-note
+verdict-item
+verdict-item-permit-note
+verdict-items
+verdict-legend
+verdict-level
+verdict-mark
+verdict-no-fly
+verdict-no-fly-item
+verdict-pending
+verdict-procedure
+verdict-procedure-deadline
+verdict-procedures
+verdict-procedures-section
+verdict-responsibility
+verdict-retry
+verdict-sourced
+verdict-unknown-count
+version-actor
+version-changed
+version-list
+version-list-older
+version-op
+version-reason
+version-row
+version-time
+workspace-handle
+workspace-input
+workspace-map
+workspace-maximize
+workspace-peek
+workspace-result
+workspace-sheet
+workspace-tabs
+式: REFERENCE_LIST_ID
+式: `${testIdPrefix}-${v}`
+式: `${testId}-any`
+式: `${testId}-cannot`
+式: `${testId}-changed`
+式: `${testId}-date`
+式: `${testId}-due`
+式: `${testId}-label`
+式: `${testId}-link`
+式: `${testId}-list`
+式: `${testId}-listed`
+式: `${testId}-next-day`
+式: `${testId}-note`
+式: `${testId}-option`
+式: `${testId}-source`
+式: `${testId}-stale`
+式: `${testId}-text`
+式: `${testId}-time`
+式: `${testId}-toggle`
+式: `${testPrefix}-${v}`
+式: `${testPrefix}-confirm-done`
+式: `${testPrefix}-confirm-latest`
+式: `${testPrefix}-dips-number`
+式: `${testPrefix}-memo`
+式: `${testPrefix}-number-unavailable`
+式: `airspace-${flag}`
+式: `field-docs-basis-${d.key}`
+式: `field-docs-confirm-${d.key}`
+式: `field-docs-item-${d.key}`
+式: `field-docs-notes-${d.key}`
+式: `field-docs-state-${d.key}`
+式: `field-docs-undo-${d.key}`
+式: `field-em-result-${r}`
+式: `field-item-${item}`
+式: `field-item-state-${item}`
+式: `field-item-undo-${item}`
+式: `field-site-${f}-${o.value}`
+式: `field-step-${n}`
+式: `incident-contact-${c}`
+式: `incident-event-type-${o.key}`
+式: `incident-event-type-desc-${o.key}`
+式: `incident-event-type-label-${o.key}`
+式: `incident-follow-up-${s}`
+式: `incident-follow-up-update-${v}`
+式: `incident-kind-${k}`
+式: `incident-report-channel-${c}`
+式: `inspection-item-${it.key}`
+式: `inspection-result-${it.key}`
+式: `inspection-timing-${t ?? "all"}`
+式: `journal-tab-${key}`
+式: `more-count-${m.id}`
+式: `more-link-${m.id}`
+式: `nav-${it.key}`
+式: `offline-inspection-${it.key}-${r}`
+式: `offline-inspection-item-${it.key}`
+式: `offline-inspection-note-${it.key}`
+式: `offline-inspection-timing-${t}`
+式: `offline-journal-safety-${v}`
+式: `permit-kind-${c.value}`
+式: `permit-place-${val}`
+式: `plan-flag-${c.value}`
+式: `plan-permit-${c.value}`
+式: `plan-step-${n}`
+式: `plan-tab-${t.key}`
+式: `plan-view-${v.key}`
+式: `procedure-${s.kind}`
+式: `procedure-check-${kind}-${k}`
+式: `procedure-deadline-${s.kind}`
+式: `procedure-form-${kind}`
+式: `procedure-history-${s.kind}`
+式: `procedure-latest-${s.kind}`
+式: `procedure-reference-${kind}`
+式: `procedure-retract-${kind}`
+式: `procedure-retract-form-${kind}`
+式: `procedure-retract-open-${kind}`
+式: `procedure-retract-reason-${kind}`
+式: `procedure-stale-${s.kind}`
+式: `procedure-status-${s.kind}`
+式: `procedure-submit-${kind}`
+式: `regulation-card-${regulation.id}`
+式: `report-${open}-form`
+式: `report-${open}-reason`
+式: `report-${open}-submit`
+式: `report-action-${k}`
+式: `report-copied-${item.key}`
+式: `report-copy-${item.key}`
+式: `report-group-${g.id}`
+式: `report-group-mark-${g.id}`
+式: `report-input-${k}`
+式: `report-input-purpose-${code}`
+式: `report-item-${item.key}`
+式: `report-item-api-${item.key}`
+式: `report-item-label-${item.key}`
+式: `report-item-value-${item.key}`
+式: `report-item-warnings-${item.key}`
+式: `report-kind-${k}`
+式: `workspace-toggle-${side}`
+式: bare ? undefined : "plan-report"
+式: bare ? undefined : "plan-report-status-badge"
+式: bare ? undefined : "plan-stale"
+式: bare ? undefined : "plan-state"
+式: d.status === "unmet" ? `field-docs-fix-${d.key
+式: direct && !isCancel ? "send-submit" : "record-submit"
+式: id
+式: labelTestId
+式: part === "details" ? "verdict-details" : "verdict-summary"
+式: r.testId
+式: rowTestId?.(row)
+式: testId

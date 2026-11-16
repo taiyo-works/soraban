@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ヘッダー 3 案</title>
+<style>
+:root { --ink: #262523; --ink-2: #4A4843; --rule: #E4E2D9; --orange: #EBA15C; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; color: var(--ink); font: 400 16px/1.8 "Noto Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 26px; margin: 0 0 8px; } h2 { font-size: 20px; margin: 0 0 8px; border-left: 5px solid var(--orange); padding-left: 12px; }
+p, ul { margin: 0 0 10px; } ul { padding-left: 1.2em; }
+.lead { color: var(--ink-2); max-width: 46rem; }
+section { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--rule); }
+.shots { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin: 12px 0; }
+.shots figure { margin: 0; } .shots img { display: block; border: 1px solid var(--rule); max-width: 100%; height: auto; }
+.shots .s375 img { width: 240px; } .shots .s1280 img { width: min(640px, 100%); }
+figcaption { font-size: 13px; color: var(--ink-2); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; } th, td { border: 1px solid var(--rule); padding: 6px 10px; text-align: left; vertical-align: top; }
+a { color: var(--ink); text-underline-offset: 3px; }
+.rec { margin-top: 16px; padding: 12px 16px; border: 2px solid var(--ink); border-radius: 12px; }
+</style></head><body><main>
+<h1>公開の「/」のヘッダー 3 案（静的な見本）</h1>
+<p class="lead">今のヘッダー（丘の波線・雲・太陽・ドローンの線画が文字と重なる）を作り直す案。どれも、ブランドの橙の丸（ロゴの円の測定値 #EBA15C。ドローンの線画入り）・「そらばん」・副題・主役の要素 1 つ、で組む。橙は面と太い線だけ（文字・細い線には使わない）。外部通信・外部フォント・依存なし（インライン SVG）。本番のコードは変えていない。見本の値は <code>../tokens.css</code> の抜粋（<code>base.css</code>）。</p>
+
+<table>
+<tr><th></th><th>高さ（スマホ / PC）</th><th>主役</th><th>橙の使い方</th></tr>
+<tr><td>今の挿絵</td><td>128 / 280</td><td>丘 3 層・雲・日・ドローン</td><td>日の円</td></tr>
+<tr><td><a href="option-a.html">A 余白</a></td><td>112 / 200</td><td>1 本の航跡と小さなドローン</td><td>丸のロゴ、日の円（面）</td></tr>
+<tr><td><a href="option-b.html">B 幾何</a></td><td>128 / 240</td><td>円と直線（等高線の抽象）</td><td>丸のロゴ、大きな日の円（面）</td></tr>
+<tr><td><a href="option-c.html">C 経路</a></td><td>128 / 240</td><td>地図の帯の上の飛行経路</td><td>丸のロゴ、経路の太い線（6px）</td></tr>
+</table>
+
+<section><h2>A 余白（最小）</h2>
+<div class="shots"><figure class="s375"><img src="shots/option-a-375.png" alt="案 A 375px"><figcaption>375×812</figcaption></figure><figure class="s1280"><img src="shots/option-a-1280.png" alt="案 A 1280px"><figcaption>1280×800</figcaption></figure></div>
+<ul><li>長所: 一番すっきり。文字の背後に線が無く、読みやすさが最大。スマホで 16px 低くなり、最初の画面に本文が多く入る（A7 に有利）。</li>
+<li>短所: 印象が薄い。「橙のあしらい」は丸と日の円だけで、ブランドの記憶に残る力は弱い。</li>
+<li>実装の規模: 小。<code>hero-illustration.tsx</code> の差し替えと <code>.sb-hero</code> の高さ（112 / 200）の変更で済む。<code>page.tsx</code> は変えない。</li></ul></section>
+
+<section><h2>B 幾何</h2>
+<div class="shots"><figure class="s375"><img src="shots/option-b-375.png" alt="案 B 375px"><figcaption>375×812</figcaption></figure><figure class="s1280"><img src="shots/option-b-1280.png" alt="案 B 1280px"><figcaption>1280×800</figcaption></figure></div>
+<ul><li>長所: 「そら」と等高線を円で表し、ロゴの丸と形が揃う。橙の面が大きく、見た目の印象が強い。</li>
+<li>短所: 同心円が標的・レーダーにも見える。右上の面積が大きく、橙の面積の上限（1 画面 5%）に近づく（スマホで約 3%、要計測）。意味が弱く装飾寄り。</li>
+<li>実装の規模: 小〜中。<code>hero-illustration.tsx</code> の差し替え（円と直線だけ）と高さの変更。</li></ul></section>
+
+<section><h2>C 経路</h2>
+<div class="shots"><figure class="s375"><img src="shots/option-c-375.png" alt="案 C 375px"><figcaption>375×812</figcaption></figure><figure class="s1280"><img src="shots/option-c-1280.png" alt="案 C 1280px"><figcaption>1280×800</figcaption></figure></div>
+<ul><li>長所: 主役の「飛行経路」が製品（飛行計画の通報・日誌）の中身そのもの。橙の太い線が品よく目を引き、文字と絵が上下に分かれる（重ならない）。</li>
+<li>短所: 4 つの要素（格子・経路・経由点・ドローン）があり、A より賑やか。地図の帯の上端に墨の線を引くため、下の本文との間が少し詰まる。</li>
+<li>実装の規模: 中。<code>hero-illustration.tsx</code> を、スマホ用と PC 用の 2 枚の SVG（1:1 の座標）に差し替える（今の構造と同じ）。経由点・ドローンも SVG の中に入れる（この見本は重ね書きの要素で近似した）。高さの変更（スマホ 128 のまま、PC 240）。</li></ul></section>
+
+<div class="rec"><strong>推奨: C 経路。</strong> 3 案のうち、橙の太い線に意味（飛行経路）があり、文字と絵が重ならず、スマホの高さも今と同じ 128px に収まる。「すっきり」を最優先するなら A。B は飾り寄りなので推さない。</div>
+
+<section><h2>測定（Chromium、実測）</h2>
+<ul><li>ヘッダーの高さは、A 112 / 200、B・C 128 / 240（今の 128 / 280 以下）。横スクロールなし（scrollWidth = 幅）。外部リクエスト 0 件。</li>
+<li>橙の細い文字・細い線は 0（橙は面と 6px の線だけ）。橙の面の上の文字は無い（ロゴの丸の中は墨の線画）。</li>
+<li>未測定: 橙の面積の割合（5% 以下）、実機・直射日光、色覚の模擬。</li></ul></section>
+</main></body></html>

@@ -160,7 +160,7 @@ describe("名称の統一（A5）：古い呼び名が画面のコードに残�
       if (statSync(p).isDirectory()) return walk(p);
       return /\.(tsx?|ts)$/.test(n) && !/\.test\.ts$/.test(n) ? [p] : [];
     });
-  // デザイン見本（components/ui/catalog）は、実画面ではなく見本の画面名（「今日」の見本など）を持つため対象外
+  // デザイン見本（app/ops/design）は、実画面ではないため対象外
   const files = [...walk(path.join(SRC, "app")), ...walk(path.join(SRC, "components")), ...walk(path.join(SRC, "lib"))].filter((f) => !f.includes(`${path.sep}catalog${path.sep}`));
   const BANNED = ["運航管理のトップ", "運航管理へ", "地点判定へ", "今日へ戻る", 'title="その他"', 'label: "その他"', 'label: "今日"'];
 

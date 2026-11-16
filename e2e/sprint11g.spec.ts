@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { openDiagnosis } from "./field-checks";
+import { expectNoApplicationSupport } from "./field-checks";
 
 // Sprint 11g 契約 14〜16（docs/sprints/sprint-11g.md）の E2E。100g 未満の機体（模型航空機）の手続きを「許可または通報」と表示する。
 // 補助関数は e2e/sprint11e.spec.ts と同じ。本番相当サーバー（baseURL、同梱データ）だけを使う。
@@ -73,9 +73,9 @@ const toggle = async (box: Locator, page: Page, on: boolean, withCheck = true): 
   await settled(page);
 };
 
-/** 飛行方法のチェック（06 の中。申請支援の診断だけをやり直す）。 */
+/** 飛行の方法のチェック（06 の中。判定だけをやり直す）。凡例は Sprint 18-1 で「飛行方法（申請支援）」から「飛行の方法」に変えた。 */
 const methodBox = (page: Page, label: string) =>
-  page.locator("fieldset", { hasText: "飛行方法（申請支援）" }).getByRole("checkbox", { name: label, exact: true });
+  page.locator("fieldset", { hasText: "飛行の方法（選ぶと判定に反映します）" }).getByRole("checkbox", { name: label, exact: true });
 
 const setPlannedDate = async (page: Page, iso: string): Promise<void> => {
   const diag = waitDiagnose(page);
@@ -160,7 +160,7 @@ test.describe("Sprint 11g：許可または通報", () => {
     for (const u of [EGOV, ...NEW_URLS]) expect(t).toContain(u);
   });
 
-  test("15. 米子市役所で 50g＋150m 以上：許可または通報（高い空域）、確認の義務項目、申請支援の注記・PDF・飛行マニュアル骨子", async ({
+  test("15. 米子市役所で 50g＋150m 以上：許可または通報（高い空域）、確認の義務項目、申請支援の注記・束ね PDF・飛行マニュアル骨子は出ない", async ({
     page,
   }) => {
     await openReady(page);
@@ -178,17 +178,9 @@ test.describe("Sprint 11g：許可または通報", () => {
       "許可または通報（管制圏等の内側は許可、外側は通報）",
     );
 
-    const dl = page.waitForEvent("download");
-    await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
-    await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
-    const app = await pdfText(await dl);
-    const a = squash(app);
-    expect(a).toContain(squash("許可または通報（管制圏等の内側は許可、外側は通報）"));
-    expect(a).toContain(squash("航空法第134条の3 に基づく飛行の許可または通報（模型航空機・高い空域）"));
-    for (const u of NEW_URLS) expect(a).toContain(u);
-    // 飛行マニュアル骨子：許可または通報の観点
-    expect(a).toContain(squash("内側（許可）か外側（通報）かは、空港事務所・管制機関・空港管理者に確かめる"));
-    expect(app).not.toContain("第132条の85");
+    // 以前は申請支援の束ね PDF（許可または通報の観点・新しい出典 URL・マニュアル骨子の文）を検査していた。Sprint 18-1 で止めたので、出ないことを検査する。
+    // 骨子・注記の中身は packages/regulations の model-aircraft／diagnosis の単体テストが守る。出典 URL は下の地点判定 PDF が検査する。
+    await expectNoApplicationSupport(page, "11g #15");
 
     // 地点判定の PDF：長い手続き名の折り返しで「-」が入らない
     const reg = squash(await exportPdf(page));

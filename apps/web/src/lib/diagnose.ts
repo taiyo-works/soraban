@@ -16,8 +16,8 @@ export type DiagnoseResponse = ApplicationDiagnosis & {
   readonly verdict?: FlightVerdict;
   /** 診断に使った機体重量（g）。未指定は無い。 */
   readonly droneWeightG?: number;
-  /** DIPS／DRS 入力プリフィル表（座標・住所・飛行方法・機体重量 等の実値） */
-  readonly prefill: readonly PrefillField[];
+  /** DIPS／DRS 入力プリフィル表。申請支援のフラグが無効（既定・本番）のとき、API は含めない（Sprint 18-1）。 */
+  readonly prefill?: readonly PrefillField[];
   /** 申請支援診断（入力条件＋導出結果）を含む決定論的証跡 ID */
   readonly evidenceId: string;
   /** ベースとなる地点規制判定の証跡 ID */

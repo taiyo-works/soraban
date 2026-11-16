@@ -49,7 +49,7 @@ test.describe("Sprint 12a 契約 18：運航管理が無効のとき", () => {
   test("`/ops/plans` と `/api/ops/plans` は 404（画面・API とも）", async ({ page, request }) => {
     const ui = await page.goto("/ops/plans");
     expect(ui?.status()).toBe(404);
-    for (const p of ["/ops/plans/new", "/ops/places", "/ops/plans/00000000-0000-4000-8000-000000000000/snapshots"]) {
+    for (const p of ["/ops/plans/new", "/ops/places", "/ops/plans/00000000-0000-4000-8000-000000000000/snapshots", ...["overview", "journal", "judgement"].map((r) => `/ops/plans/00000000-0000-4000-8000-000000000000/${r}`)]) {
       expect((await request.get(p)).status(), p).toBe(404);
     }
     const api = await request.get("/api/ops/plans");

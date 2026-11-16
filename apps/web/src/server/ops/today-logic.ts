@@ -265,7 +265,7 @@ export type LicenseActionInput = {
 };
 
 /**
- * 技能証明を更新する。有効期限が今日から 60 日以内（tier 5）。期限日の翌日以降は期限切れ（tier 3）。
+ * 技能証明の有効期限を確認する。有効期限が今日から 60 日以内（tier 5）。期限日の翌日以降は期限切れ（tier 3）。
  * 期限日の当日はまだ有効。期限が未入力なら出さない。
  */
 export const licenseNextActions = (list: readonly LicenseActionInput[]): TodayNextAction[] => {

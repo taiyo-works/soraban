@@ -214,7 +214,7 @@ export const doneByProcedureId = (
  */
 export const VERDICT_FAILED_LABEL = "判定できません";
 export const VERDICT_FAILED_NOTE =
-  "申請支援の診断に失敗したため、この入力（飛行の方法・空域・飛行予定日・許可）での判定が出ていません。再試行してください。判定が出るまで PDF は出力できません。";
+  "飛行の方法を含む判定に失敗したため、この入力（飛行の方法・空域・飛行予定日・許可）での判定が出ていません。再試行してください。判定が出るまで PDF は出力できません。";
 export const VERDICT_RETRY_LABEL = "再試行";
 /** 地点判定（/api/check）が失敗したときの説明（差し戻し 3 回目 F3）。前の地点の結果は出さない。 */
 export const VERDICT_CHECK_FAILED_NOTE =
@@ -225,7 +225,7 @@ export const PROVISIONAL_ITEM_NOTE = "地点だけの判定（結論は未確定
 export const DIAGNOSE_TIMEOUT_MS = 20_000;
 
 /** 履歴で、飛行の方法を含む判定が確定していない項目の表示。 */
-export const HISTORY_UNDETERMINED_LABEL = "判定未確定（申請支援の診断が未完了）";
+export const HISTORY_UNDETERMINED_LABEL = "判定未確定（飛行の方法を含む判定が未完了）";
 
 /** 判定中（/api/diagnose の応答待ち）の表示。 */
 export const VERDICT_PENDING_LABEL = "判定中";

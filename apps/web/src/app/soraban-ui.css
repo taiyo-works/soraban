@@ -62,6 +62,14 @@
   line-gap-override: 0%;
 }
 
+/* ===== 常に明るい表示（Sprint 16 D-1）：OS が暗でも、入力欄・選択欄・スクロールバーを含めて明で描く。強制の暗（休眠）だけ暗 ===== */
+:root {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 /* ===== ページの骨格 ===== */
 .sb-page {
   color: var(--sb-ink);
@@ -92,11 +100,13 @@
 .sb-band-white {
   background: var(--sb-base);
 }
-.sb-band-off {
-  background: var(--sb-surface);
-}
+/* Sprint 16 H-1：ページの地は白。帯の交互の敷き分け（オフホワイト・ベージュ）はやめ、帯の区切りは罫と余白で */
+.sb-band-off,
 .sb-band-beige {
-  background: var(--sb-sunken);
+  background: var(--sb-base);
+}
+.sb-band + .sb-band {
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .sb-band {
@@ -104,7 +114,7 @@
   }
 }
 
-/* 見出し：左 5px の橙線＋背後の大きな薄い数字（装飾） */
+/* 見出し：左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
   margin-bottom: 16px;
@@ -124,18 +134,15 @@
   letter-spacing: 0.06em;
   font-weight: 700;
 }
-.sb-sec-num {
-  position: absolute;
-  right: 0;
-  top: -30px;
-  font-size: 96px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: var(--sb-sec-num);
-  font-family: var(--font-num), sans-serif;
-  pointer-events: none;
-  user-select: none;
+/* 仕上げ：見出しは字間を詰める（palt）＋行を均す（balance）。本文は行末の孤立を避ける（pretty）。数字は桁をそろえる */
+.sb-sec-head h2 {
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
+.sb-sec-note,
+.opx-notice,
+.sb-block p {
+  text-wrap: pretty;
 }
 .sb-sec-note {
   position: relative;
@@ -148,17 +155,13 @@
   .sb-sec-head h2 {
     font-size: 26px;
   }
-  .sb-sec-num {
-    font-size: 140px;
-    top: -48px;
-  }
 }
 
-/* ブロック（影は 1 種類）。白の帯の中ではオフホワイト、他では白 */
+/* ブロック（影なし。罫で分ける：Sprint 16 H-2）。白の帯の中ではごく薄いグレー、他では白 */
 .sb-block {
   background: var(--sb-base);
   border-radius: var(--sb-r-l);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   padding: 20px 16px;
   min-width: 0;
 }
@@ -167,6 +170,7 @@
 }
 .sb-block-soft {
   border-radius: var(--sb-r-l);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   background: var(--sb-surface);
   padding: 14px 16px;
 }
@@ -179,37 +183,53 @@
   }
 }
 
-/* ===== ピルボタン（右端に墨の丸。矢印の入れ替えは動き 1 種類め） ===== */
+/* ===== ピルボタン（右端に墨の丸。矢印の入れ替えは動き 1 種類め） =====
+ * 文字は面の中央に置く：右端の丸（--sb-pill-ar）と文字との間（--sb-pill-gap）と同じだけ左にも余白を取り、左右を対称にする。
+ * 以前は左 22px・右に丸だけで、文字が丸の分だけ左に寄って見えた。丸は流れの中にあるので、ボタンの高さ（丸 + 上下 4px）は変わらない。 */
 .sb-pill {
+  --sb-pill-ar: 44px;
+  --sb-pill-gap: 14px;
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  justify-content: center;
+  gap: var(--sb-pill-gap);
   min-height: var(--sb-hit);
-  padding: 4px 4px 4px 22px;
+  padding: 4px;
   border-radius: var(--sb-pill);
   border: 1px solid transparent;
   cursor: pointer;
   font-weight: 700;
   font-size: 15px;
   line-height: 1.3;
-  text-align: left;
+  text-align: center;
   text-decoration: none;
   color: var(--sb-ink);
   background: transparent;
   transition: background var(--sb-dur) var(--sb-ease);
 }
 .sb-pill-label {
-  flex: 1;
+  /* 縮みにくくして、幅が足りないときは左の空き（下の ::before）から先に縮め、それでも足りないときだけ折り返す */
+  flex: 0 0.001 auto;
   min-width: 0;
+}
+/* 左の空き：右の丸と同じ幅。文字が面の中央に来る。幅が足りないとき（1280px の左の列など）は 0 まで縮み、文字は「左の縁と丸のあいだ」の中央になる */
+.sb-pill:has(> .sb-pill-arrow)::before {
+  content: "";
+  width: var(--sb-pill-ar);
+  flex: 0 1000 auto;
+  min-width: 0;
+}
+/* 丸（矢印）の無いピル（見本の切り替えなど）は、左右とも同じ余白 */
+.sb-pill:not(:has(> .sb-pill-arrow)) {
+  padding: 4px 20px;
 }
 .sb-pill-arrow {
   position: relative;
   flex: none;
   display: block;
-  width: 44px;
-  height: 44px;
+  width: var(--sb-pill-ar);
+  height: var(--sb-pill-ar);
   border-radius: var(--sb-pill);
   background: var(--sb-ink);
   color: var(--sb-on-dot);
@@ -239,15 +259,16 @@
 .sb-pill:focus-visible .sb-a2 {
   transform: none;
 }
+/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁で境界を持たせる（現場は .sb-pill の縁の太さを上書きしない） */
 .sb-pill-primary {
   background: var(--sb-orange);
+  border-color: var(--sb-on-orange);
   color: var(--sb-on-orange);
+  --sb-pill-ar: 48px;
   min-height: var(--sb-hit-primary);
   font-size: 16px;
 }
 .sb-pill-primary .sb-pill-arrow {
-  width: 48px;
-  height: 48px;
   background: var(--sb-on-orange);
   color: var(--sb-on-orange-fg);
 }
@@ -273,18 +294,22 @@
   color: var(--sb-on-orange);
 }
 .sb-pill-sm {
+  --sb-pill-ar: 40px;
+  --sb-pill-gap: 10px;
   min-height: var(--sb-hit);
   font-size: 14px;
-  padding-left: 20px;
 }
-.sb-pill-sm .sb-pill-arrow {
-  width: 40px;
-  height: 40px;
-}
-/* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、左の余白と矢印との間を詰める */
+/* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、対称の余白を取らず、
+ * 左の余白と丸との間を詰めて、文字は「左の縁と丸のあいだ」の中央に置く（唯一の例外。幅が足りない） */
 .sb-pill-tight {
-  gap: 8px;
+  --sb-pill-gap: 8px;
   padding-left: 16px;
+}
+.sb-pill-tight::before {
+  display: none;
+}
+.sb-pill-tight .sb-pill-label {
+  flex: 1;
 }
 .sb-pill:disabled,
 .sb-pill[aria-disabled="true"] {
@@ -608,13 +633,15 @@ input.sb-check:disabled {
 }
 .sb-check-row.is-on {
   background: var(--sb-hover);
+  /* 橙の薄い面は白の地との差が小さい（1.59:1）ので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
 .sb-check-row:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
 }
 
-/* ===== ヒーロー（挿絵は `/` のトップだけ。スマホ 232px、PC 320px。文字は空の上にだけ置く） ===== */
+/* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を橙の経路が進む。スマホ 128px、PC 240px） ===== */
 .sb-hero {
   position: relative;
   height: 128px;
@@ -626,17 +653,30 @@ input.sb-check:disabled {
   inset: 0;
   pointer-events: none;
 }
-.sb-hero-art svg {
+/* 帯：地図の格子の面（--sb-surface）と、上端の墨の罫。点・ドローンは帯からはみ出してよい（ヒーローが切る） */
+.sb-art-m,
+.sb-art-p {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--sb-surface);
+  border-top: 1.5px solid var(--sb-ink);
 }
 .sb-art-m {
   display: block;
+  height: 40px;
 }
 .sb-art-p {
   display: none;
+  height: 84px;
+}
+.sb-art-m > svg,
+.sb-art-p > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .sb-hero-text {
   position: relative;
@@ -661,7 +701,6 @@ input.sb-check:disabled {
   border-radius: var(--sb-pill);
   background: var(--sb-orange);
   color: var(--sb-on-orange);
-  box-shadow: 0 0 0 4px var(--sb-halo);
 }
 .sb-brand-mark svg {
   width: 30px;
@@ -752,20 +791,13 @@ input.sb-check:disabled {
   .sb-band-first .sb-sec-head h2 {
     font-size: 20px;
   }
-  .sb-band-first .sb-sec-num {
-    font-size: 72px;
-    top: -18px;
-  }
   .sb-block {
     padding: 12px 14px 14px;
-  }
-  .sb-hero-art svg {
-    height: 128px;
   }
 }
 @media (min-width: 1024px) {
   .sb-hero {
-    height: 280px;
+    height: 240px;
   }
   .sb-art-m {
     display: none;
@@ -981,7 +1013,7 @@ input.sb-check:disabled {
 .sb-item-card {
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   padding: 16px;
   min-width: 0;
 }

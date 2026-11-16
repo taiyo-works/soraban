@@ -4,7 +4,7 @@
 // DIPS へは送信しない（手動は記録だけ、模擬は同じプロセスの中の模擬）。ネットワーク呼び出しを持たない。
 import { randomUUID } from "node:crypto";
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MemberRow, PilotRow } from "@soraban/db";
 import { effectiveReport, MockGateway, type ReportInputs, type SubmitResult } from "@soraban/dips";
 import { createTempDatabase, runCli, withClient, type TempDatabase } from "../../../../../packages/db/src/test-db-helpers";
@@ -800,6 +800,9 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
   // 契約 9：権限
   // ================================================================
   describe("契約 9：権限（soraban_app と追記専用）", () => {
+    // dips_permit の記録は申請支援のフラグが有効のときだけ受け付ける（Sprint 18-2）。追記専用・権限の検査はフラグ有効側で今までどおり守る。
+    beforeEach(() => vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1"));
+    afterEach(() => vi.unstubAllEnvs());
     const priv = async (table: string, p: string) =>
       (await owner.query("select has_table_privilege('soraban_app', $1, $2) as ok", [table, p])).rows[0].ok as boolean;
 
@@ -1403,6 +1406,10 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
   // 契約 17：手続きの「済み」の記録
   // ================================================================
   describe("契約 17：手続きの「済み」の記録（dips_permit・small_drone_law）", () => {
+    // Sprint 18-2：dips_permit の記録・apply_permit は申請支援のフラグが有効のときだけ。ここはフラグ有効の振る舞いを、期待値を変えずに守る
+    // （フラグ無効の振る舞いは次の describe「Sprint 18-2」）。
+    beforeEach(() => vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1"));
+    afterEach(() => vi.unstubAllEnvs());
     /** 美保基地の周辺（小型無人機等飛行禁止法の同意・通報の手続きが出る）で、夜間飛行（DIPS の承認の手続きが出る）。 */
     const MIHO = { latitude: 35.4936, longitude: 133.2361 };
     const permitPlan = () => activePlan({ ...MIHO, flags: ["method_night"], plannedStartAt: "2027-02-10T09:00" });
@@ -1557,6 +1564,128 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       const ok = await record(ctxOf(pilotMember), mine.id, permitDone);
       expect(ok.record.recordedByName).toBe("s12b-pilot");
       expect(ok.canRecord).toBe(true);
+    });
+  });
+
+  // ================================================================
+  // Sprint 18-2：申請支援のフラグが無効（既定・本番）のときの手続きの記録・次にやること・判定スナップショットの保存
+  // ================================================================
+  describe("Sprint 18-2：申請支援のフラグが無効（既定・本番）", () => {
+    const MIHO = { latitude: 35.4936, longitude: 133.2361 };
+    const permitPlan = () => activePlan({ ...MIHO, flags: ["method_night"], plannedStartAt: "2027-02-10T09:00" });
+    const record = (ctx: OpsContext, planId: string, body: Record<string, unknown>) => procs.createProcedureRecord(ctx, planId, body);
+    const permitDone = { kind: "dips_permit", action: "done", doneAt: "2027-01-05T11:00", checks: { applicationCompleted: true } };
+    const policeDone = { kind: "small_drone_law", action: "done", doneAt: "2027-01-05T11:10", checks: { facilityConsentObtained: true, policeNoticeDone: true }, reference: "R-123" };
+    const procRows = (planId: string) =>
+      owner.query("select id, kind, action, content_hash, reference, checks from plan_procedure_records where plan_id = $1 order by created_at, id", [planId]);
+    beforeEach(() => vi.stubEnv("APPLICATION_SUPPORT_ENABLED", ""));
+    afterEach(() => vi.unstubAllEnvs());
+
+    it("2-2 dips_permit の done・retract は action に関わらず 409 procedure_kind_disabled。行は増えない。small_drone_law は今までどおり記録できる", async () => {
+      const plan = await permitPlan();
+      const n0 = await count("plan_procedure_records", "plan_id = $1", [plan.id]);
+      for (const body of [permitDone, { kind: "dips_permit", action: "retract", reason: "x" }, { kind: "dips_permit", action: "retract" }, { kind: "dips_permit" }]) {
+        await expectOpsError(record(mgr(), plan.id, body), 409, "procedure_kind_disabled");
+      }
+      expect(await count("plan_procedure_records", "plan_id = $1", [plan.id])).toBe(n0);
+      // 権限は先に見る（閲覧者は 403、他の組織は 404）
+      await expectOpsError(record(ctxOf(viewer), plan.id, permitDone), 403, "forbidden");
+      await expectOpsError(record(ctxOf(managerB), plan.id, permitDone), 404, "not_found");
+      // small_drone_law：記録・取り下げ・notify_police の出入り
+      expect((await plans.getPlan(mgr(), plan.id)).nextActions.map((x) => x.id)).toContain("notify_police");
+      const p = await record(mgr(), plan.id, policeDone);
+      expect(p.record).toMatchObject({ kind: "small_drone_law", label: "同意・通報を記録済み（利用者の申告）" });
+      expect((await plans.getPlan(mgr(), plan.id)).nextActions.map((x) => x.id)).not.toContain("notify_police");
+      await record(mgr(), plan.id, { kind: "small_drone_law", action: "retract", reason: "通報していなかった" });
+      expect((await plans.getPlan(mgr(), plan.id)).nextActions.map((x) => x.id)).toContain("notify_police");
+      expect(await count("plan_procedure_records", "plan_id = $1", [plan.id])).toBe(n0 + 2);
+    });
+
+    it("2-3 既存の dips_permit の行は消えず、読み取り専用の「以前の記録」として出る。行数・ハッシュの列は変わらない。行が無い計画には出ない", async () => {
+      const plan = await permitPlan();
+      // 行が無い計画には、記録の対象としても以前の記録としても出ない（フォームの入口が無い）
+      const none = await procs.listProcedureRecords(mgr(), plan.id);
+      expect(none.summary.map((s) => s.kind)).toEqual(["small_drone_law"]);
+      // フラグ有効の状態で記録してから、無効で読む
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1");
+      const made = await record(mgr(), plan.id, permitDone);
+      expect(made.record.label).toBe("申請済み（利用者の申告）");
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      const before = (await procRows(plan.id)).rows;
+      const view = await procs.listProcedureRecords(mgr(), plan.id);
+      const legacy = view.summary.find((s) => s.kind === "dips_permit")!;
+      expect(legacy).toMatchObject({
+        legacy: true,
+        applicable: false,
+        status: "done",
+        kindLabel: "以前の記録：許可・承認の手続きの申告（受付を停止しています）",
+        statusLabel: "以前の申告（許可・承認の取得を示すものではありません）",
+        deadlineLabel: null,
+      });
+      expect(view.summary.find((s) => s.kind === "small_drone_law")).toMatchObject({ legacy: false });
+      expect(view.records.find((r) => r.kind === "dips_permit")).toMatchObject({ action: "done", label: "以前の申告（許可・承認の取得を示すものではありません）", doneAtJst: "2027-01-05 11:00" });
+      // 行は消えず、ハッシュの列も変わらない
+      expect((await procRows(plan.id)).rows).toEqual(before);
+      expect(before).toHaveLength(1);
+      // 計画の取得にも出る（読み取り専用）。「申請済み」の語はどの応答にも出ない
+      const d = await plans.getPlan(mgr(), plan.id);
+      expect(d.procedureRecords.find((s) => s.kind === "dips_permit")).toMatchObject({ legacy: true, status: "done" });
+      // （view.note の境界の文は「許可・承認の申請」の語を含むため、要約・履歴・計画の記録の要約だけを見る）
+      for (const text of [JSON.stringify([view.summary, view.records]), JSON.stringify(d.procedureRecords), JSON.stringify(d.nextActions)]) {
+        expect(text).not.toContain("申請済み");
+        expect(text).not.toContain("許可・承認の申請");
+      }
+      // 取り下げも受け付けない
+      await expectOpsError(record(mgr(), plan.id, { kind: "dips_permit", action: "retract", reason: "x" }), 409, "procedure_kind_disabled");
+      expect((await procRows(plan.id)).rows).toEqual(before);
+      // 以前の記録があっても、次にやることは「取得した許可・承認を登録する」（申請の記録に依存しない）
+      expect(d.nextActions.map((x) => x.id)).toEqual(expect.arrayContaining(["register_permit", "notify_police"]));
+      expect(d.nextActions.map((x) => x.id)).not.toContain("apply_permit");
+    });
+
+    it("2-4 apply_permit は出ない。register_permit は申請の記録なしで出る（tier 3・期限の文言なし）。操縦者は canAct false", async () => {
+      const plan = await permitPlan();
+      const d = await plans.getPlan(mgr(), plan.id);
+      expect(d.nextActions.map((x) => x.id)).not.toContain("apply_permit");
+      const reg = d.nextActions.find((x) => x.id === "register_permit")!;
+      expect(reg).toMatchObject({ label: "取得した許可・承認を登録する", tier: 3, dueLabel: null, canAct: true, href: "/ops/permits/new" });
+      expect(reg.reason).toContain("利用者本人が DIPS 2.0 などの公式の手続きで取得します");
+      // 期限が過ぎても tier 3 のまま
+      const later = await plans.getPlan(mgr({ now: () => new Date("2027-02-05T03:00:00Z") }), plan.id);
+      expect(later.nextActions.find((x) => x.id === "register_permit")).toMatchObject({ tier: 3, dueLabel: null });
+      expect(await count("plan_procedure_records", "plan_id = $1", [plan.id])).toBe(0);
+    });
+
+    it("L8 判定スナップショットの result に prefill・deadlines・categoryNote を保存しない。フラグ有効なら今までどおり保存する。旧い行はフラグ無効の API の応答から除く（行は書き換えない）", async () => {
+      const KEYS = ["prefill", "deadlines", "categoryNote"] as const;
+      const resultOf = async (snapshotId: string) => (await owner.query("select result, content_hash from judgement_snapshots where id = $1", [snapshotId])).rows[0] as { result: Record<string, unknown>; content_hash: string };
+      // 有効のとき：保存される（旧い行と同じ形。応答に値があることの確認も兼ねる）
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1");
+      const on = await permitPlan();
+      const rowOn = await resultOf(on.currentSnapshotId);
+      expect(Object.keys(rowOn.result)).toContain("prefill");
+      // 無効のとき：新しい行に入らない。判定の中身（verdict・category・evidenceId など）は同じ
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      const off = await permitPlan();
+      const rowOff = await resultOf(off.currentSnapshotId);
+      for (const k of KEYS) expect(Object.keys(rowOff.result), k).not.toContain(k);
+      for (const k of ["verdict", "category", "evidenceId", "checkEvidenceId", "engineVersion", "procedures", "flags"]) expect(rowOff.result[k], k).toBeDefined();
+      const rest = { ...rowOn.result };
+      for (const k of KEYS) delete rest[k];
+      expect(Object.keys(rowOff.result).sort()).toEqual(Object.keys(rest).sort());
+      // 旧い行（有効のときに書いた行）は、無効の API の応答（getSnapshot）から除かれる。有効なら含まれる
+      const viaOff = await plans.getSnapshot(mgr(), on.id, on.currentSnapshotId);
+      for (const k of KEYS) expect(Object.keys(viaOff.result as object), k).not.toContain(k);
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "1");
+      expect(Object.keys((await plans.getSnapshot(mgr(), on.id, on.currentSnapshotId)).result as object)).toContain("prefill");
+      vi.stubEnv("APPLICATION_SUPPORT_ENABLED", "");
+      // 行は書き換わらず、追記専用・ハッシュの検査も壊れない
+      const again = await resultOf(on.currentSnapshotId);
+      expect(again).toEqual(rowOn);
+      for (const id of [on.id, off.id]) expect((await owner.query("select * from verify_judgement_snapshots($1)", [id])).rows).toEqual([]);
+      // 証跡 ID は保存の有無に関わらず応答のとおり
+      expect(viaOff.diagnosisEvidenceId).toBe(rowOn.result["evidenceId"]);
+      expect((await plans.getSnapshot(mgr(), off.id, off.currentSnapshotId)).diagnosisEvidenceId).toBe(rowOff.result["evidenceId"]);
     });
   });
 
@@ -1743,6 +1872,75 @@ describe.skipIf(!ADMIN_URL)("通報の記録・監査・手続きの記録の DB
       // 記録すると期限の対象でなくなる
       await recordNew(mgr(), plan);
       expect((await plans.getPlan(at("2027-01-14T01:00:00Z"), plan.id)).report.deadline.state).toBe("none");
+    });
+  });
+  // ================================================================
+  // Sprint 19-1c（レビュー指摘 1）：範囲が 2 つ以上の計画。新規・変更の記録と再送は止め、画面の読み出し・取消の記録は通す
+  // ================================================================
+  describe("Sprint 19-1c：範囲が 2 つ以上の計画の通報", () => {
+    const TRI_HQ = [
+      [133.3805, 35.4342],
+      [133.3815, 35.4342],
+      [133.381, 35.4352],
+    ];
+    const CIRCLE_HQ = { kind: "circle", center: [133.383, 35.4342], radiusM: 40 };
+    const TWO = [{ kind: "polygon", vertices: TRI_HQ }, CIRCLE_HQ];
+
+    /** 多角形 1 つの計画に通報を 1 件記録してから、範囲を 2 つに訂正する。 */
+    const withReportThenTwoAreas = async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const first = await recordNew(mgr(), plan);
+      const upd = await plans.updatePlan(mgr(), plan.id, { expectedVersion: plan.version, reason: "範囲を 2 つにした", areas: TWO });
+      return { plan, first, version: upd.record.version };
+    };
+
+    it("画面の読み出し（getPlanReport）は止めない：警告 route_multiple_areas・経路は出さない・新規/変更は記録できない。履歴は見られる", async () => {
+      const { plan, first } = await withReportThenTwoAreas();
+      const view = await reports.getPlanReport(mgr(), plan.id);
+      const route = view.prepared.items.find((i) => i.key === "route")!;
+      expect(route.apiValue).toBeNull();
+      expect(route.warnings.map((w) => w.code)).toEqual(["route_multiple_areas"]);
+      expect(view.warnings.map((w) => w.code)).toContain("route_multiple_areas");
+      expect(view.recordable).toEqual({ allowed: false, reason: "multiple_areas" });
+      expect(view.reports.map((r) => r.id)).toContain(first.report.id);
+      expect(view.effective?.id).toBe(first.report.id);
+      // 取消の見え方では、記録できる
+      const cancelView = await reports.getPlanReport(mgr(), plan.id, { kind: "cancel" });
+      expect(cancelView.recordable).toEqual({ allowed: true, reason: null });
+      expect(cancelView.warnings.map((w) => w.code)).not.toContain("route_multiple_areas");
+    });
+
+    it("新規・変更の記録は 409 route_multiple_areas（行も試行も増えない）。取消の記録は通る", async () => {
+      const { plan, first, version } = await withReportThenTwoAreas();
+      const rowsBefore = (await reportRows(plan.id)).length;
+      const e1 = await reports.createReport(mgr(), plan.id, { kind: "change", expectedPlanVersion: version, manual: manual(), inputs: FULL_INPUTS }).then(() => null, (x: unknown) => x);
+      expect(e1).toMatchObject({ status: 409, code: "route_multiple_areas", fieldCodes: { areas: "route_multiple_areas" } });
+      await expectOpsError(reports.createReport(mgr(), plan.id, { kind: "new", expectedPlanVersion: version, manual: manual(), inputs: FULL_INPUTS }), 409, "route_multiple_areas");
+      expect((await reportRows(plan.id)).length).toBe(rowsBefore);
+      // 取消：DIPS で取り消した結果を記録できる（有効な通報が残らない）
+      const cancel = await reports.createReport(mgr(), plan.id, { kind: "cancel", baseReportId: first.report.id, manual: manual({ dipsNumber: "CX-19" }) });
+      expect(cancel.created).toBe(true);
+      expect(cancel.report).toMatchObject({ kind: "cancel", status: "reported_manual" });
+      expect((await reports.getPlanReport(mgr(), plan.id)).effective).toBeNull();
+    });
+
+    it("再送（retryReport）は 409 route_multiple_areas。送信は呼ばれない", async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const spy = new SpyMock();
+      const failed = await send(mockCtx({ gateway: spy }), plan, { mockScenario: "rejected" });
+      expect(failed.report.status).toBe("failed");
+      await plans.updatePlan(mgr(), plan.id, { expectedVersion: plan.version, reason: "範囲を 2 つにした", areas: TWO });
+      await expectOpsError(reports.retryReport(mockCtx({ gateway: spy }), plan.id, failed.report.id, { confirmSend: true, mockScenario: "ok" }), 409, "route_multiple_areas");
+      expect(spy.calls).toBe(1);
+    });
+
+    it("多角形 1 つの計画は、通常どおり記録できる", async () => {
+      const plan = await activePlan({ areas: [{ kind: "polygon", vertices: TRI_HQ }] });
+      const r = await recordNew(mgr(), plan);
+      expect(r.created).toBe(true);
+      const route = r.view.prepared.items.find((i) => i.key === "route")!;
+      expect(JSON.parse(route.apiValue!).features[0].geometry.type).toBe("Polygon");
+      expect(r.view.recordable).toMatchObject({ allowed: true });
     });
   });
 });

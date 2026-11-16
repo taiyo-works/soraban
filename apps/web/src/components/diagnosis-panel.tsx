@@ -433,7 +433,7 @@ export function DiagnosisPanel({
       <DeadlineCalendar diagnosis={diagnosis} plannedDate={plannedDate} />
 
       {/* 申請内容プリフィル表（DIPS／DRS の入力欄に対応する値・各行コピペ）。 */}
-      <PrefillTable prefill={diagnosis.prefill} />
+      <PrefillTable prefill={diagnosis.prefill ?? []} />
 
       {/* 書類ドラフト（独自飛行マニュアル骨子 ／ 標準を使う選択）。
           選択（manualChoice）は束ね PDF にも反映する。 */}

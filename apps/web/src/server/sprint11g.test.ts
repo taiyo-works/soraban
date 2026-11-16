@@ -287,7 +287,8 @@ describe("C. 定数と文言（grep）", () => {
 
   it("13. 禁止語が 0 件。model-aircraft.ts に罰則の記載がない", () => {
     const re = /通報不要|飛行可能|要確認・要許可|ロックーン|おおむね ?300m|特許|出願/;
-    for (const f of sources) expect(readFileSync(f, "utf8"), relative(ROOT, f)).not.toMatch(re);
+    // Sprint 18-3：禁止語の一覧そのもの（lib/wording-policy.ts）は語を列挙するので除く（意図の変更。sprint-18-test-changes.md）
+    for (const f of sources.filter((x) => !x.endsWith("/lib/wording-policy.ts"))) expect(readFileSync(f, "utf8"), relative(ROOT, f)).not.toMatch(re);
     expect(readFileSync(MODEL_FILE, "utf8")).not.toMatch(/懲役|罰金|過料/);
   });
 });

@@ -315,6 +315,8 @@ export type FlightPlanRow = {
   readonly created_at: string;
   readonly updated_at: string;
   readonly voided_at: string | null;
+  /** Sprint 19-1b（0018）。範囲の配列（jsonb）。null は未設定。 */
+  readonly flight_areas: unknown | null;
 };
 
 export type JudgementSnapshotRow = {
@@ -901,6 +903,7 @@ export const FLIGHT_PLAN_COLUMNS = columns<FlightPlanRow>()([
   "created_at",
   "updated_at",
   "voided_at",
+  "flight_areas",
 ]);
 
 export const JUDGEMENT_SNAPSHOT_COLUMNS = columns<JudgementSnapshotRow>()([

@@ -1,0 +1,266 @@
+# Sprint 16-1 で削除した旧い見本（components/ui/catalog。12g の見本・試作・?view=style）だけが持っていた data-testid（265 件）。実画面の識別子は 0 件。
+act-check
+act-dips-import
+act-field
+act-geo
+act-journal-flight
+act-journal-incident
+act-journal-inspection
+act-judge-card
+act-judge-head
+act-plan-from-judge
+act-plan-new-card
+act-plan-new-head
+act-plan-new-home
+act-plan-new-list
+act-plans-list
+act-register-new
+back
+buttons
+buttons-long
+catalog-notice
+contrast-readout
+controls-section
+ctl-acc
+ctl-command
+ctl-day
+ctl-density
+ctl-field
+ctl-geo
+ctl-jsp
+ctl-judge
+ctl-pc
+ctl-pcname
+ctl-screen
+ctl-sp
+ctl-theme
+ctl-view
+demo-context
+demo-error
+demo-info
+demo-toggle
+field-incident
+field-inspection
+fields
+home-actions
+home-empty
+home-flight
+icon-grid
+judge-denied
+judge-empty
+judge-live
+judge-loading
+judge-map
+judge-note
+judge-result
+judge-retry
+judge-sample-pill
+judge-strip
+judge-trial
+judge-workspace
+layer-chips
+legend-list
+map-pick
+map-pin
+menu-trial
+next-flight-band
+open-dialog
+open-drawer
+open-reason
+open-sheet
+open-toast
+page-field
+page-home
+page-journal
+page-judge
+page-plans
+page-register
+pc-frame
+pc-main
+pc-nav
+prop: act-check
+prop: act-dips-import
+prop: act-field
+prop: act-geo
+prop: act-journal-flight
+prop: act-journal-incident
+prop: act-journal-inspection
+prop: act-judge-card
+prop: act-judge-head
+prop: act-plan-from-judge
+prop: act-plan-new-card
+prop: act-plan-new-head
+prop: act-plan-new-home
+prop: act-plan-new-list
+prop: act-plans-list
+prop: act-register-new
+prop: back
+prop: buttons
+prop: buttons-long
+prop: catalog-notice
+prop: contrast-readout
+prop: controls-section
+prop: ctl-acc
+prop: ctl-command
+prop: ctl-day
+prop: ctl-density
+prop: ctl-field
+prop: ctl-geo
+prop: ctl-jsp
+prop: ctl-judge
+prop: ctl-pc
+prop: ctl-pcname
+prop: ctl-screen
+prop: ctl-sp
+prop: ctl-theme
+prop: ctl-view
+prop: demo-context
+prop: demo-error
+prop: demo-info
+prop: demo-toggle
+prop: field-incident
+prop: field-inspection
+prop: fields
+prop: home-actions
+prop: home-empty
+prop: home-flight
+prop: icon-grid
+prop: judge-denied
+prop: judge-empty
+prop: judge-live
+prop: judge-loading
+prop: judge-map
+prop: judge-note
+prop: judge-result
+prop: judge-retry
+prop: judge-sample-pill
+prop: judge-strip
+prop: judge-trial
+prop: judge-workspace
+prop: layer-chips
+prop: legend-list
+prop: map-pick
+prop: map-pin
+prop: menu-trial
+prop: next-flight-band
+prop: open-dialog
+prop: open-drawer
+prop: open-reason
+prop: open-sheet
+prop: open-toast
+prop: page-field
+prop: page-home
+prop: page-journal
+prop: page-judge
+prop: page-plans
+prop: page-register
+prop: pc-frame
+prop: pc-main
+prop: pc-nav
+prop: reason-result
+prop: sample-field
+prop: sample-field-primary
+prop: sample-form
+prop: sample-inspector
+prop: sample-inspector-body
+prop: sample-legend
+prop: sample-list
+prop: sample-notice
+prop: sample-today
+prop: sample-workspace
+prop: sample-workspace-frame
+prop: sp-band
+prop: sp-conclusion
+prop: sp-disclaimer
+prop: sp-frame
+prop: sp-geo-input
+prop: sp-handle
+prop: sp-layer-panel
+prop: sp-layers-open
+prop: sp-main
+prop: sp-nav
+prop: sp-result
+prop: sp-sheet
+prop: sp-sheet-body
+prop: style-notice
+prop: style-trial
+prop: trial-controls
+prop: trial-notice
+prop: trial-pc
+prop: trial-sp
+reason-result
+sample-field
+sample-field-primary
+sample-form
+sample-inspector
+sample-inspector-body
+sample-legend
+sample-list
+sample-notice
+sample-today
+sample-workspace
+sample-workspace-frame
+sp-band
+sp-conclusion
+sp-disclaimer
+sp-frame
+sp-handle
+sp-layer-panel
+sp-layers-open
+sp-main
+sp-nav
+sp-result
+sp-sheet
+sp-sheet-body
+style-notice
+style-trial
+trial-controls
+trial-notice
+trial-pc
+trial-sp
+式: `${prefix}-goal`
+式: `${prefix}-recount`
+式: `${prefix}-restart`
+式: `${prefix}-script-select`
+式: `${prefix}-script`
+式: `${prefix}-taps`
+式: `${t}-address`
+式: `${t}-conclusion`
+式: `${t}-conditions`
+式: `${t}-disclaimer`
+式: `${t}-geo-confirm-no`
+式: `${t}-geo-confirm-yes`
+式: `${t}-geo-confirm`
+式: `${t}-geo-loading`
+式: `${t}-layer-${id}`
+式: `${t}-layer-${l.id}`
+式: `${t}-layer-list`
+式: `${t}-layer-panel`
+式: `${t}-layers-close`
+式: `${t}-layers-open`
+式: `${t}-map-pick`
+式: `${t}-map`
+式: `${t}-pin`
+式: `${t}-result`
+式: `${t}-row-${r.id}-basis`
+式: `${t}-row-${r.id}-toggle`
+式: `${t}-row-${r.id}`
+式: `${t}-search`
+式: `${t}-summary`
+式: `act-${a.id}`
+式: `appicon-${id}-${key}-${s}`
+式: `appicon-${id}-raw`
+式: `appicon-${id}`
+式: `buttons-${b.variant}`
+式: `layer-${l.id}`
+式: `legend-${l.id}`
+式: `nav-${k}`
+式: `nav-${t.key}`
+式: `page-${kind}`
+式: `register-${k.id}`
+式: `sample-preview-${p.id}`
+式: `sample-verdict-${v}`
+式: `sp-fold-${g.id}`
+式: `sp-tab-${x.id}`
+式: `stub-${page}`
+式: testId ?? `${t

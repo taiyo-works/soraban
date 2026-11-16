@@ -1,5 +1,6 @@
 // 計画の応答に載せる通報の状況・期限・次にやること（Sprint 12b 設計 E・G）。plans.ts（計画の DTO）と reports.ts（通報の API）が使う。
 // 状態は保存せず、通報の行（flight_reports）・手続きの記録（plan_procedure_records）・コピーの監査から毎回導出する。
+import { fingerprintAreasOfRow } from "./flight-areas";
 import { reportRegistrationOf, type PermitMatchResult, type PermitRegistration } from "./permit-logic";
 import type { PlanProcedureRecordRow } from "@soraban/db";
 import {
@@ -7,6 +8,8 @@ import {
   PROCEDURE_RECORD_DONE_LABEL,
   PROCEDURE_RECORD_KIND_LABEL,
   PROCEDURE_RECORD_KINDS,
+  PROCEDURE_RECORD_LEGACY_DONE_LABEL,
+  PROCEDURE_RECORD_LEGACY_KIND_LABEL,
   PROCEDURE_RECORD_NONE_LABEL,
   PROCEDURE_RECORD_RETRACTED_LABEL,
   PROCEDURE_RECORD_STALE_LABEL,
@@ -88,6 +91,7 @@ export const currentFingerprintPartsOf = (r: PlanWithJoins, registration: Permit
     latitude: Number(r.latitude),
     longitude: Number(r.longitude),
     radiusM: r.radius_m,
+    areas: fingerprintAreasOfRow(r),
     maxAltitudeM: r.max_altitude_m,
     aircraftId: r.aircraft_id,
     pilotId: r.pilot_id,
@@ -124,6 +128,8 @@ export type SummarizeInput = {
   readonly now: Date;
   /** 許可・承認の登録の照合（Sprint 12d）。通報の指紋（適用された登録の識別と値）と「許可・承認の結果を登録する」の次にやることに使う。 */
   readonly permits: PermitMatchResult;
+  /** 申請支援のフラグ（lib/boundary.ts）。次にやること「許可・承認を申請する」を出すかどうか。呼び出し側がサービス層で読んで渡す。 */
+  readonly applicationSupport: boolean;
 };
 
 /** 要否・通報の行・手続きの記録・時刻から、通報の状況・期限・次にやることを導出する（保存した状態は読まない）。 */
@@ -166,6 +172,7 @@ export const summarizePlanReport = (i: SummarizeInput): PlanReportSummary => {
       record: can(role, "report.record", { isSelf: i.isSelf }),
     },
     permits: { applied: i.permits.numbers.some((n) => n.status === "applied"), canRegister: can(role, "permit.create") },
+    applicationSupport: i.applicationSupport,
   });
   return { report: { ...i.requirement, status, deadline }, nextActions, currentFingerprint };
 };
@@ -202,8 +209,13 @@ export type ProcedureRecordStatusCode = "none" | "done" | "stale" | "retracted";
 export type ProcedureRecordSummaryDto = {
   readonly kind: ProcedureRecordKind;
   readonly kindLabel: string;
-  /** 現在のスナップショットの手続きに、この種別の手続きがあるか（無ければ記録の対象でない）。 */
+  /** 現在のスナップショットの手続きに、この種別の手続きがあるか（無ければ記録の対象でない）。以前の記録（legacy）は常に false。 */
   readonly applicable: boolean;
+  /**
+   * 以前の記録：申請支援のフラグが無効のとき、dips_permit は新しい記録を受け付けない。既存の行があるときだけ、読み取り専用で返す（Sprint 18-2）。
+   * 記録のフォーム・取り下げは出さない。
+   */
+  readonly legacy: boolean;
   /** none 記録なし／done 現在のスナップショットに対する有効な記録／stale 前の判定に対する記録／retracted 取り下げ。 */
   readonly status: ProcedureRecordStatusCode;
   readonly statusLabel: string;
@@ -212,14 +224,18 @@ export type ProcedureRecordSummaryDto = {
   readonly deadlineLabel: string | null;
 };
 
-export const procedureRecordDto = (r: ProcedureRecordRowWithTimes, currentSnapshotId: string): ProcedureRecordDto => {
+/** 申請支援のフラグが無効のとき、dips_permit の記録は「以前の記録」（読み取り専用）として扱う。 */
+export const isLegacyKind = (kind: ProcedureRecordKind, applicationSupport: boolean): boolean => kind === "dips_permit" && !applicationSupport;
+
+export const procedureRecordDto = (r: ProcedureRecordRowWithTimes, currentSnapshotId: string, applicationSupport: boolean): ProcedureRecordDto => {
   const at = asDate(r.created_at);
+  const legacy = isLegacyKind(r.kind, applicationSupport);
   return {
     id: r.id,
     kind: r.kind,
-    kindLabel: PROCEDURE_RECORD_KIND_LABEL[r.kind],
+    kindLabel: legacy ? PROCEDURE_RECORD_LEGACY_KIND_LABEL : PROCEDURE_RECORD_KIND_LABEL[r.kind],
     action: r.action,
-    label: r.action === "done" ? PROCEDURE_RECORD_DONE_LABEL[r.kind] : PROCEDURE_RECORD_RETRACTED_LABEL,
+    label: r.action === "done" ? (legacy ? PROCEDURE_RECORD_LEGACY_DONE_LABEL : PROCEDURE_RECORD_DONE_LABEL[r.kind]) : PROCEDURE_RECORD_RETRACTED_LABEL,
     doneAt: r.done_at_jst,
     doneAtJst: r.done_at_jst ? r.done_at_jst.replace("T", " ") : null,
     reference: r.reference,
@@ -239,28 +255,41 @@ const PERMIT_ID = /^(flight-permission-|flight-approval-)/;
 export const summarizeProcedureRecords = (
   records: readonly ProcedureRecordRowWithTimes[],
   plan: PlanWithJoins,
+  applicationSupport: boolean,
 ): ProcedureRecordSummaryDto[] => {
   const procs = plan.snapshot_result_slim.verdict.procedures ?? [];
   const applicable: Record<ProcedureRecordKind, readonly (typeof procs)[number][]> = {
     dips_permit: procs.filter((p) => PERMIT_ID.test(p.procedureId) && p.procedureId !== "flight-permission-emergency-airspace"),
     small_drone_law: procs.filter((p) => p.procedureId === "small-drone-law-consent-notice"),
   };
-  return PROCEDURE_RECORD_KINDS.map((kind): ProcedureRecordSummaryDto => {
+  const out: ProcedureRecordSummaryDto[] = [];
+  for (const kind of PROCEDURE_RECORD_KINDS) {
     const rows = records.filter((r) => r.kind === kind);
+    const legacy = isLegacyKind(kind, applicationSupport);
+    // 以前の記録：行が無ければ返さない（新しい記録の入口を出さない）
+    if (legacy && rows.length === 0) continue;
     const latestRow = [...rows].sort((a, b) => (a.created_at_us < b.created_at_us ? -1 : a.created_at_us > b.created_at_us ? 1 : a.id < b.id ? -1 : 1)).pop();
-    const latest = latestRow ? procedureRecordDto(latestRow, plan.current_snapshot_id) : null;
+    const latest = latestRow ? procedureRecordDto(latestRow, plan.current_snapshot_id, applicationSupport) : null;
     const status: ProcedureRecordStatusCode =
       latest === null ? "none" : latest.action === "retract" ? "retracted" : latest.forCurrentSnapshot ? "done" : "stale";
     const dated = applicable[kind].filter((p) => p.deadlineDate !== null).sort((a, b) => (a.deadlineDate! < b.deadlineDate! ? -1 : 1))[0];
-    return {
+    out.push({
       kind,
-      kindLabel: PROCEDURE_RECORD_KIND_LABEL[kind],
-      applicable: applicable[kind].length > 0,
+      kindLabel: legacy ? PROCEDURE_RECORD_LEGACY_KIND_LABEL : PROCEDURE_RECORD_KIND_LABEL[kind],
+      applicable: !legacy && applicable[kind].length > 0,
+      legacy,
       status,
       statusLabel:
-        status === "done" ? latest!.label : status === "stale" ? PROCEDURE_RECORD_STALE_LABEL : status === "retracted" ? PROCEDURE_RECORD_RETRACTED_LABEL : PROCEDURE_RECORD_NONE_LABEL,
+        legacy && (status === "done" || status === "stale")
+          ? PROCEDURE_RECORD_LEGACY_DONE_LABEL
+          : status === "done"
+            ? latest!.label
+            : status === "stale"
+              ? PROCEDURE_RECORD_STALE_LABEL
+              : status === "retracted" ? PROCEDURE_RECORD_RETRACTED_LABEL : PROCEDURE_RECORD_NONE_LABEL,
       latest,
-      deadlineLabel: (dated ?? applicable[kind][0])?.deadlineLabel ?? null,
-    };
-  });
+      deadlineLabel: legacy ? null : ((dated ?? applicable[kind][0])?.deadlineLabel ?? null),
+    });
+  }
+  return out;
 };

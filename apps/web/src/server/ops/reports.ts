@@ -9,6 +9,7 @@
 //   - 外部（模擬）を呼ぶ間、トランザクションを開けておかない：①prepared の行と監査を書く → ②アダプターを呼ぶ（上限 10 秒）→
 //     ③結果の版と監査を書く。③が失敗しても②の結果で再送しない（prepared のまま「結果不明」として扱う）。
 //   - 監査（flight_report_attempts）に、秘密・トークン・技能証明書番号・氏名・内容の全文を入れない（内容はハッシュと要約）。
+import { fingerprintAreasOfRow } from "./flight-areas";
 import { randomUUID } from "node:crypto";
 import type { PilotRow } from "@soraban/db";
 import {
@@ -33,6 +34,7 @@ import {
   latestLiveReport,
   ManualGateway,
   MockGateway,
+  PREPARE_WARNING_MESSAGE,
   REPORT_CHANNEL_LABEL,
   REPORT_ERROR_KIND_LABEL,
   REPORT_FIELDS,
@@ -62,6 +64,7 @@ import {
 } from "@soraban/dips";
 import type { ReportRequirement, SpecificFlightFlag } from "@soraban/regulations";
 import { SPECIFIC_FLIGHT_FLAG_LABEL } from "@soraban/regulations";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { formatJst, toJstInput } from "@/lib/ops-time";
 import { can } from "./authz";
 import { currentFingerprintPartsOf, rowLite, summarizePlanReport, type PlanReportExtras } from "./report-dto";
@@ -245,7 +248,7 @@ export type PlanReportView = {
     readonly revealLicenseNumber: boolean;
   };
   /** 新規・変更の記録ができるか（下書き・中止した計画はできない）。取消は中止した計画でもできる。 */
-  readonly recordable: { readonly allowed: boolean; readonly reason: "draft" | "voided" | null };
+  readonly recordable: { readonly allowed: boolean; readonly reason: "draft" | "voided" | "multiple_areas" | null };
   /** 確認前・判定が古いときなどの警告（記録は止めない）。 */
   readonly warnings: readonly ReportWarningDto[];
 };
@@ -295,6 +298,22 @@ const loadBundle = async (ctx: OpsContext, planId: string): Promise<PlanBundle> 
   return { plan, mine, isSelf: dto.isSelf, planState: dto.state, stale: dto.freshness.stale, requirement, extras, permits };
 };
 
+/** 範囲が 2 つ以上か（DIPS に出すジオメトリは 1 つ。複数を出せるかは文書に記載なし。※要再確認・検証環境）。 */
+const hasMultipleAreas = (plan: PlanWithJoins): boolean => (fingerprintAreasOfRow(plan)?.length ?? 0) >= 2;
+
+/**
+ * 範囲が 2 つ以上の計画は、新規・変更の記録と再送を止める（409 route_multiple_areas）。1 つ目だけを出すと、通報が実際の範囲より
+ * 狭くなる経路になるため出さない。画面の読み出し（getPlanReport）と履歴・試行の閲覧、取消の記録は止めない
+ * （取消を記録できないと、そらばん上が「有効な通報あり」のまま残る）。
+ * 外す条件：DIPS の検証環境で複数のジオメトリの受理を確かめ、設定 routeFormat.multiArea に複数を出す値を足すとき。
+ * 多角形 1 つ・円 1 つ・点だけは止めない（19-1c で整形を実装済み）。
+ */
+const assertSingleRouteArea = (plan: PlanWithJoins): void => {
+  if (hasMultipleAreas(plan)) {
+    throw new OpsError(409, "route_multiple_areas", { areas: PREPARE_WARNING_MESSAGE.route_multiple_areas }, { areas: "route_multiple_areas" });
+  }
+};
+
 const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: ReportInputs): Promise<PlanForReport> => {
   const { plan } = b;
   const org = ctx.member.org_id;
@@ -314,6 +333,7 @@ const buildPlanForReport = async (ctx: OpsContext, b: PlanBundle, inputs: Report
     latitude: Number(plan.latitude),
     longitude: Number(plan.longitude),
     radiusM: plan.radius_m,
+    areas: fingerprintAreasOfRow(plan),
     maxAltitudeM: plan.max_altitude_m,
     accessControl: plan.access_control,
     permitNumbers: plan.permit_numbers,
@@ -468,6 +488,7 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
     extras,
     now: nowOf(ctx),
     permits,
+    applicationSupport: isApplicationSupportEnabled(),
   });
   const status = summary.report.status;
   const eff = effectiveReport(lites);
@@ -508,7 +529,12 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
 
   const attempts = await store.listAttempts(ctx.db, ctx.member.org_id, plan.id, 50);
   const reports = [...rows].reverse().map((r) => reportDto(r, rows, b, ctx));
-  const recordAllowed = kind === "cancel" ? true : !voided && plan.status === "active";
+  const multipleAreas = hasMultipleAreas(plan);
+  // 取消は、範囲が複数でも記録できる（DIPS で取り消した結果を残すため）。新規・変更は、範囲が複数のとき記録できない
+  const recordAllowed = kind === "cancel" ? true : !voided && plan.status === "active" && !multipleAreas;
+  if (multipleAreas && !voided && kind !== "cancel") {
+    warnings.push({ code: "route_multiple_areas", message: PREPARE_WARNING_MESSAGE.route_multiple_areas });
+  }
 
   return {
     planId: plan.id,
@@ -560,7 +586,10 @@ const buildView = async (ctx: OpsContext, b: PlanBundle, selected: Selected, opt
       record: can(ctx.member.role, "report.record", { isSelf: b.isSelf }),
       revealLicenseNumber: can(ctx.member.role, "flight.readLicenseNumber", { isSelf: b.isSelf }),
     },
-    recordable: { allowed: recordAllowed, reason: recordAllowed ? null : voided ? "voided" : "draft" },
+    recordable: {
+      allowed: recordAllowed,
+      reason: recordAllowed ? null : voided ? "voided" : plan.status !== "active" ? "draft" : "multiple_areas",
+    },
     warnings,
   };
 };
@@ -741,6 +770,9 @@ export const createReport = async (ctx: OpsContext, planId: string, body: unknow
   const { kind } = v.data;
   const org = ctx.member.org_id;
   const now = nowOf(ctx);
+
+  // 範囲が 2 つ以上：新規・変更は記録しない（取消は通す）
+  if (kind !== "cancel") assertSingleRouteArea(plan);
 
   // 計画の版：新規・変更はクライアントが見た版が最新でなければ 409
   if (v.data.expectedPlanVersion !== null && v.data.expectedPlanVersion !== plan.current_version) {
@@ -1223,6 +1255,7 @@ export const retryReport = async (ctx: OpsContext, planId: string, rid: string, 
   const { plan } = b;
   if (plan.voided_at !== null) throw new OpsError(409, "voided");
   if (plan.status !== "active") throw new OpsError(409, "not_requested");
+  assertSingleRouteArea(plan);
   if (!v.data.confirmSend) {
     throw new OpsError(400, "invalid_input", { confirmSend: "送信内容を確認し、送信を確定してください" }, { confirmSend: "confirm_required" });
   }

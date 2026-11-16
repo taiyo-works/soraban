@@ -50,7 +50,8 @@ test.describe("Sprint 12b：運航管理が無効のとき", () => {
     await expect(page.getByTestId("verdict-level")).toBeVisible();
     await expect(page.getByTestId("create-plan-from-verdict")).toHaveCount(0);
     await expect(page.getByTestId("home-ops-link")).toHaveCount(0);
-    const text = await page.locator("body").innerText();
+    // Sprint 18-3：見出しの説明（site-ops-note。契約 §5.4 の文）に「通報の記録」が入る。運航管理の表示（記録・次にやること）が無いことの検査なので、その 1 文は除く
+    const text = (await page.locator("body").innerText()).replace(await page.getByTestId("site-ops-note").innerText(), "");
     expect(text).not.toMatch(/通報の記録|次にやること|手続きの記録/);
     expect(text).not.toMatch(/特許|出願/);
     expect(requested.filter((p) => /\/ops|\/api\/ops|dips|mlit\.go\.jp/i.test(p))).toEqual([]);

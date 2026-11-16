@@ -294,3 +294,27 @@ pnpm test:e2e                                      # DB なし（/ と /ops/desi
 pnpm test:e2e:ops                                  # E2E-DB（現場・圏外・事故・通報を含む）。空の DB から 2 回
 git diff origin/main --stat -- packages apps/web/src/server apps/web/src/app/api package.json pnpm-lock.yaml   # 差分 0（R-4）
 ```
+
+## 12. 16-1 の実施記録と契約の読み替え（2026-11-02、generator）
+
+ユーザーの決定（2026-11-02「推奨案で進めて」）: §7・§8 の推奨をすべて採用（Q1 常に明るい表示、Q2 線画、Q3 Preview に `DESIGN_CATALOG=1`＝ユーザー作業）。G-1（見本の承認）はユーザーのゲートで、16-1 はまだマージしない。
+
+### 12.1 読み替え（Sprint 17・18・19 でその後に入ったものに合わせた。現状のコードを正とした）
+
+| # | 読み替え |
+|---|---|
+| 1 | 対象画面の「計画の詳細」は、今は `PlanFrame`（`components/ops/plan-frame.tsx`）の下の `…/plans/[id]`・`/overview`・`/judgement`・`/journal` の各タブ。16-1 では個別に作り替えず、トークン（地・罫・影）の変更で一括して白基調になる。撮影の対象に入れた。`/ops/about`・公開の免責・フッターも同じ |
+| 2 | `/ops` のページの地は `--sb-surface`（`#F7F7F3`）だった（`ops-v2.css` の `.ds.ops-v2`・`html:has(.ops-v2)`・`--bg-app`）。H-1 に従い `--sb-base`（白）にした。`sprint12g-1a-db` の「地は rgb(247,247,243)」の期待を白に変えた（意図の変更。`sprint-16-test-changes.md`） |
+| 3 | H-2 の影の置き換え: `box-shadow: var(--sb-shadow)` で面を分けていた `.sb-block`・`.sb-item-card`・`.opx-card`・`.opx-row`（狭い幅）・`.opx-table`（広い幅）・`.opx-row-card`・`.opx-form > section/fieldset` を、罫に置き換えた。罫は `box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule)`（内側の輪。通常 1px、現場 1.5px）で、`border` にしない。`border` にすると各カードが 2px 高くなり、`sprint12g-1b-db` A7（ホームの最初の画面 ≤ 752px）が 755.6 で落ちたため。内側の輪は寸法を変えず、既存の「外へ広がる影が 0」の検査（inset を除外）とも両立する。浮かせる部品（利用者メニュー、地図の操作）は `--sb-shadow`（none）を参照したまま |
+| 4 | H-5: 見出しの背後の数字は `SectionHead` の `num`、`records-client.tsx` の `Step` の `no`、`.sb-sec-num`・`.opx-step-num` を削除。ブランドの丸の外輪（`--sb-halo`）と等高線（`--sb-contour*`）のトークンも削除（等高線は旧い見本の中でしか使われていなかった） |
+| 5 | D-2 の対象: `soraban-ui.css` には OS の暗の宣言が無かった。実際にあったのは `soraban-tokens.css` と `globals.css`（`--color-*` の青黒と 12g の `.ds` の暗）で、両方外した。加えて 503 の画面（`proxy.ts` のインライン CSS）の暗も外した。`color-scheme` は `:root` で `light`、`.ds` で `light`（強制の暗だけ `dark`） |
+| 6 | S-1 の基準: 判定の塗りの上の文字は、現場でも日差しの模擬では 3.0 以上とした。§1.5 の表が「要手続きの塗りの上の墨 3.99＝良」としており、判定色の値を変えない（H-4）ことと両立させるため。橙の面の上の文字も 3.0 以上（契約どおり）。日差しの模擬は明の 2 通り（通常・現場）に適用し、休眠の暗には適用しない |
+| 7 | H-3 の縁の色は `--sb-on-orange`（墨。暗でも同じ値）。`.opx-btn-primary`（`ops-v2.css`）は `border: var(--sb-rule-w) solid …`、`.sb-pill-primary`（`soraban-ui.css`）は `border-color`。選択中の面（`.sb-check-row.is-on`、橙の薄い面）にも `--sb-edge` の内側の縁を足した |
+| 8 | R-1 の一覧: 既存の仕組み（`scripts/testids.mjs`、`sprint-17-testids-baseline.txt`）をそのまま使い、新しい `sprint-16-testids-baseline.txt` は作らなかった。旧い見本だけが持っていた 265 件は `--write --reason` で一覧から外し、別に `docs/evaluations/sprint-16-removed-catalog-testids.txt` に残した（実画面の識別子は 0 件。単体テストの件数とハッシュも更新） |
+| 9 | T-5: `PWA_THEME_COLOR`・`PWA_BACKGROUND_COLOR` を `#FFFFFF` にし、`pwa.test.ts` が `soraban-tokens.css` の `--sb-base` と比べる。アイコンの画像・`icon.svg`・favicon の藍は、`brand-visual-plan.md` §2 に従い 16-1 では替えない（U-5 は 16-3 ではなくブランドの刷新へ） |
+| 10 | 橙の値は `#F89B48` のまま（H-3「値は変えない」）。`brand-visual-plan.md` とデザイン見本 v3 の `#EBA15C` への差し替えはトークン 1 か所で済む。G-1 で決める |
+| 11 | `/ops/design` の旧い 12g の見本・試作・`?view=style`・`view=menu`・`view=judge` は削除。新しい見本は `?mode=field`・`?theme=dark`（休眠の確認）・`?veil=1`（日差しの模擬の白い膜）。D-3 の「暗の値を確かめていた検査は見本での検査に移す」は、`sprint16-1.spec.ts` の強制の暗（検査 10）と `check-contrast-v2.mjs` の暗 2 通りで受けた。12g の見本の部品（ダイアログ・コマンドパレットほか）の操作の検査は、部品が実画面で使われているかぎり実画面の E2E が持つ。実画面で使われていない部品（`components/ui/*` の一部）は 16-3 で部品ごと削除する |
+
+### 12.2 16-1 の検証（`docs/evaluations/` ではなく作業ログ。評価者が空の DB から再現する）
+
+`sprint-16-test-changes.md` に、変えたテストと理由を書いた。

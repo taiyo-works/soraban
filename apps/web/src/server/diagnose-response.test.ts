@@ -1,0 +1,79 @@
+// Sprint 18-1 A16：/api/diagnose の応答から prefill を取り除くのは、ルートの層（server/diagnose-response.ts）だけ。
+// handleDiagnosePost の応答は変えない（diagnose-core.test.ts の基準が守る）。
+import { describe, expect, it } from "vitest";
+import { runRegulationCheckWith } from "./check-core";
+import { APPLICATION_SUPPORT_KEYS, applyApplicationSupportFlag, omitApplicationSupport, stripPrefillFromResponse } from "./diagnose-response";
+import { handleDiagnosePost } from "./handlers";
+import { BASELINE_LOCATIONS, BASELINE_NOW, baselineProvider } from "./sprint11e-baseline";
+
+const yonago = BASELINE_LOCATIONS.find((l) => l.name === "米子市役所")!;
+
+const original = async (): Promise<Response> =>
+  handleDiagnosePost(
+    new Request("http://x/api/diagnose", {
+      method: "POST",
+      body: JSON.stringify({ ...yonago.loc, droneWeightG: 900, flags: ["method_night"], plannedDate: "2027-01-14" }),
+    }),
+    (loc, ctx) => runRegulationCheckWith(baselineProvider("31202"), loc, ctx, BASELINE_NOW),
+  );
+
+describe("applyApplicationSupportFlag（A16）", () => {
+  it("無効（未設定）：prefill が無く、他の項目は同一。状態コード・ヘッダーは保つ", async () => {
+    const before = (await (await original()).json()) as Record<string, unknown>;
+    expect(Array.isArray(before["prefill"]) && (before["prefill"] as unknown[]).length > 0).toBe(true);
+    const res = await applyApplicationSupportFlag(await original(), {});
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("application/json");
+    const after = (await res.json()) as Record<string, unknown>;
+    expect("prefill" in after).toBe(false);
+    expect("deadlines" in after).toBe(false);
+    expect("categoryNote" in after).toBe(false);
+    expect(before["deadlines"]).toBeDefined();
+    expect(JSON.stringify(after)).not.toMatch(/開庁日以上前までに提出|提出期限の目安/);
+    expect(after["category"]).toBe(before["category"]);
+    expect(after["verdict"]).toBeDefined();
+    expect(after["procedures"]).toBeDefined();
+    expect(after["evidenceId"]).toBe(before["evidenceId"]);
+    const rest = { ...before };
+    for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
+    expect(after).toEqual(rest);
+  });
+
+  it("有効：応答は無変更（prefill が残る）", async () => {
+    const before = await (await original()).text();
+    const res = await applyApplicationSupportFlag(await original(), { APPLICATION_SUPPORT_ENABLED: "1" });
+    expect(await res.text()).toBe(before);
+  });
+
+  it("有効でも本番のデプロイ（VERCEL_ENV=production）は取り除く", async () => {
+    const res = await applyApplicationSupportFlag(await original(), {
+      APPLICATION_SUPPORT_ENABLED: "1",
+      VERCEL_ENV: "production",
+    });
+    const j = (await res.json()) as object;
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in j, k).toBe(false);
+  });
+
+  it("失敗の応答（400）はそのまま返す", async () => {
+    const bad = await handleDiagnosePost(
+      new Request("http://x/api/diagnose", { method: "POST", body: "{" }),
+      (loc, ctx) => runRegulationCheckWith(baselineProvider("31202"), loc, ctx, BASELINE_NOW),
+    );
+    const res = await stripPrefillFromResponse(bad);
+    expect(res.status).toBe(400);
+  });
+
+  it("omitApplicationSupport（運航管理の判定スナップショットの保存・読み出しでも使う。Sprint 18-2 L8）：3 項目だけ除き、元は変えない", async () => {
+    const full = (await (await original()).json()) as Record<string, unknown>;
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in full, `前提 ${k}`).toBe(true);
+    const frozen = JSON.stringify(full);
+    const out = omitApplicationSupport(full);
+    expect(JSON.stringify(full)).toBe(frozen);
+    for (const k of APPLICATION_SUPPORT_KEYS) expect(k in out, k).toBe(false);
+    const rest = { ...full };
+    for (const k of APPLICATION_SUPPORT_KEYS) delete rest[k];
+    expect(out).toEqual(rest);
+    expect(out["verdict"]).toEqual(full["verdict"]);
+    expect(out["evidenceId"]).toBe(full["evidenceId"]);
+  });
+});

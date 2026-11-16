@@ -85,17 +85,15 @@ describe("見本のページ", () => {
   });
 });
 
-describe("見本の設定（クエリ文字列）", () => {
+describe("見本の設定（クエリ文字列。Sprint 16-1 で白基調の見本に作り直した）", () => {
   it("既知の値だけを読み、不明な値は既定に戻す", async () => {
-    const { parseConfig, DEFAULT_CONFIG } = await import("../components/ui/catalog/config");
-    expect(parseConfig({})).toEqual(DEFAULT_CONFIG);
-    // 案の見本（view・pc・sp・day・pcname・judge）は既定のまま変わらない（menu-trial.test.ts が別に確かめる）
-    expect(parseConfig({ theme: "dark", field: "1", density: "compact", screen: "workspace" })).toEqual({
-      ...DEFAULT_CONFIG, theme: "dark", field: true, density: "compact", screen: "workspace",
-    });
-    expect(parseConfig({ theme: "neon", field: "yes", density: "x", screen: "none" })).toEqual(DEFAULT_CONFIG);
-    // 配色案（palette）は廃止：古い共有 URL に付いていても無視する
-    expect(parseConfig({ palette: "3" })).toEqual(DEFAULT_CONFIG);
-    expect(parseConfig({ theme: ["light", "dark"] }).theme).toBe("light");
+    const { parseCatalogConfig } = await import("../app/ops/design/catalog");
+    const def = { mode: null, theme: null, veil: false };
+    expect(parseCatalogConfig({})).toEqual(def);
+    expect(parseCatalogConfig({ mode: "field", theme: "dark", veil: "1" })).toEqual({ mode: "field", theme: "dark", veil: true });
+    expect(parseCatalogConfig({ mode: "x", theme: "neon", veil: "yes" })).toEqual(def);
+    // 旧い見本の設定（view・field・density・screen・palette）は無視する
+    expect(parseCatalogConfig({ view: "style", field: "1", density: "compact", screen: "workspace", palette: "3" })).toEqual(def);
+    expect(parseCatalogConfig({ mode: ["field", "x"] }).mode).toBe("field");
   });
 });

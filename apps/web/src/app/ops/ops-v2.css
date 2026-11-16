@@ -7,7 +7,7 @@
 
 /* ===== 1 旧い名前を v2 の値へ（運航管理の枠 .ops-v2 の中だけ。見本ページ /ops/design は枠を持たないので影響しない） ===== */
 .ds.ops-v2 {
-  --bg-app: var(--sb-surface);
+  --bg-app: var(--sb-base);
   --bg-surface: var(--sb-base);
   --bg-sunken: var(--sb-sunken);
   --fg: var(--sb-ink);
@@ -54,13 +54,13 @@
 
 /* ===== 2 ページの骨格 ===== */
 .ds.ops-v2 {
-  background: var(--sb-surface);
+  background: var(--sb-base);
   color: var(--sb-ink);
   letter-spacing: 0.02em;
 }
 html:has(.ops-v2),
 html:has(.ops-v2) body {
-  background: var(--sb-surface);
+  background: var(--sb-base);
 }
 html:has(.ops-v2) body {
   color: var(--sb-ink);
@@ -134,14 +134,16 @@ html:has(.ops-v2) body {
 .opx-btn:active {
   background: var(--sb-hover);
 }
+/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁（通常 1px、現場 1.5px）で境界を持たせる。縁の色は暗でも墨の --sb-on-orange */
 .opx-btn-primary {
   min-height: var(--sb-hit-primary);
-  padding: 4px 4px 4px 26px;
-  border-color: transparent;
+  /* 文字は面の中央：右端の丸（48px）と gap（12px）の分だけ左にも余白を取り、左右を対称にする（以前は左 26px で文字が丸の分だけ左に寄っていた） */
+  padding: 4px 4px 4px calc(4px + 48px + 12px);
+  border: var(--sb-rule-w) solid var(--sb-on-orange);
   background: var(--sb-orange);
   color: var(--sb-on-orange);
   font-size: 16px;
-  justify-content: space-between;
+  justify-content: center;
 }
 .opx-btn-primary {
   position: relative;
@@ -236,6 +238,10 @@ html:has(.ops-v2) body {
   letter-spacing: 0.06em;
   color: var(--sb-ink);
 }
+.opx-h1 {
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
 .opx-eyebrow {
   font-size: 13px;
   font-weight: 700;
@@ -326,6 +332,10 @@ html:has(.ops-v2) body {
   font-size: 13px;
   line-height: 1.75;
 }
+/* 本文として読ませる案内（不変条件 6: 本文 16px 以上）。.opx-note の 13px を、この案内だけ上書きする */
+.opx-note-lg {
+  font-size: 16px;
+}
 .opx-note-red {
   background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
   box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
@@ -357,18 +367,18 @@ html:has(.ops-v2) body {
   color: var(--sb-ink);
 }
 
-/* 影は 1 種類（--sb-shadow）。Tailwind の shadow-* は複数の影を重ねて出すため使わない */
+/* 影は使わない（--sb-shadow は none。浮かせる部品だけが参照する）。Tailwind の shadow-* は複数の影を重ねて出すため使わない */
 .opx-shadow {
   box-shadow: var(--sb-shadow);
 }
 
-/* 白いカード（影は 1 種類） */
+/* 白いカード（影なし。罫で分ける：Sprint 16 H-2） */
 .opx-card {
   min-width: 0;
   padding: 20px 16px;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
   .opx-card {
@@ -409,6 +419,32 @@ html:has(.ops-v2) body {
   }
 }
 
+/* 項目の並び（compact）：狭い画面でも項目名を左・値を右の 2 列にして、縦を詰める（Sprint 17-2） */
+.opx-detail-compact > div {
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 6px 0;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.45;
+}
+@media (min-width: 640px) {
+  .opx-detail-compact > div {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+}
+/* 広い画面では 2 列に並べる（縦を詰める。順序は左列→右列ではなく、行ごとに左→右） */
+@media (min-width: 1024px) {
+  .opx-detail-compact {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+  .opx-detail-compact > div {
+    grid-template-columns: 9rem minmax(0, 1fr);
+  }
+}
+
 /* 範囲の切り替え（チップ。現在地は実線＋太字、ほかは破線） */
 .opx-seg {
   display: flex;
@@ -446,7 +482,7 @@ html:has(.ops-v2) body {
   padding: 14px 16px;
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
-  box-shadow: var(--sb-shadow);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
   font-size: 14px;
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);

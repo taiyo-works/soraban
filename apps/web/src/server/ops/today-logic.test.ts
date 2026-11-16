@@ -353,6 +353,6 @@ describe("次にやることの表示名（新しい項目）", () => {
     expect(NEXT_ACTION_LABEL.check_emergency_airspace).toBe("緊急用務空域を確認する");
     expect(NEXT_ACTION_LABEL.write_journal).toBe("日誌を記入する");
     expect(NEXT_ACTION_LABEL.review_journal_mismatch).toBe("日誌の食い違いを確認する");
-    expect(NEXT_ACTION_LABEL.renew_license).toBe("技能証明を更新する");
+    expect(NEXT_ACTION_LABEL.renew_license).toBe("技能証明の有効期限を確認する");
   });
 });

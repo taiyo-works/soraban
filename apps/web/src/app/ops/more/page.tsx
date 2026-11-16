@@ -73,6 +73,21 @@ export default async function OpsMorePage() {
         <Icon name="unlinked" size={16} className="shrink-0 text-sb-ink-3" />
         <p>DIPS との接続：未接続。機体・操縦者はアプリの中で登録し、通報は DIPS で行った結果を手で記録します。</p>
       </section>
+      {/* このアプリについて（Sprint 18-3）。提供元・境界・免責。右上の利用者メニューからも入れる（どちらも 2 回の操作）。 */}
+      <ul className="sb-block sb-rows !py-1" data-testid="more-about">
+        <li>
+          <Link href="/ops/about" prefetch={false} data-testid="more-link-about" className="sb-row min-h-16 w-full">
+            <Icon name="info" size={22} className="shrink-0 text-sb-ink-2" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-[15px] font-bold text-sb-ink">このアプリについて</span>
+              <span className="text-[13px] text-sb-ink-2">提供元・このアプリの範囲・免責</span>
+            </span>
+            <span aria-hidden className="sb-go-dot">
+              <Icon name="chevron-right" size={18} />
+            </span>
+          </Link>
+        </li>
+      </ul>
     </main>
   );
 }

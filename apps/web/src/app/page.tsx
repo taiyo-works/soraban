@@ -10,6 +10,10 @@ import { Suspense } from "react";
 import { BrandDrone, HeroIllustration } from "@/components/hero-illustration";
 import { OpsHomeEntry } from "@/components/ops-home-entry";
 import { RegulationChecker } from "@/components/regulation-checker";
+import { BOUNDARY_FULL, isApplicationSupportEnabled } from "@/lib/boundary";
+import { DISCLAIMER_JUDGEMENT } from "@/lib/disclaimers";
+import { PROVIDER } from "@/lib/provider-info";
+import { ProviderInfo } from "@/components/provider-info";
 import { Disclosure, SectionHead } from "@/components/ui/sb-parts";
 
 // 自治体別の件数を「米子8 + 境港4 + 出雲5」のような短い列に整形する。
@@ -89,7 +93,7 @@ const ADDRESS_INDEX_AVAILABLE = addressIndexAvailable();
 
 // 運営者・利用の範囲・対象地域。スマホでは「項目名｜内容」の 2 列、PC では 3 段の並びにする。
 const SITE_FACTS: ReadonlyArray<readonly [string, string]> = [
-  ["運営者", "フューチャーテック株式会社"],
+  ["提供元", PROVIDER.name],
   ["利用の範囲", "現在は社内での試験運用中"],
   [
     "対象地域",
@@ -117,7 +121,7 @@ export default function Home() {
                 </span>
                 そらばん
               </span>
-              <span className="sb-hero-sub">ドローン飛行の可否判定と運航管理</span>
+              <span className="sb-hero-sub">ドローンの飛行計画の通報・点検・飛行日誌</span>
             </h1>
           </div>
         </div>
@@ -126,11 +130,11 @@ export default function Home() {
             {/* 誰のための道具で、使うと何が得られるか（Sprint 11a B1）。地域名はここに書かず site-facts の対象地域にだけ書く。 */}
             <p data-testid="site-lead" className="sb-lead">
               <strong>業務でドローンを飛ばす事業者・操縦者のための道具です。</strong>
-              飛ばす前に、その地点がどの法令・条例に当たり、どの手続きが要るかを一度に確かめ、出典つきの記録として残せます。
+              このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
             <p data-testid="site-ops-note" className="sb-ops-note">
-              運航管理（飛行計画・通報・飛行日誌）は、社内で試験運用しながら整えています。
+              通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。
             </p>
             {/* 運航管理が有効でログイン済みの利用者にだけ出す入口（Sprint 12a J）。動的な部分は Suspense の内側に閉じ込め、
                 `/` の静的なシェルは変えない。無効のとき（本番）は何も描かず、追加の通信もしない。 */}
@@ -157,18 +161,20 @@ export default function Home() {
         <section aria-labelledby="checker-heading" className="sb-band sb-band-off sb-band-first">
           <SectionHead
             id="checker-heading"
-            num="01"
             title="地点を判定する"
             note="住所・座標・地図のクリックで地点を指定できます"
           />
-          <RegulationChecker addressIndexAvailable={ADDRESS_INDEX_AVAILABLE} />
+          {/* 申請支援の診断パネル等は、フラグ APPLICATION_SUPPORT_ENABLED（既定・本番は無効）の裏。値はビルドのときに固まる（lib/boundary.ts）。 */}
+          <RegulationChecker
+            addressIndexAvailable={ADDRESS_INDEX_AVAILABLE}
+            applicationSupport={isApplicationSupportEnabled()}
+          />
         </section>
 
         {/* ============================ 収録範囲 ============================ */}
         <section aria-labelledby="coverage-heading" className="sb-band sb-band-white">
           <SectionHead
             id="coverage-heading"
-            num="02"
             title="収録している規制とデータ"
             note="件数と確認日は現在の収録内容から表示しています"
           />
@@ -207,8 +213,8 @@ export default function Home() {
             <h2 id="disclaimer-heading" className="text-sm font-bold text-sb-ink">
               免責事項
             </h2>
-            <p className="max-w-3xl text-[13px] leading-[1.9] text-sb-ink-2">
-              本ツールは参考情報であり、飛行可否を最終的に保証するものではありません。緊急用務空域等の動的情報は反映していません。実運用前に必ず{" "}
+            <p className="max-w-3xl text-sm leading-[1.9] text-sb-ink-2">
+              {DISCLAIMER_JUDGEMENT}緊急用務空域等の動的情報は反映していません。公式の情報：{" "}
               <a
                 href="https://www.dips.mlit.go.jp/portal/"
                 target="_blank"
@@ -217,13 +223,15 @@ export default function Home() {
               >
                 国土交通省 DIPS
               </a>
-              、警察庁、各自治体の最新情報をご確認ください。自治体の条例データの一部は手作業で収録しており、各データに確認日と確からしさ（低・中・高）を付けています。
+              。自治体の条例データの一部は手作業で収録しており、各データに確認日と確からしさ（低・中・高）を付けています。
             </p>
           </div>
-          <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-xs text-sb-ink-3">
-            <p className="text-sb-ink-2">
-              © 2026 フューチャーテック株式会社
-              <span className="ml-3 text-sb-ink-3">鳥取県西伯郡日吉津村</span>
+          <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-sm text-sb-ink-3">
+            <p className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
+            {/* 提供元の 6 項目（Sprint 18-3）と境界の文。値は lib/provider-info.ts・lib/boundary.ts の定数から。 */}
+            <ProviderInfo testId="site-provider" className="max-w-3xl" compact />
+            <p data-testid="site-boundary" className="max-w-3xl text-sm leading-relaxed text-sb-ink-2">
+              {BOUNDARY_FULL}
             </p>
             <p className="max-w-3xl leading-relaxed">
               出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開資料（地形図・空港要覧）からの概算（そらばん作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース

@@ -61,7 +61,18 @@ export type ReportFieldsData = {
   readonly verifiedAt: string;
   readonly source: { readonly title: string; readonly pages: string; readonly note: string };
   readonly numberPolicy: "number_or_declared_unavailable" | "required_number";
-  readonly routeFormat: { readonly circleRadiusPlacement: "properties" | "geometry" | "both"; readonly note: string };
+  readonly routeFormat: {
+    /** 円の半径の置き場所。既定は properties（リクエストのサンプルに合わせる）。 */
+    readonly circleRadiusPlacement: "properties" | "geometry" | "both";
+    readonly note: string;
+    /** 多角形の環の閉じ方。既定は open。closed は検証環境で受理を確かめるまで使わない。 */
+    readonly polygonRing: "open" | "closed";
+    readonly polygonRingNote: string;
+    /** 範囲が 2 つ以上のときの扱い。single_only（既定）は通報の準備を止める。first_only は設けない。 */
+    readonly multiArea: "single_only";
+    readonly multiAreaNote: string;
+    readonly coordinateNote: string;
+  };
   readonly groups: readonly ReportFieldGroup[];
   readonly fields: readonly ReportField[];
 };

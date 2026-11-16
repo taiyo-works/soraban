@@ -58,7 +58,10 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
       </PageHeader>
 
       <Section title="判定の結果" aria-label="判定の結果" description="計画を保存したときにサーバーが実行して保存した結果です。ここでは再計算しません。">
-        <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={verdictPermitNotesFromBasis(s.permitBasis)} />
+        {/* 判定エンジンの文言を出す領域の印（Sprint 18-3。限定語の検査から外す。lib/wording-policy.ts） */}
+        <div data-wording-scope="judgement" data-testid="judgement-scope-snapshot">
+          <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={verdictPermitNotesFromBasis(s.permitBasis)} />
+        </div>
       </Section>
 
       <Section title="根拠の記録" aria-label="根拠の記録">
@@ -66,7 +69,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
           data-testid="basis-facts"
           rows={[
             ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="basis-check-evidence">{s.checkEvidenceId}</span>],
-            ["申請支援の証跡 ID", <span key="d" className={mono} data-testid="basis-diagnosis-evidence">{s.diagnosisEvidenceId}</span>],
+            ["飛行の方法を含む判定の証跡 ID", <span key="d" className={mono} data-testid="basis-diagnosis-evidence">{s.diagnosisEvidenceId}</span>],
             ["エンジンの版", <span key="e" className={mono} data-testid="basis-engine">{s.engineVersion}</span>],
             ["判定の日時", <time key="t" dateTime={s.checkedAt} className="sb-num text-xs tnum">{formatJst(new Date(s.checkedAt))}（{s.checkedAt}）</time>],
             [

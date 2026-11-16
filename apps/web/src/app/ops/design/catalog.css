@@ -1,0 +1,168 @@
+/* デザイン見本 /ops/design（Sprint 16-1。白基調の v2 の見本）。値は持たず、soraban-tokens.css の --sb-* だけを使う。見本のためだけの CSS（本番の画面は読まない）。 */
+html:has(.sbx-catalog),
+html:has(.sbx-catalog) body {
+  background: var(--sb-base);
+  color: var(--sb-ink);
+}
+.sbx-catalog {
+  color-scheme: light;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 96px;
+  font-size: max(16px, var(--sb-fs-body));
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+html[data-theme="dark"] .sbx-catalog {
+  color-scheme: dark;
+}
+.sbx-catalog *:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sbx-catalog h1 {
+  font-size: 28px;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-feature-settings: "palt" 1;
+  text-wrap: balance;
+}
+/* 節の見出し：橙の短い面（8px の丸い角ではなく 5px×1 行の棒）を頭に置いて、節の始まりを示す（装飾の絵は足さない） */
+.sbx-catalog h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-feature-settings: "palt" 1;
+}
+.sbx-catalog h2::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 1.2em;
+  background: var(--sb-orange);
+}
+.sbx-note {
+  font-size: max(14px, var(--sb-fs-note));
+  color: var(--sb-ink-3);
+  text-wrap: pretty;
+}
+.sbx-catalog header > .sbx-note {
+  max-width: 44em;
+}
+.sbx-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px 0;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+.sbx-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+.sbx-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.sbx-ground {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-l);
+}
+.sbx-ground[data-ground="base"] { background: var(--sb-base); }
+.sbx-ground[data-ground="surface"] { background: var(--sb-surface); }
+.sbx-ground[data-ground="sunken"] { background: var(--sb-sunken); }
+.sbx-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.sbx-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--sb-hit);
+  padding: 0 14px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-r-m);
+  background: var(--sb-field);
+  color: var(--sb-ink);
+  font-size: 16px;
+}
+.sbx-input::placeholder {
+  color: var(--sb-ph);
+}
+.sbx-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--sb-orange);
+  border: var(--sb-rule-w) solid var(--sb-on-orange);
+}
+.sbx-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 8px 4px;
+  border-bottom: 2px solid var(--sb-edge);
+  background: var(--sb-base);
+  font-size: max(18px, var(--sb-fs-body));
+  line-height: 1.5;
+}
+.sbx-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+.sbx-swatch {
+  height: 40px;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-m);
+}
+
+/* 現場モードの見本（?mode=field）：文字の大きさも現場の基準に合わせる（本文 18px・状態の語 20px 以上・押す部品 56px 以上・補助 14px 以上）。
+ * G-1 で現場の見え方を誤って判断させないため。実画面の部品の寸法は 16-2 で現場に合わせる。 */
+html[data-mode="field"] .sbx-catalog {
+  font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sb-vtag {
+  min-height: 56px;
+  padding: 4px 16px 4px 10px;
+  font-size: 20px;
+}
+html[data-mode="field"] .sbx-catalog .sb-vtag .sb-vm {
+  width: 28px;
+  height: 28px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill,
+html[data-mode="field"] .sbx-catalog .opx-btn,
+html[data-mode="field"] .sbx-catalog .sbx-input {
+  font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill:not(.sb-pill-primary),
+html[data-mode="field"] .sbx-catalog .opx-btn:not(.opx-btn-primary),
+html[data-mode="field"] .sbx-catalog .sbx-input {
+  min-height: 56px;
+}
+html[data-mode="field"] .sbx-catalog .sb-pill-label {
+  font-size: 18px;
+}
+html[data-mode="field"] .sbx-catalog .sbx-note {
+  font-size: 16px;
+}

@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 // 判定画面には運航管理へのリンクを出さない。
 test.describe("Sprint 10: 利用者機能が無効のとき", () => {
   test("運航管理の画面と API はすべて 404", async ({ request }) => {
-    for (const path of ["/ops", "/ops/aircraft", "/ops/aircraft/new", "/ops/sign-in", "/ops/no-access", "/ops/members"]) {
+    for (const path of ["/ops", "/ops/aircraft", "/ops/aircraft/new", "/ops/sign-in", "/ops/no-access", "/ops/members", "/ops/about"]) {
       const r = await request.get(path, { maxRedirects: 0 });
       expect(r.status(), path).toBe(404);
     }

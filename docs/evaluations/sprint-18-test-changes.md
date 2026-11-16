@@ -1,0 +1,154 @@
+# Sprint 18-1: 既存テストの変更と理由
+
+意図の変更は「公開の `/` の申請支援（診断パネル・束ね PDF・プリフィル・マニュアル骨子・期限カレンダー）を、フラグ
+`APPLICATION_SUPPORT_ENABLED`（既定・本番は無効）で止めた」ことだけ。**元の検査を単に消さず、「無くなっていること」の検査に置き換えた**
+（共通の補助 `expectNoApplicationSupport`: 本文 `textContent`（畳みの中も含む）に申請支援の語 10 個が 0 件、診断の部品 4 種が 0 個、「束ね PDF」のボタンが 0 個）。
+診断パネルの中身そのものは `packages/regulations` の単体テスト（無変更）が守る。フラグ有効の E2E は作らない（公開の `/` はビルド時に値が固まるため。`apps/web/src/lib/boundary.ts`）。
+
+画面に出なくなった `data-testid` の対応表は `sprint-18-testid-map.md`。基準の一覧から消える識別子は 0（コードを残したため）。
+
+## 置き換えた公開の E2E（16 本）と補助関数
+
+| # | テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|---|
+| 1 | `sprint10a` #9 | 束ね PDF に運営者・「判定の版」・免責・証跡 ID（フッター）・禁止語 | 束ね PDF のボタンが 0、申請支援の語・部品が 0。**運営者・判定の版・免責・禁止語は #8（地点判定 PDF）が既に検査**。証跡 ID の日本語ラベル（`証跡 ID（判定と手続き）ev_…`、英字 `Evidence` でない）の検査は #8 に移した | 束ね PDF が出ない |
+| 2 | `sprint11a` #4 | `diagnosis-did-status` に「非該当（工業専用地域）」 | `did-status`（DID 自動判定）に同じ文字列。診断パネルが無いこと | 同じ値は公開の `/` に残る `did-status` で見える |
+| 3 | `sprint11a` #12 | 診断パネルに通達の注記（国空無機第338898号）とリンク、束ね PDF に番号 | 判定の手続きに「物件の投下」が出る。通達の番号・リンクは**画面に出ない**（実測）。診断パネルが無いこと | 通達の注記は診断の `verificationNotes` で判定の画面には出ない。注記の中身は `packages/regulations/src/sprint11a.test.ts`（10・11）が守る |
+| 4 | `sprint11a` #17 | 診断パネルの「飛行できません」・期限の逆算が出ない・5-1(2)c) の説明・プリフィルの飛行の種類・束ね PDF | 結論 `verdict-level`=「飛行不可」（`data-level=no_fly`）、本文に「開庁日以上前までに提出」「起算日」が 0、申請支援が 0、地点判定 PDF に「飛行不可」があり「許可申請」が 0 | 「飛行できません」・5-1(2)c)・プリフィルは診断の文言で出ない。5-1(2)c) は `sprint11a.test.ts` 16 が守る |
+| 5 | `sprint11c` #6 | 診断パネルの手続きカード（article）が、同意・通報のチェックの有無にかかわらず出る | 判定の `verdict-small-drone-consent`・`verdict-small-drone-notice`（要手続きの手続き）が出る。入力後は要手続きの行か `verdict-done-item[data-item-id=small-drone-law]` のどちらかに残る。診断の article は 0 | 契約の表は「`small-drone-law-consent-notice` の行」だが、判定の手続きの id は `verdict-small-drone-consent`・`-notice`（2 行に分かれる）。実測で合わせた |
+| 6 | `sprint7` 飛行禁止法の手続き | 診断パネルの article と、出典リンク `…/tsuhou.html`。green では article が 0 | 判定の同意・通報の行が出る。出典リンクは規制カード `regulation-card-small-drone-law` の `…/kogatamujinki/index.html`。green では 2 行とも 0 | 判定の手続きの行にはリンクが無い。`tsuhou.html` は診断の手続きのデータ（`sprint12a-diagnose-baseline.json` の応答全文が守る）で、画面には出なくなった |
+| 7 | `sprint11d` #6 | `procedure-card[data-procedure-id=flight-permission-did]` が `data-verdict=procedure_done`、`procedure-verdict-done` に「手続き済み（条件付き）」 | 段取り（要手続きの手続き）から DID が外れること（既存）、`verdict-done` の節に「手続き済み（条件付き）」、`verdict-done-item`（aviation-law-did。item の id を持ち、手続きの id は持たない）の中に「国交省 DIPS：DID 上空の飛行許可」と `verdict-done-condition` が 1 件以上、`procedure-card` が 0 | 手続き済みの印は判定の `verdict-done-item` に残る |
+| 8 | `sprint11e` #13 | `diagnosis-category-headline` に「対象外（模型航空機」、束ね PDF の文字列、マニュアル骨子に第132条の85 が無い | 申請支援が 0、「カテゴリー I（特定飛行に非該当）」が本文に無い。判定（level・手続き・DID の理由）と地点判定 PDF の検査は残した | カテゴリー・PDF・骨子は出ない。中身は `packages/regulations` の `model-aircraft`・`diagnosis` の単体と `apps/web/src/server/sprint11e.test.ts` |
+| 9 | `sprint11f` #3・4 | `diagnosis-did-status`（`DID（人口集中地区）: 対象外（模型航空機）`／`該当`）、束ね PDF の DID の行 | `did-status`（`DID 自動判定：…`）に同じ値、申請支援が 0。地点判定 PDF・履歴の検査は残した | 同じ値は `did-status` に残る |
+| 10 | `sprint11g` #15 | 束ね PDF（許可または通報・出典 URL・マニュアル骨子の文） | 申請支援が 0。判定の手続き・義務・注記と地点判定 PDF（出典 URL を含む）の検査は残した | 骨子の中身は `packages/regulations` の単体と `apps/web/src/server/sprint11g.test.ts` |
+| 11〜13 | `sprint12h-pr2` B2（3 件） | `diagnosis-details` が見える・閉じている／カテゴリーの見出しと「申請の準備」の summary が見える・束ね PDF が隠れている／キーボードで開閉（矢印の向き・文字・44px・フォーカスの輪） | `diagnosis-details` が 0。申請支援が 0。**開閉の検査は同じ部品（`Disclosure`）の `coverage-details` に移し、検査項目は同じ**。ページ全体の高さの上限（16,646／13,500）は**変えず**、短くなった分が戻らないよう 12,000 の上限を足した（12,000px は 18-1 の後戻り防止の上限。18-3 などで画面が意図して伸びるときは、理由を書いて引き上げてよい） | 部品が無い。実測（375px）前 12,086px → 後 11,244px、1280px は 6,713px → 6,189px |
+| 14 | `sprint12h-pr2`「申請の準備を開くと…」 | 必要手続き・提出期限・束ね PDF が出る | 申請支援が 0（全部の畳みを開いても） | 「申請の準備」が無い |
+| 15 | `sprint12h-pr2` N1 | `verdict-responsibility` に旧い文全文（「…下書きまでを手伝います。」） | `BOUNDARY_SHORT` の全文（`toHaveText` で他の文が混ざらないことは 18-1 の spec）、「下書き」が無い。「代行・代理申請の語がない」は無変更 | 契約 §4.2。文言の意図的な変更 |
+| 16 | `sprint7` D「地点判定 PDF と申請支援 PDF にデータ名・確認日・改正」 | 2 つの PDF（`[t1, t2]`）を同じ項目で検査 | 地点判定 PDF（`t1`）だけ。束ね PDF は出ないこと | 束ね PDF が出ない |
+| 補助 | `methodCheck`／`methodBox`（11d・11e・11f・11g） | 凡例「飛行方法（申請支援）」で fieldset を探す | 凡例「飛行の方法（選ぶと判定に反映します）」で探す（探す対象・操作は同じ） | 凡例の文言の変更（契約 §4.2） |
+| 補助 | `openDiagnosis`（`field-checks.ts`） | `diagnosis-details` を開く | **削除**。使う所が無くなったため。代わりに `expectNoApplicationSupport`・`APPLICATION_SUPPORT_WORDS`・`APPLICATION_SUPPORT_TESTIDS` を追加 | 補助関数でテストではない |
+
+## 追加したテスト
+
+- `e2e/sprint18-1.spec.ts`（公開の E2E）: 1-1（4 地点 × 375×812・1280×900、畳みを開いても、横スクロールなし）、1-2（判定の部品が見える・地点判定 PDF・結論 8 通り）、1-3（責任の注記）、1-4（`/api/diagnose` に `prefill` が無い）、1-5（凡例・予定日・補助者・免責・診断の失敗の文・PDF に「許可申請」が無い）、1-6（旧い履歴の項目）。
+- 単体: `lib/boundary.test.ts`（フラグ 5 通り＋`page.tsx` が 1 回だけ呼ぶ）、`server/diagnose-response.test.ts`（ルートの層の取り除き。無効なら無く他の項目は同一・有効なら無変更・本番は取り除く）、`lib/history.test.ts`（手続きの完了を含む旧い項目を読んでも JSON が変わらない）。
+
+## 結論の同一性（1-2）
+
+基準のコミット `8b3ee65` のビルドで、フラグ前の画面（凡例「飛行方法（申請支援）」）から同じ 8 通りを取り、18-1 後と完全に一致した（`data-verdict-key`/`data-level`）:
+
+| 地点 | 飛行の方法なし | 夜間 |
+|---|---|---|
+| 米子市役所（初期表示） | needs / needs_procedure | needs / needs_procedure |
+| 美保基地の周辺（境港市） | needs / needs_procedure | needs / needs_procedure |
+| 鳥取市の工業専用地域 | none / no_procedure | needs / needs_procedure |
+| 米子市役所＋緊急用務空域 | no / no_fly | no / no_fly |
+
+`handleDiagnosePost` の応答の SHA を比べる `diagnose-core.test.ts` は無変更で通る。`git diff --stat` に `packages/` は無い。
+
+## レビュー後の追加（18-1 リトライ 1/3）
+
+- **M1**: フラグ無効のとき `/api/diagnose` の応答から `prefill` に加え `deadlines`（申請の提出期限の逆算）・`categoryNote` も除く（`server/diagnose-response.ts`）。`category`（履歴の保存値）・`procedures`・`verdict`・`evidenceId` は残す。単体: 無効なら 3 項目が無く文字列に「開庁日以上前までに提出」「提出期限の目安」が無い／有効なら無変更／本番・Vercel は有効でも除く。E2E: `sprint18-1.spec.ts` 1-4b。
+- **L1**: 判定履歴の行の `cat:IIA相当` などを、フラグ無効では出さない（保存値は不変）。既存の E2E の変更: `sprint11a` #21（`cat:IIA相当` → `cat:` が無いこと＋保存値に `II_A` が残ること）、`sprint11f`（正の検査 `cat:` 4 か所 → 診断由来で残る `DID:`。負の検査 `not cat:` はそのまま）。
+- **L5**: フラグは `VERCEL` が設定された環境では常に偽（`boundary.test.ts` を更新）。契約 §12 に追記、`docs/runbooks/local-verification.md` に運用の注意。
+- **M2（契約の誤り）**: `/ops/plans/[id]/judgement` と `snapshots/[sid]` には `verdict-responsibility` が**元から出ない**（`evidence` prop を渡すのは公開の `/` だけ）。契約 1-3 の「`/judgement` で `BOUNDARY_SHORT`」の E2E-DB は足さない。代わりに `sprint17-db` の J-4 に「主画面・`/report`・`/judgement` に旧い注記の文「入力項目の下書き」「手伝います」が 0 件（`/report` には別の意味の「下書き」が元からあるため、語でなく文で検査）、`/judgement` に `verdict-responsibility` が 0 個」を足した。
+- **語の一覧**: `APPLICATION_SUPPORT_WORDS` に「起算日」「開庁日以上前までに提出」「提出期限の目安」「DIPS／DRS 入力」「マニュアル骨子」「手続き窓口」を追加（公開の `/` の全体の走査として強くなる）。
+- **L2**: `sprint11d` #6 の重複した検査を、`verdict-done` の見出しと `verdict-done-condition` の件数に置き換えた。
+
+---
+
+# Sprint 18-2: 運航管理の「申請」に見える機能・文言（既存テストの変更と理由）
+
+意図の変更は、運航管理の「許可・承認の申請済み」の記録（`dips_permit`）と次にやること「許可・承認を申請する」（`apply_permit`）を、
+フラグ `APPLICATION_SUPPORT_ENABLED`（既定・本番は無効。`isApplicationSupportEnabled()`）の裏に止めたこと。
+**フラグ有効側の振る舞いは DB テスト・単体で期待値を変えずに守り**（`vi.stubEnv("APPLICATION_SUPPORT_ENABLED","1")` または引数 `applicationSupport: true`）、
+無効側（既定）の新しい期待は E2E-DB と DB テスト・単体で明示した。変えた期待値は `register_permit` の名前（契約どおり）だけ。
+マイグレーション・`packages/**` のデータ・判定エンジン・証跡 ID・`evidence_log` は無変更。基準の一覧から消える識別子は 0（`node scripts/testids.mjs --check` が「消えた識別子は 0」）。
+
+## 置き換えた E2E-DB
+
+| テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|
+| `sprint12b-db` #17 手続きの記録 | `dips_permit` を画面で記録・取り下げ・再記録・「前の判定に対する記録」、`apply_permit` の出入り、そのあと `small_drone_law` を 1 回記録 | **前半**：`apply_permit` が 0、`register_permit`（名前「取得した許可・承認を登録する」・期限の文言なし）、`procedure-dips_permit`・`procedure-form-dips_permit`・`procedure-submit-dips_permit` が 0、`procedure-none` が新しい文、API は done・retract とも 409 `procedure_kind_disabled` で行が増えない、「許可済み」「申請済み」が 4 画面に無い。**後半**：`small_drone_law` で、元の `dips_permit` の流れと同じ検査（確認が欠けると記録できない・記録・取り下げ・記録し直し・計画の訂正で「前の判定に対する記録です」・`notify_police` の出入り・禁止語の走査）を行う | 契約 §7.2 の対応表。`dips_permit` の流れの検査はフラグ有効側の DB テスト（`reports.db.test.ts` 契約 17）が期待値を変えずに守る |
+| `sprint12d-db` #15 | `dips_permit` を API で記録（201）→ `register_permit`（「結果を登録する」）、最後に `procedure-history-dips_permit` が見える | 記録を作らず（API は 409）`register_permit` が出る（`next-action-due` なし）。操縦者は押せない。番号を入れて判定が手続き済みになると消える。`procedure-dips_permit` と `procedure-form-dips_permit` は 0 | 申請の記録に依存しない（契約 2-4）。後半（番号で手続き済み）は同じ |
+| `sprint12d-db` 計画の照合（`plan-permit-applied-note`） | 「申請済み」を含む | 「利用者本人が DIPS 2.0 で取得します」を含み、「申請済み」を含まない | 契約 §4.3-5 |
+| `sprint17-db` S-5 | `apply_permit` の `href` が `/overview#procedures`、押して `/overview#procedures` に移りビューポートに入る | `apply_permit` が無い、`register_permit` の `href` が `/ops/permits/new`（押して移る）。手続きの記録への移動の検査は、美保基地の周辺の計画の `notify_police`（`href` `/overview#procedures`、押して移りビューポートに入る）に移した | 契約 §7.2。同じ「手続きの節へ移る」検査は残る |
+| `sprint17-db` S-1 | 計画（/overview）の部品に `plan-procedures`（手続きの記録の中身）が 1 個 | `plan-procedures-details`（節の畳み）が 1 個、`procedure-none` が 1 個（この計画は夜間飛行で飛行禁止法の手続きが無く、許可・承認の記録は受け付けないため、記録の対象が無い旨の文が出る） | 以前は `dips_permit` の記録の対象があったため `plan-procedures` が出ていた。節自体が /overview にあることの検査は残る |
+| `sprint11a-db` #22 | 一覧と詳細の札が「更新の申請期間」 | 「更新の時期」 | 契約 §4.3-3 |
+| `sprint12a-db`・`sprint12b-db` の `OFFICIAL` | 「申請・通報は DIPS 2.0 などの公式の手続きで行ってください」 | 「許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 で行います」 | 契約 B5（4 定数を 1 文に） |
+
+## 置き換えた DB テスト・単体
+
+| テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|
+| `reports.db.test.ts` 契約 9（権限・追記専用の 2 件） | `dips_permit` を記録して追記専用を確かめる | 同じ。各テストの前にフラグ有効を設定（`vi.stubEnv`） | 検査の主題は権限・追記専用で、フラグ有効側で今までどおり守る |
+| `reports.db.test.ts` 契約 17（8 件） | `dips_permit` の記録・取り下げ・訂正・版・認可、`apply_permit` | 同じ期待値のまま、フラグ有効を設定して実行 | 契約 2-5（期待値を変えずに通す） |
+| `permits.db.test.ts` 契約 15 | `dips_permit` の記録のあと `register_permit`（名前「許可・承認の結果を登録する」） | 2 件：フラグ有効＝同じ流れで名前だけ「取得した許可・承認を登録する」／フラグ無効（既定）＝記録なしで `register_permit` が出て（tier 3・期限なし）、登録を作って番号を入れると消え、`dips_permit` の記録は作られない | 契約 2-4・2-5 |
+| `report-logic.test.ts` | `apply_permit`・`register_permit`（引数なし） | `Build` の `applicationSupport` 既定を `true`（既存の期待値は無変更。`register_permit` の名前のみ更新）。無効側は新しい `describe`（`apply_permit` が出ない・`register_permit` は記録に依存せず出る・tier 3・期限なし・`canAct`・適用済みで消える・`notify_police` は同じ） | 契約 2-4・2-5 |
+| `license.test.ts` | 札の文言に「更新の申請期限」「申請」 | 札の文言を 1 つの定数に（「更新の時期」「更新の期限（満了の 1 か月前）を過ぎています」「有効期限切れ」）。「申請」を含まない。ホームの近づく期限の定数も同一であること | 契約 2-6 |
+| `today-logic.test.ts` | `renew_license` の名前「技能証明を更新する」 | 「技能証明の有効期限を確認する」 | 契約 §4.3-3（識別子・`href`・tier は無変更） |
+| `messages.test.ts`・`report-requirement.test.ts` | 公式の手続きの文（旧） | 新しい 1 文 | 契約 B5 |
+| `field.db.test.ts` | `renew_license` の表示名を見ない | 表示名が新しい名前であることを足した | 契約 2-6 |
+
+## 追加したテスト
+
+- `e2e/ops-db/sprint18-2-db.spec.ts`: 2-1・2-8（許可・承認のフォームが無い、`small_drone_law` は記録できる、説明文と `procedure-none`）、2-7・2-9（証跡 ID の見出し 3 画面、公式の手続きの文、`/judgement` の注記）、2-10（運航管理の 21 画面の `main` に、「許可・承認を申請する」「申請済み」「申請の準備」「申請支援」「更新の申請」と旧い公式の文が 0）。
+- DB `reports.db.test.ts` の「Sprint 18-2」: 2-2（done・retract とも 409 で行が増えない・権限が先・`small_drone_law` の流れ）、2-3（既存の行が消えず「以前の記録」になる・行数とハッシュの列が同じ・取り下げも 409・行が無い計画には出ない）、2-4、L8（下記）。
+- 単体: `lib/official-note.test.ts`（4 定数の末尾が `OFFICIAL_PROCEDURE_NOTE` と一致・旧い文が無い・「代行」「代理」が無い）、`server/diagnose-response.test.ts`（`omitApplicationSupport`）。
+
+## L8: 判定スナップショットの `result` に申請支援の出力が保存・返却されるか（実測）
+
+18-1 のレビューからの申し送り。**保存・返却される（実測）**:
+
+- `writeJudged`（`server/ops/plans.ts`）が `DiagnosisRun.response`（`/api/diagnose` の応答そのもの）をそのまま `judgement_snapshots.result` に保存していた。応答には `prefill`・`deadlines`・`categoryNote` が含まれる（`diagnose-core.ts` の `runDiagnosis`）。
+- `GET /api/ops/plans/[id]/snapshots/[sid]`（`plans.getSnapshot`）が `result: r.result` として返していた（判定の画面は `snapshot.result` を VerdictSummary に渡すが、画面に `prefill` を出す所は無い）。一覧 `GET …/snapshots` は `result` を返さない。`snapshot_result_slim`（計画の取得）は `category`・`flags`・手続きの id と期限だけを取り出す SQL で、3 項目を含まない。
+
+対処（フラグ無効のとき。有効なら今までどおり）:
+
+1. **保存前に取り除く**: `writeJudged` が `omitApplicationSupport(res)`（`server/diagnose-response.ts`。`/api/diagnose` のルートの層と同じ関数・同じ 3 項目）を通して保存する。`category`・`verdict`・`procedures`・`evidenceId`・`checkEvidenceId`・`engineVersion` など他の項目は同一。証跡 ID は判定の入力から決まるので変わらない。内容のハッシュ（`soraban-snapshot-v1`）は DB が保存された `result` から計算するため整合する（`verify_judgement_snapshots` が 0 行）。
+2. **既存の行は書き換えない**（追記専用）。`getSnapshot` の応答の DTO の層で、フラグ無効のとき `result` から 3 項目を除く。`reportRequirement` には元の `result` を渡す（要否の計算は 3 項目を使わず、変えない）。
+3. 運航管理でも `server/diagnose-response.ts` の層を再利用できた（`omitApplicationSupport` を共通化。`stripPrefillFromResponse` もこれを使う）。
+
+DB テスト（`reports.db.test.ts` L8）: 有効のとき保存される／無効のとき新しい行に 3 項目が無く他のキーは同じ／旧い行（有効のときに書いた行）は無効の `getSnapshot` で 3 項目が除かれ、有効なら含まれる／行の `result`・`content_hash` は読む前後で同一／`verify_judgement_snapshots` が両方の計画で 0 行／`diagnosisEvidenceId` が行の `evidenceId` と一致。
+
+## 画面に出なくなった識別子（フラグ無効）
+
+`sprint-18-testid-map.md` の 18-2 の節に追記。基準の一覧から消える識別子は 0。
+
+## リスク②（圏外の先読みの束）
+
+Sprint 15 の先読みの束（`server/ops/field-compose.ts` が組み立てる field-bundle）に次にやることの名前は**含まれない**（実測：`nextActions`・`NEXT_ACTION_LABEL` を参照しない。入るのは現場の確認項目・携行書類・ギャップの文言など）。
+このため、古い束を開いたときに旧い「許可・承認を申請する」「技能証明を更新する」が出ることは無い。ホーム（今日）の圏外の殻（`/ops/offline/today`）は、次にやることを持たない殻である（コードの検索の範囲。実機の圏外では確かめていない）。
+
+## 18-2 リトライ 1/3（レビュー後。sprint-18.md §12.1）
+
+- **中-1**: `register_permit`（フラグ無効）の条件から `!permits.applied` を外し、判定に許可・承認の手続きが残っているとき出す。`NextActionsInput.permits` を必須にした（低-1）。`report-logic.test.ts`：`Build` の既定を `permits: { applied: true }`（フラグ有効の既存の期待値は無変更）、無効側の「適用された登録があれば消える」は「手続きが残らない入力（空・緊急用務空域だけ）では出ない」に直し、「一部だけ登録（applied=true でも手続きが残れば出続ける）／手続きが空なら消える」を足した。DB：`permits.db.test.ts` に「夜間だけ登録→30m が残り出続ける→30m も登録して消える」を足した。
+- **中-2**: 以前の `dips_permit` の記録の札を「以前の申告（許可・承認の取得を示すものではありません）」に変更（中立の札・緑の ✓ なし・stale でも「もう一度確認してください」「前の判定に対する記録です」を出さない）。`PROCEDURE_RECORD_NOTE` に「許可・承認の取得を示すものではありません。」を足した。`reports.db.test.ts` 2-3 の期待を更新。部品テスト `components/ops/procedure-client.test.ts`（低-2：done・stale の以前の記録で、フォーム・取り下げ・stale の部品が 0、「申請済み」「✓」が無い）。
+- **低-3**: 「DIPS 2.0 で行います／取得します」を「DIPS 2.0 などの公式の手続きで」に揃えた（`OFFICIAL_PROCEDURE_NOTE` とその 4 定数、`register_permit` の理由、`/judgement` の注記、各テスト・E2E-DB の期待）。免許更新の説明は「更新の手続きは、操縦者本人が公式の手続きで行います」とし、期限を過ぎた場合の文は「更新の期限（満了の 1 か月前、…）を過ぎています。」だけにした。
+
+## 18-3（提供元の表記・題名と説明・免責・禁止語の検査）
+
+| テスト | 前の検査 | 後の検査 | 理由 |
+|---|---|---|---|
+| 10a `TITLE`・`PURPOSE`（#2・#6） | 「そらばん — ドローン飛行の可否判定と運航管理」 | 「そらばん — ドローンの飛行計画の通報・点検・飛行日誌」 | 位置づけの変更（契約 §5.4）。意図の変更 |
+| 10a #3 | site-facts に「運営者」の語は検査せず、名称と利用の範囲 | 「提供元」の見出しと名称、利用の範囲 | 見出しを「運営者」→「提供元」に（§5.4） |
+| 11a #7 `site-lead` | 「飛ばす前に」「手続き」「記録」を含む | 「判定は補助」を含む（「業務でドローンを…」「法令・条例」「出典」は同じ） | 新しい文（§5.4）。主役は通報・点検・日誌で、判定は補助 |
+| 11a #8 `site-ops-note` | 運航管理・社内で試験運用 | 同じ＋通報・点検・飛行日誌 | 新しい文。検査は強くなった |
+| `sprint11g.test.ts` #13 | `apps/web/src` 全体に禁止語（通報不要ほか）が 0 | `lib/wording-policy.ts`（禁止語の一覧そのもの）だけを除外 | 一覧が語を列挙するため。語は E2E・単体の走査で別に検査している |
+
+新規: `e2e/sprint18-3-wording.spec.ts`・`e2e/ops-db/sprint18-3-wording-db.spec.ts`・`e2e/ops-db/sprint18-3-db.spec.ts`・`lib/wording-policy.test.ts`・`lib/provider-info.test.ts`・`lib/pwa.test.ts`（説明の検査）。
+
+判定の領域の印（`data-wording-scope="judgement"`）を付けた要素（契約 §6.1 の一覧どおり。増やしていない）: 公開の `/` の `result-section`・`result-details`・`did-status`、`/judgement` と `/snapshots/[sid]` の `VerdictSummary` を包む要素、計画の主画面の `plan-judge-line`。
+
+### 走査で見つかって直したもの
+- 飛行禁止法の手続きの記録フォームの項目名「控えの番号（申請受付番号など）」（`procedure-client.tsx`）→ 飛行禁止法の記録は「控えの番号」（申請の記録は、フラグ有効のときだけ従来の名前）。
+
+### 走査の扱いの決め（契約 §6 の実測での確定）
+- 地点判定の PDF は判定の結果の再掲なので、全面禁止語は 0 件、限定語は「判定エンジン由来」として記録だけ（印の中と同じ扱い）。
+- 「載せない語」（未定・準備中ほか）の走査は `/`・`/ops/about`・マニフェストだけ（ほかの画面には「飛行の準備中」「@example.test」など別の意味の語が正当に出るため）。
+- 単体の定数の走査（`wording-policy.test.ts`）から外したもの: フラグ有効のときだけ出る表示 4 件（`dips_permit` の記録の名前ほか）、判定の領域の印の中にだけ出る見出し `VERDICT_SECTION_TITLE.duties`「飛行の前後に必ず行うこと」。
+- `/judgement` の「必ず DIPS で確認」「保証」は、画面には出なかった（印の中の限定語は「飛行の前後に必ず行うこと」と都市公園条例の「事前申請が必要」）。判定エンジンの文言は変えていない。
+
+- 12b「`/` は 12a のまま…」：本文から `site-ops-note`（契約 §5.4 の新しい 1 文に「通報の記録」が入る）を除いて「通報の記録／次にやること／手続きの記録」が無いことを検査（意図：運航管理の表示が出ないこと。検査の対象は同じ）。
+- 提供元の電話・メールは文字のまま（リンクにしない）：12h-pr2 Q-8（押す部品 43.5px 以上）に当たるため。
+- 契約 §5.4 の `site-lead`・`site-ops-note` は、12h-pr2 Q-20（3-detail のスクロール量 2 画面以内。375×812）を守るため、契約のリスク①に従って短くした（lead「…地点がどの法令・条例に当たるかを出典つきで確かめられます（判定は補助）。」、ops-note「通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。」）。意味は契約の文と同じ。上限は変えていない。

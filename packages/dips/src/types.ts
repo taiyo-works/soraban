@@ -50,6 +50,11 @@ export type ReportInputs = {
 };
 
 /** 通報内容の整形に使う計画・機体・操縦者・スナップショットの値（サービス層が DB から作る）。 */
+/** 通報の指紋に入れる飛行範囲（座標は [経度, 緯度]）。範囲の識別子・名前は指紋に入れない。 */
+export type FingerprintArea =
+  | { readonly kind: "polygon"; readonly vertices: readonly (readonly [number, number])[] }
+  | { readonly kind: "circle"; readonly center: readonly [number, number]; readonly radiusM: number };
+
 export type PlanForReport = {
   readonly planId: string;
   readonly title: string;
@@ -60,6 +65,11 @@ export type PlanForReport = {
   readonly latitude: number;
   readonly longitude: number;
   readonly radiusM: number | null;
+  /**
+   * 飛行範囲（Sprint 19-1b）。多角形があるか 2 件以上のときだけ指紋に入る（円 1 つ・点だけの計画の指紋は従来と同じ）。
+   * このときの latitude・longitude・radiusM は範囲を覆う円。
+   */
+  readonly areas?: readonly FingerprintArea[] | null;
   readonly maxAltitudeM: number | null;
   /** 立入管理措置（計画の accessControl）。 */
   readonly accessControl: boolean | null;
@@ -168,6 +178,8 @@ export type FingerprintParts = {
   readonly aircraftId: string;
   readonly pilotId: string;
   readonly flags: readonly string[];
+  /** 飛行範囲（多角形があるか 2 件以上のときだけ。無ければ省く）。座標は小数 6 桁に丸めた [経度, 緯度]。 */
+  readonly areas?: readonly FingerprintArea[];
   /**
    * 通報に許可書発行日・許可期間を出す登録（適用された登録がちょうど 1 件のときだけ。無ければ省く。Sprint 12d の指摘）。
    * 無いときは指紋の元に入れず、従来の指紋と一致する。

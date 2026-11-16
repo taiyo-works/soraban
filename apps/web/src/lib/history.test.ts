@@ -79,6 +79,29 @@ describe("history.ts — 判定履歴＋申請支援条件・進捗の保存と�
     expect(loaded[0]?.diagnosisSummary).toBeUndefined();
   });
 
+  it("Sprint 18-1：手続きの完了を含む旧い項目は、読んでも localStorage の JSON を書き換えず、内容が読める", () => {
+    const withProcedures = [
+      makeBaseEntry({
+        diagnosisInput: {
+          methodFlags: ["method_night"],
+          completedProcedureIds: ["drone-registration", "flight-permission-did"],
+        },
+        diagnosisSummary: {
+          diagnosisEvidenceId: "ev_diag999988887777",
+          category: "II_B_eligible",
+          isSpecificFlight: true,
+          procedureCount: 6,
+        },
+      }),
+    ];
+    const raw = JSON.stringify(withProcedures);
+    storage.setItem("soraban:history:v1", raw);
+    const loaded = loadHistory();
+    expect(loaded[0]?.diagnosisInput?.completedProcedureIds).toEqual(["drone-registration", "flight-permission-did"]);
+    expect(getHistorySnapshot()).toHaveLength(1);
+    expect(storage.getItem("soraban:history:v1")).toBe(raw);
+  });
+
   it("saveHistory で申請支援入力（diagnosisInput）とサマリ（diagnosisSummary）を保存できる", () => {
     const entry = makeBaseEntry({
       diagnosisInput: {

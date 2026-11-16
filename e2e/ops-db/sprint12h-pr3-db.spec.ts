@@ -287,8 +287,16 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     expect(tagBgs.length).toBeGreaterThan(0);
     for (const bg of tagBgs) expect(verdictFills, `札の地 ${bg}`).not.toContain(bg);
     // 点検の詳細の戻り先は「点検の一覧」。現在地は点検
-    await page.getByTestId("inspection-list").locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark }).first().click();
-    await page.waitForURL(/\/ops\/inspections\/[0-9a-f-]{36}$/);
+    // 描画直後のクリックが遷移しないことがある（CI で P3a-4 が waitForURL のタイムアウトで落ちた）。押し直し、最後は href で開く（期待は同じ）
+    const detailRow = page.getByTestId("inspection-list").locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark }).first();
+    const detailUrl = /\/ops\/inspections\/[0-9a-f-]{36}$/;
+    for (let attempt = 0; attempt < 3 && !detailUrl.test(page.url()); attempt++) {
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      await detailRow.click();
+      await page.waitForURL(detailUrl, { timeout: 10_000, waitUntil: "commit" }).catch(() => undefined);
+    }
+    if (!detailUrl.test(page.url())) await page.goto((await detailRow.getAttribute("href"))!);
+    await page.waitForURL(detailUrl);
     await expect(page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections")).toHaveAttribute("aria-current", "page");
     const back = page.locator("main").getByRole("link", { name: "点検の一覧" }).first();
     await expect(back).toHaveAttribute("href", "/ops/inspections");

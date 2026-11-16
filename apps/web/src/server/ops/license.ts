@@ -9,10 +9,14 @@ export const LICENSE_RENEWAL_SOURCE_URL = "https://www.mlit.go.jp/koku/level4/li
 
 export type LicenseRenewalStatus = "none" | "renewal_window" | "past_deadline" | "expired";
 
+/**
+ * 技能証明の状態の札の文言（Sprint 18-2）。有効期限の通知だけにして、「申請」の語と更新の手順の案内を外した。
+ * 札を出す 4 か所（操縦者の一覧・詳細の license-renewal.tsx、ホームの近づく期限 deadlines-logic.ts・today-ui.tsx）はこの定数を使う。
+ */
 export const LICENSE_RENEWAL_LABEL: Readonly<Record<Exclude<LicenseRenewalStatus, "none">, string>> = {
-  renewal_window: "更新の申請期間です（満了の 1 か月前までに申請）",
-  past_deadline: "更新の申請期限（満了の 1 か月前）を過ぎています",
-  expired: "有効期限が切れています",
+  renewal_window: "更新の時期",
+  past_deadline: "更新の期限（満了の 1 か月前）を過ぎています",
+  expired: "有効期限切れ",
 };
 
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;

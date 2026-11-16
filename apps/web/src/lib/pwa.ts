@@ -10,6 +10,8 @@
 // 新しい版（ビルド）を配ったとき：新しい Service Worker は待機し、入力中の画面を勝手に再読み込みしない。利用者が「更新する」を
 // 押したとき（SKIP_WAITING）か、すべての画面を閉じて次に開いたときに切り替わる（契約 A-4）。背景同期（Background Sync）は使わない。
 
+import { PROVIDER } from "./provider-info";
+
 export const SW_URL = "/ops/sw.js";
 export const SW_SCOPE = "/ops";
 export const SW_CACHE_PREFIX = "soraban-ops-";
@@ -146,9 +148,12 @@ self.addEventListener("fetch", (event) => {
 `;
 };
 
-/** テーマの色（ロゴの藍。icon.svg の背景と同じ）。 */
-export const PWA_THEME_COLOR = "#1d3557";
-export const PWA_BACKGROUND_COLOR = "#f5f2ea";
+/**
+ * ステータスバーと起動画面の色（Sprint 16 H-9：白基調）。--sb-base（soraban-tokens.css の明の値）と同じ値で、単体テスト（pwa.test.ts）が一致を確かめる。
+ * アイコンの画像（藍の地）はブランドの刷新で作り直すため、ここでは替えない（docs/sprints/brand-visual-plan.md）。
+ */
+export const PWA_THEME_COLOR = "#FFFFFF";
+export const PWA_BACKGROUND_COLOR = "#FFFFFF";
 
 /**
  * Web アプリマニフェスト（契約 A-1）。開始 URL は /ops（ホームの「今日」）、scope は /ops（公開の判定画面 / は含めない）。
@@ -158,7 +163,9 @@ export const pwaManifest = () => ({
   id: "/ops",
   name: "そらばん 運航管理",
   short_name: "そらばん",
-  description: "ドローンの飛行前の確認・離着陸・点検・日誌を、電波の弱い現場でも記録します。",
+  // Sprint 18-3 §5.4（§12.3 で変更）：圏外で使えるのは点検と飛行日誌（OFFLINE_SHELLS）。通報の作業台は圏外では使えないので、
+  // 「通報の記録をまとめる」と「点検と日誌は圏外でも記録できる」を分けて書く。提供元の名称は lib/provider-info.ts の定数から。
+  description: `ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめます。点検と飛行日誌は、電波の弱い現場でも記録できます。提供元：${PROVIDER.name}`,
   lang: "ja",
   start_url: "/ops",
   scope: "/ops",

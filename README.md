@@ -1,84 +1,65 @@
 # そらばん（Soraban）
 
-山陰の業務ドローン運用者向けコンプライアンス統合SaaS。
+ドローンの**飛行計画の通報**、**飛行前・飛行後の点検**、**飛行日誌**（離陸・着陸の時刻と飛行時間）を一つにまとめる運航管理アプリ。
 
-## ブランド
-- 名称：そらばん（Soraban）
-- 由来：空 ＋ 番 ＋ 算盤
+提供元：フューチャーテック株式会社（`docs/provider-info.md`）
+
+## サービスの考え方
+
+- **主役は 3 つ**: 飛行計画の通報（DIPS の「飛行計画の登録」の流れの入力・確認・記録）、飛行前・飛行後の点検、日誌と飛行記録。事務所の PC で計画し、現場のスマホ（PWA）で点検と記録をつけ、電波の届かない場所でも使える。
+- **判定は補助**: 地点の空域・法令・条例の確認は、通報や日誌を止めない参考情報として位置づける。判定していない地域は「確認していません」と示し、「問題なし」とは示さない。判定は当面、山陰を先に扱う。
+- **境界**: 許可・承認などの**申請の代行・支援はしない**。通報は、利用者本人の DIPS 認証と最終確認のもとで行う。DIPS API は未申請で、当面は DIPS に手動で出し、受付番号をアプリに記録する運用。
+- **対象**: 資格を持つ操縦者と、すでに飛行許可・承認を取得している企業・操縦者。完成時の対象は全国を目標にする。
 
 ## 開発状況
 
-社内の試験運用中（公開ページは noindex）。2026-10-28 時点の `main` は Sprint 12h の途中（マージ済みの先端は PR #42、マージコミット `6b82554`）である。
+社内の試験運用中（公開ページは noindex）。運航管理（`/ops`）は、機能フラグ `OPS_ENABLED` が有効なときだけ開く。本番の既定は無効で、無効のときは画面も API も 404 になる。
 
-公開の判定画面（`/`）はデザイン v2 に作り直してある。住所・座標・地図・現在地から地点を決め、航空法・小型無人機等飛行禁止法・条例を 4 段（飛行不可／要手続き／手続き済み・情報／手続き不要、判定不能を含む）で示し、出典と確認日を残す。申請支援（手続きのチェックリスト、期限、プリフィル、束ね PDF）は判定の下に続く。
-
-運航管理（`/ops`）は、機能フラグ `OPS_ENABLED` が有効なときだけ開く。本番の既定は無効で、無効のときは画面も API も 404 になる。有効なときのメニューは、スマホ下タブがホーム／計画／点検／日誌／登録の 5 つ、PC の左メニューがホーム／判定／計画／点検／日誌／登録の 6 項目である。中身は飛行計画、判定スナップショット、通報の準備と手動記録、日常点検、飛行記録、許可・承認の登録、事故・ヒヤリハット、現場モードまで実装済みである。DIPS 2.0 への送信はまだ行わない。
-
-スプリントの索引と状態は `docs/sprints/README.md`。次の契約は Sprint 13（`docs/sprints/sprint-13.md`、計画のみ）。
-
-### 番号のルール
-
-次のスプリントは 13 から続ける。12a〜12h は Sprint 12 の枝番であり、13 のあとで番号を戻さない。2026-10-20 の計画表にあった「Sprint 13＝点検整備」などは予約であり、実施したスプリントではない。点検整備・期限一覧（12f）・証跡の出力・判定データの DB 化は、Sprint 13 のあとで空き番号を付け直す。
-
-| Sprint | 内容 | 状態 | 文書 |
-|---|---|---|---|
-| 1〜6 | 申請支援診断、期限、束ね PDF、法令の注記、判定履歴、信頼性（DID 三値・CI） | main に含まれる | `docs/sprints/sprint-1.md` 〜 `sprint-6.md` |
-| 7 | 判定の現行法令対応（飛行禁止法 1,000m、DID から工業専用地域を除外、出典台帳） | マージ済み（#7） | `docs/sprints/sprint-7.md` |
-| 8 | Neon（PostgreSQL + PostGIS）の土台と地点判定の証跡 | マージ済み（#10） | `docs/sprints/sprint-8.md` |
-| 9 | 地図での地点指定（現在地・住所検索・長押し） | マージ済み（#11） | `docs/sprints/sprint-9.md` |
-| 10 / 10a | 利用者・機体・操縦者と版の履歴／公開面の整備 | マージ済み（#13 / #15） | `sprint-10.md` / `sprint-10a.md` |
-| 11〜11g | 日常点検と飛行記録、制度の最新化、判定の 4 段、100g 未満の表示 | マージ済み（#14、#19、#21〜#25） | `sprint-11.md` 〜 `sprint-11g.md` |
-| 12a〜12e | 飛行計画、通報の準備、今日と現場、許可の登録、事故・ヒヤリハット | マージ済み（#26〜#31） | `sprint-12a.md` 〜 `sprint-12e.md` |
-| 12f | 期限一覧 | 未着手（契約ファイルなし） | `sprint-12.md` の予約のみ |
-| 12g / 12h | デザインの刷新。判定画面 v2 と運航管理のメニューまで main | 12h は進行中（③b1 が PR #43） | `sprint-12g.md` / `sprint-12h.md` |
-| 13 | 飛行計画通報 API、判定履歴のサーバー保存、README、CI の確認、UX | 計画 | `docs/sprints/sprint-13.md` |
-
-### 主な機能（現状）
-
-- 地点判定と申請支援。結論は入力の直下。層の切り替え、A4 の PDF、診断の証跡 ID がある。
-- 運航管理（フラグの裏）: 計画 → 点検 → 日誌のメニュー、登録（機体・操縦者・許可・承認・地点・利用者）、現場モード。
-- 判定履歴（公開画面）: ブラウザの `localStorage`（キー `soraban:history:v1`）、最大 50 件。条件・進捗・診断の要約を保存し、同じ端末で復元する。端末をまたいだ同期はない。地点判定の証跡は、別途 `evidence_log` に追記できる（`DATABASE_URL` があるとき）。申請支援の全文は、飛行計画の判定スナップショットに保存するときだけサーバーに残る。
+- 公開の画面（`/`）: 住所・座標・地図・現在地から地点を決め、法令・条例の判定を示す（出典と確認日つき）。今後は補助の位置づけに下げる。
+- 運航管理（`/ops`）: 飛行計画、通報の準備と手動記録、日常点検、飛行記録、現場モード（圏外でも記録できる PWA）、許可・承認の登録（取得済みの控え）、事故・ヒヤリハット。DIPS 2.0 への送信はまだ行わない。
+- 計画と進め方: 総合計画 `docs/sprints/ops-completion-plan.md`、スプリントの索引と状態 `docs/sprints/README.md`、UI 設計 `docs/design/ops-core-ui/README.md`。
 
 ### 既知の制約
 
-- **DID ポリゴンデータはリポジトリ未追跡**（`packages/regulations/data/did/by-pref/` は .gitignore）。データが無い環境では DID は「未確認」となり、診断は「要確認」を返す（Sprint 6 以前は誤って「DID 外」と表示していた）。取得は `pnpm --filter @soraban/regulations fetch:did`。
-- 本診断は補助情報。最終確認は DIPS／DRS／航空局および各管理者で行うこと。申請・通報の代理はしない。利用者が自分の名義で公式の手続きを行う。
-
-## 起点エリア
-- 鳥取県米子市・境港市
-- 島根県出雲市
-- → 山陰全域 → 中国地方へ段階展開
+- **DID ポリゴンデータはリポジトリ未追跡**（`packages/regulations/data/did/by-pref/` は .gitignore）。データが無い環境では DID は「未確認」となり、診断は「要確認」を返す。取得は `pnpm --filter @soraban/regulations fetch:did`。
+- 判定は参考情報で、法令・条例・データの更新や欠落がありうる。最終確認は、DIPS・航空局および各管理者で行う。
+- 法務まわり（免責、規約、専門家の確認）は整備中。専門家の確認が済むまで、外部への提供はしない（`docs/sprints/legal-info-plan.md`）。
 
 ## 技術スタック
-- Next.js 16 + Tailwind v4 + MapLibre GL（`apps/web`）
-- Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1）。ドライバは `pg`、マイグレーションは `packages/db/migrations` の SQL ＋最小ランナー
-- Gemini 3 Flash-Lite
-- TypeScript strict / pnpm workspace
+
+- Next.js 16 + Tailwind v4 + MapLibre GL（`apps/web`）。スマホは PWA としてホーム画面に追加して使う。
+- Neon（PostgreSQL 18 + PostGIS 3.6、aws-ap-southeast-1）。ドライバは `pg`、マイグレーションは `packages/db/migrations` の SQL ＋最小ランナー。認証は Neon Auth。
+- TypeScript strict / pnpm workspace。
 
 ## モノレポ構成
+
 ```
 apps/
   web/       — Next.js 16 (App Router, Turbopack, Tailwind v4)
   scraper/   — 条例スクレイパ
 packages/
   db/          — @soraban/db: Neon（pg）接続層・SQL マイグレーション
+  dips/        — @soraban/dips: DIPS 連携の型と手動・模擬のゲートウェイ
   regulations/ — @soraban/regulations: 規制データ／型
   geo/         — @soraban/geo: 緯度経度・GSI ヘルパ
 ```
 
 ## 開発コマンド
+
 - `pnpm install` — 依存関係取得
 - `pnpm dev` — Web を起動（`apps/web`）
-- `pnpm typecheck` — 全 workspace の型検査
-- `pnpm lint` — 全 workspace の lint
-- `pnpm test` — 単体テスト（vitest）
-- `pnpm build` — 全 workspace のビルド
-- `pnpm test:e2e` — E2E（Playwright。初回は `pnpm exec playwright install chromium`）
+- `pnpm typecheck` / `pnpm lint` / `pnpm test` / `pnpm build`
+- `pnpm test:e2e` — 公開側の E2E（Playwright。初回は `pnpm exec playwright install chromium`）
 - `pnpm test:db` — DB を使うテスト（`TEST_DATABASE_URL` が必要。未設定ならスキップ、`REQUIRE_DB_TESTS=1` なら失敗）
+- `pnpm test:e2e:ops` — 運航管理の E2E（PostgreSQL + PostGIS と `soraban_app` ロールが必要）
 - `pnpm db:status`・`pnpm db:migrate` — マイグレーションの確認・適用（`DATABASE_URL_UNPOOLED`。手順は `packages/db/README.md`）
 
-## CI
-`.github/workflows/ci.yml`：PR と `main` への push で typecheck / lint / test / build、続けて Playwright E2E（DB なし）と、PostGIS のサービスコンテナを使う `db` ジョブ（マイグレーション適用・`pnpm test:db`・運航管理の E2E）を実行する。`docs/**` と `*.md` だけの変更では動かない。2026-10-28 の `main`（`6b82554`）は成功。同じ日の PR #43 は失敗している。記録は `docs/sprints/sprint-13.md`。
+ローカルでの検証の手順と既知の不安定なテストは `docs/runbooks/local-verification.md`。
 
-## 作成者
-奥田憲章
+## CI
+
+`.github/workflows/ci.yml`：PR と `main` への push で typecheck / lint / test / build、続けて Playwright E2E（DB なし）と、PostGIS のサービスコンテナを使う `db` ジョブ（マイグレーション適用・`pnpm test:db`・運航管理の E2E）を実行する。`docs/**` と `*.md` だけの変更では動かない。
+
+## 開発の進め方
+
+計画 → 実装 → 独立レビュー → デザイン → 評価の順に、役割を分けたエージェントで進める（`CLAUDE.md`、`.claude/agents/`）。スプリントの契約と評価レポートは `docs/sprints/`、`docs/evaluations/`。

@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { openDiagnosis } from "./field-checks";
+import { expectNoApplicationSupport } from "./field-checks";
 
 // Sprint 11a 契約（docs/sprints/sprint-11a.md）の E2E。制度の最新化と公開面の意図の明確化。
 // 本番相当サーバー（baseURL、同梱データ）だけを使う。運航管理の項目は e2e/ops-db/sprint11a-db.spec.ts。
@@ -19,7 +19,6 @@ const openReady = async (page: Page): Promise<void> => {
 };
 
 const checker = (page: Page): Locator => page.locator('section[aria-labelledby="checker-heading"]');
-const diagnosisSection = (page: Page): Locator => page.locator('section[aria-labelledby="diagnosis-heading"]');
 const hero = (page: Page): Locator => page.locator("header", { has: page.locator("h1") });
 const card = (page: Page, id: string) => page.getByTestId(`regulation-card-${id}`);
 const preset = (page: Page, name: string) =>
@@ -45,13 +44,6 @@ const pdfText = async (download: Download): Promise<string> => {
     text += content.items.map((it) => ("str" in it ? it.str : "")).join("") + "\n";
   }
   return text;
-};
-
-const bundlePdf = async (page: Page): Promise<string> => {
-  const dl = page.waitForEvent("download");
-  await openDiagnosis(page); // 申請支援は畳んである（申請の準備を開いてから押す）
-  await page.getByRole("button", { name: /束ね PDF を出力/ }).click();
-  return pdfText(await dl);
 };
 
 test.describe("A. 地点の例と初期表示", () => {
@@ -93,14 +85,16 @@ test.describe("A. 地点の例と初期表示", () => {
     await expect(card(page, "aviation-law-did")).toHaveAttribute("data-status", "green");
   });
 
-  test("4. 鳥取市の工業専用地域：DID green・「DID：非該当（工業専用地域）」・申請支援も非該当（工業専用地域）", async ({
+  test("4. 鳥取市の工業専用地域：DID green・「DID：非該当（工業専用地域）」・DID 自動判定も非該当（工業専用地域）", async ({
     page,
   }) => {
     await openReady(page);
     await selectPreset(page, "鳥取市の工業専用地域");
     await expect(card(page, "aviation-law-did")).toHaveAttribute("data-status", "green");
     await expect(page.getByTestId("did-detail")).toContainText("DID：非該当（工業専用地域）");
-    await expect(page.getByTestId("diagnosis-did-status")).toContainText("非該当（工業専用地域）");
+    // 以前は申請支援の diagnosis-did-status を検査していた（Sprint 18-1）。同じ文字列を DID 自動判定（did-status）で検査する
+    await expect(page.getByTestId("did-status")).toContainText("非該当（工業専用地域）");
+    await expectNoApplicationSupport(page, "11a #4");
   });
 
   test("5. 開いた直後は米子市役所で、初回の判定は DID red・unknown なし・証跡 ID あり", async ({ page }) => {
@@ -122,7 +116,8 @@ test.describe("B. トップの意図", () => {
     await openReady(page);
     const lead = hero(page).getByTestId("site-lead");
     const t = await lead.innerText();
-    for (const w of ["業務でドローンを飛ばす事業者・操縦者", "飛ばす前に", "法令・条例", "手続き", "出典", "記録"]) {
+    // Sprint 18-3：主役は通報・点検・日誌で、判定は補助。文言を新しい値にした（飛ばす前に・手続き・記録 → 補助）。
+    for (const w of ["業務でドローンを飛ばす事業者・操縦者", "法令・条例", "出典", "判定は補助"]) {
       expect(t).toContain(w);
     }
     const h1 = await hero(page).locator("h1").innerText();
@@ -137,6 +132,7 @@ test.describe("B. トップの意図", () => {
     const note = await hero(page).getByTestId("site-ops-note").innerText();
     expect(note).toContain("運航管理");
     expect(note).toContain("社内で試験運用");
+    for (const w of ["通報", "点検", "飛行日誌"]) expect(note).toContain(w);
     const header = await hero(page).innerText();
     for (const w of ["唯一", "業界初", "No.1", "最適", "完全", "自動で申請", "一括申請", "AI"]) {
       expect(header, `見出し領域に「${w}」`).not.toContain(w);
@@ -144,52 +140,44 @@ test.describe("B. トップの意図", () => {
   });
 });
 
-test.describe("C. 制度の最新化（申請支援）", () => {
-  test("12. 物件の投下を選ぶと通達の注記とリンクが出て、申請支援 PDF に通達の番号が入る", async ({ page }) => {
+test.describe("C. 制度の最新化（申請支援は止めてある。Sprint 18-1）", () => {
+  test("12. 物件の投下を選んでも、通達の注記・リンク・束ね PDF は出ない（申請支援が無効）。判定の手続きには物件の投下が出る", async ({ page }) => {
+    // 以前：診断パネルに通達の注記（国空無機第338898号）とリンクが出て、束ね PDF にも番号が入ることを検査していた。
+    // 通達の注記は診断（verificationNotes）の文で、判定の画面には出ない（実測）。注記の中身は packages/regulations の
+    // sprint11a.test.ts（10・11。物件投下・危険物の note と verificationNotes）が守る。
     await openReady(page);
     const diag = waitDiagnose(page);
     await page.getByRole("checkbox", { name: "物件の投下", exact: true }).check();
     await diag;
-    const section = diagnosisSection(page);
-    await expect(section).toContainText("国空無機第338898号");
-    await expect(section.locator('a[href="https://www.mlit.go.jp/common/001990796.pdf"]').first()).toBeVisible();
-    const t = await bundlePdf(page);
-    expect(t).toContain("国空無機第338898号");
+    await expect(page.getByTestId("verdict-procedures")).toContainText("物件の投下");
+    const text = await page.evaluate(() => document.body.textContent ?? "");
+    expect(text).not.toContain("国空無機第338898号");
+    await expect(page.locator('a[href="https://www.mlit.go.jp/common/001990796.pdf"]')).toHaveCount(0);
+    await expectNoApplicationSupport(page, "11a #12");
   });
 
-  test("17. 緊急用務空域にチェックすると「飛行できません」で、提出期限の逆算が出ない。PDF も同様", async ({ page }) => {
+  test("17. 緊急用務空域にチェックすると結論は「飛行不可」。提出期限の逆算は出ない（全体で）。地点判定の PDF は出る", async ({ page }) => {
     await openReady(page);
     const diag = waitDiagnose(page);
     await page.getByTestId("airspace-airspace_emergency").locator("input").check();
     await diag;
-    const section = diagnosisSection(page);
-    await expect(section).toContainText("飛行できません");
-    const emergency = section.locator("article", { hasText: "緊急用務空域の指定の確認" });
-    await openDiagnosis(page); // 申請支援の準備は畳んである。見る前に開く
-    await expect(emergency).toBeVisible();
-    await expect(emergency).not.toContainText("開庁日以上前までに提出");
-    // 期限の一覧（逆算）にも緊急用務空域の項目がない
-    const sectionText = await section.innerText();
-    for (const line of sectionText.split("\n")) {
-      if (line.includes("開庁日以上前までに提出")) expect(line).not.toContain("緊急用務");
-    }
-    await expect(section).not.toContainText("IIA 相当・申請が必要");
-    // 原則飛行禁止はカテゴリーの説明で言い切り（例外の許可は審査要領 5-1(2)c)）、「要確認」の見出しを付けない
-    await expect(section).toContainText("緊急用務空域に指定されている間は、原則として飛行できません");
-    await expect(section).toContainText("5-1(2)c)");
-    await expect(section).not.toContainText("要確認: 緊急用務空域");
-    await expect(section).not.toContainText("申請する手続きではありません");
-    // 横断手続きに「IIA 相当・不要化不可」を出さず、指定の解除後に飛行する場合の手続きと示す
-    await expect(section).not.toContainText("IIA 相当・不要化不可");
-    await expect(section.getByText("指定の解除後に飛行する場合").first()).toBeVisible();
-    // プリフィルの飛行の種類
-    await expect(page.getByText("緊急用務空域（指定中は飛行不可）").first()).toBeVisible();
-    const t = await bundlePdf(page);
-    expect(t).toContain("飛行できません");
-    expect(t).toContain("5-1(2)c)");
+    // 結論は「飛行不可」（判定の結論。「飛行できません」は診断パネルの文言で、判定の画面には出ない）
+    await expect(page.getByTestId("verdict-level")).toHaveText("飛行不可");
+    await expect(page.getByTestId("verdict-summary")).toHaveAttribute("data-level", "no_fly");
+    // 以前は診断パネルの「開庁日以上前までに提出」の一覧に緊急用務空域が無いこと等を検査していた。
+    // いまは申請の期限の逆算そのものが全体で 0 件（verdict の「飛行の 10 開庁日以上前」の列は判定の手続きの表示で、別）。
+    const text = await page.evaluate(() => document.body.textContent ?? "");
+    expect(text).not.toContain("開庁日以上前までに提出");
+    expect(text).not.toContain("起算日");
+    // 緊急用務空域の飛行フラグは、プリフィルの表示（申請支援）が無くなったので画面の文字では見ない
+    await expectNoApplicationSupport(page, "11a #17");
+    // 地点判定の PDF は今までどおり出て、結論「飛行不可」が入る（以前の束ね PDF の「飛行できません」「5-1(2)c)」は診断の文言で、出なくなった）
+    const dl = page.waitForEvent("download");
+    await page.getByRole("button", { name: /PDF 出力/ }).first().click();
+    const t = await pdfText(await dl);
+    expect(t.replace(/\s+/g, "")).toContain("飛行不可");
+    expect(t).not.toContain("許可申請");
     expect(t).not.toMatch(/要確認:\s*緊急用務空域/);
-    expect(t).not.toContain("IIA 相当・不要化不可");
-    expect(t).not.toContain("IIA 相当・申請が必要");
   });
 });
 
@@ -224,8 +212,9 @@ test.describe("D. 過去の履歴は不変", () => {
     const item = page.getByTestId("history-item").filter({ hasText: "緊急用務空域の旧履歴" });
     await expect(item).toHaveCount(1);
     await expect(item).toContainText(`diag:${OLD_DIAG}`);
-    await expect(item).toContainText("cat:IIA相当");
+    await expect(item).not.toContainText("cat:"); // 以前は「cat:IIA相当」。Sprint 18-1 で行から外した（保存値は下で確かめる）
     const stored = await page.evaluate(() => window.localStorage.getItem("soraban:history:v1") ?? "");
     expect(stored).toContain(OLD_DIAG);
+    expect(stored).toContain("II_A"); // 保存値のカテゴリーは書き換えない
   });
 });

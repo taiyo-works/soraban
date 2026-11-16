@@ -1,9 +1,12 @@
-// 手続きの「済み」の記録のサービス層（Sprint 12b 設計 D3・E）。許可・承認の申請（dips_permit）と、小型無人機等飛行禁止法の
-// 同意・通報（small_drone_law）を、利用者の申告として追記専用の表（plan_procedure_records）に残す。
-// 判定の結論（手続き済み（条件付き））は変えない。「許可済み」とは出さず、「申請済み（利用者の申告）」と表示する。
+// 手続きの「済み」の記録のサービス層（Sprint 12b 設計 D3・E）。小型無人機等飛行禁止法の同意・通報（small_drone_law）と、
+// 許可・承認の申請（dips_permit）を、利用者の申告として追記専用の表（plan_procedure_records）に残す。
+// 【Sprint 18-2】dips_permit の新しい記録は、申請支援のフラグ（lib/boundary.ts）が無効（既定・本番）のとき受け付けない（409 procedure_kind_disabled）。
+// 既存の dips_permit の行は消さず、読み取り専用の「以前の記録」として返す（report-dto の summarizeProcedureRecords）。
+// 判定の結論（手続き済み（条件付き））は変えない。「許可済み」とは出さない。
 // 有効な記録は、計画ごと・種別ごとの最新の行が done のもの。記録時のスナップショットと現在のスナップショットが違うとき
 // （計画の訂正や再判定で判定が変わった）は「前の判定に対する記録です」と出し、次にやることに戻る。
 import { PROCEDURE_RECORD_NOTE } from "@soraban/dips";
+import { isApplicationSupportEnabled } from "@/lib/boundary";
 import { loadPlanBundle } from "./plans";
 import {
   procedureRecordDto,
@@ -32,13 +35,14 @@ export type ProcedureRecordsView = {
 
 const view = async (ctx: OpsContext, planId: string): Promise<ProcedureRecordsView> => {
   const { plan, extras, dto } = await loadPlanBundle(ctx, planId);
-  const records = [...extras.records].reverse().map((r) => procedureRecordDto(r, plan.current_snapshot_id));
+  const applicationSupport = isApplicationSupportEnabled();
+  const records = [...extras.records].reverse().map((r) => procedureRecordDto(r, plan.current_snapshot_id, applicationSupport));
   return {
     planId: plan.id,
     planVersion: plan.current_version,
     snapshotId: plan.current_snapshot_id,
     note: PROCEDURE_RECORD_NOTE,
-    summary: summarizeProcedureRecords(extras.records, plan),
+    summary: summarizeProcedureRecords(extras.records, plan, applicationSupport),
     records,
     canRecord: assertableRecord(ctx, dto.isSelf),
   };
@@ -67,6 +71,10 @@ export const listProcedureRecords = async (ctx: OpsContext, planId: string): Pro
 export const createProcedureRecord = async (ctx: OpsContext, planId: string, body: unknown): Promise<ProcedureRecordsView & { readonly record: ProcedureRecordDto }> => {
   const { plan, dto, extras } = await loadPlanBundle(ctx, planId);
   assertCan(ctx, "procedure.record", dto.isSelf);
+  // 申請支援のフラグが無効なら、dips_permit は action（done・retract）に関わらず受け付けない。入力の検査より前に拒む。
+  if (!isApplicationSupportEnabled() && asInput(body)["kind"] === "dips_permit") {
+    throw new OpsError(409, "procedure_kind_disabled");
+  }
   const v = validateProcedureRecord(asInput(body), nowOf(ctx));
   if (!v.ok) throw new OpsError(400, "invalid_input", v.errors, v.codes);
   const r = v.data;

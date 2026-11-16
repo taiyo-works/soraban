@@ -11,6 +11,7 @@ import {
   DIPS_ONLY_LABEL,
   fieldByKey,
   LICENSE_MASKED_NOTE,
+  PREPARE_WARNING_MESSAGE,
   MANUAL_CONFIRM_DIPS_DONE,
   MANUAL_CONFIRM_MATCHES_LATEST,
   MANUAL_NUMBER_UNAVAILABLE_LABEL,
@@ -27,8 +28,10 @@ import {
   type ReportInputs,
   type ReportKind,
 } from "@soraban/dips";
+import { BOUNDARY_REGISTRATION } from "@/lib/boundary";
 import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports";
-import { DeadlineBox, ReportBox, ReportStatusBox } from "./plan-ui";
+import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
+import { REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE } from "@/lib/plan-main";
 import { loadDraft, saveDraft, clearDraft, reportDraftKey } from "./drafts";
 import { Field, fieldErrorsOf, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField, splitJst } from "./report-parts";
@@ -245,29 +248,30 @@ function ItemRow({
   const canCopy = item.copyable && item.copyText !== null;
   return (
     <li
-      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 border-b border-sb-rule sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 px-2 sm:px-3 ${compact ? "py-2" : "py-3"} ${
+      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-1.5 ${
         item.status === "missing" ? "bg-sb-sunken" : ""
       }`}
       data-testid={`report-item-${item.key}`}
       data-status={item.status}
     >
-      {/* 項目名（左）。API 名・必須・DIPS の画面での名前は、項目名の下に小さく添える */}
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-sm font-medium leading-snug text-sb-ink" data-testid={`report-item-label-${item.key}`}>
-          {item.label}
-        </span>
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          {item.required && item.status !== "dips_only" ? (
-            <span className="opx-required">必須</span>
+      {/* 項目名（左）。必須は項目名に並べ、API 名・DIPS の画面での名前は 1 行の小さな字にまとめる */}
+      <div className="col-start-1 row-start-1 flex min-w-0 flex-col">
+        <span className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium leading-snug text-sb-ink">
+          <span data-testid={`report-item-label-${item.key}`}>{item.label}</span>
+          {item.required && item.status !== "dips_only" ? <span className="opx-required">必須</span> : null}
+          {item.apiField || item.dipsScreenLabel ? (
+            <span className="break-all text-xs font-normal leading-snug text-sb-ink-3">
+              {item.apiField ? <span className="sb-num">{item.apiField}</span> : null}
+              {item.apiField && item.dipsScreenLabel ? "／" : ""}
+              {item.dipsScreenLabel ? <>DIPS の画面：{item.dipsScreenLabel}</> : null}
+            </span>
           ) : null}
-          {item.apiField ? <span className="break-all sb-num text-xs text-sb-ink-3">{item.apiField}</span> : null}
         </span>
-        {item.dipsScreenLabel ? <span className="text-xs leading-snug text-sb-ink-3">DIPS の画面：{item.dipsScreenLabel}</span> : null}
       </div>
 
-      {/* コピー（右上。44px 以上）とコピー済みの表示 */}
+      {/* コピー（右。44px 以上）とコピー済みの表示 */}
       {canCopy || copied ? (
-        <div className="col-start-2 row-start-1 flex flex-col items-end gap-1 sm:col-start-3">
+        <div className="col-start-2 row-span-2 row-start-1 flex flex-col items-end gap-1 sm:col-start-3 sm:row-span-1">
           {canCopy ? (
             <button
               type="button"
@@ -288,9 +292,9 @@ function ItemRow({
       ) : null}
 
       {/* 値・補足 */}
-      <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+      <div className={`flex min-w-0 flex-col gap-1 sm:col-span-1 sm:col-start-2 sm:row-start-1 ${canCopy || copied ? "col-start-1 row-start-2" : "col-span-2 row-start-2"}`}>
         {item.status === "filled" ? (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-1.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
             {item.unit ? <span className="ml-1 text-xs text-sb-ink-2">{item.unit}</span> : null}
           </span>
@@ -300,9 +304,9 @@ function ItemRow({
             <span>{MISSING_VALUE_LABEL}</span>
           </span>
         ) : item.status === "dips_only" ? (
-          <span className="inline-flex items-start gap-2 text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
-            <span aria-hidden className="w-5 shrink-0 text-center sb-num text-sb-ink-3">－</span>
-            <span>{item.value ?? DIPS_ONLY_LABEL}</span>
+          <span className="inline-flex items-start gap-1 text-xs leading-snug text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
+            <span aria-hidden className="w-4 shrink-0 text-center sb-num text-sb-ink-3">－</span>
+            <span>{item.apiField && item.value ? item.value.replace(`（${item.apiField}）`, "") : (item.value ?? DIPS_ONLY_LABEL)}</span>
           </span>
         ) : item.status === "not_applicable" ? (
           <span className="inline-flex items-start gap-2 text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
@@ -310,7 +314,7 @@ function ItemRow({
             <span>{NOT_APPLICABLE_LABEL}</span>
           </span>
         ) : (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-1.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
           </span>
         )}
@@ -660,6 +664,9 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
             {r.dipsNumber ?? (r.numberUnavailable ? "番号なし（表示されなかった）" : "—")}
           </dd>
         </div>
+        <details className="col-span-2 sm:col-span-4" data-testid="report-row-details">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pb-2 sm:grid-cols-4">
         {pair("記録の版", r.version, "report-row-version")}
         {pair("計画の版", r.planVersion, "report-row-plan-version")}
         {pair("対応表の版", r.mapRevision, "report-row-map-revision")}
@@ -669,10 +676,12 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
           <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-check-evidence">{r.checkEvidenceId}</span></dd>
         </div>
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5 sm:col-span-4">
-          <dt className="text-xs text-sb-ink-2">申請支援の証跡 ID</dt>
+          <dt className="text-xs text-sb-ink-2">飛行の方法を含む判定の証跡 ID</dt>
           <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-diagnosis-evidence">{r.diagnosisEvidenceId}</span></dd>
         </div>
         {pair("記録した日時", r.createdAtJst, undefined, true)}
+          </div>
+        </details>
       </dl>
       {r.memo ? <p className="break-all opx-note text-xs leading-relaxed text-sb-ink-2" data-testid="report-row-memo">メモ：{r.memo}</p> : null}
       {r.errorMessage ? (
@@ -783,6 +792,17 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   const kindLabels: Record<ReportKind, string> = { new: "新規の通報", change: "変更の通報", cancel: "取消の記録" };
   const maskedLicense = !view.permissions.revealLicenseNumber;
   const notice = REPORT_NOTICE_BY_CHANNEL[view.adapter.name];
+  // 中止した計画で通報の記録が無い：手順バー・入力の案内は出さず、事実だけを示す（主画面と同じ文言）
+  const voidedNone = view.planVoided && view.status.code === "no_record";
+  // 期限の警告・通報時からの変更点・対応が要る状況のときは、状況の詳細を開いたままにする
+  const statusOpen =
+    view.deadline.state === "overdue_started" ||
+    view.deadline.state === "past_guide" ||
+    view.fingerprintChanges.length > 0 ||
+    ["cancel_needed", "change_review", "unknown", "failed"].includes(view.status.code);
+  const keepVisibleIds = new Set([view.effective?.id, view.status.latestId].filter((x): x is string => !!x));
+  const isShownRow = (r: ReportDto, i: number): boolean => i === 0 || keepVisibleIds.has(r.id);
+  const olderReports = view.reports.filter((r, i) => !isShownRow(r, i));
 
   // ---- 記録（手動／取消）
   const [m, setM] = useState<ManualFields>(EMPTY_MANUAL);
@@ -825,46 +845,93 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   };
 
   return (
-    <div className="flex flex-col gap-10" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
-        <p
-          className="opx-notice flex flex-col gap-2 !px-4 !py-3.5 !text-base !font-medium !leading-relaxed"
+        {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
+        <div
+          className="opx-notice flex flex-col gap-1 !px-4 !py-1 !text-base !font-medium !leading-snug"
           data-meaning="warn"
           data-testid="report-notice"
           data-adapter={view.adapter.name}
         >
-          <span>{notice}</span>
-          {view.adapter.name === "mock" ? (
-            <span className="text-xs font-normal leading-relaxed text-sb-ink-2" data-testid="report-mock-assumption">{MOCK_ASSUMPTION_NOTE}{OFFICIAL_PROCEDURE_NOTE}</span>
-          ) : (
-            <span className="text-sm font-normal leading-relaxed text-sb-ink-2">{REPORT_SELF_REPORT_NOTE}</span>
-          )}
-        </p>
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-sb-ink-2">
-          <span>送信元：</span>
-          <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
-            {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}
-            {view.adapter.label}
-          </Badge>
-          <span data-testid="report-adapter-mode">{view.adapter.modeLabel}</span>
-        </p>
-      </div>
+          <span data-testid="report-notice-short">{view.adapter.name === "mock" ? REPORT_NOTICE_BY_CHANNEL.mock : REPORT_NOTE_SHORT}</span>
+          <details>
+            <summary className="flex min-h-11 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
+              <span className="underline underline-offset-2">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</span>
+              <span className="ml-auto flex items-center gap-x-2 text-xs text-sb-ink-2">
+                <span>送信元：</span>
+                <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
+                  {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}
+                  {view.adapter.label}
+                </Badge>
+                <span data-testid="report-adapter-mode">{view.adapter.modeLabel}</span>
+              </span>
+            </summary>
+            <div className="flex flex-col gap-2 pb-1">
+              <span>{notice}</span>
+              {view.adapter.name === "mock" ? (
+                <span className="text-xs font-normal leading-relaxed text-sb-ink-2" data-testid="report-mock-assumption">{MOCK_ASSUMPTION_NOTE}{OFFICIAL_PROCEDURE_NOTE}</span>
+              ) : (
+                <span className="text-sm font-normal leading-relaxed text-sb-ink-2">{REPORT_SELF_REPORT_NOTE}</span>
+              )}
+            </div>
+          </details>
+        </div>
 
-      <Section id="status" title="通報の要否と状況" aria-label="通報の要否と状況">
-        <ReportBox report={view.requirement} />
-        <ReportStatusBox status={view.status} changes={view.fingerprintChanges} />
-        <DeadlineBox deadline={view.deadline} />
+      {voidedNone ? null : (
+      <nav
+          aria-label="通報の手順"
+          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 max-sm:-mt-3 lg:top-14"
+          data-testid="report-stepper"
+        >
+          {[
+            ["#inputs", "① 内容を整える", "report-step-inputs"],
+            ["#items", "② DIPS に入力", "report-step-items"],
+            ["#record", "③ 結果を記録", "report-step-record"],
+          ].map(([href, label, id]) => (
+            <a key={id} href={href} data-testid={id} className="flex min-h-11 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
+              {label}
+            </a>
+          ))}
+        </nav>
+      )}
+
+      <div className="flex flex-col gap-3 sm:gap-6 max-sm:-mt-3" data-testid="report-status-and-kinds">
+      {voidedNone ? (
+        <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2 rounded-sb-l bg-sb-base px-4 py-3 opx-shadow" data-testid="report-status-line" data-voided-none="1">
+          <p className="text-base font-bold text-sb-ink">{VOIDED_NO_RECORD_LABEL}</p>
+          <p className="text-sm leading-relaxed text-sb-ink-2">{VOIDED_NO_RECORD_NOTE}</p>
+        </section>
+      ) : null}
+      {voidedNone ? null : (
+      <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2" data-testid="report-status-line">
+        {/* 記録の前に読むべき警告は、畳まずに 1 行ずつ出す */}
         {view.warnings.length > 0 ? (
           <ul className="flex flex-col gap-1.5" data-testid="report-warnings">
             {view.warnings.map((w) => (
-              <li key={w.code} className="opx-note text-xs leading-relaxed text-sb-ink-2" data-code={w.code}>
+              <li key={w.code} className="opx-note text-sm leading-relaxed text-sb-ink" data-code={w.code}>
                 {w.message}
               </li>
             ))}
           </ul>
         ) : null}
-      </Section>
+        <details className="rounded-sb-l bg-sb-base opx-shadow" data-testid="report-status-details" open={statusOpen}>
+          <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm text-sb-ink">
+            <ReportBadge report={view.requirement} bare />
+            <span className="ml-auto font-bold underline underline-offset-2">詳細</span>
+            <span className="flex basis-full flex-wrap items-center gap-x-2 gap-y-0.5">
+              <ReportStatusBadge status={view.status} bare />
+              {view.deadline.message ? <span className="min-w-0 flex-1 text-sm leading-snug text-sb-ink-2">{view.deadline.message}</span> : null}
+            </span>
+          </summary>
+          <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
+            <ReportBox report={view.requirement} />
+            <ReportStatusBox status={view.status} changes={view.fingerprintChanges} />
+            <DeadlineBox deadline={view.deadline} />
+          </div>
+        </details>
+      </section>
+      )}
 
       <nav aria-label="通報の種別" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap" data-testid="report-kind-tabs">
         {(["new", "change", "cancel"] as const).map((k) => (
@@ -874,15 +941,16 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             disabled={!kindAvailable[k]}
             aria-pressed={kind === k}
             onClick={() => setKind(k)}
-            className={`${kind === k ? buttonPrimaryClass : buttonGhostClass} !px-1.5 sm:!px-5`}
+            className={`${buttonGhostClass} !px-1.5 sm:!px-5 ${kind === k ? "!border-transparent !bg-sb-inverse !text-sb-inverse-fg" : ""}`}
             data-testid={`report-kind-${k}`}
           >
             {kindLabels[k]}
           </button>
         ))}
       </nav>
+      </div>
 
-      {!isCancel ? (
+      {voidedNone ? null : !isCancel ? (
         <>
           <Section id="inputs" title="通報の画面で入力する項目" aria-label="通報の画面で入力する項目">
             <InputsPanel form={form} setForm={setForm} errors={inputErrors} preview={preview} />
@@ -894,7 +962,9 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             aria-label="DIPS の入力順の項目"
             description="項目ごとに「コピー」を押して、DIPS 2.0 の通報画面に貼り付けます。そらばんが持たない項目は、DIPS で入力してください。"
           >
-            <div className="flex flex-col gap-1.5 text-xs leading-relaxed text-sb-ink-2" data-testid="report-map-info">
+            <details data-testid="report-map-details">
+              <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">項目の対応表について（版 {view.prepared.mapRevision}）・DIPS の通報画面の入力順とは照合していません</summary>
+            <div className="flex flex-col gap-1.5 text-xs leading-relaxed text-sb-ink-2" data-testid="report-map-info" >
               <p>
                 項目の対応表：版 <span className="sb-num tnum" data-testid="report-map-revision">{view.prepared.mapRevision}</span>・確認日{" "}
                 <span className="sb-num tnum" data-testid="report-map-verified">{view.prepared.mapVerifiedAt.slice(0, 10)}</span>
@@ -902,6 +972,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
               <p>項目の並びは、DIPS 2.0 API 飛行計画通報ガイドライン 1.10 版の項目の並びです。DIPS の通報画面の入力順とは照合していません。</p>
               <p>{COPY_AUDIT_NOTE}</p>
             </div>
+            </details>
             <p
               className={`opx-edge-row !flex-row flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-sb-ink ${
                 view.prepared.missingRequiredCount > 0 ? "opx-edge-attn" : ""
@@ -937,7 +1008,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                     ) : null}
                     <span className="ml-auto sb-num text-xs font-normal tnum text-sb-ink-3">{g.itemKeys.length} 項目</span>
                   </h3>
-                  <ul className="flex flex-col">
+                  <ul className="flex flex-col lg:block lg:columns-2 lg:gap-x-8">
                     {g.itemKeys.map((k) => {
                       const item = view.prepared.items.find((i) => i.key === k);
                       return item ? <ItemRow key={k} item={item} copied={copied[k] === true} onCopy={(i) => void onCopy(i)} maskedLicense={maskedLicense} /> : null;
@@ -967,11 +1038,15 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         {!view.permissions.record ? (
           <Note>記録は、運航管理者と、この計画の操縦者本人だけが行えます。</Note>
         ) : !view.recordable.allowed ? (
-          <Note>
-            {view.recordable.reason === "draft"
-              ? "計画が下書きのため、通報の記録はできません。先に確認を依頼してください。"
-              : "計画は中止されています。通報の記録はできません（取消の記録はできます）。"}
-          </Note>
+          <div data-testid="report-record-blocked" data-reason={view.recordable.reason ?? ""}>
+            <p className="opx-note opx-note-lg">
+              {view.recordable.reason === "draft"
+                ? "計画が下書きのため、通報の記録はできません。先に確認を依頼してください。"
+                : view.recordable.reason === "multiple_areas"
+                  ? `${PREPARE_WARNING_MESSAGE.route_multiple_areas}。範囲が複数の間は、新規・変更の通報の記録はできません${view.effective ? "（取消の記録はできます）" : ""}。`
+                  : "計画は中止されています。通報の記録はできません（取消の記録はできます）。"}
+            </p>
+          </div>
         ) : isCancel && !view.effective ? (
           <Note>取り消せる有効な通報がありません。</Note>
         ) : (
@@ -1036,16 +1111,31 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           </p>
         ) : (
           <ol className="flex flex-col border-t border-sb-rule" data-testid="report-history">
-            {view.reports.map((r) => (
+            {view.reports.filter((r, i) => isShownRow(r, i)).map((r) => (
               <ReportRow key={r.id} r={r} />
             ))}
           </ol>
         )}
+        {olderReports.length > 0 ? (
+          <details data-testid="report-history-older">
+            <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">過去の記録を見る（{olderReports.length} 件）</summary>
+            <ol className="flex flex-col border-t border-sb-rule">
+              {olderReports.map((r) => (
+                <ReportRow key={r.id} r={r} />
+              ))}
+            </ol>
+          </details>
+        ) : null}
       </Section>
 
       <Section id="audit" title="操作の監査" aria-label="操作の監査" description="誰が・いつ・何を・どこへ・結果を残します。値の全文・秘密・技能証明書番号・氏名は記録しません。">
-        <AuditList audit={view.audit} />
+        <details data-testid="report-audit-details">
+          <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">監査の記録を見る（{view.audit.length} 件）</summary>
+          <AuditList audit={view.audit} />
+        </details>
       </Section>
+      {/* 機体・操縦者の DIPS への登録は利用者本人が行う（Sprint 18-3）。作業台の末尾に 1 行。第一画面の並びは変えない */}
+      <p className="text-base leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
     </div>
   );
 }

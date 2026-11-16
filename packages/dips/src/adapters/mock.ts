@@ -14,7 +14,7 @@
 //   timeout        unknown         応答なし。同上（実際の時間切れの判定はサービス層。ここは即座に時間切れの結果を返す）
 //   unknown_status submitted_api   未知の外部状況（生の値 "XYZ"）を externalStatus に入れて返す。状態は増やさない
 import { REPORT_FIELDS, type ReportFieldsData } from "../fields";
-import { traceOf, UNSUPPORTED_STATUS, type NotificationGateway } from "../gateway";
+import { assertSubmittable, traceOf, UNSUPPORTED_STATUS, type NotificationGateway } from "../gateway";
 import { REPORT_ERROR_KIND_LABEL } from "../messages";
 import { prepareReport } from "../prepare";
 import { sha256Hex } from "../sha256";
@@ -60,6 +60,7 @@ export class MockGateway implements NotificationGateway {
   }
 
   async submit(prepared: PreparedReport, ctx: SubmitContext): Promise<SubmitResult> {
+    assertSubmittable(prepared);
     const scenario: MockScenario = ctx.mockScenario ?? "ok";
     const trace = traceOf(prepared, "mock");
     const base = {

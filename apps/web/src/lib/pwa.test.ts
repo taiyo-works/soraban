@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { DEVICE_STORAGE_NOTES, OFFLINE_SHELLS, isCacheableStatic, isNeverCache, pwaManifest, serviceWorkerSource, shellForPath, staticAssetsIn } from "./pwa";
+import { DEVICE_STORAGE_NOTES, OFFLINE_SHELLS, PWA_BACKGROUND_COLOR, PWA_THEME_COLOR, isCacheableStatic, isNeverCache, pwaManifest, serviceWorkerSource, shellForPath, staticAssetsIn } from "./pwa";
 
 const WEB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -13,6 +13,19 @@ const pngSize = (file: string): [number, number] => {
   expect(b.subarray(1, 4).toString("ascii")).toBe("PNG");
   return [b.readUInt32BE(16), b.readUInt32BE(20)];
 };
+
+describe("Sprint 16 T-5・H-9 PWA の色は白基調（--sb-base の明の値）と一致する", () => {
+  it("PWA_THEME_COLOR・PWA_BACKGROUND_COLOR・マニフェストの theme_color・background_color が、soraban-tokens.css の :root の --sb-base と同じ", () => {
+    const css = readFileSync(path.join(WEB, "src", "app", "soraban-tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const root = /(?:^|\n):root\s*\{([^}]*)\}/.exec(css)![1]!;
+    const base = /--sb-base:\s*(#[0-9a-fA-F]{6})\s*;/.exec(root)![1]!;
+    expect(PWA_THEME_COLOR.toUpperCase()).toBe(base.toUpperCase());
+    expect(PWA_BACKGROUND_COLOR.toUpperCase()).toBe(base.toUpperCase());
+    const m = pwaManifest();
+    expect(m.theme_color.toUpperCase()).toBe(base.toUpperCase());
+    expect(m.background_color.toUpperCase()).toBe(base.toUpperCase());
+  });
+});
 
 describe("A-1 マニフェスト", () => {
   it("名称・アイコン（192・512）・display・開始 URL（/ops）・theme_color が揃う。scope は /ops（公開の / を含めない）", () => {
@@ -76,5 +89,15 @@ describe("F-3 端末に保存する内容の説明", () => {
     const t = DEVICE_STORAGE_NOTES.join("");
     for (const w of ["先読み", "送信待ち", "下書き", "キャッシュ", "ログアウト", "※要再確認"]) expect(t).toContain(w);
     expect(t).not.toMatch(/代行|代理|通報不要/);
+  });
+});
+
+describe("Sprint 18-3 §5.4 マニフェストの説明に通報の記録と提供元が入る", () => {
+  it("description は通報・点検・飛行日誌と提供元（定数から）を含み、name・short_name は変えない", async () => {
+    const { PROVIDER } = await import("./provider-info");
+    const m = pwaManifest();
+    expect(m.description).toBe(`ドローンの飛行計画の通報の記録、飛行前・飛行後の点検、飛行日誌をまとめます。点検と飛行日誌は、電波の弱い現場でも記録できます。提供元：${PROVIDER.name}`);
+    expect(m.name).toBe("そらばん 運航管理");
+    expect(m.short_name).toBe("そらばん");
   });
 });

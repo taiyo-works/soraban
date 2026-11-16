@@ -73,9 +73,9 @@ const toggle = async (box: Locator, page: Page, on: boolean, withCheck = true): 
   await settled(page);
 };
 
-/** 飛行方法のチェック（06 の中。申請支援の診断だけをやり直す）。 */
+/** 飛行の方法のチェック（06 の中。判定だけをやり直す）。凡例は Sprint 18-1 で「飛行方法（申請支援）」から「飛行の方法」に変えた。 */
 const methodBox = (page: Page, label: string) =>
-  page.locator("fieldset", { hasText: "飛行方法（申請支援）" }).getByRole("checkbox", { name: label, exact: true });
+  page.locator("fieldset", { hasText: "飛行の方法（選ぶと判定に反映します）" }).getByRole("checkbox", { name: label, exact: true });
 
 const setPlannedDate = async (page: Page, iso: string): Promise<void> => {
   const diag = waitDiagnose(page);
@@ -190,11 +190,13 @@ test.describe("B. 地点と飛び方での結果", () => {
     const card = page.getByTestId("regulation-card-aviation-law-did");
     await expect(card).toHaveAttribute("data-status", "red");
     await expect(card).toHaveAttribute("data-verdict", "procedure_done");
-    // DID の手続きは段取りから外れ、申請支援の手続きの一覧には印つきで残る
+    // DID の手続きは段取り（要手続きの手続き）から外れ、判定の「手続き済み（条件付き）」の節（verdict-done）の項目に残る。
+    // 以前は申請支援の手続きカード（procedure-card）に印つきで残ることを検査していた。申請支援を止めたので（Sprint 18-1）、
+    // 判定側の節の見出しと条件の行で検査する（verdict-done-item は item の id を持ち、手続きの id は持たない）。診断パネル（procedure-card）は出ない。
     await expect(procedures(page).filter({ hasText: "飛行許可（DID上空）" })).toHaveCount(0);
-    const procCard = page.locator('[data-testid="procedure-card"][data-procedure-id="flight-permission-did"]');
-    await expect(procCard).toHaveAttribute("data-verdict", "procedure_done");
-    await expect(procCard.getByTestId("procedure-verdict-done")).toContainText("手続き済み（条件付き）");
+    await expect(page.getByTestId("verdict-done")).toContainText("手続き済み（条件付き）");
+    expect(await done.getByTestId("verdict-done-condition").count()).toBeGreaterThanOrEqual(1);
+    await expect(page.getByTestId("procedure-card")).toHaveCount(0);
   });
 
   test("7. 空港等周辺（該当の可能性）：DIPS の全種類を入れても要手続きのまま、個別許可と調整の理由、空港等周辺の飛行許可が手続きに出る", async ({

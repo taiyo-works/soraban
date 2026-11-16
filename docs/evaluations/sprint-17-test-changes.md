@@ -1,0 +1,82 @@
+# Sprint 17-1: 既存テストの変更と理由（T-2）
+
+意図の変更は「URL（どの画面で見るか）」と「画面を移る操作の追加」だけ。**期待値（文言・件数・寸法・比・data-* の値）は弱めていない。** 「存在しないこと」の検査（`toHaveCount(0)`）は、移動先の画面（その識別子が実際に出る画面）に移して残した（主画面で数えると常に 0 になって弱まるため）。
+
+## 単体テスト
+
+| ファイル | 変更 | 理由 |
+|---|---|---|
+| `apps/web/src/server/ops/report-logic.test.ts` | `apply_permit` の `href` の期待値を `/ops/plans/{id}#procedures` → `/ops/plans/{id}/overview#procedures` | `planHref` の行き先を新しい画面へ（契約 §5.1・T-3）。他の `planHref` の期待は関数の出力と照合する形で変更なし |
+| `apps/web/src/app/ops/ops-v2-conventions.test.ts` | 新しい画面・部品（`S17_FILES`）を v2 トークン検査の対象に**追加** | D-1。既存の検査は変えていない |
+| `apps/web/src/components/ops/ops-nav-model.ts`（`BACK_TABLE`） | `/overview`・`/journal`・`/judgement` の行を追加。`/snapshots` の戻り先を判定へ | 戻り先の表（`ops-nav.test.ts` が全行を検査する） |
+
+追加: `plan-anchor-compat.test.ts`（旧アンカー 8 つの移送先）、`testids-baseline.test.ts`（T-1: 基準の一覧から消えた識別子が 0）。
+
+## E2E-DB（`pnpm test:e2e:ops`）
+
+| ファイル | テスト | 変更 | 理由 |
+|---|---|---|---|
+| `sprint12a-db.spec.ts` | 11・16・17・20 | 確認の依頼・確認・再確認の操作と `plan-confirmation-*` の検査は `/overview`、`plan-snapshot-seq` は `/judgement` を `goto`。`plan-basis-link` のタップ寸法は `/judgement` で検査。訂正後は主画面（保存直後の行き先）で通知を確かめたあと `/overview` へ。20 の画面一覧に新しい 4 画面を追加 | 識別子の移動（§6） |
+| 同 | 9 | `plan-stale`・`plan-rejudge`・`plan-snapshot-seq` を `/judgement` で | 同上 |
+| 同 | 13・14 | `plan-flights-empty`・`plan-make-flight`・`plan-flight-row` を `/journal` で | 同上 |
+| 同 | 認可 | `plan-edit-link`・`plan-confirm-panel` の不在/存在を `/overview`、`plan-make-flight` の不在を `/journal` で。他人の計画の `plan-edit-link` 不在も `/overview` で | 「無いこと」の検査を実際に出る画面へ |
+| 同 | 計画を判定から作る | `plan-snapshot-seq`・`plan-check-evidence` を保存後に `/judgement` で | 同上 |
+| `sprint12b-db.spec.ts` | 17 | 次にやること（`next-action`）は主画面、`procedure-*` は `/overview` を `goto`。「次にやることを押すと手続きの記録へ移る」の URL 検査を `/overview#procedures$` に（旧 `#procedures$`）。次にやることの「消える/戻る」の検査は主画面で | 手続きの記録を計画タブへ（§3.2-8）。URL の検査は**より厳密**にした |
+| 同 | 18 | `plan-judged-at` を `/judgement` で。タップ寸法の走査対象に新しい画面を追加 | 識別子の移動・対象の追加 |
+| `sprint12c-db.spec.ts` | 12 | `plan-flight-row` を `/journal` で | 同上 |
+| `sprint12d-db.spec.ts` | 13-1〜13-5・14 | `plan-permit-*`・`verdict-*`・`plan-stale-box`・`plan-rejudge`・`plan-basis-link` は `/judgement`。`next-actions`・`next-action` は主画面。`procedure-history-*`・`plan-overview` は `/overview` | 同上 |
+| `sprint12e-db.spec.ts` | 13 | `incident-linked*` を `/journal` で | 同上 |
+
+追加: `sprint17-db.spec.ts`（S-1・S-2・S-3・S-5・S-6・J-1（暫定）・J-2（17-1 の範囲）・J-3・J-4）。
+
+変更していない E2E（`sprint12h-*`・`sprint14`・`sprint15`・通常の E2E ほか）は、空の DB からの全体実行（153 件）で通った。
+
+## 差し戻し 1 回目（2026-11-01）での追加・変更
+
+期待値は弱めていない。待ちの追加と、検査の範囲を**広げる**変更だけ。
+
+| 内容 | ファイル | 理由 |
+|---|---|---|
+| `tapSize` の `boundingBox()` の前に `toBeVisible()` を追加 | `sprint12a-db.spec.ts` | 新しい画面は Suspense でストリーミングされ、描画直後は本文が `display:none` の中にある。`toContainText` は非表示でも通るので待ちにならず、`boundingBox()` が null になっていた（CI の失敗） |
+| 計画の画面への `goto` を `gotoPlan`（可視のタブが出るまで待つ）に統一 | `e2e/ops-db/plan-screen.ts`（新）、12a〜12e・17 | 同じ競合を、`goto` の直後の `boundingBox`・`toHaveCount(0)`（描画前に通る偽の成功）の両方で防ぐ |
+| 「無いはずの語が無い」検査を、元の計画の詳細にあった内容の**移動先すべて**（主画面・`/overview`・`/judgement`・`/journal`）で回す（`onAllPlanScreens`） | 12a（計画の詳細の禁止語）、12b（「許可済み」、`expectNoForbiddenWords` 2 か所）、12d（`expectNoForbiddenWords` 4 か所） | 17-1 で 1 画面に狭まっていた範囲を元に戻す（レビュー中-1） |
+| v2 の見た目の走査（文字の比・押す部品・はみ出し・角丸と影・旧い部品）の対象に `/overview`・`/judgement`・`/journal` を追加 | `sprint12h-pr3b1-db.spec.ts`、`sprint12h-pr3b2b-db.spec.ts` | 新しい 3 画面も同じ基準で検査する（基準は変えていない） |
+| 旧アンカー 7 本＋`#sec-report` と「次にやること」（確認・手続き・再判定）の移動後に、対象の要素の上端がビューポート内にあることを検査 | `sprint17-db.spec.ts` | URL と要素の存在だけでは、スクロールされない不具合を見逃す。`HashScroll`（`components/ops/hash-scroll.tsx`）で修正 |
+| 非 DB の 404 の一覧に `/overview`・`/journal`・`/judgement` を追加 | `e2e/sprint12a.spec.ts` | `OPS_ENABLED` 無効で新ルートも 404 |
+| 基準の一覧の件数の下限（1,996）とハッシュを単体テストで固定。`--write` は `--reason` が必須で、記録 `sprint-17-testids-baseline-log.txt` に追記。収集前にコメントを除く | `scripts/testids.mjs`、`testids-baseline.test.ts` | 黙って書き直せないようにする |
+| 許可・承認の登録の「この登録を根拠にしている計画」の行き先を `/judgement` に | `permit-ui.tsx` | 行の内容（根拠の版・判定が古い）は判定の情報のため。既存の E2E は行き先を検査していない |
+| 点検の行のクリックを押し直し付きにした（期待は同じ） | `sprint12h-pr3-db.spec.ts` P3a-4 | CI（run 41268733165）で `waitForURL` のタイムアウトで失敗した既知の不安定。17-1 とは無関係。描画直後のクリックが遷移しないため、`tapAndWait` と同じ作法で押し直す |
+
+## Sprint 17-2（2026-11-01）での追加・変更
+
+期待値（文言・件数・寸法・比・`data-*`）は弱めていない。変えたのは「折りたたみを開く操作」だけ。
+
+| 内容 | ファイル | 理由 |
+|---|---|---|
+| `gotoPlan` が、計画の画面の折りたたみ（次にやることの「ほか N 件」・手続きの記録・判定の記録・許可番号の形式・出典の古い項目・中止のフォーム）を開く。折りたたみそのものを試験する 17-2 の検査は `gotoPlanFolded` を使う | `e2e/ops-db/plan-screen.ts` | 17-2 で長さを詰めるために畳んだ。畳んだ中の部品を押す・見る既存の検査は、開いてから行う（契約 §11） |
+| `openReport` が、通報の作業台の折りたたみ（状況の詳細・過去の記録・監査・項目の対応表）を開く | `sprint12b-db.spec.ts` | 同上。`plan-report-*` は作業台では「状況の詳細」の中（1 行の状況＋詳細）に残してある。`innerText` で「含まない」を検査する箇所が空振りしないよう、開いてから読む |
+| 再判定の後の再読み込みのあとに `openPlanFolds` | `sprint12d-db.spec.ts`（契約 14） | `:visible` で読む `plan-snapshot-seq` が、判定の記録の折りたたみの中に入った |
+| 主画面の次にやることを押す検査の `page.goto` を `gotoPlan` に | `sprint17-db.spec.ts` | 3 件目以降が「ほか N 件」の中に入った |
+| 主画面の `plan-report-box`・`plan-report-reasons` は根拠が折りたたみ内。`plan-report-label` は中止・記録なしのとき「中止（通報の記録はありません）」（ユーザーの判断。オーケストレーターが代行） | — | 既存の検査に、中止・記録なしの主画面を見るものは無かった |
+
+## Sprint 17-2 差し戻し 1 回目（2026-11-01）での追加・変更
+
+期待値は弱めていない。
+
+| 内容 | ファイル | 理由 |
+|---|---|---|
+| `gotoPlan` が畳みを**開かない**形に戻し、畳んだ中身を読む・押す検査だけ `gotoPlanOpen`（`gotoPlan` ＋ `openPlanFolds`）に明示的に替えた（12a〜12e・17-1。呼び出し名を機械的に置換） | `plan-screen.ts`、各 spec | 一律に開くと「既定で見えるか」を検査できず、畳みの退行を見逃す（レビュー中-3）。`onAllPlanScreens` は禁止語の走査なので、畳みの中も読むため開く |
+| `openReport` に `{ folds: false }` を足し、12b 契約 16 の「飛行開始後」「目安超過」の検査は開かずに `toBeVisible`（`plan-report-deadline`・`plan-report-penalty`・`plan-report-deadline-message`） | `sprint12b-db.spec.ts` | 警告・期限が既定で見えることを検査する（中-2） |
+| 17-2 の L-2 に `plan-report-status` の第一画面の検査を戻した（中止・記録なしだけは状況の行を出さず `plan-report-label` に代える。理由：事実の 1 行を示すため。契約 §3.2 の「通報の状況」を、記録が無い中止では事実の 1 行で示す、というユーザーの判断による） | `sprint17-2-db.spec.ts` | 前の版で差し替えていた穴を埋める（中-4c） |
+| 新規：中止 × 失敗の取消が主画面に出る（模擬アダプター）、期限超過が開かずに見える・状況の詳細がキーボードで開閉できる、変更点が多い計画の長さ | `sprint17-2-db.spec.ts` | 高-1、中-2、中-4b、低-5 |
+
+## Sprint 17-2 評価の指摘への対応（2026-11-01）
+
+| 内容 | ファイル | 理由 |
+|---|---|---|
+| 禁止語の走査を `textContent`（畳みの中も含む）でも行う `expectNoForbiddenTextContent` を追加し、`onAllPlanScreens`・17-2 の主画面の各状態・`/report` で回す | `plan-screen.ts`、`sprint17-2-db.spec.ts` | `gotoPlan` が開くのは testid のある畳みだけで、`innerText` の走査から外れる文があった（評価 R-5） |
+| 主画面の手順 ①②③・「通報の結果を見る」を押した後、`/report` の節の上端が手順バーの下にあり、その節にフォーカスがあることを検査（375・1280） | `sprint17-2-db.spec.ts` | `/report` に `HashScroll` を置いた（評価 R-1）。URL だけでなく位置を検査する |
+| 通報済み・取消済み・取消待ちの見出し、中止・記録なしの `/report`（手順バーなし、事実の文言）の検査 | 同上 | 評価 R-2・R-3 |
+| 版 12・通報の記録あり・飛行記録 8 件の計画の長さ（計画・日誌・作業台）と、古い版・古い飛行記録が畳まれていること | 同上 | 評価の長さの指摘（上限は引き上げず、件数で畳む） |
+| 作業台の上限（375 幅）：**9,500px を満たせず、指示により 10,200px まで引き上げ**。実測は通報の記録 1 件で 10,082〜10,170px（入力 1,744px・項目 68 行・記録のフォーム 745px・履歴 1 行が主）。1280 幅は 7,000px のまま（実測 6,846〜6,914px）。主画面の上限は動かしていない | `sprint17-2-db.spec.ts`（実データ並み・変更点が多い計画の 2 検査） | 契約 §4 の「上限を黙って上げない」に従い、理由と実測を記録する。シード 1 件の素の作業台（記録なし）は 9,500px 以下のまま検査している |
+| `report-row-details`（記録の詳細：版・証跡 ID・記録した日時）を `REPORT_FOLDS` に追加 | `plan-screen.ts` | 作業台の履歴の行を詰めるために畳んだ。`openReport` が開く |

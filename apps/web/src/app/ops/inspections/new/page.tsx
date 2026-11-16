@@ -1,6 +1,7 @@
 import { InspectionForm } from "@/components/ops/records-client";
 import { Forbidden } from "@/components/ops/versions";
 import { PageHeader } from "@/components/ops/ui";
+import { DISCLAIMER_INSPECTION } from "@/lib/disclaimers";
 import { safeReturnTo } from "@/lib/ops-return";
 import { getPlan } from "@/server/ops/plans";
 import { isUuid, OpsError } from "@/server/ops/service";
@@ -40,6 +41,8 @@ export default async function InspectionNewPage({
     <main className="flex flex-col gap-6">
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p className="text-xs leading-relaxed text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
+        {/* 点検の免責（Sprint 18-3）。入力の先頭 */}
+        <p className="text-base leading-relaxed text-sb-ink" data-testid="inspection-disclaimer">{DISCLAIMER_INSPECTION}</p>
       </PageHeader>
       <InspectionForm aircraft={aircraft} pilots={pilots} fixedPilotId={fixedPilotId} memberId={me.member.id} initialAircraftId={aircraftId} {...(pilotId ? { initialPilotId: pilotId } : {})} {...(initialTiming ? { initialTiming } : {})} {...(returnTo ? { returnTo } : {})} {...(planId ? { planId } : {})} {...(flightTakeoffAt ? { flightTakeoffAt } : {})} />
     </main>

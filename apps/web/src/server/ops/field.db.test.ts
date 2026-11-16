@@ -1089,7 +1089,7 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       const m = t.nextActions.find((a) => a.id === "review_journal_mismatch")!;
       expect(m).toMatchObject({ tier: 4, href: `/ops/flights/${f.record.id}`, canAct: true });
       const lic = t.nextActions.find((a) => a.id === "renew_license")!;
-      expect(lic).toMatchObject({ tier: 5, href: `/ops/pilots/${O.pilotLinked.id}` });
+      expect(lic).toMatchObject({ tier: 5, href: `/ops/pilots/${O.pilotLinked.id}`, label: "技能証明の有効期限を確認する" });
       expect(lic.reason).toContain("2027-02-20");
       // 時間で消える：4 日後には出ない
       t = await today.getToday(ctxOf(O.manager, { now: () => new Date(NOW.getTime() + 3.5 * 24 * 3600_000) }));

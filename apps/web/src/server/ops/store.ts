@@ -82,6 +82,10 @@ export const mapDbError = (e: unknown): never => {
       if (o.detail === "inspection_mismatch") {
         throw new OpsError(400, "invalid_input", { dailyInspectionId: "同じ機体の日常点検を選んでください" }, { dailyInspectionId: "inspection_mismatch" });
       }
+      // 0018 のトリガーが detail で示す飛行範囲の検査（アプリの検査をすり抜けた場合の防御）
+      if (o.detail === "flight_areas_invalid" || o.detail === "flight_areas_not_covered") {
+        throw new OpsError(422, o.detail, { areas: "飛行範囲が保存できない形です" }, { areas: o.detail });
+      }
       throw new OpsError(400, "invalid_input");
     }
     case "23502":

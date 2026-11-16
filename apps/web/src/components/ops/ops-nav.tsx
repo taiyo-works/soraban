@@ -212,6 +212,17 @@ function UserMenu({ user }: { readonly user: OpsNavUser }) {
               {user.email}
             </p>
           </div>
+          {/* このアプリについて（Sprint 18-3）。押す部品は 48px 以上。移動したらメニューを閉じる */}
+          <Link
+            href="/ops/about"
+            prefetch={false}
+            onClick={() => setOpen(false)}
+            data-testid="user-menu-about"
+            className="inline-flex min-h-12 w-full items-center gap-2 rounded-sb-m border border-sb-edge bg-sb-base px-3 text-table font-semibold text-sb-ink hover:bg-sb-sunken"
+          >
+            <Icon name="info" size={18} className="shrink-0 text-sb-ink-2" />
+            このアプリについて
+          </Link>
           <SignOutButton provider={user.provider} memberId={user.memberId} />
         </div>
       ) : null}
