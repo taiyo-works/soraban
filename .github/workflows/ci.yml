@@ -61,6 +61,9 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # build は、Playwright の OS 依存パッケージ（apt）を入れる前に行う。先に入れる順では、build 中の
+      # フォント取得（next/font/google）が失敗した（2026-11-16、ubuntu-26.04。db ジョブは build が先で通る）。
+      - run: pnpm build
       - name: Playwright のバージョンを取得
         id: playwright-version
         run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
@@ -75,7 +78,6 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
-      - run: pnpm build
       - run: pnpm test:e2e
         env:
           CI: "1"
