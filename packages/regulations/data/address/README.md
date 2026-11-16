@@ -46,4 +46,4 @@ pnpm typecheck && pnpm test   # 同梱索引の照合精度のテスト（bundle
 
 町字の座標付き件数が 0 件など、列名の想定と違う入力では索引を作らずに異常終了する（summary.md に見出し行を残す）。
 
-国内の self-hosted ランナーがあれば、`data-fetch/address-*` ブランチへの push で `.github/workflows/fetch-address-data.yml` を実行できる（`runs-on` の変更が必要）。
+国内の self-hosted ランナーがあれば、`.github/workflows/fetch-address-data.yml` を手動実行（`gh workflow run fetch-address-data.yml --ref <ブランチ>`）できる（`runs-on` の変更が必要。Actions の消費を抑えるため、ブランチへの push では動かさない）。

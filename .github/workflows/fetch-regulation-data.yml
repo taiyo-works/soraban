@@ -3,13 +3,11 @@ name: Fetch regulation data
 # 地図データ（DID 令和2年・工業専用地域）を国土数値情報から取得し、同梱形式に変換する（手動実行のみ）。
 # ダウンロード URL はダウンロードページの HTML から抜き出す（推測しない）。取得できない入手元はスキップしてログに残す。
 # 処理本体：packages/regulations/scripts/fetch-regulation-data.sh
+#
+# 手動実行のみ（Actions の消費を抑えるため、ブランチへの push では動かさない）。ブランチを選んで実行できる:
+#   gh workflow run fetch-regulation-data.yml --ref <ブランチ> -f output=commit
 
 on:
-  # 既定ブランチに入る前でも試せるよう、data-fetch/ で始まるブランチへの push でも実行する（既定値で実行し、
-  # 生成データと FETCH_REPORT.md を同じ data-fetch ブランチにコミットする）。
-  # data-fetch/address-** は住所データ用（fetch-address-data.yml）なので除く。
-  push:
-    branches: ['data-fetch/**', '!data-fetch/address-**']
   workflow_dispatch:
     inputs:
       output:
@@ -125,15 +123,13 @@ jobs:
       verify: ${{ steps.verify.outcome }}
 
   # 生成データと FETCH_REPORT.md をコミットして push する。
-  #   - push（data-fetch/** への push）では常に、そのブランチへ。それ以外のブランチには書かない。
-  #   - 手動実行では output=commit のときだけ、実行したブランチへ。
+  #   - 手動実行で output=commit のときだけ、実行したブランチへ。それ以外のブランチには書かない。
   # GITHUB_TOKEN による push は新しいワークフロー実行を起こさない（ループしない）。
   commit:
     needs: fetch
     if: >-
       always() && needs.fetch.result != 'cancelled' &&
-      ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/data-fetch/')) ||
-       (github.event_name == 'workflow_dispatch' && inputs.output == 'commit'))
+      github.event_name == 'workflow_dispatch' && inputs.output == 'commit'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

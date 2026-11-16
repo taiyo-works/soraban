@@ -1,8 +1,14 @@
 name: CI
 
-# 文書だけの変更では動かさない（Actions の消費を抑える）。ワークフロー自身の変更は対象に含める。
+# Actions の消費を抑える方針。フルで回すと 1 回あたり約 45 分（db 約 24・e2e 約 17・verify 約 3。直近 8 回の実測）。
+#   - 文書だけの変更では動かさない。ワークフロー自身の変更は対象に含める。
+#   - PR では、Draft でなければ verify（約 3 分）だけを回す。e2e と db は、main への push と手動実行で回す。
+#     公開リポジトリの間など、PR でもフルで回したいときは、リポジトリ変数 CI_FULL_ON_PR を true にする。
+#   - 外部サービスの疎通確認（smoke）は、毎回ではなく週 1 回（月曜 03:17 UTC）と手動実行だけ。
+#   - 手動実行（Actions → CI → Run workflow）は、選んだブランチで 4 つすべてを回す。
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "docs/**"
       - "**/*.md"
@@ -11,16 +17,22 @@ on:
     paths-ignore:
       - "docs/**"
       - "**/*.md"
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
 
+# schedule・手動実行・PR・push が互いの実行を打ち切らないよう、イベントごとに分ける。
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: typecheck / lint / test / build
+    name: typecheck / lint / test
+    # PR は Draft を除く。schedule では smoke だけを回す。
+    if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -32,13 +44,15 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
-      - run: pnpm build
+      # build は e2e・db が行う（main への push と手動実行）。PR ごとの build は Vercel のプレビューが確かめる。
 
   e2e:
     name: e2e (Playwright)
+    # PR では、変数 CI_FULL_ON_PR が true のときだけ。main への push と手動実行では常に回す。
+    if: github.event_name != 'pull_request' || vars.CI_FULL_ON_PR == 'true'
     runs-on: ubuntu-latest
     needs: verify
-    timeout-minutes: 40
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -79,8 +93,10 @@ jobs:
 
   # Sprint 9: 外部サービス（国土地理院）との疎通確認。E2E は模擬サーバーを使うため、実サービスの変化はここで見る。
   # 外部の都合で落ちうるので、失敗しても CI 全体は止めない。
+  # push・PR では回さない（週 1 回の schedule と手動実行だけ）。
   smoke-external:
     name: smoke (external services, non-blocking)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -101,9 +117,11 @@ jobs:
   # （AUTH_PROVIDER=test・OPS_ENABLED=1・soraban_app で接続した next start）を実行する。
   db:
     name: db (PostGIS service container)
+    # PR では、変数 CI_FULL_ON_PR が true のときだけ。main への push と手動実行では常に回す。
+    if: github.event_name != 'pull_request' || vars.CI_FULL_ON_PR == 'true'
     runs-on: ubuntu-latest
     needs: verify
-    timeout-minutes: 40
+    timeout-minutes: 35
     services:
       postgres:
         image: postgis/postgis:18-3.6
