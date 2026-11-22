@@ -860,11 +860,11 @@ test.describe("Q-26 動き", () => {
     await ctx.close();
   });
 
-  test("通常：矢印の入れ替えは 0.5s（ホバー・フォーカス・押下）", async ({ page }) => {
+  test("通常：矢印の入れ替えは標準の動き 0.18s（ホバー・フォーカス・押下。16-A で 0.5s から変更）", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await openReady(page);
     const d = await page.evaluate(() => getComputedStyle(document.querySelector(".sb-pill-arrow .sb-ar")!).transitionDuration);
-    expect(d).toBe("0.5s");
+    expect(d).toBe("0.18s");
   });
 });
 
