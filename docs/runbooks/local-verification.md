@@ -6,7 +6,9 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 
 - **PostgreSQL 16 + PostGIS**: クラスタ `16/main`（ポート 5432）。止まっていれば `pg_ctlcluster 16 main start`。ロール `postgres` と `soraban_app` は、CI と同じテスト用の値（`postgres` / `soraban_app_ci_only`）に設定されている前提。起動時に設定されていなければ設定し直す（アプリのコードには影響しない）。
 - **検証は空の DB から**: 実行のたびに新しい名前の DB を作り、マイグレーションとシード（`db:seed:ops-test`）を入れる。前の実行の計画が残った DB を使い回すと、時間帯の重なり（`overlap`）などで偽の失敗が出る。
-- **Chromium**: `/opt/pw-browsers/chromium`。`playwright install` はしない（別のバージョンが入って壊れる）。必要なら `--no-sandbox`。
+- **Chromium**: `/opt/pw-browsers/chromium`。`playwright install` はしない（別のバージョンが入って壊れる）。Playwright が要求する版の headless shell が無いと、全件が `Executable doesn't exist` で落ちるので、`E2E_CHROMIUM_PATH=/opt/pw-browsers/chromium E2E_CHROMIUM_ARGS=--no-sandbox`（フルの Chromium）を指定する。公開側 E2E は 1 ワーカー（既定）で流す。headless shell と `--workers=2` では、`sprint7` 159・173、`sprint9` 306・352、`sprint12h-pr2` Q-20 が `waitForResponse` のタイムアウトで実装と無関係に落ちる（2026-11-22、16-A の再判定で観測）。
+- **ops の手動検証用の DB**: `db:migrate`・`db:seed:ops-test` には `DATABASE_URL` に加えて `DATABASE_URL_UNPOOLED` も要る。
+- **コントラスト検査**: `node docs/design/tokens-v2/check-contrast-v2.mjs`（`scripts/` ではない）。
 - **ネットワーク**: 外部ホストはプロキシで制限されている。地図タイル（`cyberjapandata.gsi.go.jp`）は 403 になることがあり、公開側の地図のテストが揺れる原因になる。許可されていないホストは、環境の設定（Network access）で追加する必要がある。
 - **GitHub Actions**: CI が動く。push 後は、実行結果を GitHub のツールで確認する（課金の上限に達すると、ジョブが約 2 秒で失敗し、check-run の注記に理由が出る）。
 
@@ -22,6 +24,8 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - `sprint12g-1b` A7（ホームの最初の画面の縦位置。911 > 752）。観測: CI の fd2c82e で失敗、1d82cd1 の CI では成功。前の実行のデータが残った DB の部分再実行でもローカルで失敗した（空の DB の全体では成功）。
 - `sprint12h-pr3` P3a-5（`waitForURL` のタイムアウト）。観測: CI の fd2c82e で失敗、1d82cd1 の CI では成功。P3a-4 と同系統の可能性があるが、未確認。
 - 計画の新しい画面（`/overview`・`/judgement`・`/journal`・主画面）は Suspense でストリーミングされ、描画の直後は本文が `display:none` の中にある。`goto` の直後に `boundingBox()` や `toHaveCount(0)` を使うと偽の失敗・偽の成功になる。`e2e/ops-db/plan-screen.ts` の `gotoPlan`（可視のタブが出るまで待つ）を使う。
+- 色・コントラストを測る E2E は、`document.getAnimations()` が空になってから測る。背景色の遷移（180ms）の途中を拾うと、比が 1.1〜4 で揺れる（`sprint16-a` A-7/K-3 で観測。`--repeat-each=25` で 14/25）。
+- `sprint12g-1b` A7 の追記: 後続の `sprint12g-1b-fix-db` M-4 が作る期限切れの許可（validTo 2026-12-20）が使い回した DB に残り、期限の先頭に出るのが原因（16-A の評価で特定）。
 - 基準のコミットでも落ちるかを比べて、変更が原因かを切り分ける。
 
 ## 落とし穴
