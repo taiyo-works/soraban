@@ -84,11 +84,10 @@ test.describe("Sprint 16-A E2E-DB：新しいトークン（主色・地）が�
     for (const s of SCREENS) {
       await open(page, s);
       expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), `${s.name}: 地`).toBe("rgb(246, 247, 249)");
-      const faces = await page.locator(".opx-btn-primary:not(:disabled), .sb-pill-primary:not(:disabled)").evaluateAll((els) => els.map((e) => ({ bg: getComputedStyle(e).backgroundColor, fg: getComputedStyle(e).color })));
-      for (const f of faces) {
-        expect(f.bg, `${s.name}: 主ボタンの面`).toBe(s.field ? "rgb(24, 72, 176)" : "rgb(31, 95, 224)");
-        expect(f.fg, `${s.name}: 主ボタンの文字`).toBe("rgb(255, 255, 255)");
-      }
+      // 無効から有効へ変わる間は背景が遷移する。落ち着いてから確かめる
+      const faces = () => page.locator(".opx-btn-primary, .sb-pill-primary").evaluateAll((els) => els.filter((e) => !e.matches(":disabled") && e.getAttribute("aria-disabled") !== "true").map((e) => ({ bg: getComputedStyle(e).backgroundColor, fg: getComputedStyle(e).color })));
+      const want = s.field ? "rgb(24, 72, 176)" : "rgb(31, 95, 224)";
+      await expect.poll(async () => (await faces()).every((f) => f.bg === want && f.fg === "rgb(255, 255, 255)"), { timeout: 10_000, message: `${s.name}: 主ボタンの面は ${want}、文字は白` }).toBe(true);
     }
   });
 });

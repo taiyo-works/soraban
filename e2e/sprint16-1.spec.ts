@@ -184,14 +184,12 @@ test.describe("C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は�
     await page.locator(".sb-pill-primary:not(:disabled)").first().waitFor();
     const n = await page.locator(".sb-pill-primary").count();
     expect(n).toBeGreaterThan(0);
-    const bs = await page.locator(".sb-pill-primary").evaluateAll((els) => els.map((el) => ({ c: getComputedStyle(el).borderTopColor, color: getComputedStyle(el).color, bg: getComputedStyle(el).backgroundColor, disabled: (el as HTMLButtonElement).disabled === true || el.getAttribute("aria-disabled") === "true" })));
-    for (const b of bs) {
-      if (b.disabled) continue;
-      expect(b.bg).toBe(PRIMARY);
-      expect(b.color).toBe(WHITE);
-      expect(b.c).toBe(PRIMARY);
-      expect(ratioOf(b.bg, BASE)).toBeGreaterThanOrEqual(3);
-    }
+    // 無効から有効へ変わる間は背景が遷移する（--sb-dur）。落ち着いてから、無効でない主ボタンをすべて確かめる
+    const read = () => page.locator(".sb-pill-primary").evaluateAll((els) => els.filter((el) => !el.matches(":disabled") && el.getAttribute("aria-disabled") !== "true").map((el) => ({ c: getComputedStyle(el).borderTopColor, color: getComputedStyle(el).color, bg: getComputedStyle(el).backgroundColor })));
+    await expect.poll(async () => (await read()).every((b) => b.bg === PRIMARY && b.color === WHITE && b.c === PRIMARY), { timeout: 10_000 }).toBe(true);
+    const bs = await read();
+    expect(bs.length).toBeGreaterThan(0);
+    for (const b of bs) expect(ratioOf(b.bg, BASE)).toBeGreaterThanOrEqual(3);
   });
 });
 
