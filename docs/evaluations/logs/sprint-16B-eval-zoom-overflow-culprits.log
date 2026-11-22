@@ -1,0 +1,24 @@
+== /ops/plans/new
+   span[].opx-optional right=415 w=79 「任意」
+== /ops/inspections/new
+   span[].opx-optional right=439 w=79 「任意」
+== /ops/flights/new
+   span[].opx-optional right=439 w=79 「任意」
+   span[].opx-optional right=439 w=79 「任意」
+== /ops/plans/{id}/overview
+== /ops/plans/{id}/judgement
+   span[]. right=486 w=254 「機体登録（DRS）＋リモート」
+   span[].font-medium text-sb-ink right=486 w=254 「機体登録（DRS）＋リモート」
+   span[].block text-sm leading-relaxed  right=486 w=254 「100g 以上の機体の前提で」
+   span[]. right=399 w=167 「飛行計画の通報特定飛行のたび」
+   span[].block text-sm leading-relaxed  right=399 w=167 「特定飛行のたびに、飛行の前に」
+   span[]. right=399 w=167 「飛行日誌の作成・記録特定飛行」
+   span[].block text-sm leading-relaxed  right=399 w=167 「特定飛行のたびに、飛行・日常」
+   span[]. right=514 w=282 「緊急用務空域の指定の確認飛行」
+== /ops/plans/{id}/report
+   span[]. right=393 w=113 「報道取材」
+   span[]. right=422 w=142 「農林水産業」
+   span[]. right=393 w=113 「環境調査」
+   span[]. right=477 w=197 「インフラ点検・保守」
+   span[]. right=422 w=142 「事故・災害対応等」
+   span[]. right=429 w=149 「その他2(業務以外)」
