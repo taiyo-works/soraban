@@ -56,3 +56,4 @@ files.zip
 test-results/
 playwright-report/
 playwright-report-ops/
+!docs/evaluations/logs/*.log
