@@ -73,7 +73,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => onConfirm(candidate)} className="sb-text-btn !bg-sb-orange !border-sb-ink !text-sb-on-orange">
+            <button type="button" onClick={() => onConfirm(candidate)} className="sb-text-btn !bg-sb-primary !border-sb-primary !text-sb-on-primary">
               この地点で判定
             </button>
             <button type="button" onClick={onCancel} className="sb-text-btn">

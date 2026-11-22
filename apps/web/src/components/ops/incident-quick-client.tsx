@@ -32,7 +32,7 @@ import { IncidentFactNotice, IncidentOfficialNotice, IncidentSafetyFirst } from 
 const BTN = "opx-btn w-full";
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
-// 選択中の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
+// 選択中の面（主色。右端の丸と矢印は付けない：押すと進む意味になるため）
 const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 // 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく
@@ -146,7 +146,7 @@ export function IncidentQuickClient({
       {/* ② 事実の記録の注意 */}
       <IncidentFactNotice large />
 
-      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-orange pl-3">
+      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-primary pl-3">
         <h1 className="text-2xl font-bold leading-snug">事故・ヒヤリハットの簡易記録</h1>
         <p data-testid="incident-quick-plan">{planTitle}</p>
       </header>

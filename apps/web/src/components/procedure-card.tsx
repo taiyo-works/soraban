@@ -146,7 +146,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
           href={procedure.systemUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 min-w-11 items-center font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+          className="inline-flex min-h-11 min-w-11 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
           title={
             procedure.kind === "facility_consent_notice"
               ? "事前通報の方法（警察庁の案内）を開く"
@@ -166,7 +166,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
           href={procedure.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 min-w-11 items-center text-sb-ink-2 underline decoration-sb-orange decoration-2 underline-offset-4"
+          className="inline-flex min-h-11 min-w-11 items-center text-sb-ink-2 underline decoration-sb-primary decoration-2 underline-offset-4"
           title="根拠条文・手引きの出典を開く"
         >
           出典 ↗

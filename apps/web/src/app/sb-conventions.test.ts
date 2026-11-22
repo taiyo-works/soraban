@@ -135,8 +135,8 @@ describe("Q-26 動き", () => {
 
   it("減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。矢印の入れ替えは止まる（soraban-ui.css）", () => {
     const tokens = stripComments(read("app/soraban-tokens.css"));
-    expect(tokens).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-rise: 0ms; \}/);
-    expect(tokens).toMatch(/:root\[data-mode="field"\]\s*\{[^}]*--sb-dur: 0ms;[^}]*--sb-dur-rise: 0ms;/);
+    expect(tokens).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-press: 0ms; --sb-dur-sheet: 0ms; --sb-dur-state: 0ms; --sb-dur-rise: 0ms; \}/);
+    expect(tokens).toMatch(/:root\[data-mode="field"\]\s*\{[^}]*--sb-dur: 0ms;[^}]*--sb-dur-press: 0ms;[^}]*--sb-dur-sheet: 0ms;[^}]*--sb-dur-state: 0ms;[^}]*--sb-dur-rise: 0ms;/);
     expect(ui).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.sb-pill-arrow \.sb-a2 \{\s*display: none;/);
     expect(ui).toMatch(/:root\[data-mode="field"\] \.sb-pill-arrow \.sb-a2 \{\s*display: none;/);
   });

@@ -1479,7 +1479,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 </div>
               </div>
 
-              {/* 判定の見分け方（5 段。形と言葉をセットで。橙は使わない） */}
+              {/* 判定の見分け方（5 段。形と言葉をセットで。色だけに頼らない） */}
               <div className="sb-block-soft flex flex-col gap-2" aria-label="判定の見分け方" data-testid="verdict-legend" role="group">
                 <p className="text-sm font-bold text-sb-ink">判定の見分け方</p>
                 <div className="flex flex-wrap gap-2">
@@ -1673,8 +1673,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{dipsItems.map(renderPermit)}</div>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{permitItems.map(renderPermit)}</div>
-              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の橙線でひとまとまりに見せる */}
-              <div className="border-l-4 border-sb-orange pl-2">
+              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の主色の線でひとまとまりに見せる */}
+              <div className="border-l-4 border-sb-primary pl-2">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{pairItems.map(renderPermit)}</div>
               </div>
             </div>

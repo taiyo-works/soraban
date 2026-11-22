@@ -113,7 +113,7 @@ describe("Q-9 ③b1・Q-5 ③b2a／③b2b の画面・部品は v2 のトーク�
       expect(src.match(/border-l-(?:2|4)\b/)?.[0] ?? null, f).toBeNull();
     }
   });
-  it("③b2a：許可・承認の期限の札（有効性・技能証明の更新）は判定の色を使わない（墨の面＋「！」／薄い橙の面）", () => {
+  it("③b2a：許可・承認の期限の札（有効性・技能証明の更新）は判定の色を使わない（墨の面＋「！」／状態「注意」の面）", () => {
     const permit = stripComments(read("components/ops/permit-ui.tsx"));
     const m = /export const VALIDITY_TONE[\s\S]*?};/.exec(permit)?.[0] ?? "";
     expect(m).toMatch(/expiring: "soon"/);
@@ -128,7 +128,7 @@ describe("Q-9 ③b1・Q-5 ③b2a／③b2b の画面・部品は v2 のトーク�
     expect(alert).toMatch(/--sb-inverse-bg/);
     expect(alert).not.toMatch(/--sb-v-/);
     const soon = /\.opx-badge-soon \{[^}]*\}/.exec(css)?.[0] ?? "";
-    expect(soon).toMatch(/--sb-orange-hover/);
+    expect(soon).toMatch(/--sb-st-warn-face/);
     expect(soon).not.toMatch(/--sb-v-/);
   });
   it("ops-v2.css・ops-v2-screens.css に色の直書きがない（色は var(--sb-*) か color-mix だけ）", () => {

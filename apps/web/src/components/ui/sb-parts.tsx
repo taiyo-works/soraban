@@ -90,7 +90,7 @@ export function PillLink({
   );
 }
 
-// ── 判定の印（5 段。形と言葉を必ず併用する。橙は使わない）──
+// ── 判定の印（5 段。形と言葉を必ず併用する。主色・状態色以外の色は使わない）──
 
 export type VerdictKey = "no" | "needs" | "done" | "none" | "unknown";
 
@@ -160,7 +160,7 @@ export function VerdictBig({ level }: { readonly level: ItemVerdict }) {
   );
 }
 
-// ── 見出し（左 5px の橙線だけ。Sprint 16 H-5：背後の大きな薄い数字をやめた）──
+// ── 見出し（左 5px の主色の線だけ。Sprint 16 H-5：背後の大きな薄い数字をやめた）──
 
 export function SectionHead({
   id,

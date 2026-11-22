@@ -80,10 +80,10 @@ const choiceClass = (checked: boolean, tone: "brand" | "red" = "brand") =>
       : "border-2 border-dashed border-sb-edge bg-sb-base text-sb-ink-2 hover:bg-sb-hover"
   }`;
 const choiceInputClass = "h-6 w-6 shrink-0 cursor-pointer";
-const brandAccent = "accent-sb-orange";
+const brandAccent = "accent-sb-primary";
 
 /**
- * 入力の段（見出し）。白いカードで、見出しは左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
+ * 入力の段（見出し）。白いカードで、見出しは左 5px の主色の線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
  */
 function Step({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (

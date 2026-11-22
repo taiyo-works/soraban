@@ -15,12 +15,12 @@
   --fg-mute: var(--sb-ink-3);
   --line: var(--sb-rule);
   --line-strong: var(--sb-edge);
-  /* 文字・リンク・フォーカスは墨。橙は面だけ（橙の細い文字は作らない） */
+  /* 文字・リンク・フォーカスは墨。主色は主ボタンの面・選択中・現在地 */
   --accent: var(--sb-ink);
   --accent-soft: var(--sb-hover);
-  --accent-solid: var(--sb-orange);
-  --accent-solid-hover: var(--sb-orange-hover);
-  --accent-fg: var(--sb-on-orange);
+  --accent-solid: var(--sb-primary);
+  --accent-solid-hover: var(--sb-primary-press);
+  --accent-fg: var(--sb-on-primary);
   --ok-fg: var(--sb-v-none-fg);
   --ok-bg: color-mix(in srgb, var(--sb-v-none-fill) 10%, var(--sb-base));
   --ok-line: var(--sb-v-none-fg);
@@ -110,7 +110,7 @@ html:has(.ops-v2) body {
 /* ===== 3 部品 =====
  * @layer components に置く：Tailwind の部品（utilities）で、画面ごとに幅・高さ・余白を重ね書きできるようにする（.opx-btn に w-full など）。 */
 @layer components {
-/* ボタン：普通 48px、主ボタン 56px（現場 56／64px）。文字は 15px 太字。主ボタンは橙の面＋右端の墨の丸（矢印は文字の →） */
+/* ボタン：普通 48px、主ボタン 56px（現場 56／64px）。文字は 15px 太字。主ボタンは主色の面＋右端の白い丸（矢印は文字の →） */
 .opx-btn {
   display: inline-flex;
   align-items: center;
@@ -134,21 +134,21 @@ html:has(.ops-v2) body {
 .opx-btn:active {
   background: var(--sb-hover);
 }
-/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁（通常 1px、現場 1.5px）で境界を持たせる。縁の色は暗でも墨の --sb-on-orange */
+/* 主ボタンは主色の面＋白の文字。主色と地の比は 5 以上なので、面だけで境界を満たす（旧 16-1 の墨の縁は不要）。縁は面と同じ色 */
 .opx-btn-primary {
   min-height: var(--sb-hit-primary);
   /* 文字は面の中央：右端の丸（48px）と gap（12px）の分だけ左にも余白を取り、左右を対称にする（以前は左 26px で文字が丸の分だけ左に寄っていた） */
   padding: 4px 4px 4px calc(4px + 48px + 12px);
-  border: var(--sb-rule-w) solid var(--sb-on-orange);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  border: var(--sb-rule-w) solid var(--sb-primary);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
   font-size: 16px;
   justify-content: center;
 }
 .opx-btn-primary {
   position: relative;
 }
-/* 右端の墨の丸（::after）と、その上の矢印（::before。マスクで形だけ描き、色は --sb-on-orange-fg）。
+/* 右端の白い丸（::after）と、その上の矢印（::before。マスクで形だけ描き、色は主色）。
  * 文字（content: "→"）にしない：疑似要素の文字は読み上げ・アクセシブルネームに入り、ボタンの名前が「保存→」になる */
 .opx-btn-primary::after {
   content: "";
@@ -156,7 +156,7 @@ html:has(.ops-v2) body {
   width: 48px;
   height: 48px;
   border-radius: var(--sb-pill);
-  background: var(--sb-on-orange);
+  background: var(--sb-on-primary);
 }
 .opx-btn-primary::before {
   content: "";
@@ -166,14 +166,19 @@ html:has(.ops-v2) body {
   width: 48px;
   height: 48px;
   margin-top: -24px;
-  background: var(--sb-on-orange-fg);
+  background: var(--sb-primary);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
   pointer-events: none;
 }
 .opx-btn-primary:hover,
 .opx-btn-primary:active {
-  background: var(--sb-orange-hover);
+  background: var(--sb-primary-press);
+  border-color: var(--sb-primary-press);
+}
+.opx-btn-primary:hover::before,
+.opx-btn-primary:active::before {
+  background: var(--sb-primary-press);
 }
 .opx-btn-danger {
   border-color: var(--sb-v-no-fg);
@@ -286,8 +291,8 @@ html:has(.ops-v2) body {
 }
 .opx-badge-amber {
   border: 1.5px dashed var(--sb-ink);
-  background: var(--sb-orange-hover);
-  color: var(--sb-on-orange);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 .opx-badge-red {
@@ -302,7 +307,7 @@ html:has(.ops-v2) body {
   color: var(--sb-ink-3);
 }
 /* 期限の札（許可・承認の有効性、技能証明の更新期限）：判定の色（赤・琥珀・緑）は使わない。形と言葉で区別する。
- * 期限切れ・失効＝墨の面に「！」、期限が近い＝薄い橙の面（ホームの「近づく期限」の札と同じ。v2 草案 §3） */
+ * 期限切れ・失効＝墨の面に「！」、期限が近い＝状態「注意」の面（ホームの「近づく期限」の札と同じ。v2 草案 §3） */
 .opx-badge-alert {
   border-color: transparent;
   background: var(--sb-inverse-bg);
@@ -311,8 +316,8 @@ html:has(.ops-v2) body {
 }
 .opx-badge-soon {
   border-color: transparent;
-  background: var(--sb-orange-hover);
-  color: var(--sb-on-orange);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 /* 文言の先頭の印（×）を「！」に見せる：文字（テキスト・読み上げ）は変えず、見た目だけ。代替テキストを空にして読み上げに入れない */

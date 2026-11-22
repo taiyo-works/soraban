@@ -172,9 +172,9 @@ a:focus-visible {
   border-radius: var(--sb-r-s);
 }
 
-/* Selection: 橙を薄く敷く */
+/* Selection: 主色を薄く敷く */
 ::selection {
-  background: color-mix(in srgb, var(--sb-orange) 40%, transparent);
+  background: color-mix(in srgb, var(--sb-primary) 24%, transparent);
   color: var(--sb-ink);
 }
 

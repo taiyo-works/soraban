@@ -219,7 +219,7 @@ export default function Home() {
                 href="https://www.dips.mlit.go.jp/portal/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+                className="font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
               >
                 国土交通省 DIPS
               </a>

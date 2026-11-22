@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 // Sprint 12h PR ③b：デザインシステム v2（暖色・ピル・角丸 16/8/4）。見た目は app/ops/ops-v2.css の .opx-*（と soraban-ui.css の .sb-*）で、値は --sb-* だけ。
 // 色だけで意味を伝えないよう、状態は必ず文字で示し、形（実線・破線・反転）を併用する。
 
-// "alert"（期限切れ・失効など。墨の面＋「！」）と "soon"（期限が近い。薄い橙の面）は、期限の札用。判定の色（赤・琥珀・緑）は使わない（形と言葉で区別する）。
+// "alert"（期限切れ・失効など。墨の面＋「！」）と "soon"（期限が近い。状態「注意」の面）は、期限の札用。判定の色（赤・琥珀・緑）は使わない（形と言葉で区別する）。
 export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
 export type BadgeTone = Tone | "alert" | "soon";
 
@@ -91,7 +91,7 @@ export function PageHeader({
   );
 }
 
-/** 画面内の区切り（v2 の見出し：左 5px の橙線）。 */
+/** 画面内の区切り（v2 の見出し：左 5px の主色の線）。 */
 export function Section({
   title,
   description,

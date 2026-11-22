@@ -28,7 +28,7 @@ html[data-theme="dark"] .sbx-catalog {
   font-feature-settings: "palt" 1;
   text-wrap: balance;
 }
-/* 節の見出し：橙の短い面（8px の丸い角ではなく 5px×1 行の棒）を頭に置いて、節の始まりを示す（装飾の絵は足さない） */
+/* 節の見出し：主色の短い面（8px の丸い角ではなく 5px×1 行の棒）を頭に置いて、節の始まりを示す（装飾の絵は足さない） */
 .sbx-catalog h2 {
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@ html[data-theme="dark"] .sbx-catalog {
   flex: none;
   width: 5px;
   height: 1.2em;
-  background: var(--sb-orange);
+  background: var(--sb-primary);
 }
 .sbx-note {
   font-size: max(14px, var(--sb-fs-note));
@@ -109,8 +109,8 @@ html[data-theme="dark"] .sbx-catalog {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: var(--sb-orange);
-  border: var(--sb-rule-w) solid var(--sb-on-orange);
+  background: var(--sb-primary);
+  border: var(--sb-rule-w) solid var(--sb-primary);
 }
 .sbx-band {
   display: flex;

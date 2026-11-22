@@ -9,7 +9,7 @@
   color: var(--sb-ink);
   font-weight: 700;
   text-decoration: underline;
-  text-decoration-color: var(--sb-orange);
+  text-decoration-color: var(--sb-primary);
   text-decoration-thickness: 3px;
   text-underline-offset: 5px;
 }
@@ -48,7 +48,7 @@
     min-width: 320px;
   }
 }
-/* 行程：丸い印・段の名前・済／次／未。「次」の段だけ橙の面（形：チェック＝済、▶＝次、破線の輪＝未） */
+/* 行程：丸い印・段の名前・済／次／未。「次」の段だけ主色の面（形：チェック＝済、▶＝次、破線の輪＝未） */
 .opx-route {
   display: grid;
   gap: 2px;
@@ -95,15 +95,15 @@
   color: var(--sb-on-dot);
 }
 .opx-rs-next {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .opx-rs-next .opx-rs-dot {
-  background: var(--sb-on-orange);
-  color: var(--sb-orange);
+  background: var(--sb-on-primary);
+  color: var(--sb-primary);
 }
 .opx-rs-next .opx-rs-state {
-  color: var(--sb-on-orange);
+  color: var(--sb-on-primary);
   font-weight: 700;
 }
 .opx-rs-todo .opx-rs-dot,
@@ -258,7 +258,7 @@
 }
 
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
- * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の橙線）にする。保存の帯（.opx-submit）は区画の外。 */
+ * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の主色の線）にする。保存の帯（.opx-submit）は区画の外。 */
 .opx-form > section,
 .opx-form > fieldset {
   min-width: 0;
@@ -282,7 +282,7 @@
   margin: 0 0 16px;
   padding: 4px 0 4px 14px;
   border: 0;
-  border-left: 5px solid var(--sb-orange);
+  border-left: 5px solid var(--sb-primary);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;
@@ -308,7 +308,7 @@
 .sb-sec-head[data-tone="danger"] {
   border-left-color: var(--sb-v-no-fg);
 }
-/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、橙の線も題の 1 行分に収める */
+/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、主色の線も題の 1 行分に収める */
 .ops-v2 .sb-sec-head {
   min-height: 40px;
 }

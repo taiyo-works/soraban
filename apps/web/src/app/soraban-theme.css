@@ -18,9 +18,26 @@
   --color-sb-rule: var(--sb-rule);
   --color-sb-edge: var(--sb-edge);
   --color-sb-focus: var(--sb-focus);
-  --color-sb-orange: var(--sb-orange);
-  --color-sb-orange-hover: var(--sb-orange-hover);
-  --color-sb-on-orange: var(--sb-on-orange);
+  --color-sb-ink-disabled: var(--sb-ink-disabled);
+  --color-sb-primary: var(--sb-primary);
+  --color-sb-primary-press: var(--sb-primary-press);
+  --color-sb-primary-soft: var(--sb-primary-soft);
+  --color-sb-on-primary: var(--sb-on-primary);
+  --color-sb-st-safe: var(--sb-st-safe-mark);
+  --color-sb-st-safe-face: var(--sb-st-safe-face);
+  --color-sb-st-safe-text: var(--sb-st-safe-text);
+  --color-sb-st-warn: var(--sb-st-warn-mark);
+  --color-sb-st-warn-face: var(--sb-st-warn-face);
+  --color-sb-st-warn-text: var(--sb-st-warn-text);
+  --color-sb-st-danger: var(--sb-st-danger-mark);
+  --color-sb-st-danger-face: var(--sb-st-danger-face);
+  --color-sb-st-danger-text: var(--sb-st-danger-text);
+  --color-sb-st-info: var(--sb-st-info-mark);
+  --color-sb-st-info-face: var(--sb-st-info-face);
+  --color-sb-st-info-text: var(--sb-st-info-text);
+  --color-sb-st-flying: var(--sb-st-flying-mark);
+  --color-sb-st-flying-face: var(--sb-st-flying-face);
+  --color-sb-st-flying-text: var(--sb-st-flying-text);
   --color-sb-v-no: var(--sb-v-no-fill);
   --color-sb-v-no-on: var(--sb-v-no-on);
   --color-sb-v-no-fg: var(--sb-v-no-fg);
@@ -41,6 +58,10 @@
   --radius-sb-s: var(--sb-r-s);
   --radius-sb-pill: var(--sb-pill);
   --shadow-sb: var(--sb-shadow);
+  --shadow-sb-float: var(--sb-shadow-float);
+  --radius-sb-card: var(--sb-r-card);
+  --radius-sb-control: var(--sb-r-control);
+  --radius-sb-sheet: var(--sb-r-sheet);
   /* 書体は 2 つだけ。和文は Noto Sans JP、数字・座標・証跡 ID は Plus Jakarta Sans（tabular-nums を併用） */
   --font-num: var(--font-jakarta), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic UI", sans-serif;
 }

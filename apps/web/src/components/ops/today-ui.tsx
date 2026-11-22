@@ -42,7 +42,7 @@ export function TodayStatus({ badge }: { readonly badge: TodayBadgeDto }) {
   );
 }
 
-// 行程の 1 行（判定→計画→確認→通報→点検→飛行→日誌）。各段は「丸い印＋段の名前＋済／次／未」。「次」の段だけ橙の面。
+// 行程の 1 行（判定→計画→確認→通報→点検→飛行→日誌）。各段は「丸い印＋段の名前＋済／次／未」。「次」の段だけ主色の面。
 // 状態は文字と印の形（チェック・▶・破線の輪）が伝える（色だけに頼らない）。7 段が 320px でも折り返さない。
 type RouteStage = { readonly label: string; readonly state: "done" | "next" | "todo" | "skip"; readonly stateLabel?: string };
 const ROUTE_STATE_LABEL = { done: "済", next: "次", todo: "未", skip: "対象外" } as const;
@@ -90,7 +90,7 @@ function Fact({ label, children }: { readonly label: string; readonly children: 
 }
 
 /**
- * 行程表の帯（「次の飛行」の主役）。7 つの段（丸い印・段の名前・済／次／未）を 1 行に置き、「次」の段を橙の面にする。
+ * 行程表の帯（「次の飛行」の主役）。7 つの段（丸い印・段の名前・済／次／未）を 1 行に置き、「次」の段を主色の面にする。
  * 帯の下に 1 行：いまの「次」の段と、その段の作業（この計画の次にやること。押すとその作業へ）。
  * 行程の導出（journey-logic）は変えない。ここは見せ方だけ。
  */
@@ -239,7 +239,7 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
 /** 「計画の一覧へ」（次にやることの見出しの右。押す高さは 44px 以上）。 */
 function PlansLink({ href }: { readonly href: string }) {
   return (
-    <a href={href} className="inline-flex min-h-11 items-center text-[14px] font-bold text-sb-ink underline decoration-sb-orange decoration-[3px] underline-offset-4" data-testid="today-plans-link">
+    <a href={href} className="inline-flex min-h-11 items-center text-[14px] font-bold text-sb-ink underline decoration-sb-primary decoration-[3px] underline-offset-4" data-testid="today-plans-link">
       計画の一覧へ
     </a>
   );
@@ -248,7 +248,7 @@ function PlansLink({ href }: { readonly href: string }) {
 /** 次にやること：最初の画面に出す件数（残りは「ほか N 件を見る」で開く。近づく期限などが最初の画面から落ちないようにする）。 */
 export const NEXT_ACTIONS_INITIAL = 3;
 
-// 急ぎ度の札（見本の「次にやること」の札）。状態は札の文字と印で伝え、橙は「急ぎ」の面だけに使う（判定の色は使わない）。
+// 急ぎ度の札（見本の「次にやること」の札）。状態は札の文字と印で伝え、主色・状態色は「急ぎ」の面だけに使う（判定の色は使わない）。
 const TIER_PILL: Readonly<Record<number, { readonly cls: string; readonly mark: string; readonly text: string; readonly meaning: string }>> = {
   1: { cls: "sb-tag sb-tag-strong", mark: "！", text: "最優先", meaning: "danger" },
   2: { cls: "sb-tag sb-tag-strong", mark: "！", text: "期限超過", meaning: "warn" },

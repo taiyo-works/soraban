@@ -91,7 +91,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
           <span
             aria-hidden
             className={`inline-block h-2 w-2 shrink-0 rotate-45 ${
-              choice === "standard" ? "bg-sb-orange" : "border border-sb-edge"
+              choice === "standard" ? "bg-sb-primary" : "border border-sb-edge"
             }`}
           />
           標準マニュアル（01／02）を使う
@@ -106,7 +106,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
           <span
             aria-hidden
             className={`inline-block h-2 w-2 shrink-0 rotate-45 ${
-              choice === "custom" ? "bg-sb-orange" : "border border-sb-edge"
+              choice === "custom" ? "bg-sb-primary" : "border border-sb-edge"
             }`}
           />
           独自マニュアルを作る（骨子を生成）

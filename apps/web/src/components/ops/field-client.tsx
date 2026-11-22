@@ -109,7 +109,7 @@ import { FIELD_BACK } from "./ops-nav-model";
 const BTN = "opx-btn w-full";
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
-// 選択中・現在地の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
+// 選択中・現在地の面（主色。右端の丸と矢印は付けない：押すと進む意味になるため）
 const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 const BTN_FLIGHT = "opx-btn opx-btn-primary opx-btn-field w-full min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
@@ -1315,7 +1315,7 @@ export function FieldClient({
 
       {/* 上部：計画の要点（運航票の見出し）と「ホームへ戻る」 */}
       <header className="flex flex-col gap-3 border-b-[length:var(--sb-mark-w)] border-sb-edge pb-4">
-        <div className="flex flex-col gap-1 border-l-[length:8px] border-sb-orange pl-3">
+        <div className="flex flex-col gap-1 border-l-[length:8px] border-sb-primary pl-3">
           <h1 className="text-2xl font-bold leading-snug" data-testid="field-plan-title">
             {plan.title}
           </h1>

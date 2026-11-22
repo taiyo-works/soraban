@@ -70,11 +70,11 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
       "飛行計画",
       d.planId ? (
         <span key="p" className="flex flex-col gap-0.5">
-          <Link prefetch={false} href={`/ops/plans/${d.planId}`} className="text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4" data-testid="incident-detail-plan">
+          <Link prefetch={false} href={`/ops/plans/${d.planId}`} className="text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="incident-detail-plan">
             {d.planTitle ?? "計画"}
           </Link>
           {d.snapshotId ? (
-            <Link prefetch={false} href={`/ops/plans/${d.planId}/snapshots/${d.snapshotId}`} className="text-xs text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4" data-testid="incident-detail-snapshot">
+            <Link prefetch={false} href={`/ops/plans/${d.planId}/snapshots/${d.snapshotId}`} className="text-xs text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="incident-detail-snapshot">
               記録したときの判定スナップショット{d.snapshotSeq !== null ? `（第 ${d.snapshotSeq} 版）` : ""}
             </Link>
           ) : null}
@@ -86,7 +86,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
     [
       "日誌（飛行記録）",
       d.flightRecordId ? (
-        <Link key="fl" prefetch={false} href={`/ops/flights/${d.flightRecordId}`} className="text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4" data-testid="incident-detail-flight">
+        <Link key="fl" prefetch={false} href={`/ops/flights/${d.flightRecordId}`} className="text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="incident-detail-flight">
           日誌を見る
         </Link>
       ) : (

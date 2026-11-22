@@ -57,7 +57,7 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
             href={LICENSE_RENEWAL_SOURCE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center text-[13px] font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+            className="inline-flex min-h-11 items-center text-[13px] font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
           >
             更新の手続き（国土交通省）↗
           </a>

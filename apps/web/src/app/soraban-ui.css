@@ -114,12 +114,12 @@
   }
 }
 
-/* 見出し：左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
+/* 見出し：左 5px の主色の線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
   margin-bottom: 16px;
   padding: 4px 0 4px 14px;
-  border-left: 5px solid var(--sb-orange);
+  border-left: 5px solid var(--sb-primary);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -259,29 +259,29 @@
 .sb-pill:focus-visible .sb-a2 {
   transform: none;
 }
-/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁で境界を持たせる（現場は .sb-pill の縁の太さを上書きしない） */
+/* 主ボタン：主色の面＋白の文字（主色／地の比は 5 以上なので、面だけで境界を満たす。旧 16-1 の墨の縁は不要）。右端の丸は白、矢印は主色 */
 .sb-pill-primary {
-  background: var(--sb-orange);
-  border-color: var(--sb-on-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  border-color: var(--sb-primary);
+  color: var(--sb-on-primary);
   --sb-pill-ar: 48px;
   min-height: var(--sb-hit-primary);
   font-size: 16px;
 }
 .sb-pill-primary .sb-pill-arrow {
-  background: var(--sb-on-orange);
-  color: var(--sb-on-orange-fg);
+  background: var(--sb-on-primary);
+  color: var(--sb-primary);
 }
 .sb-pill-primary:hover,
 .sb-pill-primary:active,
 .sb-pill-primary:focus-visible {
-  background: var(--sb-orange-hover);
+  background: var(--sb-primary-press);
+  border-color: var(--sb-primary-press);
 }
 .sb-pill-primary:hover .sb-pill-arrow,
 .sb-pill-primary:active .sb-pill-arrow,
 .sb-pill-primary:focus-visible .sb-pill-arrow {
-  background: var(--sb-on-orange-fg);
-  color: var(--sb-on-orange);
+  color: var(--sb-primary-press);
 }
 .sb-pill-secondary {
   background: var(--sb-control);
@@ -290,8 +290,8 @@
 .sb-pill-secondary:hover .sb-pill-arrow,
 .sb-pill-secondary:active .sb-pill-arrow,
 .sb-pill-secondary:focus-visible .sb-pill-arrow {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .sb-pill-sm {
   --sb-pill-ar: 40px;
@@ -412,9 +412,9 @@
   font-weight: 500;
 }
 .sb-tag-deadline {
-  background: var(--sb-orange-hover);
+  background: var(--sb-st-warn-face);
   border-color: transparent;
-  color: var(--sb-on-orange);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 .sb-tag-strong {
@@ -594,7 +594,7 @@ input.sb-check {
   display: inline-grid;
   place-content: center;
   cursor: pointer;
-  color: var(--sb-on-orange);
+  color: var(--sb-on-primary);
 }
 input.sb-check::after {
   content: "";
@@ -606,8 +606,8 @@ input.sb-check::after {
   transition: transform var(--sb-dur) var(--sb-ease);
 }
 input.sb-check:checked {
-  background: var(--sb-orange);
-  border-color: var(--sb-ink);
+  background: var(--sb-primary);
+  border-color: var(--sb-primary);
 }
 input.sb-check:checked::after {
   transform: translateY(-1px) rotate(-45deg) scale(1);
@@ -633,7 +633,7 @@ input.sb-check:disabled {
 }
 .sb-check-row.is-on {
   background: var(--sb-hover);
-  /* 橙の薄い面は白の地との差が小さい（1.59:1）ので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
+  /* 薄い主色の面は地との差が小さいので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
 .sb-check-row:has(:focus-visible) {
@@ -641,7 +641,7 @@ input.sb-check:disabled {
   outline-offset: 3px;
 }
 
-/* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を橙の経路が進む。スマホ 128px、PC 240px） ===== */
+/* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を墨の経路が進む。スマホ 128px、PC 240px） ===== */
 .sb-hero {
   position: relative;
   height: 128px;
@@ -699,8 +699,8 @@ input.sb-check:disabled {
   align-items: center;
   justify-content: center;
   border-radius: var(--sb-pill);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .sb-brand-mark svg {
   width: 30px;
@@ -736,7 +736,7 @@ input.sb-check:disabled {
   color: var(--sb-ink);
 }
 .sb-ops-note {
-  border-left: 3px solid var(--sb-orange);
+  border-left: 3px solid var(--sb-primary);
   padding-left: 12px;
   font-size: 12px;
   line-height: 1.6;
@@ -1046,8 +1046,8 @@ input.sb-check:disabled {
   align-items: center;
   padding: 0 20px;
   border-radius: var(--sb-pill);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
   font-weight: 700;
   text-decoration: none;
 }
@@ -1067,10 +1067,10 @@ input.sb-check:disabled {
   --line: var(--sb-rule);
   --line-strong: var(--sb-edge);
   --accent: var(--sb-ink);
-  --accent-soft: var(--sb-orange);
-  --accent-solid: var(--sb-orange);
-  --accent-solid-hover: var(--sb-orange-hover);
-  --accent-fg: var(--sb-on-orange);
+  --accent-soft: var(--sb-primary-soft);
+  --accent-solid: var(--sb-primary);
+  --accent-solid-hover: var(--sb-primary-press);
+  --accent-fg: var(--sb-on-primary);
 }
 
 /* 地図の出典表記の開閉ボタンも 44px（押す部品の下限）。出典の文は地図の右下に収める */
@@ -1085,7 +1085,7 @@ input.sb-check:disabled {
   min-height: 44px;
   border-radius: var(--sb-pill);
 }
-/* チェック行：選ばれている行・ホバーの行は面が橙になるので、薄い文字色は 4.5:1 を保つ濃さに上げる */
+/* チェック行：選ばれている行・ホバーの行は面が薄い主色になるので、薄い文字色は 4.5:1 を保つ濃さに上げる */
 .sb-check-row.is-on .text-sb-ink-3,
 .sb-check-row:hover .text-sb-ink-3,
 .sb-check-row.is-on .sb-hint,
@@ -1194,7 +1194,7 @@ input.sb-check:disabled {
 }
 
 /* ===== 運航管理のメニュー（Sprint 12h PR ③a。見本：warm-final/home.html の .tabbar／.tab） =====
- * 下タブ 5 つ（高さ 60px 以上）と、PC の左メニュー（項目 48px）。現在地は橙の面＋太字＋aria-current（色だけに頼らない）。 */
+ * 下タブ 5 つ（高さ 60px 以上）と、PC の左メニュー（項目 48px）。現在地は薄い主色の面＋太字＋aria-current（色だけに頼らない）。 */
 .sb-tabs {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1232,8 +1232,8 @@ input.sb-check:disabled {
   font-weight: 700;
 }
 .sb-tab[aria-current="page"] .sb-tab-ic {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary-soft);
+  color: var(--sb-primary);
 }
 .sb-tab:focus-visible,
 .sb-side-link:focus-visible {
@@ -1261,8 +1261,8 @@ input.sb-check:disabled {
   color: var(--sb-ink);
 }
 .sb-side-link[aria-current="page"] {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary-soft);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 .sb-side-sub {
@@ -1295,8 +1295,8 @@ input.sb-check:disabled {
 }
 a.sb-row:hover .sb-go-dot,
 a.sb-row:focus-visible .sb-go-dot {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .sb-chips {
   display: flex;

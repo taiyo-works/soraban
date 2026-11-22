@@ -10,7 +10,7 @@ import { Badge, Section, type BadgeTone } from "./ui";
 // 登録は利用者の申告で、そらばんは許可書そのものを確認できない。DIPS には接続しない。
 
 // 有効性の札は判定の色（赤・琥珀・緑）を使わない（ホームの「近づく期限」の札と同じ規則）：
-// 期限切れ・失効・取消＝墨の面に「！」（alert）、期限が近い＝薄い橙の面（soon）。形と文言で見分ける。
+// 期限切れ・失効・取消＝墨の面に「！」（alert）、期限が近い＝状態「注意」の面（soon）。形と文言で見分ける。
 export const VALIDITY_TONE: Readonly<Record<PermitValidity, BadgeTone>> = {
   upcoming: "brand",
   valid: "green",
@@ -110,7 +110,7 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
                 <span className="sb-num tnum">{n.validFrom} 〜 {n.validTo}</span>
               ) : null}
               {n.kinds.length > 0 ? <span data-testid="plan-permit-kinds">関係した種類：{n.kinds.map((k) => k.label).join("、")}</span> : null}
-              <Link prefetch={false} href={`/ops/permits/${n.registrationId}${n.versionNo ? `?version=${n.versionNo}#v${n.versionNo}` : ""}`} className="inline-flex min-h-11 items-center font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4" data-testid="plan-permit-link">
+              <Link prefetch={false} href={`/ops/permits/${n.registrationId}${n.versionNo ? `?version=${n.versionNo}#v${n.versionNo}` : ""}`} className="inline-flex min-h-11 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="plan-permit-link">
                 登録を見る
               </Link>
             </p>
@@ -177,7 +177,7 @@ export function PermitBasisSection({ basis }: { readonly basis: readonly PermitB
               <Link
                 prefetch={false}
                 href={`/ops/permits/${b.registrationId}?version=${b.versionNo}#v${b.versionNo}`}
-                className="inline-flex min-h-11 items-center self-start text-sm font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+                className="inline-flex min-h-11 items-center self-start text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
                 data-testid="basis-permit-link"
               >
                 当時の版（版 {b.versionNo}）を見る

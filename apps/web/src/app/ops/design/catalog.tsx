@@ -54,8 +54,8 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       <CatalogAttrs mode={config.mode} theme={config.theme} />
       {config.veil ? <div className="sbx-veil" data-testid="cat-veil" aria-hidden="true" /> : null}
       <header className="flex flex-col gap-2">
-        <h1>デザイン見本（白基調）</h1>
-        <p className="sbx-note">地は白、面はごく薄いグレー、くぼみは一段濃いグレー。影は使わず罫で分ける。橙は操作と現在地だけで、橙の面の押せる部品には墨の縁を付ける。判定色は値・形・言葉を変えない。</p>
+        <h1>デザイン見本（静かな管制室）</h1>
+        <p className="sbx-note">地は薄いグレー、面は白、くぼみは一段濃いグレー。影は使わず罫で分ける。主色は空色の 1 色で、操作と現在地だけに使う。判定色は状態色から引き、形・言葉は変えない。</p>
         {config.mode ? (
           <p className="sbx-note" data-testid="cat-field-note">
             現場の見本：色・罫・押す部品の大きさ・文字の大きさ（本文 18px、状態の語 20px）を現場の基準に合わせて並べています。挿絵や帯など一部の部品は通常と同じ寸法のままなので、現場の最終の見え方は実画面で確かめてください。
@@ -90,7 +90,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-buttons" data-testid="cat-buttons">
-        <h2 id="cat-buttons">ボタン（橙の面には墨の縁）</h2>
+        <h2 id="cat-buttons">ボタン（主色の面＋白の文字）</h2>
         <div className="sbx-row">
           <PillButton variant="primary" data-testid="cat-primary">主ボタン（保存する）</PillButton>
           <PillButton data-testid="cat-secondary">副ボタン</PillButton>
@@ -101,7 +101,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
           <button type="button" className="opx-btn" data-testid="cat-opx-secondary">副ボタン</button>
           <button type="button" className="opx-btn opx-btn-danger" data-testid="cat-opx-danger">取り消す</button>
         </div>
-        <p className="sbx-note">橙の面と白の地の比は 2.15:1。境界は墨の縁（通常 1px、現場 1.5px）が担う。</p>
+        <p className="sbx-note">主色の面と地の比は 5:1 以上（現場は 7:1 以上）。面だけで境界を満たす。</p>
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-forms" data-testid="cat-forms">
@@ -120,7 +120,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <input className="sbx-input" placeholder="例：機体の名前" data-testid="cat-input" />
           </label>
           <div className="sb-check-row is-on" data-testid="cat-selected" style={{ padding: "12px" }}>
-            <span>選択中の面（橙の薄い面＋縁）</span>
+            <span>選択中の面（薄い主色の面＋縁）</span>
           </div>
         </div>
       </section>
@@ -141,11 +141,11 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </div>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-orange" data-testid="cat-orange">
-        <h2 id="cat-orange">橙の使いどころ（文字・細い線には使わない）</h2>
-        <SectionHead id="cat-orange-head" as="h3" title="見出し（左に橙の太い線だけ）" note="背後の大きな数字はやめた" />
+      <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-orange">
+        <h2 id="cat-primary-use">主色の使いどころ（操作と現在地だけ）</h2>
+        <SectionHead id="cat-primary-head" as="h3" title="見出し（左に主色の太い線だけ）" note="背後の大きな数字はやめた" />
         <p>
-          <span className="sbx-dot" aria-hidden="true" /> 現在地の印（小さな橙の丸＋墨の縁）。橙の文字は作らない。
+          <span className="sbx-dot" aria-hidden="true" /> 現在地の印（小さな主色の丸）。
         </p>
       </section>
 
@@ -157,7 +157,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-art" data-testid="cat-art-section">
-        <h2 id="cat-art">`/` の挿絵（線画。線は墨、日の出だけ橙）</h2>
+        <h2 id="cat-art">`/` の挿絵（線画。色は墨と白だけ）</h2>
         <div className="sb-hero" style={{ borderRadius: "var(--sb-r-l)" }}>
           <HeroIllustration />
         </div>

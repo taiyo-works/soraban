@@ -1,11 +1,11 @@
 /*
  * 公開の `/` のヘッダーの挿絵（C 案：地図の帯の上の飛行経路。2026-11-04 ユーザー決定。docs/design/header-c/）。
- * 見出しの下端に、地図の格子（薄い面と罫）の帯を置き、その上を橙の太い経路線が離陸点から着陸点へ進む。
- * 経由点（白地に墨の輪）・離陸点（橙の面）・着陸点（墨の面）・ドローン（墨の線画）は SVG の中。
+ * 見出しの下端に、地図の格子（薄い面と罫）の帯を置き、その上を墨の太い経路線が離陸点から着陸点へ進む。
+ * 経由点（白地に墨の輪）・離陸点（白の面に墨の輪）・着陸点（墨の面）・ドローン（墨の線画）は SVG の中。
  *
  * - インライン SVG：画像の要求は 0 件。img ではないので LCP の要素にならない。優先読み込みもない。
  * - 装飾：aria-hidden、textContent なし。文字は帯の上に置かない。
- * - 橙は面（離陸点）と太い線（経路 6px）だけ。細い線・文字には使わない。塗りは橙・白・墨だけ（グラデーションなし）。
+ * - 挿絵の色は墨と白だけ（グラデーションなし。Sprint 16-A：橙は使わない）。
  * - 帯の格子と経路は、幅に合わせて伸縮する（preserveAspectRatio="none"＋non-scaling-stroke で線の太さは一定）。
  *   点とドローンは入れ子の SVG（x を % で置き、サイズは px）で、伸縮で楕円にならない。
  * - 高さはスマホ 128px、PC 240px（soraban-ui.css の .sb-hero）。帯はスマホ 40px、PC 84px。スマホ用と PC 用の 2 枚を CSS で切り替える。
@@ -34,7 +34,7 @@ function Band({ w, h, grid, route, waypoints, start, end, drone, droneW }: {
     <svg aria-hidden="true">
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" width="100%" height="100%" fill="none">
         <path d={grid} fill="none" stroke="var(--sb-rule)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-        <path d={d} fill="none" stroke="var(--sb-orange)" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        <path d={d} fill="none" stroke="var(--sb-art-line)" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       </svg>
       {waypoints.map((p) => (
         <svg key={p.join()} {...at(w, p)} width="0" height="0" overflow="visible">
@@ -42,7 +42,7 @@ function Band({ w, h, grid, route, waypoints, start, end, drone, droneW }: {
         </svg>
       ))}
       <svg {...at(w, start)} width="0" height="0" overflow="visible">
-        <circle r={8} fill="var(--sb-orange)" stroke="var(--sb-art-line)" strokeWidth={2.5} />
+        <circle r={8} fill="var(--sb-art-sky)" stroke="var(--sb-art-line)" strokeWidth={2.5} />
       </svg>
       <svg {...at(w, end)} width="0" height="0" overflow="visible">
         <circle r={5} fill="var(--sb-art-line)" />

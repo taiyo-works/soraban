@@ -149,7 +149,7 @@ function ReferenceLink({ title, url }: { readonly title: string; readonly url: s
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`参照先：${title}（新しいタブで開く）`}
-      className="text-sb-ink underline decoration-sb-orange underline-offset-2 hover:text-sb-ink hover:decoration-sb-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
+      className="text-sb-ink underline decoration-sb-primary underline-offset-2 hover:text-sb-ink hover:decoration-sb-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
     >
       {title}
       {/* 矢印だけが次の行に送られないよう、語結合子でつなぐ */}
@@ -201,7 +201,7 @@ function ReasonWithReferences({
           参照先：
           <a
             href={`#${REFERENCE_LIST_ID}`}
-            className="sb-num text-xs tnum text-sb-ink underline decoration-sb-orange underline-offset-2 hover:text-sb-ink"
+            className="sb-num text-xs tnum text-sb-ink underline decoration-sb-primary underline-offset-2 hover:text-sb-ink"
           >
             {refNo(0)}〜{refNo(MODEL_AIRCRAFT_REFERENCES.length - 1)}
           </a>
