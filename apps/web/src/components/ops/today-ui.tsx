@@ -152,7 +152,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
           {card.title}
         </h2>
         <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sb-ink-2">
-          <span>
+          <span className="[overflow-wrap:anywhere]">
             <span className="text-sm text-sb-ink-3">機体 </span>
             <span className="font-bold text-sb-ink" data-testid="today-card-aircraft">
               <span className="opx-num">{card.registrationMark}</span>（{card.modelName}）
@@ -280,7 +280,7 @@ function HomeActionRow({ action, today }: { readonly action: TodayNextAction; re
   const body = (
     <>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex flex-wrap items-center gap-x-1 gap-y-1">
           <span className={pill.cls} data-meaning={pill.meaning}>
             <span aria-hidden>{pill.mark}</span>
             {pill.text}

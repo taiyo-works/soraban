@@ -457,7 +457,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     for (const [key, href] of [["aircraft", "/ops/aircraft"], ["pilots", "/ops/pilots"], ["permits", "/ops/permits"], ["places", "/ops/places"]] as const) {
       await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
     }
-    for (const a of await side.locator('a[data-testid^="nav-"]').all()) expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    for (const a of await side.locator('a[data-testid^="nav-"]').all()) expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     // 項目は 48px 以上（子項目は 44px 以上）、現在地は薄い主色の面
     for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, k).toBeGreaterThanOrEqual(47.5);
     // 現在地（子項目は子が現在地、親の「登録」は太字だけの祖先）

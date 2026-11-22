@@ -152,7 +152,7 @@ const tapSize = async (page: Page, testId: string) => {
   await expect(page.getByTestId(testId).first()).toBeVisible();
   const box = await page.getByTestId(testId).first().boundingBox();
   expect(box, testId).not.toBeNull();
-  expect(box!.height, `${testId} の高さ`).toBeGreaterThanOrEqual(43.5);
+  expect(box!.height, `${testId} の高さ`).toBeGreaterThanOrEqual(47.5);
 };
 
 const RUN_BASE = Date.UTC(2025, 0, 1) + Math.floor(Math.random() * 600) * 24 * 3600 * 1000;

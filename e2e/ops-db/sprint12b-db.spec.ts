@@ -737,7 +737,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
             const lab = el.closest("label");
             if (lab) box = lab.getBoundingClientRect();
           }
-          if (box.height < 43.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 20)}] ${Math.round(box.height)}px`);
+          if (box.height < 47.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 20)}] ${Math.round(box.height)}px`);
         }
         return { found: out, checked: n };
       });

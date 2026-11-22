@@ -272,7 +272,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       }
       const copies = await page.locator('[data-testid^="report-copy-"]').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
       expect(copies.length).toBeGreaterThan(0);
-      for (const c of copies) expect(c).toBeGreaterThanOrEqual(44);
+      for (const c of copies) expect(c).toBeGreaterThanOrEqual(48);
       // 手順バーの「結果を記録する」→ #record
       await page.getByTestId("report-step-record").click();
       await expect.poll(() => page.evaluate(() => location.hash)).toBe("#record");

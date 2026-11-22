@@ -337,7 +337,7 @@ html:has(.ops-v2) body {
   background: var(--sb-sunken);
   color: var(--sb-ink-2);
   font-size: 0.875rem;
-  line-height: 1.75;
+  line-height: 1.5;
 }
 /* 本文として読ませる案内（不変条件 6: 本文 16px 以上）。.opx-note の 13px を、この案内だけ上書きする */
 .opx-note-lg {

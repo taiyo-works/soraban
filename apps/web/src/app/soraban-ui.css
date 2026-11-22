@@ -91,6 +91,8 @@
 .sb-num {
   font-family: var(--font-num), sans-serif;
   font-variant-numeric: tabular-nums;
+  /* 数字・日時は字間を空けない（折り返しを増やさない） */
+  letter-spacing: 0;
 }
 .sb-band {
   position: relative;
@@ -406,9 +408,9 @@
 .sb-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   min-height: 28px;
-  padding: 2px 12px;
+  padding: 2px 8px;
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   border: 1px solid var(--sb-rule);
@@ -416,6 +418,7 @@
   line-height: 1.4;
   color: var(--sb-ink-2);
   font-weight: 500;
+  letter-spacing: 0;
 }
 .sb-tag-deadline {
   background: var(--sb-st-warn-face);
@@ -881,7 +884,7 @@ input.sb-check:disabled {
 .sb-note-card {
   border-radius: var(--sb-r-m);
   background: var(--sb-surface);
-  padding: 8px 12px;
+  padding: 6px 12px;
   font-size: 0.875rem;
   line-height: 1.7;
   color: var(--sb-ink-2);
@@ -937,12 +940,16 @@ input.sb-check:disabled {
   height: 100%;
   padding: 6px 10px 6px 8px;
   line-height: 1.4;
+  letter-spacing: 0;
   border-radius: var(--sb-pill);
   cursor: pointer;
   background: var(--sb-control);
   border: 2px solid var(--sb-ink);
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);
+}
+.sb-layer li {
+  line-height: 1.35;
 }
 .sb-layer.is-wide {
   align-items: flex-start;
@@ -1195,9 +1202,9 @@ input.sb-check:disabled {
   scroll-margin-top: 12px;
 }
 
-/* 地図の高さ：スマホは画面の高さの 38.5%（260〜380px。N3 の下限は 38%）。PC（2 列）は 4:3 */
+/* 地図の高さ：スマホは画面の高さの 38.2%（260〜380px。N3 の下限は 38%）。PC（2 列）は 4:3 */
 .sb-map-canvas {
-  height: clamp(260px, 38.5svh, 380px);
+  height: clamp(260px, 38.2svh, 380px);
 }
 @media (min-width: 1024px) {
   .sb-map-canvas {
@@ -1302,7 +1309,7 @@ input.sb-check:disabled {
 .sb-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   min-height: var(--sb-hit-row);
   padding: 14px 0;
   color: inherit;
@@ -1311,8 +1318,8 @@ input.sb-check:disabled {
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--sb-pill);
   background: var(--sb-ink);
   color: var(--sb-on-dot);

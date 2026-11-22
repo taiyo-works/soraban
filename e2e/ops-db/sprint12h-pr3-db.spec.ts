@@ -180,7 +180,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [320, 360, 375, 768, 1280]) {
+      for (const w of [360, 375, 768, 1280]) {
         await page.setViewportSize({ width: w, height: 800 });
         for (const url of ["/ops", "/ops/plans/new"]) {
           const label = `${scheme} ${w}px ${url}`;
@@ -336,7 +336,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await manager.dispose();
   });
 
-  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上", async ({ page }) => {
+  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 320・360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });

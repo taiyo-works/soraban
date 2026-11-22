@@ -120,7 +120,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await expect(skip).toBeFocused();
     await expect(skip).toBeInViewport();
     const box = (await skip.boundingBox())!;
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     // 上バー（ホームへ戻るリンク・利用者メニュー）→ 本文 → 下タブの順
     const idx = (id: string) => order.indexOf(id);
     expect(idx("ops-brand-mark")).toBeGreaterThan(0);
@@ -235,7 +235,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const toggle = page.getByTestId("today-next-more-toggle");
     await expect(toggle).toHaveText(`ほか ${total - 3} 件を見る`);
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     // 次にやることの総数の表示は残る
     // （見出しの数は、上位 8 件に収まらない分も含めた総数。行の数以上になる）
     const headline = Number(/(\d+) 件/.exec(await page.getByTestId("today-next-actions").locator("h2 + span").innerText())?.[1]);
@@ -295,8 +295,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       const link = page.getByRole("main").getByRole("link", { name }).first();
       await expect(link, path).toBeVisible();
       const b = (await link.boundingBox())!;
-      expect(b.width, `${path} 戻りリンクの幅`).toBeGreaterThanOrEqual(44);
-      expect(b.height, `${path} 戻りリンクの高さ`).toBeGreaterThanOrEqual(44);
+      expect(b.width, `${path} 戻りリンクの幅`).toBeGreaterThanOrEqual(48);
+      expect(b.height, `${path} 戻りリンクの高さ`).toBeGreaterThanOrEqual(48);
     }
   });
 
@@ -381,7 +381,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       const link = card.getByTestId("today-card-next-link");
       await expect(link).toHaveAttribute("data-action-id", "request_confirmation");
       await expect(link).toHaveText("確認を依頼する");
-      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(48);
       await expect(card.getByTestId("today-card-route-count")).toHaveText("済 1 / 7");
     }
     await clearPlans(bm);

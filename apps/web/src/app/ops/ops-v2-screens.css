@@ -334,8 +334,8 @@
 /* ホームのスマホ：見出しを低くして、近づく期限が最初の画面から落ちないようにする（PC は見本どおりの大きさ） */
 @media (max-width: 1023px) {
   [data-testid="ops-today"] .sb-sec-head {
-    min-height: 36px;
-    margin-bottom: 6px;
+    min-height: 32px;
+    margin-bottom: 4px;
     padding: 2px 0 2px 12px;
     flex-direction: row;
     flex-wrap: wrap;
@@ -352,7 +352,7 @@
     font-size: 1.1875rem;
   }
   [data-testid="ops-today"] .sb-row {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 }

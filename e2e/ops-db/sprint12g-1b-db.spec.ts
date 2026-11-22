@@ -206,8 +206,8 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     const btn = page.getByTestId("user-menu-button");
     await expect(btn).toBeVisible();
     const box = (await btn.boundingBox())!;
-    expect(box.width).toBeGreaterThanOrEqual(44);
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(48);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     await expect(page.getByTestId("ops-me-name")).toHaveCount(0);
     await openUserMenu(page);
     await expect(page.getByTestId("ops-me-name")).toHaveText("組織B 管理者");
@@ -220,7 +220,7 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await info.click();
     await expect(page.getByTestId("user-menu").getByText("利用者の招待・役割の変更・停止ができます", { exact: false })).toBeVisible();
     await expect(page.getByTestId("signout")).toBeVisible();
-    expect((await page.getByTestId("signout").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await page.getByTestId("signout").boundingBox())!.height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalScroll(page, "利用者メニュー");
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
@@ -254,7 +254,7 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
       await page.goto(p);
       const back = page.locator("main").getByRole("link", { name: /登録/ }).first();
       await expect(back, p).toHaveAttribute("href", "/ops/more");
-      expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(44);
+      expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(48);
     }
     // 点検は 1 段目の画面（Sprint 12h PR ③a）：戻りリンクを置かない（計画の一覧と同じ検査）。飛行記録の一覧の戻り先は日誌のまま
     await page.goto("/ops/flights");

@@ -433,7 +433,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
         for (const name of names) {
           const box = await page.getByRole("button", { name, exact: true }).boundingBox();
           expect(box, name).not.toBeNull();
-          expect(box!.height, name).toBeGreaterThanOrEqual(44);
+          expect(box!.height, name).toBeGreaterThanOrEqual(48);
         }
       };
       await minHeight("/ops/flights/new", ["離陸：今", "着陸：今", "保存"]);
@@ -576,7 +576,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
         await page.goto(path);
         const box = await page.locator("main").getByRole("link", { name, exact: false }).first().boundingBox();
         expect(box, `${path} ${name}`).not.toBeNull();
-        expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(44);
+        expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(48);
       }
       // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは ホーム／計画／点検／日誌／登録 の 5 つ・60px 以上に）：スマホは下の 5 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
       const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections").boundingBox();
@@ -586,9 +586,9 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       // boundingBox は待たない。左メニューが描かれてから測る
       await expect(page.getByTestId("ops-sidebar").getByTestId("nav-verdict")).toBeVisible();
       const home = await page.getByTestId("ops-sidebar").getByTestId("nav-verdict").boundingBox();
-      expect(home!.height).toBeGreaterThanOrEqual(44);
+      expect(home!.height).toBeGreaterThanOrEqual(48);
       const logo = await page.getByRole("link", { name: /そらばん 運航管理/ }).boundingBox();
-      expect(logo!.height).toBeGreaterThanOrEqual(44);
+      expect(logo!.height).toBeGreaterThanOrEqual(48);
     });
 
     test("20（画面）. ログアウトで下書きが消える", async ({ page }) => {
