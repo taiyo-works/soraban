@@ -3,6 +3,16 @@ import { expect, type Locator, type Page } from "@playwright/test";
 // 現場モードの見た目の基準（Sprint 12c 契約 15）を検査する補助。ブラウザで計算した色・寸法から、WCAG の式で比を求める。
 // 明るい配色と暗い配色は、呼び出し側が page.emulateMedia({ colorScheme }) で切り替えてから呼ぶ。
 
+/**
+ * 色の遷移（transition・animation）が終わるのを待つ。途中の色を測ると比がぶれるため、色を測る前に呼ぶ。
+ * 無限の動き（読み込み中の回転など）で待ち続けないよう、上限（既定 3 秒）を置く。上限に達したら、そのまま測る（検査は弱めない）。
+ */
+export const waitForSettledStyles = async (page: Page, timeoutMs = 3000): Promise<void> => {
+  await page
+    .waitForFunction(() => document.getAnimations().every((a) => a.effect?.getTiming().iterations === Infinity), undefined, { timeout: timeoutMs })
+    .catch(() => undefined);
+};
+
 export type Rgb = readonly [number, number, number];
 
 /** WCAG 2.x の相対輝度。 */
@@ -39,6 +49,7 @@ export type TextSample = {
  * 色の形式（rgb・oklch・color-mix など）に依らないよう、キャンバスで 8 ビットの RGBA に直す。
  */
 export const collectTextSamples = async (page: Page, rootSelector: string): Promise<TextSample[]> => {
+  await waitForSettledStyles(page);
   const raw = await page.evaluate((sel) => {
     const root = document.querySelector(sel);
     if (!root) return [];

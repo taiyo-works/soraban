@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { waitForSettledStyles } from "./field-checks";
 
 // Sprint 16 K-13：対象画面の要素の計算された色（文字・背景・縁・輪・下線・SVG の塗りと線・影）が、トークンが決める集合に入ること。
 // 集合 = その画面で解決された `--sb-*` の色（地 3 段・文字 4 段＋無効・線・主色 4 つ・状態 5 種の印・面・文字・判定・未確認・挿絵・地図の固定色）。
@@ -7,8 +8,9 @@ import { expect, type Page } from "@playwright/test";
 
 type Violation = { readonly where: string; readonly prop: string; readonly color: string };
 
-export const collectColorViolations = async (page: Page, rootSelector: string, exempt: readonly string[] = []): Promise<Violation[]> =>
-  page.evaluate(([sel, ex]) => {
+export const collectColorViolations = async (page: Page, rootSelector: string, exempt: readonly string[] = []): Promise<Violation[]> => {
+  await waitForSettledStyles(page);
+  return page.evaluate(([sel, ex]) => {
     const root = document.querySelector(sel);
     if (!root) return [{ where: sel, prop: "root", color: "見つからない" }];
     const cv = document.createElement("canvas");
@@ -104,6 +106,7 @@ export const collectColorViolations = async (page: Page, rootSelector: string, e
     }
     return out;
   }, [rootSelector, exempt] as const);
+};
 
 /** exempt：地図の凡例など、地図の固定色（regulation-map-colors.ts）を使う部品のセレクタ（契約の「地図と挿絵の中」）。 */
 export const expectColorsInTokenSet = async (page: Page, rootSelector: string, label: string, exempt: readonly string[] = []): Promise<void> => {
