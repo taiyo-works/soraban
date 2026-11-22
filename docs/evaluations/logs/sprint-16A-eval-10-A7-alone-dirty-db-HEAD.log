@@ -1,0 +1,49 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts sprint12g-1b-db.spec.ts -g 'A7\. 予定のない日'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint12g-1b-db.spec.ts:55:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7. 予定のない日：何もない旨と次の一手が先頭、375×812 の最初の画面に期限の最初の行が入る（見本の S3＝0 回） (31.3s)
+
+
+  1) e2e/ops-db/sprint12g-1b-db.spec.ts:55:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7. 予定のない日：何もない旨と次の一手が先頭、375×812 の最初の画面に期限の最初の行が入る（見本の S3＝0 回） 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('deadline-row').first()
+    Expected substring: "期限 太郎MWRCSAR3"
+    Received string:    "許可・承認GB-XY-MWRBYF072026/12/20（日）！16 日過ぎ"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toContainText" getByTestId('deadline-row').first() with timeout 30000ms
+      - waiting for getByTestId('deadline-row').first()
+        63 × locator resolved to <li data-kind="permit" data-testid="deadline-row">…</li>
+           - unexpected value "許可・承認GB-XY-MWRBYF072026/12/20（日）！16 日過ぎ"
+
+
+      103 |     expect(first.y + first.height - pillsBlock).toBeLessThanOrEqual(812 - 60);
+      104 |     // 期限の並び：近い順。技能証明は氏名、許可・承認は番号。技能証明書の番号は出ない。機体の期限は出ない旨の 1 行
+    > 105 |     await expect(dl.nth(0)).toContainText(pilotName);
+          |                             ^
+      106 |     await expect(dl.nth(0)).toContainText("あと 15 日");
+      107 |     await expect(dl.nth(0)).toContainText("技能証明");
+      108 |     await expect(page.locator('[data-testid="deadline-row"][data-kind="permit"]')).toContainText(permitNumber);
+        at /home/user/soraban/e2e/ops-db/sprint12g-1b-db.spec.ts:105:29
+
+    Error Context: test-results/ops/sprint12g-1b-db-Sprint-12g-5d92b-初の画面に期限の最初の行が入る（見本の-S3＝0-回）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint12g-1b-db-Sprint-12g-5d92b-初の画面に期限の最初の行が入る（見本の-S3＝0-回）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint12g-1b-db-Sprint-12g-5d92b-初の画面に期限の最初の行が入る（見本の-S3＝0-回）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint12g-1b-db.spec.ts:55:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7. 予定のない日：何もない旨と次の一手が先頭、375×812 の最初の画面に期限の最初の行が入る（見本の S3＝0 回） 
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1
