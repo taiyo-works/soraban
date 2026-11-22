@@ -258,7 +258,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
                     href={a.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-11 min-w-11 items-center text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
+                    className="inline-flex min-h-12 min-w-12 items-center text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
                   >
                     {a.title}
                   </a>
@@ -276,7 +276,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
             href={regulation.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 min-w-11 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
+            className="inline-flex min-h-12 min-w-12 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
           >
             出典 ↗
           </a>

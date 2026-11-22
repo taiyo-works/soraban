@@ -108,7 +108,7 @@ export function CommandPalette({
               setActive(0);
             }}
             onKeyDown={onKeyDown}
-            className="min-h-11 w-full rounded-ctl border border-line-strong bg-surface pl-10 pr-3 text-[1rem] text-fg placeholder:text-fg-mute"
+            className="min-h-12 w-full rounded-ctl border border-line-strong bg-surface pl-10 pr-3 text-[1rem] text-fg placeholder:text-fg-mute"
           />
         </div>
         <ul id={listId} ref={listRef} role="listbox" aria-label="候補" className="max-h-[50dvh] overflow-y-auto">
@@ -129,7 +129,7 @@ export function CommandPalette({
                   data-index={i}
                   onMouseMove={() => setActive(i)}
                   onClick={() => run(c)}
-                  className={cx("flex min-h-11 cursor-pointer items-center gap-3 rounded-ctl px-3 text-body", i === active ? "bg-accent-soft text-fg" : "text-fg-soft")}
+                  className={cx("flex min-h-12 cursor-pointer items-center gap-3 rounded-ctl px-3 text-body", i === active ? "bg-accent-soft text-fg" : "text-fg-soft")}
                 >
                   {c.icon ? <Icon name={c.icon} size={18} className={i === active ? "text-accent" : "text-fg-mute"} /> : <span className="w-[18px]" />}
                   <span className="min-w-0 flex-1 truncate">{c.label}</span>
@@ -171,7 +171,7 @@ export function ShortcutSheet({ open, onClose, groups, "data-testid": testId = "
             <h3 className="text-aux font-medium text-fg-mute">{g.title}</h3>
             <dl className="flex flex-col divide-y divide-line">
               {g.items.map((it) => (
-                <div key={it.label} className="flex min-h-11 items-center justify-between gap-4 py-1.5">
+                <div key={it.label} className="flex min-h-12 items-center justify-between gap-4 py-1.5">
                   <dt className="min-w-0 text-body text-fg">{it.label}</dt>
                   <dd className="flex shrink-0 items-center gap-1">
                     {it.keys.map((k, i) => (

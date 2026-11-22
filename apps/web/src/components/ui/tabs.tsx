@@ -66,7 +66,7 @@ export function Tabs({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(t.id)}
             className={cx(
-              "-mb-px inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-body transition-colors duration-[var(--dur)] field:min-h-14",
+              "-mb-px inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-body transition-colors duration-[var(--dur)] field:min-h-14",
               active ? "border-accent font-semibold text-fg" : "border-transparent text-fg-soft hov:text-fg",
             )}
           >
@@ -116,7 +116,7 @@ export function Segmented({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(o.id)}
             className={cx(
-              "inline-flex min-h-11 min-w-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-[background-color,color,border-color] duration-[var(--dur)] field:min-h-14 field:text-body",
+              "inline-flex min-h-12 min-w-12 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-table transition-[background-color,color,border-color] duration-[var(--dur)] field:min-h-14 field:text-body",
               active ? "border-accent bg-surface font-semibold text-accent" : "border-transparent text-fg-soft hov:text-fg",
             )}
           >

@@ -67,7 +67,7 @@ export default async function AircraftDetailPage({ params, searchParams }: { rea
         </span>
         <span className="text-sm text-sb-ink-3">
           既存の総飛行時間 ＋ 取消していない飛行記録 {a.flightCount} 件の飛行時間の合計。
-          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">
+          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-12 items-center text-sb-ink underline underline-offset-2">
             この機体の飛行記録
           </a>
         </span>

@@ -164,7 +164,7 @@ export function PrefillTable({ prefill }: Props) {
                     <button
                       type="button"
                       onClick={() => void handleCopy(idx, f.value)}
-                      className={`inline-flex min-h-11 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sb-pill border px-3 py-1.5 sb-num text-sm font-bold transition-colors ${
+                      className={`inline-flex min-h-12 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sb-pill border px-3 py-1.5 sb-num text-sm font-bold transition-colors ${
                         state === "ok"
                           ? "border-sb-v-none-fg bg-sb-surface text-sb-v-none-fg"
                           : state === "fail"

@@ -93,7 +93,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
 const planCheckRow =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
+  "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
 const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
 const selectClass = `${inputClass} min-h-12`;
 
@@ -482,7 +482,7 @@ export function PlanForm({
                   <li key={`${h.lat},${h.lng},${h.title}`}>
                     <button
                       type="button"
-                      className="flex min-h-11 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-surface"
+                      className="flex min-h-12 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-surface"
                       onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
                     >
                       <span>{h.title}</span>

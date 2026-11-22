@@ -110,7 +110,7 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
                 <span className="sb-num tnum">{n.validFrom} 〜 {n.validTo}</span>
               ) : null}
               {n.kinds.length > 0 ? <span data-testid="plan-permit-kinds">関係した種類：{n.kinds.map((k) => k.label).join("、")}</span> : null}
-              <Link prefetch={false} href={`/ops/permits/${n.registrationId}${n.versionNo ? `?version=${n.versionNo}#v${n.versionNo}` : ""}`} className="inline-flex min-h-11 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="plan-permit-link">
+              <Link prefetch={false} href={`/ops/permits/${n.registrationId}${n.versionNo ? `?version=${n.versionNo}#v${n.versionNo}` : ""}`} className="inline-flex min-h-12 items-center font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="plan-permit-link">
                 登録を見る
               </Link>
             </p>
@@ -177,7 +177,7 @@ export function PermitBasisSection({ basis }: { readonly basis: readonly PermitB
               <Link
                 prefetch={false}
                 href={`/ops/permits/${b.registrationId}?version=${b.versionNo}#v${b.versionNo}`}
-                className="inline-flex min-h-11 items-center self-start text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
+                className="inline-flex min-h-12 items-center self-start text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
                 data-testid="basis-permit-link"
               >
                 当時の版（版 {b.versionNo}）を見る
@@ -249,7 +249,7 @@ export function BasisPlanList({ plans, count }: { readonly plans: readonly Permi
         <ul className="flex flex-col gap-2" data-testid="permit-basis-plans">
           {plans.map((p) => (
             <li key={p.planId} className="rounded-sb-m bg-sb-surface" data-testid="permit-basis-plan">
-              <Link prefetch={false} href={`/ops/plans/${p.planId}/judgement`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 rounded-sb-m px-3 py-2.5 text-sm hover:bg-sb-hover">
+              <Link prefetch={false} href={`/ops/plans/${p.planId}/judgement`} className="flex min-h-12 flex-wrap items-center gap-x-4 gap-y-1 rounded-sb-m px-3 py-2.5 text-sm hover:bg-sb-hover">
                 <span className="break-words text-sb-ink">{p.title}</span>
                 <span className="sb-num text-sm tnum text-sb-ink-2">{p.plannedDate}</span>
                 <span className="sb-num text-sm tnum text-sb-ink-3">根拠の版 {p.versionNo ?? "—"}</span>

@@ -330,7 +330,7 @@ function ItemRow({
             </p>
             {item.apiValue ? (
               <details className="text-sm text-sb-ink-3">
-                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sb-ink underline-offset-2 hover:underline">API 形式（参考）</summary>
+                <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sb-ink underline-offset-2 hover:underline">API 形式（参考）</summary>
                 <p className="break-all sb-num tnum" data-testid="report-route-geojson">{item.apiValue}</p>
               </details>
             ) : null}
@@ -665,7 +665,7 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
           </dd>
         </div>
         <details className="col-span-2 sm:col-span-4" data-testid="report-row-details">
-          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
+          <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pb-2 sm:grid-cols-4">
         {pair("記録の版", r.version, "report-row-version")}
         {pair("計画の版", r.planVersion, "report-row-plan-version")}
@@ -856,7 +856,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         >
           <span data-testid="report-notice-short">{view.adapter.name === "mock" ? REPORT_NOTICE_BY_CHANNEL.mock : REPORT_NOTE_SHORT}</span>
           <details>
-            <summary className="flex min-h-11 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
+            <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
               <span className="underline underline-offset-2">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</span>
               <span className="ml-auto flex items-center gap-x-2 text-sm text-sb-ink-2">
                 <span>送信元：</span>
@@ -889,7 +889,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             ["#items", "② DIPS に入力", "report-step-items"],
             ["#record", "③ 結果を記録", "report-step-record"],
           ].map(([href, label, id]) => (
-            <a key={id} href={href} data-testid={id} className="flex min-h-11 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
+            <a key={id} href={href} data-testid={id} className="flex min-h-12 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
               {label}
             </a>
           ))}

@@ -74,7 +74,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
               判定の根拠を見る
             </Link>
-            <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-11 items-center text-sm text-sb-ink underline underline-offset-2" data-testid="plan-snapshots-link">
+            <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots`} className="inline-flex min-h-12 items-center text-sm text-sb-ink underline underline-offset-2" data-testid="plan-snapshots-link">
               判定の履歴を見る
             </Link>
           </div>
@@ -139,7 +139,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             ) : (
               <p>許可・承認は、利用者本人が DIPS 2.0 などの公式の手続きで取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。</p>
             )}
-            <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-11 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
+            <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-12 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
               許可・承認の登録を見る
             </Link>
           </div>

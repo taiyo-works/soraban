@@ -125,7 +125,7 @@ export function Workspace({
           aria-pressed={maximized}
           aria-label={maximized ? "地図の最大化を戻す" : "地図を最大化"}
           data-testid="workspace-maximize"
-          className="absolute right-3 top-3 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl border border-line-strong bg-surface text-fg hov:bg-sunken field:min-h-14 field:min-w-14 max-lg:hidden"
+          className="absolute right-3 top-3 z-10 inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl border border-line-strong bg-surface text-fg hov:bg-sunken field:min-h-14 field:min-w-14 max-lg:hidden"
         >
           <Icon name={maximized ? "minimize" : "maximize"} size={18} />
         </button>
@@ -160,7 +160,7 @@ export function Workspace({
                 cycle();
               }
             }}
-            className="flex min-h-11 w-full touch-none cursor-grab items-center justify-center rounded-t-ctl field:min-h-14"
+            className="flex min-h-12 w-full touch-none cursor-grab items-center justify-center rounded-t-ctl field:min-h-14"
           >
             <span className="h-1 w-9 rounded-ctl bg-line-strong" />
           </button>
@@ -226,7 +226,7 @@ function EdgeToggle({ side, open, onClick, controls, label }: { readonly side: "
       aria-label={`${label}のペインを${open ? "閉じる" : "開く"}（${side === "left" ? "[" : "]"} キー）`}
       data-testid={`workspace-toggle-${side}`}
       className={cx(
-        "absolute top-1/2 z-10 inline-flex min-h-14 min-w-11 -translate-y-1/2 items-center justify-center border border-line-strong bg-surface text-fg-soft hov:text-fg field:min-w-14 max-lg:hidden",
+        "absolute top-1/2 z-10 inline-flex min-h-14 min-w-12 -translate-y-1/2 items-center justify-center border border-line-strong bg-surface text-fg-soft hov:text-fg field:min-w-14 max-lg:hidden",
         side === "left" ? "left-0 rounded-r-ctl border-l-0" : "right-0 rounded-l-ctl border-r-0",
       )}
     >

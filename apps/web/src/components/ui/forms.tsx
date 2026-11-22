@@ -56,7 +56,7 @@ export function FormField({
 }
 
 const CONTROL =
-  "block w-full min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[1rem] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
+  "block w-full min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[1rem] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur)] min-h-12 field:min-h-14 field:text-[1.125rem] " +
   "hov:border-fg foc:border-accent disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
 const CONTROL_ERROR = "!border-danger-line";
 
@@ -101,7 +101,7 @@ export function SearchInput({ className, ...rest }: Omit<InputHTMLAttributes<HTM
 }
 
 const CHOICE_ROW =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-ctl px-1 py-2.5 text-body text-fg field:min-h-14 has-[:disabled]:cursor-not-allowed has-[:disabled]:text-fg-mute";
+  "flex min-h-12 cursor-pointer items-start gap-3 rounded-ctl px-1 py-2.5 text-body text-fg field:min-h-14 has-[:disabled]:cursor-not-allowed has-[:disabled]:text-fg-mute";
 const CHOICE_INPUT = "mt-0.5 h-5 w-5 shrink-0 accent-accent field:h-6 field:w-6 disabled:cursor-not-allowed";
 
 export function Checkbox({ label, hint, className, ...rest }: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { readonly label: ReactNode; readonly hint?: ReactNode }) {
@@ -153,7 +153,7 @@ export function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange?.(!checked)}
-      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl field:min-h-14 field:min-w-14 disabled:cursor-not-allowed"
+      className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl field:min-h-14 field:min-w-14 disabled:cursor-not-allowed"
     >
       <span
         aria-hidden="true"
@@ -209,7 +209,7 @@ export function ErrorSummary({ errors, ...rest }: { readonly errors: readonly { 
       <ul className="mt-1 list-disc pl-9">
         {errors.map((e) => (
           <li key={e.id}>
-            <a href={`#${e.id}`} className="inline-flex min-h-11 items-center underline underline-offset-2 field:min-h-14">
+            <a href={`#${e.id}`} className="inline-flex min-h-12 items-center underline underline-offset-2 field:min-h-14">
               {e.message}
             </a>
           </li>

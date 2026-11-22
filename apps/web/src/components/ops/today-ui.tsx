@@ -239,7 +239,7 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
 /** 「計画の一覧へ」（次にやることの見出しの右。押す高さは 44px 以上）。 */
 function PlansLink({ href }: { readonly href: string }) {
   return (
-    <a href={href} className="inline-flex min-h-11 items-center text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-[3px] underline-offset-4" data-testid="today-plans-link">
+    <a href={href} className="inline-flex min-h-12 items-center text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-[3px] underline-offset-4" data-testid="today-plans-link">
       計画の一覧へ
     </a>
   );

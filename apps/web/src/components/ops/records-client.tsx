@@ -310,7 +310,7 @@ function PlaceInput({
           </span>
         ) : null}
         <details open={coordOpen || undefined} className="group/coord">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm text-sb-ink [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 text-sm text-sb-ink [&::-webkit-details-marker]:hidden">
             <span aria-hidden className="inline-block transition-transform group-open/coord:rotate-90">
               ›
             </span>

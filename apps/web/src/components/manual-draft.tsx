@@ -220,7 +220,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
         <button
           type="button"
           onClick={() => void handleCopyText()}
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-sb-pill border px-4 py-2 sb-num text-sm font-bold transition-colors ${
+          className={`inline-flex min-h-12 items-center gap-1.5 rounded-sb-pill border px-4 py-2 sb-num text-sm font-bold transition-colors ${
             copied
               ? "border-sb-v-none-fg bg-sb-surface text-sb-v-none-fg"
               : "border-sb-edge bg-sb-control text-sb-ink hover:bg-sb-hover"

@@ -150,7 +150,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           ],
         ] as [string, React.ReactNode][])
       : []),
-    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
+    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-12 items-center text-sb-ink underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
   ];
   return (
     <main className="flex flex-col gap-10">

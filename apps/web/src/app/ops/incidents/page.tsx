@@ -102,7 +102,7 @@ export default async function IncidentListPage({
           </select>
         </label>
         <div className="col-span-2 flex flex-wrap items-center justify-between gap-x-3 sm:col-span-1 sm:justify-start">
-          <label className="flex min-h-11 items-center gap-2 text-sm text-sb-ink-2">
+          <label className="flex min-h-12 items-center gap-2 text-sm text-sb-ink-2">
             <input type="checkbox" name="detailPending" value="1" defaultChecked={sp.detailPending === "1"} className="h-5 w-5 accent-sb-ink" data-testid="incident-filter-pending" />
             詳細が未記入のものだけ
           </label>

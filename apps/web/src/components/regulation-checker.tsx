@@ -1267,7 +1267,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
   return (
     <div className="sb-check-grid">
       {/* ─── INPUT FORM ───────────────────────────────── */}
-      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-5" data-testid="input-block">
+      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-3.5" data-testid="input-block">
         {/* 住所または緯度・経度（入力欄と 2 つのボタンは最初の画面に入る） */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
@@ -1605,7 +1605,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
         {/* 機体・運航条件 — ClauseGraph の例外節と照合される。折りたたみが標準（上級設定）。
             既定 = 最も厳しい解釈でまず判定し、必要なときだけ展開する */}
         <details className="flex flex-col gap-3 border-t border-sb-rule pt-5 [&>summary::-webkit-details-marker]:hidden">
-          <summary className="sb-eyebrow flex min-h-11 cursor-pointer select-none list-none items-center gap-1">
+          <summary className="sb-eyebrow flex min-h-12 cursor-pointer select-none list-none items-center gap-1">
             機体・運航条件
             <span className="ml-2 font-normal text-sb-ink-3">（例外節を自動適用 / タップで展開）</span>
             <span aria-hidden className="ml-auto text-sm text-sb-ink-3 [details[open]_&]:rotate-90">
@@ -1735,7 +1735,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                     : ""}
                 </span>
                 {autoDidStatus === "unverified" && !userAirspaceFlags.includes("airspace_did") ? (
-                  <label className="flex min-h-11 cursor-pointer items-center gap-2">
+                  <label className="flex min-h-12 cursor-pointer items-center gap-2">
                     <input
                       type="checkbox"
                       checked={didConfirmedNotApplicable}
@@ -1897,7 +1897,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   <button
                     type="button"
                     onClick={() => restoreFromHistory(h)}
-                    className="flex min-h-11 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
+                    className="flex min-h-12 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
                     title={
                       applicationSupport
                         ? `証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`
@@ -1952,7 +1952,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   <button
                     type="button"
                     onClick={() => handleRemoveHistory(h.evidenceId)}
-                    className="sb-text-btn !min-w-11 !px-0"
+                    className="sb-text-btn !min-w-12 !px-0"
                     aria-label="この履歴を削除"
                     title="削除"
                   >

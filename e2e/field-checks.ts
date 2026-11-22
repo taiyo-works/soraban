@@ -276,7 +276,7 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
         const navEl = document.querySelector<HTMLElement>('[data-testid="ops-bottom-nav"]');
         const nav = navEl && visible(navEl) && getComputedStyle(navEl).position === "fixed" ? navEl : null;
         const reaches = (el: HTMLElement): boolean => {
-          el.scrollIntoView({ block: "center" });
+          el.scrollIntoView({ block: "center", behavior: "instant" });
           const r = el.getBoundingClientRect();
           if (r.top < 0 || r.bottom > window.innerHeight || r.left < 0 || r.right > window.innerWidth) return false;
           const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -286,7 +286,7 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
           .filter((el) => visible(el) && !(el as HTMLButtonElement).disabled && !el.closest("dialog:not([open])"))
           .filter((el) => !reaches(el))
           .map(describe);
-        window.scrollTo(0, document.documentElement.scrollHeight);
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" });
         let navCoversLast = 0;
         if (nav) {
           const nr = nav.getBoundingClientRect();
@@ -304,7 +304,7 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
           }
           if (last && bottom > nr.top + 1) navCoversLast = Math.round(bottom - nr.top);
         }
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: "instant" });
         return {
           width: w,
           scrollWidth: de.scrollWidth,

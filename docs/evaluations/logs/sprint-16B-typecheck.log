@@ -4,10 +4,10 @@
 
 Scope: 6 of 7 workspace projects
 apps/scraper typecheck$ tsc --noEmit
-packages/geo typecheck$ tsc --noEmit
 packages/db typecheck$ tsc --noEmit
-apps/scraper typecheck: Done
+packages/geo typecheck$ tsc --noEmit
 packages/geo typecheck: Done
+apps/scraper typecheck: Done
 packages/db typecheck: Done
 packages/dips typecheck$ tsc --noEmit
 packages/regulations typecheck$ tsc --noEmit

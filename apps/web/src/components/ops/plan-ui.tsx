@@ -151,7 +151,7 @@ export function ReportBox({
           <>
             {report.reasons.length > 0 ? (
               <details className="pl-10">
-                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+                <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
                   根拠を見る（{report.reasons.length} 件）
                 </summary>
                 <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
@@ -170,7 +170,7 @@ export function ReportBox({
               {REPORT_NOTE_SHORT}
             </p>
             <details className="pl-10">
-              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+              <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
                 固定の文言の全文
               </summary>
               <div className="pb-2">
@@ -428,7 +428,7 @@ export function NextActionItem({
       {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-sb-ink-3" /> : null}
     </>
   );
-  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-11", flush ? "" : "px-3");
+  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-12", flush ? "" : "px-3");
   return action.canAct ? (
     <a href={action.href} className={cx(box, "hover:bg-sb-hover")} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}
@@ -518,7 +518,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
           </p>
         ) : null}
         <details className="pl-11" {...(started ? { open: true } : {})}>
-          <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
+          <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
           <div className="flex flex-col gap-1.5 pb-2">
             {deadline.guideNote ? (
               <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">

@@ -91,9 +91,9 @@ const BUTTON_VARIANT: Readonly<Record<Variant, string>> = {
 };
 
 const BUTTON_SIZE = {
-  md: "min-h-11 min-w-28 px-4 field:min-h-14 field:px-5 field:text-[1.125rem]",
-  sm: "min-h-11 min-w-20 px-3 field:min-h-14",
-  icon: "min-h-11 min-w-11 px-0 field:min-h-14 field:min-w-14",
+  md: "min-h-12 min-w-28 px-4 field:min-h-14 field:px-5 field:text-[1.125rem]",
+  sm: "min-h-12 min-w-20 px-3 field:min-h-14",
+  icon: "min-h-12 min-w-12 px-0 field:min-h-14 field:min-w-14",
 } as const;
 
 export function buttonClass(variant: Variant = "secondary", size: keyof typeof BUTTON_SIZE = "md", extra?: string): string {
@@ -227,7 +227,7 @@ export function StatTile({
   const cls = cx(
     "flex items-center justify-between gap-3",
     size === "lead" ? "rounded-ctl border border-line-strong bg-surface p-5" : "py-3",
-    href && "min-h-11 transition-colors hov:bg-accent-soft field:min-h-14",
+    href && "min-h-12 transition-colors hov:bg-accent-soft field:min-h-14",
   );
   return href ? (
     <Link {...rest} href={href} prefetch={false} className={cls}>
@@ -261,7 +261,7 @@ export function PageHeader({
   return (
     <header {...rest} className="flex flex-col gap-1">
       {back ? (
-        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-11 min-w-11 items-center gap-1 self-start text-aux text-accent hov:underline field:min-h-14">
+        <Link href={back.href} prefetch={false} className="-mb-1 inline-flex min-h-12 min-w-12 items-center gap-1 self-start text-aux text-accent hov:underline field:min-h-14">
           <Icon name="chevron-left" size={16} />
           {back.label}
         </Link>
@@ -356,7 +356,7 @@ export function Disclosure({
 }: { readonly summary: ReactNode; readonly icon?: IconName; readonly defaultOpen?: boolean; readonly children: ReactNode } & DataAttrs) {
   return (
     <details {...rest} open={defaultOpen || undefined} className="group rounded-ctl bg-sunken">
-      <summary className="flex min-h-11 field:min-h-14 field:text-body cursor-pointer list-none items-center gap-2 rounded-ctl px-4 text-table font-medium text-fg-soft hov:text-fg [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-12 field:min-h-14 field:text-body cursor-pointer list-none items-center gap-2 rounded-ctl px-4 text-table font-medium text-fg-soft hov:text-fg [&::-webkit-details-marker]:hidden">
         <Icon name={icon} size={16} className="text-fg-mute" />
         <span className="min-w-0 flex-1">{summary}</span>
         <Icon name="chevron-down" size={16} className="text-fg-mute transition-transform duration-[var(--dur)] group-open:rotate-180" />

@@ -26,7 +26,7 @@ export function VerdictStamp({
       data-level={level}
       className={cx(
         "inline-flex max-w-full items-center gap-2 rounded-ctl border border-current font-semibold [outline:1px_solid_currentColor] [outline-offset:-4px] [text-wrap:balance] [word-break:auto-phrase]",
-        size === "md" ? "min-h-11 px-3.5 py-1.5 text-body field:min-h-14" : "min-h-8 px-3 py-1 text-aux",
+        size === "md" ? "min-h-12 px-3.5 py-1.5 text-body field:min-h-14" : "min-h-8 px-3 py-1 text-aux",
         VERDICT_TONE[level],
         className,
       )}

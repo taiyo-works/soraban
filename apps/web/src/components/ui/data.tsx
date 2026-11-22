@@ -122,13 +122,13 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={() => toggle(c.key)}
-                        className={cx("-mx-2 inline-flex min-h-11 items-center gap-1 rounded-ctl px-2 hov:text-fg field:min-h-14 compact:min-h-9", active && "text-fg")}
+                        className={cx("-mx-2 inline-flex min-h-12 items-center gap-1 rounded-ctl px-2 hov:text-fg field:min-h-14 compact:min-h-9", active && "text-fg")}
                       >
                         {c.header}
                         <Icon name={active ? (sort!.dir === "asc" ? "chevron-up" : "chevron-down") : "sort"} size={14} />
                       </button>
                     ) : (
-                      <span className="inline-flex min-h-11 items-center field:min-h-14 compact:min-h-9">{c.header}</span>
+                      <span className="inline-flex min-h-12 items-center field:min-h-14 compact:min-h-9">{c.header}</span>
                     )}
                   </th>
                 );
@@ -176,7 +176,7 @@ export function DataTable<T>({
                           )}
                         >
                           {c.primary && href ? (
-                            <Link href={href} prefetch={false} className="ds-table-link inline-flex min-h-11 items-center rounded-ctl hov:underline md:min-h-0 field:min-h-14">
+                            <Link href={href} prefetch={false} className="ds-table-link inline-flex min-h-12 items-center rounded-ctl hov:underline md:min-h-0 field:min-h-14">
                               {c.cell(row)}
                             </Link>
                           ) : (
@@ -200,14 +200,14 @@ export function DataTable<T>({
 /** A removable filter chip: "label: value" and an x button that removes it. A ruled tag, not a pill. */
 export function Chip({ label, value, onRemove }: { readonly label: string; readonly value: string; readonly onRemove: () => void }) {
   return (
-    <span className="inline-flex min-h-11 items-center gap-1 rounded-ctl border border-line-strong bg-surface pl-3 text-table text-fg field:min-h-14">
+    <span className="inline-flex min-h-12 items-center gap-1 rounded-ctl border border-line-strong bg-surface pl-3 text-table text-fg field:min-h-14">
       <span className="text-fg-mute">{label}</span>
       <span className="font-medium">{value}</span>
       <button
         type="button"
         aria-label={`${label}「${value}」の絞り込みを外す`}
         onClick={onRemove}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
+        className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
       >
         <Icon name="x" size={14} />
       </button>
@@ -247,7 +247,7 @@ export function FilterBar({
         ) : null}
         {children}
       </div>
-      <div className="flex min-h-11 flex-wrap items-center gap-2" aria-live="polite">
+      <div className="flex min-h-12 flex-wrap items-center gap-2" aria-live="polite">
         {chips.map((c) => (
           <Chip key={c.id} label={c.label} value={c.value} onRemove={c.onRemove} />
         ))}

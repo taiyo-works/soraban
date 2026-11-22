@@ -159,7 +159,7 @@ export function Dialog({
             type="button"
             aria-label="閉じる"
             onClick={onClose}
-            className="-mr-2 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken field:min-h-14 field:min-w-14"
+            className="-mr-2 inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken field:min-h-14 field:min-w-14"
           >
             <Icon name="x" size={20} />
           </button>
@@ -227,7 +227,7 @@ export function InfoPopover({ label, children, "data-testid": testId }: { readon
         onClick={() => (pinned ? close() : setPinned(true))}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-mute hov:text-accent field:min-h-14 field:min-w-14"
+        className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl text-fg-mute hov:text-accent field:min-h-14 field:min-w-14"
       >
         <Icon name="info" size={18} />
       </button>
@@ -278,14 +278,14 @@ export function ToastProvider({ children }: { readonly children: ReactNode }) {
         className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-center gap-2 px-4"
       >
         {items.map((t) => (
-          <div key={t.id} data-testid="toast" className="ds-pop pointer-events-auto flex min-h-11 max-w-[28rem] items-center gap-2 rounded-ctl border border-line-strong bg-surface py-1 pl-4 pr-1 text-table text-fg field:min-h-14">
+          <div key={t.id} data-testid="toast" className="ds-pop pointer-events-auto flex min-h-12 max-w-[28rem] items-center gap-2 rounded-ctl border border-line-strong bg-surface py-1 pl-4 pr-1 text-table text-fg field:min-h-14">
             <Icon name={t.meaning === "ok" ? "check-circle" : t.meaning === "warn" ? "alert" : "info"} size={18} className={t.meaning === "ok" ? "text-ok-fg" : t.meaning === "warn" ? "text-warn-fg" : "text-info-fg"} />
             <span className="min-w-0 flex-1">{t.message}</span>
             <button
               type="button"
               aria-label="通知を閉じる"
               onClick={() => setItems((cur) => cur.filter((x) => x.id !== t.id))}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
+              className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl hov:bg-sunken field:min-h-14 field:min-w-14"
             >
               <Icon name="x" size={16} />
             </button>
@@ -413,7 +413,7 @@ export function ContextMenu({
           const r = e.currentTarget.getBoundingClientRect();
           setAt(open ? null : { x: r.right, y: r.bottom, above: r.top });
         }}
-        className="relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken field:min-h-14 field:min-w-14"
+        className="relative z-10 inline-flex min-h-12 min-w-12 items-center justify-center rounded-ctl text-fg-soft hov:bg-sunken field:min-h-14 field:min-w-14"
       >
         <Icon name="more" size={20} />
       </button>
@@ -435,7 +435,7 @@ export function ContextMenu({
                 close();
                 it.onSelect();
               }}
-              className="flex min-h-11 items-center gap-2 rounded-ctl px-3 text-left text-body text-fg hov:bg-accent-soft focus-visible:bg-accent-soft field:min-h-14"
+              className="flex min-h-12 items-center gap-2 rounded-ctl px-3 text-left text-body text-fg hov:bg-accent-soft focus-visible:bg-accent-soft field:min-h-14"
             >
               {it.icon ? <Icon name={it.icon} size={18} className="text-fg-mute" /> : null}
               {it.label}
