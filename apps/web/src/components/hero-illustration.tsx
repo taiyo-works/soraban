@@ -38,7 +38,7 @@ function Band({ w, h, grid, route, waypoints, start, end, drone, droneW }: {
       </svg>
       {waypoints.map((p) => (
         <svg key={p.join()} {...at(w, p)} width="0" height="0" overflow="visible">
-          <circle r={7} fill="var(--sb-base)" stroke="var(--sb-art-line)" strokeWidth={2.5} />
+          <circle r={7} fill="var(--sb-art-cloud)" stroke="var(--sb-art-line)" strokeWidth={2.5} />
         </svg>
       ))}
       <svg {...at(w, start)} width="0" height="0" overflow="visible">
@@ -57,7 +57,7 @@ function Band({ w, h, grid, route, waypoints, start, end, drone, droneW }: {
 function DroneLine({ x, y, width, height }: { readonly x: number; readonly y: number; readonly width: number; readonly height: number }) {
   return (
     <svg x={x} y={y} width={width} height={height} viewBox="0 0 160 96" fill="none" stroke="var(--sb-art-line)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="62" y="38" width="36" height="18" rx="9" fill="var(--sb-base)" />
+      <rect x="62" y="38" width="36" height="18" rx="9" fill="var(--sb-art-cloud)" />
       <circle cx="80" cy="47" r="4.5" />
       <path d="M64 42 L36 28 M96 42 L124 28 M64 52 L36 66 M96 52 L124 66" />
       <ellipse cx="30" cy="24" rx="22" ry="4.5" />

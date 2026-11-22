@@ -350,7 +350,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     const widths = await Promise.all(items.map(async ([key]) => (await nav.getByTestId(`nav-${key}`).boundingBox())!.width));
     for (const w of widths) expect(Math.abs(w - 375 / 5)).toBeLessThan(2);
     await expectNoHorizontalScroll(page, "下メニュー");
-    // 現在地は 4 つの手がかり（aria-current・data-active・太字・橙の面）とアイコンで示す。面は、見本どおりアイコンの丸い面（タブの先頭の要素）
+    // 現在地は 4 つの手がかり（aria-current・data-active・太字・薄い主色の面）とアイコンで示す。面は、見本どおりアイコンの丸い面（タブの先頭の要素）
     const here = nav.getByTestId("nav-today");
     const other = nav.getByTestId("nav-plans");
     await expect(here).toHaveAttribute("aria-current", "page");
@@ -458,7 +458,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
       await expect(side.getByTestId(`nav-${key}`)).toHaveAttribute("href", href);
     }
     for (const a of await side.locator('a[data-testid^="nav-"]').all()) expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    // 項目は 48px 以上（子項目は 44px 以上）、現在地は橙の面
+    // 項目は 48px 以上（子項目は 44px 以上）、現在地は薄い主色の面
     for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, k).toBeGreaterThanOrEqual(47.5);
     // 現在地（子項目は子が現在地、親の「登録」は太字だけの祖先）
     await expect(side.getByTestId("nav-today")).toHaveAttribute("aria-current", "page");

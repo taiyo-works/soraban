@@ -64,9 +64,9 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
         const h = getComputedStyle(document.querySelector('[data-testid="ops-header"]')!);
         return { bg: b.backgroundColor, fg: b.color, headerBorder: h.borderBottomWidth, grid: b.backgroundImage };
       });
-      // v2 のトークン（明）：地は --sb-base（白。Sprint 16-1 H-1 でオフホワイト #F7F7F3 から変更）、字は --sb-ink（墨 #262523）。旧い紙の色・方眼は出ない
-      expect(v.bg, path).toBe("rgb(255, 255, 255)");
-      expect(v.fg, path).toBe("rgb(38, 37, 35)");
+      // v2 のトークン（明）：地は --sb-base（#F6F7F9。Sprint 16-A で白から変更）、字は --sb-ink（墨 #14181F）。旧い紙の色・方眼は出ない
+      expect(v.bg, path).toBe("rgb(246, 247, 249)");
+      expect(v.fg, path).toBe("rgb(20, 24, 31)");
       expect(v.grid, path).toBe("none");
       expect(v.headerBorder, path).toBe("1px");
     }
@@ -78,11 +78,11 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
     // 5 つの順序と名前（Sprint 12h PR ③a：ホーム／計画／点検／日誌／登録。判定は下タブにない）
     expect((await page.getByTestId("ops-bottom-nav").locator("a").allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "計画", "点検", "日誌", "登録"]);
     await expect(page.getByTestId("ops-sidebar")).toBeHidden();
-    // 公開の判定画面 `/` は .ds を使わず、v2 のトークン（地は --sb-base＝白。PR ② で旧い紙の色から変更）で描く（下メニューの部品だけが自前の .ds を持つ）
+    // 公開の判定画面 `/` は .ds を使わず、v2 のトークン（地は --sb-base＝#F6F7F9。Sprint 16-A で白から変更）で描く（下メニューの部品だけが自前の .ds を持つ）
     await page.goto(`${BASE}/`);
     await expect(page.getByTestId("site-ops-note")).toBeVisible();
     await expect(page.locator(".ds:not([data-testid='ops-bottom-nav'])")).toHaveCount(0);
-    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(255, 255, 255)");
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(246, 247, 249)");
     // while signed in, the catalog still has no ops chrome and does not look the user up
     await page.goto(`${BASE}/ops/design`);
     await expect(page.getByTestId("design-catalog")).toBeVisible();

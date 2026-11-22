@@ -178,17 +178,18 @@ test.describe("Q-9 判定の 5 段（形と語。橙は使わない）", () => {
       expect(new Set(info.map((i) => i.key)).size).toBe(5);
       for (const i of info) {
         expect(i.shape.length, `${i.text} の形`).toBeGreaterThan(20);
-        expect(i.bg, `${i.text} は橙の塗りでない`).not.toBe("rgb(235, 161, 92)");
-        expect(i.bg).not.toBe("rgb(245, 203, 160)");
+        // 16-A：主色（操作の色）の面でも、薄い主色の面でもない（判定は状態色から引く。意図は同じ：操作の色を判定に流用しない）
+        expect(i.bg, `${i.text} は主色の塗りでない`).not.toBe("rgb(31, 95, 224)");
+        expect(i.bg).not.toBe("rgb(232, 240, 253)");
       }
-      // 結論の大きな印・規制ごとの札も橙でない
-      const orange = await page.evaluate(() =>
+      // 結論の大きな印・規制ごとの札も主色でない
+      const primary = await page.evaluate(() =>
         Array.from(document.querySelectorAll(".sb-vtag, .sb-v-big, [data-testid='regulation-verdict']")).filter((e) => {
           const c = getComputedStyle(e).backgroundColor;
-          return c === "rgb(235, 161, 92)" || c === "rgb(245, 203, 160)";
+          return c === "rgb(31, 95, 224)" || c === "rgb(232, 240, 253)";
         }).length,
       );
-      expect(orange).toBe(0);
+      expect(primary).toBe(0);
     });
   }
 

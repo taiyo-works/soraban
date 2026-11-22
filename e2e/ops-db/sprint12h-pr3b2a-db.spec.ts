@@ -184,7 +184,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
     }
   });
 
-  test("P3b2a-5. 旧い見た目の部品がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは橙の面。同じ画面の ?query 切り替えは <a>", async ({ page }) => {
+  test("P3b2a-5. 旧い見た目の部品がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは主色の面。同じ画面の ?query 切り替えは <a>", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -192,23 +192,24 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
         const label = `${scheme} ${s}`;
         await open(page, s, label);
         await expect(page.locator("main .eyebrow, main .bearing-mark, main [class*='rounded-ctl'], main [class*='rounded-sharp']"), label).toHaveCount(0);
-        const orange = await page.evaluate(() => {
+        const primary = await page.evaluate(() => {
           const p = document.createElement("div");
-          p.style.color = "var(--sb-orange)";
+          p.style.color = "var(--sb-primary)";
           document.body.appendChild(p);
           const v = getComputedStyle(p).color;
           p.remove();
           return v;
         });
-        const blueFaces = await page.evaluate(() =>
+        const blueFaces = await page.evaluate((own) =>
           Array.from(document.querySelectorAll<HTMLElement>("main button, main a")).filter((e) => {
-            const [r = 0, g = 0, b = 0, a = 1] = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
-            return a > 0.5 && b > r + 40 && b > g + 20;
-          }).length,
+            const bgc = getComputedStyle(e).backgroundColor;
+            const [r = 0, g = 0, b = 0, a = 1] = bgc.match(/[\d.]+/g)?.map(Number) ?? [];
+            return a > 0.5 && b > r + 40 && b > g + 20 && bgc !== own; // 藍・青の面（主色の面は除く）
+          }).length, primary,
         );
         expect(blueFaces, `${label}: 藍の面のボタン`).toBe(0);
         const primaries = await page.locator("main .opx-btn-primary:not(:disabled)").evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
-        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(orange);
+        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(primary);
       }
     }
     // 一覧の「取消済みも含める」は通常のリンク（<a>）で、押すと URL が切り替わる（Link の同じ画面の ?query 切り替えを使わない：Q-12）
@@ -217,7 +218,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
     await expect(page).toHaveURL(/includeVoided=1/);
   });
 
-  test("P3b2a-6. 期限の札は判定の色（赤・琥珀・緑）を使わない：期限切れ・失効＝墨の面＋「！」、期限間近＝薄い橙の面（明・暗）", async ({ page }) => {
+  test("P3b2a-6. 期限の札は判定の色（赤・琥珀・緑）を使わない：期限切れ・失効＝墨の面＋「！」、期限間近＝状態「注意」の面（明・暗）", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -232,7 +233,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
           p.remove();
           return c;
         };
-        return { inverse: rgb("--sb-inverse-bg"), soon: rgb("--sb-orange-hover"), judge: ["--sb-v-no-fill", "--sb-v-no-fg", "--sb-v-needs-fill", "--sb-v-needs-fg", "--sb-v-none-fg"].map(rgb) };
+        return { inverse: rgb("--sb-inverse-bg"), soon: rgb("--sb-st-warn-face"), judge: ["--sb-v-no-fill", "--sb-v-no-fg", "--sb-v-needs-fill", "--sb-v-needs-fg", "--sb-v-none-fg"].map(rgb) };
       });
       const badges = await page.getByTestId("permit-validity").evaluateAll((els) =>
         els.map((e) => {

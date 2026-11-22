@@ -355,7 +355,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       expect(await route.locator('li[data-stage-state="done"] .opx-rs-dot svg path').count()).toBeGreaterThanOrEqual(1);
       const todoBorder = await route.locator('li[data-stage-state="todo"] .opx-rs-dot').first().evaluate((e) => getComputedStyle(e).borderTopStyle);
       expect(todoBorder).toBe("dashed");
-      // 「次」の欄はちょうど 1 つ。橙の面が塗られ、文字は「次」
+      // 「次」の欄はちょうど 1 つ。主色の面が塗られ、文字は「次」
       const next = route.locator('li[data-stage-state="next"]');
       await expect(next).toHaveCount(1);
       await expect(next.locator(".opx-rs-state")).toHaveText("次");

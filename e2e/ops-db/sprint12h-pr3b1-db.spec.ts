@@ -199,7 +199,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
     }
   });
 
-  test("P3b1-5. 旧い見た目の部品がない：旧いボタン・札・見出しの名前（rounded-ctl・eyebrow・bearing-mark）と藍の地が 0。主ボタンは橙の面＋墨の文字（4.5:1 以上）", async ({ page }) => {
+  test("P3b1-5. 旧い見た目の部品がない：旧いボタン・札・見出しの名前（rounded-ctl・eyebrow・bearing-mark）と藍の地が 0。主ボタンは主色の面＋白の文字（4.5:1 以上）", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -208,24 +208,25 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
         await page.goto(urlOf(s));
         await expect(page.locator("main h1").first(), label).toBeVisible();
         await expect(page.locator("main .eyebrow, main .bearing-mark, main [class*='rounded-ctl'], main [class*='rounded-sharp']"), label).toHaveCount(0);
-        const orange = await page.evaluate(() => {
+        const primary = await page.evaluate(() => {
           const p = document.createElement("div");
-          p.style.color = "var(--sb-orange)";
+          p.style.color = "var(--sb-primary)";
           document.body.appendChild(p);
           const v = getComputedStyle(p).color;
           p.remove();
           return v;
         });
-        const blueFaces = await page.evaluate(() =>
+        const blueFaces = await page.evaluate((own) =>
           Array.from(document.querySelectorAll<HTMLElement>("main button, main a")).filter((e) => {
-            const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
+            const bgc = getComputedStyle(e).backgroundColor;
+            const m = bgc.match(/[\d.]+/g)?.map(Number) ?? [];
             const [r = 0, g = 0, b = 0, a = 1] = m;
-            return a > 0.5 && b > r + 40 && b > g + 20; // 藍・青の面
-          }).length,
+            return a > 0.5 && b > r + 40 && b > g + 20 && bgc !== own; // 藍・青の面（主色の面は除く）
+          }).length, primary,
         );
         expect(blueFaces, `${label}: 藍の面のボタン`).toBe(0);
         const primaries = await page.locator("main .opx-btn-primary:not(:disabled), main .sb-pill-primary:not(:disabled)").evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
-        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(orange);
+        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(primary);
       }
     }
   });

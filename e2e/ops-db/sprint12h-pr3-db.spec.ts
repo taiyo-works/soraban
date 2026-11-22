@@ -90,7 +90,7 @@ test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
 test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目", () => {
-  test("P3a-1. 下タブ：ホーム／計画／点検／日誌／登録 の 5 つ（高さ 60px 以上・折り返さない・橙の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし", async ({ page }) => {
+  test("P3a-1. 下タブ：ホーム／計画／点検／日誌／登録 の 5 つ（高さ 60px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -109,12 +109,12 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
             expect(b.r.width, `${label} 幅`).toBeGreaterThanOrEqual(w / 5 - 2);
             expect(b.label, `${label} ラベルが折り返している`).toBeLessThan(24);
           }
-          // 現在地：aria-current は 1 つだけ（`/` は 0）。橙の面は、現在地のタブだけ
+          // 現在地：aria-current は 1 つだけ（`/` は 0）。薄い主色の面は、現在地のタブだけ
           await expect(nav.locator('[aria-current="page"]'), label).toHaveCount(current ? 1 : 0);
           if (current) await expect(nav.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
-          const orange = await rgbOf(page, "var(--sb-orange)");
+          const soft = await rgbOf(page, "var(--sb-primary-soft)");
           const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e.firstElementChild as HTMLElement).backgroundColor));
-          expect(faces.filter((f) => f === orange).length, `${label} 橙の面`).toBe(current ? 1 : 0);
+          expect(faces.filter((f) => f === soft).length, `${label} 薄い主色の面`).toBe(current ? 1 : 0);
           await expectNoHorizontalScroll(page, label);
           // 文字は 4.5:1 以上、12px 以上（v2 の最小）
           const samples = await collectTextSamples(page, '[data-testid="ops-bottom-nav"]');
@@ -123,7 +123,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
             expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(12);
           }
-          // 橙の面の上のアイコンは墨（3:1 以上）
+          // 薄い主色の面の上のアイコンは主色（3:1 以上）
           if (current) {
             const [fg, bg] = await nav.getByTestId(`nav-${current}`).evaluate((a) => {
               const face = a.firstElementChild as HTMLElement;
@@ -135,14 +135,14 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
               return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
             };
             const [l1, l2] = [lum(parse(fg)), lum(parse(bg))];
-            expect((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05), `${label} 橙の面の上のアイコン`).toBeGreaterThanOrEqual(3);
+            expect((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05), `${label} 薄い主色の面の上のアイコン`).toBeGreaterThanOrEqual(3);
           }
         }
       }
     }
   });
 
-  test("P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は橙の面・見出し 12px 以上。1280・1440px × 明・暗", async ({ page }) => {
+  test("P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は薄い主色の面・見出し 12px 以上。1280・1440px × 明・暗", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -162,8 +162,8 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
           for (const k of ["aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(43.5);
           await expect(side.locator('[aria-current="page"]'), label).toHaveCount(1);
           await expect(side.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
-          const orange = await rgbOf(page, "var(--sb-orange)");
-          expect(await side.getByTestId(`nav-${current}`).evaluate((a) => getComputedStyle(a).backgroundColor), `${label} 橙の面`).toBe(orange);
+          const soft = await rgbOf(page, "var(--sb-primary-soft)");
+          expect(await side.getByTestId(`nav-${current}`).evaluate((a) => getComputedStyle(a).backgroundColor), `${label} 薄い主色の面`).toBe(soft);
           const samples = await collectTextSamples(page, '[data-testid="ops-sidebar"]');
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);

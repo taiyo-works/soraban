@@ -192,7 +192,7 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
     }
   });
 
-  test("P3b2b-5. 旧い見た目がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは橙の面。判定の履歴・事故の一覧は <a>/<Link> の別画面への移動だけ", async ({ page }) => {
+  test("P3b2b-5. 旧い見た目がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは主色の面。判定の履歴・事故の一覧は <a>/<Link> の別画面への移動だけ", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -201,22 +201,23 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
         await open(page, s, label);
         const sel = `${root(s)} .eyebrow, ${root(s)} .bearing-mark, ${root(s)} [class*='rounded-ctl'], ${root(s)} [class*='rounded-sharp']`;
         await expect(page.locator(sel), label).toHaveCount(0);
-        const orange = await page.evaluate(() => {
+        const primary = await page.evaluate(() => {
           const p = document.createElement("div");
-          p.style.color = "var(--sb-orange)";
+          p.style.color = "var(--sb-primary)";
           document.body.appendChild(p);
           const v = getComputedStyle(p).color;
           p.remove();
           return v;
         });
-        const blueFaces = await page.evaluate((r0) =>
+        const blueFaces = await page.evaluate(([r0, own]) =>
           Array.from(document.querySelectorAll<HTMLElement>(`${r0} button, ${r0} a`)).filter((e) => {
-            const [r = 0, g = 0, b = 0, a = 1] = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
-            return a > 0.5 && b > r + 40 && b > g + 20;
-          }).length, root(s));
+            const bgc = getComputedStyle(e).backgroundColor;
+            const [r = 0, g = 0, b = 0, a = 1] = bgc.match(/[\d.]+/g)?.map(Number) ?? [];
+            return a > 0.5 && b > r + 40 && b > g + 20 && bgc !== own; // 藍・青の面（主色の面は除く）
+          }).length, [root(s), primary] as const);
         expect(blueFaces, `${label}: 藍の面のボタン`).toBe(0);
         const primaries = await page.locator(`${root(s)} .opx-btn-primary:not(:disabled)`).evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
-        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(orange);
+        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(primary);
       }
     }
     // 事故の一覧の「取消済みも含める」は通常のリンク（<a>）で、押すと URL が切り替わる（Q-12）
