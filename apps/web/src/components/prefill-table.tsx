@@ -10,7 +10,7 @@ type Props = {
 // system → 表示トーン（DRS=墨抜き / DIPS 2.0=藍）。procedure-card・パネル末尾の
 // 「2 系統の窓口」と同じ塗り分けで一貫させ、別導線であることを一目で示す。
 const systemTone: Readonly<Record<PrefillField["system"], string>> = {
-  "DIPS 2.0": "border-sb-ink text-sb-ink bg-sb-hover",
+  "DIPS 2.0": "border-sb-ink text-sb-ink bg-sb-st-info-face",
   DRS: "border-sb-edge text-sb-ink bg-sb-surface",
 };
 

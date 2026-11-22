@@ -164,7 +164,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {verdictItem && verdictItem.appliedPermits.length > 0 ? (
         <div
           data-testid="regulation-applied-permits"
-          className="rounded-sb-m border-l-4 border-sb-ink bg-sb-hover px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
+          className="rounded-sb-m border-l-4 border-sb-ink bg-sb-st-info-face px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
         >
           <p className="sb-eyebrow">適用した許可・同意・目的（元の判定は変えない）</p>
           <ul className="mt-1 flex flex-col gap-1">

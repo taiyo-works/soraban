@@ -40,7 +40,7 @@ const CHIP_BOX: Record<Tone, string> = {
   neutral: "border border-sb-rule bg-sb-base text-sb-ink",
   brand: "border border-transparent bg-sb-inverse text-sb-inverse-fg font-bold",
   green: "border-[1.5px] border-sb-ink bg-sb-base text-sb-ink font-bold",
-  amber: "border-[1.5px] border-dashed border-sb-ink bg-sb-hover text-sb-ink font-bold",
+  amber: "border-[1.5px] border-dashed border-sb-ink bg-sb-st-warn-face text-sb-ink font-bold",
   red: "border-[1.5px] border-sb-v-no-fg bg-sb-base text-sb-v-no-fg font-bold",
   mute: "border border-dashed border-sb-edge bg-sb-sunken text-sb-ink-3",
 };

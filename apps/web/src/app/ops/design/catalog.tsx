@@ -143,7 +143,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
 
       <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-orange">
         <h2 id="cat-primary-use">主色の使いどころ（操作と現在地だけ）</h2>
-        <SectionHead id="cat-primary-head" as="h3" title="見出し（左に主色の太い線だけ）" note="背後の大きな数字はやめた" />
+        <SectionHead id="cat-primary-head" as="h3" title="見出し（左に墨の太い線だけ）" note="背後の大きな数字はやめた" />
         <p>
           <span className="sbx-dot" aria-hidden="true" /> 現在地の印（小さな主色の丸）。
         </p>

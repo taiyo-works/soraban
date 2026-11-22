@@ -204,7 +204,7 @@
 .opx-box-warn {
   gap: 8px;
   border: var(--sb-mark-w) solid var(--sb-v-no-fg);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
 }
 .opx-box-bad {
   gap: 12px;
@@ -218,7 +218,7 @@
   gap: 8px;
   padding: 16px;
   border: 6px solid var(--sb-v-no-fg);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
 }
 .opx-band {
   display: flex;
@@ -282,7 +282,7 @@
   margin: 0 0 16px;
   padding: 4px 0 4px 14px;
   border: 0;
-  border-left: 5px solid var(--sb-primary);
+  border-left: 5px solid var(--sb-ink);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;

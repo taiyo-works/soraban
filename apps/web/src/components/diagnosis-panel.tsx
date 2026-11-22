@@ -499,7 +499,7 @@ export function DiagnosisPanel({
           </p>
           <p className="border border-sb-rule bg-sb-base px-3 py-2.5 rounded-sb-m">
             <span className="mb-1 flex items-center gap-2">
-              <span className="inline-flex items-center border border-sb-ink bg-sb-hover px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
+              <span className="inline-flex items-center border border-sb-ink bg-sb-st-info-face px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
                 DIPS 2.0
               </span>
               <span className="text-xs text-sb-ink-3">飛行許可・承認</span>

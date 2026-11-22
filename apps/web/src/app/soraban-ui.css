@@ -114,12 +114,12 @@
   }
 }
 
-/* 見出し：左 5px の主色の線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
+/* 見出し：左 5px の墨の線だけ（主色は操作と現在地だけに使う。飾りの線は墨）（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
   margin-bottom: 16px;
   padding: 4px 0 4px 14px;
-  border-left: 5px solid var(--sb-primary);
+  border-left: 5px solid var(--sb-ink);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -736,7 +736,7 @@ input.sb-check:disabled {
   color: var(--sb-ink);
 }
 .sb-ops-note {
-  border-left: 3px solid var(--sb-primary);
+  border-left: 3px solid var(--sb-edge);
   padding-left: 12px;
   font-size: 12px;
   line-height: 1.6;

@@ -22,13 +22,13 @@
   --accent-solid-hover: var(--sb-primary-press);
   --accent-fg: var(--sb-on-primary);
   --ok-fg: var(--sb-v-none-fg);
-  --ok-bg: color-mix(in srgb, var(--sb-v-none-fill) 10%, var(--sb-base));
+  --ok-bg: var(--sb-st-safe-face);
   --ok-line: var(--sb-v-none-fg);
   --warn-fg: var(--sb-v-needs-fg);
-  --warn-bg: color-mix(in srgb, var(--sb-v-needs-fill) 14%, var(--sb-base));
+  --warn-bg: var(--sb-st-warn-face);
   --warn-line: var(--sb-v-needs-fg);
   --danger-fg: var(--sb-v-no-fg);
-  --danger-bg: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  --danger-bg: var(--sb-st-danger-face);
   --danger-line: var(--sb-v-no-fg);
   --info-fg: var(--sb-ink-2);
   --info-bg: var(--sb-sunken);
@@ -186,7 +186,7 @@ html:has(.ops-v2) body {
 }
 .opx-btn-danger:hover,
 .opx-btn-danger:active {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 12%, var(--sb-base));
+  background: var(--sb-st-danger-face);
 }
 /* 現場の大きな主ボタン（高さ 64px 以上。現場の値は --sb-hit-primary が持つ） */
 .opx-btn-field {
@@ -342,7 +342,7 @@ html:has(.ops-v2) body {
   font-size: 16px;
 }
 .opx-note-red {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
   color: var(--sb-ink);
 }
@@ -362,7 +362,7 @@ html:has(.ops-v2) body {
   color: var(--sb-ink);
 }
 .opx-notice[data-meaning="danger"] {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   border: 1.5px solid var(--sb-v-no-fg);
   color: var(--sb-ink);
 }
@@ -570,7 +570,7 @@ html:has(.ops-v2) body {
 .opx-form-error {
   padding: 10px 14px;
   border-radius: var(--sb-r-m);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
   color: var(--sb-ink);
   font-size: 14px;

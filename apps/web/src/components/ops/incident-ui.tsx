@@ -114,7 +114,7 @@ export function IncidentGuidanceView({ g, testId = "incident-guidance" }: { read
       aria-live="polite"
     >
       <p className="flex items-start gap-2 text-base font-medium leading-snug" data-testid={`${testId}-label`}>
-        <span aria-hidden className={`${markChipClass} mt-px ${possible ? "border-sb-ink bg-sb-hover text-sb-ink" : "border-sb-edge text-sb-ink-2"}`}>
+        <span aria-hidden className={`${markChipClass} mt-px ${possible ? "border-sb-ink bg-sb-st-warn-face text-sb-ink" : "border-sb-edge text-sb-ink-2"}`}>
           {g.mark}
         </span>
         <span className="min-w-0">{g.label}</span>
@@ -144,7 +144,7 @@ export function IncidentReportStateView({ s, testId = "incident-report-state" }:
       </span>
       {s.changedLabel ? (
         <span className="flex items-start gap-1.5 font-bold text-sb-ink" data-testid={`${testId}-changed`}>
-          <span aria-hidden className={`${markChipClass} border-sb-ink bg-sb-hover text-sb-ink`}>
+          <span aria-hidden className={`${markChipClass} border-sb-ink bg-sb-st-warn-face text-sb-ink`}>
             ！
           </span>
           <span className="min-w-0">{s.changedLabel}</span>

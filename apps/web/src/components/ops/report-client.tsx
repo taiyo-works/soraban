@@ -300,7 +300,7 @@ function ItemRow({
           </span>
         ) : item.status === "missing" ? (
           <span className="inline-flex items-start gap-2 text-sm font-medium text-sb-ink" data-testid={`report-item-value-${item.key}`}>
-            <span aria-hidden className="mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-hover sb-num text-xs font-bold leading-none">!</span>
+            <span aria-hidden className="mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-st-warn-face sb-num text-xs font-bold leading-none">!</span>
             <span>{MISSING_VALUE_LABEL}</span>
           </span>
         ) : item.status === "dips_only" ? (
@@ -1002,7 +1002,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                   <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-surface px-2 py-2 text-sm font-medium text-sb-ink sm:px-3">
                     <span>{g.label}</span>
                     {g.needsConfirmation ? (
-                      <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-hover px-1.5 text-xs font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>
+                      <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-st-warn-face px-1.5 text-xs font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>
                         {NEEDS_CONFIRMATION_MARK}
                       </span>
                     ) : null}
@@ -1064,7 +1064,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             {direct && !isCancel ? (
               <>
                 <p
-                  className="flex items-start gap-3 rounded-sb-m border-2 border-dashed border-sb-ink bg-sb-hover px-3 py-3 text-sm font-medium leading-relaxed text-sb-ink"
+                  className="flex items-start gap-3 rounded-sb-m border-2 border-dashed border-sb-ink bg-sb-st-info-face px-3 py-3 text-sm font-medium leading-relaxed text-sb-ink"
                   data-testid="mock-notice"
                 >
                   <span aria-hidden className="mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-base sb-num text-xs font-bold leading-none">◇</span>

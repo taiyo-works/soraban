@@ -44,7 +44,7 @@ html[data-theme="dark"] .sbx-catalog {
   flex: none;
   width: 5px;
   height: 1.2em;
-  background: var(--sb-primary);
+  background: var(--sb-ink);
 }
 .sbx-note {
   font-size: max(14px, var(--sb-fs-note));
@@ -165,4 +165,7 @@ html[data-mode="field"] .sbx-catalog .sb-pill-label {
 }
 html[data-mode="field"] .sbx-catalog .sbx-note {
   font-size: 16px;
+}
+.sbx-catalog pre {
+  color: var(--sb-ink);
 }

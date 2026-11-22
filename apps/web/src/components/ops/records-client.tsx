@@ -389,7 +389,7 @@ function DraftBar({
     <div
       data-testid="draft-status"
       className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-sb-l px-4 py-3 ${
-        restored ? "border-[1.5px] border-sb-ink bg-sb-hover" : "bg-sb-sunken"
+        restored ? "border-[1.5px] border-sb-ink bg-sb-st-info-face" : "bg-sb-sunken"
       }`}
     >
       <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-sb-ink-2">
