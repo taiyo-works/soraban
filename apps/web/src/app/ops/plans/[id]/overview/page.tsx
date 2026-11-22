@@ -41,7 +41,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
       "場所",
       <span key="pl" className="flex flex-col">
         <span>{plan.placeName}</span>
-        <span className="sb-num text-xs tnum text-sb-ink-2">
+        <span className="sb-num text-sm tnum text-sb-ink-2">
           {plan.latitude}, {plan.longitude}（WGS84）{plan.radiusM !== null ? `／半径 ${plan.radiusM} m` : ""}
         </span>
       </span>,
@@ -59,7 +59,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
       })(),
     ],
     ["運航の目的（例外）", plan.judgementPurpose ? (PURPOSE_VALUE_LABEL[plan.judgementPurpose] ?? plan.judgementPurpose) : "通常運航"],
-    ["許可・承認の番号", <span key="pn" className="break-all sb-num text-xs" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
+    ["許可・承認の番号", <span key="pn" className="break-all sb-num text-sm" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
     ["メモ", plan.notes ?? "—"],
   ];
 
@@ -105,11 +105,11 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           </div>
           <dl className="flex flex-col border-t border-sb-rule text-sm" data-testid="plan-confirm-facts">
             <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-              <dt className="text-xs text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
+              <dt className="text-sm text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
               <dd data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
             </div>
             <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
-              <dt className="text-xs text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
+              <dt className="text-sm text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
               <dd data-testid="plan-stale-sources">
                 {plan.staleSources.length === 0 ? (
                   "ありません"
@@ -147,8 +147,8 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
                       {DECISION_LABEL[c.decision]}
                     </Badge>
                     {c.selfConfirmation ? <Badge tone="amber">{SELF_CONFIRMATION_LABEL}</Badge> : null}
-                    <span className="sb-num text-xs tnum text-sb-ink-3">版 {c.planVersion}</span>
-                    <time dateTime={c.createdAt} className="sb-num text-xs tnum text-sb-ink-2">{c.createdAtJst}</time>
+                    <span className="sb-num text-sm tnum text-sb-ink-3">版 {c.planVersion}</span>
+                    <time dateTime={c.createdAt} className="sb-num text-sm tnum text-sb-ink-2">{c.createdAtJst}</time>
                     <span>{c.confirmerName}</span>
                   </p>
                   {c.reason ? <p className="break-all text-sb-ink-2">理由：{c.reason}</p> : null}

@@ -82,14 +82,14 @@ export function PrefillTable({ prefill }: Props) {
             DIPS／DRS 入力プリフィル (
             <span className="tnum">{String(prefill.length).padStart(2, "0")}</span> 行)
           </p>
-          <p className="max-w-prose text-xs leading-relaxed text-sb-ink-2">
+          <p className="max-w-prose text-sm leading-relaxed text-sb-ink-2">
             各行の値をコピーして、DIPS 2.0（許可・承認）／DRS（機体登録）のフォームに貼り付けてください。
             自動入力はしません（規約・法的リスク回避）。入力先システムは行ごとに区別しています。
           </p>
         </div>
         {/* 系統の凡例（行頭の系統列と同じ塗り分け）。DRS と DIPS 2.0 が別ポータルである
             ことを表頭で一目に示す。値・ラベルは変えず装飾の凡例のみ。 */}
-        <div className="flex shrink-0 items-center gap-3 text-xs tracking-wide text-sb-ink-3">
+        <div className="flex shrink-0 items-center gap-3 text-sm tracking-wide text-sb-ink-3">
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden className={`inline-block h-2.5 w-2.5 border ${systemTone.DRS}`} />
             DRS
@@ -107,7 +107,7 @@ export function PrefillTable({ prefill }: Props) {
       <div className="rounded-sb-m border border-sb-rule md:overflow-x-auto">
         <table className="block w-full border-collapse text-left text-sm md:table md:min-w-[680px]">
           <thead className="max-md:hidden">
-            <tr className="border-b border-sb-edge bg-sb-surface text-xs tracking-wide text-sb-ink-3">
+            <tr className="border-b border-sb-edge bg-sb-surface text-sm tracking-wide text-sb-ink-3">
               <th scope="col" className="w-8 py-2.5 pl-3 text-center font-medium">
                 <span aria-hidden>#</span>
               </th>
@@ -139,32 +139,32 @@ export function PrefillTable({ prefill }: Props) {
                   {/* 通し番号（register の一葉感。coverage 一覧・期限カレンダーと同じ mono tnum）。 */}
                   <td
                     aria-hidden
-                    className="select-none py-3 pl-3 text-center align-middle sb-num text-xs tnum text-sb-ink-3 max-md:hidden"
+                    className="select-none py-3 pl-3 text-center align-middle sb-num text-sm tnum text-sb-ink-3 max-md:hidden"
                   >
                     {String(idx + 1).padStart(2, "0")}
                   </td>
                   <td className="py-3 pl-3 pr-3 max-md:block max-md:p-0">
                     <span
-                      className={`inline-flex items-center border px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider ${systemTone[f.system]}`}
+                      className={`inline-flex items-center border px-1.5 py-px sb-num text-sm font-medium uppercase tracking-wider ${systemTone[f.system]}`}
                     >
                       {f.system}
                     </span>
                   </td>
-                  <td className="py-3 pr-3 text-[13px] leading-relaxed text-sb-ink-2 max-md:block max-md:p-0" data-label="入力欄">
+                  <td className="py-3 pr-3 text-[0.875rem] leading-relaxed text-sb-ink-2 max-md:block max-md:p-0" data-label="入力欄">
                     {f.dipsFieldLabel}
                   </td>
                   {/* 値＝この表の主役。display 書体・ink で最大の可読性を確保。 */}
                   <td className="py-3 pr-3 max-md:block max-md:p-0" data-label="値">
                     <span className=" font-medium text-sb-ink">{f.value}</span>
                   </td>
-                  <td className="py-3 pr-3 text-xs leading-relaxed text-sb-ink-3 max-md:block max-md:p-0" data-label="出所">
+                  <td className="py-3 pr-3 text-sm leading-relaxed text-sb-ink-3 max-md:block max-md:p-0" data-label="出所">
                     {f.source}
                   </td>
                   <td className="py-3 pr-3 text-right max-md:block max-md:p-0 max-md:text-left">
                     <button
                       type="button"
                       onClick={() => void handleCopy(idx, f.value)}
-                      className={`inline-flex min-h-11 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sb-pill border px-3 py-1.5 sb-num text-xs font-bold transition-colors ${
+                      className={`inline-flex min-h-11 min-w-[6.5rem] items-center justify-center gap-1.5 rounded-sb-pill border px-3 py-1.5 sb-num text-sm font-bold transition-colors ${
                         state === "ok"
                           ? "border-sb-v-none-fg bg-sb-surface text-sb-v-none-fg"
                           : state === "fail"

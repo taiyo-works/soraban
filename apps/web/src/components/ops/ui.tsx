@@ -81,7 +81,7 @@ export function PageHeader({
           {eyebrow ? <p className="opx-eyebrow">{eyebrow}</p> : null}
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1 className="opx-h1">{title}</h1>
-            {meta ? <span className="text-[13px] text-sb-ink-3">{meta}</span> : null}
+            {meta ? <span className="text-[0.875rem] text-sb-ink-3">{meta}</span> : null}
           </div>
         </div>
         {aside}

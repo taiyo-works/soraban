@@ -93,7 +93,7 @@ export default async function PlanListPage({
           ) : null}
         </div>
       </div>
-      <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3" data-testid="plan-count">
+      <p className="sb-num text-[0.875rem] font-bold tnum text-sb-ink-3" data-testid="plan-count">
         {rows.length} 件
       </p>
       {rows.length === 0 ? (
@@ -112,7 +112,7 @@ export default async function PlanListPage({
                   </span>
                   {p.voided ? <Badge tone="red">中止</Badge> : null}
                 </span>
-                <span className="text-xs text-sb-ink-2">
+                <span className="text-sm text-sb-ink-2">
                   <span className="sb-num">{p.registrationMark}</span>
                   <span aria-hidden className="mx-1.5 text-sb-ink-3">
                     ／
@@ -135,7 +135,7 @@ export default async function PlanListPage({
                 <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-surface" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
-                    <p className="px-3 pb-2.5 pl-[2.625rem] text-xs text-sb-ink-3" data-testid="plan-row-next-count">
+                    <p className="px-3 pb-2.5 pl-[2.625rem] text-sm text-sb-ink-3" data-testid="plan-row-next-count">
                       ほか {p.nextActionCount - 1} 件（詳細で確認できます）
                     </p>
                   ) : null}

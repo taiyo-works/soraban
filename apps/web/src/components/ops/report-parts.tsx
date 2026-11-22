@@ -43,7 +43,7 @@ export function JstDateTimeField({
           <input type="time" className={`${inputClass} min-h-12 sb-num tnum`} value={time} onChange={(e) => onTime(e.target.value)} data-testid={`${testId}-time`} />
         </Field>
       </div>
-      <p id={hintId} className="text-xs leading-relaxed text-sb-ink-3">
+      <p id={hintId} className="text-sm leading-relaxed text-sb-ink-3">
         {hint}
       </p>
     </div>

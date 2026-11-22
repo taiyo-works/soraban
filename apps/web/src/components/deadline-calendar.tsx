@@ -140,10 +140,10 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
         {hasPlannedDate ? (
           // 起算日（飛行予定日）。すべての提出期限はここから逆算される — その関係を
           // 「起算日 →」のラベルで明示し、日付は mono の tnum で固定幅に揃える。
-          <p className="flex items-baseline gap-2 text-xs tracking-wide text-sb-ink-3">
+          <p className="flex items-baseline gap-2 text-sm tracking-wide text-sb-ink-3">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 border border-sb-edge" />
             起算日 — 飛行予定日
-            <span className="tnum text-xs font-medium normal-case tracking-normal text-sb-ink">
+            <span className="tnum text-sm font-medium normal-case tracking-normal text-sb-ink">
               {formatJaDate(plannedDate)}
             </span>
           </p>
@@ -189,7 +189,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                     mono 数字の語彙で「台帳の一葉」感を出す。 */}
                 <span
                   aria-hidden
-                  className="flex select-none items-center justify-center self-stretch border-r border-sb-rule px-2.5 sb-num text-xs tnum text-sb-ink-3"
+                  className="flex select-none items-center justify-center self-stretch border-r border-sb-rule px-2.5 sb-num text-sm tnum text-sb-ink-3"
                 >
                   {String(idx + 1).padStart(2, "0")}
                 </span>
@@ -199,7 +199,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                   <span className=" text-sm font-medium leading-snug text-sb-ink">
                     {procedure.title}
                   </span>
-                  <span className="text-xs leading-relaxed text-sb-ink-3">
+                  <span className="text-sm leading-relaxed text-sb-ink-3">
                     {procedure.leadTimeBusinessDays} 開庁日前まで（土日・国民の祝日を除く）
                   </span>
                 </div>
@@ -215,19 +215,19 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                         <span className={`flex items-baseline self-center ${tone.accent}`}>
                           <UrgencyMark shape={tone.mark} />
                         </span>
-                        <span className="text-xs font-normal text-sb-ink-3 tnum">
+                        <span className="text-sm font-normal text-sb-ink-3 tnum">
                           {parts.year}
                         </span>
                         <span className="text-xl font-medium tracking-tight tnum sm:text-2xl">
                           {parts.md}
                         </span>
-                        <span className="text-xs font-normal text-sb-ink-3">（{parts.weekday}）</span>
+                        <span className="text-sm font-normal text-sb-ink-3">（{parts.weekday}）</span>
                       </p>
 
                       {/* アラート＝色＋符号＋テキストの三重符号化。
                           overdue は赤の塗りバッジで最も強く、urgent は amber 罫、ok は控えめ。 */}
                       <span
-                        className={`inline-flex shrink-0 items-center gap-1.5 border px-2 py-1 sb-num text-xs uppercase tracking-wider ${
+                        className={`inline-flex shrink-0 items-center gap-1.5 border px-2 py-1 sb-num text-sm uppercase tracking-wider ${
                           isOverdue
                             ? "border-sb-v-no-fg bg-sb-v-no-fg font-medium text-sb-base"
                             : `${tone.rule} bg-sb-base text-sb-ink-2`
@@ -247,7 +247,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
                       </span>
                     </>
                   ) : (
-                    <span className="sb-num text-xs text-sb-ink-3">{basis}</span>
+                    <span className="sb-num text-sm text-sb-ink-3">{basis}</span>
                   )}
                 </div>
               </li>
@@ -258,7 +258,7 @@ export function DeadlineCalendar({ diagnosis, plannedDate }: Props) {
 
       {/* 期限は目安である旨の断り（spec §11-C: 標準処理期間は目安）。 */}
       {hasPlannedDate && items.length > 0 ? (
-        <p className="text-xs leading-relaxed text-sb-ink-3">
+        <p className="text-sm leading-relaxed text-sb-ink-3">
           ※ 「飛行開始の 10 開庁日以上前」を計算根拠としていますが、標準処理期間は目安であり、
           確定的な法定処理期間ではありません（内容により前後します）。祝日は内閣府公開データに基づきます。
           最終的な提出可否は DIPS／航空局でご確認ください。

@@ -62,7 +62,7 @@ export function LicenseRenewalNotice({
       <Badge tone={STAGE_TONE[status]} {...(STAGE_TONE[status] === "alert" ? { mark: "！" } : {})}>
         {STAGE_LABEL[status]}
       </Badge>
-      <span className="text-xs leading-relaxed text-sb-ink-2">{stageDetail(status, expiresOn)}</span>
+      <span className="text-sm leading-relaxed text-sb-ink-2">{stageDetail(status, expiresOn)}</span>
     </span>
   );
 }

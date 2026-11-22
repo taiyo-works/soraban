@@ -38,7 +38,7 @@ export function JourneyLedger({ stages, "data-testid": testId = "route" }: { rea
             key={s.label}
             data-stage-state={s.state}
             className={cx(
-              "flex min-w-0 flex-col items-start gap-1 border-t-[3px] px-1.5 pb-2.5 pt-1.5 [counter-increment:stage] before:font-mono before:text-[12px] before:leading-none before:tracking-wider before:text-fg-mute before:content-[counter(stage,decimal-leading-zero)] @md:px-3",
+              "flex min-w-0 flex-col items-start gap-1 border-t-[3px] px-1.5 pb-2.5 pt-1.5 [counter-increment:stage] before:font-mono before:text-[0.875rem] before:leading-none before:tracking-wider before:text-fg-mute before:content-[counter(stage,decimal-leading-zero)] @md:px-3",
               i > 0 && "border-l border-l-line",
               s.state === "done" && "border-t-fg-soft",
               s.state === "next" && "border-t-accent bg-accent-soft before:text-accent",

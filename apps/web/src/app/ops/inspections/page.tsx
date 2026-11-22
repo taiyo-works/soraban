@@ -37,7 +37,7 @@ function SecHead({ title, aside, testId }: { readonly title: string; readonly as
         <h2>{title}</h2>
       </div>
       {aside ? (
-        <p className="sb-num text-[13px] text-sb-ink-3" {...(testId ? { "data-testid": testId } : {})}>
+        <p className="sb-num text-[0.875rem] text-sb-ink-3" {...(testId ? { "data-testid": testId } : {})}>
           {aside}
         </p>
       ) : null}
@@ -80,7 +80,7 @@ export default async function InspectionListPage({
 
       <section aria-label="未実施" className="flex flex-col gap-3" data-testid="inspection-pending">
         <SecHead title="未実施" aside={`${pending.length} 件`} testId="inspection-pending-count" />
-        <p className="text-[13px] text-sb-ink-3" data-testid="inspection-pending-scope">
+        <p className="text-[0.875rem] text-sb-ink-3" data-testid="inspection-pending-scope">
           今日の計画で、飛行前の点検の記録がまだないものです。
         </p>
         {pending.length === 0 ? (
@@ -104,7 +104,7 @@ export default async function InspectionListPage({
                         {p.timeLabel ? <span className="sb-num ml-2 text-table font-medium text-sb-ink-2">{p.timeLabel}</span> : null}
                       </span>
                       {p.registrationMark ? (
-                        <span className="text-[13px] text-sb-ink-3">
+                        <span className="text-[0.875rem] text-sb-ink-3">
                           機体 <span className="sb-num text-sb-ink-2">{p.registrationMark}</span>
                         </span>
                       ) : null}
@@ -150,7 +150,7 @@ export default async function InspectionListPage({
           ))}
         </nav>
         <RecordFilter basePath="/ops/inspections" aircraft={aircraft} value={filter} hidden={timing ? { timing } : {}} />
-        <p className="sb-num text-[13px] text-sb-ink-3" data-testid="inspection-count">
+        <p className="sb-num text-[0.875rem] text-sb-ink-3" data-testid="inspection-count">
           {rows.length} 件
         </p>
         {rows.length === 0 ? (
@@ -190,7 +190,7 @@ export default async function InspectionListPage({
                         <span className="sb-num break-all">{i.registrationMark}</span>
                       </span>
                       <span className="break-words text-table text-sb-ink-2">
-                        <span className="text-[13px] text-sb-ink-3">実施者 </span>
+                        <span className="text-[0.875rem] text-sb-ink-3">実施者 </span>
                         {i.inspectorName}
                       </span>
                     </span>

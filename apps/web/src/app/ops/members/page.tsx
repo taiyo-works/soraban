@@ -26,7 +26,7 @@ export default async function MembersPage() {
   return (
     <main className="flex flex-col gap-10">
       <PageHeader title="利用者" back={BACK_TO.register}>
-        <p className="text-[13px] leading-relaxed text-sb-ink-3">
+        <p className="text-[0.875rem] leading-relaxed text-sb-ink-3">
           {me.org.name}の利用者です。役割の変更と利用の停止は、次にその人が操作したときから反映されます。
         </p>
       </PageHeader>
@@ -35,11 +35,11 @@ export default async function MembersPage() {
           <li key={m.id} className="flex flex-col gap-2 py-3">
             <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <p className="flex min-w-0 flex-col">
-                <span className="text-[15px] font-bold text-sb-ink">
+                <span className="text-[1rem] font-bold text-sb-ink">
                   {m.displayName}
-                  {m.id === me.member.id ? <span className="ml-2 text-xs font-bold text-sb-ink">（あなた）</span> : null}
+                  {m.id === me.member.id ? <span className="ml-2 text-sm font-bold text-sb-ink">（あなた）</span> : null}
                 </span>
-                <span className="break-all sb-num text-[13px] text-sb-ink-3">{m.email}</span>
+                <span className="break-all sb-num text-[0.875rem] text-sb-ink-3">{m.email}</span>
               </p>
               <span className="flex shrink-0 flex-wrap items-center gap-1.5">
                 <Badge tone={ROLE_TONE[m.role]}>{ROLE_LABELS[m.role]}</Badge>
@@ -48,7 +48,7 @@ export default async function MembersPage() {
             </div>
             <ChangeNotice target={memberNoticeTarget(m.id)} />
             <details className="group">
-              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-[13px] font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4">
+              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-[0.875rem] font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4">
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
                 役割・利用を変更する
               </summary>
@@ -63,7 +63,7 @@ export default async function MembersPage() {
         title="招待"
         description="招待した人が、このメールアドレスの Google アカウントで初めてログインすると、利用者として有効になります。"
       >
-        <dl className="grid grid-cols-1 gap-3 text-[13px] sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-3 text-[0.875rem] sm:grid-cols-3">
           {(["manager", "pilot", "viewer"] as const).map((r) => (
             <div key={r} className="flex flex-col gap-0.5 rounded-sb-m bg-sb-sunken px-3 py-2.5">
               <dt className="font-bold text-sb-ink">{ROLE_LABELS[r]}</dt>

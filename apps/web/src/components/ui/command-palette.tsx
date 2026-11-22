@@ -108,7 +108,7 @@ export function CommandPalette({
               setActive(0);
             }}
             onKeyDown={onKeyDown}
-            className="min-h-11 w-full rounded-ctl border border-line-strong bg-surface pl-10 pr-3 text-[16px] text-fg placeholder:text-fg-mute"
+            className="min-h-11 w-full rounded-ctl border border-line-strong bg-surface pl-10 pr-3 text-[1rem] text-fg placeholder:text-fg-mute"
           />
         </div>
         <ul id={listId} ref={listRef} role="listbox" aria-label="候補" className="max-h-[50dvh] overflow-y-auto">

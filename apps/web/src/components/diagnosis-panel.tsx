@@ -129,13 +129,13 @@ function NoteWithSource({ text }: { text: string }) {
     <>
       <span>{body}</span>
       {urls.map((url) => (
-        <span key={url} className="mt-0.5 block text-xs font-normal text-sb-ink-3">
+        <span key={url} className="mt-0.5 block text-sm font-normal text-sb-ink-3">
           出典{" "}
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all sb-num text-xs underline decoration-sb-rule underline-offset-2 hover:text-sb-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus focus-visible:ring-offset-1 focus-visible:ring-offset-sb-base"
+            className="break-all sb-num text-sm underline decoration-sb-rule underline-offset-2 hover:text-sb-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus focus-visible:ring-offset-1 focus-visible:ring-offset-sb-base"
           >
             {shortUrl(url)}
           </a>
@@ -285,7 +285,7 @@ export function DiagnosisPanel({
               <SeverityMark shape={sev.mark} className={sev.accent} />
               <p className={`sb-eyebrow ${sev.accent}`}>カテゴリー切り分け</p>
               <span
-                className={`ml-auto inline-flex items-center border px-2 py-0.5 sb-num text-xs uppercase tracking-wider ${
+                className={`ml-auto inline-flex items-center border px-2 py-0.5 sb-num text-sm uppercase tracking-wider ${
                   sev.emphatic
                     ? "border-sb-v-no-fg bg-sb-v-no-fg text-sb-base"
                     : `${sev.rule} ${sev.accent} bg-sb-base`
@@ -299,14 +299,14 @@ export function DiagnosisPanel({
                 {modelAircraft ? MODEL_AIRCRAFT_CATEGORY_HEADLINE : categoryHeadline[diagnosis.category]}
               </span>
             </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-sb-ink-2">
+            <p className="mt-1.5 text-sm leading-relaxed text-sb-ink-2">
               {modelAircraft ? MODEL_AIRCRAFT_CATEGORY_NOTE : diagnosis.categoryNote}
             </p>
-            <p className="mt-1.5 text-xs tracking-wide text-sb-ink-3" data-testid="diagnosis-did-status">
+            <p className="mt-1.5 text-sm tracking-wide text-sb-ink-3" data-testid="diagnosis-did-status">
               DID（人口集中地区）: {formatDidDetermination(diagnosis.didStatus ?? "unverified", diagnosis.didDetail, { droneWeightG: diagnosis.droneWeightG })}
             </p>
             {(diagnosis.verificationNotes ?? []).length > 0 ? (
-              <ul className="mt-2 flex flex-col gap-1 border-t border-sb-v-needs-fg pt-2 text-xs leading-relaxed text-sb-v-needs-fg">
+              <ul className="mt-2 flex flex-col gap-1 border-t border-sb-v-needs-fg pt-2 text-sm leading-relaxed text-sb-v-needs-fg">
                 {(diagnosis.verificationNotes ?? []).map((n) => (
                   <li key={n}>
                     {verificationNoteLabel(n)}<NoteWithSource text={n} />
@@ -315,7 +315,7 @@ export function DiagnosisPanel({
               </ul>
             ) : null}
             {diagnosis.category === "III_level4" ? (
-              <p className="mt-2.5 flex gap-2 border-t border-sb-v-no-fg pt-2.5 text-xs font-medium leading-relaxed text-sb-v-no-fg">
+              <p className="mt-2.5 flex gap-2 border-t border-sb-v-no-fg pt-2.5 text-sm font-medium leading-relaxed text-sb-v-no-fg">
                 <SeverityMark shape="triangle" className="mt-0.5 shrink-0" />
                 <span>
                   ※ 単純な飛行許可・承認の申請では実施できません。一等無人航空機操縦士 ＋ 第一種機体認証が必須です。
@@ -325,12 +325,12 @@ export function DiagnosisPanel({
             {/* IIA／IIB は正式名称が未確認（spec §11-D）。「相当」表記であることの断りと
                 出典を併記する。確定的に正式名称と断定しない。 */}
             {diagnosis.category === "II_A" || diagnosis.category === "II_B_eligible" ? (
-              <p className="mt-2 text-xs leading-relaxed text-sb-ink-3">
+              <p className="mt-2 text-sm leading-relaxed text-sb-ink-3">
                 ※「IIA／IIB」の呼称が国土交通省の正式名称か運用通称かは要確認のため「相当」表記としています（制度実体＝申請が必要な区分と不要化できる区分の別は確実）。
               </p>
             ) : null}
             {/* 出典の併記（契約：カテゴリー切り分けバナーに出典を併記）。 */}
-            <p className="mt-2 border-t border-sb-rule pt-2 text-xs tracking-wide text-sb-ink-3">
+            <p className="mt-2 border-t border-sb-rule pt-2 text-sm tracking-wide text-sb-ink-3">
               出典{" "}
               <a
                 href={def.sourceUrl}
@@ -353,7 +353,7 @@ export function DiagnosisPanel({
       })()}
 
       {/* 免責（全画面表示の契約）。最終確認は DIPS／航空局で。 */}
-      <div className="rounded-sb-m border-l-2 border-sb-ink bg-sb-base px-4 py-3 text-xs leading-relaxed text-sb-ink-2">
+      <div className="rounded-sb-m border-l-2 border-sb-ink bg-sb-base px-4 py-3 text-sm leading-relaxed text-sb-ink-2">
         <span className="sb-eyebrow">免責</span> {diagnosis.disclaimer}
       </div>
 
@@ -390,7 +390,7 @@ export function DiagnosisPanel({
                   }}
                 />
               </span>
-              <p className="sb-num text-xs tnum text-sb-ink-3">
+              <p className="sb-num text-sm tnum text-sb-ink-3">
                 完了{" "}
                 <span
                   className={
@@ -452,7 +452,7 @@ export function DiagnosisPanel({
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex flex-col gap-1">
             <p className="text-sm font-bold text-sb-ink">束ね PDF 出力</p>
-            <p className="max-w-prose text-xs leading-relaxed text-sb-ink-2">
+            <p className="max-w-prose text-sm leading-relaxed text-sb-ink-2">
               カテゴリー切り分け・必要手続き・提出期限・プリフィル表・書類ドラフトを 1 つの PDF にまとめます。
             </p>
           </div>
@@ -468,7 +468,7 @@ export function DiagnosisPanel({
           </PillButton>
         </div>
         {bundleError ? (
-          <p className="text-xs text-sb-v-no-fg" role="alert">
+          <p className="text-sm text-sb-v-no-fg" role="alert">
             {bundleError}
           </p>
         ) : null}
@@ -479,13 +479,13 @@ export function DiagnosisPanel({
           「2 つの別ポータル」であることを一目で示す。 */}
       <div className="flex flex-col gap-2 border-t border-sb-rule pt-4">
         <p className="sb-eyebrow">2 系統の手続き窓口（混同しないこと）</p>
-        <div className="grid grid-cols-1 gap-2 text-xs leading-relaxed text-sb-ink-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 text-sm leading-relaxed text-sb-ink-2 sm:grid-cols-2">
           <p className="border border-sb-rule bg-sb-base px-3 py-2.5 rounded-sb-m">
             <span className="mb-1 flex items-center gap-2">
-              <span className="inline-flex items-center border border-sb-edge bg-sb-surface px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
+              <span className="inline-flex items-center border border-sb-edge bg-sb-surface px-1.5 py-px sb-num text-sm font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
                 DRS
               </span>
-              <span className="text-xs text-sb-ink-3">機体登録（別系統）</span>
+              <span className="text-sm text-sb-ink-3">機体登録（別系統）</span>
             </span>
             <a
               href="https://www.dips-reg.mlit.go.jp/drs/"
@@ -499,10 +499,10 @@ export function DiagnosisPanel({
           </p>
           <p className="border border-sb-rule bg-sb-base px-3 py-2.5 rounded-sb-m">
             <span className="mb-1 flex items-center gap-2">
-              <span className="inline-flex items-center border border-sb-ink bg-sb-st-info-face px-1.5 py-px sb-num text-xs font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
+              <span className="inline-flex items-center border border-sb-ink bg-sb-st-info-face px-1.5 py-px sb-num text-sm font-medium uppercase tracking-wider text-sb-ink rounded-sb-m">
                 DIPS 2.0
               </span>
-              <span className="text-xs text-sb-ink-3">飛行許可・承認</span>
+              <span className="text-sm text-sb-ink-3">飛行許可・承認</span>
             </span>
             <a
               href="https://www.ossportal.dips.mlit.go.jp/"
@@ -518,7 +518,7 @@ export function DiagnosisPanel({
       </div>
 
       {/* 証跡メタ */}
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-sb-rule pt-4 text-xs tracking-wide text-sb-ink-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-sb-rule pt-4 text-sm tracking-wide text-sb-ink-3 sm:grid-cols-3">
         <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
           <dt className="sb-eyebrow">証跡 ID（申請支援の診断）</dt>
           <dd className="tnum normal-case tracking-normal text-sb-ink">{diagnosis.evidenceId}</dd>

@@ -40,7 +40,7 @@ export default async function PlaceDetailPage({ params }: { readonly params: Pro
           rows={[
             ["名称", p.name],
             ["住所", p.addressText ?? "—"],
-            ["座標（WGS84）", <span key="c" className="sb-num text-xs tnum" data-testid="place-coords">{p.latitude}, {p.longitude}</span>],
+            ["座標（WGS84）", <span key="c" className="sb-num text-sm tnum" data-testid="place-coords">{p.latitude}, {p.longitude}</span>],
             ["メモ", p.note ?? "—"],
           ]}
         />

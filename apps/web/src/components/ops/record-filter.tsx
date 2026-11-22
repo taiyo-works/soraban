@@ -19,7 +19,7 @@ export function RecordFilter({
       {Object.entries(hidden).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
-      <label className="col-span-2 flex min-w-0 flex-col gap-1 text-[13px] font-bold text-sb-ink-2 sm:col-span-1">
+      <label className="col-span-2 flex min-w-0 flex-col gap-1 text-[0.875rem] font-bold text-sb-ink-2 sm:col-span-1">
         機体
         <select name="aircraftId" defaultValue={value.aircraftId ?? ""} className={input}>
           <option value="">すべて</option>
@@ -30,16 +30,16 @@ export function RecordFilter({
           ))}
         </select>
       </label>
-      <label className="flex min-w-0 flex-col gap-1 text-[13px] font-bold text-sb-ink-2">
+      <label className="flex min-w-0 flex-col gap-1 text-[0.875rem] font-bold text-sb-ink-2">
         期間（から）
         <input type="date" name="from" defaultValue={value.from ?? ""} className={`${input} tnum`} />
       </label>
-      <label className="flex min-w-0 flex-col gap-1 text-[13px] font-bold text-sb-ink-2">
+      <label className="flex min-w-0 flex-col gap-1 text-[0.875rem] font-bold text-sb-ink-2">
         期間（まで）
         <input type="date" name="to" defaultValue={value.to ?? ""} className={`${input} tnum`} />
       </label>
       <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 sm:col-span-1 sm:justify-start">
-        <label className="flex min-h-12 items-center gap-2 text-[14px] text-sb-ink">
+        <label className="flex min-h-12 items-center gap-2 text-[0.875rem] text-sb-ink">
           <input type="checkbox" name="includeVoided" value="1" defaultChecked={value.includeVoided} className="sb-check" />
           取消済みも含める
         </label>

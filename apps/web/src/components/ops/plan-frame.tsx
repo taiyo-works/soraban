@@ -66,7 +66,7 @@ export function PlanFrame({
           <div className="flex flex-wrap items-center gap-2">
             <PlanStateBadge state={plan.state} label={plan.stateLabel} />
             {plan.freshness.stale ? <StaleBadge /> : null}
-            <span className="sb-num text-[12px] tnum text-sb-ink-3">版 {plan.version}</span>
+            <span className="sb-num text-[0.875rem] tnum text-sb-ink-3">版 {plan.version}</span>
           </div>
         </PageHeader>
         {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}

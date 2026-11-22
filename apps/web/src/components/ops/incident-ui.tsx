@@ -35,11 +35,11 @@ export function IncidentSafetyFirst({ large = false }: { readonly large?: boolea
               aria-hidden
               className={`inline-flex shrink-0 items-center justify-center rounded-sb-pill border sb-num leading-none tnum ${
                 i === 0 ? "border-sb-ink bg-sb-inverse text-sb-inverse-fg" : "border-sb-edge text-sb-ink"
-              } ${large ? "mt-0.5 h-8 w-8 text-lg" : "mt-px h-6 w-6 text-xs"}`}
+              } ${large ? "mt-0.5 h-8 w-8 text-lg" : "mt-px h-6 w-6 text-sm"}`}
             >
               {i + 1}
             </span>
-            <p className={`min-w-0 ${i === 0 ? (large ? "font-bold" : "text-[15px] font-bold leading-relaxed") : ""}`} data-testid="incident-safety-first-line">
+            <p className={`min-w-0 ${i === 0 ? (large ? "font-bold" : "text-[1rem] font-bold leading-relaxed") : ""}`} data-testid="incident-safety-first-line">
               {line}
             </p>
           </li>
@@ -84,7 +84,7 @@ export function IncidentReportRecordNotice() {
 
 /** 記号の小さな札（目安・報告の状態の印）。文字と並べて使い、色だけで意味を伝えない。 */
 const markChipClass =
-  "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-sb-s border px-0.5 sb-num text-xs font-bold leading-none";
+  "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-sb-s border px-0.5 sb-num text-sm font-bold leading-none";
 
 export type GuidanceViewModel = {
   readonly level: IncidentGuidanceLevel;
@@ -122,11 +122,11 @@ export function IncidentGuidanceView({ g, testId = "incident-guidance" }: { read
       <p className="text-sm leading-relaxed" data-testid={`${testId}-text`}>
         {g.text}
       </p>
-      <p className="border-t border-sb-rule pt-2.5 text-xs leading-relaxed text-sb-ink-2" data-testid={`${testId}-note`}>
+      <p className="border-t border-sb-rule pt-2.5 text-sm leading-relaxed text-sb-ink-2" data-testid={`${testId}-note`}>
         {g.note}
       </p>
       {g.revision !== undefined ? (
-        <p className="text-xs leading-relaxed text-sb-ink-2" data-testid={`${testId}-source`}>
+        <p className="text-sm leading-relaxed text-sb-ink-2" data-testid={`${testId}-source`}>
           <span className="sb-num tnum">類型のデータの版 {g.revision}</span>（{g.statusLabel}）：{g.source}
         </p>
       ) : null}
@@ -171,7 +171,7 @@ export function IncidentRow({ d }: { readonly d: IncidentDto }) {
       data-voided={d.voided ? "true" : "false"}
     >
       <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="sb-num text-[13px] tnum text-sb-ink-2" data-testid="incident-row-time">
+        <span className="sb-num text-[0.875rem] tnum text-sb-ink-2" data-testid="incident-row-time">
           {d.occurredAtJst}
         </span>
         <Badge tone="neutral" data-testid="incident-row-kind">
@@ -188,10 +188,10 @@ export function IncidentRow({ d }: { readonly d: IncidentDto }) {
           </Badge>
         ) : null}
       </span>
-      <span className={`break-all text-[15px] font-medium leading-snug ${d.summary ? "" : "text-sb-ink-2"}`} data-testid="incident-row-summary">
+      <span className={`break-all text-[1rem] font-medium leading-snug ${d.summary ? "" : "text-sb-ink-2"}`} data-testid="incident-row-summary">
         {d.summary ?? "（何が起きたかは未記入）"}
       </span>
-      <span className="grid grid-cols-1 gap-1 text-xs leading-relaxed text-sb-ink-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,0.5fr)] sm:gap-4">
+      <span className="grid grid-cols-1 gap-1 text-sm leading-relaxed text-sb-ink-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,0.5fr)] sm:gap-4">
         <span data-testid="incident-row-guidance">
           <span className="text-sb-ink-3">目安：</span>
           <span aria-hidden>{d.guidance.mark} </span>
@@ -237,7 +237,7 @@ export function LinkedIncidentsSection({ dto }: { readonly dto: PlanIncidentsDto
   return (
     <Section title="この飛行の事故・ヒヤリハット" aria-label="この飛行の事故・ヒヤリハット">
       <div className="flex flex-col gap-4" data-testid="incident-linked">
-        <p className="self-start sb-num text-xs tnum text-sb-ink-2" data-testid="incident-linked-count" data-count={dto.count}>
+        <p className="self-start sb-num text-sm tnum text-sb-ink-2" data-testid="incident-linked-count" data-count={dto.count}>
           {dto.count} 件
         </p>
         <IncidentList rows={dto.incidents} empty="この飛行に結び付いた事故・ヒヤリハットの記録はありません。" />
@@ -246,7 +246,7 @@ export function LinkedIncidentsSection({ dto }: { readonly dto: PlanIncidentsDto
             <Link prefetch={false} href={safetyHref} className={`${buttonOutlineBrandClass} self-start`} data-testid="incident-linked-safety">
               事故・ヒヤリハットとして記録する
             </Link>
-            <p className="text-xs leading-relaxed text-sb-ink-2">日誌の「安全に影響のあった事項」を、要約の初期値に入れて入力画面を開きます。記録は保存するまで作られません。</p>
+            <p className="text-sm leading-relaxed text-sb-ink-2">日誌の「安全に影響のあった事項」を、要約の初期値に入れて入力画面を開きます。記録は保存するまで作られません。</p>
           </div>
         ) : null}
         {dto.canCreate ? (
@@ -255,7 +255,7 @@ export function LinkedIncidentsSection({ dto }: { readonly dto: PlanIncidentsDto
             記録する
           </Link>
         ) : null}
-        <p className="opx-note !text-xs" data-testid="incident-linked-fact">
+        <p className="opx-note !text-sm" data-testid="incident-linked-fact">
           {dto.notices.fact}
         </p>
       </div>

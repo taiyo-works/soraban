@@ -116,12 +116,12 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
           const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e.firstElementChild as HTMLElement).backgroundColor));
           expect(faces.filter((f) => f === soft).length, `${label} 薄い主色の面`).toBe(current ? 1 : 0);
           await expectNoHorizontalScroll(page, label);
-          // 文字は 4.5:1 以上、12px 以上（v2 の最小）
+          // 文字は 4.5:1 以上、14px 以上（16-B：12→14）
           const samples = await collectTextSamples(page, '[data-testid="ops-bottom-nav"]');
           expect(samples.length, label).toBeGreaterThanOrEqual(5);
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
-            expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(12);
+            expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(14);
           }
           // 薄い主色の面の上のアイコンは主色（3:1 以上）
           if (current) {
@@ -159,7 +159,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
           for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) {
             expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           }
-          for (const k of ["aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(43.5);
+          for (const k of ["aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           await expect(side.locator('[aria-current="page"]'), label).toHaveCount(1);
           await expect(side.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
           const soft = await rgbOf(page, "var(--sb-primary-soft)");
@@ -167,7 +167,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
           const samples = await collectTextSamples(page, '[data-testid="ops-sidebar"]');
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
-            expect(s.fontSize, `${label} 「${s.text}」の大きさ（見出しも 12px 以上）`).toBeGreaterThanOrEqual(12);
+            expect(s.fontSize, `${label} 「${s.text}」の大きさ（見出しも 14px 以上）`).toBeGreaterThanOrEqual(14);
           }
           await expectNoHorizontalScroll(page, label);
         }
@@ -180,7 +180,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1280]) {
+      for (const w of [320, 360, 375, 768, 1280]) {
         await page.setViewportSize({ width: w, height: 800 });
         for (const url of ["/ops", "/ops/plans/new"]) {
           const label = `${scheme} ${w}px ${url}`;
@@ -301,8 +301,8 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     const back = page.locator("main").getByRole("link", { name: "点検の一覧" }).first();
     await expect(back).toHaveAttribute("href", "/ops/inspections");
     const bb = (await back.boundingBox())!;
-    expect(bb.width).toBeGreaterThanOrEqual(44);
-    expect(bb.height).toBeGreaterThanOrEqual(44);
+    expect(bb.width).toBeGreaterThanOrEqual(48);
+    expect(bb.height).toBeGreaterThanOrEqual(48);
     // 点検の入力の戻り先も「点検の一覧」
     await page.goto("/ops/inspections/new");
     await expect(page.locator("main").getByRole("link", { name: "点検の一覧" }).first()).toHaveAttribute("href", "/ops/inspections");
@@ -328,7 +328,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await page.goto("/ops/journal");
     await expect(page.getByTestId("journal-to-inspections")).toHaveAttribute("href", "/ops/inspections");
     await expect(page.getByTestId("journal-to-inspections")).toBeVisible();
-    expect((await page.getByTestId("journal-to-inspections").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await page.getByTestId("journal-to-inspections").boundingBox())!.height).toBeGreaterThanOrEqual(48);
     await expect(page.getByTestId("journal-tab-inspections")).toBeVisible();
     await page.getByTestId("journal-to-inspections").click();
     await page.waitForURL(/\/ops\/inspections$/);
@@ -336,25 +336,25 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await manager.dispose();
   });
 
-  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 43.5px 以上", async ({ page }) => {
+  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 800 });
         for (const url of ["/ops", "/ops/plans", "/ops/plans/new", "/ops/inspections", "/ops/inspections/new", "/ops/journal", "/ops/more", "/"]) {
           await page.goto(url);
           await expect(page.locator("main").first()).toBeVisible();
           await expectNoHorizontalScroll(page, `${scheme} ${w}px ${url}`);
         }
-        // メニューと入口（今回の部品）の押す部品は 43.5px 以上
+        // メニューと入口（今回の部品）の押す部品は 47.5px 以上
         for (const sel of ['[data-testid="ops-bottom-nav"] a', '[data-testid="ops-sidebar"] a', '[data-testid="judge-pills"] a']) {
           for (const url of ["/ops"]) {
             await page.goto(url);
             const hs = await page.locator(sel).evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).map((e) => [e.getBoundingClientRect().width, e.getBoundingClientRect().height]));
             for (const [bw, bh] of hs) {
-              expect(bw, `${scheme} ${w}px ${sel} 幅`).toBeGreaterThanOrEqual(43.5);
-              expect(bh, `${scheme} ${w}px ${sel} 高さ`).toBeGreaterThanOrEqual(43.5);
+              expect(bw, `${scheme} ${w}px ${sel} 幅`).toBeGreaterThanOrEqual(47.5);
+              expect(bh, `${scheme} ${w}px ${sel} 高さ`).toBeGreaterThanOrEqual(47.5);
             }
           }
         }

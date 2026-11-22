@@ -21,13 +21,13 @@
 .opx-nc-time {
   font-family: var(--font-num), sans-serif;
   font-variant-numeric: tabular-nums;
-  font-size: 40px;
+  font-size: 2.5rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.02em;
 }
 .opx-nc-title {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   line-height: 1.5;
   letter-spacing: 0.05em;
@@ -37,10 +37,10 @@
 }
 @media (min-width: 1024px) {
   .opx-nc-time {
-    font-size: 52px;
+    font-size: 3.25rem;
   }
   .opx-nc-title {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
   .opx-nc-primary {
     align-self: flex-start;
@@ -79,13 +79,13 @@
   height: 12px;
 }
 .opx-rs-name {
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 .opx-rs-state {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--sb-ink-3);
   white-space: nowrap;
@@ -124,7 +124,7 @@
 }
 @media (max-width: 400px) {
   .opx-rs-name {
-    font-size: 12px;
+    font-size: 0.875rem;
     letter-spacing: 0;
   }
 }
@@ -169,7 +169,7 @@
   border: 1.5px solid transparent;
   border-radius: var(--sb-r-m);
   background: var(--sb-surface);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .opx-edge-attn {
   border-style: dashed;
@@ -231,7 +231,7 @@
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   color: var(--sb-ink);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.4;
   text-align: left;
 }
@@ -283,7 +283,7 @@
   padding: 4px 0 4px 14px;
   border: 0;
   border-left: 5px solid var(--sb-ink);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.06em;
@@ -313,11 +313,11 @@
   min-height: 40px;
 }
 .ops-v2 .sb-sec-head h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 @media (min-width: 1024px) {
   .ops-v2 .sb-sec-head h2 {
-    font-size: 22px;
+    font-size: 1.375rem;
   }
 }
 /* 見出しの右に件数（次にやること） */
@@ -345,7 +345,7 @@
     flex-wrap: nowrap;
   }
   [data-testid="ops-today"] .sb-sec-head h2 {
-    font-size: 19px;
+    font-size: 1.1875rem;
   }
   [data-testid="ops-today"] .sb-row {
     padding-top: 10px;

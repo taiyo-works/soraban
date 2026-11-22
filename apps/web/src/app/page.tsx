@@ -191,10 +191,10 @@ export default function Home() {
               <li key={layer.title} className="sb-block flex flex-col gap-2 !p-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="sb-tag shrink-0 font-bold text-sb-ink">{layer.source}</span>
-                  <span className="text-xs text-sb-ink-3">{layer.coverage}</span>
+                  <span className="text-sm text-sb-ink-3">{layer.coverage}</span>
                 </div>
-                <p className="text-[15px] font-bold leading-snug text-sb-ink">{layer.title}</p>
-                <p className="text-xs leading-relaxed text-sb-ink-3">
+                <p className="text-[1rem] font-bold leading-snug text-sb-ink">{layer.title}</p>
+                <p className="text-sm leading-relaxed text-sb-ink-3">
                   {layer.dataset}
                   <span aria-hidden className="mx-1.5 text-sb-edge">
                     ／

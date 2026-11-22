@@ -237,7 +237,7 @@ function DateTimeInput({
         />
       </div>
       <FieldError id={errorId} message={error} />
-      <span id={hintId} className="text-xs text-sb-ink-3">
+      <span id={hintId} className="text-sm text-sb-ink-3">
         日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。
       </span>
     </fieldset>
@@ -298,19 +298,19 @@ function PlaceInput({
             現在地を入れる
           </button>
           {hasPos ? (
-            <span className="sb-num text-xs tnum text-sb-ink-2">
+            <span className="sb-num text-sm tnum text-sb-ink-2">
               {pos.lat || "—"}, {pos.lng || "—"}
               {pos.acc ? `（精度 約 ${pos.acc} m）` : ""}
             </span>
           ) : null}
         </div>
         {status ? (
-          <span role="status" className="text-xs text-sb-ink-2">
+          <span role="status" className="text-sm text-sb-ink-2">
             {status}
           </span>
         ) : null}
         <details open={coordOpen || undefined} className="group/coord">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-xs text-sb-ink [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm text-sb-ink [&::-webkit-details-marker]:hidden">
             <span aria-hidden className="inline-block transition-transform group-open/coord:rotate-90">
               ›
             </span>
@@ -325,11 +325,11 @@ function PlaceInput({
                 <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lng} onChange={(e) => onPos({ ...pos, lng: e.target.value })} />
               </Field>
             </div>
-            <span className="text-xs text-sb-ink-3">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
+            <span className="text-sm text-sb-ink-3">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
           </div>
         </details>
         <FieldError message={errors[keys.acc]} />
-        <span className="text-xs leading-relaxed text-sb-ink-3">
+        <span className="text-sm leading-relaxed text-sb-ink-3">
           位置は「保存」を押したときに限り、飛行日誌の記載事項（場所）として送られます。位置を続けて記録することはありません。
         </span>
       </div>
@@ -354,7 +354,7 @@ function Warnings({ items, testId = "record-warnings" }: { readonly items: reado
   if (items.length === 0) return null;
   return (
     <div data-testid={testId} className="flex flex-col gap-1.5 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-3">
-      <p className="text-[13px] font-bold text-sb-ink">確認してください（保存は止めません）</p>
+      <p className="text-[0.875rem] font-bold text-sb-ink">確認してください（保存は止めません）</p>
       <ul className="flex flex-col gap-1 text-sm text-sb-ink">
         {items.map((w) => (
           <li key={w} className="flex gap-1.5">
@@ -392,7 +392,7 @@ function DraftBar({
         restored ? "border-[1.5px] border-sb-ink bg-sb-st-info-face" : "bg-sb-sunken"
       }`}
     >
-      <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-sb-ink-2">
+      <p className="min-w-0 flex-1 text-[0.875rem] leading-relaxed text-sb-ink-2">
         {restored ? (
           <>
             <span className="font-medium text-sb-ink">前回の入力の続きです。</span>
@@ -469,7 +469,7 @@ function SaveRow({
         >
           {label}
         </button>
-        <span aria-live="polite" className="text-xs text-sb-ink-3">
+        <span aria-live="polite" className="text-sm text-sb-ink-3">
           {busy ? "送信しています…" : null}
         </span>
         {children}
@@ -1047,13 +1047,13 @@ export function FlightForm({
           }`}
           aria-live="polite"
         >
-          <span className="text-xs text-sb-ink-3">飛行時間</span>
+          <span className="text-sm text-sb-ink-3">飛行時間</span>
           {minutes && minutes.ok ? (
             <>
               <span className="sb-num text-3xl leading-none tnum text-sb-ink" data-testid="flight-minutes">
                 {formatHm(minutes.minutes)}
               </span>
-              {minutes.roundedUp ? <span className="text-xs text-sb-ink-2">（1 分未満は切り上げ）</span> : null}
+              {minutes.roundedUp ? <span className="text-sm text-sb-ink-2">（1 分未満は切り上げ）</span> : null}
             </>
           ) : (
             <span className="sb-num text-3xl leading-none text-sb-ink-3" data-testid="flight-minutes">
@@ -1061,12 +1061,12 @@ export function FlightForm({
             </span>
           )}
           {liveMinutesError ? (
-            <span className="basis-full text-xs text-sb-v-no-fg">
+            <span className="basis-full text-sm text-sb-v-no-fg">
               <span aria-hidden>! </span>
               {liveMinutesError}
             </span>
           ) : !minutes ? (
-            <span className="basis-full text-xs text-sb-ink-3">離陸・着陸の時刻を入れると、ここに表示します。</span>
+            <span className="basis-full text-sm text-sb-ink-3">離陸・着陸の時刻を入れると、ここに表示します。</span>
           ) : null}
         </div>
         <PlaceInput
@@ -1095,7 +1095,7 @@ export function FlightForm({
         <fieldset className="flex min-w-0 flex-col gap-3">
           <legend className="mb-1 text-sm text-sb-ink">
             特定飛行の形態
-            <span className="ml-2 text-xs text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
+            <span className="ml-2 text-sm text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
           </legend>
           {(
             [
@@ -1104,7 +1104,7 @@ export function FlightForm({
             ] as const
           ).map(([group, title]) => (
             <div key={group} className="flex flex-col gap-2">
-              <p aria-hidden className="sb-num text-[12px] uppercase tracking-wider text-sb-ink-3">
+              <p aria-hidden className="sb-num text-[0.875rem] uppercase tracking-wider text-sb-ink-3">
                 {title}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1158,7 +1158,7 @@ export function FlightForm({
         <fieldset className="flex min-w-0 flex-col gap-3">
           <legend className="mb-1 flex items-center gap-2 text-sm text-sb-ink">
             <span>不具合（記事）</span>
-            <span className="text-xs text-sb-ink-3">{v.defects.length === 0 ? "なし" : `${v.defects.length} 件`}</span>
+            <span className="text-sm text-sb-ink-3">{v.defects.length === 0 ? "なし" : `${v.defects.length} 件`}</span>
           </legend>
           {v.defects.map((d, i) => {
             const upd = (k: keyof DefectState, val: string) =>
@@ -1169,7 +1169,7 @@ export function FlightForm({
             return (
               <div key={i} className="flex flex-col gap-3 rounded-sb-m border border-sb-rule p-3" data-testid="defect-row">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="sb-num text-xs tnum text-sb-ink-3">不具合 {i + 1}</span>
+                  <span className="sb-num text-sm tnum text-sb-ink-3">不具合 {i + 1}</span>
                   <button type="button" className={smallGhostClass} onClick={() => set("defects", v.defects.filter((_, j) => j !== i))}>
                     不具合 {i + 1} を外す
                   </button>
@@ -1203,7 +1203,7 @@ export function FlightForm({
           >
             不具合を加える
           </button>
-          <span className="text-xs text-sb-ink-3">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
+          <span className="text-sm text-sb-ink-3">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
         </fieldset>
       </Step>
 
@@ -1543,14 +1543,14 @@ export function InspectionForm({
 
       <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-relaxed text-sb-ink-3 sm:max-w-md">
+          <p className="text-sm leading-relaxed text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
           <button type="button" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>
-        <p className="flex flex-wrap items-baseline gap-x-3 sb-num text-xs tnum text-sb-ink-2" aria-live="polite">
+        <p className="flex flex-wrap items-baseline gap-x-3 sb-num text-sm tnum text-sb-ink-2" aria-live="polite">
           <span>
             選択 {selectedCount} / {INSPECTION_ITEMS.length}
           </span>
@@ -1572,7 +1572,7 @@ export function InspectionForm({
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                   <span className="flex min-w-0 items-baseline gap-2 text-sm text-sb-ink">
-                    <span aria-hidden className="sb-num text-xs tnum text-sb-ink-3">
+                    <span aria-hidden className="sb-num text-sm tnum text-sb-ink-3">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {it.label}
@@ -1629,7 +1629,7 @@ export function InspectionForm({
         disabled={!allSelected}
       >
         {!allSelected ? (
-          <span className="text-xs text-sb-ink-3">
+          <span className="text-sm text-sb-ink-3">
             9 項目すべてを選ぶと保存できます（残り {INSPECTION_ITEMS.length - selectedCount} 項目）
           </span>
         ) : null}

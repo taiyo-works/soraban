@@ -92,7 +92,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
       ) : null}
       {error ? (
         <p className="sb-note-card is-error flex flex-col gap-0.5" role="alert" data-testid="current-location-error">
-          <span className="text-xs font-bold text-sb-v-no-fg">現在地を取得できませんでした</span>
+          <span className="text-sm font-bold text-sb-v-no-fg">現在地を取得できませんでした</span>
           <span>{error}</span>
         </p>
       ) : null}

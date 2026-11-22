@@ -22,7 +22,7 @@ const openReady = async (page: Page, url = "/"): Promise<void> => {
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 };
 
-// ───────────────────────── Q-8 タップ 44px ─────────────────────────
+// ───────────────────────── Q-8 タップ 48px ─────────────────────────
 
 type TapReport = { readonly tooSmall: string[]; readonly count: number; readonly tight: string[] };
 
@@ -79,7 +79,7 @@ const measureTapTargets = (page: Page): Promise<TapReport> =>
     for (const el of candidates) {
       const r = el.getBoundingClientRect();
       rects.push({ el, r });
-      if (r.width < 43.5 || r.height < 43.5) tooSmall.push(`${describe(el)} ${Math.round(r.width * 10) / 10}×${Math.round(r.height * 10) / 10}`);
+      if (r.width < 47.5 || r.height < 47.5) tooSmall.push(`${describe(el)} ${Math.round(r.width * 10) / 10}×${Math.round(r.height * 10) / 10}`);
     }
     // 押す部品どうしの間隔は 8px 以上（案）：重ならず、隣り合う（縦か横で重なる）のに 8px 未満の組
     const tight: string[] = [];
@@ -109,12 +109,12 @@ const geoContext = async (browser: Browser, baseURL: string | undefined, viewpor
     permissions: ["geolocation"],
   });
 
-test.describe("Q-8 タップ 44px（`/` の押す部品）", () => {
+test.describe("Q-8 タップ 48px（`/` の押す部品）", () => {
   for (const vp of [
     { width: 375, height: 812 },
     { width: 360, height: 740 },
   ]) {
-    test(`${vp.width}×${vp.height}：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 43.5px 以上で、部品どうしの間隔が 8px 以上`, async ({ browser, baseURL }, testInfo) => {
+    test(`${vp.width}×${vp.height}：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上`, async ({ browser, baseURL }, testInfo) => {
       const ctx = await geoContext(browser, baseURL, vp);
       const page = await ctx.newPage();
       // 1 初期（判定の結果が出る前の最初の描画）。通信を止めて、結果の出ていない状態を測る
@@ -584,7 +584,7 @@ const overflowReport = (page: Page) =>
   });
 
 test.describe("Q-13 はみ出し 0", () => {
-  for (const width of [360, 375, 768, 1024, 1280, 1440]) {
+  for (const width of [320, 360, 375, 768, 1024, 1280, 1440]) {
     for (const scheme of ["light", "dark"] as const) {
       test(`${width}px・${scheme}：横スクロールなし。文字・ボタン・チップが親の枠から出ない`, async ({ page }, testInfo) => {
         await page.emulateMedia({ colorScheme: scheme });
@@ -1010,7 +1010,7 @@ test.describe("B2 縦が長すぎない：規制カード・収録の一覧は�
     await expect(dd).not.toHaveAttribute("open", "");
     expect((await hint()).text).toBe('"開く"');
     const box = (await summary.boundingBox())!;
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     await summary.focus();
     expect(await summary.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe("solid");
   });
@@ -1075,12 +1075,12 @@ test.describe("N1 結論の札と責任の注記", () => {
   });
 });
 
-test.describe("N2 文字は 12px 以上", () => {
+test.describe("N2 文字は 14px 以上", () => {
   for (const [w, h] of [[375, 812], [1280, 800]] as const) {
-    test(`${w}px：/ の文字（地図の層の状態の札を含む）はすべて 12px 以上`, async ({ page }) => {
+    test(`${w}px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: h });
       await openReady(page);
-      await expectFontSize(page, "main", 12, `${w}px`);
+      await expectFontSize(page, "main", 14, `${w}px`);
     });
   }
 });

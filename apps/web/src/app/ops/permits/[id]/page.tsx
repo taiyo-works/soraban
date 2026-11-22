@@ -61,7 +61,7 @@ export default async function PermitDetailPage({
         <span>{p.placeSummary}</span>
         {p.placeScope.type === "circles"
           ? p.placeScope.circles.map((c, i) => (
-              <span key={i} className="sb-num text-xs tnum text-sb-ink-2">
+              <span key={i} className="sb-num text-sm tnum text-sb-ink-2">
                 {c.name ? `${c.name}：` : ""}
                 {c.lat}, {c.lng}／半径 {c.radiusM} m
               </span>
@@ -94,7 +94,7 @@ export default async function PermitDetailPage({
         />
         <PermitDeclaration declaration={p.declaration} noDipsNote={p.noDipsNote} />
         {p.notes.map((n) => (
-          <p key={n} className="text-xs leading-relaxed text-sb-ink-3" data-testid="permit-note">{n}</p>
+          <p key={n} className="text-sm leading-relaxed text-sb-ink-3" data-testid="permit-note">{n}</p>
         ))}
         {p.voided ? (
           <Note tone="red">この登録は取り消されています（誤登録の記録）。登録内容と版の履歴は残しています。訂正はできません。</Note>
@@ -135,7 +135,7 @@ export default async function PermitDetailPage({
             pilotOptions={opts.pilots}
             affectedCount={p.basisPlanCount}
           />
-          <p className="text-xs leading-relaxed text-sb-ink-3">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+          <p className="text-sm leading-relaxed text-sb-ink-3">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
         </Section>
       ) : null}
 

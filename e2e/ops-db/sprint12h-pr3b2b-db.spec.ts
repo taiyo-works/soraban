@@ -79,7 +79,7 @@ const open = async (page: Page, s: Screen, label: string): Promise<void> => {
 const modeOf = (page: Page): Promise<string | null> => page.evaluate(() => document.documentElement.getAttribute("data-mode"));
 
 test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴）", () => {
-  test("P3b2b-1. 文字：12px 以上・4.5:1 以上（明・暗。375px）。現場の 2 画面は 7:1 以上", async ({ page }) => {
+  test("P3b2b-1. 文字：14px 以上・4.5:1 以上（明・暗。375px）。現場の 2 画面は 7:1 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -89,13 +89,13 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
         const min = s.field ? 7 : 4.5;
         const samples = await collectTextSamples(page, root(s));
         expect(samples.length, label).toBeGreaterThan(0);
-        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < min || t.fontSize < (s.field ? 18 : 12))).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
+        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < min || t.fontSize < (s.field ? 18 : 14))).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
         expect(bad, label).toEqual([]);
       }
     }
   });
 
-  test("P3b2b-2. 押す部品：高さ 43.5px 以上（375×812・360×740）。現場は 56px 以上、主ボタンは 64px 以上", async ({ page }) => {
+  test("P3b2b-2. 押す部品：高さ 47.5px 以上（375×812・360×740）。現場は 56px 以上、主ボタンは 64px 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const [w, h] of [[375, 812], [360, 740]] as const) {
       await page.setViewportSize({ width: w, height: h });
@@ -110,7 +110,7 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
             const b = el.getBoundingClientRect();
             if (b.width === 0 || b.height === 0 || getComputedStyle(el).visibility === "hidden") continue;
             if (el.tagName === "A" && el.closest("p, dd")) continue;
-            if (b.height < (field ? 55.5 : 43.5)) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${b.width.toFixed(0)}×${b.height.toFixed(1)}`);
+            if (b.height < (field ? 55.5 : 47.5)) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${b.width.toFixed(0)}×${b.height.toFixed(1)}`);
             if (field && el.classList.contains("opx-btn-primary") && !el.hasAttribute("disabled") && b.height < 63.5) prim.push(`${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)} ${b.height.toFixed(1)}`);
           }
           return { out, prim };
@@ -125,7 +125,7 @@ test.describe("Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事�
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 900 });
         for (const s of SCREENS) {
           const label = `${scheme} ${w}px ${s.path}`;

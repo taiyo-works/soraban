@@ -208,7 +208,7 @@ export const FormError = ({ message }: { readonly message: string | null }) =>
 /** 入力欄のまとまり（狭い画面では 1 列、広い画面では 2 列）。 */
 export const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
   <fieldset className="flex min-w-0 flex-col gap-3">
-    <legend className="mb-1 text-[13px] font-bold tracking-wider text-sb-ink-2">{title}</legend>
+    <legend className="mb-1 text-[0.875rem] font-bold tracking-wider text-sb-ink-2">{title}</legend>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
   </fieldset>
 );
@@ -463,7 +463,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
             <span className="text-sm text-sb-ink-2">分</span>
           </div>
           <FieldError id={flightErrorId} message={flightError} />
-          <span id={`${flightId}-hint`} className="text-xs leading-relaxed text-sb-ink-3">
+          <span id={`${flightId}-hint`} className="text-sm leading-relaxed text-sb-ink-3">
             この機体をそらばんで記録し始める前に飛んだ時間の合計。分は 0〜59 で入力します（なければ 0 時間 0 分）。
           </span>
         </fieldset>
@@ -483,7 +483,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         <button type="submit" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -524,7 +524,7 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
         <button type="submit" className={buttonDangerClass} disabled={busy}>
           {label}を取り消す
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -680,7 +680,7 @@ export function PilotForm({
       </Group>
 
       <fieldset className="flex min-w-0 flex-col gap-1">
-        <legend className="mb-1 sb-num text-[12px] uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
+        <legend className="mb-1 sb-num text-[0.875rem] uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <label className={checkRowClass}>
             <input type="checkbox" className={checkboxClass} checked={v.limitationType} onChange={check("limitationType")} />
@@ -715,7 +715,7 @@ export function PilotForm({
         <button type="submit" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -778,7 +778,7 @@ export function MemberInviteForm() {
         <button type="submit" className={buttonClass} disabled={busy}>
           招待する
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -847,7 +847,7 @@ export function MemberControls({
         <button type="submit" className={subtleButtonClass} disabled={busy}>
           変更する
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );

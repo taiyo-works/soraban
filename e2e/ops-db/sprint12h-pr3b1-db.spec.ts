@@ -84,7 +84,7 @@ test.beforeAll(async () => {
 });
 
 test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面）", () => {
-  test("P3b1-1. 文字：12px 以上、コントラスト 4.5:1 以上（明・暗。375px）。主要 12 画面", async ({ page }) => {
+  test("P3b1-1. 文字：14px 以上、コントラスト 4.5:1 以上（明・暗。375px）。主要 12 画面", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -95,13 +95,13 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
         const samples = await collectTextSamples(page, "main");
         expect(samples.length, label).toBeGreaterThan(0);
         // 背後の大きな薄い番号（装飾。aria-hidden）は読ませない文字なので、数えない
-        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 12)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
+        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 14)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
         expect(bad, `${label}`).toEqual([]);
       }
     }
   });
 
-  test("P3b1-2. 押す部品：高さ 43.5px 以上（ボタン・リンクのボタン・入力欄・select・summary・チップ・戻りリンク）。375×812・360×740。文の中のリンクは除く", async ({ page }) => {
+  test("P3b1-2. 押す部品：高さ 47.5px 以上（ボタン・リンクのボタン・入力欄・select・summary・チップ・戻りリンク）。375×812・360×740。文の中のリンクは除く", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const [w, h] of [[375, 812], [360, 740]] as const) {
       await page.setViewportSize({ width: w, height: h });
@@ -118,7 +118,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
             if (getComputedStyle(el).visibility === "hidden") continue;
             // 文の中の語句のリンク（段落・項目の値の中）は除く
             if (el.tagName === "A" && el.closest("p, dd")) continue;
-            if (r.height < 43.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
+            if (r.height < 47.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
           }
           return out;
         });
@@ -131,7 +131,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 900 });
         for (const s of SCREENS) {
           const label = `${scheme} ${w}px ${s}`;

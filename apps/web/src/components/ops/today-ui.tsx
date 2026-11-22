@@ -83,7 +83,7 @@ function Route({ stages, compact = false }: { readonly stages: readonly RouteSta
 function Fact({ label, children }: { readonly label: string; readonly children: ReactNode }) {
   return (
     <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1">
-      <dt className="text-[13px] text-sb-ink-3">{label}</dt>
+      <dt className="text-[0.875rem] text-sb-ink-3">{label}</dt>
       <dd className="min-w-0 text-sb-ink [text-wrap:pretty]">{children}</dd>
     </div>
   );
@@ -99,8 +99,8 @@ function RouteBand({ card, next }: { readonly card: TodayCardDto; readonly next:
   return (
     <div className="flex flex-col gap-2" data-testid="today-card-route">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-[13px] font-bold text-sb-ink-2">行程</p>
-        <p className="opx-num text-[13px] text-sb-ink-3" data-testid="today-card-route-count">
+        <p className="text-[0.875rem] font-bold text-sb-ink-2">行程</p>
+        <p className="opx-num text-[0.875rem] text-sb-ink-3" data-testid="today-card-route-count">
           済 {done} / {card.journey.length}
         </p>
       </div>
@@ -134,7 +134,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
   return (
     <section aria-label={card.reasonLabel} data-testid="today-card" data-reason={card.reason} data-plan-id={card.planId} className="sb-block opx-nc">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <p className="text-[13px] font-bold text-sb-ink-2" data-testid="today-card-reason">
+        <p className="text-[0.875rem] font-bold text-sb-ink-2" data-testid="today-card-reason">
           {card.reasonLabel}
         </p>
         <TodayStatus badge={card.badge} />
@@ -144,7 +144,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
           <p className="opx-nc-time" data-testid="today-card-time">
             {card.timeLabel}
           </p>
-          <p className="opx-num text-[13px] text-sb-ink-3" data-testid="today-card-date">
+          <p className="opx-num text-[0.875rem] text-sb-ink-3" data-testid="today-card-date">
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>
           </p>
         </div>
@@ -153,13 +153,13 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
         </h2>
         <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sb-ink-2">
           <span>
-            <span className="text-[13px] text-sb-ink-3">機体 </span>
+            <span className="text-[0.875rem] text-sb-ink-3">機体 </span>
             <span className="font-bold text-sb-ink" data-testid="today-card-aircraft">
               <span className="opx-num">{card.registrationMark}</span>（{card.modelName}）
             </span>
           </span>
           <span>
-            <span className="text-[13px] text-sb-ink-3">操縦者 </span>
+            <span className="text-[0.875rem] text-sb-ink-3">操縦者 </span>
             <span className="font-bold text-sb-ink" data-testid="today-card-pilot">
               {card.pilotName}
             </span>
@@ -222,7 +222,7 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
   const actions = canPlan ? empty.actions : empty.actions.filter((a) => a.href !== PLAN_NEW_HREF);
   return (
     <section aria-label="今日の飛行" className="sb-block flex flex-col gap-3" data-testid="today-empty">
-      <p className="text-[18px] font-bold leading-snug" data-testid="today-empty-message">
+      <p className="text-[1.125rem] font-bold leading-snug" data-testid="today-empty-message">
         {empty.message}
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -239,7 +239,7 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
 /** 「計画の一覧へ」（次にやることの見出しの右。押す高さは 44px 以上）。 */
 function PlansLink({ href }: { readonly href: string }) {
   return (
-    <a href={href} className="inline-flex min-h-11 items-center text-[14px] font-bold text-sb-ink underline decoration-sb-primary decoration-[3px] underline-offset-4" data-testid="today-plans-link">
+    <a href={href} className="inline-flex min-h-11 items-center text-[0.875rem] font-bold text-sb-ink underline decoration-sb-primary decoration-[3px] underline-offset-4" data-testid="today-plans-link">
       計画の一覧へ
     </a>
   );
@@ -286,23 +286,23 @@ function HomeActionRow({ action, today }: { readonly action: TodayNextAction; re
             {pill.text}
           </span>
           {action.planTitle ? (
-            <span className="min-w-0 text-[13px] text-sb-ink-3" data-testid="today-next-action-plan">
+            <span className="min-w-0 text-[0.875rem] text-sb-ink-3" data-testid="today-next-action-plan">
               {action.planTitle}
             </span>
           ) : null}
         </span>
-        <span className="text-[15px] font-bold leading-snug text-sb-ink" data-testid="today-next-action-label">
+        <span className="text-[1rem] font-bold leading-snug text-sb-ink" data-testid="today-next-action-label">
           {action.label}
         </span>
-        <span className="text-[13px] leading-relaxed text-sb-ink-2 [text-wrap:pretty]">{day(action.reason)}</span>
+        <span className="text-[0.875rem] leading-relaxed text-sb-ink-2 [text-wrap:pretty]">{day(action.reason)}</span>
         {due ? (
           <span className="flex flex-col gap-0.5" data-testid="today-next-action-due">
-            <span className="text-[13px] leading-relaxed text-sb-ink [text-wrap:pretty]">{day(due.head)}</span>
-            {due.note ? <span className="text-[12px] leading-relaxed text-sb-ink-3 [text-wrap:pretty]">{due.note}</span> : null}
+            <span className="text-[0.875rem] leading-relaxed text-sb-ink [text-wrap:pretty]">{day(due.head)}</span>
+            {due.note ? <span className="text-[0.875rem] leading-relaxed text-sb-ink-3 [text-wrap:pretty]">{due.note}</span> : null}
           </span>
         ) : null}
         {!action.canAct ? (
-          <span className="text-[13px] text-sb-ink-3" data-testid="today-next-action-cannot">
+          <span className="text-[0.875rem] text-sb-ink-3" data-testid="today-next-action-cannot">
             {action.id === "register_permit" ? "運航管理者に依頼してください（許可・承認の登録は運航管理者だけが行えます）。" : "この操作は運航管理者または計画の操縦者本人が行います。"}
           </span>
         ) : null}
@@ -356,7 +356,7 @@ export function TodayNextActions({
         <div className="sb-sec-head sb-sec-row">
           <h2 id="today-next-h">次にやること</h2>
           <span className="flex items-center gap-x-4">
-            {total ? <span className="sb-num text-[13px] text-sb-ink-3">{total} 件</span> : null}
+            {total ? <span className="sb-num text-[0.875rem] text-sb-ink-3">{total} 件</span> : null}
             {plansHref ? <PlansLink href={plansHref} /> : null}
           </span>
         </div>
@@ -393,14 +393,14 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
               {/* 一覧の行は上下 14px。ここだけ 8px に戻す。2 行の期限を、375×812 の最初の画面（下タブ 60px を除く）に収めるため */}
               <a href={d.href} className="sb-row !py-2" data-testid="deadline-link">
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[15px] font-bold leading-snug">{d.what}</span>
-                  <span className="break-words text-[13px] text-sb-ink-2">
+                  <span className="text-[1rem] font-bold leading-snug">{d.what}</span>
+                  <span className="break-words text-[0.875rem] text-sb-ink-2">
                     {d.subject}
                     {d.licenseStatus ? `　${LICENSE_RENEWAL_LABEL[d.licenseStatus]}` : ""}
                   </span>
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-1">
-                  <span className="sb-num text-[13px] text-sb-ink">
+                  <span className="sb-num text-[0.875rem] text-sb-ink">
                     <time dateTime={d.date}>{formatDay(d.date, today)}</time>
                   </span>
                   {d.overdue || d.daysLeft <= 30 ? (
@@ -409,7 +409,7 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
                       {d.leftLabel}
                     </span>
                   ) : (
-                    <span className="text-[13px] text-sb-ink-3">{d.leftLabel}</span>
+                    <span className="text-[0.875rem] text-sb-ink-3">{d.leftLabel}</span>
                   )}
                 </span>
               </a>
@@ -417,7 +417,7 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
           ))}
         </ul>
       )}
-      <p className="text-[12.5px] text-sb-ink-3" data-testid="home-deadlines-note">
+      <p className="text-[0.875rem] text-sb-ink-3" data-testid="home-deadlines-note">
         機体の期限は、記録する場所がまだないため出ません。
       </p>
     </section>
@@ -439,13 +439,13 @@ export function TodayUpcoming({ flights, today }: { readonly flights: readonly T
             <li key={f.planId} data-testid="upcoming-row" data-plan-id={f.planId}>
               <a href={f.href} className="sb-row !flex-col !items-stretch !gap-2" data-testid="upcoming-link">
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="min-w-0 text-[15px] font-bold leading-snug">
+                  <span className="min-w-0 text-[1rem] font-bold leading-snug">
                     <span className="sb-num">
                       <time dateTime={f.plannedDate}>{formatDay(f.plannedDate, today)}</time>
                     </span>{" "}
                     {f.title}
                   </span>
-                  <span className="text-[13px] text-sb-ink-3">あと {f.daysLeft} 日</span>
+                  <span className="text-[0.875rem] text-sb-ink-3">あと {f.daysLeft} 日</span>
                 </span>
                 <Route stages={f.journey} compact />
               </a>

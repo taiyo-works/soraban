@@ -56,7 +56,7 @@ export function FormField({
 }
 
 const CONTROL =
-  "block w-full min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[16px] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
+  "block w-full min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[1rem] text-fg placeholder:text-fg-mute transition-colors duration-[var(--dur)] min-h-11 field:min-h-14 field:text-[1.125rem] " +
   "hov:border-fg foc:border-accent disabled:cursor-not-allowed disabled:border-line disabled:bg-sunken disabled:text-fg-mute";
 const CONTROL_ERROR = "!border-danger-line";
 

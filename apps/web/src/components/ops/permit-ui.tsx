@@ -45,7 +45,7 @@ export function PermitDeclaration({ declaration, noDipsNote }: { readonly declar
         <span aria-hidden className="mr-1.5 sb-num">!</span>
         <span data-testid="permit-declaration-text">{declaration}</span>
       </p>
-      <p className="text-xs leading-relaxed text-sb-ink-2">
+      <p className="text-sm leading-relaxed text-sb-ink-2">
         <span data-testid="permit-no-dips-note">{noDipsNote}</span>
       </p>
     </div>
@@ -93,7 +93,7 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
       {summary.numbers.map((n) => (
         <li key={n.numberText} className={`opx-edge-row ${MATCH_EDGE[n.status]}`.trim()} data-testid="plan-permit-row" data-status={n.status}>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="break-all sb-num text-[15px] text-sb-ink" data-testid="plan-permit-number">{n.numberText}</span>
+            <span className="break-all sb-num text-[1rem] text-sb-ink" data-testid="plan-permit-number">{n.numberText}</span>
             <Badge tone={MATCH_TONE[n.status]} data-testid="plan-permit-status">{n.statusLabel}</Badge>
           </p>
           {n.reasons.length > 0 ? (
@@ -104,7 +104,7 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
             </ul>
           ) : null}
           {n.registrationId ? (
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-sb-ink-2">
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-sb-ink-2">
               <span className="sb-num tnum" data-testid="plan-permit-version">版 {n.versionNo}</span>
               {n.validFrom && n.validTo ? (
                 <span className="sb-num tnum">{n.validFrom} 〜 {n.validTo}</span>
@@ -116,13 +116,13 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
             </p>
           ) : null}
           {n.conditionsText ? (
-            <p className="break-all text-xs leading-relaxed text-sb-ink-2" data-testid="plan-permit-conditions">
+            <p className="break-all text-sm leading-relaxed text-sb-ink-2" data-testid="plan-permit-conditions">
               <span className="font-medium text-sb-ink">許可書の条件（照合していません）：</span>
               {n.conditionsText}
             </p>
           ) : null}
           {n.scopeNotes.map((s) => (
-            <p key={s} className="text-xs leading-relaxed text-sb-ink-2">{s}</p>
+            <p key={s} className="text-sm leading-relaxed text-sb-ink-2">{s}</p>
           ))}
         </li>
       ))}
@@ -134,8 +134,8 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
 export function CandidateSummary({ c }: { readonly c: PlanPermitCandidateDto }) {
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
-      <span className="break-all sb-num text-[13px] text-sb-ink">{c.permitNumber}</span>
-      <span className="text-xs text-sb-ink-2">
+      <span className="break-all sb-num text-[0.875rem] text-sb-ink">{c.permitNumber}</span>
+      <span className="text-sm text-sb-ink-2">
         {c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}
       </span>
     </span>
@@ -157,19 +157,19 @@ export function PermitBasisSection({ basis }: { readonly basis: readonly PermitB
           {basis.map((b) => (
             <li key={`${b.registrationId}-${b.versionNo}`} className={`opx-edge-row ${b.versionExists && b.hashMatches ? "" : "opx-edge-attn"}`.trim()} data-testid="basis-permit" data-applied={String(b.applied)}>
               <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="break-all sb-num text-[15px] text-sb-ink" data-testid="basis-permit-number">{b.permitNumber}</span>
+                <span className="break-all sb-num text-[1rem] text-sb-ink" data-testid="basis-permit-number">{b.permitNumber}</span>
                 <Badge tone={b.applied ? "green" : "brand"} data-testid="basis-permit-applied">
                   {b.applied ? "● 適用" : "◇ 参考（空港等周辺。判定の段は変えていません）"}
                 </Badge>
-                <span className="sb-num text-xs tnum text-sb-ink-2" data-testid="basis-permit-version">版 {b.versionNo}</span>
+                <span className="sb-num text-sm tnum text-sb-ink-2" data-testid="basis-permit-version">版 {b.versionNo}</span>
                 {b.versionExists && b.hashMatches ? (
                   <Badge tone="green" data-testid="basis-permit-hash">✓ 版のハッシュが一致します</Badge>
                 ) : (
                   <Badge tone="amber" data-testid="basis-permit-hash">! 版が一致しません</Badge>
                 )}
               </p>
-              <p className="break-all sb-num text-xs text-sb-ink-2" data-testid="basis-permit-hash-value">{b.versionHash}</p>
-              <p className="text-xs leading-relaxed text-sb-ink-2">
+              <p className="break-all sb-num text-sm text-sb-ink-2" data-testid="basis-permit-hash-value">{b.versionHash}</p>
+              <p className="text-sm leading-relaxed text-sb-ink-2">
                 <span data-testid="basis-permit-period">有効期間：{b.validFrom} 〜 {b.validTo}</span>
                 <span className="ml-3">照合した飛行の日付：{b.window.from === b.window.to ? b.window.from : `${b.window.from} 〜 ${b.window.to}`}</span>
                 <span className="ml-3">関係した種類：{b.kinds.map((k) => PERMIT_KIND_LABEL[k] ?? k).join("、")}</span>
@@ -211,23 +211,23 @@ export function PermitVersionList({ versions, highlight }: { readonly versions: 
               data-highlight={String(highlight === v.versionNo)}
             >
               <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="sb-num text-xs tnum text-sb-ink-3">版 {v.versionNo}</span>
+                <span className="sb-num text-sm tnum text-sb-ink-3">版 {v.versionNo}</span>
                 <Badge tone={v.op === "void" ? "red" : v.op === "create" ? "brand" : "neutral"} data-testid="permit-version-op">
                   {v.op === "create" ? "登録" : v.op === "void" ? "取消" : content.status === "revoked" && v.changedFields.includes("状態") ? "失効" : "訂正"}
                 </Badge>
                 {highlight === v.versionNo ? <Badge tone="brand" data-testid="permit-version-highlight">◆ 判定の根拠にした版</Badge> : null}
-                <time dateTime={v.createdAt} className="sb-num text-[13px] tnum">{v.createdAtJst}</time>
+                <time dateTime={v.createdAt} className="sb-num text-[0.875rem] tnum">{v.createdAtJst}</time>
                 <span className="break-all">{v.actorName}</span>
               </p>
-              {v.reason ? <p className="break-all text-sb-ink-2"><span className="text-xs text-sb-ink-3">理由：</span>{v.reason}</p> : null}
+              {v.reason ? <p className="break-all text-sb-ink-2"><span className="text-sm text-sb-ink-3">理由：</span>{v.reason}</p> : null}
               {v.changedFields.length > 0 ? (
                 <p className="text-sb-ink-2" data-testid="permit-version-changed">
-                  <span className="text-xs text-sb-ink-3">変わった項目：</span>
+                  <span className="text-sm text-sb-ink-3">変わった項目：</span>
                   {v.changedFields.join("、")}
                 </p>
               ) : null}
-              <p className="break-all sb-num text-xs text-sb-ink-2" data-testid="permit-version-hash">{v.contentHash}</p>
-              <p className="break-all text-xs text-sb-ink-2" data-testid="permit-version-content">
+              <p className="break-all sb-num text-sm text-sb-ink-2" data-testid="permit-version-hash">{v.contentHash}</p>
+              <p className="break-all text-sm text-sb-ink-2" data-testid="permit-version-content">
                 <span className="text-sb-ink-3">この版の内容：</span>
                 番号 {content.permitNumber}／{content.coverage === "blanket" ? "包括許可" : "個別許可"}／{content.validFrom} 〜 {content.validTo}
                 {content.status === "revoked" ? `／失効日 ${content.revokedOn}` : ""}
@@ -251,8 +251,8 @@ export function BasisPlanList({ plans, count }: { readonly plans: readonly Permi
             <li key={p.planId} className="rounded-sb-m bg-sb-surface" data-testid="permit-basis-plan">
               <Link prefetch={false} href={`/ops/plans/${p.planId}/judgement`} className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 rounded-sb-m px-3 py-2.5 text-sm hover:bg-sb-hover">
                 <span className="break-words text-sb-ink">{p.title}</span>
-                <span className="sb-num text-xs tnum text-sb-ink-2">{p.plannedDate}</span>
-                <span className="sb-num text-xs tnum text-sb-ink-3">根拠の版 {p.versionNo ?? "—"}</span>
+                <span className="sb-num text-sm tnum text-sb-ink-2">{p.plannedDate}</span>
+                <span className="sb-num text-sm tnum text-sb-ink-3">根拠の版 {p.versionNo ?? "—"}</span>
                 {!p.isCurrentVersion ? <Badge tone="amber">! 登録は版が進んでいます（判定が古い）</Badge> : null}
                 {!p.applied ? <Badge tone="brand">◇ 参考</Badge> : null}
               </Link>

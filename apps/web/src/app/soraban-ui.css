@@ -129,7 +129,7 @@
 .sb-sec-head h2 {
   position: relative;
   z-index: 1;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1.4;
   letter-spacing: 0.06em;
   font-weight: 700;
@@ -147,13 +147,13 @@
 .sb-sec-note {
   position: relative;
   z-index: 1;
-  font-size: 13px;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: var(--sb-ink-3);
 }
 @media (min-width: 1024px) {
   .sb-sec-head h2 {
-    font-size: 26px;
+    font-size: 1.625rem;
   }
 }
 
@@ -200,7 +200,7 @@
   border: 1px solid transparent;
   cursor: pointer;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 1rem;
   line-height: 1.3;
   text-align: center;
   text-decoration: none;
@@ -266,7 +266,7 @@
   color: var(--sb-on-primary);
   --sb-pill-ar: 48px;
   min-height: var(--sb-hit-primary);
-  font-size: 16px;
+  font-size: 1rem;
 }
 .sb-pill-primary .sb-pill-arrow {
   background: var(--sb-on-primary);
@@ -297,7 +297,7 @@
   --sb-pill-ar: 40px;
   --sb-pill-gap: 10px;
   min-height: var(--sb-hit);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 /* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、対称の余白を取らず、
  * 左の余白と丸との間を詰めて、文字は「左の縁と丸のあいだ」の中央に置く（唯一の例外。幅が足りない） */
@@ -364,7 +364,7 @@
   border: 1.5px solid var(--sb-edge);
   background: var(--sb-control);
   color: var(--sb-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -406,7 +406,7 @@
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   border: 1px solid var(--sb-rule);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.4;
   color: var(--sb-ink-2);
   font-weight: 500;
@@ -430,7 +430,7 @@
   min-height: 30px;
   padding: 3px 14px 3px 8px;
   border-radius: var(--sb-pill);
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
@@ -500,13 +500,13 @@
   border-radius: var(--sb-r-m);
 }
 .sb-v-eyebrow {
-  font-size: 13px;
+  font-size: 0.875rem;
   color: var(--sb-ink-3);
   font-weight: 500;
   letter-spacing: 0.08em;
 }
 .sb-v-word {
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 0.08em;
@@ -516,7 +516,7 @@
 }
 @media (min-width: 1024px) {
   .sb-v-word {
-    font-size: 34px;
+    font-size: 2.125rem;
   }
   .sb-v-big {
     width: 76px;
@@ -531,7 +531,7 @@
 /* ===== 入力 ===== */
 .sb-label {
   display: block;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -542,7 +542,7 @@
   border-radius: var(--sb-r-m);
   background: var(--sb-field);
   padding: 0 16px;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--sb-ink);
   letter-spacing: 0.03em;
 }
@@ -566,17 +566,17 @@ select.sb-input {
   opacity: 1;
 }
 .sb-hint {
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--sb-ink-3);
 }
 .sb-field-text {
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--sb-ink-2);
 }
 .sb-eyebrow {
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--sb-ink-2);
@@ -687,7 +687,7 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   line-height: 1.2;
@@ -709,7 +709,7 @@ input.sb-check:disabled {
 .sb-hero-sub {
   display: block;
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 1.5;
@@ -726,7 +726,7 @@ input.sb-check:disabled {
   gap: 7px;
 }
 .sb-lead {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--sb-ink-2);
   max-width: 46rem;
@@ -738,7 +738,7 @@ input.sb-check:disabled {
 .sb-ops-note {
   border-left: 3px solid var(--sb-edge);
   padding-left: 12px;
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: var(--sb-ink-3);
 }
@@ -756,7 +756,7 @@ input.sb-check:disabled {
   border-radius: var(--sb-pill);
   background: var(--sb-control);
   border: 1px solid var(--sb-rule);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 .sb-facts dt {
@@ -770,7 +770,7 @@ input.sb-check:disabled {
 .sb-disclaimer-short {
   border-left: 3px solid var(--sb-ink);
   padding-left: 12px;
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: var(--sb-ink-2);
   max-width: 46rem;
@@ -789,7 +789,7 @@ input.sb-check:disabled {
     margin-bottom: 8px;
   }
   .sb-band-first .sb-sec-head h2 {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
   .sb-block {
     padding: 12px 14px 14px;
@@ -811,7 +811,7 @@ input.sb-check:disabled {
     padding: 40px 32px 0;
   }
   .sb-brand {
-    font-size: 46px;
+    font-size: 2.875rem;
   }
   .sb-brand-mark {
     width: 56px;
@@ -822,7 +822,7 @@ input.sb-check:disabled {
   }
   .sb-hero-sub {
     max-width: none;
-    font-size: 19px;
+    font-size: 1.1875rem;
     margin-top: 6px;
   }
   .sb-intro {
@@ -870,7 +870,7 @@ input.sb-check:disabled {
   border-radius: var(--sb-r-m);
   background: var(--sb-surface);
   padding: 10px 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--sb-ink-2);
 }
@@ -984,14 +984,14 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 .sb-layer-sources[open] {
   padding-bottom: 12px;
 }
 .sb-layer-group {
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--sb-ink-2);
   margin: 10px 0 6px;
@@ -1003,7 +1003,7 @@ input.sb-check:disabled {
   padding: 0 8px;
   border-radius: var(--sb-pill);
   border: 1px solid var(--sb-edge);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.4;
   color: var(--sb-ink-2);
@@ -1025,7 +1025,7 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   background: var(--sb-sunken);
   color: var(--sb-ink);
@@ -1118,12 +1118,12 @@ input.sb-check:disabled {
   display: none;
 }
 .sb-disc-title {
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.4;
 }
 .sb-disc-note {
-  font-size: 12px;
+  font-size: 0.875rem;
   color: var(--sb-ink-2);
 }
 /* 開閉の印：矢印の向き（閉＝下向き、開＝上向き）と、文字（開く／閉じる）。動きは付けない（動きは 2 つだけ） */
@@ -1135,7 +1135,7 @@ input.sb-check:disabled {
   gap: 6px;
   min-height: 44px;
   padding: 0 4px;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--sb-ink-2);
 }
@@ -1311,7 +1311,7 @@ a.sb-row:focus-visible .sb-go-dot {
   padding: 6px 16px;
   border-radius: var(--sb-pill);
   border: 2px dashed var(--sb-edge);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.2;
   color: var(--sb-ink-3);

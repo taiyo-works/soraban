@@ -415,8 +415,11 @@ describe("12h P1-7 soraban-tokens.css と v2 の見本（docs/design/tokens-v2�
     expect([light["--sb-dur"], light["--sb-dur-press"], light["--sb-dur-sheet"], light["--sb-dur-state"]]).toEqual(["180ms", "120ms", "280ms", "300ms"]);
     expect(light["--sb-ease"]).toBe("cubic-bezier(0.2, 0, 0, 1)");
     expect([1, 2, 3, 4, 5, 6, 8, 10, 12].map((n) => light[`--sb-sp-${n}`])).toEqual(["4px", "8px", "12px", "16px", "20px", "24px", "32px", "40px", "48px"]);
-    expect([light["--sb-hit-min"], light["--sb-hit"], light["--sb-hit-primary"]]).toEqual(["44px", "48px", "56px"]);
+    expect([light["--sb-hit-min"], light["--sb-hit"], light["--sb-hit-primary"]]).toEqual(["48px", "48px", "56px"]); // 16-B：44→48
     expect([field["--sb-hit-min"], field["--sb-hit"], field["--sb-hit-primary"], field["--sb-hit-row"]]).toEqual(["56px", "56px", "64px", "64px"]);
+    // 16-B：文字の大きさは rem（1rem = 16px）。本文 16（現場 18）、補足 14（現場も 14）
+    expect([light["--sb-fs-body"], light["--sb-fs-note"]]).toEqual(["1rem", "0.875rem"]);
+    expect([field["--sb-fs-body"], field["--sb-fs-note"]]).toEqual(["1.125rem", "0.875rem"]);
     // 暗の地は純黒でなく青みのある黒（青 ≥ 赤）
     for (const k of ["--sb-base", "--sb-surface", "--sb-sunken"]) {
       const h = dark[k]!;

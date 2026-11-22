@@ -53,10 +53,10 @@ export default async function PlanJournalPage({ params }: { readonly params: Pro
               <Link prefetch={false} href={`/ops/flights/new?planId=${plan.id}`} className={`${buttonOutlineBrandClass} self-start`} data-testid="plan-make-flight">
                 飛行記録を作る
               </Link>
-              <p className="text-xs text-sb-ink-3">機体・操縦者・目的・場所・特定飛行の形態を引き継ぎます。離陸・着陸の時刻は、実際の時刻を入れてください。</p>
+              <p className="text-sm text-sb-ink-3">機体・操縦者・目的・場所・特定飛行の形態を引き継ぎます。離陸・着陸の時刻は、実際の時刻を入れてください。</p>
             </div>
           ) : null}
-          <p className="text-xs text-sb-ink-3">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
+          <p className="text-sm text-sb-ink-3">{JUDGEMENT_LINK_MISSING_LABEL}の記録は、飛行記録の一覧と詳細に出ます。</p>
         </Section>
 
         <LinkedIncidentsSection dto={planIncidents} />

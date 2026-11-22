@@ -89,7 +89,7 @@ export type IncidentFormInitial = {
 
 const ErrorText = ({ message, testId }: { readonly message?: string; readonly testId?: string }) =>
   message ? (
-    <span role="alert" className="text-xs font-bold leading-relaxed text-sb-v-no-fg" data-testid={testId}>
+    <span role="alert" className="text-sm font-bold leading-relaxed text-sb-v-no-fg" data-testid={testId}>
       <span aria-hidden>! </span>
       {message}
     </span>
@@ -209,7 +209,7 @@ export function IncidentForm({
           data-testid={`incident-event-type-${o.key}`}
         />
         <span className="flex min-w-0 flex-col gap-1.5">
-          <span className="text-[15px] font-medium leading-snug" data-testid={`incident-event-type-label-${o.key}`}>
+          <span className="text-[1rem] font-medium leading-snug" data-testid={`incident-event-type-label-${o.key}`}>
             {o.label}
           </span>
           {o.description ? (
@@ -283,7 +283,7 @@ export function IncidentForm({
             </label>
           ))}
         </div>
-        <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="incident-kind-notice">
+        <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="incident-kind-notice">
           {INCIDENT_KIND_NOTICE}
         </p>
         <ErrorText message={errors["kind"]} />
@@ -451,7 +451,7 @@ export function IncidentForm({
         <button type="submit" className={`${buttonPrimaryClass} min-h-12 w-full sm:w-auto`} disabled={busy} data-testid="incident-submit">
           {mode === "create" ? "記録する" : "訂正を保存する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -583,7 +583,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
         <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
           報告の結果を記録する
         </button>
-        {!checked ? <span className="text-xs text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
+        {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
       </SubmitRow>
     </form>
   );
@@ -635,7 +635,7 @@ export function IncidentConsultedForm({ id, defaultDoneAt }: { readonly id: stri
         <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
           要否を確かめたことを記録する
         </button>
-        {!checked ? <span className="text-xs text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
+        {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
       </SubmitRow>
     </form>
   );

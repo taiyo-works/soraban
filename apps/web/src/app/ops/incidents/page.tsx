@@ -59,7 +59,7 @@ export default async function IncidentListPage({
       >
         <IncidentFactNotice />
         <IncidentOfficialNotice />
-        {canCreate ? null : <p className="text-xs leading-relaxed text-sb-ink-3">閲覧者は記録を見ることだけができます。</p>}
+        {canCreate ? null : <p className="text-sm leading-relaxed text-sb-ink-3">閲覧者は記録を見ることだけができます。</p>}
       </PageHeader>
 
       <form
@@ -68,7 +68,7 @@ export default async function IncidentListPage({
         data-testid="incident-filter"
         aria-label="事故・ヒヤリハットの絞り込み"
       >
-        <label className="flex min-w-0 flex-col gap-1 text-xs text-sb-ink-3">
+        <label className="flex min-w-0 flex-col gap-1 text-sm text-sb-ink-3">
           区分
           <select name="kind" defaultValue={kind ?? ""} className={selectClass} data-testid="incident-filter-kind">
             <option value="">すべて</option>
@@ -79,7 +79,7 @@ export default async function IncidentListPage({
             ))}
           </select>
         </label>
-        <label className="flex min-w-0 flex-col gap-1 text-xs text-sb-ink-3">
+        <label className="flex min-w-0 flex-col gap-1 text-sm text-sb-ink-3">
           報告の状態
           <select name="reportState" defaultValue={reportState ?? ""} className={selectClass} data-testid="incident-filter-report">
             <option value="">すべて</option>
@@ -90,7 +90,7 @@ export default async function IncidentListPage({
             ))}
           </select>
         </label>
-        <label className="col-span-2 flex min-w-0 flex-col gap-1 text-xs text-sb-ink-3 sm:col-span-1">
+        <label className="col-span-2 flex min-w-0 flex-col gap-1 text-sm text-sb-ink-3 sm:col-span-1">
           対応の状況
           <select name="followUp" defaultValue={followUp ?? ""} className={selectClass} data-testid="incident-filter-follow-up">
             <option value="">すべて</option>
@@ -102,7 +102,7 @@ export default async function IncidentListPage({
           </select>
         </label>
         <div className="col-span-2 flex flex-wrap items-center justify-between gap-x-3 sm:col-span-1 sm:justify-start">
-          <label className="flex min-h-11 items-center gap-2 text-xs text-sb-ink-2">
+          <label className="flex min-h-11 items-center gap-2 text-sm text-sb-ink-2">
             <input type="checkbox" name="detailPending" value="1" defaultChecked={sp.detailPending === "1"} className="h-5 w-5 accent-sb-ink" data-testid="incident-filter-pending" />
             詳細が未記入のものだけ
           </label>
@@ -114,7 +114,7 @@ export default async function IncidentListPage({
       </form>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/incidents" includeVoided={sp.includeVoided === "1"} />
-        <p className="sb-num text-xs tnum text-sb-ink-2" data-testid="incident-count">
+        <p className="sb-num text-sm tnum text-sb-ink-2" data-testid="incident-count">
           {rows.length} 件
         </p>
       </div>

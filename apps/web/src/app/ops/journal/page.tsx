@@ -102,7 +102,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           </a>
         ))}
       </nav>
-      <p className="sb-num text-[13px] text-sb-ink-3" data-testid="journal-range">
+      <p className="sb-num text-[0.875rem] text-sb-ink-3" data-testid="journal-range">
         最近 {RECENT_DAYS} 日（{from}〜{to}）　{rows.length} 件
       </p>
       {rows.length === 0 ? (
@@ -120,8 +120,8 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
                     {r.f.voided ? (
                       <span className="sb-tag">取消済み</span>
                     ) : null}
-                    <span className="sb-num text-[15px] font-bold text-sb-ink">{r.f.flightDate}</span>
-                    <span className="sb-num text-[15px] font-bold text-sb-ink">
+                    <span className="sb-num text-[1rem] font-bold text-sb-ink">{r.f.flightDate}</span>
+                    <span className="sb-num text-[1rem] font-bold text-sb-ink">
                       {r.f.takeoffAtJst.slice(11)}–{r.f.landingAtJst}
                     </span>
                     <span className="sb-num text-sb-ink-2">{formatHm(r.f.flightMinutes)}</span>
@@ -140,7 +140,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
                     {r.i.voided ? (
                       <span className="sb-tag">取消済み</span>
                     ) : null}
-                    <span className="sb-num text-[15px] font-bold text-sb-ink">{r.i.inspectedAtJst}</span>
+                    <span className="sb-num text-[1rem] font-bold text-sb-ink">{r.i.inspectedAtJst}</span>
                     <span className="text-sb-ink-2">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
                     {r.i.hasAbnormal ? (
                       <span className="sb-tag sb-tag-strong">
@@ -161,7 +161,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           )}
         </ul>
       )}
-      <div className="flex flex-wrap gap-x-5 gap-y-1 text-[14px]">
+      <div className="flex flex-wrap gap-x-5 gap-y-1 text-[0.875rem]">
         <Link href="/ops/flights" prefetch={false} className="opx-underlink" data-testid="journal-flights-link">
           飛行記録の一覧へ
         </Link>

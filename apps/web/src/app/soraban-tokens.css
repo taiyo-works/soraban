@@ -5,7 +5,7 @@
  * 名前は v1 の --sb-* を引き継ぐ。このファイルが値の正で、検査は docs/design/tokens-v2/check-contrast-v2.mjs が読む。
  * 構成：1 :root（明）、2 :root[data-mode="field"]（現場・明）、3 :root[data-theme="dark"] と同 [data-mode="field"]（強制の暗。休眠：画面から切り替えられず、
  * OS の暗い設定にも従わない。夜間用の手動の切替を後で作るときの土台で、検査だけ続ける）、4 動きを減らす設定。
- * 16-A では構成・寸法・文字の大きさの値を変えない（--sb-hit-min 44・--sb-fs-body 15・--sb-fs-note 12・角丸 16/8/4 は 16-B・16-C が §3.1 の値に引き上げる）。
+ * 16-A では構成・寸法・文字の大きさの値を変えなかった。16-B で --sb-hit-min 48・--sb-fs-body 1rem（16px）・--sb-fs-note 0.875rem（14px）に引き上げた（角丸 16/8/4 は 16-C が §3.1 の値にする）。
  */
 
 :root {
@@ -79,14 +79,14 @@
   --sb-sp-1: 4px;  --sb-sp-2: 8px;  --sb-sp-3: 12px; --sb-sp-4: 16px; --sb-sp-5: 20px;
   --sb-sp-6: 24px; --sb-sp-8: 32px; --sb-sp-10: 40px; --sb-sp-12: 48px;
 
-  /* 寸法（16-A では変えない。16-B で hit-min 48・fs-body 16・fs-note 14 に引き上げる） */
-  --sb-hit-min: 44px;            /* 押せる部品の下限（チップ） */
+  /* 寸法（16-B：hit-min 48・fs-body 16・fs-note 14。文字の大きさは rem（1rem = 16px。端末の文字の設定・200% に追随する）） */
+  --sb-hit-min: 48px;            /* 押せる部品の下限（チップ） */
   --sb-hit: 48px;                /* 普通のボタン・入力欄 */
   --sb-hit-primary: 56px;        /* 主ボタン */
   --sb-hit-row: 48px;            /* チェック行（現場で 64px） */
-  --sb-fs-h: 22px;
-  --sb-fs-body: 15px;
-  --sb-fs-note: 12px;
+  --sb-fs-h: 1.375rem;
+  --sb-fs-body: 1rem;
+  --sb-fs-note: 0.875rem;
 
   /* 動き：状態の変化だけ。標準 180ms・押下 120ms・シート 280ms・状態の背景 300ms（ease-out）。--sb-dur-rise はせり上がり表示の 1 回だけ。現場と reduce では 0 */
   --sb-dur: 180ms;
@@ -121,9 +121,9 @@
   --sb-hit: 56px;
   --sb-hit-primary: 64px;
   --sb-hit-row: 64px;
-  --sb-fs-h: 24px;
-  --sb-fs-body: 18px;
-  --sb-fs-note: 14px;
+  --sb-fs-h: 1.5rem;
+  --sb-fs-body: 1.125rem;
+  --sb-fs-note: 0.875rem;
   --sb-dur: 0ms;
   --sb-dur-press: 0ms;
   --sb-dur-sheet: 0ms;

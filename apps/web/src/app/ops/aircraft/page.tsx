@@ -45,7 +45,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />
-        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
+        <p className="sb-num text-[0.875rem] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
         <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された機体はありません。</p>
@@ -59,7 +59,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
                   href={`/ops/aircraft/${a.id}`}
                   className={`${listRowClass} ${GRID} ${a.voided ? "text-sb-ink-3" : ""}`}
                 >
-                  <span className="min-w-0 break-all sb-num text-[15px] text-sb-ink">
+                  <span className="min-w-0 break-all sb-num text-[1rem] text-sb-ink">
                     <CellLabel>登録記号</CellLabel>
                     {a.registrationMark}
                   </span>

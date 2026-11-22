@@ -13,7 +13,7 @@ export function MismatchBadges({ mismatches }: { readonly mismatches: readonly J
       {mismatches.map((m) => (
         <span
           key={m.code}
-          className="flex items-start gap-2 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-2 text-[13px] leading-snug text-sb-ink [text-wrap:pretty]"
+          className="flex items-start gap-2 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-2 text-[0.875rem] leading-snug text-sb-ink [text-wrap:pretty]"
           data-testid="flight-mismatch"
           data-code={m.code}
         >

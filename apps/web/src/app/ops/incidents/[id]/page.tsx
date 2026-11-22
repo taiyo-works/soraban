@@ -15,7 +15,7 @@ import { nowOf } from "@/server/ops/records";
 import { OpsError } from "@/server/ops/service";
 
 /** 開閉の見出し（ボタンと同じ押しやすさ）。開閉の向きは ▸／▾ の印で示す（読み上げは details の開閉状態で伝わる）。 */
-const SUMMARY = `${buttonGhostClass} cursor-pointer list-none gap-2 self-start [&::-webkit-details-marker]:hidden before:sb-num before:text-xs before:text-sb-ink-3 before:content-['▸'] [[open]>&]:border-sb-ink [[open]>&]:before:content-['▾']`;
+const SUMMARY = `${buttonGhostClass} cursor-pointer list-none gap-2 self-start [&::-webkit-details-marker]:hidden before:sb-num before:text-sm before:text-sb-ink-3 before:content-['▸'] [[open]>&]:border-sb-ink [[open]>&]:before:content-['▾']`;
 /** 開いた details の中身（フォーム）。開閉の見出し（ボタン）の直下に積む。 */
 const DETAILS = "flex flex-col gap-3 open:pb-1";
 
@@ -74,7 +74,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
             {d.planTitle ?? "計画"}
           </Link>
           {d.snapshotId ? (
-            <Link prefetch={false} href={`/ops/plans/${d.planId}/snapshots/${d.snapshotId}`} className="text-xs text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="incident-detail-snapshot">
+            <Link prefetch={false} href={`/ops/plans/${d.planId}/snapshots/${d.snapshotId}`} className="text-sm text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4" data-testid="incident-detail-snapshot">
               記録したときの判定スナップショット{d.snapshotSeq !== null ? `（第 ${d.snapshotSeq} 版）` : ""}
             </Link>
           ) : null}
@@ -178,7 +178,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
                 <p className="flex flex-wrap items-center gap-2">
                   <span className="font-medium" data-testid="incident-report-record-action">{r.actionLabel}</span>
                   {r.retracted ? <Badge tone="mute">取り下げ済み</Badge> : null}
-                  {r.doneAtJst ? <span className="sb-num text-xs tnum text-sb-ink-2">{r.doneAtJst}</span> : null}
+                  {r.doneAtJst ? <span className="sb-num text-sm tnum text-sb-ink-2">{r.doneAtJst}</span> : null}
                 </p>
                 {r.action === "reported" ? (
                   <p data-testid="incident-report-record-detail">
@@ -188,7 +188,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
                 ) : null}
                 {r.note ? <p className="opx-note break-all">{r.note}</p> : null}
                 {r.reason ? <p className="opx-note break-all">理由：{r.reason}</p> : null}
-                <p className="text-xs leading-relaxed text-sb-ink-2">
+                <p className="text-sm leading-relaxed text-sb-ink-2">
                   記録した人：{r.recordedByName}（記録時の版 {r.incidentVersion}）／{r.declaration}
                 </p>
                 {canReport && r.active ? (
@@ -219,7 +219,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
             </details>
           </div>
         ) : !d.voided ? (
-          <p className="opx-note !text-xs" data-testid="incident-report-denied">報告の記録は、運航管理者か、記録を作った本人・記録の操縦者が行えます。</p>
+          <p className="opx-note !text-sm" data-testid="incident-report-denied">報告の記録は、運航管理者か、記録を作った本人・記録の操縦者が行えます。</p>
         ) : null}
       </Section>
 
@@ -228,7 +228,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
           <IncidentForm key={d.version} mode="correct" initial={incidentInitialOf(d)} plans={opts.plans} aircraft={opts.aircraft} pilots={opts.pilots} id={d.id} version={d.version} />
         </Section>
       ) : !d.voided ? (
-        <p id="correct" className="opx-note !text-xs" data-testid="incident-correct-denied">
+        <p id="correct" className="opx-note !text-sm" data-testid="incident-correct-denied">
           訂正は、運航管理者か、記録を作った本人・記録の操縦者が行えます。
         </p>
       ) : null}

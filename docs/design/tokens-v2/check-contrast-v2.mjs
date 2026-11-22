@@ -139,14 +139,15 @@ for (const [mode, layers] of MODES) {
       veil.push({ ...p, mode, ratio: r, need, ok: r >= need - 1e-9, note: veiled(col(p.fg), col(p.bg), G_NOTE) });
     }
   }
-  const px = (k) => parseFloat(t["--sb-" + k]);
+  // 値は px か rem（1rem = 16px）。rem は 16 倍して px に直して比べる
+  const px = (k) => { const v = String(t["--sb-" + k]).trim(); return /rem$/.test(v) ? parseFloat(v) * 16 : parseFloat(v); };
   const chk = (name, ok, msg) => { if (!ok) problems.push(`${mode}: ${name} ${msg}`); };
-  chk("--sb-hit-min", px("hit-min") >= (isField ? 56 : 44), `${px("hit-min")}px が下限未満`);
+  chk("--sb-hit-min", px("hit-min") >= (isField ? 56 : 48), `${px("hit-min")}px が下限未満`);
   chk("--sb-hit", px("hit") >= (isField ? 56 : 48), `${px("hit")}px が下限未満`);
   chk("--sb-hit-primary", px("hit-primary") >= (isField ? 64 : 56), `${px("hit-primary")}px が下限未満`);
   chk("--sb-hit-row", px("hit-row") >= (isField ? 64 : 48), `${px("hit-row")}px が下限未満`);
-  chk("--sb-fs-note", px("fs-note") >= (isField ? 14 : 12), `${px("fs-note")}px が下限未満`);
-  chk("--sb-fs-body", px("fs-body") >= (isField ? 18 : 15), `${px("fs-body")}px が下限未満`);
+  chk("--sb-fs-note", px("fs-note") >= 14, `${px("fs-note")}px が下限未満`);
+  chk("--sb-fs-body", px("fs-body") >= (isField ? 18 : 16), `${px("fs-body")}px が下限未満`);
   for (const d of ["dur", "dur-press", "dur-sheet", "dur-state", "dur-rise"]) chk("--sb-" + d, !isField || px(d) === 0, "現場は 0 のはず");
   chk("--sb-dur", px("dur") === (isField ? 0 : 180) && px("dur-press") === (isField ? 0 : 120) && px("dur-sheet") === (isField ? 0 : 280) && px("dur-state") === (isField ? 0 : 300), "動きは標準 180・押下 120・シート 280・状態 300ms（現場 0）");
   chk("--sb-shadow", !isField || t["--sb-shadow"] === "none", "現場は none のはず");

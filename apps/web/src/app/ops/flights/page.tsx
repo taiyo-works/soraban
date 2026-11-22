@@ -51,7 +51,7 @@ export default async function FlightListPage({
         {canCreate ? null : <Note>{recordCreateDenied(me)}</Note>}
       </PageHeader>
       <RecordFilter basePath="/ops/flights" aircraft={aircraft} value={filter} />
-      <p className="sb-num text-[12px] tnum text-sb-ink-3">{rows.length} 件</p>
+      <p className="sb-num text-[0.875rem] tnum text-sb-ink-3">{rows.length} 件</p>
       {rows.length === 0 ? (
         <p className="border-y border-sb-rule py-6 text-center text-sm text-sb-ink-3">飛行記録はありません。</p>
       ) : (
@@ -73,7 +73,7 @@ export default async function FlightListPage({
                     <CellLabel>操縦者</CellLabel>
                     {f.pilotName}
                   </span>
-                  <span className="col-span-2 col-start-1 row-start-2 sb-num text-base tnum text-sb-ink sm:col-span-1 sm:col-auto sm:row-auto sm:text-[13px]">
+                  <span className="col-span-2 col-start-1 row-start-2 sb-num text-base tnum text-sb-ink sm:col-span-1 sm:col-auto sm:row-auto sm:text-[0.875rem]">
                     <span className="sr-only">離陸–着陸</span>
                     {f.takeoffAtJst.slice(11)}–{f.landingAtJst}
                   </span>

@@ -100,7 +100,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
         <input className={`${inputClass} min-h-12`} value={reference} onChange={(e) => setReference(e.target.value)} data-testid={`procedure-reference-${kind}`} />
       </Field>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-xs text-sb-ink-3">確認（すべて必要です）</legend>
+        <legend className="mb-1 text-sm text-sb-ink-3">確認（すべて必要です）</legend>
         {CHECKS[kind].map((k) => (
           <label key={k} className={confirmRowClass}>
             <input
@@ -114,7 +114,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
           </label>
         ))}
         {CHECKS[kind].some((k) => errors[`checks.${k}`]) ? (
-          <span role="alert" className="text-xs text-sb-v-no-fg">
+          <span role="alert" className="text-sm text-sb-v-no-fg">
             <span aria-hidden>! </span>
             すべての確認にチェックを入れてください。
           </span>
@@ -226,19 +226,19 @@ export function ProcedureRecordsPanel({
                     {s.statusLabel}
                   </Badge>
                   {s.latest && done ? (
-                    <span className="sb-num text-xs tnum text-sb-ink" data-testid={`procedure-latest-${s.kind}`}>
+                    <span className="sb-num text-sm tnum text-sb-ink" data-testid={`procedure-latest-${s.kind}`}>
                       {s.latest.doneAtJst}
                       {s.latest.reference ? `・控え ${s.latest.reference}` : ""}
                     </span>
                   ) : null}
                 </p>
                 {s.deadlineLabel ? (
-                  <p className="text-xs leading-relaxed text-sb-ink-2" data-testid={`procedure-deadline-${s.kind}`}>
+                  <p className="text-sm leading-relaxed text-sb-ink-2" data-testid={`procedure-deadline-${s.kind}`}>
                     {s.deadlineLabel}
                   </p>
                 ) : null}
                 {s.status === "stale" && !s.legacy ? (
-                  <p className="text-xs leading-relaxed text-sb-ink" data-testid={`procedure-stale-${s.kind}`}>
+                  <p className="text-sm leading-relaxed text-sb-ink" data-testid={`procedure-stale-${s.kind}`}>
                     {PROCEDURE_RECORD_STALE_LABEL}
                   </p>
                 ) : null}
@@ -252,13 +252,13 @@ export function ProcedureRecordsPanel({
                   <DoneForm planId={planId} planVersion={planVersion} kind={s.kind} />
                 ) : null
               ) : !canRecord ? (
-                <p className="text-xs text-sb-ink-3">記録は運航管理者と、この計画の操縦者本人だけが行えます。</p>
+                <p className="text-sm text-sb-ink-3">記録は運航管理者と、この計画の操縦者本人だけが行えます。</p>
               ) : null}
             </div>
             {mine.length > 0 ? (
               <ol className="mx-3 mb-3 flex flex-col border-t border-sb-rule sm:mx-4" data-testid={`procedure-history-${s.kind}`}>
                 {mine.map((r) => (
-                  <li key={r.id} className="flex flex-col gap-1 border-b border-sb-rule py-2.5 text-xs text-sb-ink-2 last:border-b-0" data-testid="procedure-history-row" data-action={r.action}>
+                  <li key={r.id} className="flex flex-col gap-1 border-b border-sb-rule py-2.5 text-sm text-sb-ink-2 last:border-b-0" data-testid="procedure-history-row" data-action={r.action}>
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
                       <span className="text-sm font-medium text-sb-ink">{r.label}</span>
                       {r.doneAtJst ? <span className="sb-num tnum text-sb-ink">{r.doneAtJst}</span> : null}

@@ -196,6 +196,149 @@ export const expectNoHorizontalScroll = async (page: Page, label: string): Promi
   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);
 };
 
+/** 文字 200%・320 幅の検査（Sprint 16-B）で使う幅。 */
+export const TEXT_ZOOM_WIDTHS = [390, 430] as const;
+
+export type TextZoomReport = {
+  readonly width: number;
+  readonly scrollWidth: number;
+  readonly clientWidth: number;
+  /** 文字を持つのに、overflow が hidden/clip で内容が切れている要素 */
+  readonly clipped: string[];
+  /** 200% にしても文字の大きさが（ほぼ）2 倍にならなかった要素（px 固定の指定が残っている） */
+  readonly unscaled: string[];
+  /** 主ボタンで、スクロールしても画面の中に入らない・固定の下部ナビに隠れるもの */
+  readonly unreachablePrimary: string[];
+  /** 固定の下部ナビが、ページの最後の要素を隠しているか（隠れた分の px。隠れていなければ 0） */
+  readonly navCoversLast: number;
+  readonly textCount: number;
+};
+
+/**
+ * 文字 200%（K-5）。`html` の文字の大きさを 32px（既定の 200%）にして、各幅（既定 390・430）で次を確かめる。
+ * - 横スクロールがない
+ * - 文字を持つ要素の切れ（overflow が hidden/clip で scrollHeight/scrollWidth が clientHeight/clientWidth を超える）が 0
+ * - 文字を持つ要素の計算された大きさが、基準（16px）の 2 倍になる（rem・em だけで書かれていること）。地図の部品（`.maplibregl-*`・`.leaflet-*`）は第三者の部品なので除く
+ * - 主ボタン（`.opx-btn-primary`・`.sb-pill-primary`・`[data-variant="primary"]`）にスクロールで届き、固定の下部ナビに隠れない
+ * - 固定の下部ナビが、最後の要素を隠さない（最後までスクロールしたとき）
+ * 検査のあと、幅と文字の大きさを元に戻す。端末の文字の設定がウェブにどう効くかは実機で確かめる（G-2）。
+ */
+export const measureTextZoom = async (page: Page, width: number): Promise<TextZoomReport> => {
+  const original = page.viewportSize();
+  await page.setViewportSize({ width, height: original?.height ?? 844 });
+  await waitForSettledStyles(page);
+  try {
+    const baseline = await page.evaluate(() => {
+      const out: number[] = [];
+      for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) out.push(parseFloat(getComputedStyle(el).fontSize));
+      return out;
+    });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+    return await page.evaluate(
+      ({ w, base }) => {
+        const de = document.documentElement;
+        const all = Array.from(document.body.querySelectorAll<HTMLElement>("*"));
+        const describe = (el: Element): string => {
+          const id = el.getAttribute("data-testid");
+          const t = (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 20);
+          return `${el.tagName.toLowerCase()}${id ? `[${id}]` : ""}「${t}」`;
+        };
+        const visible = (el: HTMLElement): boolean => {
+          const r = el.getBoundingClientRect();
+          const cs = getComputedStyle(el);
+          const shown = el.checkVisibility?.({ checkVisibilityCSS: true, contentVisibilityAuto: true }) ?? true;
+          return shown && r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none";
+        };
+        const hasOwnText = (el: HTMLElement): boolean => Array.from(el.childNodes).some((n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim().length > 0);
+        const isSr = (el: HTMLElement): boolean => !!el.closest(".sb-sr, .sr-only");
+        const isThirdParty = (el: HTMLElement): boolean => !!el.closest(".maplibregl-map, .maplibregl-ctrl, .leaflet-container");
+        const clipped: string[] = [];
+        const unscaled: string[] = [];
+        let textCount = 0;
+        all.forEach((el, i) => {
+          if (!hasOwnText(el) || !visible(el) || isSr(el)) return;
+          textCount++;
+          const cs = getComputedStyle(el);
+          if (!isThirdParty(el)) {
+            const before = base[i] ?? 0;
+            const after = parseFloat(cs.fontSize);
+            if (before > 0 && after < before * 1.9) unscaled.push(`${describe(el)} ${before}px→${after}px`);
+          }
+          const clips = (v: string) => v === "hidden" || v === "clip";
+          if ((clips(cs.overflowX) || clips(cs.overflowY)) && !isThirdParty(el)) {
+            if (el.scrollHeight > el.clientHeight + 1 && clips(cs.overflowY)) clipped.push(`${describe(el)} 高さ ${el.clientHeight}<${el.scrollHeight}`);
+            else if (el.scrollWidth > el.clientWidth + 1 && clips(cs.overflowX)) clipped.push(`${describe(el)} 幅 ${el.clientWidth}<${el.scrollWidth}`);
+          }
+        });
+        const navEl = document.querySelector<HTMLElement>('[data-testid="ops-bottom-nav"]');
+        const nav = navEl && visible(navEl) && getComputedStyle(navEl).position === "fixed" ? navEl : null;
+        const reaches = (el: HTMLElement): boolean => {
+          el.scrollIntoView({ block: "center" });
+          const r = el.getBoundingClientRect();
+          if (r.top < 0 || r.bottom > window.innerHeight || r.left < 0 || r.right > window.innerWidth) return false;
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return !!hit && (hit === el || el.contains(hit));
+        };
+        const unreachablePrimary = Array.from(document.querySelectorAll<HTMLElement>('.opx-btn-primary, .sb-pill-primary, [data-variant="primary"]'))
+          .filter((el) => visible(el) && !(el as HTMLButtonElement).disabled && !el.closest("dialog:not([open])"))
+          .filter((el) => !reaches(el))
+          .map(describe);
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        let navCoversLast = 0;
+        if (nav) {
+          const nr = nav.getBoundingClientRect();
+          const main = document.querySelector<HTMLElement>("main") ?? document.body;
+          let last: HTMLElement | null = null;
+          let bottom = -1;
+          for (const el of Array.from(main.querySelectorAll<HTMLElement>("*"))) {
+            if (nav.contains(el) || !visible(el)) continue;
+            const r = el.getBoundingClientRect();
+            if (r.height === 0) continue;
+            if (r.bottom > bottom) {
+              bottom = r.bottom;
+              last = el;
+            }
+          }
+          if (last && bottom > nr.top + 1) navCoversLast = Math.round(bottom - nr.top);
+        }
+        window.scrollTo(0, 0);
+        return {
+          width: w,
+          scrollWidth: de.scrollWidth,
+          clientWidth: de.clientWidth,
+          clipped,
+          unscaled,
+          unreachablePrimary,
+          navCoversLast,
+          textCount,
+        };
+      },
+      { w: width, base: baseline },
+    );
+  } finally {
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "";
+    });
+    if (original) await page.setViewportSize(original);
+  }
+};
+
+export const expectTextZoom = async (page: Page, label: string, widths: readonly number[] = TEXT_ZOOM_WIDTHS): Promise<void> => {
+  for (const w of widths) {
+    const r = await measureTextZoom(page, w);
+    const l = `${label} 文字 200%・${w}px`;
+    expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+    expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+    expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+    expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+  }
+};
+
 /**
  * 折りたたみ（`<details>`）を開く。すでに開いていれば何もしない。
  * 判定画面 `/` は、規制カードの「根拠の詳細」・申請支援の「申請の準備」・収録の一覧を、見出しだけ見せて畳んでいる（Sprint 12h PR ②）。

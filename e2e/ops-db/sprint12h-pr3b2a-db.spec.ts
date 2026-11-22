@@ -74,7 +74,7 @@ const open = async (page: Page, s: string, label: string): Promise<void> => {
 };
 
 test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面）", () => {
-  test("P3b2a-1. 文字：12px 以上、コントラスト 4.5:1 以上（明・暗。375px）。登録系 16 画面", async ({ page }) => {
+  test("P3b2a-1. 文字：14px 以上、コントラスト 4.5:1 以上（明・暗。375px）。登録系 16 画面", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -83,13 +83,13 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
         await open(page, s, label);
         const samples = await collectTextSamples(page, "main");
         expect(samples.length, label).toBeGreaterThan(0);
-        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 12)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
+        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 14)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
         expect(bad, label).toEqual([]);
       }
     }
   });
 
-  test("P3b2a-2. 押す部品：高さ 43.5px 以上（375×812・360×740）。登録の入口のリンクは 56px 以上", async ({ page }) => {
+  test("P3b2a-2. 押す部品：高さ 47.5px 以上（375×812・360×740）。登録の入口のリンクは 56px 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const [w, h] of [[375, 812], [360, 740]] as const) {
       await page.setViewportSize({ width: w, height: h });
@@ -103,7 +103,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
             const r = el.getBoundingClientRect();
             if (r.width === 0 || r.height === 0 || getComputedStyle(el).visibility === "hidden") continue;
             if (el.tagName === "A" && el.closest("p, dd")) continue;
-            if (r.height < 43.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
+            if (r.height < 47.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
           }
           return out;
         });
@@ -119,7 +119,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 900 });
         for (const s of SCREENS) {
           const label = `${scheme} ${w}px ${s}`;

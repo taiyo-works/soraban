@@ -197,7 +197,7 @@ describe("Q-18a 公開の `/` の CSS を増やさない", () => {
 });
 
 describe("Q-11 押す部品の下限", () => {
-  it("ボタン・戻りリンク・チップは --sb-hit-min（44px）以上のトークンを使う", () => {
+  it("ボタン・戻りリンク・チップは --sb-hit-min（48px）以上のトークンを使う", () => {
     const css = stripComments(read("app/ops/ops-v2.css"));
     for (const cls of [".opx-btn", ".opx-back", ".opx-seg > a"]) {
       const i = css.indexOf(`${cls} {`);

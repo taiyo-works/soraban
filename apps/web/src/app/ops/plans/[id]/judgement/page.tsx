@@ -15,7 +15,7 @@ import { canUpdatePlan } from "@/server/ops/plan-page";
 import { getSnapshot } from "@/server/ops/plans";
 import { loadPlan } from "../_load";
 
-const mono = "sb-num text-xs tnum break-all";
+const mono = "sb-num text-sm tnum break-all";
 
 // 判定の画面（Sprint 17-1）。判定は補助。中身は計画の詳細にあった「判定の要約」「許可・承認の照合」をそのまま移した（再設計しない）。
 // 判定を見なくても、通報の準備と記録は止まらない（通報の主画面と /report で完結する）。
@@ -53,7 +53,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             data-testid="plan-judgement"
             rows={[
               ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-              ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-xs tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
+              ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-sm tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
               ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
               ["飛行の方法を含む判定の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
               ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
@@ -101,7 +101,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
           </details>
           {planPermits.permits.window ? (
-            <p className="sb-num text-xs tnum text-sb-ink-2" data-testid="plan-permit-window">
+            <p className="sb-num text-sm tnum text-sb-ink-2" data-testid="plan-permit-window">
               照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}
             </p>
           ) : null}
@@ -114,12 +114,12 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           {planPermits.candidates.length > 0 ? (
             <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
               <p className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
-              <p className="text-xs leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
+              <p className="text-sm leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
               <ul className="flex flex-col border-t border-sb-rule">
                 {planPermits.candidates.map((c) => (
                   <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
-                    <span className="break-all sb-num text-[13px] text-sb-ink">{c.permitNumber}</span>
-                    <span className="text-xs text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
+                    <span className="break-all sb-num text-[0.875rem] text-sb-ink">{c.permitNumber}</span>
+                    <span className="text-sm text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
                   </li>
                 ))}
               </ul>
@@ -130,7 +130,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               ) : null}
             </div>
           ) : null}
-          <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
+          <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
             {isApplicationSupportEnabled() ? (
               <p>
                 「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、

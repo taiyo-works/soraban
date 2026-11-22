@@ -225,7 +225,7 @@ export function PermitForm({
           })}
         </div>
         <FieldError message={errors["kinds"]} />
-        <p className="text-xs leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
+        <p className="text-sm leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
         {hasAirport ? (
           <Field label="空港名（1 行に 1 件・5 件まで）" required error={errors["airportNames"]} hint="どの空港の許可かの表記です（照合には使いません）。">
             <textarea className={inputClass} rows={2} value={v.airportNames} onChange={(e) => set("airportNames", e.target.value)} data-testid="permit-airport-names" />
@@ -252,7 +252,7 @@ export function PermitForm({
             );
           })}
         </div>
-        {v.coverage === "individual" ? <p className="text-xs leading-relaxed text-sb-ink-3">個別許可は全国を範囲にできません。</p> : null}
+        {v.coverage === "individual" ? <p className="text-sm leading-relaxed text-sb-ink-3">個別許可は全国を範囲にできません。</p> : null}
         {v.placeType === "circles" ? (
           <div className="flex flex-col gap-3" data-testid="permit-circles">
             {v.circles.map((c, i) => (
@@ -281,7 +281,7 @@ export function PermitForm({
                 円を追加する
               </button>
             ) : null}
-            <p className="text-xs leading-relaxed text-sb-ink-3">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
+            <p className="text-sm leading-relaxed text-sb-ink-3">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
           </div>
         ) : null}
         {v.placeType === "text" ? (
@@ -358,7 +358,7 @@ export function PermitForm({
         <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="permit-submit">
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -403,7 +403,7 @@ function ScopePicker({
           限定しない場合も、許可書に機体・操縦者の限定がないか許可書で確認してください。
         </p>
       ) : options.length === 0 ? (
-        <p className="text-xs text-sb-ink-3">{emptyLabel}</p>
+        <p className="text-sm text-sb-ink-3">{emptyLabel}</p>
       ) : (
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {options.map((o) => (

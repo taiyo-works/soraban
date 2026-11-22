@@ -138,7 +138,7 @@ body {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.7rem;
+  font-size: 0.875rem;
   color: var(--color-ink-mute);
 }
 
@@ -446,21 +446,21 @@ html:has(body.has-bottom-nav) {
   --color-neutral-line: var(--neutral-line);
   --radius-ctl: var(--r-journal);
   --radius-pill: var(--r-pill);
-  --text-h1: var(--fs-h1, 22px);
+  --text-h1: var(--fs-h1, 1.375rem);
   --text-h1--line-height: 1.4;
-  --text-h2: var(--fs-h2, 17px);
+  --text-h2: var(--fs-h2, 1.0625rem);
   --text-h2--line-height: 1.45;
-  --text-h3: var(--fs-h3, 15px);
+  --text-h3: var(--fs-h3, 1rem);
   --text-h3--line-height: 1.5;
-  --text-body: var(--fs-body, 15px);
+  --text-body: var(--fs-body, 1rem);
   --text-body--line-height: 1.7;
-  --text-table: var(--fs-table, 14px);
+  --text-table: var(--fs-table, 0.875rem);
   --text-table--line-height: 1.7;
-  --text-aux: var(--fs-aux, 12px);
+  --text-aux: var(--fs-aux, 0.875rem);
   --text-aux--line-height: 1.7;
-  --text-stat: var(--fs-stat, 30px);
+  --text-stat: var(--fs-stat, 1.875rem);
   --text-stat--line-height: 1.1;
-  --text-state: var(--fs-state, 14px);
+  --text-state: var(--fs-state, 0.875rem);
   --text-state--line-height: 1.4;
 }
 
@@ -484,15 +484,15 @@ html:has(body.has-bottom-nav) {
   --ds-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace;
 
   /* type scale (docs/design/ui-direction.md 3.2) */
-  --fs-h1: 22px;
-  --fs-h2: 17px;
-  --fs-h3: 15px;
-  --fs-body: 15px;
-  --fs-table: 14px;
-  --fs-aux: 12px;
-  --fs-stat: 30px;
-  --fs-state: 14px;
-  --tap: 44px;
+  --fs-h1: 1.375rem;
+  --fs-h2: 1.0625rem;
+  --fs-h3: 1rem;
+  --fs-body: 1rem;
+  --fs-table: 0.875rem;
+  --fs-aux: 0.875rem;
+  --fs-stat: 1.875rem;
+  --fs-state: 0.875rem;
+  --tap: 48px;
 
   background: var(--bg-app);
   color: var(--fg);
@@ -559,21 +559,21 @@ html:has(body.has-bottom-nav) {
 }
 @media (min-width: 1024px) {
   .ds {
-    --fs-h1: 24px;
-    --fs-h2: 18px;
-    --fs-body: 14px;
-    --fs-table: 13px;
+    --fs-h1: 1.5rem;
+    --fs-h2: 1.125rem;
+    --fs-body: 1rem;
+    --fs-table: 0.875rem;
   }
 }
 .ds.field,
 .ds .field {
-  --fs-h1: 26px;
-  --fs-h2: 22px;
-  --fs-h3: 20px;
-  --fs-body: 18px;
-  --fs-table: 18px;
-  --fs-aux: 14px;
-  --fs-state: 20px;
+  --fs-h1: 1.625rem;
+  --fs-h2: 1.375rem;
+  --fs-h3: 1.25rem;
+  --fs-body: 1.125rem;
+  --fs-table: 1.125rem;
+  --fs-aux: 0.875rem;
+  --fs-state: 1.25rem;
   --tap: 56px;
   font-size: var(--fs-body);
 }

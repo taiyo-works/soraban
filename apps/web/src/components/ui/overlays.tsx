@@ -500,7 +500,7 @@ export function ReasonDialog({
         id={id}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        className="min-h-24 w-full rounded-ctl border border-line-strong bg-surface px-3 py-2.5 text-[16px] leading-[1.7] text-fg placeholder:text-fg-mute hov:border-fg"
+        className="min-h-24 w-full rounded-ctl border border-line-strong bg-surface px-3 py-2.5 text-[1rem] leading-[1.7] text-fg placeholder:text-fg-mute hov:border-fg"
         placeholder="記録に残す理由を入力します"
       />
     </Dialog>

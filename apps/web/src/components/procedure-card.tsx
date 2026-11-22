@@ -56,33 +56,33 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span
-          className={`inline-flex items-center whitespace-nowrap rounded-sb-pill border px-2.5 py-px sb-num text-xs font-bold ${systemTone[procedure.system]}`}
+          className={`inline-flex items-center whitespace-nowrap rounded-sb-pill border px-2.5 py-px sb-num text-sm font-bold ${systemTone[procedure.system]}`}
         >
           {procedure.system}
         </span>
-        <span className="whitespace-nowrap text-xs text-sb-ink-3">{kindLabel}</span>
+        <span className="whitespace-nowrap text-sm text-sb-ink-3">{kindLabel}</span>
         {noFly ? (
-          <span className="ml-auto inline-flex items-center gap-1.5 whitespace-nowrap rounded-sb-pill border border-sb-v-no-fg bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-v-no-fg">
+          <span className="ml-auto inline-flex items-center gap-1.5 whitespace-nowrap rounded-sb-pill border border-sb-v-no-fg bg-sb-surface px-2 py-0.5 text-sm font-medium text-sb-v-no-fg">
             <span aria-hidden className="relative inline-block h-2 w-2 rounded-full border border-current">
               <span className="absolute inset-x-px top-1/2 h-px -translate-y-1/2 bg-current" />
             </span>
             指定中は飛行不可
           </span>
         ) : badge === "after_release" ? (
-          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-sm font-medium text-sb-ink-3">
             {PROCEDURE_BADGE_LABEL.after_release}
           </span>
         ) : procedure.kind === "facility_consent_notice" ? (
-          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
+          <span className="ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-sm font-medium text-sb-ink-3">
             航空法とは別系統（飛行禁止法）
           </span>
         ) : procedure.waivableByIIB ? (
-          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-ink-3">
+          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-rule bg-sb-surface px-2 py-0.5 text-sm font-medium text-sb-ink-3">
             <span aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-current" />
             IIB 相当で不要化可
           </span>
         ) : (
-          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-v-needs-fg bg-sb-surface px-2 py-0.5 text-xs font-medium text-sb-v-needs-fg">
+          <span className="ml-auto inline-flex items-center gap-1 rounded-sb-pill border border-sb-v-needs-fg bg-sb-surface px-2 py-0.5 text-sm font-medium text-sb-v-needs-fg">
             <span aria-hidden className="inline-block h-1.5 w-1.5 bg-current" />
             IIA 相当・不要化不可
           </span>
@@ -109,7 +109,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       {satisfied ? (
         <div
           data-testid="procedure-verdict-done"
-          className="flex flex-col gap-1 rounded-sb-m border-l-4 border-l-sb-v-done-fg bg-sb-surface px-3 py-2 text-xs leading-relaxed text-sb-ink-2"
+          className="flex flex-col gap-1 rounded-sb-m border-l-4 border-l-sb-v-done-fg bg-sb-surface px-3 py-2 text-sm leading-relaxed text-sb-ink-2"
         >
           <p className="flex items-center gap-1.5 font-semibold text-sb-ink">
             <VerdictSign level="procedure_done" />
@@ -124,16 +124,16 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       ) : null}
 
       {procedure.note ? (
-        <p className="text-xs leading-relaxed text-sb-ink-2">{procedure.note}</p>
+        <p className="text-sm leading-relaxed text-sb-ink-2">{procedure.note}</p>
       ) : null}
 
-      <p className="border-l border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-3">
+      <p className="border-l border-sb-rule pl-3 text-sm leading-relaxed text-sb-ink-3">
         <span className="sb-eyebrow">法的根拠</span>{" "}
         <span className="text-sb-ink-2">{procedure.legalBasis}</span>
       </p>
 
       {deadlineBasis ? (
-        <p className="border-l border-sb-rule pl-3 text-xs leading-relaxed text-sb-ink-3">
+        <p className="border-l border-sb-rule pl-3 text-sm leading-relaxed text-sb-ink-3">
           <span className="sb-eyebrow">提出期限</span>{" "}
           <span className="text-sb-ink-2">{deadlineBasis}</span>
         </p>
@@ -141,7 +141,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
 
       {/* システム系統 URL（手続きをする場所）と 出典 URL（条文・手引き）を別導線で。
           手続き窓口を主導線（藍・矢印つき）、出典を従（控えめ）として段差をつける。 */}
-      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-sb-rule pt-2.5 text-xs">
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-sb-rule pt-2.5 text-sm">
         <a
           href={procedure.systemUrl}
           target="_blank"
