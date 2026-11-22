@@ -19,7 +19,7 @@ const signIn = async (ctx: APIRequestContext, who: Who): Promise<void> => {
 let planId = "";
 const SCREENS = [
   { name: "ホーム", path: "/ops", ready: "today-heading", field: false },
-  { name: "計画の一覧", path: "/ops/plans", ready: "plan-list-page", field: false },
+  { name: "計画の一覧", path: "/ops/plans", ready: "plan-count", field: false },
   { name: "点検の一覧", path: "/ops/inspections", ready: "main h1", field: false },
   { name: "点検の入力", path: "/ops/inspections/new", ready: "main h1", field: false },
   { name: "日誌", path: "/ops/journal", ready: "main h1", field: false },
