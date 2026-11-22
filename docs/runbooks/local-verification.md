@@ -31,6 +31,8 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 ## 落とし穴
 
 - **コンテナは長い実行の途中で再起動する**。区切りごとにコミットし、各実行のログを残す。未コミットの変更と、バックグラウンドの実行は失われる。
+- **公開側 E2E をローカルで流すときは `next start` を明示する**。`pnpm test:e2e` は既定で `next dev`（`E2E_SERVER_CMD` の既定）を使い、`.next/dev` を作って lint を落とす・本番ビルドと違う結果になる。CI と同じ条件は `CI=1 E2E_SERVER_CMD="pnpm --filter @soraban/web exec next start -p 3100" E2E_FIXTURE_SERVER_CMD="NEXT_DIST_DIR=.next pnpm --filter @soraban/web exec next start -p 3101" pnpm test:e2e --retries=0`。モックの `mock-gsi-server`（3198・3199）が前の実行から残っていると起動できない（`pkill -f mock-gsi`）。
+- `next build` が `next/font/google queries have exactly one entry` で失敗することがある（Google Fonts の取得の揺れ。再実行で通る。2026-11-22、16-B で観測）。
 - `.claude/settings.json` が `rm -rf*` を拒否する。掃除は、新しい名前のディレクトリを使う、または `mv` で退避する。
 - `next start` を動かすと `apps/web/tsconfig.json` が書き換わることがある（`git checkout` で戻す）。古い `apps/web/.next-e2e-fixture/dev` が lint を落とすことがある（退避する）。前の実行の `mock-gsi-server`（ポート 3198）が残っていると、E2E の起動を妨げる（止める）。
 - 作業ツリーには、別のエージェントの途中の変更が入っていることがある。自分のコミットは**パスを指定して**行い、他の変更を巻き込まない。
