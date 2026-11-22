@@ -1,0 +1,18 @@
+import { request } from "/home/user/soraban/node_modules/@playwright/test/index.mjs";
+const BASE = "http://127.0.0.1:3400";
+const signIn = async (key) => { const c = await request.newContext({ baseURL: BASE }); const r = await c.post("/api/test-auth/sign-in", { data: { authUserId: key, email: `${key}@example.test`, emailVerified: true, name: key } }); if (r.status() !== 200) throw new Error("signin"); return c; };
+const m = await signIn("b-manager"); const p = await signIn("b-pilot");
+const me = await (await p.get("/api/ops/me")).json();
+const ok = async (r, l) => { if (r.status() >= 300) throw new Error(l + " " + r.status() + " " + await r.text()); return r.json(); };
+const mark = "JU16DSG1";
+const ac = await ok(await m.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "Mavic 3 Enterprise", manufacturer: "DJI", serialNumber: "SN-DSG1", typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } }), "ac");
+const ac2 = await ok(await m.post("/api/ops/aircraft", { data: { registrationMark: "JU16DSG2", modelName: "Matrice 30", manufacturer: "DJI", serialNumber: "SN-DSG2", typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 3.7 } }), "ac2");
+const plan = await ok(await m.post("/api/ops/plans", { data: { title: "米子 空撮 試験", aircraftId: ac.id, pilotId: me.pilotId, plannedStartAt: "2027-01-05T13:00", durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } }), "plan");
+await ok(await m.post("/api/ops/plans", { data: { title: "境港 点検 試験", aircraftId: ac2.id, pilotId: me.pilotId, plannedStartAt: "2027-01-06T10:00", durationMinutes: 30, purpose: "点検", placeName: "試験地点2", latitude: 35.54, longitude: 133.23, flags: [] } }), "plan2");
+const NORMAL = Object.fromEntries(["general","propeller","frame","communication","propulsion","power","autopilot","controller","battery"].map((k) => [k, { result: "normal" }]));
+const insp = await ok(await m.post("/api/ops/inspections", { data: { aircraftId: ac.id, pilotId: me.pilotId, inspectedAt: "2027-01-05T08:30", placeName: "本社 駐車場", items: NORMAL } }), "insp");
+const AB = { ...NORMAL, propeller: { result: "abnormal", note: "試験の記載" } };
+await m.post("/api/ops/inspections", { data: { aircraftId: ac2.id, pilotId: me.pilotId, inspectedAt: "2027-01-05T08:40", placeName: "本社 駐車場", items: AB } }).then(async (r) => console.log("insp2", r.status()));
+await ok(await m.post("/api/ops/flights", { data: { aircraftId: ac.id, pilotId: me.pilotId, purpose: "空撮", takeoffPlace: "米子市日吉津 本社", landingPlace: "米子市日吉津 本社", safetyIssue: false, takeoffAt: "2027-01-05T09:00", landingAt: "2027-01-05T09:10", dailyInspectionId: insp.id } }), "flight");
+await p.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), occurredAt: "2027-01-05T12:00", kind: "takeoff" } });
+console.log(JSON.stringify({ planId: plan.id }));
