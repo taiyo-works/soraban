@@ -150,7 +150,7 @@ export function PrefillTable({ prefill }: Props) {
                       {f.system}
                     </span>
                   </td>
-                  <td className="py-3 pr-3 text-[0.875rem] leading-relaxed text-sb-ink-2 max-md:block max-md:p-0" data-label="入力欄">
+                  <td className="py-3 pr-3 text-sm leading-relaxed text-sb-ink-2 max-md:block max-md:p-0" data-label="入力欄">
                     {f.dipsFieldLabel}
                   </td>
                   {/* 値＝この表の主役。display 書体・ink で最大の可読性を確保。 */}

@@ -171,7 +171,7 @@ export function IncidentRow({ d }: { readonly d: IncidentDto }) {
       data-voided={d.voided ? "true" : "false"}
     >
       <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="sb-num text-[0.875rem] tnum text-sb-ink-2" data-testid="incident-row-time">
+        <span className="sb-num text-sm tnum text-sb-ink-2" data-testid="incident-row-time">
           {d.occurredAtJst}
         </span>
         <Badge tone="neutral" data-testid="incident-row-kind">

@@ -20,7 +20,7 @@ export function MoreRows({ count, children, "data-testid": testId = "more-rows" 
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
         data-testid={`${testId}-toggle`}
-        className="flex min-h-11 w-full items-center gap-1.5 border-t border-sb-rule text-[0.875rem] font-bold text-sb-ink touch-manipulation hover:underline"
+        className="flex min-h-11 w-full items-center gap-1.5 border-t border-sb-rule text-sm font-bold text-sb-ink touch-manipulation hover:underline"
       >
         <Icon name={open ? "chevron-up" : "chevron-down"} size={16} />
         {open ? `ほか ${count} 件を閉じる` : `ほか ${count} 件を見る`}

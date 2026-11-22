@@ -208,7 +208,7 @@ export const FormError = ({ message }: { readonly message: string | null }) =>
 /** 入力欄のまとまり（狭い画面では 1 列、広い画面では 2 列）。 */
 export const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
   <fieldset className="flex min-w-0 flex-col gap-3">
-    <legend className="mb-1 text-[0.875rem] font-bold tracking-wider text-sb-ink-2">{title}</legend>
+    <legend className="mb-1 text-sm font-bold tracking-wider text-sb-ink-2">{title}</legend>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
   </fieldset>
 );
@@ -680,7 +680,7 @@ export function PilotForm({
       </Group>
 
       <fieldset className="flex min-w-0 flex-col gap-1">
-        <legend className="mb-1 sb-num text-[0.875rem] uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
+        <legend className="mb-1 sb-num text-sm uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <label className={checkRowClass}>
             <input type="checkbox" className={checkboxClass} checked={v.limitationType} onChange={check("limitationType")} />

@@ -27,7 +27,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
               <p className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sb-ink">
                 <span className="flex items-baseline gap-1.5">
                   <span className="text-sm text-sb-ink-3">日時</span>
-                  <time dateTime={v.createdAt} className="sb-num text-[0.875rem] tnum" data-testid="version-time">
+                  <time dateTime={v.createdAt} className="sb-num text-sm tnum" data-testid="version-time">
                     {v.createdAtJst}
                   </time>
                 </span>

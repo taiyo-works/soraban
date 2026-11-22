@@ -102,7 +102,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           </a>
         ))}
       </nav>
-      <p className="sb-num text-[0.875rem] text-sb-ink-3" data-testid="journal-range">
+      <p className="sb-num text-sm text-sb-ink-3" data-testid="journal-range">
         最近 {RECENT_DAYS} 日（{from}〜{to}）　{rows.length} 件
       </p>
       {rows.length === 0 ? (
@@ -161,7 +161,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           )}
         </ul>
       )}
-      <div className="flex flex-wrap gap-x-5 gap-y-1 text-[0.875rem]">
+      <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
         <Link href="/ops/flights" prefetch={false} className="opx-underlink" data-testid="journal-flights-link">
           飛行記録の一覧へ
         </Link>

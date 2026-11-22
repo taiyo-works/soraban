@@ -354,7 +354,7 @@ function Warnings({ items, testId = "record-warnings" }: { readonly items: reado
   if (items.length === 0) return null;
   return (
     <div data-testid={testId} className="flex flex-col gap-1.5 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-3">
-      <p className="text-[0.875rem] font-bold text-sb-ink">確認してください（保存は止めません）</p>
+      <p className="text-sm font-bold text-sb-ink">確認してください（保存は止めません）</p>
       <ul className="flex flex-col gap-1 text-sm text-sb-ink">
         {items.map((w) => (
           <li key={w} className="flex gap-1.5">
@@ -392,7 +392,7 @@ function DraftBar({
         restored ? "border-[1.5px] border-sb-ink bg-sb-st-info-face" : "bg-sb-sunken"
       }`}
     >
-      <p className="min-w-0 flex-1 text-[0.875rem] leading-relaxed text-sb-ink-2">
+      <p className="min-w-0 flex-1 text-sm leading-relaxed text-sb-ink-2">
         {restored ? (
           <>
             <span className="font-medium text-sb-ink">前回の入力の続きです。</span>
@@ -1104,7 +1104,7 @@ export function FlightForm({
             ] as const
           ).map(([group, title]) => (
             <div key={group} className="flex flex-col gap-2">
-              <p aria-hidden className="sb-num text-[0.875rem] uppercase tracking-wider text-sb-ink-3">
+              <p aria-hidden className="sb-num text-sm uppercase tracking-wider text-sb-ink-3">
                 {title}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

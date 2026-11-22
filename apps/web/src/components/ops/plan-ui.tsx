@@ -61,9 +61,9 @@ function Chip({ tone, glyph, children, ...rest }: ChipProps) {
   return (
     <span
       {...attrs}
-      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-[0.875rem] font-medium leading-5 ${CHIP_BOX[tone]}`}
+      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-sm font-medium leading-5 ${CHIP_BOX[tone]}`}
     >
-      <span aria-hidden className={`w-3 text-center sb-num text-[0.875rem] font-bold leading-none ${CHIP_GLYPH[tone]}`}>
+      <span aria-hidden className={`w-3 text-center sb-num text-sm font-bold leading-none ${CHIP_GLYPH[tone]}`}>
         {glyph}
       </span>
       {children}
@@ -507,7 +507,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
     return (
       <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 text-sm ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
         <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
-          <span aria-hidden className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[0.875rem] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
+          <span aria-hidden className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
             {DEADLINE_GLYPH[deadline.state]}
           </span>
           <span className="pt-0.5" data-testid="plan-report-deadline-message">{deadline.message}</span>
@@ -526,12 +526,12 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
               </p>
             ) : null}
             {deadline.penaltyNote ? (
-              <p className="text-[0.875rem] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+              <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
                 {deadline.penaltyNote}
               </p>
             ) : null}
-            {deadline.outageNote ? <p className="text-[0.875rem] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-            <p className="text-[0.875rem] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+            {deadline.outageNote ? <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+            <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
           </div>
         </details>
       </div>
@@ -546,7 +546,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
       <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
         <span
           aria-hidden
-          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[0.875rem] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
+          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
         >
           {DEADLINE_GLYPH[deadline.state]}
         </span>
@@ -564,12 +564,12 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
       ) : null}
       <div className="flex flex-col gap-1.5 border-t border-sb-rule pl-11 pt-2.5">
         {deadline.penaltyNote ? (
-          <p className="text-[0.875rem] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+          <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
             {deadline.penaltyNote}
           </p>
         ) : null}
-        {deadline.outageNote ? <p className="text-[0.875rem] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-        <p className="text-[0.875rem] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+        {deadline.outageNote ? <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+        <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
       </div>
     </div>
   );

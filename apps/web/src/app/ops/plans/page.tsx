@@ -93,7 +93,7 @@ export default async function PlanListPage({
           ) : null}
         </div>
       </div>
-      <p className="sb-num text-[0.875rem] font-bold tnum text-sb-ink-3" data-testid="plan-count">
+      <p className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="plan-count">
         {rows.length} 件
       </p>
       {rows.length === 0 ? (

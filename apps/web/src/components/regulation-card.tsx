@@ -92,7 +92,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       data-testid={`regulation-card-${regulation.id}`}
       data-status={regulation.status}
       data-verdict={verdictItem?.verdict ?? ""}
-      className="sb-item-card flex flex-col gap-2.5"
+      className="sb-item-card flex flex-col gap-1.5"
     >
       <div className="flex items-center gap-2">
         <span

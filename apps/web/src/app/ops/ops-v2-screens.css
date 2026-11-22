@@ -80,12 +80,14 @@
 }
 .opx-rs-name {
   font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 .opx-rs-state {
   font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 500;
   color: var(--sb-ink-3);
   white-space: nowrap;
@@ -125,6 +127,7 @@
 @media (max-width: 400px) {
   .opx-rs-name {
     font-size: 0.875rem;
+    line-height: 1.5;
     letter-spacing: 0;
   }
 }
@@ -170,6 +173,7 @@
   border-radius: var(--sb-r-m);
   background: var(--sb-surface);
   font-size: 0.875rem;
+  line-height: 1.5;
 }
 .opx-edge-attn {
   border-style: dashed;

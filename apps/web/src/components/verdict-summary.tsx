@@ -438,7 +438,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                             ) : null}
                           </td>
                           <td className={`${cell} max-md:col-start-2 max-md:pt-2.5`}>
-                            <span className="text-[0.875rem] font-medium leading-snug text-sb-ink">{p.title}</span>
+                            <span className="text-sm font-medium leading-snug text-sb-ink">{p.title}</span>
                             <ReasonWithReferences
                               reason={p.reason}
                               mode="links"
@@ -496,7 +496,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     data-item-id={d.itemId}
                     className={`flex flex-col gap-2 border border-sb-rule border-l-4 bg-sb-base px-3 py-2.5 text-sm text-sb-ink-2 ${VERDICT_EDGE.procedure_done}`}
                   >
-                    <span className="flex items-start gap-2 text-[0.875rem] font-medium leading-snug text-sb-ink">
+                    <span className="flex items-start gap-2 text-sm font-medium leading-snug text-sb-ink">
                       <span className="pt-0.5">
                         <VerdictSign level="procedure_done" />
                       </span>
@@ -604,7 +604,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       <td data-label="適用した許可" className={`${ITEM_CELL} text-sb-ink-2`}>
                         {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
                       </td>
-                      <td data-label="判定" className={`${ITEM_CELL} whitespace-nowrap md:pr-2`}>
+                      <td data-label="判定" className={`${ITEM_CELL} md:whitespace-nowrap md:pr-2`}>
                         <span className={`inline-flex items-center gap-1.5 font-medium ${VERDICT_TONE[it.verdict]}`}>
                           <VerdictSign level={it.verdict} />
                           {VERDICT_LABEL[it.verdict]}

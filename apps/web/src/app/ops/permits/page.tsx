@@ -73,7 +73,7 @@ export default async function PermitListPage({
       </form>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/permits" includeVoided={includeVoided} />
-        <p className="sb-num text-[0.875rem] font-bold tnum text-sb-ink-3" data-testid="permit-count">{rows.length} 件</p>
+        <p className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="permit-count">{rows.length} 件</p>
       </div>
 
       {rows.length === 0 ? (
@@ -92,7 +92,7 @@ export default async function PermitListPage({
                     </span>
                     <span className="text-sm text-sb-ink-2" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
                   </span>
-                  <span className="sb-num text-[0.875rem] tnum text-sb-ink-2" data-testid="permit-row-period">
+                  <span className="sb-num text-sm tnum text-sb-ink-2" data-testid="permit-row-period">
                     {p.validFrom} 〜 {p.validTo}
                   </span>
                   <span className="flex flex-wrap items-center gap-1.5">

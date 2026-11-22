@@ -1378,7 +1378,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
             onRetry={retryVerdict}
             meta={
-              <p className="sb-num text-[0.875rem] text-sb-ink-3">
+              <p className="sb-num text-sm text-sb-ink-3">
                 {lat}°N · {lng}°E
                 {showResultDetail && result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>

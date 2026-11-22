@@ -134,7 +134,7 @@ export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummar
 export function CandidateSummary({ c }: { readonly c: PlanPermitCandidateDto }) {
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
-      <span className="break-all sb-num text-[0.875rem] text-sb-ink">{c.permitNumber}</span>
+      <span className="break-all sb-num text-sm text-sb-ink">{c.permitNumber}</span>
       <span className="text-sm text-sb-ink-2">
         {c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}
       </span>
@@ -216,7 +216,7 @@ export function PermitVersionList({ versions, highlight }: { readonly versions: 
                   {v.op === "create" ? "登録" : v.op === "void" ? "取消" : content.status === "revoked" && v.changedFields.includes("状態") ? "失効" : "訂正"}
                 </Badge>
                 {highlight === v.versionNo ? <Badge tone="brand" data-testid="permit-version-highlight">◆ 判定の根拠にした版</Badge> : null}
-                <time dateTime={v.createdAt} className="sb-num text-[0.875rem] tnum">{v.createdAtJst}</time>
+                <time dateTime={v.createdAt} className="sb-num text-sm tnum">{v.createdAtJst}</time>
                 <span className="break-all">{v.actorName}</span>
               </p>
               {v.reason ? <p className="break-all text-sb-ink-2"><span className="text-sm text-sb-ink-3">理由：</span>{v.reason}</p> : null}

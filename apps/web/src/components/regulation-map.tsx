@@ -671,7 +671,7 @@ export function RegulationMap({
             className="sb-check"
           />
           <LayerSwatch kind={group.swatch} />
-          <span className="flex min-w-0 flex-1 flex-col gap-1 text-[0.875rem] leading-snug">
+          <span className="flex min-w-0 flex-1 flex-col gap-1 text-sm leading-snug">
             <span aria-hidden="true" className="font-bold">
               {group.shortLabel}
             </span>

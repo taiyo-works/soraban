@@ -182,7 +182,7 @@ export function ManualDraft({ flags, choice, onChoiceChange, droneWeightG }: Pro
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="break-all sb-num text-[0.875rem] underline decoration-sb-rule underline-offset-2 hover:text-sb-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus focus-visible:ring-offset-1 focus-visible:ring-offset-sb-base"
+                                    className="break-all sb-num text-sm underline decoration-sb-rule underline-offset-2 hover:text-sb-ink hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-focus focus-visible:ring-offset-1 focus-visible:ring-offset-sb-base"
                                   >
                                     {shortUrl(url)}
                                   </a>

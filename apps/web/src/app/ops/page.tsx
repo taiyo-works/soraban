@@ -33,7 +33,7 @@ export default async function OpsHome() {
             <h1 className="opx-h1" data-testid="today-heading">
               ホーム
             </h1>
-            <span className="opx-num text-[0.875rem] text-sb-ink-3" data-testid="today-date">
+            <span className="opx-num text-sm text-sb-ink-3" data-testid="today-date">
               <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
             </span>
           </div>
@@ -64,7 +64,7 @@ export default async function OpsHome() {
 
       {canEnter ? (
         <nav aria-label="記録の入力" className="flex flex-col gap-2 border-t border-sb-rule pt-5">
-          <p className="text-[0.875rem] font-bold text-sb-ink-2">記録を入力</p>
+          <p className="text-sm font-bold text-sb-ink-2">記録を入力</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="/ops/flights/new" prefetch={false} className="opx-btn min-h-14 sm:min-h-12" data-testid="ops-enter-flight">
               飛行記録を入力

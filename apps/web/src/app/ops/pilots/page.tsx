@@ -53,7 +53,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/pilots" includeVoided={includeVoided} />
-        <p className="sb-num text-[0.875rem] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
+        <p className="sb-num text-sm font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
         <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された操縦者はいません。</p>

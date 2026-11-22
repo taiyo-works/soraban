@@ -134,7 +134,7 @@ function PermitNumberHelper({
             const saved = isEdit ? savedByKey.get(t.key) : undefined;
             return (
               <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 text-sm leading-relaxed ${known ? "border-sb-ink" : "border-sb-ink"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
-                <span className="break-all sb-num text-[0.875rem] text-sb-ink">{t.text}</span>
+                <span className="break-all sb-num text-sm text-sb-ink">{t.text}</span>
                 {known ? (
                   <span className="text-sb-ink-2">
                     登録があります。{saved ? `保存済みの照合：${saved.statusLabel}${saved.reasons.length > 0 ? `（${saved.reasons.join("／")}）` : ""}。` : ""}
@@ -159,7 +159,7 @@ function PermitNumberHelper({
             {candidates.map((c) => (
               <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sb-m border border-l-2 border-sb-rule border-l-sb-ink bg-sb-base px-3 py-2" data-testid="plan-permit-candidate">
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="break-all sb-num text-[0.875rem] text-sb-ink">{c.permitNumber}</span>
+                  <span className="break-all sb-num text-sm text-sb-ink">{c.permitNumber}</span>
                   <span className="text-sm text-sb-ink-2">{c.summary}</span>
                 </span>
                 <button type="button" className={buttonGhostClass} onClick={() => onInsert(c.permitNumber)} data-testid="plan-permit-insert">
@@ -486,7 +486,7 @@ export function PlanForm({
                       onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
                     >
                       <span>{h.title}</span>
-                      <span className="sb-num text-[0.875rem] tnum text-sb-ink-3">
+                      <span className="sb-num text-sm tnum text-sb-ink-3">
                         {h.lat}, {h.lng}
                       </span>
                     </button>
