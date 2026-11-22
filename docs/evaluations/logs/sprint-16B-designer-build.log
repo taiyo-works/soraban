@@ -1,0 +1,165 @@
+
+> @soraban/web@0.0.0 build /home/user/soraban/apps/web
+> next build
+
+▲ Next.js 16.2.4 (Turbopack)
+- Cache Components enabled
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 15.1s
+  Running TypeScript ...
+  Finished TypeScript in 19.8s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/73) ...
+  Generating static pages using 3 workers (18/73) 
+  Generating static pages using 3 workers (36/73) 
+  Generating static pages using 3 workers (54/73) 
+✓ Generating static pages using 3 workers (73/73) in 1141ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ◐ /
+├ ○ /_not-found
+├ ○ /api/airports
+├ ƒ /api/auth/[...path]
+├ ƒ /api/check
+├ ƒ /api/diagnose
+├ ƒ /api/did/[pref]
+├ ƒ /api/geocode
+├ ƒ /api/health/db
+├ ○ /api/industrial
+├ ƒ /api/ops/aircraft
+├ ƒ /api/ops/aircraft/[id]
+├ ƒ /api/ops/aircraft/[id]/versions
+├ ƒ /api/ops/aircraft/[id]/void
+├ ƒ /api/ops/field-bundle
+├ ƒ /api/ops/flights
+├ ƒ /api/ops/flights/[id]
+├ ƒ /api/ops/flights/[id]/incidents
+├ ƒ /api/ops/flights/[id]/versions
+├ ƒ /api/ops/flights/[id]/void
+├ ƒ /api/ops/incidents
+├ ƒ /api/ops/incidents/[id]
+├ ƒ /api/ops/incidents/[id]/reports
+├ ƒ /api/ops/incidents/[id]/versions
+├ ƒ /api/ops/incidents/[id]/void
+├ ƒ /api/ops/inspections
+├ ƒ /api/ops/inspections/[id]
+├ ƒ /api/ops/inspections/[id]/versions
+├ ƒ /api/ops/inspections/[id]/void
+├ ƒ /api/ops/me
+├ ƒ /api/ops/members
+├ ƒ /api/ops/members/[id]
+├ ƒ /api/ops/members/[id]/versions
+├ ƒ /api/ops/permits
+├ ƒ /api/ops/permits/[id]
+├ ƒ /api/ops/permits/[id]/revoke
+├ ƒ /api/ops/permits/[id]/versions
+├ ƒ /api/ops/permits/[id]/void
+├ ƒ /api/ops/pilots
+├ ƒ /api/ops/pilots/[id]
+├ ƒ /api/ops/pilots/[id]/versions
+├ ƒ /api/ops/pilots/[id]/void
+├ ƒ /api/ops/places
+├ ƒ /api/ops/places/[id]
+├ ƒ /api/ops/places/[id]/versions
+├ ƒ /api/ops/places/[id]/void
+├ ƒ /api/ops/plans
+├ ƒ /api/ops/plans/[id]
+├ ƒ /api/ops/plans/[id]/confirmations
+├ ƒ /api/ops/plans/[id]/field
+├ ƒ /api/ops/plans/[id]/field-events
+├ ƒ /api/ops/plans/[id]/incidents
+├ ƒ /api/ops/plans/[id]/permits
+├ ƒ /api/ops/plans/[id]/procedure-records
+├ ƒ /api/ops/plans/[id]/rejudge
+├ ƒ /api/ops/plans/[id]/report
+├ ƒ /api/ops/plans/[id]/reports
+├ ƒ /api/ops/plans/[id]/reports/[rid]
+├ ƒ /api/ops/plans/[id]/reports/[rid]/resolve
+├ ƒ /api/ops/plans/[id]/reports/[rid]/retract
+├ ƒ /api/ops/plans/[id]/reports/[rid]/retry
+├ ƒ /api/ops/plans/[id]/reports/[rid]/versions
+├ ƒ /api/ops/plans/[id]/reports/audit
+├ ƒ /api/ops/plans/[id]/request-confirmation
+├ ƒ /api/ops/plans/[id]/snapshots
+├ ƒ /api/ops/plans/[id]/snapshots/[sid]
+├ ƒ /api/ops/plans/[id]/versions
+├ ƒ /api/ops/plans/[id]/void
+├ ƒ /api/ops/today
+├ ƒ /api/test-auth/sign-in
+├ ƒ /api/test-auth/sign-out
+├ ○ /icon.svg
+├ ◐ /ops
+├ ◐ /ops/about
+├ ◐ /ops/aircraft
+├ ◐ /ops/aircraft/[id]
+│ └ /ops/aircraft/[id]
+├ ◐ /ops/aircraft/new
+├ ◐ /ops/design
+├ ◐ /ops/flights
+├ ◐ /ops/flights/[id]
+│ └ /ops/flights/[id]
+├ ◐ /ops/flights/new
+├ ◐ /ops/incidents
+├ ◐ /ops/incidents/[id]
+│ └ /ops/incidents/[id]
+├ ◐ /ops/incidents/new
+├ ◐ /ops/inspections
+├ ◐ /ops/inspections/[id]
+│ └ /ops/inspections/[id]
+├ ◐ /ops/inspections/new
+├ ◐ /ops/journal
+├ ƒ /ops/manifest.webmanifest
+├ ◐ /ops/members
+├ ◐ /ops/more
+├ ◐ /ops/no-access
+├ ◐ /ops/offline/field
+├ ◐ /ops/offline/inspection
+├ ◐ /ops/offline/journal
+├ ◐ /ops/offline/today
+├ ◐ /ops/offline/unavailable
+├ ◐ /ops/permits
+├ ◐ /ops/permits/[id]
+│ └ /ops/permits/[id]
+├ ◐ /ops/permits/new
+├ ◐ /ops/pilots
+├ ◐ /ops/pilots/[id]
+│ └ /ops/pilots/[id]
+├ ◐ /ops/pilots/new
+├ ◐ /ops/places
+├ ◐ /ops/places/[id]
+│ └ /ops/places/[id]
+├ ◐ /ops/places/new
+├ ◐ /ops/plans
+├ ◐ /ops/plans/[id]
+│ └ /ops/plans/[id]
+├ ◐ /ops/plans/[id]/edit
+│ └ /ops/plans/[id]/edit
+├ ◐ /ops/plans/[id]/field
+│ └ /ops/plans/[id]/field
+├ ◐ /ops/plans/[id]/field/incident
+│ └ /ops/plans/[id]/field/incident
+├ ◐ /ops/plans/[id]/journal
+│ └ /ops/plans/[id]/journal
+├ ◐ /ops/plans/[id]/judgement
+│ └ /ops/plans/[id]/judgement
+├ ◐ /ops/plans/[id]/overview
+│ └ /ops/plans/[id]/overview
+├ ◐ /ops/plans/[id]/report
+│ └ /ops/plans/[id]/report
+├ ◐ /ops/plans/[id]/snapshots
+│ └ /ops/plans/[id]/snapshots
+├ ◐ /ops/plans/[id]/snapshots/[sid]
+│ └ /ops/plans/[id]/snapshots/[sid]
+├ ◐ /ops/plans/new
+├ ◐ /ops/sign-in
+└ ƒ /ops/sw.js
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+

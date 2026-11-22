@@ -342,6 +342,7 @@ html:has(.ops-v2) body {
 /* 本文として読ませる案内（不変条件 6: 本文 16px 以上）。.opx-note の 13px を、この案内だけ上書きする */
 .opx-note-lg {
   font-size: 1rem;
+  line-height: 1.7;
 }
 .opx-note-red {
   background: var(--sb-st-danger-face);
@@ -682,4 +683,14 @@ html:has(.ops-v2) body {
 [data-testid="report-notice"] summary .opx-badge {
   padding-left: 6px;
   padding-right: 6px;
+}
+
+/* 16-B（designer）：16px の固定の文言は行の高さ 1.5（前の 1.38 は詰めすぎ。方針の本文 1.7 には、最初の画面の上限があり届かない） */
+[data-testid="report-notice-short"],
+[data-testid="report-notice"] {
+  line-height: 1.5;
+}
+/* ホームの「ホーム画面に追加」の案内は 16px の本文：行の高さ 1.7 */
+[data-testid="pwa-install-guide"] {
+  line-height: 1.7;
 }

@@ -44,7 +44,7 @@ export default async function PlanReportPage({
     throw e;
   }
   return (
-    <main className="flex flex-col gap-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         eyebrow="通報の内容"
         back={safeReturnTo(sp["returnTo"]) ? { href: safeReturnTo(sp["returnTo"])!, label: "現場モードへ戻る" } : { href: `/ops/plans/${view.planId}`, label: "通報の状況" }}

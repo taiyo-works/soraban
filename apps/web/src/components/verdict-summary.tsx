@@ -541,7 +541,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   className="grid grid-cols-[4.5rem_1fr] items-baseline gap-x-3 py-1.5 text-sm text-sb-ink-2"
                 >
                   <span
-                    className={`justify-self-start rounded-sb-pill border px-2 py-px text-sm leading-tight ${
+                    className={`justify-self-start whitespace-nowrap rounded-sb-pill border px-2 py-px text-sm leading-tight ${
                       d.kind === "premise" ? "border-sb-rule text-sb-ink-3" : "border-sb-edge text-sb-ink"
                     }`}
                   >

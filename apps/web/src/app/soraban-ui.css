@@ -71,18 +71,32 @@
 }
 
 /* ===== ページの骨格 ===== */
-/* 16-B：文字を大きくした（補足 12→14、本文 15→16）分、行の高さを詰めて画面の長さを保つ。本文 16px×1.6＝25.6px（前は 15px×1.75＝26.25px）、leading-relaxed は 1.625→1.5 */
+/* 16-B：文字を大きくした（補足 12→14、本文 15→16）分、行の高さを詰めて画面の長さを保つ。
+ * 本文（16px）は方針どおり行の高さ 1.7・字間 0.01em（designer の磨き込み。字間を 0.03→0.01em にした分で、長さの上限に収める）。
+ * 補足（14px）の leading-relaxed は 1.625→1.5（方針の補足 1.5）。16px の本文に付いた leading-relaxed だけ 1.7（下の .text-base.leading-relaxed） */
 :root {
   --leading-relaxed: 1.5;
 }
 .sb-page {
   color: var(--sb-ink);
   font-size: var(--sb-fs-body);
-  line-height: 1.6;
-  letter-spacing: 0.02em;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
   line-break: strict;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
+}
+/* 本文（16px）の段落は 1.7。補足（14px）の既定（text-sm の 1.43、leading-snug の 1.375）は方針の補足 1.5 に揃える。
+ * 見出し（leading-snug の 16px）は方針のカード見出し 1.45。明示の leading-*（tight など）は触らない */
+.text-base.leading-relaxed {
+  line-height: 1.7;
+}
+.sb-page .text-sm:not([class*="leading-"]),
+.sb-page .text-sm.leading-snug {
+  line-height: 1.5;
+}
+.sb-page .leading-snug:not(.text-sm) {
+  line-height: 1.45;
 }
 .sb-page *:focus-visible {
   outline: 3px solid var(--sb-focus);
@@ -91,8 +105,9 @@
 .sb-num {
   font-family: var(--font-num), sans-serif;
   font-variant-numeric: tabular-nums;
-  /* 数字・日時は字間を空けない（折り返しを増やさない） */
+  /* 数字・日時は字間を空けない（折り返しを増やさない）。数字用の字体は空白が狭く、「2027-01-10 10:00」の日付と時刻がくっついて読めたので、語間だけ少し空ける */
   letter-spacing: 0;
+  word-spacing: 0.25em;
 }
 .sb-band {
   position: relative;
@@ -123,7 +138,7 @@
 /* 見出し：左 5px の墨の線だけ（主色は操作と現在地だけに使う。飾りの線は墨）（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   padding: 4px 0 4px 14px;
   border-left: 5px solid var(--sb-ink);
   display: flex;
@@ -408,9 +423,9 @@
 .sb-tag {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   min-height: 28px;
-  padding: 2px 8px;
+  padding: 2px 12px;
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   border: 1px solid var(--sb-rule);
@@ -580,7 +595,7 @@ select.sb-input {
 }
 .sb-hint {
   font-size: 0.875rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--sb-ink-3);
 }
 .sb-field-text {
@@ -742,7 +757,7 @@ input.sb-check:disabled {
 }
 .sb-lead {
   font-size: 0.875rem;
-  line-height: 1.7;
+  line-height: 1.5;
   color: var(--sb-ink-2);
   max-width: 46rem;
 }
@@ -807,7 +822,7 @@ input.sb-check:disabled {
     font-size: 1.25rem;
   }
   .sb-block {
-    padding: 12px 14px 14px;
+    padding: 12px 14px 12px;
   }
 }
 @media (min-width: 1024px) {
@@ -886,7 +901,7 @@ input.sb-check:disabled {
   background: var(--sb-surface);
   padding: 6px 12px;
   font-size: 0.875rem;
-  line-height: 1.7;
+  line-height: 1.5;
   color: var(--sb-ink-2);
 }
 .sb-note-card.is-warn {
