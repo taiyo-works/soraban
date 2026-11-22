@@ -91,7 +91,7 @@ export function PageHeader({
   );
 }
 
-/** 画面内の区切り（v2 の見出し：左 5px の主色の線）。 */
+/** 画面内の区切り（v2 の見出し：左 5px の墨の線）。 */
 export function Section({
   title,
   description,

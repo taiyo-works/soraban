@@ -1,0 +1,82 @@
+
+Running 2 tests using 1 worker
+
+[WebServer] ⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "127.0.0.1".
+[WebServer] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[WebServer] 
+[WebServer] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[WebServer] 
+[WebServer] // next.config.js
+[WebServer] module.exports = {
+[WebServer]   allowedDevOrigins: ['127.0.0.1'],
+[WebServer] }
+[WebServer] 
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  ✘  1 e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない (2.0m)
+
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない::  1) e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない,line=30,col=8::  1) e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      28 |%0A      29 | const waitCheck = (page: Page) =>%0A    > 30 |   page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |        ^%0A      31 | const waitDiagnose = (page: Page) =>%0A      32 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      33 |%0A        at waitCheck (/home/user/soraban/e2e/sprint7.spec.ts:30:8)%0A        at gotoCoords (/home/user/soraban/e2e/sprint7.spec.ts:36:17)%0A        at /home/user/soraban/e2e/sprint7.spec.ts:163:11
+  ✘  2 e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す (2.0m)
+
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す::  2) e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す ────────────%0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す,line=15,col=40::  2) e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す ────────────%0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);%0A      14 |%0A    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |                                        ^%0A      16 | const waitDiagnose = (page: Page) =>%0A      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      18 |%0A        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)%0A        at openReady (/home/user/soraban/e2e/sprint9.spec.ts:21:17)%0A        at /home/user/soraban/e2e/sprint9.spec.ts:353:11
+
+
+  1) e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      28 |
+      29 | const waitCheck = (page: Page) =>
+    > 30 |   page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |        ^
+      31 | const waitDiagnose = (page: Page) =>
+      32 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      33 |
+        at waitCheck (/home/user/soraban/e2e/sprint7.spec.ts:30:8)
+        at gotoCoords (/home/user/soraban/e2e/sprint7.spec.ts:36:17)
+        at /home/user/soraban/e2e/sprint7.spec.ts:163:11
+
+    Error Context: test-results/sprint7-C-工業専用地域の除外（フィクスチャ-7450e-確認』、収録済み市町村の-DID-内・工専外では出ない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint7-C-工業専用地域の除外（フィクスチャ-7450e-確認』、収録済み市町村の-DID-内・工専外では出ない/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sprint7-C-工業専用地域の除外（フィクスチャ-7450e-確認』、収録済み市町村の-DID-内・工専外では出ない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す ────────────
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)
+        at openReady (/home/user/soraban/e2e/sprint9.spec.ts:21:17)
+        at /home/user/soraban/e2e/sprint9.spec.ts:353:11
+
+    Error Context: test-results/sprint9-A・B-住所検索-（フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-A・B-住所検索-（フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sprint9-A・B-住所検索-（フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない 
+    e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す ─────────────
+::notice title=🎭 Playwright Run Summary::  2 failed%0A    e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない %0A    e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す ─────────────

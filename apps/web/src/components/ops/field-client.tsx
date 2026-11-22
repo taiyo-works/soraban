@@ -1315,7 +1315,7 @@ export function FieldClient({
 
       {/* 上部：計画の要点（運航票の見出し）と「ホームへ戻る」 */}
       <header className="flex flex-col gap-3 border-b-[length:var(--sb-mark-w)] border-sb-edge pb-4">
-        <div className="flex flex-col gap-1 border-l-[length:8px] border-sb-primary pl-3">
+        <div className="flex flex-col gap-1 border-l-[length:8px] border-sb-ink pl-3">
           <h1 className="text-2xl font-bold leading-snug" data-testid="field-plan-title">
             {plan.title}
           </h1>

@@ -1,0 +1,35 @@
+
+Running 10 tests using 1 worker
+
+[WebServer] Route / is rendering with server caches disabled. For this navigation, Component Metadata in React DevTools will not accurately reflect what is statically prerenderable and runtime prefetchable. See more info here: https://nextjs.org/docs/messages/cache-bypass-in-dev
+[WebServer] ⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "127.0.0.1".
+[WebServer] Cross-origin access to Next.js dev resources is blocked by default for safety.
+[WebServer] 
+[WebServer] To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+[WebServer] 
+[WebServer] // next.config.js
+[WebServer] module.exports = {
+[WebServer]   allowedDevOrigins: ['127.0.0.1'],
+[WebServer] }
+[WebServer] 
+[WebServer] Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  ✘   1 e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 (2.0m)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812::  1) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812,line=13,col=8::  1) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 %0A    Error: page.waitForResponse: Test ended.%0A%0A      11 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A      12 | const waitDiagnose = (page: Page) =>%0A    > 13 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A         |        ^%0A      14 |%0A      15 | const openReady = async (page: Page, url = "/"): Promise<void> => {%0A      16 |   const check = waitCheck(page);%0A        at waitDiagnose (/home/user/soraban/e2e/sprint12h-pr2.spec.ts:13:8)%0A        at open (/home/user/soraban/e2e/sprint12h-pr2.spec.ts:893:23)%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:905:13
+  ✘   2 e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 (2.0m)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800::  2) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800,line=13,col=8::  2) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 %0A    Error: page.waitForResponse: Test ended.%0A%0A      11 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A      12 | const waitDiagnose = (page: Page) =>%0A    > 13 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A         |        ^%0A      14 |%0A      15 | const openReady = async (page: Page, url = "/"): Promise<void> => {%0A      16 |   const check = waitCheck(page);%0A        at waitDiagnose (/home/user/soraban/e2e/sprint12h-pr2.spec.ts:13:8)%0A        at open (/home/user/soraban/e2e/sprint12h-pr2.spec.ts:893:23)%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:905:13
+  ✓   3 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /（公開の判定画面）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (1.1s)
+  ✓   4 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（通常）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (2.3s)
+  ✓   5 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（現場）：文字は 7:1 以上（無効の部品を除く）。横スクロールなし (720ms)
+  ✓   6 e2e/sprint7.spec.ts:136:7 › C. 工業専用地域の除外（本番相当サーバー・実データ） › 境港市の工業専用地域内（実データ）では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク (2.6s)
+  ✘   7 e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない (2.0m)
+
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない::  3) e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない,line=30,col=8::  3) e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      28 |%0A      29 | const waitCheck = (page: Page) =>%0A    > 30 |   page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |        ^%0A      31 | const waitDiagnose = (page: Page) =>%0A      32 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      33 |%0A        at waitCheck (/home/user/soraban/e2e/sprint7.spec.ts:30:8)%0A        at gotoCoords (/home/user/soraban/e2e/sprint7.spec.ts:36:17)%0A        at /home/user/soraban/e2e/sprint7.spec.ts:163:11
+  ✘   8 e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク (2.0m)
+
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク::  4) e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint7.spec.ts,title=e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク,line=30,col=8::  4) e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      28 |%0A      29 | const waitCheck = (page: Page) =>%0A    > 30 |   page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |        ^%0A      31 | const waitDiagnose = (page: Page) =>%0A      32 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      33 |%0A        at waitCheck (/home/user/soraban/e2e/sprint7.spec.ts:30:8)%0A        at gotoCoords (/home/user/soraban/e2e/sprint7.spec.ts:36:17)%0A        at /home/user/soraban/e2e/sprint7.spec.ts:177:11

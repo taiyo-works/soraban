@@ -160,7 +160,7 @@ export function VerdictBig({ level }: { readonly level: ItemVerdict }) {
   );
 }
 
-// ── 見出し（左 5px の主色の線だけ。Sprint 16 H-5：背後の大きな薄い数字をやめた）──
+// ── 見出し（左 5px の墨の線だけ。Sprint 16 H-5：背後の大きな薄い数字をやめた）──
 
 export function SectionHead({
   id,

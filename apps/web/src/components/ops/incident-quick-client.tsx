@@ -146,7 +146,7 @@ export function IncidentQuickClient({
       {/* ② 事実の記録の注意 */}
       <IncidentFactNotice large />
 
-      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-primary pl-3">
+      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-ink pl-3">
         <h1 className="text-2xl font-bold leading-snug">事故・ヒヤリハットの簡易記録</h1>
         <p data-testid="incident-quick-plan">{planTitle}</p>
       </header>

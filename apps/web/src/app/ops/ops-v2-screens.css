@@ -258,7 +258,7 @@
 }
 
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
- * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の主色の線）にする。保存の帯（.opx-submit）は区画の外。 */
+ * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の墨の線）にする。保存の帯（.opx-submit）は区画の外。 */
 .opx-form > section,
 .opx-form > fieldset {
   min-width: 0;
@@ -308,7 +308,7 @@
 .sb-sec-head[data-tone="danger"] {
   border-left-color: var(--sb-v-no-fg);
 }
-/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、主色の線も題の 1 行分に収める */
+/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、墨の線も題の 1 行分に収める */
 .ops-v2 .sb-sec-head {
   min-height: 40px;
 }

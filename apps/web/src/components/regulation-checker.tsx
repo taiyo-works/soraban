@@ -1673,8 +1673,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{dipsItems.map(renderPermit)}</div>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{permitItems.map(renderPermit)}</div>
-              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の主色の線でひとまとまりに見せる */}
-              <div className="border-l-4 border-sb-primary pl-2">
+              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の線でひとまとまりに見せる */}
+              <div className="border-l-4 border-sb-edge pl-2">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{pairItems.map(renderPermit)}</div>
               </div>
             </div>
