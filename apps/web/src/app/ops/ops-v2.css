@@ -56,7 +56,7 @@
 .ds.ops-v2 {
   background: var(--sb-base);
   color: var(--sb-ink);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 html:has(.ops-v2),
 html:has(.ops-v2) body {

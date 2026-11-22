@@ -118,7 +118,7 @@ function VerdictScale({ level }: { level: ItemVerdict }) {
 
 // 規制ごとの判定の表のセル（狭い幅では「列名 値」の 1 行ずつに積む。列名は data-label を ::before で出す）。
 const ITEM_CELL =
-  "flex gap-2 py-0.5 pr-3 md:table-cell md:py-1.5 max-md:before:w-[5.5rem] max-md:before:shrink-0 max-md:before:text-sm max-md:before:leading-5 max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
+  "flex gap-2 py-0.5 pr-2 md:table-cell md:py-1.5 max-md:before:w-[5.5rem] max-md:before:shrink-0 max-md:before:text-sm max-md:before:leading-5 max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
 
 /** 段階の言葉。括弧の中（「条件付き」）は折り返しても一塊で読めるよう、小さく続ける（文字列は変えない）。 */
 function LevelWords({ label }: { label: string }) {
@@ -408,13 +408,13 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="flex flex-col gap-3 md:table-row-group">
+                  <tbody className="flex flex-col gap-2 md:table-row-group">
                     {verdict.procedures.map((p, i) => {
                       const countdown = deadlineCountdown(p.deadline.date);
                       const edge = VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"];
                       // 768px 以上は表の行、狭い幅は 1 件ずつの票（左端の帯・番号の列・手続き名 → 出す先 → 期限 → 法的な重さ）。
                       const cell =
-                        "block bg-sb-base py-1 pr-3 align-top md:table-cell md:border-y md:border-sb-rule md:py-2.5";
+                        "block bg-sb-base py-1 pr-2 align-top md:table-cell md:border-y md:border-sb-rule md:py-2.5";
                       const labelled =
                         "max-md:col-start-2 max-md:before:mb-0.5 max-md:before:block max-md:before:text-sm max-md:before:tracking-[0.08em] max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
                       return (
@@ -572,7 +572,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     <th className="py-1 pr-2 font-medium">判定</th>
                   </tr>
                 </thead>
-                <tbody className="flex flex-col gap-3 md:table-row-group">
+                <tbody className="flex flex-col gap-2 md:table-row-group">
                   {verdict.items.map((it) => (
                     <tr
                       key={it.id}
@@ -580,9 +580,9 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       data-item-id={it.id}
                       data-base-status={it.baseStatus}
                       data-verdict={it.verdict}
-                      className={`block rounded-sb-l border-b-0 border-l-4 bg-sb-base py-2 pl-3 align-top shadow-sb md:table-row md:rounded-none md:border-b md:border-l-0 md:border-sb-rule md:bg-transparent md:py-0 md:pl-0 md:shadow-none ${VERDICT_EDGE[it.verdict]}`}
+                      className={`block rounded-sb-l border-b-0 border-l-4 bg-sb-base py-1.5 pl-2 align-top shadow-sb md:table-row md:rounded-none md:border-b md:border-l-0 md:border-sb-rule md:bg-transparent md:py-0 md:pl-0 md:shadow-none ${VERDICT_EDGE[it.verdict]}`}
                     >
-                      <td className={`block pb-1 pr-3 text-sb-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
+                      <td className={`block pb-1 pr-2 text-sb-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}
                         {permitNotes?.item[it.id] ? (
                           <span data-testid="verdict-item-permit-note" className="mt-0.5 block text-sm leading-relaxed text-sb-ink-2">

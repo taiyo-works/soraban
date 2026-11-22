@@ -117,7 +117,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               <p className="text-sm leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
               <ul className="flex flex-col border-t border-sb-rule">
                 {planPermits.candidates.map((c) => (
-                  <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-2.5 pl-3 text-sm" data-testid="plan-permit-candidate">
+                  <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-1 pl-3 text-sm" data-testid="plan-permit-candidate">
                     <span className="break-all sb-num text-sm text-sb-ink">{c.permitNumber}</span>
                     <span className="text-sm text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
                   </li>
