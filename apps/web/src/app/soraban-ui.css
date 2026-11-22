@@ -107,7 +107,7 @@
   font-variant-numeric: tabular-nums;
   /* 数字・日時は字間を空けない（折り返しを増やさない）。数字用の字体は空白が狭く、「2027-01-10 10:00」の日付と時刻がくっついて読めたので、語間だけ少し空ける */
   letter-spacing: 0;
-  word-spacing: 0.25em;
+  word-spacing: 0.12em;
 }
 .sb-band {
   position: relative;
@@ -138,7 +138,7 @@
 /* 見出し：左 5px の墨の線だけ（主色は操作と現在地だけに使う。飾りの線は墨）（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 4px 0 4px 14px;
   border-left: 5px solid var(--sb-ink);
   display: flex;
