@@ -248,7 +248,7 @@ function ItemRow({
   const canCopy = item.copyable && item.copyText !== null;
   return (
     <li
-      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-1.5 ${
+      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-0.5 ${
         item.status === "missing" ? "bg-sb-sunken" : ""
       }`}
       data-testid={`report-item-${item.key}`}
@@ -304,7 +304,7 @@ function ItemRow({
             <span>{MISSING_VALUE_LABEL}</span>
           </span>
         ) : item.status === "dips_only" ? (
-          <span className="inline-flex items-start gap-1 text-sm leading-snug text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
+          <span className="inline-flex items-start gap-1 text-sm leading-[1.3] text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
             <span aria-hidden className="w-4 shrink-0 text-center sb-num text-sb-ink-3">－</span>
             <span>{item.apiField && item.value ? item.value.replace(`（${item.apiField}）`, "") : (item.value ?? DIPS_ONLY_LABEL)}</span>
           </span>
@@ -881,7 +881,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       {voidedNone ? null : (
       <nav
           aria-label="通報の手順"
-          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 max-sm:-mt-3 lg:top-14"
+          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-0.5 max-sm:-mt-3 lg:top-14"
           data-testid="report-stepper"
         >
           {[
@@ -996,10 +996,10 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                 ))}
               </ul>
             ) : null}
-            <div className="flex flex-col gap-6" data-testid="report-groups">
+            <div className="flex flex-col gap-4" data-testid="report-groups">
               {view.prepared.groups.map((g) => (
                 <section key={g.id} aria-label={g.label} className="flex flex-col" data-testid={`report-group-${g.id}`} data-needs-confirmation={g.needsConfirmation ? "1" : "0"}>
-                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-surface px-2 py-2 text-sm font-medium text-sb-ink sm:px-3">
+                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-surface px-2 py-1 text-sm font-medium text-sb-ink sm:px-3">
                     <span>{g.label}</span>
                     {g.needsConfirmation ? (
                       <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-st-warn-face px-1.5 text-sm font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>

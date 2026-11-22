@@ -430,8 +430,8 @@ html:has(.ops-v2) body {
 
 /* 項目の並び（compact）：狭い画面でも項目名を左・値を右の 2 列にして、縦を詰める（Sprint 17-2） */
 .opx-detail-compact > div {
-  grid-template-columns: 7rem minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 8px;
   padding: 6px 0;
   align-items: baseline;
   font-size: 0.875rem;
@@ -664,4 +664,22 @@ html:has(.ops-v2) body {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
+}
+
+/* 16-B：通報の作業台の「固定の文言の全文」の見出し行。文字を 14px にしても、送信元・方式の 2 つの札が折り返さず 1 行（48px）に収まるようにする */
+[data-testid="report-notice"] summary {
+  row-gap: 0;
+}
+[data-testid="report-notice"] summary > .ml-auto {
+  flex-wrap: wrap;
+  column-gap: 4px;
+  row-gap: 0;
+}
+[data-testid="report-notice"] summary > .ml-auto > * {
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+[data-testid="report-notice"] summary .opx-badge {
+  padding-left: 6px;
+  padding-right: 6px;
 }
