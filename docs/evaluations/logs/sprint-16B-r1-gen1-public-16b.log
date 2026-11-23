@@ -1,0 +1,1876 @@
+
+Running 36 tests using 1 worker
+
+  ✓   1 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓   2 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (3.9s)
+  ✓   3 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓   4 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.1s)
+  ✓   5 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (859ms)
+  ✓   6 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (514ms)
+  ✓   7 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (438ms)
+  ✓   8 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (597ms)
+  ✓   9 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (426ms)
+  ✓  10 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (412ms)
+  ✓  11 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (599ms)
+  ✓  12 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (593ms)
+  ✓  13 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (603ms)
+  ✓  14 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (597ms)
+  ✓  15 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (540ms)
+  ✓  16 e2e/sprint16-b.spec.ts:81:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (7.3s)
+  ✓  17 e2e/sprint16-b.spec.ts:86:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.1s)
+  ✓  18 e2e/sprint16-b.spec.ts:109:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (3.9s)
+  ✘  19 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.2s)
+  ✘  20 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.5s)
+  ✘  21 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✘  22 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.3s)
+  ✘  23 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✘  24 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.3s)
+  ✘  25 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✘  26 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✘  27 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.6s)
+  ✘  28 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (764ms)
+  ✘  29 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (769ms)
+  ✘  30 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (788ms)
+  ✓  31 e2e/sprint16-b.spec.ts:172:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 印のない 14px の p は失敗する。16px・1.7 の p は通る (214ms)
+  ✓  32 e2e/sprint16-b.spec.ts:179:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する (152ms)
+  ✓  33 e2e/sprint16-b.spec.ts:186:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す (174ms)
+  ✓  34 e2e/sprint16-b.spec.ts:192:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す (197ms)
+  ✓  35 e2e/sprint16-b.spec.ts:201:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く (156ms)
+  ✓  36 e2e/sprint16-b.spec.ts:207:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ (156ms)
+
+
+  1) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（初期）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（37 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 39
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--4f7cc-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--4f7cc-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--4f7cc-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（初期）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（37 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 39
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--f6ccb-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--f6ccb-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--f6ccb-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（初期）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（38 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 40
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「住所・座標・地図のクリックで地点を指定で」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--c5b9c-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--c5b9c-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--c5b9c-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（132 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 134
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 30px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_82fdcd51941e26f9」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:04:55」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（132 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 134
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 30px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_d7889b44ef50c95d」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:05:03」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（133 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 135
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「住所・座標・地図のクリックで地点を指定で」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 34px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_503eedb9c4e372c0」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:05:12」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（292 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 294
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 30px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「航空法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「空港等周辺概算空港（山陰・但馬の供用中空」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港等周辺」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「DID（航空法第132条の85）公式デー」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「DID（航空法第132条の85）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「収録済みの市町村のみ表示」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「小型無人機等飛行禁止法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定を確認できた施設のうち地図に収録でき」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「その他」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-no-map-row]「緊急用務空域：動的な情報のため、地図には」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-no-map-row]「緊急用務空域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「そらばん追加」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取市・米子市・倉吉市・境港市・八頭町・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「文化財保護法125条 / 鳥取市・米子市」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取県・島根県 迷惑行為等防止条例」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「国勢調査に基づく人口集中地区（DID）の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 3 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・国土交通大臣の許可・承認を取得している」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市計画法第8条第1項第1号の工業専用」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2020）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2019）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土交通省告示第435号（令和8年3月3」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-01）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「空港等の周辺（進入表面・転移表面・水平表」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-14・版 ai」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「防衛関係施設・原子力事業所などの対象施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・対象施設の管理者の同意を得たうえで、飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2026）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「改正小型無人機等飛行禁止法（令和8年法律」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-14）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の都市公園内では、利用者の安全確」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市公園の管理者の許可を受けた場合は、」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・市が主催し、又は後援する行事のために行」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-19・版 da」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の国指定史跡では、文化財保護法第」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・文化庁長官の許可（市指定の場合は教育委」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・災害復旧・人命救助等の緊急行為」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「鳥取県迷惑行為等防止条例では、公衆に著し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・施設管理者・自治体担当部署と事前調整し」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・警察・消防・自治体等の公務として行う飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_c1dcf9867a5ad062」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:05:20」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[dips-permits]「国交省 DIPS の許可・承認（種類ごと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「地点を指定すると、航空法（人口集中地区・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「山陰・但馬」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県で指定を確認した施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「12 市町村（収録を拡大中）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「10 市町村」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「都道府県」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県全域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（292 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 294
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 30px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「航空法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「空港等周辺概算空港（山陰・但馬の供用中空」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港等周辺」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「DID（航空法第132条の85）公式デー」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「DID（航空法第132条の85）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「収録済みの市町村のみ表示」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「小型無人機等飛行禁止法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定を確認できた施設のうち地図に収録でき」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「その他」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-no-map-row]「緊急用務空域：動的な情報のため、地図には」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-no-map-row]「緊急用務空域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「そらばん追加」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取市・米子市・倉吉市・境港市・八頭町・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「文化財保護法125条 / 鳥取市・米子市」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取県・島根県 迷惑行為等防止条例」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「国勢調査に基づく人口集中地区（DID）の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 3 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・国土交通大臣の許可・承認を取得している」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市計画法第8条第1項第1号の工業専用」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2020）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2019）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土交通省告示第435号（令和8年3月3」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-01）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「空港等の周辺（進入表面・転移表面・水平表」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-14・版 ai」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「防衛関係施設・原子力事業所などの対象施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・対象施設の管理者の同意を得たうえで、飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2026）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「改正小型無人機等飛行禁止法（令和8年法律」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-14）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の都市公園内では、利用者の安全確」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市公園の管理者の許可を受けた場合は、」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・市が主催し、又は後援する行事のために行」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-19・版 da」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の国指定史跡では、文化財保護法第」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・文化庁長官の許可（市指定の場合は教育委」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・災害復旧・人命救助等の緊急行為」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「鳥取県迷惑行為等防止条例では、公衆に著し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・施設管理者・自治体担当部署と事前調整し」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・警察・消防・自治体等の公務として行う飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_a58e73c3d605c0b3」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:05:28」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[dips-permits]「国交省 DIPS の許可・承認（種類ごと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「地点を指定すると、航空法（人口集中地区・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「山陰・但馬」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県で指定を確認した施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「12 市町村（収録を拡大中）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「10 市町村」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「都道府県」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県全域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（293 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 295
+
+    - Array []
+    + Array [
+    +   "本文 p[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[site-lead]「業務でドローンを飛ばす事業者・操縦者のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[site-ops-note]「通報の記録・点検・飛行日誌は、運航管理の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「フューチャーテック株式会社」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は社内での試験運用中」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 dd[site-facts]「現在は鳥取県・島根県（条例データを収録し」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[site-disclaimer]「判定結果は参考情報です。飛行の可否は、国」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「住所・座標・地図のクリックで地点を指定で」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[current-location-privacy]「現在地は、「現在地で判定」を押したときに」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「結論」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-level]「要手続き」 34px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「35.4278°N · 133.3314」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「確認日 2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-checked-date]「2026-10-19」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「出典つき（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-sourced]「（6 件）」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-responsibility]「許可・承認などの申請は、ご本人が DIP」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[map-pick-hint]「地図を長押しすると、その位置を判定地点（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[map-pick-hint]「地図をクリックまたは右クリックすると、そ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[map-pick-hint]「右クリック」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「敷地・区域：レッドゾーン・原則飛行禁止（」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「敷地・区域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：レッドゾーン・原則飛行禁止（敷地は概算」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「周辺地域：イエローゾーン・おおむね 1,」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「周辺地域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：イエローゾーン・おおむね 1,000m」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[legend-zones]「要確認帯：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 strong[legend-zones]「要確認帯」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[legend-zones]「：法定の範囲ではありません」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「航空法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「空港等周辺概算空港（山陰・但馬の供用中空」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港等周辺」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「DID（航空法第132条の85）公式デー」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「DID（航空法第132条の85）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（DID から除外・告示第4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公式データ」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「収録済みの市町村のみ表示」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「小型無人機等飛行禁止法」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設 6 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定を確認できた施設のうち地図に収録でき」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「その他」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-no-map-row]「緊急用務空域：動的な情報のため、地図には」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-no-map-row]「緊急用務空域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[layer-list]「そらばん追加」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「都市公園（鳥取44 + 米子34 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取市・米子市・倉吉市・境港市・八頭町・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「指定史跡（鳥取1 + 米子2 + 倉吉1」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「文化財保護法125条 / 鳥取市・米子市」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「公衆密集地 100m（鳥取4 + 米子4」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「概算」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[layer-list]「鳥取県・島根県 迷惑行為等防止条例」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-procedures-section]「要手続きの手続き（期限順）（2 件）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-duties-section]「飛行の前後に必ず行うこと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「前提機体登録（DRS）＋リモートID10」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「前提」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「機体登録（DRS）＋リモートID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「100g 以上の機体の前提です（判定の段」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行計画の通報特定飛行のたびに、」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行計画の通報」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行の前に DIPS 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと飛行日誌の作成・記録特定飛行のた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行日誌の作成・記録」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「特定飛行のたびに、飛行・日常点検・点検整」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[verdict-duty]「飛行ごと緊急用務空域の指定の確認飛行の直」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行ごと」 14px / 行の高さ 1.25（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「緊急用務空域の指定の確認」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[verdict-duty]「飛行の直前に、緊急用務空域が指定されてい」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-details]「規制ごとの判定（元の判定 → 適用した許」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当→適用した許可 なし→要手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[did-detail]「DID：該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-did]「この地点 判定地点は 米子市 の DID」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-did]「判定地点は 米子市 の DID（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「国勢調査に基づく人口集中地区（DID）の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 3 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・国土交通大臣の許可・承認を取得している」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市計画法第8条第1項第1号の工業専用」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「国土数値情報 人口集中地区データ（A16」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2020）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「工業専用地域（用途地域）— 市町村単位の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2019）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「国土交通省告示第435号（令和8年3月3」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-01）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-aviation-law-airport]「この地点 最寄りの 米子鬼太郎空港（美保」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-aviation-law-airport]「最寄りの 米子鬼太郎空港（美保基地共用）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「空港等の周辺（進入表面・転移表面・水平表」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・機体重量が100g未満の場合は航空法上」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「空港（山陰・但馬の供用中空港）— 公開資」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-14・版 ai」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-small-drone-law]「この地点 最寄りの対象施設は「陸上自衛隊」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-small-drone-law]「最寄りの対象施設は「陸上自衛隊米子駐屯地」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「防衛関係施設・原子力事業所などの対象施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・対象施設の管理者の同意を得たうえで、飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「小型無人機等飛行禁止法 対象施設（鳥取県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（基準年 2026）・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「反映済みの改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「改正小型無人機等飛行禁止法（令和8年法律」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「（施行・適用 2026-07-14）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-park-ordinance]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-park-ordinance]「判定地点は登録された米子市内の都市公園ポ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の都市公園内では、利用者の安全確」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・都市公園の管理者の許可を受けた場合は、」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・市が主催し、又は後援する行事のために行」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「都市公園（12 市町村）— 公開資料から」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-05-19・版 da」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 非該当→適用した許可 なし→手」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 非該当」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「手続き不要」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「国の法律」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31202-heritage-protection]「この地点 判定地点は登録された米子市内の」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31202-heritage-protection]「判定地点は登録された米子市内の指定史跡区」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「米子市内の国指定史跡では、文化財保護法第」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・文化庁長官の許可（市指定の場合は教育委」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・災害復旧・人命救助等の緊急行為」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「指定史跡（10 市町）— 公開資料からの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-verdict-line]「元の判定 該当の可能性（要確認）→適用し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「元の判定 該当の可能性（要確認）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「適用した許可 なし」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「→」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict]「要手続き」 14px / 行の高さ 1.30（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-verdict-line]「条例」 14px / 行の高さ 1.00（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-card-31-pref-nuisance-prevention]「この地点 判定地点は 庁舎「米子市役所」」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「この地点」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-card-31-pref-nuisance-prevention]「判定地点は 庁舎「米子市役所」からおよそ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-summary]「鳥取県迷惑行為等防止条例では、公衆に著し」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-exceptions]「例外節 2 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・施設管理者・自治体担当部署と事前調整し」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-exceptions]「・警察・消防・自治体等の公務として行う飛」 14px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「根拠（使用データ・確認日・版・反映済みの」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[regulation-datasets]「使用データ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 li[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「県条例の対象施設（病院・学校・庁舎・駅・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[regulation-datasets]「・確認日 2026-04-30・版 zo」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[verdict-legend]「判定の見分け方」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[evidence-id]「ev_c5da03202c416a41」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「低」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「soraban-0.4.0-verdic」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[result-details]「2026/11/23 0:05:36」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[geocode-attribution]「出典：国土地理院 住所検索」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[dips-permits]「国交省 DIPS の許可・承認（種類ごと」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「地点の例（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「（県別。押すとその地点で判定）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[detail-block]「免責 判定は入力された情報の範囲での参考」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[detail-block]「免責」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「1 件」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「件数と確認日は現在の収録内容から表示して」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「地点を指定すると、航空法（人口集中地区・」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — DID（人口」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国土数値情報 A16 令和2年国勢調査ベ」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「本体データ 同梱済み・確認日 2026-」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「山陰・但馬」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「航空法第132条の85 — 空港等周辺」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「空港の周辺区域は公開資料からの概算／6 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 空港」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「国」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県で指定を確認した施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「小型無人機等飛行禁止法 — 対象施設の周」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「敷地境界からおおむね 1,000m（改正」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「6 施設・確認日 2026-10-19」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「12 市町村（収録を拡大中）」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「都市公園条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公園の区域は公開資料からの概算／計 57」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 577 公園（鳥取44 + 米子34」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「市町村」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「10 市町村」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「文化財保護法125条 / 自治体文化財条」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「国指定史跡・県指定史跡（区域は概算）／計」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 13 件（鳥取1 + 米子2 + 倉」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「都道府県」 14px / 行の高さ 1.40（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「鳥取県・島根県全域」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「鳥取県・島根県 迷惑行為等防止条例」 16px / 行の高さ 1.45（16px・1.7 以上が必要）",
+    +   "本文 p[coverage-details]「公衆が密集する施設の周辺 100m（施設」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「／」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 span[coverage-details]「計 45 施設（鳥取4 + 米子4 + 」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「判定は入力された情報の範囲での参考情報で」 14px / 行の高さ 1.90（16px・1.7 以上が必要）",
+    +   "本文 p[p]「© 2026 フューチャーテック株式会社」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-name]「フューチャーテック株式会社」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-representative]「代表取締役 長谷岡 千春」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-address]「〒689-3553 鳥取県西伯郡日吉津村」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-phone]「0859-27-1227」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-email]「info@futuretec-jp.co」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 dd[provider-hours]「9:00〜17:00」 14px / 行の高さ 1.60（16px・1.7 以上が必要）",
+    +   "本文 p[site-boundary]「そらばんは、許可・承認、機体登録、操縦者」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    +   "本文 p[p]「出典：国土交通省「国土数値情報（人口集中」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+
+    Error: /ops/design 375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（5 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "本文 p[design-catalog]「地は薄いグレー、面は白、くぼみは一段濃い」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-buttons]「主色の面と地の比は 5:1 以上（現場は」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block]「影なし。罫は 1px（現場 1.5px）」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block-soft]「注記・補足に使う。」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-orange]「背後の大きな数字はやめた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:152:7
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--a64bf--以上、data-note-は-14px・1-5-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--a64bf--以上、data-note-は-14px・1-5-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--a64bf--以上、data-note-は-14px・1-5-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+
+    Error: /ops/design 390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（5 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "本文 p[design-catalog]「地は薄いグレー、面は白、くぼみは一段濃い」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-buttons]「主色の面と地の比は 5:1 以上（現場は」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block]「影なし。罫は 1px（現場 1.5px）」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block-soft]「注記・補足に使う。」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-orange]「背後の大きな数字はやめた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:152:7
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--51cfa--以上、data-note-は-14px・1-5-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--51cfa--以上、data-note-は-14px・1-5-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--51cfa--以上、data-note-は-14px・1-5-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+
+    Error: /ops/design 1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（5 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "本文 p[design-catalog]「地は薄いグレー、面は白、くぼみは一段濃い」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-buttons]「主色の面と地の比は 5:1 以上（現場は」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block]「影なし。罫は 1px（現場 1.5px）」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-block-soft]「注記・補足に使う。」 14px / 行の高さ 1.70（16px・1.7 以上が必要）",
+    +   "本文 p[cat-orange]「背後の大きな数字はやめた」 14px / 行の高さ 1.50（16px・1.7 以上が必要）",
+    + ]
+
+       at field-checks.ts:241
+
+      239 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      240 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 241 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      242 | };
+      243 |
+      244 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:241:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:152:7
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--945c5--以上、data-note-は-14px・1-5-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--945c5--以上、data-note-は-14px・1-5-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--945c5--以上、data-note-は-14px・1-5-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12 failed
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+    e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+    e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 
+  24 passed (1.6m)

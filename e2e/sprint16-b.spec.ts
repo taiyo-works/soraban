@@ -117,9 +117,9 @@ test.describe("16-B 公開側：文字の下限・rem 化・200%・320 幅", () 
 type PublicState = "初期" | "判定の結果を出した状態" | "details を開いた状態";
 const openPublicState = async (page: Page, state: PublicState): Promise<void> => {
   if (state === "初期") {
-    // 判定の結果が出る前の最初の描画（通信を止めて測る。sprint12h-pr2 Q-8 と同じ）
-    await page.route("**/api/check", (r) => r.abort());
-    await page.route("**/api/diagnose", (r) => r.abort());
+    // 判定の結果が出る前の最初の描画。通信は応答しないまま止める（abort すると「判定に失敗しました」の表示になり、初期の状態ではなくなる）。
+    await page.route("**/api/check", () => undefined);
+    await page.route("**/api/diagnose", () => undefined);
     await page.goto(SCREENS[0].url);
     await expect(page.locator(SCREENS[0].ready)).toBeVisible();
     return;

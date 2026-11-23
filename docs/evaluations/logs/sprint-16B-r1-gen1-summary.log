@@ -1,0 +1,42 @@
+## /ops/design 390px: 失敗の行 5（p・li・dd 自身 5、子孫 0）
+   testid×件数: design-catalog×1, cat-buttons×1, cat-block×1, cat-block-soft×1, cat-orange×1
+   大きさ/行の高さ: 14px/1.70（16px・1.7×4, 14px/1.50（16px・1.7×1
+## ホーム 390px: 失敗の行 34（p・li・dd 自身 17、子孫 17）
+   testid×件数: route×7, judge-pills×1, today-card-reason×1, today-card-time×1, today-card-date×1, today-card-route×1, today-card-route-count×1, home-deadlines×1, home-deadlines-note×1, home-upcoming×1, pwa-prefetch-status×1
+   大きさ/行の高さ: 16px/1.20（16px・1.7×7, 14px/1.43（16px・1.7×6, 14px/1.50（16px・1.7×2, 40px/1.00（16px・1.7×1, 16px/1.50（16px・1.7×1
+## 計画の一覧 390px: 失敗の行 13（p・li・dd 自身 13、子孫 0）
+   testid×件数: plan-row-next-count×10, ops-root×1, plan-count×1, plan-dips-notice×1
+   大きさ/行の高さ: 14px/1.43（16px・1.7×11, 14px/1.50（16px・1.7×2
+## 計画の作成 390px: 失敗の行 18（p・li・dd 自身 10、子孫 8）
+   testid×件数: plan-permit-candidates×2, ops-root×1, plan-dips-notice×1, judge-pills×1, plan-place-helper×1, plan-flags×1, plan-permit-registry-note×1, plan-permits×1, plan-permit-helper×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×8, 14px/1.43（16px・1.7×2
+## 点検の一覧 390px: 失敗の行 5（p・li・dd 自身 5、子孫 0）
+   testid×件数: inspection-pending-count×1, inspection-pending-scope×1, inspection-records×1, inspection-count×1, inspection-empty×1
+   大きさ/行の高さ: 14px/1.43（16px・1.7×4, 14px/1.70（16px・1.7×1
+## 点検の入力 390px: 失敗の行 23（p・li・dd 自身 4、子孫 19）
+   testid×件数: ops-root×3, draft-status×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×3, 14px/1.43（16px・1.7×1
+## 日誌 390px: 失敗の行 2（p・li・dd 自身 2、子孫 0）
+   testid×件数: journal-range×1, journal-empty×1
+   大きさ/行の高さ: 14px/1.43（16px・1.7×2
+## 飛行記録の入力 390px: 失敗の行 4（p・li・dd 自身 4、子孫 0）
+   testid×件数: ops-root×3, draft-status×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×2, 14px/1.43（16px・1.7×2
+## 登録 390px: 失敗の行 1（p・li・dd 自身 1、子孫 0）
+   testid×件数: dips-note×1
+   大きさ/行の高さ: 14px/1.43（16px・1.7×1
+## 現場 390px: 失敗の行 135（p・li・dd 自身 90、子孫 45）
+   testid×件数: field-flight-row×5, field-site-form×4, field-docs-notes-license×4, field-window-notice×2, field-flight-gaps×2, field-item-state-inspection×2, inspection-disclaimer×2, field-item-state-emergency_airspace×2, field-emergency-note×2, field-em-hint×2, field-item-state-report_recheck×2, field-report-status×2, field-report-record-before-takeoff×2, field-report-warning×2, field-item-state-carry×2, field-permits×2, field-docs-state-permit×2, field-docs-notes-permit×2, field-docs-state-registration×2, field-docs-basis-registration×2, field-docs-notes-registration×2, field-docs-state-remote_id×2, field-docs-notes-remote_id×2, field-docs-state-license×2, field-docs-basis-license×2, field-docs-state-report×2, field-docs-notes-report×2, field-docs-state-manual×2, field-docs-notes-manual×2, field-plan-time×1, field-plan-who×1, field-unsent×1, field-in-flight×1, field-elapsed×1, field-post-none×1, field-journal-none×1, field-round-label×1, field-item-inspection×1, field-item-emergency_airspace×1, field-item-report_recheck×1
+   大きさ/行の高さ: 18px/1.50（18px・1.7×64, 20px/1.40（18px・1.7×24, 24px/1.33（18px・1.7×1, 60px/1.25（18px・1.7×1
+## 計画の主画面 390px: 失敗の行 14（p・li・dd 自身 7、子孫 7）
+   testid×件数: ops-root×1, plan-report-box×1, plan-report-status×1, plan-report-deadline×1, plan-report-guide-at×1, plan-report-note-short×1, plan-disclaimer×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×4, 14px/1.38（16px・1.7×2, 16px/1.38（16px・1.7×1
+## 計画の概要 390px: 失敗の行 38（p・li・dd 自身 22、子孫 16）
+   testid×件数: plan-overview×12, ops-root×6, version-row×2, plan-unknown-count×1, plan-stale-sources×1
+   大きさ/行の高さ: 14px/1.45（16px・1.7×12, 14px/1.50（16px・1.7×6, 14px/1.43（16px・1.7×4
+## 判定 390px: 失敗の行 33（p・li・dd 自身 22、子孫 11）
+   testid×件数: ops-root×4, verdict-conclusion×2, verdict-duty×2, permit-declaration×2, plan-permit-candidates×2, plan-disclaimer×1, verdict-level×1, verdict-unknown-count×1, verdict-procedures-section×1, verdict-duties-section×1, verdict-summary×1, plan-permit-window×1, plan-permit-empty×1, plan-permit-candidate×1, plan-permit-applied-note×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×14, 14px/1.43（16px・1.7×7, 30px/1.25（16px・1.7×1
+## 通報の作業台 390px: 失敗の行 357（p・li・dd 自身 44、子孫 313）
+   testid×件数: report-prepare-warnings×4, plan-report-deadline×3, report-screen×3, report-map-info×3, report-item-api-airspace×2, report-item-api-flight_type×2, report-item-api-start_time×2, report-route-guide×2, report-item-api-first_class×2, report-item-api-second_class×2, report-item-api-certification1×2, report-item-api-certification2×2, ops-root×1, report-warnings×1, plan-report-box×1, plan-report-reasons×1, plan-dips-notice×1, plan-report-status×1, plan-report-guide-at×1, plan-report-guide-note×1, report-inputs×1, report-missing-count×1, report-item-warnings-altitude×1, report-item-warnings-route×1, report-item-warnings-onsite_control×1, report-history-empty×1, report-audit-empty×1
+   大きさ/行の高さ: 14px/1.50（16px・1.7×38, 14px/1.43（16px・1.7×3, 14px/1.38（16px・1.7×2, 16px/1.38（16px・1.7×1

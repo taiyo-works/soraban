@@ -1,0 +1,35 @@
+
+Running 10 tests using 1 worker
+
+ZOOM 計画の作成 390px {"over":25,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 計画の作成 430px {"over":5,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   1 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 計画の作成 (1.2s)
+ZOOM 点検の入力 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 点検の入力 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   2 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 点検の入力 (922ms)
+ZOOM 飛行記録の入力 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 飛行記録の入力 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   3 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 飛行記録の入力 (830ms)
+ZOOM 判定 390px {"over":124,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 判定 430px {"over":84,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   4 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 判定 (7.0s)
+ZOOM 通報の作業台 390px {"over":87,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 通報の作業台 430px {"over":67,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   5 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 通報の作業台 (1.3s)
+ZOOM 計画の概要 390px {"over":32,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 計画の概要 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   6 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 計画の概要 (850ms)
+ZOOM ホーム 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM ホーム 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   7 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail ホーム (1.0s)
+ZOOM 計画の一覧 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 計画の一覧 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   8 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 計画の一覧 (1.5s)
+ZOOM 点検の一覧 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 点検の一覧 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓   9 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 点検の一覧 (964ms)
+ZOOM 日誌 390px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+ZOOM 日誌 430px {"over":0,"clipped":0,"unscaled":0,"unreachablePrimary":[],"navCoversLast":0,"clippedList":[],"unscaledList":[]}
+  ✓  10 e2e/ops-db/zz-tmp-zoom-detail.spec.ts:75:7 › zoom-detail 日誌 (681ms)
+
+  10 passed (20.7s)
