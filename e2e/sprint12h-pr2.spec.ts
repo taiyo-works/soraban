@@ -259,6 +259,8 @@ const lowContrastText = (page: Page) =>
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0 || cs.visibility === "hidden" || cs.display === "none") continue;
       if (el.closest(".sb-sr, .sr-only, script, style, [aria-hidden='true'], .maplibregl-canvas-container, .maplibregl-ctrl-attrib")) continue;
+      // 16-C：無効のボタンの文字は --sb-ink-disabled（WCAG 1.4.3 の対象外。field-checks の collectTextSamples と同じ扱い）
+      if (el.closest("button:disabled, [aria-disabled='true']")) continue;
       seen.add(el);
       const fg = toRgba(cs.color);
       let opacity = 1;

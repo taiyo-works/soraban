@@ -169,6 +169,9 @@ a {
 a:focus-visible {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
+}
+/* 本文リンクの輪は角を丸める。ボタン・状態ラベル・カードの形をしたリンクは、自分の角丸を保つ（16-C） */
+a:focus-visible:not(.opx-btn, .sb-pill, .sb-state, .sb-card, .sb-text-btn) {
   border-radius: var(--sb-r-s);
 }
 

@@ -150,3 +150,15 @@
 - `e2e/sprint12h-pr2.spec.ts`: B2・Q-20 の実測を `console.log`（`[長さ]`・`[画面]`）に出す行を追加（検査の追加のみ）。
 
 **この差し戻しの全体の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16B-r1-gen3-*.log`）**: 運航管理 E2E 全体 256 件通過（`-ops-full-final2.log`。A7 も通過。値は検査が出力しないので、752 以下であることだけを確認）、公開側 252 件通過（`-public-full-final.log`、`--retries=0`・`next start`・1 ワーカー）、`sprint16-b` ×3 で 111 件（`-public-16b-repeat3.log`）、`sprint16-b-db`・`sprint16-b-r1-db`・`sprint17-2-db` ×3 で 231 件（`-ops-repeat3-final.log`）。`typecheck`・`lint`（エラー 0。警告 1 は `report-client.tsx` の未使用変数で、この差し戻しの前からのもの）・単体 3,029 件・DB テスト 287 件・`build`・`check-contrast-v2.mjs`（満たさない 0）・`testids.mjs --check`（消えた識別子 0）。全体実行の途中で落ちた `sprint12h-pr3-db` P3a-5（`waitForURL` のタイムアウト。runbook の既知の不安定。同じ spec の単独実行は 7/7 通過、その後の全体実行は 256/256）と、公開側の `sprint9` の右クリックの `waitForResponse`（runbook の既知。次の全体実行では通過）は、この差し戻しとは無関係と切り分けた。
+
+### 16-C 部品 1（ボタン 5 種・カード 3 種・状態ラベル）：変えた既存テストと理由（K-10）
+
+| 検査 | 前 | 後 | 理由・弱めていない根拠 |
+|---|---|---|---|
+| `sb-conventions.test.ts` Q-26「減らす指定と現場では…」 | `.sb-pill-arrow .sb-a2` を減らす指定・現場で `display: none` にする規則を要求 | `soraban-ui.css` に `sb-pill-arrow`・`sb-a1`・`sb-a2` が無いこと、`.sb-pill` の transition が `--sb-dur`（背景）と `--sb-dur-press`（押下）だけであること | C-2 が右端の丸と矢印（入れ替えの動き）を外すため、止める対象が無くなった。時間はトークンだけという検査は残し、動きが 0 になること（トークンの検査）は変えていない |
+| `sprint12h-pr2` 「reducedMotion: reduce で…」 | `.sb-pill-arrow .sb-ar` の transition-duration が 0、`.sb-a2` が非表示 | `.sb-pill` の transition-duration が 0、`.sb-pill-arrow` が 0 個 | 同上。測る対象を矢印からボタン本体に替えた（0 であることは同じ強さ） |
+| `sprint12h-pr2` 「通常：矢印の入れ替えは標準の動き 0.18s」 | 矢印の transition-duration が `0.18s` | `.sb-pill` が `0.18s, 0.12s`（背景 `--sb-dur`・押下 `--sb-dur-press`） | 同上。C-1 の押下 120ms を足して固定した |
+| `sprint12h-pr3b1-db`・`-pr3b2a-db`・`-pr3b2b-db` の角丸の許可 | 16・8・4（と円形） | 16・12・8・4（と円形） | C-1 が主・副・文字・危険のボタンの角丸を 12 にする（方針書の ボタン 12）。許可の集合に 12 を足しただけで、ほかの値（例 6・10）は引き続き失敗する |
+| 新しい検査 | — | `e2e/sprint16-c.spec.ts`（見本の 5 種・カード 3 種・状態ラベル・K-8 の `/`）、`e2e/ops-db/sprint16-c-db.spec.ts`（C-2 の実画面・全幅の主ボタン・K-8 の 4 画面・札の記号の縦位置・ログイン状態の `/` の 200%） | 追加のみ |
+
+画面の長さ・最初の画面の縦位置・文字の下限・押す部品の下限・比の下限の上限は変えていない（下の「上限を変えたもの」に結果を書く）。

@@ -1,0 +1,128 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-c-db.spec.ts
+
+
+Running 19 tests using 1 worker
+
+  ✘   1 e2e/ops-db/sprint16-c-db.spec.ts:48:7 › C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル › 面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない (4.9s)
+  ✘   2 e2e/ops-db/sprint16-c-db.spec.ts:99:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › ホームの today-card-primary（390・全幅） (692ms)
+  ✓   3 e2e/ops-db/sprint16-c-db.spec.ts:109:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 日誌の journal-new-flight（390・全幅） (513ms)
+  ✘   4 e2e/ops-db/sprint16-c-db.spec.ts:117:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (715ms)
+  ✓   5 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (704ms)
+  ✓   6 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (520ms)
+  ✓   7 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (658ms)
+  ✓   8 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (640ms)
+  ✓   9 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (471ms)
+  ✓  10 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (661ms)
+  ✓  11 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (644ms)
+  ✓  12 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (542ms)
+  ✓  13 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (637ms)
+  ✓  14 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (599ms)
+  ✓  15 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (469ms)
+  ✓  16 e2e/ops-db/sprint16-c-db.spec.ts:135:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (416ms)
+  ✓  17 e2e/ops-db/sprint16-c-db.spec.ts:149:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホームに今日の計画がある状態でも 1 つ（計画を開く） (528ms)
+  ✓  18 e2e/ops-db/sprint16-c-db.spec.ts:159:7 › 持ち越し 2：札の記号と文字の縦の中心（±1px） › 計画の一覧の plan-state・plan-report の札 (527ms)
+  ✓  19 e2e/ops-db/sprint16-c-db.spec.ts:188:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） (10.7s)
+
+
+  1) e2e/ops-db/sprint16-c-db.spec.ts:48:7 › C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル › 面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -6,7 +6,7 @@
+        "color": "rgb(255, 255, 255)",
+        "fs": "16px",
+        "fw": "600",
+        "h": 56,
+        "outline": "solid 3px rgb(31, 95, 224) 3px",
+    -   "radius": "12px",
+    +   "radius": "4px",
+      }
+
+      61 |     expect(pub.radius).toBe("12px");
+      62 |     expect(pub.outline).toContain("solid 3px");
+    > 63 |     expect(ops).toEqual(pub);
+         |                 ^
+      64 |     const deco = await page.locator(".opx-btn-primary").first().evaluate((el) => ({ before: getComputedStyle(el, "::before").content, after: getComputedStyle(el, "::after").content, kids: el.children.length }));
+      65 |     expect(deco.before).toMatch(/^(none|normal)$/);
+      66 |     expect(deco.after).toMatch(/^(none|normal)$/);
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:63:17
+
+    Error Context: test-results/ops/sprint16-c-db-C-2-実画面：-の-s-3c0f5-丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-C-2-実画面：-の-s-3c0f5-丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-C-2-実画面：-の-s-3c0f5-丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-c-db.spec.ts:99:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › ホームの today-card-primary（390・全幅） 
+
+    Error: ホーム「計画を開く」: 全幅
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 357
+    Received:    330
+
+      86 |   });
+      87 |   expect(r.text.length, label).toBeGreaterThan(0);
+    > 88 |   expect(r.w, `${label}: 全幅`).toBeGreaterThanOrEqual(r.parentW - 1);
+         |                               ^
+      89 |   expect(r.textInside, `${label}: 文字が枠の中に見える`).toBe(true);
+      90 |   expect(Math.abs(r.textCx - r.btnCx), `${label}: 文字が面の中央（丸の分の偏りがない）`).toBeLessThanOrEqual(1.5);
+      91 |   expect(r.before, label).toMatch(/^(none|normal)$/);
+        at expectCleanFullWidthPrimary (/home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:88:31)
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:106:5
+
+    Error Context: test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-e0601--today-card-primary（390・全幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-e0601--today-card-primary（390・全幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-e0601--today-card-primary（390・全幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-c-db.spec.ts:117:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） 
+
+    Error: 計画の主画面の主ボタン: 全幅
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 357
+    Received:    326
+
+      86 |   });
+      87 |   expect(r.text.length, label).toBeGreaterThan(0);
+    > 88 |   expect(r.w, `${label}: 全幅`).toBeGreaterThanOrEqual(r.parentW - 1);
+         |                               ^
+      89 |   expect(r.textInside, `${label}: 文字が枠の中に見える`).toBe(true);
+      90 |   expect(Math.abs(r.textCx - r.btnCx), `${label}: 文字が面の中央（丸の分の偏りがない）`).toBeLessThanOrEqual(1.5);
+      91 |   expect(r.before, label).toMatch(/^(none|normal)$/);
+        at expectCleanFullWidthPrimary (/home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:88:31)
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:122:5
+
+    Error Context: test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-770b3-plan-primary-action（390・全幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-770b3-plan-primary-action（390・全幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-持ち越し-1：全幅の主ボ-770b3-plan-primary-action（390・全幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    e2e/ops-db/sprint16-c-db.spec.ts:48:7 › C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル › 面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない 
+    e2e/ops-db/sprint16-c-db.spec.ts:99:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › ホームの today-card-primary（390・全幅） 
+    e2e/ops-db/sprint16-c-db.spec.ts:117:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） 
+  16 passed (32.8s)
+ ELIFECYCLE  Command failed with exit code 1.

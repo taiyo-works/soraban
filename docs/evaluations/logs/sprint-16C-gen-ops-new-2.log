@@ -1,0 +1,28 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-c-db.spec.ts
+
+
+Running 19 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-c-db.spec.ts:48:7 › C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル › 面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない (4.8s)
+  ✓   2 e2e/ops-db/sprint16-c-db.spec.ts:101:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › ホームの today-card-primary（390・全幅） (827ms)
+  ✓   3 e2e/ops-db/sprint16-c-db.spec.ts:111:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 日誌の journal-new-flight（390・全幅） (515ms)
+  ✓   4 e2e/ops-db/sprint16-c-db.spec.ts:119:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (585ms)
+  ✓   5 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (716ms)
+  ✓   6 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (571ms)
+  ✓   7 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (579ms)
+  ✓   8 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (655ms)
+  ✓   9 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (505ms)
+  ✓  10 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (624ms)
+  ✓  11 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (544ms)
+  ✓  12 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (494ms)
+  ✓  13 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (652ms)
+  ✓  14 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (622ms)
+  ✓  15 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (587ms)
+  ✓  16 e2e/ops-db/sprint16-c-db.spec.ts:137:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (599ms)
+  ✓  17 e2e/ops-db/sprint16-c-db.spec.ts:151:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホームに今日の計画がある状態でも 1 つ（計画を開く） (504ms)
+  ✓  18 e2e/ops-db/sprint16-c-db.spec.ts:161:7 › 持ち越し 2：札の記号と文字の縦の中心（±1px） › 計画の一覧の plan-state・plan-report の札 (596ms)
+  ✓  19 e2e/ops-db/sprint16-c-db.spec.ts:190:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） (10.6s)
+
+  19 passed (30.1s)

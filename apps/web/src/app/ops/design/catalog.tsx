@@ -98,7 +98,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
           <PillButton variant="danger" data-testid="cat-danger">取り消す</PillButton>
           <PillButton disabled aria-describedby="cat-disabled-reason" data-testid="cat-disabled">押せない</PillButton>
         </div>
-        <p className="sb-disabled-reason" id="cat-disabled-reason" data-testid="cat-disabled-reason">必須の項目がまだ入力されていません。</p>
+        <p data-note="" className="sb-disabled-reason" id="cat-disabled-reason" data-testid="cat-disabled-reason">必須の項目がまだ入力されていません。</p>
         <div className="sbx-row">
           <button type="button" className="opx-btn opx-btn-primary" data-variant="primary" data-testid="cat-opx-primary">運航管理の主ボタン</button>
           <button type="button" className="opx-btn" data-testid="cat-opx-secondary">副ボタン</button>
@@ -106,7 +106,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
           <button type="button" className="opx-btn opx-btn-danger" data-testid="cat-opx-danger">取り消す</button>
           <button type="button" className="opx-btn" disabled aria-describedby="cat-opx-disabled-reason" data-testid="cat-opx-disabled">押せない</button>
         </div>
-        <p className="opx-disabled-reason" id="cat-opx-disabled-reason" data-testid="cat-opx-disabled-reason">必須の項目がまだ入力されていません。</p>
+        <p data-note="" className="opx-disabled-reason" id="cat-opx-disabled-reason" data-testid="cat-opx-disabled-reason">必須の項目がまだ入力されていません。</p>
         <p className="sbx-note">主色の面と地の比は 5:1 以上（現場は 7:1 以上）。面だけで境界を満たす。押すと主色が濃くなり、少し縮む（120ms）。</p>
       </section>
 
