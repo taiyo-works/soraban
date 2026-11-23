@@ -86,6 +86,7 @@ for (const [prefix, label] of [["cat-", "`/` 系（.sb-pill）"], ["cat-opx-", "
     });
 
     test(`押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（${prefix}primary）`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 2600 }); // 見本は縦に長いので、全体が画面に入る高さにする
       await open(page);
       const btn = page.getByTestId(`${prefix}primary`);
       const dur = await btn.evaluate((el) => getComputedStyle(el).transitionDuration);
@@ -140,6 +141,7 @@ test.describe("C-3 カード 3 種", () => {
   });
 
   test("一覧：最小の高さ 72・カード全体がリンク・中は見出し→主情報→補足の 3 段まで", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 2600 });
     await open(page);
     const card = page.getByTestId("cat-card-list");
     const s = await card.evaluate((el) => ({ tag: el.tagName, h: el.getBoundingClientRect().height, minH: getComputedStyle(el).minHeight, children: el.children.length, href: el.getAttribute("href") }));
@@ -219,6 +221,7 @@ test.describe("C-4 状態ラベル（K-7：記号＋文字）", () => {
   }
 
   test("押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる）", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 2600 });
     await open(page);
     const link = page.getByTestId("cat-state-link");
     await link.evaluate((el) => el.scrollIntoView({ block: "center" }));
