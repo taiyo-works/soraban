@@ -37,20 +37,32 @@ cat-band-section
 cat-block
 cat-block-soft
 cat-buttons
+cat-card
+cat-card-list
+cat-card-state
+cat-cards
+cat-danger
 cat-disabled
+cat-disabled-reason
 cat-field
+cat-field-note
 cat-forms
 cat-grounds
 cat-input
 cat-nav
 cat-normal
 cat-opx-danger
+cat-opx-disabled
+cat-opx-disabled-reason
 cat-opx-primary
 cat-opx-secondary
+cat-opx-text
 cat-orange
 cat-primary
 cat-secondary
 cat-selected
+cat-state-link
+cat-text
 cat-veil
 cat-veil-toggle
 cat-verdict
@@ -721,20 +733,36 @@ prop: cat-band-section
 prop: cat-block
 prop: cat-block-soft
 prop: cat-buttons
+prop: cat-card
+prop: cat-card-list
+prop: cat-card-state
+prop: cat-cards
+prop: cat-danger
 prop: cat-disabled
+prop: cat-disabled-reason
 prop: cat-field
+prop: cat-field-note
 prop: cat-forms
 prop: cat-grounds
 prop: cat-input
 prop: cat-nav
 prop: cat-normal
 prop: cat-opx-danger
+prop: cat-opx-disabled
+prop: cat-opx-disabled-reason
 prop: cat-opx-primary
 prop: cat-opx-secondary
+prop: cat-opx-text
 prop: cat-orange
 prop: cat-primary
 prop: cat-secondary
 prop: cat-selected
+prop: cat-state-danger
+prop: cat-state-flying
+prop: cat-state-info
+prop: cat-state-link
+prop: cat-state-safe
+prop: cat-text
 prop: cat-veil
 prop: cat-veil-toggle
 prop: cat-verdict
