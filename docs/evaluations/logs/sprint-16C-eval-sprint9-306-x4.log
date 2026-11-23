@@ -1,0 +1,112 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint9.spec.ts -g '右クリック' --repeat-each=4
+
+
+Running 8 tests using 1 worker
+
+  ✓  1 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (6.1s)
+  ✘  2 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (2.0m)
+
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり::  1) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり,line=15,col=40::  1) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);%0A      14 |%0A    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |                                        ^%0A      16 | const waitDiagnose = (page: Page) =>%0A      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      18 |%0A        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)%0A        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+  ✓  3 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (6.1s)
+  ✘  4 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (2.0m)
+
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり::  2) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり,line=15,col=40::  2) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);%0A      14 |%0A    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |                                        ^%0A      16 | const waitDiagnose = (page: Page) =>%0A      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      18 |%0A        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)%0A        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+  ✓  5 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (6.0s)
+  ✘  6 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (2.0m)
+
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり::  3) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Test timeout of 120000ms exceeded.
+::error file=e2e/sprint9.spec.ts,title=e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり,line=15,col=40::  3) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    Error: page.waitForResponse: Test timeout of 120000ms exceeded.%0A%0A      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);%0A      14 |%0A    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());%0A         |                                        ^%0A      16 | const waitDiagnose = (page: Page) =>%0A      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());%0A      18 |%0A        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)%0A        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+  ✓  7 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (5.8s)
+  ✓  8 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (6.9s)
+
+
+  1) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)
+        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+
+    Error Context: test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)
+        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+
+    Error Context: test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat1/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)
+        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+
+    Error Context: test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat2/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat2/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり-repeat2/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+  5 passed (6.7m)
+::notice title=🎭 Playwright Run Summary::  3 failed%0A    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり %0A  5 passed (6.7m)
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1

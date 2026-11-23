@@ -1,0 +1,82 @@
+planId dddf2598-a0ce-4ba9-975b-d848816612e5 plans 1
+ZOOM 390 home 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 plans 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 plannew 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 inspections 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 inspnew 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 journal 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 flightnew 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 more 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 main 100% 390/390 200% 390/390 clipped 1 NG ["NAV.overflow-hidden rounded-sb-l b[plan-digest] 474x451 > 326x451"]
+ZOOM 390 overview 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 judge 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 report 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 field 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 aircraft 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 members 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 permits 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 places 100% 390/390 200% 416/390 clipped 0 NG []
+ZOOM 390 incidents 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 390 pilots 100% 390/390 200% 390/390 clipped 0 ok
+ZOOM 430 home 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 plans 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 plannew 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 inspections 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 inspnew 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 journal 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 flightnew 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 more 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 main 100% 430/430 200% 430/430 clipped 1 NG ["NAV.overflow-hidden rounded-sb-l b[plan-digest] 474x451 > 366x451"]
+ZOOM 430 overview 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 judge 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 report 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 field 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 aircraft 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 members 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 permits 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 places 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 incidents 100% 430/430 200% 430/430 clipped 0 ok
+ZOOM 430 pilots 100% 430/430 200% 430/430 clipped 0 ok
+SCAN 390 home {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 plans {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 plannew {"small":[{"id":"plan-flag-airspace_150m","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-airspace_emergency","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_night","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_bvlos","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_30m","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_event","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_dangerous","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_drop","w":20,"h":20,"t":"","inline":false}],"nSmall":12,"melts":[],"nested":[]}
+SCAN 390 inspections {"small":[{"id":"INPUT.sb-check","w":24,"h":24,"t":"","inline":false}],"nSmall":1,"melts":[],"nested":[]}
+SCAN 390 inspnew {"small":[{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false}],"nSmall":20,"melts":[],"nested":[]}
+SCAN 390 journal {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 flightnew {"small":[{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false}],"nSmall":12,"melts":[],"nested":[]}
+SCAN 390 more {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 main {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 overview {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 judge {"small":[],"nSmall":0,"melts":["TR.grid grid-cols-[2.5rem_minmax(0,1fr)] ro[verdict-procedure]","UL.flex flex-col divide-y divide-sb-rule ro[verdict-duties]","TR.block rounded-sb-l border-b-0 border-l-4[verdict-item]"],"nested":[]}
+SCAN 390 report {"small":[{"id":"report-input-purpose-1","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-2","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-3","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-4","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-5","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-6","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-7","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-8","w":20,"h":20,"t":"","inline":false}],"nSmall":16,"melts":[],"nested":[]}
+SCAN 390 field {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 aircraft {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 members {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 permits {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 places {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 390 incidents {"small":[{"id":"incident-filter-pending","w":20,"h":20,"t":"","inline":false}],"nSmall":1,"melts":[],"nested":[]}
+SCAN 390 pilots {"small":[],"nSmall":0,"melts":[],"nested":[]}
+STORAGE 390 {"ls":["soraban:ops-draft:flight:409de7df-18e4-4a55-a9e4-06a963c4cff8","soraban:ops-draft:inspection:409de7df-18e4-4a55-a9e4-06a963c4cff8","soraban:ops-current-member"],"ss":[]}
+SCAN 1280 home {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 plans {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 plannew {"small":[{"id":"plan-flag-airspace_150m","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-airspace_emergency","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_night","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_bvlos","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_30m","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_event","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_dangerous","w":20,"h":20,"t":"","inline":false},{"id":"plan-flag-method_drop","w":20,"h":20,"t":"","inline":false}],"nSmall":12,"melts":[],"nested":[]}
+SCAN 1280 inspections {"small":[{"id":"INPUT.sb-check","w":24,"h":24,"t":"","inline":false}],"nSmall":1,"melts":[],"nested":[]}
+SCAN 1280 inspnew {"small":[{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false}],"nSmall":20,"melts":[],"nested":[]}
+SCAN 1280 journal {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 flightnew {"small":[{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false},{"id":"INPUT.h-6 w-6 shrink-0 cursor-","w":24,"h":24,"t":"","inline":false}],"nSmall":12,"melts":[],"nested":[]}
+SCAN 1280 more {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 main {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 overview {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 judge {"small":[],"nSmall":0,"melts":["UL.flex flex-col divide-y divide-sb-rule ro[verdict-duties]"],"nested":[]}
+SCAN 1280 report {"small":[{"id":"report-input-purpose-1","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-2","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-3","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-4","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-5","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-6","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-7","w":20,"h":20,"t":"","inline":false},{"id":"report-input-purpose-8","w":20,"h":20,"t":"","inline":false}],"nSmall":16,"melts":[],"nested":[]}
+SCAN 1280 field {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 aircraft {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 members {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 permits {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 places {"small":[],"nSmall":0,"melts":[],"nested":[]}
+SCAN 1280 incidents {"small":[{"id":"incident-filter-pending","w":20,"h":20,"t":"","inline":false}],"nSmall":1,"melts":[],"nested":[]}
+SCAN 1280 pilots {"small":[],"nSmall":0,"melts":[],"nested":[]}
+STORAGE 1280 {"ls":["soraban:ops-draft:flight:409de7df-18e4-4a55-a9e4-06a963c4cff8","soraban:ops-draft:inspection:409de7df-18e4-4a55-a9e4-06a963c4cff8","soraban:ops-current-member"],"ss":[]}
+DARK /ops rgb(246, 247, 249)
+DARK /ops/plans rgb(246, 247, 249)
+DARK / rgb(246, 247, 249)
