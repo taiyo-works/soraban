@@ -1,0 +1,18 @@
+DB=soraban_ev16d_p3b2bfile_1795457972
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts e2e/ops-db/sprint12h-pr3b-db.spec.ts
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:82:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-1. 文字：14px 以上・4.5:1 以上（明・暗。375px）。現場の 2 画面は 7:1 以上 (23.8s)
+  ✓  2 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:98:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-2. 押す部品：高さ 47.5px 以上（375×812・360×740）。現場は 56px 以上、主ボタンは 64px 以上 (10.0s)
+  ✓  3 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:124:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-3. はみ出し 0：幅 360〜1440 × 明・暗で横スクロールなし。長い計画名・番号・説明が親から出ない (1.0m)
+  ✓  4 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:149:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-4. 形：角丸は {16・8・4・ピル・円} だけ。影は --sb-shadow だけ。現場は影なし・動きなし (17.2s)
+  ✓  5 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:195:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-5. 旧い見た目がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは主色の面。判定の履歴・事故の一覧は <a>/<Link> の別画面への移動だけ (10.8s)
+  ✓  6 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (5.3s)
+
+  6 passed (2.2m)
+::notice title=🎭 Playwright Run Summary::  6 passed (2.2m)
+exit 0 DB=soraban_ev16d_p3b2bfile_1795457972
