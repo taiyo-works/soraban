@@ -151,7 +151,7 @@ test.describe("C-3 カード 3 種", () => {
     expect(s.minH).toBe("72px");
     expect(s.children).toBeLessThanOrEqual(3);
     // カードのどこを押しても押せる（四隅の内側の点が、そのリンクを指す）
-    await card.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await card.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     const box = (await card.boundingBox())!;
     for (const [dx, dy] of [[8, 8], [box.width - 8, 8], [8, box.height - 8], [box.width - 8, box.height - 8]] as const) {
       const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('[data-testid="cat-card-list"]') !== null, [box.x + dx, box.y + dy] as const);
@@ -224,7 +224,7 @@ test.describe("C-4 状態ラベル（K-7：記号＋文字）", () => {
     await page.setViewportSize({ width: 1280, height: 2600 });
     await open(page);
     const link = page.getByTestId("cat-state-link");
-    await link.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await link.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     const box = (await link.boundingBox())!;
     expect(box.height).toBeLessThan(40);
     const cx = box.x + box.width / 2;

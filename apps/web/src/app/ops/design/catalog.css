@@ -344,12 +344,12 @@ html[data-theme="dark"] .sbx-catalog {
   flex: none;
   display: inline-grid;
   place-content: center;
-  width: 28px;
-  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   border-radius: var(--sb-pill);
   background: var(--sb-sunken);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
-  font-size: 0.875rem;
+  font-size: inherit;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -436,7 +436,7 @@ html[data-theme="dark"] .sbx-catalog {
 }
 .sbx-prep-k {
   flex: none;
-  font-size: 0.875rem;
+  font-size: inherit;
   font-weight: 700;
   color: var(--sb-ink-2);
 }
