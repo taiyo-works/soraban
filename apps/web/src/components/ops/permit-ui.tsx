@@ -41,11 +41,11 @@ const MATCH_EDGE: Readonly<Record<PermitMatchStatus, string>> = {
 export function PermitDeclaration({ declaration, noDipsNote }: { readonly declaration: string; readonly noDipsNote: string }) {
   return (
     <div className="opx-notice flex flex-col gap-1.5" data-testid="permit-declaration">
-      <p className="text-sm font-bold leading-relaxed text-sb-ink">
+      <p data-note="" className="text-sm font-bold leading-relaxed text-sb-ink">
         <span aria-hidden className="mr-1.5 sb-num">!</span>
         <span data-testid="permit-declaration-text">{declaration}</span>
       </p>
-      <p className="text-sm leading-relaxed text-sb-ink-2">
+      <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">
         <span data-testid="permit-no-dips-note">{noDipsNote}</span>
       </p>
     </div>
@@ -83,7 +83,7 @@ export function permitScopeSummary(p: PermitDto): string {
 export function PlanPermitList({ summary }: { readonly summary: PlanPermitSummary }) {
   if (summary.numbers.length === 0) {
     return (
-      <p className="sb-block-soft text-sm text-sb-ink-2" data-testid="plan-permit-empty">
+      <p className="sb-block-soft text-sb-ink-2" data-testid="plan-permit-empty">
         許可・承認の番号が入っていません。DIPS の許可・承認は、登録した許可の番号を計画の許可番号の欄に入れたときだけ判定に使われます。
       </p>
     );

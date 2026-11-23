@@ -102,11 +102,11 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           </a>
         ))}
       </nav>
-      <p className="sb-num text-sm text-sb-ink-3" data-testid="journal-range">
+      <p data-note="" className="sb-num text-sm text-sb-ink-3" data-testid="journal-range">
         最近 {RECENT_DAYS} 日（{from}〜{to}）　{rows.length} 件
       </p>
       {rows.length === 0 ? (
-        <p className="sb-block-soft text-sm text-sb-ink-2" data-testid="journal-empty">
+        <p className="sb-block-soft text-sb-ink-2" data-testid="journal-empty">
           最近 {RECENT_DAYS} 日の記録はありません。
         </p>
       ) : (

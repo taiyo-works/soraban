@@ -78,7 +78,7 @@ export function PageHeader({
       ) : null}
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex min-w-0 flex-col gap-1">
-          {eyebrow ? <p className="opx-eyebrow">{eyebrow}</p> : null}
+          {eyebrow ? <p data-note="" className="opx-eyebrow">{eyebrow}</p> : null}
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1 className="opx-h1">{title}</h1>
             {meta ? <span className="text-sm text-sb-ink-3">{meta}</span> : null}
@@ -110,7 +110,7 @@ export function Section({
     <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4">
       <div className="sb-sec-head" {...(tone === "danger" ? { "data-tone": "danger" } : {})}>
         <h2>{title}</h2>
-        {description ? <p className="sb-sec-note">{description}</p> : null}
+        {description ? <p className="sb-sec-note sb-sec-note-body">{description}</p> : null}
       </div>
       {children}
     </section>
@@ -118,8 +118,13 @@ export function Section({
 }
 
 /** 短い説明（権限・取消の意味など）。くぼみの面に置く。 */
-export function Note({ children, tone = "brand" }: { readonly children: ReactNode; readonly tone?: "brand" | "red" }) {
-  return <p className={`opx-note ${tone === "red" ? "opx-note-red" : ""}`.trim()}>{children}</p>;
+export function Note({ children, tone = "brand", body = false }: { readonly children: ReactNode; readonly tone?: "brand" | "red"; readonly body?: boolean }) {
+  // 既定は補足（定型の免責・断り書き。印 data-note="" で 14px・1.5）。body は本文（説明文。16px・1.7。印なし）
+  return (
+    <p className={`opx-note ${body ? "opx-note-lg " : ""}${tone === "red" ? "opx-note-red" : ""}`.trim()} {...(body ? {} : { "data-note": "" })}>
+      {children}
+    </p>
+  );
 }
 
 /** 常に見える固定の注意書き（折りたたまない）。くぼみの面。warn・danger は枠の形（破線・実線）でも区別する。 */

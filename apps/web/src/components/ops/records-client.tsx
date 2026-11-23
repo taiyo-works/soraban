@@ -392,7 +392,7 @@ function DraftBar({
         restored ? "border-[1.5px] border-sb-ink bg-sb-st-info-face" : "bg-sb-sunken"
       }`}
     >
-      <p className="min-w-0 flex-1 text-sm leading-relaxed text-sb-ink-2">
+      <p className="min-w-0 flex-1 text-sb-ink-2">
         {restored ? (
           <>
             <span className="font-medium text-sb-ink">前回の入力の続きです。</span>
@@ -1104,7 +1104,7 @@ export function FlightForm({
             ] as const
           ).map(([group, title]) => (
             <div key={group} className="flex flex-col gap-2">
-              <p aria-hidden className="sb-num text-sm uppercase tracking-wider text-sb-ink-3">
+              <p data-note="" aria-hidden className="sb-num text-sm uppercase tracking-wider text-sb-ink-3">
                 {title}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1543,14 +1543,14 @@ export function InspectionForm({
 
       <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm leading-relaxed text-sb-ink-3 sm:max-w-md">
+          <p className="text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
           <button type="button" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>
-        <p className="flex flex-wrap items-baseline gap-x-3 sb-num text-sm tnum text-sb-ink-2" aria-live="polite">
+        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num text-sm tnum text-sb-ink-2" aria-live="polite">
           <span>
             選択 {selectedCount} / {INSPECTION_ITEMS.length}
           </span>
@@ -1571,8 +1571,8 @@ export function InspectionForm({
                 data-testid={`inspection-item-${it.key}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                  <span className="flex min-w-0 items-baseline gap-2 text-sm text-sb-ink">
-                    <span aria-hidden className="sb-num text-sm tnum text-sb-ink-3">
+                  <span className="flex min-w-0 items-baseline gap-2 text-sb-ink">
+                    <span aria-hidden className="sb-num tnum text-sb-ink-3">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {it.label}

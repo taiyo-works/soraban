@@ -133,8 +133,8 @@ function PermitNumberHelper({
             const known = registered.has(t.key);
             const saved = isEdit ? savedByKey.get(t.key) : undefined;
             return (
-              <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 text-sm leading-relaxed ${known ? "border-sb-ink" : "border-sb-ink"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
-                <span className="break-all sb-num text-sm text-sb-ink">{t.text}</span>
+              <li key={t.key} className={`flex flex-col gap-0.5 border-l-2 pl-3 ${known ? "border-sb-ink" : "border-sb-ink"}`} data-testid="plan-permit-input-state" data-registered={String(known)}>
+                <span className="break-all sb-num text-sb-ink">{t.text}</span>
                 {known ? (
                   <span className="text-sb-ink-2">
                     登録があります。{saved ? `保存済みの照合：${saved.statusLabel}${saved.reasons.length > 0 ? `（${saved.reasons.join("／")}）` : ""}。` : ""}
@@ -153,14 +153,14 @@ function PermitNumberHelper({
       ) : null}
       {candidates.length > 0 ? (
         <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
-          <p className="text-sm font-medium text-sb-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
-          <p className="text-sm leading-relaxed text-sb-ink-2">{helper?.candidatesNote}</p>
+          <p data-note="" className="text-sm font-medium text-sb-ink">{helper?.candidatesNote ? "登録済みの許可・承認" : ""}</p>
+          <p className="text-sb-ink-2">{helper?.candidatesNote}</p>
           <ul className="flex flex-col gap-1.5">
             {candidates.map((c) => (
               <li key={c.permitNumber} className="flex flex-wrap items-center justify-between gap-2 rounded-sb-m border border-l-2 border-sb-rule border-l-sb-ink bg-sb-base px-3 py-2" data-testid="plan-permit-candidate">
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="break-all sb-num text-sm text-sb-ink">{c.permitNumber}</span>
-                  <span className="text-sm text-sb-ink-2">{c.summary}</span>
+                  <span className="break-all sb-num text-sb-ink">{c.permitNumber}</span>
+                  <span className="text-sb-ink-2">{c.summary}</span>
                 </span>
                 <button type="button" className={buttonGhostClass} onClick={() => onInsert(c.permitNumber)} data-testid="plan-permit-insert">
                   番号を入れる
@@ -170,7 +170,7 @@ function PermitNumberHelper({
           </ul>
         </div>
       ) : null}
-      <p className="opx-note">{PERMIT_DECLARATION_NOTE}</p>
+      <p data-note="" className="opx-note">{PERMIT_DECLARATION_NOTE}</p>
     </div>
   );
 }
@@ -449,18 +449,18 @@ export function PlanForm({
         </div>
 
         <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-3" data-testid="plan-place-helper">
-          <p className="text-sm leading-relaxed text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
+          <p className="text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
               現在地を取得する
             </button>
           </div>
           {locStatus ? (
-            <p role="status" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-loc-status">
+            <p role="status" className="text-sb-ink-2" data-testid="plan-loc-status">
               {locStatus}
             </p>
           ) : null}
-          {unavailableReason && !locStatus ? <p className="text-sm leading-relaxed text-sb-ink-3">{unavailableReason}</p> : null}
+          {unavailableReason && !locStatus ? <p className="text-sb-ink-3">{unavailableReason}</p> : null}
           <div className="flex flex-col gap-2">
             <label htmlFor="plan-address-q" className="text-sm text-sb-ink">
               住所で探す
@@ -535,7 +535,7 @@ export function PlanForm({
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-flags">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">飛行の方法・空域</legend>
-        <p className="text-sm leading-relaxed text-sb-ink-3">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
+        <p className="text-sb-ink-3">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_FLAG_CHOICES.map((c) => (
             <label key={c.value} className={planCheckRow}>
@@ -549,7 +549,7 @@ export function PlanForm({
 
       <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-permits">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
-        <p className="opx-note" data-testid="plan-permit-registry-note">
+        <p className="opx-note opx-note-lg" data-testid="plan-permit-registry-note">
           国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
           計画の日時・場所・機体・操縦者が範囲に収まるものが判定に使われます。許可・承認は登録から照合します。
         </p>
@@ -562,7 +562,7 @@ export function PlanForm({
           ))}
         </div>
         <FormErrorLine message={errors["pilotPermits"]} />
-        <p className="text-sm leading-relaxed text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
+        <p className="text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
       </fieldset>
 
       <section className="flex flex-col gap-4" aria-label="判定の条件">

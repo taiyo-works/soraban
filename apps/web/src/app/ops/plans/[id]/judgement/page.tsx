@@ -32,7 +32,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
     <PlanFrame plan={plan} eyebrow="判定（補助）" back={{ href: `/ops/plans/${plan.id}`, label: "通報の状況" }}>
       {/* 再判定の直後の結果の通知（版の一覧は /overview にあるため、ここでも受け取る） */}
       <ChangeNotice target={VERSION_NOTICE_TARGET} />
-      <p className="opx-note" data-testid="plan-disclaimer">
+      <p data-note="" className="opx-note" data-testid="plan-disclaimer">
         {PLAN_JUDGEMENT_DISCLAIMER}
       </p>
 
@@ -62,8 +62,8 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           </details>
           {plan.freshness.stale ? (
             <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
-              <p className="text-sm font-medium text-sb-ink">判定が古くなっています</p>
-              <ul className="list-disc pl-5 text-sm text-sb-ink-2" data-testid="plan-stale-reasons">
+              <p className="font-medium text-sb-ink">判定が古くなっています</p>
+              <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
                 {plan.freshness.reasons.map((r) => (
                   <li key={r.code}>{r.label}</li>
                 ))}
@@ -92,34 +92,34 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           description="計画の許可番号の欄に入れた番号を、登録した許可・承認に結びつけ、計画の日時・場所・飛行の方法・機体・操縦者が範囲に収まるものだけを判定に使います。"
         >
           <PermitDeclaration declaration={planPermits.declaration} noDipsNote={planPermits.noDipsNote} />
-          <Note tone="red">
+          <Note tone="red" body>
             範囲外・期限切れ・失効・取消・未登録・確認できないものは適用せず、要手続きのままです。許可があっても、空港の敷地内と緊急用務空域は飛行不可のままで、
             空港等周辺の個別許可は表示と根拠までで、判定の段は変えません。
           </Note>
           <details data-testid="plan-permit-format-details">
             <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">許可番号の形式について（※要再確認）</summary>
-            <p className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+            <p data-note="" className="opx-note" data-testid="plan-permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
           </details>
           {planPermits.permits.window ? (
-            <p className="sb-num text-sm tnum text-sb-ink-2" data-testid="plan-permit-window">
+            <p data-note="" className="sb-num text-sm tnum text-sb-ink-2" data-testid="plan-permit-window">
               照合した飛行の日付：{planPermits.permits.window.from === planPermits.permits.window.to ? planPermits.permits.window.from : `${planPermits.permits.window.from} 〜 ${planPermits.permits.window.to}`}
             </p>
           ) : null}
           {!planPermits.judgementUpToDate ? (
-            <p className="opx-note" data-testid="plan-permit-stale">
+            <p className="opx-note opx-note-lg" data-testid="plan-permit-stale">
               ! 登録（または許可番号）が、判定した時点から変わっています。判定をやり直すと、現在の登録で照合し直します。
             </p>
           ) : null}
           <PlanPermitList summary={planPermits.permits} />
           {planPermits.candidates.length > 0 ? (
             <div className="flex flex-col gap-2" data-testid="plan-permit-candidates">
-              <p className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
-              <p className="text-sm leading-relaxed text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
+              <p data-note="" className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
+              <p className="text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
               <ul className="flex flex-col border-t border-sb-rule">
                 {planPermits.candidates.map((c) => (
-                  <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-1 pl-3 text-sm" data-testid="plan-permit-candidate">
-                    <span className="break-all sb-num text-sm text-sb-ink">{c.permitNumber}</span>
-                    <span className="text-sm text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
+                  <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-1 pl-3" data-testid="plan-permit-candidate">
+                    <span className="break-all sb-num text-sb-ink">{c.permitNumber}</span>
+                    <span className="text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
                   </li>
                 ))}
               </ul>
@@ -132,12 +132,12 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           ) : null}
           <div className="flex flex-col gap-1 border-l-2 border-sb-rule pl-3 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-permit-applied-note">
             {isApplicationSupportEnabled() ? (
-              <p>
+              <p data-note="">
                 「許可・承認の申請済み」の記録（手続きの記録）は利用者の申告で、判定を変えません。許可が下りたら登録し、計画の許可番号の欄に番号を入れると、
                 範囲に収まるときだけ判定が変わります。
               </p>
             ) : (
-              <p>許可・承認は、利用者本人が DIPS 2.0 などの公式の手続きで取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。</p>
+              <p data-note="">許可・承認は、利用者本人が DIPS 2.0 などの公式の手続きで取得します。取得した許可・承認を登録し、計画の許可番号の欄に番号を入れると、範囲に収まるときだけ判定が変わります。</p>
             )}
             <Link prefetch={false} href="/ops/permits" className="inline-flex min-h-12 items-center self-start text-sb-ink underline underline-offset-2" data-testid="plan-permits-link">
               許可・承認の登録を見る

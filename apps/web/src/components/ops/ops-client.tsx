@@ -175,7 +175,7 @@ export const Field = ({
   const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex min-w-0 flex-col gap-1.5 text-sm text-sb-ink">
-      <span className="flex items-center gap-2">
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <label htmlFor={controlId} className="font-bold">
           {label}
         </label>

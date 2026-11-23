@@ -54,6 +54,11 @@ html[data-theme="dark"] .sbx-catalog {
 .sbx-catalog header > .sbx-note {
   max-width: 44em;
 }
+/* 見本の説明の段落 p は本文（16px・1.7。現場は 18px）。名前や値を添える span.sbx-note は補足のまま 14px */
+.sbx-catalog p.sbx-note {
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+}
 .sbx-section {
   display: flex;
   flex-direction: column;
@@ -165,6 +170,9 @@ html[data-mode="field"] .sbx-catalog .sb-pill-label {
 }
 html[data-mode="field"] .sbx-catalog .sbx-note {
   font-size: 1rem;
+}
+html[data-mode="field"] .sbx-catalog p.sbx-note {
+  font-size: 1.125rem;
 }
 .sbx-catalog pre {
   color: var(--sb-ink);

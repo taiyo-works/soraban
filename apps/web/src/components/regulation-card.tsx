@@ -111,6 +111,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {verdictItem ? (
         <p
           data-testid="regulation-verdict-line"
+          data-note=""
           className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-sb-m border border-l-4 border-sb-rule py-1.5 pl-2 pr-2 text-sm text-sb-ink-2 ${provisional ? "border-l-sb-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
         >
           <span>元の判定 {baseStatusDisplay(verdictItem)}</span>
@@ -133,7 +134,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           )}
           <span className="ml-auto inline-flex items-end gap-1 text-sb-ink-3">
             <TierGauge tier={regulation.legalTier} />
-            <span className="leading-none">{legalTierLabel(regulation.legalTier)}</span>
+            <span>{legalTierLabel(regulation.legalTier)}</span>
           </span>
         </p>
       ) : null}
@@ -143,36 +144,36 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {regulation.didDetail ? (
         <p
           data-testid="did-detail"
-          className={`border-l-2 pl-3 text-sm font-medium leading-relaxed text-sb-ink ${isModelAircraftDidExcluded(regulation) ? "border-sb-rule" : DID_DETAIL_TONE[regulation.didDetail]}`}
+          className={`border-l-2 pl-3 font-medium text-sb-ink ${isModelAircraftDidExcluded(regulation) ? "border-sb-rule" : DID_DETAIL_TONE[regulation.didDetail]}`}
         >
           {isModelAircraftDidExcluded(regulation) ? MODEL_AIRCRAFT_DID_DETAIL_LABEL : DID_DETAIL_LABEL[regulation.didDetail]}
         </p>
       ) : null}
-      <p className="border-l border-sb-rule pl-3 text-sm leading-relaxed text-sb-ink-3">
-        <span className="sb-eyebrow">この地点</span>{" "}
+      <p className="border-l border-sb-rule pl-3 text-sb-ink-3">
+        <span data-note="" className="sb-eyebrow">この地点</span>{" "}
         <span className="text-sb-ink-2">{regulationNoteDisplay(regulation)}</span>
       </p>
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p
           data-testid="airport-mlit-note"
-          className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-surface px-3 py-2 text-sm leading-relaxed text-sb-ink-2"
+          className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-surface px-3 py-2 text-sb-ink-2"
         >
-          <span className="sb-eyebrow block ">入力した許可について</span>{" "}
+          <span data-note="" className="sb-eyebrow block ">入力した許可について</span>{" "}
           {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
         </p>
       ) : null}
       {verdictItem && verdictItem.appliedPermits.length > 0 ? (
         <div
           data-testid="regulation-applied-permits"
-          className="rounded-sb-m border-l-4 border-sb-ink bg-sb-st-info-face px-3 py-2 text-sm leading-relaxed text-sb-ink-2"
+          className="rounded-sb-m border-l-4 border-sb-ink bg-sb-st-info-face px-3 py-2 text-sb-ink-2"
         >
-          <p className="sb-eyebrow">適用した許可・同意・目的（元の判定は変えない）</p>
+          <p data-note="" className="sb-eyebrow">適用した許可・同意・目的（元の判定は変えない）</p>
           <ul className="mt-1 flex flex-col gap-1">
             {verdictItem.appliedPermits.map((p) => (
-              <li key={p.id} className="leading-snug">
+              <li key={p.id}>
                 <span>・{p.condition}</span>
                 {p.machine ? (
-                  <span className="block pl-2.5 text-sm tracking-wide text-sb-ink-3">{p.machine}</span>
+                  <span data-note="" className="block pl-2.5 text-sm tracking-wide text-sb-ink-3">{p.machine}</span>
                 ) : null}
               </li>
             ))}
@@ -182,22 +183,22 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
         <div
           data-testid="regulation-excluded"
-          className="rounded-sb-m border-l-4 border-sb-v-none-fg bg-sb-surface px-3 py-2 text-sm leading-relaxed text-sb-v-none-fg"
+          className="rounded-sb-m border-l-4 border-sb-v-none-fg bg-sb-surface px-3 py-2 text-sb-v-none-fg"
         >
-          <p className="sb-eyebrow !text-sb-v-none-fg">
+          <p data-note="" className="sb-eyebrow !text-sb-v-none-fg">
             {regulation.statusBeforeExclusion !== undefined ? EXCLUDED_BY_WEIGHT_HEADING : EXCLUDED_HEADING}
           </p>
           {regulation.statusBeforeExclusion !== undefined ? (
-            <p data-testid="regulation-status-before-exclusion" className="mt-1 font-medium leading-snug">
+            <p data-testid="regulation-status-before-exclusion" className="mt-1 font-medium">
               {statusBeforeExclusionLine(regulation.statusBeforeExclusion)}
             </p>
           ) : null}
           <ul className="mt-1 flex flex-col gap-1">
             {regulation.appliedExceptions.map((ex) => (
-              <li key={ex.id} className="leading-snug">
+              <li key={ex.id}>
                 <span>・{ex.condition}</span>
                 {ex.machine ? (
-                  <span className="block pl-2.5 text-sm tracking-wide text-sb-v-none-fg">
+                  <span data-note="" className="block pl-2.5 text-sm tracking-wide text-sb-v-none-fg">
                     {formatMachineCondition(ex.machine)}
                   </span>
                 ) : null}
@@ -213,15 +214,15 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         title="根拠の詳細"
         note="説明・使用データ・版・改正"
       >
-        <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="regulation-summary">
+        <p className="text-sb-ink-2" data-testid="regulation-summary">
           {regulation.summary}
         </p>
         {exceptions.length > 0 ? (
-          <div data-testid="regulation-exceptions" className="flex flex-col gap-1 text-sm leading-relaxed text-sb-ink-2">
-            <p className="sb-eyebrow">例外節 {exceptions.length} 件</p>
+          <div data-testid="regulation-exceptions" className="flex flex-col gap-1 text-sb-ink-2">
+            <p data-note="" className="sb-eyebrow">例外節 {exceptions.length} 件</p>
             <ul className="flex flex-col gap-1.5">
               {exceptions.map((ex) => (
-                <li key={ex.id} className="leading-snug">
+                <li key={ex.id}>
                   ・{ex.condition}
                 </li>
               ))}
@@ -233,10 +234,10 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         data-testid="regulation-datasets"
         className="sb-block-soft flex flex-col gap-2 !p-3 text-sm leading-relaxed text-sb-ink-3"
       >
-        <p className="text-sm font-bold text-sb-ink">根拠（使用データ・確認日・版・反映済みの改正・出典）</p>
+        <p data-note="" className="text-sm font-bold text-sb-ink">根拠（使用データ・確認日・版・反映済みの改正・出典）</p>
         <div>
-          <p className="sb-eyebrow">使用データ</p>
-          <ul className="mt-0.5 flex flex-col gap-0.5">
+          <p data-note="" className="sb-eyebrow">使用データ</p>
+          <ul data-note="" className="mt-0.5 flex flex-col gap-0.5">
             {regulation.datasets.map((d) => (
               <li key={d.id}>
                 <span className="text-sb-ink-2">{d.name}</span>
@@ -250,8 +251,8 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         </div>
         {regulation.amendments.length > 0 ? (
           <div>
-            <p className="sb-eyebrow">反映済みの改正</p>
-            <ul className="mt-0.5 flex flex-col gap-0.5">
+            <p data-note="" className="sb-eyebrow">反映済みの改正</p>
+            <ul data-note="" className="mt-0.5 flex flex-col gap-0.5">
               {regulation.amendments.map((a) => (
                 <li key={a.id}>
                   <a

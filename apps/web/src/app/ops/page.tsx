@@ -25,7 +25,7 @@ export default async function OpsHome() {
   const canPlan = planCreateDenied(me) === null;
   const today = await getToday(ctx);
   return (
-    <main className="flex flex-col gap-4 lg:gap-6" data-testid="ops-today">
+    <main className="flex flex-col gap-3 lg:gap-6" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
       <div className="flex flex-col gap-3">
         <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
@@ -50,13 +50,13 @@ export default async function OpsHome() {
         <JudgePills />
       </div>
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-7">
-        <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
+      <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-7">
+        <div className="flex min-w-0 flex-col gap-3 lg:gap-6">
           {today.card ? <TodayCard card={today.card} today={today.today} nextActions={today.nextActions} /> : today.empty ? <TodayEmpty empty={today.empty} canPlan={canPlan} /> : null}
           <TodayRest rows={today.rest} />
           <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} today={today.today} />
         </div>
-        <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-3 lg:gap-6">
           <TodayDeadlines deadlines={today.deadlines} today={today.today} />
           <TodayUpcoming flights={today.upcoming} today={today.today} />
         </div>

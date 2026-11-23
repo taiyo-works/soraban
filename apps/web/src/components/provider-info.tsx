@@ -8,6 +8,7 @@ export function ProviderInfo({ testId, className = "", compact = false, links = 
   return (
     <dl
       data-testid={testId}
+      {...(compact ? { "data-note": "" } : {})}
       className={`grid grid-cols-[auto_1fr] gap-x-4 ${compact ? "gap-y-0 text-sm leading-[1.6]" : "items-center gap-y-1 text-base leading-relaxed"} ${className}`}
     >
       {PROVIDER_ROWS.map((r) => (

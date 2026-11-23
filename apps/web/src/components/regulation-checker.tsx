@@ -1304,7 +1304,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
           />
           {geocodeResults.length > 1 ? (
             <div className="flex flex-col gap-1">
-              <p className="text-sm text-sb-ink-2">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
+              <p className="text-sb-ink-2">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
               <ul className="flex flex-col gap-2">
                 {geocodeResults.map((r) => (
                   <li key={`${r.source}-${r.level}-${r.lat}-${r.lng}`}>
@@ -1378,7 +1378,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
             onRetry={retryVerdict}
             meta={
-              <p className="sb-num text-sm text-sb-ink-3">
+              <p data-note="" className="sb-num text-sm text-sb-ink-3">
                 {lat}°N · {lng}°E
                 {showResultDetail && result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
@@ -1481,7 +1481,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
               {/* 判定の見分け方（5 段。形と言葉をセットで。色だけに頼らない） */}
               <div className="sb-block-soft flex flex-col gap-2" aria-label="判定の見分け方" data-testid="verdict-legend" role="group">
-                <p className="text-sm font-bold text-sb-ink">判定の見分け方</p>
+                <p data-note="" className="text-sm font-bold text-sb-ink">判定の見分け方</p>
                 <div className="flex flex-wrap gap-2">
                   {VERDICT_LEGEND_ORDER.map((l) => (
                     <VerdictTag key={l} level={l}>
@@ -1492,7 +1492,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
               </div>
 
               {/* audit meta */}
-              <dl className="sb-block-soft grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-sb-ink-3 sm:grid-cols-4">
+              <dl data-note="" className="sb-block-soft grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-sb-ink-3 sm:grid-cols-4">
                 <div className="col-span-2 flex flex-col gap-0.5">
                   <dt className="font-bold text-sb-ink-2">証跡 ID</dt>
                   <dd className="sb-num text-sm text-sb-ink" data-testid="evidence-id">
@@ -1519,7 +1519,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
       {/* ─── 詳細な指定（座標・条件・飛行方法・地点の例）。入力欄は状態で動くので、form の外でも判定に使われる ─── */}
       <section className="sb-block sb-area-wide flex flex-col gap-5" aria-label="詳細な指定" data-testid="detail-block">
-        <p className="sb-hint" data-testid="geocode-attribution">
+        <p data-note="" className="sb-hint" data-testid="geocode-attribution">
             出典：
             {addressIndexAvailable
               ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／"
@@ -1667,7 +1667,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             <div className="flex flex-col gap-2">
               <span className="sb-field-text">取得済みの許可</span>
               <div data-testid="dips-permits" className="flex flex-col gap-2">
-                <p className="text-sm leading-snug text-sb-ink-3">
+                <p className="text-sb-ink-3">
                   国交省 DIPS の許可・承認（種類ごと。範囲・期間は照合しません。空港等周辺は個別の許可のため入力に含めません）
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{dipsItems.map(renderPermit)}</div>
@@ -1807,7 +1807,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
         {/* 地点の例 */}
         <div className="flex flex-col gap-3 border-t border-sb-rule pt-5">
-          <p className="sb-eyebrow">
+          <p data-note="" className="sb-eyebrow">
             地点の例
             <span className="ml-2 font-normal text-sb-ink-3">（県別。押すとその地点で判定）</span>
           </p>
@@ -1834,7 +1834,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
         {/* 免責（入力前＝初期状態でも常に表示）。判定結果や診断パネルが出る前から、
             「本機能は補助であり最終確認は DIPS／航空局で」を画面に出しておく契約
             （sprint-4：免責を入力前・結果表示・チェックリスト・プリフィルの全画面状態に表示）。 */}
-        <p className="sb-note-card border-l-4 border-sb-ink ">
+        <p data-note="" className="sb-note-card border-l-4 border-sb-ink ">
           <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
         </p>
       </section>
@@ -1864,7 +1864,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 判定履歴
                 <span className="ml-2 text-sm font-normal text-sb-ink-3">（ローカル保存 / 最大 50 件）</span>
               </h3>
-              <p className="sb-num text-sm text-sb-ink-3">{history.length} 件</p>
+              <p data-note="" className="sb-num text-sm text-sb-ink-3">{history.length} 件</p>
             </div>
             <button type="button" onClick={handleClearHistory} className="sb-text-btn">
               全削除

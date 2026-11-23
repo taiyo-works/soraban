@@ -683,7 +683,7 @@ export function RegulationMap({
               </>
             ) : null}
             {group.zones ? (
-              <ul className="flex flex-col gap-1" data-testid="legend-zones">
+              <ul data-note="" className="flex flex-col gap-1" data-testid="legend-zones">
                 {group.zones.map((z) => (
                   <li key={z.key} className="flex items-start gap-1.5 text-sm text-sb-ink">
                     <span
@@ -716,6 +716,7 @@ export function RegulationMap({
             主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
         <p
           className="flex items-start gap-2 border-b border-sb-rule bg-sb-surface px-3 py-1.5 text-sm leading-snug text-sb-ink"
+          data-note=""
           data-testid="map-pick-hint"
         >
           <span aria-hidden className="mt-[0.4em] inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: MAP_COLORS.pin }} />
@@ -743,8 +744,8 @@ export function RegulationMap({
           <summary>各層の出典と状態（公式データ・概算）</summary>
           {rowsByGroup.map((g) => (
             <div key={g.name} data-group={g.name} className="flex flex-col gap-1.5">
-              <p className="sb-layer-group">{g.name}</p>
-              <ul className="flex flex-col gap-2">
+              <p data-note="" className="sb-layer-group">{g.name}</p>
+              <ul data-note="" className="flex flex-col gap-2">
                 {g.layers.map((l) => (
                   <li key={l.key} className="text-sm leading-relaxed text-sb-ink-2" data-layer-row={l.key}>
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">

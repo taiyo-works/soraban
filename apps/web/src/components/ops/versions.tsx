@@ -63,10 +63,10 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
       {older.length > 0 ? (
         <details data-testid="version-list-older">
           <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い版 {older.length} 件を見る（最新 {shown.length} 件は下に出ています）</summary>
-          <ol className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(row)}</ol>
+          <ol data-note="" className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(row)}</ol>
         </details>
       ) : null}
-      <ol className={`flex flex-col border-t border-sb-rule${recent !== undefined ? " lg:grid lg:grid-cols-2 lg:gap-x-8" : ""}`} data-testid="version-list">
+      <ol data-note="" className={`flex flex-col border-t border-sb-rule${recent !== undefined ? " lg:grid lg:grid-cols-2 lg:gap-x-8" : ""}`} data-testid="version-list">
         {shown.map(row)}
       </ol>
     </Section>

@@ -56,7 +56,7 @@ export default async function PlanDetailPage({ params }: { readonly params: Prom
             現場モードを開く
           </Link>
         </div>
-        <p className="opx-note" data-testid="plan-disclaimer">
+        <p data-note="" className="opx-note" data-testid="plan-disclaimer">
           {PLAN_JUDGEMENT_DISCLAIMER}
         </p>
       </div>

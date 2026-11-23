@@ -93,11 +93,11 @@ export default async function PlanListPage({
           ) : null}
         </div>
       </div>
-      <p className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="plan-count">
+      <p data-note="" className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="plan-count">
         {rows.length} 件
       </p>
       {rows.length === 0 ? (
-        <p className="sb-block-soft text-center text-sm text-sb-ink-2">該当する飛行計画はありません。</p>
+        <p className="sb-block-soft text-center text-sb-ink-2">該当する飛行計画はありません。</p>
       ) : (
         <ul className="flex flex-col gap-3" data-testid="plan-list">
           {rows.map((p) => (
@@ -135,7 +135,7 @@ export default async function PlanListPage({
                 <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-surface" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
-                    <p className="px-3 pb-2.5 pl-[2.625rem] text-sm text-sb-ink-3" data-testid="plan-row-next-count">
+                    <p data-note="" className="px-3 pb-2.5 pl-[2.625rem] text-sm text-sb-ink-3" data-testid="plan-row-next-count">
                       ほか {p.nextActionCount - 1} 件（詳細で確認できます）
                     </p>
                   ) : null}

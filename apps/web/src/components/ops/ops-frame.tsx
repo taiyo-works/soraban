@@ -12,7 +12,7 @@ import { OPS_MAIN_ID } from "./ops-nav-model";
 // DOM では最後に置いても見た目の位置は変わらない（先頭に置くと、スマホの最初の Tab が下タブになる）。
 // デザイン見本（/ops/design）は全幅で自前のレイアウト（と `.ds`）を持つため、この枠を付けない。
 // pathname は動的なルートでは要求時にしか分からないため、呼び出し側（ops/layout.tsx）が Suspense の内側に置く。
-export const OPS_CONTENT_CLASS = "mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 sm:gap-10 lg:px-8";
+export const OPS_CONTENT_CLASS = "mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 pb-6 pt-4 sm:px-6 sm:py-8 sm:gap-10 lg:px-8";
 
 export function OpsFrame({ nav, topBar, bottomNav, children }: { readonly nav: ReactNode; readonly topBar: ReactNode; readonly bottomNav: ReactNode; readonly children: ReactNode }) {
   const pathname = usePathname() ?? "";

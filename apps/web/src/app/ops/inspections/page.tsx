@@ -37,7 +37,7 @@ function SecHead({ title, aside, testId }: { readonly title: string; readonly as
         <h2>{title}</h2>
       </div>
       {aside ? (
-        <p className="sb-num text-sm text-sb-ink-3" {...(testId ? { "data-testid": testId } : {})}>
+        <p data-note="" className="sb-num text-sm text-sb-ink-3" {...(testId ? { "data-testid": testId } : {})}>
           {aside}
         </p>
       ) : null}
@@ -80,11 +80,11 @@ export default async function InspectionListPage({
 
       <section aria-label="未実施" className="flex flex-col gap-3" data-testid="inspection-pending">
         <SecHead title="未実施" aside={`${pending.length} 件`} testId="inspection-pending-count" />
-        <p className="text-sm text-sb-ink-3" data-testid="inspection-pending-scope">
+        <p className="text-sb-ink-3" data-testid="inspection-pending-scope">
           今日の計画で、飛行前の点検の記録がまだないものです。
         </p>
         {pending.length === 0 ? (
-          <p className="sb-block-soft text-table text-sb-ink-2" data-testid="inspection-pending-empty">
+          <p className="sb-block-soft text-sb-ink-2" data-testid="inspection-pending-empty">
             未実施の点検はありません。
           </p>
         ) : (
@@ -150,11 +150,11 @@ export default async function InspectionListPage({
           ))}
         </nav>
         <RecordFilter basePath="/ops/inspections" aircraft={aircraft} value={filter} hidden={timing ? { timing } : {}} />
-        <p className="sb-num text-sm text-sb-ink-3" data-testid="inspection-count">
+        <p data-note="" className="sb-num text-sm text-sb-ink-3" data-testid="inspection-count">
           {rows.length} 件
         </p>
         {rows.length === 0 ? (
-          <p className="sb-block-soft text-table text-sb-ink-2" data-testid="inspection-empty">
+          <p className="sb-block-soft text-sb-ink-2" data-testid="inspection-empty">
             日常点検の記録はありません。
           </p>
         ) : (

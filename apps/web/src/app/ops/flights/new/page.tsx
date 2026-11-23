@@ -80,7 +80,7 @@ export default async function FlightNewPage({
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="飛行記録の入力" back={{ href: "/ops/flights", label: "飛行記録の一覧" }}>
-        <p className="text-sm leading-relaxed text-sb-ink-3">
+        <p className="text-sb-ink-3">
           1 回の飛行（電源を入れて離陸し、着陸して電源を切るまで）を 1 件として入力します。飛行時間は離陸・着陸の時刻から自動で求めます。
         </p>
       </PageHeader>

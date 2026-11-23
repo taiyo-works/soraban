@@ -29,7 +29,7 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
         {action.label}
       </a>
       {cancelNotice ? (
-        <p className="rounded-sb-m border-[1.5px] border-sb-v-no-fg bg-sb-base px-3 py-2 text-sm font-bold leading-relaxed text-sb-ink" data-testid="plan-cancel-needed">
+        <p className="rounded-sb-m border-[1.5px] border-sb-v-no-fg bg-sb-base px-3 py-2 font-bold text-sb-ink" data-testid="plan-cancel-needed">
           <span aria-hidden className="mr-1">!!</span>
           {cancelNotice}
         </p>

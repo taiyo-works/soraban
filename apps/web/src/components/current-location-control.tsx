@@ -82,7 +82,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
           </div>
         </div>
       ) : null}
-      <p className="sb-hint" data-testid="current-location-privacy">
+      <p data-note="" className="sb-hint" data-testid="current-location-privacy">
         {CURRENT_LOCATION_JUDGE_NOTE}
       </p>
       {unavailableReason ? (

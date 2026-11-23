@@ -9,7 +9,7 @@ import { PillLink } from "@/components/ui/sb-parts";
 export function JudgePills({ testId = "judge-pills", lead = "飛ばす前に、地点を判定する" }: { readonly testId?: string; readonly lead?: string }) {
   return (
     <section aria-label="地点を判定する" className="flex flex-col gap-2" data-testid={testId}>
-      <p className="text-sm font-bold text-sb-ink-2">{lead}</p>
+      <p data-note="" className="text-sm font-bold text-sb-ink-2">{lead}</p>
       <div className="grid grid-cols-2 gap-2 sm:max-w-md">
         <PillLink small block icon="locate" className="sb-pill-tight" href="/?start=here" data-testid="judge-pill-here">
           現在地で判定

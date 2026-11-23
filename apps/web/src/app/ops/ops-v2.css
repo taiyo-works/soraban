@@ -276,7 +276,7 @@ html:has(.ops-v2) body {
   color: var(--sb-ink-2);
   font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .opx-badge-brand {
@@ -421,6 +421,9 @@ html:has(.ops-v2) body {
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--sb-ink);
+  /* 値は本文（16px・1.7）。項目名の dt は補足 14px */
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
 }
 @media (min-width: 640px) {
   .opx-detail > div {

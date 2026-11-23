@@ -41,7 +41,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
       "場所",
       <span key="pl" className="flex flex-col">
         <span>{plan.placeName}</span>
-        <span className="sb-num text-sm tnum text-sb-ink-2">
+        <span className="sb-num tnum text-sb-ink-2">
           {plan.latitude}, {plan.longitude}（WGS84）{plan.radiusM !== null ? `／半径 ${plan.radiusM} m` : ""}
         </span>
       </span>,
@@ -59,7 +59,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
       })(),
     ],
     ["運航の目的（例外）", plan.judgementPurpose ? (PURPOSE_VALUE_LABEL[plan.judgementPurpose] ?? plan.judgementPurpose) : "通常運航"],
-    ["許可・承認の番号", <span key="pn" className="break-all sb-num text-sm" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
+    ["許可・承認の番号", <span key="pn" className="break-all sb-num" data-testid="plan-permit-numbers-text">{plan.permitNumbers ?? "—"}</span>],
     ["メモ", plan.notes ?? "—"],
   ];
 
@@ -103,20 +103,20 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
             <PlanStateBadge state={plan.state} label={plan.stateLabel} />
             {plan.selfConfirmation ? <Badge tone="amber" data-testid="plan-self-confirmation">{SELF_CONFIRMATION_LABEL}</Badge> : null}
           </div>
-          <dl className="flex flex-col border-t border-sb-rule text-sm" data-testid="plan-confirm-facts">
+          <dl className="flex flex-col border-t border-sb-rule" data-testid="plan-confirm-facts">
             <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-sm text-sb-ink-3 sm:text-sm">判定不能の件数</dt>
-              <dd data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
+              <dd className="[overflow-wrap:anywhere]" data-testid="plan-unknown-count">{j.verdictUnknownCount > 0 ? unknownCountLabel(j.verdictUnknownCount) : "判定不能 0 件"}</dd>
             </div>
             <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 border-b border-sb-rule py-2 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-sm text-sb-ink-3 sm:text-sm">出典・確認日が古い項目（90 日超）</dt>
-              <dd data-testid="plan-stale-sources">
+              <dd className="[overflow-wrap:anywhere]" data-testid="plan-stale-sources">
                 {plan.staleSources.length === 0 ? (
                   "ありません"
                 ) : (
                   <details data-testid="plan-stale-sources-details">
                     <summary className="flex min-h-12 cursor-pointer select-none items-center font-medium text-sb-ink">{plan.staleSources.length} 件あります（開く）</summary>
-                    <ul className="flex list-disc flex-col gap-1 pl-5">
+                    <ul data-note="" className="flex list-disc flex-col gap-1 pl-5">
                       {plan.staleSources.map((s) => (
                         <li key={s.id}>
                           {s.name}：確認日 {s.verifiedAt}
@@ -131,24 +131,24 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           </dl>
           {plan.state === "draft" ? (
             <div id="request-confirmation" className="flex scroll-mt-4 flex-col gap-2">
-              <Note>下書きです。確認を依頼すると、運航管理者が確認できます。</Note>
+              <Note body>下書きです。確認を依頼すると、運航管理者が確認できます。</Note>
               {updatable ? <RequestConfirmationButton planId={plan.id} version={plan.version} /> : null}
             </div>
           ) : null}
           {plan.confirmations.length === 0 ? (
-            plan.state !== "draft" && !plan.voided ? <p className="text-sm text-sb-ink-3">確認の記録はまだありません。</p> : null
+            plan.state !== "draft" && !plan.voided ? <p className="text-sb-ink-3">確認の記録はまだありません。</p> : null
           ) : (
             <ol className="flex flex-col border-t border-sb-rule" data-testid="plan-confirmations">
               {[...plan.confirmations].reverse().map((c) => (
-                <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-sb-rule py-3 pl-3 text-sm ${c.decision === "approved" ? "border-l-sb-ink" : "border-l-sb-v-no-fg"}`} data-testid="plan-confirmation-row">
+                <li key={c.id} className={`flex flex-col gap-1 border-b border-l-4 border-b-sb-rule py-3 pl-3 ${c.decision === "approved" ? "border-l-sb-ink" : "border-l-sb-v-no-fg"}`} data-testid="plan-confirmation-row">
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <Badge tone={c.decision === "approved" ? "green" : "red"} data-testid="plan-confirmation-decision">
                       <span aria-hidden className="mr-1">{c.decision === "approved" ? "✓" : "↩"}</span>
                       {DECISION_LABEL[c.decision]}
                     </Badge>
                     {c.selfConfirmation ? <Badge tone="amber">{SELF_CONFIRMATION_LABEL}</Badge> : null}
-                    <span className="sb-num text-sm tnum text-sb-ink-3">版 {c.planVersion}</span>
-                    <time dateTime={c.createdAt} className="sb-num text-sm tnum text-sb-ink-2">{c.createdAtJst}</time>
+                    <span data-note="" className="sb-num text-sm tnum text-sb-ink-3">版 {c.planVersion}</span>
+                    <time data-note="" dateTime={c.createdAt} className="sb-num text-sm tnum text-sb-ink-2">{c.createdAtJst}</time>
                     <span>{c.confirmerName}</span>
                   </p>
                   {c.reason ? <p className="break-all text-sb-ink-2">理由：{c.reason}</p> : null}
@@ -161,7 +161,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
               <ConfirmPanel planId={plan.id} version={plan.version} stale={plan.freshness.stale} />
             </div>
           ) : null}
-          {!manager && plan.status === "active" && !plan.voided ? <Note>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
+          {!manager && plan.status === "active" && !plan.voided ? <Note body>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
         </Section>
 
         <VersionList versions={versions} recent={5} />

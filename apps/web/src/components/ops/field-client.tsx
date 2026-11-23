@@ -874,7 +874,7 @@ export function FieldClient({
                   ) : view.canInspect ? (
                     <>
                       {/* 点検の免責（Sprint 18-3）。点検の入力（/ops/inspections/new）の先頭にも同じ文が出る */}
-                      <p className="leading-relaxed" data-testid="inspection-disclaimer">
+                      <p data-testid="inspection-disclaimer">
                         {DISCLAIMER_INSPECTION}
                       </p>
                       <a href={inspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-inspection-link">
@@ -1009,13 +1009,13 @@ export function FieldClient({
                     {plan.permitNumbers ? `許可・承認の番号：${plan.permitNumbers}` : "許可・承認の番号の登録はありません。"}
                   </p>
                   {plan.permitStates.length > 0 ? (
-                    <ul className="opx-note flex flex-col gap-3 text-lg" data-testid="field-permit-states">
+                    <ul className="opx-note flex flex-col gap-3 text-lg leading-[1.7]" data-testid="field-permit-states">
                       {plan.permitStates.map((n) => (
                         <li key={n.numberText} data-testid="field-permit-state" data-status={n.status}>
                           <span className="break-all sb-num">{n.numberText}</span>：{n.statusLabel}
                         </li>
                       ))}
-                      <li className="text-base text-sb-ink-2">登録は利用者の入力です。許可書を携行し、書かれた条件を確認してください。</li>
+                      <li className="text-sb-ink-2">登録は利用者の入力です。許可書を携行し、書かれた条件を確認してください。</li>
                     </ul>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled ? (
@@ -1298,7 +1298,7 @@ export function FieldClient({
 
   return (
     <main
-      className="flex flex-col gap-5 pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-sb-ink touch-manipulation"
+      className="flex flex-col gap-5 pb-[env(safe-area-inset-bottom)] text-lg leading-[1.7] text-sb-ink touch-manipulation"
       data-testid="field-root"
       data-hydrated={hydrated ? "true" : "false"}
       aria-label="現場モード"

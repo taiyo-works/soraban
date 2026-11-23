@@ -91,6 +91,17 @@
 .text-base.leading-relaxed {
   line-height: 1.7;
 }
+/* 補足の印 data-note（16-B 差し戻し 1：R1-1・R1-2）。印のある要素は 14px・行の高さ 1.5（補足）。大きさと行の高さを印から決めるので、
+ * 印と見た目がずれない（Tailwind の text-sm の 1.43、leading-snug の 1.375 などを、印があれば 1.5 に揃える）。印のない p・li・dd は本文（16px・1.7。現場 18px）。
+ * 付けてよい要素は p・li・dd・ul・ol・dl と、本文の中の span・time・small だけ（e2e/field-checks.ts が置き場所を検査する）。 */
+:is(p, li, dd, ul, ol, dl, span, time, small)[data-note] {
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+}
+/* 印のある要素の中の text-sm・leading-snug も 1.5（補足の中の子は、1.43・1.375 のままにしない） */
+:is(p, li, dd, ul, ol, dl)[data-note] :is(.text-sm, .leading-snug) {
+  line-height: 1.5;
+}
 .sb-page .text-sm:not([class*="leading-"]),
 .sb-page .text-sm.leading-snug {
   line-height: 1.5;
@@ -171,6 +182,11 @@
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-3);
+}
+/* 節の説明文（Section の description）は本文：16px・1.7（補足の .sb-sec-note の上書き） */
+.sb-sec-note.sb-sec-note-body {
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
 }
 @media (min-width: 1024px) {
   .sb-sec-head h2 {
@@ -456,7 +472,7 @@
   border-radius: var(--sb-pill);
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.5;
   /* 文字 200%・320 幅でも枠から出ない（長い語「判定不能（データ未整備）」が折り返せるように。通常の大きさでは 1 行に収まる） */
   max-width: 100%;
   white-space: normal;
@@ -756,8 +772,8 @@ input.sb-check:disabled {
   gap: 5px;
 }
 .sb-lead {
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
   color: var(--sb-ink-2);
   max-width: 46rem;
 }
@@ -768,8 +784,8 @@ input.sb-check:disabled {
 .sb-ops-note {
   border-left: 3px solid var(--sb-edge);
   padding-left: 12px;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
   color: var(--sb-ink-3);
 }
 .sb-facts {
@@ -796,6 +812,9 @@ input.sb-check:disabled {
 .sb-facts dd {
   font-weight: 700;
   min-width: 0;
+  /* 値は本文（16px・1.7）。項目名の dt は補足 14px */
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
 }
 .sb-disclaimer-short {
   border-left: 3px solid var(--sb-ink);
@@ -1043,7 +1062,7 @@ input.sb-check:disabled {
   border: 1px solid var(--sb-edge);
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--sb-ink-2);
 }
 

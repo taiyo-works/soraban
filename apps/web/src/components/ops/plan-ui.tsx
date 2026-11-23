@@ -131,8 +131,8 @@ export function ReportBox({
     return (
       <div className="flex flex-col gap-2" {...(head ? { "data-testid": "plan-report-box" } : { "data-testid": "plan-report-box-body" })} data-kind={report.kind}>
         {head ? (
-        <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
-          <span aria-hidden className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
+        <p className="flex items-start gap-3 text-base font-bold leading-relaxed text-sb-ink">
+          <span aria-hidden data-note="" className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
             {glyph}
           </span>
           <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
@@ -140,10 +140,10 @@ export function ReportBox({
         ) : null}
         {!body ? null : voidedNoRecord ? (
           <>
-            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+            <p data-note="" className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
               {REPORT_NOTE_SHORT}
             </p>
-            <p className="pl-10 text-sm font-medium leading-relaxed text-sb-ink" data-testid="plan-voided-no-record-note">
+            <p className="pl-10 font-medium text-sb-ink" data-testid="plan-voided-no-record-note">
               {VOIDED_NO_RECORD_NOTE}
             </p>
           </>
@@ -154,7 +154,7 @@ export function ReportBox({
                 <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
                   根拠を見る（{report.reasons.length} 件）
                 </summary>
-                <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
+                <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sb-ink-2" data-testid="plan-report-reasons">
                   {report.reasons.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
@@ -162,11 +162,11 @@ export function ReportBox({
               </details>
             ) : null}
             {report.exceptionNote ? (
-              <p className="opx-note ml-10" data-testid="plan-report-exception">
+              <p data-note="" className="opx-note ml-10" data-testid="plan-report-exception">
                 {report.exceptionNote}
               </p>
             ) : null}
-            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+            <p data-note="" className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
               {REPORT_NOTE_SHORT}
             </p>
             <details className="pl-10">
@@ -188,9 +188,10 @@ export function ReportBox({
       data-testid="plan-report-box"
       data-kind={report.kind}
     >
-      <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 text-base font-bold leading-relaxed text-sb-ink">
         <span
           aria-hidden
+          data-note=""
           className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[REPORT_TONE[report.kind]]} ${CHIP_GLYPH[REPORT_TONE[report.kind]]}`}
         >
           {REPORT_GLYPH[report.kind]}
@@ -198,14 +199,14 @@ export function ReportBox({
         <span className="pt-0.5" data-testid="plan-report-label">{report.label}</span>
       </p>
       {report.reasons.length > 0 ? (
-        <ul className="flex list-disc flex-col gap-1 pl-12 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
+        <ul className="flex list-disc flex-col gap-1 pl-12 text-sb-ink-2" data-testid="plan-report-reasons">
           {report.reasons.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>
       ) : null}
       {report.exceptionNote ? (
-        <p className="opx-note ml-10" data-testid="plan-report-exception">
+        <p data-note="" className="opx-note ml-10" data-testid="plan-report-exception">
           {report.exceptionNote}
         </p>
       ) : null}
@@ -219,7 +220,7 @@ export function ReportBox({
 /** 「そらばんは DIPS に送信しません。…」の固定の文言。 */
 export function DipsNotice({ text = REPORT_FIXED_NOTE }: { readonly text?: string }) {
   return (
-    <p className="opx-note" data-testid="plan-dips-notice">
+    <p data-note="" className="opx-note" data-testid="plan-dips-notice">
       {text}
     </p>
   );
@@ -505,33 +506,33 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
   const started = deadline.state === "overdue_started";
   if (compact) {
     return (
-      <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 text-sm ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
-        <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
-          <span aria-hidden className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
+      <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
+        <p className="flex items-start gap-3 font-bold text-sb-ink">
+          <span aria-hidden data-note="" className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
             {DEADLINE_GLYPH[deadline.state]}
           </span>
           <span className="pt-0.5" data-testid="plan-report-deadline-message">{deadline.message}</span>
         </p>
         {deadline.guideAtJst ? (
-          <p className="pl-11 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
-            社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
+          <p className="pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
+            社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
           </p>
         ) : null}
         <details className="pl-11" {...(started ? { open: true } : {})}>
           <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
           <div className="flex flex-col gap-1.5 pb-2">
             {deadline.guideNote ? (
-              <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
+              <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
                 {deadline.guideNote}
               </p>
             ) : null}
             {deadline.penaltyNote ? (
-              <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+              <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
                 {deadline.penaltyNote}
               </p>
             ) : null}
-            {deadline.outageNote ? <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-            <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+            {deadline.outageNote ? <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+            <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
           </div>
         </details>
       </div>
@@ -539,13 +540,14 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
   }
   return (
     <div
-      className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 text-sm ${DEADLINE_BAR[deadline.state]}`}
+      className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 ${DEADLINE_BAR[deadline.state]}`}
       data-testid="plan-report-deadline"
       data-state={deadline.state}
     >
-      <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 font-bold text-sb-ink">
         <span
           aria-hidden
+          data-note=""
           className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
         >
           {DEADLINE_GLYPH[deadline.state]}
@@ -553,23 +555,23 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
         <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
-          社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
+          社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
         </p>
       ) : null}
       {deadline.guideNote ? (
-        <p className="pl-11 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
+        <p data-note="" className="pl-11 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
           {deadline.guideNote}
         </p>
       ) : null}
       <div className="flex flex-col gap-1.5 border-t border-sb-rule pl-11 pt-2.5">
         {deadline.penaltyNote ? (
-          <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+          <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
             {deadline.penaltyNote}
           </p>
         ) : null}
-        {deadline.outageNote ? <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-        <p className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+        {deadline.outageNote ? <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+        <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
       </div>
     </div>
   );
@@ -580,20 +582,21 @@ export function ReportStatusBox({ status, changes }: { readonly status: ReportSt
   const tone = STATUS_TONE[status.code];
   return (
     <div className="flex flex-col gap-2" data-testid="plan-report-status" data-code={status.code}>
-      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 font-medium text-sb-ink">
         <span
           aria-hidden
+          data-note=""
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
         >
           {status.mark}
         </span>
         <span className="pt-0.5" data-testid="plan-report-status-label">{status.label}</span>
       </p>
-      {status.detail && status.code !== "reported" ? <p className="pl-10 sb-num text-sm tnum text-sb-ink-2">{status.detail}</p> : null}
+      {status.detail && status.code !== "reported" ? <p data-note="" className="pl-10 sb-num text-sm tnum text-sb-ink-2">{status.detail}</p> : null}
       {changes.length > 0 ? (
-        <div className="opx-note ml-10 flex flex-col gap-1" data-testid="plan-report-changes">
-          <p className="text-sm font-medium text-sb-ink">通報時から変わった点</p>
-          <ul className="flex flex-col gap-0.5 text-sm leading-relaxed text-sb-ink-2">
+        <div className="opx-note opx-note-lg ml-10 flex flex-col gap-1" data-testid="plan-report-changes">
+          <p data-note="" className="text-sm font-medium text-sb-ink">通報時から変わった点</p>
+          <ul className="flex flex-col gap-0.5 text-sb-ink-2">
             {changes.map((c) => (
               <li key={c.key} data-testid="plan-report-change-row" data-key={c.key}>
                 {c.label}：<span className="sb-num tnum">{c.before}</span> → <span className="sb-num tnum">{c.after}</span>

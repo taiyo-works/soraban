@@ -65,7 +65,7 @@ function RouteDot({ state }: { readonly state: RouteStage["state"] }) {
 
 function Route({ stages, compact = false }: { readonly stages: readonly RouteStage[]; readonly compact?: boolean }) {
   return (
-    <ol aria-label="行程" data-testid="route" data-variant="dots" className={compact ? "opx-route opx-route-compact" : "opx-route"} style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
+    <ol aria-label="行程" data-note="" data-testid="route" data-variant="dots" className={compact ? "opx-route opx-route-compact" : "opx-route"} style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
       {stages.map((st) => (
         <li key={st.label} data-stage-state={st.state} className={`opx-rs opx-rs-${st.state}`}>
           <span className="opx-rs-dot" aria-hidden="true">
@@ -99,8 +99,8 @@ function RouteBand({ card, next }: { readonly card: TodayCardDto; readonly next:
   return (
     <div className="flex flex-col gap-2" data-testid="today-card-route">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-sm font-bold text-sb-ink-2">行程</p>
-        <p className="opx-num text-sm text-sb-ink-3" data-testid="today-card-route-count">
+        <p data-note="" className="text-sm font-bold text-sb-ink-2">行程</p>
+        <p data-note="" className="opx-num text-sm text-sb-ink-3" data-testid="today-card-route-count">
           済 {done} / {card.journey.length}
         </p>
       </div>
@@ -134,7 +134,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
   return (
     <section aria-label={card.reasonLabel} data-testid="today-card" data-reason={card.reason} data-plan-id={card.planId} className="sb-block opx-nc">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <p className="text-sm font-bold text-sb-ink-2" data-testid="today-card-reason">
+        <p data-note="" className="text-sm font-bold text-sb-ink-2" data-testid="today-card-reason">
           {card.reasonLabel}
         </p>
         <TodayStatus badge={card.badge} />
@@ -144,7 +144,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
           <p className="opx-nc-time" data-testid="today-card-time">
             {card.timeLabel}
           </p>
-          <p className="opx-num text-sm text-sb-ink-3" data-testid="today-card-date">
+          <p data-note="" className="opx-num text-sm text-sb-ink-3" data-testid="today-card-date">
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>
           </p>
         </div>
@@ -153,13 +153,13 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
         </h2>
         <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sb-ink-2">
           <span className="[overflow-wrap:anywhere]">
-            <span className="text-sm text-sb-ink-3">機体 </span>
+            <span data-note="" className="text-sm text-sb-ink-3">機体 </span>
             <span className="font-bold text-sb-ink" data-testid="today-card-aircraft">
               <span className="opx-num">{card.registrationMark}</span>（{card.modelName}）
             </span>
           </span>
           <span>
-            <span className="text-sm text-sb-ink-3">操縦者 </span>
+            <span data-note="" className="text-sm text-sb-ink-3">操縦者 </span>
             <span className="font-bold text-sb-ink" data-testid="today-card-pilot">
               {card.pilotName}
             </span>
@@ -417,7 +417,7 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
           ))}
         </ul>
       )}
-      <p className="text-sm text-sb-ink-3" data-testid="home-deadlines-note">
+      <p data-note="" className="text-sm text-sb-ink-3" data-testid="home-deadlines-note">
         機体の期限は、記録する場所がまだないため出ません。
       </p>
     </section>

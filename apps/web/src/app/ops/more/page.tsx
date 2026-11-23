@@ -69,7 +69,7 @@ export default async function OpsMorePage() {
           </ul>
         </section>
       ) : null}
-      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-sb-m bg-sb-sunken px-4 py-3 text-sm text-sb-ink-2" data-testid="dips-note">
+      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-sb-m bg-sb-sunken px-4 py-3 text-sb-ink-2" data-testid="dips-note">
         <Icon name="unlinked" size={16} className="shrink-0 text-sb-ink-3" />
         <p>DIPS との接続：未接続。機体・操縦者はアプリの中で登録し、通報は DIPS で行った結果を手で記録します。</p>
       </section>

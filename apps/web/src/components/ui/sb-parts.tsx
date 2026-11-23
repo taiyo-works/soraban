@@ -176,7 +176,7 @@ export function SectionHead({
   return (
     <div className="sb-sec-head">
       <Tag id={id}>{title}</Tag>
-      {note ? <p className="sb-sec-note">{note}</p> : null}
+      {note ? <p data-note="" className="sb-sec-note">{note}</p> : null}
     </div>
   );
 }
