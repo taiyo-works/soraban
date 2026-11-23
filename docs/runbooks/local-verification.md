@@ -6,7 +6,7 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 
 - **PostgreSQL 16 + PostGIS**: クラスタ `16/main`（ポート 5432）。止まっていれば `pg_ctlcluster 16 main start`。ロール `postgres` と `soraban_app` は、CI と同じテスト用の値（`postgres` / `soraban_app_ci_only`）に設定されている前提。起動時に設定されていなければ設定し直す（アプリのコードには影響しない）。
 - **検証は空の DB から**: 実行のたびに新しい名前の DB を作り、マイグレーションとシード（`db:seed:ops-test`）を入れる。前の実行の計画が残った DB を使い回すと、時間帯の重なり（`overlap`）などで偽の失敗が出る。
-- **Chromium**: `/opt/pw-browsers/chromium`。`playwright install` はしない（別のバージョンが入って壊れる）。Playwright が要求する版の headless shell が無いと、全件が `Executable doesn't exist` で落ちるので、`E2E_CHROMIUM_PATH=/opt/pw-browsers/chromium E2E_CHROMIUM_ARGS=--no-sandbox`（フルの Chromium）を指定する。公開側 E2E は 1 ワーカー（既定）で流す。headless shell と `--workers=2` では、`sprint7` 159・173、`sprint9` 306・352、`sprint12h-pr2` Q-20 が `waitForResponse` のタイムアウトで実装と無関係に落ちる（2026-11-22、16-A の再判定で観測）。
+- **Chromium**: `/opt/pw-browsers/chromium`。`playwright install` はしない（別のバージョンが入って壊れる）。Playwright が要求する版の headless shell が無いと、全件が `Executable doesn't exist` で落ちるので、`E2E_CHROMIUM_PATH=/opt/pw-browsers/chromium E2E_CHROMIUM_ARGS=--no-sandbox`（フルの Chromium）を指定する。公開側 E2E は 1 ワーカー（既定）で流す。headless shell と `--workers=2` では、`sprint7` 159・173、`sprint9` 306・352、`sprint12h-pr2` Q-20 が `waitForResponse` のタイムアウトで実装と無関係に落ちる（2026-11-22、16-A の再判定で観測）。なお `sprint9` 306（右クリック）は、フルの Chromium・1 ワーカーでも単独 ×6 で 3/6 落ちる（2026-11-23、16-B 差し戻し 1 の再判定。基準 `c58d92e` でも同じ）。落ちたら基準のコミットと比べて切り分ける。
 - **ops の手動検証用の DB**: `db:migrate`・`db:seed:ops-test` には `DATABASE_URL` に加えて `DATABASE_URL_UNPOOLED` も要る。
 - **コントラスト検査**: `node docs/design/tokens-v2/check-contrast-v2.mjs`（`scripts/` ではない）。
 - **ネットワーク**: 外部ホストはプロキシで制限されている。地図タイル（`cyberjapandata.gsi.go.jp`）は 403 になることがあり、公開側の地図のテストが揺れる原因になる。許可されていないホストは、環境の設定（Network access）で追加する必要がある。
