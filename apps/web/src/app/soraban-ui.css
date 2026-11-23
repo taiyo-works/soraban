@@ -812,7 +812,9 @@ input.sb-check:disabled {
 .sb-facts dd {
   font-weight: 700;
   min-width: 0;
-  /* 値は本文（16px・1.7）。項目名の dt は補足 14px */
+}
+/* 値は本文（16px・1.7）。印 data-note のある dd は補足（14px・1.5）で、上の [data-note] の規則に任せる（詳細度が同じで後ろのこの規則が勝つのを避ける）。項目名の dt は補足 14px */
+.sb-facts dd:not([data-note]) {
   font-size: var(--sb-fs-body);
   line-height: 1.7;
 }
