@@ -42,7 +42,7 @@ test.describe("D-1 入力欄", () => {
     expect(r.invalid).toBeGreaterThanOrEqual(1);
   });
 
-  test("フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない", async ({ page }) => {
+  test("フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。キーボードのフォーカスの輪（3px）も残る", async ({ page }) => {
     await open(page);
     const input = page.getByTestId("cat-input");
     await input.focus();
@@ -52,12 +52,13 @@ test.describe("D-1 入力欄", () => {
     await waitForSettledStyles(page);
     const s = await input.evaluate((el) => {
       const c = getComputedStyle(el);
-      return { bc: c.borderTopColor, bw: c.borderTopWidth, shadow: c.boxShadow, outline: c.outlineStyle };
+      return { bc: c.borderTopColor, bw: c.borderTopWidth, shadow: c.boxShadow, outline: c.outlineStyle, ow: parseFloat(c.outlineWidth) };
     });
     expect(s.bc).toBe(PRIMARY);
     expect(s.bw).toBe("1px");
     expect(s.shadow).toBe(`${PRIMARY} 0px 0px 0px 1px inset`);
-    expect(s.outline).toBe("none");
+    expect(s.outline).toBe("solid"); // Q-22：キーボードのフォーカスの輪は弱めない
+    expect(s.ow).toBeGreaterThanOrEqual(3);
   });
 
   test("ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない", async ({ page }) => {

@@ -182,3 +182,26 @@
 - 注意: 検査の追加後、最初の実行は古い `.next`（`next start`）のまま走り、K-8 と `/ops/places` が落ちた（足した検査が効くことの確認）。`pnpm build` のあと 72/72（×3）通過。
 
 **16-C gen3（評価 10 節の要修正：計画の主画面 200% の検査が修正前でも通る）**: `sprint16-c-db.spec.ts` の「計画の主画面」に、`plan-digest`（nav）自身の `scrollWidth <= clientWidth + 1` と、各リンク・右端の「判定を見る →」「計画の確認へ →」の右端が nav の枠内、を直接 expect（390・430、200%）。左の注入は、実画面の札の複製 3 組＋折り返せる文（折り返せない 1 語は入れない）に変更。`expectTextZoom` は変えていない。修正前（718ad3d のアプリ）の再ビルドで 390 が 474>326 で落ち、修正後で通る（`sprint-16C-gen3-spec-{old,fixed-first,x3}.log`）。既存の検査は弱めていない。
+
+### 16-D 部品 2（入力欄・チェック行・ボトムシート・スケルトン・空の状態・通信エラー）：変えた既存テストと理由（K-10）
+
+| 検査 | 前 | 後 | 理由・弱めていない根拠 |
+|---|---|---|---|
+| `sprint11-db` 18（日常点検の異常の備考）の誤りの確認 | `frame.getByRole("alert")` が「備考を入力してください」を含む | `frame.locator(".sb-field-error")` が同じ文を含む（直後の `aria-invalid="true"` の検査もそのまま） | D-1「項目ごとのエラーは `role` を `alert` にしない（`aria-describedby` で結ぶ）」。`FieldError`（`ops-client.tsx`）の `role="alert"` を外したため、同じ要素・同じ文・同じ可視性を、項目ごとのエラーの印のクラスで選ぶ。送信の結果の `FormError`（`role="alert"`）は変えていない |
+| `sprint12a-db` 11・16・17・20（差し戻しの理由の必須） | `getByRole("alert").filter({ hasText: "差し戻しの理由" })` が見える | `locator(".sb-field-error").filter({ hasText: "差し戻しの理由" })` が見える | 同上。`Field` の誤りの行。文と可視性の期待は同じ |
+| `testids-baseline.test.ts` の件数の下限・ハッシュ | 1905・`f49d970e…` | 1946・`d6e632dd…` | K-9。見本の `cat-f-*`・`cat-chk-*`・`cat-sheet-*`・`sheet*`・`cat-skeleton`・`cat-empty`・`cat-error`・運航管理の `ops-loading*` を足して `--write --reason` で書き直した。消えた識別子は 0（`--check`）。見本の入力欄 `cat-input` は、新しい入力欄（`TextField`）の識別子として残した |
+| `expectTextZoom`（`e2e/field-checks.ts`、16-B 差し戻し 1・16-C の 200% の全画面で呼ばれる） | 文字を持つ要素の切れだけ | 追加：`overflow` が `hidden`・`clip` の**入れ物**（文字の有無を問わない）で `scrollWidth > clientWidth + 1` を 0 に（`clippedContainers`）。除外は `CLIP_CONTAINER_EXCLUDES`（読み上げ専用・地図・`/` の挿絵）と、全文が `title` にある省略表示だけ。除外はテストの注記 `clip-excluded` に出す | 追加のみ（強める方向）。直接の文字を持たない入れ物の切れを見逃す（16-C の評価）ため。陰性の確認は `sprint16-d.spec.ts`（切れる入れ物は失敗・挿絵の除外は通る） |
+
+**追加した検査**（すべて追加。既存の検査・上限・識別子は弱めていない）:
+
+- `e2e/sprint16-d.spec.ts`（公開側。見本と `/`）23 件：D-1（寸法・フォーカスの枠・ラベル・エラーの関連付け・現場）、D-2（72・32 の丸・「済」・折りたたみ・現場）、D-3（キーボードだけの開閉・3 段・暗幕・閉じ込め・Esc・フォーカスの復帰・動き）、D-4、D-5、K-15、追加 1（見本の 200%・入れ物の切れの陰性）、`/` の入力欄のラベル。
+- `e2e/ops-db/sprint16-d-db.spec.ts`（実画面）28 件：D-1（運航管理の入力フォーム 13 画面の見えるラベル・高さ・角丸、エラー 3 画面の関連付け）、D-2（許可の登録の行・チェックの丸）、D-4（`ops-loading-content`）、追加 1（200% の入れ物の切れ 9 画面）。
+- `e2e/field-checks.ts` に `collectFieldReport`・`expectFields`（D-1 の共通の検査）を追加。
+
+**文字 200% の入れ物の切れの検査で落ちた画面（修正前）**: ログイン状態の `/`（`sprint16-c-db` の「持ち越し 3」、390 幅）の緯度・経度の入力欄 2 つ（`input[text]` の幅 155<164、155<184）。ログ `sprint-16D-gen-ops-full-1.log`・`sprint-16D-gen-ops-zoom-probe.log`。修正は `regulation-checker.tsx` の緯度・経度の 2 列を `repeat(auto-fit, minmax(9rem, 1fr))`（最小幅を rem で持つ）にして、幅が足りないとき縦に積む（スタイルの最小の修正。375 以上の等倍は 2 列のまま）。見積もりにあった `plan-ui.tsx:463` と `ops/flights/[id]/page.tsx:177` は、計画の主画面・飛行記録の詳細の 200%（390・430）で切れず、直していない（`sprint16-d-db` の追加 1 で確認）。除外リストに入れた要素は、実画面では 0。
+
+**上限を変えたもの（R1-8 の手続き）**: なし。画面の長さ・最初の画面の縦位置の上限は変えていない（倍率の報告対象なし）。
+
+**見える文字の追加（D-1 の「ラベルは常に見える」のため）**: 日付・時刻の入力（`records-client.tsx` の `DateTimeInput`）に「日付」「時刻」、機体の登録の既存の総飛行時間に「時間」「分」、`/` の座標の入力に「座標または Google マップの URL」の見えるラベルを入力欄の上に足した。読み上げ名は従来の `aria-label` のまま（`getByLabel` の既存の検査は変わらない）。
+
+**Q-22（`sprint12h-pr2`）のフォーカスの輪**: 入力欄のフォーカスは、主色の 2px の枠（縁 1px＋内側 1px）を足した上で、キーボードのフォーカスの輪（3px・各画面の規則）をそのまま残した（輪を消すと Q-22 が落ちる。弱めない）。

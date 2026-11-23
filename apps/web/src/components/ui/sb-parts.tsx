@@ -269,7 +269,7 @@ export function TextField({ id, label, hint, error, requiredMark, className, ...
       </label>
       <input {...rest} id={id} className={cx("sb-input", className)} aria-invalid={error ? true : undefined} aria-describedby={describedBy} />
       {error ? (
-        <p id={errorId} className="sb-field-error" data-testid={`${id}-error`}>
+        <p id={errorId} data-note="" className="sb-field-error" data-testid={`${id}-error`}>
           <FieldErrorMark />
           <span>{error}</span>
         </p>

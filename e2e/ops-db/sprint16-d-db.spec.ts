@@ -34,7 +34,9 @@ test.beforeAll(async () => {
   const plan = await manager.post("/api/ops/plans", { data: { title: `入力欄の確認 ${stamp}`, aircraftId, pilotId: me.pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
   expect(plan.status(), await plan.text()).toBe(201);
   planId = ((await plan.json()) as { id: string }).id;
-  const fl = await manager.post("/api/ops/flights", { data: { aircraftId, pilotId: me.pilotId, purpose: "空撮", takeoffPlace: "米子市日吉津 本社", landingPlace: "米子市日吉津 本社", safetyIssue: false, takeoffAt: `${DAY}T09:00`, landingAt: `${DAY}T09:25` } });
+  // 同じ操縦者の飛行記録は時間帯が重ならないようにする（繰り返し実行で 409 overlap にならないよう、日を乱数で選ぶ）
+  const fday = new Date(Date.UTC(2026, 0, 1) + (Number.parseInt(randomUUID().slice(0, 6), 16) % 330) * 86_400_000).toISOString().slice(0, 10);
+  const fl = await manager.post("/api/ops/flights", { data: { aircraftId, pilotId: me.pilotId, purpose: "空撮", takeoffPlace: "米子市日吉津 本社", landingPlace: "米子市日吉津 本社", safetyIssue: false, takeoffAt: `${fday}T09:00`, landingAt: `${fday}T09:25` } });
   expect(fl.status(), await fl.text()).toBe(201);
   flightId = ((await fl.json()) as { id: string }).id;
   await pilot.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T12:00`, kind: "takeoff" } });
