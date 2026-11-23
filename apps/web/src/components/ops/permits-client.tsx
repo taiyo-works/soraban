@@ -77,6 +77,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 const rowClass =
   "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
 const box = `${checkboxClass} mt-0.5`;
+const radio = "sb-radio mt-0.5";
 
 /** 登録・訂正のフォーム。訂正では reason と expectedVersion を送る。 */
 export function PermitForm({
@@ -246,7 +247,7 @@ export function PermitForm({
             const disabled = val === "nationwide" && (v.coverage === "individual" || hasAirport);
             return (
               <label key={val} className={`${rowClass} ${disabled ? "opacity-50" : ""}`}>
-                <input type="radio" name="place-type" className={box} checked={v.placeType === val} disabled={disabled} onChange={() => set("placeType", val)} data-testid={`permit-place-${val}`} />
+                <input type="radio" name="place-type" className={radio} checked={v.placeType === val} disabled={disabled} onChange={() => set("placeType", val)} data-testid={`permit-place-${val}`} />
                 {label}
               </label>
             );
@@ -390,11 +391,11 @@ function ScopePicker({
       <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">{title}</legend>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         <label className={rowClass}>
-          <input type="radio" name={`${testId}-type`} className={box} checked={type === "any"} onChange={() => onType("any")} data-testid={`${testId}-any`} />
+          <input type="radio" name={`${testId}-type`} className={radio} checked={type === "any"} onChange={() => onType("any")} data-testid={`${testId}-any`} />
           限定しない
         </label>
         <label className={rowClass}>
-          <input type="radio" name={`${testId}-type`} className={box} checked={type === "listed"} onChange={() => onType("listed")} data-testid={`${testId}-listed`} />
+          <input type="radio" name={`${testId}-type`} className={radio} checked={type === "listed"} onChange={() => onType("listed")} data-testid={`${testId}-listed`} />
           選ぶ
         </label>
       </div>

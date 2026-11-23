@@ -70,9 +70,7 @@ html:has(.ops-v2) body {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
 }
-.ds.ops-v2 :is(input, select, textarea):focus-visible {
-  outline-offset: 0;
-}
+/* 輪は全部品で要素から 3px 離す（design-system.md「オフセット 3px」、soraban-ui.css の .sb-input と同じ）。入力欄だけ offset 0 にする規則は特異性で効いておらず、二重の線に見えるため置かずに 3px を正とした（16-D 差し戻し 1） */
 .ds.ops-v2 ::selection {
   background: var(--sb-mark-bg);
   color: var(--sb-ink);

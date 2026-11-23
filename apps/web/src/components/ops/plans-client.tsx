@@ -428,7 +428,7 @@ export function PlanForm({
         <Field label="場所の名称" required error={errors["placeName"]} hint="100 文字以内">
           <input className={`${inputClass} min-h-12`} value={v.placeName} onChange={(e) => set("placeName", e.target.value)} data-testid="plan-place-name" />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
           <Field label="緯度" required error={errors["latitude"]} hint="世界測地系（WGS84）、小数 6 桁まで">
             <input
               inputMode="decimal"
@@ -801,7 +801,7 @@ export function PlaceForm({ initial }: { readonly initial?: PlaceFormValue }) {
       <Field label="住所" required={false} error={errors["addressText"]} hint="200 文字以内。表示用の文字です。座標とは別に保存します。">
         <input className={`${inputClass} min-h-12`} value={v.addressText} onChange={set("addressText")} data-testid="place-address" />
       </Field>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
         <Field label="緯度" required error={errors["latitude"]} hint="世界測地系（WGS84）、小数 6 桁まで">
           <input inputMode="decimal" className={`${inputClass} min-h-12 sb-num tnum`} value={v.lat} onChange={set("lat")} data-testid="place-lat" />
         </Field>

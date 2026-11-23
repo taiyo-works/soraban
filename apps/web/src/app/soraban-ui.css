@@ -639,6 +639,11 @@ button.sb-state::after {
   font-weight: 700;
   line-height: 1.6;
 }
+/* 文の最小幅（word-break: auto-phrase で「入力してください」が割れない幅）が列幅を超えても、横にあふれさせず折り返す（16-D 差し戻し 1） */
+.sb-field-error > span:not(.sb-field-error-mark) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .sb-field-error-mark {
   flex: none;
   width: 18px;
