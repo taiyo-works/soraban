@@ -31,23 +31,36 @@ basis-permits-empty
 basis-plan-link
 basis-procedures
 boundary-registration
+cat-arrow-list
+cat-arrow-none-card
+cat-arrow-with-card
 cat-art-section
 cat-band
 cat-band-section
 cat-block
 cat-block-soft
+cat-bottomnav
+cat-bottomnav-sec
 cat-buttons
 cat-card
 cat-card-list
 cat-card-state
 cat-cards
+cat-check-disabled
+cat-check-off
+cat-check-on
+cat-check-set
 cat-checks-section
+cat-choices
 cat-danger
 cat-disabled
 cat-disabled-reason
+cat-dot-list
 cat-f-check
 cat-f-check-submit
+cat-f-disabled
 cat-f-error
+cat-f-focus
 cat-field
 cat-field-note
 cat-forms
@@ -55,6 +68,9 @@ cat-grounds
 cat-input
 cat-inputs
 cat-inputs-section
+cat-lines
+cat-logo
+cat-logo-list
 cat-nav
 cat-normal
 cat-opx-danger
@@ -63,18 +79,54 @@ cat-opx-disabled-reason
 cat-opx-primary
 cat-opx-secondary
 cat-opx-text
-cat-orange
+cat-order
+cat-order-list
+cat-prep
+cat-prep-body
+cat-prep-cards
+cat-prep-rejudge
+cat-prep-reload
+cat-prep-rows
+cat-prep-rows-inspection
+cat-prep-rows-report
+cat-prep-rule
+cat-prep-verdicts
+cat-prim-face
+cat-prim-focus
+cat-prim-press
+cat-prim-soft
 cat-primary
+cat-primary-chips
+cat-primary-use
+cat-progress
+cat-progress-sample
+cat-radio-disabled
+cat-radio-no
+cat-radio-off
+cat-radio-on
+cat-radio-set
 cat-secondary
 cat-selected
 cat-sheet-open
 cat-sheet-open-peek
 cat-sheet-section
 cat-skeleton-section
+cat-state-labels
 cat-state-link
 cat-states-result
 cat-states-section
+cat-status
+cat-status-list
 cat-text
+cat-type
+cat-type-body
+cat-type-card
+cat-type-colors
+cat-type-list
+cat-type-note
+cat-type-number
+cat-type-section
+cat-type-title
 cat-veil
 cat-veil-toggle
 cat-verdict
@@ -739,26 +791,43 @@ prop: basis-permits-empty
 prop: basis-plan-link
 prop: basis-procedures
 prop: boundary-registration
+prop: cat-arrow-list
+prop: cat-arrow-none
+prop: cat-arrow-none-card
+prop: cat-arrow-with
+prop: cat-arrow-with-card
 prop: cat-art-section
 prop: cat-band
 prop: cat-band-section
 prop: cat-block
 prop: cat-block-soft
+prop: cat-bottomnav
+prop: cat-bottomnav-sec
 prop: cat-buttons
 prop: cat-card
 prop: cat-card-list
 prop: cat-card-state
 prop: cat-cards
+prop: cat-check-disabled
+prop: cat-check-off
+prop: cat-check-on
+prop: cat-check-set
 prop: cat-checks-section
 prop: cat-chk-group
+prop: cat-choices
 prop: cat-danger
 prop: cat-disabled
 prop: cat-disabled-reason
+prop: cat-dot-list
+prop: cat-dot-same
+prop: cat-dot-shapes
 prop: cat-empty
 prop: cat-error
 prop: cat-f-check
 prop: cat-f-check-submit
+prop: cat-f-disabled
 prop: cat-f-error
+prop: cat-f-focus
 prop: cat-field
 prop: cat-field-note
 prop: cat-forms
@@ -766,6 +835,11 @@ prop: cat-grounds
 prop: cat-input
 prop: cat-inputs
 prop: cat-inputs-section
+prop: cat-lines
+prop: cat-logo
+prop: cat-logo-ink
+prop: cat-logo-list
+prop: cat-logo-primary
 prop: cat-nav
 prop: cat-normal
 prop: cat-opx-danger
@@ -774,8 +848,36 @@ prop: cat-opx-disabled-reason
 prop: cat-opx-primary
 prop: cat-opx-secondary
 prop: cat-opx-text
-prop: cat-orange
+prop: cat-order
+prop: cat-order-adopted
+prop: cat-order-adopted-list
+prop: cat-order-direction
+prop: cat-order-direction-list
+prop: cat-order-list
+prop: cat-prep
+prop: cat-prep-body
+prop: cat-prep-cards
+prop: cat-prep-rejudge
+prop: cat-prep-reload
+prop: cat-prep-rows
+prop: cat-prep-rows-inspection
+prop: cat-prep-rows-report
+prop: cat-prep-rule
+prop: cat-prep-verdicts
+prop: cat-prim-face
+prop: cat-prim-focus
+prop: cat-prim-press
+prop: cat-prim-soft
 prop: cat-primary
+prop: cat-primary-chips
+prop: cat-primary-use
+prop: cat-progress
+prop: cat-progress-sample
+prop: cat-radio-disabled
+prop: cat-radio-no
+prop: cat-radio-off
+prop: cat-radio-on
+prop: cat-radio-set
 prop: cat-secondary
 prop: cat-selected
 prop: cat-sheet-open
@@ -786,11 +888,23 @@ prop: cat-skeleton-section
 prop: cat-state-danger
 prop: cat-state-flying
 prop: cat-state-info
+prop: cat-state-labels
 prop: cat-state-link
 prop: cat-state-safe
 prop: cat-states-result
 prop: cat-states-section
+prop: cat-status
+prop: cat-status-list
 prop: cat-text
+prop: cat-type
+prop: cat-type-body
+prop: cat-type-card
+prop: cat-type-colors
+prop: cat-type-list
+prop: cat-type-note
+prop: cat-type-number
+prop: cat-type-section
+prop: cat-type-title
 prop: cat-veil
 prop: cat-veil-toggle
 prop: cat-verdict
@@ -1849,6 +1963,7 @@ workspace-tabs
 式: `${testId}-shrink`
 式: `${testId}-source`
 式: `${testId}-stale`
+式: `${testId}-tag`
 式: `${testId}-text`
 式: `${testId}-time`
 式: `${testId}-title`
@@ -1860,7 +1975,13 @@ workspace-tabs
 式: `${testPrefix}-memo`
 式: `${testPrefix}-number-unavailable`
 式: `airspace-${flag}`
+式: `cat-bnav-${it.key}`
 式: `cat-chk-${i}`
+式: `cat-dot-same-${l.tone}`
+式: `cat-dot-shapes-${l.tone}`
+式: `cat-prep-card-${id}`
+式: `cat-prep-v-${s.id}`
+式: `cat-status-${s.key}`
 式: `field-docs-basis-${d.key}`
 式: `field-docs-confirm-${d.key}`
 式: `field-docs-item-${d.key}`

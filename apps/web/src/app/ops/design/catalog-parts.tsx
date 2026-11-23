@@ -29,6 +29,8 @@ export function CatalogInputs() {
         </PillButton>
       </div>
       <TextField id="cat-f-error" label="機体の登録番号（エラーの見本）" defaultValue="" error="登録番号は 12 桁で入力してください。" data-testid="cat-f-error" />
+      <TextField id="cat-f-focus" label="フォーカス中の見本（実際は Tab で出る）" hint="主色の輪 3px・離して 1 本だけ" className="sbx-focused" data-testid="cat-f-focus" />
+      <TextField id="cat-f-disabled" label="機体の名前（無効の見本）" disabled defaultValue="" data-testid="cat-f-disabled" />
     </div>
   );
 }
@@ -90,6 +92,48 @@ export function CatalogStates() {
           {msg}
         </p>
       </div>
+    </div>
+  );
+}
+
+/** チェック（複数選択・32px の丸）とラジオ（単一選択・24px の輪）を並べる（16-D の後回し）。行全体が <label>。素の input の状態は端末の標準で動く。 */
+export function CatalogChoices() {
+  return (
+    <div className="sbx-grid" data-testid="cat-choices">
+      <fieldset className="sbx-choice-set" data-testid="cat-check-set">
+        <legend className="sbx-choice-legend">チェック（複数選択・sb-check・32px）</legend>
+        <label className="sb-check-row sbx-choice">
+          <input type="checkbox" className="sb-check" data-testid="cat-check-off" />
+          <span>未チェック</span>
+        </label>
+        <label className="sb-check-row sbx-choice">
+          <input type="checkbox" className="sb-check" defaultChecked data-testid="cat-check-on" />
+          <span>チェック済み（記号つき）</span>
+        </label>
+        <label className="sb-check-row sbx-choice">
+          <input type="checkbox" className="sb-check" disabled data-testid="cat-check-disabled" />
+          <span>無効</span>
+        </label>
+      </fieldset>
+      <fieldset className="sbx-choice-set" data-testid="cat-radio-set">
+        <legend className="sbx-choice-legend">ラジオ（単一選択・sb-radio・24px）</legend>
+        <label className="sb-check-row sbx-choice">
+          <input type="radio" name="cat-radio-demo" className="sb-radio" data-testid="cat-radio-off" />
+          <span>未選択</span>
+        </label>
+        <label className="sb-check-row sbx-choice">
+          <input type="radio" name="cat-radio-demo" className="sb-radio" defaultChecked data-testid="cat-radio-on" />
+          <span>選択（内側に点）</span>
+        </label>
+        <label className="sb-check-row sbx-choice">
+          <input type="radio" name="cat-radio-demo" className="sb-radio sb-radio-no" data-testid="cat-radio-no" />
+          <span>異常あり（選ぶと危険の印の色）</span>
+        </label>
+        <label className="sb-check-row sbx-choice">
+          <input type="radio" name="cat-radio-off-group" className="sb-radio" disabled data-testid="cat-radio-disabled" />
+          <span>無効</span>
+        </label>
+      </fieldset>
     </div>
   );
 }

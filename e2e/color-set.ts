@@ -70,8 +70,13 @@ export const collectColorViolations = async (page: Page, rootSelector: string, e
     };
     const out: Violation[] = [];
     const seen = new Set<string>();
-    const note = (el: Element, prop: string, css: string): void => {
-      const c = rgba(css);
+    // 影の色は、キャンバスを通さず文字列の数値を直接読む（薄い影 rgba(…, 0.08) は、キャンバスの 8 ビットの往復で RGB がずれて、墨の影が集合の外に見える。16-E で下部ナビの見本の影で判明）
+    const direct = (css: string): C | null => {
+      const m = css.match(/[\d.]+/g)?.map(Number);
+      return m && m.length >= 3 ? [m[0]!, m[1]!, m[2]!, m[3] ?? 1] : null;
+    };
+    const note = (el: Element, prop: string, css: string, raw = false): void => {
+      const c = raw ? direct(css) : rgba(css);
       if (ok(c)) return;
       const where = `${el.closest("[data-testid]")?.getAttribute("data-testid") ?? ""}<${el.tagName.toLowerCase()}${typeof (el as HTMLElement).className === "string" && (el as HTMLElement).className ? "." + (el as HTMLElement).className.split(/\s+/)[0] : ""}>`;
       const key = `${where}|${prop}|${css}`;
@@ -102,7 +107,7 @@ export const collectColorViolations = async (page: Page, rootSelector: string, e
         if (!bb || (bb.width > 0 && bb.height > 0)) note(el, "fill", cs.fill);
         if (cs.stroke !== "none") note(el, "stroke", cs.stroke);
       }
-      if (cs.boxShadow !== "none") for (const m of cs.boxShadow.matchAll(/(rgba?\([^)]*\))/g)) note(el, "box-shadow", m[1]!);
+      if (cs.boxShadow !== "none") for (const m of cs.boxShadow.matchAll(/(rgba?\([^)]*\))/g)) note(el, "box-shadow", m[1]!, true);
     }
     return out;
   }, [rootSelector, exempt] as const);

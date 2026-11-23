@@ -5,7 +5,8 @@ import { HeroIllustration } from "@/components/hero-illustration";
 import { PillButton, SectionHead, StatusLabel, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { CatalogAttrs } from "./catalog-attrs";
-import { CatalogChecks, CatalogInputs, CatalogSheet, CatalogStates } from "./catalog-parts";
+import { CatalogChecks, CatalogChoices, CatalogInputs, CatalogSheet, CatalogStates } from "./catalog-parts";
+import { BottomNavSample, CardArrowCandidates, DotShapeCandidates, LineChips, LogoCandidates, PrepSection, PrimaryChips, StateKinds, TypeScale, WizardOrder } from "./catalog-specimens";
 
 // デザイン見本 v2（Sprint 16-1。G-1 でユーザーが配色を決める）。認証・DB・外部通信なし。静的な部品の並べだけで、操作の状態は持たない。
 // 設定は URL: ?mode=field（現場の値）／?theme=dark（休眠している暗の確認用）／?veil=1（日差しの模擬：白い膜 rgba(255,255,255,.35)）。
@@ -77,7 +78,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </header>
 
       <section className="sbx-section" aria-labelledby="cat-grounds" data-testid="cat-grounds">
-        <h2 id="cat-grounds">地の三段と文字</h2>
+        <h2 id="cat-grounds">地と面（地の三段・罫・縁）</h2>
         <div className="sbx-grid">
           {GROUNDS.map(([key, label, token]) => (
             <div key={key} className="sbx-ground" data-ground={key}>
@@ -89,11 +90,31 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             </div>
           ))}
         </div>
+        <LineChips />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-type" data-testid="cat-type">
+        <h2 id="cat-type">文字の段</h2>
+        <TypeScale />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-primary-use">
+        <h2 id="cat-primary-use">主色（操作と現在地だけ）</h2>
+        <PrimaryChips />
+        <SectionHead id="cat-primary-head" as="h3" title="見出し（左に墨の太い線だけ）" note="背後の大きな数字はやめた" />
+        <p>
+          <span className="sbx-dot" aria-hidden="true" /> 現在地の印（小さな主色の丸）。
+        </p>
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-status-h" data-testid="cat-status">
+        <h2 id="cat-status-h">状態 5 種と未確認（記号と文字を併用する）</h2>
+        <StateKinds />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-buttons" data-testid="cat-buttons">
         <h2 id="cat-buttons">ボタン 5 種（主・副・文字・危険・無効）</h2>
-        <div className="sbx-row">
+        <div className="sbx-row" data-specimen-group="pill">
           <PillButton variant="primary" data-testid="cat-primary">主ボタン（保存する）</PillButton>
           <PillButton data-testid="cat-secondary">副ボタン</PillButton>
           <PillButton variant="text" data-testid="cat-text">文字ボタン</PillButton>
@@ -101,7 +122,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
           <PillButton disabled aria-describedby="cat-disabled-reason" data-testid="cat-disabled">押せない</PillButton>
         </div>
         <p data-note="" className="sb-disabled-reason" id="cat-disabled-reason" data-testid="cat-disabled-reason">必須の項目がまだ入力されていません。</p>
-        <div className="sbx-row">
+        <div className="sbx-row" data-specimen-group="opx">
           <button type="button" className="opx-btn opx-btn-primary" data-variant="primary" data-testid="cat-opx-primary">運航管理の主ボタン</button>
           <button type="button" className="opx-btn" data-testid="cat-opx-secondary">副ボタン</button>
           <button type="button" className="opx-btn opx-btn-text" data-testid="cat-opx-text">文字ボタン</button>
@@ -113,7 +134,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-cards" data-testid="cat-cards">
-        <h2 id="cat-cards">カード 3 種と状態ラベル</h2>
+        <h2 id="cat-cards">カード 3 種</h2>
         <div className="sbx-grid">
           <div className="sb-card" data-testid="cat-card">
             <strong>通常のカード</strong>
@@ -129,6 +150,12 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <p className="sbx-note">状態の面と、左端 6px の状態の印の色の帯。</p>
           </div>
         </div>
+        <h3 className="sbx-h3">一覧のカードの矢印（G-1 で決める）</h3>
+        <CardArrowCandidates />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-labels-h" data-testid="cat-state-labels">
+        <h2 id="cat-labels-h">状態ラベル</h2>
         <div className="sbx-row">
           <StatusLabel tone="info" testId="cat-state-info">待機中</StatusLabel>
           <StatusLabel tone="flying" testId="cat-state-flying">飛行中</StatusLabel>
@@ -139,6 +166,8 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <span>押せるラベル</span>
           </a>
         </div>
+        <h3 className="sbx-h3">点の形（G-1 で決める）</h3>
+        <DotShapeCandidates />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-forms" data-testid="cat-forms">
@@ -164,8 +193,9 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-checks-h" data-testid="cat-checks-section">
-        <h2 id="cat-checks-h">チェック行と群（完了数/総数・折りたたみ）</h2>
+        <h2 id="cat-checks-h">チェック行と群（完了数/総数・折りたたみ）・チェックとラジオ</h2>
         <CatalogChecks />
+        <CatalogChoices />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-sheet-h" data-testid="cat-sheet-section">
@@ -180,7 +210,9 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
 
       <section className="sbx-section" aria-labelledby="cat-states-h" data-testid="cat-states-section">
         <h2 id="cat-states-h">空の状態と通信エラー</h2>
-        <CatalogStates />
+        <div data-specimen-group="empty">
+          <CatalogStates />
+        </div>
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-verdict" data-testid="cat-verdict">
@@ -199,12 +231,26 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </div>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-orange">
-        <h2 id="cat-primary-use">主色の使いどころ（操作と現在地だけ）</h2>
-        <SectionHead id="cat-primary-head" as="h3" title="見出し（左に墨の太い線だけ）" note="背後の大きな数字はやめた" />
-        <p>
-          <span className="sbx-dot" aria-hidden="true" /> 現在地の印（小さな主色の丸）。
-        </p>
+      <section className="sbx-section" aria-labelledby="cat-logo-h" data-testid="cat-logo">
+        <h2 id="cat-logo-h">ロゴの丸（G-1 で決める）</h2>
+        <LogoCandidates />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-order-h" data-testid="cat-order">
+        <h2 id="cat-order-h">計画作成の段の順（G-1 で決める）</h2>
+        <p className="sbx-note">現行の計画作成は、段に分けない 1 画面の縦長フォームです。下の 2 つはどちらも案で、見本の中だけに置きます。</p>
+        <WizardOrder />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-bottomnav-h" data-testid="cat-bottomnav-sec" id="cat-bottomnav-sec">
+        <h2 id="cat-bottomnav-h">下部ナビ（4 項目の見本）</h2>
+        <BottomNavSample />
+        <p className="sbx-note">高さ 64 以上・文字 14 以上。現在地は主色のアイコンと文字・薄い主色の面・aria-current。影は浮くものだけが持つ（現場では無し）。</p>
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-prep-h" data-testid="cat-prep">
+        <h2 id="cat-prep-h">準備カードの文言案（§8 の全状態）</h2>
+        <PrepSection />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-band" data-testid="cat-band-section">

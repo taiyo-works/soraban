@@ -2,3 +2,4 @@
 2026-11-02T02:56:25.866Z	1877	Sprint 16-1: 旧い見本（components/ui/catalog）の削除により、その見本だけが持つ 265 件を除く（一覧は sprint-16-removed-catalog-testids.txt）。実画面の識別子は消えていない
 2026-11-23T07:35:48.408Z	1905	Sprint 16-C: 見本の部品 1（ボタン 5 種・無効の理由・カード 3 種・状態ラベル）の cat-* を追加
 2026-11-23T14:17:48.016Z	1946	16-D：見本に入力欄・チェック行・シート・スケルトン・空の状態・通信エラーの識別子（cat-f-*・cat-chk-*・cat-sheet-*・sheet*・cat-skeleton・cat-empty・cat-error ほか）と、運航管理の読み込み中（ops-loading*）を追加。消えたものは無い
+2026-11-23T23:31:16.652Z	2067	16-E：見本の節 cat-orange を cat-primary-use に置き換え（橙の名前を残さない。K-13）。cat-type・cat-primary-use・cat-status・cat-state-labels・cat-logo・cat-order・cat-bottomnav*・cat-prep* ほか、並べ見本・準備カード・下部ナビの見本の識別子を追加
