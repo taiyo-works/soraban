@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { PROCEDURE_CHECK_LABEL, PROCEDURE_KIND_DISABLED_MESSAGE, PROCEDURE_NONE_NOTE, PROCEDURE_RECORD_NOTE, PROCEDURE_RECORD_STALE_LABEL, type ProcedureRecordKind } from "@soraban/dips";
 import type { ProcedureRecordDto, ProcedureRecordSummaryDto } from "@/server/ops/report-dto";
-import { fieldErrorsOf, Field, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
+import { fieldErrorsOf, Field, FieldError, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField } from "./report-parts";
 import { buttonDangerClass, buttonPrimaryClass, Badge, type Tone } from "./ui";
 
@@ -107,18 +107,15 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
               type="checkbox"
               className={confirmBoxClass}
               checked={checks[k] === true}
+              aria-invalid={errors[`checks.${k}`] ? true : undefined}
+              aria-describedby={CHECKS[kind].some((c) => errors[`checks.${c}`]) ? `procedure-err-checks-${kind}` : undefined}
               onChange={(e) => setChecks((s) => ({ ...s, [k]: e.target.checked }))}
               data-testid={`procedure-check-${kind}-${k}`}
             />
             <span>{PROCEDURE_CHECK_LABEL[k]}</span>
           </label>
         ))}
-        {CHECKS[kind].some((k) => errors[`checks.${k}`]) ? (
-          <span role="alert" className="text-sm text-sb-v-no-fg">
-            <span aria-hidden>! </span>
-            すべての確認にチェックを入れてください。
-          </span>
-        ) : null}
+        <FieldError id={`procedure-err-checks-${kind}`} message={CHECKS[kind].some((k) => errors[`checks.${k}`]) ? "すべての確認にチェックを入れてください。" : undefined} />
       </fieldset>
       <FormError message={message} />
       <div>

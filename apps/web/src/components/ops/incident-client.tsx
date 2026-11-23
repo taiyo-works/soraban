@@ -45,7 +45,7 @@ import {
 } from "@/lib/ops-incident";
 import { newRequestId } from "./drafts";
 import { IncidentGuidanceView, IncidentReportRecordNotice } from "./incident-ui";
-import { Field, FormError, fieldErrorsOf, inputClass, reloadAfterChange, send, SubmitRow, useErrorFocus, type ApiResult } from "./ops-client";
+import { Field, FieldError, FormError, fieldErrorsOf, inputClass, reloadAfterChange, send, SubmitRow, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, JstDateTimeField, joinJst, splitJst } from "./report-parts";
 import { buttonPrimaryClass, buttonDangerClass, VERSION_NOTICE_TARGET } from "./ui";
 
@@ -87,14 +87,6 @@ export type IncidentFormInitial = {
   readonly followUpOn: string | null;
 };
 
-const ErrorText = ({ message, testId }: { readonly message?: string; readonly testId?: string }) =>
-  message ? (
-    <span role="alert" className="text-sm font-bold leading-relaxed text-sb-v-no-fg" data-testid={testId}>
-      <span aria-hidden>! </span>
-      {message}
-    </span>
-  ) : null;
-
 /** 「ある／ない／わからない」の選択（初期値なし。色だけで区別しない）。 */
 function YesNoUnknownField({
   name,
@@ -112,7 +104,7 @@ function YesNoUnknownField({
   readonly testIdPrefix: string;
 }) {
   return (
-    <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={error ? true : undefined}>
+    <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={error ? true : undefined} aria-describedby={error ? `${testIdPrefix}-err` : undefined}>
       <legend className={legendClass}>
         {legend}
         <span aria-hidden className="opx-required">必須</span>
@@ -125,7 +117,7 @@ function YesNoUnknownField({
           </label>
         ))}
       </div>
-      <ErrorText message={error} />
+      <FieldError id={`${testIdPrefix}-err`} message={error} />
     </fieldset>
   );
 }
@@ -270,7 +262,7 @@ export function IncidentForm({
   return (
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-8" aria-label={mode === "create" ? "事故・ヒヤリハットの記録" : "事故・ヒヤリハットの訂正"} data-testid="incident-form" noValidate>
       {/* 区分（利用者が選ぶ。法令上の区分ではない） */}
-      <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["kind"] ? true : undefined}>
+      <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["kind"] ? true : undefined} aria-describedby={errors["kind"] ? "incident-err-kind" : undefined}>
         <legend className={legendClass}>
           区分
           <span aria-hidden className="opx-required">必須</span>
@@ -286,7 +278,7 @@ export function IncidentForm({
         <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="incident-kind-notice">
           {INCIDENT_KIND_NOTICE}
         </p>
-        <ErrorText message={errors["kind"]} />
+        <FieldError id="incident-err-kind" message={errors["kind"]} />
       </fieldset>
 
       <JstDateTimeField label="起きた日時" date={date} time={time} onDate={setDate} onTime={setTime} error={errors["occurredAt"]} testId="incident-occurred" />
@@ -341,7 +333,7 @@ export function IncidentForm({
       </fieldset>
 
       {/* 事象の類型（複数選択。初期値なし）。目安に効く類型・事実の類型・排他の 2 つを間を空けて分ける */}
-      <fieldset className="flex min-w-0 flex-col gap-3" aria-invalid={errors["eventTypes"] ? true : undefined} data-testid="incident-event-types">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-invalid={errors["eventTypes"] ? true : undefined} aria-describedby={errors["eventTypes"] ? "incident-err-eventTypes" : undefined} data-testid="incident-event-types">
         <legend className={legendClass}>
           起きた事象の類型
           <span aria-hidden className="opx-required">必須</span>
@@ -360,7 +352,7 @@ export function IncidentForm({
         <ul className="mt-5 flex flex-col gap-2 border-t border-sb-rule pt-5" data-testid="incident-event-types-exclusive">
           {exclusiveOpts.map(typeOption)}
         </ul>
-        <ErrorText message={errors["eventTypes"]} testId="incident-event-types-error" />
+        <FieldError id="incident-err-eventTypes" message={errors["eventTypes"]} testId="incident-event-types-error" />
       </fieldset>
 
       {/* 入力中の目安（保存時にサーバーが再計算する） */}
@@ -383,7 +375,7 @@ export function IncidentForm({
       ) : null}
       <YesNoUnknownField name="incident-damage" legend={AIRCRAFT_DAMAGE_LABEL} value={aircraftDamage} onChange={setAircraftDamage} error={errors["aircraftDamage"]} testIdPrefix="incident-damage" />
 
-      <fieldset className="flex min-w-0 flex-col gap-2">
+      <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["contactsMade"] ? true : undefined} aria-describedby={errors["contactsMade"] ? "incident-err-contactsMade" : undefined}>
         <legend className={legendClass}>連絡した先（任意）</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {INCIDENT_CONTACTS.map((c) => (
@@ -399,7 +391,7 @@ export function IncidentForm({
             </label>
           ))}
         </div>
-        <ErrorText message={errors["contactsMade"]} />
+        <FieldError id="incident-err-contactsMade" message={errors["contactsMade"]} />
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-4">
@@ -547,7 +539,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" aria-label="報告の結果の記録" data-testid="incident-report-form">
       <IncidentReportRecordNotice />
       <JstDateTimeField label="報告した日時" date={date} time={time} onDate={setDate} onTime={setTime} error={errors["doneAt"]} testId="incident-report-done" />
-      <fieldset className="flex min-w-0 flex-col gap-2">
+      <fieldset className="flex min-w-0 flex-col gap-2" aria-invalid={errors["channel"] ? true : undefined} aria-describedby={errors["channel"] ? "incident-report-err-channel" : undefined}>
         <legend className={legendClass}>報告の方法</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {(["dips", "other"] as const).map((c) => (
@@ -557,7 +549,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
             </label>
           ))}
         </div>
-        <ErrorText message={errors["channel"]} />
+        <FieldError id="incident-report-err-channel" message={errors["channel"]} />
       </fieldset>
       {channel === "other" ? (
         <Field label="その他の方法" required error={errors["channelNote"]} hint="例：電子メール（報告要領に定める方法）。相手の氏名は書かないでください。">
@@ -575,10 +567,10 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
         <textarea className={inputClass} rows={2} value={note} maxLength={INCIDENT_LIMITS.reportNote} onChange={(e) => setNote(e.target.value)} data-testid="incident-report-note" />
       </Field>
       <label className={confirmRowClass}>
-        <input type="checkbox" className={confirmBoxClass} checked={checked} onChange={(e) => setChecked(e.target.checked)} data-testid="incident-report-check" />
+        <input type="checkbox" className={confirmBoxClass} checked={checked} aria-invalid={errors["checks"] ? true : undefined} aria-describedby={errors["checks"] ? "incident-report-err-checks" : undefined} onChange={(e) => setChecked(e.target.checked)} data-testid="incident-report-check" />
         <span>{INCIDENT_REPORT_CHECK_LABEL.reportCompleted}</span>
       </label>
-      <ErrorText message={errors["checks"]} />
+      <FieldError id="incident-report-err-checks" message={errors["checks"]} />
       <SubmitRow message={message}>
         <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
           報告の結果を記録する
@@ -627,10 +619,10 @@ export function IncidentConsultedForm({ id, defaultDoneAt }: { readonly id: stri
         <textarea className={inputClass} rows={3} value={note} maxLength={INCIDENT_LIMITS.reportNote} onChange={(e) => setNote(e.target.value)} data-testid="incident-consult-note" />
       </Field>
       <label className={confirmRowClass}>
-        <input type="checkbox" className={confirmBoxClass} checked={checked} onChange={(e) => setChecked(e.target.checked)} data-testid="incident-consult-check" />
+        <input type="checkbox" className={confirmBoxClass} checked={checked} aria-invalid={errors["checks"] ? true : undefined} aria-describedby={errors["checks"] ? "incident-consult-err-checks" : undefined} onChange={(e) => setChecked(e.target.checked)} data-testid="incident-consult-check" />
         <span>{INCIDENT_REPORT_CHECK_LABEL.consultationDone}</span>
       </label>
-      <ErrorText message={errors["checks"]} />
+      <FieldError id="incident-consult-err-checks" message={errors["checks"]} />
       <SubmitRow message={message}>
         <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
           要否を確かめたことを記録する

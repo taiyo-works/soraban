@@ -111,8 +111,9 @@ function ChoiceGroup({
   /** ラジオのまとまりの読み上げ名。渡すと role="radiogroup" にし、誤りのときにフォーカスを移せるようにする。 */
   readonly radiogroupLabel?: string;
 }) {
+  const errId = `${useId()}-err`;
   return (
-    <fieldset className="flex min-w-0 flex-col gap-2">
+    <fieldset className="flex min-w-0 flex-col gap-2" aria-describedby={error ? errId : undefined}>
       <legend className="mb-1.5 flex items-center gap-2 text-sm text-sb-ink">
         <span>{legend}</span>
         <RequiredTag required={required} />
@@ -122,12 +123,12 @@ function ChoiceGroup({
           columns === 2 ? "grid-cols-2 sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
         }`}
         {...(radiogroupLabel
-          ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined }
+          ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined, "aria-describedby": error ? errId : undefined }
           : {})}
       >
         {children}
       </div>
-      <FieldError message={error} />
+      <FieldError id={errId} message={error} />
     </fieldset>
   );
 }
@@ -341,7 +342,7 @@ function PlaceInput({
             <span className="text-sm text-sb-ink-3">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
           </div>
         </details>
-        <FieldError message={errors[keys.acc]} />
+        <FieldError id={`place-err-${keys.acc}`} message={errors[keys.acc]} />
         <span className="text-sm leading-relaxed text-sb-ink-3">
           位置は「保存」を押したときに限り、飛行日誌の記載事項（場所）として送られます。位置を続けて記録することはありません。
         </span>
@@ -1105,7 +1106,7 @@ export function FlightForm({
         <Field label="経由地" required={false} error={errors["waypoints"]} hint="電源を切らずに経由した場所（200 文字以内）">
           <input className={inputClass} value={v.waypoints} onChange={(e) => set("waypoints", e.target.value)} />
         </Field>
-        <fieldset className="flex min-w-0 flex-col gap-3">
+        <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["specificFlightTypes"] ? "record-err-specificFlightTypes" : undefined}>
           <legend className="mb-1 text-sm text-sb-ink">
             特定飛行の形態
             <span className="ml-2 text-sm text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
@@ -1133,7 +1134,7 @@ export function FlightForm({
               </div>
             </div>
           ))}
-          <FieldError message={errors["specificFlightTypes"]} />
+          <FieldError id="record-err-specificFlightTypes" message={errors["specificFlightTypes"]} />
         </fieldset>
       </Step>
 
@@ -1596,6 +1597,7 @@ export function InspectionForm({
                     tabIndex={-1}
                     aria-label={`${it.label}の結果`}
                     aria-invalid={resultError ? true : undefined}
+                    aria-describedby={resultError ? `inspection-err-result-${it.key}` : undefined}
                   >
                     {(["normal", "abnormal"] as const).map((r) => (
                       <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem]`}>
@@ -1611,7 +1613,7 @@ export function InspectionForm({
                     ))}
                   </div>
                 </div>
-                <FieldError message={resultError} />
+                <FieldError id={`inspection-err-result-${it.key}`} message={resultError} />
                 {abnormal || st.note || noteError ? (
                   <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
                     <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(it.key, { note: e.target.value })} />

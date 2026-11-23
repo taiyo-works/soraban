@@ -219,3 +219,82 @@ test.describe("追加 1：文字 200%（390・430）の入れ物の切れ（16-D
     });
   }
 });
+
+// D-1（全入力欄の条件）：項目エラーは、エラーの id が入力欄（単独の入力・チェック・ラジオのまとまり・fieldset）の aria-describedby に入っている。role は alert でない。
+const expectErrorsLinked = async (page: Page, label: string, minErrors = 1): Promise<void> => {
+  const r = await page.evaluate(() => {
+    const errs = Array.from(document.querySelectorAll<HTMLElement>("main .sb-field-error")).filter((e) => e.getBoundingClientRect().width > 0 && (e.textContent ?? "").trim().length > 0);
+    return errs.map((e) => ({
+      id: e.id,
+      text: (e.textContent ?? "").trim().slice(0, 24),
+      role: e.getAttribute("role"),
+      inAlert: !!e.closest('[role="alert"]'),
+      svg: e.querySelectorAll("svg").length,
+      linked: e.id !== "" && Array.from(document.querySelectorAll("[aria-describedby]")).some((h) => (h.getAttribute("aria-describedby") ?? "").split(/\s+/).includes(e.id)),
+    }));
+  });
+  expect(r.length, `${label}: 項目エラーが出ていない`).toBeGreaterThanOrEqual(minErrors);
+  for (const e of r) {
+    expect(e.id, `${label}「${e.text}」: id がない`).not.toBe("");
+    expect(e.linked, `${label}「${e.text}」: aria-describedby で結ばれていない`).toBe(true);
+    expect(e.role, `${label}「${e.text}」`).toBeNull();
+    expect(e.inAlert, `${label}「${e.text}」: alert の中`).toBe(false);
+    expect(e.svg, `${label}「${e.text}」: 記号がない`).toBe(1);
+  }
+};
+
+test.describe("D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー）", () => {
+  test("事故・ヒヤリハットの記録：区分・類型・ある/ない/わからないのエラーが fieldset に結ばれる", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto("/ops/incidents/new");
+    await expect(page.getByTestId("incident-form")).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.getByTestId("incident-submit").click();
+    await expect(page.locator("main .sb-field-error").first()).toBeVisible();
+    await expectErrorsLinked(page, "事故の記録", 3);
+    await expect(page.getByTestId("incident-event-types-error")).toBeVisible();
+  });
+
+  test("許可・承認の登録：種類・場所のエラーが fieldset に結ばれる", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto("/ops/permits/new");
+    await expect(page.getByTestId("permit-form")).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.getByTestId("permit-submit").click();
+    await expect(page.locator("main .sb-field-error").first()).toBeVisible();
+    await expectErrorsLinked(page, "許可の登録", 2);
+  });
+
+  test("通報の作業台：控えの記録の確認チェックのエラーがチェックに結ばれる", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    // 控えの記録の入力は、確認を依頼した（有効な）計画にだけ出る。別の計画を作って依頼する（時間帯が重ならない日を選ぶ）
+    const pilot = await pwRequest.newContext({ baseURL: BASE });
+    await signIn(pilot, seeded("a-pilot"));
+    const pilotId = ((await (await pilot.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+    await pilot.dispose();
+    const day = new Date(Date.UTC(2026, 6, 1) + (Number.parseInt(randomUUID().slice(0, 6), 16) % 150) * 86_400_000).toISOString().slice(0, 10);
+    const created = await page.request.post("/api/ops/plans", { data: { title: `控えの確認 ${stamp}`, aircraftId, pilotId, plannedStartAt: `${day}T10:00`, durationMinutes: 30, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
+    expect(created.status(), await created.text()).toBe(201);
+    const plan = (await created.json()) as { id: string; version: number };
+    const req = await page.request.post(`/api/ops/plans/${plan.id}/request-confirmation`, { data: { expectedVersion: plan.version } });
+    expect(req.status(), await req.text()).toBe(200);
+    await gotoPlan(page, `/ops/plans/${plan.id}/report`);
+    await openReportFolds(page);
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.getByTestId("record-submit").click();
+    await expect(page.getByTestId("report-record-form").locator(".sb-field-error").first()).toBeVisible();
+    await expectErrorsLinked(page, "通報の控えの記録", 2);
+    const described = await page.getByTestId("record-confirm-done").getAttribute("aria-describedby");
+    expect(described).toContain("record-err-confirmedDipsDone");
+  });
+
+  test("計画の作成：飛行の方法・同意のまとまりのエラーが fieldset に結ばれる（保存できない入力）", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto("/ops/plans/new");
+    await expect(page.locator("main h1").first()).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page.locator("main [aria-invalid=true]").first()).toBeVisible();
+    await expectErrorsLinked(page, "計画の作成", 1);
+  });
+});

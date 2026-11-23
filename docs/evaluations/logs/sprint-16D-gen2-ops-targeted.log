@@ -1,0 +1,92 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-d-db.spec.ts e2e/ops-db/sprint12b-db.spec.ts e2e/ops-db/sprint12d-db.spec.ts
+
+
+Running 51 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint12b-db.spec.ts:238:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 1. 判定不能が残る計画は「通報：要確認（要として扱います）」、判定不能が無く特定飛行に当たらない計画は「推奨」のまま。「次の版で追加します」が残らない (1.7s)
+  ✓   2 e2e/ops-db/sprint12b-db.spec.ts:260:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 4・5・13. 通報内容を DIPS の入力順に並べてコピーし、記録するまで「通報済み」と出ず、二つの確認と番号が揃うと記録される。変更・取消まで (13.1s)
+  ✓   3 e2e/ops-db/sprint12b-db.spec.ts:471:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 4. 閲覧者・他の操縦者には技能証明書番号が伏せ字でコピーできず、運航管理者と本人には全桁が出る。他の組織は 404 (3.7s)
+  ✓   4 e2e/ops-db/sprint12b-db.spec.ts:512:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 16. 次にやること：目安超過・飛行開始後の最上位の警告・記録後に消える・詳細と一覧から直接移る・対応が必要の絞り込み (13.8s)
+  ✓   5 e2e/ops-db/sprint12b-db.spec.ts:603:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 17. 手続きの記録（Sprint 18-2）：許可・承認の「申請済み」の記録は止める（フォーム無し・API は 409・apply_permit は出ない）。飛行禁止法の同意・通報は、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録 (16.2s)
+  ✓   6 e2e/ops-db/sprint12b-db.spec.ts:706:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 18. 軽微な表示：判定の日時が JST、タップ領域 44px 以上、訂正フォームの機体は読み取り専用の文、新規の機体セレクトがはみ出さない (11.9s)
+  ✓   7 e2e/ops-db/sprint12b-db.spec.ts:802:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 同じシナリオ（通報内容 → 送信 → 番号と状態 → 変更 → 取消）を模擬で流す。模擬の表示・根拠の鎖は手動と同じ形 (6.8s)
+  ✓   8 e2e/ops-db/sprint12b-db.spec.ts:872:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 模擬の timeout は「結果不明」で再送のボタンが出ず、確認後に確定できる。rejected は失敗となり再送できる (11.3s)
+  ✓   9 e2e/ops-db/sprint12b-db.spec.ts:951:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 未知の外部状況は状態を増やさず「状況：不明（生の値）」と出る (2.5s)
+  ✓  10 e2e/ops-db/sprint12d-db.spec.ts:157:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-1. 「登録」から一覧へ：初期データの 6 件が文字と記号つきの有効性で区別され、固定の文言が出る。絞り込みが効く。375px で横スクロールなし (2.3s)
+  ✓  11 e2e/ops-db/sprint12d-db.spec.ts:202:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-2. 登録（運航管理者のみ）→ 詳細 → 訂正（理由必須・影響する計画の旨）→ 失効 → 取消 → 版の履歴。同じ番号は拒否 (5.5s)
+  ✓  12 e2e/ops-db/sprint12d-db.spec.ts:301:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-3. 操縦者・閲覧者は閲覧だけ（登録の入口・訂正・失効・取消がなく、API は 403）。他の組織の登録は 404。「この登録を根拠にしている計画」が出る (2.1s)
+  ✓  13 e2e/ops-db/sprint12d-db.spec.ts:346:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-1. 登録した許可の番号を計画に入れると、範囲に収まる種類だけが判定に使われ、エンジンの「照合していません」が登録の文に置き換わる。番号なし・未登録は要手続きのまま (3.8s)
+  ✓  14 e2e/ops-db/sprint12d-db.spec.ts:393:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-2. 範囲外・期限切れ・失効・文章のみ・機体の限定・空港等周辺（参考）・手入力の DIPS の許可：すべて要手続きのままで、理由が出る (7.8s)
+  ✓  15 e2e/ops-db/sprint12d-db.spec.ts:453:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-3. 許可があっても、緊急用務空域は飛行不可のまま（結論は判定の部品のまま）。文言は「飛べる」と読めない (2.4s)
+  ✓  16 e2e/ops-db/sprint12d-db.spec.ts:469:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-4. 計画のフォーム：DIPS の許可・承認のチェックがなく、案内が出る。番号の登録の有無が入力中に分かり、候補の「番号を入れる」で欄に足せる。保存すると判定が変わる (2.2s)
+  ✓  17 e2e/ops-db/sprint12d-db.spec.ts:515:7 › Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14） › 14. 日誌から 4 タップ以内で、判定の根拠 → 許可の登録の版へ辿れる。登録を訂正すると「判定が古い」→ 再判定で新しい版を根拠にし、古いスナップショットは当時の版を指す (5.9s)
+  ✓  18 e2e/ops-db/sprint12d-db.spec.ts:595:7 › Sprint 12d E2E-DB：12b との関係と次にやること（契約 15） › 15. 申請の記録に依存せず、登録がなければ「取得した許可・承認を登録する」が出て（運航管理者のみ操作）、番号を入れて判定が手続き済みになると消える（Sprint 18-2） (4.7s)
+  ✓  19 e2e/ops-db/sprint12d-db.spec.ts:650:7 › Sprint 12d E2E-DB：通報内容と現場モード（契約 16） › 16. 結びついた登録があれば通報内容に許可書発行日・許可期間が出る（形式は※要確認）。なければ「DIPS で入力」。現場モードの携行品に番号ごとの状態が出る (2.1s)
+  ✓  20 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の作成（390 幅） (640ms)
+  ✓  21 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） (642ms)
+  ✓  22 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） (654ms)
+  ✓  23 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） (436ms)
+  ✓  24 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 操縦者の登録（390 幅） (467ms)
+  ✓  25 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 場所の登録（390 幅） (459ms)
+  ✓  26 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 許可・承認の登録（390 幅） (620ms)
+  ✓  27 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 事故・重大インシデントの記録（390 幅） (579ms)
+  ✓  28 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） (600ms)
+  ✓  29 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 利用者（390 幅） (654ms)
+  ✓  30 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の訂正（390 幅） (639ms)
+  ✓  31 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 通報の作業台（390 幅） (765ms)
+  ✓  32 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の概要（390 幅） (550ms)
+  ✓  33 e2e/ops-db/sprint16-d-db.spec.ts:93:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 機体の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.2s)
+  ✓  34 e2e/ops-db/sprint16-d-db.spec.ts:116:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 許可・承認の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.2s)
+  ✓  35 e2e/ops-db/sprint16-d-db.spec.ts:129:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 点検の入力：異常にして備考なしで保存すると、その項目の備考に誤りが示される (1.1s)
+  ✓  36 e2e/ops-db/sprint16-d-db.spec.ts:149:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 許可・承認の登録（opx-check-row）：72 以上・丸 32・チェックすると行末に「済」 (883ms)
+  ✓  37 e2e/ops-db/sprint16-d-db.spec.ts:172:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 計画の訂正・通報（チェックの丸が 32）：ラベル付きのチェックはすべて 32 の丸 (633ms)
+  ✓  38 e2e/ops-db/sprint16-d-db.spec.ts:187:7 › D-4 実画面：運航管理の読み込み中は静止したスケルトン › ops の枠の読み込み中の表示は、aria-busy と「読み込み中」を持つ静止した帯（動きなし） (165ms)
+  ✓  39 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 飛行記録の詳細 (1.0s)
+  ✓  40 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 計画の主画面 (936ms)
+  ✓  41 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 機体の登録 (801ms)
+  ✓  42 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 許可・承認の登録 (825ms)
+  ✓  43 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 場所の登録 (815ms)
+  ✓  44 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 操縦者の登録 (674ms)
+  ✓  45 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 事故・重大インシデントの記録 (772ms)
+  ✓  46 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 飛行記録の一覧（絞り込み） (794ms)
+  ✓  47 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 利用者 (777ms)
+  ✓  48 e2e/ops-db/sprint16-d-db.spec.ts:247:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 事故・ヒヤリハットの記録：区分・類型・ある/ない/わからないのエラーが fieldset に結ばれる (1.2s)
+  ✓  49 e2e/ops-db/sprint16-d-db.spec.ts:258:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 許可・承認の登録：種類・場所のエラーが fieldset に結ばれる (1.1s)
+  ✘  50 e2e/ops-db/sprint16-d-db.spec.ts:268:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 通報の作業台：控えの記録の確認チェックのエラーがチェックに結ばれる (2.0m)
+  ✓  51 e2e/ops-db/sprint16-d-db.spec.ts:280:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 計画の作成：飛行の方法・同意のまとまりのエラーが fieldset に結ばれる（保存できない入力） (1.2s)
+
+
+  1) e2e/ops-db/sprint16-d-db.spec.ts:268:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 通報の作業台：控えの記録の確認チェックのエラーがチェックに結ばれる 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: locator.click: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for getByTestId('record-submit')
+
+
+      271 |     await openReportFolds(page);
+      272 |     await page.waitForLoadState("networkidle").catch(() => undefined);
+    > 273 |     await page.getByTestId("record-submit").click();
+          |                                             ^
+      274 |     await expect(page.getByTestId("report-record-form").locator(".sb-field-error").first()).toBeVisible();
+      275 |     await expectErrorsLinked(page, "通報の控えの記録", 2);
+      276 |     const described = await page.getByTestId("record-confirm-done").getAttribute("aria-describedby");
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:273:45
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-項目エラーの関連-52ef4-：控えの記録の確認チェックのエラーがチェックに結ばれる/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-項目エラーの関連-52ef4-：控えの記録の確認チェックのエラーがチェックに結ばれる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-項目エラーの関連-52ef4-：控えの記録の確認チェックのエラーがチェックに結ばれる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-d-db.spec.ts:268:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 通報の作業台：控えの記録の確認チェックのエラーがチェックに結ばれる 
+  50 passed (4.5m)
+ ELIFECYCLE  Command failed with exit code 1.

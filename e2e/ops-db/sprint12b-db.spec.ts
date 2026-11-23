@@ -342,7 +342,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     // 記録：二つの確認が無いと記録できない（エラーが出て、状況は「記録なし」のまま）
     await fillManual(page, "record", { date: "2027-01-05", time: "11:00", number: "FP-E2E-0001" });
     await page.getByTestId("record-submit").click();
-    await expect(page.getByTestId("report-record-form").getByRole("alert").first()).toBeVisible();
+    await expect(page.getByTestId("report-record-form").locator(".sb-field-error").first()).toBeVisible();
     await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "no_record");
     expect((await getView(manager, plan.id)).reports).toHaveLength(0);
     // 未来の時刻は記録できない
@@ -645,7 +645,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await page.getByTestId("procedure-done-at-small_drone_law-time").fill("09:00");
     await page.getByTestId("procedure-check-small_drone_law-facilityConsentObtained").check();
     await page.getByTestId("procedure-submit-small_drone_law").click();
-    await expect(page.getByTestId("procedure-form-small_drone_law").getByRole("alert").first()).toBeVisible();
+    await expect(page.getByTestId("procedure-form-small_drone_law").locator(".sb-field-error").first()).toBeVisible();
     await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "none");
     await page.getByTestId("procedure-check-small_drone_law-policeNoticeDone").check();
     await page.getByTestId("procedure-submit-small_drone_law").click();

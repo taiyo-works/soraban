@@ -41,6 +41,7 @@ import {
   useErrorFocus,
   versionOf,
   type ApiResult,
+  FieldError,
 } from "./ops-client";
 import type { PilotOption } from "./records-client";
 import { buttonDangerClass, buttonGhostClass, buttonOutlineBrandClass, buttonPrimaryClass, VERSION_NOTICE_TARGET } from "./ui";
@@ -533,7 +534,7 @@ export function PlanForm({
         </div>
       </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-flags">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["flags"] ? "plan-err-flags" : undefined} data-testid="plan-flags">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">飛行の方法・空域</legend>
         <p className="text-sb-ink-3">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
@@ -544,10 +545,10 @@ export function PlanForm({
             </label>
           ))}
         </div>
-        <FormErrorLine message={errors["flags"]} />
+        <FieldError id="plan-err-flags" message={errors["flags"]} />
       </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="plan-permits">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["pilotPermits"] ? "plan-err-pilotPermits" : undefined} data-testid="plan-permits">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
         <p className="opx-note opx-note-lg" data-testid="plan-permit-registry-note">
           国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
@@ -561,7 +562,7 @@ export function PlanForm({
             </label>
           ))}
         </div>
-        <FormErrorLine message={errors["pilotPermits"]} />
+        <FieldError id="plan-err-pilotPermits" message={errors["pilotPermits"]} />
         <p className="text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
       </fieldset>
 
@@ -626,14 +627,6 @@ export function PlanForm({
     </form>
   );
 }
-
-const FormErrorLine = ({ message }: { readonly message?: string }) =>
-  message ? (
-    <span role="alert" className="text-sm leading-relaxed text-sb-v-no-fg">
-      <span aria-hidden>! </span>
-      {message}
-    </span>
-  ) : null;
 
 // ---- 確認の依頼・再判定・確認 ----------------------------------
 

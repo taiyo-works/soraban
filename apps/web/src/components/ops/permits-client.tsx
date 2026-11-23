@@ -211,7 +211,7 @@ export function PermitForm({
         </Field>
       </Group>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-kinds">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["kinds"] ? "permit-err-kinds" : undefined} data-testid="permit-kinds">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">許可・承認の種類</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {kindChoices.map((c) => {
@@ -224,7 +224,7 @@ export function PermitForm({
             );
           })}
         </div>
-        <FieldError message={errors["kinds"]} />
+        <FieldError id="permit-err-kinds" message={errors["kinds"]} />
         <p className="text-sm leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
         {hasAirport ? (
           <Field label="空港名（1 行に 1 件・5 件まで）" required error={errors["airportNames"]} hint="どの空港の許可かの表記です（照合には使いません）。">
@@ -233,7 +233,7 @@ export function PermitForm({
         ) : null}
       </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-place">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["placeScope"] ? "permit-err-placeScope" : undefined} data-testid="permit-place">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">場所の範囲</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
           {(
@@ -294,7 +294,7 @@ export function PermitForm({
             </p>
           </div>
         ) : null}
-        <FieldError message={errors["placeScope"]} />
+        <FieldError id="permit-err-placeScope" message={errors["placeScope"]} />
       </fieldset>
 
       <ScopePicker
@@ -386,7 +386,7 @@ function ScopePicker({
   readonly emptyLabel: string;
 }) {
   return (
-    <fieldset className="flex min-w-0 flex-col gap-3" data-testid={testId}>
+    <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={error ? `${testId}-err` : undefined} data-testid={testId}>
       <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">{title}</legend>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         <label className={rowClass}>
@@ -414,7 +414,7 @@ function ScopePicker({
           ))}
         </div>
       )}
-      <FieldError message={error} />
+      <FieldError id={`${testId}-err`} message={error} />
     </fieldset>
   );
 }

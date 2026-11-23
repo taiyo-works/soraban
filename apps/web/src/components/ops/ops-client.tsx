@@ -135,10 +135,10 @@ export const RequiredTag = ({ required }: { readonly required?: boolean }) =>
     </span>
   );
 
-export const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
+export const FieldError = ({ id, message, testId }: { readonly id?: string; readonly message?: string; readonly testId?: string }) =>
   message ? (
     // 16-D D-1：role="alert" にしない（入力欄の aria-describedby で結ぶ。送信の結果は FormError が alert で 1 度だけ知らせる）。記号は SVG＋文字
-    <span id={id} className="opx-field-error sb-field-error" data-field-error="">
+    <span id={id} className="opx-field-error sb-field-error" data-field-error="" {...(testId ? { "data-testid": testId } : {})}>
       <FieldErrorMark />
       <span>{message}</span>
     </span>

@@ -205,3 +205,12 @@
 **見える文字の追加（D-1 の「ラベルは常に見える」のため）**: 日付・時刻の入力（`records-client.tsx` の `DateTimeInput`）に「日付」「時刻」、機体の登録の既存の総飛行時間に「時間」「分」、`/` の座標の入力に「座標または Google マップの URL」の見えるラベルを入力欄の上に足した。読み上げ名は従来の `aria-label` のまま（`getByLabel` の既存の検査は変わらない）。
 
 **Q-22（`sprint12h-pr2`）のフォーカスの輪**: 入力欄のフォーカスは、主色の 2px の枠（縁 1px＋内側 1px）を足した上で、キーボードのフォーカスの輪（3px・各画面の規則）をそのまま残した（輪を消すと Q-22 が落ちる。弱めない）。
+
+**16-D 追加作業（gen2：ad hoc の項目エラーを共通の `FieldError` に寄せた）**: D-1「項目エラーは記号付き 1 行・`aria-describedby` で結ぶ・`role` は `alert` にしない」を全入力欄の条件として、`report-client`（飛行目的・確認チェック 3 か所）、`incident-client`（`ErrorText` を廃止。区分・類型・けが・損傷・連絡先・報告の方法・確認チェック）、`plans-client`（`FormErrorLine` を廃止。飛行の方法・同意）、`procedure-client`（確認チェック）、`records-client`・`permits-client`（id のなかった群のエラー）を、`FieldError`（`ops-client.tsx`。`role` なし・SVG 記号・`.sb-field-error`）に替え、エラーの id を入力欄（単独のチェック）または fieldset・radiogroup の `aria-describedby` に入れた。文言・バリデーション・送信・`data-testid`（`incident-event-types-error` を含む）は変えていない。フォーム全体の結果（`FormError`・圏外の再送の枠・`SubmitRow`）は `role="alert"` のまま。
+
+| 検査 | 前 | 後 | 理由・弱めていない根拠 |
+|---|---|---|---|
+| `sprint12b-db`（通報の控えの記録：二つの確認が無いと記録できない） | `report-record-form` の `getByRole("alert").first()` が見える | `.sb-field-error` の最初の要素が見える | 確認チェックの項目エラーから `role="alert"` を外したため。同じフォーム・同じ可視性（エラーが出て「記録なし」のまま、の続きの検査は同じ） |
+| `sprint12b-db`（手続きの記録：確認が足りない） | `procedure-form-small_drone_law` の `getByRole("alert").first()` が見える | `.sb-field-error` の最初の要素が見える | 同上 |
+
+追加（`sprint16-d-db`「項目エラーの関連付け」4 件）: 事故の記録・許可の登録・通報の控えの記録・計画の作成で、見えている項目エラーのすべてが id を持ち、いずれかの要素の `aria-describedby` に入っていて、`role` が無く `alert` の中でもなく、SVG 記号を 1 つ持つ。通報の控えでは確認チェックの `aria-describedby` に `record-err-confirmedDipsDone` が入っていることも確かめる。群のエラー（ラジオ・複数選択）は、入力欄ごとではなく fieldset／radiogroup の `aria-describedby` に結ぶ（個々の選択肢は誤りの単位ではないため）。

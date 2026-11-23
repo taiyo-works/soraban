@@ -33,7 +33,7 @@ import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports
 import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
 import { REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE } from "@/lib/plan-main";
 import { loadDraft, saveDraft, clearDraft, reportDraftKey } from "./drafts";
-import { Field, fieldErrorsOf, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
+import { Field, fieldErrorsOf, FieldError, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField, splitJst } from "./report-parts";
 import { buttonDangerClass, buttonGhostClass, buttonOutlineBrandClass, buttonPrimaryClass, Badge, Note, Section } from "./ui";
 
@@ -194,6 +194,8 @@ function InputsPanel({
                   type="checkbox"
                   className={confirmBoxClass}
                   checked={form.purposes.includes(n)}
+                  aria-invalid={errors["flightPurposes"] ? true : undefined}
+                  aria-describedby={errors["flightPurposes"] ? "report-err-flightPurposes" : undefined}
                   onChange={(e) => set("purposes", e.target.checked ? [...form.purposes, n].sort((a, b) => a - b) : form.purposes.filter((x) => x !== n))}
                   data-testid={`report-input-purpose-${code}`}
                 />
@@ -202,12 +204,7 @@ function InputsPanel({
             );
           })}
         </div>
-        {errors["flightPurposes"] ? (
-          <span role="alert" className="text-sm text-sb-v-no-fg font-bold">
-            <span aria-hidden>! </span>
-            {errors["flightPurposes"]}
-          </span>
-        ) : null}
+        <FieldError id="report-err-flightPurposes" message={errors["flightPurposes"]} />
       </fieldset>
       {form.purposes.includes(13) ? textField("otherBusinessText", "その他1（業務）の理由") : null}
       {form.purposes.includes(16) ? textField("otherNonBusinessText", "その他2（業務以外）の理由") : null}
@@ -439,33 +436,27 @@ function ManualFormFields({
               type="checkbox"
               className={confirmBoxClass}
               checked={m.confirmedDipsDone}
+              aria-invalid={errors["confirmedDipsDone"] ? true : undefined}
+              aria-describedby={errors["confirmedDipsDone"] ? `${testPrefix}-err-confirmedDipsDone` : undefined}
               onChange={(e) => setM((s) => ({ ...s, confirmedDipsDone: e.target.checked }))}
               data-testid={`${testPrefix}-confirm-done`}
             />
             <span>{MANUAL_CONFIRM_DIPS_DONE}</span>
           </label>
-          {errors["confirmedDipsDone"] ? (
-            <span role="alert" className="text-sm text-sb-v-no-fg font-bold">
-              <span aria-hidden>! </span>
-              {errors["confirmedDipsDone"]}
-            </span>
-          ) : null}
+          <FieldError id={`${testPrefix}-err-confirmedDipsDone`} message={errors["confirmedDipsDone"]} />
           <label className={confirmRowClass}>
             <input
               type="checkbox"
               className={confirmBoxClass}
               checked={m.confirmedMatchesLatest}
+              aria-invalid={errors["confirmedMatchesLatest"] ? true : undefined}
+              aria-describedby={errors["confirmedMatchesLatest"] ? `${testPrefix}-err-confirmedMatchesLatest` : undefined}
               onChange={(e) => setM((s) => ({ ...s, confirmedMatchesLatest: e.target.checked }))}
               data-testid={`${testPrefix}-confirm-latest`}
             />
             <span>{MANUAL_CONFIRM_MATCHES_LATEST}</span>
           </label>
-          {errors["confirmedMatchesLatest"] ? (
-            <span role="alert" className="text-sm text-sb-v-no-fg font-bold">
-              <span aria-hidden>! </span>
-              {errors["confirmedMatchesLatest"]}
-            </span>
-          ) : null}
+          <FieldError id={`${testPrefix}-err-confirmedMatchesLatest`} message={errors["confirmedMatchesLatest"]} />
         </fieldset>
       ) : null}
     </>
@@ -1081,15 +1072,10 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                   </select>
                 </Field>
                 <label className={confirmRowClass}>
-                  <input type="checkbox" className={confirmBoxClass} checked={confirmSend} onChange={(e) => setConfirmSend(e.target.checked)} data-testid="send-confirm" />
+                  <input type="checkbox" className={confirmBoxClass} checked={confirmSend} aria-invalid={errors["confirmSend"] ? true : undefined} aria-describedby={errors["confirmSend"] ? "send-err-confirmSend" : undefined} onChange={(e) => setConfirmSend(e.target.checked)} data-testid="send-confirm" />
                   <span>上の項目の内容を確認した（実際の DIPS には送信されません）</span>
                 </label>
-                {errors["confirmSend"] ? (
-                  <span role="alert" className="text-sm text-sb-v-no-fg font-bold">
-                    <span aria-hidden>! </span>
-                    {errors["confirmSend"]}
-                  </span>
-                ) : null}
+                <FieldError id="send-err-confirmSend" message={errors["confirmSend"]} />
               </>
             ) : (
               <ManualFormFields m={m} setM={setM} errors={errors} testPrefix="record" withConfirmations />
