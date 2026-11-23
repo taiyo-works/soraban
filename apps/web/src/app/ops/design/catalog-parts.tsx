@@ -13,7 +13,7 @@ export function CatalogInputs() {
   const error = checked && name.trim() === "" ? "機体の名前を入力してください。" : undefined;
   return (
     <div className="sbx-grid" data-testid="cat-inputs">
-      <TextField id="cat-f-name" label="機体の名前" hint="例：試験機 1" placeholder="入力してください" data-testid="cat-f-name" />
+      <TextField id="cat-input" label="機体の名前" hint="例：試験機 1" placeholder="入力してください" data-testid="cat-input" />
       <div className="flex flex-col gap-2">
         <TextField
           id="cat-f-check"

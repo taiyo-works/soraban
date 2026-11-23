@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
-import { expectFields, expectNoHorizontalScroll, waitForSettledStyles } from "../field-checks";
+import { expectFields, expectNoHorizontalScroll, expectTextZoom, waitForSettledStyles } from "../field-checks";
 import { gotoPlan, openReportFolds } from "./plan-screen";
 
 // Sprint 16-D の E2E-DB：部品 2 の実画面（契約 D-1・D-2・D-4、K-15）。見本の上の検査は e2e/sprint16-d.spec.ts。
@@ -18,6 +18,7 @@ const signIn = async (ctx: APIRequestContext, who: Who): Promise<void> => {
 
 let planId = "";
 let aircraftId = "";
+let flightId = "";
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
 test.beforeAll(async () => {
@@ -33,6 +34,9 @@ test.beforeAll(async () => {
   const plan = await manager.post("/api/ops/plans", { data: { title: `入力欄の確認 ${stamp}`, aircraftId, pilotId: me.pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
   expect(plan.status(), await plan.text()).toBe(201);
   planId = ((await plan.json()) as { id: string }).id;
+  const fl = await manager.post("/api/ops/flights", { data: { aircraftId, pilotId: me.pilotId, purpose: "空撮", takeoffPlace: "米子市日吉津 本社", landingPlace: "米子市日吉津 本社", safetyIssue: false, takeoffAt: `${DAY}T09:00`, landingAt: `${DAY}T09:25` } });
+  expect(fl.status(), await fl.text()).toBe(201);
+  flightId = ((await fl.json()) as { id: string }).id;
   await pilot.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T12:00`, kind: "takeoff" } });
   await manager.dispose();
   await pilot.dispose();
@@ -189,4 +193,27 @@ test.describe("D-4 実画面：運航管理の読み込み中は静止したス�
     expect(block).toContain("読み込み中");
     expect(block).not.toContain("animate");
   });
+});
+
+test.describe("追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面）", () => {
+  const SCREENS = [
+    { name: "飛行記録の詳細", path: () => `/ops/flights/${flightId}` },
+    { name: "計画の主画面", path: () => `/ops/plans/${planId}`, plan: true },
+    { name: "機体の登録", path: () => "/ops/aircraft/new" },
+    { name: "許可・承認の登録", path: () => "/ops/permits/new" },
+    { name: "場所の登録", path: () => "/ops/places/new" },
+    { name: "操縦者の登録", path: () => "/ops/pilots/new" },
+    { name: "事故・重大インシデントの記録", path: () => "/ops/incidents/new" },
+    { name: "飛行記録の一覧（絞り込み）", path: () => "/ops/flights" },
+    { name: "利用者", path: () => "/ops/members" },
+  ] as const;
+  for (const sc of SCREENS) {
+    test(sc.name, async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      if ("plan" in sc) await gotoPlan(page, sc.path());
+      else await page.goto(sc.path());
+      await expect(page.locator("main h1").first()).toBeVisible();
+      await expectTextZoom(page, sc.name);
+    });
+  }
 });

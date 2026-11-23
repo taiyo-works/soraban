@@ -1531,8 +1531,13 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             座標で指定する
             <span className="ml-2 font-normal text-sb-ink-3">（Google Maps 「座標をコピー」 / URL に対応）</span>
           </legend>
+          {/* 16-D D-1：見えるラベルを入力欄の上に置く（読み上げ名は従来の aria-label と同じ文字のまま） */}
+          <label htmlFor="combined-input" className="sb-label">
+            座標または Google マップの URL
+          </label>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
+              id="combined-input"
               type="text"
               aria-label="座標または Google マップの URL"
               value={combined}
@@ -1571,7 +1576,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
               {combinedStatus.message}
             </p>
           ) : null}
-          <div className="grid grid-cols-2 gap-3">
+          {/* 16-D 追加 1：文字 200% で 2 列のままだと、緯度・経度の入力欄が文字で切れた（入れ物の切れ）。列の最小幅を rem で持ち、幅が足りないときは縦に積む（等倍の 375 以上は 2 列のまま） */}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
             <label className="flex flex-col gap-1.5">
               <span className="sb-field-text">緯度（北緯・度）</span>
               <input

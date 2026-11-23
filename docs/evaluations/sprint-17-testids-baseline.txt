@@ -41,14 +41,20 @@ cat-card
 cat-card-list
 cat-card-state
 cat-cards
+cat-checks-section
 cat-danger
 cat-disabled
 cat-disabled-reason
+cat-f-check
+cat-f-check-submit
+cat-f-error
 cat-field
 cat-field-note
 cat-forms
 cat-grounds
 cat-input
+cat-inputs
+cat-inputs-section
 cat-nav
 cat-normal
 cat-opx-danger
@@ -61,7 +67,13 @@ cat-orange
 cat-primary
 cat-secondary
 cat-selected
+cat-sheet-open
+cat-sheet-open-peek
+cat-sheet-section
+cat-skeleton-section
 cat-state-link
+cat-states-result
+cat-states-section
 cat-text
 cat-veil
 cat-veil-toggle
@@ -737,14 +749,23 @@ prop: cat-card
 prop: cat-card-list
 prop: cat-card-state
 prop: cat-cards
+prop: cat-checks-section
+prop: cat-chk-group
 prop: cat-danger
 prop: cat-disabled
 prop: cat-disabled-reason
+prop: cat-empty
+prop: cat-error
+prop: cat-f-check
+prop: cat-f-check-submit
+prop: cat-f-error
 prop: cat-field
 prop: cat-field-note
 prop: cat-forms
 prop: cat-grounds
 prop: cat-input
+prop: cat-inputs
+prop: cat-inputs-section
 prop: cat-nav
 prop: cat-normal
 prop: cat-opx-danger
@@ -757,11 +778,18 @@ prop: cat-orange
 prop: cat-primary
 prop: cat-secondary
 prop: cat-selected
+prop: cat-sheet-open
+prop: cat-sheet-open-peek
+prop: cat-sheet-section
+prop: cat-skeleton
+prop: cat-skeleton-section
 prop: cat-state-danger
 prop: cat-state-flying
 prop: cat-state-info
 prop: cat-state-link
 prop: cat-state-safe
+prop: cat-states-result
+prop: cat-states-section
 prop: cat-text
 prop: cat-veil
 prop: cat-veil-toggle
@@ -1172,6 +1200,8 @@ prop: ops-enter-plan
 prop: ops-header
 prop: ops-inspections
 prop: ops-journal
+prop: ops-loading
+prop: ops-loading-content
 prop: ops-logo
 prop: ops-me-email
 prop: ops-me-name
@@ -1503,6 +1533,7 @@ prop: result-section
 prop: route
 prop: send-confirm
 prop: send-scenario
+prop: sheet
 prop: shortcut-sheet
 prop: signout
 prop: signout-cancel
@@ -1796,12 +1827,16 @@ workspace-result
 workspace-sheet
 workspace-tabs
 式: REFERENCE_LIST_ID
+式: `${id}-error`
 式: `${testIdPrefix}-${v}`
 式: `${testId}-any`
+式: `${testId}-body`
 式: `${testId}-cannot`
 式: `${testId}-changed`
+式: `${testId}-close`
 式: `${testId}-date`
 式: `${testId}-due`
+式: `${testId}-expand`
 式: `${testId}-label`
 式: `${testId}-link`
 式: `${testId}-list`
@@ -1809,10 +1844,14 @@ workspace-tabs
 式: `${testId}-next-day`
 式: `${testId}-note`
 式: `${testId}-option`
+式: `${testId}-root`
+式: `${testId}-scrim`
+式: `${testId}-shrink`
 式: `${testId}-source`
 式: `${testId}-stale`
 式: `${testId}-text`
 式: `${testId}-time`
+式: `${testId}-title`
 式: `${testId}-toggle`
 式: `${testPrefix}-${v}`
 式: `${testPrefix}-confirm-done`
@@ -1821,6 +1860,7 @@ workspace-tabs
 式: `${testPrefix}-memo`
 式: `${testPrefix}-number-unavailable`
 式: `airspace-${flag}`
+式: `cat-chk-${i}`
 式: `field-docs-basis-${d.key}`
 式: `field-docs-confirm-${d.key}`
 式: `field-docs-item-${d.key}`
@@ -1904,3 +1944,4 @@ workspace-tabs
 式: r.testId
 式: rowTestId?.(row)
 式: testId
+式: testId ? `${testId

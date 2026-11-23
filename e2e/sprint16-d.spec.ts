@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectFields, expectTextZoom, measureTextZoom, waitForSettledStyles } from "./field-checks";
+import { expectFields, expectTextZoom, measureTextZoom, openDetails, waitForSettledStyles } from "./field-checks";
 
 // Sprint 16-D の E2E（DB なし）：部品 2（入力欄・チェック行・ボトムシート・スケルトン・空の状態・通信エラー）。契約 D-1〜D-5、K-6・K-7・K-15、追加 1（文字 200% の入れ物の切れ）。
 // 見本（/ops/design）は DESIGN_CATALOG=1 の 2 台目だけが表示する。実画面の入力欄・チェック行は sprint16-d-db。
+const MAIN = `http://127.0.0.1:${process.env["E2E_PORT"] ?? 3100}`;
 const CATALOG = process.env["E2E_CATALOG_URL"] ?? `http://127.0.0.1:${process.env["E2E_FIXTURE_PORT"] ?? 3101}`;
 
 const SUNKEN = "rgb(238, 241, 245)";
@@ -28,7 +29,7 @@ const storageKeys = (page: Page): Promise<string> =>
 test.describe("D-1 入力欄", () => {
   test("通常：高さ 52 以上・角丸 12・面 sunken・縁 edge の 1px・ラベルは入力欄の上に見える", async ({ page }) => {
     await open(page);
-    const s = await page.getByTestId("cat-f-name").evaluate((el) => {
+    const s = await page.getByTestId("cat-input").evaluate((el) => {
       const c = getComputedStyle(el);
       return { h: el.getBoundingClientRect().height, r: c.borderTopLeftRadius, bg: c.backgroundColor, bw: c.borderTopWidth, bs: c.borderTopStyle, bc: c.borderTopColor, fs: parseFloat(c.fontSize) };
     });
@@ -43,7 +44,7 @@ test.describe("D-1 入力欄", () => {
 
   test("フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない", async ({ page }) => {
     await open(page);
-    const input = page.getByTestId("cat-f-name");
+    const input = page.getByTestId("cat-input");
     await input.focus();
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Tab");
@@ -61,12 +62,12 @@ test.describe("D-1 入力欄", () => {
 
   test("ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない", async ({ page }) => {
     await open(page);
-    const label = page.locator('label[for="cat-f-name"]');
+    const label = page.locator('label[for="cat-input"]');
     await expect(label).toBeVisible();
     await expect(label).toHaveText("機体の名前");
     await label.click();
-    await expect(page.getByTestId("cat-f-name")).toBeFocused();
-    expect(await page.getByTestId("cat-f-name").getAttribute("placeholder")).not.toBe(await label.textContent());
+    await expect(page.getByTestId("cat-input")).toBeFocused();
+    expect(await page.getByTestId("cat-input").getAttribute("placeholder")).not.toBe(await label.textContent());
   });
 
   test("エラー：縁が危険の印の色。下に記号（SVG）付きの 1 行。aria-describedby で結ぶ。role は alert にしない。入力すると消える", async ({ page }) => {
@@ -101,7 +102,7 @@ test.describe("D-1 入力欄", () => {
 
   test("現場：高さ 56 以上", async ({ page }) => {
     await open(page, "mode=field");
-    const h = await page.getByTestId("cat-f-name").evaluate((el) => el.getBoundingClientRect().height);
+    const h = await page.getByTestId("cat-input").evaluate((el) => el.getBoundingClientRect().height);
     expect(h).toBeGreaterThanOrEqual(55.5);
     await expectFields(page, '[data-testid="cat-inputs"]', "現場の見本の入力欄", { field: true, minCount: 3 });
   });
@@ -312,7 +313,7 @@ test.describe("D-3 ボトムシート", () => {
     await page.getByTestId("cat-sheet-open").click();
     await page.getByTestId("sheet-expand").click();
     // 動きを減らす：時間のトークンは 0。全体の規則（0.01ms）で残る一瞬の遷移は、すぐ終わって getAnimations() が空になる
-    expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-sheet").trim())).toBe("0ms");
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-sheet").trim())).toMatch(/^0(ms|s)$/);
     await expect.poll(() => page.evaluate(() => document.getAnimations().length), { message: "動きを減らす", timeout: 2000 }).toBe(0);
     expect(parseFloat(await page.getByTestId("sheet").evaluate((el) => getComputedStyle(el).animationDuration))).toBeLessThanOrEqual(0.0001);
   });
@@ -396,8 +397,8 @@ test.describe("D-5 空の状態と通信エラー", () => {
     await card.getByRole("button", { name: "再読み込み" }).click();
     await expect(page.getByTestId("cat-states-result")).toHaveText("再読み込みしました（見本）");
     // 画面全体は止まっていない：ほかの入力欄に入力できる
-    await page.getByTestId("cat-f-name").fill("確認");
-    await expect(page.getByTestId("cat-f-name")).toHaveValue("確認");
+    await page.getByTestId("cat-input").fill("確認");
+    await expect(page.getByTestId("cat-input")).toHaveValue("確認");
   });
 });
 
@@ -444,4 +445,17 @@ test.describe("K-15 端末データ・K-5 入れ物の切れ（追加 1）", () 
     await inject("sb-hero");
     await expectTextZoom(page, "除外（挿絵）", [390]);
   });
+});
+
+test.describe("D-1 実画面（公開の `/`）", () => {
+  for (const w of [375, 390, 1280]) {
+    test(`全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（${w}px。畳んだ項目を開いた状態）`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: w >= 1024 ? 800 : 844 });
+      await page.goto(`${MAIN}/`);
+      await page.locator(".sb-pill-primary").first().waitFor();
+      for (const d of await page.locator("main details").all()) await openDetails(d).catch(() => undefined);
+      await waitForSettledStyles(page);
+      await expectFields(page, "main", `/ ${w}px`, { minCount: 3 });
+    });
+  }
 });

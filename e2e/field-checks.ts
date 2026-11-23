@@ -368,7 +368,9 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
         const describe = (el: Element): string => {
           const id = el.getAttribute("data-testid");
           const t = (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 20);
-          return `${el.tagName.toLowerCase()}${id ? `[${id}]` : ""}「${t}」`;
+          // 入力欄は textContent が空なので、種類・名前・ラベルの文字で見分ける
+          const field = el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement ? `[${el.getAttribute("type") ?? el.tagName.toLowerCase()}${el.name ? `:${el.name}` : ""}${el.getAttribute("aria-label") ? `:${el.getAttribute("aria-label")}` : ""}]` : "";
+          return `${el.tagName.toLowerCase()}${id ? `[${id}]` : ""}${field}「${t}」`;
         };
         const visible = (el: HTMLElement): boolean => {
           const r = el.getBoundingClientRect();

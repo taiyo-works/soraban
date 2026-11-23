@@ -1,0 +1,182 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint16-d.spec.ts
+
+
+Running 23 tests using 1 worker
+
+  ✓   1 e2e/sprint16-d.spec.ts:30:7 › D-1 入力欄 › 通常：高さ 52 以上・角丸 12・面 sunken・縁 edge の 1px・ラベルは入力欄の上に見える (709ms)
+  ✓   2 e2e/sprint16-d.spec.ts:45:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない (715ms)
+  ✓   3 e2e/sprint16-d.spec.ts:63:7 › D-1 入力欄 › ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない (783ms)
+  ✓   4 e2e/sprint16-d.spec.ts:73:7 › D-1 入力欄 › エラー：縁が危険の印の色。下に記号（SVG）付きの 1 行。aria-describedby で結ぶ。role は alert にしない。入力すると消える (781ms)
+  ✓   5 e2e/sprint16-d.spec.ts:103:7 › D-1 入力欄 › 現場：高さ 56 以上 (488ms)
+  ✓   6 e2e/sprint16-d.spec.ts:112:7 › D-2 チェック行 › 行の高さ 72 以上・32 の丸いチェック・行全体が <label>・クリックで切り替わる。群の見出しに完了数/総数 (762ms)
+  ✓   7 e2e/sprint16-d.spec.ts:140:7 › D-2 チェック行 › K-7 チェック済みは記号（塗りの丸）と文字「済」。未チェックには「済」が出ない (736ms)
+  ✓   8 e2e/sprint16-d.spec.ts:166:7 › D-2 チェック行 › 群：折りたためる（summary を Enter で開閉）。畳んでも完了数/総数は見出しに残る (654ms)
+  ✓   9 e2e/sprint16-d.spec.ts:183:7 › D-2 チェック行 › 現場：行は 72 以上のまま・済みの色は濃い主色 (547ms)
+  ✓  10 e2e/sprint16-d.spec.ts:200:7 › D-3 ボトムシート › キーボードだけで：開く→見出しにフォーカス→段を変える→閉じる→元にフォーカスが戻る。3 段の高さ・暗幕・角丸・つまみ (1.9s)
+  ✓  11 e2e/sprint16-d.spec.ts:266:7 › D-3 ボトムシート › 「閉じる」ボタンと暗幕のクリックでも閉じ、そのつど元にフォーカスが戻る。ピークは暗幕なしで地の画面を操作できる (1.3s)
+  ✘  12 e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） (2.0s)
+
+::error file=e2e/sprint16-d.spec.ts,title=e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空）,line=316,col=125::  1) e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） %0A    Error: expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: "0ms"%0A    Received: "0s"%0A%0A      314 |     await page.getByTestId("sheet-expand").click();%0A      315 |     // 動きを減らす：時間のトークンは 0。全体の規則（0.01ms）で残る一瞬の遷移は、すぐ終わって getAnimations() が空になる%0A    > 316 |     expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-sheet").trim())).toBe("0ms");%0A          |                                                                                                                             ^%0A      317 |     await expect.poll(() => page.evaluate(() => document.getAnimations().length), { message: "動きを減らす", timeout: 2000 }).toBe(0);%0A      318 |     expect(parseFloat(await page.getByTestId("sheet").evaluate((el) => getComputedStyle(el).animationDuration))).toBeLessThanOrEqual(0.0001);%0A      319 |   });%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:316:125
+  ✓  13 e2e/sprint16-d.spec.ts:321:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない（暗幕の下の主ボタンは対象外） (1.3s)
+  ✓  14 e2e/sprint16-d.spec.ts:339:7 › D-4 スケルトン › カードの形の静止した帯（sunken）。帯は aria-hidden・親に aria-busy と「読み込み中」。動きなし (684ms)
+  ✓  15 e2e/sprint16-d.spec.ts:364:7 › D-4 スケルトン › K-6：見本の中に、animation-iteration-count が infinite の要素・動いているアニメーションがない (663ms)
+  ✓  16 e2e/sprint16-d.spec.ts:373:7 › D-5 空の状態と通信エラー › 空の状態：アイコン（装飾）・一文・主ボタン 1 つだけ (569ms)
+  ✓  17 e2e/sprint16-d.spec.ts:388:7 › D-5 空の状態と通信エラー › 通信エラー：該当のカードの中に一文と「再読み込み」。画面全体を止めない（ほかの部品は操作できる）。role は付けない (591ms)
+  ✓  18 e2e/sprint16-d.spec.ts:406:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本の操作（入力・チェック・シート・再読み込み）の前後で、端末のストレージの鍵が増えない (1.6s)
+  ✓  19 e2e/sprint16-d.spec.ts:421:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本全体：文字 200%（390・430）で、横スクロール・文字の切れ・入れ物の切れがない (908ms)
+  ✓  20 e2e/sprint16-d.spec.ts:426:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 入れ物の切れの検査が働く：子だけを持つ入れ物（直接の文字なし）が横に切れていると失敗し、除外の要素なら通る (756ms)
+  ✘  21 e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） (5.0s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態）,line=622,col=47::  2) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） %0A    Error: / 375px: 見えるラベルがない入力欄%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "input[type=text]「反映」",%0A    + ]%0A%0A       at field-checks.ts:622%0A%0A      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);%0A      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);%0A    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);%0A          |                                               ^%0A      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);%0A      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);%0A      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);%0A        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+  ✘  22 e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） (5.9s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態）,line=622,col=47::  3) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） %0A    Error: / 390px: 見えるラベルがない入力欄%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "input[type=text]「反映」",%0A    + ]%0A%0A       at field-checks.ts:622%0A%0A      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);%0A      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);%0A    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);%0A          |                                               ^%0A      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);%0A      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);%0A      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);%0A        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+  ✘  23 e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） (6.1s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態）,line=622,col=47::  4) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） %0A    Error: / 1280px: 見えるラベルがない入力欄%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "input[type=text]「反映」",%0A    + ]%0A%0A       at field-checks.ts:622%0A%0A      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);%0A      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);%0A    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);%0A          |                                               ^%0A      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);%0A      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);%0A      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);%0A        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+
+
+  1) e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "0ms"
+    Received: "0s"
+
+      314 |     await page.getByTestId("sheet-expand").click();
+      315 |     // 動きを減らす：時間のトークンは 0。全体の規則（0.01ms）で残る一瞬の遷移は、すぐ終わって getAnimations() が空になる
+    > 316 |     expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-sheet").trim())).toBe("0ms");
+          |                                                                                                                             ^
+      317 |     await expect.poll(() => page.evaluate(() => document.getAnimations().length), { message: "動きを減らす", timeout: 2000 }).toBe(0);
+      318 |     expect(parseFloat(await page.getByTestId("sheet").evaluate((el) => getComputedStyle(el).animationDuration))).toBeLessThanOrEqual(0.0001);
+      319 |   });
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:316:125
+
+    Error Context: test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） 
+
+    Error: / 375px: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "input[type=text]「反映」",
+    + ]
+
+       at field-checks.ts:622
+
+      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+
+    Error Context: test-results/sprint16-d-D-1-実画面（公開の-）-全-c050c-以上・角丸-12（375px。畳んだ項目を開いた状態）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-1-実画面（公開の-）-全-c050c-以上・角丸-12（375px。畳んだ項目を開いた状態）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-1-実画面（公開の-）-全-c050c-以上・角丸-12（375px。畳んだ項目を開いた状態）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） 
+
+    Error: / 390px: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "input[type=text]「反映」",
+    + ]
+
+       at field-checks.ts:622
+
+      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+
+    Error Context: test-results/sprint16-d-D-1-実画面（公開の-）-全-a20ee-以上・角丸-12（390px。畳んだ項目を開いた状態）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-1-実画面（公開の-）-全-a20ee-以上・角丸-12（390px。畳んだ項目を開いた状態）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-1-実画面（公開の-）-全-a20ee-以上・角丸-12（390px。畳んだ項目を開いた状態）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） 
+
+    Error: / 1280px: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "input[type=text]「反映」",
+    + ]
+
+       at field-checks.ts:622
+
+      620 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      621 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 622 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      623 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      624 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      625 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:622:47)
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:458:7
+
+    Error Context: test-results/sprint16-d-D-1-実画面（公開の-）-全-68d5a-上・角丸-12（1280px。畳んだ項目を開いた状態）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-1-実画面（公開の-）-全-68d5a-上・角丸-12（1280px。畳んだ項目を開いた状態）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-1-実画面（公開の-）-全-68d5a-上・角丸-12（1280px。畳んだ項目を開いた状態）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） 
+    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） 
+    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） 
+    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） 
+  19 passed (41.1s)
+::notice title=🎭 Playwright Run Summary::  4 failed%0A    e2e/sprint16-d.spec.ts:294:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） %0A    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） %0A    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） %0A    e2e/sprint16-d.spec.ts:452:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） %0A  19 passed (41.1s)
+ ELIFECYCLE  Command failed with exit code 1.

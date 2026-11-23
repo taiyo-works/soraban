@@ -399,7 +399,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.getByRole("radiogroup", { name: "フレームの結果" }).getByRole("radio", { name: "異常" }).check();
       await page.getByRole("button", { name: "保存", exact: true }).click();
       const frame = page.getByTestId("inspection-item-frame");
-      await expect(frame.getByRole("alert")).toContainText("備考を入力してください");
+      await expect(frame.locator(".sb-field-error")).toContainText("備考を入力してください");
       await expect(frame.getByLabel("フレームの備考")).toHaveAttribute("aria-invalid", "true");
       await expect(page).toHaveURL(/\/ops\/inspections\/new/);
     });

@@ -276,7 +276,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     for (const id of ["plan-confirm-approve", "plan-confirm-return"]) await tapSize(page, id);
     // 差し戻しは理由が必須
     await page.getByTestId("plan-confirm-return").click();
-    await expect(page.getByRole("alert").filter({ hasText: "差し戻しの理由" }).first()).toBeVisible();
+    await expect(page.locator(".sb-field-error").filter({ hasText: "差し戻しの理由" }).first()).toBeVisible();
     // 確認する（自分が保存した版への確認なので「自己確認」と併記される）
     await page.getByTestId("plan-confirm-approve").click();
     await expect(page.getByTestId("plan-confirmation-status")).toContainText("確認済み（自己確認）");
