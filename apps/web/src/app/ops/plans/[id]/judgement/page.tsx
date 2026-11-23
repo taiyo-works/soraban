@@ -53,10 +53,10 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             data-testid="plan-judgement"
             rows={[
               ["判定の通し番号", <span key="n" data-testid="plan-snapshot-seq">{j.seq}</span>],
-              ["判定の日時（日本時間）", <time key="t" dateTime={j.checkedAt} className="sb-num text-sm tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
-              ["地点判定の証跡 ID", <span key="c" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
-              ["飛行の方法を含む判定の証跡 ID", <span key="d" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
-              ["エンジンの版", <span key="e" className={mono}>{j.engineVersion}</span>],
+              ["判定の日時（日本時間）", <time key="t" data-note="" dateTime={j.checkedAt} className="sb-num text-sm tnum" data-testid="plan-judged-at">{formatJst(new Date(j.checkedAt))}</time>],
+              ["地点判定の証跡 ID", <span key="c" data-note="" className={mono} data-testid="plan-check-evidence">{j.checkEvidenceId}</span>],
+              ["飛行の方法を含む判定の証跡 ID", <span key="d" data-note="" className={mono} data-testid="plan-diagnosis-evidence">{j.diagnosisEvidenceId}</span>],
+              ["エンジンの版", <span key="e" data-note="" className={mono}>{j.engineVersion}</span>],
             ]}
           />
           </details>
