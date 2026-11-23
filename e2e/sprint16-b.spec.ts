@@ -1,6 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import { collectTextSamples, expectFontSize, expectNoHorizontalScroll, expectTextZoom } from "./field-checks";
 
+const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+const waitDiagnose = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+
 // Sprint 16-B の E2E（DB なし）：文字の下限 14px・本文 16px・rem 化の確かめ（契約 B-1〜B-4、共通条件 K-2・K-4・K-5）。
 // 対象：公開の `/`、見本 `/ops/design`（通常・現場）。運航管理の画面は e2e/ops-db/sprint16-b-db.spec.ts。
 const MAIN = `http://127.0.0.1:${process.env["E2E_PORT"] ?? 3100}`;
@@ -106,5 +109,104 @@ test.describe("16-B 公開側：文字の下限・rem 化・200%・320 幅", () 
   test("B-4. 文字の大きさの標本が十分ある（検査が空でない）", async ({ page }) => {
     await open(page, SCREENS[0], 390);
     expect((await collectTextSamples(page, "body")).length).toBeGreaterThan(20);
+  });
+});
+
+// ───────── 差し戻し 1（R1-3・R1-4）：本文 16px・行の高さ 1.7、補足（data-note）14px・1.5 ─────────
+// この検査は、designer の工程（R1-1・R1-2）の前は落ちてよい。落ちた一覧が designer の作業の一覧になる。
+type PublicState = "初期" | "判定の結果を出した状態" | "details を開いた状態";
+const openPublicState = async (page: Page, state: PublicState): Promise<void> => {
+  if (state === "初期") {
+    // 判定の結果が出る前の最初の描画（通信を止めて測る。sprint12h-pr2 Q-8 と同じ）
+    await page.route("**/api/check", (r) => r.abort());
+    await page.route("**/api/diagnose", (r) => r.abort());
+    await page.goto(SCREENS[0].url);
+    await expect(page.locator(SCREENS[0].ready)).toBeVisible();
+    return;
+  }
+  const check = waitCheck(page);
+  const diag = waitDiagnose(page);
+  await page.goto(SCREENS[0].url);
+  await Promise.all([check, diag]);
+  await expect(page.getByTestId("verdict-level")).toBeVisible();
+  if (state === "details を開いた状態") {
+    await page.evaluate(() => {
+      for (const d of Array.from(document.querySelectorAll("details"))) (d as HTMLDetailsElement).open = true;
+    });
+  }
+};
+
+test.describe("16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note）", () => {
+  for (const state of ["初期", "判定の結果を出した状態", "details を開いた状態"] as const) {
+    for (const w of [375, 390, 1280]) {
+      test(`R1-3. /（${state}）${w}px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい`, async ({ page }) => {
+        await page.setViewportSize({ width: w, height: w >= 1024 ? 800 : 844 });
+        await openPublicState(page, state);
+        await expectFontSize(page, "body", 14, `/（${state}）${w}px`, { body: 16 });
+      });
+    }
+  }
+  for (const w of [375, 390, 1280]) {
+    test(`R1-3. /ops/design ${w}px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上`, async ({ page }) => {
+      await open(page, SCREENS[1], w, w >= 1024 ? 800 : 844);
+      await expectFontSize(page, "body", 14, `/ops/design ${w}px`, { body: 16 });
+    });
+  }
+});
+
+// 検査自体が働くことの確認（R1-3）。アプリの画面に頼らず、値の決まった小さな HTML で確かめる。
+test.describe("16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認）", () => {
+  const BODY = "font-size:16px;line-height:1.7;margin:0";
+  const NOTE = "font-size:14px;line-height:1.5;margin:0";
+  /** html を root の中に置いて検査し、失敗の文面（通れば空）を返す。 */
+  const run = async (page: Page, html: string, opts?: { body: number }): Promise<string> => {
+    await page.setContent(`<!doctype html><html><body style="font-size:16px;margin:0"><main id="probe-root" style="width:600px">${html}</main></body></html>`);
+    try {
+      await (opts ? expectFontSize(page, "#probe-root", 14, "検査の確認", opts) : expectFontSize(page, "#probe-root", 14, "検査の確認"));
+      return "";
+    } catch (e) {
+      return String((e as Error).message);
+    }
+  };
+
+  test("印のない 14px の p は失敗する。16px・1.7 の p は通る", async ({ page }) => {
+    expect(await run(page, `<p data-testid="ok" style="${BODY}">本文の文</p>`, { body: 16 })).toBe("");
+    const msg = await run(page, `<p data-testid="small-body" style="${NOTE}">印のない 14px の文</p>`, { body: 16 });
+    expect(msg).toContain("small-body");
+    expect(msg).toContain("14px");
+  });
+
+  test("data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する", async ({ page }) => {
+    expect(await run(page, `<p data-testid="n" data-note style="${NOTE}">補足の文</p>`, { body: 16 })).toBe("");
+    const msg = await run(page, `<p data-testid="tight-note" data-note style="font-size:14px;line-height:1.4;margin:0">詰めた補足</p>`, { body: 16 });
+    expect(msg).toContain("tight-note");
+    expect(msg).toContain("1.40");
+  });
+
+  test("本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す", async ({ page }) => {
+    expect(await run(page, `<p style="font-size:16px;line-height:1.5;margin:0">1.5</p>`, { body: 16 })).toContain("1.50");
+    expect(await run(page, `<p style="font-size:16px;line-height:normal;margin:0">normal</p>`, { body: 16 })).toContain("normal");
+    expect(await run(page, `<p style="font-size:16px;line-height:27.1px;margin:0">1.694</p>`, { body: 16 })).toBe("");
+  });
+
+  test("div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す", async ({ page }) => {
+    const msg = await run(page, `<div data-testid="card" data-note><p style="${BODY}">本文</p></div>`, { body: 16 });
+    expect(msg).toContain("data-note は");
+    expect(msg).toContain("div[card]");
+    expect(await run(page, `<section data-note><p style="${BODY}">本文</p></section>`, { body: 16 })).toContain("section");
+    expect(await run(page, `<ul data-note style="margin:0"><li style="${NOTE}">出典 1</li><li style="${NOTE}">出典 2</li></ul>`, { body: 16 })).toBe("");
+    expect(await run(page, `<p style="${BODY}">本文 <span data-note style="${NOTE}">日付</span> <time data-note style="${NOTE}">2026-11-22</time> <small data-note style="${NOTE}">小</small></p>`, { body: 16 })).toBe("");
+  });
+
+  test("本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く", async ({ page }) => {
+    const bad = await run(page, `<p style="${BODY}">本文 <span data-testid="kid" style="font-size:14px;line-height:1.7">小さい子孫</span></p>`, { body: 16 });
+    expect(bad).toContain("kid");
+    expect(await run(page, `<p style="${BODY}">本文 <a href="#x" style="font-size:14px;line-height:1.2">リンク</a> <button style="font-size:14px">押す</button></p>`, { body: 16 })).toBe("");
+  });
+
+  test("現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ", async ({ page }) => {
+    expect(await run(page, `<p data-testid="p16" style="${BODY}">16px</p>`, { body: 18 })).toContain("p16");
+    expect(await run(page, `<p style="${NOTE};display:none">隠れた 14px</p><p style="${BODY}">本文</p>`, { body: 16 })).toBe("");
+    expect(await run(page, `<p style="${NOTE}">印のない 14px</p>`)).toBe("");
   });
 });

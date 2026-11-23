@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 // 現場モードの見た目の基準（Sprint 12c 契約 15）を検査する補助。ブラウザで計算した色・寸法から、WCAG の式で比を求める。
 // 明るい配色と暗い配色は、呼び出し側が page.emulateMedia({ colorScheme }) で切り替えてから呼ぶ。
@@ -133,11 +133,112 @@ export const expectContrast = async (page: Page, rootSelector: string, min: numb
   expect(bad, `${label}: 比が ${min} 未満`).toEqual([]);
 };
 
-/** 文字の大きさが min px 以上であること。 */
-export const expectFontSize = async (page: Page, rootSelector: string, min: number, label: string): Promise<void> => {
+export type FontSizeOptions = {
+  /**
+   * 本文の検査（Sprint 16-B 差し戻し 1、契約 R1-3）。本文の最小の大きさ（通常 16、現場 18）。省略したときは、従来どおり min px の検査だけ。
+   * 印 `data-note` のない p・li・dd（と、その中の文字を持つ子孫）は body px 以上・行の高さ 1.7（誤差 0.01）以上、
+   * 印のあるものは 14px 以上・1.5（誤差 0.01）以上。`data-note` が許された要素以外に付いていれば失敗にする。
+   */
+  readonly body?: number;
+};
+
+/** 補足（`data-note`）の下限。契約 R1-1・R1-3。 */
+export const NOTE_FONT_MIN = 14;
+/** 行の高さ（計算された line-height ÷ font-size）の下限。測定の誤差 0.01 を引いた値。 */
+export const BODY_LINE_RATIO_MIN = 1.7 - 0.01;
+export const NOTE_LINE_RATIO_MIN = 1.5 - 0.01;
+/** `data-note` を付けてよい要素（契約 R1-2）。div・section・main・カードの外枠には付けない。 */
+export const DATA_NOTE_ALLOWED_TAGS = ["p", "li", "dd", "ul", "ol", "dl", "span", "time", "small"] as const;
+
+export type BodyTextReport = {
+  /** 検査した p・li・dd の数（見えているもの） */
+  readonly checked: number;
+  /** 本文の検査・補足の検査に落ちたもの（testid・文の先頭・大きさ・行の高さ） */
+  readonly bad: string[];
+  /** `data-note` が許された要素以外に付いているもの */
+  readonly misplaced: string[];
+  /** 印の付いた要素の data-testid（なければタグ名）ごとの件数 */
+  readonly marked: Record<string, number>;
+};
+
+/** root の中の本文・補足の大きさと行の高さを集める（expectFontSize の { body } 用）。 */
+export const collectBodyTextReport = async (page: Page, rootSelector: string, body: number): Promise<BodyTextReport> => {
+  await waitForSettledStyles(page);
+  return page.evaluate(
+    ({ sel, bodyMin, noteMin, bodyLh, noteLh, allowed }) => {
+      const root = document.querySelector(sel);
+      const empty = { checked: 0, bad: [] as string[], misplaced: [] as string[], marked: {} as Record<string, number> };
+      if (!root) return empty;
+      const idOf = (el: Element): string => el.closest("[data-testid]")?.getAttribute("data-testid") ?? el.tagName.toLowerCase();
+      const visible = (el: HTMLElement): boolean => {
+        const r = el.getBoundingClientRect();
+        if (r.width <= 1 || r.height <= 1) return false;
+        const cs = getComputedStyle(el);
+        if (cs.visibility === "hidden" || cs.display === "none") return false;
+        if (el.closest(".sb-sr, .sr-only")) return false;
+        return el.checkVisibility?.({ checkVisibilityCSS: true, contentVisibilityAuto: true }) ?? true;
+      };
+      const SKIP_DESC = "button, a, summary, label, [role='tab'], [role='button']";
+      const out = empty;
+      const measure = (el: Element, sizeMin: number, lhMin: number, kind: string): void => {
+        const cs = getComputedStyle(el);
+        const fs = parseFloat(cs.fontSize);
+        const lhPx = parseFloat(cs.lineHeight);
+        const ratio = lhPx / fs;
+        const lhOk = cs.lineHeight !== "normal" && Number.isFinite(ratio) && ratio >= lhMin;
+        if (fs >= sizeMin && lhOk) return;
+        const t = (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 20);
+        out.bad.push(`${kind} ${el.tagName.toLowerCase()}[${idOf(el)}]「${t}」 ${fs}px / 行の高さ ${cs.lineHeight === "normal" ? "normal" : ratio.toFixed(2)}（${sizeMin}px・${lhMin + 0.01} 以上が必要）`);
+      };
+      const hasOwnText = (el: Element): boolean => Array.from(el.childNodes).some((n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim().length > 0);
+      // ③ data-note の置き場所
+      const marks = [...(root.matches("[data-note]") ? [root] : []), ...Array.from(root.querySelectorAll("[data-note]"))];
+      for (const m of marks) {
+        if (!allowed.includes(m.tagName.toLowerCase())) out.misplaced.push(`${m.tagName.toLowerCase()}[${idOf(m)}]`);
+      }
+      for (const el of Array.from(root.querySelectorAll<HTMLElement>("p, li, dd"))) {
+        if (!visible(el) || (el.textContent ?? "").trim().length === 0) continue;
+        if (el.closest("nav, .maplibregl-ctrl")) continue;
+        out.checked++;
+        const isNote = el.hasAttribute("data-note") || !!el.parentElement?.closest("ul, ol, dl")?.hasAttribute("data-note");
+        const [sizeMin, lhMin, kind] = isNote ? [noteMin, noteLh, "補足"] : [bodyMin, bodyLh, "本文"];
+        if (isNote) out.marked[idOf(el)] = (out.marked[idOf(el)] ?? 0) + 1;
+        measure(el, sizeMin, lhMin, kind);
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT);
+        for (let n = walker.nextNode() as HTMLElement | null; n; n = walker.nextNode() as HTMLElement | null) {
+          if (!hasOwnText(n) || !visible(n)) continue;
+          const mk = n.closest("[data-note]");
+          if (mk && el.contains(mk) && mk !== el) continue;
+          const skip = n.closest(SKIP_DESC);
+          if (skip && el.contains(skip) && skip !== el) continue;
+          measure(n, sizeMin, lhMin, kind);
+        }
+      }
+      return out;
+    },
+    { sel: rootSelector, bodyMin: body, noteMin: NOTE_FONT_MIN, bodyLh: BODY_LINE_RATIO_MIN, noteLh: NOTE_LINE_RATIO_MIN, allowed: [...DATA_NOTE_ALLOWED_TAGS] as string[] },
+  );
+};
+
+/**
+ * 文字の大きさが min px 以上であること。
+ * opts.body を渡すと、本文（印のない p・li・dd）と補足（`data-note`）の大きさ・行の高さも確かめる（契約 R1-3）。省略したときは従来の動作のまま。
+ */
+export const expectFontSize = async (page: Page, rootSelector: string, min: number, label: string, opts: FontSizeOptions = {}): Promise<void> => {
   const samples = await collectTextSamples(page, rootSelector);
   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+  if (opts.body === undefined) return;
+  const rep = await collectBodyTextReport(page, rootSelector, opts.body);
+  try {
+    const ids = Object.entries(rep.marked).map(([k, v]) => `${k}×${v}`).join(", ");
+    test.info().annotations.push({ type: "data-note", description: `${label}: 印の付いた p・li・dd ${Object.values(rep.marked).reduce((a, b) => a + b, 0)} 件（検査した p・li・dd ${rep.checked} 件）${ids ? ` ${ids}` : ""}` });
+  } catch {
+    // test の外（単体の呼び出し）では注記しない
+  }
+  expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+  expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+  expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
 };
 
 export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
