@@ -1,0 +1,120 @@
+== normal 375
+input idle {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=48 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":1}
+  cat-empty {"btns":["記録を追加する 56"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 48"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}
+== normal 1280
+input idle {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=48 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":1}
+  cat-empty {"btns":["記録を追加する 56"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 48"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}
+== field 375
+input idle {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=56 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":0}
+  cat-empty {"btns":["記録を追加する 64"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 56"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}
+== field 1280
+input idle {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(74, 84, 102)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"solid 3px rgb(24, 72, 176) off 3px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":56,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(138, 26, 18)","fs":"18px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(138, 26, 18) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":1044,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":1044,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":1044,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":1044,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=56 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":0}
+  cat-empty {"btns":["記録を追加する 64"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 56"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}
+== veil 375
+input idle {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":319,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=48 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":1}
+  cat-empty {"btns":["記録を追加する 56"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 48"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}
+== veil 1280
+input idle {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input kbd-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input click-focus {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(107, 117, 134)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"none","label":"機体の名前","labelAbove":true,"labelVisible":true,"invalid":null,"desc":"cat-input-hint"}
+input focus+error {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"solid 3px rgb(31, 95, 224) off 3px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+  error el {"role":null,"text":"機体の名前を入力してください。","svg":1,"closestAlert":false,"color":"rgb(138, 26, 18)","fs":"14px"}
+input error blurred {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の名前（確認の見本） 必須","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-check-error"}
+input error static {"h":52,"radius":"12px","bg":"rgb(238, 241, 245)","border":"1px solid rgb(180, 35, 24)","fs":"16px","outline":"none 3px rgb(20, 24, 31) off 0px","shadow":"rgb(180, 35, 24) 0px 0px 0px 1px inset","label":"機体の登録番号（エラーの見本）","labelAbove":true,"labelVisible":true,"invalid":"true","desc":"cat-f-error-error"}
+group count 1/4
+ row 0 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":true,"aria":null,"text":"機体にひび・欠けがない済","svgOrContent":"\"\""}
+ row 1 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"プロペラが固定されている済","svgOrContent":"\"\""}
+ row 2 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"バッテリーの残量が十分済","svgOrContent":"\"\""}
+ row 3 {"h":72,"w":833.5,"tag":"LABEL","box":"32x32","radius":"9999px","checked":false,"aria":null,"text":"送信機の電池が十分済","svgOrContent":"\"\""}
+ after click row1; count 2/4 row1 text プロペラが固定されている済
+ kbd space row2; count 3/4
+ collapse control SUMMARY h=48 expanded=null
+ collapsed: row visible? false count still 3/4
+ skeleton {"busy":"true","hidden":4,"text":"読み込み中","anims":0,"docAnims":1}
+  cat-empty {"btns":["記録を追加する 56"],"primaries":1,"text":"まだ記録がありません。最初の記録を追加しましょう。記録を追加する","svg":1}
+  cat-error {"btns":["再読み込み 48"],"primaries":0,"text":"読み込めませんでした。通信の状態を確かめて、もう一度お試しください。再読み込み","svg":1}

@@ -1,0 +1,54 @@
+normal 375 opened; stage half focus H2[sheet-title] inSheet=true anims 2
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 652.625 vh 812 ratio 0.804 focus BUTTON[sheet-shrink] inSheet=true anims 1
+  back to half ratio 0.572
+  peek peek h 196.171875 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open ["CSSAnimation:sb-sheet-scrim","CSSAnimation:sb-sheet"] td 0.28s/0.28s
+normal 1280 opened; stage half focus H2[sheet-title] inSheet=true anims 2
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 642.984375 vh 800 ratio 0.804 focus BUTTON[sheet-shrink] inSheet=true anims 1
+  back to half ratio 0.572
+  peek peek h 214.859375 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open ["CSSAnimation:sb-sheet-scrim","CSSAnimation:sb-sheet"] td 0.28s/0.28s
+field 375 opened; stage half focus H2[sheet-title] inSheet=true anims 0
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 730.796875 vh 812 ratio 0.900 focus BUTTON[sheet-shrink] inSheet=true anims 0
+  back to half ratio 0.500
+  peek peek h 120 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open [] td 0s/0s
+field 1280 opened; stage half focus H2[sheet-title] inSheet=true anims 0
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 720 vh 800 ratio 0.900 focus BUTTON[sheet-shrink] inSheet=true anims 0
+  back to half ratio 0.500
+  peek peek h 120 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open [] td 0s/0s
+reduce 375 opened; stage half focus H2[sheet-title] inSheet=true anims 0
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 730.796875 vh 812 ratio 0.900 focus BUTTON[sheet-shrink] inSheet=true anims 0
+  back to half ratio 0.500
+  peek peek h 120 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open [] td 1e-05s/1e-05s
+reduce 1280 opened; stage half focus H2[sheet-title] inSheet=true anims 0
+  tab trail all inSheet: true BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true | BUTTON[sheet-close] inSheet=true | INPUT[] inSheet=true | BUTTON[sheet-expand] inSheet=true | BUTTON[sheet-shrink] inSheet=true
+  shift-tab all inSheet: true
+  after expand stage full h 720 vh 800 ratio 0.900 focus BUTTON[sheet-shrink] inSheet=true anims 0
+  back to half ratio 0.500
+  peek peek h 120 scrim 0 aria-modal false focus BUTTON[sheet-expand] inSheet=true
+  after Esc: sheet count 0 focus BUTTON[cat-sheet-open] inSheet=false opener focused true
+  close btn: count 0 opener focused true
+  anims right after open [] td 1e-05s/1e-05s

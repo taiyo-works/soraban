@@ -1,0 +1,6 @@
+375 /ops/plans {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"343x138","hiddenFlags":4}
+375 /ops/flights {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"343x138","hiddenFlags":4}
+375 /ops/journal {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"343x138","hiddenFlags":4}
+1280 /ops/plans {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"960x138","hiddenFlags":4}
+1280 /ops/flights {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"960x138","hiddenFlags":4}
+1280 /ops/journal {"busy":"true","text":"読み込み中","anims":0,"subAnims":0,"bars":4,"bg":["rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)","rgb(238, 241, 245)"],"animNames":[],"box":"960x138","hiddenFlags":4}

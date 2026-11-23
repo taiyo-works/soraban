@@ -1,0 +1,29 @@
+Running 9 tests using 1 worker
+EVZOOM 飛行記録の入力（エラー） 390: sw=390/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 飛行記録の入力（エラー） 430: sw=430/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  1 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 飛行記録の入力（エラー） (2.6s)
+EVZOOM 計画の作成（エラー） 390: sw=456/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 計画の作成（エラー） 430: sw=476/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  2 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 計画の作成（エラー） (2.6s)
+EVZOOM 事故の記録（エラー） 390: sw=390/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 事故の記録（エラー） 430: sw=430/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  3 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 事故の記録（エラー） (2.5s)
+EVZOOM 計画の訂正 390: sw=390/390 clipped=[] containers=["input[plan-lat][input]「」 幅 133<204","input[plan-lng][input]「」 幅 133<225"] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 計画の訂正 430: sw=430/430 clipped=[] containers=["input[plan-lat][input]「」 幅 153<204","input[plan-lng][input]「」 幅 153<225"] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  4 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 計画の訂正 (2.0s)
+EVZOOM 計画の訂正（エラー） 390: sw=390/390 clipped=[] containers=["input[plan-lat][input]「」 幅 133<204","input[plan-lng][input]「」 幅 133<225"] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 計画の訂正（エラー） 430: sw=430/430 clipped=[] containers=["input[plan-lat][input]「」 幅 153<204","input[plan-lng][input]「」 幅 153<225"] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  5 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 計画の訂正（エラー） (2.4s)
+EVZOOM 場所の登録（エラー） 390: sw=456/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 場所の登録（エラー） 430: sw=476/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  6 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 場所の登録（エラー） (2.4s)
+EVZOOM 許可の登録（エラー） 390: sw=390/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 許可の登録（エラー） 430: sw=430/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  7 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 許可の登録（エラー） (2.5s)
+EVZOOM 機体の登録（エラー） 390: sw=390/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 機体の登録（エラー） 430: sw=430/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  8 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 機体の登録（エラー） (2.3s)
+EVZOOM 操縦者の登録（エラー） 390: sw=390/390 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+EVZOOM 操縦者の登録（エラー） 430: sw=430/430 clipped=[] containers=[] unscaled=0 unreachablePrimary=[] nav=0 excl=1
+  ✓  9 e2e/ev-tmp/ev-zoom.spec.ts:69:7 › 操縦者の登録（エラー） (2.4s)
+  9 passed (22.8s)
