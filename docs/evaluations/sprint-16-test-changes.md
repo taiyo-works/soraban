@@ -171,3 +171,5 @@
 **上限を変えたもの（R1-8 の手続き）**: なし。画面の長さ・最初の画面の縦位置の上限は変えていない（倍率の報告対象なし）。
 
 **16-C の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16C-gen-*.log`）**: ops E2E 全体 275 件通過（基準 256 ＋ `sprint16-c-db` 19）、公開側 271 通過・1 失敗（`sprint9` 306 右クリック。runbook の既知の不安定。基準 `c58d92e` でも 3/6 失敗）、272 件（基準 252 ＋ `sprint16-c` 20）。新しい spec は ×3 で通過（`sprint16-c` 60/60、`sprint16-c-db` 57/57）。
+
+**16-C gen2（K-8 の追加修正）の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16C-gen2-*.log`）**: typecheck・lint・単体 3029 通過。ops E2E 全体 278 通過（275 ＋ 新しい 3）、公開側 272 通過（既知の不安定も出ず）。`sprint16-c-db` ×3 は 66/66。
