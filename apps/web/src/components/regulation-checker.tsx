@@ -1256,7 +1256,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
     readonly desc: string;
   }) => (
     <label key={p.key} className={`sb-check-row ${p.state ? "is-on" : ""}`}>
-      <input type="checkbox" checked={p.state} onChange={(e) => p.set(e.target.checked)} className="sb-check mt-0.5" />
+      <input type="checkbox" checked={p.state} onChange={(e) => p.set(e.target.checked)} className="sb-check" />
       <span className="flex flex-1 flex-col gap-0.5 leading-snug">
         <span className="text-sm font-bold text-sb-ink">{p.label}</span>
         <span className="text-sm text-sb-ink-3">{p.desc}</span>
@@ -1705,7 +1705,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                       disabled={isAuto}
                       title={isAuto ? "地点判定から自動検出（この地点では外せません）" : undefined}
                       onChange={() => toggleAirspaceFlag(flag)}
-                      className="sb-check mt-0.5"
+                      className="sb-check"
                     />
                     <span className="text-sm font-bold leading-snug text-sb-ink">
                       {SPECIFIC_FLIGHT_FLAG_LABEL[flag]}
@@ -1755,7 +1755,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
               const checked = methodFlags.includes(flag);
               return (
                 <label key={flag} className={`sb-check-row ${checked ? "is-on" : ""}`}>
-                  <input type="checkbox" checked={checked} onChange={() => toggleMethodFlag(flag)} className="sb-check mt-0.5" />
+                  <input type="checkbox" checked={checked} onChange={() => toggleMethodFlag(flag)} className="sb-check" />
                   <span className="text-sm font-bold leading-snug text-sb-ink">{SPECIFIC_FLIGHT_FLAG_LABEL[flag]}</span>
                 </label>
               );

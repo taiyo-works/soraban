@@ -3,7 +3,9 @@ import type { ItemVerdict } from "@soraban/regulations";
 import "./catalog.css";
 import { HeroIllustration } from "@/components/hero-illustration";
 import { PillButton, SectionHead, StatusLabel, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { CatalogAttrs } from "./catalog-attrs";
+import { CatalogChecks, CatalogInputs, CatalogSheet, CatalogStates } from "./catalog-parts";
 
 // デザイン見本 v2（Sprint 16-1。G-1 でユーザーが配色を決める）。認証・DB・外部通信なし。静的な部品の並べだけで、操作の状態は持たない。
 // 設定は URL: ?mode=field（現場の値）／?theme=dark（休眠している暗の確認用）／?veil=1（日差しの模擬：白い膜 rgba(255,255,255,.35)）。
@@ -150,14 +152,35 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <strong>ごく薄いグレーの面</strong>
             <p className="sbx-note">注記・補足に使う。</p>
           </div>
-          <label className="flex flex-col gap-1">
-            <span>入力欄（縁は 3:1 以上）</span>
-            <input className="sbx-input" placeholder="例：機体の名前" data-testid="cat-input" />
-          </label>
           <div className="sb-check-row is-on" data-testid="cat-selected" style={{ padding: "12px" }}>
             <span>選択中の面（薄い主色の面＋縁）</span>
           </div>
         </div>
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-inputs-h" data-testid="cat-inputs-section">
+        <h2 id="cat-inputs-h">入力欄（ラベルは常に上・エラーは記号付き 1 行）</h2>
+        <CatalogInputs />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-checks-h" data-testid="cat-checks-section">
+        <h2 id="cat-checks-h">チェック行と群（完了数/総数・折りたたみ）</h2>
+        <CatalogChecks />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-sheet-h" data-testid="cat-sheet-section">
+        <h2 id="cat-sheet-h">ボトムシート（3 段）</h2>
+        <CatalogSheet />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-skel-h" data-testid="cat-skeleton-section">
+        <h2 id="cat-skel-h">スケルトン（静止）</h2>
+        <SkeletonCard testId="cat-skeleton" />
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-states-h" data-testid="cat-states-section">
+        <h2 id="cat-states-h">空の状態と通信エラー</h2>
+        <CatalogStates />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-verdict" data-testid="cat-verdict">

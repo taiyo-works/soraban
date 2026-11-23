@@ -76,7 +76,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は墨の枠と薄い地で示す（チェックの記号と併用）。③b1 の計画の入力（plans-client.tsx）と同じ作り
 const rowClass =
   "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
-const box = `${checkboxClass} mt-0.5 h-5! w-5!`;
+const box = `${checkboxClass} mt-0.5`;
 
 /** 登録・訂正のフォーム。訂正では reason と expectedVersion を送る。 */
 export function PermitForm({

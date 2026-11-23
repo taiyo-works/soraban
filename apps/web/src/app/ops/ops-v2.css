@@ -631,14 +631,9 @@ html:has(.ops-v2) body {
   padding: 12px 16px;
   line-height: 1.7;
 }
-.sb-input[aria-invalid="true"] {
-  border-color: var(--sb-v-no-fg);
-  box-shadow: inset 0 0 0 1px var(--sb-v-no-fg);
-}
-.sb-input:disabled {
-  border-style: dashed;
-  background: var(--sb-sunken);
-  color: var(--sb-ink-3);
+/* 入力欄のエラー・無効・フォーカスの規則は 16-D で soraban-ui.css（.sb-input）へ移した。ここは運航管理の輪（.ds.ops-v2 の 3px）を、入力欄だけ主色の 2px の枠に置き換える */
+.ds.ops-v2 .sb-input:focus-visible {
+  outline: none;
 }
 /* 入力欄は、横に並べた行の中で縮める（既定の最小幅のままだと、日付と時刻の 2 つが 375px の列からはみ出す） */
 .ds.ops-v2 .sb-input {

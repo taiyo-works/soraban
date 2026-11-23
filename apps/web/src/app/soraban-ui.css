@@ -607,19 +607,51 @@ button.sb-state::after {
   font-weight: 700;
   letter-spacing: 0.05em;
 }
+/* 入力欄（Sprint 16-D D-1）：高さ 52 以上（現場 56＝--sb-hit）・角丸 12・面 --sb-sunken・--sb-edge の 1px の縁。
+ * フォーカスは主色の 2px の枠（縁 1px＋内側の 1px）。エラーは縁が危険の印の色（下の 1 行は .sb-field-error。role=alert にしない）。ラベルは入力欄の上に常に出す（.sb-label）。 */
 .sb-input {
   width: 100%;
-  min-height: 52px;
-  border: 1.5px solid var(--sb-edge);
-  border-radius: var(--sb-r-m);
-  background: var(--sb-field);
+  min-height: max(52px, var(--sb-hit));
+  border: var(--sb-rule-w) solid var(--sb-edge);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-sunken);
   padding: 0 16px;
   font-size: 1rem;
   color: var(--sb-ink);
   letter-spacing: 0.03em;
 }
-.sb-input.sb-input-sm {
-  min-height: 48px;
+.sb-input[aria-invalid="true"] {
+  border-color: var(--sb-st-danger-mark);
+  box-shadow: inset 0 0 0 1px var(--sb-st-danger-mark);
+}
+.sb-input:focus,
+:is(input, select, textarea).sb-input:focus-visible,
+.sb-page .sb-input:focus-visible,
+.ds :is(input, select, textarea).sb-input:focus-visible {
+  outline: none;
+  border-color: var(--sb-focus);
+  box-shadow: inset 0 0 0 1px var(--sb-focus);
+}
+.sb-input:disabled {
+  border-style: dashed;
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+}
+/* 項目ごとのエラー：記号（SVG）＋文字の 1 行。入力欄の aria-describedby で結ぶ */
+.sb-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--sb-st-danger-text);
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.6;
+}
+.sb-field-error-mark {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
 }
 select.sb-input {
   appearance: none;
@@ -655,15 +687,16 @@ select.sb-input {
   letter-spacing: 0.04em;
   color: var(--sb-ink-2);
 }
-/* チェック行・チェックの枠（見た目は丸め。行は 16・枠は 4） */
+/* チェック行・チェックの丸（Sprint 16-D D-2）：左に 32 の丸いチェック、行の高さ 72 以上（チェックを持つ行）、行全体が <label>。
+ * チェック済みは、チェックの記号＋行末の文字「済」（色だけに頼らない）。丸はチェックを持つ入力に共通（.sb-check）。 */
 input.sb-check {
   appearance: none;
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   margin: 0;
   border: 2px solid var(--sb-edge);
-  border-radius: var(--sb-r-s);
+  border-radius: var(--sb-pill);
   background: var(--sb-field);
   display: inline-grid;
   place-content: center;
@@ -672,11 +705,11 @@ input.sb-check {
 }
 input.sb-check::after {
   content: "";
-  width: 11px;
-  height: 6px;
+  width: 15px;
+  height: 8px;
   border-left: 3px solid currentColor;
   border-bottom: 3px solid currentColor;
-  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transform: translateY(-2px) rotate(-45deg) scale(0);
   transition: transform var(--sb-dur) var(--sb-ease);
 }
 input.sb-check:checked {
@@ -684,7 +717,7 @@ input.sb-check:checked {
   border-color: var(--sb-primary);
 }
 input.sb-check:checked::after {
-  transform: translateY(-1px) rotate(-45deg) scale(1);
+  transform: translateY(-2px) rotate(-45deg) scale(1);
 }
 input.sb-check:disabled {
   cursor: not-allowed;
@@ -693,7 +726,7 @@ input.sb-check:disabled {
 .sb-check-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   min-height: var(--sb-hit-row);
   padding: 8px 12px;
   border-radius: var(--sb-r-m);
@@ -713,6 +746,102 @@ input.sb-check:disabled {
 .sb-check-row:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
+}
+/* チェックを持つ行は 72 以上（現場は --sb-hit-row の 64 より大きい 72 のまま）。チェックと文字は行の中央にそろえる */
+.sb-check-row:has(input.sb-check),
+.opx-check-row:has(input.sb-check) {
+  min-height: 72px;
+  align-items: center;
+  padding-block: 12px;
+}
+/* チェック済みの行末の「済」（既存の行は疑似要素。読み上げには出さず、状態はチェックボックス自身が伝える） */
+:is(.sb-check-row, .opx-check-row):has(input.sb-check:checked)::after {
+  content: "済" / "";
+  flex: none;
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-primary);
+}
+/* 新しい部品（CheckRow）は本物の文字「済」を持つので、疑似要素は出さない */
+.sb-chk::after {
+  content: none !important;
+}
+.sb-chk .sb-chk-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sb-fs-body);
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.sb-chk .sb-chk-done {
+  display: none;
+  flex: none;
+  margin-left: auto;
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-primary);
+}
+.sb-chk:has(input.sb-check:checked) .sb-chk-done {
+  display: inline;
+}
+/* 群（CheckGroup）：見出しに「完了数/総数」・折りたためる（<details>） */
+.sb-chk-group {
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-chk-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--sb-hit);
+  padding: 8px 16px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--sb-r-card);
+}
+.sb-chk-group > summary::-webkit-details-marker {
+  display: none;
+}
+.sb-chk-group > summary:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sb-chk-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sb-fs-body);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink);
+}
+.sb-chk-count {
+  flex: none;
+  font-size: var(--sb-fs-body);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.sb-chk-chev {
+  flex: none;
+  color: var(--sb-ink-2);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+.sb-chk-group[open] .sb-chk-chev {
+  transform: rotate(180deg);
+}
+.sb-chk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 12px 12px;
 }
 
 /* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を墨の経路が進む。スマホ 128px、PC 240px） ===== */
@@ -1419,4 +1548,178 @@ a.sb-row:focus-visible .sb-go-dot {
   background: var(--sb-control);
   color: var(--sb-ink);
   font-weight: 700;
+}
+
+/* ===== 空の状態・通信エラー（Sprint 16-D D-5） ===== */
+.sb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-empty-icon {
+  color: var(--sb-ink-3);
+}
+.sb-empty-message {
+  max-width: 28em;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+.sb-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sb-error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+.sb-error-message .sb-field-error-mark {
+  margin-top: 5px;
+  color: var(--sb-st-danger-mark);
+}
+
+/* ===== スケルトン（Sprint 16-D D-4）：カードの形の静止した帯。動かさない（V-6）。aria-hidden の帯と、親の aria-busy・読み上げの文「読み込み中」 ===== */
+.sb-skel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: var(--sb-sp-4);
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-skel {
+  display: block;
+  height: 16px;
+  border-radius: var(--sb-r-control);
+  background: var(--sb-sunken);
+}
+.sb-skel-title {
+  width: 40%;
+  height: 22px;
+}
+.sb-skel-line:nth-of-type(odd) {
+  width: 92%;
+}
+.sb-skel-line:nth-of-type(even) {
+  width: 68%;
+}
+
+/* ===== ボトムシート（Sprint 16-D D-3）：上側の角丸 20・つまみ・高さ 3 段（120px・50%・90%）。暗幕は中間以上だけ。開閉と段の変更は --sb-dur-sheet（現場と動きを減らす指定で 0） ===== */
+.sb-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.sb-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--sb-scrim);
+  pointer-events: auto;
+  animation: sb-sheet-fade var(--sb-dur-sheet) var(--sb-ease);
+}
+.sb-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  height: 50dvh;
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  border-radius: var(--sb-r-sheet) var(--sb-r-sheet) 0 0;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-bottom: 0;
+  box-shadow: var(--sb-shadow-float);
+  pointer-events: auto;
+  transition: height var(--sb-dur-sheet) var(--sb-ease);
+  animation: sb-sheet-rise var(--sb-dur-sheet) var(--sb-ease);
+}
+.sb-sheet[data-stage="peek"] {
+  height: 120px;
+}
+.sb-sheet[data-stage="half"] {
+  height: 50dvh;
+}
+.sb-sheet[data-stage="full"] {
+  height: 90dvh;
+}
+.sb-sheet-handle {
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-edge);
+}
+.sb-sheet-head {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 4px 8px 4px 16px;
+}
+.sb-sheet-title {
+  flex: 1 1 8em;
+  min-width: 0;
+  font-size: var(--sb-fs-h);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--sb-ink);
+}
+.sb-sheet-title:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+  border-radius: var(--sb-r-s);
+}
+.sb-sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.sb-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 16px 16px;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+}
+@keyframes sb-sheet-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sb-sheet-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

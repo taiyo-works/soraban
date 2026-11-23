@@ -216,25 +216,38 @@ function DateTimeInput({
             {nowLabel}
           </button>
         ) : null}
-        <input
-          type="date"
-          aria-label={`${label.replace(/時刻$/, "")}日`}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className={`${inputClass} tnum min-h-12 sm:w-[11rem]`}
-          value={date}
-          onChange={(e) => onChange(e.target.value, time)}
-        />
-        <input
-          type="time"
-          aria-label={label}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          step={60}
-          className={`${inputClass} tnum min-h-12 sm:w-[8.5rem]`}
-          value={time}
-          onChange={(e) => onChange(date, e.target.value)}
-        />
+        {/* 16-D D-1：見えるラベル（日付・時刻）を入力欄の上に置く。読み上げ名は従来の aria-label のまま */}
+        <div className="flex min-w-0 flex-col gap-1">
+          <label htmlFor={`${id}-date`} className="sb-label">
+            日付
+          </label>
+          <input
+            id={`${id}-date`}
+            type="date"
+            aria-label={`${label.replace(/時刻$/, "")}日`}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            className={`${inputClass} tnum min-h-12 sm:w-[11rem]`}
+            value={date}
+            onChange={(e) => onChange(e.target.value, time)}
+          />
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <label htmlFor={`${id}-time`} className="sb-label">
+            時刻
+          </label>
+          <input
+            id={`${id}-time`}
+            type="time"
+            aria-label={label}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            step={60}
+            className={`${inputClass} tnum min-h-12 sm:w-[8.5rem]`}
+            value={time}
+            onChange={(e) => onChange(date, e.target.value)}
+          />
+        </div>
       </div>
       <FieldError id={errorId} message={error} />
       <span id={hintId} className="text-sm text-sb-ink-3">

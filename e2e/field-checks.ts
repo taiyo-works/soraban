@@ -303,6 +303,13 @@ export const expectNoHorizontalScroll = async (page: Page, label: string): Promi
   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);
 };
 
+/** 入れ物の切れの検査から外す要素（意図して切っているもの）。理由を必ず書く。足すときは理由と、画面の全文が別に得られることを PR に書く。 */
+export const CLIP_CONTAINER_EXCLUDES: ReadonlyArray<{ readonly selector: string; readonly reason: string }> = [
+  { selector: ".sb-sr, .sr-only", reason: "視覚的に隠した読み上げ専用の文（1px の枠で切るのが目的）" },
+  { selector: ".maplibregl-map, .maplibregl-ctrl, .leaflet-container", reason: "地図（第三者の部品。ドラッグで動かす枠で、枠の外は地図の続き）" },
+  { selector: ".sb-hero", reason: "`/` の挿絵（文字を持たない線画の背景。枠で切る意匠）" },
+];
+
 /** 文字 200%・320 幅の検査（Sprint 16-B）で使う幅。 */
 export const TEXT_ZOOM_WIDTHS = [390, 430] as const;
 
@@ -312,6 +319,14 @@ export type TextZoomReport = {
   readonly clientWidth: number;
   /** 文字を持つのに、overflow が hidden/clip で内容が切れている要素 */
   readonly clipped: string[];
+  /**
+   * 入れ物の切れ（16-D 追加 1）：overflow-x/y が hidden・clip の要素（文字を持つかどうかを問わない）で scrollWidth > clientWidth + 1 のもの。
+   * `clipped` は「直接の文字を持つ要素」しか見ないので、子だけを持つ入れ物（nav・グリッドなど）の切れを見逃す（16-C の評価で plan-digest が該当）。
+   * 意図して切っている要素は CLIP_CONTAINER_EXCLUDES と、省略表示（text-overflow: ellipsis で全文が title にあるもの）だけ除く。
+   */
+  readonly clippedContainers: string[];
+  /** 除外した入れ物（理由つきの記録。テストの注記に出す） */
+  readonly excludedContainers: string[];
   /** 200% にしても文字の大きさが（ほぼ）2 倍にならなかった要素（px 固定の指定が残っている） */
   readonly unscaled: string[];
   /** 主ボタンで、スクロールしても画面の中に入らない・固定の下部ナビに隠れるもの */
@@ -347,7 +362,7 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
     });
     await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
     return await page.evaluate(
-      ({ w }) => {
+      ({ w, excludes }) => {
         const de = document.documentElement;
         const all = Array.from(document.body.querySelectorAll<HTMLElement>("*"));
         const describe = (el: Element): string => {
@@ -382,6 +397,27 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
             else if (el.scrollWidth > el.clientWidth + 1 && clips(cs.overflowX)) clipped.push(`${describe(el)} 幅 ${el.clientWidth}<${el.scrollWidth}`);
           }
         });
+        // 入れ物の切れ（文字の有無を問わない）。除外は CLIP_CONTAINER_EXCLUDES と、全文が title にある省略表示だけ
+        const clippedContainers: string[] = [];
+        const excludedContainers: string[] = [];
+        const clipsV = (v: string) => v === "hidden" || v === "clip";
+        for (const el of all) {
+          const cs = getComputedStyle(el);
+          if (!clipsV(cs.overflowX) && !clipsV(cs.overflowY)) continue;
+          if (!visible(el)) continue;
+          if (!(clipsV(cs.overflowX) && el.scrollWidth > el.clientWidth + 1)) continue;
+          const label = `${describe(el)} 幅 ${el.clientWidth}<${el.scrollWidth}`;
+          const hit = excludes.find((x) => el.matches(x.selector) || !!el.closest(x.selector));
+          if (hit) {
+            excludedContainers.push(`${label}（除外：${hit.reason}）`);
+            continue;
+          }
+          if (cs.textOverflow === "ellipsis" && (el.hasAttribute("title") || !!el.closest("[title]"))) {
+            excludedContainers.push(`${label}（除外：省略表示。全文は title にある）`);
+            continue;
+          }
+          clippedContainers.push(label);
+        }
         const navEl = document.querySelector<HTMLElement>('[data-testid="ops-bottom-nav"]');
         const nav = navEl && visible(navEl) && getComputedStyle(navEl).position === "fixed" ? navEl : null;
         const reaches = (el: HTMLElement): boolean => {
@@ -419,13 +455,15 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
           scrollWidth: de.scrollWidth,
           clientWidth: de.clientWidth,
           clipped,
+          clippedContainers,
+          excludedContainers,
           unscaled,
           unreachablePrimary,
           navCoversLast,
           textCount,
         };
       },
-      { w: width },
+      { w: width, excludes: CLIP_CONTAINER_EXCLUDES.map((x) => ({ ...x })) },
     );
   } finally {
     await page.evaluate(() => {
@@ -439,9 +477,11 @@ export const expectTextZoom = async (page: Page, label: string, widths: readonly
   for (const w of widths) {
     const r = await measureTextZoom(page, w);
     const l = `${label} 文字 200%・${w}px`;
+    if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });
     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
@@ -494,4 +534,92 @@ export const expectNoApplicationSupport = async (page: Page, label = "公開の 
   for (const w of APPLICATION_SUPPORT_WORDS) expect(text, `${label}: 「${w}」が残っている`).not.toContain(w);
   for (const id of APPLICATION_SUPPORT_TESTIDS) await expect(page.getByTestId(id), `${label}: ${id}`).toHaveCount(0);
   await expect(page.getByRole("button", { name: /束ね PDF/ }), `${label}: 束ね PDF のボタン`).toHaveCount(0);
+};
+
+
+/**
+ * 入力欄の検査（Sprint 16-D D-1）。root の中の見えている入力欄（input・select・textarea。hidden・submit・button・checkbox・radio・file・range を除く）について:
+ * - 見えるラベルがある（`<label for>`・包む `<label>`・`aria-labelledby` のどれかが、見えていて空でない文字を持つ。`aria-label` だけは不可。プレースホルダーはラベルではない）
+ * - ラベルの文字は入力欄の上にある（文字の下端 ≤ 入力欄の上端 + 2px）
+ * - 高さは 52px 以上（現場 56px 以上）・角丸 12px
+ * - `aria-invalid="true"` の入力欄は、`aria-describedby` が見えて空でない文字を持つ要素を指し、その要素は role="alert" でなく、記号（SVG か aria-hidden の印）を持つ
+ */
+export type FieldReport = { readonly count: number; readonly noLabel: string[]; readonly notAbove: string[]; readonly badSize: string[]; readonly badError: string[]; readonly invalid: number };
+
+export const collectFieldReport = async (page: Page, rootSelector: string, field: boolean): Promise<FieldReport> =>
+  page.evaluate(
+    ({ root, field }) => {
+      const rootEl = document.querySelector(root) ?? document.body;
+      const describe = (el: Element): string => {
+        const ty = el.getAttribute("type");
+        const near = (el.closest("div, label, fieldset, section")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 24);
+        return `${el.tagName.toLowerCase()}${ty ? `[type=${ty}]` : ""}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : el.id ? `#${el.id}` : el.getAttribute("name") ? `[name=${el.getAttribute("name")}]` : ""}「${near}」`;
+      };
+      const shown = (el: Element): boolean => {
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && !el.closest(".sb-sr, .sr-only");
+      };
+      const textNodeRect = (host: Element, control: Element): DOMRect | null => {
+        const w = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          if (!(n.textContent ?? "").trim()) continue;
+          if (control.contains(n)) continue;
+          const par = (n as Text).parentElement;
+          if (par && (par.closest(".sb-sr, .sr-only") || getComputedStyle(par).display === "none")) continue;
+          const range = document.createRange();
+          range.selectNodeContents(n);
+          const rect = range.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) return rect;
+        }
+        return null;
+      };
+      const controls = Array.from(rootEl.querySelectorAll<HTMLInputElement>("input, select, textarea")).filter((el) => {
+        if (el instanceof HTMLInputElement && ["hidden", "submit", "button", "checkbox", "radio", "file", "range", "reset", "image"].includes(el.type)) return false;
+        return shown(el);
+      });
+      const noLabel: string[] = [];
+      const notAbove: string[] = [];
+      const badSize: string[] = [];
+      const badError: string[] = [];
+      let invalid = 0;
+      for (const el of controls) {
+        const hosts: Element[] = Array.from(el.labels ?? []);
+        for (const id of (el.getAttribute("aria-labelledby") ?? "").split(/\s+/).filter(Boolean)) {
+          const t = document.getElementById(id);
+          if (t) hosts.push(t);
+        }
+        const rects = hosts.filter(shown).map((h) => textNodeRect(h, el)).filter((r): r is DOMRect => r !== null);
+        if (rects.length === 0) {
+          noLabel.push(describe(el));
+        } else {
+          const er = el.getBoundingClientRect();
+          if (!rects.some((r) => r.bottom <= er.top + 2)) notAbove.push(`${describe(el)}（ラベルの下端 ${Math.round(rects[0]!.bottom)} > 入力欄の上端 ${Math.round(er.top)}）`);
+        }
+        const cs = getComputedStyle(el);
+        const h = el.getBoundingClientRect().height;
+        const min = field ? 56 : 52;
+        if (h < min - 0.5) badSize.push(`${describe(el)} 高さ ${h.toFixed(1)} < ${min}`);
+        if (parseFloat(cs.borderTopLeftRadius) !== 12) badSize.push(`${describe(el)} 角丸 ${cs.borderTopLeftRadius}`);
+        if (el.getAttribute("aria-invalid") === "true") {
+          invalid++;
+          const ids = (el.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean);
+          const targets = ids.map((id) => document.getElementById(id)).filter((t): t is HTMLElement => !!t && shown(t) && (t.textContent ?? "").trim().length > 0);
+          const ok = targets.some((t) => t.getAttribute("role") !== "alert" && !t.closest('[role="alert"]') && !!t.querySelector('svg, [aria-hidden="true"]'));
+          if (!ok) badError.push(`${describe(el)}（aria-describedby=${el.getAttribute("aria-describedby") ?? "なし"}）`);
+        }
+      }
+      return { count: controls.length, noLabel, notAbove, badSize, badError, invalid };
+    },
+    { root: rootSelector, field },
+  );
+
+export const expectFields = async (page: Page, rootSelector: string, label: string, opts: { field?: boolean; minCount?: number } = {}): Promise<FieldReport> => {
+  const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+  expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+  expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+  expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+  expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+  expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+  return r;
 };

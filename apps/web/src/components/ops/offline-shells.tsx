@@ -8,6 +8,7 @@
 //   journal      日誌（飛行記録）の入力。離着陸の時刻は現場の記録から引き継ぐ。送信待ちに入れる。サーバーの警告は送信後に出る
 //   today        先読み済みの計画の一覧
 //   unavailable  圏外では行えない画面（計画の作成・通報・登録・一覧）：圏外であることと、戻ってから行うことを出す
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { useEffect, useMemo, useState } from "react";
 import { FIELD_STATE_MARK, fieldHref } from "@/lib/ops-field";
 import { enqueue } from "@/lib/ops-outbox";
@@ -73,6 +74,7 @@ function OfflineBanner() {
 function Loading() {
   return (
     <main className={MAIN} data-testid="offline-loading">
+      <SkeletonCard />
       <p>端末に保存した内容を読み込んでいます…</p>
     </main>
   );

@@ -231,3 +231,151 @@ export function Disclosure({
     </details>
   );
 }
+
+// ── 入力欄・チェック行・空の状態・通信エラー（Sprint 16-D：D-1・D-2・D-5。見た目は soraban-ui.css の .sb-input／.sb-check*／.sb-chk*／.sb-empty／.sb-error-card） ──
+
+/** 項目ごとのエラーの先頭の記号（色だけに頼らない。装飾なので読み上げない。隣に文字を置く）。 */
+export function FieldErrorMark() {
+  return (
+    <svg className="sb-field-error-mark" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2.8 L18 16.6 H2 Z" />
+      <path d="M10 8 V11.6" />
+      <circle cx="10" cy="14.2" r="0.6" fill="currentColor" />
+    </svg>
+  );
+}
+
+type TextFieldProps = Omit<ComponentPropsWithRef<"input">, "id" | "aria-invalid" | "aria-describedby" | "children"> & {
+  /** ラベルと入力欄を結ぶ id（必須。説明・エラーの id もここから作る：`${id}-hint`・`${id}-error`）。 */
+  readonly id: string;
+  /** 常に入力欄の上に出すラベル。プレースホルダーをラベルの代わりにしない。 */
+  readonly label: string;
+  readonly hint?: string;
+  /** あるとき、縁が危険の印の色になり、下に記号付きの 1 行が出る（aria-describedby で入力欄に結ぶ。role は付けない）。 */
+  readonly error?: string;
+  readonly requiredMark?: boolean;
+};
+
+/** 入力欄（ラベル＋入力＋説明＋エラー）。読み上げ名はラベルだけ。説明とエラーは aria-describedby。 */
+export function TextField({ id, label, hint, error, requiredMark, className, ...rest }: TextFieldProps) {
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+  return (
+    <div className="sb-field flex min-w-0 flex-col gap-1.5">
+      <label htmlFor={id} className="sb-label">
+        {label}
+        {requiredMark ? <span className="sb-field-required"> 必須</span> : null}
+      </label>
+      <input {...rest} id={id} className={cx("sb-input", className)} aria-invalid={error ? true : undefined} aria-describedby={describedBy} />
+      {error ? (
+        <p id={errorId} className="sb-field-error" data-testid={`${id}-error`}>
+          <FieldErrorMark />
+          <span>{error}</span>
+        </p>
+      ) : null}
+      {hint ? (
+        <p id={hintId} data-note="" className="sb-hint">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+type CheckRowProps = Omit<ComponentPropsWithRef<"input">, "type" | "children"> & {
+  readonly label: ReactNode;
+  readonly rowTestId?: string;
+};
+
+/** チェック行：行全体が <label>。左に 32 の丸いチェック、右に項目名、済みのときは行末に文字「済」（色だけに頼らない）。 */
+export function CheckRow({ label, rowTestId, className, ...rest }: CheckRowProps) {
+  return (
+    <label className={cx("sb-check-row", "sb-chk", className)} {...(rowTestId ? { "data-testid": rowTestId } : {})}>
+      <input {...rest} type="checkbox" className="sb-check" />
+      <span className="sb-chk-text">{label}</span>
+      <span className="sb-chk-done" aria-hidden="true">
+        済
+      </span>
+    </label>
+  );
+}
+
+/** チェック行の群：見出しに「完了数/総数」を文字で出し、折りたためる（<details>。開閉は標準の動作で、キーボードでも開閉できる）。 */
+export function CheckGroup({
+  title,
+  done,
+  total,
+  children,
+  defaultOpen = true,
+  testId,
+}: {
+  readonly title: string;
+  readonly done: number;
+  readonly total: number;
+  readonly children: ReactNode;
+  readonly defaultOpen?: boolean;
+  readonly testId?: string;
+}) {
+  return (
+    <details className="sb-chk-group" {...(defaultOpen ? { open: true } : {})} {...(testId ? { "data-testid": testId } : {})}>
+      <summary>
+        <span className="sb-chk-title">{title}</span>
+        <span className="sb-chk-count" data-testid={testId ? `${testId}-count` : undefined}>
+          {done}/{total}
+        </span>
+        <svg className="sb-chk-chev" viewBox="0 0 20 20" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M5 8 L10 13 L15 8" />
+        </svg>
+      </summary>
+      <div className="sb-chk-list">{children}</div>
+    </details>
+  );
+}
+
+/** 空の状態：アイコン・一文・主ボタン 1 つだけ（ボタンは onAction か href のどちらか）。 */
+export function EmptyState({
+  message,
+  actionLabel,
+  onAction,
+  href,
+  testId,
+}: {
+  readonly message: string;
+  readonly actionLabel: string;
+  readonly onAction?: () => void;
+  readonly href?: string;
+  readonly testId?: string;
+}) {
+  return (
+    <div className="sb-empty" {...(testId ? { "data-testid": testId } : {})}>
+      <svg className="sb-empty-icon" viewBox="0 0 48 48" width={48} height={48} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="8" y="10" width="32" height="28" rx="4" />
+        <path d="M8 26 H17 L20 31 H28 L31 26 H40" />
+      </svg>
+      <p className="sb-empty-message">{message}</p>
+      {href ? (
+        <PillLink variant="primary" href={href}>
+          {actionLabel}
+        </PillLink>
+      ) : (
+        <PillButton variant="primary" onClick={onAction}>
+          {actionLabel}
+        </PillButton>
+      )}
+    </div>
+  );
+}
+
+/** 通信エラー：該当のカードの中に一文と「再読み込み」だけ（画面全体を止めない。role は付けない）。 */
+export function ErrorCard({ message, onRetry, retryLabel = "再読み込み", testId }: { readonly message: string; readonly onRetry: () => void; readonly retryLabel?: string; readonly testId?: string }) {
+  return (
+    <div className="sb-card sb-error-card" {...(testId ? { "data-testid": testId } : {})}>
+      <p className="sb-error-message">
+        <FieldErrorMark />
+        <span>{message}</span>
+      </p>
+      <PillButton onClick={onRetry}>{retryLabel}</PillButton>
+    </div>
+  );
+}

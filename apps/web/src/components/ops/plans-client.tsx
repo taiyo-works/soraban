@@ -94,7 +94,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
 const planCheckRow =
   "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
-const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
+const planCheckbox = `${checkboxClass} mt-0.5`;
 const selectClass = `${inputClass} min-h-12`;
 
 /** 欄に番号を足す（既にある番号は足さない）。 */

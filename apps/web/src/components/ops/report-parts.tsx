@@ -53,4 +53,4 @@ export function JstDateTimeField({
 /** 画面の確認のチェック（44px 以上の行）。 */
 export const confirmRowClass =
   "opx-check-row !items-start border-[1.5px] border-transparent !py-2.5 leading-snug has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover";
-export const confirmBoxClass = "mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-sb-ink";
+export const confirmBoxClass = "sb-check mt-0.5";

@@ -10,6 +10,7 @@ import { clearBundles, clearCurrentMember, clearOtherMembersBundles, setCurrentM
 import { flushIncidentOutbox, incidentUnsentTotalForMember, planIdsWithIncidentOutbox } from "./incident-outbox";
 import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import { Icon } from "@/components/ui/icons";
+import { FieldErrorMark } from "@/components/ui/sb-parts";
 import { buttonClass as dsButtonClass } from "@/components/ui/primitives";
 import {
   buttonDangerClass,
@@ -136,9 +137,10 @@ export const RequiredTag = ({ required }: { readonly required?: boolean }) =>
 
 export const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
   message ? (
-    <span id={id} role="alert" className="opx-field-error">
-      <span aria-hidden>! </span>
-      {message}
+    // 16-D D-1：role="alert" にしない（入力欄の aria-describedby で結ぶ。送信の結果は FormError が alert で 1 度だけ知らせる）。記号は SVG＋文字
+    <span id={id} className="opx-field-error sb-field-error" data-field-error="">
+      <FieldErrorMark />
+      <span>{message}</span>
     </span>
   ) : null;
 
@@ -438,29 +440,40 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
             <span>使用開始時の既存の総飛行時間</span>
             <RequiredTag required />
           </legend>
-          <div className="flex items-center gap-2">
-            <input
-              aria-label="既存の総飛行時間（時間）"
-              aria-invalid={flightError ? true : undefined}
-              aria-describedby={flightDescribedBy}
-              aria-required
-              className={`${inputClass.replace("w-full ", "")} tnum w-24 text-right`}
-              inputMode="numeric"
-              value={v.hours}
-              onChange={set("hours")}
-            />
-            <span className="text-sm text-sb-ink-2">時間</span>
-            <input
-              aria-label="既存の総飛行時間（分）"
-              aria-invalid={flightError ? true : undefined}
-              aria-describedby={flightDescribedBy}
-              aria-required
-              className={`${inputClass.replace("w-full ", "")} tnum w-20 text-right`}
-              inputMode="numeric"
-              value={v.minutes}
-              onChange={set("minutes")}
-            />
-            <span className="text-sm text-sb-ink-2">分</span>
+          {/* 16-D D-1：見えるラベル（時間・分）を入力欄の上に置く（単位は、これで読める）。読み上げ名は従来の aria-label のまま */}
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor={`${flightId}-hours`} className="sb-label">
+                時間
+              </label>
+              <input
+                id={`${flightId}-hours`}
+                aria-label="既存の総飛行時間（時間）"
+                aria-invalid={flightError ? true : undefined}
+                aria-describedby={flightDescribedBy}
+                aria-required
+                className={`${inputClass.replace("w-full ", "")} tnum w-24 text-right`}
+                inputMode="numeric"
+                value={v.hours}
+                onChange={set("hours")}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor={`${flightId}-minutes`} className="sb-label">
+                分
+              </label>
+              <input
+                id={`${flightId}-minutes`}
+                aria-label="既存の総飛行時間（分）"
+                aria-invalid={flightError ? true : undefined}
+                aria-describedby={flightDescribedBy}
+                aria-required
+                className={`${inputClass.replace("w-full ", "")} tnum w-20 text-right`}
+                inputMode="numeric"
+                value={v.minutes}
+                onChange={set("minutes")}
+              />
+            </div>
           </div>
           <FieldError id={flightErrorId} message={flightError} />
           <span id={`${flightId}-hint`} className="text-sm leading-relaxed text-sb-ink-3">

@@ -1,0 +1,177 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-d-db.spec.ts
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の作成（390 幅） (913ms)
+  ✘   2 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） (847ms)
+  ✘   3 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） (683ms)
+  ✘   4 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） (764ms)
+  ✓   5 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 操縦者の登録（390 幅） (697ms)
+  ✓   6 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 場所の登録（390 幅） (491ms)
+  ✓   7 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 許可・承認の登録（390 幅） (563ms)
+  ✓   8 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 事故・重大インシデントの記録（390 幅） (762ms)
+  ✘   9 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） (663ms)
+  ✓  10 e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 利用者（390 幅） (617ms)
+
+
+  1) e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） ──
+
+    Error: 点検の入力: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "input",
+    +   "input",
+    + ]
+
+       at ../field-checks.ts:616
+
+      614 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      615 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 616 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      617 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      618 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      619 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:616:47)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:61:7
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-00b8f-高さ-52-以上・角丸-12-点検の入力（390-幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-00b8f-高さ-52-以上・角丸-12-点検の入力（390-幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-00b8f-高さ-52-以上・角丸-12-点検の入力（390-幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） 
+
+    Error: 飛行記録の入力: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "input",
+    +   "input",
+    +   "input",
+    +   "input",
+    + ]
+
+       at ../field-checks.ts:616
+
+      614 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      615 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 616 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      617 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      618 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      619 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:616:47)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:61:7
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-ccb52--52-以上・角丸-12-飛行記録の入力（390-幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-ccb52--52-以上・角丸-12-飛行記録の入力（390-幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-ccb52--52-以上・角丸-12-飛行記録の入力（390-幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） ──
+
+    Error: 機体の登録: 見えるラベルがない入力欄
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "input",
+    +   "input",
+    + ]
+
+       at ../field-checks.ts:616
+
+      614 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+      615 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+    > 616 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+          |                                               ^
+      617 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      618 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+      619 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:616:47)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:61:7
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-b1e54-高さ-52-以上・角丸-12-機体の登録（390-幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-b1e54-高さ-52-以上・角丸-12-機体の登録（390-幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-b1e54-高さ-52-以上・角丸-12-機体の登録（390-幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） 
+
+    Error: 飛行記録の一覧（絞り込み）: 入力欄の高さ・角丸
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "select 高さ 48.0 < 52",
+    +   "input 高さ 48.0 < 52",
+    +   "input 高さ 48.0 < 52",
+    + ]
+
+       at ../field-checks.ts:618
+
+      616 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+      617 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+    > 618 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+          |                                            ^
+      619 |   expect(r.badError, `${label}: エラーの関連付け（aria-describedby・alert でない・記号）`).toEqual([]);
+      620 |   return r;
+      621 | };
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:618:44)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:61:7
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-34b6b-・角丸-12-飛行記録の一覧（絞り込み）（390-幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-34b6b-・角丸-12-飛行記録の一覧（絞り込み）（390-幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-34b6b-・角丸-12-飛行記録の一覧（絞り込み）（390-幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） ───
+    e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） ─
+    e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） ───
+    e2e/ops-db/sprint16-d-db.spec.ts:56:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） 
+  6 passed (15.2s)
+ ELIFECYCLE  Command failed with exit code 1.
