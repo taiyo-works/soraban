@@ -111,3 +111,40 @@ C-1〜C-6 は計算されたスタイルで満たす。検査を弱めた箇所�
 ## 9. 撮影
 
 `docs/evaluations/screenshots/sprint-16C/eval-*.png|jpg`（見本 375・1280・現場、色なし、`/` の未ログイン・ログイン済み、ホーム・計画・点検・日誌・主画面、200%、通報）。測定ログ: `sprint-16C-eval-manual-1.log`・`-manual-2.log`。
+
+## 10. 要修正の確認（d037824）
+
+判定: **条件付き合格**。要修正の 2 件（#1 主ボタンの寸法、#2・#3 文字 200% の切れ・横スクロール）は実画面で直っている。ただし、足された「計画の主画面の 200% の検査」は、修正前の実装でも通り、**回帰を防げない**。
+
+### 結果
+
+| 確認 | 結果 | 根拠 |
+|---|---|---|
+| 1. `/`（ログイン済み・結果あり）の主 | ✅ | 375・390・1280 とも主 高さ 56・文字 16px。同じ画面の副は高さ 48。主は幅 236px で副より狭いが、青の面で高さが上回り、小さくは見えない（`r1-eval-home-{375,390,1280}.png`、`sprint-16C-r1-eval-manual.log` の R1MEASURE） |
+| 2a. 計画の主画面 200%（390・430）の `plan-digest` | ✅ | 390: nav の scrollWidth 326 = clientWidth 326、430: 366 = 366。「判定を見る →」「計画の確認へ →」は枠の内側（右端 326／366）。文書の横スクロールなし。判定の行は実画面の札（要手続き・判定不能 2 件・出典が古い）と確認の札（下書き）を含む（`r1-eval-plan-digest-normal-{390,430}.png`）。評価時は 474>326 |
+| 2b. `/ops/places` 200%（390・430） | ✅ | 文書の scrollWidth = clientWidth（390・430）。`place-row-name` の右端 342／382（枠内）。評価時は 416>390（`r1-eval-places-200-{390,430}.png`） |
+| 3. 足した検査が修正前に落ちるか | 一部 ❌ | 下記 |
+| 4. 反復と関連 E2E | ✅ | `sprint16-c-db` ×3 = 72 通過。ops 全体 280 通過（空の DB）、公開側全体 272 通過（`next start`・1 ワーカー） |
+
+### 3. 検査が修正前で落ちるか（718ad3d のアプリ＋d037824 の spec、`pnpm build` し直し）
+
+`sprint16-c-db` の `-g "K-8|差し戻し 1"` を、修正前の 3 ファイル（`regulation-checker.tsx`・`plan-ui.tsx`・`ops/places/page.tsx`）で実行。作業ツリーは d037824 に戻し、修正後のアプリで再ビルド済み（`git status` はログのみ）。
+
+| 検査 | 修正前 | 判定 |
+|---|---|---|
+| K-8 の高さ（375・390・1280） | 3/3 失敗 | ✅ 効く |
+| `/ops/places` の 200% | 失敗 | ✅ 効く |
+| **計画の主画面の 200%（DOM で左を長くする版）** | **通過** | ❌ **効かない** |
+
+原因（実測）: `expectTextZoom`（`e2e/field-checks.ts`）の切れの検査は、`hasOwnText`（直接の文字を持つ要素）だけを対象にする。切れた `nav[plan-digest]` は直接の文字を持たず（子要素だけ）、そもそも検査の対象に入らない。評価の独自の測定が検出したのは、この `nav` の scrollWidth > clientWidth。足された spec は左の内容を足しても、対象が変わらず、修正前でも 854>326 の状態で通る（`sprint-16C-r1-eval-probe-old.log`）。
+
+### 要修正（generator か designer。16-L 以前でよい）
+
+- 計画の主画面の 200% の検査を、`plan-digest`（nav）自身の `scrollWidth <= clientWidth`、または各リンクが nav の枠内、を直接 expect する形にする。`expectTextZoom` の `hasOwnText` の条件の見直しでもよいが、他の画面の偽の失敗に注意。修正前で落ちることを再確認する。
+- 補足: 左に「折り返せない長い 1 語」（約 625px）を足すと、修正後も nav は 625>326 になる。実画面の札は折り返すので現実的ではないが、検査の入れ方としては、実画面の札の範囲にすること。
+
+### 実行ログ・撮影
+
+- ログ: `docs/evaluations/logs/sprint-16C-r1-eval-{build,prefix-build,prefix-spec,probe-old,manual,spec-x3,opsfull,public-full}.log`
+- 撮影: `docs/evaluations/screenshots/sprint-16C/r1-eval-*.png`
+- 検証できなかったこと: 評価時の「判定の行が長い計画」そのもの（シードにない）。実画面の札を含む計画で 200% の幅 326／366 に収まることを確認し、評価時の 474 の再現は、DOM の追加で代用した。
