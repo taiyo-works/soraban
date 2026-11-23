@@ -1601,7 +1601,7 @@ export function InspectionForm({
                     aria-describedby={resultError ? `inspection-err-result-${it.key}` : undefined}
                   >
                     {(["normal", "abnormal"] as const).map((r) => (
-                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[6rem]`}>
+                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem] !px-3`}>
                         <input
                           type="radio"
                           name={`item-${it.key}`}
