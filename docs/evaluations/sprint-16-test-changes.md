@@ -162,3 +162,10 @@
 | 新しい検査 | — | `e2e/sprint16-c.spec.ts`（見本の 5 種・カード 3 種・状態ラベル・K-8 の `/`）、`e2e/ops-db/sprint16-c-db.spec.ts`（C-2 の実画面・全幅の主ボタン・K-8 の 4 画面・札の記号の縦位置・ログイン状態の `/` の 200%） | 追加のみ |
 
 画面の長さ・最初の画面の縦位置・文字の下限・押す部品の下限・比の下限の上限は変えていない（下の「上限を変えたもの」に結果を書く）。
+
+| `sprint12h-pr2` Q-11 実画面のコントラスト（`lowContrastText`） | 無効のボタンの文字も 4.5 以上を要求 | `button:disabled`・`[aria-disabled="true"]` の中の文字は対象外 | C-1 が無効の文字を `--sb-ink-disabled`（白で 3.10、WCAG 1.4.3 の対象外）に定めたため。`field-checks.ts` の `collectTextSamples` と `check-contrast-v2.mjs`（「記録のみ」）が元から無効を除いているのと同じ扱い。有効な部品の比の下限は変えていない。無効の理由の文（`…-disabled-reason`）は有効な補足の文字（`--sb-ink-2`、4.5 以上）として検査される |
+| `sprint12h-pr2` Q-11 など、`a:focus-visible` の角丸 | リンク型ボタンにフォーカスすると角丸が 4px になる（`globals.css`） | `.opx-btn`・`.sb-pill`・`.sb-state`・`.sb-card`・`.sb-text-btn` は除外（本文リンクの輪だけ 4px） | 検査の変更ではなく不具合の修正。16-C でボタンの角丸が 12 になり、フォーカス時だけ 4 に変わる差が出たため（`sprint16-c-db` C-2 が検出） |
+
+**上限を変えたもの（R1-8 の手続き）**: なし。画面の長さ・最初の画面の縦位置の上限は変えていない（倍率の報告対象なし）。
+
+**16-C の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16C-gen-*.log`）**: ops E2E 全体 275 件通過（基準 256 ＋ `sprint16-c-db` 19）、公開側 271 通過・1 失敗（`sprint9` 306 右クリック。runbook の既知の不安定。基準 `c58d92e` でも 3/6 失敗）、272 件（基準 252 ＋ `sprint16-c` 20）。新しい spec は ×3 で通過（`sprint16-c` 60/60、`sprint16-c-db` 57/57）。
