@@ -222,3 +222,7 @@
 | `sprint16-d` D-1「フォーカス」（見本の入力欄） | 縁が主色（`PRIMARY`）・縁の幅 1px・`box-shadow` が `PRIMARY 0 0 0 1px inset`（D-1 の「主色の 2px の枠」）に加えて、輪（実線・3px 以上）が残る | 輪（実線・3px 以上）の色が `PRIMARY`、縁は 1px・`EDGE` のまま、`box-shadow` なし。追加：フォーカス中かつエラーの入力欄で、`aria-invalid`・記号付きの 1 行が見え、縁は `DANGER_MARK`、輪は `PRIMARY` | 実画面で、D-1 の枠（縁＋内側の 1px）と Q-22 の 3px の輪（`.ds.ops-v2` は offset 0）が二重の太い線に見えたため、枠を外し、Q-22 の輪 1 本にした。D-1 の「2px 以上の主色の輪」は 3px の輪で満たす（検査は「3px 以上」＝強い側）。Q-22（`sprint12h-pr2`）と輪の「実線・3px 以上」の検査は変えていない。「枠がちょうど 2px」を見る検査は元からなく、`box-shadow` の文字列を固定していた部分だけを直した |
 
 見た目の統一（検査の変更なし）：素の checkbox／radio を `input.sb-check`（複数選択。32px の丸）と新しい `input.sb-radio`（単一選択。24px の輪＋点。異常は `sb-radio-no`）に揃えた（`records-client`・`incident-client`）。72px の行は D-2 の既存の対象（`.sb-check-row`・`.opx-check-row` の `sb-check` を持つ行）だけ。枠付きの選択肢（`choiceClass`。48px）は 48px のまま。上限の変更なし。
+
+**16-D 差し戻し 1（generator：検査の追加）**: 評価の要修正 1（文字 200% の検査にエラー表示の状態がなく、検証エラーを出した `/ops/plans/new`・`/ops/places/new` の横はみ出しを見逃した）に対し、`e2e/ops-db/sprint16-d-db.spec.ts` に「追加 1b」を足した。計画の作成・場所の登録・機体の登録・操縦者の登録・許可・承認の登録・事故・重大インシデントの記録の 6 画面で、空のまま送信して項目エラーを出し、`expectTextZoom`（390・430。横スクロールなし・clippedContainers 0 ほか既存の項目）で測る。既存の検査・上限・識別子は変えていない（追加のみ）。
+- **現 HEAD（0214b2d）で計画の作成・場所の登録の 2 件が失敗する**（390 幅で `scrollWidth` 456 > 390。評価の実測と同じ。430 は 390 が通った後に測られる）。機体・操縦者・許可・事故の 4 件は通る。ログ `docs/evaluations/logs/sprint-16D-fix1-gen-zoomerr.log`。
+- **`test.fail` などで隠していない**。designer が緯度・経度の 2 列（`grid-cols-2`）またはエラー文の最小幅を直すと通る前提で、それまで意図して失敗のまま置く。

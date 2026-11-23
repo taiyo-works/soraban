@@ -220,6 +220,31 @@ test.describe("追加 1：文字 200%（390・430）の入れ物の切れ（16-D
   }
 });
 
+// 評価（16-D 差し戻し 1）の要修正 1：上の追加 1 は入力が空の状態だけを測っていた。検証エラー（記号付きの 1 行）が出た状態は、
+// 文が長く列が狭いと 200% で横にはみ出す（390 で 456>390、430 で 476>430：計画・場所の緯度・経度の 2 列）。エラーを出してから測る。
+test.describe("追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態）", () => {
+  const ERROR_SCREENS = [
+    { name: "計画の作成", path: "/ops/plans/new", submit: 'main form button[type=submit]' },
+    { name: "場所の登録", path: "/ops/places/new", submit: 'main form button[type=submit]' },
+    { name: "機体の登録", path: "/ops/aircraft/new", submit: 'main form button[type=submit]' },
+    { name: "操縦者の登録", path: "/ops/pilots/new", submit: 'main form button[type=submit]' },
+    { name: "許可・承認の登録", path: "/ops/permits/new", submit: '[data-testid="permit-submit"]' },
+    { name: "事故・重大インシデントの記録", path: "/ops/incidents/new", submit: 'main form button[type=submit]' },
+  ] as const;
+  for (const sc of ERROR_SCREENS) {
+    test(`${sc.name}（エラー表示）`, async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      await page.goto(sc.path);
+      await expect(page.locator("main h1").first()).toBeVisible();
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      await page.locator(sc.submit).first().click();
+      await expect(page.locator('main [aria-invalid="true"], main .sb-field-error').first()).toBeVisible();
+      await waitForSettledStyles(page);
+      await expectTextZoom(page, `${sc.name}（エラー表示）`);
+    });
+  }
+});
+
 // D-1（全入力欄の条件）：項目エラーは、エラーの id が入力欄（単独の入力・チェック・ラジオのまとまり・fieldset）の aria-describedby に入っている。role は alert でない。
 const expectErrorsLinked = async (page: Page, label: string, minErrors = 1): Promise<void> => {
   const r = await page.evaluate(() => {

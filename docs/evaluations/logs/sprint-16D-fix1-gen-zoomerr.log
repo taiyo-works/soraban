@@ -1,0 +1,89 @@
+DB=soraban_g16d_zoomerr_1795462347 REPO=/home/user/soraban 0214b2d
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-d-db.spec.ts -g '追加 1b'
+
+
+Running 6 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） (1.7s)
+
+::error file=e2e/field-checks.ts,title=e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示）,line=484,col=46::  1) e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） %0A    Error: 計画の作成（エラー表示） 文字 200%・390px: 横スクロールがある%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 390%0A    Received:    456%0A%0A       at ../field-checks.ts:484%0A%0A      482 |     if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });%0A      483 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);%0A    > 484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);%0A          |                                              ^%0A      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);%0A      486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);%0A      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);%0A        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:484:46)%0A        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:243:7
+  ✘  2 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） (1.3s)
+
+::error file=e2e/field-checks.ts,title=e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示）,line=484,col=46::  2) e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） %0A    Error: 場所の登録（エラー表示） 文字 200%・390px: 横スクロールがある%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 390%0A    Received:    456%0A%0A       at ../field-checks.ts:484%0A%0A      482 |     if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });%0A      483 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);%0A    > 484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);%0A          |                                              ^%0A      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);%0A      486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);%0A      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);%0A        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:484:46)%0A        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:243:7
+  ✓  3 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 機体の登録（エラー表示） (1.5s)
+  ✓  4 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 操縦者の登録（エラー表示） (1.4s)
+  ✓  5 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 許可・承認の登録（エラー表示） (1.6s)
+  ✓  6 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 事故・重大インシデントの記録（エラー表示） (1.4s)
+
+
+  1) e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） 
+
+    Error: 計画の作成（エラー表示） 文字 200%・390px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 390
+    Received:    456
+
+       at ../field-checks.ts:484
+
+      482 |     if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });
+      483 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    > 484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+          |                                              ^
+      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+      486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
+      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:484:46)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:243:7
+
+    Error Context: test-results/ops/sprint16-d-db-追加-1b：文字-200-55e40-ル（検証エラーを出した状態）-計画の作成（エラー表示）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-追加-1b：文字-200-55e40-ル（検証エラーを出した状態）-計画の作成（エラー表示）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-追加-1b：文字-200-55e40-ル（検証エラーを出した状態）-計画の作成（エラー表示）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） 
+
+    Error: 場所の登録（エラー表示） 文字 200%・390px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 390
+    Received:    456
+
+       at ../field-checks.ts:484
+
+      482 |     if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });
+      483 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    > 484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+          |                                              ^
+      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+      486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
+      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:484:46)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:243:7
+
+    Error Context: test-results/ops/sprint16-d-db-追加-1b：文字-200-4a9a4-ル（検証エラーを出した状態）-場所の登録（エラー表示）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-追加-1b：文字-200-4a9a4-ル（検証エラーを出した状態）-場所の登録（エラー表示）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-追加-1b：文字-200-4a9a4-ル（検証エラーを出した状態）-場所の登録（エラー表示）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） 
+    e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） 
+  4 passed (15.2s)
+::notice title=🎭 Playwright Run Summary::  2 failed%0A    e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） %0A    e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） %0A  4 passed (15.2s)
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1 DB=soraban_g16d_zoomerr_1795462347
