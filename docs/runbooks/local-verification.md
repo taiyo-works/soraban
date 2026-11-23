@@ -35,6 +35,7 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - `next build` が `next/font/google queries have exactly one entry` で失敗することがある（Google Fonts の取得の揺れ。再実行で通る。2026-11-22、16-B で観測）。
 - `.claude/settings.json` が `rm -rf*` を拒否する。掃除は、新しい名前のディレクトリを使う、または `mv` で退避する。
 - `next start` を動かすと `apps/web/tsconfig.json` が書き換わることがある（`git checkout` で戻す）。古い `apps/web/.next-e2e-fixture/dev` が lint を落とすことがある（退避する）。前の実行の `mock-gsi-server`（ポート 3198）が残っていると、E2E の起動を妨げる（止める）。
+- **E2E の前に、アプリのコードを変えたら `pnpm build` をやり直す**。ops の E2E は既存の `.next` を `next start` で配るので、ビルドが古いと修正前のコードで動き、直したはずの検査が落ちる（16-D 差し戻し 1 で発生）。ログには、どのビルドで流したかを残す。
 - 作業ツリーには、別のエージェントの途中の変更が入っていることがある。自分のコミットは**パスを指定して**行い、他の変更を巻き込まない。
 
 ## 申請支援のフラグ（Sprint 18）
