@@ -173,3 +173,10 @@
 **16-C の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16C-gen-*.log`）**: ops E2E 全体 275 件通過（基準 256 ＋ `sprint16-c-db` 19）、公開側 271 通過・1 失敗（`sprint9` 306 右クリック。runbook の既知の不安定。基準 `c58d92e` でも 3/6 失敗）、272 件（基準 252 ＋ `sprint16-c` 20）。新しい spec は ×3 で通過（`sprint16-c` 60/60、`sprint16-c-db` 57/57）。
 
 **16-C gen2（K-8 の追加修正）の検証（空の DB から。ログは `docs/evaluations/logs/sprint-16C-gen2-*.log`）**: typecheck・lint・単体 3029 通過。ops E2E 全体 278 通過（275 ＋ 新しい 3）、公開側 272 通過（既知の不安定も出ず）。`sprint16-c-db` ×3 は 66/66。
+
+**16-C 差し戻し 1（designer。評価の要修正 2 件。ログは `docs/evaluations/logs/sprint-16C-r1-designer-*.log`）**: 既存の検査は弱めていない。足したもの（すべて `e2e/ops-db/sprint16-c-db.spec.ts`）。
+
+- K-8（ログイン済み・判定結果あり）に、主「この判定で飛行計画を作る」の高さ 55.5 以上・文字 16px 以上・副「この地点を判定する」より低くない、を追加（375・390・1280）。実装は `regulation-checker.tsx` の `PillLink` から `small` を外した（主の標準寸法 56px）。
+- 文字 200%（390・430。`expectTextZoom`）に、計画の主画面と `/ops/places` を追加。計画の主画面は、`plan-digest` の左の内容を長くした状態（DOM に文を足す）でも測る。評価の計画は判定の行が長く、検査用の計画では再現しないため。実装は `plan-ui.tsx` の行に `flex-wrap`・リンクに `ml-auto`、`ops/places/page.tsx` の名前に `min-w-0`・`overflow-wrap:anywhere`。
+- 画面の長さ・最初の画面の縦位置の上限は変えていない（R1-8 の対象なし）。
+- 注意: 検査の追加後、最初の実行は古い `.next`（`next start`）のまま走り、K-8 と `/ops/places` が落ちた（足した検査が効くことの確認）。`pnpm build` のあと 72/72（×3）通過。

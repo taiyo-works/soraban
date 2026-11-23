@@ -1,0 +1,15 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-c-db.spec.ts -g '計画の主画面' --repeat-each=3
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-c-db.spec.ts:121:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (935ms)
+  ✓  2 e2e/ops-db/sprint16-c-db.spec.ts:232:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 計画の主画面（plan-digest の判定を見る・計画の確認へ） (1.0s)
+  ✓  3 e2e/ops-db/sprint16-c-db.spec.ts:121:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (651ms)
+  ✓  4 e2e/ops-db/sprint16-c-db.spec.ts:232:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 計画の主画面（plan-digest の判定を見る・計画の確認へ） (1.1s)
+  ✓  5 e2e/ops-db/sprint16-c-db.spec.ts:121:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (564ms)
+  ✓  6 e2e/ops-db/sprint16-c-db.spec.ts:232:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 計画の主画面（plan-digest の判定を見る・計画の確認へ） (1.1s)
+
+  6 passed (11.3s)

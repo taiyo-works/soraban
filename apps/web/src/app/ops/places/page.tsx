@@ -44,8 +44,8 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
           {rows.map((p) => (
             <li key={p.id}>
               <Link prefetch={false} href={`/ops/places/${p.id}`} className={`${listRowClass} sm:grid-cols-1 ${p.voided ? "text-sb-ink-3" : ""}`} data-testid="place-row">
-                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="break-words font-medium text-sb-ink" data-testid="place-row-name">
+                <span className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="min-w-0 break-words [overflow-wrap:anywhere] font-medium text-sb-ink" data-testid="place-row-name">
                     {p.name}
                   </span>
                   {p.voided ? <Badge tone="red">取消済み</Badge> : null}

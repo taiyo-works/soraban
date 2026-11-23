@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll, expectTextZoom, waitForSettledStyles } from "../field-checks";
+import { gotoPlan } from "./plan-screen";
 
 // Sprint 16-C の E2E-DB：部品 1 の実画面（契約 C-2・C-6、K-8、持ち越し 1〜3）。
 // 見本の上の検査（C-1・C-3・C-4）は e2e/sprint16-c.spec.ts。ここは運航管理の実画面と、ログインした状態の `/`。
@@ -170,6 +171,12 @@ test.describe("K-8 ログイン済み・判定結果ありの `/`：主ボタン
       await waitForSettledStyles(page);
       expect(await page.locator('[data-variant="primary"]:visible').count(), `${w}px`).toBe(1);
       await expect(plan).toHaveAttribute("data-variant", "primary");
+      // 16-C 差し戻し 1：主は標準寸法（高さ 56 以上・文字 16px 以上）。副の「判定する」より小さく見えない
+      const pb = (await plan.boundingBox())!;
+      expect(pb.height, `${w}px：主の高さ`).toBeGreaterThanOrEqual(55.5);
+      expect(await plan.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)), `${w}px：主の文字`).toBeGreaterThanOrEqual(16);
+      const sb = (await page.locator('button[type="submit"].sb-pill:visible').first().boundingBox())!;
+      expect(pb.height, `${w}px：主は副より小さくない`).toBeGreaterThanOrEqual(sb.height);
       const submit = page.locator('button[type="submit"].sb-pill:visible').first();
       await expect(submit).toHaveClass(/sb-pill-secondary/);
       await expect(submit).not.toHaveAttribute("data-variant", "primary");
@@ -218,5 +225,33 @@ test.describe("持ち越し 3：運航管理にログインした状態の `/`�
     await expectTextZoom(page, "ログイン状態の /");
     const arrows = await page.locator(".sb-pill-arrow").count();
     expect(arrows).toBe(0);
+  });
+});
+
+test.describe("16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面", () => {
+  test("計画の主画面（plan-digest の判定を見る・計画の確認へ）", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await gotoPlan(page, `/ops/plans/${planId}`);
+    await expect(page.getByTestId("plan-digest").first()).toBeAttached();
+    await waitForSettledStyles(page);
+    await expectTextZoom(page, "計画の主画面");
+    // 評価の計画は判定の行が長かった（札が増える）。左の内容を長くしても、右の「判定を見る →」「計画の確認へ →」が切れない
+    await page.evaluate(() => {
+      for (const id of ["plan-judge-line", "plan-confirm-link"]) {
+        const host = document.querySelector<HTMLElement>(`[data-testid="plan-digest"] [data-testid="${id}"]`) ?? document.querySelector<HTMLElement>(`[data-testid="plan-digest"] [data-testid="${id}"] > span`);
+        const span = document.createElement("span");
+        span.className = "text-sm text-sb-ink-2";
+        span.textContent = "判定の根拠が古い可能性があります（出典の更新を確認）";
+        (host ?? document.querySelector<HTMLElement>('[data-testid="plan-digest"] a span'))!.appendChild(span);
+      }
+    });
+    await expectTextZoom(page, "計画の主画面（plan-digest の左を長くした）");
+  });
+  test("登録（場所）/ops/places（place-row-name）", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto("/ops/places");
+    await expect(page.getByTestId("place-row-name").first()).toBeVisible();
+    await waitForSettledStyles(page);
+    await expectTextZoom(page, "/ops/places");
   });
 });

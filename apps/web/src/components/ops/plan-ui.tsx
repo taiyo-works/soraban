@@ -281,7 +281,7 @@ export function PlanDigest({
   readonly stale: boolean;
   readonly sourcesStale: boolean;
 }) {
-  const row = "flex min-h-12 items-center justify-between gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
+  const row = "flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
   const m = judgeLineModel({ level: verdictLevel, unknownCount, stale, sourcesStale });
   return (
     <nav aria-label="ほかの要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
@@ -292,14 +292,14 @@ export function PlanDigest({
           {m.stale ? <StaleBadge bare /> : null}
           {m.sourcesStale ? <SourceStaleBadge /> : null}
         </span>
-        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
+        <span className="ml-auto shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
       </a>
       <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row} data-testid="plan-confirm-link">
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-sm text-sb-ink-2">確認：</span>
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
+        <span className="ml-auto shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
       </a>
     </nav>
   );

@@ -1389,7 +1389,6 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   // 判定の入力（座標・機体の重さ・フラグ・許可・予定日）だけを計画のフォームに引き継ぐ。結果は引き継がない（保存でサーバーが再実行する）。
                   <PillLink
                     variant="primary"
-                    small
                     href={buildPlanHandoffHref({
                       lat,
                       lng,
