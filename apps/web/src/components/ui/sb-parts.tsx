@@ -6,12 +6,11 @@ import type { ItemVerdict } from "@soraban/regulations";
 
 const cx = (...parts: ReadonlyArray<string | false | null | undefined>): string => parts.filter(Boolean).join(" ");
 
-// ── ピルボタン（右端に丸＋矢印。ホバー・押下・フォーカスで矢印が入れ替わる）──
+// ── ボタン（主・副・文字・危険。16-C：右端の丸と矢印は外した。クラス名 .sb-pill* は残す）──
 
 export type PillIcon = "arrow" | "locate" | "external" | "download";
 
-const ICON_PATH: Record<PillIcon, ReactNode> = {
-  arrow: <path d="M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5" />,
+const ICON_PATH: Record<Exclude<PillIcon, "arrow">, ReactNode> = {
   external: <path d="M7 4 H16 V13 M16 4 L5 15" />,
   download: <path d="M10 3.5 V13 M5.5 9 L10 13.5 L14.5 9 M4 16.5 H16" />,
   locate: (
@@ -23,31 +22,21 @@ const ICON_PATH: Record<PillIcon, ReactNode> = {
   ),
 };
 
-function PillGlyph({ icon }: { readonly icon: PillIcon }) {
-  return (
-    <svg viewBox="0 0 20 20" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      {ICON_PATH[icon]}
-    </svg>
-  );
-}
-
+// "arrow"（既定）は何も描かない。探す・外部・保存だけ、文字の脇に線画のアイコン（円なし・装飾）を置く。
 function PillInner({ icon, children }: { readonly icon: PillIcon; readonly children: ReactNode }) {
   return (
     <>
+      {icon === "arrow" ? null : (
+        <svg className="sb-pill-icon" viewBox="0 0 20 20" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          {ICON_PATH[icon]}
+        </svg>
+      )}
       <span className="sb-pill-label">{children}</span>
-      <span className="sb-pill-arrow" aria-hidden="true">
-        <span className="sb-ar sb-a1">
-          <PillGlyph icon={icon} />
-        </span>
-        <span className="sb-ar sb-a2">
-          <PillGlyph icon={icon} />
-        </span>
-      </span>
     </>
   );
 }
 
-type PillVariant = "primary" | "secondary";
+type PillVariant = "primary" | "secondary" | "text" | "danger";
 type PillCommon = {
   readonly variant?: PillVariant;
   readonly small?: boolean;
@@ -56,7 +45,10 @@ type PillCommon = {
 };
 
 const pillClass = (p: PillCommon, extra?: string): string =>
-  cx("sb-pill", (p.variant ?? "secondary") === "primary" ? "sb-pill-primary" : "sb-pill-secondary", p.small && "sb-pill-sm", p.block && "sb-pill-block", extra);
+  cx("sb-pill", `sb-pill-${p.variant ?? "secondary"}`, p.small && "sb-pill-sm", p.block && "sb-pill-block", extra);
+
+// K-8：主ボタンには data-variant="primary"（1 画面に 1 つ）
+const variantAttr = (p: PillCommon): { "data-variant"?: "primary" } => ((p.variant ?? "secondary") === "primary" ? { "data-variant": "primary" } : {});
 
 export function PillButton({
   variant,
@@ -68,7 +60,7 @@ export function PillButton({
   ...rest
 }: PillCommon & Omit<ComponentPropsWithRef<"button">, "children"> & { readonly children: ReactNode }) {
   return (
-    <button type="button" {...rest} className={pillClass({ variant, small, block }, className)}>
+    <button type="button" {...rest} {...variantAttr({ variant })} className={pillClass({ variant, small, block }, className)}>
       <PillInner icon={icon}>{children}</PillInner>
     </button>
   );
@@ -84,9 +76,22 @@ export function PillLink({
   ...rest
 }: PillCommon & Omit<ComponentPropsWithRef<"a">, "children"> & { readonly children: ReactNode }) {
   return (
-    <a {...rest} className={pillClass({ variant, small, block }, className)}>
+    <a {...rest} {...variantAttr({ variant })} className={pillClass({ variant, small, block }, className)}>
       <PillInner icon={icon}>{children}</PillInner>
     </a>
+  );
+}
+
+// ── 状態ラベル（16-C。待機中＝情報、飛行中＝飛行中、飛行済＝安全、中止＝危険。丸は装飾で、状態は文字が担う）──
+
+export type StatusTone = "info" | "flying" | "safe" | "danger";
+
+export function StatusLabel({ tone, children, testId }: { readonly tone: StatusTone; readonly children: ReactNode; readonly testId?: string }) {
+  return (
+    <span className={cx("sb-state", `sb-state-${tone}`)} data-tone={tone} {...(testId ? { "data-testid": testId } : {})}>
+      <span className="sb-state-dot" aria-hidden="true" />
+      <span>{children}</span>
+    </span>
   );
 }
 

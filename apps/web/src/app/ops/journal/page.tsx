@@ -76,7 +76,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {canCreate ? (
             <>
-              <Link href="/ops/flights/new" prefetch={false} className="opx-btn opx-btn-primary min-h-14 w-full sm:w-auto" data-testid="journal-new-flight">
+              <Link href="/ops/flights/new" prefetch={false} data-variant="primary" className="opx-btn opx-btn-primary min-h-14 w-full sm:w-auto" data-testid="journal-new-flight">
                 飛行記録を入力
               </Link>
               <Link href="/ops/inspections/new" prefetch={false} className={entryClass} data-testid="journal-new-inspection">

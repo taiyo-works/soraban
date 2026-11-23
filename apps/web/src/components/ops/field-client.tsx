@@ -636,7 +636,7 @@ export function FieldClient({
                 </a>
               ) : null}
               {canConfirm ? (
-                <button type="button" className={BTN_PRIMARY} data-testid={`field-docs-confirm-${d.key}`} onClick={() => onCheck("docs_confirm", { docKey: d.key })}>
+                <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid={`field-docs-confirm-${d.key}`} onClick={() => onCheck("docs_confirm", { docKey: d.key })}>
                   {FIELD_DOC_CONFIRM_ACTION}
                 </button>
               ) : null}
@@ -683,7 +683,7 @@ export function FieldClient({
         </a>
       ) : null}
       {!rs.done && view.canRecord && !cancelled ? (
-        <button type="button" className={BTN_PRIMARY} data-testid="field-restriction-submit" onClick={() => onCheck("flight_restriction")}>
+        <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-restriction-submit" onClick={() => onCheck("flight_restriction")}>
           {FIELD_RESTRICTION_ACTION}
         </button>
       ) : null}
@@ -748,6 +748,7 @@ export function FieldClient({
                       type="button"
                       role="radio"
                       aria-checked={on}
+                      data-variant="primary"
                       className={on ? BTN_PRIMARY : BTN_OUTLINE}
                       data-testid={`field-site-${f}-${o.value}`}
                       onClick={() => setSiteSel((cur) => ({ ...cur, [f]: o.value }))}
@@ -816,7 +817,7 @@ export function FieldClient({
               {siteMsg}
             </p>
           ) : null}
-          <button type="button" className={BTN_PRIMARY} disabled={!siteCanSubmit || siteBusy} data-testid="field-site-submit" onClick={() => void onSiteSubmit()}>
+          <button type="button" data-variant="primary" className={BTN_PRIMARY} disabled={!siteCanSubmit || siteBusy} data-testid="field-site-submit" onClick={() => void onSiteSubmit()}>
             現場状況を記録する
           </button>
           {!draftSite ? <p data-testid="field-site-hint">第三者・他機・雨・視程を選ぶと記録できます（風速・気温は未入力でも記録できます）。</p> : null}
@@ -877,7 +878,7 @@ export function FieldClient({
                       <p data-testid="inspection-disclaimer">
                         {DISCLAIMER_INSPECTION}
                       </p>
-                      <a href={inspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-inspection-link">
+                      <a href={inspectionNewHref(planId)} data-variant="primary" className={BTN_PRIMARY} data-testid="field-inspection-link">
                         {FIELD_CHECK_ACTION_LABEL.inspection}
                       </a>
                     </>
@@ -947,6 +948,7 @@ export function FieldClient({
                       </div>
                       <button
                         type="button"
+                        data-variant="primary"
                         className={BTN_PRIMARY}
                         disabled={!sourceChosen}
                         data-testid="field-em-submit"
@@ -996,7 +998,7 @@ export function FieldClient({
                     </a>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled && view.report.canRecheck ? (
-                    <button type="button" className={BTN_PRIMARY} data-testid="field-recheck-submit" onClick={() => onCheck("report_recheck")}>
+                    <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-recheck-submit" onClick={() => onCheck("report_recheck")}>
                       {FIELD_CHECK_ACTION_LABEL.report_recheck}
                     </button>
                   ) : null}
@@ -1019,7 +1021,7 @@ export function FieldClient({
                     </ul>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled ? (
-                    <button type="button" className={BTN_PRIMARY} data-testid="field-carry-submit" onClick={() => onCheck("carry")}>
+                    <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-carry-submit" onClick={() => onCheck("carry")}>
                       {FIELD_CHECK_ACTION_LABEL.carry}
                     </button>
                   ) : null}
@@ -1066,6 +1068,7 @@ export function FieldClient({
       {inFlight ? (
         <button
           type="button"
+          data-variant="primary"
           className={BTN_FLIGHT}
           data-testid="field-flight-button"
           data-action="landing"
@@ -1078,6 +1081,7 @@ export function FieldClient({
         <>
           <button
             type="button"
+            data-variant="primary"
             className={BTN_FLIGHT}
             data-testid="field-flight-button"
             data-action="takeoff"
@@ -1192,7 +1196,7 @@ export function FieldClient({
                 ) : null}
                 {!f.post.done && view.canInspect && !later ? (
                   <>
-                    <a href={postInspectionNewHref(planId)} className={BTN_PRIMARY} data-testid="field-post-link">
+                    <a href={postInspectionNewHref(planId)} data-variant="primary" className={BTN_PRIMARY} data-testid="field-post-link">
                       {FIELD_POST_INSPECTION_ACTION}
                     </a>
                     <button
@@ -1239,6 +1243,7 @@ export function FieldClient({
           <a
             key={f.takeoffEventId}
             href={journalHref(f)}
+            data-variant="primary"
             className={BTN_PRIMARY}
             data-testid="field-journal-link"
             onClick={(e) => void goJournal(e, journalHref(f))}

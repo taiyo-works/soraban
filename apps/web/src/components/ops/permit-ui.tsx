@@ -248,7 +248,7 @@ export function BasisPlanList({ plans, count }: { readonly plans: readonly Permi
       {plans.length === 0 ? null : (
         <ul className="flex flex-col gap-2" data-testid="permit-basis-plans">
           {plans.map((p) => (
-            <li key={p.planId} className="rounded-sb-m bg-sb-surface" data-testid="permit-basis-plan">
+            <li key={p.planId} className="rounded-sb-m bg-sb-sunken" data-testid="permit-basis-plan">
               <Link prefetch={false} href={`/ops/plans/${p.planId}/judgement`} className="flex min-h-12 flex-wrap items-center gap-x-4 gap-y-1 rounded-sb-m px-3 py-2.5 text-sm hover:bg-sb-hover">
                 <span className="break-words text-sb-ink">{p.title}</span>
                 <span className="sb-num text-sm tnum text-sb-ink-2">{p.plannedDate}</span>

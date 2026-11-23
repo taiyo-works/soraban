@@ -25,7 +25,7 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
       data-code={status.code}
     >
       <ReportBox report={plan.report} compact part="head" voidedNoRecord={voidedNoRecord} heading={cardHeading({ voided: plan.voided, statusCode: status.code, hasEffective, requirementLabel: plan.report.label, reportedLabel: status.label.split("：")[0] ?? "", reportDue })} />
-      <a href={action.href} className={`${buttonPrimaryClass} w-full`} data-testid="plan-primary-action" data-action-id={action.id}>
+      <a href={action.href} data-variant="primary" className={`${buttonPrimaryClass} w-full`} data-testid="plan-primary-action" data-action-id={action.id}>
         {action.label}
       </a>
       {cancelNotice ? (

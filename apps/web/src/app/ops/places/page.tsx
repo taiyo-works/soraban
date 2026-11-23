@@ -20,7 +20,7 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
         back={BACK_TO.register}
         aside={
           manager ? (
-            <Link prefetch={false} href="/ops/places/new" className={buttonPrimaryClass} data-testid="place-new-link">
+            <Link prefetch={false} href="/ops/places/new" data-variant="primary" className={buttonPrimaryClass} data-testid="place-new-link">
               地点を登録
             </Link>
           ) : null

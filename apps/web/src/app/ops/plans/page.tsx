@@ -64,7 +64,7 @@ export default async function PlanListPage({
         title="飛行計画"
         aside={
           denied === null ? (
-            <Link prefetch={false} href="/ops/plans/new" className="opx-btn opx-btn-primary" data-testid="plan-new-link">
+            <Link prefetch={false} href="/ops/plans/new" data-variant="primary" className="opx-btn opx-btn-primary" data-testid="plan-new-link">
               飛行計画を作る
             </Link>
           ) : null
@@ -132,7 +132,7 @@ export default async function PlanListPage({
                 </span>
               </Link>
               {p.nextAction ? (
-                <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-surface" data-testid="plan-row-next">
+                <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-sunken" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
                     <p data-note="" className="px-3 pb-2.5 pl-[2.625rem] text-sm text-sb-ink-3" data-testid="plan-row-next-count">

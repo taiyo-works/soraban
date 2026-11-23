@@ -715,7 +715,7 @@ export function RegulationMap({
         {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
             主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
         <p
-          className="flex items-start gap-2 border-b border-sb-rule bg-sb-surface px-3 py-1.5 text-sm leading-snug text-sb-ink"
+          className="flex items-start gap-2 border-b border-sb-rule bg-sb-sunken px-3 py-1.5 text-sm leading-snug text-sb-ink"
           data-note=""
           data-testid="map-pick-hint"
         >

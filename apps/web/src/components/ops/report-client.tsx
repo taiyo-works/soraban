@@ -294,7 +294,7 @@ function ItemRow({
       {/* 値・補足 */}
       <div className={`flex min-w-0 flex-col gap-1 sm:col-span-1 sm:col-start-2 sm:row-start-1 ${canCopy || copied ? "col-start-1 row-start-2" : "col-span-2 row-start-2"}`}>
         {item.status === "filled" ? (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-sunken px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
             {item.unit ? <span className="ml-1 text-sb-ink-2">{item.unit}</span> : null}
           </span>
@@ -314,7 +314,7 @@ function ItemRow({
             <span>{NOT_APPLICABLE_LABEL}</span>
           </span>
         ) : (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-sunken px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
           </span>
         )}
@@ -563,7 +563,7 @@ function RowActions({ report }: { readonly report: ReportDto }) {
             e.preventDefault();
             void submit();
           }}
-          className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-3 sm:px-4"
+          className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-3 sm:px-4"
           aria-label={open === "correct" ? "記録の訂正" : open === "retract" ? "記録の取り下げ" : open === "resolve" ? "結果不明の確定" : "失敗した送信の再送"}
           data-testid={`report-${open}-form`}
         >
@@ -609,7 +609,7 @@ function RowActions({ report }: { readonly report: ReportDto }) {
           )}
           <FormError message={message} />
           <div>
-            <button type="submit" className={open === "retract" ? buttonDangerClass : buttonPrimaryClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
+            <button type="submit" data-variant={open === "retract" ? undefined : "primary"} className={open === "retract" ? buttonDangerClass : buttonPrimaryClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
               {open === "correct" ? "訂正を保存する" : open === "retract" ? "取り下げる" : open === "resolve" ? "確定する" : "再送する"}
             </button>
           </div>
@@ -630,7 +630,7 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
       </dd>
     </div>
   );
-  const idBox = "inline-block max-w-full rounded-sb-m bg-sb-surface px-1.5 py-0.5 text-sm leading-relaxed";
+  const idBox = "inline-block max-w-full rounded-sb-m bg-sb-sunken px-1.5 py-0.5 text-sm leading-relaxed";
   return (
     <li
       className={`flex flex-col gap-3 border-b border-sb-rule py-4 ${r.isEffective ? "opx-edge-hl" : ""}`}
@@ -999,7 +999,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             <div className="flex flex-col gap-4" data-testid="report-groups">
               {view.prepared.groups.map((g) => (
                 <section key={g.id} aria-label={g.label} className="flex flex-col" data-testid={`report-group-${g.id}`} data-needs-confirmation={g.needsConfirmation ? "1" : "0"}>
-                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-surface px-2 py-1 text-sm font-medium text-sb-ink sm:px-3">
+                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-sunken px-2 py-1 text-sm font-medium text-sb-ink sm:px-3">
                     <span>{g.label}</span>
                     {g.needsConfirmation ? (
                       <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-st-warn-face px-1.5 text-sm font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>
@@ -1096,7 +1096,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             )}
             <FormError message={message} />
             <div>
-              <button type="submit" className={buttonPrimaryClass} disabled={busy || (direct && !isCancel && !confirmSend)} data-testid={direct && !isCancel ? "send-submit" : "record-submit"}>
+              <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || (direct && !isCancel && !confirmSend)} data-testid={direct && !isCancel ? "send-submit" : "record-submit"}>
                 {direct && !isCancel ? "送信する（模擬）" : isCancel ? "取消の結果を記録する" : "通報の結果を記録する"}
               </button>
             </div>

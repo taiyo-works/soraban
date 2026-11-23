@@ -448,7 +448,7 @@ export function IncidentForm({
       ) : null}
 
       <SubmitRow message={message}>
-        <button type="submit" className={`${buttonPrimaryClass} min-h-12 w-full sm:w-auto`} disabled={busy} data-testid="incident-submit">
+        <button type="submit" data-variant="primary" className={`${buttonPrimaryClass} min-h-12 w-full sm:w-auto`} disabled={busy} data-testid="incident-submit">
           {mode === "create" ? "記録する" : "訂正を保存する"}
         </button>
         {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
@@ -498,7 +498,7 @@ export function IncidentFollowUpForm({ id, version, status, on }: { readonly id:
         <textarea className={inputClass} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="incident-follow-up-update-reason" />
       </Field>
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="incident-follow-up-update-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="incident-follow-up-update-submit">
           対応の状況を更新する
         </button>
       </SubmitRow>
@@ -580,7 +580,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
       </label>
       <ErrorText message={errors["checks"]} />
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
           報告の結果を記録する
         </button>
         {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
@@ -632,7 +632,7 @@ export function IncidentConsultedForm({ id, defaultDoneAt }: { readonly id: stri
       </label>
       <ErrorText message={errors["checks"]} />
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
           要否を確かめたことを記録する
         </button>
         {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}

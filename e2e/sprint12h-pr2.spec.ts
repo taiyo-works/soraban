@@ -842,29 +842,29 @@ test.describe("Q-26 動き", () => {
     }
   });
 
-  test("reducedMotion: reduce で、せり上がり・矢印の入れ替えの時間が 0", async ({ browser, baseURL }) => {
+  test("reducedMotion: reduce で、せり上がり・ボタンの動きの時間が 0", async ({ browser, baseURL }) => {
     const ctx = await browser.newContext({ baseURL, reducedMotion: "reduce", viewport: { width: 375, height: 812 } });
     const page = await ctx.newPage();
     await openReady(page);
     const r = await page.evaluate(() => {
       const cs = getComputedStyle(document.querySelector('[data-testid="verdict-conclusion"]')!);
-      const pill = getComputedStyle(document.querySelector(".sb-pill-arrow .sb-ar")!);
+      const pill = getComputedStyle(document.querySelector(".sb-pill")!);
       return { rise: cs.animationDuration, pill: pill.transitionDuration, token: getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-rise").trim() };
     });
     // 0（globals.css の減らす指定は 0.01ms の !important を当てるため、算出値は 1e-5 秒）。体感できない 0.1ms 以下を 0 とみなす
     expect(parseFloat(r.rise)).toBeLessThanOrEqual(0.0001);
     expect(parseFloat(r.pill)).toBeLessThanOrEqual(0.0001);
     expect(r.token).toMatch(/^0(ms|s)$/);
-    // 矢印の入れ替え（2 つ目の矢印）は出さない
-    await expect(page.locator(".sb-pill-arrow .sb-a2").first()).toBeHidden();
+    // 16-C：右端の丸と矢印は外した（入れ替えの矢印は無い）
+    await expect(page.locator(".sb-pill-arrow")).toHaveCount(0);
     await ctx.close();
   });
 
-  test("通常：矢印の入れ替えは標準の動き 0.18s（ホバー・フォーカス・押下。16-A で 0.5s から変更）", async ({ page }) => {
+  test("通常：ボタンの背景は標準の動き 0.18s、押下の縮みは 0.12s（16-C。矢印の入れ替えは外した）", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await openReady(page);
-    const d = await page.evaluate(() => getComputedStyle(document.querySelector(".sb-pill-arrow .sb-ar")!).transitionDuration);
-    expect(d).toBe("0.18s");
+    const d = await page.evaluate(() => getComputedStyle(document.querySelector(".sb-pill")!).transitionDuration);
+    expect(d).toBe("0.18s, 0.12s");
   });
 });
 

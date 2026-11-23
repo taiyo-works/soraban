@@ -156,7 +156,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p
           data-testid="airport-mlit-note"
-          className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-surface px-3 py-2 text-sb-ink-2"
+          className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-sunken px-3 py-2 text-sb-ink-2"
         >
           <span data-note="" className="sb-eyebrow block ">入力した許可について</span>{" "}
           {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
@@ -183,7 +183,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       {regulation.appliedExceptions && regulation.appliedExceptions.length > 0 ? (
         <div
           data-testid="regulation-excluded"
-          className="rounded-sb-m border-l-4 border-sb-v-none-fg bg-sb-surface px-3 py-2 text-sb-v-none-fg"
+          className="rounded-sb-m border-l-4 border-sb-v-none-fg bg-sb-sunken px-3 py-2 text-sb-v-none-fg"
         >
           <p data-note="" className="sb-eyebrow !text-sb-v-none-fg">
             {regulation.statusBeforeExclusion !== undefined ? EXCLUDED_BY_WEIGHT_HEADING : EXCLUDED_HEADING}

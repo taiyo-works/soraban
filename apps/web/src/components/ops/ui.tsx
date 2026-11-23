@@ -198,6 +198,8 @@ export function CellLabel({ children }: { readonly children: ReactNode }) {
 
 export const buttonPrimaryClass = "opx-btn opx-btn-primary";
 export const buttonGhostClass = "opx-btn";
+/** 文字ボタン（背景なし・主色の文字・高さ 48）。 */
+export const buttonTextClass = "opx-btn opx-btn-text";
 export const buttonDangerClass = "opx-btn opx-btn-danger";
 
 /** 屋外で手袋でも押せる大きさの主ボタン（高さ 56px 以上。現場は 64px）。 */

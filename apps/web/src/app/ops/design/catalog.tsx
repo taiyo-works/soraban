@@ -2,7 +2,7 @@ import { VERDICT_LABEL } from "@soraban/regulations";
 import type { ItemVerdict } from "@soraban/regulations";
 import "./catalog.css";
 import { HeroIllustration } from "@/components/hero-illustration";
-import { PillButton, SectionHead, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
+import { PillButton, SectionHead, StatusLabel, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
 import { CatalogAttrs } from "./catalog-attrs";
 
 // デザイン見本 v2（Sprint 16-1。G-1 でユーザーが配色を決める）。認証・DB・外部通信なし。静的な部品の並べだけで、操作の状態は持たない。
@@ -90,18 +90,52 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-buttons" data-testid="cat-buttons">
-        <h2 id="cat-buttons">ボタン（主色の面＋白の文字）</h2>
+        <h2 id="cat-buttons">ボタン 5 種（主・副・文字・危険・無効）</h2>
         <div className="sbx-row">
           <PillButton variant="primary" data-testid="cat-primary">主ボタン（保存する）</PillButton>
           <PillButton data-testid="cat-secondary">副ボタン</PillButton>
-          <PillButton disabled data-testid="cat-disabled">押せない</PillButton>
+          <PillButton variant="text" data-testid="cat-text">文字ボタン</PillButton>
+          <PillButton variant="danger" data-testid="cat-danger">取り消す</PillButton>
+          <PillButton disabled aria-describedby="cat-disabled-reason" data-testid="cat-disabled">押せない</PillButton>
+        </div>
+        <p className="sb-disabled-reason" id="cat-disabled-reason" data-testid="cat-disabled-reason">必須の項目がまだ入力されていません。</p>
+        <div className="sbx-row">
+          <button type="button" className="opx-btn opx-btn-primary" data-variant="primary" data-testid="cat-opx-primary">運航管理の主ボタン</button>
+          <button type="button" className="opx-btn" data-testid="cat-opx-secondary">副ボタン</button>
+          <button type="button" className="opx-btn opx-btn-text" data-testid="cat-opx-text">文字ボタン</button>
+          <button type="button" className="opx-btn opx-btn-danger" data-testid="cat-opx-danger">取り消す</button>
+          <button type="button" className="opx-btn" disabled aria-describedby="cat-opx-disabled-reason" data-testid="cat-opx-disabled">押せない</button>
+        </div>
+        <p className="opx-disabled-reason" id="cat-opx-disabled-reason" data-testid="cat-opx-disabled-reason">必須の項目がまだ入力されていません。</p>
+        <p className="sbx-note">主色の面と地の比は 5:1 以上（現場は 7:1 以上）。面だけで境界を満たす。押すと主色が濃くなり、少し縮む（120ms）。</p>
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-cards" data-testid="cat-cards">
+        <h2 id="cat-cards">カード 3 種と状態ラベル</h2>
+        <div className="sbx-grid">
+          <div className="sb-card" data-testid="cat-card">
+            <strong>通常のカード</strong>
+            <p className="sbx-note">白い面・角丸 16・1px の罫・内側 16。</p>
+          </div>
+          <a className="sb-card sb-card-list" href="#cat-cards" data-testid="cat-card-list">
+            <strong>一覧のカード</strong>
+            <span>見出し → 主情報 → 補足（最小の高さ 72・全体が押せる）</span>
+          </a>
+          <div className="sb-card sb-card-state" data-state="warn" data-testid="cat-card-state">
+            <strong>状態のカード</strong>
+            <p className="sbx-note">状態の面と、左端 6px の状態の印の色の帯。</p>
+          </div>
         </div>
         <div className="sbx-row">
-          <button type="button" className="opx-btn opx-btn-primary" data-testid="cat-opx-primary">運航管理の主ボタン</button>
-          <button type="button" className="opx-btn" data-testid="cat-opx-secondary">副ボタン</button>
-          <button type="button" className="opx-btn opx-btn-danger" data-testid="cat-opx-danger">取り消す</button>
+          <StatusLabel tone="info" testId="cat-state-info">待機中</StatusLabel>
+          <StatusLabel tone="flying" testId="cat-state-flying">飛行中</StatusLabel>
+          <StatusLabel tone="safe" testId="cat-state-safe">飛行済</StatusLabel>
+          <StatusLabel tone="danger" testId="cat-state-danger">中止</StatusLabel>
+          <a className="sb-state sb-state-info" href="#cat-cards" data-testid="cat-state-link">
+            <span className="sb-state-dot" aria-hidden="true" />
+            <span>押せるラベル</span>
+          </a>
         </div>
-        <p className="sbx-note">主色の面と地の比は 5:1 以上（現場は 7:1 以上）。面だけで境界を満たす。</p>
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-forms" data-testid="cat-forms">

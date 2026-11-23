@@ -172,7 +172,7 @@ test.describe("Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の�
                 if (v === "0px" || v.endsWith("%")) continue;
                 const px = parseFloat(v);
                 if (px >= 100) continue;
-                if (![16, 8, 4].includes(px) && !(Math.abs(r.width - r.height) <= 1 && px >= Math.min(r.width, r.height) / 2 - 0.5)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} ${prop}=${v}`);
+                if (![16, 12, 8, 4].includes(px) && !(Math.abs(r.width - r.height) <= 1 && px >= Math.min(r.width, r.height) / 2 - 0.5)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} ${prop}=${v}`);
               }
               if (shadowOutside(cs.boxShadow)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} boxShadow=${cs.boxShadow.slice(0, 40)}`);
             }

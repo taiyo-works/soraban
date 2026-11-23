@@ -42,7 +42,7 @@ export default async function FlightListPage({
         back={BACK_TO.journal}
         aside={
           canCreate ? (
-            <Link href="/ops/flights/new" className={buttonFieldClass}>
+            <Link href="/ops/flights/new" data-variant="primary" className={buttonFieldClass}>
               飛行記録を入力
             </Link>
           ) : null

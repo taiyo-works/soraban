@@ -109,7 +109,7 @@ export function ProcedureCard({ procedure, deadlineBasis, done, onToggleDone, ca
       {satisfied ? (
         <div
           data-testid="procedure-verdict-done"
-          className="flex flex-col gap-1 rounded-sb-m border-l-4 border-l-sb-v-done-fg bg-sb-surface px-3 py-2 text-sm leading-relaxed text-sb-ink-2"
+          className="flex flex-col gap-1 rounded-sb-m border-l-4 border-l-sb-v-done-fg bg-sb-sunken px-3 py-2 text-sm leading-relaxed text-sb-ink-2"
         >
           <p className="flex items-center gap-1.5 font-semibold text-sb-ink">
             <VerdictSign level="procedure_done" />

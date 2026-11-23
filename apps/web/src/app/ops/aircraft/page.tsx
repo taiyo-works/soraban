@@ -33,7 +33,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
         back={BACK_TO.register}
         aside={
           manager ? (
-            <Link href="/ops/aircraft/new" className={buttonPrimaryClass}>
+            <Link href="/ops/aircraft/new" data-variant="primary" className={buttonPrimaryClass}>
               機体を登録
             </Link>
           ) : null

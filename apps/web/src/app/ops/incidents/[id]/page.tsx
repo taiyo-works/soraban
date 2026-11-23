@@ -109,7 +109,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
             {d.detailPendingLabel}
           </p>
           {canUpdate ? (
-            <a href="#correct" className={`${buttonPrimaryClass} self-start`} data-testid="incident-detail-fill">
+            <a href="#correct" data-variant="primary" className={`${buttonPrimaryClass} self-start`} data-testid="incident-detail-fill">
               詳細を記入する
             </a>
           ) : (

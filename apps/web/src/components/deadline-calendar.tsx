@@ -34,14 +34,14 @@ const urgencyTone: Readonly<
   overdue: {
     rule: "border-sb-v-no-fg",
     accent: "text-sb-v-no-fg",
-    surface: "bg-sb-surface",
+    surface: "bg-sb-sunken",
     label: "期限超過",
     mark: "triangle",
   },
   urgent: {
     rule: "border-sb-v-needs-fg",
     accent: "text-sb-v-needs-fg",
-    surface: "bg-sb-surface",
+    surface: "bg-sb-sunken",
     label: "期限が近い",
     mark: "square",
   },

@@ -93,7 +93,7 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
 const planCheckRow =
-  "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
+  "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
 const planCheckbox = `${checkboxClass} mt-0.5 h-5! w-5!`;
 const selectClass = `${inputClass} min-h-12`;
 
@@ -356,7 +356,7 @@ export function PlanForm({
             <span className="flex items-center gap-2">
               <span>機体</span>
             </span>
-            <p className="break-words rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-2.5 text-base leading-snug text-sb-ink sm:text-sm" data-testid="plan-aircraft-text">
+            <p className="break-words rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-2.5 text-base leading-snug text-sb-ink sm:text-sm" data-testid="plan-aircraft-text">
               <span className="sb-num">{selectedAircraft?.registrationMark ?? ""}</span>
               <span>（{selectedAircraft?.modelName ?? ""}）</span>
             </p>
@@ -448,7 +448,7 @@ export function PlanForm({
           </Field>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-3" data-testid="plan-place-helper">
+        <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-3" data-testid="plan-place-helper">
           <p className="text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
@@ -482,7 +482,7 @@ export function PlanForm({
                   <li key={`${h.lat},${h.lng},${h.title}`}>
                     <button
                       type="button"
-                      className="flex min-h-12 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-surface"
+                      className="flex min-h-12 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-sunken"
                       onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
                     >
                       <span>{h.title}</span>
@@ -512,7 +512,7 @@ export function PlanForm({
               ) : null}
               <p className="text-sm text-sb-ink-3">まだ入力欄に入れていません。{CURRENT_LOCATION_PRIVACY_NOTE}</p>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className={buttonPrimaryClass} onClick={useCandidate} data-testid="plan-use-candidate">
+                <button type="button" data-variant="primary" className={buttonPrimaryClass} onClick={useCandidate} data-testid="plan-use-candidate">
                   この地点を使う
                 </button>
                 <button type="button" className={buttonGhostClass} onClick={() => setCandidate(null)}>
@@ -612,7 +612,7 @@ export function PlanForm({
       </section>
 
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="plan-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="plan-submit">
           {isEdit ? "訂正を保存する" : "計画を保存する"}
         </button>
         {busy ? (
@@ -680,7 +680,7 @@ export function RejudgeButton({ planId, version, highlight }: { readonly planId:
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" className={highlight ? buttonPrimaryClass : buttonOutlineBrandClass} onClick={() => void onClick()} disabled={busy} data-testid="plan-rejudge">
+        <button type="button" data-variant={highlight ? "primary" : undefined} className={highlight ? buttonPrimaryClass : buttonOutlineBrandClass} onClick={() => void onClick()} disabled={busy} data-testid="plan-rejudge">
           判定をやり直す
         </button>
         {busy ? (
@@ -732,7 +732,7 @@ export function ConfirmPanel({ planId, version, stale }: { readonly planId: stri
       </Field>
       <FormError message={message} />
       <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
-        <button type="button" className={buttonPrimaryClass} disabled={busy} onClick={() => void submit("approved")} data-testid="plan-confirm-approve">
+        <button type="button" data-variant="primary" className={buttonPrimaryClass} disabled={busy} onClick={() => void submit("approved")} data-testid="plan-confirm-approve">
           確認する
         </button>
         <button type="button" className={buttonDangerClass} disabled={busy} onClick={() => void submit("returned")} data-testid="plan-confirm-return">
@@ -828,7 +828,7 @@ export function PlaceForm({ initial }: { readonly initial?: PlaceFormValue }) {
         </Field>
       ) : null}
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="place-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="place-submit">
           {editing ? "訂正を保存する" : "登録する"}
         </button>
         {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}

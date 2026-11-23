@@ -186,7 +186,7 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
         </Fact>
       </dl>
       <RouteBand card={card} next={journeyNext(card.journey, nextActions, card.planId)} />
-      <a href={card.primary.href} className="opx-btn opx-btn-primary opx-nc-primary" data-testid="today-card-primary" data-kind={card.primary.kind}>
+      <a href={card.primary.href} data-variant="primary" className="opx-btn opx-btn-primary opx-nc-primary" data-testid="today-card-primary" data-kind={card.primary.kind}>
         {card.primary.label}
       </a>
     </section>
@@ -227,7 +227,7 @@ export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNulla
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
         {actions.map((a, i) => (
-          <a key={a.href} href={a.href} className={i === 0 ? "opx-btn opx-btn-primary" : "opx-btn min-h-14 sm:min-h-12"} data-testid="today-empty-action">
+          <a key={a.href} href={a.href} data-variant={i === 0 ? "primary" : undefined} className={i === 0 ? "opx-btn opx-btn-primary" : "opx-btn min-h-14 sm:min-h-12"} data-testid="today-empty-action">
             {a.label}
           </a>
         ))}

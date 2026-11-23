@@ -171,7 +171,7 @@
   padding: 12px 14px;
   border: 1.5px solid transparent;
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -242,22 +242,17 @@
 .opx-band:hover {
   background: var(--sb-hover);
 }
-/* 面だけで見せる主ボタン（右端の丸と矢印なし）：選択中・現在地 */
+/* 面だけで見せる主ボタン（選択中・現在地）。16-C 以降は主ボタン自体に丸と矢印がないので、クラス名だけ残す */
 .opx-btn-primary.opx-btn-flat {
   justify-content: center;
-  padding: 4px 22px;
-}
-.opx-btn-primary.opx-btn-flat::before,
-.opx-btn-primary.opx-btn-flat::after {
-  display: none;
 }
 /* 常にカードの行（狭い画面でも広い画面でも。判定の履歴） */
 .opx-row.opx-row-card {
   align-items: start;
   padding: 14px 16px;
   border-bottom: 0;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 
@@ -266,10 +261,10 @@
 .opx-form > section,
 .opx-form > fieldset {
   min-width: 0;
-  padding: 20px 16px;
+  padding: var(--sb-sp-4);
   border: 0;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {

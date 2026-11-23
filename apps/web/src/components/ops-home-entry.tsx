@@ -47,10 +47,6 @@ export async function OpsHomeEntry() {
           className="sb-pill sb-pill-secondary sb-pill-sm"
         >
           <span className="sb-pill-label">ホームへ</span>
-          <span className="sb-pill-arrow" aria-hidden="true">
-            <span className="sb-ar sb-a1">→</span>
-            <span className="sb-ar sb-a2">→</span>
-          </span>
         </Link>
       </p>
       <OpsBottomNavLazy />

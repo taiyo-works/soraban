@@ -480,7 +480,7 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         </Field>
       ) : null}
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
         {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
@@ -712,7 +712,7 @@ export function PilotForm({
         </Field>
       ) : null}
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
         {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
@@ -775,7 +775,7 @@ export function MemberInviteForm() {
         </Field>
       </div>
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           招待する
         </button>
         {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
@@ -976,7 +976,7 @@ export function GoogleSignInButton() {
   };
   return (
     <div className="flex flex-col gap-3">
-      <button type="button" className={`${buttonClass} w-full sm:w-auto sm:self-start`} onClick={onClick} disabled={busy}>
+      <button type="button" data-variant="primary" className={`${buttonClass} w-full sm:w-auto sm:self-start`} onClick={onClick} disabled={busy}>
         Google でログイン
       </button>
       <FormError message={message} />

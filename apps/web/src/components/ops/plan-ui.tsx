@@ -63,7 +63,7 @@ function Chip({ tone, glyph, children, ...rest }: ChipProps) {
       {...attrs}
       className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-sm font-medium leading-5 ${CHIP_BOX[tone]}`}
     >
-      <span aria-hidden className={`w-3 text-center sb-num text-sm font-bold leading-none ${CHIP_GLYPH[tone]}`}>
+      <span aria-hidden className={`inline-flex h-5 w-3 shrink-0 items-center justify-center sb-num text-sm font-bold leading-none ${CHIP_GLYPH[tone]}`}>
         {glyph}
       </span>
       {children}

@@ -39,10 +39,10 @@ const CHECKS: Readonly<Record<ProcedureRecordKind, readonly (keyof typeof PROCED
 const STATUS_TONE: Readonly<Record<ProcedureRecordSummaryDto["status"], Tone>> = { none: "amber", done: "green", stale: "amber", retracted: "mute" };
 // 状況の箱：色は線と背景だけ。意味は札の記号と文字が担う。
 const STATUS_BOX: Readonly<Record<ProcedureRecordSummaryDto["status"], string>> = {
-  none: "border-sb-rule border-l-sb-ink bg-sb-surface",
-  done: "border-sb-rule border-l-sb-ink bg-sb-surface",
-  stale: "border-sb-rule border-l-sb-ink bg-sb-surface",
-  retracted: "border-sb-rule border-l-sb-rule bg-sb-surface",
+  none: "border-sb-rule border-l-sb-ink bg-sb-sunken",
+  done: "border-sb-rule border-l-sb-ink bg-sb-sunken",
+  stale: "border-sb-rule border-l-sb-ink bg-sb-sunken",
+  retracted: "border-sb-rule border-l-sb-rule bg-sb-sunken",
 };
 const STATUS_GLYPH: Readonly<Record<ProcedureRecordSummaryDto["status"], string>> = { none: "！", done: "✓", stale: "△", retracted: "－" };
 
@@ -122,7 +122,7 @@ function DoneForm({ planId, planVersion, kind }: { readonly planId: string; read
       </fieldset>
       <FormError message={message} />
       <div>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid={`procedure-submit-${kind}`}>
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid={`procedure-submit-${kind}`}>
           {kind === "dips_permit" ? "申請済みとして記録する" : "同意・通報を記録する"}
         </button>
       </div>
@@ -210,7 +210,7 @@ export function ProcedureRecordsPanel({
   return (
     <div className="flex flex-col gap-4" data-testid="plan-procedures">
       {/* 記録は利用者の申告で、許可・承認が下りたことを示すものではない。カードの上で先に読めるよう、枠つきで置く。 */}
-      <p data-note="" className="rounded-sb-m border border-l-4 border-sb-rule border-l-sb-ink bg-sb-surface px-3 py-2.5 text-sm leading-relaxed text-sb-ink">{PROCEDURE_RECORD_NOTE}</p>
+      <p data-note="" className="rounded-sb-m border border-l-4 border-sb-rule border-l-sb-ink bg-sb-sunken px-3 py-2.5 text-sm leading-relaxed text-sb-ink">{PROCEDURE_RECORD_NOTE}</p>
       {shown.map((s) => {
         const mine = records.filter((r) => r.kind === s.kind);
         const done = s.status === "done";

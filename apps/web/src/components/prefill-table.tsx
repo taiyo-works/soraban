@@ -107,7 +107,7 @@ export function PrefillTable({ prefill }: Props) {
       <div className="rounded-sb-m border border-sb-rule md:overflow-x-auto">
         <table className="block w-full border-collapse text-left text-sm md:table md:min-w-[680px]">
           <thead className="max-md:hidden">
-            <tr className="border-b border-sb-edge bg-sb-surface text-sm tracking-wide text-sb-ink-3">
+            <tr className="border-b border-sb-edge bg-sb-sunken text-sm tracking-wide text-sb-ink-3">
               <th scope="col" className="w-8 py-2.5 pl-3 text-center font-medium">
                 <span aria-hidden>#</span>
               </th>
@@ -134,7 +134,7 @@ export function PrefillTable({ prefill }: Props) {
               return (
                 <tr
                   key={`${f.system}-${f.dipsFieldLabel}-${idx}`}
-                  className="flex flex-col gap-1 px-3 py-3 align-top transition-colors hover:bg-sb-surface md:table-row md:p-0"
+                  className="flex flex-col gap-1 px-3 py-3 align-top transition-colors hover:bg-sb-sunken md:table-row md:p-0"
                 >
                   {/* 通し番号（register の一葉感。coverage 一覧・期限カレンダーと同じ mono tnum）。 */}
                   <td

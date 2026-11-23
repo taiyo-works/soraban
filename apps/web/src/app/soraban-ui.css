@@ -194,25 +194,114 @@
   }
 }
 
-/* ブロック（影なし。罫で分ける：Sprint 16 H-2）。白の帯の中ではごく薄いグレー、他では白 */
-.sb-block {
-  background: var(--sb-base);
-  border-radius: var(--sb-r-l);
+/* カード 3 種（Sprint 16-C。.sb-card と .opx-card と .sb-block は同じ規則）。罫は inset の 1px（影は使わない）。
+ * 通常：面 --sb-surface・角丸 16・--sb-rule の 1px・内側 16。一覧：最小の高さ 72・カード全体が押せる（中は見出し→主情報→補足の 3 段まで）。
+ * 判定・状態：状態の面＋左端 6px の状態の印の色の帯（帯は角丸に沿って切る）。.sb-block-soft はくぼみの面（注記・補足） */
+.sb-block,
+.sb-card {
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  padding: 20px 12px;
+  padding: var(--sb-sp-4);
   min-width: 0;
 }
-.sb-band-white .sb-block {
-  background: var(--sb-surface);
-}
 .sb-block-soft {
-  border-radius: var(--sb-r-l);
+  border-radius: var(--sb-r-card);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   padding: 10px 12px;
 }
-.sb-band-off .sb-block-soft {
-  background: var(--sb-base);
+.sb-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 72px;
+  color: var(--sb-ink);
+  text-decoration: none;
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur-press) var(--sb-ease);
+}
+a.sb-card-list,
+button.sb-card-list {
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+}
+a.sb-card-list:hover,
+button.sb-card-list:hover {
+  background: var(--sb-hover);
+}
+a.sb-card-list:active,
+button.sb-card-list:active {
+  transform: scale(0.99);
+}
+.sb-card-state {
+  position: relative;
+  overflow: hidden;
+  background: var(--sb-state-face, var(--sb-surface));
+  transition: background var(--sb-dur-state) var(--sb-ease);
+}
+.sb-card.sb-card-state,
+.sb-block.sb-card-state,
+.opx-card.sb-card-state {
+  padding-left: calc(var(--sb-sp-4) + 6px);
+}
+.sb-card-state::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--sb-state-mark, var(--sb-edge));
+}
+.sb-card-state[data-state="safe"] { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); }
+.sb-card-state[data-state="warn"] { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); }
+.sb-card-state[data-state="danger"] { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); }
+.sb-card-state[data-state="info"] { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); }
+.sb-card-state[data-state="flying"] { --sb-state-face: var(--sb-st-flying-face); --sb-state-mark: var(--sb-st-flying-mark); }
+
+/* 状態ラベル（16-C）：高さ 28 以上・左右 10・角丸 999・文字 14/600。先頭に 8px の丸（aria-hidden）と文字。待機中＝情報、飛行中＝飛行中、飛行済＝安全、中止＝危険。
+ * 丸は inline-flex の中央に置き、文字の行の中心と縦に揃える。押せるラベル（a・button）は当たり判定 48px（見た目の高さは 28 のまま、疑似要素で広げる） */
+.sb-state {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-state-face, var(--sb-st-info-face));
+  color: var(--sb-state-text, var(--sb-st-info-text));
+  font-size: var(--sb-fs-note);
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.sb-state-dot {
+  flex: none;
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-state-mark, var(--sb-st-info-mark));
+}
+.sb-state-info { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); --sb-state-text: var(--sb-st-info-text); }
+.sb-state-flying { --sb-state-face: var(--sb-st-flying-face); --sb-state-mark: var(--sb-st-flying-mark); --sb-state-text: var(--sb-st-flying-text); }
+.sb-state-safe { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); --sb-state-text: var(--sb-st-safe-text); }
+.sb-state-danger { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); --sb-state-text: var(--sb-st-danger-text); }
+a.sb-state,
+button.sb-state {
+  cursor: pointer;
+}
+a.sb-state::after,
+button.sb-state::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: max(100%, var(--sb-hit-min));
+  transform: translateY(-50%);
 }
 @media (min-width: 1024px) {
   .sb-block {
@@ -220,204 +309,143 @@
   }
 }
 
-/* ===== ピルボタン（右端に墨の丸。矢印の入れ替えは動き 1 種類め） =====
- * 文字は面の中央に置く：右端の丸（--sb-pill-ar）と文字との間（--sb-pill-gap）と同じだけ左にも余白を取り、左右を対称にする。
- * 以前は左 22px・右に丸だけで、文字が丸の分だけ左に寄って見えた。丸は流れの中にあるので、ボタンの高さ（丸 + 上下 4px）は変わらない。 */
+/* ===== ボタン 5 種（Sprint 16-C。主・副・文字・危険・無効。`/` の .sb-pill と `/ops` の .opx-btn は同じ計算スタイル） =====
+ * 主：主色の面・白の文字・角丸 12・高さ 56（現場 64）・太さ 600。副：くぼみの面・墨の文字・--sb-edge の 1px の縁。文字：背景なし・主色の文字・高さ 48。
+ * 危険：副の形で文字だけ危険の文字色。無効：くぼみの面・--sb-ink-disabled の文字（破線の縁を残し、色だけに頼らない）。
+ * 押下：--sb-primary-press（主）＋ scale(.98)・--sb-dur-press。右端の丸と矢印は置かない（旧 v2 の意匠は 16-C で外した。クラス名は残す）。
+ * 同じ規則を運航管理側の .opx-btn が持つ（@layer components に置くため、値は同じトークンで二重に書く）。 */
 .sb-pill {
-  --sb-pill-ar: 44px;
-  --sb-pill-gap: 14px;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sb-pill-gap);
+  gap: 8px;
   min-height: var(--sb-hit);
-  padding: 4px;
-  border-radius: var(--sb-pill);
-  border: 1px solid transparent;
+  padding: 0 20px;
+  border-radius: var(--sb-r-control);
+  border: 1px solid var(--sb-edge);
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
   line-height: 1.3;
   text-align: center;
   text-decoration: none;
   color: var(--sb-ink);
-  background: transparent;
-  transition: background var(--sb-dur) var(--sb-ease);
-}
-.sb-pill-label {
-  /* 縮みにくくして、幅が足りないときは左の空き（下の ::before）から先に縮め、それでも足りないときだけ折り返す */
-  flex: 0 0.001 auto;
-  min-width: 0;
-}
-/* 左の空き：右の丸と同じ幅。文字が面の中央に来る。幅が足りないとき（1280px の左の列など）は 0 まで縮み、文字は「左の縁と丸のあいだ」の中央になる */
-.sb-pill:has(> .sb-pill-arrow)::before {
-  content: "";
-  width: var(--sb-pill-ar);
-  flex: 0 1000 auto;
-  min-width: 0;
-}
-/* 丸（矢印）の無いピル（見本の切り替えなど）は、左右とも同じ余白 */
-.sb-pill:not(:has(> .sb-pill-arrow)) {
-  padding: 4px 20px;
-}
-.sb-pill-arrow {
-  position: relative;
-  flex: none;
-  display: block;
-  width: var(--sb-pill-ar);
-  height: var(--sb-pill-ar);
-  border-radius: var(--sb-pill);
-  background: var(--sb-ink);
-  color: var(--sb-on-dot);
-  overflow: hidden;
+  background: var(--sb-sunken);
+  touch-action: manipulation;
   transition:
     background var(--sb-dur) var(--sb-ease),
-    color var(--sb-dur) var(--sb-ease);
+    transform var(--sb-dur-press) var(--sb-ease);
 }
-.sb-pill-arrow .sb-ar {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform var(--sb-dur) var(--sb-ease);
+.sb-pill:hover {
+  background: var(--sb-hover);
 }
-.sb-pill-arrow .sb-a2 {
-  transform: translateX(-130%);
+.sb-pill:active {
+  transform: scale(0.98);
 }
-.sb-pill:hover .sb-a1,
-.sb-pill:active .sb-a1,
-.sb-pill:focus-visible .sb-a1 {
-  transform: translateX(130%);
+.sb-pill-label {
+  min-width: 0;
 }
-.sb-pill:hover .sb-a2,
-.sb-pill:active .sb-a2,
-.sb-pill:focus-visible .sb-a2 {
-  transform: none;
+/* 文字だけのアイコン（探す・外部・保存）。円はない。文字の脇に置く装飾 */
+.sb-pill-icon {
+  flex: none;
+  display: block;
 }
-/* 主ボタン：主色の面＋白の文字（主色／地の比は 5 以上なので、面だけで境界を満たす。旧 16-1 の墨の縁は不要）。右端の丸は白、矢印は主色 */
 .sb-pill-primary {
   background: var(--sb-primary);
   border-color: var(--sb-primary);
   color: var(--sb-on-primary);
-  --sb-pill-ar: 48px;
   min-height: var(--sb-hit-primary);
-  font-size: 1rem;
-}
-.sb-pill-primary .sb-pill-arrow {
-  background: var(--sb-on-primary);
-  color: var(--sb-primary);
 }
 .sb-pill-primary:hover,
-.sb-pill-primary:active,
-.sb-pill-primary:focus-visible {
+.sb-pill-primary:active {
   background: var(--sb-primary-press);
   border-color: var(--sb-primary-press);
 }
-.sb-pill-primary:hover .sb-pill-arrow,
-.sb-pill-primary:active .sb-pill-arrow,
-.sb-pill-primary:focus-visible .sb-pill-arrow {
-  color: var(--sb-primary-press);
-}
 .sb-pill-secondary {
-  background: var(--sb-control);
+  background: var(--sb-sunken);
   border-color: var(--sb-edge);
 }
-.sb-pill-secondary:hover .sb-pill-arrow,
-.sb-pill-secondary:active .sb-pill-arrow,
-.sb-pill-secondary:focus-visible .sb-pill-arrow {
-  background: var(--sb-primary);
-  color: var(--sb-on-primary);
+.sb-pill-secondary:hover {
+  background: var(--sb-hover);
+}
+.sb-pill-text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--sb-primary);
+  min-height: var(--sb-hit-min);
+}
+.sb-pill-text:hover {
+  background: var(--sb-hover);
+}
+.sb-pill-danger {
+  background: var(--sb-sunken);
+  border-color: var(--sb-edge);
+  color: var(--sb-st-danger-text);
 }
 .sb-pill-sm {
-  --sb-pill-ar: 40px;
-  --sb-pill-gap: 10px;
   min-height: var(--sb-hit);
   font-size: 0.875rem;
   line-height: 1.5;
 }
-/* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、対称の余白を取らず、
- * 左の余白と丸との間を詰めて、文字は「左の縁と丸のあいだ」の中央に置く（唯一の例外。幅が足りない） */
+/* 2 列に並べる小さなボタン（運航管理の判定への入口）：余白を詰める（360px でも 6 文字のラベルが折り返さない） */
 .sb-pill-tight {
-  --sb-pill-gap: 8px;
-  padding-left: 16px;
-}
-.sb-pill-tight::before {
-  display: none;
-}
-.sb-pill-tight .sb-pill-label {
-  flex: 1;
+  padding: 0 12px;
+  gap: 6px;
 }
 .sb-pill:disabled,
 .sb-pill[aria-disabled="true"] {
   background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-  border: 1.5px dashed var(--sb-edge);
+  color: var(--sb-ink-disabled);
+  border: 1px dashed var(--sb-edge);
   cursor: not-allowed;
-}
-.sb-pill:disabled .sb-pill-arrow,
-.sb-pill[aria-disabled="true"] .sb-pill-arrow {
-  background: var(--sb-edge);
-  color: var(--sb-base);
-}
-.sb-pill:disabled:hover .sb-a1,
-.sb-pill[aria-disabled="true"]:hover .sb-a1 {
   transform: none;
-}
-.sb-pill:disabled:hover .sb-a2,
-.sb-pill[aria-disabled="true"]:hover .sb-a2 {
-  transform: translateX(-130%);
 }
 .sb-pill-block {
   width: 100%;
 }
-:root[data-mode="field"] .sb-pill-arrow .sb-a2 {
-  display: none;
-}
-:root[data-mode="field"] .sb-pill:hover .sb-a1,
-:root[data-mode="field"] .sb-pill:active .sb-a1,
-:root[data-mode="field"] .sb-pill:focus-visible .sb-a1 {
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .sb-pill-arrow .sb-a2 {
-    display: none;
-  }
-  .sb-pill:hover .sb-a1,
-  .sb-pill:active .sb-a1,
-  .sb-pill:focus-visible .sb-a1 {
-    transform: none;
-  }
+/* 無効の理由（ボタンの下に 1 行）。補足の文字 */
+.sb-disabled-reason {
+  margin-top: 4px;
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+  color: var(--sb-ink-2);
 }
 
-/* 文字だけのボタン（住所検索・取消・再試行など）。押す高さは 44px 以上 */
+/* 文字だけのボタン（住所検索・取消・再試行など）。背景なし・主色の文字・高さ 48 以上 */
 .sb-text-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: var(--sb-hit-min);
   padding: 0 16px;
-  border-radius: var(--sb-pill);
-  border: 1.5px solid var(--sb-edge);
-  background: var(--sb-control);
-  color: var(--sb-ink);
+  border-radius: var(--sb-r-control);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sb-primary);
   font-size: 0.875rem;
   line-height: 1.5;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--sb-dur) var(--sb-ease);
+  touch-action: manipulation;
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur-press) var(--sb-ease);
 }
 .sb-text-btn:hover,
 .sb-text-btn:active {
   background: var(--sb-hover);
 }
+.sb-text-btn:active {
+  transform: scale(0.98);
+}
 .sb-text-btn:disabled {
   background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-  border-style: dashed;
+  color: var(--sb-ink-disabled);
+  border: 1px dashed var(--sb-edge);
   cursor: not-allowed;
+  transform: none;
 }
 
 /* せり上がり（動き 2 種類め。判定結果が出たときの結論カードだけ。1 回） */
@@ -669,7 +697,7 @@ input.sb-check:disabled {
   min-height: var(--sb-hit-row);
   padding: 8px 12px;
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   cursor: pointer;
   transition: background var(--sb-dur) var(--sb-ease);
 }
@@ -919,7 +947,7 @@ input.sb-check:disabled {
 }
 .sb-note-card {
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   padding: 6px 12px;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -1033,7 +1061,7 @@ input.sb-check:disabled {
 }
 .sb-layer-sources {
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   padding: 0 12px;
 }
 .sb-layer-sources > summary {

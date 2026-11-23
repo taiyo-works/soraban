@@ -73,7 +73,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
           aside={
             canEnterFlight ? (
               // 通常の画面遷移で開く（入力画面は下書きを端末から読み直すため。クライアント側の遷移の競合も避ける）
-              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} className={buttonFieldClass}>
+              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} data-variant="primary" className={buttonFieldClass}>
                 この機体の飛行記録を入力
               </a>
             ) : null

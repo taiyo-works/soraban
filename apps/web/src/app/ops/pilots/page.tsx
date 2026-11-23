@@ -36,7 +36,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
         back={BACK_TO.register}
         aside={
           manager ? (
-            <Link href="/ops/pilots/new" className={buttonPrimaryClass}>
+            <Link href="/ops/pilots/new" data-variant="primary" className={buttonPrimaryClass}>
               操縦者を登録
             </Link>
           ) : null

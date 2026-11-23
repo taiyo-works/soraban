@@ -73,7 +73,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
   needs_verification: {
     rule: "border-sb-v-needs-fg",
     accent: "text-sb-v-needs-fg",
-    surface: "bg-sb-surface",
+    surface: "bg-sb-sunken",
     severity: "要確認",
     mark: "triangle",
     emphatic: false,
@@ -97,7 +97,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
   III_level4: {
     rule: "border-sb-v-no-fg",
     accent: "text-sb-v-no-fg",
-    surface: "bg-sb-surface",
+    surface: "bg-sb-sunken",
     severity: "最重要",
     mark: "triangle",
     emphatic: true,
@@ -105,7 +105,7 @@ const categorySeverity: Readonly<Record<DiagnosisCategory, CategorySeverity>> = 
   emergency_no_fly: {
     rule: "border-sb-v-no-fg",
     accent: "text-sb-v-no-fg",
-    surface: "bg-sb-surface",
+    surface: "bg-sb-sunken",
     severity: "原則飛行禁止",
     mark: "prohibit",
     emphatic: true,

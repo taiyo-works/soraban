@@ -292,7 +292,7 @@ function PlaceInput({
       <Field label={label} required error={errors[keys.name]} hint="地名・施設名など、正確な位置が分かる名前（100 文字以内）">
         <input className={`${inputClass} min-h-12`} value={name} onChange={(e) => onName(e.target.value)} />
       </Field>
-      <div className="flex flex-col gap-2 rounded-sb-m bg-sb-surface p-3">
+      <div className="flex flex-col gap-2 rounded-sb-m bg-sb-sunken p-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <button type="button" className={`${tallGhostClass}`} onClick={locate}>
             現在地を入れる
@@ -454,7 +454,7 @@ function SaveRow({
             <span className="mr-1.5 font-medium text-sb-v-needs-fg">未送信</span>
             {message}
           </p>
-          <button type="button" className={`${bigButtonClass} w-full sm:w-auto sm:self-start`} onClick={onRetry} disabled={busy}>
+          <button type="button" data-variant="primary" className={`${bigButtonClass} w-full sm:w-auto sm:self-start`} onClick={onRetry} disabled={busy}>
             再送する
           </button>
         </div>
@@ -1546,7 +1546,7 @@ export function InspectionForm({
           <p className="text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
-          <button type="button" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
+          <button type="button" data-variant="primary" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>

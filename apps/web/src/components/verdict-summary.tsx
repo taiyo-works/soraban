@@ -286,7 +286,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     </p>
                   ) : null}
                   {verdict.level === "procedure_done" ? (
-                    <p data-testid="verdict-conditional" className="rounded-sb-m border-l-4 border-sb-v-done-fg bg-sb-surface px-3 py-2 font-bold text-sb-ink">
+                    <p data-testid="verdict-conditional" className="rounded-sb-m border-l-4 border-sb-v-done-fg bg-sb-sunken px-3 py-2 font-bold text-sb-ink">
                       {CONDITIONAL_NOTE}
                       {permitNotes && verdict.done.length > 0 && verdict.done.every((d) => permitNotes.applied[d.itemId] !== undefined)
                         ? [...new Set(verdict.done.map((d) => permitNotes.applied[d.itemId]))].join("")

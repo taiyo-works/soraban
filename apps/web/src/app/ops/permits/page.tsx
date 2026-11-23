@@ -38,7 +38,7 @@ export default async function PermitListPage({
         back={returnTo ? { href: returnTo, label: "現場モードへ戻る" } : BACK_TO.register}
         aside={
           manager ? (
-            <Link prefetch={false} href="/ops/permits/new" className={buttonPrimaryClass} data-testid="permit-new-link">
+            <Link prefetch={false} href="/ops/permits/new" data-variant="primary" className={buttonPrimaryClass} data-testid="permit-new-link">
               許可・承認を登録
             </Link>
           ) : null

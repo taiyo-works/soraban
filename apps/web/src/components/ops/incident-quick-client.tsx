@@ -175,7 +175,7 @@ export function IncidentQuickClient({
             </p>
           </div>
           {!savedRejected ? (
-            <a href={saved.recordId ? incidentHref(saved.recordId, "correct") : `${INCIDENTS_HREF}?detailPending=1`} className={BTN_PRIMARY} data-testid="incident-quick-detail">
+            <a href={saved.recordId ? incidentHref(saved.recordId, "correct") : `${INCIDENTS_HREF}?detailPending=1`} data-variant="primary" className={BTN_PRIMARY} data-testid="incident-quick-detail">
               詳細を記入する
             </a>
           ) : null}
@@ -209,7 +209,7 @@ export function IncidentQuickClient({
             時刻：いま（押した時刻で記録します）
           </p>
           {/* ⑥ 記録する */}
-          <button type="button" className={`${BTN_RECORD} tracking-[0.2em]`} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
+          <button type="button" data-variant="primary" className={`${BTN_RECORD} tracking-[0.2em]`} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
             記録する
           </button>
           {!ready ? (

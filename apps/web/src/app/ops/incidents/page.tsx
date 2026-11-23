@@ -51,7 +51,7 @@ export default async function IncidentListPage({
         back={BACK_TO.journal}
         aside={
           canCreate ? (
-            <Link prefetch={false} href="/ops/incidents/new" className={buttonPrimaryClass} data-testid="incident-new-link">
+            <Link prefetch={false} href="/ops/incidents/new" data-variant="primary" className={buttonPrimaryClass} data-testid="incident-new-link">
               記録する
             </Link>
           ) : null

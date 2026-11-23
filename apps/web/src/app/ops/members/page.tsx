@@ -52,7 +52,7 @@ export default async function MembersPage() {
                 <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
                 役割・利用を変更する
               </summary>
-              <div className="mt-2 rounded-sb-m bg-sb-surface p-3">
+              <div className="mt-2 rounded-sb-m bg-sb-sunken p-3">
                 <MemberControls key={m.version} member={m} />
               </div>
             </details>
