@@ -235,17 +235,48 @@ test.describe("16-C 差し戻し 1：文字 200%（390・430）で切れ・横�
     await expect(page.getByTestId("plan-digest").first()).toBeAttached();
     await waitForSettledStyles(page);
     await expectTextZoom(page, "計画の主画面");
-    // 評価の計画は判定の行が長かった（札が増える）。左の内容を長くしても、右の「判定を見る →」「計画の確認へ →」が切れない
+    // 評価の計画は判定の行が長かった（札が増える）。実画面の札（判定の札・確認の札）を複製して左に並べる。折り返せない 1 語は入れない。
     await page.evaluate(() => {
-      for (const id of ["plan-judge-line", "plan-confirm-link"]) {
-        const host = document.querySelector<HTMLElement>(`[data-testid="plan-digest"] [data-testid="${id}"]`) ?? document.querySelector<HTMLElement>(`[data-testid="plan-digest"] [data-testid="${id}"] > span`);
-        const span = document.createElement("span");
-        span.className = "text-sm text-sb-ink-2";
-        span.textContent = "判定の根拠が古い可能性があります（出典の更新を確認）";
-        (host ?? document.querySelector<HTMLElement>('[data-testid="plan-digest"] a span'))!.appendChild(span);
+      const left = (a: Element | null): HTMLElement | null => a?.querySelector<HTMLElement>(":scope > span:first-child") ?? null;
+      const hosts = [left(document.querySelector('[data-testid="plan-digest"] [data-testid="plan-judge-link"]')), left(document.querySelector('[data-testid="plan-digest"] [data-testid="plan-confirm-link"]'))];
+      for (const host of hosts) {
+        if (!host) continue;
+        const kids = Array.from(host.children).slice(1);
+        for (let i = 0; i < 3; i++) for (const k of kids) host.appendChild(k.cloneNode(true));
+        const note = document.createElement("span");
+        note.className = "text-sm text-sb-ink-2";
+        note.textContent = "判定の根拠が古い可能性があります（出典の更新を確認）";
+        host.appendChild(note);
       }
     });
     await expectTextZoom(page, "計画の主画面（plan-digest の左を長くした）");
+    // expectTextZoom は「直接の文字を持つ要素」の切れしか見ない。切れる入れ物は plan-digest（nav）自身なので、直接測る（差し戻し 1 再評価）。
+    for (const w of [390, 430]) {
+      await page.setViewportSize({ width: w, height: 844 });
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = "200%";
+      });
+      await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+      const m = await page.evaluate(() => {
+        const nav = document.querySelector<HTMLElement>('[data-testid="plan-digest"]')!;
+        const nr = nav.getBoundingClientRect();
+        const links = Array.from(nav.querySelectorAll<HTMLElement>("a")).map((a) => {
+          const r = a.getBoundingClientRect();
+          const tailEl = a.querySelector<HTMLElement>(":scope > span:last-child")!;
+          return { id: a.getAttribute("data-testid"), right: r.right, tailRight: tailEl.getBoundingClientRect().right, tailText: tailEl.textContent };
+        });
+        return { sw: nav.scrollWidth, cw: nav.clientWidth, navRight: nr.right, links };
+      });
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = "";
+      });
+      expect(m.links.length, `${w}px: リンクが無い`).toBeGreaterThanOrEqual(2);
+      expect(m.sw, `${w}px 200%: plan-digest の scrollWidth ${m.sw} > clientWidth ${m.cw}（nav が切れている）`).toBeLessThanOrEqual(m.cw + 1);
+      for (const l of m.links) {
+        expect(l.right, `${w}px 200%: ${l.id} の右端が nav の外`).toBeLessThanOrEqual(m.navRight + 1);
+        expect(l.tailRight, `${w}px 200%: ${l.id}「${l.tailText}」の右端が nav の枠の外`).toBeLessThanOrEqual(m.navRight + 1);
+      }
+    }
   });
   test("登録（場所）/ops/places（place-row-name）", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));

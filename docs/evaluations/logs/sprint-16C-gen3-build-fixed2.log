@@ -1,0 +1,162 @@
+
+> soraban@0.0.0 build /home/user/soraban
+> pnpm -r build
+
+Scope: 6 of 7 workspace projects
+apps/web build$ next build
+apps/web build: ▲ Next.js 16.2.4 (Turbopack)
+apps/web build: - Cache Components enabled
+apps/web build:   Creating an optimized production build ...
+apps/web build: ✓ Compiled successfully in 14.3s
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 15.6s ...
+apps/web build:   Collecting page data using 3 workers ...
+apps/web build:   Generating static pages using 3 workers (0/73) ...
+apps/web build:   Generating static pages using 3 workers (18/73) 
+apps/web build:   Generating static pages using 3 workers (36/73) 
+apps/web build:   Generating static pages using 3 workers (54/73) 
+apps/web build: ✓ Generating static pages using 3 workers (73/73) in 969ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: ┌ ◐ /
+apps/web build: ├ ○ /_not-found
+apps/web build: ├ ○ /api/airports
+apps/web build: ├ ƒ /api/auth/[...path]
+apps/web build: ├ ƒ /api/check
+apps/web build: ├ ƒ /api/diagnose
+apps/web build: ├ ƒ /api/did/[pref]
+apps/web build: ├ ƒ /api/geocode
+apps/web build: ├ ƒ /api/health/db
+apps/web build: ├ ○ /api/industrial
+apps/web build: ├ ƒ /api/ops/aircraft
+apps/web build: ├ ƒ /api/ops/aircraft/[id]
+apps/web build: ├ ƒ /api/ops/aircraft/[id]/versions
+apps/web build: ├ ƒ /api/ops/aircraft/[id]/void
+apps/web build: ├ ƒ /api/ops/field-bundle
+apps/web build: ├ ƒ /api/ops/flights
+apps/web build: ├ ƒ /api/ops/flights/[id]
+apps/web build: ├ ƒ /api/ops/flights/[id]/incidents
+apps/web build: ├ ƒ /api/ops/flights/[id]/versions
+apps/web build: ├ ƒ /api/ops/flights/[id]/void
+apps/web build: ├ ƒ /api/ops/incidents
+apps/web build: ├ ƒ /api/ops/incidents/[id]
+apps/web build: ├ ƒ /api/ops/incidents/[id]/reports
+apps/web build: ├ ƒ /api/ops/incidents/[id]/versions
+apps/web build: ├ ƒ /api/ops/incidents/[id]/void
+apps/web build: ├ ƒ /api/ops/inspections
+apps/web build: ├ ƒ /api/ops/inspections/[id]
+apps/web build: ├ ƒ /api/ops/inspections/[id]/versions
+apps/web build: ├ ƒ /api/ops/inspections/[id]/void
+apps/web build: ├ ƒ /api/ops/me
+apps/web build: ├ ƒ /api/ops/members
+apps/web build: ├ ƒ /api/ops/members/[id]
+apps/web build: ├ ƒ /api/ops/members/[id]/versions
+apps/web build: ├ ƒ /api/ops/permits
+apps/web build: ├ ƒ /api/ops/permits/[id]
+apps/web build: ├ ƒ /api/ops/permits/[id]/revoke
+apps/web build: ├ ƒ /api/ops/permits/[id]/versions
+apps/web build: ├ ƒ /api/ops/permits/[id]/void
+apps/web build: ├ ƒ /api/ops/pilots
+apps/web build: ├ ƒ /api/ops/pilots/[id]
+apps/web build: ├ ƒ /api/ops/pilots/[id]/versions
+apps/web build: ├ ƒ /api/ops/pilots/[id]/void
+apps/web build: ├ ƒ /api/ops/places
+apps/web build: ├ ƒ /api/ops/places/[id]
+apps/web build: ├ ƒ /api/ops/places/[id]/versions
+apps/web build: ├ ƒ /api/ops/places/[id]/void
+apps/web build: ├ ƒ /api/ops/plans
+apps/web build: ├ ƒ /api/ops/plans/[id]
+apps/web build: ├ ƒ /api/ops/plans/[id]/confirmations
+apps/web build: ├ ƒ /api/ops/plans/[id]/field
+apps/web build: ├ ƒ /api/ops/plans/[id]/field-events
+apps/web build: ├ ƒ /api/ops/plans/[id]/incidents
+apps/web build: ├ ƒ /api/ops/plans/[id]/permits
+apps/web build: ├ ƒ /api/ops/plans/[id]/procedure-records
+apps/web build: ├ ƒ /api/ops/plans/[id]/rejudge
+apps/web build: ├ ƒ /api/ops/plans/[id]/report
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/[rid]
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/[rid]/resolve
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/[rid]/retract
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/[rid]/retry
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/[rid]/versions
+apps/web build: ├ ƒ /api/ops/plans/[id]/reports/audit
+apps/web build: ├ ƒ /api/ops/plans/[id]/request-confirmation
+apps/web build: ├ ƒ /api/ops/plans/[id]/snapshots
+apps/web build: ├ ƒ /api/ops/plans/[id]/snapshots/[sid]
+apps/web build: ├ ƒ /api/ops/plans/[id]/versions
+apps/web build: ├ ƒ /api/ops/plans/[id]/void
+apps/web build: ├ ƒ /api/ops/today
+apps/web build: ├ ƒ /api/test-auth/sign-in
+apps/web build: ├ ƒ /api/test-auth/sign-out
+apps/web build: ├ ○ /icon.svg
+apps/web build: ├ ◐ /ops
+apps/web build: ├ ◐ /ops/about
+apps/web build: ├ ◐ /ops/aircraft
+apps/web build: ├ ◐ /ops/aircraft/[id]
+apps/web build: │ └ /ops/aircraft/[id]
+apps/web build: ├ ◐ /ops/aircraft/new
+apps/web build: ├ ◐ /ops/design
+apps/web build: ├ ◐ /ops/flights
+apps/web build: ├ ◐ /ops/flights/[id]
+apps/web build: │ └ /ops/flights/[id]
+apps/web build: ├ ◐ /ops/flights/new
+apps/web build: ├ ◐ /ops/incidents
+apps/web build: ├ ◐ /ops/incidents/[id]
+apps/web build: │ └ /ops/incidents/[id]
+apps/web build: ├ ◐ /ops/incidents/new
+apps/web build: ├ ◐ /ops/inspections
+apps/web build: ├ ◐ /ops/inspections/[id]
+apps/web build: │ └ /ops/inspections/[id]
+apps/web build: ├ ◐ /ops/inspections/new
+apps/web build: ├ ◐ /ops/journal
+apps/web build: ├ ƒ /ops/manifest.webmanifest
+apps/web build: ├ ◐ /ops/members
+apps/web build: ├ ◐ /ops/more
+apps/web build: ├ ◐ /ops/no-access
+apps/web build: ├ ◐ /ops/offline/field
+apps/web build: ├ ◐ /ops/offline/inspection
+apps/web build: ├ ◐ /ops/offline/journal
+apps/web build: ├ ◐ /ops/offline/today
+apps/web build: ├ ◐ /ops/offline/unavailable
+apps/web build: ├ ◐ /ops/permits
+apps/web build: ├ ◐ /ops/permits/[id]
+apps/web build: │ └ /ops/permits/[id]
+apps/web build: ├ ◐ /ops/permits/new
+apps/web build: ├ ◐ /ops/pilots
+apps/web build: ├ ◐ /ops/pilots/[id]
+apps/web build: │ └ /ops/pilots/[id]
+apps/web build: ├ ◐ /ops/pilots/new
+apps/web build: ├ ◐ /ops/places
+apps/web build: ├ ◐ /ops/places/[id]
+apps/web build: │ └ /ops/places/[id]
+apps/web build: ├ ◐ /ops/places/new
+apps/web build: ├ ◐ /ops/plans
+apps/web build: ├ ◐ /ops/plans/[id]
+apps/web build: │ └ /ops/plans/[id]
+apps/web build: ├ ◐ /ops/plans/[id]/edit
+apps/web build: │ └ /ops/plans/[id]/edit
+apps/web build: ├ ◐ /ops/plans/[id]/field
+apps/web build: │ └ /ops/plans/[id]/field
+apps/web build: ├ ◐ /ops/plans/[id]/field/incident
+apps/web build: │ └ /ops/plans/[id]/field/incident
+apps/web build: ├ ◐ /ops/plans/[id]/journal
+apps/web build: │ └ /ops/plans/[id]/journal
+apps/web build: ├ ◐ /ops/plans/[id]/judgement
+apps/web build: │ └ /ops/plans/[id]/judgement
+apps/web build: ├ ◐ /ops/plans/[id]/overview
+apps/web build: │ └ /ops/plans/[id]/overview
+apps/web build: ├ ◐ /ops/plans/[id]/report
+apps/web build: │ └ /ops/plans/[id]/report
+apps/web build: ├ ◐ /ops/plans/[id]/snapshots
+apps/web build: │ └ /ops/plans/[id]/snapshots
+apps/web build: ├ ◐ /ops/plans/[id]/snapshots/[sid]
+apps/web build: │ └ /ops/plans/[id]/snapshots/[sid]
+apps/web build: ├ ◐ /ops/plans/new
+apps/web build: ├ ◐ /ops/sign-in
+apps/web build: └ ƒ /ops/sw.js
+apps/web build: ƒ Proxy (Middleware)
+apps/web build: ○  (Static)             prerendered as static content
+apps/web build: ◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+apps/web build: ƒ  (Dynamic)            server-rendered on demand
+apps/web build: Done

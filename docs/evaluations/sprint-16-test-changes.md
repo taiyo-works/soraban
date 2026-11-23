@@ -180,3 +180,5 @@
 - 文字 200%（390・430。`expectTextZoom`）に、計画の主画面と `/ops/places` を追加。計画の主画面は、`plan-digest` の左の内容を長くした状態（DOM に文を足す）でも測る。評価の計画は判定の行が長く、検査用の計画では再現しないため。実装は `plan-ui.tsx` の行に `flex-wrap`・リンクに `ml-auto`、`ops/places/page.tsx` の名前に `min-w-0`・`overflow-wrap:anywhere`。
 - 画面の長さ・最初の画面の縦位置の上限は変えていない（R1-8 の対象なし）。
 - 注意: 検査の追加後、最初の実行は古い `.next`（`next start`）のまま走り、K-8 と `/ops/places` が落ちた（足した検査が効くことの確認）。`pnpm build` のあと 72/72（×3）通過。
+
+**16-C gen3（評価 10 節の要修正：計画の主画面 200% の検査が修正前でも通る）**: `sprint16-c-db.spec.ts` の「計画の主画面」に、`plan-digest`（nav）自身の `scrollWidth <= clientWidth + 1` と、各リンク・右端の「判定を見る →」「計画の確認へ →」の右端が nav の枠内、を直接 expect（390・430、200%）。左の注入は、実画面の札の複製 3 組＋折り返せる文（折り返せない 1 語は入れない）に変更。`expectTextZoom` は変えていない。修正前（718ad3d のアプリ）の再ビルドで 390 が 474>326 で落ち、修正後で通る（`sprint-16C-gen3-spec-{old,fixed-first,x3}.log`）。既存の検査は弱めていない。
