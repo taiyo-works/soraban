@@ -73,3 +73,11 @@
 ## 撮影
 
 評価者が `/ops/plans`・`/ops/plans/<id>/report`・`/ops/design` の 390 幅で、入れ子の箱が白い面の上で見えることを撮影で確かめる。
+
+## designer 追記（2026-11-23）：`bg-sb-base` ＋ `opx-shadow` のカード（12 か所）
+
+上の一覧は `bg-sb-surface`（66 か所）の見直しだった。同じ 16-A の意味の入れ替えで、逆側の `rounded-sb-l bg-sb-base opx-shadow`（以前は「白い面」を作っていた書き方）が、面も罫もないまま**ページの地に溶けていた**（`plan-ui.tsx`・`plan-main-ui.tsx`・`report-client.tsx`・`plans/page.tsx` の 12 か所）。計画の一覧では、行の本体が地と同じ色で、下の「次の予定」の足（くぼみ）だけが浮いて見えた。
+
+- 対応: `ops-v2.css`（unlayered の節）で `.opx-shadow` を「白い面＋ `--sb-rule` の 1px の罫」にした。罫は `outline`（内側。`outline-offset: -1px`）で描く：足のくぼみ・ホバーの面の上にも罫が残り、角丸に沿う。TSX・クラス名は変えていない。
+- 対象外にしたもの: `bg-sb-base` に自前の縁（border）を持つ札・入れ子の箱・注意の箱（縁で見える）、`verdict-summary.tsx` の判定カード（`shadow-sb` ＋左の帯。16-G 以降で状態のカードに載せ替える）。
+- 撮影: `docs/evaluations/screenshots/sprint-16C/designer-before-*.png`（前）と `designer-plans-*`・`designer-plan-main-*`（後）。
