@@ -1,0 +1,402 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-b-db.spec.ts e2e/ops-db/sprint16-b-r1-db.spec.ts -g 'B-4/K-5|R1-5' --repeat-each=12
+
+
+Running 96 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (3.2s)
+  ✓   2 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (793ms)
+  ✓   3 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (778ms)
+  ✓   4 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (789ms)
+  ✓   5 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.9s)
+  ✓   6 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.2s)
+  ✓   7 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (921ms)
+  ✓   8 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.2s)
+  ✓   9 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.9s)
+  ✓  10 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (935ms)
+  ✓  11 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (781ms)
+  ✓  12 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (987ms)
+  ✓  13 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.8s)
+  ✓  14 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  15 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (769ms)
+  ✓  16 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.1s)
+  ✓  17 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.6s)
+  ✓  18 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (858ms)
+  ✓  19 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (952ms)
+  ✓  20 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (964ms)
+  ✓  21 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.8s)
+  ✓  22 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  23 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (746ms)
+  ✓  24 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.1s)
+  ✓  25 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (3.0s)
+  ✓  26 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (929ms)
+  ✓  27 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (945ms)
+  ✓  28 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (968ms)
+  ✓  29 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (13.0s)
+  ✓  30 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.3s)
+  ✓  31 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (744ms)
+  ✓  32 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.3s)
+  ✓  33 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (3.0s)
+  ✓  34 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (809ms)
+  ✓  35 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (765ms)
+  ✓  36 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (854ms)
+  ✓  37 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.9s)
+  ✓  38 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.2s)
+  ✓  39 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (885ms)
+  ✓  40 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.1s)
+  ✘  41 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (780ms)
+  ✓  42 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (834ms)
+  ✓  43 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (888ms)
+  ✓  44 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (906ms)
+  ✓  45 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.8s)
+  ✓  46 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.4s)
+  ✓  47 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (902ms)
+  ✓  48 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.3s)
+  ✘  49 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (908ms)
+  ✓  50 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (873ms)
+  ✓  51 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (797ms)
+  ✓  52 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (884ms)
+  ✓  53 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.8s)
+  ✓  54 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.3s)
+  ✓  55 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (887ms)
+  ✓  56 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.2s)
+  ✘  57 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (800ms)
+  ✓  58 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (836ms)
+  ✓  59 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (947ms)
+  ✓  60 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (804ms)
+  ✓  61 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.9s)
+  ✓  62 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.2s)
+  ✓  63 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (983ms)
+  ✓  64 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.1s)
+  ✘  65 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (829ms)
+  ✓  66 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  67 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (970ms)
+  ✓  68 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (990ms)
+  ✓  69 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (13.0s)
+  ✓  70 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  71 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (771ms)
+  ✓  72 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.1s)
+  ✘  73 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (885ms)
+  ✓  74 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (932ms)
+  ✓  75 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (757ms)
+  ✓  76 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (938ms)
+  ✓  77 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (13.0s)
+  ✓  78 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  79 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (996ms)
+  ✓  80 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.4s)
+  ✘  81 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (783ms)
+  ✓  82 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (966ms)
+  ✓  83 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (978ms)
+  ✓  84 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (979ms)
+  ✓  85 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (13.0s)
+  ✓  86 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.3s)
+  ✓  87 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (920ms)
+  ✓  88 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.2s)
+  ✘  89 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (815ms)
+  ✓  90 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (975ms)
+  ✓  91 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (921ms)
+  ✓  92 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (781ms)
+  ✓  93 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (12.9s)
+  ✓  94 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.3s)
+  ✓  95 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (741ms)
+  ✓  96 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.4s)
+
+
+  1) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat6/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat6/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat6/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat7/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat7/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat7/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat8/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat8/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat8/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat9/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat9/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat9/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat10/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat10/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat10/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:445
+
+      443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      447 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      448 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:445:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+  89 passed (4.5m)
+ ELIFECYCLE  Command failed with exit code 1.

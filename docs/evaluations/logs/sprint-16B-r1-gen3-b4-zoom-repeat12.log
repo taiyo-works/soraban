@@ -1,0 +1,108 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-b-db.spec.ts -g B-4/K-5 --repeat-each=12
+
+
+Running 12 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.9s)
+  ✓   2 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✓   3 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.4s)
+  ✓   4 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✓   5 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (3.0s)
+  ✘   6 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (837ms)
+  ✓   7 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✓   8 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.6s)
+  ✓   9 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✓  10 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.8s)
+  ✓  11 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✘  12 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (820ms)
+
+
+  1) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:443
+
+      441 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      442 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 443 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      444 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      445 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      446 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:443:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat5/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+
+    Error: ホーム 文字 200%・390px: 200% にしても大きくならない文字（rem・em にする）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "div「判定は入力された情報の範囲での目安です。」 16px→28px",
+    +   "span「ホーム」 16px→28px",
+    +   "span「計画」 16px→28px",
+    +   "span「点検」 16px→28px",
+    +   "span「日誌」 16px→28px",
+    +   "span「登録」 16px→28px",
+    + ]
+
+       at ../field-checks.ts:443
+
+      441 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      442 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 443 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+          |                                                                ^
+      444 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      445 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      446 |   }
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:443:64)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-db.spec.ts:86:7
+
+    Error Context: test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-db-Sprint-16-B--8fb36-文字が-2-倍になる・主ボタンに届き下部ナビに隠れない-repeat11/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+    e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない 
+  10 passed (41.5s)
+ ELIFECYCLE  Command failed with exit code 1.

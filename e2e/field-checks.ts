@@ -335,17 +335,19 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
   await page.setViewportSize({ width, height: original?.height ?? 844 });
   await waitForSettledStyles(page);
   try {
-    const baseline = await page.evaluate(() => {
-      const out: number[] = [];
-      for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) out.push(parseFloat(getComputedStyle(el).fontSize));
-      return out;
+    // 基準の大きさは要素そのものに結び付けて持つ（番号で突き合わせると、測っている間に DOM に要素が増減したとき、別の要素と比べて誤検出する。
+    // 14795fa でも、同じ DB で繰り返すと 24 回中 11 回「16px→28px」の誤検出が出た）。基準のない（後から増えた）要素は 2 倍の検査から外す。
+    await page.evaluate(() => {
+      const m = new WeakMap<Element, number>();
+      for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) m.set(el, parseFloat(getComputedStyle(el).fontSize));
+      (window as unknown as { __zoomBase?: WeakMap<Element, number> }).__zoomBase = m;
     });
     await page.evaluate(() => {
       document.documentElement.style.fontSize = "200%";
     });
     await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
     return await page.evaluate(
-      ({ w, base }) => {
+      ({ w }) => {
         const de = document.documentElement;
         const all = Array.from(document.body.querySelectorAll<HTMLElement>("*"));
         const describe = (el: Element): string => {
@@ -365,12 +367,12 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
         const clipped: string[] = [];
         const unscaled: string[] = [];
         let textCount = 0;
-        all.forEach((el, i) => {
+        all.forEach((el) => {
           if (!hasOwnText(el) || !visible(el) || isSr(el)) return;
           textCount++;
           const cs = getComputedStyle(el);
           if (!isThirdParty(el)) {
-            const before = base[i] ?? 0;
+            const before = (window as unknown as { __zoomBase?: WeakMap<Element, number> }).__zoomBase?.get(el) ?? 0;
             const after = parseFloat(cs.fontSize);
             if (before > 0 && after < before * 1.9) unscaled.push(`${describe(el)} ${before}px→${after}px`);
           }
@@ -423,7 +425,7 @@ export const measureTextZoom = async (page: Page, width: number): Promise<TextZo
           textCount,
         };
       },
-      { w: width, base: baseline },
+      { w: width },
     );
   } finally {
     await page.evaluate(() => {
