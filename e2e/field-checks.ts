@@ -147,6 +147,9 @@ export const NOTE_FONT_MIN = 14;
 /** 行の高さ（計算された line-height ÷ font-size）の下限。測定の誤差 0.01 を引いた値。 */
 export const BODY_LINE_RATIO_MIN = 1.7 - 0.01;
 export const NOTE_LINE_RATIO_MIN = 1.5 - 0.01;
+/** 大きな文字（本文の基準より LARGE_TEXT_GAP px 以上大きい p・li・dd と子孫。見出し・表示の役割）は、行の高さ 1.25（誤差 0.01）以上だけを求める（2026-11-23 オーケストレーターの決定）。 */
+export const LARGE_TEXT_GAP = 2;
+export const LARGE_LINE_RATIO_MIN = 1.25 - 0.01;
 /** `data-note` を付けてよい要素（契約 R1-2）。div・section・main・カードの外枠には付けない。 */
 export const DATA_NOTE_ALLOWED_TAGS = ["p", "li", "dd", "ul", "ol", "dl", "span", "time", "small"] as const;
 
@@ -165,7 +168,7 @@ export type BodyTextReport = {
 export const collectBodyTextReport = async (page: Page, rootSelector: string, body: number): Promise<BodyTextReport> => {
   await waitForSettledStyles(page);
   return page.evaluate(
-    ({ sel, bodyMin, noteMin, bodyLh, noteLh, allowed }) => {
+    ({ sel, bodyMin, noteMin, bodyLh, noteLh, largeGap, largeLh, allowed }) => {
       const root = document.querySelector(sel);
       const empty = { checked: 0, bad: [] as string[], misplaced: [] as string[], marked: {} as Record<string, number> };
       if (!root) return empty;
@@ -185,10 +188,13 @@ export const collectBodyTextReport = async (page: Page, rootSelector: string, bo
         const fs = parseFloat(cs.fontSize);
         const lhPx = parseFloat(cs.lineHeight);
         const ratio = lhPx / fs;
-        const lhOk = cs.lineHeight !== "normal" && Number.isFinite(ratio) && ratio >= lhMin;
+        // 大きな文字（本文の基準より 2px 以上大きい。見出し・表示の役割）は、行の高さ 1.25 以上だけを求める。
+        const large = kind === "本文" && fs >= bodyMin + largeGap;
+        const needLh = large ? largeLh : lhMin;
+        const lhOk = cs.lineHeight !== "normal" && Number.isFinite(ratio) && ratio >= needLh;
         if (fs >= sizeMin && lhOk) return;
         const t = (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 20);
-        out.bad.push(`${kind} ${el.tagName.toLowerCase()}[${idOf(el)}]「${t}」 ${fs}px / 行の高さ ${cs.lineHeight === "normal" ? "normal" : ratio.toFixed(2)}（${sizeMin}px・${lhMin + 0.01} 以上が必要）`);
+        out.bad.push(`${large ? "大きな文字" : kind} ${el.tagName.toLowerCase()}[${idOf(el)}]「${t}」 ${fs}px / 行の高さ ${cs.lineHeight === "normal" ? "normal" : ratio.toFixed(2)}（${sizeMin}px・${(needLh + 0.01).toFixed(2)} 以上が必要）`);
       };
       const hasOwnText = (el: Element): boolean => Array.from(el.childNodes).some((n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim().length > 0);
       // ③ data-note の置き場所
@@ -216,7 +222,7 @@ export const collectBodyTextReport = async (page: Page, rootSelector: string, bo
       }
       return out;
     },
-    { sel: rootSelector, bodyMin: body, noteMin: NOTE_FONT_MIN, bodyLh: BODY_LINE_RATIO_MIN, noteLh: NOTE_LINE_RATIO_MIN, allowed: [...DATA_NOTE_ALLOWED_TAGS] as string[] },
+    { sel: rootSelector, bodyMin: body, noteMin: NOTE_FONT_MIN, bodyLh: BODY_LINE_RATIO_MIN, noteLh: NOTE_LINE_RATIO_MIN, largeGap: LARGE_TEXT_GAP, largeLh: LARGE_LINE_RATIO_MIN, allowed: [...DATA_NOTE_ALLOWED_TAGS] as string[] },
   );
 };
 

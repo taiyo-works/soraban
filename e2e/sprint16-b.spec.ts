@@ -204,6 +204,23 @@ test.describe("16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰�
     expect(await run(page, `<p style="${BODY}">本文 <a href="#x" style="font-size:14px;line-height:1.2">リンク</a> <button style="font-size:14px">押す</button></p>`, { body: 16 })).toBe("");
   });
 
+  test("大きな文字（本文の基準より 2px 以上大きい）は行の高さ 1.25 以上で通る。本文の大きさは 1.7 のまま", async ({ page }) => {
+    // 22px・1.25 は通る
+    expect(await run(page, `<p data-testid="big" style="font-size:22px;line-height:1.25;margin:0">22px の表示</p>`, { body: 16 })).toBe("");
+    // 22px でも 1.2 は失敗する（下限は 1.25）
+    expect(await run(page, `<p data-testid="big-tight" style="font-size:22px;line-height:1.2;margin:0">22px・1.2</p>`, { body: 16 })).toContain("big-tight");
+    // 本文の大きさ（16px）で 1.2 なら失敗する。17px（基準 +1）も 1.7 のまま
+    expect(await run(page, `<p data-testid="body-tight" style="font-size:16px;line-height:1.2;margin:0">16px・1.2</p>`, { body: 16 })).toContain("body-tight");
+    expect(await run(page, `<p data-testid="p17" style="font-size:17px;line-height:1.25;margin:0">17px・1.25</p>`, { body: 16 })).toContain("p17");
+    // 境界: 18px（基準 +2）は大きな文字、1.25 で通る。現場（body: 18）の 20px・1.25 も通り、19px・1.25 は失敗
+    expect(await run(page, `<p style="font-size:18px;line-height:1.25;margin:0">18px</p>`, { body: 16 })).toBe("");
+    expect(await run(page, `<p style="font-size:20px;line-height:1.25;margin:0">20px</p>`, { body: 18 })).toBe("");
+    expect(await run(page, `<p data-testid="p19" style="font-size:19px;line-height:1.25;margin:0">19px</p>`, { body: 18 })).toContain("p19");
+    // 大きな文字の子孫も、その大きさ（22px）に応じて 1.25 で通る。normal は失敗する
+    expect(await run(page, `<p style="font-size:22px;line-height:1.25;margin:0">状態 <span style="font-size:22px">語</span></p>`, { body: 16 })).toBe("");
+    expect(await run(page, `<p data-testid="big-normal" style="font-size:22px;line-height:normal;margin:0">normal</p>`, { body: 16 })).toContain("big-normal");
+  });
+
   test("現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ", async ({ page }) => {
     expect(await run(page, `<p data-testid="p16" style="${BODY}">16px</p>`, { body: 18 })).toContain("p16");
     expect(await run(page, `<p style="${NOTE};display:none">隠れた 14px</p><p style="${BODY}">本文</p>`, { body: 16 })).toBe("");
