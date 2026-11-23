@@ -89,11 +89,11 @@ export default async function AircraftDetailPage({ params, searchParams }: { rea
           }
         />
         {a.voided ? (
-          <Note tone="red">
+          <Note tone="red" body>
             この機体は取り消されています。誤登録の記録として、登録内容と版の一覧を残しています。訂正はできません。
           </Note>
         ) : manager ? null : (
-          <Note>訂正・取消は運航管理者だけが行えます。</Note>
+          <Note body>訂正・取消は運航管理者だけが行えます。</Note>
         )}
         <DetailList rows={rows} data-testid="aircraft-detail" />
       </div>

@@ -42,7 +42,7 @@ export default async function PilotListPage({ searchParams }: { readonly searchP
           ) : null
         }
       >
-        <Note>
+        <Note body>
           技能証明書番号は、一覧では末尾 4 桁以外を伏せています。
           {manager
             ? "全桁は各操縦者の詳細画面で確認できます。"

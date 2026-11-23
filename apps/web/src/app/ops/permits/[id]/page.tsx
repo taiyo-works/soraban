@@ -97,11 +97,11 @@ export default async function PermitDetailPage({
           <p key={n} className="text-sm leading-relaxed text-sb-ink-3" data-testid="permit-note">{n}</p>
         ))}
         {p.voided ? (
-          <Note tone="red">この登録は取り消されています（誤登録の記録）。登録内容と版の履歴は残しています。訂正はできません。</Note>
+          <Note tone="red" body>この登録は取り消されています（誤登録の記録）。登録内容と版の履歴は残しています。訂正はできません。</Note>
         ) : p.status === "revoked" ? (
-          <Note tone="red">この登録は失効しています（失効日 {p.revokedOn}）。失効日以降の飛行には適用されません。訂正はできません。</Note>
+          <Note tone="red" body>この登録は失効しています（失効日 {p.revokedOn}）。失効日以降の飛行には適用されません。訂正はできません。</Note>
         ) : null}
-        {!can(me.member.role, "permit.update") ? <Note>訂正・失効・取消は運航管理者だけが行えます。</Note> : null}
+        {!can(me.member.role, "permit.update") ? <Note body>訂正・失効・取消は運航管理者だけが行えます。</Note> : null}
         <DetailList rows={rows} data-testid="permit-detail" />
       </div>
 

@@ -324,6 +324,19 @@
     font-size: 1.375rem;
   }
 }
+/* 節の説明文（本文 16px）を持つ見出し：墨の線は見出しの行だけに掛け、説明は線の下に本文として置く（説明まで線で囲むと、本文が見出しの一部に見える） */
+.sb-sec-head:has(> .sb-sec-note-body) {
+  padding-left: 0;
+  border-left: 0;
+  gap: 6px;
+}
+.sb-sec-head:has(> .sb-sec-note-body) > h2 {
+  border-left: 5px solid var(--sb-ink);
+  padding: 4px 0 4px 14px;
+}
+.sb-sec-head[data-tone="danger"]:has(> .sb-sec-note-body) > h2 {
+  border-left-color: var(--sb-v-no-fg);
+}
 /* 見出しの右に件数（次にやること） */
 .sb-sec-head.sb-sec-row {
   flex-direction: row;

@@ -45,9 +45,9 @@ export default async function PermitListPage({
         }
       >
         <PermitDeclaration declaration={PERMIT_DECLARATION_NOTE} noDipsNote={PERMIT_NO_DIPS_NOTE} />
-        <Note>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
+        <Note body>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
         <p className="opx-note" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
-        {manager ? null : <Note>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
+        {manager ? null : <Note body>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
       </PageHeader>
 
       <form method="get" className="sb-block-soft flex flex-wrap items-end gap-3" data-testid="permit-filter" aria-label="許可・承認の絞り込み">

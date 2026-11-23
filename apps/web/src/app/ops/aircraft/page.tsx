@@ -39,7 +39,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
           ) : null
         }
       >
-        {manager ? null : <Note>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
+        {manager ? null : <Note body>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
         {/* 機体の DIPS への登録は利用者本人が行う（Sprint 18-3） */}
         <p className="text-base leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
       </PageHeader>

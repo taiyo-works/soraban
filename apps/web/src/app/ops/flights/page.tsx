@@ -48,7 +48,7 @@ export default async function FlightListPage({
           ) : null
         }
       >
-        {canCreate ? null : <Note>{recordCreateDenied(me)}</Note>}
+        {canCreate ? null : <Note body>{recordCreateDenied(me)}</Note>}
       </PageHeader>
       <RecordFilter basePath="/ops/flights" aircraft={aircraft} value={filter} />
       <p className="sb-num text-sm tnum text-sb-ink-3">{rows.length} 件</p>

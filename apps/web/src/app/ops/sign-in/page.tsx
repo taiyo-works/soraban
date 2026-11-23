@@ -14,7 +14,7 @@ export default async function OpsSignIn() {
             運航管理者から招待されたメールアドレスの Google アカウントでログインしてください。
           </p>
           <GoogleSignInButton />
-          <Note>
+          <Note body>
             招待されていないメールアドレスでは利用できません。利用したい場合は、社内の運航管理者に招待を依頼してください。
           </Note>
         </div>

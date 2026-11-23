@@ -1,0 +1,20 @@
+## typecheck
+packages/regulations typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+## lint
+apps/web lint: /home/user/soraban/apps/web/src/components/ops/report-client.tsx
+apps/web lint:   247:9  warning  'compact' is assigned a value but never used  @typescript-eslint/no-unused-vars
+apps/web lint: ✖ 1 problem (0 errors, 1 warning)
+apps/web lint: Done
+## test
+
+ Test Files  123 passed | 1 skipped (124)
+      Tests  3029 passed | 15 skipped (3044)
+   Start at  01:44:49
+   Duration  13.61s (transform 6.38s, setup 0ms, import 18.08s, tests 7.88s, environment 11ms)
+
+## contrast
+日差しの模擬（通常。g=0.1 が合否、g=0.25 は記録）: 97 件。最小余裕 3.70（要 3）注釈 / sunken／g=0.25: 2.75（要 3。記録のみ）注釈 / sunken
+日差しの模擬（現場。g=0.1 が合否、g=0.25 は記録）: 97 件。最小余裕 4.53（要 4.5）手続き不要：文字・線 / sunken／g=0.25: 3.12（要 4.5。記録のみ）手続き�
+組 101（通常 101／現場 101／暗 100／現場・暗 100）= 計 402 件と、寸法・動き・暗の構造を検査。日差しの模擬 194 件。満たさない: 0

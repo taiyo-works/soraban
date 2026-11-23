@@ -70,7 +70,7 @@ export default async function PlanListPage({
           ) : null
         }
       >
-        {denied !== null ? <Note>{denied}</Note> : null}
+        {denied !== null ? <Note body>{denied}</Note> : null}
         <Note>{PLAN_JUDGEMENT_DISCLAIMER}</Note>
       </PageHeader>
       <div className="flex flex-col gap-3">

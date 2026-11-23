@@ -56,7 +56,7 @@ export function PlanFrame({
   readonly children: ReactNode;
 }) {
   return (
-    <main className="flex flex-col gap-6 lg:gap-4">
+    <main className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
         <PageHeader
           eyebrow={eyebrow}
@@ -69,7 +69,7 @@ export function PlanFrame({
             <span className="sb-num text-sm tnum text-sb-ink-3">版 {plan.version}</span>
           </div>
         </PageHeader>
-        {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
+        {plan.voided ? <Note tone="red" body>この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
         <PlanTabs planId={plan.id} {...(current ? { current } : {})} />
       </div>
       <HashScroll />

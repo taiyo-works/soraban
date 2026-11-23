@@ -168,9 +168,9 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           }
         />
         {f.voided ? (
-          <Note tone="red">この飛行記録は取り消されています。総飛行時間には数えません。記載内容と版の一覧は残しています。</Note>
+          <Note tone="red" body>この飛行記録は取り消されています。総飛行時間には数えません。記載内容と版の一覧は残しています。</Note>
         ) : correctable ? null : (
-          <Note>訂正は運航管理者と、記録の操縦者本人だけが行えます。</Note>
+          <Note body>訂正は運航管理者と、記録の操縦者本人だけが行えます。</Note>
         )}
         <dl
           aria-label="飛行の要点"

@@ -79,7 +79,7 @@ export default async function InspectionDetailPage({ params }: { readonly params
             ) : null
           }
         />
-        {i.voided ? <Note tone="red">この日常点検は取り消されています。記載内容と版の一覧は残しています。</Note> : null}
+        {i.voided ? <Note tone="red" body>この日常点検は取り消されています。記載内容と版の一覧は残しています。</Note> : null}
         <DetailList rows={rows} data-testid="inspection-detail" />
       </div>
       {correctable && options ? (

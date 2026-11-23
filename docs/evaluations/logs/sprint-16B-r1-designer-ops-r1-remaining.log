@@ -1,0 +1,48 @@
+## ホーム 2
+   375,390 本文 p[today-card-time]「13:00〜14:00」 40px / 行の高さ 1.25
+   1280 本文 p[today-card-time]「13:00〜14:00」 52px / 行の高さ 1.25
+## 現場 41
+   1280,375,390 本文 p[field-in-flight]「▶ 飛行中（離陸 12:00）」 24px / 行の高さ 1.33
+   1280,375,390 本文 span[field-in-flight]「▶」 24px / 行の高さ 1.33
+   1280,375,390 本文 span[field-in-flight]「（離陸 12:00）」 24px / 行の高さ 1.33
+   1280,375,390 本文 p[field-elapsed]「0:00:00」 60px / 行の高さ 1.25
+   1280,375,390 本文 p[field-flight-row]「1 回目：▶ 飛行中」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-flight-row]「▶」 20px / 行の高さ 1.40
+   1280,375,390 本文 h3[field-item-inspection]「日常点検」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-item-state-inspection]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-item-state-inspection]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 h3[field-item-emergency_airspace]「緊急用務空域の確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-item-state-emergency_airspace]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-item-state-emergency_airspace]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 h3[field-item-report_recheck]「通報済みの再確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-item-state-report_recheck]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-item-state-report_recheck]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-report-warning]「！ 通報の確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 h3[field-item-carry]「携行品」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-item-state-carry]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-item-state-carry]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-restriction-state]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-restriction-state]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-site-state]「－ 未」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-site-state]「－」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-permit]「許可承認書」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-permit]「？ 要確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-permit]「？」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-registration]「登録記号」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-registration]「✓ 確認済み」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-registration]「✓」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-remote_id]「リモートID」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-remote_id]「？ 要確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-remote_id]「？」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-license]「技能証明書」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-license]「？ 要確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-license]「？」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-report]「飛行計画の通報」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-report]「？ 要確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-report]「？」 20px / 行の高さ 1.40
+   1280,375,390 本文 h4[field-docs-item-manual]「飛行マニュアルの組み合わせ制限」 20px / 行の高さ 1.40
+   1280,375,390 本文 p[field-docs-state-manual]「？ 要確認」 20px / 行の高さ 1.40
+   1280,375,390 本文 span[field-docs-state-manual]「？」 20px / 行の高さ 1.40
+## 判定 2
+   375,390 本文 p[verdict-level]「要手続き」 30px / 行の高さ 1.25
+   1280 本文 p[verdict-level]「要手続き」 34px / 行の高さ 1.25

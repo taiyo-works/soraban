@@ -343,6 +343,7 @@ html:has(.ops-v2) body {
 .opx-note-lg {
   font-size: 1rem;
   line-height: 1.7;
+  padding-block: 8px;
 }
 .opx-note-red {
   background: var(--sb-st-danger-face);

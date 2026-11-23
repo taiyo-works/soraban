@@ -101,11 +101,11 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
           }
         />
         {p.voided ? (
-          <Note tone="red">
+          <Note tone="red" body>
             この操縦者は取り消されています。誤登録の記録として、登録内容と版の一覧を残しています。訂正はできません。
           </Note>
         ) : editNote ? (
-          <Note>{editNote}</Note>
+          <Note body>{editNote}</Note>
         ) : null}
         <DetailList rows={rows} data-testid="pilot-detail" />
       </div>

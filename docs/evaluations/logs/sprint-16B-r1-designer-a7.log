@@ -1,0 +1,202 @@
+# A7（sprint12g-1b A7）の測定。空の DB から、sprint10-db〜sprint12g-1b-db を 1 ワーカーで流した最後の A7。値 = first.y + first.height - pillsBlock（上限 752）。
+## 基準 c58d92e
+A7NUM {"firstY":741.8125,"firstH":104.90625,"pillsBlock":96.09375,"value":750.625,"emptyY":211.1875,"pillsY":115.09375}
+A7DUMP
+main[ops-today] y=72.0 h=1438.8 fs=15px lh=25.5px pt=0px pb=0px gap=16px
+  div[] y=72.0 h=123.2 fs=15px lh=25.5px pt=0px pb=0px gap=12px
+    header[] y=72.0 h=31.1 fs=15px lh=25.5px pt=0px pb=0px gap=12px
+      div[] y=72.0 h=31.1 fs=15px lh=25.5px pt=0px pb=0px gap=4px
+        h1[today-heading] y=72.0 h=30.8 fs=22px lh=30.8px pt=0px pb=0px gap=normal 「ホーム」
+        span[today-date] y=81.0 h=22.1 fs=13px lh=22.1px pt=0px pb=0px gap=normal
+          time[] y=84.0 h=16.0 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「1/5（火）」
+    section[judge-pills] y=115.1 h=80.1 fs=15px lh=25.5px pt=0px pb=0px gap=8px
+      p[] y=115.1 h=22.1 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「飛ばす前に、地点を判定する」
+      div[] y=145.2 h=50.0 fs=15px lh=25.5px pt=0px pb=0px gap=8px
+        a[judge-pill-here] y=145.2 h=50.0 fs=14px lh=18.2px pt=4px pb=4px gap=8px
+          span[] y=161.1 h=18.2 fs=14px lh=18.2px pt=0px pb=0px gap=normal 「現在地で判定」
+          span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+            span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+            span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+        a[judge-pill-search] y=145.2 h=50.0 fs=14px lh=18.2px pt=4px pb=4px gap=8px
+          span[] y=161.1 h=18.2 fs=14px lh=18.2px pt=0px pb=0px gap=normal 「場所を調べる」
+          span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+            span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+            span[] y=150.2 h=40.0 fs=14px lh=18.2px pt=0px pb=0px gap=normal
+  div[] y=211.2 h=851.0 fs=15px lh=25.5px pt=0px pb=0px gap=16px
+    div[] y=211.2 h=460.6 fs=15px lh=25.5px pt=0px pb=0px gap=16px
+      section[today-empty] y=211.2 h=213.5 fs=15px lh=25.5px pt=12px pb=14px gap=12px
+        p[today-empty-message] y=223.2 h=49.5 fs=18px lh=24.75px pt=0px pb=0px gap=normal 「予定されている飛行計画はありません。」
+        div[] y=284.7 h=126.0 fs=15px lh=25.5px pt=0px pb=0px gap=12px
+          a[today-empty-action] y=284.7 h=58.0 fs=16px lh=20.8px pt=4px pb=4px gap=12px 「飛行計画を作る」
+          a[today-empty-action] y=354.7 h=56.0 fs=15px lh=19.5px pt=0px pb=0px gap=12px 「地点を判定する」
+      section[today-next-actions] y=440.7 h=231.1 fs=15px lh=25.5px pt=0px pb=0px gap=8px
+        div[] y=440.7 h=48.0 fs=15px lh=25.5px pt=2px pb=2px gap=12px
+          h2[] y=451.4 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「次にやること」
+          span[] y=442.7 h=44.0 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+            span[] y=453.6 h=22.1 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「1 件」
+            a[today-plans-link] y=442.7 h=44.0 fs=14px lh=23.8px pt=0px pb=0px gap=normal 「計画の一覧へ」
+        div[] y=502.7 h=169.1 fs=15px lh=25.5px pt=4px pb=4px gap=normal
+          ul[] y=506.7 h=161.1 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+            li[today-next-action] y=506.7 h=161.1 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+              a[today-next-action-link] y=506.7 h=161.1 fs=15px lh=25.5px pt=10px pb=10px gap=12px
+                span[] y=516.7 h=141.1 fs=15px lh=25.5px pt=0px pb=0px gap=4px
+                  span[] y=516.7 h=28.0 fs=15px lh=25.5px pt=0px pb=0px gap=4px
+                    span[] y=516.7 h=28.0 fs=12.5px lh=17.5px pt=2px pb=2px gap=4px
+                      span[] y=521.9 h=17.5 fs=12.5px lh=17.5px pt=0px pb=0px gap=normal 「ⓘ」
+                    span[today-next-action-plan] y=519.6 h=22.1 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「今日の計画 MWSJCHYE」
+                  span[today-next-action-label] y=548.7 h=20.6 fs=15px lh=20.625px pt=0px pb=0px gap=normal 「日誌の食い違いを確認する」
+                  span[] y=573.3 h=84.5 fs=13px lh=21.125px pt=0px pb=0px gap=normal 「計画の時間帯の外で飛行しています（離陸が 60 」
+                span[] y=516.7 h=44.0 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+    div[] y=687.8 h=374.3 fs=15px lh=25.5px pt=0px pb=0px gap=16px
+      section[home-deadlines] y=687.8 h=257.3 fs=15px lh=25.5px pt=0px pb=0px gap=8px
+        div[] y=687.8 h=36.0 fs=15px lh=25.5px pt=2px pb=2px gap=2px
+          h2[] y=689.8 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「近づく期限」
+          p[] y=695.8 h=20.8 fs=13px lh=20.8px pt=0px pb=0px gap=normal 「60 日以内」
+        ul[] y=737.8 h=178.1 fs=15px lh=25.5px pt=4px pb=4px gap=normal
+          li[deadline-row] y=741.8 h=104.9 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+            a[deadline-link] y=741.8 h=104.9 fs=15px lh=25.5px pt=8px pb=8px gap=12px
+              span[] y=749.8 h=88.9 fs=15px lh=25.5px pt=0px pb=0px gap=2px
+                span[] y=749.8 h=20.6 fs=15px lh=20.625px pt=0px pb=0px gap=normal 「技能証明」
+                span[] y=772.4 h=66.3 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「期限 太郎MWSJG2DQ　更新の期限（満了の 」
+              span[] y=767.2 h=54.1 fs=15px lh=25.5px pt=0px pb=0px gap=4px
+                span[] y=767.2 h=22.1 fs=13px lh=22.1px pt=0px pb=0px gap=normal
+                  time[] y=770.2 h=16.0 fs=13px lh=22.1px pt=0px pb=0px gap=normal 「1/20（水）」
+                span[] y=793.3 h=28.0 fs=12.5px lh=17.5px pt=2px pb=2px gap=4px
+                  span[] y=798.6 h=17.5 fs=12.5px lh=17.5px pt=0px pb=0px gap=normal 「○」
+          li[deadline-row] y=846.7 h=65.2 fs=15px lh=25.5px pt=0px pb=0px gap=normal
+            a[deadline-link] y=847.7 h=64.2 fs=15px lh=25.5px pt=8px pb=8px gap=12px
+A7END
+## HEAD 1db63a6（この差し戻しの前）
+A7NUM {"firstY":730.296875,"firstH":100,"pillsBlock":94,"value":736.296875,"emptyY":208.796875,"pillsY":114.796875}
+A7DUMP
+main[ops-today] y=72.0 h=1445.8 fs=16px lh=27.2px pt=0px pb=0px gap=16px
+  div[] y=72.0 h=120.8 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+    header[] y=72.0 h=30.8 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+      div[] y=72.0 h=30.8 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+        h1[today-heading] y=72.0 h=30.8 fs=22px lh=30.8px pt=0px pb=0px gap=normal 「ホーム」
+        span[today-date] y=81.0 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal
+          time[] y=82.0 h=18.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1/5（火）」
+    section[judge-pills] y=114.8 h=78.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+      p[] y=114.8 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「飛ばす前に、地点を判定する」
+      div[] y=142.8 h=50.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        a[judge-pill-here] y=142.8 h=50.0 fs=14px lh=21px pt=4px pb=4px gap=8px
+          span[] y=157.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「現在地で判定」
+          span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+        a[judge-pill-search] y=142.8 h=50.0 fs=14px lh=21px pt=4px pb=4px gap=8px
+          span[] y=157.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「場所を調べる」
+          span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=147.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+  div[] y=208.8 h=848.9 fs=16px lh=27.2px pt=0px pb=0px gap=16px
+    div[] y=208.8 h=457.5 fs=16px lh=27.2px pt=0px pb=0px gap=16px
+      section[today-empty] y=208.8 h=211.5 fs=16px lh=27.2px pt=12px pb=12px gap=12px
+        p[today-empty-message] y=220.8 h=49.5 fs=18px lh=24.75px pt=0px pb=0px gap=normal 「予定されている飛行計画はありません。」
+        div[] y=282.3 h=126.0 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+          a[today-empty-action] y=282.3 h=58.0 fs=16px lh=20.8px pt=4px pb=4px gap=12px 「飛行計画を作る」
+          a[today-empty-action] y=352.3 h=56.0 fs=16px lh=20.8px pt=0px pb=0px gap=12px 「地点を判定する」
+      section[today-next-actions] y=436.3 h=230.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        div[] y=436.3 h=52.0 fs=16px lh=27.2px pt=2px pb=2px gap=12px
+          h2[] y=449.0 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「次にやること」
+          span[] y=438.3 h=48.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            span[] y=452.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1 件」
+            a[today-plans-link] y=438.3 h=48.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「計画の一覧へ」
+        div[] y=500.3 h=166.0 fs=16px lh=27.2px pt=4px pb=4px gap=normal
+          ul[] y=504.3 h=158.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            li[today-next-action] y=504.3 h=158.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+              a[today-next-action-link] y=504.3 h=158.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+                span[] y=512.3 h=142.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                  span[] y=512.3 h=28.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                    span[] y=512.3 h=28.0 fs=14px lh=19.6px pt=2px pb=2px gap=4px
+                      span[] y=516.5 h=19.6 fs=14px lh=19.6px pt=0px pb=0px gap=normal 「ⓘ」
+                    span[today-next-action-plan] y=516.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「今日の計画 MWSIZZSD」
+                  span[today-next-action-label] y=544.3 h=22.0 fs=16px lh=22px pt=0px pb=0px gap=normal 「日誌の食い違いを確認する」
+                  span[] y=570.3 h=84.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「計画の時間帯の外で飛行しています（離陸が 60 」
+                span[] y=512.3 h=36.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+    div[] y=682.3 h=375.4 fs=16px lh=27.2px pt=0px pb=0px gap=16px
+      section[home-deadlines] y=682.3 h=261.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        div[] y=682.3 h=32.0 fs=16px lh=27.2px pt=2px pb=2px gap=2px
+          h2[] y=684.3 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「近づく期限」
+          p[] y=689.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「60 日以内」
+        ul[] y=726.3 h=169.0 fs=16px lh=27.2px pt=4px pb=4px gap=normal
+          li[deadline-row] y=730.3 h=100.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            a[deadline-link] y=730.3 h=100.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+              span[] y=738.3 h=84.0 fs=16px lh=27.2px pt=0px pb=0px gap=2px
+                span[] y=738.3 h=22.0 fs=16px lh=22px pt=0px pb=0px gap=normal 「技能証明」
+                span[] y=762.3 h=60.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「期限 太郎MWSJ41SJ　更新の期限（満了の 」
+              span[] y=754.3 h=52.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                span[] y=754.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal
+                  time[] y=755.3 h=18.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1/20（水）」
+                span[] y=778.3 h=28.0 fs=14px lh=19.6px pt=2px pb=2px gap=4px
+                  span[] y=782.5 h=19.6 fs=14px lh=19.6px pt=0px pb=0px gap=normal 「○」
+          li[deadline-row] y=830.3 h=61.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            a[deadline-link] y=831.3 h=60.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+A7END
+## 今回（ops 全体の中の A7）
+A7NUM {"firstY":711.296875,"firstH":100,"pillsBlock":91,"value":720.296875,"emptyY":197.796875,"pillsY":106.796875}
+A7DUMP
+main[ops-today] y=64.0 h=1424.0 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+  div[] y=64.0 h=121.8 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+    header[] y=64.0 h=30.8 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+      div[] y=64.0 h=30.8 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+        h1[today-heading] y=64.0 h=30.8 fs=22px lh=30.8px pt=0px pb=0px gap=normal 「ホーム」
+        span[today-date] y=73.0 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal
+          time[] y=74.0 h=18.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1/5（火）」
+    section[judge-pills] y=106.8 h=79.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+      p[] y=106.8 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「飛ばす前に、地点を判定する」
+      div[] y=135.8 h=50.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        a[judge-pill-here] y=135.8 h=50.0 fs=14px lh=21px pt=4px pb=4px gap=8px
+          span[] y=150.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「現在地で判定」
+          span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+        a[judge-pill-search] y=135.8 h=50.0 fs=14px lh=21px pt=4px pb=4px gap=8px
+          span[] y=150.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「場所を調べる」
+          span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+            span[] y=140.8 h=40.0 fs=14px lh=21px pt=0px pb=0px gap=normal
+  div[] y=197.8 h=838.9 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+    div[] y=197.8 h=453.5 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+      section[today-empty] y=197.8 h=211.5 fs=16px lh=27.2px pt=12px pb=12px gap=12px
+        p[today-empty-message] y=209.8 h=49.5 fs=18px lh=24.75px pt=0px pb=0px gap=normal 「予定されている飛行計画はありません。」
+        div[] y=271.3 h=126.0 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+          a[today-empty-action] y=271.3 h=58.0 fs=16px lh=20.8px pt=4px pb=4px gap=12px 「飛行計画を作る」
+          a[today-empty-action] y=341.3 h=56.0 fs=16px lh=20.8px pt=0px pb=0px gap=12px 「地点を判定する」
+      section[today-next-actions] y=421.3 h=230.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        div[] y=421.3 h=52.0 fs=16px lh=27.2px pt=2px pb=2px gap=12px
+          h2[] y=434.0 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「次にやること」
+          span[] y=423.3 h=48.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            span[] y=437.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1 件」
+            a[today-plans-link] y=423.3 h=48.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「計画の一覧へ」
+        div[] y=485.3 h=166.0 fs=16px lh=27.2px pt=4px pb=4px gap=normal
+          ul[] y=489.3 h=158.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            li[today-next-action] y=489.3 h=158.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+              a[today-next-action-link] y=489.3 h=158.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+                span[] y=497.3 h=142.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                  span[] y=497.3 h=28.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                    span[] y=497.3 h=28.0 fs=14px lh=19.6px pt=2px pb=2px gap=4px
+                      span[] y=501.5 h=19.6 fs=14px lh=19.6px pt=0px pb=0px gap=normal 「ⓘ」
+                    span[today-next-action-plan] y=501.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「今日の計画 MWSKZJCN」
+                  span[today-next-action-label] y=529.3 h=22.0 fs=16px lh=22px pt=0px pb=0px gap=normal 「日誌の食い違いを確認する」
+                  span[] y=555.3 h=84.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「計画の時間帯の外で飛行しています（離陸が 60 」
+                span[] y=497.3 h=36.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+    div[] y=663.3 h=373.4 fs=16px lh=27.2px pt=0px pb=0px gap=12px
+      section[home-deadlines] y=663.3 h=263.0 fs=16px lh=27.2px pt=0px pb=0px gap=8px
+        div[] y=663.3 h=32.0 fs=16px lh=27.2px pt=2px pb=2px gap=2px
+          h2[] y=665.3 h=26.6 fs=19px lh=26.6px pt=0px pb=0px gap=normal 「近づく期限」
+          p[] y=670.3 h=21.0 fs=14px lh=21px pt=0px pb=0px gap=normal 「60 日以内」
+        ul[] y=707.3 h=169.0 fs=16px lh=27.2px pt=4px pb=4px gap=normal
+          li[deadline-row] y=711.3 h=100.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            a[deadline-link] y=711.3 h=100.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+              span[] y=719.3 h=84.0 fs=16px lh=27.2px pt=0px pb=0px gap=2px
+                span[] y=719.3 h=22.0 fs=16px lh=22px pt=0px pb=0px gap=normal 「技能証明」
+                span[] y=743.3 h=60.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「期限 太郎MWSL32EN　更新の期限（満了の 」
+              span[] y=735.3 h=52.0 fs=16px lh=27.2px pt=0px pb=0px gap=4px
+                span[] y=735.3 h=20.0 fs=14px lh=20px pt=0px pb=0px gap=normal
+                  time[] y=736.3 h=18.0 fs=14px lh=20px pt=0px pb=0px gap=normal 「1/20（水）」
+                span[] y=759.3 h=28.0 fs=14px lh=19.6px pt=2px pb=2px gap=4px
+                  span[] y=763.5 h=19.6 fs=14px lh=19.6px pt=0px pb=0px gap=normal 「○」
+          li[deadline-row] y=811.3 h=61.0 fs=16px lh=27.2px pt=0px pb=0px gap=normal
+            a[deadline-link] y=812.3 h=60.0 fs=16px lh=27.2px pt=8px pb=8px gap=8px
+A7END

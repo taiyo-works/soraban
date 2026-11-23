@@ -27,9 +27,9 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
         }
       >
         {manager ? (
-          <Note>登録した地点は、飛行計画のフォームで選べます。選ぶと名称と座標が計画に写ります。</Note>
+          <Note body>登録した地点は、飛行計画のフォームで選べます。選ぶと名称と座標が計画に写ります。</Note>
         ) : (
-          <Note>地点の登録・訂正・取消は運航管理者だけが行えます。</Note>
+          <Note body>地点の登録・訂正・取消は運航管理者だけが行えます。</Note>
         )}
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">

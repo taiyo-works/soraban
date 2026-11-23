@@ -34,7 +34,7 @@ export default async function PlaceDetailPage({ params }: { readonly params: Pro
             </span>
           }
         />
-        {p.voided ? <Note tone="red">この地点は取り消されています。計画のフォームでは選べません。記載内容と版の一覧は残しています。</Note> : null}
+        {p.voided ? <Note tone="red" body>この地点は取り消されています。計画のフォームでは選べません。記載内容と版の一覧は残しています。</Note> : null}
         <DetailList
           data-testid="place-detail"
           rows={[
