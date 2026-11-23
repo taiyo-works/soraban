@@ -133,7 +133,7 @@ export default function Home() {
               このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
-            <p data-testid="site-ops-note" className="sb-ops-note">
+            <p data-testid="site-ops-note" data-note="" className="sb-ops-note">
               通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。
             </p>
             {/* 運航管理が有効でログイン済みの利用者にだけ出す入口（Sprint 12a J）。動的な部分は Suspense の内側に閉じ込め、
@@ -145,7 +145,7 @@ export default function Home() {
               {SITE_FACTS.map(([label, value]) => (
                 <div key={label}>
                   <dt>{label}</dt>
-                  <dd>{value}</dd>
+                  <dd data-note="">{value}</dd>
                 </div>
               ))}
             </dl>

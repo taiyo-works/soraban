@@ -1,0 +1,96 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint12h-pr2.spec.ts -g 'Q-12|B1'
+
+
+Running 14 tests using 1 worker
+
+  ✘   1 e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える (31.8s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える,line=364,col=63::  1) e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える %0A    Error: expect(locator).toBeInViewport() failed%0A%0A    Locator:  getByTestId('current-location-button')%0A    Expected: in viewport%0A    Received: viewport ratio 0.5428240895271301%0A    Timeout:  30000ms%0A%0A    Call log:%0A      - Expect "toBeInViewport" getByTestId('current-location-button') with timeout 30000ms%0A      - waiting for getByTestId('current-location-button')%0A        63 × locator resolved to <button type="button" aria-busy="false" data-testid="current-location-button" class="sb-pill sb-pill-secondary sb-pill-block">…</button>%0A           - unexpected value "viewport ratio 0.5428240895271301"%0A%0A%0A      362 |     await expect(page.locator("#address-input")).toBeInViewport({ ratio: 1 });%0A      363 |     await expect(page.getByRole("button", { name: /この地点を判定する/ })).toBeInViewport({ ratio: 1 });%0A    > 364 |     await expect(page.getByTestId("current-location-button")).toBeInViewport({ ratio: 1 });%0A          |                                                               ^%0A      365 |     await expect(page.getByTestId("current-location-button")).toContainText("現在地で判定");%0A      366 |     // 結論は入力の直下（契約 §6.2 の順：入力 → 結論 → 地図）。最初の画面（812px）のすぐ下で、1 画面分のスクロールで見出しごと入る%0A      367 |     const top = await page.getByTestId("verdict-conclusion").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:364:63
+  ✓   2 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.3s)
+  ✓   3 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.0s)
+  ✓   4 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.7s)
+  ✘   5 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (1.9s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり）,line=425,col=52::  2) e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） %0A    Error: 1 画面分スクロールした後の見出しの下端%0A%0A    expect(received).toBeLessThan(expected)%0A%0A    Expected: < 488%0A    Received:   514.0625%0A%0A      423 |       expect(after.top, "1 画面分スクロールした後の見出しの上端").toBeGreaterThan(0);%0A      424 |       // 見出しの下端も画面に入り、下に余裕（結論の語・形が見える）がある%0A    > 425 |       expect(after.bottom, "1 画面分スクロールした後の見出しの下端").toBeLessThan(initial.vh - 80);%0A          |                                                    ^%0A      426 |       await ctx.close();%0A      427 |     });%0A      428 |%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:425:52
+  ✓   6 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.2s)
+  ✓   7 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.5s)
+  ✓   8 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.6s)
+  ✓   9 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.2s)
+  ✓  10 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (3.0s)
+  ✓  11 e2e/sprint12h-pr2.spec.ts:462:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 動きを減らす設定と現場モードでは、結論へ瞬間に移る（滑らかなスクロールにしない） (4.1s)
+  ✓  12 e2e/sprint12h-pr2.spec.ts:488:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 判定の応答を待つ間に利用者がスクロールしたら、結論が出たあとに引き戻さない (7.8s)
+  ✓  13 e2e/sprint12h-pr2.spec.ts:511:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.2s)
+  ✓  14 e2e/sprint12h-pr2.spec.ts:539:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 通常は滑らかに移る（smooth）。初回の自動判定では動かさない (2.3s)
+
+
+  1) e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える 
+
+    Error: expect(locator).toBeInViewport() failed
+
+    Locator:  getByTestId('current-location-button')
+    Expected: in viewport
+    Received: viewport ratio 0.5428240895271301
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toBeInViewport" getByTestId('current-location-button') with timeout 30000ms
+      - waiting for getByTestId('current-location-button')
+        63 × locator resolved to <button type="button" aria-busy="false" data-testid="current-location-button" class="sb-pill sb-pill-secondary sb-pill-block">…</button>
+           - unexpected value "viewport ratio 0.5428240895271301"
+
+
+      362 |     await expect(page.locator("#address-input")).toBeInViewport({ ratio: 1 });
+      363 |     await expect(page.getByRole("button", { name: /この地点を判定する/ })).toBeInViewport({ ratio: 1 });
+    > 364 |     await expect(page.getByTestId("current-location-button")).toBeInViewport({ ratio: 1 });
+          |                                                               ^
+      365 |     await expect(page.getByTestId("current-location-button")).toContainText("現在地で判定");
+      366 |     // 結論は入力の直下（契約 §6.2 の順：入力 → 結論 → 地図）。最初の画面（812px）のすぐ下で、1 画面分のスクロールで見出しごと入る
+      367 |     const top = await page.getByTestId("verdict-conclusion").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:364:63
+
+    Error Context: test-results/sprint12h-pr2-Q-12-375×812-7f4d6-、結論は-1-回のスクロール（1-画面分以内）で見える/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-Q-12-375×812-7f4d6-、結論は-1-回のスクロール（1-画面分以内）で見える/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-Q-12-375×812-7f4d6-、結論は-1-回のスクロール（1-画面分以内）で見える/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） 
+
+    Error: 1 画面分スクロールした後の見出しの下端
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 488
+    Received:   514.0625
+
+      423 |       expect(after.top, "1 画面分スクロールした後の見出しの上端").toBeGreaterThan(0);
+      424 |       // 見出しの下端も画面に入り、下に余裕（結論の語・形が見える）がある
+    > 425 |       expect(after.bottom, "1 画面分スクロールした後の見出しの下端").toBeLessThan(initial.vh - 80);
+          |                                                    ^
+      426 |       await ctx.close();
+      427 |     });
+      428 |
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:425:52
+
+    Error Context: test-results/sprint12h-pr2-B1-判定したあと、結論-4c182-は-1-画面分のスクロールで見出しごと入る（余裕あり）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-B1-判定したあと、結論-4c182-は-1-画面分のスクロールで見出しごと入る（余裕あり）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-B1-判定したあと、結論-4c182-は-1-画面分のスクロールで見出しごと入る（余裕あり）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える 
+    e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） 
+  12 passed (1.2m)
+::notice title=🎭 Playwright Run Summary::  2 failed%0A    e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える %0A    e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） %0A  12 passed (1.2m)
+ ELIFECYCLE  Command failed with exit code 1.
