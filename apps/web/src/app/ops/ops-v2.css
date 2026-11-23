@@ -434,7 +434,7 @@ html:has(.ops-v2) body {
   }
 }
 
-/* 範囲の切り替え（チップ。現在地は実線＋太字、ほかは破線） */
+/* 範囲の切り替え（チップ。現在地は墨の 2px の縁＋太字、ほかは --sb-edge の実線。破線は「無効」だけの印） */
 .opx-seg {
   display: flex;
   flex-wrap: wrap;
@@ -444,10 +444,13 @@ html:has(.ops-v2) body {
   display: inline-flex;
   align-items: center;
   min-height: var(--sb-hit-min);
-  padding: 6px 16px;
-  border: 2px dashed var(--sb-edge);
+  padding: 7px 17px;
+  /* 16-C（designer）：選ばれていない選択肢は実線の縁。以前の破線は、16-C で「無効」の印（破線の縁＋薄い文字）になったので、押せる部品が無効に見えていた。
+   * 選択中の 2px の墨の縁と外寸は同じ（縁 1px＋余白 +1px）。文字は ink-2（白の上で 9 以上）、面は白 */
+  border: 1px solid var(--sb-edge);
   border-radius: var(--sb-pill);
-  color: var(--sb-ink-3);
+  background: var(--sb-surface);
+  color: var(--sb-ink-2);
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.2;
@@ -457,6 +460,7 @@ html:has(.ops-v2) body {
 }
 .opx-seg > a[aria-current="page"],
 .opx-seg > a[aria-current="true"] {
+  padding: 6px 16px;
   border: 2px solid var(--sb-ink);
   background: var(--sb-control);
   color: var(--sb-ink);
@@ -613,6 +617,15 @@ html:has(.ops-v2) body {
 }
 
 /* ===== 4 共通の .sb-*（unlayered）の上書き：@layer の外に置く（unlayered の規則は layer の規則に勝つため、ここに書かないと効かない） ===== */
+/* 16-C（designer）：`rounded-sb-l bg-sb-base opx-shadow` のカード（計画の一覧の行・主画面の「次にやること」・通報の状況ほか 12 か所）。
+ * 16-A で base がページの地（薄いグレー）になり、面も罫もないまま地に溶けていた（行の下の「次の予定」の足だけがくぼみで浮いて見えた）。
+ * カードの規則（白い面・1px の --sb-rule の罫）に合わせる。罫は outline で内側に描く：子の面（足のくぼみ・ホバー）の上にも罫が残り、角丸に沿う。
+ * クラス名は変えない。unlayered に置くので、utilities の bg-sb-base より先に効く。 */
+.opx-shadow {
+  background-color: var(--sb-surface);
+  outline: var(--sb-rule-w) solid var(--sb-rule);
+  outline-offset: calc(var(--sb-rule-w) * -1);
+}
 .ds.ops-v2 textarea.sb-input {
   min-height: 96px;
   padding: 12px 16px;

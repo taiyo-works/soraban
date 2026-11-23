@@ -29,8 +29,8 @@ const href = (c: CatalogConfig, over: Partial<Record<"mode" | "theme" | "veil", 
 
 const LEVELS: readonly ItemVerdict[] = ["no_fly", "needs_procedure", "procedure_done", "no_procedure", "unknown"];
 const GROUNDS = [
-  ["base", "ページの地（白）", "--sb-base"],
-  ["surface", "面（ごく薄いグレー）", "--sb-surface"],
+  ["base", "ページの地（薄いグレー）", "--sb-base"],
+  ["surface", "面（白。カード・ブロック）", "--sb-surface"],
   ["sunken", "くぼみ（入力欄・表の見出し・注記）", "--sb-sunken"],
 ] as const;
 
@@ -118,8 +118,9 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <p className="sbx-note">白い面・角丸 16・1px の罫・内側 16。</p>
           </div>
           <a className="sb-card sb-card-list" href="#cat-cards" data-testid="cat-card-list">
-            <strong>一覧のカード</strong>
-            <span>見出し → 主情報 → 補足（最小の高さ 72・全体が押せる）</span>
+            <strong>一覧のカード（見出し）</strong>
+            <span>13:00〜14:00　機体 JU0000（試験機）</span>
+            <span data-note="" className="sbx-note">最小の高さ 72・全体が押せる</span>
           </a>
           <div className="sb-card sb-card-state" data-state="warn" data-testid="cat-card-state">
             <strong>状態のカード</strong>
