@@ -1334,7 +1334,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
         <div data-testid="current-location" className="flex flex-col gap-3">
           <div className="sb-btn-row !mt-0">
-            <PillButton type="submit" variant="primary" block disabled={isChecking}>
+            <PillButton type="submit" variant={opsEntryAvailable && canExportPdf ? "secondary" : "primary"} block disabled={isChecking}>
               {isChecking ? "判定中…" : "この地点を判定する"}
             </PillButton>
             <PillButton

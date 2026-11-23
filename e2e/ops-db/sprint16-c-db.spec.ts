@@ -46,11 +46,12 @@ const styleOf = (page: Page, selector: string): Promise<PrimaryStyle> =>
 
 test.describe("C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル", () => {
   test("面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない", async ({ page }) => {
-    await signIn(page.request, seeded("a-manager"));
+    // 未ログインの `/`（判定する＝主、56px）で測る。ログイン済みで結果があると主は「この判定で飛行計画を作る」（48px）に替わる（K-8、gen2）
     await page.goto("/");
     await page.locator(".sb-pill-primary:not(:disabled)").first().waitFor();
     await waitForSettledStyles(page);
     const pub = await styleOf(page, ".sb-pill-primary:not(:disabled)");
+    await signIn(page.request, seeded("a-manager"));
     await page.goto("/ops/plans");
     await expect(page.getByTestId("plan-new-link")).toBeVisible();
     await waitForSettledStyles(page);
@@ -155,6 +156,27 @@ test.describe("C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant=\"prim
     await waitForSettledStyles(page);
     expect(await page.locator('[data-variant="primary"]:visible').count()).toBe(1);
   });
+});
+
+test.describe("K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る）", () => {
+  for (const w of [375, 390, 1280]) {
+    test(`${w}px：見えている data-variant="primary" は 1 つで、判定するは副`, async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      await page.setViewportSize({ width: w, height: w >= 1024 ? 800 : 844 });
+      await page.goto("/");
+      await expect(page.getByTestId("verdict-level")).toBeVisible({ timeout: 60_000 });
+      const plan = page.getByTestId("create-plan-from-verdict");
+      await expect(plan).toBeVisible();
+      await waitForSettledStyles(page);
+      expect(await page.locator('[data-variant="primary"]:visible').count(), `${w}px`).toBe(1);
+      await expect(plan).toHaveAttribute("data-variant", "primary");
+      const submit = page.locator('button[type="submit"].sb-pill:visible').first();
+      await expect(submit).toHaveClass(/sb-pill-secondary/);
+      await expect(submit).not.toHaveAttribute("data-variant", "primary");
+      const stray = await page.locator(".sb-pill-primary:not([data-variant])").count();
+      expect(stray).toBe(0);
+    });
+  }
 });
 
 test.describe("持ち越し 2：札の記号と文字の縦の中心（±1px）", () => {
