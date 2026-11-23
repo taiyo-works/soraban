@@ -20,7 +20,7 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 
 - `sprint12h-pr3-db` P3a-4（点検の行のクリック後に遷移しない。全体実行でだけ起きる。単独なら通る）。
 - 公開側 `sprint12h-pr2` B1（地図をクリックしたあとのスクロールの着地のずれ。地図タイルの 403 とは別に起きる）。
-- `sprint12h-pr3b2b-db` P3b2b-6（`router.push("/ops/incidents")` の後に `incident-list-page` が出ない）。観測: Sprint 17-1 の評価で、ローカルの全体実行 1 回で失敗、単独 `--repeat-each=4` は 4/4 成功。CI の fd2c82e・1d82cd1 では成功。原因は未特定。16-D 差し戻し 1 の切り分け（2026-11-23、空の DB から ops 全体）: 16-D の評価で HEAD 0214b2d は 0/2（2 回とも全体の 122 番で失敗）だったが、generator の再実行では HEAD 2/2 通過・基準 37e8f9c 2/2 通過（HEAD 312 件・基準 280 件）。同じ build・同じ手順で再現せず、頻度は HEAD 合計 2/4 失敗・基準 0/4 未満、16-D の変更が原因とは言えない。失敗時は `incident-list-page` が 30 秒出ない（クライアントルーターの `push` が完了しない）。ログ `docs/evaluations/logs/sprint-16D-fix1-gen-*.log`。
+- `sprint12h-pr3b2b-db` P3b2b-6（`router.push("/ops/incidents")` の後に `incident-list-page` が出ない）。観測: Sprint 17-1 の評価で、ローカルの全体実行 1 回で失敗、単独 `--repeat-each=4` は 4/4 成功。CI の fd2c82e・1d82cd1 では成功。原因は未特定。16-D 差し戻し 1 の切り分け（2026-11-23、空の DB から ops 全体）: 16-D の評価で HEAD 0214b2d は 0/2（2 回とも全体の 122 番で失敗）だったが、generator の再実行では HEAD 2/2 通過・基準 37e8f9c 2/2 通過（HEAD 312 件・基準 280 件）。同じ build・同じ手順で再現せず、評価者と同じ手順の 3 回目も HEAD 312/312 通過。頻度は HEAD 合計 2/5 失敗・基準 0/3、16-D の変更が原因とは言えない。失敗時は `incident-list-page` が 30 秒出ない（クライアントルーターの `push` が完了しない）。ログ `docs/evaluations/logs/sprint-16D-fix1-gen-*.log`。
 - `sprint12g-1b` A7（ホームの最初の画面の縦位置。911 > 752）。観測: CI の fd2c82e で失敗、1d82cd1 の CI では成功。前の実行のデータが残った DB の部分再実行でもローカルで失敗した（空の DB の全体では成功）。
 - `sprint12h-pr3` P3a-5（`waitForURL` のタイムアウト）。観測: CI の fd2c82e で失敗、1d82cd1 の CI では成功。P3a-4 と同系統の可能性があるが、未確認。
 - 計画の新しい画面（`/overview`・`/judgement`・`/journal`・主画面）は Suspense でストリーミングされ、描画の直後は本文が `display:none` の中にある。`goto` の直後に `boundingBox()` や `toHaveCount(0)` を使うと偽の失敗・偽の成功になる。`e2e/ops-db/plan-screen.ts` の `gotoPlan`（可視のタブが出るまで待つ）を使う。
