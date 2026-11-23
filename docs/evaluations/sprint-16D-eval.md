@@ -128,3 +128,72 @@ designer が判断を仰いだ 2 点への意見:
 ## 8. 撮影・ログ
 
 撮影: `docs/evaluations/screenshots/sprint-16D/eval-*`（入力・チェック・シートの 3 段（通常・現場・reduce）・スケルトン・選択肢・フォーカス・エラー・200%・ラジオの輪）。ログ: `docs/evaluations/logs/sprint-16D-eval-*.log`（`m1`〜`m12` が手動測定、`zoom-*` が 200%、`opsfull1/2`・`base-ops-full`・`public-full` が全体）。一時の 200% の spec は `/tmp/claude-0/ev4/ev-tmp-saved/ev-zoom.spec.ts`（リポジトリには入れていない）。
+
+---
+
+# §再判定（差し戻し 1）
+
+- 評価日: 2026-11-23。対象: HEAD `3431c85`（generator 254c5a3・d2d6851・5e11a76、designer c5642c5・e868a8b）。評価者: evaluator（アプリのコードは直していない。一時スクリプトは `/tmp/claude-0/ev4/r1*.mjs`）。
+- 手順: runbook の「E2E の前に pnpm build をやり直す」に従い、**`pnpm build` をやり直した後**（`apps/web/.next/BUILD_ID` 22:14:56）に E2E を流した。public と ops は同時に流していない。ops は毎回新しい DB（`ops1`＝`soraban_ev16d_ops1_1795472157`、`ops2`＝`soraban_ev16d_ops2_1795473481`）。ログは `docs/evaluations/logs/sprint-16D-recheck1-*.log`。
+
+## 最終判定: 合格
+
+要修正 3 件はすべて解消した。退行なし。残るのは前回から持ち越しの後回し項目（§5-3〜5-5）と、P3b2b-6 の原因未特定のみ。
+
+## R-1 検証結果
+
+| コマンド | 結果 |
+|---|---|
+| typecheck / lint | 通過（lint 警告 1 は既存の `report-client.tsx` `compact`） |
+| `pnpm test` | 3029 通過・15 スキップ（前回と同数） |
+| `REQUIRE_DB_TESTS=1 pnpm test:db` | 10 ファイル・287 通過 |
+| `pnpm build` | 通過 |
+| `check-contrast-v2.mjs` | 満たさない 0（402 件＋日差し 194 件） |
+| `testids.mjs --check` | 消えた識別子 0 |
+| ops E2E 全体 1 回目（新 DB・新ビルド） | **318 通過・失敗 0**（21.9 分） |
+| ops E2E 全体 2 回目（新 DB） | **318 通過・失敗 0**（21.0 分） |
+| 公開側 E2E 全体（`next start`・`--retries=0`・1 ワーカー） | 294 通過・1 失敗（`sprint9` 306 右クリック。runbook の既知。前回の評価と同じ件数・同じ 1 件） |
+
+件数: ops 318（前回 312＋追加 1b の 6）。追加 1b の 6 件（#259〜264）は 2 回とも通過。
+
+**P3b2b-6**: 2 回とも通過（全体の 122 番）。頻度の累計は、今回の評価者 0/2、generator の HEAD 3 回 0/3、designer 1 回 0/1 で、**designer の修正後のコードでは 0/6**（修正前のコードは評価者 2/2・generator 0/3 失敗…runbook の記録どおり HEAD 合計 2/5＋今回 0/3）。runbook の頻度（HEAD 2/5・基準 0/3）と矛盾しない。16-D 変更が原因とは言えず、原因未特定のまま。CI での確認は引き続き望ましい（前回同様、このブランチの CI は確認できていない）。
+
+## R-2 要修正 1（200% の横スクロール）✅
+
+- 実操作（Playwright・`html` を 200%・空送信で検証エラー表示・390 と 430）: 計画・場所・許可・事故の 4 画面、**`scrollWidth` = 幅（390=390、430=430）、はみ出す要素 0**（`recheck1-m6-hscroll-390.log` は 6 画面×エラーの有無、すべて 390/390。`recheck1-m6b-error-geometry.log` は 390・430 のエラー文の左右端）。
+- 計画・場所の緯度・経度は、200% では 1 列に折り返され（`gridTemplateColumns: 326px` / 430 で `366px`）、エラー文は「緯度を／入力してください」と折り返して枠内に収まる（`recheck1-places-err-390-200.png`、`recheck1-plans-err-390/430-200.png`、`recheck1-places-err-430-200.png`）。
+- 通常の倍率では 2 列のまま（375: 150＋150／166＋166、1280: 450＋450／282＋282。`recheck1-m7-grid-focus.log`）。見た目の退行なし。
+- 追加 1b の 6 件が通る。修正前のアプリで落ちることは generator のログ（`sprint-16D-fix1-gen-zoomerr.log`、390 で 456>390）で確認済みのものを採用（再確認は省略）。検査は「追加のみ」で、既存の検査・上限・識別子は弱めていない（`e2e` の差分は追加 25 行・削除 0）。
+
+## R-3 要修正 2（輪の offset 3px を正とする判断）✅ 妥当
+
+- 実測（375・1280、`/ops/plans/new`・`flights/new`・`incidents/new`・`permits/new`・`inspections/new`・`places/new` を Tab で巡回）: リンク・ボタン・input(text/date/time/checkbox/radio)・select・textarea・summary・submit のすべてで **`solid 3px rgb(31,95,224) off 3px`**。入力欄だけ違う、という状態はない（date/time の内側の欄は既定の `outline: none` で、外側の入力の輪が代表）。
+- 見え方（`recheck1-input-ring-ok-375.png`、`-err-`）: 灰色の縁 1px（エラー時は危険色）の外に、約 3px の空きを置いて主色の輪 1 本。エラーかつフォーカスでも、危険色の縁と主色の輪は別の色の帯として分かれ、二重の太い線には見えない。offset 0 のほうが縁と輪が接して太い二重線に見えやすいという designer の理由と、design-system.md「オフセット 3px」・Q-22（3px 以上）に整合する。
+- Q-22 は公開側の全体（`sprint12h-pr2`）で通過。designer のログでは 3 件通過。`ops-v2.css` の削除は 3 行のみで、他の規則への影響なし。
+- 気づき（軽・要対応でない）: チェック・ラジオの行は、行自体の 2px の主色の輪（`has-[:focus-visible]:ring-2`）と、丸の 3px の輪が同時に出る（`recheck1-permit-radio-focus-ring-375.png`）。どこにフォーカスがあるかは明確で、前から同じ構造。16-E で行の輪か丸の輪のどちらかに揃えてもよい。
+
+## R-4 要修正 3（`/ops/permits/new` の radio）✅
+
+- 7 つとも `sb-radio`（24px の輪＋点）。行は `min-height: 48px`（実測 48）で、行全体が押せる（`label` クリックで選択が移る）。選択中は主色の太い輪＋点、行は `border-sb-ink`＋淡い面、無効（空港等周辺の個別許可・全国が使えない場合）は破線の輪で薄い（`recheck1-permit-radio-375.png`）。
+- 375・1280・現場表示相当で同一の結果（`recheck1-m8-permit-radio.log`）。単一選択の動作: 行クリックで「場所の範囲」の ●○○ → ○●○、**ArrowDown で次へ（フォーカスと選択が一緒に移る）、ArrowUp で戻る、Space は選択を保つ、Tab でグループから出て次の入力欄（円の名称）へ、Shift+Tab で選択中の項目に戻る**（ネイティブの radio グループの挙動）。機体・操縦者の範囲（限定しない／選ぶ）も行クリックで切り替わる。
+- 事故・点検・飛行記録の `sb-radio` と同じ部品になった（前回 §5-6 の不一致が解消）。
+
+## R-5 退行・不変条件
+
+- `git diff 0214b2d HEAD` のアプリ差分は 4 ファイルの CSS・クラス名・グリッド指定のみ（`ops-v2.css` −3、`soraban-ui.css` +5、`permits-client.tsx` ±、`plans-client.tsx` ±2）。追加行に禁止語・ストレージ呼び出し・グラデーション・`prefers-color-scheme` は 0。判定エンジン・証跡・マイグレーション・`packages`・`api`・`docs/design` の差分 0。`data-testid` の変更なし（`testids --check` で消失 0）。
+- 端末データ: ストレージを触るコードの追加なし（上のスキャン）。
+
+## R-6 デザイン 4 基準の再採点
+
+| 基準 | 点 | 変化 |
+|---|---|---|
+| 階層・読みやすさ | 4 | 変化なし |
+| 余白・密度 | **5**（前回 4） | 200% のエラー表示の横はみ出しが解消。エラー文は 1 列で折り返して収まる |
+| 部品の整合・触りやすさ | **5**（前回 4） | permits が `sb-radio` に揃い、輪は全部品で 3px・主色 1 本。減点だった 2 点が解消。行の輪と丸の輪の併用だけが軽い注記 |
+| 色・トーン | 5 | 変化なし |
+
+## R-7 残る事項
+
+- §5-3（`/ops/plans/[id]/edit` の緯度・経度が 200% で切れる。基準でも同じ。16-H2 の H2-4 で）、§5-4（シートの Esc と IME。16-H2）、§5-5（見本に `sb-radio` がない。16-E）は未対応のまま（契約上は後回し）。
+- P3b2b-6 の原因は未特定（上記）。CI の結果は確認できていない。実機の文字サイズ・IME・指での操作は未検証。
+- 撮影: `docs/evaluations/screenshots/sprint-16D/recheck1-*`。
