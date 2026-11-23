@@ -181,10 +181,13 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
         // L-2：スクロールなしで、タイトル・タブ・状況・主操作が入る
         // 契約どおり plan-report-status も（中止・記録なしでは状況の行を出さず、事実の 1 行 plan-report-label に代える）
         const firstScreenIds = ["plan-title-heading", "plan-tabs", "plan-report-label", "plan-primary-action", ...(key === "voidedNone" ? [] : ["plan-report-status"])];
+        // 2026-11-23 ユーザーの決定（16-B 差し戻し 1）：中止済みかつ通報を記録済み（voidedRecorded）の 375 幅だけ 748→800 に一時的に緩める。
+        // ほかの状態・幅は変えない。16-L の L-5 で 748 に戻す。
+        const firstScreenLimit = key === "voidedRecorded" && size.width === 375 ? 800 : size.firstScreen;
         for (const id of firstScreenIds) {
           const box = await page.getByTestId(id).first().boundingBox();
           expect(box, `${key} ${id}`).not.toBeNull();
-          expect(box!.y + box!.height, `${key} ${id} の下端`).toBeLessThanOrEqual(size.firstScreen);
+          expect(box!.y + box!.height, `${key} ${id} の下端`).toBeLessThanOrEqual(firstScreenLimit);
         }
         const primary = page.getByTestId("plan-primary-action");
         await expect(primary).toHaveCount(1);
