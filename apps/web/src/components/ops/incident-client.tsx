@@ -51,7 +51,8 @@ import { buttonPrimaryClass, buttonDangerClass, VERSION_NOTICE_TARGET } from "./
 
 const radioRowClass =
   "opx-check-row border-[1.5px] border-transparent has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover";
-const radioClass = "h-5 w-5 shrink-0 cursor-pointer accent-sb-ink";
+const radioClass = "sb-radio";
+const checkClass = "sb-check";
 // 項目のまとまりの見出し（12a・12d のフォームと同じ、下に罫線を引いた小見出し）
 const legendClass = "mb-1 flex w-full items-center gap-2 border-b border-sb-rule pb-1.5 text-sm font-bold text-sb-ink";
 
@@ -195,7 +196,7 @@ export function IncidentForm({
       <label className={`${radioRowClass} items-start !py-3 ${o.exclusive ? "border-dashed" : ""}`} data-testid="incident-event-type" data-key={o.key}>
         <input
           type="checkbox"
-          className={`${radioClass} mt-0.5`}
+          className={`${checkClass} mt-0.5`}
           checked={eventTypes.includes(o.key)}
           onChange={() => toggleType(o.key, o.exclusive)}
           data-testid={`incident-event-type-${o.key}`}
@@ -382,7 +383,7 @@ export function IncidentForm({
             <label key={c} className={radioRowClass}>
               <input
                 type="checkbox"
-                className={radioClass}
+                className={checkClass}
                 checked={contacts.includes(c)}
                 onChange={() => setContacts((cur) => (cur.includes(c) ? cur.filter((x) => x !== c) : [...cur, c]))}
                 data-testid={`incident-contact-${c}`}

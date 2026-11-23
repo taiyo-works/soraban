@@ -214,3 +214,11 @@
 | `sprint12b-db`（手続きの記録：確認が足りない） | `procedure-form-small_drone_law` の `getByRole("alert").first()` が見える | `.sb-field-error` の最初の要素が見える | 同上 |
 
 追加（`sprint16-d-db`「項目エラーの関連付け」4 件）: 事故の記録・許可の登録・通報の控えの記録・計画の作成で、見えている項目エラーのすべてが id を持ち、いずれかの要素の `aria-describedby` に入っていて、`role` が無く `alert` の中でもなく、SVG 記号を 1 つ持つ。通報の控えでは確認チェックの `aria-describedby` に `record-err-confirmedDipsDone` が入っていることも確かめる。群のエラー（ラジオ・複数選択）は、入力欄ごとではなく fieldset／radiogroup の `aria-describedby` に結ぶ（個々の選択肢は誤りの単位ではないため）。
+
+**16-D designer 磨き込み（2026-11-23）：入力欄のフォーカスの輪を 1 本に**
+
+| 検査 | 前 | 後 | 理由・弱めていない根拠 |
+|---|---|---|---|
+| `sprint16-d` D-1「フォーカス」（見本の入力欄） | 縁が主色（`PRIMARY`）・縁の幅 1px・`box-shadow` が `PRIMARY 0 0 0 1px inset`（D-1 の「主色の 2px の枠」）に加えて、輪（実線・3px 以上）が残る | 輪（実線・3px 以上）の色が `PRIMARY`、縁は 1px・`EDGE` のまま、`box-shadow` なし。追加：フォーカス中かつエラーの入力欄で、`aria-invalid`・記号付きの 1 行が見え、縁は `DANGER_MARK`、輪は `PRIMARY` | 実画面で、D-1 の枠（縁＋内側の 1px）と Q-22 の 3px の輪（`.ds.ops-v2` は offset 0）が二重の太い線に見えたため、枠を外し、Q-22 の輪 1 本にした。D-1 の「2px 以上の主色の輪」は 3px の輪で満たす（検査は「3px 以上」＝強い側）。Q-22（`sprint12h-pr2`）と輪の「実線・3px 以上」の検査は変えていない。「枠がちょうど 2px」を見る検査は元からなく、`box-shadow` の文字列を固定していた部分だけを直した |
+
+見た目の統一（検査の変更なし）：素の checkbox／radio を `input.sb-check`（複数選択。32px の丸）と新しい `input.sb-radio`（単一選択。24px の輪＋点。異常は `sb-radio-no`）に揃えた（`records-client`・`incident-client`）。72px の行は D-2 の既存の対象（`.sb-check-row`・`.opx-check-row` の `sb-check` を持つ行）だけ。枠付きの選択肢（`choiceClass`。48px）は 48px のまま。上限の変更なし。

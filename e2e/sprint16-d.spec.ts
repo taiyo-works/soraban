@@ -42,7 +42,7 @@ test.describe("D-1 入力欄", () => {
     expect(r.invalid).toBeGreaterThanOrEqual(1);
   });
 
-  test("フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。キーボードのフォーカスの輪（3px）も残る", async ({ page }) => {
+  test("フォーカス：主色の輪が 1 本（3px。D-1 の「2px 以上」を満たす）。枠・内側の影を足さない（輪が二重に見えない）。エラー中もエラーが分かる", async ({ page }) => {
     await open(page);
     const input = page.getByTestId("cat-input");
     await input.focus();
@@ -52,13 +52,30 @@ test.describe("D-1 入力欄", () => {
     await waitForSettledStyles(page);
     const s = await input.evaluate((el) => {
       const c = getComputedStyle(el);
-      return { bc: c.borderTopColor, bw: c.borderTopWidth, shadow: c.boxShadow, outline: c.outlineStyle, ow: parseFloat(c.outlineWidth) };
+      return { oc: c.outlineColor, ow: parseFloat(c.outlineWidth), bc: c.borderTopColor, bw: c.borderTopWidth, shadow: c.boxShadow, outline: c.outlineStyle };
     });
-    expect(s.bc).toBe(PRIMARY);
-    expect(s.bw).toBe("1px");
-    expect(s.shadow).toBe(`${PRIMARY} 0px 0px 0px 1px inset`);
     expect(s.outline).toBe("solid"); // Q-22：キーボードのフォーカスの輪は弱めない
-    expect(s.ow).toBeGreaterThanOrEqual(3);
+    expect(s.oc).toBe(PRIMARY);
+    expect(s.ow).toBeGreaterThanOrEqual(3); // D-1：主色の輪は 2px 以上
+    expect(s.bw).toBe("1px");
+    expect(s.bc).toBe(EDGE); // 枠の色を変えて二重にしない
+    expect(s.shadow).toBe("none");
+    // フォーカス中かつエラー：縁は危険の印の色のまま、記号付きの 1 行も出る
+    const bad = page.getByTestId("cat-f-check");
+    await page.getByTestId("cat-f-check-submit").click();
+    await bad.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(bad).toBeFocused();
+    await waitForSettledStyles(page);
+    await expect(bad).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByTestId("cat-f-check-error")).toBeVisible();
+    const e = await bad.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { bc: c.borderTopColor, oc: c.outlineColor };
+    });
+    expect(e.oc).toBe(PRIMARY);
+    expect(e.bc).toBe(DANGER_MARK);
   });
 
   test("ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない", async ({ page }) => {

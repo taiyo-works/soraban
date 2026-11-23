@@ -46,6 +46,9 @@ html[data-theme="dark"] .sbx-catalog {
   height: 1.2em;
   background: var(--sb-ink);
 }
+.sbx-catalog .sb-sheet-title::before {
+  content: none;
+}
 .sbx-note {
   font-size: max(0.875rem, var(--sb-fs-note));
   color: var(--sb-ink-3);

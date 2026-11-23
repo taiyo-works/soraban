@@ -608,7 +608,7 @@ button.sb-state::after {
   letter-spacing: 0.05em;
 }
 /* 入力欄（Sprint 16-D D-1）：高さ 52 以上（現場 56＝--sb-hit）・角丸 12・面 --sb-sunken・--sb-edge の 1px の縁。
- * フォーカスは主色の 2px の枠（縁 1px＋内側の 1px）。エラーは縁が危険の印の色（下の 1 行は .sb-field-error。role=alert にしない）。ラベルは入力欄の上に常に出す（.sb-label）。 */
+ * フォーカスは、各画面共通の主色の輪（3px・離す。Q-22。D-1 の「2px 以上の主色の輪」を満たす）1 本だけ。枠は足さない（輪が二重に見えたため 16-D 磨き込みで外した）。エラーは縁が危険の印の色（下の 1 行は .sb-field-error。role=alert にしない）。ラベルは入力欄の上に常に出す（.sb-label）。 */
 .sb-input {
   width: 100%;
   min-height: max(52px, var(--sb-hit));
@@ -623,11 +623,6 @@ button.sb-state::after {
 .sb-input[aria-invalid="true"] {
   border-color: var(--sb-st-danger-mark);
   box-shadow: inset 0 0 0 1px var(--sb-st-danger-mark);
-}
-/* フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。キーボードのフォーカスの輪（3px・各画面の規則）は、Q-22 の検査があるのでそのまま残す */
-.sb-input:focus {
-  border-color: var(--sb-focus);
-  box-shadow: inset 0 0 0 1px var(--sb-focus);
 }
 .sb-input:disabled {
   border-style: dashed;
@@ -720,6 +715,46 @@ input.sb-check:disabled {
   cursor: not-allowed;
   border-style: dashed;
 }
+/* ラジオ（素の radio の置き換え）：24 の輪＋選択で内側に主色の点。チェックの丸（32・チェックの記号）と形で見分け、選択は輪の太さ・点・行の枠（各画面の choice／radio 行）でも示す。
+ * 押す範囲は行全体（<label>）。「あり」側の危険の選択（異常）は .sb-radio-no で危険の印の色。 */
+input.sb-radio {
+  appearance: none;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 2px solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-field);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+}
+input.sb-radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-primary);
+  transform: scale(0);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+input.sb-radio:checked {
+  border-color: var(--sb-primary);
+}
+input.sb-radio:checked::after {
+  transform: scale(1);
+}
+input.sb-radio.sb-radio-no:checked {
+  border-color: var(--sb-st-danger-mark);
+}
+input.sb-radio.sb-radio-no:checked::after {
+  background: var(--sb-st-danger-mark);
+}
+input.sb-radio:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+}
 .sb-check-row {
   display: flex;
   align-items: flex-start;
@@ -750,6 +785,10 @@ input.sb-check:disabled {
   min-height: 72px;
   align-items: center;
   padding-block: 12px;
+}
+/* 説明文を持つ複数行の行（items-start を付けた行）は、丸を先頭の行にそろえる */
+.opx-check-row.items-start:has(input.sb-check) {
+  align-items: flex-start;
 }
 /* チェック済みの行末の「済」（既存の行は疑似要素。読み上げには出さず、状態はチェックボックス自身が伝える） */
 :is(.sb-check-row, .opx-check-row):has(input.sb-check:checked)::after {
@@ -1564,9 +1603,12 @@ a.sb-row:focus-visible .sb-go-dot {
 }
 .sb-empty-message {
   max-width: 28em;
+  text-wrap: balance;
+  line-break: strict;
   font-size: var(--sb-fs-body);
   line-height: 1.7;
   color: var(--sb-ink);
+  text-wrap: pretty;
 }
 .sb-error-card {
   display: flex;
@@ -1581,6 +1623,7 @@ a.sb-row:focus-visible .sb-go-dot {
   font-size: var(--sb-fs-body);
   line-height: 1.7;
   color: var(--sb-ink);
+  text-wrap: pretty;
 }
 .sb-error-message .sb-field-error-mark {
   margin-top: 5px;
@@ -1701,6 +1744,9 @@ a.sb-row:focus-visible .sb-go-dot {
   padding: 8px 16px 16px;
   font-size: var(--sb-fs-body);
   line-height: 1.7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 @keyframes sb-sheet-rise {
   from {

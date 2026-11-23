@@ -72,15 +72,16 @@ const smallGhostClass = `${buttonGhostClass} opx-btn-sm`;
 
 /** 2 択・多択の選択肢（ラジオ・チェックボックスを枠付きの押しやすい大きさにする）。状態は文字と印で示し、色は補助。 */
 const choiceClass = (checked: boolean, tone: "brand" | "red" = "brand") =>
-  `flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 rounded-sb-m px-3.5 text-sm transition-colors ${
+  `flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 rounded-sb-m px-3.5 text-base transition-colors ${
     checked
       ? tone === "red"
         ? "border-2 border-sb-v-no-fg bg-sb-control font-bold text-sb-v-no-fg"
         : "border-2 border-sb-ink bg-sb-control font-bold text-sb-ink"
-      : "border-2 border-dashed border-sb-edge bg-sb-base text-sb-ink-2 hover:bg-sb-hover"
+      : "border-2 border-sb-rule bg-sb-surface text-sb-ink-2 hover:bg-sb-hover"
   }`;
-const choiceInputClass = "h-6 w-6 shrink-0 cursor-pointer";
-const brandAccent = "accent-sb-primary";
+/** 選択肢の入力：複数選択は丸いチェック（sb-check）、単一選択はラジオ（sb-radio）。見た目は共通部品に揃える */
+const choiceCheckClass = "sb-check";
+const choiceRadioClass = "sb-radio";
 
 /**
  * 入力の段（見出し）。白いカードで、見出しは左 5px の墨の線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
@@ -1126,7 +1127,7 @@ export function FlightForm({
                   const checked = v.specificFlightTypes.includes(t.key);
                   return (
                     <label key={t.key} className={choiceClass(checked)}>
-                      <input type="checkbox" className={`${choiceInputClass} ${brandAccent}`} checked={checked} onChange={() => toggleType(t.key)} />
+                      <input type="checkbox" className={choiceCheckClass} checked={checked} onChange={() => toggleType(t.key)} />
                       {t.label}
                     </label>
                   );
@@ -1155,7 +1156,7 @@ export function FlightForm({
               <input
                 type="radio"
                 name="safetyIssue"
-                className={`${choiceInputClass} ${brandAccent}`}
+                className={choiceRadioClass}
                 checked={v.safetyIssue === val}
                 onChange={() => set("safetyIssue", val)}
               />
@@ -1536,7 +1537,7 @@ export function InspectionForm({
         <ChoiceGroup legend="区分">
           {(["pre_flight", "post_flight"] as const).map((t) => (
             <label key={t} className={choiceClass(v.timing === t)}>
-              <input type="radio" name="timing" className={`${choiceInputClass} ${brandAccent}`} checked={v.timing === t} onChange={() => set("timing", t)} />
+              <input type="radio" name="timing" className={choiceRadioClass} checked={v.timing === t} onChange={() => set("timing", t)} />
               {INSPECTION_TIMING_LABELS[t]}
             </label>
           ))}
@@ -1600,11 +1601,11 @@ export function InspectionForm({
                     aria-describedby={resultError ? `inspection-err-result-${it.key}` : undefined}
                   >
                     {(["normal", "abnormal"] as const).map((r) => (
-                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem]`}>
+                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[6rem]`}>
                         <input
                           type="radio"
                           name={`item-${it.key}`}
-                          className={`${choiceInputClass} ${r === "abnormal" ? "accent-sb-v-no-fg" : brandAccent}`}
+                          className={`${choiceRadioClass} ${r === "abnormal" ? "sb-radio-no" : ""}`}
                           checked={st.result === r}
                           onChange={() => setItem(it.key, { result: r })}
                         />
