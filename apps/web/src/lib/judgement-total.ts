@@ -1,7 +1,7 @@
 // 判定の総合の語（Sprint 16-H2。契約 §8.2）。計画の段 ⑥（/ops/plans/[id]/judgement）の第 1 層。
 // 判定エンジンが返す項目の区分（FlightVerdict.items の verdict）を数えるだけで、判定の結果は変えない。
 // 順序は「飛行不可 → 要手続き → 判定不能（未確認）→ 手続き済み → 手続き不要」。判定不能が 1 件でもあれば、総合を「手続き済み」「手続き不要」の語にしない。
-// 「飛行可」「安全」「OK」「問題なし」「通報不要」は、どの状態にも使わない。
+// 飛行できる・安全・問題がない・通報が要らない、と読める語は、どの状態にも使わない（単体テストが語の一覧で確かめる）。
 import type { FlightVerdict, ItemVerdict } from "@soraban/regulations";
 
 export type TotalKey = "no_fly" | "needs_procedure" | "unknown" | "done" | "none" | "missing";
