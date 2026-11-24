@@ -150,7 +150,7 @@ export function JudgementTiles({
             </dl>
             <section aria-label="根拠（この判定に使ったデータ）" data-testid="judgement-sheet-datasets">
               <h3 className="opx-tile-h3">根拠（この判定に使ったデータ）</h3>
-              <p className="opx-tile-aside">項目ごとのデータの対応は保存していないため、判定全体で使ったデータを示します。</p>
+              <p data-note="" className="opx-tile-aside">項目ごとのデータの対応は保存していないため、判定全体で使ったデータを示します。</p>
               {datasets.length === 0 ? (
                 <p>記録されたデータはありません。</p>
               ) : (

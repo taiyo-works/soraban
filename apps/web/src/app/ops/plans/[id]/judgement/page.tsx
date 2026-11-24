@@ -117,7 +117,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             {tiles.length > 0 ? (
               <div className="flex flex-col gap-3" data-testid="judgement-tiles-section">
                 <h3 className="opx-tile-h3">項目ごとの判定（{tiles.length} 件）</h3>
-                <p className="opx-tile-aside">調べた項目だけです。項目を押すと、理由と根拠を開きます。気象・標高・ハザードは、まだ調べていません。</p>
+                <p data-note="" className="opx-tile-aside">調べた項目だけです。項目を押すと、理由と根拠を開きます。気象・標高・ハザードは、まだ調べていません。</p>
                 <JudgementTiles items={tiles} datasets={datasets} fetchedAt={fetchedAt} fetchedAtIso={j.checkedAt} />
               </div>
             ) : null}

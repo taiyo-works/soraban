@@ -62,7 +62,7 @@ const expectInViewport = async (page: Page, id: string, label: string) => {
 
 
 const SIZES = [
-  { name: "375x812", width: 375, height: 812, firstScreen: 748, main: 2600, report: 10400, judgement: 5300, overview: 3000, journal: 1400 },
+  { name: "375x812", width: 375, height: 812, firstScreen: 748, main: 2600, report: 10400, judgement: 4600, overview: 3000, journal: 1400 },
   { name: "1280x800", width: 1280, height: 800, firstScreen: 800, main: 1800, report: 7000, judgement: 3300, overview: 2200, journal: 1100 },
 ] as const;
 
@@ -298,13 +298,31 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       await page.setViewportSize({ width: size.width, height: size.height });
       await login(page);
       const base = `/ops/plans/${plans.pending.id}`;
-      for (const [path, limit, name] of [["/judgement", size.judgement, "判定"], ["/overview", size.overview, "計画"], ["/journal", size.journal, "日誌"]] as const) {
+      for (const [path, limit, name] of [["/overview", size.overview, "計画"], ["/journal", size.journal, "日誌"]] as const) {
         await gotoPlan(page, `${base}${path}`);
         await page.waitForLoadState("networkidle").catch(() => undefined);
         const h = await height(page);
         console.log(`[長さ] ${name} ${size.name}: ${h}px`);
         expect(h, name).toBeLessThanOrEqual(limit);
       }
+      // 判定（16-H2 H2-5）：組織の許可・承認の登録の件数に依存しない測り方にする。
+      // 判定の画面は、計画の日時・場所・機体・操縦者が範囲に収まる登録を「候補」として並べる（1 件あたり約 96px）。全体の実行が進むと
+      // 組織の登録が増え、同じ計画でも候補が増えて長さが変わっていた（候補 10 件で 5,068px）。そこで (1) 登録のどれの有効期間にも入らない
+      // 日付（2031-06-15）の計画で測り、候補を 0 件に固定する。(2) 候補が何件あっても、見えている候補は 3 件まで（残りは畳む）ことを、
+      // 登録の件数が変わりうる計画（pending）で確かめる。
+      const fixed = await createPlan({ plannedStartAt: "2031-06-15T10:00", title: `S172 len ${stamp}-${seq++}` });
+      await gotoPlan(page, `/ops/plans/${fixed.id}/judgement`);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      await expect(page.getByTestId("plan-permit-candidate")).toHaveCount(0);
+      const hj = await height(page);
+      console.log(`[長さ] 判定（候補 0 件に固定）${size.name}: ${hj}px`);
+      expect(hj, "判定").toBeLessThanOrEqual(size.judgement);
+      await gotoPlan(page, `${base}/judgement`);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      const shown = await page.locator('[data-testid="plan-permit-candidate"]:visible').count();
+      const all = await page.locator('[data-testid="plan-permit-candidate"]').count();
+      console.log(`[長さ] 判定（登録の件数が変わりうる計画）${size.name}: ${await height(page)}px、候補 ${all} 件のうち見えるのは ${shown} 件`);
+      expect(shown, "見えている候補は 3 件まで").toBeLessThanOrEqual(3);
     });
   }
 
