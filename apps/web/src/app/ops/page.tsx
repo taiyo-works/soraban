@@ -39,7 +39,6 @@ export default async function OpsHome() {
           <span className="opx-num" data-testid="today-date">
             <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
           </span>
-          {card ? <span className="[overflow-wrap:anywhere]" data-testid="today-place">{card.placeName}</span> : null}
         </p>
       </header>
 
@@ -47,7 +46,7 @@ export default async function OpsHome() {
         <div className="flex min-w-0 flex-col gap-3 lg:gap-6">
           {card ? (
             <>
-              <HomePrepCard planId={card.planId} input={card.prep} when={`${formatDay(card.plannedDate, today.today)} ${card.timeLabel}`} place={card.placeName} />
+              <HomePrepCard planId={card.planId} input={card.prep} when={`${formatDay(card.plannedDate, today.today)} ${card.timeLabel}`} />
               <div className="flex flex-col gap-3">
                 <HomeNextCard card={card} today={today.today} />
                 <HomePrimary action={primaryAction} canPlan={canPlan} />

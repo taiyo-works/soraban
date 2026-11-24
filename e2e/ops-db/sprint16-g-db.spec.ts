@@ -82,6 +82,8 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
   let planId = "";
   let planTitle = "";
   let pilotName = "";
+  let aircraftId = "";
+  let pilotId = "";
   const placeName = `地点${stamp}`; // 最初の画面の高さの検査のため、日時と並べて 1 行に収まる長さ
 
   test.beforeAll(async () => {
@@ -90,9 +92,10 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     const mark = `JUG16${stamp}`.slice(0, 20);
     const ac = await bm.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "ホーム試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
     expect(ac.status(), await ac.text()).toBe(201);
-    const aircraftId = ((await ac.json()) as { id: string }).id;
+    aircraftId = ((await ac.json()) as { id: string }).id;
     const bp = await apiAs(seeded("b-pilot"));
     const me = (await (await bp.get("/api/ops/me")).json()) as { pilotId: string };
+    pilotId = me.pilotId;
     await bp.dispose();
     planTitle = `ホームの確認 ${stamp}`;
     const plan = await bm.post("/api/ops/plans", {
@@ -121,11 +124,13 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     }
     // ①補足：日付と場所
     await expect(page.getByTestId("today-date")).toHaveText("1/5（火）");
-    await expect(page.getByTestId("today-place")).toHaveText(placeName);
+    // 2026-11-24 のユーザーの判断：場所名は ③ 次の予定の 1 か所だけ（題の補足 today-place は外した）
+    await expect(page.getByTestId("today-place")).toHaveCount(0);
     // ②準備カード：見出し・日時と場所・3 行・注記
     await expect(page.getByTestId("home-prep-title")).toHaveText("次の飛行の準備");
     await expect(page.getByTestId("home-prep-when")).toContainText("1/5（火）");
-    await expect(page.getByTestId("home-prep-when")).toContainText(placeName);
+    await expect(page.getByTestId("home-prep-when")).not.toContainText(placeName);
+    await expect(page.getByTestId("home-prep-when")).not.toHaveAttribute("title", /./);
     await expect(page.getByTestId("home-prep-report-text")).toHaveText("DIPS に出す内容を確認する");
     await expect(page.getByTestId("home-prep-inspection-text")).toHaveText("未記録");
     await expect(page.getByTestId("home-prep-note")).toHaveText("判定は参考情報です");
@@ -291,6 +296,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     await clearPlans(bm);
     const bp = await apiAs(seeded("b-pilot"));
     const me = (await (await bp.get("/api/ops/me")).json()) as { pilotId: string };
+    pilotId = me.pilotId;
     await bp.dispose();
     await signIn(page.request, seeded("b-manager"));
     const variants = [
@@ -302,7 +308,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
         const mark = `JUR${v.key}${stamp}`.slice(0, 20);
         const ac = await bm.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "通報の行の試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
         expect(ac.status(), await ac.text()).toBe(201);
-        const aircraftId = ((await ac.json()) as { id: string }).id;
+        aircraftId = ((await ac.json()) as { id: string }).id;
         const pl = await bm.post("/api/ops/plans", {
           data: { title: `通報の行 ${v.key} ${stamp}`, aircraftId, pilotId: me.pilotId, plannedStartAt: `${DAY}T${13 + i}:00`, durationMinutes: 30, purpose: "空撮", placeName: `地点${v.key}${stamp}`, latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] },
         });
@@ -370,4 +376,33 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     for (const id of ["ops-enter-inspection", "ops-enter-plan", "ops-enter-flight", "home-primary"]) await expect(page.getByTestId(id), id).toHaveCount(0);
     expect((await visiblePrimaries(page)).length).toBeLessThanOrEqual(1);
   });
+  for (const [w, h] of [[375, 812], [390, 844]] as const) {
+    test(`2026-11-24 の判断：約 30 字の長い場所名でも ${w}×${h} の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ`, async ({ page }) => {
+      const longPlace = `${stamp}の長い場所名ゆうがおの里山河川敷広場第二駐車場北側`.slice(0, 30);
+      expect(longPlace.length).toBe(30);
+      const bm = await apiAs(seeded("b-manager"));
+      await clearPlans(bm);
+      const plan = await bm.post("/api/ops/plans", {
+        data: { title: `長い場所の確認 ${stamp}`, aircraftId, pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: longPlace, latitude: 35.434238, longitude: 133.380508, flags: [] },
+      });
+      expect(plan.status(), await plan.text()).toBe(201);
+      await bm.dispose();
+      await signIn(page.request, seeded("b-manager"));
+      await page.setViewportSize({ width: w, height: h });
+      await page.goto("/ops");
+      await expect(page.getByTestId("home-prep")).toBeVisible();
+      await waitForSettledStyles(page);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      const navTop = (await page.getByTestId("ops-bottom-nav").boundingBox())!.y;
+      const q = (await page.getByTestId("home-quick").boundingBox())!;
+      const margin = navTop - (q.y + q.height);
+      console.log(`[16-G gen3] ${w}x${h} long place: quick bottom ${(q.y + q.height).toFixed(1)}, nav top ${navTop.toFixed(1)}, margin ${margin.toFixed(1)}`);
+      expect(margin, `クイック操作の下端と下部ナビの上端の余裕 ${margin}px`).toBeGreaterThanOrEqual(8);
+      // 場所名は、見えている範囲（畳んだ中を除く）に 1 回だけ。題の補足・準備カードの日時行・title 属性には出ない
+      const main = await page.getByTestId("ops-today").innerText();
+      expect(main.split(longPlace).length - 1, "場所名の出現回数").toBe(1);
+      await expect(page.getByTestId("home-next-place")).toHaveText(longPlace);
+      expect(await page.getByTestId("ops-today").locator("[title]").evaluateAll((els, p) => els.filter((e) => (e.getAttribute("title") ?? "").includes(p as string)).length, longPlace)).toBe(0);
+    });
+  }
 });

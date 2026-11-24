@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { HomePrepCard } from "./home-prep-card";
 import type { PrepInput } from "@/server/ops/prep-card-logic";
 
-const render = (input: PrepInput): string => renderToStaticMarkup(createElement(HomePrepCard, { input, when: "1/5（火） 13:00〜14:00", place: "試験地点" }));
+const render = (input: PrepInput): string => renderToStaticMarkup(createElement(HomePrepCard, { input, when: "1/5（火） 13:00〜14:00" }));
 
 describe("ホームの準備カード（16-G HM-1 ②・HM-5）", () => {
   it("3 行（通報・飛行前点検・判定（参考））と、判定は参考情報である旨の注記を出す。各行に記号（svg）と文字", () => {
@@ -34,7 +34,7 @@ describe("ホームの準備カード（16-G HM-1 ②・HM-5）", () => {
 
   it("差し戻し 1：判定の記録が無いときは「再読み込み」ではなく、判定の画面の再判定（#rejudge）へのリンク。他の 2 行は出る", () => {
     const h = renderToStaticMarkup(
-      createElement(HomePrepCard, { planId: "p-1", when: "1/5（火） 13:00〜14:00", place: "試験地点", input: { report: "recorded", inspection: "recorded", judgement: { kind: "no_record", stale: false } } }),
+      createElement(HomePrepCard, { planId: "p-1", when: "1/5（火） 13:00〜14:00", input: { report: "recorded", inspection: "recorded", judgement: { kind: "no_record", stale: false } } }),
     );
     expect(h).toContain("未確認（判定の記録がありません）");
     expect(h).toContain('data-testid="home-prep-rejudge"');
@@ -45,15 +45,15 @@ describe("ホームの準備カード（16-G HM-1 ②・HM-5）", () => {
     expect(h).toContain('data-tone="unknown"');
   });
 
-  it("差し戻し 1：受付番号なしの記録は注意（△）、対象外（模型航空機）は未確認で注意の文つき。「受付番号を記録済み」とは出ない", () => {
+  it("差し戻し 1：受付番号なしの記録は注意（△）、対象外（模型航空機）は未確認で補足なし。「受付番号を記録済み」とは出ない", () => {
     const a = render({ report: "recorded_no_number", inspection: "recorded", judgement: { kind: "counts", stale: false, counts: { noFly: 0, needs: 0, unknown: 0, done: 0, none: 2 } } });
     expect(a).toContain("記録あり（受付番号なし）");
     expect(a).not.toContain("受付番号を記録済み");
     expect(a).toContain('data-state="warn"');
     const b = render({ report: "not_applicable", inspection: "recorded", judgement: { kind: "counts", stale: false, counts: { noFly: 0, needs: 0, unknown: 0, done: 0, none: 2 } } });
     expect(b).toContain("対象外（模型航空機）");
-    expect(b).toContain("通報の記録を必須としません");
-    expect(b).toContain('data-testid="home-prep-report-note"');
+    expect(b).not.toContain("必須としません");
+    expect(b).not.toContain('data-testid="home-prep-report-note"');
     expect(b).toContain('data-tone="unknown"');
   });
 

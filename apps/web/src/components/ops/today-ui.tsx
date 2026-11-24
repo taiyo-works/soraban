@@ -256,14 +256,14 @@ export function HomeNextCard({ card, today }: { readonly card: TodayCardDto; rea
           <StatusLabel tone={BADGE_TONE[card.badge.code]} testId="home-next-status">
             {card.badge.label}
           </StatusLabel>
-          <span className="opx-num text-sm text-sb-ink-3" data-testid="home-next-when">
+          <span className="opx-num text-sm leading-[1.5] text-sb-ink-3" data-testid="home-next-when">
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>　{card.timeLabel}
           </span>
         </span>
         <span className="home-next-title text-[1.0625rem] font-bold leading-snug" data-testid="home-next-title">
           {card.title}
         </span>
-        <span className="home-next-place text-sm text-sb-ink-2" data-testid="home-next-place">
+        <span className="home-next-place text-sm leading-[1.5] text-sb-ink-2" data-testid="home-next-place">
           {card.placeName}
         </span>
       </ListCardLink>
@@ -479,13 +479,15 @@ function DeadlineRow({ d, today }: { readonly d: DeadlineDto; readonly today: st
       <a href={d.href} className="sb-row" data-testid="deadline-link">
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[1rem] font-bold leading-snug">{d.what}</span>
-          <span className="break-words text-sm text-sb-ink-2">
+          <span className="break-words text-sm leading-[1.5] text-sb-ink-2">
             {d.subject}
             {d.licenseStatus ? `　${LICENSE_RENEWAL_LABEL[d.licenseStatus]}` : ""}
+            {/* 読み上げで、状態の文と次の日付が続かないように句点を入れる（見えない） */}
+            <span className="sr-only">。</span>
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-1">
-          <span className="sb-num text-sm text-sb-ink">
+          <span className="sb-num text-sm leading-[1.5] text-sb-ink">
             <time dateTime={d.date}>{formatDay(d.date, today)}</time>
           </span>
           {d.overdue || d.daysLeft <= 30 ? (
@@ -494,7 +496,7 @@ function DeadlineRow({ d, today }: { readonly d: DeadlineDto; readonly today: st
               {d.leftLabel}
             </span>
           ) : (
-            <span className="text-sm text-sb-ink-3">{d.leftLabel}</span>
+            <span className="text-sm leading-[1.5] text-sb-ink-3">{d.leftLabel}</span>
           )}
         </span>
       </a>

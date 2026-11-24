@@ -10,7 +10,6 @@
 //   - エンジン（ENGINE_VERSION・VERDICT_LABEL）は変えない。ここは判定の結果の件数を読んで言葉を選ぶだけ。
 import type { ItemVerdict } from "@soraban/regulations";
 import type { ReportStatusCode } from "@soraban/dips";
-import { FIELD_REPORT_NOT_REQUIRED_MODEL } from "@/lib/ops-field";
 
 export type PrepTone = "safe" | "warn" | "danger" | "info" | "unknown";
 
@@ -62,8 +61,8 @@ export const PREP_REPORT: Readonly<Record<PrepReportKey, PrepRow>> = {
   confirm: { tone: "warn", level: "needs_procedure", text: "DIPS に出す内容を確認する" },
   cancelled: { tone: "danger", level: "no_fly", text: "取り消し済み" },
   // 100g 未満（模型航空機）。既存の通報の状況の語（REPORT_STATUS_LABEL）の短い形。docs-judge は免除と読める語を使わず要確認のまま扱うので、
-  // ここも未確認（灰・点線の四角）にし、既存の注意の文（docs-judge と同じ定数）を添える
-  not_applicable: { tone: "unknown", level: "unknown", text: "対象外（模型航空機）", note: FIELD_REPORT_NOT_REQUIRED_MODEL },
+  // ここも未確認（灰・点線の四角）にする。補足は付けない（2026-11-24 のユーザーの判断。定数 FIELD_REPORT_NOT_REQUIRED_MODEL は現場モード・docs-judge が使うので残す）
+  not_applicable: { tone: "unknown", level: "unknown", text: "対象外（模型航空機）" },
 };
 
 // ---- 飛行前点検 ------------------------------------------------------------

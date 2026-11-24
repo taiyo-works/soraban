@@ -53,7 +53,7 @@ function Row({ id, label, row, foot, planId }: { readonly id: string; readonly l
   );
 }
 
-export function HomePrepCard({ input, when, place, planId }: { readonly input: PrepInput; /** 日時（補足） */ readonly when: string; readonly place: string; /** 再判定の行き先（判定の記録が無いとき） */ readonly planId?: string }) {
+export function HomePrepCard({ input, when, planId }: { readonly input: PrepInput; /** 日時（補足）。場所は次の予定（home-next-place）の 1 か所だけに出す */ readonly when: string; /** 再判定の行き先（判定の記録が無いとき） */ readonly planId?: string }) {
   const m = prepModel(input);
   const tone: PrepTone = m.tone;
   return (
@@ -68,8 +68,8 @@ export function HomePrepCard({ input, when, place, planId }: { readonly input: P
         <h2 className="home-prep-title" data-testid="home-prep-title">
           {PREP_TITLE}
         </h2>
-        <span data-note="" className="home-prep-when" data-testid="home-prep-when" title={`${when}　${place}`}>
-          {when}　{place}
+        <span data-note="" className="home-prep-when" data-testid="home-prep-when">
+          {when}
         </span>
       </div>
       <ul className="home-prep-rows">

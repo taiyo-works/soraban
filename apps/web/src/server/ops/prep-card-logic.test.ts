@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { FIELD_REPORT_NOT_REQUIRED_MODEL } from "@/lib/ops-field";
 import {
   hasReportNumber,
   heaviestTone,
@@ -46,7 +45,8 @@ describe("準備カード：通報の行（§8.1）", () => {
     expect(m.tone).toBe("warn");
   });
   it("差し戻し 1：対象外（模型航空機）は免除と読ませない。未確認（灰・点線の四角）で、docs-judge と同じ既存の注意の文を添える。帯では未確認として数える", () => {
-    expect(PREP_REPORT.not_applicable).toMatchObject({ tone: "unknown", level: "unknown", text: "対象外（模型航空機）", note: FIELD_REPORT_NOT_REQUIRED_MODEL });
+    expect(PREP_REPORT.not_applicable).toMatchObject({ tone: "unknown", level: "unknown", text: "対象外（模型航空機）" });
+    expect(PREP_REPORT.not_applicable.note).toBeUndefined();
     const m = prepModel({ report: "not_applicable", inspection: "recorded", judgement: counts({ none: 1 }) });
     expect(m.tone).toBe("unknown");
     expect(heaviestTone([PREP_REPORT.not_applicable, { tone: "info" }, { tone: "safe" }])).toBe("unknown");
