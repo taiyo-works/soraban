@@ -1,6 +1,7 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { gotoPlanOpen, onAllPlanScreens, openPlanFolds } from "./plan-screen";
 import { expectNoHorizontalScroll } from "../field-checks";
+import { walkWizard } from "./plan-wizard";
 
 // Sprint 12d の E2E-DB（契約 12〜15 の画面・通しの部分。契約 16 の通報内容・現場モードは別の describe）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバーを与えた next start に対して実行する。
@@ -479,6 +480,8 @@ test.describe("Sprint 12d E2E-DB：計画の照合（契約 13）", () => {
     // 新規：DIPS のチェックはない。同意・通報・公園・文化庁は残る
     await page.goto("/ops/plans/new");
     await expect(tid(page, "plan-form")).toBeVisible();
+    // 新規は 6 段（16-H1）。許可・承認の欄は ④
+    await walkWizard(page, { placeName: "許可の確認", lat: "35.1", lng: "133.1", date: "2027-02-01", time: "09:00", duration: "10", title: "許可の確認", purpose: "確認" }, 4);
     await expect(tid(page, "plan-permit-registry-note")).toContainText("登録から照合します");
     await expect(page.locator('[data-testid^="plan-permit-mlit"]')).toHaveCount(0);
     await expect(tid(page, "plan-permit-park_manager")).toBeVisible();

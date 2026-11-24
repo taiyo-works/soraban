@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { gotoPlanOpen, onAllPlanScreens, openReportFolds } from "./plan-screen";
+import { walkWizard } from "./plan-wizard";
 
 // Sprint 12b の E2E-DB（契約 1・4・5・13・16・17・18 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバーを与えた next start に対して実行する。
@@ -769,6 +770,8 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     expect(box!.width).toBeLessThanOrEqual(375);
     await noHorizontalScroll(page, "計画の訂正フォーム");
     await page.goto("/ops/plans/new");
+    // 新規は 6 段（16-H1）。機体の選択は ④
+    await walkWizard(page, { placeName: "幅の確認", lat: "35.1", lng: "133.1", date: "2027-02-01", time: "09:00", duration: "10", title: "幅の確認", purpose: "確認" }, 4);
     await expect(page.getByTestId("plan-aircraft")).toBeVisible();
     const sel = await page.getByTestId("plan-aircraft").boundingBox();
     expect(sel!.x + sel!.width).toBeLessThanOrEqual(375);
