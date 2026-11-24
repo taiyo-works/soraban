@@ -534,3 +534,102 @@ html[data-mode="field"] .home-quick-btn {
   [data-testid="ops-today"] { gap: 8px; }
   [data-testid="ops-today"] > div > div, [data-testid="ops-today"] > div > div > div { gap: 8px; }
 }
+
+/* ===== 計画作成の 6 段（16-H1）：上に固定の進捗の帯（高さ 4・主色）と「2/6 日時」、段の見出し、確認のカード =====
+ * 色・寸法はトークンだけ。進捗の帯は見本（/ops/design の cat-progress）と同じ形。 */
+.opx-wiz-progress {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-inline: calc(var(--sb-sp-1) * -1);
+  padding: 8px var(--sb-sp-1) 6px;
+  background: var(--sb-base);
+}
+@media (min-width: 1024px) {
+  .opx-wiz-progress {
+    top: 56px;
+  }
+}
+.opx-wiz-bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--sb-pill);
+  background: var(--sb-sunken);
+}
+.opx-wiz-fill {
+  height: 100%;
+  background: var(--sb-primary);
+}
+.opx-wiz-step {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink);
+  font-variant-numeric: tabular-nums;
+}
+.opx-wiz-heading {
+  margin: 0;
+  padding: 4px 0 4px 14px;
+  border-left: 5px solid var(--sb-ink);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink);
+  outline: none;
+}
+.opx-wiz-heading:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+}
+.opx-wiz-cardhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.opx-wiz-cardhead h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink);
+}
+.opx-wiz-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.opx-wiz-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+}
+@media (min-width: 640px) {
+  .opx-wiz-row {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+.opx-wiz-row dt {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.opx-wiz-row dd {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.opx-wiz-errlead {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sb-st-danger-text);
+}

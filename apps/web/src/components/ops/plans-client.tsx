@@ -47,14 +47,14 @@ import type { PilotOption } from "./records-client";
 import { buttonDangerClass, buttonGhostClass, buttonOutlineBrandClass, buttonPrimaryClass, VERSION_NOTICE_TARGET } from "./ui";
 
 /** 通信できない場合も ApiResult にする（status 0）。 */
-const call = async (method: string, url: string, body?: unknown): Promise<ApiResult> => {
+export const call = async (method: string, url: string, body?: unknown): Promise<ApiResult> => {
   try {
     return await send(method, url, body);
   } catch {
     return { ok: false, status: 0, data: { error: "network" } };
   }
 };
-const failMessage = (r: ApiResult): string =>
+export const failMessage = (r: ApiResult): string =>
   r.status === 0 ? "通信できませんでした。入力した内容は画面に残っています。通信が戻ってから、もう一度操作してください。" : messageFor(r);
 
 // ---- 飛行計画のフォーム ----------------------------------------
@@ -90,16 +90,16 @@ const geoReasonSnapshot = (): string => {
 };
 
 const round6 = (n: number): string => String(roundCoordinate(n));
-const toggle = (list: readonly string[], v: string): string[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+export const toggle = (list: readonly string[], v: string): string[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は藍の枠と薄い地で示す（チェックの記号と併用）。
-const planCheckRow =
+export const planCheckRow =
   "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
-const planCheckbox = `${checkboxClass} mt-0.5`;
-const selectClass = `${inputClass} min-h-12`;
+export const planCheckbox = `${checkboxClass} mt-0.5`;
+export const selectClass = `${inputClass} min-h-12`;
 
 /** 欄に番号を足す（既にある番号は足さない）。 */
-const appendNumber = (current: string, number: string): string => {
+export const appendNumber = (current: string, number: string): string => {
   const key = normalizePermitNumber(number);
   if (splitPermitNumbers(current).some((t) => t.key === key)) return current;
   return current.trim() === "" ? number : `${current.trim().replace(/[,，、;；]+$/, "")}, ${number}`;
@@ -110,7 +110,7 @@ const appendNumber = (current: string, number: string): string => {
  * 保存済みの計画の照合の結果（訂正のとき）、範囲に収まる登録の候補（「番号を入れる」。欄に足すだけで、保存は利用者が行う）。
  * 登録は利用者の申告で、許可の有無で飛行の可否が決まるという意味ではない。
  */
-function PermitNumberHelper({
+export function PermitNumberHelper({
   value,
   helper,
   isEdit,
@@ -176,38 +176,41 @@ function PermitNumberHelper({
   );
 }
 
-export function PlanForm({
-  aircraft,
-  pilots,
-  fixedPilotId,
-  places,
-  initial,
-  editing,
-  handoffWeightG,
-  permitHelper,
-}: {
-  readonly aircraft: readonly PlanAircraftOption[];
-  readonly pilots: readonly PilotOption[];
-  readonly fixedPilotId: string | null;
-  readonly places: readonly PlacePick[];
-  readonly initial: PlanFormValues;
-  /** 訂正のとき（機体は変えられない）。 */
-  readonly editing?: { readonly id: string; readonly version: number };
-  /** 判定画面から引き継いだ機体の重さ（g）。参考表示だけ。 */
-  readonly handoffWeightG?: string;
-  /** 許可番号の欄の案内（番号ごとの保存済みの照合の結果と、「番号を入れる」の候補）。 */
-  readonly permitHelper?: PermitHelper;
-}) {
-  const isEdit = editing !== undefined;
-  const [v, setV] = useState<PlanFormValues>({ ...initial, pilotId: fixedPilotId ?? initial.pilotId });
-  const [clientRequestId] = useState(() => newRequestId());
-  const [reason, setReason] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const { formRef, requestErrorFocus } = useErrorFocus();
-  const set = <K extends keyof PlanFormValues>(k: K, value: PlanFormValues[K]) => setV((s) => ({ ...s, [k]: value }));
+/** 計画の保存・訂正に送る本文（入力値を API の形に整える）。 */
+export const planBody = (v: PlanFormValues) => ({
+  title: v.title,
+  aircraftId: v.aircraftId || null,
+  pilotId: v.pilotId || null,
+  plannedStartAt: v.startDate && v.startTime ? `${v.startDate}T${v.startTime.slice(0, 5)}` : null,
+  durationMinutes: v.duration.trim() === "" ? null : v.duration.trim(),
+  purpose: v.purpose,
+  placeName: v.placeName,
+  latitude: v.lat.trim() === "" ? null : v.lat.trim(),
+  longitude: v.lng.trim() === "" ? null : v.lng.trim(),
+  radiusM: v.radius.trim() === "" ? null : v.radius.trim(),
+  savedPlaceId: v.savedPlaceId || null,
+  maxAltitudeM: v.altitude.trim() === "" ? null : v.altitude.trim(),
+  flags: v.flags,
+  pilotPermits: v.permits,
+  judgementPurpose: v.judgementPurpose || null,
+  accessControl: v.access === "yes" ? true : v.access === "no_third_party" ? false : null,
+  thirdPartyOverflight: v.access === "no_third_party" ? true : null,
+  bvlosWithObserver: v.flags.includes("method_bvlos") && v.observer !== "" ? v.observer === "with" : null,
+  permitNumbers: v.permitNumbers.trim() === "" ? null : v.permitNumbers,
+  notes: v.notes.trim() === "" ? null : v.notes,
+});
 
+/**
+ * 場所の補助（現在地・住所検索）。候補は「この地点を使う」で確定するまで入力欄に入れない。確定したときだけ onPick を呼ぶ。
+ * 状態は部品の中に持つ（端末には何も書かない）。candidatePrimary は「この地点を使う」を主ボタンにするか（段に分けた画面では「次へ」が主ボタン）。
+ */
+export function PlaceSearchHelper({
+  onPick,
+  candidatePrimary = true,
+}: {
+  readonly onPick: (c: { readonly lat: string; readonly lng: string; readonly name: string | null }) => void;
+  readonly candidatePrimary?: boolean;
+}) {
   // 場所の候補（現在地・住所検索）。確定するまで入力欄に入れない
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [locStatus, setLocStatus] = useState<string | null>(null);
@@ -216,25 +219,6 @@ export function PlanForm({
   const [hits, setHits] = useState<readonly GeocodeResult[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchNote, setSearchNote] = useState<string | null>(null);
-
-  const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
-  const withAircraftWeight = useMemo(
-    () => (a: PlanAircraftOption) =>
-      `${a.registrationMark}（${a.modelName}）${a.status === "suspended" ? "［休止］" : ""}　${
-        a.maxTakeoffWeightKg === null ? "重量未登録" : `最大離陸重量 ${a.maxTakeoffWeightKg} kg`
-      }`,
-    [],
-  );
-
-  const pickPlace = (id: string) => {
-    const p = places.find((x) => x.id === id);
-    if (!p) {
-      set("savedPlaceId", "");
-      return;
-    }
-    setV((s) => ({ ...s, savedPlaceId: p.id, placeName: p.name, lat: String(p.latitude), lng: String(p.longitude) }));
-  };
-
   const locate = async () => {
     const a = geolocationAvailability({
       geolocation: typeof navigator !== "undefined" ? navigator.geolocation : undefined,
@@ -272,47 +256,152 @@ export function PlanForm({
 
   const useCandidate = () => {
     if (!candidate) return;
-    setV((s) => ({
-      ...s,
-      lat: round6(candidate.lat),
-      lng: round6(candidate.lng),
-      savedPlaceId: "",
-      placeName: candidate.asName && !s.placeName.trim() ? candidate.label.slice(0, 100) : s.placeName,
-    }));
+    onPick({ lat: round6(candidate.lat), lng: round6(candidate.lng), name: candidate.asName ? candidate.label.slice(0, 100) : null });
     setCandidate(null);
     setHits(null);
     setLocStatus("この地点を入力欄に入れました。計画を保存するまで送りません。");
   };
 
-  const body = () => ({
-    title: v.title,
-    aircraftId: v.aircraftId || null,
-    pilotId: v.pilotId || null,
-    plannedStartAt: v.startDate && v.startTime ? `${v.startDate}T${v.startTime.slice(0, 5)}` : null,
-    durationMinutes: v.duration.trim() === "" ? null : v.duration.trim(),
-    purpose: v.purpose,
-    placeName: v.placeName,
-    latitude: v.lat.trim() === "" ? null : v.lat.trim(),
-    longitude: v.lng.trim() === "" ? null : v.lng.trim(),
-    radiusM: v.radius.trim() === "" ? null : v.radius.trim(),
-    savedPlaceId: v.savedPlaceId || null,
-    maxAltitudeM: v.altitude.trim() === "" ? null : v.altitude.trim(),
-    flags: v.flags,
-    pilotPermits: v.permits,
-    judgementPurpose: v.judgementPurpose || null,
-    accessControl: v.access === "yes" ? true : v.access === "no_third_party" ? false : null,
-    thirdPartyOverflight: v.access === "no_third_party" ? true : null,
-    bvlosWithObserver: v.flags.includes("method_bvlos") && v.observer !== "" ? v.observer === "with" : null,
-    permitNumbers: v.permitNumbers.trim() === "" ? null : v.permitNumbers,
-    notes: v.notes.trim() === "" ? null : v.notes,
-  });
+  // 位置情報が使えない理由（使えるときは空文字。サーバーの描画では判定しない）
+  const unavailableReason = useSyncExternalStore(noopSubscribe, geoReasonSnapshot, () => "");
+
+  return (
+        <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-3" data-testid="plan-place-helper">
+          <p className="text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
+              現在地を取得する
+            </button>
+          </div>
+          {locStatus ? (
+            <p role="status" className="text-sb-ink-2" data-testid="plan-loc-status">
+              {locStatus}
+            </p>
+          ) : null}
+          {unavailableReason && !locStatus ? <p className="text-sb-ink-3">{unavailableReason}</p> : null}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="plan-address-q" className="text-sm text-sb-ink">
+              住所で探す
+            </label>
+            <div className="flex gap-2">
+              <input id="plan-address-q" className={`${inputClass} min-h-12`} value={q} onChange={(e) => setQ(e.target.value)} placeholder="例：米子市加茂町" data-testid="plan-address-q" />
+              <button type="button" className={`${buttonGhostClass} shrink-0 whitespace-nowrap`} onClick={() => void search()} disabled={searching || q.trim() === ""} data-testid="plan-address-search">
+                検索
+              </button>
+            </div>
+            {searchNote ? (
+              <p role="status" className="text-sm text-sb-ink-3">
+                {searchNote}
+              </p>
+            ) : null}
+            {hits && hits.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-sb-rule rounded-sb-m border border-sb-rule" data-testid="plan-address-results">
+                {hits.slice(0, 5).map((h) => (
+                  <li key={`${h.lat},${h.lng},${h.title}`}>
+                    <button
+                      type="button"
+                      className="flex min-h-12 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-sunken"
+                      onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
+                    >
+                      <span>{h.title}</span>
+                      <span className="sb-num text-sm tnum text-sb-ink-3">
+                        {h.lat}, {h.lng}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+          {candidate ? (
+            <div className="flex flex-col gap-2 rounded-sb-m border border-sb-ink bg-sb-base px-3 py-3" data-testid="plan-candidate">
+              <p className="text-sm text-sb-ink">
+                候補：{candidate.label}
+                <span className="ml-2 sb-num text-sm tnum text-sb-ink-2">
+                  {round6(candidate.lat)}, {round6(candidate.lng)}
+                </span>
+                {candidate.accuracyM !== undefined ? <span className="ml-2 text-sm text-sb-ink-2">（{formatAccuracy(candidate.accuracyM)}）</span> : null}
+              </p>
+              {candidate.accuracyM !== undefined && isLowAccuracy(candidate.accuracyM) ? (
+                <p className="opx-note" role="status">
+                  <span className="font-medium">注意：</span>
+                  {LOW_ACCURACY_MESSAGE}
+                </p>
+              ) : null}
+              <p className="text-sm text-sb-ink-3">まだ入力欄に入れていません。{CURRENT_LOCATION_PRIVACY_NOTE}</p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" {...(candidatePrimary ? { "data-variant": "primary" } : {})} className={candidatePrimary ? buttonPrimaryClass : buttonGhostClass} onClick={useCandidate} data-testid="plan-use-candidate">
+                  この地点を使う
+                </button>
+                <button type="button" className={buttonGhostClass} onClick={() => setCandidate(null)}>
+                  取消
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+  );
+}
+
+export function PlanForm({
+  aircraft,
+  pilots,
+  fixedPilotId,
+  places,
+  initial,
+  editing,
+  handoffWeightG,
+  permitHelper,
+}: {
+  readonly aircraft: readonly PlanAircraftOption[];
+  readonly pilots: readonly PilotOption[];
+  readonly fixedPilotId: string | null;
+  readonly places: readonly PlacePick[];
+  readonly initial: PlanFormValues;
+  /** 訂正のとき（機体は変えられない）。 */
+  readonly editing?: { readonly id: string; readonly version: number };
+  /** 判定画面から引き継いだ機体の重さ（g）。参考表示だけ。 */
+  readonly handoffWeightG?: string;
+  /** 許可番号の欄の案内（番号ごとの保存済みの照合の結果と、「番号を入れる」の候補）。 */
+  readonly permitHelper?: PermitHelper;
+}) {
+  const isEdit = editing !== undefined;
+  const [v, setV] = useState<PlanFormValues>({ ...initial, pilotId: fixedPilotId ?? initial.pilotId });
+  const [clientRequestId] = useState(() => newRequestId());
+  const [reason, setReason] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const { formRef, requestErrorFocus } = useErrorFocus();
+  const set = <K extends keyof PlanFormValues>(k: K, value: PlanFormValues[K]) => setV((s) => ({ ...s, [k]: value }));
+
+
+  const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
+  const withAircraftWeight = useMemo(
+    () => (a: PlanAircraftOption) =>
+      `${a.registrationMark}（${a.modelName}）${a.status === "suspended" ? "［休止］" : ""}　${
+        a.maxTakeoffWeightKg === null ? "重量未登録" : `最大離陸重量 ${a.maxTakeoffWeightKg} kg`
+      }`,
+    [],
+  );
+
+  const pickPlace = (id: string) => {
+    const p = places.find((x) => x.id === id);
+    if (!p) {
+      set("savedPlaceId", "");
+      return;
+    }
+    setV((s) => ({ ...s, savedPlaceId: p.id, placeName: p.name, lat: String(p.latitude), lng: String(p.longitude) }));
+  };
+
+
 
   const submit = async () => {
     setBusy(true);
     setMessage(null);
     const r = isEdit
-      ? await call("PATCH", `/api/ops/plans/${editing.id}`, { ...body(), expectedVersion: editing.version, reason })
-      : await call("POST", "/api/ops/plans", { ...body(), clientRequestId });
+      ? await call("PATCH", `/api/ops/plans/${editing.id}`, { ...planBody(v), expectedVersion: editing.version, reason })
+      : await call("POST", "/api/ops/plans", { ...planBody(v), clientRequestId });
     setBusy(false);
     if (!r.ok) {
       setErrors(fieldErrorsOf(r));
@@ -335,8 +424,6 @@ export function PlanForm({
     if (!busy) void submit();
   };
 
-  // 位置情報が使えない理由（使えるときは空文字。サーバーの描画では判定しない）
-  const unavailableReason = useSyncExternalStore(noopSubscribe, geoReasonSnapshot, () => "");
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="opx-form flex flex-col gap-6" aria-label={isEdit ? "飛行計画の訂正" : "飛行計画の入力"} data-testid="plan-form">
@@ -449,80 +536,9 @@ export function PlanForm({
           </Field>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-3" data-testid="plan-place-helper">
-          <p className="text-sb-ink-3">座標は直接入れるほか、現在地や住所から探せます。候補は「この地点を使う」を押すまで入力欄に入りません。</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" className={buttonGhostClass} onClick={() => void locate()} disabled={locating || unavailableReason !== ""} data-testid="plan-locate">
-              現在地を取得する
-            </button>
-          </div>
-          {locStatus ? (
-            <p role="status" className="text-sb-ink-2" data-testid="plan-loc-status">
-              {locStatus}
-            </p>
-          ) : null}
-          {unavailableReason && !locStatus ? <p className="text-sb-ink-3">{unavailableReason}</p> : null}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="plan-address-q" className="text-sm text-sb-ink">
-              住所で探す
-            </label>
-            <div className="flex gap-2">
-              <input id="plan-address-q" className={`${inputClass} min-h-12`} value={q} onChange={(e) => setQ(e.target.value)} placeholder="例：米子市加茂町" data-testid="plan-address-q" />
-              <button type="button" className={`${buttonGhostClass} shrink-0 whitespace-nowrap`} onClick={() => void search()} disabled={searching || q.trim() === ""} data-testid="plan-address-search">
-                検索
-              </button>
-            </div>
-            {searchNote ? (
-              <p role="status" className="text-sm text-sb-ink-3">
-                {searchNote}
-              </p>
-            ) : null}
-            {hits && hits.length > 0 ? (
-              <ul className="flex flex-col divide-y divide-sb-rule rounded-sb-m border border-sb-rule" data-testid="plan-address-results">
-                {hits.slice(0, 5).map((h) => (
-                  <li key={`${h.lat},${h.lng},${h.title}`}>
-                    <button
-                      type="button"
-                      className="flex min-h-12 w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-sb-sunken"
-                      onClick={() => setCandidate({ lat: h.lat, lng: h.lng, label: h.title, asName: true })}
-                    >
-                      <span>{h.title}</span>
-                      <span className="sb-num text-sm tnum text-sb-ink-3">
-                        {h.lat}, {h.lng}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-          {candidate ? (
-            <div className="flex flex-col gap-2 rounded-sb-m border border-sb-ink bg-sb-base px-3 py-3" data-testid="plan-candidate">
-              <p className="text-sm text-sb-ink">
-                候補：{candidate.label}
-                <span className="ml-2 sb-num text-sm tnum text-sb-ink-2">
-                  {round6(candidate.lat)}, {round6(candidate.lng)}
-                </span>
-                {candidate.accuracyM !== undefined ? <span className="ml-2 text-sm text-sb-ink-2">（{formatAccuracy(candidate.accuracyM)}）</span> : null}
-              </p>
-              {candidate.accuracyM !== undefined && isLowAccuracy(candidate.accuracyM) ? (
-                <p className="opx-note" role="status">
-                  <span className="font-medium">注意：</span>
-                  {LOW_ACCURACY_MESSAGE}
-                </p>
-              ) : null}
-              <p className="text-sm text-sb-ink-3">まだ入力欄に入れていません。{CURRENT_LOCATION_PRIVACY_NOTE}</p>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" data-variant="primary" className={buttonPrimaryClass} onClick={useCandidate} data-testid="plan-use-candidate">
-                  この地点を使う
-                </button>
-                <button type="button" className={buttonGhostClass} onClick={() => setCandidate(null)}>
-                  取消
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </div>
+        <PlaceSearchHelper
+          onPick={(c) => setV((s) => ({ ...s, lat: c.lat, lng: c.lng, savedPlaceId: "", placeName: c.name !== null && !s.placeName.trim() ? c.name : s.placeName }))}
+        />
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <Field label="範囲の半径（m）" required={false} error={errors["radiusM"]} hint="1〜10000 m。点と半径で表します。">
