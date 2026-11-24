@@ -4,7 +4,7 @@ import { openAllPlans } from "../ops-menu";
 
 // Sprint 16-G の E2E-DB：ホーム（準備カード・次の予定・期限・クイック操作 3・空の状態・畳んだ「すべての予定」）。契約 HM-1〜HM-5、K-8。
 // サーバーの時計は OPS_TEST_NOW（JST 2027-01-05 12:00）。組織 B で確かめる（組織 A は他の試験の計画が多い）。
-// HM-5 の「判定の行が取れない」経路は、今の API を変えずに E2E で作れないため、単体（prep-card-logic.test.ts・home-prep-card.test.ts）で確かめる。
+// HM-5 の「判定の行が取れない」経路は、今の API を変えずに E2E で作れないため、単体（prep-card-logic.test.ts・home-prep-card.test.ts）と、サーバー側の DB テスト（field.db.test.ts の HM-5）で確かめる。
 const BASE = `http://127.0.0.1:${process.env["E2E_OPS_PORT"] ?? 3300}`;
 const DAY = "2027-01-05";
 const stamp = Date.now().toString(36).toUpperCase();
@@ -155,7 +155,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     await expectNoHorizontalScroll(page, "ホーム");
   });
 
-  test("HM-2・K-8 主ボタンは 1 つ。次にやることの 1 件（押せる先頭）で、行き先は一覧の同じ行と同じ", async ({ page }) => {
+  test("HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ", async ({ page }) => {
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
     await expect(page.getByTestId("home-primary")).toBeVisible();
@@ -163,10 +163,9 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     const primaries = await visiblePrimaries(page);
     expect(primaries, `見える主ボタン ${primaries.join("・")}`).toEqual(["home-primary"]);
     const t = (await (await page.request.get("/api/ops/today")).json()) as { card: { planId: string } | null; nextActions: { id: string; label: string; href: string; canAct: boolean; planId: string | null }[] };
-    // 差し戻し 1：準備カードの計画の押せる行動を優先し、無ければ押せる先頭の 1 件
-    const first = t.nextActions.find((a) => a.canAct && a.planId === t.card?.planId) ?? t.nextActions.find((a) => a.canAct);
-    // 準備カードの計画の行動があるときは、別の計画名の添え書きは出ない
-    if (first && first.planId === t.card?.planId) await expect(page.getByTestId("home-primary-plan")).toHaveCount(0);
+    // 差し戻し 1：準備カードの計画の押せる行動だけ（別の計画の行動を主ボタンにしない）。無ければ「新しい計画」。計画名の添え書きは出さない
+    const first = t.nextActions.find((a) => a.canAct && a.planId === t.card?.planId);
+    await expect(page.getByTestId("home-primary-plan")).toHaveCount(0);
     if (first) {
       await expect(page.getByTestId("home-primary")).toHaveText(first.label);
       await expect(page.getByTestId("home-primary")).toHaveAttribute("href", first.href);
@@ -296,7 +295,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     await signIn(page.request, seeded("b-manager"));
     const variants = [
       { key: "num", manual: { dipsNumber: "FP-HOME-0001" }, text: "受付番号を記録済み", tone: "safe" },
-      { key: "nonum", manual: { numberUnavailable: true }, text: "記録あり（受付番号なし）", tone: "warn" },
+      { key: "nonum", manual: { numberUnavailable: true, memo: "完了画面に番号が出なかった" }, text: "記録あり（受付番号なし）", tone: "warn" },
     ] as const;
     try {
       for (const [i, v] of variants.entries()) {

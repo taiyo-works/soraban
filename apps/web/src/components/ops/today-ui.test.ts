@@ -66,25 +66,15 @@ describe("ホームの部品（Sprint 12g-1b 差し戻し）", () => {
 });
 
 describe("ホームの主ボタン（16-G 差し戻し 1）", () => {
-  const html = (a: TodayNextAction | null, cardPlanId: string | undefined) =>
-    renderToStaticMarkup(createElement(HomePrimary, { action: a, canPlan: true, ...(cardPlanId !== undefined ? { cardPlanId } : {}) }));
+  const html = (a: TodayNextAction | null) => renderToStaticMarkup(createElement(HomePrimary, { action: a, canPlan: true }));
 
-  it("準備カードの計画の行動のときは、計画名の添え書きを出さない", () => {
-    const h = html(action(1), "p1");
+  it("行動があればその行動、無ければ「新しい計画」。計画名の添え書きは出さない（最初の画面に入らないため）", () => {
+    const h = html(action(1));
     expect(h).toContain("作業 1");
     expect(h).toContain('data-testid="home-primary"');
     expect(h).not.toContain("home-primary-plan");
-  });
-  it("別の計画の行動のときは、主ボタンの下に対象の計画名を 1 行添える（home-primary-plan）", () => {
-    const h = html(action(2), "p1");
-    expect(h).toContain('data-testid="home-primary-plan"');
-    expect(h).toContain("計画 2");
-    expect(h.indexOf("home-primary-plan")).toBeGreaterThan(h.indexOf('data-testid="home-primary"'));
-  });
-  it("計画に結び付かない行動（技能証明など）には添えない。行動が無ければ「新しい計画」", () => {
-    expect(html(action(3, { planId: null, planTitle: null }), "p1")).not.toContain("home-primary-plan");
-    const h = html(null, "p1");
-    expect(h).toContain("新しい計画");
-    expect(h).not.toContain("home-primary-plan");
+    const n = html(null);
+    expect(n).toContain("新しい計画");
+    expect(n).toContain('data-action-id="new_plan"');
   });
 });
