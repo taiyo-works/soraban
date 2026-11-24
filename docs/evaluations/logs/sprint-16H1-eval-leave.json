@@ -1,0 +1,187 @@
+[
+ {
+  "case": "A-no-input",
+  "beforeunloadPrevented": [
+   false,
+   false
+  ],
+  "dialogs": [],
+  "movedTo": "/ops/plans"
+ },
+ {
+  "case": "B-link-cancel",
+  "beforeunloadPrevented": true,
+  "dialogs": [
+   {
+    "type": "confirm",
+    "msg": "入力した内容はまだ保存されていません。このページを離れると、"
+   }
+  ],
+  "stayed": "/ops/plans/new",
+  "valueKept": "離脱の試験",
+  "histAfterInput": {
+   "url": "/ops/plans/new?step=1",
+   "state": "{\"sbWiz\":1,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "case": "B-bottomnav-cancel",
+  "dialogs": [
+   {
+    "type": "confirm",
+    "msg": "入力した内容はまだ保存されていません。このページを離れると、"
+   }
+  ],
+  "stayed": "/ops/plans/new"
+ },
+ {
+  "case": "B-bottomnav-accept",
+  "dialogs": [
+   {
+    "type": "confirm",
+    "msg": "入力した内容はまだ保存されていません。このページを離れると、"
+   }
+  ],
+  "movedTo": "/ops"
+ },
+ {
+  "case": "B-reopen-empty",
+  "placeName": "",
+  "unload": false
+ },
+ {
+  "case": "C-sentinel",
+  "h0": {
+   "url": "/ops/plans/new",
+   "state": "{\"sbWiz\":0,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 3
+  },
+  "h1": {
+   "url": "/ops/plans/new?step=1",
+   "state": "{\"sbWiz\":1,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  },
+  "trail": [
+   {
+    "at": "step4",
+    "url": "/ops/plans/new?step=4",
+    "state": "{\"sbWiz\":4,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 7
+   },
+   {
+    "at": "back1",
+    "step": "3",
+    "url": "/ops/plans/new?step=3",
+    "state": "{\"sbWiz\":3,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 7
+   },
+   {
+    "at": "back2",
+    "step": "2",
+    "url": "/ops/plans/new?step=2",
+    "state": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 7
+   },
+   {
+    "at": "fwd1",
+    "step": "3",
+    "vals": "番兵の計画",
+    "url": "/ops/plans/new?step=3",
+    "state": "{\"sbWiz\":3,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 7
+   },
+   {
+    "at": "to-step1",
+    "step": "1",
+    "place": "番兵の試験",
+    "dialogs": [],
+    "url": "/ops/plans/new?step=1",
+    "state": "{\"sbWiz\":1,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 7
+   },
+   {
+    "at": "back-from-step1-cancel",
+    "dialogs": [
+     "confirm"
+    ],
+    "step": "1",
+    "place": "番兵の試験",
+    "url": "/ops/plans/new?step=1",
+    "state": "{\"sbWiz\":1,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+    "len": 4
+   },
+   {
+    "at": "next-after-cancel",
+    "r": {
+     "attempts": 1
+    },
+    "step": "2"
+   },
+   {
+    "at": "back-from-step1-accept",
+    "dialogs": [
+     "confirm"
+    ],
+    "url": "/ops/plans",
+    "hist": {
+     "url": "/ops/plans",
+     "state": "{\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+     "len": 5
+    }
+   }
+  ]
+ },
+ {
+  "case": "D-422",
+  "status": 400,
+  "errs": {
+   "step": "5",
+   "list": [
+    "場所：緯度：緯度は −90〜90、経度は −180〜180 の範囲です場所の段へ戻る",
+    "場所：範囲の半径（m）は 1〜10000 の範囲で入力してください場所の段へ戻る"
+   ],
+   "lead": "▲ 入力に誤りがあり、保存できませんでした。該当の段へ戻って直してください。",
+   "formErr": "入力に誤りがあります。各項目の案内を確認してください。",
+   "saveBtn": true
+  }
+ },
+ {
+  "case": "D-fix",
+  "fixId": "plan-review-error-fix-1",
+  "box": {
+   "x": 48,
+   "y": -1186.484375,
+   "width": 115.140625,
+   "height": 48
+  },
+  "step": "1",
+  "focus": "plan-lat",
+  "fieldErrs": [
+   "plan-lat",
+   "plan-radius"
+  ],
+  "msg": "入力に誤りがあります。各項目の案内を確認してください。"
+ },
+ {
+  "case": "D-back-to-review",
+  "step": "5",
+  "formErr": null
+ },
+ {
+  "case": "D-saved",
+  "url": "http://127.0.0.1:3400/ops/plans/1a52d775-c5fc-4b41-a616-ddf986dd7ae8"
+ },
+ {
+  "case": "E-a-viewer",
+  "form": 0,
+  "h1": "権限がありません",
+  "body": "権限がありません\n\n閲覧者は飛行計画を作れません。"
+ },
+ {
+  "case": "E-a-pilot",
+  "form": 1,
+  "h1": "飛行計画の入力",
+  "body": "←\n飛行計画の一覧\n飛行計画の入力\n\n判定は入力された情報の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手"
+ }
+]
