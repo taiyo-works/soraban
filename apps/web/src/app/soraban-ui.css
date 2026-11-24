@@ -1494,10 +1494,8 @@ input.sb-radio:disabled {
   display: grid;
   /* 列は等分（1fr）。ただし最小は項目名の幅（min-content）：文字 200%・幅 360px で「ホーム」（84px）が等分の 80px からはみ出さないよう、列が広がる（16-F 差し戻し 1 の R-4。ふだんの幅は等分のまま） */
   grid-template-columns: repeat(4, minmax(min-content, 1fr));
-  /* 16-F2：320 幅・文字 200% の 4 列は、項目名の幅の合計が 280px（ホーム 84・計画 56・日誌 56・機体と 84）。余白は列の間 2px×3＋左右 4px×2＋項目の左右 2px×8＝30px 以内にして 310px に収める
-   * （以前は 8px 系で 352px、右端が 26px 切れた）。文字の大きさは変えない。ふだんの幅は 1fr の等分なので、見た目の差は列の間が 6px 狭くなる程度 */
-  gap: 2px;
-  padding: 0 4px env(safe-area-inset-bottom);
+  gap: 8px;
+  padding: 0 8px env(safe-area-inset-bottom);
   background: var(--sb-surface);
   border-top: var(--sb-rule-w) solid var(--sb-rule);
   box-shadow: var(--sb-shadow-float);
@@ -1511,16 +1509,27 @@ input.sb-radio:disabled {
   gap: 2px;
   min-height: 64px;
   margin-block: 4px;
-  padding: 4px 2px;
+  padding: 4px;
   border-radius: var(--sb-r-control);
   font-size: var(--sb-fs-note);
   font-weight: 500;
   line-height: 1.3;
   text-align: center;
   word-break: keep-all;
-  overflow-wrap: normal;
   color: var(--sb-ink-2);
   touch-action: manipulation;
+}
+/* 16-F2：幅 359px 以下（320 など）・文字 200% の 4 列は、項目名の幅の合計が 280px（ホーム 84・計画 56・日誌 56・機体と 84）。
+ * 余白（列の間 8px×3＋左右 8px×2＋項目の左右 4px×8＝72px。必要な幅 352px で右端が 26px 切れた）を、列の間 2px×3＋左右 4px×2＋項目の左右 2px×8＝30px にして 310px に収める。
+ * 文字の大きさは変えない。360px 以上の寸法・見た目は 16-F のまま（360px の 200% は余白 72px でも 352px で収まる） */
+@media (max-width: 359px) {
+  .sb-tabs {
+    gap: 2px;
+    padding-inline: 4px;
+  }
+  .sb-tab {
+    padding-inline: 2px;
+  }
 }
 .sb-tab:hover {
   background: var(--sb-hover);
