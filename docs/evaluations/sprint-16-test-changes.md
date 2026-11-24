@@ -455,3 +455,5 @@
 **失敗のまま残した検査（1 件）**: `sprint16-h1-fix1-db` R-1b 段 5（`.opx-wiz-row dd` 18 件が 16px・行の高さ 1.60、1.7 以上が必要）。R-2 のとおり designer が CSS を直した後に通る前提で、`test.fail` などで隠さずに失敗の状態でコミットした。段 ①〜④ の R-1b と R-1a は通る。
 
 **検証**（空の DB から。ログ `docs/evaluations/logs/sprint-16H1-gen2-*.log`）: typecheck・lint（警告 1 は既存）・`pnpm test` 3057 通過・build・`testids --check`（消えた 0）。`sprint16-h1-db`（10）＋ `sprint16-h1-fix1-db`（16）は 25 通過・1 失敗（上記）。
+
+**ops の E2E 全体（空の DB から。ログ `sprint-16H1-gen2-ops-e2e.log`）**: 371 件中 370 通過・1 失敗（上記の R-1b 段 5 のみ。旧 355 + 新規 16）。公開の E2E は、今回の差分が `plan-wizard.tsx`（運航管理）と ops の E2E・文書だけで公開側に及ばないため省略。
