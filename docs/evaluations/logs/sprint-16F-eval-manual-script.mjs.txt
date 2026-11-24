@@ -1,0 +1,79 @@
+import { createRequire } from "node:module";
+const require = createRequire("/home/user/soraban/package.json");
+const { chromium } = require("@playwright/test");
+import fs from "node:fs";
+const BASE = process.env.BASE || "http://127.0.0.1:3400";
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16F";
+fs.mkdirSync(SHOT, { recursive: true });
+const out = {};
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
+const mk = async (w, h, who = "a-manager", extra = {}) => {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 1024, baseURL: BASE, ...extra });
+  const r = await ctx.request.post("/api/test-auth/sign-in", { data: { authUserId: who, email: `${who}@example.test`, emailVerified: true, name: who } });
+  if (r.status() !== 200) throw new Error("signin " + r.status());
+  return ctx;
+};
+const settle = async (p) => { await p.waitForSelector('[data-testid="ops-bottom-nav"]', { state: 'attached', timeout: 8000 }).catch(() => {}); await p.waitForTimeout(700); await p.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(()=>{})))); };
+const navInfo = (p) => p.evaluate(() => {
+  const nav = document.querySelector('[data-testid="ops-bottom-nav"]');
+  const vis = nav && getComputedStyle(nav).display !== "none" && nav.getBoundingClientRect().height > 0;
+  const tabs = [...document.querySelectorAll('.sb-tab')].map(a => { const r = a.getBoundingClientRect(); const sp = a.querySelector('span'); const sr = sp.getBoundingClientRect(); const lh = parseFloat(getComputedStyle(sp).lineHeight); const cs = getComputedStyle(a);
+    return { id: a.dataset.testid, text: sp.textContent, h: +r.height.toFixed(1), w: +r.width.toFixed(1), fs: parseFloat(getComputedStyle(sp).fontSize), lines: Math.round(sr.height / lh), cur: a.getAttribute("aria-current"), color: cs.color, bg: cs.backgroundColor, spanOver: sr.right > r.right + 0.5 || sr.left < r.left - 0.5, beforeH: getComputedStyle(a, "::before").height }; });
+  const side = document.querySelector('[data-testid="ops-sidebar"]');
+  const sideVis = side && getComputedStyle(side).display !== "none" && side.getBoundingClientRect().width > 0;
+  const links = sideVis ? [...side.querySelectorAll('a[aria-current="page"]')].map(a => a.dataset.testid + ":" + a.textContent.trim()) : [];
+  const sideAll = sideVis ? [...side.querySelectorAll('a')].map(a => { const r=a.getBoundingClientRect(); return a.dataset.testid+"@"+Math.round(r.height)+(a.getAttribute("aria-current")?"*":"")+(a.dataset.ancestor?"^":"") }) : [];
+  return { navVisible: !!vis, tabs, sideVis: !!sideVis, sideCurrent: links, sideAll, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth };
+});
+const T0=Date.now(); const pages = ["/ops", "/ops/plans", "/ops/journal", "/ops/more", "/ops/inspections", "/ops/inspections/new", "/ops/flights", "/ops/incidents", "/ops/aircraft", "/ops/pilots", "/ops/permits", "/ops/places", "/ops/members", "/ops/about", "/ops/plans/new"];
+const which = process.argv[2];
+if (which === "nav") {
+  for (const [w, h] of [[375, 812], [390, 844], [430, 932], [360, 740], [320, 640], [1023, 800], [1024, 800], [1280, 800]]) {
+    const ctx = await mk(w, h); const p = await ctx.newPage();
+    for (const u of pages) {
+      await p.goto(u, { waitUntil: "domcontentloaded" }); await settle(p); const i = await navInfo(p);
+      const bad = [];
+      if (w < 1024) { if (!i.navVisible) bad.push("nav-hidden"); if (i.tabs.length !== 4) bad.push("tabs=" + i.tabs.length); for (const t of i.tabs) { if (t.h < 64) bad.push(t.id + " h" + t.h); if (t.fs < 14) bad.push("fs"); if (t.lines !== 1 && !(w===320&&t.id==="nav-more")) bad.push(t.id + " lines" + t.lines); if (t.spanOver) bad.push("over"); } if (i.sideVis) bad.push("side visible"); }
+      else { if (i.navVisible) bad.push("bottom visible"); if (!i.sideVis) bad.push("side hidden"); }
+      if (i.sw > i.cw) bad.push(`hscroll ${i.sw}>${i.cw}`);
+      out[`${w} ${u}`] = { cur: i.tabs.filter(t => t.cur).map(t => t.id + ":" + t.text + ":" + t.color), side: i.sideCurrent, bad, h: i.tabs.map(t=>t.h).join("/") };
+    }
+    await ctx.close();
+  }
+}
+if (which === "zoom") {
+  for (const [w, h] of [[390, 844], [360, 740], [430, 932]]) {
+    const ctx = await mk(w, h); const p = await ctx.newPage();
+    for (const u of pages) {
+      await p.goto(u, { waitUntil: "domcontentloaded" }); await settle(p);
+      await p.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+      await p.waitForTimeout(500);
+      const r = await p.evaluate(() => {
+        const tabs = [...document.querySelectorAll('.sb-tab')].map(a => { const ar = a.getBoundingClientRect(); const sp = a.querySelector('span'); const sr = sp.getBoundingClientRect(); const lh = parseFloat(getComputedStyle(sp).lineHeight); return { id: a.dataset.testid, lines: Math.round(sr.height / lh), over: sr.right > ar.right + 0.5 || sr.left < ar.left - 0.5 || ar.right > innerWidth + 0.5 || ar.left < -0.5, h: Math.round(ar.height) }; });
+        window.scrollTo(0, document.documentElement.scrollHeight); 
+        const nav = document.querySelector('[data-testid="ops-bottom-nav"]').getBoundingClientRect();
+        const main = document.querySelector('main'); const last = [...main.querySelectorAll('a,button,p,li,h2,dd,dt,span,div')].filter(e => e.getBoundingClientRect().height > 0 && e.children.length === 0 && e.textContent.trim()).map(e => e.getBoundingClientRect().bottom).reduce((a, b) => Math.max(a, b), 0);
+        return { tabs, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, navTop: nav.top, lastBottom: last };
+      });
+      const bad = [];
+      const more = r.tabs.find(t => t.id === "nav-more");
+      if (more.lines !== 2) bad.push("more lines " + more.lines);
+      for (const t of r.tabs) if (t.over) bad.push(t.id + " over");
+      if (r.sw > r.cw) bad.push(`hscroll ${r.sw}>${r.cw}`);
+      if (r.lastBottom > r.navTop + 0.5) bad.push(`covered ${r.lastBottom.toFixed(0)}>${r.navTop.toFixed(0)}`);
+      out[`zoom${w} ${u}`] = { lines: r.tabs.map(t => t.lines).join(""), bad, gap: (r.navTop - r.lastBottom).toFixed(0) };
+      if (u === "/ops" ) await p.screenshot({ path: `${SHOT}/eval-zoom200-${w}-home.png` });
+    }
+    await ctx.close();
+  }
+}
+if (which === "z320") {
+  const ctx = await mk(320, 640); const p = await ctx.newPage();
+  for (const u of pages) {
+    await p.goto(u, { waitUntil: "domcontentloaded" }); await settle(p);
+    const r = await p.evaluate(() => { window.scrollTo(0, document.documentElement.scrollHeight); const nav = document.querySelector('[data-testid="ops-bottom-nav"]').getBoundingClientRect(); const main = document.querySelector('main'); const last = [...main.querySelectorAll('*')].filter(e => e.getBoundingClientRect().height > 0 && e.children.length === 0 && e.textContent.trim()).map(e => e.getBoundingClientRect().bottom).reduce((a, b) => Math.max(a, b), 0); return { gap: Math.round(nav.top - last), navH: Math.round(nav.height), sw: document.documentElement.scrollWidth }; });
+    out["320 " + u] = r;
+  }
+}
+console.log(JSON.stringify(out, null, 1));
+await browser.close();

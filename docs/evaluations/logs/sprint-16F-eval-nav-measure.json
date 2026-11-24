@@ -1,0 +1,1022 @@
+{
+ "375 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "375 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "390 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "430 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "360 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "320 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "320 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/70.4"
+ },
+ "1023 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1023 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [],
+  "bad": [],
+  "h": "64/64/64/64"
+ },
+ "1024 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-today:ホーム"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-plans:計画"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-journal:日誌"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-inspections:点検"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-inspections:点検"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-flights:飛行記録"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-incidents:事故・ヒヤリハット"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-aircraft:機体"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-pilots:操縦者"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-permits:許可・承認"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-places:地点"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1024 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-plans:計画"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops": {
+  "cur": [
+   "nav-today:ホーム:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-today:ホーム"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/plans": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-plans:計画"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/journal": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-journal:日誌"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/more": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/inspections": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-inspections:点検"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/inspections/new": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-inspections:点検"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/flights": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-flights:飛行記録"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/incidents": {
+  "cur": [
+   "nav-journal:日誌:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-incidents:事故・ヒヤリハット"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/aircraft": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-aircraft:機体"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/pilots": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-pilots:操縦者"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/permits": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-permits:許可・承認"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/places": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-places:地点"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/members": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/about": {
+  "cur": [
+   "nav-more:機体と書類:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-more:機体と書類"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ },
+ "1280 /ops/plans/new": {
+  "cur": [
+   "nav-plans:計画:rgb(31, 95, 224)"
+  ],
+  "side": [
+   "nav-plans:計画"
+  ],
+  "bad": [],
+  "h": "0/0/0/0"
+ }
+}

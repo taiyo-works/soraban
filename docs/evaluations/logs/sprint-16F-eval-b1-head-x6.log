@@ -1,0 +1,50 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --repeat-each=6 -g '現場モードでは、結論への移動が' e2e/sprint12h-pr2.spec.ts
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.5s)
+  ✓  2 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.5s)
+  ✓  3 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.6s)
+  ✘  4 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.2s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない）,line=537,col=56::  1) e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） %0A    Error: 1 フレームで確定%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 2%0A    Received:    895%0A%0A      535 |     const settled = ys[ys.length - 1];%0A      536 |     // 動き始めた次のフレームで、最後の位置（±2px）に着いている%0A    > 537 |     expect(Math.abs(ys[first] - settled), "1 フレームで確定").toBeLessThanOrEqual(2);%0A          |                                                        ^%0A      538 |     await ctx.close();%0A      539 |   });%0A      540 |%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:537:56
+  ✓  5 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.5s)
+  ✓  6 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.3s)
+
+
+  1) e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） 
+
+    Error: 1 フレームで確定
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 2
+    Received:    895
+
+      535 |     const settled = ys[ys.length - 1];
+      536 |     // 動き始めた次のフレームで、最後の位置（±2px）に着いている
+    > 537 |     expect(Math.abs(ys[first] - settled), "1 フレームで確定").toBeLessThanOrEqual(2);
+          |                                                        ^
+      538 |     await ctx.close();
+      539 |   });
+      540 |
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:537:56
+
+    Error Context: test-results/sprint12h-pr2-B1-判定したあと、結論-59e79-論への移動が-1-フレームで確定する（滑らかにしない）-repeat3/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-B1-判定したあと、結論-59e79-論への移動が-1-フレームで確定する（滑らかにしない）-repeat3/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-B1-判定したあと、結論-59e79-論への移動が-1-フレームで確定する（滑らかにしない）-repeat3/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） 
+  5 passed (21.5s)
+::notice title=🎭 Playwright Run Summary::  1 failed%0A    e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） %0A  5 passed (21.5s)
+ ELIFECYCLE  Command failed with exit code 1.
