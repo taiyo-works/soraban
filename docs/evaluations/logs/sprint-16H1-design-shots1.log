@@ -1,0 +1,35 @@
+
+Running 4 tests using 1 worker
+
+MEASURE 375 step1 {"sc":false,"small":[],"docH":1903}
+MEASURE 375 step2 {"sc":false,"small":[],"docH":1351}
+MEASURE 375 step3 {"sc":false,"small":[],"docH":2261}
+MEASURE 375 step4 {"sc":false,"small":[],"docH":3207}
+MEASURE 375 step5 {"sc":false,"small":[],"docH":2450}
+MEASURE 375 error1 {"sc":false,"small":[],"docH":1982}
+MEASURE 375 422 {"sc":false,"small":[],"docH":2907}
+  ✓  1 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 375 (3.8s)
+MEASURE 390 step1 {"sc":false,"small":[],"docH":1810}
+MEASURE 390 step2 {"sc":false,"small":[],"docH":1309}
+MEASURE 390 step3 {"sc":false,"small":[],"docH":2219}
+MEASURE 390 step4 {"sc":false,"small":[],"docH":3144}
+MEASURE 390 step5 {"sc":false,"small":[],"docH":2408}
+MEASURE 390 error1 {"sc":false,"small":[],"docH":1889}
+MEASURE 390 422 {"sc":false,"small":[],"docH":2865}
+  ✓  2 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 390 (3.5s)
+MEASURE 1280 step1 {"sc":false,"small":[],"docH":1534}
+MEASURE 1280 step2 {"sc":false,"small":[],"docH":884}
+MEASURE 1280 step3 {"sc":false,"small":[],"docH":1696}
+MEASURE 1280 step4 {"sc":false,"small":[],"docH":2216}
+MEASURE 1280 step5 {"sc":false,"small":[],"docH":1821}
+MEASURE 1280 error1 {"sc":false,"small":[],"docH":1591}
+MEASURE 1280 422 {"sc":false,"small":[],"docH":2092}
+  ✓  3 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 1280 (4.2s)
+MEASURE 320x200 step1 {"scrollW":336,"clientW":320,"bad":["DIV.flex min-w-0 flex-col gap-1.5 :336","SPAN.flex flex-wrap items-center ga:336","INPUT.sb-input min-h-12 sb-num tnum:336","SPAN.opx-hint:336","DIV.flex min-w-0 flex-col gap-1.5 :336"]}
+MEASURE 320x200 step2 {"scrollW":320,"clientW":320,"bad":[]}
+MEASURE 320x200 step3 {"scrollW":320,"clientW":320,"bad":[]}
+MEASURE 320x200 step4 {"scrollW":327,"clientW":320,"bad":[]}
+MEASURE 320x200 step5 {"scrollW":320,"clientW":320,"bad":[]}
+  ✓  4 e2e/ops-db/zz-design-h1-shots.spec.ts:83:5 › 320 幅・文字 200% (2.4s)
+
+  4 passed (18.2s)

@@ -423,7 +423,7 @@ export function PlanWizard({
             <Field label="場所の名称" required error={err("placeName")} hint="100 文字以内">
               <input className={`${inputClass} min-h-12`} value={v.placeName} onChange={(e) => set("placeName", e.target.value)} data-testid="plan-place-name" />
             </Field>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(9rem,100%),1fr))] gap-3">
               <Field label="緯度" required error={err("latitude")} hint="世界測地系（WGS84）、小数 6 桁まで">
                 <input
                   inputMode="decimal"
@@ -737,18 +737,18 @@ function Review({
           <p className="opx-wiz-errlead">
             <span aria-hidden>▲ </span>入力に誤りがあり、保存できませんでした。該当の段へ戻って直してください。
           </p>
-          <ul className="flex flex-col gap-2">
+          <ul className="opx-wiz-errlist">
             {Object.entries(serverErrors)
               .filter(([k]) => stepOfKey(k) !== null)
               .map(([k, m]) => {
                 const n = stepOfKey(k)!;
                 return (
-                  <li key={k} className="flex flex-wrap items-center justify-between gap-2" data-testid="plan-review-error">
+                  <li key={k} className="opx-wiz-erritem" data-testid="plan-review-error">
                     <span className="min-w-0">
                       <span className="font-bold">{WIZARD_STEPS[n - 1]!.label}：</span>
                       {m}
                     </span>
-                    <button type="button" className={buttonTextClass} onClick={() => onFix(n)} data-testid={`plan-review-error-fix-${n}`}>
+                    <button type="button" className={`${buttonTextClass} opx-wiz-link`} onClick={() => onFix(n)} data-testid={`plan-review-error-fix-${n}`}>
                       {WIZARD_STEPS[n - 1]!.label}の段へ戻る
                     </button>
                   </li>
@@ -764,7 +764,7 @@ function Review({
         <section key={c.n} className="flex flex-col gap-3" aria-labelledby={`plan-review-h-${c.n}`} data-testid={`plan-review-${c.n}`}>
           <div className="opx-wiz-cardhead">
             <h3 id={`plan-review-h-${c.n}`}>{c.title}</h3>
-            <button type="button" className={buttonTextClass} onClick={() => onEdit(c.n)} aria-label={`${c.title}を修正`} data-testid={`plan-review-edit-${c.n}`}>
+            <button type="button" className={`${buttonTextClass} opx-wiz-link`} onClick={() => onEdit(c.n)} aria-label={`${c.title}を修正`} data-testid={`plan-review-edit-${c.n}`}>
               修正
             </button>
           </div>

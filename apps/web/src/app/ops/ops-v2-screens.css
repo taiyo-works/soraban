@@ -624,7 +624,7 @@ html[data-mode="field"] .home-quick-btn {
 .opx-wiz-row dd {
   margin: 0;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--sb-ink);
   overflow-wrap: anywhere;
 }
@@ -632,4 +632,57 @@ html[data-mode="field"] .home-quick-btn {
   margin: 0;
   font-weight: 700;
   color: var(--sb-st-danger-text);
+}
+
+/* ===== 計画作成の 6 段：最初の画面で「今どの段か」と次の操作が見えるようにする（16-H1 designer）=====
+ * ・進捗の帯は画面の一番上（順序を先頭に）。固定なので、スクロールしても「n/6」が見える。
+ * ・段 ②〜④ では、地点を調べる案内と、段 ① ⑤ に出ている免責の断り書きを畳み、入力欄を最初の画面に近づける（断り書きは段 ① と段 ⑤ に残る）。
+ * ・文字の拡大・320px でも横にはみ出さないよう、行の中の並びは折り返す。 */
+main:has(> .opx-wiz-progress) > .opx-wiz-progress {
+  order: -1;
+}
+main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form[data-step="4"]) > [data-testid="judge-pills"],
+main:has(> .opx-wiz-progress):has(form[data-step="5"]) > [data-testid="judge-pills"],
+main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form[data-step="4"]) > div:first-child .opx-note {
+  display: none;
+}
+@media (max-width: 1023px) {
+  main:has(> .opx-wiz-progress) > div:first-child .opx-note {
+    padding: 8px 12px;
+  }
+  main:has(> .opx-wiz-progress) {
+    gap: 12px;
+  }
+}
+.opx-wiz-heading {
+  overflow-wrap: anywhere;
+}
+
+/* 保存できなかった項目の一覧：1 件ずつ左に太い線（色に頼らない）、直す導線は下線つきの文字ボタン（高さ 48 以上は .opx-btn のまま） */
+.opx-wiz-errlist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-wiz-erritem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding-left: 12px;
+  border-left: 4px solid var(--sb-ink);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.opx-wiz-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.opx-wiz-erritem .opx-wiz-link {
+  justify-content: flex-start;
+  padding-inline: 0;
 }
