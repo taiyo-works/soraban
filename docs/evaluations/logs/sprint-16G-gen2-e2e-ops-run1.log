@@ -1,0 +1,55 @@
+build: gen2-build.log (HEAD f8cd081), db=soraban_g2_1795516148
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --grep 'Sprint 16-G'
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-g-db.spec.ts:114:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (1.3s)
+  ✓   2 e2e/ops-db/sprint16-g-db.spec.ts:158:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。次にやることの 1 件（押せる先頭）で、行き先は一覧の同じ行と同じ (931ms)
+  ✓   3 e2e/ops-db/sprint16-g-db.spec.ts:185:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (837ms)
+  ✓   4 e2e/ops-db/sprint16-g-db.spec.ts:185:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (840ms)
+  ✓   5 e2e/ops-db/sprint16-g-db.spec.ts:223:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない (764ms)
+  ✓   6 e2e/ops-db/sprint16-g-db.spec.ts:241:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない (607ms)
+  ✓   7 e2e/ops-db/sprint16-g-db.spec.ts:250:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中 (1.4s)
+  ✘   8 e2e/ops-db/sprint16-g-db.spec.ts:290:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） (1.4s)
+  -   9 e2e/ops-db/sprint16-g-db.spec.ts:339:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない
+  -  10 e2e/ops-db/sprint16-g-db.spec.ts:366:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」
+
+
+  1) e2e/ops-db/sprint16-g-db.spec.ts:290:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） 
+
+    Error: {"error":"invalid_input","fields":{"memo":"番号がないときは、控えのメモ（画面の表示・時刻など）を入力してください"},"codes":{"memo":"memo_required"}}
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 300
+    Received:   400
+
+      316 |           data: { kind: "new", expectedPlanVersion: active.version, inputs: { flightSpeed: 40, assistantsNumber: 1 }, manual: { reportedAt: `${DAY}T11:30`, confirmedDipsDone: true, confirmedMatchesLatest: true, ...v.manual } },
+      317 |         });
+    > 318 |         expect(rep.status(), await rep.text()).toBeLessThan(300);
+          |                                                ^
+      319 |         await page.goto("/ops");
+      320 |         await expect(page.getByTestId("home-prep")).toBeVisible();
+      321 |         await expect(page.getByTestId("home-prep-report-text")).toHaveText(v.text);
+        at /home/user/soraban/e2e/ops-db/sprint16-g-db.spec.ts:318:48
+
+    Error Context: test-results/ops/sprint16-g-db-Sprint-16-G--bafb6-なかった記録は「記録あり（受付番号なし）」（注意・△）/error-context.md
+
+    Error Context: test-results/ops/sprint16-g-db-Sprint-16-G--bafb6-なかった記録は「記録あり（受付番号なし）」（注意・△）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-g-db-Sprint-16-G--bafb6-なかった記録は「記録あり（受付番号なし）」（注意・△）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-g-db-Sprint-16-G--bafb6-なかった記録は「記録あり（受付番号なし）」（注意・△）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-g-db.spec.ts:290:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） 
+  2 did not run
+  7 passed (13.6s)
+ ELIFECYCLE  Command failed with exit code 1.

@@ -296,7 +296,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const texts = await times.allInnerTexts();
     expect(texts.length, "期限の行（上段＋畳んだ中）").toBeGreaterThanOrEqual(1);
     for (const t of texts) expect(t.trim()).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
-    await expect(page.getByTestId("home-deadlines-rest")).not.toContainText(/\d{4}-\d{2}-\d{2}/);
+    if ((await page.getByTestId("home-deadlines-rest").count()) > 0) await expect(page.getByTestId("home-deadlines-rest")).not.toContainText(/\d{4}-\d{2}-\d{2}/);
     if (r.status() === 201) expect(texts.map((t) => t.trim())).toContain("2026/12/20（日）");
     await bm.dispose();
   });

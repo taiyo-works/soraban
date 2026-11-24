@@ -1,0 +1,16 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts zz-measure-tmp
+
+
+Running 1 test using 1 worker
+
+MEASURE 375x812 通常（同じ計画） {"quickBottom":736,"navTop":739,"margin":4}
+MEASURE rects home-prep:y104h197 home-prep-when:y144h21 home-prep-judgement:y231h58 home-next:y309h95 home-primary:y413h56 home-deadlines:y481h182 home-quick:y671h65
+MEASURE 375x812 計画名の 1 行を足した {"quickBottom":765,"navTop":739,"margin":-25}
+MEASURE 390x844 通常（同じ計画） {"quickBottom":715,"navTop":771,"margin":57}
+MEASURE rects home-prep:y104h197 home-prep-when:y144h21 home-prep-judgement:y231h58 home-next:y309h95 home-primary:y413h56 home-deadlines:y481h161 home-quick:y650h65
+MEASURE 390x844 計画名の 1 行を足した {"quickBottom":744,"navTop":771,"margin":28}
+  ✓  1 e2e/ops-db/zz-measure-tmp.spec.ts:3:5 › measure (2.9s)
+
+  1 passed (7.3s)
