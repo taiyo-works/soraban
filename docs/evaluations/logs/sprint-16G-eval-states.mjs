@@ -80,7 +80,7 @@ try {
   await voidAll(bm);
 
   // 対象外（100g 未満）
-  id = await mkPlan(bm, { title: `模型 ${stamp}`, aircraftId: await mkAircraft(bm, "x", 0.09), pilotId: pid, place: `地点模型${stamp}` });
+  id = await mkPlan(bm, { title: `模型 ${stamp}`, aircraftId: await mkAircraft(bm, "x", 0.9), pilotId: pid, place: `地点模型${stamp}` });
   await confirmPlan(bm, id).catch(() => undefined);
   await snap("report-model");
   await voidAll(bm);

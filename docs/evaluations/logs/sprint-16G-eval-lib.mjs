@@ -37,7 +37,7 @@ export const voidAll = async (ctx) => {
 };
 
 export const mkAircraft = async (ctx, tag, kg = 0.9) => {
-  const mark = `E16${tag}${stamp}`.slice(0, 20);
+  const mark = `JU${tag}${stamp}`.slice(0, 20);
   const r = await ctx.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: kg } });
   if (r.status() !== 201) throw new Error("aircraft " + (await r.text()));
   return (await r.json()).id;

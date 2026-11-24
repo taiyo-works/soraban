@@ -5,12 +5,12 @@ const bm = await apiAs("b-manager");
 const pid = await pilotId();
 const browser = await launch();
 const out = [];
-const LONG_PLACE = "鳥取県米子市皆生温泉三丁目の海岸ひろば北側駐車場"; // 30 字前後
-const LONG_PILOT = "とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字";
+const LONG_PLACE = "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場"; // 30 字
+const LONG_PILOT = process.env.PILOT_NAME ?? "とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字";
 try {
   await voidAll(bm);
   const ac = await mkAircraft(bm, "l");
-  for (const [n, exp] of [["A", "2027-01-20"], ["B", "2027-02-05"]]) {
+  for (const [n, exp] of JSON.parse(process.env.PILOT_DATES ?? '[["A","2027-01-20"],["B","2027-02-05"]]')) {
     const r = await bm.post("/api/ops/pilots", { data: { fullName: `${LONG_PILOT}${n}${stamp}`.slice(0, 40), hasLicense: true, licenseClass: "second", licenseNumber: `EV16-${stamp}-${n}`.slice(0, 30), licenseExpiresOn: exp } });
     out.push({ pilotCreate: r.status() });
   }
