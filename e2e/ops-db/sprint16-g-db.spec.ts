@@ -204,6 +204,10 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
       await inFirstScreen("home-next", "次の予定");
       await inFirstScreen("home-primary", "主ボタン");
       await inFirstScreen("home-quick", "クイック操作");
+      {
+        const qb = (await page.getByTestId("home-quick").boundingBox())!;
+        console.log(`[16-G gen3] ${w}x${h} normal: quick bottom ${(qb.y + qb.height).toFixed(1)}, nav top ${navTop.toFixed(1)}, margin ${(navTop - qb.y - qb.height).toFixed(1)}`);
+      }
       const boxes = [] as { y: number; h: number; w: number }[];
       for (const id of ["ops-enter-inspection", "ops-enter-plan", "ops-enter-flight"]) {
         const b = (await page.getByTestId(id).boundingBox())!;
