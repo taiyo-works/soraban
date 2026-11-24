@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Icon } from "@/components/ui/icons";
 import { formatDay, formatDaysIn } from "@/lib/ops-day";
 import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
@@ -278,20 +279,20 @@ export function HomeQuick({ canEnter, canPlan }: { readonly canEnter: boolean; r
   if (!canEnter) return null;
   return (
     <nav aria-label="クイック操作" className="home-quick" data-count={canPlan ? 3 : 2} data-testid="home-quick">
-      <a href="/ops/inspections/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-inspection">
+      <Link prefetch={false} href="/ops/inspections/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-inspection">
         <Icon name="inspection" size={24} />
         <span className="home-quick-label">飛行前点検</span>
-      </a>
+      </Link>
       {canPlan ? (
-        <a href="/ops/plans/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-plan">
+        <Link prefetch={false} href="/ops/plans/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-plan">
           <Icon name="plus" size={24} />
           <span className="home-quick-label">新しい計画</span>
-        </a>
+        </Link>
       ) : null}
-      <a href="/ops/flights/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-flight">
+      <Link prefetch={false} href="/ops/flights/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-flight">
         <Icon name="flight" size={24} />
         <span className="home-quick-label">飛行記録</span>
-      </a>
+      </Link>
     </nav>
   );
 }
