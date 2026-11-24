@@ -29,6 +29,7 @@ import {
   VERDICT_TONE,
 } from "@/lib/verdict-display";
 import { BOUNDARY_SHORT } from "@/lib/boundary";
+import type { JudgementTotal } from "@/lib/judgement-total";
 import { TierGauge } from "./verdict-mark";
 import { PillButton, VERDICT_KEY, VerdictBig, VerdictSign } from "./ui/sb-parts";
 
@@ -66,6 +67,11 @@ type Props = {
    * checkedDate：判定に使ったデータの確認日のうち最も新しい日（YYYY-MM-DD）。sourced：出典のリンクを持つ規制の数。
    */
   readonly evidence?: { readonly checkedDate: string | undefined; readonly sourced: number };
+  /**
+   * 判定の総合の語（計画の段 ⑥ の第 1 層。Sprint 16-H2）。渡すと、結論の語の位置に総合の語（`judgement-total`）を出し、
+   * 判定エンジンの段（`verdict-level`）はその下の「判定の段」に小さく出す。判定の結果は変えない。
+   */
+  readonly total?: JudgementTotal;
 };
 
 /** 手続きの責任の線（北極星：本人名義・本人提出）。境界の文（lib/boundary.ts）をそのまま使う。 */
@@ -240,7 +246,7 @@ function ModelAircraftReferenceList() {
   );
 }
 
-export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes, part = "all", evidence }: Props) {
+export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes, part = "all", evidence, total }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
   const showConclusion = part !== "details";
@@ -264,19 +270,33 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
           {ready ? (
             <>
               <div className="flex items-center gap-3.5">
-                <VerdictBig level={verdict.level} />
+                <VerdictBig level={total ? total.sign : verdict.level} />
                 <div className="min-w-0">
                   <p id="verdict-heading" tabIndex={-1} data-note="" className="sb-v-eyebrow">
                     {VERDICT_SECTION_TITLE.conclusion}
                   </p>
-                  <p data-testid="verdict-level" className="sb-v-word" data-verdict-key={VERDICT_KEY[verdict.level]}>
-                    <LevelWords label={VERDICT_LABEL[verdict.level]} />
-                  </p>
+                  {total ? (
+                    <>
+                      <p data-testid="judgement-total" data-total-key={total.key} data-stale={total.stale ? "true" : "false"} className="sb-v-total">
+                        {total.text}
+                      </p>
+                      <p data-note="" className="sb-v-sub">
+                        判定の段：<span data-testid="verdict-level" data-verdict-key={VERDICT_KEY[verdict.level]}><LevelWords label={VERDICT_LABEL[verdict.level]} /></span>
+                      </p>
+                    </>
+                  ) : (
+                    <p data-testid="verdict-level" className="sb-v-word" data-verdict-key={VERDICT_KEY[verdict.level]}>
+                      <LevelWords label={VERDICT_LABEL[verdict.level]} />
+                    </p>
+                  )}
                   {meta}
                 </div>
               </div>
-              {/* 判定の印の 4 段の目盛り（装飾。読み上げは段階の言葉が担う） */}
-              <VerdictScale level={verdict.level} />
+              {total?.note ? (
+                <p data-testid="judgement-total-note" data-note="" className="text-sb-ink-2">{total.note}</p>
+              ) : null}
+              {/* 判定の印の 4 段の目盛り（装飾。読み上げは段階の言葉が担う。総合の語を出す画面では省く） */}
+              {total ? null : <VerdictScale level={verdict.level} />}
               {verdict.unknownCount > 0 || verdict.level === "procedure_done" ? (
                 <div className="flex flex-col gap-1.5 border-t border-sb-rule pt-2.5">
                   {verdict.unknownCount > 0 ? (
@@ -307,7 +327,13 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   <p id="verdict-heading" tabIndex={-1} data-note="" className="sb-v-eyebrow">
                     {VERDICT_SECTION_TITLE.conclusion}
                   </p>
-                  <p className="sb-v-word">{VERDICT_FAILED_LABEL}</p>
+                  {total ? (
+                    <p data-testid="judgement-total" data-total-key={total.key} data-stale={total.stale ? "true" : "false"} className="sb-v-total">
+                      {total.text}
+                    </p>
+                  ) : (
+                    <p className="sb-v-word">{VERDICT_FAILED_LABEL}</p>
+                  )}
                   {meta}
                 </div>
               </div>

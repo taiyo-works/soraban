@@ -22,7 +22,7 @@ export const gotoPlanOpen = async (page: Page, url: string): Promise<void> => {
  * 許可番号の形式・中止のフォーム）。既存の検査は折りたたまれた中の部品を読む・押すので、開く操作をここで行う（期待値は変えない）。
  * gotoPlan は開かない（既定の見え方を試験する）。畳んだ中身を読む検査は gotoPlanOpen を使う。
  */
-export const PLAN_FOLDS = ["next-actions-more", "plan-procedures-details", "plan-judgement-details", "plan-permit-format-details", "plan-void-details", "plan-stale-sources-details"] as const;
+export const PLAN_FOLDS = ["next-actions-more", "plan-procedures-details", "plan-judgement-details", "plan-permit-format-details", "plan-void-details", "plan-stale-sources-details", "plan-judgement-full", "plan-permit-candidates-more"] as const;
 export const openFolds = async (page: Page, testIds: readonly string[]): Promise<void> => {
   await page.evaluate((ids) => {
     for (const id of ids) for (const el of document.querySelectorAll(`details[data-testid="${id}"]`)) (el as HTMLDetailsElement).open = true;

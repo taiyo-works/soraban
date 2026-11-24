@@ -1840,3 +1840,23 @@ a.sb-row:focus-visible .sb-go-dot {
     opacity: 1;
   }
 }
+
+/* 判定の総合の語（計画の段 ⑥。16-H2）：結論の語より一段小さく、長い文でも折り返す */
+.sb-v-total {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.sb-v-sub {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--sb-ink-2);
+}
+.sb-v-sub > span {
+  font-weight: 700;
+  color: var(--sb-ink);
+}

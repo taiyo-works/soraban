@@ -1,13 +1,23 @@
 import Link from "next/link";
-import { PLAN_JUDGEMENT_DISCLAIMER, type FlightVerdict } from "@soraban/regulations";
+import {
+  getDataset,
+  MODEL_AIRCRAFT_REFERENCE_LINE,
+  MODEL_AIRCRAFT_REFERENCES,
+  PLAN_JUDGEMENT_DISCLAIMER,
+  PERMIT_SCOPE_NOT_VERIFIED_NOTE,
+  type FlightVerdict,
+} from "@soraban/regulations";
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { PermitDeclaration, PlanPermitList } from "@/components/ops/permit-ui";
 import { PlanFrame } from "@/components/ops/plan-frame";
+import { JudgementTiles, type TileDataset, type TileItem } from "@/components/ops/judgement-tiles";
 import { RejudgeButton } from "@/components/ops/plans-client";
-import { buttonOutlineBrandClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
+import { buttonOutlineBrandClass, buttonPrimaryClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { VerdictSummary } from "@/components/verdict-summary";
 import { isApplicationSupportEnabled } from "@/lib/boundary";
+import { judgementTotal, TILE_RANK } from "@/lib/judgement-total";
 import { formatJst } from "@/lib/ops-time";
+import { baseStatusDisplay, legalTierLabel, VERDICT_LABEL } from "@/lib/verdict-display";
 import { PERMIT_FORMAT_UNVERIFIED_NOTE } from "@/server/ops/permit-logic";
 import { verdictPermitNotes } from "@/server/ops/permit-page";
 import { getPlanPermits } from "@/server/ops/permits";
@@ -16,6 +26,25 @@ import { getSnapshot } from "@/server/ops/plans";
 import { loadPlan } from "../_load";
 
 const mono = "sb-num text-sm tnum break-all";
+
+/** 許可の候補は、最初の 3 件だけを出し、残りは畳む（組織の許可の件数で画面の長さが変わらないように。16-H2 H2-5）。 */
+const CANDIDATES_SHOWN = 3;
+
+/** 項目の理由から、模型航空機の参照先の行を外す（参照先は題名のリンクとして別に出す）。 */
+const splitReason = (reason: string): { readonly text: string; readonly refs: readonly { title: string; url: string }[] } =>
+  reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE)
+    ? { text: reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim(), refs: MODEL_AIRCRAFT_REFERENCES.map((r) => ({ title: r.title, url: r.url })) }
+    : { text: reason, refs: [] };
+
+/** 台帳（sources.json）の値だけを引く。台帳に無いデータセットは、保存した名称・基準年・確認日だけにする。 */
+const datasetInfo = (d: { id: string; name: string; baseYear: number | null; verifiedAt: string }, stale: boolean): TileDataset => {
+  try {
+    const r = getDataset(d.id);
+    return { id: d.id, name: r.name, provider: r.provider, version: r.version, baseYear: r.baseYear, verifiedAt: d.verifiedAt, url: r.url, stale };
+  } catch {
+    return { id: d.id, name: d.name, baseYear: d.baseYear, verifiedAt: d.verifiedAt, stale };
+  }
+};
 
 // 判定の画面（Sprint 17-1）。判定は補助。中身は計画の詳細にあった「判定の要約」「許可・承認の照合」をそのまま移した（再設計しない）。
 // 判定を見なくても、通報の準備と記録は止まらない（通報の主画面と /report で完結する）。
@@ -27,6 +56,31 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
   const verdict = (snapshot.result as { verdict?: FlightVerdict }).verdict;
   const updatable = !plan.voided && canUpdatePlan(me, plan.isSelf);
   const j = plan.judgement;
+  const total = judgementTotal(verdict, plan.freshness.stale);
+  const fetchedAt = formatJst(new Date(j.checkedAt));
+  const staleIds = new Set(snapshot.staleSources.map((x) => x.id));
+  const datasets = snapshot.datasets.map((d) => datasetInfo(d, staleIds.has(d.id)));
+  const tiles: TileItem[] = (verdict?.items ?? [])
+    .map((it, idx) => ({ it, idx }))
+    .sort((a, b) => TILE_RANK[a.it.verdict] - TILE_RANK[b.it.verdict] || a.idx - b.idx)
+    .map(({ it }) => {
+      const r = splitReason(it.reason);
+      const done = verdict?.done.find((d) => d.itemId === it.id);
+      const note = permitNotes.item[it.id];
+      return {
+        id: it.id,
+        title: it.title,
+        verdict: it.verdict,
+        verdictLabel: VERDICT_LABEL[it.verdict],
+        baseLabel: baseStatusDisplay(it),
+        tierLabel: legalTierLabel(it.legalTier),
+        reason: r.text,
+        refs: r.refs,
+        appliedPermits: it.appliedPermits.map((p) => p.label),
+        ...(note ? { permitNote: note } : {}),
+        conditions: (done?.conditions ?? []).map((c) => (c === PERMIT_SCOPE_NOT_VERIFIED_NOTE ? (permitNotes.applied[it.id] ?? c) : c)),
+      };
+    });
 
   return (
     <PlanFrame plan={plan} eyebrow="判定（補助）" back={{ href: `/ops/plans/${plan.id}`, label: "通報の状況" }}>
@@ -40,11 +94,59 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           id="sec-verdict"
           title="判定の要約"
           aria-label="判定の要約"
-          description="結論と、判定の根拠です。計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。"
+          description="計画を保存したときに、サーバーが実行した判定（現在のスナップショット）です。総合・項目・詳細の順に見られます。"
         >
           {/* 判定エンジンの文言を出す領域の印（Sprint 18-3。限定語の検査から外す。lib/wording-policy.ts） */}
-          <div data-wording-scope="judgement" data-testid="judgement-scope-plan">
-            <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={permitNotes} />
+          <div data-wording-scope="judgement" data-testid="judgement-scope-plan" className="flex flex-col gap-6">
+            {/* 第 1 層：判定の総合（形と言葉）と、判定の取得時刻 */}
+            <VerdictSummary
+              part="conclusion"
+              verdict={verdict}
+              pending={false}
+              failed={verdict === undefined}
+              failedNote="この計画には、判定の記録がありません。判定をやり直すと、記録ができます。"
+              total={total}
+              permitNotes={permitNotes}
+              meta={
+                <p data-note="" className="sb-v-sub" data-testid="judgement-fetched-at">
+                  判定の取得時刻（日本時間）：<time dateTime={j.checkedAt} className="sb-num tnum">{fetchedAt}</time>
+                </p>
+              }
+            />
+            {/* 第 2 層：項目のタイル（押すと第 3 層のボトムシートで詳細） */}
+            {tiles.length > 0 ? (
+              <div className="flex flex-col gap-3" data-testid="judgement-tiles-section">
+                <h3 className="opx-tile-h3">項目ごとの判定（{tiles.length} 件）</h3>
+                <p className="opx-tile-aside">調べた項目だけです。項目を押すと、理由と根拠を開きます。気象・標高・ハザードは、まだ調べていません。</p>
+                <JudgementTiles items={tiles} datasets={datasets} fetchedAt={fetchedAt} fetchedAtIso={j.checkedAt} />
+              </div>
+            ) : null}
+            {/* 手続き・手続き済み・飛行の前後の確認・規制ごとの表（従来の全体）。長さのため畳む */}
+            {verdict ? (
+              <details data-testid="plan-judgement-full">
+                <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">手続き・飛行の前後の確認・規制ごとの表（全体）</summary>
+                <div className="pt-3">
+                  <VerdictSummary part="details" verdict={verdict} pending={false} permitNotes={permitNotes} />
+                </div>
+              </details>
+            ) : null}
+          </div>
+          {plan.freshness.stale ? (
+            <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
+              <p className="font-medium text-sb-ink">判定が古くなっています</p>
+              <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
+                {plan.freshness.reasons.map((r) => (
+                  <li key={r.code}>{r.label}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {/* 主ボタンは 1 つ（H2-3）。アプリからは送らない。DIPS へ出す内容の確認（通報の主画面）へ進む */}
+          <div className="flex flex-col gap-2" data-testid="judgement-next">
+            <Link prefetch={false} href={`/ops/plans/${plan.id}`} data-variant="primary" className={`${buttonPrimaryClass} self-start`} data-testid="judgement-primary">
+              DIPS に出す内容を確認
+            </Link>
+            <p data-note="" className="text-sb-ink-2">判定は補助です。通報は、ご本人が DIPS で行います。</p>
           </div>
           <details data-testid="plan-judgement-details">
             <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">判定の記録（通し番号・日時・証跡 ID・エンジンの版）</summary>
@@ -60,16 +162,6 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             ]}
           />
           </details>
-          {plan.freshness.stale ? (
-            <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
-              <p className="font-medium text-sb-ink">判定が古くなっています</p>
-              <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
-                {plan.freshness.reasons.map((r) => (
-                  <li key={r.code}>{r.label}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
           <div className="flex flex-wrap items-center gap-3">
             <Link prefetch={false} href={`/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`} className={buttonOutlineBrandClass} data-testid="plan-basis-link">
               判定の根拠を見る
@@ -80,7 +172,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           </div>
           {updatable ? (
             <div id="rejudge" className="scroll-mt-4">
-              <RejudgeButton planId={plan.id} version={plan.version} highlight={plan.freshness.stale} />
+              <RejudgeButton planId={plan.id} version={plan.version} />
             </div>
           ) : null}
         </Section>
@@ -116,13 +208,20 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               <p data-note="" className="text-sm font-medium text-sb-ink">範囲に収まる登録済みの許可・承認（候補）</p>
               <p className="text-sb-ink-2">番号を計画の許可番号の欄に入れて保存すると、判定に使われます。提案だけで、いまの判定には使っていません。</p>
               <ul className="flex flex-col border-t border-sb-rule">
-                {planPermits.candidates.map((c) => (
-                  <li key={c.registrationId} className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-1 pl-3" data-testid="plan-permit-candidate">
-                    <span className="break-all sb-num text-sb-ink">{c.permitNumber}</span>
-                    <span className="text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
-                  </li>
+                {planPermits.candidates.slice(0, CANDIDATES_SHOWN).map((c) => (
+                  <PermitCandidate key={c.registrationId} c={c} />
                 ))}
               </ul>
+              {planPermits.candidates.length > CANDIDATES_SHOWN ? (
+                <details data-testid="plan-permit-candidates-more">
+                  <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">ほか {planPermits.candidates.length - CANDIDATES_SHOWN} 件を見る</summary>
+                  <ul className="flex flex-col border-t border-sb-rule">
+                    {planPermits.candidates.slice(CANDIDATES_SHOWN).map((c) => (
+                      <PermitCandidate key={c.registrationId} c={c} />
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
               {updatable ? (
                 <Link prefetch={false} href={`/ops/plans/${plan.id}/edit`} className={`${buttonOutlineBrandClass} self-start`} data-testid="plan-permit-edit-link">
                   計画を訂正して番号を入れる
@@ -145,5 +244,16 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
           </div>
         </Section>
     </PlanFrame>
+  );
+}
+
+type Candidate = Awaited<ReturnType<typeof getPlanPermits>>["candidates"][number];
+
+function PermitCandidate({ c }: { readonly c: Candidate }) {
+  return (
+    <li className="flex flex-col gap-0.5 border-b border-l-2 border-b-sb-rule border-l-sb-ink py-1 pl-3" data-testid="plan-permit-candidate">
+      <span className="break-all sb-num text-sb-ink">{c.permitNumber}</span>
+      <span className="text-sb-ink-2">{c.coverageLabel}／{c.kinds.map((k) => k.label).join("、")}／版 {c.versionNo}／{c.validFrom} 〜 {c.validTo}</span>
+    </li>
   );
 }
