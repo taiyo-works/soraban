@@ -160,8 +160,7 @@ export function PlanWizard({
   readonly permitHelper?: PermitHelper;
 }) {
   const [v, setV] = useState<PlanFormValues>(() => ({ ...initial, pilotId: fixedPilotId ?? initial.pilotId }));
-  const initialJson = useRef<string>("");
-  if (initialJson.current === "") initialJson.current = JSON.stringify(v);
+  const [initialJson] = useState(() => JSON.stringify({ ...initial, pilotId: fixedPilotId ?? initial.pilotId }));
   const [clientRequestId] = useState(() => newRequestId());
   const [step, setStep] = useState(1);
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
@@ -213,7 +212,10 @@ export function PlanWizard({
   // ---- 保存の前の離脱の確認 ----
   const dirtyRef = useRef(false);
   // 保存が済んだら（再描画の前に画面を移すので、savedRef も見る）確認を出さない
-  dirtyRef.current = JSON.stringify(v) !== initialJson.current;
+  const dirty = JSON.stringify(v) !== initialJson;
+  useEffect(() => {
+    dirtyRef.current = dirty;
+  }, [dirty]);
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       if (!dirtyRef.current || savedRef.current) return;

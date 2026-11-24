@@ -47,12 +47,14 @@ cat-card-list
 cat-card-state
 cat-cards
 cat-check-disabled
+cat-check-focus
 cat-check-off
 cat-check-on
 cat-check-set
 cat-checks-section
 cat-choices
 cat-danger
+cat-decide
 cat-disabled
 cat-disabled-reason
 cat-dot-list
@@ -101,6 +103,7 @@ cat-primary-use
 cat-progress
 cat-progress-sample
 cat-radio-disabled
+cat-radio-focus
 cat-radio-no
 cat-radio-off
 cat-radio-on
@@ -118,6 +121,7 @@ cat-states-section
 cat-status
 cat-status-list
 cat-text
+cat-toc
 cat-type
 cat-type-body
 cat-type-card
@@ -291,10 +295,27 @@ geocode-result
 hero-art
 history-item
 history-verdict
+home-all-body
 home-deadlines
+home-deadlines-count
 home-deadlines-empty
 home-deadlines-note
+home-deadlines-rest
+home-head
+home-next
+home-next-link
+home-next-place
+home-next-title
+home-next-when
 home-ops-link
+home-prep
+home-prep-note
+home-prep-rejudge
+home-prep-reload
+home-prep-title
+home-prep-when
+home-primary
+home-quick
 home-today-band
 home-today-empty
 home-today-flight
@@ -727,6 +748,8 @@ plan-report-reasons
 plan-report-status
 plan-report-status-label
 plan-request-confirmation
+plan-review-error
+plan-review-errors
 plan-row
 plan-row-next
 plan-row-next-count
@@ -744,6 +767,7 @@ plan-stale-sources-details
 plan-start
 plan-start-date
 plan-start-time
+plan-step-heading
 plan-steps
 plan-submit
 plan-tabs
@@ -754,6 +778,13 @@ plan-use-candidate
 plan-void-details
 plan-voided-no-record-note
 plan-weight-unknown
+plan-when-section
+plan-wizard-back
+plan-wizard-next
+plan-wizard-progress
+plan-wizard-progress-band
+plan-wizard-step-text
+plans-today
 procedure-card
 procedure-history-row
 procedure-none
@@ -809,6 +840,7 @@ prop: cat-card-list
 prop: cat-card-state
 prop: cat-cards
 prop: cat-check-disabled
+prop: cat-check-focus
 prop: cat-check-off
 prop: cat-check-on
 prop: cat-check-set
@@ -816,6 +848,7 @@ prop: cat-checks-section
 prop: cat-chk-group
 prop: cat-choices
 prop: cat-danger
+prop: cat-decide
 prop: cat-disabled
 prop: cat-disabled-reason
 prop: cat-dot-list
@@ -854,6 +887,8 @@ prop: cat-order-adopted-list
 prop: cat-order-direction
 prop: cat-order-direction-list
 prop: cat-order-list
+prop: cat-order-reasons-adopted
+prop: cat-order-reasons-direction
 prop: cat-prep
 prop: cat-prep-body
 prop: cat-prep-cards
@@ -874,6 +909,7 @@ prop: cat-primary-use
 prop: cat-progress
 prop: cat-progress-sample
 prop: cat-radio-disabled
+prop: cat-radio-focus
 prop: cat-radio-no
 prop: cat-radio-off
 prop: cat-radio-on
@@ -891,11 +927,13 @@ prop: cat-state-info
 prop: cat-state-labels
 prop: cat-state-link
 prop: cat-state-safe
+prop: cat-state-warn
 prop: cat-states-result
 prop: cat-states-section
 prop: cat-status
 prop: cat-status-list
 prop: cat-text
+prop: cat-toc
 prop: cat-type
 prop: cat-type-body
 prop: cat-type-card
@@ -1072,10 +1110,29 @@ prop: geocode-result
 prop: hero-art
 prop: history-item
 prop: history-verdict
+prop: home-all
+prop: home-all-body
 prop: home-deadlines
+prop: home-deadlines-count
 prop: home-deadlines-empty
 prop: home-deadlines-note
+prop: home-deadlines-rest
+prop: home-head
+prop: home-next
+prop: home-next-link
+prop: home-next-place
+prop: home-next-status
+prop: home-next-title
+prop: home-next-when
 prop: home-ops-link
+prop: home-prep
+prop: home-prep-note
+prop: home-prep-rejudge
+prop: home-prep-reload
+prop: home-prep-title
+prop: home-prep-when
+prop: home-primary
+prop: home-quick
 prop: home-today-band
 prop: home-today-empty
 prop: home-today-flight
@@ -1528,6 +1585,18 @@ prop: plan-report-reasons
 prop: plan-report-status
 prop: plan-report-status-label
 prop: plan-request-confirmation
+prop: plan-review-aircraft
+prop: plan-review-coords
+prop: plan-review-duration
+prop: plan-review-error
+prop: plan-review-errors
+prop: plan-review-flags
+prop: plan-review-permit-numbers
+prop: plan-review-pilot
+prop: plan-review-place-name
+prop: plan-review-purpose
+prop: plan-review-start
+prop: plan-review-title
 prop: plan-row
 prop: plan-row-next
 prop: plan-row-next-action
@@ -1546,6 +1615,7 @@ prop: plan-stale-sources-details
 prop: plan-start
 prop: plan-start-date
 prop: plan-start-time
+prop: plan-step-heading
 prop: plan-steps
 prop: plan-submit
 prop: plan-tabs
@@ -1556,6 +1626,13 @@ prop: plan-use-candidate
 prop: plan-void-details
 prop: plan-voided-no-record-note
 prop: plan-weight-unknown
+prop: plan-when-section
+prop: plan-wizard-back
+prop: plan-wizard-next
+prop: plan-wizard-progress
+prop: plan-wizard-progress-band
+prop: plan-wizard-step-text
+prop: plans-today
 prop: procedure-card
 prop: procedure-history-row
 prop: procedure-none
@@ -1994,6 +2071,9 @@ workspace-tabs
 式: `field-item-undo-${item}`
 式: `field-site-${f}-${o.value}`
 式: `field-step-${n}`
+式: `home-prep-${id}-note`
+式: `home-prep-${id}-text`
+式: `home-prep-${id}`
 式: `incident-contact-${c}`
 式: `incident-event-type-${o.key}`
 式: `incident-event-type-desc-${o.key}`
@@ -2018,6 +2098,9 @@ workspace-tabs
 式: `permit-place-${val}`
 式: `plan-flag-${c.value}`
 式: `plan-permit-${c.value}`
+式: `plan-review-${c.n}`
+式: `plan-review-edit-${c.n}`
+式: `plan-review-error-fix-${n}`
 式: `plan-step-${n}`
 式: `plan-tab-${t.key}`
 式: `plan-view-${v.key}`

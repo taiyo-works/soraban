@@ -419,3 +419,4 @@
 | `sprint12a-db` 認可（操縦者） | `plan-pilot` が無効（`toBeDisabled`）を計画作成の 1 画面で | ①〜③ を入れて ④ で同じ検査 | 操縦者の欄は ④ にある | 検査は同じ（自分の計画だけ作れる） |
 | `sprint12b-db` ③（幅 375 の新規作成フォーム） | `plan-aircraft` が見える・親に収まる・横スクロールなし | ④まで進めて同じ検査 | 機体の選択は ④ | 同じ要素・同じ上限 |
 | `sprint12d-db` 12（許可・承認の欄） | `plan-permit-*` の有無・番号入力の警告と登録の案内・横スクロールなし | ④まで進めて同じ検査 | 許可・承認の欄は ④ | 期待値は同じ |
+| `apps/web/src/components/ops/testids-baseline.test.ts` | 件数 2067・ハッシュ `7054fd3f…` | 件数 2150・ハッシュ `a7ce8395…` | 6 段で足した識別子 83 件を基準の一覧に書いた（`--write --reason`。ログ `sprint-17-testids-baseline-log.txt`） | 消えた識別子は 0（`--check`） |
