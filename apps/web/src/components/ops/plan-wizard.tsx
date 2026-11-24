@@ -71,6 +71,7 @@ const STEP_OF_KEY: Readonly<Record<string, number>> = {
   maxAltitudeM: 3,
   judgementPurpose: 3,
   accessControl: 3,
+  thirdPartyOverflight: 3,
   bvlosWithObserver: 3,
   aircraftId: 4,
   pilotId: 4,
@@ -111,6 +112,26 @@ const withStep = (n: number): string => {
   u.searchParams.set("step", String(n));
   return `${u.pathname}${u.search}${u.hash}`;
 };
+/** ①〜④をまとめて検べる（⑤に入るとき）。漏れのある項目と、最初に漏れのある段（無ければ null）。 */
+export const validateAll = (v: PlanFormValues): { readonly errors: Record<string, string>; readonly firstStep: number | null } => {
+  let errors: Record<string, string> = {};
+  let firstStep: number | null = null;
+  for (let s = 1; s <= LAST_INPUT_STEP - 1; s++) {
+    const e = validateStep(s, v);
+    if (Object.keys(e).length > 0) {
+      errors = { ...errors, ...e };
+      firstStep ??= s;
+    }
+  }
+  return { errors, firstStep };
+};
+
+/** 履歴の印（入力の値は載せない。段の履歴の番号だけ）。0 は、この画面に入った最初の履歴。 */
+const histIndex = (): number => {
+  const n = (window.history.state as { sbWiz?: unknown } | null)?.sbWiz;
+  return typeof n === "number" ? n : 0;
+};
+
 const stepFromLocation = (): number => {
   const n = Number(new URL(window.location.href).searchParams.get("step"));
   return Number.isInteger(n) && n >= 1 && n <= LAST_INPUT_STEP ? n : 1;
@@ -169,8 +190,17 @@ export function PlanWizard({
   const [busy, setBusy] = useState(false);
   const [fromReview, setFromReview] = useState(false);
   const savedRef = useRef(false);
+  const leavingRef = useRef(false);
+  const dirtyRef = useRef(false);
+  const sentinelRef = useRef(false);
+  const vRef = useRef(v);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { formRef, requestErrorFocus } = useErrorFocus();
+  const requestErrorFocusRef = useRef(requestErrorFocus);
+  useEffect(() => {
+    vRef.current = v;
+    requestErrorFocusRef.current = requestErrorFocus;
+  });
   const set = <K extends keyof PlanFormValues>(k: K, value: PlanFormValues[K]) => setV((s) => ({ ...s, [k]: value }));
   const err = (k: string): string | undefined => clientErrors[k] ?? serverErrors[k];
 
@@ -184,8 +214,36 @@ export function PlanWizard({
   useEffect(() => {
     // 再読み込みや、別の画面から履歴で戻ってきたときは入力が無いので、①から始める
     if (new URL(window.location.href).searchParams.has("step") && stepFromLocation() !== 1) window.history.replaceState(null, "", withStep(1));
+    // この画面に入った最初の履歴に印（0）を付ける（番兵の履歴と区別するため。値は載せない）
+    window.history.replaceState({ sbWiz: 0 }, "");
     const onPop = () => {
-      setStep(stepFromLocation());
+      // 入力のあと、番兵より前（この画面に入った最初の履歴）へ戻る＝この画面を出る。確認して、取り消したら番兵を積み直して留まる
+      if (sentinelRef.current && histIndex() === 0 && dirtyRef.current && !savedRef.current && !leavingRef.current) {
+        if (window.confirm(LEAVE_MESSAGE)) {
+          leavingRef.current = true;
+          window.history.back();
+        } else {
+          window.history.pushState({ sbWiz: 1 }, "", withStep(1));
+          setStep(1);
+          setFromReview(false);
+        }
+        return;
+      }
+      let n = stepFromLocation();
+      // ⑤へ履歴で移ったとき、①〜④に漏れがあれば、漏れのある最初の段へ戻す
+      if (n === LAST_INPUT_STEP) {
+        const all = validateAll(vRef.current);
+        if (all.firstStep !== null) {
+          n = all.firstStep;
+          window.history.replaceState({ sbWiz: histIndex() }, "", withStep(n));
+          setClientErrors((s) => ({ ...s, ...all.errors }));
+          setFromReview(true);
+          requestErrorFocusRef.current();
+          setStep(n);
+          return;
+        }
+      }
+      setStep(n);
       setFromReview(false);
     };
     window.addEventListener("popstate", onPop);
@@ -193,7 +251,7 @@ export function PlanWizard({
   }, []);
 
   const goTo = useCallback((n: number) => {
-    window.history.pushState(null, "", withStep(n));
+    window.history.pushState({ sbWiz: histIndex() + 1 }, "", withStep(n));
     setStep(n);
   }, []);
 
@@ -210,20 +268,24 @@ export function PlanWizard({
   }, [step, formRef]);
 
   // ---- 保存の前の離脱の確認 ----
-  const dirtyRef = useRef(false);
   // 保存が済んだら（再描画の前に画面を移すので、savedRef も見る）確認を出さない
   const dirty = JSON.stringify(v) !== initialJson;
   useEffect(() => {
     dirtyRef.current = dirty;
+    // 入力が始まったら番兵の履歴を 1 つ積む（段 ① のとき）。段 ① でブラウザの戻るを押すと、この画面を出る前に確認できる
+    if (dirty && !sentinelRef.current && !savedRef.current && stepFromLocation() === 1 && histIndex() === 0) {
+      sentinelRef.current = true;
+      window.history.pushState({ sbWiz: 1 }, "", withStep(1));
+    }
   }, [dirty]);
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!dirtyRef.current || savedRef.current) return;
+      if (!dirtyRef.current || savedRef.current || leavingRef.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
     const onClick = (e: MouseEvent) => {
-      if (!dirtyRef.current || savedRef.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (!dirtyRef.current || savedRef.current || leavingRef.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
       if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
       const u = new URL(a.href, window.location.href);
@@ -245,16 +307,29 @@ export function PlanWizard({
   const next = () => {
     const found = validateStep(step, v);
     const keys = KEYS_OF_STEP(step);
-    setServerErrors((s) => Object.fromEntries(Object.entries(s).filter(([k]) => !keys.includes(k))));
+    const remainingServer = Object.entries(serverErrors).filter(([k]) => !keys.includes(k));
+    setServerErrors(Object.fromEntries(remainingServer));
     setClientErrors((s) => ({ ...Object.fromEntries(Object.entries(s).filter(([k]) => !keys.includes(k))), ...found }));
     if (Object.keys(found).length > 0) {
       requestErrorFocus();
       return;
     }
-    if (fromReview) {
-      setFromReview(false);
-      goTo(LAST_INPUT_STEP);
-    } else goTo(step + 1);
+    // 保存の誤りが全部直ったら、下の誤りの 1 行も消す
+    if (remainingServer.length === 0) setMessage(null);
+    const target = fromReview ? LAST_INPUT_STEP : step + 1;
+    if (target === LAST_INPUT_STEP) {
+      // ⑤に入るとき、①〜④をまとめて検べ、漏れのある最初の段へ戻す
+      const all = validateAll(v);
+      if (all.firstStep !== null) {
+        setClientErrors((s) => ({ ...s, ...all.errors }));
+        setFromReview(true);
+        goTo(all.firstStep);
+        requestErrorFocus();
+        return;
+      }
+    }
+    setFromReview(false);
+    goTo(target);
   };
   const back = () => {
     setFromReview(false);
@@ -270,8 +345,8 @@ export function PlanWizard({
     setBusy(true);
     setMessage(null);
     const r = await call("POST", "/api/ops/plans", { ...planBody(v), clientRequestId });
-    setBusy(false);
     if (!r.ok) {
+      setBusy(false);
       setServerErrors(fieldErrorsOf(r));
       setMessage(failMessage(r));
       requestErrorFocus();
@@ -325,7 +400,7 @@ export function PlanWizard({
           <fieldset className="flex min-w-0 flex-col gap-4" data-testid="plan-place-section">
             <legend>場所</legend>
             {places.length > 0 ? (
-              <Field label="よく使う地点から選ぶ" required={false} hint="選ぶと、名称と座標が入ります。座標は計画に写しとして残ります。">
+              <Field label="よく使う地点から選ぶ" required={false} error={err("savedPlaceId")} hint="選ぶと、名称と座標が入ります。座標は計画に写しとして残ります。">
                 <select
                   className={selectClass}
                   value={v.savedPlaceId}
@@ -431,7 +506,7 @@ export function PlanWizard({
                     ))}
                   </select>
                 </Field>
-                <Field label="立入管理措置／第三者上空" required={false} error={err("accessControl")}>
+                <Field label="立入管理措置／第三者上空" required={false} error={err("accessControl") ?? err("thirdPartyOverflight")}>
                   <select className={selectClass} value={v.access} onChange={(e) => set("access", e.target.value)} data-testid="plan-access">
                     {PLAN_ACCESS_CHOICES.map((c) => (
                       <option key={c.value} value={c.value}>
