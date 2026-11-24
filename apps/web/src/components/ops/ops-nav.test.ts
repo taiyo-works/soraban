@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { BACK_TABLE, BACK_TO, BOTTOM_TABS, currentChildKey, currentChildParent, currentNavKey, FIELD_BACK, NAV_CHILDREN, NAV_GROUPS, NAV_ITEM, navHiddenOn, SIDE_ITEMS, visibleChildrenOf, visibleNavChildren } from "./ops-nav-model";
+import { BACK_TABLE, BACK_TO, BOTTOM_TABS, currentChildKey, currentChildParent, currentNavKey, FIELD_BACK, hasVisibleCurrentChild, NAV_CHILDREN, NAV_GROUPS, NAV_ITEM, navHiddenOn, SIDE_ITEMS, visibleChildrenOf, visibleNavChildren } from "./ops-nav-model";
 
 const PLAN = "00000000-0000-4000-8000-000000000001";
 
@@ -55,6 +55,22 @@ describe("メニューの定義（Sprint 12g-1b 段階 A → 16-F で 4 項目�
       expect(visibleChildrenOf("more", role).map((c) => c.key), role).toEqual(["aircraft", "pilots", "permits", "places"]);
       expect(visibleNavChildren(role).length, role).toBe(NAV_CHILDREN.length);
     }
+  });
+
+  it("R-5：親を祖先にするのは、現在地の子がその親のもので、かつその役割に見えるときだけ（見えない子が現在地でも親は現在地のまま）", () => {
+    const all = visibleChildrenOf("journal", "manager");
+    expect(hasVisibleCurrentChild("/ops/inspections", "journal", all)).toBe(true);
+    expect(hasVisibleCurrentChild("/ops/inspections/new", "journal", all)).toBe(true);
+    // 子が見えない役割（点検を隠した一覧）では、点検の画面でも日誌は祖先にしない
+    const noInspections = all.filter((c) => c.key !== "inspections");
+    expect(hasVisibleCurrentChild("/ops/inspections", "journal", noInspections)).toBe(false);
+    expect(hasVisibleCurrentChild("/ops/flights", "journal", noInspections)).toBe(true);
+    // 別の親の子は、親が違えば祖先にしない
+    expect(hasVisibleCurrentChild("/ops/aircraft", "journal", all)).toBe(false);
+    expect(hasVisibleCurrentChild("/ops/aircraft", "more", visibleChildrenOf("more", "viewer"))).toBe(true);
+    // 日誌・機体と書類の画面そのものでは子が現在地でない
+    expect(hasVisibleCurrentChild("/ops/journal", "journal", all)).toBe(false);
+    expect(hasVisibleCurrentChild("/ops/more", "more", visibleChildrenOf("more", "manager"))).toBe(false);
   });
 
   it("現場モード・サインイン・アクセス権なしでは出さない", () => {

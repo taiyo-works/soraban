@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll, expectTextZoom, waitForSettledStyles } from "../field-checks";
 
 // Sprint 16-F の E2E-DB：画面の枠（下部ナビ 4 項目・PC の左メニュー・上の状態の層）。契約 F-1〜F-7、§7（互換）、K-5・K-7・K-8。
@@ -54,6 +54,23 @@ test.beforeAll(async () => {
   await manager.dispose();
   await pilot.dispose();
 });
+
+/**
+ * リンクを押し、遷移先の画面（done）が見えるまで確かめる。描画直後のクリックは、遷移しない・URL だけ変わって画面が替わらないことがある
+ * （既存の tapAndWait と同じ事情。Next のクライアントルーターの揺れで、runbook の既知の不安定と同系統）ため、10 秒で見えなければ押し直す（最大 3 回）。
+ * href で直接開く逃げ道は置かない：押して移れなければ失敗にする。押した回数は記録に残す。
+ */
+const tapUntil = async (page: Page, link: Locator, done: Locator, label: string): Promise<void> => {
+  let taps = 0;
+  for (; taps < 3; ) {
+    await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => undefined);
+    taps++;
+    await link.click();
+    if (await done.waitFor({ state: "visible", timeout: 10_000 }).then(() => true, () => false)) break;
+  }
+  console.log(`[押下] ${label}: 押した回数 ${taps}`);
+  await expect(done, `${label}: 押して移れた（${taps} 回押した）`).toBeVisible();
+};
 
 const PRIMARY = '.opx-btn-primary, .sb-pill-primary, [data-variant="primary"]';
 const visiblePrimaries = (page: Page): Promise<string[]> =>
@@ -143,11 +160,11 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
     }
   });
 
-  test("文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行", async ({ page }) => {
+  test("文字 200%（390・430・360）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     await page.goto("/ops/journal");
     await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
-    for (const w of [390, 430]) {
+    for (const w of [390, 430, 360]) {
       await page.setViewportSize({ width: w, height: 844 });
       await waitForSettledStyles(page);
       const normal = await page.getByTestId("ops-bottom-nav").getByTestId("nav-more").evaluate((e) => (e.lastElementChild as HTMLElement).getBoundingClientRect().height);
@@ -163,7 +180,7 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
           const range = document.createRange();
           range.selectNodeContents(lab);
           const lines = new Set(Array.from(range.getClientRects()).map((q) => Math.round(q.top))).size;
-          return { text: lab.textContent ?? "", lines, h: r.height, right: r.right, left: r.left, labelOk: lab.scrollWidth <= lab.clientWidth + 1, fs: parseFloat(getComputedStyle(lab).fontSize) };
+          return { text: lab.textContent ?? "", lines, h: r.height, right: r.right, left: r.left, labRight: lab.getBoundingClientRect().right, labLeft: lab.getBoundingClientRect().left, labelOk: lab.scrollWidth <= lab.clientWidth + 1, fs: parseFloat(getComputedStyle(lab).fontSize) };
         }),
       );
       for (const it of z) {
@@ -173,6 +190,8 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
         expect(it.labelOk, `${w}px 200% ${it.text} 切れ`).toBe(true);
         expect(it.left, `${w}px 200% ${it.text} 左`).toBeGreaterThanOrEqual(0);
         expect(it.right, `${w}px 200% ${it.text} 右`).toBeLessThanOrEqual(w);
+        expect(it.labRight, `${w}px 200% ${it.text} ラベルの右端が項目の右端以下`).toBeLessThanOrEqual(it.right + 0.01);
+        expect(it.labLeft, `${w}px 200% ${it.text} ラベルの左端が項目の左端以上`).toBeGreaterThanOrEqual(it.left - 0.01);
         expect(it.h, `${w}px 200% ${it.text} 高さ`).toBeGreaterThanOrEqual(64);
       }
       expect(z.map((i) => i.text)).toEqual(NAV4);
@@ -201,6 +220,38 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
       await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
       await waitForSettledStyles(page);
       await expectTextZoom(page, `下部ナビ ${name}`);
+    }
+  });
+
+  test("R-3 幅 320px・等倍：「機体と書類」が 2 行になっても、下部ナビの高さと本文の末尾の余裕（下部ナビの上端まで 4px 以上）を測る", async ({ page }) => {
+    await signIn(page.request, seeded("a-manager"));
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [url, ready] of [["/ops/more", "ops-more"], ["/ops/journal", "ops-journal"]] as const) {
+      await page.goto(url);
+      await expect(page.getByTestId(ready)).toBeVisible();
+      await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
+      await waitForSettledStyles(page);
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await waitForSettledStyles(page);
+      const m = await page.evaluate(() => {
+        const nav = document.querySelector<HTMLElement>('[data-testid="ops-bottom-nav"]')!;
+        const nb = nav.getBoundingClientRect();
+        const more = nav.querySelector<HTMLElement>('[data-testid="nav-more"]')!.lastElementChild as HTMLElement;
+        const range = document.createRange();
+        range.selectNodeContents(more);
+        const lines = new Set(Array.from(range.getClientRects()).map((q) => Math.round(q.top))).size;
+        let bottom = 0;
+        for (const el of Array.from(document.querySelectorAll<HTMLElement>("main *"))) {
+          const r = el.getBoundingClientRect();
+          if (r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden") bottom = Math.max(bottom, r.bottom);
+        }
+        return { navH: nb.height, navTop: nb.top, contentBottom: bottom, lines, atEnd: Math.abs(window.scrollY + window.innerHeight - document.documentElement.scrollHeight) <= 1, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth };
+      });
+      console.log(`[R-3] 320px ${url}: 項目名 ${m.lines} 行、下部ナビ ${m.navH}px、本文の末尾 ${m.contentBottom}px、下部ナビの上端 ${m.navTop}px、余裕 ${m.navTop - m.contentBottom}px`);
+      expect(m.atEnd, `${url} 末尾まで送った`).toBe(true);
+      expect(m.navH, `${url} 下部ナビの高さ`).toBeGreaterThanOrEqual(64);
+      expect(m.contentBottom, `${url} 本文の末尾（${m.contentBottom}）は下部ナビの上端（${m.navTop}）より 4px 以上上`).toBeLessThanOrEqual(m.navTop - 4);
+      expect(m.sw, `${url} 横スクロールなし`).toBeLessThanOrEqual(m.cw);
     }
   });
 });
@@ -350,7 +401,14 @@ test.describe("F-4 点検へ 1 回", () => {
   for (const [w, h] of [[375, 812], [390, 844]] as const) {
     test(`ホームの最初の画面（${w}×${h}、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回`, async ({ page }) => {
       for (const who of ["a-manager", "b-manager"]) {
-        if (who === "b-manager") await clearPlans(await apiAs(seeded("b-manager")));
+        if (who === "b-manager") {
+          const api = await apiAs(seeded("b-manager"));
+          try {
+            await clearPlans(api);
+          } finally {
+            await api.dispose();
+          }
+        }
         await signIn(page.request, seeded(who));
         await page.setViewportSize({ width: w, height: h });
         await page.goto("/ops");
@@ -374,13 +432,18 @@ test.describe("F-4 点検へ 1 回", () => {
         await expect(q).not.toHaveAttribute("data-variant", "primary");
         // 同じ画面に同じ行き先のリンクを重ねない
         await expect(page.locator('main a[href="/ops/inspections/new"]')).toHaveCount(1);
-        // 描画直後のクリックが遷移しないことがある（既存の tapAndWait と同じ作法）。押し直し、最後は href で開く（期待は同じ）
-        for (let attempt = 0; attempt < 3 && !/\/ops\/inspections\/new$/.test(page.url()); attempt++) {
-          await page.waitForLoadState("networkidle").catch(() => undefined);
+        // 描画直後のクリックが遷移しないことがある（既存の tapAndWait と同じ作法）。押し直しは最大 3 回までで、
+        // href で直接開く逃げ道は置かない（押して移れたことが検査）。押し直しの回数は記録に残す
+        let taps = 0;
+        let idle = 0;
+        for (; taps < 3 && !/\/ops\/inspections\/new$/.test(page.url()); ) {
+          if (await page.waitForLoadState("networkidle", { timeout: 5_000 }).then(() => true, () => false)) idle++;
+          taps++;
           await q.click();
           await page.waitForURL(/\/ops\/inspections\/new$/, { timeout: 10_000, waitUntil: "commit" }).catch(() => undefined);
         }
-        if (!/\/ops\/inspections\/new$/.test(page.url())) await page.goto("/ops/inspections/new");
+        console.log(`[F-4 押下] ${who} ${w}: 押した回数 ${taps}、networkidle に達した回数 ${idle}`);
+        expect(page.url(), `${who} ${w}: 押して点検の入力へ移れた（${taps} 回押した）`).toMatch(/\/ops\/inspections\/new$/);
         await page.waitForURL(/\/ops\/inspections\/new$/);
         await expect(page.locator("main h1").first()).toBeVisible();
       }
@@ -398,18 +461,16 @@ test.describe("F-4 点検へ 1 回", () => {
     await expect(page.getByTestId("journal-tabs")).toBeVisible();
     const tab = page.getByTestId("journal-tab-inspections");
     await expect(tab).toHaveAttribute("href", "/ops/journal?tab=inspections");
-    await tab.click();
+    await tapUntil(page, tab, page.locator('[data-testid="journal-tab-inspections"][aria-current="page"]'), "日誌のタブ→点検");
     await page.waitForURL(/\/ops\/journal\?tab=inspections$/);
-    await expect(page.getByTestId("journal-tab-inspections")).toHaveAttribute("aria-current", "page");
     // 一覧（点検の画面）へ
     await page.goto("/ops/journal");
     const link = page.getByTestId("journal-to-inspections");
     await expect(link).toHaveAttribute("href", "/ops/inspections");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/ops");
-    await page.getByTestId("ops-sidebar").getByTestId("nav-inspections").click();
+    await tapUntil(page, page.getByTestId("ops-sidebar").getByTestId("nav-inspections"), page.getByTestId("ops-inspections"), "左メニュー→点検");
     await page.waitForURL(/\/ops\/inspections$/);
-    await expect(page.getByTestId("ops-inspections")).toBeVisible();
   });
 });
 

@@ -217,7 +217,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     // 上部は画面の先頭の近く（見出しの直後）。同じ画面の 375×812 の最初の画面に入る
     expect(hb.y + hb.height).toBeLessThan(812);
     await expect(pills.locator("a")).toHaveCount(2);
-    // ホーム上部に、点検への大きなボタンを置かない（点検の入口は下タブと、次の飛行カードの 1 行リンク。入力ボタンは画面の末尾の「記録を入力」）
+    // 見出しの枠（header）の中に、点検への大きなボタンを置かない。点検のクイック操作（ops-enter-inspection）は 16-F から header の外の home-quick（ピルの下）にあり、header の中には置かない（点検は下タブにはない。日誌の下・次の飛行カードの 1 行リンクからも入れる）
     await expect(page.locator("[data-testid='ops-today'] header a[href^='/ops/inspections']")).toHaveCount(0);
     expect((await page.getByTestId("ops-enter-inspection").boundingBox())!.y, "点検の入力ボタンはピルより下").toBeGreaterThan(hb.y + hb.height);
     await expect(page.getByTestId("ops-enter-inspection")).toBeVisible();

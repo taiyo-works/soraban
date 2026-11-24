@@ -1492,7 +1492,8 @@ input.sb-radio:disabled {
  * 項目の高さは min-height なので伸びる（省略・アイコンだけにはしない。K-5）。 */
 .sb-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* 列は等分（1fr）。ただし最小は項目名の幅（min-content）：文字 200%・幅 360px で「ホーム」（84px）が等分の 80px からはみ出さないよう、列が広がる（16-F 差し戻し 1 の R-4。ふだんの幅は等分のまま） */
+  grid-template-columns: repeat(4, minmax(min-content, 1fr));
   gap: 8px;
   padding: 0 8px env(safe-area-inset-bottom);
   background: var(--sb-surface);

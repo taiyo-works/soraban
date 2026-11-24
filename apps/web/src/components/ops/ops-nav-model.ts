@@ -108,6 +108,15 @@ export const currentChildParent = (pathname: string): NavParentKey | null => {
   return k === null ? null : (NAV_CHILDREN.find((c) => c.key === k)?.parent ?? null);
 };
 
+/**
+ * 左メニューで親を「祖先」（現在地の子がある）にしてよいか。現在地の子の親がこの親で、かつその子がこの役割に見えるとき（`visible`）だけ。
+ * 見えない子が現在地でも、親を祖先にしない（親そのものが現在地として残る）。`visible` は `visibleChildrenOf(parent, role)`。
+ */
+export const hasVisibleCurrentChild = (pathname: string, parent: NavParentKey, visible: readonly NavChild[]): boolean => {
+  const child = currentChildKey(pathname);
+  return child !== null && currentChildParent(pathname) === parent && visible.some((c) => c.key === child);
+};
+
 // ---- 戻りリンク ----------------------------------------------------------------------------------------
 // 戻り先は「メニューで親になっている画面」。1 段目の画面（ホーム・計画・日誌・機体と書類）には戻りリンクを置かない（メニューが退路）。
 // 点検の一覧は 16-F から日誌の下の画面（戻りリンク「日誌」。ホームのクイック操作・日誌のタブからも入る）。

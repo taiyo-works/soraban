@@ -1,0 +1,43 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g 'R-3|文字 200%'
+
+
+Running 2 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-f-db.spec.ts:163:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 (946ms)
+  -  2 e2e/ops-db/sprint16-f-db.spec.ts:226:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › R-3 幅 320px・等倍：「機体と書類」が 2 行になっても、下部ナビの高さと本文の末尾の余裕（下部ナビの上端まで 4px 以上）を測る
+
+
+  1) e2e/ops-db/sprint16-f-db.spec.ts:163:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 
+
+    Error: 360px 200% ホーム ラベルの右端が項目の右端以下
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 88.01
+    Received:    90.0625
+
+      191 |         expect(it.left, `${w}px 200% ${it.text} 左`).toBeGreaterThanOrEqual(0);
+      192 |         expect(it.right, `${w}px 200% ${it.text} 右`).toBeLessThanOrEqual(w);
+    > 193 |         expect(it.labRight, `${w}px 200% ${it.text} ラベルの右端が項目の右端以下`).toBeLessThanOrEqual(it.right + 0.01);
+          |                                                                      ^
+      194 |         expect(it.labLeft, `${w}px 200% ${it.text} ラベルの左端が項目の左端以上`).toBeGreaterThanOrEqual(it.left - 0.01);
+      195 |         expect(it.h, `${w}px 200% ${it.text} 高さ`).toBeGreaterThanOrEqual(64);
+      196 |       }
+        at /home/user/soraban/e2e/ops-db/sprint16-f-db.spec.ts:193:70
+
+    Error Context: test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-f-db.spec.ts:163:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 
+  1 did not run
+ ELIFECYCLE  Command failed with exit code 1.

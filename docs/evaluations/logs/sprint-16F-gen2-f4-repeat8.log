@@ -1,0 +1,63 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g F-4 --repeat-each=8
+
+
+Running 24 tests using 1 worker
+
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓   1 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.6s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 1、networkidle に達した回数 1
+  ✓   2 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.3s)
+  ✓   3 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (2.0s)
+[F-4 押下] a-manager 375: 押した回数 2、networkidle に達した回数 2
+[F-4 押下] b-manager 375: 押した回数 2、networkidle に達した回数 2
+  ✓   4 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (22.5s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 1、networkidle に達した回数 1
+  ✓   5 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.4s)
+  ✘   6 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (31.7s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓   7 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.1s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 1、networkidle に達した回数 1
+  ✓   8 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.2s)
+  ✓   9 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (1.8s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  10 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.2s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 2、networkidle に達した回数 2
+  ✓  11 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (12.4s)
+  ✘  12 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (31.5s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  13 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.4s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 2、networkidle に達した回数 2
+  ✓  14 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (12.2s)
+  ✘  15 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (31.6s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  16 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.3s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 2、networkidle に達した回数 2
+  ✓  17 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (12.0s)
+  ✘  18 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (31.4s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  19 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.3s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 1、networkidle に達した回数 1
+  ✓  20 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.2s)
+  ✓  21 e2e/ops-db/sprint16-f-db.spec.ts:402:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (2.0s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  22 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.2s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 1、networkidle に達した回数 1
+  ✓  23 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.4s)
+ ELIFECYCLE  Command failed.

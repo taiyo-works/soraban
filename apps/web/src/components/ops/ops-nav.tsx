@@ -15,7 +15,7 @@ import { Icon, type IconName } from "@/components/ui/icons";
 import { InfoPopover } from "@/components/ui/overlays";
 import type { MemberRoleDb } from "@soraban/db";
 import { SignOutButton } from "./ops-client";
-import { BOTTOM_TABS, currentChildKey, currentChildParent, currentNavKey, NAV_GROUPS, NAV_ITEM, navHiddenOn, OPS_MAIN_ID, type NavParentKey, visibleChildrenOf } from "./ops-nav-model";
+import { BOTTOM_TABS, currentChildKey, currentNavKey, hasVisibleCurrentChild, NAV_GROUPS, NAV_ITEM, navHiddenOn, OPS_MAIN_ID, type NavParentKey, visibleChildrenOf } from "./ops-nav-model";
 
 export type OpsNavUser = {
   readonly memberId: string;
@@ -66,7 +66,6 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
   if (navHiddenOn(pathname)) return null;
   const current = currentNavKey(pathname);
   const child = currentChildKey(pathname);
-  const childParent = currentChildParent(pathname);
   return (
     <nav
       aria-label="運航管理のメニュー（左）"
@@ -84,7 +83,7 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
           {g.keys.map((k) => {
             const item = NAV_ITEM[k];
             const parent: NavParentKey | null = k === "journal" || k === "more" ? k : null;
-            const hasChild = parent !== null && childParent === parent;
+            const hasChild = parent !== null && hasVisibleCurrentChild(pathname, parent, visibleChildrenOf(parent, role));
             return (
               <div key={k} className="flex flex-col gap-0.5">
                 <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
