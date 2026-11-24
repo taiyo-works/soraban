@@ -1,0 +1,11 @@
+[実測] 375x812 plan-title-heading 下端 182
+[実測] 375x812 plan-tabs 下端 379.765625
+[実測] 375x812 plan-report-label 下端 440.953125
+[実測] 375x812 plan-primary-action 下端 508.953125
+[実測] 375x812 plan-report-status 下端 799.453125
+[実測] 1280x800 plan-title-heading 下端 211
+[実測] 1280x800 plan-tabs 下端 381.984375
+[実測] 1280x800 plan-report-label 下端 443.171875
+[実測] 1280x800 plan-primary-action 下端 511.171875
+[実測] 1280x800 plan-report-status 下端 665.734375
+  2 passed (6.1s)

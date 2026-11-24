@@ -212,8 +212,8 @@ html:has(.ops-v2) body {
 /* 画面の見出し */
 .opx-h1 {
   font-size: var(--sb-fs-h);
-  /* 16-F：題を 22→24px にした分、行の高さを 1.4→1.25（大きな文字の下限）にして、題の 1 行の高さを 30.8→30px に保つ（最初の画面の縦位置の検査を下げない） */
-  line-height: 1.25;
+  /* 16-F：題 24px の行間は方針書 §タイポ（画面タイトル 24 / 行間 1.35）に合わせる。1 行 32.4px */
+  line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--sb-ink);
