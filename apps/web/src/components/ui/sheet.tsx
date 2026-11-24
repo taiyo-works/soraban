@@ -76,7 +76,8 @@ function SheetOpen({
   const close = useCallback(() => onClose(), [onClose]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") {
+      // 変換中（IME の確定前）の Esc は変換の取り消しなので、シートを閉じない
+      if (e.key === "Escape" && !e.isComposing && e.keyCode !== 229) {
         e.stopPropagation();
         close();
       }

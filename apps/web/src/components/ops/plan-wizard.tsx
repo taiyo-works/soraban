@@ -21,6 +21,7 @@ import {
 import type { PermitHelper } from "@/server/ops/permit-page";
 import { setChangeFlash } from "./change-notice";
 import { newRequestId } from "./drafts";
+import { QuickWhen } from "./plan-quick";
 import { Field, fieldErrorsOf, FieldError, FormError, inputClass, useErrorFocus } from "./ops-client";
 import type { PilotOption } from "./records-client";
 import {
@@ -105,6 +106,14 @@ export const validateStep = (step: number, v: PlanFormValues): Record<string, st
   return e;
 };
 
+/**
+ * サーバーの項目の誤りの文は「緯度：緯度は −90〜90…」のように項目名で始まり、文の中でも項目名を繰り返すことがある。
+ * 画面では項目名を段の名前と欄の見出しで示すので、重なる先頭の「項目名：」を 1 つにする（文の中身は変えない）。
+ */
+export const tidyFieldMessage = (m: string): string => m.replace(/^([^：\s]{1,16})：(?=\1)/, "");
+export const tidyFieldErrors = (e: Readonly<Record<string, string>>): Record<string, string> =>
+  Object.fromEntries(Object.entries(e).map(([k, m]) => [k, typeof m === "string" ? tidyFieldMessage(m) : m]));
+
 const LEAVE_MESSAGE = "入力した内容はまだ保存されていません。このページを離れると、入力した内容は消えます。離れますか？";
 
 const withStep = (n: number): string => {
@@ -184,6 +193,8 @@ export function PlanWizard({
   const [initialJson] = useState(() => JSON.stringify({ ...initial, pilotId: fixedPilotId ?? initial.pilotId }));
   const [clientRequestId] = useState(() => newRequestId());
   const [step, setStep] = useState(1);
+  // クイック選択の「今日・明日・次の 30 分」の基準（画面を開いた時刻。段 ② は利用者の操作の後に描くので、サーバーの描画とずれない）
+  const [now] = useState(() => new Date());
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -347,7 +358,7 @@ export function PlanWizard({
     const r = await call("POST", "/api/ops/plans", { ...planBody(v), clientRequestId });
     if (!r.ok) {
       setBusy(false);
-      setServerErrors(fieldErrorsOf(r));
+      setServerErrors(tidyFieldErrors(fieldErrorsOf(r)));
       setMessage(failMessage(r));
       requestErrorFocus();
       return;
@@ -455,6 +466,15 @@ export function PlanWizard({
 
         {step === 2 ? (
           <section className="flex flex-col gap-4" aria-label="日時" data-testid="plan-when-section">
+            <QuickWhen
+              now={now}
+              startDate={v.startDate}
+              startTime={v.startTime}
+              duration={v.duration}
+              onDate={(d) => set("startDate", d)}
+              onTime={(t) => set("startTime", t)}
+              onDuration={(m) => set("duration", m)}
+            />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field label="予定開始（日付）" required error={err("startDate") ?? err("plannedStartAt")} hint="日本時間">
                 <input type="date" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />

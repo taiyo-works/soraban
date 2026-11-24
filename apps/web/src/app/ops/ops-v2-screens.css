@@ -701,3 +701,63 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   justify-content: flex-start;
   padding-inline: 0;
 }
+
+/* ===== 計画作成 段 ②：日時のクイック選択（16-H2 H2-1）=====
+ * 押す部品は 48px 以上・間 8px。選択中は薄い主色の面＋主色の 2px の縁＋チェックの記号（aria-pressed）。色・寸法はトークンだけ。 */
+.opx-quick-head {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+.opx-quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sb-sp-2);
+}
+.opx-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(6.5rem, 100%), 1fr));
+  gap: var(--sb-sp-2);
+}
+.opx-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--sb-hit-min);
+  min-width: var(--sb-hit-min);
+  padding: 6px 16px;
+  border: 0;
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  box-shadow: inset 0 0 0 1px var(--sb-edge);
+  color: var(--sb-ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.opx-quick-btn:hover {
+  background: var(--sb-hover);
+}
+.opx-quick-btn:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+}
+.opx-quick-btn .opx-quick-mark {
+  display: none;
+  flex: none;
+  color: var(--sb-primary);
+}
+.opx-quick-btn[aria-pressed="true"] {
+  background: var(--sb-primary-soft);
+  box-shadow: inset 0 0 0 2px var(--sb-primary);
+  font-weight: 700;
+}
+.opx-quick-btn[aria-pressed="true"] .opx-quick-mark {
+  display: inline-block;
+}

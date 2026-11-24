@@ -434,7 +434,8 @@ export function PlanForm({
         </p>
       ) : null}
 
-      <section className="flex flex-col gap-4" aria-label="計画の基本">
+      <section className="flex flex-col gap-4" aria-labelledby="plan-edit-h-basic" data-testid="plan-edit-basic">
+        <h2 id="plan-edit-h-basic">計画の基本</h2>
         <Field label="計画名" required error={errors["title"]} hint="100 文字以内">
           <input className={`${inputClass} min-h-12`} value={v.title} onChange={(e) => set("title", e.target.value)} data-testid="plan-title" />
         </Field>
@@ -482,6 +483,13 @@ export function PlanForm({
             ))}
           </select>
         </Field>
+        <Field label="飛行の目的" required error={errors["purpose"]} hint="100 文字以内。飛行記録の目的に引き継ぎます。">
+          <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} data-testid="plan-purpose" />
+        </Field>
+      </section>
+
+      <section className="flex flex-col gap-4" aria-labelledby="plan-edit-h-when" data-testid="plan-edit-when">
+        <h2 id="plan-edit-h-when">日時</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="予定開始（日付）" required error={errors["plannedStartAt"]} hint="日本時間">
             <input type="date" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />
@@ -493,13 +501,10 @@ export function PlanForm({
             <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.duration} onChange={(e) => set("duration", e.target.value)} data-testid="plan-duration" />
           </Field>
         </div>
-        <Field label="飛行の目的" required error={errors["purpose"]} hint="100 文字以内。飛行記録の目的に引き継ぎます。">
-          <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} data-testid="plan-purpose" />
-        </Field>
       </section>
 
       <fieldset className="flex min-w-0 flex-col gap-4" data-testid="plan-place-section">
-        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">場所</legend>
+        <legend>場所</legend>
         {places.length > 0 ? (
           <Field label="よく使う地点から選ぶ" required={false} hint="選ぶと、名称と座標が入ります。座標は計画に写しとして残ります。">
             <select className={selectClass} value={v.savedPlaceId} onChange={(e) => pickPlace(e.target.value)} data-testid="plan-saved-place">
@@ -515,7 +520,8 @@ export function PlanForm({
         <Field label="場所の名称" required error={errors["placeName"]} hint="100 文字以内">
           <input className={`${inputClass} min-h-12`} value={v.placeName} onChange={(e) => set("placeName", e.target.value)} data-testid="plan-place-name" />
         </Field>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
+        {/* 緯度・経度は、文字 200%・320px でも欄が切れないよう、列の最小幅を画面の幅で頭打ちにして折り返す */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(9rem,100%),1fr))] gap-3">
           <Field label="緯度" required error={errors["latitude"]} hint="世界測地系（WGS84）、小数 6 桁まで">
             <input
               inputMode="decimal"
@@ -540,18 +546,13 @@ export function PlanForm({
           onPick={(c) => setV((s) => ({ ...s, lat: c.lat, lng: c.lng, savedPlaceId: "", placeName: c.name !== null && !s.placeName.trim() ? c.name : s.placeName }))}
         />
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <Field label="範囲の半径（m）" required={false} error={errors["radiusM"]} hint="1〜10000 m。点と半径で表します。">
-            <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.radius} onChange={(e) => set("radius", e.target.value)} data-testid="plan-radius" />
-          </Field>
-          <Field label="最大高度（m）" required={false} error={errors["maxAltitudeM"]} hint="0〜2000 m。150 m 以上は「150m以上の高さ」として判定に入ります。">
-            <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.altitude} onChange={(e) => set("altitude", e.target.value)} data-testid="plan-altitude" />
-          </Field>
-        </div>
+        <Field label="範囲の半径（m）" required={false} error={errors["radiusM"]} hint="1〜10000 m。点と半径で表します。">
+          <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.radius} onChange={(e) => set("radius", e.target.value)} data-testid="plan-radius" />
+        </Field>
       </fieldset>
 
       <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["flags"] ? "plan-err-flags" : undefined} data-testid="plan-flags">
-        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">飛行の方法・空域</legend>
+        <legend>飛行の方法・空域</legend>
         <p className="text-sb-ink-3">DID（人口集中地区）と空港等周辺は、地点から判定が導きます。ここでは選びません。</p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {PLAN_FLAG_CHOICES.map((c) => (
@@ -564,25 +565,11 @@ export function PlanForm({
         <FieldError id="plan-err-flags" message={errors["flags"]} />
       </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["pilotPermits"] ? "plan-err-pilotPermits" : undefined} data-testid="plan-permits">
-        <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
-        <p className="opx-note opx-note-lg" data-testid="plan-permit-registry-note">
-          国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
-          計画の日時・場所・機体・操縦者が範囲に収まるものが判定に使われます。許可・承認は登録から照合します。
-        </p>
-        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-          {PLAN_PERMIT_CHOICES.map((c) => (
-            <label key={c.value} className={planCheckRow}>
-              <input type="checkbox" className={planCheckbox} checked={v.permits.includes(c.value)} onChange={() => set("permits", toggle(v.permits, c.value))} data-testid={`plan-permit-${c.value}`} />
-              {c.label}
-            </label>
-          ))}
-        </div>
-        <FieldError id="plan-err-pilotPermits" message={errors["pilotPermits"]} />
-        <p className="text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
-      </fieldset>
-
-      <section className="flex flex-col gap-4" aria-label="判定の条件">
+      <section className="flex flex-col gap-4" aria-labelledby="plan-edit-h-cond" data-testid="plan-edit-cond">
+        <h2 id="plan-edit-h-cond">判定の条件</h2>
+        <Field label="最大高度（m）" required={false} error={errors["maxAltitudeM"]} hint="0〜2000 m。150 m 以上は「150m以上の高さ」として判定に入ります。">
+          <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.altitude} onChange={(e) => set("altitude", e.target.value)} data-testid="plan-altitude" />
+        </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="運航の目的（例外）" required={false} error={errors["judgementPurpose"]} hint="史跡・公園・県条例の例外節と照合します。">
             <select className={selectClass} value={v.judgementPurpose} onChange={(e) => set("judgementPurpose", e.target.value)} data-testid="plan-judgement-purpose">
@@ -614,6 +601,28 @@ export function PlanForm({
             </select>
           </Field>
         ) : null}
+      </section>
+
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["pilotPermits"] ? "plan-err-pilotPermits" : undefined} data-testid="plan-permits">
+        <legend>取得済みの同意・通報・許可（DIPS の許可・承認を除く）</legend>
+        <p className="opx-note opx-note-lg" data-testid="plan-permit-registry-note">
+          国土交通省の許可・承認（DIPS）は、ここでは選びません。登録した許可の番号を、下の「許可・承認の番号」の欄に入れたときだけ、
+          計画の日時・場所・機体・操縦者が範囲に収まるものが判定に使われます。許可・承認は登録から照合します。
+        </p>
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          {PLAN_PERMIT_CHOICES.map((c) => (
+            <label key={c.value} className={planCheckRow}>
+              <input type="checkbox" className={planCheckbox} checked={v.permits.includes(c.value)} onChange={() => set("permits", toggle(v.permits, c.value))} data-testid={`plan-permit-${c.value}`} />
+              {c.label}
+            </label>
+          ))}
+        </div>
+        <FieldError id="plan-err-pilotPermits" message={errors["pilotPermits"]} />
+        <p className="text-sb-ink-3">これらの同意・通報・許可は、範囲と有効期間を照合していません。許可書で確認してください。</p>
+      </fieldset>
+
+      <section className="flex flex-col gap-4" aria-labelledby="plan-edit-h-permit-no" data-testid="plan-edit-permit-no">
+        <h2 id="plan-edit-h-permit-no">許可・承認の番号とメモ</h2>
         <Field label="許可・承認の番号" required={false} error={errors["permitNumbers"]} hint="登録した許可の番号。複数は「,」「、」「;」か改行で区切ります（200 文字以内）。">
           <input className={`${inputClass} min-h-12`} value={v.permitNumbers} onChange={(e) => set("permitNumbers", e.target.value)} data-testid="plan-permit-numbers" />
         </Field>
@@ -621,12 +630,16 @@ export function PlanForm({
         <Field label="メモ" required={false} error={errors["notes"]} hint="500 文字以内">
           <textarea className={inputClass} rows={3} value={v.notes} onChange={(e) => set("notes", e.target.value)} data-testid="plan-notes" />
         </Field>
-        {isEdit ? (
+      </section>
+
+      {isEdit ? (
+        <section className="flex flex-col gap-4" aria-labelledby="plan-edit-h-reason" data-testid="plan-edit-reason">
+          <h2 id="plan-edit-h-reason">訂正の記録</h2>
           <Field label="訂正の理由" required error={errors["reason"]} hint="版の一覧に残ります。">
             <textarea className={inputClass} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="plan-reason" />
           </Field>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       <SubmitRow message={message}>
         <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="plan-submit">
