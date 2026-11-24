@@ -5,7 +5,7 @@ import { JudgePills } from "@/components/ops/judge-pills";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { FieldPrefetch } from "@/components/ops/field-prefetch";
 import { HomePrepCard } from "@/components/ops/home-prep-card";
-import { HomeAllPlans, HomeNextCard, HomePrimary, HomeQuick, TodayCard, TodayDeadlines, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
+import { HomeAllPlans, HomeNextCard, HomePrimary, HomeQuick, TodayCard, TodayDeadlines, TodayDeadlinesRest, TodayEmpty, TodayNextActions, TodayRest, TodayUpcoming } from "@/components/ops/today-ui";
 import { formatDay } from "@/lib/ops-day";
 import { planCreateDenied } from "@/server/ops/plan-page";
 import { recordCreateDenied } from "@/server/ops/record-page";
@@ -31,15 +31,15 @@ export default async function OpsHome() {
   return (
     <main className="flex flex-col gap-3 lg:gap-6" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
-      <header className="flex flex-col gap-1" data-testid="home-head">
+      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5" data-testid="home-head">
         <h1 className="opx-h1" data-testid="today-heading">
           ホーム
         </h1>
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-sm text-sb-ink-3" data-note="">
+        <p className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 text-sm text-sb-ink-3" data-note="">
           <span className="opx-num" data-testid="today-date">
             <time dateTime={today.today}>{formatDay(today.today, today.today)}</time>
           </span>
-          {card ? <span data-testid="today-place">{card.placeName}</span> : null}
+          {card ? <span className="[overflow-wrap:anywhere]" data-testid="today-place">{card.placeName}</span> : null}
         </p>
       </header>
 
@@ -66,6 +66,7 @@ export default async function OpsHome() {
       <HomeAllPlans>
         <JudgePills />
         {card ? <TodayCard card={card} today={today.today} nextActions={today.nextActions} /> : null}
+        <TodayDeadlinesRest deadlines={today.deadlines} today={today.today} />
         <TodayRest rows={today.rest} />
         <TodayNextActions actions={today.nextActions} total={today.nextActionTotal} plansHref={today.plansHref} today={today.today} />
         <TodayUpcoming flights={today.upcoming} today={today.today} />

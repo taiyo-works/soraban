@@ -377,29 +377,18 @@
   padding-top: 12px;
   padding-bottom: 12px;
 }
-/* 見出しと、日時・場所（補足）を 1 行に置く。場所が長いときは補足の側を省略記号で切る */
+/* 見出しの下に、日時と場所（補足）。長い場所の名前は折り返す（文字 200% でも切らない。省略記号は使わない） */
 .home-prep-head {
   display: flex;
-  align-items: baseline;
-  gap: 4px 12px;
+  flex-direction: column;
+  gap: 0;
   min-width: 0;
-}
-.home-prep-title { flex: none; }
-.home-prep-title {
-  font-size: 1.125rem;
-  line-height: 1.4;
-  font-weight: 700;
 }
 .home-prep-when {
-  flex: 1 1 0;
-  min-width: 0;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-3);
-  /* 日時と場所は 1 行。長い場所の名前は省略記号で切る（全文は title と、次の予定のカードにある）。最初の画面にクイック操作まで入れるため */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .home-prep-rows {
   display: flex;
@@ -443,12 +432,23 @@
   color: var(--sb-ink-3);
 }
 .home-prep-foot {
-  flex-basis: 100%;
-  padding-left: 32px;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-3);
 }
+/* 判定の行：「判定は参考情報です」は、見出しの行の右に置く（画面の並びだけ。読む順は、文のあとに注記の DOM の順のまま）。
+ * 文は次の行に、記号の幅（32px）だけ下げて置く。最初の画面にクイック操作まで入れるため、行を 1 行ぶん低くする */
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-foot {
+  order: 2;
+  margin-left: auto;
+}
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-v {
+  order: 3;
+  flex-basis: calc(100% - 32px);
+  margin-left: 32px;
+}
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-note { order: 4; }
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-reload { order: 5; }
 .home-prep-row[data-tone="safe"] .home-prep-sign { color: var(--sb-st-safe-text); }
 .home-prep-row[data-tone="warn"] .home-prep-sign { color: var(--sb-st-warn-text); }
 .home-prep-row[data-tone="danger"] .home-prep-sign { color: var(--sb-st-danger-text); }
@@ -492,17 +492,10 @@ html[data-mode="field"] .home-quick-btn {
   padding-bottom: 10px;
 }
 .home-next-card .sb-card-list-text { gap: 2px; }
-.home-next-title {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.home-next-title,
 .home-next-place {
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .home-dl-head {
   display: flex;

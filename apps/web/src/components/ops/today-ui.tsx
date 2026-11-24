@@ -260,10 +260,10 @@ export function HomeNextCard({ card, today }: { readonly card: TodayCardDto; rea
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>　{card.timeLabel}
           </span>
         </span>
-        <span className="home-next-title text-[1.0625rem] font-bold leading-snug [overflow-wrap:anywhere]" data-testid="home-next-title">
+        <span className="home-next-title text-[1.0625rem] font-bold leading-snug" data-testid="home-next-title">
           {card.title}
         </span>
-        <span className="home-next-place text-sm text-sb-ink-2" data-testid="home-next-place" title={card.placeName}>
+        <span className="home-next-place text-sm text-sb-ink-2" data-testid="home-next-place">
           {card.placeName}
         </span>
       </ListCardLink>
@@ -500,36 +500,50 @@ function DeadlineRow({ d, today }: { readonly d: DeadlineDto; readonly today: st
 
 /**
  * 近づく期限（HM-1 ④。技能証明の有効期限と、許可・承認の有効な最終日。残り 60 日以内）。無いときは段ごと出さない。
- * 最初は近い順に HOME_DEADLINES_INITIAL 件、残りは「ほか N 件を見る」。機体の期限は記録する場所が無いため出ない。
+ * 最初の画面にクイック操作まで入れるため、上段には期限の近い 1 件だけを出し、残りは「すべての予定」の中（TodayDeadlinesRest）に置く。
+ * 「ほか N 件」の件数は見出しの行に出す（押す部品は増やさない）。機体の期限は記録する場所が無いため出ない（注記を 1 行）。
  */
 export function TodayDeadlines({ deadlines, today }: { readonly deadlines: readonly DeadlineDto[]; readonly today: string }) {
   if (deadlines.length === 0) return null;
   const head = deadlines.slice(0, HOME_DEADLINES_INITIAL);
-  const tail = deadlines.slice(HOME_DEADLINES_INITIAL);
+  const rest = deadlines.length - head.length;
   return (
     <section aria-label="近づく期限" data-testid="home-deadlines" className="flex flex-col gap-2">
       <div className="sb-block !py-1">
-        {/* 最初の画面にクイック操作まで入れるため、見出しは枠の中の 1 行（h2 のまま。節の見出しの大きさは使わない） */}
+        {/* 見出しは枠の中の 1 行（h2 のまま。節の見出しの大きさは使わない） */}
         <div className="home-dl-head">
           <h2 id="home-deadlines-h">近づく期限</h2>
-          <span data-note="" className="text-sm text-sb-ink-3">60 日以内</span>
+          <span data-note="" className="text-sm text-sb-ink-3" data-testid="home-deadlines-count">
+            60 日以内{rest > 0 ? `・ほか ${rest} 件` : ""}
+          </span>
         </div>
         <ul className="sb-rows">
           {head.map((d) => (
             <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />
           ))}
         </ul>
-        {tail.length > 0 ? (
-          <MoreRows count={tail.length} data-testid="home-deadlines-more">
-            {tail.map((d) => (
-              <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />
-            ))}
-          </MoreRows>
-        ) : null}
       </div>
       <p data-note="" className="text-sm text-sb-ink-3" data-testid="home-deadlines-note">
         機体の期限は、記録する場所がまだないため出ません。
       </p>
+    </section>
+  );
+}
+
+/** 近づく期限の残り（上段に出した 1 件より後ろ）。「すべての予定」の中に置く。 */
+export function TodayDeadlinesRest({ deadlines, today }: { readonly deadlines: readonly DeadlineDto[]; readonly today: string }) {
+  const tail = deadlines.slice(HOME_DEADLINES_INITIAL);
+  if (tail.length === 0) return null;
+  return (
+    <section aria-label="近づく期限（残り）" data-testid="home-deadlines-rest" className="flex flex-col gap-2">
+      <SectionHead id="home-deadlines-rest-h" title="近づく期限（残り）" note="60 日以内" />
+      <div className="sb-block !py-1">
+        <ul className="sb-rows">
+          {tail.map((d) => (
+            <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

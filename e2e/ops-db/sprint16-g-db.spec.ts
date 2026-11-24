@@ -1,5 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll, waitForSettledStyles } from "../field-checks";
+import { openAllPlans } from "../ops-menu";
 
 // Sprint 16-G の E2E-DB：ホーム（準備カード・次の予定・期限・クイック操作 3・空の状態・畳んだ「すべての予定」）。契約 HM-1〜HM-5、K-8。
 // サーバーの時計は OPS_TEST_NOW（JST 2027-01-05 12:00）。組織 B で確かめる（組織 A は他の試験の計画が多い）。
@@ -68,7 +69,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
   let planId = "";
   let planTitle = "";
   let pilotName = "";
-  const placeName = `ホーム試験地点${stamp}`;
+  const placeName = `地点${stamp}`; // 最初の画面の高さの検査のため、日時と並べて 1 行に収まる長さ
 
   test.beforeAll(async () => {
     const bm = await apiAs(seeded("b-manager"));
@@ -231,7 +232,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     expect(dump).not.toMatch(/35\.4342|133\.3805/);
   });
 
-  test("HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件、残りは「ほか N 件を見る」", async ({ page }) => {
+  test("HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中", async ({ page }) => {
     const bm = await apiAs(seeded("b-manager"));
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
@@ -257,12 +258,14 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     await expect(section.getByTestId("deadline-row")).not.toHaveCount(0);
     const all = ((await (await bm.get("/api/ops/today")).json()) as { deadlines: { daysLeft: number }[] }).deadlines;
     expect(all.every((d) => d.daysLeft <= 60), "60 日を超える期限は出ない").toBe(true);
-    const visibleRows = await section.getByTestId("deadline-row").evaluateAll((els) => els.filter((e) => (e as HTMLElement).offsetParent !== null).length);
-    expect(visibleRows).toBe(Math.min(1, all.length));
+    // 上段には近い 1 件だけ。残りは「すべての予定」の中（畳んだ中）にあり、件数は見出しの行に出る
+    await expect(section.getByTestId("deadline-row")).toHaveCount(Math.min(1, all.length));
     if (all.length > 1) {
-      await expect(page.getByTestId("home-deadlines-more-toggle")).toHaveText(`ほか ${all.length - 1} 件を見る`);
-      await page.getByTestId("home-deadlines-more-toggle").click();
-      await expect(section.getByTestId("deadline-row").nth(all.length - 1)).toBeVisible();
+      await expect(page.getByTestId("home-deadlines-count")).toContainText(`ほか ${all.length - 1} 件`);
+      await expect(page.getByTestId("home-deadlines-rest").getByTestId("deadline-row")).toHaveCount(all.length - 1);
+      await expect(page.getByTestId("home-deadlines-rest")).toBeHidden();
+      await openAllPlans(page);
+      await expect(page.getByTestId("home-deadlines-rest")).toBeVisible();
     }
     expect(await before(page, "home-primary", "home-deadlines")).toBe(true);
     expect(await before(page, "home-deadlines", "home-quick")).toBe(true);
