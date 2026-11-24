@@ -16,6 +16,7 @@ import { fieldInspectionLites, toLite } from "./field-rows";
 import { enrichFlights } from "./flight-extras";
 import { incidentTodayActions } from "./incidents";
 import { journeyStages, type JourneyStageDto } from "./journey-logic";
+import { prepInspectionKey, prepReportKey, type PrepInspectionKey, type PrepJudgementInput, type PrepReportKey } from "./prep-card-logic";
 import { loadPlanSummaries, type PlanDto } from "./plans";
 import { asDate, myPilot, nowOf } from "./records";
 import type { NextAction } from "./report-logic";
@@ -94,6 +95,12 @@ export type TodayCardDto = {
   /** 確認の状況（運航管理者の確認。既存の導出と文言）。 */
   readonly confirmation: { readonly state: string; readonly label: string };
   readonly badge: TodayBadgeDto;
+  /** 準備カード（Sprint 16-G。通報・飛行前点検・判定の 3 行の材料。語の選び方は prep-card-logic）。 */
+  readonly prep: {
+    readonly report: PrepReportKey;
+    readonly inspection: PrepInspectionKey;
+    readonly judgement: PrepJudgementInput;
+  };
   /** 行程の 7 段（判定→計画→確認→通報→点検→飛行→日誌。記録の有無から毎回導出する）。 */
   readonly journey: readonly JourneyStageDto[];
   /** 主ボタン 1 つ：当日の計画は「現場モードを開く」、それ以外は「計画を開く」。 */
@@ -262,6 +269,21 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
   });
   const summaryBy = new Map(summaries.map((s) => [s.row.id, s]));
 
+  // 準備カードの判定の行の材料：カードの計画の現在の判定の項目を段階ごとに数える（1 回の問い合わせ。失敗しても画面の他の部分は出す）
+  const prepJudgement = await (async (): Promise<PrepJudgementInput> => {
+    if (!model.card) return { kind: "load_failed" };
+    const s = summaryBy.get(model.card.planId);
+    if (!s) return { kind: "load_failed" };
+    const stale = s.dto.freshness.stale;
+    try {
+      const c = await store.snapshotItemCounts(ctx.db, org, s.row.current_snapshot_id);
+      if (!c) return { kind: "no_record", stale };
+      return { kind: "counts", stale, counts: { noFly: c.no_fly, needs: c.needs_procedure, unknown: c.unknown, done: c.procedure_done, none: c.no_procedure } };
+    } catch {
+      return { kind: "load_failed" };
+    }
+  })();
+
   const card = ((): TodayCardDto | null => {
     if (!model.card) return null;
     const s = summaryBy.get(model.card.planId);
@@ -298,6 +320,15 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
       },
       confirmation: { state: dto.state, label: dto.stateLabel },
       badge: badgeOf(now, r, stateBy.get(r.id)),
+      prep: {
+        report: prepReportKey(dto.report.status.code),
+        inspection: prepInspectionKey({
+          isFlightDay: isToday,
+          done: stateBy.get(r.id)?.checks.inspection.done ?? false,
+          abnormal: stateBy.get(r.id)?.checks.inspection.abnormal ?? false,
+        }),
+        judgement: prepJudgement,
+      },
       journey: journeyOf(r, dto, stateBy.get(r.id), flightRecordPlanIds.has(r.id), today),
       primary:
         isToday || inFlight

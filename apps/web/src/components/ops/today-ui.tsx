@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icons";
 import { formatDay, formatDaysIn } from "@/lib/ops-day";
 import { DEADLINE_GUIDE_DISCLAIMER } from "@soraban/dips";
 import { LICENSE_RENEWAL_LABEL } from "@/server/ops/license";
-import { SectionHead } from "@/components/ui/sb-parts";
+import { Disclosure, ListCardLink, PillLink, SectionHead, StatusLabel, type StatusTone } from "@/components/ui/sb-parts";
 import type { DeadlineDto } from "@/server/ops/deadlines-logic";
 import type { TodayBadgeDto, TodayCardDto, TodayDto, TodayRowDto, TodayUpcomingDto } from "@/server/ops/today";
 import type { TodayNextAction } from "@/server/ops/today-logic";
@@ -186,7 +186,8 @@ export function TodayCard({ card, today, nextActions = [] }: { readonly card: To
         </Fact>
       </dl>
       <RouteBand card={card} next={journeyNext(card.journey, nextActions, card.planId)} />
-      <a href={card.primary.href} data-variant="primary" className="opx-btn opx-btn-primary opx-nc-primary" data-testid="today-card-primary" data-kind={card.primary.kind}>
+      {/* 16-G（K-8）：ホームの主ボタンは 1 つ（home-primary）。「すべての予定」の中のこのカードの入口は副ボタン */}
+      <a href={card.primary.href} className="opx-btn opx-nc-primary" data-testid="today-card-primary" data-kind={card.primary.kind}>
         {card.primary.label}
       </a>
     </section>
@@ -216,23 +217,109 @@ export function TodayRest({ rows }: { readonly rows: readonly TodayRowDto[] }) {
 
 const PLAN_NEW_HREF = "/ops/plans/new";
 
-/** 空の状態：何がないかと、次にできること（件数だけのタイルは作らない）。 */
+/**
+ * 空の状態（HM-4）：アイコン・一文・主ボタン「計画を作る」だけ。計画を作れない役割（閲覧者・操縦者の行に結び付いていない操縦者）には、
+ * 押しても作れない「計画を作る」を出さず、サーバーの文言・経路の先頭（地点を判定する）を主ボタンにする。
+ */
 export function TodayEmpty({ empty, canPlan = true }: { readonly empty: NonNullable<TodayDto["empty"]>; readonly canPlan?: boolean }) {
-  // 計画を作れない役割（閲覧者・操縦者の行に結び付いていない操縦者）には「飛行計画を作る」を出さない（押しても作れない）。サーバーの文言・経路は変えない
-  const actions = canPlan ? empty.actions : empty.actions.filter((a) => a.href !== PLAN_NEW_HREF);
+  const action = canPlan ? { label: "計画を作る", href: PLAN_NEW_HREF } : empty.actions.filter((a) => a.href !== PLAN_NEW_HREF)[0];
   return (
-    <section aria-label="今日の飛行" className="sb-block flex flex-col gap-3" data-testid="today-empty">
+    <section aria-label="今日の飛行" className="sb-block home-empty flex flex-col items-start gap-3" data-testid="today-empty">
+      <Icon name="plan" size={32} className="text-sb-ink-3" />
       <p className="text-[1.125rem] font-bold leading-snug" data-testid="today-empty-message">
         {empty.message}
       </p>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        {actions.map((a, i) => (
-          <a key={a.href} href={a.href} data-variant={i === 0 ? "primary" : undefined} className={i === 0 ? "opx-btn opx-btn-primary" : "opx-btn min-h-14 sm:min-h-12"} data-testid="today-empty-action">
-            {a.label}
-          </a>
-        ))}
-      </div>
+      {action ? (
+        <PillLink variant="primary" block href={action.href} data-testid="today-empty-action">
+          {action.label}
+        </PillLink>
+      ) : null}
     </section>
+  );
+}
+
+const BADGE_TONE: Readonly<Record<TodayBadgeDto["code"], StatusTone>> = {
+  in_flight: "flying",
+  journal_pending: "warn",
+  journaled: "safe",
+  ended: "info",
+  planned: "info",
+};
+
+/** 次の予定（HM-1 ③）：直近の 1 件の一覧カード。状態ラベル・日時・場所。カード全体が計画の画面への入口（地図のサムネイルは 19-2a の後）。 */
+export function HomeNextCard({ card, today }: { readonly card: TodayCardDto; readonly today: string }) {
+  return (
+    <section aria-label="次の予定" className="flex flex-col gap-2" data-testid="home-next">
+      <ListCardLink href={`/ops/plans/${card.planId}`} data-testid="home-next-link">
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <StatusLabel tone={BADGE_TONE[card.badge.code]} testId="home-next-status">
+            {card.badge.label}
+          </StatusLabel>
+          <span className="opx-num text-sm text-sb-ink-3" data-testid="home-next-when">
+            <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>　{card.timeLabel}
+          </span>
+        </span>
+        <span className="text-[1.0625rem] font-bold leading-snug [overflow-wrap:anywhere]" data-testid="home-next-title">
+          {card.title}
+        </span>
+        <span className="text-sm text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="home-next-place">
+          {card.placeName}
+        </span>
+      </ListCardLink>
+    </section>
+  );
+}
+
+/**
+ * クイック操作（HM-1 ⑤）：飛行前点検・新しい計画・飛行記録。幅を 3 等分した副ボタン（48px 以上。記号を上、文字を下）。
+ * 記録を入力できない役割（閲覧者）には出さない。計画を作れない役割には「新しい計画」を除く。ops-enter-* の識別子は 16-F・12c から引き継ぐ。
+ */
+export function HomeQuick({ canEnter, canPlan }: { readonly canEnter: boolean; readonly canPlan: boolean }) {
+  if (!canEnter) return null;
+  return (
+    <nav aria-label="クイック操作" className="home-quick" data-count={canPlan ? 3 : 2} data-testid="home-quick">
+      <a href="/ops/inspections/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-inspection">
+        <Icon name="inspection" size={24} />
+        <span className="home-quick-label">飛行前点検</span>
+      </a>
+      {canPlan ? (
+        <a href="/ops/plans/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-plan">
+          <Icon name="plus" size={24} />
+          <span className="home-quick-label">新しい計画</span>
+        </a>
+      ) : null}
+      <a href="/ops/flights/new" className="sb-pill sb-pill-secondary home-quick-btn" data-testid="ops-enter-flight">
+        <Icon name="flight" size={24} />
+        <span className="home-quick-label">飛行記録</span>
+      </a>
+    </nav>
+  );
+}
+
+/** ホームの主ボタン（HM-2）：次にやることの 1 件（押せるもののうち先頭）。無ければ「新しい計画」。作れない役割は出さない。 */
+export function HomePrimary({ action, canPlan }: { readonly action: TodayNextAction | null; readonly canPlan: boolean }) {
+  if (action)
+    return (
+      <PillLink variant="primary" block href={action.href} data-testid="home-primary" data-action-id={action.id}>
+        {action.label}
+      </PillLink>
+    );
+  if (!canPlan) return null;
+  return (
+    <PillLink variant="primary" block href={PLAN_NEW_HREF} data-testid="home-primary" data-action-id="new_plan">
+      新しい計画
+    </PillLink>
+  );
+}
+
+/** 下段の「すべての予定」：判定へのピル・今日のカードの詳細・残りの予定・次にやること・先の予定を畳む（HM-1）。 */
+export function HomeAllPlans({ children }: { readonly children: ReactNode }) {
+  return (
+    <Disclosure title="すべての予定" note="判定への入口・次にやること・直近の飛行" testId="home-all" summaryTestId="home-all-toggle">
+      <div className="flex flex-col gap-4" data-testid="home-all-body">
+        {children}
+      </div>
+    </Disclosure>
   );
 }
 
@@ -377,46 +464,64 @@ export function TodayNextActions({
   );
 }
 
-/** 近づく期限（技能証明の有効期限と、許可・承認の有効な最終日。60 日以内、最大 5 件）。機体の期限は記録する場所が無いため出ない。 */
+/** ホームに最初から出す期限の行数（残りは「ほか N 件を見る」。最初の画面に、クイック操作まで入れるため）。 */
+export const HOME_DEADLINES_INITIAL = 2;
+
+function DeadlineRow({ d, today }: { readonly d: DeadlineDto; readonly today: string }) {
+  return (
+    <li data-testid="deadline-row" data-kind={d.kind}>
+      {/* 一覧の行は上下 14px。ここだけ 8px に戻す。最初の画面（下タブ 60px を除く）に、期限の先頭の行までを収めるため */}
+      <a href={d.href} className="sb-row !py-2" data-testid="deadline-link">
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="text-[1rem] font-bold leading-snug">{d.what}</span>
+          <span className="break-words text-sm text-sb-ink-2">
+            {d.subject}
+            {d.licenseStatus ? `　${LICENSE_RENEWAL_LABEL[d.licenseStatus]}` : ""}
+          </span>
+        </span>
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          <span className="sb-num text-sm text-sb-ink">
+            <time dateTime={d.date}>{formatDay(d.date, today)}</time>
+          </span>
+          {d.overdue || d.daysLeft <= 30 ? (
+            <span className={d.overdue ? "sb-tag sb-tag-strong" : "sb-tag sb-tag-deadline"}>
+              <span aria-hidden>{d.overdue ? "！" : "○"}</span>
+              {d.leftLabel}
+            </span>
+          ) : (
+            <span className="text-sm text-sb-ink-3">{d.leftLabel}</span>
+          )}
+        </span>
+      </a>
+    </li>
+  );
+}
+
+/**
+ * 近づく期限（HM-1 ④。技能証明の有効期限と、許可・承認の有効な最終日。残り 60 日以内）。無いときは段ごと出さない。
+ * 最初は近い順に HOME_DEADLINES_INITIAL 件、残りは「ほか N 件を見る」。機体の期限は記録する場所が無いため出ない。
+ */
 export function TodayDeadlines({ deadlines, today }: { readonly deadlines: readonly DeadlineDto[]; readonly today: string }) {
+  if (deadlines.length === 0) return null;
+  const head = deadlines.slice(0, HOME_DEADLINES_INITIAL);
+  const tail = deadlines.slice(HOME_DEADLINES_INITIAL);
   return (
     <section aria-label="近づく期限" data-testid="home-deadlines" className="flex flex-col gap-2">
       <SectionHead id="home-deadlines-h" title="近づく期限" note="60 日以内" />
-      {deadlines.length === 0 ? (
-        <p className="text-sb-ink-2" data-testid="home-deadlines-empty">
-          60 日以内に近づく期限はありません。
-        </p>
-      ) : (
-        <ul className="sb-block sb-rows !py-1">
-          {deadlines.map((d) => (
-            <li key={`${d.kind}-${d.id}`} data-testid="deadline-row" data-kind={d.kind}>
-              {/* 一覧の行は上下 14px。ここだけ 8px に戻す。2 行の期限を、375×812 の最初の画面（下タブ 60px を除く）に収めるため */}
-              <a href={d.href} className="sb-row !py-2" data-testid="deadline-link">
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[1rem] font-bold leading-snug">{d.what}</span>
-                  <span className="break-words text-sm text-sb-ink-2">
-                    {d.subject}
-                    {d.licenseStatus ? `　${LICENSE_RENEWAL_LABEL[d.licenseStatus]}` : ""}
-                  </span>
-                </span>
-                <span className="flex shrink-0 flex-col items-end gap-1">
-                  <span className="sb-num text-sm text-sb-ink">
-                    <time dateTime={d.date}>{formatDay(d.date, today)}</time>
-                  </span>
-                  {d.overdue || d.daysLeft <= 30 ? (
-                    <span className={d.overdue ? "sb-tag sb-tag-strong" : "sb-tag sb-tag-deadline"}>
-                      <span aria-hidden>{d.overdue ? "！" : "○"}</span>
-                      {d.leftLabel}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-sb-ink-3">{d.leftLabel}</span>
-                  )}
-                </span>
-              </a>
-            </li>
+      <div className="sb-block !py-1">
+        <ul className="sb-rows">
+          {head.map((d) => (
+            <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />
           ))}
         </ul>
-      )}
+        {tail.length > 0 ? (
+          <MoreRows count={tail.length} data-testid="home-deadlines-more">
+            {tail.map((d) => (
+              <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />
+            ))}
+          </MoreRows>
+        ) : null}
+      </div>
       <p data-note="" className="text-sm text-sb-ink-3" data-testid="home-deadlines-note">
         機体の期限は、記録する場所がまだないため出ません。
       </p>

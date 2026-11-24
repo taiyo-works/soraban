@@ -29,12 +29,15 @@ const action = (n: number, extra: Partial<TodayNextAction> = {}): TodayNextActio
   }) as TodayNextAction;
 
 describe("ホームの部品（Sprint 12g-1b 差し戻し）", () => {
-  it("M-3. 空の日：計画を作れない役割には「飛行計画を作る」を出さず、「地点を判定する」を主ボタンにする", () => {
+  it("M-3（16-G HM-4 で改訂）. 空の日：計画を作れる役割は、アイコン・一文・主ボタン「計画を作る」だけ。作れない役割には「計画を作る」を出さず、「地点を判定する」を主ボタンにする", () => {
     const can = renderToStaticMarkup(createElement(TodayEmpty, { empty, canPlan: true }));
-    expect(can).toContain("飛行計画を作る");
-    expect(can).toContain("地点を判定する");
+    expect(can).toContain("計画を作る");
+    expect(can).not.toContain("地点を判定する");
+    expect(can).toContain("<svg");
+    expect(can.match(/data-testid="today-empty-action"/g)).toHaveLength(1);
+    expect(can.match(/data-variant="primary"/g)).toHaveLength(1);
     const cannot = renderToStaticMarkup(createElement(TodayEmpty, { empty, canPlan: false }));
-    expect(cannot).not.toContain("飛行計画を作る");
+    expect(cannot).not.toContain("計画を作る");
     expect(cannot).toContain("地点を判定する");
     expect(cannot.match(/data-testid="today-empty-action"/g)).toHaveLength(1);
   });

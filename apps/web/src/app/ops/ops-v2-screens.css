@@ -364,3 +364,110 @@
     padding-bottom: 8px;
   }
 }
+
+/* ===== ホーム（Sprint 16-G）：準備カード・クイック操作 3 つ・空の状態 =====
+ * 準備カードは .sb-card.sb-card-state（帯の色＝3 行のうちいちばん重い状態。unknown は帯なし）。行は「記号（24px）・見出し・状態の文」。
+ * 記号は判定の 5 段の形（VerdictSign）。色は補助で、状態は形と文字が伝える。本文 16px・行間 1.7、補足 14px・行間 1.5（下限は変えない）。 */
+.home-prep {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.home-prep-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-prep-title {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.home-prep-when {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+  overflow-wrap: anywhere;
+}
+.home-prep-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-prep-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.home-prep-sign {
+  flex: none;
+  display: inline-flex;
+}
+.home-prep-sign .sb-vm {
+  width: 24px;
+  height: 24px;
+}
+.home-prep-k {
+  flex: none;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.home-prep-v {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.home-prep-note {
+  flex-basis: 100%;
+  padding-left: 32px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+}
+.home-prep-foot {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+}
+.home-prep-row[data-tone="safe"] .home-prep-sign { color: var(--sb-st-safe-text); }
+.home-prep-row[data-tone="warn"] .home-prep-sign { color: var(--sb-st-warn-text); }
+.home-prep-row[data-tone="danger"] .home-prep-sign { color: var(--sb-st-danger-text); }
+.home-prep-row[data-tone="info"] .home-prep-sign { color: var(--sb-st-info-text); }
+.home-prep-row[data-tone="unknown"] .home-prep-sign { color: var(--sb-ink-3); }
+.home-prep-reload {
+  margin-left: 32px;
+}
+html[data-mode="field"] .home-prep-note,
+html[data-mode="field"] .home-prep-when,
+html[data-mode="field"] .home-prep-foot {
+  font-size: 1rem;
+}
+/* クイック操作：幅を 3 等分した副ボタン。記号を上、文字を下に置き、320px でも 3 つが 1 行に入る */
+.home-quick {
+  display: grid;
+  grid-template-columns: repeat(var(--home-quick-cols, 3), minmax(0, 1fr));
+  gap: 8px;
+}
+.home-quick[data-count="2"] { --home-quick-cols: 2; }
+.home-quick[data-count="1"] { --home-quick-cols: 1; }
+.home-quick-btn {
+  flex-direction: column;
+  gap: 4px;
+  min-height: 64px;
+  padding: 8px 4px;
+}
+.home-quick-label {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+html[data-mode="field"] .home-quick-btn {
+  min-height: 72px;
+}
