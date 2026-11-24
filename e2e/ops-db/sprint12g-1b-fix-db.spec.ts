@@ -306,16 +306,16 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await page.goto("/ops/more");
     const iconOf = async (testId: string): Promise<string> => page.getByTestId(testId).locator("svg").first().evaluate((s) => s.innerHTML);
     expect(await iconOf("nav-verdict")).not.toBe(await iconOf("nav-places"));
-    // 点検のアイコンは、ほかの 5 項目（ホーム・判定・計画・日誌・登録）のどれとも別の絵（Sprint 12h PR ③a）
+    // 点検のアイコンは、ほかの項目（ホーム・判定・計画・日誌・機体と書類）のどれとも別の絵（Sprint 12h PR ③a。16-F から点検は日誌の子）
     const inspection = await iconOf("nav-inspections");
-    for (const k of ["nav-today", "nav-verdict", "nav-plans", "nav-journal", "nav-more"]) expect(inspection, `点検と ${k}`).not.toBe(await iconOf(k));
+    for (const k of ["nav-today", "nav-verdict", "nav-plans", "nav-journal", "nav-more", "nav-flights", "nav-incidents"]) expect(inspection, `点検と ${k}`).not.toBe(await iconOf(k));
     expect(await iconOf("nav-pilots")).not.toBe(await iconOf("more-link-members"));
     expect(await iconOf("user-menu-button")).not.toBe(await iconOf("nav-pilots"));
     // 鍵（lock）の図形（rect の角丸 3 と M8.5 10.5V8…）が dips-note にない。点線の輪（stroke-dasharray）だけ
     const svg = await page.getByTestId("dips-note").locator("svg").first().evaluate((s) => s.innerHTML);
     expect(svg).toContain("stroke-dasharray");
     expect(svg).not.toContain("M8.5 10.5V8");
-    await expectNoHorizontalScroll(page, "登録");
+    await expectNoHorizontalScroll(page, "機体と書類");
   });
 
   test("独創性：行程表が「次の飛行」の主役。7 つの欄（等幅の通し番号）・「次」の押印・次の段の作業。375・320px で折り返さない", async ({ page }) => {

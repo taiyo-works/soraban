@@ -578,9 +578,9 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
         expect(box, `${path} ${name}`).not.toBeNull();
         expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(48);
       }
-      // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは ホーム／計画／点検／日誌／登録 の 5 つ・60px 以上に）：スマホは下の 5 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
-      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections").boundingBox();
-      expect(tab!.height).toBeGreaterThanOrEqual(60);
+      // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは 5 つ・60px 以上に、16-F で ホーム／計画／日誌／機体と書類 の 4 つ・64px 以上に）：スマホは下の 4 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
+      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-journal").boundingBox();
+      expect(tab!.height).toBeGreaterThanOrEqual(64);
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto("/ops/flights");
       // boundingBox は待たない。左メニューが描かれてから測る

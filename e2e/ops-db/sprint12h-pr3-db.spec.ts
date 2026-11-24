@@ -90,35 +90,37 @@ test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
 test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目", () => {
-  test("P3a-1. 下タブ：ホーム／計画／点検／日誌／登録 の 5 つ（高さ 60px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし", async ({ page }) => {
+  test("P3a-1. 下タブ：ホーム／計画／日誌／機体と書類 の 4 つ（16-F。高さ 64px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし。点検は日誌が現在地", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
       for (const w of [375, 360]) {
         await page.setViewportSize({ width: w, height: 740 });
-        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/inspections/new", "inspections"], ["/ops/journal", "journal"], ["/ops/more", "more"], ["/", null]] as const) {
+        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "journal"], ["/ops/inspections/new", "journal"], ["/ops/journal", "journal"], ["/ops/more", "more"], ["/", null]] as const) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
           const nav = page.getByTestId("ops-bottom-nav");
           await expect(nav, label).toBeVisible();
-          expect((await nav.locator("a").allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "点検", "日誌", "登録"]);
+          expect((await nav.locator("a").allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "日誌", "機体と書類"]);
           await expect(nav.getByTestId("nav-verdict"), label).toHaveCount(0);
+          await expect(nav.getByTestId("nav-inspections"), label).toHaveCount(0);
           const boxes = await nav.locator("a").evaluateAll((els) => els.map((e) => ({ r: e.getBoundingClientRect(), label: (e.lastElementChild as HTMLElement).getBoundingClientRect().height })));
           for (const b of boxes) {
-            expect(b.r.height, `${label} 高さ`).toBeGreaterThanOrEqual(60);
-            expect(b.r.width, `${label} 幅`).toBeGreaterThanOrEqual(w / 5 - 2);
+            expect(b.r.height, `${label} 高さ`).toBeGreaterThanOrEqual(64);
+            // 4 等分（左右 8px の余白・項目の間 8px。16-F）
+            expect(b.r.width, `${label} 幅`).toBeGreaterThanOrEqual((w - 16 - 24) / 4 - 2);
             expect(b.label, `${label} ラベルが折り返している`).toBeLessThan(24);
           }
           // 現在地：aria-current は 1 つだけ（`/` は 0）。薄い主色の面は、現在地のタブだけ
           await expect(nav.locator('[aria-current="page"]'), label).toHaveCount(current ? 1 : 0);
           if (current) await expect(nav.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
           const soft = await rgbOf(page, "var(--sb-primary-soft)");
-          const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e.firstElementChild as HTMLElement).backgroundColor));
+          const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e as HTMLElement).backgroundColor));
           expect(faces.filter((f) => f === soft).length, `${label} 薄い主色の面`).toBe(current ? 1 : 0);
           await expectNoHorizontalScroll(page, label);
           // 文字は 4.5:1 以上、14px 以上（16-B：12→14）
           const samples = await collectTextSamples(page, '[data-testid="ops-bottom-nav"]');
-          expect(samples.length, label).toBeGreaterThanOrEqual(5);
+          expect(samples.length, label).toBeGreaterThanOrEqual(4);
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
             expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(14);
@@ -148,18 +150,18 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
       await page.emulateMedia({ colorScheme: scheme });
       for (const w of [1280, 1440]) {
         await page.setViewportSize({ width: w, height: 800 });
-        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/journal", "journal"], ["/ops/flights", "journal"], ["/ops/incidents", "journal"], ["/ops/more", "more"]] as const) {
+        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/journal", "journal"], ["/ops/flights", "flights"], ["/ops/incidents", "incidents"], ["/ops/more", "more"]] as const) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
           const side = page.getByTestId("ops-sidebar");
           await expect(side, label).toBeVisible();
           await expect(page.getByTestId("ops-bottom-nav"), label).toBeHidden();
-          expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "判定", "計画", "点検", "日誌", "登録", "機体", "操縦者", "許可・承認", "地点"]);
+          expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "日誌", "飛行記録", "点検", "事故・ヒヤリハット", "機体と書類", "機体", "操縦者", "許可・承認", "地点", "判定"]);
           expect(Math.round((await side.boundingBox())!.width), `${label} 幅`).toBe(240);
-          for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) {
+          for (const k of ["today", "verdict", "plans", "journal", "more"]) {
             expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           }
-          for (const k of ["aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
+          for (const k of ["flights", "inspections", "incidents", "aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           await expect(side.locator('[aria-current="page"]'), label).toHaveCount(1);
           await expect(side.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
           const soft = await rgbOf(page, "var(--sb-primary-soft)");
@@ -297,7 +299,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     }
     if (!detailUrl.test(page.url())) await page.goto((await detailRow.getAttribute("href"))!);
     await page.waitForURL(detailUrl);
-    await expect(page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections")).toHaveAttribute("aria-current", "page");
+    await expect(page.getByTestId("ops-bottom-nav").getByTestId("nav-journal")).toHaveAttribute("aria-current", "page");
     const back = page.locator("main").getByRole("link", { name: "点検の一覧" }).first();
     await expect(back).toHaveAttribute("href", "/ops/inspections");
     const bb = (await back.boundingBox())!;

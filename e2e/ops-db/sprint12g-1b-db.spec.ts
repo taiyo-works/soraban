@@ -248,21 +248,20 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await expect(page.getByTestId("journal-new-flight")).toHaveCount(0);
     await page.goto("/ops/incidents");
     await expect(page.getByTestId("incident-list-page")).toBeVisible();
-    // 一覧の戻り先は日誌、機体・操縦者・許可・承認・地点の一覧の戻り先は登録、計画の一覧には戻りリンクがない
+    // 一覧の戻り先は日誌、機体・操縦者・許可・承認・地点の一覧の戻り先は機体と書類（16-F で表示名を「登録」から変更）、計画の一覧には戻りリンクがない
     await expect(page.getByTestId("incident-list-page").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     for (const p of ["/ops/aircraft", "/ops/pilots", "/ops/permits", "/ops/places"]) {
       await page.goto(p);
-      const back = page.locator("main").getByRole("link", { name: /登録/ }).first();
+      const back = page.locator("main").getByRole("link", { name: /機体と書類/ }).first();
       await expect(back, p).toHaveAttribute("href", "/ops/more");
       expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(48);
     }
-    // 点検は 1 段目の画面（Sprint 12h PR ③a）：戻りリンクを置かない（計画の一覧と同じ検査）。飛行記録の一覧の戻り先は日誌のまま
+    // 点検の一覧は 16-F から日誌の下の画面：戻りリンク「日誌」（行き先 /ops/journal）。飛行記録の一覧の戻り先も日誌のまま。計画の一覧には戻りリンクを置かない
     await page.goto("/ops/flights");
     await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     await page.goto("/ops/inspections");
     await expect(page.getByTestId("ops-inspections")).toBeVisible();
-    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
-    await expect(page.locator("main").getByRole("link", { name: /日誌|一覧へ戻る|戻る/ })).toHaveCount(0);
+    await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     await page.goto("/ops/plans");
     await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
     await ctx.close();

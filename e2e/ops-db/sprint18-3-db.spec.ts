@@ -78,7 +78,7 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
       const main = await page.locator("main").first().innerText();
       for (const w of ["未定", "準備中", "TBD", "要記入", "ダミー", "法人番号", "適格請求書", "平日", "祝日"]) expect(main, w).not.toContain(w);
       await noHorizontalScroll(page, `/ops/about ${who}`);
-      // 「登録」が現在地（メニューの親）
+      // 「機体と書類」（16-F で「登録」から表示名を変更）が現在地（メニューの親）
       await expect(page.locator('[data-testid="nav-more"]:visible')).toHaveAttribute("aria-current", "page");
     });
   }
@@ -102,8 +102,8 @@ test.describe("Sprint 18-3 E2E-DB：このアプリについて・境界の 1 �
     expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(56);
     await tapAndWait(page, row, /\/ops\/about$/);
     await expect(page.getByTestId("about-boundary")).toBeVisible();
-    // 戻りリンクは「登録」
-    await page.getByRole("link", { name: /登録/ }).first().waitFor();
+    // 戻りリンクは「機体と書類」
+    await page.getByRole("link", { name: /機体と書類/ }).first().waitFor();
     // 現場モードにはメニューが出ない（入口を足していない）
     // 登録の画面の長さは、入口を足しても 17-2 の上限（登録は短い画面）に収まる
     await page.goto("/ops/more");

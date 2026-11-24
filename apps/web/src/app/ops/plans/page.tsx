@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, Note, PageHeader } from "@/components/ops/ui";
+import { formatDay } from "@/lib/ops-day";
 import { DipsNotice, NextActionItem, PlanStateBadge, ReportBadge, ReportStatusBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
 import { jstDate } from "@/lib/ops-time";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
@@ -62,6 +63,12 @@ export default async function PlanListPage({
     <main className="flex flex-col gap-6">
       <PageHeader
         title="飛行計画"
+        meta={
+          // 16-F（F-6）：題の補足 1 行（14px。ホームの日付と同じ形）
+          <span className="opx-num" data-testid="plans-today">
+            今日 <time dateTime={today}>{formatDay(today, today)}</time>
+          </span>
+        }
         aside={
           denied === null ? (
             <Link prefetch={false} href="/ops/plans/new" data-variant="primary" className="opx-btn opx-btn-primary" data-testid="plan-new-link">

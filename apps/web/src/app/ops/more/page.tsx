@@ -7,11 +7,11 @@ import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { getRegisterCounts } from "@/server/ops/register-counts";
 
-// 登録（Sprint 12c 設計 G の「その他」を、Sprint 12g-1b で改名）：機体・操縦者・許可・承認・よく使う地点の入口（件数つき）と、
+// 機体と書類（Sprint 12c 設計 G の「その他」を 12g-1b で「登録」に、16-F で「機体と書類」に改名。URL は /ops/more のまま）：機体・操縦者・許可・承認・よく使う地点の入口（件数つき）と、
 // 管理（利用者。運航管理者のみ）。ログイン中の利用者の名前・役割・ログアウトは、右上の利用者メニューにある。
 // 事故・ヒヤリハットは日誌の中へ移した（/ops/journal の「事故・ヒヤリハット」）。期限一覧（12f）の枠は作らない。
 // DIPS との接続は未実装（保留）。「未接続」を静かに 1 行で示すだけで、操作も約束もしない。
-export const metadata: Metadata = { title: "登録" };
+export const metadata: Metadata = { title: "機体と書類" };
 
 export default async function OpsMorePage() {
   const { ctx, me } = await requireOpsMember();
@@ -26,8 +26,8 @@ export default async function OpsMorePage() {
   return (
     <main className="flex flex-col gap-6" data-testid="ops-more">
       <DraftOwnerGuard memberId={me.member.id} />
-      <PageHeader title="登録" meta={me.org.name} />
-      <nav aria-label="登録のメニュー">
+      <PageHeader title="機体と書類" meta={me.org.name} />
+      <nav aria-label="機体と書類のメニュー">
         <ul className="sb-block sb-rows !py-1" data-testid="more-menu">
           {items.map((m) => (
             <li key={m.href}>

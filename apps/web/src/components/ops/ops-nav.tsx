@@ -1,21 +1,21 @@
 "use client";
 
-// 運航管理のメニュー（Sprint 12g-1b 段階 A、Sprint 12h PR ③a で 5 タブ・6 項目に）。ハンバーガーは使わない。
-//   - PC（幅 1024px 以上）：左メニュー（6 項目）。上から ホーム／「調べる」＝判定／「飛ばす」＝計画・点検・日誌／登録（機体・操縦者・許可・承認・地点）。
-//   - スマホ（幅 1024px 未満）：画面下に固定の 5 タブ（ホーム／計画／点検／日誌／登録。高さ 60px 以上。判定は置かない）。上に薄いトップバー（画面名・利用者メニュー）。
+// 運航管理のメニュー（Sprint 12g-1b 段階 A、Sprint 12h PR ③a で 5 タブ、Sprint 16-F で 4 項目に）。ハンバーガーは使わない。
+//   - PC（幅 1024px 以上）：左メニュー。上から ホーム／計画／日誌（子：飛行記録・点検・事故・ヒヤリハット）／機体と書類（子：機体・操縦者・許可・承認・地点）、罫のあとに「調べる」＝判定。
+//   - スマホ（幅 1024px 未満）：画面下に固定の 4 タブ（ホーム／計画／日誌／機体と書類。高さ 64px 以上。判定は置かない）。上に薄いトップバー（画面名・利用者メニュー）。
 //   - 右上の利用者メニュー（PC・スマホ共通）：名前・役割・ログアウト。ログアウトの挙動（未送信の警告・下書きの消去）は SignOutButton のまま。
 //   - 現在地は薄い主色の面・文字の太さ・アイコン・aria-current で示す（色だけに頼らない）。見た目は soraban-ui.css の .sb-tab／.sb-side-link（v2 のトークンだけ）。
 //   - 現場モード・サインイン・アクセス権なしでは出さない（現場モードは親指の届く下半分を離着陸のボタンに使う）。
 //   - 出す条件（運航管理が有効でログイン済み）は、サーバーの OpsNavGate が決めてからこの部品を描く。
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { cx } from "@/components/ui/cx";
 import { Icon, type IconName } from "@/components/ui/icons";
 import { InfoPopover } from "@/components/ui/overlays";
 import type { MemberRoleDb } from "@soraban/db";
 import { SignOutButton } from "./ops-client";
-import { BOTTOM_TABS, currentChildKey, currentNavKey, NAV_GROUPS, NAV_ITEM, navHiddenOn, OPS_MAIN_ID, visibleNavChildren } from "./ops-nav-model";
+import { BOTTOM_TABS, currentChildKey, currentChildParent, currentNavKey, NAV_GROUPS, NAV_ITEM, navHiddenOn, OPS_MAIN_ID, type NavParentKey, visibleChildrenOf } from "./ops-nav-model";
 
 export type OpsNavUser = {
   readonly memberId: string;
@@ -60,12 +60,13 @@ function SideLink({
   );
 }
 
-/** PC の左メニュー。1024px 未満では出さない（下の 5 タブが代わりになる）。 */
+/** PC の左メニュー。1024px 未満では出さない（下の 4 タブが代わりになる）。 */
 export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
   const pathname = usePathname() ?? "";
   if (navHiddenOn(pathname)) return null;
   const current = currentNavKey(pathname);
   const child = currentChildKey(pathname);
+  const childParent = currentChildParent(pathname);
   return (
     <nav
       aria-label="運航管理のメニュー（左）"
@@ -76,19 +77,20 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
         <span className="text-h2 font-semibold leading-tight text-sb-ink">そらばん</span>
         <span className="text-aux text-sb-ink-3">運航管理</span>
       </Link>
-      {/* 見出し（調べる・飛ばす）は項目の左端（アイコンの左）にそろえ、グループの間は余白で切る。登録（と子項目）の前だけ罫を 1 本引く */}
+      {/* 上の 4 項目（見出しなし）。日誌と機体と書類は子項目を持つ（現在地が子のとき、親は data-ancestor）。罫のあとに「調べる」（判定） */}
       {NAV_GROUPS.map((g) => (
-        <div key={g.keys.join("-")} className={cx("flex flex-col gap-0.5", g.keys[0] === "more" ? "mt-3 border-t border-sb-rule pt-3" : g.heading ? "mt-3" : "")}>
+        <div key={g.keys.join("-")} className={cx("flex flex-col gap-0.5", g.heading ? "mt-3 border-t border-sb-rule pt-3" : "")}>
           {g.heading ? <p className="px-3 pb-1 text-aux font-bold text-sb-ink-2">{g.heading}</p> : null}
           {g.keys.map((k) => {
             const item = NAV_ITEM[k];
-            const hasChild = k === "more" && child !== null;
+            const parent: NavParentKey | null = k === "journal" || k === "more" ? k : null;
+            const hasChild = parent !== null && childParent === parent;
             return (
               <div key={k} className="flex flex-col gap-0.5">
                 <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
-                {k === "more" ? (
+                {parent ? (
                   <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-sb-rule pl-1.5">
-                    {visibleNavChildren(role).map((c) => (
+                    {visibleChildrenOf(parent, role).map((c) => (
                       <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />
                     ))}
                   </div>
@@ -103,7 +105,20 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
 }
 
 /**
- * スマホの下メニュー（5 タブ。判定はない）。1024px 以上では出さない。`/`（判定画面）にも置く（ログイン済みのとき）。
+ * 下タブの項目名。「機体と書類」だけ、文字を拡大して 1 列に収まらないときの折れ目（「機体と｜書類」）を <wbr> で示す。
+ * ふだんは 1 行（`.sb-tab` が語の途中で折らない）。項目名は省かず、アイコンだけにもしない（16-F の判断。理由は test-changes の 16-F 節）。
+ */
+const tabLabel = (key: string, label: string): ReactNode =>
+  key === "more" ? (
+    <>
+      機体と<wbr />書類
+    </>
+  ) : (
+    label
+  );
+
+/**
+ * スマホの下メニュー（4 タブ。判定はない）。1024px 以上では出さない。`/`（判定画面）にも置く（ログイン済みのとき）。
  * `/` は判定（左メニューの現在地）なので、下タブのどれも現在地にならない（aria-current なし）。
  * `.ds` の外（`/`）でも新しいトークンで描けるよう、外側に `ds` を付け、地は内側の面が塗る。
  */
@@ -126,10 +141,8 @@ export function OpsBottomNav({ variant = "ds" }: { readonly variant?: "ds" | "sb
           return (
             <li key={it.key} className="min-w-0">
               <Link href={it.href} prefetch={false} aria-current={active ? "page" : undefined} data-testid={`nav-${it.key}`} data-active={active ? "true" : "false"} className="sb-tab">
-                <span className="sb-tab-ic">
-                  <Icon name={it.icon} size={22} />
-                </span>
-                <span>{it.label}</span>
+                <Icon name={it.icon} size={24} />
+                <span>{tabLabel(it.key, it.label)}</span>
               </Link>
             </li>
           );
@@ -139,7 +152,7 @@ export function OpsBottomNav({ variant = "ds" }: { readonly variant?: "ds" | "sb
   );
 }
 
-/** 公開の判定画面 `/` の下メニュー。下タブ（5 つ）と同じ部品。 */
+/** 公開の判定画面 `/` の下メニュー。下タブ（4 つ）と同じ部品。 */
 export function OpsBottomNavSb() {
   return <OpsBottomNav variant="sb" />;
 }

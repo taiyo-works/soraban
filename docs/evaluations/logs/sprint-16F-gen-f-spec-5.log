@@ -1,0 +1,66 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g 'F-3|F-4|F-6'
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-f-db.spec.ts:262:7 › F-3 左メニュー（1280） › ホーム／計画／日誌（飛行記録・点検・事故・ヒヤリハット）／機体と書類（機体・操縦者・許可・承認・地点）、罫のあとに「調べる」＝判定。全役割で同じ（閲覧は全役割） (2.3s)
+  ✓   2 e2e/ops-db/sprint16-f-db.spec.ts:291:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ (4.9s)
+  ✓   3 e2e/ops-db/sprint16-f-db.spec.ts:325:7 › F-3 左メニュー（1280） › 1024 未満では左メニューは出ない（900）。現場・サインイン・権限なしでは下部ナビも左メニューも出ない (2.1s)
+  ✓   4 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (1.5s)
+  ✓   5 e2e/ops-db/sprint16-f-db.spec.ts:351:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (1.6s)
+  ✓   6 e2e/ops-db/sprint16-f-db.spec.ts:384:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (1.6s)
+  ✓   7 e2e/ops-db/sprint16-f-db.spec.ts:411:7 › F-6 上の状態の層 › 1 段目の画面（ホーム・計画・日誌・機体と書類）は、題 24px と補足 1 行 14px。題の文字は変えない (3.6s)
+  ✘   8 e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ (606ms)
+  -   9 e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（390×844）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ
+  -  10 e2e/ops-db/sprint16-f-db.spec.ts:475:7 › F-6 上の状態の層 › 主ボタンは 1 画面 1 つ（K-8）：ホーム（予定のない日を含む）・計画の一覧・日誌・点検の一覧・機体と書類
+
+
+  1) e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ 
+
+    Error: ホーム 主ボタンの下に操作がある
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "today-rest-link",
+    +   "today-rest-link",
+    +   "today-rest-link",
+    +   "today-rest-link",
+    +   "today-plans-link",
+    +   "today-next-action-link",
+    +   "today-next-action-link",
+    +   "today-next-action-link",
+    +   "today-next-more-toggle",
+    +   "ops-enter-flight",
+    + ]
+
+      467 |               .map((el) => el.getAttribute("data-testid") ?? el.textContent?.trim().slice(0, 12) ?? "");
+      468 |           }, PRIMARY);
+    > 469 |           expect(after, `${name} 主ボタンの下に操作がある`).toEqual([]);
+          |                                                 ^
+      470 |         }
+      471 |       }
+      472 |     });
+        at /home/user/soraban/e2e/ops-db/sprint16-f-db.spec.ts:469:49
+
+    Error Context: test-results/ops/sprint16-f-db-F-6-上の状態の層-主-19834-面に入らないものは末尾）。主ボタンは-1-画面-1-つ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-f-db-F-6-上の状態の層-主-19834-面に入らないものは末尾）。主ボタンは-1-画面-1-つ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-f-db-F-6-上の状態の層-主-19834-面に入らないものは末尾）。主ボタンは-1-画面-1-つ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ 
+  2 did not run
+  7 passed (22.5s)
+ ELIFECYCLE  Command failed with exit code 1.

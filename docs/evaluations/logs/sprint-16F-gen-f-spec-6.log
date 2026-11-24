@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g F-6
+
+
+Running 4 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-f-db.spec.ts:411:7 › F-6 上の状態の層 › 1 段目の画面（ホーム・計画・日誌・機体と書類）は、題 24px と補足 1 行 14px。題の文字は変えない (3.8s)
+  ✓  2 e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ (1.5s)
+  ✓  3 e2e/ops-db/sprint16-f-db.spec.ts:438:9 › F-6 上の状態の層 › 主な操作は画面の下半分（390×844）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ (1.3s)
+  ✓  4 e2e/ops-db/sprint16-f-db.spec.ts:479:7 › F-6 上の状態の層 › 主ボタンは 1 画面 1 つ（K-8）：ホーム（予定のない日を含む）・計画の一覧・日誌・点検の一覧・機体と書類 (2.6s)
+
+  4 passed (13.4s)

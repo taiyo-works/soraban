@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RecordFilter } from "@/components/ops/record-filter";
 import { Icon } from "@/components/ui/icons";
+import { BACK_TO } from "@/components/ops/ops-nav-model";
 import { Notice, PageHeader } from "@/components/ops/ui";
 import { PillLink } from "@/components/ui/sb-parts";
 import { pendingPreflightInspections } from "@/lib/inspection-pending";
@@ -12,7 +13,7 @@ import { requireOpsMember } from "@/server/ops/page";
 import { recordCreateDenied } from "@/server/ops/record-page";
 import { getToday } from "@/server/ops/today";
 
-// 点検（Sprint 12h PR ③a：メニューの 1 段目の画面。これまでは日誌の下の一覧だった）。
+// 点検（Sprint 12h PR ③a：下タブの 1 段目の画面にした。Sprint 16-F で下タブから外れ、日誌の下の画面に戻った：現在地は「日誌」、戻りリンクは「日誌」）。
 // 上から 「新しい点検」→「未実施」（今日の計画で、飛行前の点検がまだないもの。記録より上）→「記録」（区分・機体・期間で絞り込み、新しい順）。
 // 未実施の範囲：今日の飛行前だけ。飛行後・過去日・先の日は、運用の取り決めが決まるまで出さない（lib/inspection-pending.ts）。
 export const metadata: Metadata = { title: "点検" };
@@ -66,7 +67,7 @@ export default async function InspectionListPage({
   const canCreate = denied === null;
   return (
     <main className="flex flex-col gap-6" data-testid="ops-inspections">
-      <PageHeader title="点検" meta="飛行前・飛行後の日常点検" />
+      <PageHeader title="点検" meta="飛行前・飛行後の日常点検" back={BACK_TO.journal} />
 
       {canCreate ? (
         <div className="flex flex-col sm:items-start">

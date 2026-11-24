@@ -70,13 +70,13 @@ test.describe("Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存
       expect(v.grid, path).toBe("none");
       expect(v.headerBorder, path).toBe("1px");
     }
-    // 1024px 未満は下の 5 タブ（左メニューは出ない）
+    // 1024px 未満は下の 4 タブ（左メニューは出ない。16-F）
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(`${BASE}/ops`);
     await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
-    await expect(page.getByTestId("ops-bottom-nav").locator("a")).toHaveCount(5);
-    // 5 つの順序と名前（Sprint 12h PR ③a：ホーム／計画／点検／日誌／登録。判定は下タブにない）
-    expect((await page.getByTestId("ops-bottom-nav").locator("a").allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "計画", "点検", "日誌", "登録"]);
+    await expect(page.getByTestId("ops-bottom-nav").locator("a")).toHaveCount(4);
+    // 4 つの順序と名前（Sprint 16-F：ホーム／計画／日誌／機体と書類。判定も点検も下タブにない）
+    expect((await page.getByTestId("ops-bottom-nav").locator("a").allInnerTexts()).map((t) => t.trim())).toEqual(["ホーム", "計画", "日誌", "機体と書類"]);
     await expect(page.getByTestId("ops-sidebar")).toBeHidden();
     // 公開の判定画面 `/` は .ds を使わず、v2 のトークン（地は --sb-base＝#F6F7F9。Sprint 16-A で白から変更）で描く（下メニューの部品だけが自前の .ds を持つ）
     await page.goto(`${BASE}/`);

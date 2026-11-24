@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { Notice } from "@/components/ops/ui";
+import { Icon } from "@/components/ui/icons";
 import { JudgePills } from "@/components/ops/judge-pills";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { FieldPrefetch } from "@/components/ops/field-prefetch";
@@ -48,6 +49,16 @@ export default async function OpsHome() {
           ) : null}
         </header>
         <JudgePills />
+        {/* 16-F（F-4）：点検は下タブから外れたので、ホームの最初の画面に「飛行前点検」を置く（点検は主役。ホームから 1 回）。副ボタン。ホームの主ボタンは次の飛行のカードの 1 つ。
+            16-G のクイック操作（飛行前点検・新しい計画・飛行記録の 3 つ）に置き換わる */}
+        {canEnter ? (
+          <nav aria-label="クイック操作" data-testid="home-quick">
+            <Link href="/ops/inspections/new" prefetch={false} className="opx-btn w-full sm:w-auto" data-testid="ops-enter-inspection">
+              <Icon name="inspection" size={20} />
+              飛行前点検
+            </Link>
+          </nav>
+        ) : null}
       </div>
 
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-7">
@@ -68,9 +79,6 @@ export default async function OpsHome() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="/ops/flights/new" prefetch={false} className="opx-btn min-h-14 sm:min-h-12" data-testid="ops-enter-flight">
               飛行記録を入力
-            </Link>
-            <Link href="/ops/inspections/new" prefetch={false} className="opx-btn min-h-14 sm:min-h-12" data-testid="ops-enter-inspection">
-              日常点検を入力
             </Link>
           </div>
         </nav>

@@ -235,11 +235,12 @@ html:has(body.has-bottom-nav) {
   body.has-bottom-nav:has(.ds-page) {
     padding-bottom: 0;
   }
-  /* Sprint 15：下メニューの高さに 4px の余裕を足す。ホームでは、先読みの件数の行（pwa-prefetch-status）が描画の後から
+  /* 16-F：下メニューは 64px の項目＋上下 4px の余白＋上の線 1px＝73px（4.25rem=68px では足りないので 4.75rem=76px に）。
+   * Sprint 15：下メニューの高さに 4px の余裕を足す。ホームでは、先読みの件数の行（pwa-prefetch-status）が描画の後から
    * 免責の文より上に差し込まれ、末尾を約 32px 押し下げる。一番下まで送った直後にこの行が入っても、末尾が下メニューの上端に
    * かかりにくくするための余裕（sprint12g-1b-fix M-8。テストはこの行が入ってから送る。Sprint 15 R3-1） */
   .ds-page:has(> [data-testid="ops-bottom-nav"]) {
-    padding-bottom: calc(4.25rem + 4px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(4.75rem + 4px + env(safe-area-inset-bottom, 0px));
   }
 }
 

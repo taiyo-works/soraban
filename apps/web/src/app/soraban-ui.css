@@ -1485,47 +1485,45 @@ input.sb-radio:disabled {
   }
 }
 
-/* ===== 運航管理のメニュー（Sprint 12h PR ③a。見本：warm-final/home.html の .tabbar／.tab） =====
- * 下タブ 5 つ（高さ 60px 以上）と、PC の左メニュー（項目 48px）。現在地は薄い主色の面＋太字＋aria-current（色だけに頼らない）。 */
+/* ===== 運航管理のメニュー（Sprint 12h PR ③a。16-F で 4 項目に。見本：/ops/design の cat-bottomnav-sec が寸法と影の正） =====
+ * 下タブ 4 つ（高さ 64 以上＝安全領域を除く・文字 14 以上・折り返さない）と、PC の左メニュー（項目 48px）。
+ * 現在地は 主色のアイコンと文字＋薄い主色の面＋太字＋aria-current（色だけに頼らない）。浮くもの（下部ナビ）だけが --sb-shadow-float と上の 1px の線を持つ（現場では影なし＝トークン側）。
+ * 文字の拡大（200%）：ふだんは 1 行（語の途中で折らない）。拡大して 1 列に収まらないときだけ、項目名の <wbr>（「機体と｜書類」）で 2 行にし、
+ * 項目の高さは min-height なので伸びる（省略・アイコンだけにはしない。K-5）。 */
 .sb-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: var(--sb-base);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 8px env(safe-area-inset-bottom);
+  background: var(--sb-surface);
   border-top: var(--sb-rule-w) solid var(--sb-rule);
-  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: var(--sb-shadow-float);
 }
 .sb-tab {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-height: 60px;
-  padding: 6px 0;
+  gap: 2px;
+  min-height: 64px;
+  margin-block: 4px;
+  padding: 4px;
+  border-radius: var(--sb-r-control);
   font-size: var(--sb-fs-note);
   font-weight: 500;
-  line-height: 1.2;
-  white-space: nowrap;
+  line-height: 1.3;
+  text-align: center;
+  word-break: keep-all;
   color: var(--sb-ink-2);
   touch-action: manipulation;
 }
-.sb-tab-ic {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 30px;
-  border-radius: var(--sb-pill);
-}
-.sb-tab:hover .sb-tab-ic {
+.sb-tab:hover {
   background: var(--sb-hover);
 }
 .sb-tab[aria-current="page"] {
-  color: var(--sb-ink);
-  font-weight: 700;
-}
-.sb-tab[aria-current="page"] .sb-tab-ic {
   background: var(--sb-primary-soft);
   color: var(--sb-primary);
+  font-weight: 700;
 }
 .sb-tab:focus-visible,
 .sb-side-link:focus-visible {
@@ -1560,7 +1558,7 @@ input.sb-radio:disabled {
 .sb-side-sub {
   min-height: var(--sb-hit-min);
   gap: 10px;
-  padding: 0 10px;
+  padding: 4px 10px;
 }
 
 /* ===== 一覧の行・絞り込みのチップ（Sprint 12h PR ③a。点検の一覧。見本：warm-final/inspections.html） ===== */
