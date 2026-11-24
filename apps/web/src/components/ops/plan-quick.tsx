@@ -80,6 +80,11 @@ export function QuickWhen({
       </div>
       <div role="group" aria-labelledby="plan-quick-time-h" className="flex flex-col gap-2" data-testid="plan-quick-time">
         <p id="plan-quick-time-h" className="opx-quick-head">開始時刻をすぐ選ぶ（30 分刻み、日本時間）</p>
+        {slots.length === 0 ? (
+          <p data-note="" className="opx-hint" data-testid="plan-quick-time-empty">
+            今日は、このあと 30 分刻みの候補がありません。明日を選ぶか、下の時刻の入力欄に入れてください。
+          </p>
+        ) : null}
         <div className="opx-quick-grid">
           {slots.map((s) => (
             <QuickButton key={s} pressed={startTime === s} onClick={() => onTime(s)} testId={`plan-quick-time-${s.replace(":", "")}`}>

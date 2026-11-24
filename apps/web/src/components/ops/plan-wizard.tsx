@@ -21,6 +21,7 @@ import {
 import type { PermitHelper } from "@/server/ops/permit-page";
 import { setChangeFlash } from "./change-notice";
 import { newRequestId } from "./drafts";
+import { tidyFieldErrors } from "@/lib/field-message";
 import { QuickWhen } from "./plan-quick";
 import { Field, fieldErrorsOf, FieldError, FormError, inputClass, useErrorFocus } from "./ops-client";
 import type { PilotOption } from "./records-client";
@@ -105,14 +106,6 @@ export const validateStep = (step: number, v: PlanFormValues): Record<string, st
   }
   return e;
 };
-
-/**
- * サーバーの項目の誤りの文は「緯度：緯度は −90〜90…」のように項目名で始まり、文の中でも項目名を繰り返すことがある。
- * 画面では項目名を段の名前と欄の見出しで示すので、重なる先頭の「項目名：」を 1 つにする（文の中身は変えない）。
- */
-export const tidyFieldMessage = (m: string): string => m.replace(/^([^：\s]{1,16})：(?=\1)/, "");
-export const tidyFieldErrors = (e: Readonly<Record<string, string>>): Record<string, string> =>
-  Object.fromEntries(Object.entries(e).map(([k, m]) => [k, typeof m === "string" ? tidyFieldMessage(m) : m]));
 
 const LEAVE_MESSAGE = "入力した内容はまだ保存されていません。このページを離れると、入力した内容は消えます。離れますか？";
 
