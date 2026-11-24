@@ -129,7 +129,7 @@ test.describe("Sprint 16-F2 E2E-DB：下部ナビの 320・360・390 × 文字 1
     }
   });
 
-  test("計画作成の各段（①〜⑤）：下部ナビの横スクロール 0・ラベルの切れ 0。文書の幅は 320 でもナビが原因で広がらない", async ({ page }) => {
+  test("計画作成の各段（①〜⑤）：下部ナビの横スクロール 0・ラベルの切れ 0。文書の幅（320・360・390 × 100%・200%）は画面を超えない", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     const manager = await pwRequest.newContext({ baseURL: BASE });
     await signIn(manager, seeded("a-manager"));
@@ -170,8 +170,9 @@ test.describe("Sprint 16-F2 E2E-DB：下部ナビの 320・360・390 × 文字 1
       await expectStep(page, n);
       // 計画作成は計画の一部：現在地は「計画」
       await sweep(page, `計画作成 段 ${n}`, true, (m, label, w) => {
-        // 文書の幅：ナビが原因で広がらない（ナビ以外の要素のはみ出しは 16-H1 の別の検査の範囲）
         console.log(`[16-F2] ${label}: 文書 ${m.docSw}/${m.docCw}（画面 ${w}）`);
+        // 16-H2（§17 申し送り 13）：段ごとの文書の幅の検査。段 ④ の許可の欄のラベルが 320・200% で折り返さず 327 になっていた（直した）。
+        expect(m.docSw, `${label} 文書の横スクロール（scrollWidth ${m.docSw} > clientWidth ${m.docCw}）`).toBeLessThanOrEqual(m.docCw);
       });
       if (n < 5) {
         await page.setViewportSize({ width: 390, height: 844 });

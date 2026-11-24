@@ -1,0 +1,57 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-h2-db.spec.ts
+
+
+Running 12 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h2-db.spec.ts:140:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1. 段 ②：今日・明日・30 分刻みの開始・飛行時間（15・30・60・90）のクイック選択。aria-pressed・押す部品 48px 以上・標準の入力欄も残る。保存した値が一致 (3.5s)
+  ✓   2 e2e/ops-db/sprint16-h2-db.spec.ts:257:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1・K-15. クイック選択はストレージに何も書かない (1.6s)
+  ✓   3 e2e/ops-db/sprint16-h2-db.spec.ts:275:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 断り書き：段 ① と ⑤ では同じ 2 つの断り書き（免責・DIPS の注記）が見え、段 ②〜④ では隠れる (1.9s)
+  ✓   4 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（375×812）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.4s)
+  ✓   5 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（390×844）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.2s)
+  ✓   6 e2e/ops-db/sprint16-h2-db.spec.ts:334:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2・H2-3. 判定の画面：総合（形と言葉）→ 項目のタイル → シートの詳細。取得時刻。主ボタンは「DIPS に出す内容を確認」1 つ (2.1s)
+  ✓   7 e2e/ops-db/sprint16-h2-db.spec.ts:465:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2. 判定が古いとき：総合の語の前に「古い判定：」。再判定の案内は今のまま（plan-stale・plan-rejudge）。再判定後は外れる (1.8s)
+  ✓   8 e2e/ops-db/sprint16-h2-db.spec.ts:493:7 › Sprint 16-H2 E2E-DB：計画作成 2 › K-4・K-5・K-8. 判定の画面：320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし。シートを開いても横スクロールなし (35.0s)
+  ✓   9 e2e/ops-db/sprint16-h2-db.spec.ts:516:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4. 訂正の画面：段に分けず、節の見出し・新しい部品で載せ替え。plan-reason を残す。理由を入れて保存できる (2.0s)
+  ✘  10 e2e/ops-db/sprint16-h2-db.spec.ts:557:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4・K-4・K-5. 訂正の画面：緯度・経度の欄は 320〜1440 の幅、文字 200%（320・390）でも切れず、横スクロールなし (1.9s)
+  -  11 e2e/ops-db/sprint16-h2-db.spec.ts:600:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 422 の一覧：項目名が重ならない（「緯度：緯度は…」→「緯度は…」）。段へ戻る導線は今のまま
+  -  12 e2e/ops-db/sprint16-h2-db.spec.ts:625:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ④：許可の欄のラベル「公安委員会への通報（飛行禁止法）」は 320・文字 200% でも折り返し、文書の幅が画面を超えない
+
+
+  1) e2e/ops-db/sprint16-h2-db.spec.ts:557:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4・K-4・K-5. 訂正の画面：緯度・経度の欄は 320〜1440 の幅、文字 200%（320・390）でも切れず、横スクロールなし 
+
+    Error: 訂正 320px 200% 横スクロール
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 320
+    Received:    327
+
+      575 |         expect(r[k].w, `${label} ${k} の幅`).toBeGreaterThanOrEqual(100);
+      576 |       }
+    > 577 |       expect(r.sw, `${label} 横スクロール`).toBeLessThanOrEqual(r.cw);
+          |                                       ^
+      578 |     };
+      579 |     for (const w of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440]) {
+      580 |       await page.setViewportSize({ width: w, height: 800 });
+        at inside (/home/user/soraban/e2e/ops-db/sprint16-h2-db.spec.ts:577:39)
+        at /home/user/soraban/e2e/ops-db/sprint16-h2-db.spec.ts:589:7
+
+    Error Context: test-results/ops/sprint16-h2-db-Sprint-16-H-325eb-200-（320・390）でも切れず、横スクロールなし/error-context.md
+
+    Error Context: test-results/ops/sprint16-h2-db-Sprint-16-H-325eb-200-（320・390）でも切れず、横スクロールなし/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-h2-db-Sprint-16-H-325eb-200-（320・390）でも切れず、横スクロールなし/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-h2-db-Sprint-16-H-325eb-200-（320・390）でも切れず、横スクロールなし/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-h2-db.spec.ts:557:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4・K-4・K-5. 訂正の画面：緯度・経度の欄は 320〜1440 の幅、文字 200%（320・390）でも切れず、横スクロールなし 
+  2 did not run
+  9 passed (56.8s)
+ ELIFECYCLE  Command failed with exit code 1.

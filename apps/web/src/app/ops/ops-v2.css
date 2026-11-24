@@ -581,6 +581,9 @@ html:has(.ops-v2) body {
   font-size: 0.875rem;
   line-height: 1.5;
   cursor: pointer;
+  /* 文字 200%・320 幅でも、長い選択肢の語（auto-phrase の 1 まとまり）が行からあふれないよう、折り返せるようにする（16-H2） */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .opx-check-row:hover {
   background: var(--sb-hover);
