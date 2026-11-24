@@ -784,6 +784,10 @@ input.sb-radio:disabled {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
 }
+/* フォーカスの輪は行（押せる範囲）の 1 本に揃える。丸の 3px の輪と重ねない（16-D の再判定で二重に見えた。16-E designer） */
+.sb-check-row:has(:focus-visible) :is(input.sb-check, input.sb-radio):focus-visible {
+  outline: none;
+}
 /* チェックを持つ行は 72 以上（現場は --sb-hit-row の 64 より大きい 72 のまま）。チェックと文字は行の中央にそろえる */
 .sb-check-row:has(input.sb-check),
 .opx-check-row:has(input.sb-check) {

@@ -91,7 +91,7 @@ for (const [prefix, label] of [["cat-", "`/` 系（.sb-pill）"], ["cat-opx-", "
       const btn = page.getByTestId(`${prefix}primary`);
       const dur = await btn.evaluate((el) => getComputedStyle(el).transitionDuration);
       expect(dur).toBe("0.18s, 0.12s"); // 背景 180ms・押下の縮み 120ms（--sb-dur-press）
-      await btn.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      await btn.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
       const box = (await btn.boundingBox())!;
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();

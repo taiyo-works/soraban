@@ -31,6 +31,38 @@ const href = (c: CatalogConfig, over: Partial<Record<"mode" | "theme" | "veil", 
 };
 
 const LEVELS: readonly ItemVerdict[] = ["no_fly", "needs_procedure", "procedure_done", "no_procedure", "unknown"];
+/** G-1 で決める見本（ここから飛べる）。 */
+const anchor = (id: string): string => (id === "cat-bottomnav-sec" ? "#cat-bottomnav-sec" : `#sec-${id}`);
+const DECISIONS = [
+  ["cat-logo", "ロゴの丸（主色か墨か）"],
+  ["cat-state-labels", "状態ラベルの点の形"],
+  ["cat-cards", "一覧のカードの矢印"],
+  ["cat-order", "計画作成の段の順"],
+  ["cat-checks-section", "チェックとラジオ"],
+  ["cat-prep", "準備カードの文言（§8）"],
+] as const;
+const TOC = [
+  ["cat-grounds", "地と面"],
+  ["cat-type", "文字の段"],
+  ["cat-primary-use", "主色"],
+  ["cat-status", "状態 5 種"],
+  ["cat-buttons", "ボタン"],
+  ["cat-cards", "カード"],
+  ["cat-state-labels", "状態ラベル"],
+  ["cat-forms", "面と罫"],
+  ["cat-inputs-section", "入力欄"],
+  ["cat-checks-section", "チェックとラジオ"],
+  ["cat-sheet-section", "ボトムシート"],
+  ["cat-skeleton-section", "スケルトン"],
+  ["cat-states-section", "空・エラー"],
+  ["cat-verdict", "判定の五段"],
+  ["cat-logo", "ロゴの丸"],
+  ["cat-order", "段の順"],
+  ["cat-bottomnav-sec", "下部ナビ"],
+  ["cat-prep", "準備カード"],
+  ["cat-band-section", "状態の帯"],
+  ["cat-art-section", "挿絵"],
+] as const;
 const GROUNDS = [
   ["base", "ページの地（薄いグレー）", "--sb-base"],
   ["surface", "面（白。カード・ブロック）", "--sb-surface"],
@@ -77,7 +109,31 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </nav>
       </header>
 
-      <section className="sbx-section" aria-labelledby="cat-grounds" data-testid="cat-grounds">
+      <section className="sbx-decide" aria-labelledby="cat-decide-h" data-testid="cat-decide">
+        <h2 id="cat-decide-h">G-1 で決めること（6 つ）</h2>
+        <ol className="sbx-decide-list">
+          {DECISIONS.map(([id, label], i) => (
+            <li key={id}>
+              <a className="sbx-decide-link" href={anchor(id)}>
+                <span className="sbx-decide-n" aria-hidden="true">{i + 1}</span>
+                <span>{label}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <details className="sbx-toc" data-testid="cat-toc">
+          <summary>全部の節（{TOC.length}）</summary>
+          <ul className="sbx-toc-list">
+            {TOC.map(([id, label]) => (
+              <li key={id}>
+                <a className="sbx-toc-link" href={anchor(id)}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </section>
+
+      <section className="sbx-section" aria-labelledby="cat-grounds" data-testid="cat-grounds" id="sec-cat-grounds">
         <h2 id="cat-grounds">地と面（地の三段・罫・縁）</h2>
         <div className="sbx-grid">
           {GROUNDS.map(([key, label, token]) => (
@@ -93,12 +149,12 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         <LineChips />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-type" data-testid="cat-type">
+      <section className="sbx-section" aria-labelledby="cat-type" data-testid="cat-type" id="sec-cat-type">
         <h2 id="cat-type">文字の段</h2>
         <TypeScale />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-primary-use">
+      <section className="sbx-section" aria-labelledby="cat-primary-use" data-testid="cat-primary-use" id="sec-cat-primary-use">
         <h2 id="cat-primary-use">主色（操作と現在地だけ）</h2>
         <PrimaryChips />
         <SectionHead id="cat-primary-head" as="h3" title="見出し（左に墨の太い線だけ）" note="背後の大きな数字はやめた" />
@@ -107,12 +163,12 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </p>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-status-h" data-testid="cat-status">
+      <section className="sbx-section" aria-labelledby="cat-status-h" data-testid="cat-status" id="sec-cat-status">
         <h2 id="cat-status-h">状態 5 種と未確認（記号と文字を併用する）</h2>
         <StateKinds />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-buttons" data-testid="cat-buttons">
+      <section className="sbx-section" aria-labelledby="cat-buttons" data-testid="cat-buttons" id="sec-cat-buttons">
         <h2 id="cat-buttons">ボタン 5 種（主・副・文字・危険・無効）</h2>
         <div className="sbx-row" data-specimen-group="pill">
           <PillButton variant="primary" data-testid="cat-primary">主ボタン（保存する）</PillButton>
@@ -133,7 +189,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         <p className="sbx-note">主色の面と地の比は 5:1 以上（現場は 7:1 以上）。面だけで境界を満たす。押すと主色が濃くなり、少し縮む（120ms）。</p>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-cards" data-testid="cat-cards">
+      <section className="sbx-section" aria-labelledby="cat-cards" data-testid="cat-cards" id="sec-cat-cards">
         <h2 id="cat-cards">カード 3 種</h2>
         <div className="sbx-grid">
           <div className="sb-card" data-testid="cat-card">
@@ -154,7 +210,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         <CardArrowCandidates />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-labels-h" data-testid="cat-state-labels">
+      <section className="sbx-section" aria-labelledby="cat-labels-h" data-testid="cat-state-labels" id="sec-cat-state-labels">
         <h2 id="cat-labels-h">状態ラベル</h2>
         <div className="sbx-row">
           <StatusLabel tone="info" testId="cat-state-info">待機中</StatusLabel>
@@ -170,7 +226,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         <DotShapeCandidates />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-forms" data-testid="cat-forms">
+      <section className="sbx-section" aria-labelledby="cat-forms" data-testid="cat-forms" id="sec-cat-forms">
         <h2 id="cat-forms">面と罫・入力欄・選択中の面</h2>
         <div className="sbx-grid">
           <div className="sb-block" data-testid="cat-block">
@@ -187,35 +243,35 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </div>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-inputs-h" data-testid="cat-inputs-section">
+      <section className="sbx-section" aria-labelledby="cat-inputs-h" data-testid="cat-inputs-section" id="sec-cat-inputs-section">
         <h2 id="cat-inputs-h">入力欄（ラベルは常に上・エラーは記号付き 1 行）</h2>
         <CatalogInputs />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-checks-h" data-testid="cat-checks-section">
+      <section className="sbx-section" aria-labelledby="cat-checks-h" data-testid="cat-checks-section" id="sec-cat-checks-section">
         <h2 id="cat-checks-h">チェック行と群（完了数/総数・折りたたみ）・チェックとラジオ</h2>
         <CatalogChecks />
         <CatalogChoices />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-sheet-h" data-testid="cat-sheet-section">
+      <section className="sbx-section" aria-labelledby="cat-sheet-h" data-testid="cat-sheet-section" id="sec-cat-sheet-section">
         <h2 id="cat-sheet-h">ボトムシート（3 段）</h2>
         <CatalogSheet />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-skel-h" data-testid="cat-skeleton-section">
+      <section className="sbx-section" aria-labelledby="cat-skel-h" data-testid="cat-skeleton-section" id="sec-cat-skeleton-section">
         <h2 id="cat-skel-h">スケルトン（静止）</h2>
         <SkeletonCard testId="cat-skeleton" />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-states-h" data-testid="cat-states-section">
+      <section className="sbx-section" aria-labelledby="cat-states-h" data-testid="cat-states-section" id="sec-cat-states-section">
         <h2 id="cat-states-h">空の状態と通信エラー</h2>
         <div data-specimen-group="empty">
           <CatalogStates />
         </div>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-verdict" data-testid="cat-verdict">
+      <section className="sbx-section" aria-labelledby="cat-verdict" data-testid="cat-verdict" id="sec-cat-verdict">
         <h2 id="cat-verdict">判定の五段（値・形・言葉は変えない）</h2>
         <div className="sbx-row">
           {LEVELS.map((l) => (
@@ -231,12 +287,12 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         </div>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-logo-h" data-testid="cat-logo">
+      <section className="sbx-section" aria-labelledby="cat-logo-h" data-testid="cat-logo" id="sec-cat-logo">
         <h2 id="cat-logo-h">ロゴの丸（G-1 で決める）</h2>
         <LogoCandidates />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-order-h" data-testid="cat-order">
+      <section className="sbx-section" aria-labelledby="cat-order-h" data-testid="cat-order" id="sec-cat-order">
         <h2 id="cat-order-h">計画作成の段の順（G-1 で決める）</h2>
         <p className="sbx-note">現行の計画作成は、段に分けない 1 画面の縦長フォームです。下の 2 つはどちらも案で、見本の中だけに置きます。</p>
         <WizardOrder />
@@ -248,19 +304,19 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
         <p className="sbx-note">高さ 64 以上・文字 14 以上。現在地は主色のアイコンと文字・薄い主色の面・aria-current。影は浮くものだけが持つ（現場では無し）。</p>
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-prep-h" data-testid="cat-prep">
+      <section className="sbx-section" aria-labelledby="cat-prep-h" data-testid="cat-prep" id="sec-cat-prep">
         <h2 id="cat-prep-h">準備カードの文言案（§8 の全状態）</h2>
         <PrepSection />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-band" data-testid="cat-band-section">
+      <section className="sbx-section" aria-labelledby="cat-band" data-testid="cat-band-section" id="sec-cat-band-section">
         <h2 id="cat-band">状態の帯（現場）</h2>
         <Band online stale={false} />
         <Band online stale />
         <Band online={false} stale={false} />
       </section>
 
-      <section className="sbx-section" aria-labelledby="cat-art" data-testid="cat-art-section">
+      <section className="sbx-section" aria-labelledby="cat-art" data-testid="cat-art-section" id="sec-cat-art-section">
         <h2 id="cat-art">`/` の挿絵（線画。色は墨と白だけ）</h2>
         <div className="sb-hero" style={{ borderRadius: "var(--sb-r-l)" }}>
           <HeroIllustration />

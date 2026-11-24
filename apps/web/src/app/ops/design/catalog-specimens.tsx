@@ -13,10 +13,12 @@ const cx = (...parts: ReadonlyArray<string | false | null | undefined>): string 
 export function Cand({ current, name, testId, children }: { readonly current: boolean; readonly name: string; readonly testId: string; readonly children: ReactNode }) {
   return (
     <div className="sbx-cand" data-current={current ? "true" : "false"} data-testid={testId}>
-      <span className="sbx-cand-tag" data-testid={`${testId}-tag`}>
-        {current ? "現行" : "案"}
-      </span>
-      <span className="sbx-cand-name">{name}</span>
+      <div className="sbx-cand-head">
+        <span className="sbx-cand-tag" data-testid={`${testId}-tag`}>
+          {current ? "現行" : "案"}
+        </span>
+        <span className="sbx-cand-name">{name}</span>
+      </div>
       <div className="sbx-cand-body">{children}</div>
     </div>
   );
@@ -177,7 +179,7 @@ export function StateKinds() {
 
 export function LogoCandidates() {
   return (
-    <div className="sbx-grid" data-testid="cat-logo-list">
+    <div className="sbx-pair" data-testid="cat-logo-list">
       <Cand current name="主色の面（--sb-primary）" testId="cat-logo-primary">
         <span className="sb-brand">
           <span className="sb-brand-mark" aria-hidden="true">
@@ -222,7 +224,7 @@ const SHAPE_LABELS = [
 
 export function DotShapeCandidates() {
   return (
-    <div className="sbx-grid" data-testid="cat-dot-list">
+    <div className="sbx-pair" data-testid="cat-dot-list">
       <Cand current name="4 状態とも同じ丸（8px）" testId="cat-dot-same">
         <div className="sbx-row">
           {SHAPE_LABELS.map((l) => (
@@ -251,7 +253,7 @@ export function DotShapeCandidates() {
 
 export function CardArrowCandidates() {
   return (
-    <div className="sbx-grid" data-testid="cat-arrow-list">
+    <div className="sbx-pair" data-testid="cat-arrow-list">
       <Cand current name="矢印なし（全体が押せる）" testId="cat-arrow-none">
         <a className="sb-card sb-card-list" href="#cat-card-arrow" data-testid="cat-arrow-none-card">
           <strong>13:00〜14:00　試験空域</strong>
@@ -294,30 +296,49 @@ const ORDER_DIRECTION = [
 function OrderList({ items, testId }: { readonly items: ReadonlyArray<readonly [string, string]>; readonly testId: string }) {
   return (
     <ol className="sbx-order" data-testid={testId}>
-      {items.map(([name, note], i) => (
+      {items.map(([name], i) => (
         <li key={name} className="sbx-order-item">
           <span className="sbx-order-n" aria-hidden="true">
             {i + 1}
           </span>
-          <span className="sbx-order-text">
-            <strong>{name}</strong>
-            {note ? <span data-note="" className="sbx-note">{note}</span> : null}
-          </span>
+          <strong>{name}</strong>
         </li>
       ))}
     </ol>
   );
 }
 
+/** 段ごとのねらい（二つの順の並びを崩さないよう、列の下にまとめる）。 */
+function OrderReasons({ label, items, testId }: { readonly label: string; readonly items: ReadonlyArray<readonly [string, string]>; readonly testId: string }) {
+  const withNote = items.map(([name, note], i) => ({ name, note, n: i + 1 })).filter((x) => x.note);
+  return (
+    <div className="sbx-reasons" data-testid={testId}>
+      <span className="sbx-cand-name">{label}</span>
+      <ul className="sbx-reasons-list">
+        {withNote.map((x) => (
+          <li key={x.n} data-note="">
+            <b>{x.n}</b>
+            {x.note}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function WizardOrder() {
   return (
-    <div className="sbx-grid" data-testid="cat-order-list">
-      <Cand current={false} name="この計画の順（G-1 の確認の対象。§9.1）" testId="cat-order-adopted">
-        <OrderList items={ORDER_ADOPTED} testId="cat-order-adopted-list" />
-      </Cand>
-      <Cand current={false} name="方針書の順（比べる用。採らない案）" testId="cat-order-direction">
-        <OrderList items={ORDER_DIRECTION} testId="cat-order-direction-list" />
-      </Cand>
+    <div className="flex flex-col gap-3" data-testid="cat-order-list">
+      <div className="sbx-pair sbx-pair-fixed">
+        <Cand current={false} name="この計画の順（§9.1）" testId="cat-order-adopted">
+          <OrderList items={ORDER_ADOPTED} testId="cat-order-adopted-list" />
+        </Cand>
+        <Cand current={false} name="方針書の順（採らない案）" testId="cat-order-direction">
+          <OrderList items={ORDER_DIRECTION} testId="cat-order-direction-list" />
+        </Cand>
+      </div>
+      <OrderReasons label="この計画の順の理由（左の段の番号）" items={ORDER_ADOPTED} testId="cat-order-reasons-adopted" />
+      <OrderReasons label="方針書の順で気になる点（右の段の番号）" items={ORDER_DIRECTION} testId="cat-order-reasons-direction" />
       <div className="flex flex-col gap-2" data-testid="cat-progress-sample">
         <span className="sbx-cand-name">進捗の帯の見本（高さ 4・主色・「2/6 日時」の文字）</span>
         <div className="sbx-progress" role="progressbar" aria-label="計画作成の進み具合（見本）" aria-valuemin={1} aria-valuemax={6} aria-valuenow={2} aria-valuetext="2/6 日時" data-testid="cat-progress">
@@ -385,6 +406,7 @@ function PrepCard({ id, rows, readout, label }: { readonly id: string; readonly 
       data-testid={`cat-prep-card-${id}`}
     >
       <div className="sbx-prep-head">
+        <span className="sbx-cand-name">{label}（帯の色＝3 行のうち重い状態）</span>
         <h3 className="sbx-prep-title">次の飛行の準備</h3>
         <span data-note="" className="sbx-note">11/25 10:00〜10:30　試験空域（見本）</span>
       </div>
@@ -400,7 +422,6 @@ function PrepCard({ id, rows, readout, label }: { readonly id: string; readonly 
         ))}
       </ul>
       <span data-note="" className="sbx-note">{NOTE}</span>
-      <span className="sbx-cand-name">{label}（帯の色＝3 行のうち重い状態）</span>
     </section>
   );
 }

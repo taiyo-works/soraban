@@ -259,36 +259,59 @@ html[data-theme="dark"] .sbx-catalog {
   --sb-state-mark: var(--sb-st-warn-mark);
   --sb-state-text: var(--sb-st-warn-text);
 }
-/* 並べ見本の札 */
+/* 並べ見本の札：頭に「札＋名前」を 1 行で置く。案（決めてほしい方）は墨の濃い札と 2px の墨の枠、現行は静かな札と薄い枠。どちらも文字で明記する。 */
+.sbx-pair {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+}
+.sbx-pair-fixed {
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+}
 .sbx-cand {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   min-width: 0;
-  padding: 16px;
-  border: var(--sb-rule-w) solid var(--sb-rule);
+  padding: 14px;
+  border: 2px solid var(--sb-rule);
   border-radius: var(--sb-r-card);
   background: var(--sb-surface);
 }
-.sbx-cand[data-current="true"] {
-  border-color: var(--sb-edge);
+.sbx-cand[data-current="false"] {
+  border-color: var(--sb-ink);
+}
+.sbx-pair-fixed .sbx-cand {
+  padding: 12px;
+  gap: 10px;
+}
+.sbx-cand-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
 }
 .sbx-cand-tag {
-  align-self: flex-start;
-  padding: 0 10px;
+  flex: none;
+  padding: 0 12px;
   border-radius: var(--sb-pill);
   background: var(--sb-ink);
   color: var(--sb-inverse-fg);
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.7;
+  line-height: 28px;
 }
-.sbx-cand[data-current="false"] .sbx-cand-tag {
+.sbx-cand[data-current="true"] .sbx-cand-tag {
   background: var(--sb-sunken);
   color: var(--sb-ink);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
+.sbx-cand-head .sbx-cand-name {
+  flex: 1 1 8em;
+}
 .sbx-cand-name {
+  min-width: 0;
   font-size: 0.875rem;
   line-height: 1.5;
   font-weight: 600;
@@ -574,3 +597,81 @@ html[data-mode="field"] .sbx-catalog .sbx-prim {
 html[data-mode="field"] .sbx-catalog .sbx-bnav-item {
   min-height: 64px;
 }
+
+
+/* ── 16-E designer 磨き込み：G-1 の入口・目次・節のリズム・並び・フォーカスの輪 ── */
+.sbx-catalog { padding-top: 24px; }
+.sbx-section { gap: 16px; padding: 40px 0; scroll-margin-top: 8px; }
+.sbx-section > h2 { margin-bottom: 4px; }
+.sbx-decide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0 8px;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+.sbx-decide-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+.sbx-decide-list, .sbx-toc-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sbx-toc-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); margin-top: 12px; }
+.sbx-decide-link, .sbx-toc-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--sb-hit);
+  padding: 4px 14px;
+  border: 1.5px solid var(--sb-edge);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.sbx-decide-link:active, .sbx-toc-link:active { background: var(--sb-primary-soft); }
+.sbx-decide-n {
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-ink);
+  color: var(--sb-inverse-fg);
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sbx-toc > summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--sb-hit);
+  padding: 0 4px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* 並べ：段の順は 2 列を崩さない。名前だけ並べ、ねらいは下にまとめる */
+.sbx-pair-fixed .sbx-order { gap: 10px; }
+.sbx-pair-fixed .sbx-order-item { align-items: center; gap: 8px; }
+.sbx-pair-fixed .sbx-order-item strong { min-width: 0; overflow-wrap: anywhere; }
+.sbx-reasons { display: flex; flex-direction: column; gap: 6px; }
+.sbx-reasons-list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.sbx-catalog .sbx-reasons-list li { display: flex; gap: 8px; font-size: 0.875rem; line-height: 1.5; font-weight: 500; color: var(--sb-ink-3); }
+.sbx-reasons-list b { flex: none; min-width: 1.25em; color: var(--sb-ink); font-weight: 700; }
+html[data-mode="field"] .sbx-catalog .sbx-reasons-list li { font-size: 1rem; }
+/* チェックとラジオ：2 列（広い幅）・フォーカス中の見本 */
+.sbx-pair-choice { grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 16px; }
+.sbx-catalog .sbx-row-focused { outline: 3px solid var(--sb-focus); outline-offset: 3px; margin-top: 6px; }
+/* 準備カード：行の間・カードの間を少し広げ、帯の色の名前は頭に置く */
+.sbx-prep { gap: 10px; }
+.sbx-prep-rows { gap: 6px; }
+[data-testid="cat-prep-cards"] { gap: 16px; }
+.sbx-bnav { margin: 8px 0 4px; }
+.sbx-reasons + .sbx-reasons { margin-top: 8px; }
+[data-testid="cat-progress-sample"] { margin-top: 12px; }

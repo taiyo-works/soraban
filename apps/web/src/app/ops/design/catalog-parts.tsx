@@ -99,7 +99,7 @@ export function CatalogStates() {
 /** チェック（複数選択・32px の丸）とラジオ（単一選択・24px の輪）を並べる（16-D の後回し）。行全体が <label>。素の input の状態は端末の標準で動く。 */
 export function CatalogChoices() {
   return (
-    <div className="sbx-grid" data-testid="cat-choices">
+    <div className="sbx-pair sbx-pair-choice" data-testid="cat-choices">
       <fieldset className="sbx-choice-set" data-testid="cat-check-set">
         <legend className="sbx-choice-legend">チェック（複数選択・sb-check・32px）</legend>
         <label className="sb-check-row sbx-choice">
@@ -113,6 +113,10 @@ export function CatalogChoices() {
         <label className="sb-check-row sbx-choice">
           <input type="checkbox" className="sb-check" disabled data-testid="cat-check-disabled" />
           <span>無効</span>
+        </label>
+        <label className="sb-check-row sbx-choice sbx-row-focused" data-testid="cat-check-focus">
+          <input type="checkbox" className="sb-check" tabIndex={-1} />
+          <span>フォーカス中（行の輪 1 本）</span>
         </label>
       </fieldset>
       <fieldset className="sbx-choice-set" data-testid="cat-radio-set">
@@ -132,6 +136,10 @@ export function CatalogChoices() {
         <label className="sb-check-row sbx-choice">
           <input type="radio" name="cat-radio-off-group" className="sb-radio" disabled data-testid="cat-radio-disabled" />
           <span>無効</span>
+        </label>
+        <label className="sb-check-row sbx-choice sbx-row-focused" data-testid="cat-radio-focus">
+          <input type="radio" name="cat-radio-focus-group" className="sb-radio" tabIndex={-1} />
+          <span>フォーカス中（行の輪 1 本）</span>
         </label>
       </fieldset>
     </div>
