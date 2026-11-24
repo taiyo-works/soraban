@@ -1,0 +1,34 @@
+[
+ {
+  "w": 375,
+  "h": 812,
+  "reportText": "対象外（模型航空機）",
+  "note": null,
+  "noteCount": 0,
+  "rowHtml": "<li class=\"home-prep-row\" data-tone=\"unknown\" data-testid=\"home-prep-report\"><span class=\"home-prep-sign\"><svg viewBox=\"0 0 24 24\" class=\"sb-vm\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-dasharray=\"3 2.6\"></rect><path d=\"M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"></path><circle cx=\"12\" cy=\"16.9\" r=\"1.2\" fill=\"currentColor\"></circle></svg></span><span class=\"home-prep-k\">通報</span><span class=\"home-prep-v\" data-testid=\"home-prep-report-text\">対象外（模型航空機）</span></li>",
+  "rowTone": "unknown",
+  "svgDash": [
+   "3 2.6"
+  ],
+  "prepAria": "次の飛行の準備。通報、対象外（模型航空機）。飛行前点検、未記録。判定、古い判定：未確認の項目が 4 件あります。",
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "reportText": "対象外（模型航空機）",
+  "note": null,
+  "noteCount": 0,
+  "rowHtml": "<li class=\"home-prep-row\" data-tone=\"unknown\" data-testid=\"home-prep-report\"><span class=\"home-prep-sign\"><svg viewBox=\"0 0 24 24\" class=\"sb-vm\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-dasharray=\"3 2.6\"></rect><path d=\"M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"></path><circle cx=\"12\" cy=\"16.9\" r=\"1.2\" fill=\"currentColor\"></circle></svg></span><span class=\"home-prep-k\">通報</span><span class=\"home-prep-v\" data-testid=\"home-prep-report-text\">対象外（模型航空機）</span></li>",
+  "rowTone": "unknown",
+  "svgDash": [
+   "3 2.6"
+  ],
+  "prepAria": "次の飛行の準備。通報、対象外（模型航空機）。飛行前点検、未記録。判定、古い判定：未確認の項目が 4 件あります。",
+  "bad": [
+   "申請"
+  ]
+ }
+]

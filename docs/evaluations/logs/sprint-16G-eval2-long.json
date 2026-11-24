@@ -1,0 +1,1199 @@
+[
+ {
+  "pilotCreate": 201
+ },
+ {
+  "pilotCreate": 201
+ },
+ {
+  "placeLen": 30
+ },
+ {
+  "label": "long-base",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 751,
+  "gapToNav": -11,
+  "place": null,
+  "when": {
+   "top": 142,
+   "bottom": 163,
+   "h": 21,
+   "w": 305
+  },
+  "nextPlace": {
+   "top": 367,
+   "bottom": 409,
+   "h": 42,
+   "w": 275
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 295,
+   "h": 191,
+   "w": 343
+  },
+  "next": {
+   "top": 303,
+   "bottom": 417,
+   "h": 113,
+   "w": 343
+  },
+  "primary": {
+   "top": 425,
+   "bottom": 481,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 99,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 117,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 493,
+   "bottom": 678,
+   "h": 185,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-base",
+  "w": 390,
+  "h": 844,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 390,
+  "innerW": 390,
+  "navTop": 771,
+  "quickBottom": 730,
+  "gapToNav": 42,
+  "place": null,
+  "when": {
+   "top": 142,
+   "bottom": 163,
+   "h": 21,
+   "w": 320
+  },
+  "nextPlace": {
+   "top": 367,
+   "bottom": 409,
+   "h": 42,
+   "w": 290
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 295,
+   "h": 191,
+   "w": 358
+  },
+  "next": {
+   "top": 303,
+   "bottom": 417,
+   "h": 113,
+   "w": 358
+  },
+  "primary": {
+   "top": 425,
+   "bottom": 481,
+   "h": 56,
+   "w": 358
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 99,
+   "rowW": 330,
+   "whatLines": 1,
+   "whatW": 132,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 493,
+   "bottom": 657,
+   "h": 164,
+   "w": 358
+  }
+ },
+ {
+  "label": "long-base",
+  "w": 320,
+  "h": 640,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 320,
+  "innerW": 320,
+  "navTop": 561,
+  "quickBottom": 965,
+  "gapToNav": -404,
+  "place": null,
+  "when": {
+   "top": 142,
+   "bottom": 163,
+   "h": 21,
+   "w": 250
+  },
+  "nextPlace": {
+   "top": 475,
+   "bottom": 538,
+   "h": 63,
+   "w": 220
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 379,
+   "h": 274,
+   "w": 288
+  },
+  "next": {
+   "top": 387,
+   "bottom": 546,
+   "h": 159,
+   "w": 288
+  },
+  "primary": {
+   "top": 554,
+   "bottom": 610,
+   "h": 56,
+   "w": 288
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 163,
+   "rowW": 260,
+   "whatLines": 1,
+   "whatW": 178,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 5
+  },
+  "lowLH": [
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 622,
+   "bottom": 871,
+   "h": 249,
+   "w": 288
+  }
+ },
+ {
+  "label": "long-base",
+  "w": 430,
+  "h": 932,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 430,
+  "innerW": 430,
+  "navTop": 859,
+  "quickBottom": 730,
+  "gapToNav": 130,
+  "place": null,
+  "when": {
+   "top": 142,
+   "bottom": 163,
+   "h": 21,
+   "w": 360
+  },
+  "nextPlace": {
+   "top": 367,
+   "bottom": 409,
+   "h": 42,
+   "w": 330
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 295,
+   "h": 191,
+   "w": 398
+  },
+  "next": {
+   "top": 303,
+   "bottom": 417,
+   "h": 113,
+   "w": 398
+  },
+  "primary": {
+   "top": 425,
+   "bottom": 481,
+   "h": 56,
+   "w": 398
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 99,
+   "rowW": 370,
+   "whatLines": 1,
+   "whatW": 172,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 493,
+   "bottom": 657,
+   "h": 164,
+   "w": 398
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 390,
+  "h": 844,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 390,
+  "innerW": 390,
+  "navTop": 728,
+  "quickBottom": 2241,
+  "gapToNav": -1513,
+  "place": null,
+  "when": {
+   "top": 265,
+   "bottom": 349,
+   "h": 84,
+   "w": 288
+  },
+  "nextPlace": {
+   "top": 1164,
+   "bottom": 1332,
+   "h": 168,
+   "w": 258
+  },
+  "prep": {
+   "top": 201,
+   "bottom": 917,
+   "h": 716,
+   "w": 326
+  },
+  "next": {
+   "top": 925,
+   "bottom": 1340,
+   "h": 416,
+   "w": 326
+  },
+  "primary": {
+   "top": 1348,
+   "bottom": 1433,
+   "h": 85,
+   "w": 326
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 349,
+   "rowW": 298,
+   "whatLines": 1,
+   "whatW": 143,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 6
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1457,
+   "bottom": 2065,
+   "h": 607,
+   "w": 326
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 430,
+  "h": 932,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 430,
+  "innerW": 430,
+  "navTop": 816,
+  "quickBottom": 2045,
+  "gapToNav": -1229,
+  "place": null,
+  "when": {
+   "top": 265,
+   "bottom": 307,
+   "h": 42,
+   "w": 328
+  },
+  "nextPlace": {
+   "top": 1009,
+   "bottom": 1177,
+   "h": 168,
+   "w": 298
+  },
+  "prep": {
+   "top": 201,
+   "bottom": 762,
+   "h": 561,
+   "w": 366
+  },
+  "next": {
+   "top": 770,
+   "bottom": 1185,
+   "h": 416,
+   "w": 366
+  },
+  "primary": {
+   "top": 1193,
+   "bottom": 1279,
+   "h": 85,
+   "w": 366
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 349,
+   "rowW": 338,
+   "whatLines": 1,
+   "whatW": 183,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 6
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1303,
+   "bottom": 1910,
+   "h": 607,
+   "w": 366
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 320,
+  "h": 640,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 320,
+  "innerW": 320,
+  "navTop": 524,
+  "quickBottom": 3027,
+  "gapToNav": -2502,
+  "place": null,
+  "when": {
+   "top": 366,
+   "bottom": 450,
+   "h": 84,
+   "w": 218
+  },
+  "nextPlace": {
+   "top": 1537,
+   "bottom": 1831,
+   "h": 294,
+   "w": 188
+  },
+  "prep": {
+   "top": 247,
+   "bottom": 1196,
+   "h": 949,
+   "w": 256
+  },
+  "next": {
+   "top": 1204,
+   "bottom": 1839,
+   "h": 635,
+   "w": 256
+  },
+  "primary": {
+   "top": 1847,
+   "bottom": 1974,
+   "h": 127,
+   "w": 256
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 517,
+   "rowW": 228,
+   "whatLines": 1,
+   "whatW": 228,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 9
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1998,
+   "bottom": 2850,
+   "h": 852,
+   "w": 256
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 375,
+  "h": 812,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 696,
+  "quickBottom": 2422,
+  "gapToNav": -1726,
+  "place": null,
+  "when": {
+   "top": 265,
+   "bottom": 349,
+   "h": 84,
+   "w": 273
+  },
+  "nextPlace": {
+   "top": 1219,
+   "bottom": 1387,
+   "h": 168,
+   "w": 243
+  },
+  "prep": {
+   "top": 201,
+   "bottom": 971,
+   "h": 770,
+   "w": 311
+  },
+  "next": {
+   "top": 979,
+   "bottom": 1395,
+   "h": 416,
+   "w": 311
+  },
+  "primary": {
+   "top": 1403,
+   "bottom": 1488,
+   "h": 85,
+   "w": 311
+  },
+  "clipped": [
+   "SPAN",
+   "SPAN",
+   "SPAN"
+  ],
+  "deadline": {
+   "rowH": 475,
+   "rowW": 283,
+   "whatLines": 1,
+   "whatW": 283,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/20（水）",
+   "text": "技能証明 とても長い氏名の操縦者テスト太郎ホームの期限確認用四十字AMWUUVHNS 更新の期限（満了の 1 か月前）を過ぎています 。 1/20（水） ○ あと 15 日",
+   "subjectLines": 8
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1512,
+   "bottom": 2245,
+   "h": 733,
+   "w": 311
+  }
+ }
+]
