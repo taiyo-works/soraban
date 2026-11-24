@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DEADLINE_GUIDE_DISCLAIMER, DEADLINE_PAST_GUIDE_MESSAGE } from "@soraban/dips";
-import { NEXT_ACTIONS_INITIAL, splitDueLabel, TodayEmpty, TodayNextActions } from "./today-ui";
+import { HomePrimary, NEXT_ACTIONS_INITIAL, splitDueLabel, TodayEmpty, TodayNextActions } from "./today-ui";
 import type { TodayNextAction } from "@/server/ops/today-logic";
 
 const empty = {
@@ -62,5 +62,29 @@ describe("ホームの部品（Sprint 12g-1b 差し戻し）", () => {
     expect(six).toContain("6 件");
     expect(six).toContain("1/20（水）");
     expect(six).not.toContain("2027-01-20");
+  });
+});
+
+describe("ホームの主ボタン（16-G 差し戻し 1）", () => {
+  const html = (a: TodayNextAction | null, cardPlanId: string | undefined) =>
+    renderToStaticMarkup(createElement(HomePrimary, { action: a, canPlan: true, ...(cardPlanId !== undefined ? { cardPlanId } : {}) }));
+
+  it("準備カードの計画の行動のときは、計画名の添え書きを出さない", () => {
+    const h = html(action(1), "p1");
+    expect(h).toContain("作業 1");
+    expect(h).toContain('data-testid="home-primary"');
+    expect(h).not.toContain("home-primary-plan");
+  });
+  it("別の計画の行動のときは、主ボタンの下に対象の計画名を 1 行添える（home-primary-plan）", () => {
+    const h = html(action(2), "p1");
+    expect(h).toContain('data-testid="home-primary-plan"');
+    expect(h).toContain("計画 2");
+    expect(h.indexOf("home-primary-plan")).toBeGreaterThan(h.indexOf('data-testid="home-primary"'));
+  });
+  it("計画に結び付かない行動（技能証明など）には添えない。行動が無ければ「新しい計画」", () => {
+    expect(html(action(3, { planId: null, planTitle: null }), "p1")).not.toContain("home-primary-plan");
+    const h = html(null, "p1");
+    expect(h).toContain("新しい計画");
+    expect(h).not.toContain("home-primary-plan");
   });
 });

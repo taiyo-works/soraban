@@ -1041,11 +1041,11 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       // 正常なときは counts（比べる基準）
       const ok = await today.getToday(mgr(O));
       expect(ok.card!.prep.judgement.kind).toBe("counts");
-      // judgement_snapshots への問い合わせだけを失敗させる包んだ db（permits.db.test.ts の wrapped と同じ形）。件数を数える問い合わせ（snapshotItemCounts）だけが対象
+      // judgement_snapshots への問い合わせだけを失敗させる包んだ db（permits.db.test.ts の wrapped と同じ形）。件数を数える問い合わせ（snapshotItemCounts。一覧の問い合わせは通す）だけが対象
       let failed = 0;
       const wrapped = {
         query: (sql: string, ...a: unknown[]) => {
-          if (/judgement_snapshots/.test(sql) && /jsonb_array_elements/.test(sql)) {
+          if (/judgement_snapshots/.test(sql) && /count\(\*\) filter/.test(sql)) {
             failed++;
             return Promise.reject(new Error("injected: judgement_snapshots の問い合わせの失敗"));
           }

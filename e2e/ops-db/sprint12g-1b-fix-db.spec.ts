@@ -289,9 +289,15 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const dl = page.getByTestId("home-deadlines");
     await expect(dl).toBeVisible();
     await expect(dl).not.toContainText(/\d{4}-\d{2}-\d{2}/);
-    for (const t of await dl.getByTestId("deadline-row").locator("time").allTextContents()) // 16-G：3 件目以降は畳まれている（textContent で読む）
-      expect(t).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
-    if (r.status() === 201) await expect(dl).toContainText("2026/12/20（日）");
+    // 16-G（差し戻し 1）：上段には 1 件だけで、2 件目以降は畳んだ「すべての予定」の中にある。畳んだ中を開いて、ページ全体の期限の行の日付を全件測る
+    await openAllPlans(page);
+    const times = page.locator('[data-testid="deadline-row"] time');
+    await expect(times.first()).toBeVisible();
+    const texts = await times.allInnerTexts();
+    expect(texts.length, "期限の行（上段＋畳んだ中）").toBeGreaterThanOrEqual(1);
+    for (const t of texts) expect(t.trim()).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
+    await expect(page.getByTestId("home-deadlines-rest")).not.toContainText(/\d{4}-\d{2}-\d{2}/);
+    if (r.status() === 201) expect(texts.map((t) => t.trim())).toContain("2026/12/20（日）");
     await bm.dispose();
   });
 

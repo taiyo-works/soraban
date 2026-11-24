@@ -60,7 +60,20 @@ const before = (page: Page, a: string, b: string): Promise<boolean> =>
     [a, b],
   );
 
-const BANNED = ["飛行可", "問題なし", "通報不要", "完璧", "保証", "必ず", "代行", "代理"];
+// 差し戻し 1：「安全」「OK」「申請」を足した（不変条件 3）。走査の範囲は、準備カード・次の予定・クイック操作・主ボタン。
+// 判定の領域（data-wording-scope="judgement"）の語は今のまま出すので、この範囲には含めない（畳んだ中の今日のカードなどは対象外）。
+const BANNED = ["飛行可", "問題なし", "通報不要", "完璧", "保証", "必ず", "代行", "代理", "安全", "OK", "申請"];
+const SCAN_IDS = ["home-prep", "home-next", "home-quick", "home-primary"] as const;
+const expectNoBannedWords = async (page: Page, what: string): Promise<void> => {
+  for (const id of SCAN_IDS) {
+    const el = page.getByTestId(id);
+    if ((await el.count()) === 0) continue;
+    // 判定の領域の中の語は走査しない（この 4 つの範囲に判定の領域が入っていないことも確かめる）
+    expect(await el.locator('[data-wording-scope="judgement"]').count(), `${what}：${id} の中に判定の領域がない`).toBe(0);
+    const text = await el.innerText();
+    for (const w of BANNED) expect(text, `${what}：${id} に「${w}」`).not.toContain(w);
+  }
+};
 
 test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
@@ -127,9 +140,8 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     expect(label).toMatch(/^次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、.+。/);
     // 3 行の記号（形）は svg で、文字が状態を伝える
     for (const r of ["report", "inspection", "judgement"]) await expect(page.getByTestId(`home-prep-${r}`).locator("svg")).toHaveCount(1);
-    // 禁止語
-    const text = await page.getByTestId("home-prep").innerText();
-    for (const w of BANNED) expect(text, w).not.toContain(w);
+    // 禁止語（準備カード・次の予定・クイック操作・主ボタン）
+    await expectNoBannedWords(page, "ホーム");
     // 帯の色：注意以上（通報が注意）なので data-state は warn か danger。unknown（灰）にはならない
     expect(["warn", "danger"]).toContain((await page.getByTestId("home-prep").getAttribute("data-tone")) ?? "");
     // ③次の予定：カード全体が計画の画面への入口（72px 以上）。状態ラベル・日時・場所
@@ -150,8 +162,11 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     await waitForSettledStyles(page);
     const primaries = await visiblePrimaries(page);
     expect(primaries, `見える主ボタン ${primaries.join("・")}`).toEqual(["home-primary"]);
-    const t = (await (await page.request.get("/api/ops/today")).json()) as { nextActions: { id: string; label: string; href: string; canAct: boolean }[] };
-    const first = t.nextActions.find((a) => a.canAct);
+    const t = (await (await page.request.get("/api/ops/today")).json()) as { card: { planId: string } | null; nextActions: { id: string; label: string; href: string; canAct: boolean; planId: string | null }[] };
+    // 差し戻し 1：準備カードの計画の押せる行動を優先し、無ければ押せる先頭の 1 件
+    const first = t.nextActions.find((a) => a.canAct && a.planId === t.card?.planId) ?? t.nextActions.find((a) => a.canAct);
+    // 準備カードの計画の行動があるときは、別の計画名の添え書きは出ない
+    if (first && first.planId === t.card?.planId) await expect(page.getByTestId("home-primary-plan")).toHaveCount(0);
     if (first) {
       await expect(page.getByTestId("home-primary")).toHaveText(first.label);
       await expect(page.getByTestId("home-primary")).toHaveAttribute("href", first.href);
@@ -270,6 +285,55 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     expect(await before(page, "home-primary", "home-deadlines")).toBe(true);
     expect(await before(page, "home-deadlines", "home-quick")).toBe(true);
     await bm.dispose();
+  });
+
+  test("差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△）", async ({ page }) => {
+    const bm = await apiAs(seeded("b-manager"));
+    await clearPlans(bm);
+    const bp = await apiAs(seeded("b-pilot"));
+    const me = (await (await bp.get("/api/ops/me")).json()) as { pilotId: string };
+    await bp.dispose();
+    await signIn(page.request, seeded("b-manager"));
+    const variants = [
+      { key: "num", manual: { dipsNumber: "FP-HOME-0001" }, text: "受付番号を記録済み", tone: "safe" },
+      { key: "nonum", manual: { numberUnavailable: true }, text: "記録あり（受付番号なし）", tone: "warn" },
+    ] as const;
+    try {
+      for (const [i, v] of variants.entries()) {
+        const mark = `JUR${v.key}${stamp}`.slice(0, 20);
+        const ac = await bm.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "通報の行の試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+        expect(ac.status(), await ac.text()).toBe(201);
+        const aircraftId = ((await ac.json()) as { id: string }).id;
+        const pl = await bm.post("/api/ops/plans", {
+          data: { title: `通報の行 ${v.key} ${stamp}`, aircraftId, pilotId: me.pilotId, plannedStartAt: `${DAY}T${13 + i}:00`, durationMinutes: 30, purpose: "空撮", placeName: `地点${v.key}${stamp}`, latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] },
+        });
+        expect(pl.status(), await pl.text()).toBe(201);
+        const id = ((await pl.json()) as { id: string }).id;
+        const created = (await (await bm.get(`/api/ops/plans/${id}`)).json()) as { version: number };
+        expect((await bm.post(`/api/ops/plans/${id}/request-confirmation`, { data: { expectedVersion: created.version } })).status()).toBe(200);
+        const active = (await (await bm.get(`/api/ops/plans/${id}`)).json()) as { version: number };
+        const rep = await bm.post(`/api/ops/plans/${id}/reports`, {
+          data: { kind: "new", expectedPlanVersion: active.version, inputs: { flightSpeed: 40, assistantsNumber: 1 }, manual: { reportedAt: `${DAY}T11:30`, confirmedDipsDone: true, confirmedMatchesLatest: true, ...v.manual } },
+        });
+        expect(rep.status(), await rep.text()).toBeLessThan(300);
+        await page.goto("/ops");
+        await expect(page.getByTestId("home-prep")).toBeVisible();
+        await expect(page.getByTestId("home-prep-report-text")).toHaveText(v.text);
+        await expect(page.getByTestId("home-prep-report")).toHaveAttribute("data-tone", v.tone);
+        const label = (await page.getByTestId("home-prep").getAttribute("aria-label")) ?? "";
+        expect(label).toContain(`通報、${v.text}。`);
+        if (v.key === "nonum") {
+          await expect(page.getByTestId("home-prep-report-text")).not.toContainText("受付番号を記録済み");
+          // 帯は注意以上（番号なしを良い側に見せない）
+          expect(["warn", "danger"]).toContain((await page.getByTestId("home-prep").getAttribute("data-tone")) ?? "");
+        }
+        await expectNoBannedWords(page, `通報の行 ${v.key}`);
+        await voidPlan(bm, id);
+      }
+    } finally {
+      await clearPlans(bm);
+      await bm.dispose();
+    }
   });
 
   test("HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない", async ({ page }) => {
