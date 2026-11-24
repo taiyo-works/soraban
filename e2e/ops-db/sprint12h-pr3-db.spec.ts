@@ -238,10 +238,10 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await signIn(page.request, seeded("a-manager"));
     await page.goto("/ops/inspections");
     await expect(page.getByTestId("ops-inspections")).toBeVisible();
-    // 1 段目：戻りリンクなし。見出しは「点検」
+    // 16-F（F-2）：点検は日誌の下の画面。戻りリンクは「日誌」の 1 つ。見出しは「点検」
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/点検/);
-    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
-    await expect(page.locator("main").getByRole("link", { name: /日誌/ })).toHaveCount(0);
+    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(1);
+    await expect(page.locator("main").getByRole("link", { name: /日誌/ })).toHaveAttribute("href", "/ops/journal");
     // 並び：新しい点検 → 未実施 → 記録
     const y = async (id: string): Promise<number> => (await page.getByTestId(id).boundingBox())!.y;
     const [yNew, yPending, yRecords] = [await y("inspection-new"), await y("inspection-pending"), await y("inspection-records")];

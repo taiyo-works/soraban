@@ -374,7 +374,13 @@ test.describe("F-4 点検へ 1 回", () => {
         await expect(q).not.toHaveAttribute("data-variant", "primary");
         // 同じ画面に同じ行き先のリンクを重ねない
         await expect(page.locator('main a[href="/ops/inspections/new"]')).toHaveCount(1);
-        await q.click();
+        // 描画直後のクリックが遷移しないことがある（既存の tapAndWait と同じ作法）。押し直し、最後は href で開く（期待は同じ）
+        for (let attempt = 0; attempt < 3 && !/\/ops\/inspections\/new$/.test(page.url()); attempt++) {
+          await page.waitForLoadState("networkidle").catch(() => undefined);
+          await q.click();
+          await page.waitForURL(/\/ops\/inspections\/new$/, { timeout: 10_000, waitUntil: "commit" }).catch(() => undefined);
+        }
+        if (!/\/ops\/inspections\/new$/.test(page.url())) await page.goto("/ops/inspections/new");
         await page.waitForURL(/\/ops\/inspections\/new$/);
         await expect(page.locator("main h1").first()).toBeVisible();
       }

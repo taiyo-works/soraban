@@ -91,7 +91,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
   test("I-3. スキップリンク「本文へ移動」と Tab の順（スマホは 上バー → 本文 → 下タブ）。主要画面の題名", async ({ page }) => {
     await signIn(page.request, seeded("b-manager"));
     // 題名は画面ごと（テンプレート「○○ — そらばん」）
-    for (const [path, name] of [["/ops", "ホーム"], ["/ops/plans", "計画"], ["/ops/journal", "日誌"], ["/ops/more", "登録"]] as const) {
+    for (const [path, name] of [["/ops", "ホーム"], ["/ops/plans", "計画"], ["/ops/journal", "日誌"], ["/ops/more", "機体と書類"]] as const) {
       await page.goto(path);
       await expect(page).toHaveTitle(`${name} — そらばん`);
     }

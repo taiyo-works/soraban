@@ -85,7 +85,7 @@
   --sb-hit: 48px;                /* 普通のボタン・入力欄 */
   --sb-hit-primary: 56px;        /* 主ボタン */
   --sb-hit-row: 48px;            /* チェック行（現場で 64px） */
-  --sb-fs-h: 1.375rem;
+  --sb-fs-h: 1.5rem;
   --sb-fs-body: 1rem;
   --sb-fs-note: 0.875rem;
 

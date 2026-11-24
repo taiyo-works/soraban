@@ -212,7 +212,8 @@ html:has(.ops-v2) body {
 /* 画面の見出し */
 .opx-h1 {
   font-size: var(--sb-fs-h);
-  line-height: 1.4;
+  /* 16-F：題を 22→24px にした分、行の高さを 1.4→1.25（大きな文字の下限）にして、題の 1 行の高さを 30.8→30px に保つ（最初の画面の縦位置の検査を下げない） */
+  line-height: 1.25;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--sb-ink);
