@@ -678,3 +678,8 @@ html:has(.ops-v2) body {
 [data-testid="pwa-install-guide"] {
   line-height: 1.7;
 }
+
+/* ホームのクイック操作（16-F。点検は主役。主ボタンはカードの 1 つなので、これは副のまま）：アイコンだけ主色にして、上の「判定」の副ボタンと見分ける。寸法・位置は変えない */
+[data-testid="home-quick"] .opx-btn svg {
+  color: var(--sb-primary);
+}

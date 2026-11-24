@@ -515,8 +515,8 @@ test.describe("F-6 上の状態の層", () => {
         else await expect(page.getByTestId(ready)).toBeVisible();
         await waitForSettledStyles(page);
         const primaries = await visiblePrimaries(page);
-        // 点検の入力は、16-F より前から「すべて正常」（入力の補助）と「保存」の 2 つが主の見た目（K-8 の未了。16-F の範囲外として報告）。位置の検査は最後の主ボタン（保存）で行う
-        if (name === "点検の入力") expect(primaries, `${name} 主ボタン`).toEqual(["すべて正常", "保存"]);
+        // 点検の入力の主ボタンは「保存」の 1 つ（16-F 磨き込みで「すべて正常」＝入力の補助を副にした。K-8）
+        if (name === "点検の入力") expect(primaries, `${name} 主ボタン`).toEqual(["保存"]);
         else expect(primaries.length, `${name} 主ボタン ${primaries.join("・")}`).toBe(1);
         const top = await page.evaluate(
           (sel) => {

@@ -1501,6 +1501,7 @@ input.sb-radio:disabled {
   box-shadow: var(--sb-shadow-float);
 }
 .sb-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1526,12 +1527,25 @@ input.sb-radio:disabled {
   color: var(--sb-primary);
   font-weight: 700;
 }
+/* 現在地の形の手がかり（色なしでも分かる）：項目の上端に幅 24・高さ 3 の線。位置は絶対配置なので項目の寸法・並びは変えない */
+.sb-tab[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 24px;
+  height: 3px;
+  margin-left: -12px;
+  border-radius: 0 0 3px 3px;
+  background: var(--sb-primary);
+}
 .sb-tab:focus-visible,
 .sb-side-link:focus-visible {
   outline: 3px solid var(--sb-focus);
   outline-offset: -3px;
 }
 .sb-side-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1556,10 +1570,27 @@ input.sb-radio:disabled {
   color: var(--sb-ink);
   font-weight: 700;
 }
+/* 現在地の形の手がかり（色なしでも分かる）：左端に幅 4 の線。子の現在地では、子の縦線（罫）の上に重なる */
+.sb-side-link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--sb-primary);
+}
+.sb-side-link[aria-current="page"] svg {
+  color: var(--sb-primary);
+}
+/* 子：字下げを詰め（罫の左 16px）、アイコンと文字の間も 8px にして、左メニューの幅（240）で「事故・ヒヤリハット」が 1 行に入るようにする。
+ * 入らない（文字 200% など）ときは語の切れ目（「事故・｜ヒヤリハット」）で折る */
 .sb-side-sub {
   min-height: var(--sb-hit-min);
-  gap: 10px;
-  padding: 4px 10px;
+  gap: 8px;
+  padding: 4px 8px;
+  text-wrap: balance;
 }
 
 /* ===== 一覧の行・絞り込みのチップ（Sprint 12h PR ③a。点検の一覧。見本：warm-final/inspections.html） ===== */

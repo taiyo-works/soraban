@@ -1561,7 +1561,7 @@ export function InspectionForm({
           <p className="text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
-          <button type="button" data-variant="primary" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
+          <button type="button" className={`${tallGhostClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>

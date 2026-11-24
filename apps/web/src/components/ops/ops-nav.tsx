@@ -88,7 +88,7 @@ export function OpsSidebar({ role }: { readonly role: MemberRoleDb }) {
               <div key={k} className="flex flex-col gap-0.5">
                 <SideLink href={item.href} label={item.label} icon={item.icon} testId={`nav-${k}`} active={current === k && !hasChild} ancestor={hasChild} />
                 {parent ? (
-                  <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-sb-rule pl-1.5">
+                  <div className="ml-[1.3125rem] flex flex-col gap-0.5 border-l border-sb-rule pl-1">
                     {visibleChildrenOf(parent, role).map((c) => (
                       <SideLink key={c.key} sub href={c.href} label={c.label} icon={c.icon} testId={`nav-${c.key}`} active={child === c.key} />
                     ))}
