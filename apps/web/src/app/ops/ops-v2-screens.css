@@ -371,11 +371,11 @@
 .home-prep {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .sb-card.home-prep {
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 /* 見出しの下に、日時と場所（補足）。長い場所の名前は折り返す（文字 200% でも切らない。省略記号は使わない） */
 .home-prep-head {
@@ -383,6 +383,9 @@
   flex-direction: column;
   gap: 0;
   min-width: 0;
+}
+.home-prep-title {
+  font-weight: 700;
 }
 .home-prep-when {
   font-size: 0.875rem;
@@ -488,8 +491,8 @@ html[data-mode="field"] .home-quick-btn {
 
 /* ホーム：次の予定のカードは余白を詰め（高さは 72px 以上のまま）、場所は 1 行で省略。近づく期限の見出しは枠の中の 1 行 */
 .home-next-card.sb-card {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 .home-next-card .sb-card-list-text { gap: 2px; }
 .home-next-title,
@@ -505,6 +508,22 @@ html[data-mode="field"] .home-quick-btn {
 }
 [data-testid="home-deadlines"] > .sb-block { padding-top: 4px !important; padding-bottom: 0 !important; }
 [data-testid="home-deadlines"] .sb-row { padding-top: 6px; padding-bottom: 6px; }
+/* 期限の行：1 行目に「種別・日付・残り日数」、2 行目に対象を行の全幅で置く（DOM の順・読む順は変えない。中の 2 つの span は display: contents で外す）。
+ * 対象（機体・許可番号・操縦者名）が長くて折り返しても、日付と残り日数の列に幅を取られないので、行が高くならない（3 行→2 行）。
+ * 残り日数の札は、この行だけ 24px の高さにして、1 行目を詰める（札は押す部品ではない）。 */
+[data-testid="ops-today"] [data-testid="deadline-link"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 8px;
+}
+[data-testid="ops-today"] [data-testid="deadline-link"] > span { display: contents; }
+/* 種別は縮めない（文字 200% で日付と札に幅を取られて 1 字ずつ折れないよう、足りなければ日付と札が次の行へ回る） */
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:first-child > span:first-child { order: 1; flex: 1 0 auto; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:last-child > :first-child { order: 2; flex: none; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:last-child > :last-child { order: 3; flex: none; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:first-child > span:last-child { order: 4; flex: 0 0 100%; min-width: 0; }
+[data-testid="ops-today"] [data-testid="deadline-link"] .sb-tag { min-height: 24px; padding-top: 0; padding-bottom: 0; }
 .home-dl-head h2 {
   font-size: 1rem;
   line-height: 1.5;
