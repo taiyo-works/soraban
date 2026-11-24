@@ -242,9 +242,14 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const headline = Number(/(\d+) 件/.exec(await page.getByTestId("today-next-actions").locator("h2 + span").innerText())?.[1]);
     expect(headline).toBeGreaterThanOrEqual(total);
     // 最初の画面（スマホ）の下端までに、近づく期限の見出しが入る位置まで届く（長い一覧が期限を押し出さない。16-G：期限は上段に移った）
-    const deadlineTop = (await page.getByTestId("home-deadlines").boundingBox())!.y;
-    const nextTop = (await page.getByTestId("today-next-actions").boundingBox())!.y;
-    expect(deadlineTop - nextTop).toBeLessThan(900);
+    // 16-G：期限（60 日以内）が無いときは段ごと出さない。ある日は上段（次にやることより上）にあり、最初の画面から落ちない
+    if ((await page.getByTestId("home-deadlines").count()) === 0) {
+      await expect(page.getByTestId("home-deadlines-empty")).toHaveCount(1);
+    } else {
+      const deadlineTop = (await page.getByTestId("home-deadlines").boundingBox())!.y;
+      const nextTop = (await page.getByTestId("today-next-actions").boundingBox())!.y;
+      expect(deadlineTop - nextTop).toBeLessThan(900);
+    }
     // キーボードで開く（Enter）→ 全件が見える → もう一度で閉じる。フォーカスはボタンのまま
     await toggle.focus();
     await page.keyboard.press("Enter");

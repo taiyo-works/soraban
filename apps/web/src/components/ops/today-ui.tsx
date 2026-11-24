@@ -250,8 +250,8 @@ const BADGE_TONE: Readonly<Record<TodayBadgeDto["code"], StatusTone>> = {
 export function HomeNextCard({ card, today }: { readonly card: TodayCardDto; readonly today: string }) {
   return (
     <section aria-label="次の予定" className="flex flex-col gap-2" data-testid="home-next">
-      <ListCardLink href={`/ops/plans/${card.planId}`} data-testid="home-next-link">
-        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <ListCardLink href={`/ops/plans/${card.planId}`} className="home-next-card" data-testid="home-next-link">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
           <StatusLabel tone={BADGE_TONE[card.badge.code]} testId="home-next-status">
             {card.badge.label}
           </StatusLabel>
@@ -259,10 +259,10 @@ export function HomeNextCard({ card, today }: { readonly card: TodayCardDto; rea
             <time dateTime={card.plannedDate}>{formatDay(card.plannedDate, today)}</time>　{card.timeLabel}
           </span>
         </span>
-        <span className="text-[1.0625rem] font-bold leading-snug [overflow-wrap:anywhere]" data-testid="home-next-title">
+        <span className="home-next-title text-[1.0625rem] font-bold leading-snug [overflow-wrap:anywhere]" data-testid="home-next-title">
           {card.title}
         </span>
-        <span className="text-sm text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="home-next-place">
+        <span className="home-next-place text-sm text-sb-ink-2" data-testid="home-next-place" title={card.placeName}>
           {card.placeName}
         </span>
       </ListCardLink>
@@ -465,13 +465,13 @@ export function TodayNextActions({
 }
 
 /** ホームに最初から出す期限の行数（残りは「ほか N 件を見る」。最初の画面に、クイック操作まで入れるため）。 */
-export const HOME_DEADLINES_INITIAL = 2;
+export const HOME_DEADLINES_INITIAL = 1;
 
 function DeadlineRow({ d, today }: { readonly d: DeadlineDto; readonly today: string }) {
   return (
     <li data-testid="deadline-row" data-kind={d.kind}>
       {/* 一覧の行は上下 14px。ここだけ 8px に戻す。最初の画面（下タブ 60px を除く）に、期限の先頭の行までを収めるため */}
-      <a href={d.href} className="sb-row !py-2" data-testid="deadline-link">
+      <a href={d.href} className="sb-row" data-testid="deadline-link">
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[1rem] font-bold leading-snug">{d.what}</span>
           <span className="break-words text-sm text-sb-ink-2">
@@ -507,8 +507,12 @@ export function TodayDeadlines({ deadlines, today }: { readonly deadlines: reado
   const tail = deadlines.slice(HOME_DEADLINES_INITIAL);
   return (
     <section aria-label="近づく期限" data-testid="home-deadlines" className="flex flex-col gap-2">
-      <SectionHead id="home-deadlines-h" title="近づく期限" note="60 日以内" />
       <div className="sb-block !py-1">
+        {/* 最初の画面にクイック操作まで入れるため、見出しは枠の中の 1 行（h2 のまま。節の見出しの大きさは使わない） */}
+        <div className="home-dl-head">
+          <h2 id="home-deadlines-h">近づく期限</h2>
+          <span data-note="" className="text-sm text-sb-ink-3">60 日以内</span>
+        </div>
         <ul className="sb-rows">
           {head.map((d) => (
             <DeadlineRow key={`${d.kind}-${d.id}`} d={d} today={today} />

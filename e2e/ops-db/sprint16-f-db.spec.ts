@@ -242,6 +242,9 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
         const lines = new Set(Array.from(range.getClientRects()).map((q) => Math.round(q.top))).size;
         let bottom = 0;
         for (const el of Array.from(document.querySelectorAll<HTMLElement>("main *"))) {
+          // 16-G：畳んだ（閉じた <details> の）中身は見えない。Chromium は、そこにも位置と大きさを返すので数えない
+          const closed = el.closest("details:not([open])");
+          if (closed && el !== closed && !el.closest("summary")) continue;
           const r = el.getBoundingClientRect();
           if (r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden") bottom = Math.max(bottom, r.bottom);
         }

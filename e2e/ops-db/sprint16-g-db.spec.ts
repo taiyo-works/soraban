@@ -231,7 +231,7 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     expect(dump).not.toMatch(/35\.4342|133\.3805/);
   });
 
-  test("HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 2 件まで、残りは「ほか N 件を見る」", async ({ page }) => {
+  test("HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件、残りは「ほか N 件を見る」", async ({ page }) => {
     const bm = await apiAs(seeded("b-manager"));
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
@@ -258,9 +258,9 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     const all = ((await (await bm.get("/api/ops/today")).json()) as { deadlines: { daysLeft: number }[] }).deadlines;
     expect(all.every((d) => d.daysLeft <= 60), "60 日を超える期限は出ない").toBe(true);
     const visibleRows = await section.getByTestId("deadline-row").evaluateAll((els) => els.filter((e) => (e as HTMLElement).offsetParent !== null).length);
-    expect(visibleRows).toBe(Math.min(2, all.length));
-    if (all.length > 2) {
-      await expect(page.getByTestId("home-deadlines-more-toggle")).toHaveText(`ほか ${all.length - 2} 件を見る`);
+    expect(visibleRows).toBe(Math.min(1, all.length));
+    if (all.length > 1) {
+      await expect(page.getByTestId("home-deadlines-more-toggle")).toHaveText(`ほか ${all.length - 1} 件を見る`);
       await page.getByTestId("home-deadlines-more-toggle").click();
       await expect(section.getByTestId("deadline-row").nth(all.length - 1)).toBeVisible();
     }

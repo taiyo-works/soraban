@@ -17,7 +17,7 @@ import {
   type PrepTone,
 } from "@/server/ops/prep-card-logic";
 
-function Row({ id, label, row }: { readonly id: string; readonly label: string; readonly row: PrepRow }) {
+function Row({ id, label, row, foot }: { readonly id: string; readonly label: string; readonly row: PrepRow; readonly foot?: string }) {
   return (
     <li className="home-prep-row" data-tone={row.tone} data-testid={`home-prep-${id}`}>
       <span className="home-prep-sign">
@@ -35,6 +35,11 @@ function Row({ id, label, row }: { readonly id: string; readonly label: string; 
       {row.note ? (
         <span data-note="" className="home-prep-note" data-testid={`home-prep-${id}-note`}>
           {row.note}
+        </span>
+      ) : null}
+      {foot ? (
+        <span data-note="" className="home-prep-foot" data-testid="home-prep-note">
+          {foot}
         </span>
       ) : null}
     </li>
@@ -56,18 +61,15 @@ export function HomePrepCard({ input, when, place }: { readonly input: PrepInput
         <h2 className="home-prep-title" data-testid="home-prep-title">
           {PREP_TITLE}
         </h2>
-        <span data-note="" className="home-prep-when" data-testid="home-prep-when">
+        <span data-note="" className="home-prep-when" data-testid="home-prep-when" title={`${when}　${place}`}>
           {when}　{place}
         </span>
       </div>
       <ul className="home-prep-rows">
         <Row id="report" label={PREP_REPORT_LABEL} row={m.report} />
         <Row id="inspection" label={PREP_INSPECTION_LABEL} row={m.inspection} />
-        <Row id="judgement" label={PREP_JUDGEMENT_LABEL} row={m.judgement} />
+        <Row id="judgement" label={PREP_JUDGEMENT_LABEL} row={m.judgement} foot={PREP_JUDGEMENT_NOTE} />
       </ul>
-      <span data-note="" className="home-prep-foot" data-testid="home-prep-note">
-        {PREP_JUDGEMENT_NOTE}
-      </span>
     </section>
   );
 }

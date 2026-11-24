@@ -373,21 +373,33 @@
   flex-direction: column;
   gap: 8px;
 }
+.sb-card.home-prep {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+/* 見出しと、日時・場所（補足）を 1 行に置く。場所が長いときは補足の側を省略記号で切る */
 .home-prep-head {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 4px 12px;
+  min-width: 0;
 }
+.home-prep-title { flex: none; }
 .home-prep-title {
   font-size: 1.125rem;
   line-height: 1.4;
   font-weight: 700;
 }
 .home-prep-when {
+  flex: 1 1 0;
+  min-width: 0;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-3);
-  overflow-wrap: anywhere;
+  /* 日時と場所は 1 行。長い場所の名前は省略記号で切る（全文は title と、次の予定のカードにある）。最初の画面にクイック操作まで入れるため */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .home-prep-rows {
   display: flex;
@@ -431,6 +443,8 @@
   color: var(--sb-ink-3);
 }
 .home-prep-foot {
+  flex-basis: 100%;
+  padding-left: 32px;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-3);
@@ -458,7 +472,7 @@ html[data-mode="field"] .home-prep-foot {
 .home-quick[data-count="1"] { --home-quick-cols: 1; }
 .home-quick-btn {
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-height: 64px;
   padding: 8px 4px;
 }
@@ -470,4 +484,41 @@ html[data-mode="field"] .home-prep-foot {
 }
 html[data-mode="field"] .home-quick-btn {
   min-height: 72px;
+}
+
+/* ホーム：次の予定のカードは余白を詰め（高さは 72px 以上のまま）、場所は 1 行で省略。近づく期限の見出しは枠の中の 1 行 */
+.home-next-card.sb-card {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.home-next-card .sb-card-list-text { gap: 2px; }
+.home-next-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-next-place {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-dl-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 4px 0;
+}
+[data-testid="home-deadlines"] > .sb-block { padding-top: 4px !important; padding-bottom: 0 !important; }
+[data-testid="home-deadlines"] .sb-row { padding-top: 6px; padding-bottom: 6px; }
+.home-dl-head h2 {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+@media (max-width: 1023px) {
+  /* スマホは、ホームの段の間を 12→8px に詰める（最初の画面に準備カードからクイック操作までを入れるため） */
+  [data-testid="ops-today"] { gap: 8px; }
+  [data-testid="ops-today"] > div > div, [data-testid="ops-today"] > div > div > div { gap: 8px; }
 }

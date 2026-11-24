@@ -416,7 +416,8 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await page.goto("/ops/journal");
     await tapAndWait(page, nav.getByTestId("nav-more"), /\/ops\/more$/);
     await tapAndWait(page, nav.getByTestId("nav-today"), /\/ops$/);
-    // 判定へは、ホーム上部のピル（下タブに判定はない）
+    // 判定へは、ホームの「すべての予定」の中のピル（下タブに判定はない。16-G で畳んだ中に移った）
+    await openAllPlans(page);
     await tapAndWait(page, page.getByTestId("judge-pill-search"), new RegExp(`^${BASE.replace(/[.]/g, "\\.")}/\\?start=search$`));
     // Next のクライアント遷移は、前の画面を隠して残す（Activity）。同じ data-testid が重ならないよう、読み直してから確かめる
     await page.reload();
