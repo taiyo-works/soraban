@@ -222,6 +222,23 @@
     background var(--sb-dur) var(--sb-ease),
     transform var(--sb-dur-press) var(--sb-ease);
 }
+/* 矢印つきの一覧カード（G-1）：右端に chevron-right（aria-hidden の装飾）。押せる範囲・最小の高さ 72 は変えない */
+.sb-card-list-go {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sb-card-list-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.sb-card-list-arrow {
+  flex: none;
+  color: var(--sb-ink-2);
+}
 a.sb-card-list,
 button.sb-card-list {
   cursor: pointer;
@@ -278,16 +295,17 @@ button.sb-card-list:active {
   text-decoration: none;
 }
 .sb-state-dot {
+  /* G-1：点は状態ごとの形（待機中＝輪、飛行中＝三角、飛行済＝チェック、期限が近い＝警告の三角、中止＝×）。12px、色は状態の印の色。装飾で、状態は文字が担う */
   flex: none;
   display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--sb-pill);
-  background: var(--sb-state-mark, var(--sb-st-info-mark));
+  width: 12px;
+  height: 12px;
+  color: var(--sb-state-mark, var(--sb-st-info-mark));
 }
 .sb-state-info { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); --sb-state-text: var(--sb-st-info-text); }
 .sb-state-flying { --sb-state-face: var(--sb-st-flying-face); --sb-state-mark: var(--sb-st-flying-mark); --sb-state-text: var(--sb-st-flying-text); }
 .sb-state-safe { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); --sb-state-text: var(--sb-st-safe-text); }
+.sb-state-warn { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); --sb-state-text: var(--sb-st-warn-text); }
 .sb-state-danger { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); --sb-state-text: var(--sb-st-danger-text); }
 a.sb-state,
 button.sb-state {
@@ -947,8 +965,9 @@ input.sb-radio:disabled {
   align-items: center;
   justify-content: center;
   border-radius: var(--sb-pill);
-  background: var(--sb-primary);
-  color: var(--sb-on-primary);
+  /* G-1（2026-11-24）：ロゴの丸は墨。主色は「操作と現在地」だけに使い、押せるものに見せない */
+  background: var(--sb-ink);
+  color: var(--sb-inverse-fg);
 }
 .sb-brand-mark svg {
   width: 30px;
@@ -1206,6 +1225,10 @@ input.sb-radio:disabled {
 .sb-layer:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
+}
+/* フォーカスの輪は行（押せる範囲）の 1 本に揃える。丸の輪と重ねない（.sb-check-row と同じ流儀。16-E の任意の改善 2） */
+.sb-layer:has(:focus-visible) input.sb-check:focus-visible {
+  outline: none;
 }
 .sb-layer input.sb-check {
   width: 22px;

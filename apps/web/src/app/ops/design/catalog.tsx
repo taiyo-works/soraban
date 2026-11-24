@@ -2,7 +2,7 @@ import { VERDICT_LABEL } from "@soraban/regulations";
 import type { ItemVerdict } from "@soraban/regulations";
 import "./catalog.css";
 import { HeroIllustration } from "@/components/hero-illustration";
-import { PillButton, SectionHead, StatusLabel, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
+import { ListCardLink, PillButton, SectionHead, StateShape, StatusLabel, VerdictBig, VerdictTag } from "@/components/ui/sb-parts";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { CatalogAttrs } from "./catalog-attrs";
 import { CatalogChecks, CatalogChoices, CatalogInputs, CatalogSheet, CatalogStates } from "./catalog-parts";
@@ -31,13 +31,13 @@ const href = (c: CatalogConfig, over: Partial<Record<"mode" | "theme" | "veil", 
 };
 
 const LEVELS: readonly ItemVerdict[] = ["no_fly", "needs_procedure", "procedure_done", "no_procedure", "unknown"];
-/** G-1 で決める見本（ここから飛べる）。 */
+/** G-1 の決定の見本（ここから飛べる）。 */
 const anchor = (id: string): string => (id === "cat-bottomnav-sec" ? "#cat-bottomnav-sec" : `#sec-${id}`);
 const DECISIONS = [
-  ["cat-logo", "ロゴの丸（主色か墨か）"],
-  ["cat-state-labels", "状態ラベルの点の形"],
-  ["cat-cards", "一覧のカードの矢印"],
-  ["cat-order", "計画作成の段の順"],
+  ["cat-logo", "ロゴの丸（墨を採用）"],
+  ["cat-state-labels", "状態ラベルの点（状態ごとの形を採用）"],
+  ["cat-cards", "一覧のカードの矢印（あり）"],
+  ["cat-order", "計画作成の段の順（この計画の順）"],
   ["cat-checks-section", "チェックとラジオ"],
   ["cat-prep", "準備カードの文言（§8）"],
 ] as const;
@@ -110,7 +110,7 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </header>
 
       <section className="sbx-decide" aria-labelledby="cat-decide-h" data-testid="cat-decide">
-        <h2 id="cat-decide-h">G-1 で決めること（6 つ）</h2>
+        <h2 id="cat-decide-h">G-1 の決定（2026-11-24 承認）</h2>
         <ol className="sbx-decide-list">
           {DECISIONS.map(([id, label], i) => (
             <li key={id}>
@@ -196,17 +196,17 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
             <strong>通常のカード</strong>
             <p className="sbx-note">白い面・角丸 16・1px の罫・内側 16。</p>
           </div>
-          <a className="sb-card sb-card-list" href="#cat-cards" data-testid="cat-card-list">
+          <ListCardLink href="#cat-cards" data-testid="cat-card-list">
             <strong>一覧のカード（見出し）</strong>
             <span>13:00〜14:00　機体 JU0000（試験機）</span>
-            <span data-note="" className="sbx-note">最小の高さ 72・全体が押せる</span>
-          </a>
+            <span data-note="" className="sbx-note">最小の高さ 72・全体が押せる・右端の矢印は装飾</span>
+          </ListCardLink>
           <div className="sb-card sb-card-state" data-state="warn" data-testid="cat-card-state">
             <strong>状態のカード</strong>
             <p className="sbx-note">状態の面と、左端 6px の状態の印の色の帯。</p>
           </div>
         </div>
-        <h3 className="sbx-h3">一覧のカードの矢印（G-1 で決める）</h3>
+        <h3 className="sbx-h3">一覧のカードの矢印（G-1 で決定）</h3>
         <CardArrowCandidates />
       </section>
 
@@ -216,13 +216,14 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
           <StatusLabel tone="info" testId="cat-state-info">待機中</StatusLabel>
           <StatusLabel tone="flying" testId="cat-state-flying">飛行中</StatusLabel>
           <StatusLabel tone="safe" testId="cat-state-safe">飛行済</StatusLabel>
+          <StatusLabel tone="warn" testId="cat-state-warn">期限が近い</StatusLabel>
           <StatusLabel tone="danger" testId="cat-state-danger">中止</StatusLabel>
           <a className="sb-state sb-state-info" href="#cat-cards" data-testid="cat-state-link">
-            <span className="sb-state-dot" aria-hidden="true" />
+            <StateShape tone="info" />
             <span>押せるラベル</span>
           </a>
         </div>
-        <h3 className="sbx-h3">点の形（G-1 で決める）</h3>
+        <h3 className="sbx-h3">点の形（G-1 で決定）</h3>
         <DotShapeCandidates />
       </section>
 
@@ -288,13 +289,13 @@ export function DesignCatalogV2({ config }: { readonly config: CatalogConfig }) 
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-logo-h" data-testid="cat-logo" id="sec-cat-logo">
-        <h2 id="cat-logo-h">ロゴの丸（G-1 で決める）</h2>
+        <h2 id="cat-logo-h">ロゴの丸（G-1 で決定）</h2>
         <LogoCandidates />
       </section>
 
       <section className="sbx-section" aria-labelledby="cat-order-h" data-testid="cat-order" id="sec-cat-order">
-        <h2 id="cat-order-h">計画作成の段の順（G-1 で決める）</h2>
-        <p className="sbx-note">現行の計画作成は、段に分けない 1 画面の縦長フォームです。下の 2 つはどちらも案で、見本の中だけに置きます。</p>
+        <h2 id="cat-order-h">計画作成の段の順（G-1 で決定）</h2>
+        <p className="sbx-note">現行の計画作成は、段に分けない 1 画面の縦長フォームです。下の 2 つは見本の中だけに置きます。この計画の順を採用し、方針書の順は記録として残します。</p>
         <WizardOrder />
       </section>
 

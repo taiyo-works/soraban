@@ -328,33 +328,33 @@ test.describe("N. 16-E の新しい節", () => {
     expect(v.oc).toBe(PRIMARY);
   });
 
-  test("N-5. 並べ見本：ロゴ・点の形・矢印は「現行」と「案」が 1 つずつ。ロゴの丸は主色の面（現行）と墨の面（案）", async ({ page }) => {
+  test("N-5. 並べ見本（G-1 の決定）：ロゴ・点の形・矢印・段の順は「採用」と「不採用（記録）」が 1 つずつ。ロゴの丸は墨が採用、実画面も墨", async ({ page }) => {
     await open(page);
-    for (const [group, current, cand] of [["cat-logo", "cat-logo-primary", "cat-logo-ink"], ["cat-state-labels", "cat-dot-same", "cat-dot-shapes"], ["cat-cards", "cat-arrow-none", "cat-arrow-with"]] as const) {
-      await expect(page.getByTestId(group).getByTestId(`${current}-tag`), current).toHaveText("現行");
-      await expect(page.getByTestId(group).getByTestId(`${cand}-tag`), cand).toHaveText("案");
+    for (const [group, adopted, rejected] of [["cat-logo", "cat-logo-ink", "cat-logo-primary"], ["cat-state-labels", "cat-dot-shapes", "cat-dot-same"], ["cat-cards", "cat-arrow-with", "cat-arrow-none"], ["cat-order", "cat-order-adopted", "cat-order-direction"]] as const) {
+      await expect(page.getByTestId(group).getByTestId(`${adopted}-tag`), adopted).toHaveText("採用");
+      await expect(page.getByTestId(group).getByTestId(`${rejected}-tag`), rejected).toHaveText("不採用（記録）");
     }
     const bg = (id: string) => page.getByTestId(id).locator(".sb-brand-mark").evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(await bg("cat-logo-primary")).toBe(PRIMARY);
     expect(await bg("cat-logo-ink")).toBe(INK);
-    // 実画面の `.sb-brand-mark` は変えていない（`/` の丸は主色のまま）
+    // G-1 の反映：実画面の `.sb-brand-mark`（公開の `/`）は墨
     await page.goto(`${MAIN}/`);
-    expect(await page.locator(".sb-brand-mark").first().evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(PRIMARY);
+    expect(await page.locator(".sb-brand-mark").first().evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(INK);
   });
 
-  test("N-6. 点の形：現行は 4 状態とも同じ丸（8px）、案は状態ごとに形が違う（SVG の中身が全部違う）。どちらも文字を持つ", async ({ page }) => {
+  test("N-6. 点の形：不採用（記録）は 4 状態とも同じ丸（8px）、採用は状態ごとに形が違う（SVG の中身が全部違う・12px）。どちらも文字を持つ", async ({ page }) => {
     await open(page);
     const v = await page.evaluate(() => {
-      const same = ["info", "flying", "safe", "danger"].map((t) => { const l = document.querySelector(`[data-testid="cat-dot-same-${t}"]`)!; const d = l.querySelector(".sb-state-dot") as HTMLElement; return { w: d.getBoundingClientRect().width, br: getComputedStyle(d).borderTopLeftRadius, text: (l.textContent ?? "").trim() }; });
-      const shapes = ["info", "flying", "safe", "warn", "danger"].map((t) => { const l = document.querySelector(`[data-testid="cat-dot-shapes-${t}"]`)!; return { d: l.querySelector("svg")!.innerHTML, text: (l.textContent ?? "").trim() }; });
+      const same = ["info", "flying", "safe", "danger"].map((t) => { const l = document.querySelector(`[data-testid="cat-dot-same-${t}"]`)!; const d = l.querySelector(".sbx-plain-dot") as HTMLElement; return { w: d.getBoundingClientRect().width, br: getComputedStyle(d).borderTopLeftRadius, text: (l.textContent ?? "").trim() }; });
+      const shapes = ["info", "flying", "safe", "warn", "danger"].map((t) => { const l = document.querySelector(`[data-testid="cat-dot-shapes-${t}"]`)!; const s = l.querySelector("svg")!; return { d: s.innerHTML, w: s.getBoundingClientRect().width, hidden: s.getAttribute("aria-hidden"), text: (l.textContent ?? "").trim() }; });
       return { same, shapes };
     });
     for (const s of v.same) { expect(s.w).toBe(8); expect(s.text.length).toBeGreaterThan(0); }
     expect(new Set(v.shapes.map((s) => s.d)).size).toBe(5);
-    for (const s of v.shapes) expect(s.text.length).toBeGreaterThan(0);
+    for (const s of v.shapes) { expect(s.text.length).toBeGreaterThan(0); expect(s.w).toBe(12); expect(s.hidden).toBe("true"); }
   });
 
-  test("N-7. 一覧のカードの矢印：なし（現行）とあり（案）はどちらも全体が押せて高さ 72 以上。ありは矢印が装飾（aria-hidden）", async ({ page }) => {
+  test("N-7. 一覧のカードの矢印：なし（不採用）とあり（採用）はどちらも全体が押せて高さ 72 以上。ありは矢印が装飾（aria-hidden）", async ({ page }) => {
     await open(page);
     for (const id of ["cat-arrow-none-card", "cat-arrow-with-card"]) {
       const h = await page.getByTestId(id).evaluate((el) => el.getBoundingClientRect().height);
@@ -364,6 +364,28 @@ test.describe("N. 16-E の新しい節", () => {
     const arrow = page.getByTestId("cat-arrow-with-card").locator("svg");
     await expect(arrow).toHaveCount(1);
     await expect(arrow).toHaveAttribute("aria-hidden", "true");
+  });
+
+  test("N-8b. 計画作成の段の順：480px 未満は 1 列に積み、段の名前が語の途中で折れない（390・430）", async ({ page }) => {
+    for (const width of [390, 430]) {
+      await page.setViewportSize({ width, height: 900 });
+      await open(page);
+      const r = await page.evaluate(() => {
+        const a = document.querySelector('[data-testid="cat-order-adopted"]')!.getBoundingClientRect();
+        const d = document.querySelector('[data-testid="cat-order-direction"]')!.getBoundingClientRect();
+        // 段の名前は 1 行の高さに収まる（語の途中で折れていない）。長い名前は折り返してよいが、「機／体」のような 1 文字だけの行は出ない
+        const lines = [...document.querySelectorAll('[data-testid="cat-order-adopted-list"] li strong, [data-testid="cat-order-direction-list"] li strong')].map((e) => {
+          const range = document.createRange();
+          range.selectNodeContents(e);
+          const rects = [...range.getClientRects()];
+          const tops = new Set(rects.map((x) => Math.round(x.top)));
+          return { text: e.textContent ?? "", lines: tops.size, narrow: rects.some((x) => x.width > 0 && x.width < 20) };
+        });
+        return { sameColumn: Math.abs(a.left - d.left) < 1 && d.top >= a.bottom - 1, lines };
+      });
+      expect(r.sameColumn, `${width}px で 1 列`).toBe(true);
+      for (const l of r.lines) expect(l.narrow, `${width}px「${l.text}」に 1 文字だけの行`).toBe(false);
+    }
   });
 
   test("N-8. 計画作成の段の順：この計画の順は 6 段（場所→日時→飛行の方法と目的→操縦者・機体・許可→内容の確認→判定と通報の準備）。方針書の順と並べ、進捗の帯は progressbar", async ({ page }) => {

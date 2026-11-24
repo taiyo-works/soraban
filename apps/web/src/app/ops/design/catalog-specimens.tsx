@@ -2,20 +2,20 @@ import type { ReactNode } from "react";
 import type { ItemVerdict } from "@soraban/regulations";
 import { BrandDrone } from "@/components/hero-illustration";
 import { Icon, type IconName } from "@/components/ui/icons";
-import { PillButton, VerdictSign } from "@/components/ui/sb-parts";
+import { ListCardLink, PillButton, StateShape, VerdictSign } from "@/components/ui/sb-parts";
 
-// 見本の静的な節（Sprint 16-E）：文字の段・主色・状態 5 種＋未確認・並べ見本（G-1 で決める候補）・下部ナビ・準備カードの文言案。
+// 見本の静的な節（Sprint 16-E）：文字の段・主色・状態 5 種＋未確認・並べ見本（G-1 で決定。採用と不採用の記録）・下部ナビ・準備カードの文言案。
 // 認証・DB・外部通信なし。値は持たず、soraban-tokens.css の --sb-* だけを使う。候補は見本の中だけに置き、実画面は変えない。
 
 const cx = (...parts: ReadonlyArray<string | false | null | undefined>): string => parts.filter(Boolean).join(" ");
 
-/** 比べる案の札。現行の案には「現行」、そうでない案には「案」を付ける（どれが現行かを必ず明記する）。 */
-export function Cand({ current, name, testId, children }: { readonly current: boolean; readonly name: string; readonly testId: string; readonly children: ReactNode }) {
+/** 並べ見本の札。G-1（2026-11-24）の決定で、採った方に「採用」、採らなかった方に「不採用（記録）」を付ける。 */
+export function Cand({ adopted, name, testId, children }: { readonly adopted: boolean; readonly name: string; readonly testId: string; readonly children: ReactNode }) {
   return (
-    <div className="sbx-cand" data-current={current ? "true" : "false"} data-testid={testId}>
+    <div className="sbx-cand" data-decision={adopted ? "adopted" : "rejected"} data-testid={testId}>
       <div className="sbx-cand-head">
         <span className="sbx-cand-tag" data-testid={`${testId}-tag`}>
-          {current ? "現行" : "案"}
+          {adopted ? "採用" : "不採用（記録）"}
         </span>
         <span className="sbx-cand-name">{name}</span>
       </div>
@@ -180,17 +180,17 @@ export function StateKinds() {
 export function LogoCandidates() {
   return (
     <div className="sbx-pair" data-testid="cat-logo-list">
-      <Cand current name="主色の面（--sb-primary）" testId="cat-logo-primary">
+      <Cand adopted={false} name="主色の面（--sb-primary）。押せるものに見えるため採らない" testId="cat-logo-primary">
         <span className="sb-brand">
-          <span className="sb-brand-mark" aria-hidden="true">
+          <span className="sb-brand-mark sbx-mark-primary" aria-hidden="true">
             <BrandDrone />
           </span>
           そらばん
         </span>
       </Cand>
-      <Cand current={false} name="墨の面（--sb-ink）" testId="cat-logo-ink">
+      <Cand adopted name="墨の面（--sb-ink）。実画面の .sb-brand-mark はこの色" testId="cat-logo-ink">
         <span className="sb-brand">
-          <span className="sb-brand-mark sbx-mark-ink" aria-hidden="true">
+          <span className="sb-brand-mark" aria-hidden="true">
             <BrandDrone />
           </span>
           そらばん
@@ -202,44 +202,32 @@ export function LogoCandidates() {
 
 // ── 並べ見本 2：状態ラベルの点の形 ───────────────────────────────────
 
-function ShapeDot({ shape }: { readonly shape: "ring" | "play" | "check" | "triangle" | "cross" }) {
-  return (
-    <svg viewBox="0 0 12 12" width={12} height={12} className="sbx-shape" aria-hidden="true" focusable="false">
-      {shape === "ring" ? <circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" strokeWidth="2" /> : null}
-      {shape === "play" ? <path d="M3.5 2 L10 6 L3.5 10 Z" fill="currentColor" /> : null}
-      {shape === "check" ? <path d="M2 6.4 L5 9.2 L10 3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /> : null}
-      {shape === "triangle" ? <path d="M6 1.8 L11 10.2 H1 Z" fill="currentColor" /> : null}
-      {shape === "cross" ? <path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /> : null}
-    </svg>
-  );
-}
-
 const SHAPE_LABELS = [
-  { tone: "info", word: "待機中", shape: "ring" },
-  { tone: "flying", word: "飛行中", shape: "play" },
-  { tone: "safe", word: "飛行済", shape: "check" },
-  { tone: "warn", word: "期限が近い", shape: "triangle" },
-  { tone: "danger", word: "中止", shape: "cross" },
+  { tone: "info", word: "待機中" },
+  { tone: "flying", word: "飛行中" },
+  { tone: "safe", word: "飛行済" },
+  { tone: "warn", word: "期限が近い" },
+  { tone: "danger", word: "中止" },
 ] as const;
 
 export function DotShapeCandidates() {
   return (
     <div className="sbx-pair" data-testid="cat-dot-list">
-      <Cand current name="4 状態とも同じ丸（8px）" testId="cat-dot-same">
+      <Cand adopted={false} name="4 状態とも同じ丸（8px）。色なしで形の差が出ないため採らない" testId="cat-dot-same">
         <div className="sbx-row">
           {SHAPE_LABELS.map((l) => (
-            <span key={l.tone} className={cx("sb-state", l.tone === "warn" ? "sbx-state-warn" : `sb-state-${l.tone}`)} data-testid={`cat-dot-same-${l.tone}`}>
-              <span className="sb-state-dot" aria-hidden="true" />
+            <span key={l.tone} className={cx("sb-state", `sb-state-${l.tone}`)} data-testid={`cat-dot-same-${l.tone}`}>
+              <span className="sbx-plain-dot" aria-hidden="true" />
               <span>{l.word}</span>
             </span>
           ))}
         </div>
       </Cand>
-      <Cand current={false} name="状態ごとに形を変える（12px）" testId="cat-dot-shapes">
+      <Cand adopted name="状態ごとに形を変える（12px）。共通の状態ラベル部品（StatusLabel）がこの形" testId="cat-dot-shapes">
         <div className="sbx-row">
           {SHAPE_LABELS.map((l) => (
-            <span key={l.tone} className={cx("sb-state", l.tone === "warn" ? "sbx-state-warn" : `sb-state-${l.tone}`)} data-testid={`cat-dot-shapes-${l.tone}`}>
-              <ShapeDot shape={l.shape} />
+            <span key={l.tone} className={cx("sb-state", `sb-state-${l.tone}`)} data-testid={`cat-dot-shapes-${l.tone}`}>
+              <StateShape tone={l.tone} />
               <span>{l.word}</span>
             </span>
           ))}
@@ -254,20 +242,17 @@ export function DotShapeCandidates() {
 export function CardArrowCandidates() {
   return (
     <div className="sbx-pair" data-testid="cat-arrow-list">
-      <Cand current name="矢印なし（全体が押せる）" testId="cat-arrow-none">
+      <Cand adopted={false} name="矢印なし（全体が押せる）。押せることが見て分かりにくいため採らない" testId="cat-arrow-none">
         <a className="sb-card sb-card-list" href="#cat-card-arrow" data-testid="cat-arrow-none-card">
           <strong>13:00〜14:00　試験空域</strong>
           <span data-note="" className="sbx-note">機体 JU0000（試験機）</span>
         </a>
       </Cand>
-      <Cand current={false} name="右端に矢印（chevron-right）" testId="cat-arrow-with">
-        <a className="sb-card sb-card-list sbx-card-arrow" href="#cat-card-arrow" data-testid="cat-arrow-with-card">
-          <span className="sbx-card-arrow-text">
-            <strong>13:00〜14:00　試験空域</strong>
-            <span data-note="" className="sbx-note">機体 JU0000（試験機）</span>
-          </span>
-          <Icon name="chevron-right" size={24} className="sbx-card-arrow-icon" />
-        </a>
+      <Cand adopted name="右端に矢印（chevron-right）。共通の一覧カード（ListCardLink）がこの形" testId="cat-arrow-with">
+        <ListCardLink href="#cat-card-arrow" data-testid="cat-arrow-with-card">
+          <strong>13:00〜14:00　試験空域</strong>
+          <span data-note="" className="sbx-note">機体 JU0000（試験機）</span>
+        </ListCardLink>
       </Cand>
     </div>
   );
@@ -330,10 +315,10 @@ export function WizardOrder() {
   return (
     <div className="flex flex-col gap-3" data-testid="cat-order-list">
       <div className="sbx-pair sbx-pair-fixed">
-        <Cand current={false} name="この計画の順（§9.1）" testId="cat-order-adopted">
+        <Cand adopted name="この計画の順（§9.1）" testId="cat-order-adopted">
           <OrderList items={ORDER_ADOPTED} testId="cat-order-adopted-list" />
         </Cand>
-        <Cand current={false} name="方針書の順（採らない案）" testId="cat-order-direction">
+        <Cand adopted={false} name="方針書の順。保存の前に判定を見せると記録と食い違いうるため採らない" testId="cat-order-direction">
           <OrderList items={ORDER_DIRECTION} testId="cat-order-direction-list" />
         </Cand>
       </div>

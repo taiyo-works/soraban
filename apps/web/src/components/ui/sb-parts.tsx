@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
 import type { ItemVerdict } from "@soraban/regulations";
+import { Icon } from "./icons";
 
 // 公開の判定画面 `/` の部品（デザインシステム v2。見本：docs/design/warm-final/）。
 // 見た目は soraban-ui.css の .sb-*（値は soraban-tokens.css の --sb-*）。ここは構造だけで、色・寸法を持たない。
@@ -82,16 +83,45 @@ export function PillLink({
   );
 }
 
-// ── 状態ラベル（16-C。待機中＝情報、飛行中＝飛行中、飛行済＝安全、中止＝危険。丸は装飾で、状態は文字が担う）──
+// ── 状態ラベル（16-C。待機中＝情報、飛行中＝飛行中、飛行済＝安全、期限が近い＝注意、中止＝危険。
+//    G-1（2026-11-24）：点は状態ごとの形。形は装飾で、状態は文字が担う）──
 
-export type StatusTone = "info" | "flying" | "safe" | "danger";
+export type StatusTone = "info" | "flying" | "safe" | "warn" | "danger";
+
+const SHAPE_OF: Readonly<Record<StatusTone, ReactNode>> = {
+  info: <circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" strokeWidth="2" />,
+  flying: <path d="M3.5 2 L10 6 L3.5 10 Z" fill="currentColor" />,
+  safe: <path d="M2 6.4 L5 9.2 L10 3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />,
+  warn: <path d="M6 1.8 L11 10.2 H1 Z" fill="currentColor" />,
+  danger: <path d="M2.4 2.4 L9.6 9.6 M9.6 2.4 L2.4 9.6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />,
+};
+
+/** 状態ラベルの先頭の形（12px・aria-hidden）。押せるラベルなど、StatusLabel を使えない場所でも同じ形を使う。 */
+export function StateShape({ tone }: { readonly tone: StatusTone }) {
+  return (
+    <svg viewBox="0 0 12 12" width={12} height={12} className="sb-state-dot" aria-hidden="true" focusable="false">
+      {SHAPE_OF[tone]}
+    </svg>
+  );
+}
 
 export function StatusLabel({ tone, children, testId }: { readonly tone: StatusTone; readonly children: ReactNode; readonly testId?: string }) {
   return (
     <span className={cx("sb-state", `sb-state-${tone}`)} data-tone={tone} {...(testId ? { "data-testid": testId } : {})}>
-      <span className="sb-state-dot" aria-hidden="true" />
+      <StateShape tone={tone} />
       <span>{children}</span>
     </span>
+  );
+}
+
+// ── 一覧のカード（16-C。カード全体がリンク。G-1：右端に矢印。矢印は装飾で aria-hidden、押せる範囲は変えない）──
+
+export function ListCardLink({ children, className, ...rest }: Omit<ComponentPropsWithRef<"a">, "children"> & { readonly children: ReactNode }) {
+  return (
+    <a {...rest} className={cx("sb-card sb-card-list sb-card-list-go", className)}>
+      <span className="sb-card-list-text">{children}</span>
+      <Icon name="chevron-right" size={24} className="sb-card-list-arrow" />
+    </a>
   );
 }
 

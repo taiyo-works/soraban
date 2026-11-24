@@ -181,11 +181,12 @@ test.describe("C-4 状態ラベル（K-7：記号＋文字）", () => {
     ["info", "待機中", "rgb(234, 238, 243)", "rgb(63, 75, 94)"],
     ["flying", "飛行中", "rgb(225, 242, 248)", "rgb(8, 80, 106)"],
     ["safe", "飛行済", "rgb(230, 244, 236)", "rgb(14, 90, 53)"],
+    ["warn", "期限が近い", "rgb(253, 241, 220)", "rgb(107, 63, 0)"],
     ["danger", "中止", "rgb(253, 232, 230)", "rgb(138, 26, 18)"],
   ] as const;
 
   for (const [tone, word, face, text] of TONES) {
-    test(`${word}（${tone}）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 8px の丸（aria-hidden）と文字。丸と文字の縦の中心が ±1px`, async ({ page }) => {
+    test(`${word}（${tone}）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px`, async ({ page }) => {
       await open(page);
       const r = await page.getByTestId(`cat-state-${tone}`).evaluate((el) => {
         const c = getComputedStyle(el);
@@ -210,8 +211,8 @@ test.describe("C-4 状態ラベル（K-7：記号＋文字）", () => {
       expect(r.fw).toBe("600");
       expect(r.bg).toBe(face);
       expect(r.color).toBe(text);
-      expect(r.dotW).toBe(8);
-      expect(r.dotH).toBe(8);
+      expect(r.dotW).toBe(12);
+      expect(r.dotH).toBe(12);
       expect(r.dotHidden).toBe("true");
       expect(r.dotFirst).toBe(true);
       expect(r.text).toBe(word);
@@ -233,6 +234,12 @@ test.describe("C-4 状態ラベル（K-7：記号＋文字）", () => {
       const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x, y) === document.querySelector('[data-testid="cat-state-link"]') || document.querySelector('[data-testid="cat-state-link"]')!.contains(document.elementFromPoint(x, y)), [cx, cy + dy] as const);
       expect(hit, `中心から ${dy}px`).toBe(true);
     }
+  });
+
+  test("G-1 の反映：状態ごとに先頭の形が違う（5 つの SVG の中身が全部違う）。色なしでも形で区別できる", async ({ page }) => {
+    await open(page);
+    const shapes = await page.evaluate(() => ["info", "flying", "safe", "warn", "danger"].map((t) => document.querySelector(`[data-testid="cat-state-${t}"] svg`)!.innerHTML));
+    expect(new Set(shapes).size).toBe(5);
   });
 
   test("色なし（グレースケール）でも 4 つは文字で区別できる：各ラベルは空でない文字を持ち、4 つとも文字が違う", async ({ page }) => {
