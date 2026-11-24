@@ -413,7 +413,8 @@ test.describe("F-4 点検へ 1 回", () => {
         await page.setViewportSize({ width: w, height: h });
         await page.goto("/ops");
         await expect(page.getByTestId("ops-today")).toBeVisible();
-        if (who === "a-manager") await expect(page.getByTestId("today-card")).toBeVisible();
+        // 16-G：今日のカードの詳細は「すべての予定」（畳んだ中）に移った。次の飛行があるときは準備カード（home-prep）が出る
+        if (who === "a-manager") await expect(page.getByTestId("home-prep")).toBeVisible();
         else await expect(page.getByTestId("today-empty")).toBeVisible();
         await waitForSettledStyles(page);
         const q = page.getByTestId("ops-enter-inspection");
@@ -506,7 +507,7 @@ test.describe("F-6 上の状態の層", () => {
       await signIn(page.request, seeded("a-manager"));
       await page.setViewportSize({ width: w, height: h });
       for (const [name, url, ready] of [
-        ["ホーム", "/ops", "today-card"],
+        ["ホーム", "/ops", "home-prep"],
         ["計画の作成", "/ops/plans/new", "main h1"],
         ["点検の入力", "/ops/inspections/new", "main h1"],
       ] as const) {

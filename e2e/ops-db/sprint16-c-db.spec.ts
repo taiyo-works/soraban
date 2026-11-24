@@ -100,14 +100,15 @@ const expectCleanFullWidthPrimary = async (page: Page, testId: string, label: st
 };
 
 test.describe("持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」）", () => {
-  test("ホームの today-card-primary（390・全幅）", async ({ page }) => {
+  // 16-G（HM-2・K-8）：ホームの主ボタンは home-primary の 1 つ（次にやることの 1 件。無ければ「新しい計画」）。today-card-primary は「すべての予定」の中の副ボタンになった
+  test("ホームの home-primary（390・全幅）", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     await page.goto("/ops");
     await expect(page.getByTestId("today-heading")).toBeVisible();
     await waitForSettledStyles(page);
-    const has = await page.getByTestId("today-card-primary").count();
-    test.skip(has === 0, "今日の計画がないので、ホームの全幅の主ボタンは出ない（日誌の側で確かめる）");
-    await expectCleanFullWidthPrimary(page, "today-card-primary", "ホーム「計画を開く」");
+    const has = await page.getByTestId("home-primary").count();
+    test.skip(has === 0, "次にやることも計画を作る権限もないので、ホームの全幅の主ボタンは出ない（日誌の側で確かめる）");
+    await expectCleanFullWidthPrimary(page, "home-primary", "ホームの主ボタン");
   });
 
   test("日誌の journal-new-flight（390・全幅）", async ({ page }) => {

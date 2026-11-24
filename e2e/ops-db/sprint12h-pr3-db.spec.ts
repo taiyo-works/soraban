@@ -1,5 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { collectTextSamples, expectNoHorizontalScroll } from "../field-checks";
+import { openAllPlans } from "../ops-menu";
 
 // Sprint 12h PR ③a の E2E-DB（docs/sprints/sprint-12h-pr3.md §8 の Q-3・Q-4・Q-6・Q-11・Q-13・Q-14・Q-17。T-16）。
 // メニュー（下タブ 5・左メニュー 6）、判定への入口のピル、点検の 1 段目、戻りリンク。画面の組み合わせ（幅×明暗）は 1 件の中で回す。
@@ -187,6 +188,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
         for (const url of ["/ops", "/ops/plans/new"]) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
+          if (url === "/ops") await openAllPlans(page); // 16-G：判定へのピルは「すべての予定」（畳んだ中）に移った
           const pills = page.getByTestId("judge-pills");
           await expect(pills, label).toBeVisible();
           const here = page.getByTestId("judge-pill-here");
@@ -206,7 +208,8 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
             expect(await p.locator(".sb-pill-label").evaluate((el) => el.getBoundingClientRect().height), `${label} ラベルが折り返している`).toBeLessThan(30);
           }
           // 最初の画面に入る。計画の作成画面では、固定の注意書き（判定の免責・DIPS の注記）のあとで、フォームより上
-          expect(a.y + a.height, label).toBeLessThan(w < 1024 ? (url === "/ops" ? 400 : 600) : 800);
+          // 16-G：ホームのピルは畳んだ中なので、最初の画面に入る検査は計画の作成画面だけ（ホームの最初の画面は 16-G の E2E で測る）
+          if (url !== "/ops") expect(a.y + a.height, label).toBeLessThan(w < 1024 ? 600 : 800);
           if (url === "/ops/plans/new") expect(a.y, `${label} フォームより上`).toBeLessThan((await page.locator("form").first().boundingBox())!.y);
           expect(await geoCalls(page), `${label} 位置の要求`).toEqual({ get: 0, watch: 0 });
           await expectNoHorizontalScroll(page, label);
@@ -217,6 +220,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await page.emulateMedia({ colorScheme: "light" });
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/ops");
+    await openAllPlans(page);
     await page.getByTestId("judge-pill-here").click();
     await page.waitForURL(/\/\?start=here$/);
     await expect(page.getByTestId("current-location-button")).toBeFocused();
@@ -350,9 +354,10 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
           await expectNoHorizontalScroll(page, `${scheme} ${w}px ${url}`);
         }
         // メニューと入口（今回の部品）の押す部品は 47.5px 以上
-        for (const sel of ['[data-testid="ops-bottom-nav"] a', '[data-testid="ops-sidebar"] a', '[data-testid="judge-pills"] a']) {
+        for (const sel of ['[data-testid="ops-bottom-nav"] a', '[data-testid="ops-sidebar"] a', '[data-testid="judge-pills"] a', '[data-testid="home-quick"] a']) {
           for (const url of ["/ops"]) {
             await page.goto(url);
+            await openAllPlans(page); // 16-G：畳んだ中のピルも測る（幅 0 の要素は数えないので、開かないと何も測れない）
             const hs = await page.locator(sel).evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).map((e) => [e.getBoundingClientRect().width, e.getBoundingClientRect().height]));
             for (const [bw, bh] of hs) {
               expect(bw, `${scheme} ${w}px ${sel} 幅`).toBeGreaterThanOrEqual(47.5);

@@ -1,6 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll } from "../field-checks";
-import { expandNextActions, openUserMenu } from "../ops-menu";
+import { expandNextActions, openAllPlans, openUserMenu } from "../ops-menu";
 
 // Sprint 12g-1b 段階 A の差し戻し（独立評価の指摘 I-2・I-3・M-1〜M-8・M-11）の E2E-DB。組織B で確かめる。
 // サーバーの現在時刻は OPS_TEST_NOW（JST 2027-01-05 12:00）。
@@ -158,17 +158,17 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       await expect(page.getByTestId("today-empty")).toBeVisible();
       await expect(page.getByTestId("today-empty-action")).toHaveCount(1);
       await expect(page.getByTestId("today-empty-action")).toHaveText("地点を判定する");
-      await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "計画を作る" })).toHaveCount(0);
       // 残った 1 つが主ボタン（56px 以上）
       expect((await page.getByTestId("today-empty-action").boundingBox())!.height).toBeGreaterThanOrEqual(56);
       await ctx.close();
     }
-    // 運航管理者には両方が出る
+    // 運航管理者には（16-G HM-4 から）主ボタン「計画を作る」だけが出る。「地点を判定する」は「すべての予定」の中のピルから
     const ctx = await browser.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
     await signIn(ctx.request, seeded("b-manager"));
     const page = await ctx.newPage();
     await page.goto("/ops");
-    await expect(page.getByTestId("today-empty-action")).toHaveText(["飛行計画を作る", "地点を判定する"]);
+    await expect(page.getByTestId("today-empty-action")).toHaveText(["計画を作る"]);
     await ctx.close();
     await bm.dispose();
   });
@@ -222,6 +222,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     expect((await page.getByTestId("ops-header").boundingBox())!.height).toBeLessThanOrEqual(48);
     await expect(page.getByTestId("ops-header")).not.toContainText("ホーム");
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await openAllPlans(page); // 16-G：今日のカード・次にやること・直近の飛行・ピルは「すべての予定」の中
     // M-4：日付（ISO でなく 1/5（火））。年は今日と同じなので付かない
     await expect(page.getByTestId("today-date")).toHaveText("1/5（火）");
     await expect(page.getByTestId("today-card-date")).toHaveText("1/5（火）");
@@ -240,7 +241,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     // （見出しの数は、上位 8 件に収まらない分も含めた総数。行の数以上になる）
     const headline = Number(/(\d+) 件/.exec(await page.getByTestId("today-next-actions").locator("h2 + span").innerText())?.[1]);
     expect(headline).toBeGreaterThanOrEqual(total);
-    // 最初の画面（スマホ）の下端までに、近づく期限の見出しが入る位置まで届く（長い一覧が期限を押し出さない）
+    // 最初の画面（スマホ）の下端までに、近づく期限の見出しが入る位置まで届く（長い一覧が期限を押し出さない。16-G：期限は上段に移った）
     const deadlineTop = (await page.getByTestId("home-deadlines").boundingBox())!.y;
     const nextTop = (await page.getByTestId("today-next-actions").boundingBox())!.y;
     expect(deadlineTop - nextTop).toBeLessThan(900);
@@ -283,7 +284,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const dl = page.getByTestId("home-deadlines");
     await expect(dl).toBeVisible();
     await expect(dl).not.toContainText(/\d{4}-\d{2}-\d{2}/);
-    for (const t of await dl.getByTestId("deadline-row").locator("time").allInnerTexts()) expect(t).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
+    for (const t of await dl.getByTestId("deadline-row").locator("time").allTextContents()) // 16-G：3 件目以降は畳まれている（textContent で読む）
+      expect(t).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
     if (r.status() === 201) await expect(dl).toContainText("2026/12/20（日）");
     await bm.dispose();
   });
@@ -336,6 +338,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     for (const w of [375, 320]) {
       await page.setViewportSize({ width: w, height: 812 });
       await page.goto("/ops");
+      await openAllPlans(page); // 16-G：今日のカードは「すべての予定」の中
       const card = page.getByTestId("today-card");
       await expect(card).toHaveAttribute("data-plan-id", plan.id);
       const route = card.getByTestId("route");
