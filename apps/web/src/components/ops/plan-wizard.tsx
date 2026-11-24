@@ -212,15 +212,16 @@ export function PlanWizard({
 
   // ---- 保存の前の離脱の確認 ----
   const dirtyRef = useRef(false);
-  dirtyRef.current = !savedRef.current && JSON.stringify(v) !== initialJson.current;
+  // 保存が済んだら（再描画の前に画面を移すので、savedRef も見る）確認を出さない
+  dirtyRef.current = JSON.stringify(v) !== initialJson.current;
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!dirtyRef.current) return;
+      if (!dirtyRef.current || savedRef.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
     const onClick = (e: MouseEvent) => {
-      if (!dirtyRef.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (!dirtyRef.current || savedRef.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
       if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
       const u = new URL(a.href, window.location.href);
