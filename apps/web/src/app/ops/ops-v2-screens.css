@@ -648,10 +648,25 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
 }
 @media (max-width: 1023px) {
   main:has(> .opx-wiz-progress) > div:first-child .opx-note {
-    padding: 8px 12px;
+    padding: 6px 12px;
   }
   main:has(> .opx-wiz-progress) {
+    gap: 8px;
+  }
+  /* 帯は 1 行（左に「n/6 段の名前」、右に帯）。最初の画面の高さを使いすぎない */
+  .opx-wiz-progress {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
+    padding-block: 4px;
+  }
+  .opx-wiz-progress .opx-wiz-bar {
+    flex: 0 0 5.5rem;
+  }
+  .opx-wiz-progress .opx-wiz-step {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 .opx-wiz-heading {
