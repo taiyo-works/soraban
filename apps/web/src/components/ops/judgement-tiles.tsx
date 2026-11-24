@@ -84,7 +84,7 @@ export function JudgementTiles({
       </ul>
       <Sheet open={open !== null} onClose={close} title={open?.title ?? ""} testId="judgement-sheet" defaultStage="half">
         {open ? (
-          <div className="opx-tile-detail" data-wording-scope="judgement" data-testid="judgement-sheet-detail" data-item-id={open.id}>
+          <div className="opx-tile-detail" data-testid="judgement-sheet-detail" data-item-id={open.id}>
             <p className="opx-tile-state">
               <VerdictSign level={open.verdict} className="sb-vm" />
               <span data-testid="judgement-sheet-verdict">{open.verdictLabel}</span>

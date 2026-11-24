@@ -478,8 +478,23 @@ journal-tabs
 journal-to-inspections
 judge-pill-here
 judge-pill-search
+judgement-fetched-at
+judgement-next
+judgement-primary
 judgement-scope-plan
 judgement-scope-snapshot
+judgement-sheet-dataset
+judgement-sheet-datasets
+judgement-sheet-detail
+judgement-sheet-fetched-at
+judgement-sheet-reason
+judgement-sheet-refs
+judgement-sheet-verdict
+judgement-tile
+judgement-tiles
+judgement-tiles-section
+judgement-total
+judgement-total-note
 layer-list
 layer-no-map-row
 legend-zones
@@ -663,7 +678,13 @@ plan-digest
 plan-dips-notice
 plan-disclaimer
 plan-duration
+plan-edit-basic
+plan-edit-cond
 plan-edit-link
+plan-edit-permit-no
+plan-edit-reason
+plan-edit-screen
+plan-edit-when
 plan-field-link
 plan-filter-attention
 plan-filter-pending
@@ -679,6 +700,7 @@ plan-judge-link
 plan-judged-at
 plan-judgement
 plan-judgement-details
+plan-judgement-full
 plan-judgement-purpose
 plan-judging
 plan-lat
@@ -694,6 +716,7 @@ plan-overview
 plan-permit-applied-note
 plan-permit-candidate
 plan-permit-candidates
+plan-permit-candidates-more
 plan-permit-conditions
 plan-permit-edit-link
 plan-permit-empty
@@ -728,6 +751,11 @@ plan-primary-action
 plan-procedures
 plan-procedures-details
 plan-purpose
+plan-quick
+plan-quick-date
+plan-quick-duration
+plan-quick-time
+plan-quick-time-empty
 plan-radius
 plan-reason
 plan-rejudge
@@ -1307,8 +1335,24 @@ prop: journal-to-inspections
 prop: judge-pill-here
 prop: judge-pill-search
 prop: judge-pills
+prop: judgement-fetched-at
+prop: judgement-next
+prop: judgement-primary
 prop: judgement-scope-plan
 prop: judgement-scope-snapshot
+prop: judgement-sheet
+prop: judgement-sheet-dataset
+prop: judgement-sheet-datasets
+prop: judgement-sheet-detail
+prop: judgement-sheet-fetched-at
+prop: judgement-sheet-reason
+prop: judgement-sheet-refs
+prop: judgement-sheet-verdict
+prop: judgement-tile
+prop: judgement-tiles
+prop: judgement-tiles-section
+prop: judgement-total
+prop: judgement-total-note
 prop: landing
 prop: layer-list
 prop: layer-no-map-row
@@ -1500,7 +1544,13 @@ prop: plan-digest
 prop: plan-dips-notice
 prop: plan-disclaimer
 prop: plan-duration
+prop: plan-edit-basic
+prop: plan-edit-cond
 prop: plan-edit-link
+prop: plan-edit-permit-no
+prop: plan-edit-reason
+prop: plan-edit-screen
+prop: plan-edit-when
 prop: plan-field-link
 prop: plan-filter-attention
 prop: plan-filter-pending
@@ -1516,6 +1566,7 @@ prop: plan-judge-link
 prop: plan-judged-at
 prop: plan-judgement
 prop: plan-judgement-details
+prop: plan-judgement-full
 prop: plan-judgement-purpose
 prop: plan-judging
 prop: plan-lat
@@ -1531,6 +1582,7 @@ prop: plan-overview
 prop: plan-permit-applied-note
 prop: plan-permit-candidate
 prop: plan-permit-candidates
+prop: plan-permit-candidates-more
 prop: plan-permit-conditions
 prop: plan-permit-edit-link
 prop: plan-permit-empty
@@ -1565,6 +1617,13 @@ prop: plan-primary-action
 prop: plan-procedures
 prop: plan-procedures-details
 prop: plan-purpose
+prop: plan-quick
+prop: plan-quick-date
+prop: plan-quick-duration
+prop: plan-quick-time
+prop: plan-quick-time-empty
+prop: plan-quick-today
+prop: plan-quick-tomorrow
 prop: plan-radius
 prop: plan-reason
 prop: plan-rejudge

@@ -592,6 +592,8 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
       document.documentElement.style.fontSize = "";
     });
     await page.setViewportSize({ width: 390, height: 844 });
+    // 入力欄の値は、入力欄の中で横に動く（1 行の入力欄の仕様で、文字の切れではない）。共通の測定は入れ物の切れとして数えるので、値を空にしてから測る
+    for (const el of await page.locator("form[data-testid=plan-form] input:not([type=checkbox]):not([type=date]):not([type=time]):not([disabled])").all()) await el.fill("");
     await expectTextZoom(page, "訂正（H2）");
   });
 
