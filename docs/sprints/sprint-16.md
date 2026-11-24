@@ -604,6 +604,12 @@ A の限界: 段 ①〜④ の途中で再読み込みする・電池が切れ�
 6. **既存の端末の下書き**（`drafts.ts`。飛行記録 `takeoffPos`・`landingPos`・`safetyIssueDetail`、点検 `pos`・`specialNotes`、通報の入力）は、不変条件 5 の「契約で認めたもの」（Sprint 11 設計 E・G、12b）に当たるかを確かめる。当たらないなら別のスプリントで直す（16 の範囲外。reviewer の論点）。
 7. **旧 16-1 の扱い**: 旧 16-1（白基調・橙）は PR #49 で main に入っている【確認：`c86d508` が main に含まれる】。旧 README の「G-1 待ち。承認まで 16-1 をマージしない」は事実と食い違っていた。旧 G-1 は新方針で不要になった。
 8. **コミット**: planner の定義に従い、planner はコミットしていない。対象のパスは 3 つ: `docs/sprints/sprint-16.md`、`docs/sprints/README.md`、`docs/archive/sprint-16-white-orange-2026-10-31.md`（と `docs/archive/README.md` の 1 行）。
+9. **16-F の評価（`sprint-16F-eval.md`、2026-11-24 合格）からの申し送り**（evaluator の推奨どおりに進める。ユーザーが別の判断をすればそれに従う）:
+   - 現在地の線（下部ナビの上端 3px・左メニューの左端 4px）は残す。
+   - 16-G: `home-quick` を HM-1 ⑤の 3 つのクイック操作として作り直す（`home-quick`・`ops-enter-inspection`・`ops-enter-flight` を維持し、A7（752）と F-4 を下げず、viewer には出さない）。幅 320 の本文末尾の余裕の検査（16-F の R-3）にホームを足す。
+   - 16-I: 文字 200%・360px の `/ops/inspections/new` の横スクロール（370 > 360。「異常」のラジオ行）を直す。点検の入力の補足を 16px から 14px にそろえる。
+   - 16-L: 文字 200% の `/ops/about` の横スクロール（360・390・430 で 446。メールのリンクが折り返さない）を直す。`.opx-h1` の行間 1.35 で sprint17-2 voidedRecorded の下端は 799.45（上限 800 まで 0.55px）なので、L-5 で上限を 748 に戻すときは題まわりから見直す。
+   - 既知の不安定: Next のクライアントルーターで 1 回目のクリックが遷移しない揺れ（16-F の F-4、viewer の左メニュー）。根本原因は未特定。
 
 ## 18. 検証コマンド
 
