@@ -226,7 +226,7 @@ test.describe("F-1 下部ナビ（4 項目）：寸法・現在地・影", () =>
   test("R-3 幅 320px・等倍：「機体と書類」が 2 行になっても、下部ナビの高さと本文の末尾の余裕（下部ナビの上端まで 4px 以上）を測る", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [url, ready] of [["/ops/more", "ops-more"], ["/ops/journal", "ops-journal"]] as const) {
+    for (const [url, ready] of [["/ops/more", "ops-more"], ["/ops/journal", "ops-journal"], ["/ops", "ops-today"]] as const) {
       await page.goto(url);
       await expect(page.getByTestId(ready)).toBeVisible();
       await expect(page.getByTestId("ops-bottom-nav")).toBeVisible();
