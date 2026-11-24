@@ -10,6 +10,7 @@
 //   - エンジン（ENGINE_VERSION・VERDICT_LABEL）は変えない。ここは判定の結果の件数を読んで言葉を選ぶだけ。
 import type { ItemVerdict } from "@soraban/regulations";
 import type { ReportStatusCode } from "@soraban/dips";
+import { FIELD_REPORT_NOT_REQUIRED_MODEL } from "@/lib/ops-field";
 
 export type PrepTone = "safe" | "warn" | "danger" | "info" | "unknown";
 
@@ -21,7 +22,7 @@ export type PrepRow = {
   /** 行の下に小さく添える 1 行。 */
   readonly note?: string;
   /** 行の脇に出すボタン（判定の行が取れないとき）。 */
-  readonly action?: "reload";
+  readonly action?: "reload" | "rejudge";
 };
 
 export const PREP_TITLE = "次の飛行の準備";
@@ -33,17 +34,36 @@ export const PREP_INSPECTION_LABEL = "飛行前点検";
 
 // ---- 通報 ----------------------------------------------------------------
 
-export type PrepReportKey = "recorded" | "confirm" | "cancelled" | "not_applicable";
+export type PrepReportKey = "recorded" | "recorded_no_number" | "confirm" | "cancelled" | "not_applicable";
 
-export const prepReportKey = (code: ReportStatusCode): PrepReportKey =>
-  code === "reported" ? "recorded" : code === "cancelled" ? "cancelled" : code === "not_applicable_model" ? "not_applicable" : "confirm";
+/**
+ * 通報の状況から行の鍵を決める。`hasNumber` は、有効な通報の行に受付番号がある（空白を除いて空でなく、「番号が表示されなかった」の宣言でない）こと。
+ * 「通報済み」でも番号が無ければ、「受付番号を記録済み」（安全）にはしない（docs-judge の要確認と揃える）。
+ */
+export const prepReportKey = (code: ReportStatusCode, hasNumber: boolean): PrepReportKey =>
+  code === "reported"
+    ? hasNumber
+      ? "recorded"
+      : "recorded_no_number"
+    : code === "cancelled"
+      ? "cancelled"
+      : code === "not_applicable_model"
+        ? "not_applicable"
+        : "confirm";
+
+/** 有効な通報の行に受付番号があるか。空白だけの番号と、番号なしの宣言は「無い」。 */
+export const hasReportNumber = (r: { readonly dipsNumber?: string | null; readonly numberUnavailable?: boolean } | null | undefined): boolean =>
+  !!r && r.numberUnavailable !== true && typeof r.dipsNumber === "string" && r.dipsNumber.trim() !== "";
 
 export const PREP_REPORT: Readonly<Record<PrepReportKey, PrepRow>> = {
   recorded: { tone: "safe", level: "procedure_done", text: "受付番号を記録済み" },
+  // 記録はあるが受付番号が無い（「番号が表示されなかった」と宣言した手動記録など）。良い状態に読ませない（docs-judge の要確認と同じ扱い）
+  recorded_no_number: { tone: "warn", level: "needs_procedure", text: "記録あり（受付番号なし）" },
   confirm: { tone: "warn", level: "needs_procedure", text: "DIPS に出す内容を確認する" },
   cancelled: { tone: "danger", level: "no_fly", text: "取り消し済み" },
-  // 100g 未満（模型航空機）。既存の通報の状況の語（REPORT_STATUS_LABEL）の短い形
-  not_applicable: { tone: "info", level: "procedure_done", text: "対象外（模型航空機）" },
+  // 100g 未満（模型航空機）。既存の通報の状況の語（REPORT_STATUS_LABEL）の短い形。docs-judge は免除と読める語を使わず要確認のまま扱うので、
+  // ここも未確認（灰・点線の四角）にし、既存の注意の文（docs-judge と同じ定数）を添える
+  not_applicable: { tone: "unknown", level: "unknown", text: "対象外（模型航空機）", note: FIELD_REPORT_NOT_REQUIRED_MODEL },
 };
 
 // ---- 飛行前点検 ------------------------------------------------------------
@@ -84,10 +104,10 @@ export const heaviestTone = (rows: readonly { readonly tone: PrepTone }[]): Prep
 /** 判定の総合の語（§8.2）。上から順に当てる。判定不能の分岐は、手続き済み・手続き不要より先。 */
 export const prepJudgementRow = (j: PrepJudgementInput): PrepRow => {
   if (j.kind === "load_failed") return { tone: "unknown", level: "unknown", text: "未確認（読み込めませんでした）", action: "reload" };
-  if (j.kind === "no_record") return { tone: "unknown", level: "unknown", text: "未確認（判定の記録がありません）", action: "reload" };
+  if (j.kind === "no_record") return { tone: "unknown", level: "unknown", text: "未確認（判定の記録がありません）", action: "rejudge" };
   const c = j.counts;
   // 件数が 1 件も無い（判定の項目が空）のは、調べた記録が無いのと同じ。良い状態に読ませない
-  if (prepJudgementTotal(c) === 0) return { tone: "unknown", level: "unknown", text: "未確認（判定の記録がありません）", action: "reload" };
+  if (prepJudgementTotal(c) === 0) return { tone: "unknown", level: "unknown", text: "未確認（判定の記録がありません）", action: "rejudge" };
   let row: PrepRow;
   if (c.noFly > 0) row = { tone: "danger", level: "no_fly", text: `飛行不可の項目があります（${c.noFly} 件）` };
   else if (c.needs > 0) row = { tone: "warn", level: "needs_procedure", text: `手続きが要る項目があります（${c.needs} 件）` };

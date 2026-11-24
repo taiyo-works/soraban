@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { FIELD_REPORT_NOT_REQUIRED_MODEL } from "@/lib/ops-field";
 import {
+  hasReportNumber,
   heaviestTone,
   PREP_INSPECTION,
   PREP_REPORT,
@@ -15,17 +17,44 @@ const C = (o: Partial<PrepJudgementCounts> = {}): PrepJudgementCounts => ({ noFl
 const counts = (o: Partial<PrepJudgementCounts>, stale = false): PrepJudgementInput => ({ kind: "counts", counts: C(o), stale });
 
 // 良い状態と読ませてはいけない語（不変条件 3）
-const BANNED = ["飛行可", "安全", "OK", "問題なし", "通報不要", "完璧", "保証", "必ず", "代行", "代理", "申請"];
+const BANNED = ["飛行可", "安全", "OK", "問題なし", "通報不要", "完璧", "保証", "必ず", "代行", "代理", "申請", "免除"];
 
 describe("準備カード：通報の行（§8.1）", () => {
   it("通報の状況の導出を 3 つの語に寄せる。記録が無い・変更の確認・失敗・不明・送信中は「内容を確認する」", () => {
-    expect(PREP_REPORT[prepReportKey("reported")].text).toBe("受付番号を記録済み");
-    expect(PREP_REPORT[prepReportKey("cancelled")].text).toBe("取り消し済み");
+    expect(PREP_REPORT[prepReportKey("reported", true)].text).toBe("受付番号を記録済み");
+    expect(PREP_REPORT[prepReportKey("cancelled", false)].text).toBe("取り消し済み");
     for (const c of ["no_record", "change_review", "cancel_needed", "unknown", "failed", "sending"] as const) {
-      expect(prepReportKey(c)).toBe("confirm");
+      expect(prepReportKey(c, false)).toBe("confirm");
       expect(PREP_REPORT.confirm.text).toBe("DIPS に出す内容を確認する");
     }
-    expect(prepReportKey("not_applicable_model")).toBe("not_applicable");
+    expect(prepReportKey("not_applicable_model", false)).toBe("not_applicable");
+  });
+  it("差し戻し 1：通報済みでも受付番号が無ければ「受付番号を記録済み」（安全）にしない。「記録あり（受付番号なし）」・注意・△（要手続きの形）", () => {
+    expect(prepReportKey("reported", true)).toBe("recorded");
+    expect(prepReportKey("reported", false)).toBe("recorded_no_number");
+    expect(PREP_REPORT.recorded_no_number).toMatchObject({ tone: "warn", level: "needs_procedure", text: "記録あり（受付番号なし）" });
+    expect(PREP_REPORT.recorded_no_number.text).not.toContain("受付番号を記録済み");
+    // 番号の有無：空白だけ・番号なしの宣言・行なしは「無い」
+    expect(hasReportNumber({ dipsNumber: "FP-1", numberUnavailable: false })).toBe(true);
+    expect(hasReportNumber({ dipsNumber: " FP-1 " })).toBe(true);
+    for (const r of [{ dipsNumber: "   ", numberUnavailable: false }, { dipsNumber: null, numberUnavailable: true }, { dipsNumber: "FP-1", numberUnavailable: true }, { dipsNumber: "" }, null, undefined]) {
+      expect(hasReportNumber(r), JSON.stringify(r)).toBe(false);
+    }
+    // 読み上げ・帯の色
+    const m = prepModel({ report: "recorded_no_number", inspection: "recorded", judgement: counts({ none: 1 }) });
+    expect(m.readout).toContain("通報、記録あり（受付番号なし）。");
+    expect(m.tone).toBe("warn");
+  });
+  it("差し戻し 1：対象外（模型航空機）は免除と読ませない。未確認（灰・点線の四角）で、docs-judge と同じ既存の注意の文を添える。帯では未確認として数える", () => {
+    expect(PREP_REPORT.not_applicable).toMatchObject({ tone: "unknown", level: "unknown", text: "対象外（模型航空機）", note: FIELD_REPORT_NOT_REQUIRED_MODEL });
+    const m = prepModel({ report: "not_applicable", inspection: "recorded", judgement: counts({ none: 1 }) });
+    expect(m.tone).toBe("unknown");
+    expect(heaviestTone([PREP_REPORT.not_applicable, { tone: "info" }, { tone: "safe" }])).toBe("unknown");
+  });
+  it("差し戻し 1：判定の記録が無いときは判定の画面の再判定へ（rejudge）。通信の失敗だけが再読み込み（reload）", () => {
+    expect(prepJudgementRow({ kind: "no_record", stale: false }).action).toBe("rejudge");
+    expect(prepJudgementRow(counts({})).action).toBe("rejudge");
+    expect(prepJudgementRow({ kind: "load_failed" }).action).toBe("reload");
   });
   it("記録済みだけが安全。取り消し済みは危険、確認は注意", () => {
     expect(PREP_REPORT.recorded.tone).toBe("safe");
@@ -71,9 +100,9 @@ describe("準備カード：判定の総合の語（§8.2。全 8 状態）", ()
       note: "調べていない項目があります",
     });
   });
-  it("判定の項目が 1 件も無い・記録が無い → 未確認（判定の記録がありません）＋再読み込み。良い状態に読ませない", () => {
+  it("判定の項目が 1 件も無い・記録が無い → 未確認（判定の記録がありません）＋再判定へ（差し戻し 1：再読み込みではない）。良い状態に読ませない", () => {
     for (const j of [counts({}), { kind: "no_record", stale: false } as PrepJudgementInput]) {
-      expect(prepJudgementRow(j)).toMatchObject({ tone: "unknown", text: "未確認（判定の記録がありません）", action: "reload" });
+      expect(prepJudgementRow(j)).toMatchObject({ tone: "unknown", text: "未確認（判定の記録がありません）", action: "rejudge" });
     }
   });
   it("読み込みの失敗 → 未確認（読み込めませんでした）＋再読み込み", () => {

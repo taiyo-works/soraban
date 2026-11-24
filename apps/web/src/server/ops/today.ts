@@ -16,7 +16,7 @@ import { fieldInspectionLites, toLite } from "./field-rows";
 import { enrichFlights } from "./flight-extras";
 import { incidentTodayActions } from "./incidents";
 import { journeyStages, type JourneyStageDto } from "./journey-logic";
-import { prepInspectionKey, prepReportKey, type PrepInspectionKey, type PrepJudgementInput, type PrepReportKey } from "./prep-card-logic";
+import { hasReportNumber, prepInspectionKey, prepReportKey, type PrepInspectionKey, type PrepJudgementInput, type PrepReportKey } from "./prep-card-logic";
 import { loadPlanSummaries, type PlanDto } from "./plans";
 import { asDate, myPilot, nowOf } from "./records";
 import type { NextAction } from "./report-logic";
@@ -293,6 +293,8 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
     const start = asDate(r.planned_start_at);
     const isToday = r.planned_date_text === today;
     const inFlight = stateBy.get(r.id)?.openFlight != null;
+    // 有効な通報の行（受付番号の有無を準備カードの通報の行に使う）
+    const effective = dto.report.status.effectiveId ? (s.extras.rows.find((x) => x.id === dto.report.status.effectiveId) ?? null) : null;
     return {
       planId: r.id,
       reason: model.card.reason,
@@ -321,7 +323,7 @@ export const getToday = async (ctx: OpsContext, opts: { readonly limit?: number 
       confirmation: { state: dto.state, label: dto.stateLabel },
       badge: badgeOf(now, r, stateBy.get(r.id)),
       prep: {
-        report: prepReportKey(dto.report.status.code),
+        report: prepReportKey(dto.report.status.code, hasReportNumber(effective ? { dipsNumber: effective.dips_number, numberUnavailable: effective.number_unavailable } : null)),
         inspection: prepInspectionKey({
           isFlightDay: isToday,
           done: stateBy.get(r.id)?.checks.inspection.done ?? false,

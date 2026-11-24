@@ -515,3 +515,12 @@ html[data-mode="field"] .home-quick-btn {
   [data-testid="ops-today"] { gap: 8px; }
   [data-testid="ops-today"] > div > div, [data-testid="ops-today"] > div > div > div { gap: 8px; }
 }
+/* 主ボタンの下の対象の計画名（準備カードと別の計画の行動のとき。補足 14px・行間 1.5。折り返す） */
+.home-primary-plan {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+  overflow-wrap: anywhere;
+}
+html[data-mode="field"] .home-primary-plan { font-size: 1rem; }

@@ -1409,7 +1409,8 @@ export const firstVersionOf = async (
     )
   ).rows[0] ?? null;
 
-/** 判定のスナップショットの項目を、段階ごとに数える（ホームの準備カード。Sprint 16-G）。結果の全体は読まず、件数だけ返す。 */
+/** 判定のスナップショットの項目を、段階ごとに数える（ホームの準備カード。Sprint 16-G）。結果の全体は読まず、件数だけ返す。
+ * 5 段（no_fly・needs_procedure・unknown・procedure_done・no_procedure）以外の verdict（null・欠落・想定外の値）は、unknown に数える（良い側に数えない）。 */
 export type SnapshotItemCounts = {
   readonly no_fly: number;
   readonly needs_procedure: number;
@@ -1422,7 +1423,7 @@ export const snapshotItemCounts = async (db: Queryable, orgId: string, snapshotI
   const r = await db.query<{ no_fly: string; needs_procedure: string; unknown: string; procedure_done: string; no_procedure: string }>(
     `select count(*) filter (where x->>'verdict' = 'no_fly') as no_fly,
             count(*) filter (where x->>'verdict' = 'needs_procedure') as needs_procedure,
-            count(*) filter (where x->>'verdict' = 'unknown') as unknown,
+            count(*) filter (where x is not null and coalesce(x->>'verdict', '') not in ('no_fly', 'needs_procedure', 'procedure_done', 'no_procedure')) as unknown,
             count(*) filter (where x->>'verdict' = 'procedure_done') as procedure_done,
             count(*) filter (where x->>'verdict' = 'no_procedure') as no_procedure
        from judgement_snapshots s

@@ -26,8 +26,8 @@ export default async function OpsHome() {
   const canPlan = planCreateDenied(me) === null;
   const today = await getToday(ctx);
   const card = today.card;
-  // 主ボタン（HM-2）：次にやることのうち、押せる先頭の 1 件。無ければ「新しい計画」
-  const primaryAction = today.nextActions.find((a) => a.canAct) ?? null;
+  // 主ボタン（HM-2）：準備カードの計画の、押せる次の行動を優先する。無ければ、押せる先頭の 1 件（別の計画のときは計画名を添える）。無ければ「新しい計画」
+  const primaryAction = (card ? today.nextActions.find((a) => a.canAct && a.planId === card.planId) : undefined) ?? today.nextActions.find((a) => a.canAct) ?? null;
   return (
     <main className="flex flex-col gap-3 lg:gap-6" data-testid="ops-today">
       <DraftOwnerGuard memberId={me.member.id} />
@@ -47,10 +47,10 @@ export default async function OpsHome() {
         <div className="flex min-w-0 flex-col gap-3 lg:gap-6">
           {card ? (
             <>
-              <HomePrepCard input={card.prep} when={`${formatDay(card.plannedDate, today.today)} ${card.timeLabel}`} place={card.placeName} />
+              <HomePrepCard planId={card.planId} input={card.prep} when={`${formatDay(card.plannedDate, today.today)} ${card.timeLabel}`} place={card.placeName} />
               <div className="flex flex-col gap-3">
                 <HomeNextCard card={card} today={today.today} />
-                <HomePrimary action={primaryAction} canPlan={canPlan} />
+                <HomePrimary action={primaryAction} canPlan={canPlan} cardPlanId={card.planId} />
               </div>
             </>
           ) : today.empty ? (

@@ -297,14 +297,26 @@ export function HomeQuick({ canEnter, canPlan }: { readonly canEnter: boolean; r
   );
 }
 
-/** ホームの主ボタン（HM-2）：次にやることの 1 件（押せるもののうち先頭）。無ければ「新しい計画」。作れない役割は出さない。 */
-export function HomePrimary({ action, canPlan }: { readonly action: TodayNextAction | null; readonly canPlan: boolean }) {
-  if (action)
+/**
+ * ホームの主ボタン（HM-2）：準備カードの計画の押せる次の行動を優先（呼び出し側が選ぶ）。無ければ「新しい計画」。作れない役割は出さない。
+ * 準備カードと別の計画の行動のときは、主ボタンの下に対象の計画名を 14px で 1 行添える（取り違えを防ぐ。`home-primary-plan`）。
+ */
+export function HomePrimary({ action, canPlan, cardPlanId }: { readonly action: TodayNextAction | null; readonly canPlan: boolean; readonly cardPlanId?: string }) {
+  if (action) {
+    const other = action.planId !== null && cardPlanId !== undefined && action.planId !== cardPlanId && action.planTitle;
     return (
-      <PillLink variant="primary" block href={action.href} data-testid="home-primary" data-action-id={action.id}>
-        {action.label}
-      </PillLink>
+      <>
+        <PillLink variant="primary" block href={action.href} data-testid="home-primary" data-action-id={action.id}>
+          {action.label}
+        </PillLink>
+        {other ? (
+          <p className="home-primary-plan" data-note="" data-testid="home-primary-plan">
+            {action.planTitle}
+          </p>
+        ) : null}
+      </>
     );
+  }
   if (!canPlan) return null;
   return (
     <PillLink variant="primary" block href={PLAN_NEW_HREF} data-testid="home-primary" data-action-id="new_plan">
