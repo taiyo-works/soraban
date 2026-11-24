@@ -1,0 +1,4 @@
+HEAD 320px 200% pass
+HEAD 360px 200% pass
+MUTATED(16-F の余白) 320px 200% FAIL: navSw 346>320, 右端 346>320
+MUTATED(16-F の余白) 360px 200% pass

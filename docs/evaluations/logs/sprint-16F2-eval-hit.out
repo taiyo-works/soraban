@@ -1,0 +1,15 @@
+320 200%
+{"id":"nav-today","box":[4,529.2,92.1,599.6],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-plans","box":[94.1,529.2,158.6,599.6],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-journal","box":[160.6,529.2,225,599.6],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-more","box":[227,529.2,316,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+320 100%
+{"id":"nav-today","box":[4,572,80.5,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-plans","box":[82.5,572,159,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-journal","box":[161,572,237.5,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-more","box":[239.5,572,316,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+390 100%
+{"id":"nav-today","box":[8,572,95.5,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-plans","box":[103.5,572,191,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-journal","box":[199,572,286.5,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
+{"id":"nav-more","box":[294.5,572,382,636],"vh":640,"tl":"LI.min-w-0","tr":"LI.min-w-0","bl":"LI.min-w-0","br":"LI.min-w-0","c":"self"}
