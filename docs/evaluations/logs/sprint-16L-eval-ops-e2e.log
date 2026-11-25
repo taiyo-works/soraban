@@ -1,0 +1,572 @@
+HEAD 35a5ba6, DB ev16l_a, build: 4d6JytvXwBQ1bDBa0Y4-m
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0
+
+
+Running 433 tests using 1 worker
+
+  ✓    1 e2e/ops-db/sprint10-db.spec.ts:49:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済み・確認済みのメールアドレスで初回ログインすると結び付き、/ops に表示名と役割が出る (981ms)
+  ✓    2 e2e/ops-db/sprint10-db.spec.ts:60:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待されていないアドレスでは /ops/no-access が表示され、/api/ops/me が 403 (592ms)
+  ✓    3 e2e/ops-db/sprint10-db.spec.ts:68:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済みのアドレスでも emailVerified: false では結び付かない (78ms)
+  ✓    4 e2e/ops-db/sprint10-db.spec.ts:83:7 › Sprint 10 E2E-DB：運航管理 › 8. 役割ごとの API の状態コード（機体・操縦者・利用者） (386ms)
+  ✓    5 e2e/ops-db/sprint10-db.spec.ts:197:7 › Sprint 10 E2E-DB：運航管理 › 14. 理由なしの訂正・取消は 400。取消した機体は既定の一覧に出ず、詳細と版の一覧には残る。DELETE は 405 で行が残る (145ms)
+  ✓    6 e2e/ops-db/sprint10-db.spec.ts:228:7 › Sprint 10 E2E-DB：運航管理 › 17. 運航管理者が画面で機体を登録し、型式名を理由付きで訂正すると、版の一覧に登録・訂正の 2 行が出る (2.3s)
+  ✓    7 e2e/ops-db/sprint10-db.spec.ts:271:7 › Sprint 10 E2E-DB：運航管理 › 18. 技能証明書番号：一覧は末尾 4 桁以外を伏せ、詳細は運航管理者と本人にだけ全桁 (146ms)
+  ✓    8 e2e/ops-db/sprint10-db.spec.ts:316:7 › Sprint 10 E2E-DB：運航管理 › 20. スマートフォン幅 375px で /ops/aircraft と /ops/aircraft/new に横スクロールがない (1.6s)
+  ✓    9 e2e/ops-db/sprint10-db.spec.ts:330:7 › Sprint 10 E2E-DB：運航管理 › 21. 画面の操作の結果：入力の誤りは最初の項目へフォーカス、取消・利用者の変更は結果を一度だけ示す (3.5s)
+  ✓   10 e2e/ops-db/sprint10-neon.spec.ts:24:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › 未ログインで /ops を開くとサインイン画面（Google のボタン）に移る (601ms)
+  ✓   11 e2e/ops-db/sprint10-neon.spec.ts:30:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › (a) Google から戻ると verifier がセッションに交換され、session_token が設定されて /ops が表示される (1.2s)
+[WebServer] [getSessionDataFromCookie] Invalid session cookie: {
+[WebServer]   error: 'JWS Protected Header is invalid',
+[WebServer]   cookieName: '__Secure-neon-auth.local.session_data'
+[WebServer] }
+  ✓   12 e2e/ops-db/sprint10-neon.spec.ts:47:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › (b) session_token だけ（session_data なし・壊れた session_data）でも、Cookie を更新して /ops が表示される (763ms)
+  ✓   13 e2e/ops-db/sprint10-neon.spec.ts:68:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › サインイン画面・権限なしの画面は保護しないが、Google から戻ったときの交換は行う (617ms)
+  ✓   14 e2e/ops-db/sprint11-db.spec.ts:123:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 7. 機体は訂正で変えられない（400）。取消済み・抹消の機体への作成は 409。他の組織の ID は 404。別の機体の点検の紐付けは 400 (246ms)
+  ✓   15 e2e/ops-db/sprint11-db.spec.ts:175:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 15. 役割ごとの状態コード（作成・訂正・取消）。理由なしは 400、古い版は 409、DELETE は 405 で行が残る (452ms)
+  ✓   16 e2e/ops-db/sprint11-db.spec.ts:261:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 16. 「離陸：今」「着陸：今」、再読み込みで下書きが残り、保存すると詳細に飛行年月日・時刻・飛行時間 0:01・総飛行時間が出て、下書きが消える (2.1s)
+  ✓   17 e2e/ops-db/sprint11-db.spec.ts:309:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 17. 同じ clientRequestId の POST は 2 回目が 200 で同じ ID、記録は 1 件。保存の要求を遮断すると下書きが残り、再送ボタンで保存できる (1.5s)
+  ✓   18 e2e/ops-db/sprint11-db.spec.ts:353:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 18. 日常点検を「すべて正常」で保存し、進んだ飛行記録の入力画面に点検が候補として入る。当日の点検がない機体は警告が出るが保存できる。「異常」で備考なしはその項目に誤り (3.2s)
+  ✓   19 e2e/ops-db/sprint11-db.spec.ts:409:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 19. 375px で一覧・入力・詳細に横スクロールがなく、「離陸：今」「着陸：今」「保存」「すべて正常」の高さが 44px 以上 (3.1s)
+  ✓   20 e2e/ops-db/sprint11-db.spec.ts:445:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1・2：何も入力のない日常点検の下書きは、日をまたぐと今の分に入れ直して知らせる。手で入れた日時は残し「前回の入力のまま」と示す (2.8s)
+  ✓   21 e2e/ops-db/sprint11-db.spec.ts:491:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 2：9 項目を入れて保存に失敗した点検を翌日開き直すと、実施日時は保たれ「前回の入力のまま」と示す (1.3s)
+  ✓   22 e2e/ops-db/sprint11-db.spec.ts:519:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 2：「今」を押した後に再読み込みしても、実施日時は押したときのまま (1.1s)
+  ✓   23 e2e/ops-db/sprint11-db.spec.ts:537:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：下書きは利用者ごと。別の利用者でログインすると前の人の下書きは読まれず、端末から消える (986ms)
+  ✓   24 e2e/ops-db/sprint11-db.spec.ts:557:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：日常点検の候補を取得できないときは「点検がない」とは示さず、取得できないと示す (784ms)
+  ✓   25 e2e/ops-db/sprint11-db.spec.ts:571:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：「← 一覧」などのリンクの押せる範囲が高さ 44px 以上 (1.9s)
+  ✓   26 e2e/ops-db/sprint11-db.spec.ts:596:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 20（画面）. ログアウトで下書きが消える (1.6s)
+  ✓   27 e2e/ops-db/sprint11-db.spec.ts:615:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 20. 飛行記録の一覧の応答では技能証明書番号の写しを末尾 4 桁以外伏せ、詳細では運航管理者と本人にだけ全桁 (190ms)
+  ✓   28 e2e/ops-db/sprint11-db.spec.ts:655:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 総飛行時間：既存 600 分の機体に記録を入れると、一覧・詳細・機体の詳細に累計が出る (1.2s)
+  ✓   29 e2e/ops-db/sprint11a-db.spec.ts:28:7 › Sprint 11a E2E-DB：技能証明の有効期限の注意 › 22. 有効期限が 3 か月後の操縦者は一覧と詳細に「更新の時期」が出て、未入力の操縦者には出ない (1.1s)
+  ✓   30 e2e/ops-db/sprint12a-db.spec.ts:193:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 2. 偽の判定を本文に入れても、保存されるのはサーバーが実行した結果（夜間の計画は要手続き） (124ms)
+  ✓   31 e2e/ops-db/sprint12a-db.spec.ts:217:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 11・16・17・20. 計画をフォームで作る → 確認を依頼 → 確認（自己確認）→ 訂正すると「前の版への確認」 (11.2s)
+  ✓   32 e2e/ops-db/sprint12a-db.spec.ts:310:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 16. 通報の要否の 4 種（要・要・推奨・要確認）と、固定の文言。画面全文に禁止語がない (4.6s)
+  ✓   33 e2e/ops-db/sprint12a-db.spec.ts:370:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 9. 機体の最大離陸重量を変えると「判定が古い」と理由が出て、「判定をやり直す」で新しいスナップショットと版ができる (2.4s)
+  ✓   34 e2e/ops-db/sprint12a-db.spec.ts:407:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 13・14. 計画から飛行記録を作る（形態は DID・空港の導出を含む）→ 日誌の一覧から 2 タップで判定の根拠 (6.2s)
+  ✓   35 e2e/ops-db/sprint12a-db.spec.ts:493:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 17. よく使う地点：運航管理者が登録・訂正・取消でき、全役割が一覧を見られる。他の役割は 403・他の組織は 404 (3.8s)
+  ✓   36 e2e/ops-db/sprint12a-db.spec.ts:560:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 17. 現在地の座標は、「この地点を使う」で確定するまで入力欄に入らず、通信にも出ない（保存まで送らない） (2.0s)
+  ✓   37 e2e/ops-db/sprint12a-db.spec.ts:602:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 18. 運航管理が有効でログイン済み：`/` にリンクとボタンが出て、ボタンで入力（座標・重量・フラグ・許可・予定日）を引き継ぐ。結果は引き継がない (6.7s)
+  ✓   38 e2e/ops-db/sprint12a-db.spec.ts:680:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 認可：閲覧者は計画を作れない／操縦者は自分の計画だけ／確認は運航管理者だけ／他の組織は 404 (6.8s)
+  ✓   39 e2e/ops-db/sprint12a-db.spec.ts:752:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 20. 375px で横スクロールがなく、状態・通報の要否・判定の結論に文字があり、特許・出願の表示がない (8.7s)
+  ✓   40 e2e/ops-db/sprint12b-db.spec.ts:239:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 1. 判定不能が残る計画は「通報：要確認（要として扱います）」、判定不能が無く特定飛行に当たらない計画は「推奨」のまま。「次の版で追加します」が残らない (1.4s)
+  ✓   41 e2e/ops-db/sprint12b-db.spec.ts:261:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 4・5・13. 通報内容を DIPS の入力順に並べてコピーし、記録するまで「通報済み」と出ず、二つの確認と番号が揃うと記録される。変更・取消まで (14.8s)
+  ✓   42 e2e/ops-db/sprint12b-db.spec.ts:472:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 4. 閲覧者・他の操縦者には技能証明書番号が伏せ字でコピーできず、運航管理者と本人には全桁が出る。他の組織は 404 (3.9s)
+  ✓   43 e2e/ops-db/sprint12b-db.spec.ts:513:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 16. 次にやること：目安超過・飛行開始後の最上位の警告・記録後に消える・詳細と一覧から直接移る・対応が必要の絞り込み (14.1s)
+  ✓   44 e2e/ops-db/sprint12b-db.spec.ts:604:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 17. 手続きの記録（Sprint 18-2）：許可・承認の「申請済み」の記録は止める（フォーム無し・API は 409・apply_permit は出ない）。飛行禁止法の同意・通報は、すべての確認が真のときだけ記録できる。取り下げ・前の判定に対する記録 (16.9s)
+  ✓   45 e2e/ops-db/sprint12b-db.spec.ts:707:7 › Sprint 12b E2E-DB（手動）：通報内容のコピー・結果の記録・変更・取消・次にやること・手続きの記録 › 18. 軽微な表示：判定の日時が JST、タップ領域 44px 以上、訂正フォームの機体は読み取り専用の文、新規の機体セレクトがはみ出さない (12.5s)
+  ✓   46 e2e/ops-db/sprint12b-db.spec.ts:805:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 同じシナリオ（通報内容 → 送信 → 番号と状態 → 変更 → 取消）を模擬で流す。模擬の表示・根拠の鎖は手動と同じ形 (6.4s)
+  ✓   47 e2e/ops-db/sprint12b-db.spec.ts:875:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 模擬の timeout は「結果不明」で再送のボタンが出ず、確認後に確定できる。rejected は失敗となり再送できる (12.0s)
+  ✓   48 e2e/ops-db/sprint12b-db.spec.ts:954:7 › Sprint 12b E2E-DB（模擬）：送信内容の確認 → 送信、結果不明・失敗・再送 › 13. 未知の外部状況は状態を増やさず「状況：不明（生の値）」と出る (2.1s)
+  ✓   49 e2e/ops-db/sprint12c-db.spec.ts:182:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 7. /ops は「ホーム」：空の状態 → 大きなカード 1 枚と次にやること（急ぐ順）。飛行中・日誌待ち・点検なし・食い違いの各状況 (5.9s)
+  ✓   50 e2e/ops-db/sprint12c-db.spec.ts:319:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 8・16. メニュー：スマホ（1024px 未満）は下の 4 タブ（ホーム／計画／日誌／機体と書類。16-F）、PC は左メニュー。行き先と現在地、375px で折り返さない・高さ 64px 以上・末尾が隠れない。`/` では下タブに現在地がない。現場モード・サインインでは出ない (23.8s)
+  ✓   51 e2e/ops-db/sprint12c-db.spec.ts:512:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 16. ログインしていない `/` には下メニューも「ホーム」の帯もなく、運航管理への追加の通信もない (2.0s)
+  ✓   52 e2e/ops-db/sprint12c-db.spec.ts:527:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 9. 日誌の統合：/ops/journal の入口・切り替え・最近 14 日の合算の一覧（食い違いの札）と、/ops/more (6.4s)
+  ✓   53 e2e/ops-db/sprint12c-db.spec.ts:639:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 10. 飛行前：4 項目が 1 項目 1 行で「済（時刻）／未」。日常点検は実際の点検から導出し、入力して保存すると現場モードへ戻る。緊急用務空域は情報源と結果を選ぶまで記録できない (5.1s)
+  ✓   54 e2e/ops-db/sprint12c-db.spec.ts:769:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 11. 離着陸：大きなボタンは常に 1 つ。確認ダイアログなし、未了事項があっても記録され、取り消せる。二度押しは 1 行。経過時間。時間帯の外の知らせ。繰り返せる (12.1s)
+  ✓   55 e2e/ops-db/sprint12c-db.spec.ts:874:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 12. 日誌：着陸後に「日誌を記入する」で実際の離着陸の時刻と飛行前の点検が入った入力が開き、保存すると日誌済み。食い違いは保存後に知らされ、札と未了事項の写しが出る (5.4s)
+  ✓   56 e2e/ops-db/sprint12c-db.spec.ts:948:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 13. 端末の保存（送信待ち）：圏外でも押した結果が反映され、戻ると順番に二重なく送られる。応答を落としても 1 件。4xx は黙って捨てない。ログアウトは未送信を警告する (16.1s)
+  ✓   57 e2e/ops-db/sprint12c-db.spec.ts:1090:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 13b. 端末に送信待ちを保存できなくても、押した離陸は失われない：注記が出て、サーバーに 1 件だけ記録され、注記は消える (841ms)
+  ✓   58 e2e/ops-db/sprint12c-db.spec.ts:1116:7 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 14. 画面の消灯の防止：飛行中だけ取得し、着陸で解放する。非対応の端末では注記だけ (3.8s)
+  ✓   59 e2e/ops-db/sprint12c-db.spec.ts:1166:9 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 15. 現場モードの見た目の基準（明るい配色）：寸法・文字の大きさ・コントラスト 7:1・色だけで区別しない (3.1s)
+  ✓   60 e2e/ops-db/sprint12c-db.spec.ts:1166:9 › Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録 › 15. 現場モードの見た目の基準（暗い配色）：寸法・文字の大きさ・コントラスト 7:1・色だけで区別しない (3.3s)
+  ✓   61 e2e/ops-db/sprint12d-db.spec.ts:158:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-1. 「登録」から一覧へ：初期データの 6 件が文字と記号つきの有効性で区別され、固定の文言が出る。絞り込みが効く。375px で横スクロールなし (2.2s)
+  ✓   62 e2e/ops-db/sprint12d-db.spec.ts:203:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-2. 登録（運航管理者のみ）→ 詳細 → 訂正（理由必須・影響する計画の旨）→ 失効 → 取消 → 版の履歴。同じ番号は拒否 (6.2s)
+  ✓   63 e2e/ops-db/sprint12d-db.spec.ts:302:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-3. 操縦者・閲覧者は閲覧だけ（登録の入口・訂正・失効・取消がなく、API は 403）。他の組織の登録は 404。「この登録を根拠にしている計画」が出る (2.0s)
+  ✓   64 e2e/ops-db/sprint12d-db.spec.ts:347:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-1. 登録した許可の番号を計画に入れると、範囲に収まる種類だけが判定に使われ、エンジンの「照合していません」が登録の文に置き換わる。番号なし・未登録は要手続きのまま (4.1s)
+  ✓   65 e2e/ops-db/sprint12d-db.spec.ts:394:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-2. 範囲外・期限切れ・失効・文章のみ・機体の限定・空港等周辺（参考）・手入力の DIPS の許可：すべて要手続きのままで、理由が出る (9.0s)
+  ✓   66 e2e/ops-db/sprint12d-db.spec.ts:454:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-3. 許可があっても、緊急用務空域は飛行不可のまま（結論は判定の部品のまま）。文言は「飛べる」と読めない (3.1s)
+  ✓   67 e2e/ops-db/sprint12d-db.spec.ts:470:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-4. 計画のフォーム：DIPS の許可・承認のチェックがなく、案内が出る。番号の登録の有無が入力中に分かり、候補の「番号を入れる」で欄に足せる。保存すると判定が変わる (3.2s)
+  ✓   68 e2e/ops-db/sprint12d-db.spec.ts:518:7 › Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14） › 14. 日誌から 4 タップ以内で、判定の根拠 → 許可の登録の版へ辿れる。登録を訂正すると「判定が古い」→ 再判定で新しい版を根拠にし、古いスナップショットは当時の版を指す (7.0s)
+  ✓   69 e2e/ops-db/sprint12d-db.spec.ts:598:7 › Sprint 12d E2E-DB：12b との関係と次にやること（契約 15） › 15. 申請の記録に依存せず、登録がなければ「取得した許可・承認を登録する」が出て（運航管理者のみ操作）、番号を入れて判定が手続き済みになると消える（Sprint 18-2） (5.2s)
+  ✓   70 e2e/ops-db/sprint12d-db.spec.ts:653:7 › Sprint 12d E2E-DB：通報内容と現場モード（契約 16） › 16. 結びついた登録があれば通報内容に許可書発行日・許可期間が出る（形式は※要確認）。なければ「DIPS で入力」。現場モードの携行品に番号ごとの状態が出る (2.2s)
+  ✓   71 e2e/ops-db/sprint12e-db.spec.ts:213:7 › Sprint 12e E2E-DB：事故・ヒヤリハット › 9. 安全の案内と固定の注意書き：G1 が入力欄より前（画面の上でも DOM の順でも）。N1〜N7 が定数どおり設計 A の場所に出る。各類型の説明文が選択肢の下に出る (2.9s)
+  ✓   72 e2e/ops-db/sprint12e-db.spec.ts:295:7 › Sprint 12e E2E-DB：事故・ヒヤリハット › 10. 事務所の通し：一覧 → 記録する → 類型（初期値なし）→ 目安が切り替わる → 保存 → 詳細・版・出典 → 訂正 → 報告の結果・要否の確認 → 内容が変わった → 取消。操縦者は自分の分だけ、閲覧者は書けない (10.9s)
+  ✓   73 e2e/ops-db/sprint12e-db.spec.ts:463:7 › Sprint 12e E2E-DB：事故・ヒヤリハット › 11. 現場の簡易記録：現場モードの帯から移り、区分とけがの有無を選んで「記録する」だけで保存（確認ダイアログなし）。詳細の記入へ移れ、一覧に印、「今日」に詳細の記入。帯は離着陸のボタンから 24px 以上離れる (6.0s)
+  ✓   74 e2e/ops-db/sprint12e-db.spec.ts:558:7 › Sprint 12e E2E-DB：事故・ヒヤリハット › 12. 端末の保存：圏外でも押した結果が出て「未送信 N 件」。戻ると送られ、応答を落とした再送でも 1 件。4xx は黙って捨てず「あとから入力」へ。ログアウトは未送信を警告。端末に個人情報を残さない。他の利用者の保存は消える (5.3s)
+  ✓   75 e2e/ops-db/sprint12e-db.spec.ts:696:7 › Sprint 12e E2E-DB：事故・ヒヤリハット › 13. 連携：計画・日誌の画面に「この飛行の事故・ヒヤリハット」。日誌の安全に影響のあった事項から入力画面へ（要約が初期値、自動で作らない）。日誌から入れる。「ホーム」の報告の要否の確認は日数が経っても出続け、確認の記録で消える (7.1s)
+  ✓   76 e2e/ops-db/sprint12e-db.spec.ts:806:9 › Sprint 12e E2E-DB：事故・ヒヤリハット › 15. 現場の簡易記録の見た目の基準（明るい配色）：押す部品 56px 以上・間 12px 以上、本文 18px 以上、状態の語 20px 以上、コントラスト 7:1 (965ms)
+  ✓   77 e2e/ops-db/sprint12e-db.spec.ts:806:9 › Sprint 12e E2E-DB：事故・ヒヤリハット › 15. 現場の簡易記録の見た目の基準（暗い配色）：押す部品 56px 以上・間 12px 以上、本文 18px 以上、状態の語 20px 以上、コントラスト 7:1 (943ms)
+  ✓   78 e2e/ops-db/sprint12g-1a-db.spec.ts:12:7 › Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存の画面 › 1. 未ログインでも見本が表示される（サインイン画面に移らない）。運航管理の枠・ヘッダー・下メニューがなく、運航管理の API・認証を呼ばない (747ms)
+  ✓   79 e2e/ops-db/sprint12g-1a-db.spec.ts:28:7 › Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存の画面 › 2. Neon Auth の方式でも、未ログインで見本が表示される。ほかの /ops は従来どおりサインイン画面へ (777ms)
+  ✓   80 e2e/ops-db/sprint12g-1a-db.spec.ts:37:7 › Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存の画面 › 3. DESIGN_CATALOG が 1 でないサーバーでは、運航管理が有効でも 404（画面もヘッダーも出さない） (140ms)
+  ✓   81 e2e/ops-db/sprint12g-1a-db.spec.ts:44:7 › Sprint 12g 1a E2E-DB：デザイン見本と運航管理の既存の画面 › 4. ログイン済みの運航管理の画面は、v2 のトークン（.ds.ops-v2）で描かれ、PC は左メニューと右上の利用者メニュー、スマホは下の 5 タブ。公開の判定画面 `/` は .ds を使わない (3.3s)
+  ✓   82 e2e/ops-db/sprint12g-1b-db.spec.ts:55:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7. 予定のない日：何もない旨と次の一手が先頭、375×812 の最初の画面に期限の最初の行が入る（見本の S3＝0 回） (880ms)
+  ✓   83 e2e/ops-db/sprint12g-1b-db.spec.ts:119:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7・A8. 飛行がある日：次の飛行（主ボタン 1 つ）と行程の 7 段、直近の飛行にも行程。予定の窓は 7 日 (1.2s)
+  ✓   84 e2e/ops-db/sprint12g-1b-db.spec.ts:200:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A4. 利用者メニュー：スマホは右上のアイコン、開くと名前・役割（ⓘに説明）・メールアドレス・ログアウト。Escape で閉じる。タップ領域 44px 以上 (997ms)
+  ✓   85 e2e/ops-db/sprint12g-1b-db.spec.ts:231:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A9・A10. 登録の画面（件数・管理・DIPS の未接続）と、日誌の中の事故・ヒヤリハット（閲覧者には入力の入口がない） (4.3s)
+  ✓   86 e2e/ops-db/sprint12g-1b-db.spec.ts:267:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › 後始末：作った操縦者と許可・承認を取り消す (69ms)
+  ✓   87 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:49:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › I-2. 利用者メニュー：Escape で閉じるとトリガーへフォーカスが戻る。外を押して閉じたときは戻さない。名前は見える文字を含む (1.1s)
+  ✓   88 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:91:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › I-3. スキップリンク「本文へ移動」と Tab の順（スマホは 上バー → 本文 → 下タブ）。主要画面の題名 (1.8s)
+  ✓   89 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:148:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-3. 予定のない日：計画を作れない役割（閲覧者・操縦者の行に結び付いていない操縦者）には「飛行計画を作る」を出さず、「地点を判定する」は残す (2.0s)
+  ✓   90 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:176:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-8. 内容が短い画面でも、余計にスクロールしない（下タブの余白を二重に積まない）。長い画面は末尾が下タブに隠れない (1.1s)
+  ✓   91 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:199:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-1・M-2・M-4・M-5. 予定のある日：次にやることは最初 3 件＋「ほか N 件を見る」、日付は 1/5（火）、期限は 2 行、画面名は上バーと二重にならない (1.5s)
+  ✓   92 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:280:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-4. 年をまたぐ期限は年を付ける（過ぎた許可）。近づく期限の日付は 1/20（水）の形 (634ms)
+  ✓   93 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:304:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-11. 戻りリンクの押せる範囲は幅・高さとも 44px 以上（登録・日誌・一覧・詳細） (3.8s)
+  ✓   94 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:316:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-6・M-7. アイコン：判定と地点、操縦者と利用者が別の絵。登録の「DIPS 未接続」に鍵を使わない (672ms)
+  ✓   95 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:334:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › 独創性：行程表が「次の飛行」の主役。7 つの欄（等幅の通し番号）・「次」の押印・次の段の作業。375・320px で折り返さない (2.9s)
+  ✓   96 e2e/ops-db/sprint12h-pr3-db.spec.ts:94:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-1. 下タブ：ホーム／計画／日誌／機体と書類 の 4 つ（16-F。高さ 64px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし。点検は日誌が現在地 (27.8s)
+  ✓   97 e2e/ops-db/sprint12h-pr3-db.spec.ts:148:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は薄い主色の面・見出し 12px 以上。1280・1440px × 明・暗 (16.8s)
+  ✓   98 e2e/ops-db/sprint12h-pr3-db.spec.ts:181:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-3. 判定への入口：ホームと計画の作成画面の上部のピル（48px 以上・2 列・間 8px 以上）。押すと `/?start=…`、押すまで位置の要求は 0。360・375・768・1280px × 明・暗 (13.1s)
+  ✓   99 e2e/ops-db/sprint12h-pr3-db.spec.ts:236:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-4. 点検の 1 段目：新しい点検 → 未実施（今日の飛行前。記録より上）→ 記録。点検を記録すると未実施から消える。戻りリンクなし。結果の札に判定色を使わない (3.5s)
+  ✓  100 e2e/ops-db/sprint12h-pr3-db.spec.ts:319:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-5. 点検の一覧：閲覧者は「新しい点検」が出ず注記が出る。未実施の行は押せず、理由を文で示す。日誌には点検の一覧へのリンクがある (1.4s)
+  ✓  101 e2e/ops-db/sprint12h-pr3-db.spec.ts:345:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 320・360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上 (1.3m)
+  ✓  102 e2e/ops-db/sprint12h-pr3-db.spec.ts:372:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-7. 現場モード：メニューは出さず「ホームへ戻る」（56px 以上）だけ。ホーム・点検の一覧から現場の入口までの導線は変わらない (1.3s)
+  ✓  103 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:87:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-1. 文字：14px 以上、コントラスト 4.5:1 以上（明・暗。375px）。主要 12 画面 (19.7s)
+  ✓  104 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:104:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-2. 押す部品：高さ 47.5px 以上（ボタン・リンクのボタン・入力欄・select・summary・チップ・戻りリンク）。375×812・360×740。文の中のリンクは除く (11.2s)
+  ✓  105 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:130:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-3. はみ出し 0：幅 360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。要素が画面の右端を越えない (1.4m)
+  ✓  106 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:157:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-4. 形：角丸は {16・8・4・ピル・円} だけ。影は --sb-shadow だけ（枠線の輪を除く）。旧い角丸 5px・2px が 0 (11.6s)
+  ✓  107 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:202:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-5. 旧い見た目の部品がない：旧いボタン・札・見出しの名前（rounded-ctl・eyebrow・bearing-mark）と藍の地が 0。主ボタンは主色の面＋白の文字（4.5:1 以上） (12.7s)
+  ✓  108 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:234:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-6. 現場（data-mode=field）：押す部品は 56px 以上・主ボタンは 64px・動きなし・影なし。点検の入力と飛行記録の入力 (2.8s)
+  ✓  109 e2e/ops-db/sprint12h-pr3b1-db.spec.ts:269:7 › Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面） › P3b1-7. 点検の一覧の区分チップ（通常のリンク <a>）：押すと URL と一覧が切り替わる。直前に記録した点検が、チップを往復しても古いまま残らない（6 往復） (6.2s)
+  ✓  110 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:77:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-1. 文字：14px 以上、コントラスト 4.5:1 以上（明・暗。375px）。登録系 16 画面 (11.6s)
+  ✓  111 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:92:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-2. 押す部品：高さ 47.5px 以上（375×812・360×740）。登録の入口のリンクは 56px 以上 (10.6s)
+  ✓  112 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:118:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-3. はみ出し 0：幅 360〜1440 × 明・暗で横スクロールなし。長い記号・氏名・住所・番号が親から出ない (1.1m)
+  ✓  113 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:143:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-4. 形：角丸は {16・8・4・ピル・円} だけ。影は --sb-shadow だけ（枠の輪を除く） (17.0s)
+  ✓  114 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:187:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-5. 旧い見た目の部品がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは主色の面。同じ画面の ?query 切り替えは <a> (10.6s)
+  ✓  115 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:221:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-6. 期限の札は判定の色（赤・琥珀・緑）を使わない：期限切れ・失効＝墨の面＋「！」、期限間近＝状態「注意」の面（明・暗） (1.3s)
+  ✓  116 e2e/ops-db/sprint12h-pr3b2a-db.spec.ts:264:7 › Sprint 12h PR ③b2a E2E-DB：運航管理の v2（登録系の画面） › P3b2a-7. 現場（data-mode=field）：押す部品は 56px 以上・主ボタンは 64px・動きなし・影なし。登録系の一覧と入力 (2.7s)
+  ✓  117 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:82:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-1. 文字：14px 以上・4.5:1 以上（明・暗。375px）。現場の 2 画面は 7:1 以上 (23.1s)
+  ✓  118 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:98:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-2. 押す部品：高さ 47.5px 以上（375×812・360×740）。現場は 56px 以上、主ボタンは 64px 以上 (9.0s)
+  ✓  119 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:124:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-3. はみ出し 0：幅 360〜1440 × 明・暗で横スクロールなし。長い計画名・番号・説明が親から出ない (1.1m)
+  ✓  120 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:149:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-4. 形：角丸は {16・8・4・ピル・円} だけ。影は --sb-shadow だけ。現場は影なし・動きなし (17.8s)
+  ✓  121 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:195:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-5. 旧い見た目がない：rounded-ctl・rounded-sharp・.eyebrow・藍の面のボタンが 0。主ボタンは主色の面。判定の履歴・事故の一覧は <a>/<Link> の別画面への移動だけ (10.9s)
+  ✓  122 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (5.1s)
+  ✓  123 e2e/ops-db/sprint14-db.spec.ts:118:9 › Sprint 14 現場画面 375×812 › D-1〜D-3・D-5・D-6：書類・手続き 6 項目の状態（文字と形）、根拠、1 タップの確認と取り消し、空域、現場状況の入力 (6.4s)
+  ✓  124 e2e/ops-db/sprint14-db.spec.ts:200:9 › Sprint 14 現場画面 375×812 › D-7〜D-10：着陸 → 飛行後点検（後回しは未了のまま）→ 次の飛行（ラウンドごとの項目は未了、計画ごとは持ち越し）→ 2 回目の離着陸。未了のまま離陸しました (4.7s)
+  ✓  125 e2e/ops-db/sprint14-db.spec.ts:269:9 › Sprint 14 現場画面 375×812 › D-4：登録を変えると（技能証明の期限を過去に）開き直したとき満たさないに変わり、確認ボタンが無く登録を直す導線が出る。変更前の離陸の gaps は書き換わらない (1.2s)
+  ✓  126 e2e/ops-db/sprint14-db.spec.ts:294:9 › Sprint 14 現場画面 375×812 › ユーザー決定：日誌済みの飛行のラウンドに属する確認は取り消せない（409 round_journaled）。計画ごとの確認は取り消せる (1.1s)
+  ✓  127 e2e/ops-db/sprint14-db.spec.ts:336:9 › Sprint 14 現場画面 375×812 › D-11：通信できない状態で、既に開いている画面から確認を押すと送信待ちに入り、戻ると二重なく送られる (5.5s)
+  ✓  128 e2e/ops-db/sprint14-db.spec.ts:118:9 › Sprint 14 現場画面 1280×800 › D-1〜D-3・D-5・D-6：書類・手続き 6 項目の状態（文字と形）、根拠、1 タップの確認と取り消し、空域、現場状況の入力 (6.0s)
+  ✓  129 e2e/ops-db/sprint14-db.spec.ts:200:9 › Sprint 14 現場画面 1280×800 › D-7〜D-10：着陸 → 飛行後点検（後回しは未了のまま）→ 次の飛行（ラウンドごとの項目は未了、計画ごとは持ち越し）→ 2 回目の離着陸。未了のまま離陸しました (3.8s)
+  ✓  130 e2e/ops-db/sprint14-db.spec.ts:269:9 › Sprint 14 現場画面 1280×800 › D-4：登録を変えると（技能証明の期限を過去に）開き直したとき満たさないに変わり、確認ボタンが無く登録を直す導線が出る。変更前の離陸の gaps は書き換わらない (1.4s)
+  ✓  131 e2e/ops-db/sprint14-db.spec.ts:294:9 › Sprint 14 現場画面 1280×800 › ユーザー決定：日誌済みの飛行のラウンドに属する確認は取り消せない（409 round_journaled）。計画ごとの確認は取り消せる (967ms)
+  ✓  132 e2e/ops-db/sprint14-db.spec.ts:336:9 › Sprint 14 現場画面 1280×800 › D-11：通信できない状態で、既に開いている画面から確認を押すと送信待ちに入り、戻ると二重なく送られる (5.4s)
+  ✓  133 e2e/ops-db/sprint15-db.spec.ts:119:7 › Sprint 15 A：インストールと配信 › A-1：/ops でマニフェストが配信され、名称・アイコン（192・512）・display・開始 URL・theme_color が揃う (1.0s)
+  ✓  134 e2e/ops-db/sprint15-db.spec.ts:147:7 › Sprint 15 A：インストールと配信 › A-2・A-3：Service Worker は /ops にだけ効き、公開の / を受け持たない。キャッシュは許可リストだけ（/api・/ops/sign-in・画面の本体なし） (3.5s)
+  ✓  135 e2e/ops-db/sprint15-db.spec.ts:202:7 › Sprint 15 A：インストールと配信 › A-4：新しい版を配っても、入力中の現場画面は勝手に再読み込みされない。「更新する」を押したときだけ切り替わる (4.5s)
+  ✓  136 e2e/ops-db/sprint15-db.spec.ts:232:7 › Sprint 15 B：先読み › B-1・B-2：ホームを開くと、自分が操縦者の今日の計画の束が利用者ごとのキーで保存される。API は組織と利用者で絞る (2.9s)
+  ✓  137 e2e/ops-db/sprint15-db.spec.ts:274:7 › Sprint 15 B：先読み › B-3・B-4：先読みの最終更新が出て、古いと注記が出る。登録が変わったあとオンラインに戻ると判定が最新になる (3.2s)
+  ✓  138 e2e/ops-db/sprint15-db.spec.ts:313:9 › Sprint 15 C・D・E：圏外で開いて記録し、戻ると順番に送られる 375×812 › C-1〜C-4・D-1〜D-3・E-1・E-3：再読み込みしても開き、確認・離着陸・点検・日誌を保存し、戻ると作った順に送られる (7.1s)
+  ✓  139 e2e/ops-db/sprint15-db.spec.ts:313:9 › Sprint 15 C・D・E：圏外で開いて記録し、戻ると順番に送られる 1280×800 › C-1〜C-4・D-1〜D-3・E-1・E-3：再読み込みしても開き、確認・離着陸・点検・日誌を保存し、戻ると作った順に送られる (7.3s)
+  ✓  140 e2e/ops-db/sprint15-db.spec.ts:462:7 › Sprint 15 D・E：送信待ちの規則 › D-6：端末に保存できない環境では、メモリに保持して「電波が戻るまで画面を閉じないでください」を出す (2.1s)
+  ✓  141 e2e/ops-db/sprint15-db.spec.ts:483:7 › Sprint 15 D・E：送信待ちの規則 › E-2・E-5：送信の途中で再読み込みしても二重にならない。2 台の端末の記録は両方残り、同じ識別子の再送は 1 行 (3.1s)
+  ✓  142 e2e/ops-db/sprint15-db.spec.ts:527:7 › Sprint 15 D・E：送信待ちの規則 › E-4・E-6・E-8：12c の形式の行が読めて送れる。72 時間を超えた点検は送らず理由つきで残り、後ろの行は止まらない。あと 12 時間以内に超える行は注意が出る (2.8s)
+  ✓  143 e2e/ops-db/sprint15-db.spec.ts:568:7 › Sprint 15 D・E：送信待ちの規則 › E-7：通信が戻っても認証が切れていれば送信待ちは消えず、再ログインの案内が出て、ログイン後に続きが送られる (2.4s)
+  ✓  144 e2e/ops-db/sprint15-db.spec.ts:592:7 › Sprint 15 F：端末と個人情報 › F-1・F-3：未送信が無ければログアウトで先読みを消す。未送信があれば警告し、残して出られる。別の利用者のログインで前の利用者の分が消える (4.3s)
+  ✓  145 e2e/ops-db/sprint15-db.spec.ts:643:7 › Sprint 15 F（再評価）：ログアウトせずに別の利用者がログインしたとき › F-1：ホーム以外の画面（計画の一覧）だけを開いてから圏外になっても、前の利用者の先読みの計画は出ない (2.0s)
+  ✓  146 e2e/ops-db/sprint15-db.spec.ts:669:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › R-1：同じ機体・同じ日の 2 つの計画で、一方の計画の飛行後点検は他方を満たさない (2.8s)
+  ✓  147 e2e/ops-db/sprint15-db.spec.ts:702:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › BUG-1：計画の操縦者でない操縦者は、他人の計画に点検を結び付けられない（API・画面とも 403。飛行後点検は未のまま） (1.2s)
+  ✓  148 e2e/ops-db/sprint15-db.spec.ts:739:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › 追加の判断：飛行前点検も、同じ機体・同じ日の別の計画の点検や、結び付きのない点検では満たされない (2.2s)
+  ✓  149 e2e/ops-db/sprint15-db.spec.ts:759:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › 再評価：日誌の画面の「日常点検を入力する」は計画を付けて開き、保存した点検は計画に結び付き、日誌の入力へ戻る (2.3s)
+  ✓  150 e2e/ops-db/sprint15-db.spec.ts:799:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › X-1：日誌から点検へ移り、実施日時を離陸より前に直して保存すると、知らせは消え、その点検がこの飛行の日誌の既定に入る（12c の引き継ぎ） (1.9s)
+  ✓  151 e2e/ops-db/sprint15-db.spec.ts:828:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › X-4：離陸と着陸の間に実施した点検は、その飛行の飛行前点検にならない（飛行中の「済」にも日誌の既定にも入らず、選ぶと知らせる） (907ms)
+  ✓  152 e2e/ops-db/sprint15-db.spec.ts:853:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › X-3：点検を計画に結び付ける権限の無い操縦者（他人の計画）には、日誌の点検リンクに planId を付けない。計画の操縦者本人には付ける (1.3s)
+  ✓  153 e2e/ops-db/sprint15-db.spec.ts:882:7 › Sprint 15 追加：R-1 飛行後点検の計画への結び付け・U-2 通報の表示 › U-2：通報の根拠に通報日時とそらばんへの記録の時刻が出る。記録が無い計画では、離陸の前に記録する案内が出る (1.7s)
+  ✓  154 e2e/ops-db/sprint16-a-db.spec.ts:59:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-13. 要素の色がトークンの集合に入る（橙・旧い藍が無い）。現場は現場の値で (4.0s)
+  ✓  155 e2e/ops-db/sprint16-a-db.spec.ts:67:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-3. 文字は 4.5:1 以上（現場は 7:1 以上）。横スクロールなし。地は #F6F7F9 (4.3s)
+  ✓  156 e2e/ops-db/sprint16-a-db.spec.ts:81:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-14. OS が暗でも明で描かれる。主ボタンの面は主色（現場は濃い主色）で、白い文字の比が 4.5 以上（現場 7） (3.7s)
+  ✓  157 e2e/ops-db/sprint16-b-db.spec.ts:61:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-1/K-2. 文字はすべて 14px 以上（375・390・1280 幅）。入力欄の値は 16px 以上（現場は 18px 以上） (14.6s)
+  ✓  158 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (5.1s)
+  ✓  159 e2e/ops-db/sprint16-b-db.spec.ts:90:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-4. 320 幅で横スクロールがない（全画面） (4.2s)
+  ✓  160 e2e/ops-db/sprint16-b-db.spec.ts:99:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-2. 文字の大きさのトークンは rem：運航管理の画面でも本文 16px・補足 14px（現場は本文 18px）。200% で 2 倍 (1.5s)
+  ✓  161 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (945ms)
+  ✓  162 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (996ms)
+  ✓  163 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (996ms)
+  ✓  164 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.5s)
+  ✓  165 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✓  166 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✓  167 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (726ms)
+  ✓  168 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (578ms)
+  ✓  169 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (687ms)
+  ✓  170 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (986ms)
+  ✓  171 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (972ms)
+  ✓  172 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (929ms)
+  ✓  173 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (855ms)
+  ✓  174 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (800ms)
+  ✓  175 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (752ms)
+  ✓  176 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (813ms)
+  ✓  177 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (752ms)
+  ✓  178 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (826ms)
+  ✓  179 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (791ms)
+  ✓  180 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (759ms)
+  ✓  181 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (726ms)
+  ✓  182 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (641ms)
+  ✓  183 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (624ms)
+  ✓  184 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (702ms)
+  ✓  185 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 375px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (717ms)
+  ✓  186 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 390px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (739ms)
+  ✓  187 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 1280px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (920ms)
+  ✓  188 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (799ms)
+  ✓  189 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (688ms)
+  ✓  190 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (737ms)
+  ✓  191 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (841ms)
+  ✓  192 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (826ms)
+  ✓  193 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (760ms)
+  ✓  194 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (12.8s)
+  ✓  195 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (12.9s)
+  ✓  196 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (12.9s)
+  ✓  197 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (970ms)
+  ✓  198 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (842ms)
+  ✓  199 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (975ms)
+  ✓  200 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (935ms)
+  ✓  201 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  202 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  203 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (7.0s)
+  ✓  204 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.3s)
+  ✓  205 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.0s)
+  ✓  206 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.5s)
+  ✓  207 e2e/ops-db/sprint16-c-db.spec.ts:49:7 › C-2 実画面：`/` の .sb-pill-primary と `/ops` の .opx-btn-primary は同じ計算スタイル › 面・文字・高さ・角丸・太さ・縁・フォーカスの輪が一致する。丸と矢印がない (4.8s)
+  ✓  208 e2e/ops-db/sprint16-c-db.spec.ts:104:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › ホームの home-primary（390・全幅） (788ms)
+  ✓  209 e2e/ops-db/sprint16-c-db.spec.ts:114:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 日誌の journal-new-flight（390・全幅） (652ms)
+  ✓  210 e2e/ops-db/sprint16-c-db.spec.ts:122:7 › 持ち越し 1：全幅の主ボタン（ホーム「計画を開く」・日誌「飛行記録を入力」） › 計画の主画面の plan-primary-action（390・全幅） (663ms)
+  ✓  211 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (711ms)
+  ✓  212 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (809ms)
+  ✓  213 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (676ms)
+  ✓  214 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (1.0s)
+  ✓  215 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (893ms)
+  ✓  216 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (901ms)
+  ✓  217 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (823ms)
+  ✓  218 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (810ms)
+  ✓  219 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (774ms)
+  ✓  220 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (696ms)
+  ✓  221 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (682ms)
+  ✓  222 e2e/ops-db/sprint16-c-db.spec.ts:140:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (772ms)
+  ✓  223 e2e/ops-db/sprint16-c-db.spec.ts:154:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホームに今日の計画がある状態でも 1 つ（計画を開く） (779ms)
+  ✓  224 e2e/ops-db/sprint16-c-db.spec.ts:165:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 375px：見えている data-variant="primary" は 1 つで、判定するは副 (4.4s)
+  ✓  225 e2e/ops-db/sprint16-c-db.spec.ts:165:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 390px：見えている data-variant="primary" は 1 つで、判定するは副 (4.5s)
+  ✓  226 e2e/ops-db/sprint16-c-db.spec.ts:165:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 1280px：見えている data-variant="primary" は 1 つで、判定するは副 (4.6s)
+  ✓  227 e2e/ops-db/sprint16-c-db.spec.ts:191:7 › 持ち越し 2：札の記号と文字の縦の中心（±1px） › 計画の一覧の plan-state・plan-report の札 (953ms)
+  ✓  228 e2e/ops-db/sprint16-c-db.spec.ts:220:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） (10.9s)
+  ✓  229 e2e/ops-db/sprint16-c-db.spec.ts:233:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 計画の主画面（plan-digest の判定を見る・計画の確認へ） (1.5s)
+  ✓  230 e2e/ops-db/sprint16-c-db.spec.ts:282:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 登録（場所）/ops/places（place-row-name） (768ms)
+  ✓  231 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の作成（390 幅） (679ms)
+  ✓  232 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） (765ms)
+  ✓  233 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） (799ms)
+  ✓  234 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） (542ms)
+  ✓  235 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 操縦者の登録（390 幅） (671ms)
+  ✓  236 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 場所の登録（390 幅） (462ms)
+  ✓  237 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 許可・承認の登録（390 幅） (514ms)
+  ✓  238 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 事故・重大インシデントの記録（390 幅） (609ms)
+  ✓  239 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） (668ms)
+  ✓  240 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 利用者（390 幅） (690ms)
+  ✓  241 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の訂正（390 幅） (680ms)
+  ✓  242 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 通報の作業台（390 幅） (741ms)
+  ✓  243 e2e/ops-db/sprint16-d-db.spec.ts:65:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の概要（390 幅） (662ms)
+  ✓  244 e2e/ops-db/sprint16-d-db.spec.ts:93:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 機体の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.3s)
+  ✓  245 e2e/ops-db/sprint16-d-db.spec.ts:116:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 許可・承認の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.3s)
+  ✓  246 e2e/ops-db/sprint16-d-db.spec.ts:129:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 点検の入力：異常にして備考なしで保存すると、その項目の備考に誤りが示される (1.2s)
+  ✓  247 e2e/ops-db/sprint16-d-db.spec.ts:149:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 許可・承認の登録（opx-check-row）：72 以上・丸 32・チェックすると行末に「済」 (809ms)
+  ✓  248 e2e/ops-db/sprint16-d-db.spec.ts:172:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 計画の訂正・通報（チェックの丸が 32）：ラベル付きのチェックはすべて 32 の丸 (665ms)
+  ✓  249 e2e/ops-db/sprint16-d-db.spec.ts:187:7 › D-4 実画面：運航管理の読み込み中は静止したスケルトン › ops の枠の読み込み中の表示は、aria-busy と「読み込み中」を持つ静止した帯（動きなし） (195ms)
+  ✓  250 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 飛行記録の詳細 (1.1s)
+  ✓  251 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 計画の主画面 (986ms)
+  ✓  252 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 機体の登録 (763ms)
+  ✓  253 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 許可・承認の登録 (824ms)
+  ✓  254 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 場所の登録 (914ms)
+  ✓  255 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 操縦者の登録 (858ms)
+  ✓  256 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 事故・重大インシデントの記録 (928ms)
+  ✓  257 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 飛行記録の一覧（絞り込み） (983ms)
+  ✓  258 e2e/ops-db/sprint16-d-db.spec.ts:213:9 › 追加 1：文字 200%（390・430）の入れ物の切れ（16-D で対象に足した画面） › 利用者 (975ms)
+  ✓  259 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 計画の作成（エラー表示） (1.4s)
+  ✓  260 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 場所の登録（エラー表示） (1.2s)
+  ✓  261 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 機体の登録（エラー表示） (1.4s)
+  ✓  262 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 操縦者の登録（エラー表示） (1.2s)
+  ✓  263 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 許可・承認の登録（エラー表示） (1.5s)
+  ✓  264 e2e/ops-db/sprint16-d-db.spec.ts:235:9 › 追加 1b：文字 200%（390・430）の入れ物の切れ・横スクロール（検証エラーを出した状態） › 事故・重大インシデントの記録（エラー表示） (1.5s)
+  ✓  265 e2e/ops-db/sprint16-d-db.spec.ts:272:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 事故・ヒヤリハットの記録：区分・類型・ある/ない/わからないのエラーが fieldset に結ばれる (1.2s)
+  ✓  266 e2e/ops-db/sprint16-d-db.spec.ts:283:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 許可・承認の登録：種類・場所のエラーが fieldset に結ばれる (1.2s)
+  ✓  267 e2e/ops-db/sprint16-d-db.spec.ts:293:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 通報の作業台：控えの記録の確認チェックのエラーがチェックに結ばれる (1.3s)
+  ✓  268 e2e/ops-db/sprint16-d-db.spec.ts:316:7 › D-1 項目エラーの関連付け（共通の FieldError に寄せた ad hoc の項目エラー） › 計画の作成：飛行の方法・同意のまとまりのエラーが fieldset に結ばれる（保存できない入力） (1.0s)
+  ✓  269 e2e/ops-db/sprint16-f-db.spec.ts:89:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 375・390・430・360 で 4 つ（ホーム／計画／日誌／機体と書類）、高さ 64 以上・折り返さない・文字 14 以上・現在地は主色＋薄い主色の面＋aria-current・影は float＋上の 1px の線 (27.4s)
+  ✓  270 e2e/ops-db/sprint16-f-db.spec.ts:163:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430・360）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 (5.9s)
+[R-3] 320px /ops/more: 項目名 1 行、下部ナビ 73px、本文の末尾 536.265625px、下部ナビの上端 567px、余裕 30.734375px
+[R-3] 320px /ops/journal: 項目名 1 行、下部ナビ 73px、本文の末尾 536.203125px、下部ナビの上端 567px、余裕 30.796875px
+[R-3] 320px /ops: 項目名 1 行、下部ナビ 73px、本文の末尾 536.375px、下部ナビの上端 567px、余裕 30.625px
+  ✓  271 e2e/ops-db/sprint16-f-db.spec.ts:226:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › R-3 幅 320px・等倍：「機体と書類」が 2 行になっても、下部ナビの高さと本文の末尾の余裕（下部ナビの上端まで 4px 以上）を測る (2.0s)
+  ✓  272 e2e/ops-db/sprint16-f-db.spec.ts:263:7 › F-2・F-5 点検の現在地と互換 › 点検の一覧は日誌が現在地、戻りリンク「日誌」（48px 以上）。新規・詳細でも現在地は日誌 (1.4s)
+  ✓  273 e2e/ops-db/sprint16-f-db.spec.ts:280:7 › F-2・F-5 点検の現在地と互換 › F-5 既存の URL は直接開いて 200（リダイレクトなし）・見出し・現在地。?planId・timing・returnTo を保つ (4.2s)
+  ✓  274 e2e/ops-db/sprint16-f-db.spec.ts:316:7 › F-3 左メニュー（1280） › ホーム／計画／日誌（飛行記録・点検・事故・ヒヤリハット）／機体と書類（機体・操縦者・許可・承認・地点）、罫のあとに「調べる」＝判定。全役割で同じ（閲覧は全役割） (2.6s)
+  ✓  275 e2e/ops-db/sprint16-f-db.spec.ts:345:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ (5.0s)
+  ✓  276 e2e/ops-db/sprint16-f-db.spec.ts:379:7 › F-3 左メニュー（1280） › 1024 未満では左メニューは出ない（900）。現場・サインイン・権限なしでは下部ナビも左メニューも出ない (2.5s)
+[F-4 押下] a-manager 375: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 375: 押した回数 1、networkidle に達した回数 1
+  ✓  277 e2e/ops-db/sprint16-f-db.spec.ts:405:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (2.8s)
+[F-4 押下] a-manager 390: 押した回数 1、networkidle に達した回数 1
+[F-4 押下] b-manager 390: 押した回数 2、networkidle に達した回数 2
+  ✓  278 e2e/ops-db/sprint16-f-db.spec.ts:405:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回 (12.7s)
+[押下] 日誌のタブ→点検: 押した回数 1
+[押下] 左メニュー→点検: 押した回数 1
+  ✓  279 e2e/ops-db/sprint16-f-db.spec.ts:457:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回 (3.4s)
+  ✓  280 e2e/ops-db/sprint16-f-db.spec.ts:482:7 › F-6 上の状態の層 › 1 段目の画面（ホーム・計画・日誌・機体と書類）は、題 24px と補足 1 行 14px。題の文字は変えない (4.2s)
+  ✓  281 e2e/ops-db/sprint16-f-db.spec.ts:509:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ (1.8s)
+  ✓  282 e2e/ops-db/sprint16-f-db.spec.ts:509:9 › F-6 上の状態の層 › 主な操作は画面の下半分（390×844）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ (1.5s)
+  ✓  283 e2e/ops-db/sprint16-f-db.spec.ts:550:7 › F-6 上の状態の層 › 主ボタンは 1 画面 1 つ（K-8）：ホーム（予定のない日を含む）・計画の一覧・日誌・点検の一覧・機体と書類 (2.9s)
+[16-F2] ホーム 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] ホーム 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] ホーム 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] ホーム 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] ホーム 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] ホーム 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画の一覧 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画の一覧 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画の一覧 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画の一覧 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画の一覧 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画の一覧 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 日誌 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 日誌 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 日誌 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 日誌 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 日誌 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 日誌 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 機体と書類 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 機体と書類 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 機体と書類 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 機体と書類 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 機体と書類 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 機体と書類 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+  ✓  284 e2e/ops-db/sprint16-f2-db.spec.ts:113:7 › Sprint 16-F2 E2E-DB：下部ナビの 320・360・390 × 文字 100%・200% › ホーム・計画の一覧・日誌・機体と書類：横スクロール 0・ラベルの切れ 0 (4.5s)
+[16-F2] 計画作成 段 1 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画作成 段 1 320px 100%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 1 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画作成 段 1 320px 200%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 1 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画作成 段 1 360px 100%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 1 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画作成 段 1 360px 200%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 1 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画作成 段 1 390px 100%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 1 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画作成 段 1 390px 200%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 2 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画作成 段 2 320px 100%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 2 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画作成 段 2 320px 200%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 2 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画作成 段 2 360px 100%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 2 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画作成 段 2 360px 200%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 2 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画作成 段 2 390px 100%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 2 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画作成 段 2 390px 200%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 3 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画作成 段 3 320px 100%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 3 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画作成 段 3 320px 200%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 3 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画作成 段 3 360px 100%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 3 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画作成 段 3 360px 200%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 3 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画作成 段 3 390px 100%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 3 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画作成 段 3 390px 200%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 4 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画作成 段 4 320px 100%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 4 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画作成 段 4 320px 200%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 4 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画作成 段 4 360px 100%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 4 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画作成 段 4 360px 200%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 4 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画作成 段 4 390px 100%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 4 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画作成 段 4 390px 200%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 5 320px 100%: nav 320/320 items ホーム:77x64/1行 計画:77x64/1行 日誌:77x64/1行 機体と書類:77x64/1行 doc 320/320
+[16-F2] 計画作成 段 5 320px 100%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 5 320px 200%: nav 320/320 items ホーム:88x70/1行 計画:64x70/1行 日誌:64x70/1行 機体と書類:89x107/2行 doc 320/320
+[16-F2] 計画作成 段 5 320px 200%: 文書 320/320（画面 320）
+[16-F2] 計画作成 段 5 360px 100%: nav 360/360 items ホーム:80x64/1行 計画:80x64/1行 日誌:80x64/1行 機体と書類:80x64/1行 doc 360/360
+[16-F2] 計画作成 段 5 360px 100%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 5 360px 200%: nav 360/360 items ホーム:92x70/1行 計画:67x70/1行 日誌:67x70/1行 機体と書類:93x107/2行 doc 360/360
+[16-F2] 計画作成 段 5 360px 200%: 文書 360/360（画面 360）
+[16-F2] 計画作成 段 5 390px 100%: nav 390/390 items ホーム:88x64/1行 計画:88x64/1行 日誌:88x64/1行 機体と書類:88x64/1行 doc 390/390
+[16-F2] 計画作成 段 5 390px 100%: 文書 390/390（画面 390）
+[16-F2] 計画作成 段 5 390px 200%: nav 390/390 items ホーム:92x70/1行 計画:82x70/1行 日誌:82x70/1行 機体と書類:93x107/2行 doc 390/390
+[16-F2] 計画作成 段 5 390px 200%: 文書 390/390（画面 390）
+  ✓  285 e2e/ops-db/sprint16-f2-db.spec.ts:132:7 › Sprint 16-F2 E2E-DB：下部ナビの 320・360・390 × 文字 100%・200% › 計画作成の各段（①〜⑤）：下部ナビの横スクロール 0・ラベルの切れ 0。文書の幅（320・360・390 × 100%・200%）は画面を超えない (3.6s)
+  ✓  286 e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (914ms)
+  ✓  287 e2e/ops-db/sprint16-g-db.spec.ts:163:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ (779ms)
+[16-G gen3] 375x812 normal: quick bottom 709.5, nav top 739.0, margin 29.5
+  ✓  288 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (737ms)
+[16-G gen3] 390x844 normal: quick bottom 666.5, nav top 771.0, margin 104.5
+  ✓  289 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (724ms)
+  ✓  290 e2e/ops-db/sprint16-g-db.spec.ts:231:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない (760ms)
+  ✓  291 e2e/ops-db/sprint16-g-db.spec.ts:249:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない (621ms)
+  ✓  292 e2e/ops-db/sprint16-g-db.spec.ts:258:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中 (1.4s)
+  ✓  293 e2e/ops-db/sprint16-g-db.spec.ts:298:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） (1.6s)
+  ✓  294 e2e/ops-db/sprint16-g-db.spec.ts:348:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない (729ms)
+  ✓  295 e2e/ops-db/sprint16-g-db.spec.ts:375:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」 (688ms)
+[16-G gen3] 375x812 long place: quick bottom 730.5, nav top 739.0, margin 8.5
+  ✓  296 e2e/ops-db/sprint16-g-db.spec.ts:384:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 375×812 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (705ms)
+[16-G gen3] 390x844 long place: quick bottom 687.5, nav top 771.0, margin 83.5
+  ✓  297 e2e/ops-db/sprint16-g-db.spec.ts:384:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 390×844 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (763ms)
+  ✓  298 e2e/ops-db/sprint16-h1-db.spec.ts:99:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-1. 6 段・上に固定の進捗の帯（高さ 4・主色）・「2/6 日時」・progressbar の値と読み上げ。主ボタンは各段で 1 つ (2.2s)
+  ✓  299 e2e/ops-db/sprint16-h1-db.spec.ts:139:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-2. 段の移動は再読み込みなし・?step=n が履歴に積まれ、戻る・進むで入力が消えない (2.7s)
+  ✓  300 e2e/ops-db/sprint16-h1-db.spec.ts:184:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-3. 各段の「次へ」で、漏れがあれば進まず、該当の欄へフォーカス＋記号付きの 1 行のエラー（保存のときにまとめて出さない） (2.9s)
+  ✓  301 e2e/ops-db/sprint16-h1-db.spec.ts:230:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-3. サーバーの検証（422）は段 ⑤ の保存のときに、該当の段へ戻す導線と一緒に出る。直して保存できる (2.8s)
+  ✓  302 e2e/ops-db/sprint16-h1-db.spec.ts:257:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-4. 段 ⑤：①〜④の読み取りのカード＋各「修正」（48px の文字ボタン）。主ボタンは「計画を保存」1 つ。保存した値が入力と一致 (2.7s)
+  ✓  303 e2e/ops-db/sprint16-h1-db.spec.ts:309:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 端末データ：段の間の入力は端末（localStorage・sessionStorage・IndexedDB・Cache）に書かれない。入力の途中の離脱は確認し、保存の後は出さない (3.2s)
+  ✓  304 e2e/ops-db/sprint16-h1-db.spec.ts:365:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 入力が無い（何も触っていない）ときは、離れる確認を出さない (1.5s)
+  ✓  305 e2e/ops-db/sprint16-h1-db.spec.ts:386:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-7. 判定画面からの引き継ぎは各段の初期値。注記（plan-handoff-note）は段 ① に出る (2.3s)
+  ✓  306 e2e/ops-db/sprint16-h1-db.spec.ts:414:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › K-4・K-5. 各段が 320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし、主ボタンに届く (6.1s)
+  ✓  307 e2e/ops-db/sprint16-h1-db.spec.ts:444:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › 押す部品：段の操作（次へ・戻る・保存・修正・入力欄）は高さ 48px 以上、本文 16px 以上 (2.0s)
+  ✓  308 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:98:7 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1a. 段 ①〜⑤ を順に進め、各段で禁止語・限定語の走査（violationsOf）が 0 件 (2.6s)
+  ✓  309 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 1：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (1.4s)
+  ✓  310 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 2：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (1.5s)
+  ✓  311 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 3：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.0s)
+  ✓  312 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 4：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.3s)
+  ✓  313 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 5：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.1s)
+  ✓  314 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:140:7 › R-3・N-1・N-2. サーバーの 422 が段へ戻る導線で、fieldset・欄に結ばれる › R-3・N-1. 422（flags・pilotPermits）→ ③・④へ戻る。fieldset の aria-describedby に plan-err-flags・plan-err-pilotPermits、記号付きの 1 行。直すと下の誤りの 1 行も消え、保存できる (2.7s)
+  ✓  315 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:179:7 › R-3・N-1・N-2. サーバーの 422 が段へ戻る導線で、fieldset・欄に結ばれる › N-2. 422（savedPlaceId・thirdPartyOverflight）→ ① の「よく使う地点」の欄と ③ の「立入管理措置／第三者上空」の欄に、結ばれた記号付きの 1 行 (2.3s)
+  ✓  316 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (2.0s)
+  ✓  317 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.7s)
+  ✓  318 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (2.8s)
+  ✓  319 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:282:7 › N-3・N-5・N-6・N-7 › N-3. 履歴の移動で ⑤ に着いたとき、①〜④に漏れがあれば、漏れのある最初の段へ戻す (2.2s)
+  ✓  320 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:301:7 › N-3・N-5・N-6・N-7 › N-5. 各段で URL のクエリは step だけ。history.state に入力値（氏名・座標・計画名・目的・メモ）が無い (2.0s)
+  ✓  321 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:318:7 › N-3・N-5・N-6・N-7 › N-5. 引き継ぎの URL でも、各段のクエリは引き継ぎの鍵と step だけ。入力した値は URL・history.state に出ない (1.8s)
+  ✓  322 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:336:7 › N-3・N-5・N-6・N-7 › N-6. 引き継ぎの値があっても、入力の前は beforeunload が取り消されない。入力すると取り消される (1.0s)
+  ✓  323 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:350:7 › N-3・N-5・N-6・N-7 › N-7. この画面に /ops/plans/new そのもの（クエリ違いを含む）へのリンクが無い (2.0s)
+  ✓  324 e2e/ops-db/sprint16-h2-db.spec.ts:140:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1. 段 ②：今日・明日・30 分刻みの開始・飛行時間（15・30・60・90）のクイック選択。aria-pressed・押す部品 48px 以上・標準の入力欄も残る。保存した値が一致 (3.3s)
+  ✓  325 e2e/ops-db/sprint16-h2-db.spec.ts:257:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1・K-15. クイック選択はストレージに何も書かない (1.6s)
+  ✓  326 e2e/ops-db/sprint16-h2-db.spec.ts:275:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 断り書き：段 ① と ⑤ では同じ 2 つの断り書き（免責・DIPS の注記）が見え、段 ②〜④ では隠れる (2.0s)
+  ✓  327 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（375×812）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.3s)
+  ✓  328 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（390×844）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.3s)
+  ✓  329 e2e/ops-db/sprint16-h2-db.spec.ts:334:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2・H2-3. 判定の画面：総合（形と言葉）→ 項目のタイル → シートの詳細。取得時刻。主ボタンは「DIPS に出す内容を確認」1 つ (2.6s)
+  ✓  330 e2e/ops-db/sprint16-h2-db.spec.ts:505:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2・R-2・N-4. 判定が古いとき：総合の語の前に「古い判定：」、再判定が主ボタンの 1 つだけで judgement-primary は副ボタン、再判定の導線は総合の直下。再判定後は judgement-primary の 1 つだけ (2.2s)
+  ✓  331 e2e/ops-db/sprint16-h2-db.spec.ts:557:7 › Sprint 16-H2 E2E-DB：計画作成 2 › N-e. 判定が古く、再判定の権限がない（閲覧だけの）利用者：主ボタンは無し（16-L の L-4 で、judgement-primary は副ボタンに）。「判定のやり直しは、計画を変更できる人が行います」の案内が出て、再判定のボタンは出ない (1.4s)
+  ✓  332 e2e/ops-db/sprint16-h2-db.spec.ts:586:7 › Sprint 16-H2 E2E-DB：計画作成 2 › K-4・K-5・K-8. 判定の画面：320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし。シートを開いても横スクロールなし (35.1s)
+  ✓  333 e2e/ops-db/sprint16-h2-db.spec.ts:609:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4. 訂正の画面：段に分けず、節の見出し・新しい部品で載せ替え。plan-reason を残す。理由を入れて保存できる (2.0s)
+  ✓  334 e2e/ops-db/sprint16-h2-db.spec.ts:650:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4・K-4・K-5. 訂正の画面：緯度・経度の欄は 320〜1440 の幅、文字 200%（320・390）でも切れず、横スクロールなし (2.5s)
+  ✓  335 e2e/ops-db/sprint16-h2-db.spec.ts:693:7 › Sprint 16-H2 E2E-DB：計画作成 2 › N-5・H2-4. 訂正の画面：文字 200% で、緯度・経度の欄が値を全部見せる（scrollWidth <= clientWidth） (1.4s)
+  ✓  336 e2e/ops-db/sprint16-h2-db.spec.ts:717:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 422 の一覧：項目名が重ならない（「緯度：緯度は…」→「緯度は…」）。段へ戻る導線は今のまま (1.9s)
+  ✓  337 e2e/ops-db/sprint16-h2-db.spec.ts:742:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ④：許可の欄のラベル「公安委員会への通報（飛行禁止法）」は 320・文字 200% でも折り返し、文書の幅が画面を超えない (2.2s)
+  ✓  338 e2e/ops-db/sprint16-i-db.spec.ts:73:7 › 16-I 点検の入力 › I-1. 9 項目が 3 つの系統の群に 1 回ずつ入り、群の見出しに「完了数/総数」。チェック行は 72 以上、結果の選択は 56 以上、記入済みは「済」 (2.2s)
+  ✓  339 e2e/ops-db/sprint16-i-db.spec.ts:124:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） (864ms)
+  ✓  340 e2e/ops-db/sprint16-i-db.spec.ts:157:7 › 16-I 点検の入力 › I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す (2.4s)
+  ✓  341 e2e/ops-db/sprint16-i-db.spec.ts:227:7 › 16-I 点検の入力 › N-1. 「すべて正常」は未記入の項目だけを正常にする。選んだ「異常」は、群を畳んでから押しても異常のまま。全部記入済みなら何も変えない (1.5s)
+  ✓  342 e2e/ops-db/sprint16-i-db.spec.ts:252:7 › 16-I 点検の入力 › N-3. aria-live は未記入の数の 1 つだけ。群の数には読み上げ用の補い（完了 n/3 項目）があり、群の名前の近くに 14px の補足がある (898ms)
+  ✓  343 e2e/ops-db/sprint16-i-db.spec.ts:270:7 › 16-I 点検の入力 › I-2. 異常で備考なしの保存は、今のサーバーの検証の誤りが、畳んだ群の中でも開いて示される (1.2s)
+  ✓  344 e2e/ops-db/sprint16-i-db.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る（下部ナビの背後に入らない） (769ms)
+  ✓  345 e2e/ops-db/sprint16-i-db.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、390×844 の最初の画面に全体が入る（下部ナビの背後に入らない） (886ms)
+  ✓  346 e2e/ops-db/sprint16-i-db.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、1280×800 の最初の画面に全体が入る（下部ナビの背後に入らない） (990ms)
+  ✓  347 e2e/ops-db/sprint16-i-db.spec.ts:334:7 › 16-I 横スクロール 0（360 幅・文字 200%） › 360 幅：点検の入力（「異常」の行と備考を開いた状態を含む）と点検の一覧は横スクロール 0。文字 200% でも 0 で、文字の切れ 0 (2.0s)
+  ✓  348 e2e/ops-db/sprint16-i-db.spec.ts:375:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ (2.5s)
+  ✓  349 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (1.2s)
+  ✓  350 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (803ms)
+  ✓  351 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (1.5s)
+  ✓  352 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (938ms)
+  ✓  353 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (858ms)
+  ✓  354 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (854ms)
+  ✓  355 e2e/ops-db/sprint16-j-db.spec.ts:271:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (1.2s)
+  ✓  356 e2e/ops-db/sprint16-j-db.spec.ts:309:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (2.0s)
+  ✓  357 e2e/ops-db/sprint16-j-db.spec.ts:356:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (918ms)
+  ✓  358 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.4s)
+  ✓  359 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.4s)
+  ✓  360 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (2.1s)
+  ✓  361 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.7s)
+  ✓  362 e2e/ops-db/sprint16-k-db.spec.ts:237:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (6.8s)
+  ✓  363 e2e/ops-db/sprint16-k-db.spec.ts:324:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (1.1s)
+  ✓  364 e2e/ops-db/sprint16-k-db.spec.ts:362:7 › fix1 N-6 主ボタンの数え方 375×812 › 着陸後で日誌が未記入の飛行が 2 件以上：主ボタンは離陸の 1 つ、日誌へのリンクは副 (1.1s)
+  ✓  365 e2e/ops-db/sprint16-k-db.spec.ts:373:7 › fix1 N-6 主ボタンの数え方 375×812 › 日誌を書けない人（閲覧者）が、着陸した飛行のある計画を開く：主ボタンは 1 つ以下で、日誌へのリンクは主にならない (931ms)
+  ✓  366 e2e/ops-db/sprint16-k-db.spec.ts:387:7 › fix1 N-6 主ボタンの数え方 375×812 › 計画の中止後（着陸した飛行あり・日誌未記入）：主ボタンは離陸の 1 つ（押せない） (944ms)
+  ✓  367 e2e/ops-db/sprint16-k-db.spec.ts:404:7 › fix1 R-1・N-1 警告と説明の並び 375×812 › 緊急用務空域が指定されていて先読みが古い：並びは 帯 → 警告 → 説明 → header。説明は古い可能性の印と aria-describedby で結ぶ (2.2s)
+  ✓  368 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static (2.2s)
+  ✓  369 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 375 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・375px）。固定は等倍 sticky・200% static (1.8s)
+  ✓  370 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static (1.8s)
+  ✓  371 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 430 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・430px）。固定は等倍 sticky・200% static (1.9s)
+  ✓  372 e2e/ops-db/sprint16-l-db.spec.ts:181:7 › L-1 載せ替えた画面の共通の基準 › 旧い名前の class 0・主ボタンは契約の数・押す部品 48px・文字 14px 以上・320〜430 幅の横スクロール 0（375×812） (26.0s)
+  ✓  373 e2e/ops-db/sprint16-l-db.spec.ts:204:7 › L-1 載せ替えた画面の共通の基準 › 文字 200%（320・390・430）：横スクロール 0・文字の切れ 0・主ボタンに届く・下部ナビが最後を隠さない (31.7s)
+  ✓  374 e2e/ops-db/sprint16-l-db.spec.ts:217:7 › L-1・K-8 事故・ヒヤリハットの詳細 › 運航管理者：主ボタンは訂正の保存の 1 つ。報告の記録・確認の記録のフォームを開いても 1 つのまま（フォームの送信は副ボタン）。閲覧者は 0 (1.3s)
+  ✓  375 e2e/ops-db/sprint16-l-db.spec.ts:237:7 › L-1・K-8 事故・ヒヤリハットの詳細 › 事故・ヒヤリハットの記録（320 幅・文字 200%）：題と「考えられる要因」の見出しが折り返して横にはみ出さない (941ms)
+  ✓  376 e2e/ops-db/sprint16-l-db.spec.ts:246:7 › §17 申し送り（16-L） › /ops/about：文字 200% の 320・360・390・430 で横スクロール 0（メールのリンクが折り返す） (1.0s)
+  ✓  377 e2e/ops-db/sprint16-l-db.spec.ts:265:7 › §17 申し送り（16-L） › 計画の一覧：plan-report のチップ（通報：…）が 320・文字 200% で折り返し、文書の幅が 320 以内 (2.3s)
+  ✓  378 e2e/ops-db/sprint16-l-db.spec.ts:284:9 › §17 申し送り（16-L） › E-5 日誌から点検へ移ったとき（360×740） › 離陸より後の実施日時の注記は、最初の画面で下部ナビの上端の手前に全体が入る。「今」は 48px 以上で、日付・時刻の入力欄と重ならない (1.5s)
+  ✓  379 e2e/ops-db/sprint16-l-db.spec.ts:312:11 › §17 申し送り（16-L） › E-5 日誌から点検へ移ったとき（360×740） › 文字 200%・390px でも「今」は日付・時刻のラベル・入力欄と重ならず、8px 以上あく (1.1s)
+  ✓  380 e2e/ops-db/sprint16-l-db.spec.ts:312:11 › §17 申し送り（16-L） › E-5 日誌から点検へ移ったとき（360×740） › 文字 200%・430px でも「今」は日付・時刻のラベル・入力欄と重ならず、8px 以上あく (1.1s)
+  ✓  381 e2e/ops-db/sprint16-l-db.spec.ts:357:7 › L-3・L-4 判定の画面 › L-3. 判定不能の項目を含め、どのタイルのシートにも「必ず」が出ない。判定不能の文は「…で確認してください」で出る (3.1s)
+  ✓  382 e2e/ops-db/sprint16-l-db.spec.ts:380:7 › L-3・L-4 判定の画面 › L-4. 判定が古いとき：閲覧だけの利用者は主ボタン無し（judgement-primary は副ボタンで、案内が出る）。計画を変更できる運航管理者は再判定が主ボタンの 1 つ (1.6s)
+  ✓  383 e2e/ops-db/sprint16-l-db.spec.ts:403:7 › K-15 端末データ › 載せ替えた画面を開いても、localStorage・sessionStorage に新しい鍵が増えない (1.9s)
+[長さ] 主画面 375x812 draft: 2055px
+  ✓  384 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・draft）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (700ms)
+[長さ] 主画面 375x812 pending: 2055px
+  ✓  385 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・pending）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (642ms)
+[長さ] 主画面 375x812 reported: 1847px
+  ✓  386 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・reported）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (638ms)
+[長さ] 主画面 375x812 change: 2023px
+  ✓  387 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・change）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (872ms)
+[長さ] 主画面 375x812 voidedNone: 1351px
+  ✓  388 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・voidedNone）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (745ms)
+[長さ] 主画面 375x812 voidedRecorded: 1613px
+  ✓  389 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・voidedRecorded）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (742ms)
+[長さ] 主画面 1280x800 draft: 1568px
+  ✓  390 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・draft）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (780ms)
+[長さ] 主画面 1280x800 pending: 1568px
+  ✓  391 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・pending）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (727ms)
+[長さ] 主画面 1280x800 reported: 1349px
+  ✓  392 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・reported）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (873ms)
+[長さ] 主画面 1280x800 change: 1533px
+  ✓  393 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・change）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (871ms)
+[長さ] 主画面 1280x800 voidedNone: 940px
+  ✓  394 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・voidedNone）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (808ms)
+[長さ] 主画面 1280x800 voidedRecorded: 1150px
+  ✓  395 e2e/ops-db/sprint17-2-db.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・voidedRecorded）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (799ms)
+  ✓  396 e2e/ops-db/sprint17-2-db.spec.ts:210:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 中止した計画：記録が無ければ事実だけ（「通報：要」と出さない）。記録があれば取消の記録へ (922ms)
+  ✓  397 e2e/ops-db/sprint17-2-db.spec.ts:224:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-6・手順（plan-steps）：主画面から通報の内容・結果の記録・判定・確認へ、1 回の押下で移る (7.1s)
+[長さ] 作業台 375x812: 9373px
+[長さ] 項目の行 68 件の平均 63.1px
+  ✓  398 e2e/ops-db/sprint17-2-db.spec.ts:244:9 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-3・L-5・S-4（375x812）：通報の作業台の長さ・手順バー・項目の行の高さ・記録へ 1 回で移る (1.4s)
+[長さ] 作業台 1280x800: 6233px
+  ✓  399 e2e/ops-db/sprint17-2-db.spec.ts:244:9 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-3・L-5・S-4（1280x800）：通報の作業台の長さ・手順バー・項目の行の高さ・記録へ 1 回で移る (1.6s)
+  ✓  400 e2e/ops-db/sprint17-2-db.spec.ts:287:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 履歴：最新の有効な通報は常に見え、古い版は 1 回で開く (786ms)
+[長さ] 計画 375x812: 2565px
+[長さ] 日誌 375x812: 1012px
+[長さ] 判定（候補 0 件に固定）375x812: 3374px
+[長さ] 判定（候補 3 件が見える計画、候補 13 件）375x812: 3899px
+  ✓  401 e2e/ops-db/sprint17-2-db.spec.ts:296:9 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-4（375x812）：判定・計画・日誌の長さ (4.2s)
+[長さ] 計画 1280x800: 1968px
+[長さ] 日誌 1280x800: 838px
+[長さ] 判定（候補 0 件に固定）1280x800: 2133px
+[長さ] 判定（候補 3 件が見える計画、候補 16 件）1280x800: 2519px
+  ✓  402 e2e/ops-db/sprint17-2-db.spec.ts:296:9 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-4（1280x800）：判定・計画・日誌の長さ (4.3s)
+  ✓  403 e2e/ops-db/sprint17-2-db.spec.ts:350:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 高-1：通報済みの計画を中止し、後の変更の行が失敗していても(取消は手動の記録で失敗しない)、主画面に「取消が必要です」と出て、主操作は取消の記録になる(模擬アダプター) (927ms)
+  ✓  404 e2e/ops-db/sprint17-2-db.spec.ts:382:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 中-2・中-3：期限超過の警告は /report と主画面で開く操作なしに見える。状況の詳細はキーボードで開閉できる (2.5s)
+[長さ・長い計画] 375x812 変更点 4 件: 主画面 2126px / 計画 2834px / 作業台 10385px
+[長さ・長い計画] 1280x800 変更点 4 件: 主画面 1591px / 計画 2154px / 作業台 6918px
+  ✓  405 e2e/ops-db/sprint17-2-db.spec.ts:408:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 低-5：変更点が多く、通報の記録・版が多い計画でも、主画面・計画・作業台の長さを測る(上限を超えたら報告) (5.5s)
+  ✓  406 e2e/ops-db/sprint17-2-db.spec.ts:446:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › R-1：主画面の手順 ①②③・通報の結果を見る を押すと、/report の目的の節が手順バーの下に見える位置まで移る。着いた節にフォーカス (14.0s)
+  ✓  407 e2e/ops-db/sprint17-2-db.spec.ts:482:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › R-2・R-3：通報済み・取消済みの見出しは状況の言葉。中止・記録なしの /report は手順バーを出さず、事実の文言にする (2.0s)
+[長さ・実データ並み] 375x812: 計画 2792px / 日誌 1332px / 作業台 10271px
+[長さ・実データ並み] 1280x800: 計画 2112px / 日誌 1026px / 作業台 6831px
+  ✓  408 e2e/ops-db/sprint17-2-db.spec.ts:501:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-3・L-4（実データ並み）：通報の記録・版 12・飛行記録 8 件の計画でも、件数で畳んで上限内(作業台は 10,200px まで) (7.6s)
+  ✓  409 e2e/ops-db/sprint17-2-db.spec.ts:543:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 中-B：中止していない計画で取消を記録しても、通報がまだ必要なら「取消済み」と読ませず、主操作は「通報する」 (868ms)
+  ✓  410 e2e/ops-db/sprint17-2-db.spec.ts:555:7 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › 中-D：版が 6 件以上の計画を中止して読み直すと、フォーカスは新しい版の行に届く(畳んだ古い版ではない) (2.4s)
+  ✓  411 e2e/ops-db/sprint17-db.spec.ts:124:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-1・S-2・S-3・J-1・J-4：5 つの画面にタブ（現在に aria-current）。現場には出ない。判定の本体は /judgement だけ。移動先に移したものが揃う (10.0s)
+  ✓  412 e2e/ops-db/sprint17-db.spec.ts:212:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-6：旧いアンカー 8 つ（#sec-verdict ほか）で通報の主画面を開くと、新しい場所へ移り、その節までスクロールされる（ビューポート内） (7.5s)
+  ✓  413 e2e/ops-db/sprint17-db.spec.ts:241:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-5・次にやることの行き先：確認・再判定・手続きは新しい画面へ。保存直後と一覧の行は通報の主画面 (5.4s)
+  ✓  414 e2e/ops-db/sprint17-db.spec.ts:273:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › J-2（17-1 の範囲）：判定の画面を一度も開かずに、確認の依頼 → 確認 → 通報の記録（新規）→ 変更 → 取消が、主画面・/report・/overview だけで完了する (12.3s)
+  ✓  415 e2e/ops-db/sprint17-db.spec.ts:330:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › J-3：判定が古い計画でも、通報の記録は止まらない（警告の表示だけ）。判定の行は主画面に残る (2.2s)
+  ✓  416 e2e/ops-db/sprint17-db.spec.ts:354:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › R-1：壊れた % 表記の hash（#%zz・#%E0%A4%A）でも計画の画面が出る。#a%20b と # も正常 (2.6s)
+  ✓  417 e2e/ops-db/sprint18-2-db.spec.ts:87:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-1・2-8：許可・承認と飛行禁止法の手続きがある計画で、許可・承認の記録のフォームは無く、飛行禁止法の記録は今までどおり。説明文が新しい文 (2.0s)
+  ✓  418 e2e/ops-db/sprint18-2-db.spec.ts:116:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-7・2-9：証跡 ID の見出しは「飛行の方法を含む判定の証跡 ID」（値と data-testid は同じ）。公式の手続きの文は 1 つの新しい文 (2.5s)
+  ✓  419 e2e/ops-db/sprint18-2-db.spec.ts:144:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-10：運航管理の主要画面の main の本文に、申請の記録・申請支援・更新の申請の語が無い。古い公式の手続きの文も無い (6.8s)
+  ✓  420 e2e/ops-db/sprint18-3-db.spec.ts:50:9 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-5・3-2：a-manager が /ops/about を開ける。提供元の 6 項目・境界の全文・免責の 3 文が定数のとおり出る (771ms)
+  ✓  421 e2e/ops-db/sprint18-3-db.spec.ts:50:9 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-5・3-2：a-pilot が /ops/about を開ける。提供元の 6 項目・境界の全文・免責の 3 文が定数のとおり出る (824ms)
+  ✓  422 e2e/ops-db/sprint18-3-db.spec.ts:50:9 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-5・3-2：a-viewer が /ops/about を開ける。提供元の 6 項目・境界の全文・免責の 3 文が定数のとおり出る (682ms)
+  ✓  423 e2e/ops-db/sprint18-3-db.spec.ts:86:7 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-5：利用者メニューの「このアプリについて」（user-menu-about）と、登録の末尾の行（more-link-about）から 1 回の操作で移れる。押す部品は 48px 以上 (2.5s)
+  ✓  424 e2e/ops-db/sprint18-3-db.spec.ts:113:7 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-6：boundary-registration が機体・操縦者の一覧と通報の作業台にある。通報の主画面（第一画面）には足さない (1.7s)
+  ✓  425 e2e/ops-db/sprint18-3-db.spec.ts:143:7 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-7：inspection-disclaimer が点検の入力の先頭にあり、文が DISCLAIMER_INSPECTION。操縦者でも出る (1.2s)
+  ✓  426 e2e/ops-db/sprint18-3-db.spec.ts:166:7 › Sprint 18-3 E2E-DB：このアプリについて・境界の 1 行・点検の免責 › 3-7：現場モードの点検の段（点検がまだのとき）にも inspection-disclaimer が出る。文は DISCLAIMER_INSPECTION (740ms)
+  ✓  427 e2e/ops-db/sprint18-3-wording-db.spec.ts:129:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › A：ホーム・計画の一覧・計画の各画面（通報の記録あり・なし、許可・承認と飛行禁止法の手続き） (20.8s)
+  ✓  428 e2e/ops-db/sprint18-3-wording-db.spec.ts:152:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › B：点検・飛行記録・日誌・事故・ヒヤリハット (9.2s)
+  ✓  429 e2e/ops-db/sprint18-3-wording-db.spec.ts:168:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › C：登録（機体・操縦者・許可・承認・地点・利用者・登録・このアプリについて） (13.0s)
+  ✓  430 e2e/ops-db/sprint18-3-wording-db.spec.ts:195:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › D：圏外の殻（5 つ）・マニフェスト・操縦者と閲覧者のこのアプリについて (3.9s)
+  ✓  431 e2e/ops-db/sprint19-1c-db.spec.ts:75:7 › Sprint 19-1c E2E-DB：多角形の通報の整形 › C1-6. 多角形 1 つ：作業台の経路は「多角形・頂点 3」で、API 形式（参考）に Polygon の GeoJSON（開いた環）。経路の案内は手動のまま (1.3s)
+  ✓  432 e2e/ops-db/sprint19-1c-db.spec.ts:93:7 › Sprint 19-1c E2E-DB：多角形の通報の整形 › 円 1 つ：従来どおり Circle（半径は properties）。出力は変わらない (1.2s)
+  ✓  433 e2e/ops-db/sprint19-1c-db.spec.ts:100:7 › Sprint 19-1c E2E-DB：多角形の通報の整形 › 範囲が 2 つ：報告画面はエラーにならず案内を出す。経路の GeoJSON は出さず、新規・変更の記録はできない（API は 409 route_multiple_areas） (1.4s)
+
+  433 passed (29.2m)
+exit 0
