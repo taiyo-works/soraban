@@ -1507,6 +1507,41 @@ export function InspectionForm({
       >,
     }));
 
+  const draftBar = !isEdit ? (
+        <DraftBar
+          restored={restored}
+          canDiscard={restored || inspectionHasInput(v)}
+          onDiscard={discardDraft}
+          staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
+          refreshNote={refreshDt ? `実施日時を今（${refreshDt}）に入れ直しました。` : null}
+        />
+  ) : null;
+  // 16-I I-3：日誌から移ったとき（離陸の日時が渡されたとき）は、実施日時の欄を先頭にして、その直下に注記を置く。375×812 の最初の画面に注記の全体が入るよう、
+  // 下書きの案内は最初の群（機体・実施者・日時・場所）の後ろに置く（下書きの扱いは同じ。置き場所だけ）。
+  const dateFirst = flightTakeoffAt !== undefined && !isEdit;
+
+  const dateBlock = (
+    <DateTimeInput
+          label="実施時刻"
+          nowLabel="今"
+          testId="inspected"
+          date={v.date}
+          time={v.time}
+          error={errors["inspectedAt"]}
+          stale={staleDt !== null}
+          onChange={(d, t) => {
+            setStaleDt(null);
+            setRefreshDt(null);
+            // 手で直した日時も「今」で入れた日時も、利用者が入れた日時として保つ
+            setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
+          }}
+    />
+  );
+  const takeoffNote =
+    flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
+      <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
+    ) : null;
+
   return (
     <form
       ref={formRef}
@@ -1517,17 +1552,11 @@ export function InspectionForm({
       className="opx-form flex flex-col gap-6"
       aria-label={isEdit ? "日常点検の訂正" : "日常点検の入力"}
     >
-      {!isEdit ? (
-        <DraftBar
-          restored={restored}
-          canDiscard={restored || inspectionHasInput(v)}
-          onDiscard={discardDraft}
-          staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
-          refreshNote={refreshDt ? `実施日時を今（${refreshDt}）に入れ直しました。` : null}
-        />
-      ) : null}
+      {!dateFirst ? draftBar : null}
 
       <Step title="機体・実施者・日時・場所">
+        {dateFirst ? dateBlock : null}
+        {dateFirst ? takeoffNote : null}
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
           <select className={`${inputClass} min-h-12`} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
             <option value="">選んでください</option>
@@ -1549,25 +1578,7 @@ export function InspectionForm({
             ))}
           </select>
         </Field>
-        <DateTimeInput
-          label="実施時刻"
-          nowLabel="今"
-          testId="inspected"
-          date={v.date}
-          time={v.time}
-          error={errors["inspectedAt"]}
-          stale={staleDt !== null}
-          onChange={(d, t) => {
-            setStaleDt(null);
-            setRefreshDt(null);
-            // 手で直した日時も「今」で入れた日時も、利用者が入れた日時として保つ
-            setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
-          }}
-        />
-        {/* 16-I I-3：実施日時の欄のすぐ下（日誌から移ったとき、最初の画面で全体が読める位置） */}
-        {flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
-          <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
-        ) : null}
+        {!dateFirst ? dateBlock : null}
         <ChoiceGroup legend="区分">
           {(["pre_flight", "post_flight"] as const).map((t) => (
             <label key={t} className={choiceClass(v.timing === t)}>
@@ -1586,6 +1597,8 @@ export function InspectionForm({
           keys={{ name: "placeName", lat: "latitude", lng: "longitude", acc: "accuracyM" }}
         />
       </Step>
+
+      {dateFirst ? draftBar : null}
 
       <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1619,7 +1632,7 @@ export function InspectionForm({
                       <li
                         key={key}
                         className={`flex min-h-[72px] flex-col gap-2 rounded-sb-m border-l-[6px] bg-sb-sunken px-3 py-3 ${abnormal ? "border-sb-v-no-fg" : "border-transparent"}`}
-                        data-testid={`inspection-item-${key}`}
+                        data-testid={`inspection-item-${it.key}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <span className="flex min-w-0 items-baseline gap-2 font-bold text-sb-ink">
@@ -1663,7 +1676,7 @@ export function InspectionForm({
                               <input
                                 type="radio"
                                 name={`item-${key}`}
-                                className={`${choiceRadioClass} ${r === "abnormal" ? "sb-radio-no" : ""}`}
+                                className={r === "abnormal" ? "sb-check sb-check-no" : "sb-check"}
                                 checked={st.result === r}
                                 onChange={() => setItem(key, { result: r })}
                               />

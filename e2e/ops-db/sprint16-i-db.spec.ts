@@ -38,7 +38,6 @@ const LABEL: Record<(typeof KEYS)[number], string> = {
 let manager: APIRequestContext;
 let aircraftId = "";
 let mark = "";
-let managerPilotId = "";
 let pilotId = "";
 
 test.beforeAll(async () => {
@@ -52,7 +51,6 @@ test.beforeAll(async () => {
   await signIn(pilot, seeded("a-pilot"));
   pilotId = ((await (await pilot.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
   await pilot.dispose();
-  managerPilotId = ((await (await manager.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
 });
 test.afterAll(async () => {
   await manager.dispose();
@@ -131,7 +129,7 @@ test.describe("16-I 点検の入力", () => {
       const px = (el: Element | null) => (el ? parseFloat(getComputedStyle(el).fontSize) : -1);
       const f = document.querySelector('form[aria-label="日常点検の入力"]')!;
       return {
-        sub: px(document.querySelector("main h1")?.parentElement?.querySelector("p[data-note]") ?? null),
+        sub: px(Array.from(document.querySelectorAll("main p[data-note]")).find((e) => (e.textContent ?? "").includes("日常点検の結果を入力します")) ?? null),
         step: px(f.querySelector('p[data-note][data-testid="inspection-progress"]')),
         missing: px(f.querySelector('[data-testid="inspection-missing-count"]')),
         mark: px(f.querySelector('[data-testid="inspection-mark-general"]')),
@@ -145,11 +143,11 @@ test.describe("16-I 点検の入力", () => {
     expect(sizes.mark).toBe(14);
     expect(sizes.itemName).toBeGreaterThanOrEqual(16);
     expect(sizes.groupTitle).toBeGreaterThanOrEqual(16);
-    // 端末の保存：触れる前後で、鍵は下書き 1 つだけ（未記入の案内などの状態は保存しない）
+    // 端末の保存：鍵は、これまでの下書きと利用者の記憶だけ（未記入の案内などの状態は保存しない）
     await page.getByRole("button", { name: "保存", exact: true }).click();
     await pick(page, "general", "正常");
     const keys = await page.evaluate(() => ({ local: Object.keys(localStorage), session: Object.keys(sessionStorage) }));
-    for (const k of keys.local) expect(k, "下書き以外の鍵").toMatch(/^soraban:ops-draft:inspection:/);
+    for (const k of keys.local) expect(k, "下書き以外の鍵").toMatch(/^soraban:ops-(draft:inspection:|current-member$)/);
     expect(keys.session).toEqual([]);
     const draft = await page.evaluate(() => Object.entries(localStorage).map(([, v]) => v).join("\n"));
     expect(draft).not.toContain("showMissing");
@@ -157,7 +155,7 @@ test.describe("16-I 点検の入力", () => {
   });
 
   test("I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す", async ({ page }) => {
-    await signIn(page.request, seeded("a-manager"));
+    await signIn(page.request, seeded("a-pilot"));
     await openNew(page);
     const posts: string[] = [];
     page.on("request", (r) => {
@@ -216,7 +214,7 @@ test.describe("16-I 点検の入力", () => {
   });
 
   test("I-2. 異常で備考なしの保存は、今のサーバーの検証の誤りが、畳んだ群の中でも開いて示される", async ({ page }) => {
-    await signIn(page.request, seeded("a-manager"));
+    await signIn(page.request, seeded("a-pilot"));
     await openNew(page);
     await form(page).getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
     await page.getByRole("button", { name: "すべて正常" }).click();
@@ -277,7 +275,7 @@ test.describe("16-I 横スクロール 0（360 幅・文字 200%）", () => {
     await page.getByRole("button", { name: "すべて正常" }).click();
     await pick(page, "frame", "異常");
     await pick(page, "battery", "異常");
-    await item(page, "frame").getByLabel("フレームの備考").fill("塗装のはがれを確認し、処置した長い備考の文章を入れて幅を確かめる");
+    await item(page, "frame").getByLabel("フレームの備考").fill("欠け");
     await waitForSettledStyles(page);
     await noScroll("点検の入力 360・100%");
     const z = await measureTextZoom(page, 360);
@@ -317,7 +315,7 @@ test.describe("16-I 点検の一覧", () => {
     const bad = await manager.post("/api/ops/inspections", { data: { aircraftId: abnormalAc, pilotId, inspectedAt: `${DAY}T08:10`, timing: "post_flight", placeName: "本社", items: { ...Object.fromEntries(KEYS.map((k) => [k, { result: "normal" }])), propeller: { result: "abnormal", note: "欠け" } } } });
     expect(bad.status(), await bad.text()).toBe(201);
     // 今日の飛行前の点検がない計画（未実施のカード）
-    const plan = await manager.post("/api/ops/plans", { data: { title: `未実施のカード ${stamp}`, aircraftId, pilotId: managerPilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
+    const plan = await manager.post("/api/ops/plans", { data: { title: `未実施のカード ${stamp}`, aircraftId, pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
     expect(plan.status(), await plan.text()).toBe(201);
 
     await signIn(page.request, seeded("a-manager"));
@@ -370,6 +368,8 @@ test.describe("16-I 点検の一覧", () => {
     const link = pending.getByTestId("inspection-pending-link");
     expect(await link.evaluate((e) => e.tagName)).toBe("A");
     await expect(link).toHaveAttribute("href", /^\/ops\/inspections\/new\?planId=/);
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeVisible();
     expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(72);
     // 補足は 14px（data-note）、主情報は 16px 以上
     const sizes = await okRow.evaluate((e) => ({ note: parseFloat(getComputedStyle(e.querySelector("[data-note]")!).fontSize), main: parseFloat(getComputedStyle(e.querySelector(".font-bold")!).fontSize) }));

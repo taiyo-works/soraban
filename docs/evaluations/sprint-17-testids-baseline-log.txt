@@ -7,3 +7,4 @@
 2026-11-24T23:02:11.167Z	2209	16-H2 判定の画面の 3 層（judgement-total・judgement-fetched-at・judgement-tile*・judgement-sheet*・judgement-primary・judgement-next・plan-judgement-full・plan-permit-candidates-more）、段 2 のクイック選択（plan-quick*）、訂正の節（plan-edit-*）を足した。消したものは無い
 2026-11-25T00:50:14.881Z	2217	16-H2 差し戻し 1：判定のタイル・シートの識別子 4 つ
 2026-11-25T00:51:27.300Z	2219	16-H2 差し戻し 2：閲覧だけの利用者向けの案内 plan-stale-readonly-note
+2026-11-25T02:42:48.267Z	2228	16-I 点検の群（inspection-group-*）・記入の印（inspection-mark-*）・進み具合（inspection-progress）・未記入の数（inspection-missing-count）を足した。消した識別子は 0

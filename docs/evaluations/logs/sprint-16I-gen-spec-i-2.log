@@ -1,0 +1,71 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-i-db.spec.ts:73:7 › 16-I 点検の入力 › I-1. 9 項目が 3 つの系統の群に 1 回ずつ入り、群の見出しに「完了数/総数」。チェック行は 72 以上、結果の選択は 56 以上、記入済みは「済」 (1.8s)
+  ✘  2 e2e/ops-db/sprint16-i-db.spec.ts:124:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） (918ms)
+  ✓  3 e2e/ops-db/sprint16-i-db.spec.ts:157:7 › 16-I 点検の入力 › I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す (2.0s)
+  ✓  4 e2e/ops-db/sprint16-i-db.spec.ts:216:7 › 16-I 点検の入力 › I-2. 異常で備考なしの保存は、今のサーバーの検証の誤りが、畳んだ群の中でも開いて示される (928ms)
+  ✓  5 e2e/ops-db/sprint16-i-db.spec.ts:231:7 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る (706ms)
+  ✓  6 e2e/ops-db/sprint16-i-db.spec.ts:262:7 › 16-I 横スクロール 0（360 幅・文字 200%） › 360 幅：点検の入力（「異常」の行と備考を開いた状態を含む）と点検の一覧は横スクロール 0。文字 200% でも 0 で、文字の切れ 0 (1.9s)
+  ✘  7 e2e/ops-db/sprint16-i-db.spec.ts:303:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ (1.2s)
+
+
+  1) e2e/ops-db/sprint16-i-db.spec.ts:124:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） 
+
+    Error: 下書き以外の鍵
+
+    expect(received).toMatch(expected)
+
+    Expected pattern: /^soraban:ops-draft:inspection:/
+    Received string:  "soraban:ops-current-member"
+
+      148 |     await pick(page, "general", "正常");
+      149 |     const keys = await page.evaluate(() => ({ local: Object.keys(localStorage), session: Object.keys(sessionStorage) }));
+    > 150 |     for (const k of keys.local) expect(k, "下書き以外の鍵").toMatch(/^soraban:ops-draft:inspection:/);
+          |                                                      ^
+      151 |     expect(keys.session).toEqual([]);
+      152 |     const draft = await page.evaluate(() => Object.entries(localStorage).map(([, v]) => v).join("\n"));
+      153 |     expect(draft).not.toContain("showMissing");
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:150:54
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-i-db.spec.ts:303:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ 
+
+    TypeError: Cannot read properties of null (reading 'height')
+
+      369 |     expect(await link.evaluate((e) => e.tagName)).toBe("A");
+      370 |     await expect(link).toHaveAttribute("href", /^\/ops\/inspections\/new\?planId=/);
+    > 371 |     expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(72);
+          |                                        ^
+      372 |     // 補足は 14px（data-note）、主情報は 16px 以上
+      373 |     const sizes = await okRow.evaluate((e) => ({ note: parseFloat(getComputedStyle(e.querySelector("[data-note]")!).fontSize), main: parseFloat(getComputedStyle(e.querySelector(".font-bold")!).fontSize) }));
+      374 |     expect(sizes.note).toBe(14);
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:371:40
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/sprint16-i-db.spec.ts:124:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） 
+    e2e/ops-db/sprint16-i-db.spec.ts:303:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ 
+  5 passed (14.5s)

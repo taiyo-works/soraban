@@ -1,0 +1,213 @@
+
+Running 7 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-i-db.spec.ts:75:7 › 16-I 点検の入力 › I-1. 9 項目が 3 つの系統の群に 1 回ずつ入り、群の見出しに「完了数/総数」。チェック行は 72 以上、結果の選択は 56 以上、記入済みは「済」 (1.5s)
+  ✘  2 e2e/ops-db/sprint16-i-db.spec.ts:126:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） (857ms)
+  ✘  3 e2e/ops-db/sprint16-i-db.spec.ts:159:7 › 16-I 点検の入力 › I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す (32.0s)
+  ✓  4 e2e/ops-db/sprint16-i-db.spec.ts:218:7 › 16-I 点検の入力 › I-2. 異常で備考なしの保存は、今のサーバーの検証の誤りが、畳んだ群の中でも開いて示される (951ms)
+  ✘  5 e2e/ops-db/sprint16-i-db.spec.ts:233:7 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る (891ms)
+  ✘  6 e2e/ops-db/sprint16-i-db.spec.ts:264:7 › 16-I 横スクロール 0（360 幅・文字 200%） › 360 幅：点検の入力（「異常」の行と備考を開いた状態を含む）と点検の一覧は横スクロール 0。文字 200% でも 0 で、文字の切れ 0 (1.5s)
+  ✘  7 e2e/ops-db/sprint16-i-db.spec.ts:305:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ (205ms)
+
+
+  1) e2e/ops-db/sprint16-i-db.spec.ts:75:7 › 16-I 点検の入力 › I-1. 9 項目が 3 つの系統の群に 1 回ずつ入り、群の見出しに「完了数/総数」。チェック行は 72 以上、結果の選択は 56 以上、記入済みは「済」 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   32,
+    -   32,
+    +   24,
+    +   24,
+      ]
+
+       97 |     }
+       98 |     const radioSize = await item(page, "general").locator("input[type=radio]").first().evaluate((el) => [el.getBoundingClientRect().width, el.getBoundingClientRect().height]);
+    >  99 |     expect(radioSize).toEqual([32, 32]);
+          |                       ^
+      100 |     // 未記入は文字で示し、選ぶと「済」（正常）・「異常」（記号と文字）。完了数が増える
+      101 |     await expect(page.getByTestId("inspection-mark-general")).toHaveText("未記入");
+      102 |     await pick(page, "general", "正常");
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:99:23
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-959a7-72-以上、結果の選択は-56-以上、記入済みは「済」/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-959a7-72-以上、結果の選択は-56-以上、記入済みは「済」/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の入力-I-959a7-72-以上、結果の選択は-56-以上、記入済みは「済」/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の入力-I-959a7-72-以上、結果の選択は-56-以上、記入済みは「済」/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-i-db.spec.ts:126:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 14
+    Received: -1
+
+      140 |       };
+      141 |     });
+    > 142 |     expect(sizes.sub).toBe(14);
+          |                       ^
+      143 |     expect(sizes.step).toBe(14);
+      144 |     expect(sizes.missing).toBe(14);
+      145 |     expect(sizes.mark).toBe(14);
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:142:23
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の入力-I-08cf3-te）。端末に新しく保存しない（下書きの鍵は今のまま）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-i-db.spec.ts:159:7 › 16-I 点検の入力 › I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/ops\/inspections\/[0-9a-f-]{36}$/
+    Received string:  "http://127.0.0.1:3300/ops/inspections/new?aircraftId=b4ebccee-0530-4f14-9bbe-953663719ebd"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 30000ms
+        63 × locator resolved to <html lang="ja" class="noto_sans_jp_b82836c-module__S2N0dG__variable plus_jakarta_sans_c7f3dfe7-module__C3RHnW__variable h-full antialiased">…</html>
+           - unexpected value "http://127.0.0.1:3300/ops/inspections/new?aircraftId=b4ebccee-0530-4f14-9bbe-953663719ebd"
+
+
+      212 |     await expect(page.getByTestId("inspection-missing-count")).toHaveText("9 項目すべて記入済み");
+      213 |     await save.click();
+    > 214 |     await expect(page).toHaveURL(/\/ops\/inspections\/[0-9a-f-]{36}$/);
+          |                        ^
+      215 |     expect(posts).toHaveLength(1);
+      216 |   });
+      217 |
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:214:24
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-890ca-未完了の群を開き、そこへスクロールしてフォーカスを移す/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-890ca-未完了の群を開き、そこへスクロールしてフォーカスを移す/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の入力-I-890ca-未完了の群を開き、そこへスクロールしてフォーカスを移す/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の入力-I-890ca-未完了の群を開き、そこへスクロールしてフォーカスを移す/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-i-db.spec.ts:233:7 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る 
+
+    Error: 注記の下端 1130.515625 は 812 以内
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 812
+    Received:    1130.515625
+
+      252 |     const scrollY = await page.evaluate(() => window.scrollY);
+      253 |     expect(scrollY).toBe(0);
+    > 254 |     expect(n.y + n.height, `注記の下端 ${n.y + n.height} は 812 以内`).toBeLessThanOrEqual(812);
+          |                                                                ^
+      255 |     // 実施日時を離陸より前に直すと注記は消える（今までと同じ）
+      256 |     await form(page).getByLabel("実施時刻", { exact: true }).fill("10:50");
+      257 |     await expect(note).toHaveCount(0);
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:254:64
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-a9009-すぐ下にあり、375×812-の最初の画面に全体が入る/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の入力-I-a9009-すぐ下にあり、375×812-の最初の画面に全体が入る/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の入力-I-a9009-すぐ下にあり、375×812-の最初の画面に全体が入る/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の入力-I-a9009-すぐ下にあり、375×812-の最初の画面に全体が入る/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/ops-db/sprint16-i-db.spec.ts:264:7 › 16-I 横スクロール 0（360 幅・文字 200%） › 360 幅：点検の入力（「異常」の行と備考を開いた状態を含む）と点検の一覧は横スクロール 0。文字 200% でも 0 で、文字の切れ 0 
+
+    Error: 入れ物の切れ
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "input[input]「」 幅 184<1086",
+    + ]
+
+      284 |     expect(z.scrollWidth, `点検の入力 360・200%（${z.scrollWidth} > ${z.clientWidth}）`).toBeLessThanOrEqual(z.clientWidth);
+      285 |     expect(z.clipped, "文字の切れ").toEqual([]);
+    > 286 |     expect(z.clippedContainers, "入れ物の切れ").toEqual([]);
+          |                                           ^
+      287 |     expect(z.unscaled, "200% で大きくならない文字").toEqual([]);
+      288 |     await page.evaluate(() => {
+      289 |       document.documentElement.style.fontSize = "";
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:286:43
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-横スクロール--eb4e6-ロール-0。文字-200-でも-0-で、文字の切れ-0/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-横スクロール--eb4e6-ロール-0。文字-200-でも-0-で、文字の切れ-0/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-横スクロール--eb4e6-ロール-0。文字-200-でも-0-で、文字の切れ-0/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-横スクロール--eb4e6-ロール-0。文字-200-でも-0-で、文字の切れ-0/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/ops-db/sprint16-i-db.spec.ts:305:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ 
+
+    Error: {"error":"invalid_input","fields":{"pilotId":"操縦者を選んでください"},"codes":{"pilotId":"required"}}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      319 |     // 今日の飛行前の点検がない計画（未実施のカード）
+      320 |     const plan = await manager.post("/api/ops/plans", { data: { title: `未実施のカード ${stamp}`, aircraftId, pilotId: managerPilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
+    > 321 |     expect(plan.status(), await plan.text()).toBe(201);
+          |                                              ^
+      322 |
+      323 |     await signIn(page.request, seeded("a-manager"));
+      324 |     await page.goto("/ops/inspections");
+        at /home/user/soraban/e2e/ops-db/sprint16-i-db.spec.ts:321:46
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/error-context.md
+
+    Error Context: test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-i-db-16-I-点検の一覧-I-31cee-安全、異常あり＝危険）。主ボタンは「点検を記録」1-つ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    e2e/ops-db/sprint16-i-db.spec.ts:75:7 › 16-I 点検の入力 › I-1. 9 項目が 3 つの系統の群に 1 回ずつ入り、群の見出しに「完了数/総数」。チェック行は 72 以上、結果の選択は 56 以上、記入済みは「済」 
+    e2e/ops-db/sprint16-i-db.spec.ts:126:7 › 16-I 点検の入力 › I-1. 補足は 14px、本文は 16px 以上（補足は data-note）。端末に新しく保存しない（下書きの鍵は今のまま） 
+    e2e/ops-db/sprint16-i-db.spec.ts:159:7 › 16-I 点検の入力 › I-2. 未完了でも保存は押せ、「未記入 n 項目」を文字で出す。押すと送らずに、畳んだ最初の未完了の群を開き、そこへスクロールしてフォーカスを移す 
+    e2e/ops-db/sprint16-i-db.spec.ts:233:7 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る 
+    e2e/ops-db/sprint16-i-db.spec.ts:264:7 › 16-I 横スクロール 0（360 幅・文字 200%） › 360 幅：点検の入力（「異常」の行と備考を開いた状態を含む）と点検の一覧は横スクロール 0。文字 200% でも 0 で、文字の切れ 0 
+    e2e/ops-db/sprint16-i-db.spec.ts:305:7 › 16-I 点検の一覧 › I-4. 一覧のカード（72 以上・全体が押せる・見出し→主情報→補足）と状態ラベル（点検済み＝安全、異常あり＝危険）。主ボタンは「点検を記録」1 つ 
+  1 passed (46.3s)

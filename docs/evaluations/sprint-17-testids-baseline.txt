@@ -449,7 +449,10 @@ inspection-count
 inspection-detail
 inspection-disclaimer
 inspection-empty
+inspection-group-${g.key}
+inspection-item-${firstMissing}
 inspection-list
+inspection-missing-count
 inspection-new
 inspection-pending
 inspection-pending-cannot
@@ -459,6 +462,7 @@ inspection-pending-list
 inspection-pending-row
 inspection-pending-scope
 inspection-pending-title
+inspection-progress
 inspection-records
 inspection-row
 inspection-select
@@ -1309,7 +1313,10 @@ prop: inspection-count
 prop: inspection-detail
 prop: inspection-disclaimer
 prop: inspection-empty
+prop: inspection-group-${g.key}
+prop: inspection-item-${firstMissing}
 prop: inspection-list
+prop: inspection-missing-count
 prop: inspection-new
 prop: inspection-pending
 prop: inspection-pending-cannot
@@ -1320,6 +1327,7 @@ prop: inspection-pending-list
 prop: inspection-pending-row
 prop: inspection-pending-scope
 prop: inspection-pending-title
+prop: inspection-progress
 prop: inspection-records
 prop: inspection-row
 prop: inspection-select
@@ -2152,6 +2160,7 @@ workspace-tabs
 式: `incident-kind-${k}`
 式: `incident-report-channel-${c}`
 式: `inspection-item-${it.key}`
+式: `inspection-mark-${key}`
 式: `inspection-result-${it.key}`
 式: `inspection-timing-${t ?? "all"}`
 式: `journal-tab-${key}`
