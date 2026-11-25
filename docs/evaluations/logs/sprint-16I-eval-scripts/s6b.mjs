@@ -1,0 +1,11 @@
+import { launch, signedCtx } from "./lib.mjs";
+const AC = "9c29615d-b3d2-415c-8d29-2e990530bc19";
+const b = await launch();
+const ctx = await signedCtx(b, "a-pilot", { viewport: { width: 320, height: 780 }, hasTouch: true });
+const page = await ctx.newPage();
+await page.goto(`/ops/inspections/new?aircraftId=${AC}`);
+await page.getByRole("form", { name: "日常点検の入力" }).waitFor();
+await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+await page.waitForTimeout(600);
+console.log(await page.evaluate(() => ({ s: document.documentElement.scrollWidth, over: [...document.body.querySelectorAll("*")].filter(e => e.scrollWidth > e.clientWidth + 1 && e.clientWidth>0).map(e => `${e.tagName}${e.dataset.testid?"["+e.dataset.testid+"]":""}.${(e.className+"").slice(0,40)} sw${e.scrollWidth} cw${e.clientWidth}`).slice(0,10), maxR: Math.max(...[...document.body.querySelectorAll("*")].map(e=>e.getBoundingClientRect().right)) })));
+await b.close();
