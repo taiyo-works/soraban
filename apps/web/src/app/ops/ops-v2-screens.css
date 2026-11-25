@@ -987,3 +987,34 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     position: static;
   }
 }
+
+/* 16-L の E-5：日誌から点検へ移ったとき（実施日時が先頭。data-date-first）、狭い画面で注記の全体を固定の下部ナビの手前に収める。
+ * 「今」のボタンを「実施時刻」の見出しの行の右に置き（押す部品は 48px のまま）、見出しと間隔を詰める。文言・順序・data-testid は変えない。 */
+@media (max-width: 639px) {
+  .opx-form[data-date-first] > fieldset {
+    padding-top: 12px;
+  }
+  .opx-form[data-date-first] > fieldset > legend {
+    margin-bottom: 8px;
+    padding-block: 0;
+  }
+  .opx-form[data-date-first] > .opx-step {
+    gap: 8px;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] {
+    position: relative;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > legend {
+    min-height: 48px;
+    margin-bottom: 4px;
+    padding-right: 4.5rem;
+  }
+  /* fieldset の中の絶対配置は、見出し（legend）の下から数える。見出しの行（48px）と下の余白（4px）の分だけ上へ */
+  .opx-form[data-date-first] [data-testid="inspected"] > div > button:first-child {
+    position: absolute;
+    top: -52px;
+    right: 0;
+    width: auto;
+    min-width: 4rem;
+  }
+}

@@ -50,6 +50,9 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
   const total = judgementTotal(verdict, stale);
   // 古くて再判定できるときは、再判定が主ボタン。DIPS に出す内容の確認は副ボタン（主ボタンはいつも 1 つ）
   const rejudgeIsPrimary = stale && updatable;
+  // 16-L の L-4：古い判定のとき、DIPS に出す内容の確認は主にしない。再判定できる人は再判定が主、閲覧だけの人は主ボタン無し（再判定は押せず、
+  // 古い判定のまま DIPS へ進む導線を強めないため。サーバーの権限は変えない＝表示だけ）
+  const forwardIsPrimary = !stale;
   const fetchedAt = formatJst(new Date(j.checkedAt));
   const staleIds = new Set(snapshot.staleSources.map((x) => x.id));
   const datasets = snapshot.datasets.map((d) => datasetInfo(d, staleIds.has(d.id)));
@@ -151,8 +154,8 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             <Link
               prefetch={false}
               href={`/ops/plans/${plan.id}`}
-              {...(rejudgeIsPrimary ? {} : { "data-variant": "primary" })}
-              className={`${rejudgeIsPrimary ? buttonOutlineBrandClass : buttonPrimaryClass} self-start`}
+              {...(forwardIsPrimary ? { "data-variant": "primary" } : {})}
+              className={`${forwardIsPrimary ? buttonPrimaryClass : buttonOutlineBrandClass} self-start`}
               data-testid="judgement-primary"
             >
               DIPS に出す内容を確認

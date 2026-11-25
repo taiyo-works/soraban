@@ -38,7 +38,7 @@ export default async function InspectionNewPage({
   const initialTiming = sp.timing === "post_flight" ? ("post_flight" as const) : undefined;
   const flightTakeoffAt = typeof sp.takeoffAt === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(sp.takeoffAt) ? sp.takeoffAt : undefined;
   return (
-    <main className="flex flex-col gap-6">
+    <main className="flex flex-col gap-3 sm:gap-6">
       <PageHeader title="日常点検の入力" back={{ href: "/ops/inspections", label: "点検の一覧" }}>
         <p data-note="" className="text-sb-ink-3">飛行の前（または後）に行った日常点検の結果を入力します。</p>
         {/* 点検の免責（Sprint 18-3）。入力の先頭 */}
