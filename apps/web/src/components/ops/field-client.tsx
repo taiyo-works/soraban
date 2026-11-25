@@ -108,11 +108,11 @@ import { FIELD_BACK } from "./ops-nav-model";
 // 見た目は ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*。意味は枠の形（実線・破線・太さ）と記号・文字が担い、色は補助。
 const BTN = "opx-btn w-full";
 // 主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（16-K K2-4）：飛行中は「着陸」、それ以外（離陸前・着陸後）は「離陸」。日誌へのリンクは副（着陸後も主は離陸。§17-20）。
-// 確認・保存・リンクの押す部品はすべて副（BTN）。選択中は BTN_SEL（主色の面。data-variant は付けない）。
+// 確認・保存・リンクの押す部品はすべて副（BTN）。選択中は BTN_SEL（薄い面＋墨の太い縁＋太字＋◉。主色の面にしない：主ボタンと見分ける。16-K designer N-3）。
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
-// 選択中・現在地の面（主色。右端の丸と矢印は付けない：押すと進む意味になるため）
-const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+// 選択中・現在地の面。塗りは主ボタンだけのものにして、選択は縁・太字・記号（◉・▶）で示す（色なしでも見分けられる）
+const BTN_SEL = "opx-btn opx-btn-sel opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 const BTN_FLIGHT_SIZE = "min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
 const BTN_FLIGHT = `${BTN_PRIMARY} ${BTN_FLIGHT_SIZE}`;
@@ -1277,26 +1277,28 @@ export function FieldClient({
   const expiryHours = clockMs > 0 ? expiringSoon(outbox, clockMs) : null;
   const dayTime = (iso: string): string => `${jstDate(new Date(iso)).slice(5).replace("-", "/")} ${jstTime(new Date(iso))}`;
   // 状態の帯（16-K K2-3）：320・375 幅で「古い可能性」が出ても高さ 100px 以下。帯には短い印と文字（！古い可能性）だけを置き、説明は帯の下の
-  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25（帯は p・li・dd ではなく、字の大きさ 18px は保つ）。
+  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25・上下の余白 0・値（日時）は途中で折り返さない（16-K designer N-2：4 行で約 92px。字の大きさ 18px は保つ。帯は p・li・dd ではない）。
   const bandEl = (
     <>
       <section
         aria-label="接続と送信の状況"
-        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-0.5 text-lg leading-[1.25]"
+        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-0 text-lg leading-[1.25]"
         data-testid="field-status-band"
         data-online={online ? "true" : "false"}
       >
-        <span className="font-bold" data-testid="field-status-connection">
+        <span className="whitespace-nowrap font-bold" data-testid="field-status-connection">
           {online ? "● 接続あり" : "× 接続なし（圏外）"}
         </span>
-        <span className="font-bold" data-testid="field-status-unsent" data-count={unsent}>
+        <span className="whitespace-nowrap font-bold" data-testid="field-status-unsent" data-count={unsent}>
           送信待ち {unsent} 件
         </span>
-        <span data-testid="field-status-saved">最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}</span>
-        <span data-testid="field-status-prefetch">
-          先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}
+        <span className="whitespace-nowrap" data-testid="field-status-saved">
+          最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}
+        </span>
+        <span className="flex flex-wrap items-center gap-x-1" data-testid="field-status-prefetch">
+          <span className="whitespace-nowrap">先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}</span>
           {bundleStale ? (
-            <strong className="ml-1 whitespace-nowrap" data-testid="field-status-prefetch-stale" aria-describedby="field-status-prefetch-stale-help">
+            <strong className="whitespace-nowrap" data-testid="field-status-prefetch-stale" aria-describedby="field-status-prefetch-stale-help">
               ！古い可能性
             </strong>
           ) : null}

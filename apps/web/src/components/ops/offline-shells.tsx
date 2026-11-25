@@ -27,8 +27,8 @@ import { currentMember, listBundles, loadBundle } from "./field-store";
 // 各画面が <FieldModeMark /> で <html data-mode="field"> を付けている間だけ効く（Sprint 16-K K2-1）。主ボタン（data-variant="primary"）は 1 状態に 1 つ。
 const BTN = "opx-btn w-full";
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
-// 選択中の面（主色。主ボタンではない：data-variant を付けない）
-const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+// 選択中の面（薄い面＋墨の太い縁＋太字＋◉。主色の面にしない：主ボタンだけが主色。16-K designer N-3）
+const BTN_SEL = "opx-btn opx-btn-sel opx-btn-field w-full";
 const BOX = "opx-box";
 const BOX_NOTE = "opx-box opx-box-note";
 const BOX_WARN = "opx-box opx-box-warn";

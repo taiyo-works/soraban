@@ -32,8 +32,8 @@ import { IncidentFactNotice, IncidentOfficialNotice, IncidentSafetyFirst } from 
 const BTN = "opx-btn w-full";
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
-// 選択中の面（主色。右端の丸と矢印は付けない：押すと進む意味になるため）
-const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+// 選択中の面（薄い面＋墨の太い縁＋太字＋◉。主色の面にしない：「記録する」だけが主色。16-K designer N-3）
+const BTN_SEL = "opx-btn opx-btn-sel opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 // 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく
 const BTN_RECORD = `${BTN_PRIMARY} min-h-16 text-xl`;

@@ -242,9 +242,18 @@
 .opx-band:hover {
   background: var(--sb-hover);
 }
-/* 面だけで見せる主ボタン（選択中・現在地）。16-C 以降は主ボタン自体に丸と矢印がないので、クラス名だけ残す */
+/* 面だけで見せる主ボタン（旧：選択中・現在地）。16-K 以降、選択中は .opx-btn-sel を使う。クラス名だけ残す */
 .opx-btn-primary.opx-btn-flat {
   justify-content: center;
+}
+/* 選択中・現在地（16-K designer N-3）：主色の面は主ボタンだけのものにする。選択は「薄い面（--sb-hover）＋墨の太い縁（--sb-mark-w）＋太字」で示し、
+ * 記号（◉・▶）は画面側が付ける。縁が太くなった分だけ横の余白を減らして、選んでも文字の位置・折り返しが変わらない。layer の外に置き、.opx-btn（layer）に勝たせる。 */
+.opx-btn.opx-btn-sel {
+  padding-inline: calc(20px - (var(--sb-mark-w) - 1px));
+  border: var(--sb-mark-w) solid var(--sb-ink);
+  background: var(--sb-hover);
+  color: var(--sb-ink);
+  font-weight: 700;
 }
 /* 常にカードの行（狭い画面でも広い画面でも。判定の履歴） */
 .opx-row.opx-row-card {
