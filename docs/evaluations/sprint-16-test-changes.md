@@ -616,3 +616,12 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 - `e2e/ops-db/sprint16-k-db.spec.ts`（4 件）：K2-3（320×740・375×812。古い可能性が出た圏外・接続ありの帯が 100px 以下、説明は帯の下、新しい先読みでは出ない）、K2-1・K2-2・K2-4（離陸前・飛行中・着陸後・日誌後の現場と、圏外の点検・日誌・今日・行えない・保存されていない計画で、現場モードの印・主ボタン 1 つ・旧い class 0・押す部品 56・本文 18・7:1・日差しの模擬 4.5・動き 0・横スクロール 0）、新しい版の知らせ。
 - `apps/web/src/components/ops/field-offline-tokens.test.ts`（11 件）：旧い名前・色の直書き 0、全画面の `FieldModeMark`、主ボタンの置き場所、帯の構造。
 - 旧コード（1daf5fd）に戻して確かめた：単体 11 件中 7 件が落ちる。E2E は 4 件すべてが落ちる（帯は「！古い可能性」でなく全文・主ボタン 17・`pwa-update` に `opx-box` なし。旧い `offline-shells.tsx` だけを戻すと、圏外の現場に現場モードの印がなく落ちる）。ログ `docs/evaluations/logs/sprint-16K-gen-*-oldcode.log`。
+
+### 16-K 差し戻し 1 以降の変更（fix1・designer・fix designer。2026-11-25）
+
+- **書き換えた既存の検査**: なし（既存 E2E の期待値は変えていない。12c・12e・14・15・16-c の 74 件と `sprint16-k-db` の既存 8 件が、そのまま通る）。
+- **fix1（671befc）**: `sprint16-k-db` に 4 件を足した（計 8 件）。主ボタンの数え方（着陸後で日誌が未記入が 2 件以上・閲覧者・計画の中止後）と、緊急用務空域＋古い先読みの並び（帯 → 警告 → 説明 → header、`aria-describedby`・`role="status"`）。単体 `field-offline-tokens.test.ts` は、`data-variant` を持つのが離着陸の 2 つだけ（日誌へのリンクは副。§17-20）・説明は帯の外・帯の印に `aria-describedby`、の形に合わせた（足した検査で、弱めていない）。
+- **designer（b95bb03）**: 選択中の見た目を主色の面から縁・太字・記号（◉／○）に変え、`.opx-btn-sel` を足した（`opx-btn-flat` は名前だけ残す）。主色の面を持つ要素の検査は、E2E の `primaryState` の `stray`（`data-variant` の無い `.opx-btn-primary`）で守る。帯は行間 1.25・上下の余白 0 に。
+- **fix designer（R-1）**: `sprint16-k-db` に 4 件（幅 320・375・390・430）を足した（計 12 件）。文字 200% で、帯が新しい（接続あり）・古い（圏外）・古いまま接続ありの 3 状態すべてについて、帯の中身が画面からはみ出さない・帯の `scrollWidth ≤ clientWidth`・日時が途中で割れない（`getClientRects` が 1 片）・固定が等倍で `sticky`・200% で `static`（意見 8）を確かめる。375・390・430 は文書の `scrollWidth ≤ clientWidth` も確かめる。**320 だけは文書の `scrollWidth` を除外する**：帯と無関係の既存の幅（見出し・「ホームへ戻る」で 368px。K-5 の範囲外の幅。基準でも同じ）が残るため。帯に起因するはみ出しは、上の「帯の中身が画面からはみ出さない」で 320 でも確かめる。K2-3 の既存の検査は変えず、等倍の `sticky` と、帯 100px 以下（320・375。測定 94px）を同じ 4 件が確かめる。旧コード（d3338e9）に戻すと 4 件すべてが落ちる（帯の `field-status-prefetch` が 32〜527px で画面の外。ログ `docs/evaluations/logs/sprint-16K-fix-designer-spec-oldcode.log`）。
+- 単体・`testids --check`：変更なし（識別子の増減 0、消えた 0。単体 3101 件通過）。
+

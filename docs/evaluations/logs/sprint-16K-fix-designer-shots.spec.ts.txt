@@ -1,0 +1,53 @@
+import fs from "node:fs";
+import { expect, request as pwRequest, test, type Page } from "@playwright/test";
+const BASE = `http://127.0.0.1:${process.env.E2E_OPS_PORT ?? 3300}`;
+const OUT = "docs/evaluations/screenshots/sprint-16K-fix-designer";
+const REC = "docs/evaluations/logs/sprint-16K-fix-designer-measure.jsonl";
+const DAY = "2027-01-05";
+const at = (hms: string) => new Date(`${DAY}T${hms}+09:00`);
+test.use({ serviceWorkers: "allow", hasTouch: true });
+const measure = async (page: Page, w: number, zoom: "100" | "200", state: string) => {
+  await page.setViewportSize({ width: w, height: 740 });
+  await page.evaluate((z) => { document.documentElement.style.fontSize = z === "200" ? "200%" : ""; }, zoom);
+  await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+  await page.waitForTimeout(150);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const m = await page.evaluate(() => {
+    const de = document.documentElement;
+    const b = document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!;
+    return { sw: de.scrollWidth, cw: de.clientWidth, bandH: b.getBoundingClientRect().height, pos: getComputedStyle(b).position, pad: getComputedStyle(b).paddingTop, fs: getComputedStyle(b).fontSize, lines: b.getBoundingClientRect().height / parseFloat(getComputedStyle(b).lineHeight) };
+  });
+  await page.screenshot({ path: `${OUT}/${w}-${zoom}-${state}.png` });
+  await page.evaluate(() => window.scrollTo(0, 350));
+  await page.waitForTimeout(100);
+  const top = await page.evaluate(() => document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!.getBoundingClientRect().top);
+  fs.appendFileSync(REC, JSON.stringify({ w, zoom, state, ...m, topAfterScroll350: top }) + "\n");
+  await page.evaluate(() => { document.documentElement.style.fontSize = ""; window.scrollTo(0, 0); });
+};
+for (const w of [320, 375, 390, 430]) {
+  test(`shots ${w}`, async ({ page, context }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width: w, height: 740 });
+    const m = await pwRequest.newContext({ baseURL: BASE });
+    const si = { data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" } };
+    await m.post("/api/test-auth/sign-in", si);
+    await page.request.post("/api/test-auth/sign-in", si);
+    const mark = `JUS${Date.now().toString(36).toUpperCase()}`.slice(0, 20);
+    const a = (await (await m.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "現場試験機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } })).json()) as { id: string };
+    const p = (await (await m.post("/api/ops/pilots", { data: { fullName: "現場 試験", hasLicense: false } })).json()) as { id: string };
+    const pl = (await (await m.post("/api/ops/plans", { data: { title: "撮影の試験", aircraftId: a.id, pilotId: p.id, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "x", placeName: "y", latitude: 35.434238, longitude: 133.380508, flags: [] } })).json()) as { id: string };
+    await page.clock.setFixedTime(at("11:56:00"));
+    await page.goto(`/ops/plans/${pl.id}/field`);
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 60_000 });
+    await page.waitForTimeout(3000);
+    for (const z of ["100", "200"] as const) await measure(page, w, z, "fresh-online");
+    await context.setOffline(true);
+    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+    await page.reload();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    await expect(page.getByTestId("field-status-prefetch-stale")).toBeVisible();
+    for (const z of ["100", "200"] as const) await measure(page, w, z, "stale-offline");
+  });
+}
