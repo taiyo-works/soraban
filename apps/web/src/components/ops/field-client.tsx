@@ -1240,7 +1240,7 @@ export function FieldClient({
         ③ 日誌
       </h2>
       {state.pendingJournal.length > 0 && view.canJournal ? (
-        state.pendingJournal.map((f, i) => (
+        state.pendingJournal.map((f) => (
           <a
             key={f.takeoffEventId}
             href={journalHref(f)}
@@ -1277,26 +1277,31 @@ export function FieldClient({
   const expiryHours = clockMs > 0 ? expiringSoon(outbox, clockMs) : null;
   const dayTime = (iso: string): string => `${jstDate(new Date(iso)).slice(5).replace("-", "/")} ${jstTime(new Date(iso))}`;
   // 状態の帯（16-K K2-3）：320・375 幅で「古い可能性」が出ても高さ 100px 以下。帯には短い印と文字（！古い可能性）だけを置き、説明は帯の下の
-  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25・上下の余白 0・値（日時）は途中で折り返さない（16-K designer N-2：4 行で約 92px。字の大きさ 18px は保つ。帯は p・li・dd ではない）。
+  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25・上下の余白 1px・値（日時）は途中で折り返さない（ラベルと日時は別の塊。16-K designer N-2・fix R-1：4 行で約 94px。字の大きさ 18px は保つ。帯は p・li・dd ではない）。固定（sticky）は CSS の .field-band（文字が大きいときは外す）。
   const bandEl = (
     <>
       <section
         aria-label="接続と送信の状況"
-        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-0 text-lg leading-[1.25]"
+        className="field-band z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-px text-lg leading-[1.25]"
         data-testid="field-status-band"
         data-online={online ? "true" : "false"}
       >
-        <span className="whitespace-nowrap font-bold" data-testid="field-status-connection">
+        <span className="font-bold" data-testid="field-status-connection">
           {online ? "● 接続あり" : "× 接続なし（圏外）"}
         </span>
-        <span className="whitespace-nowrap font-bold" data-testid="field-status-unsent" data-count={unsent}>
-          送信待ち {unsent} 件
+        <span className="font-bold" data-testid="field-status-unsent" data-count={unsent}>
+          送信待ち <span className="whitespace-nowrap">{unsent} 件</span>
         </span>
-        <span className="whitespace-nowrap" data-testid="field-status-saved">
-          最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}
+        <span data-testid="field-status-saved">
+          最後に保存 <span className="whitespace-nowrap">{meta.savedAt ? dayTime(meta.savedAt) : "—"}</span>
         </span>
         <span className="flex flex-wrap items-center gap-x-1" data-testid="field-status-prefetch">
-          <span className="whitespace-nowrap">先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}</span>
+          {/* ラベルと日時は別の塊（文字 200% でラベルと日時の間で折り返せる。日時は nowrap で途中で割らない。ラベルは nowrap にしない：
+              文字 200%・320 幅は余白を引くと 256px で、ラベル（約 290px）が画面の外に出るため、そこだけ文字の間で折り返す。
+              接続・送信待ち・最後に保存も同じで、折り返さないのは値（日時・件数）だけ。16-K fix designer R-1） */}
+          <span>
+            <span>先読みの最終更新</span> <span className="whitespace-nowrap">{bundle ? dayTime(bundle.fetchedAt) : "なし"}</span>
+          </span>
           {bundleStale ? (
             <strong className="whitespace-nowrap" data-testid="field-status-prefetch-stale" aria-describedby="field-status-prefetch-stale-help">
               ！古い可能性
@@ -1341,7 +1346,7 @@ export function FieldClient({
             {plan.timeLabel}
           </p>
           <p data-testid="field-plan-who">
-            <span className="sb-num">{plan.registrationMark}</span>（{plan.modelName}）／<span className="whitespace-nowrap">{plan.pilotName}</span>
+            <span className="sb-num">{plan.registrationMark}</span>（{plan.modelName}）／<span>{plan.pilotName}</span>
           </p>
         </div>
         <div className="flex flex-wrap gap-3">

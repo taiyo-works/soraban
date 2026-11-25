@@ -433,3 +433,91 @@ test.describe("fix1 R-1・N-1 警告と説明の並び 375×812", () => {
     await manager.dispose();
   });
 });
+
+// 16-K 差し戻し 1（fix designer）R-1：文字 200%（html の文字の大きさ）で、帯の「先読みの最終更新 日時」が横スクロール・日時の切れを起こさない。
+// 帯が古い状態（圏外・13 時間後）と新しい状態（接続あり）の両方で測る。固定（sticky）は、等倍で sticky、文字 200% で static（意見 8）。
+// 320 は帯と無関係の既存の幅（見出し・「計画へ戻る」で 368px。K-5 の範囲外の幅）が残るので、文書の scrollWidth ではなく「帯の中身が帯と画面からはみ出さない」で確かめる。
+type ZoomProbe = { sw: number; cw: number; bandH: number; bandSw: number; bandCw: number; bandPos: string; overflow: string[]; wide: string[]; dateRects: number; dateText: string };
+const probeZoomBand = async (page: Page, width: number): Promise<ZoomProbe> => {
+  const orig = page.viewportSize()!;
+  await page.setViewportSize({ width, height: orig.height });
+  await waitForSettledStyles(page);
+  try {
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+    return await page.evaluate(() => {
+      const de = document.documentElement;
+      const band = document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!;
+      const overflow: string[] = [];
+      for (const el of Array.from(band.querySelectorAll<HTMLElement>("*"))) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && (r.right > de.clientWidth + 0.5 || r.left < -0.5)) overflow.push(`${el.getAttribute("data-testid") ?? el.tagName.toLowerCase()} ${r.left.toFixed(1)}〜${r.right.toFixed(1)}（画面 ${de.clientWidth}）`);
+      }
+      const wide: string[] = [];
+      for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.right > de.clientWidth + 0.5) wide.push(`${el.getAttribute("data-testid") ?? el.tagName.toLowerCase()}${el.className && typeof el.className === "string" ? "." + el.className.split(" ")[0] : ""} →${r.right.toFixed(0)}`);
+      }
+      const date = (document.querySelector<HTMLElement>('[data-testid="field-status-prefetch"] > span > span:last-child') ?? document.querySelector<HTMLElement>('[data-testid="field-status-prefetch"] > span'))!;
+      return {
+        sw: de.scrollWidth,
+        cw: de.clientWidth,
+        bandH: band.getBoundingClientRect().height,
+        bandSw: band.scrollWidth,
+        bandCw: band.clientWidth,
+        bandPos: getComputedStyle(band).position,
+        overflow,
+        wide: wide.slice(0, 8),
+        dateRects: date.getClientRects().length,
+        dateText: date.textContent ?? "",
+      };
+    });
+  } finally {
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "";
+    });
+    await page.setViewportSize(orig);
+  }
+};
+
+for (const w of [320, 375, 390, 430]) {
+  test.describe(`fix R-1 文字 200% の帯 ${w}`, () => {
+    test.use({ viewport: { width: w, height: 800 }, hasTouch: true });
+
+    test(`帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・${w}px）。固定は等倍 sticky・200% static`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      const check = async (state: string): Promise<void> => {
+        const band = page.getByTestId("field-status-band");
+        // 等倍：sticky、帯は 100px 以下（320・375）
+        await waitForSettledStyles(page);
+        expect(await band.evaluate((e) => getComputedStyle(e).position), `${w} ${state} 等倍の帯`).toBe("sticky");
+        if (w <= 375) expect((await band.boundingBox())!.height, `${w} ${state} 等倍の帯の高さ`).toBeLessThanOrEqual(100);
+        const z = await probeZoomBand(page, w);
+        test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+        expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+        expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+        expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+        expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        if (w >= 375) expect(z.sw, `${w} ${state} 文字 200%：現場の横スクロール（画面より右にはみ出す要素 ${z.wide.join(" / ")}）`).toBeLessThanOrEqual(z.cw);
+      };
+      await expect(page.getByTestId("field-status-prefetch-stale")).toHaveCount(0);
+      await check("新しい先読み・接続あり");
+      await setOnline(page, context, false);
+      await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+      await page.reload();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      await expect(page.getByTestId("field-status-prefetch-stale")).toBeVisible();
+      await check("古い先読み・圏外");
+      await setOnline(page, context, true);
+      await expect(page.getByTestId("field-status-connection")).toContainText("接続あり");
+      await check("古い先読み・接続あり");
+      await manager.dispose();
+    });
+  });
+}

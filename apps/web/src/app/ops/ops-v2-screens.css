@@ -970,3 +970,20 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   text-decoration-color: var(--sb-primary);
   text-underline-offset: 3px;
 }
+
+/* 現場の状態の帯（16-K fix designer・意見 8）。等倍では画面の上端に固定する。文字が大きいとき（html の文字が 200% 前後）は帯が 2 倍近い高さになり
+ * 画面の 4 割を超えるので、固定を外して流す（読む・押す場所を奪わない）。判定は rem の幅：コンテナクエリの rem は html の文字の大きさに従う
+ * （メディアクエリの rem は従わない）。16rem は、等倍では 256px（どの端末の幅も超える＝常に固定）、文字 200% では 512px、150% では 384px。 */
+[data-testid="field-root"] {
+  container-type: inline-size;
+  container-name: field;
+}
+.field-band {
+  position: sticky;
+  top: 0;
+}
+@container field (max-width: 16rem) {
+  .field-band {
+    position: static;
+  }
+}
