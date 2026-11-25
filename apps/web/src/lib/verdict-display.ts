@@ -140,6 +140,12 @@ export const VERDICT_SECTION_TITLE = {
   items: "規制ごとの判定（元の判定 → 適用した許可 → 判定）",
 } as const;
 
+/**
+ * 画面の見出し（飛行ごとの義務の節）。16-M の M-5：「必ず」は不変条件 3 の禁止語なので、画面では言い換える。
+ * PDF（pdf-verdict.tsx。Sprint 17 の範囲）は VERDICT_SECTION_TITLE.duties のまま。
+ */
+export const DUTIES_HEADING_SCREEN = "飛行の前後に行うこと";
+
 /** 段取り表の列（画面・PDF 共通）。 */
 export const PROCEDURE_COLUMNS = ["手続き", "出す先", "期限", "法的な重さ"] as const;
 

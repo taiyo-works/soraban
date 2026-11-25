@@ -2055,3 +2055,64 @@ a.sb-card-list:has([data-result="voided"]):hover {
   font-weight: 700;
   color: var(--sb-ink);
 }
+
+/* ===== 公開の `/`（Sprint 16-M） ===== */
+
+/* 判定の行：判定の帯のカード（.sb-card-state）と同じ見た目（状態の面＋左端 6px の帯）を、一覧の行（li＝.sb-vcard）と、
+ * 狭い幅の表の行（tr＝.sb-vrow。768px 以上は表の行のまま）に使う。状態は data-state（danger・warn・info・safe。判定不能は無指定＝帯なし）。
+ * 帯は角丸に沿って切る。面の中の補足の文字は、面の上でも 7:1 を保つ濃さ（--sb-ink-2）に上げる。 */
+.sb-vcard {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-state-face, var(--sb-surface));
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-vcard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--sb-state-mark, var(--sb-edge));
+}
+@media (max-width: 767px) {
+  .sb-vrow {
+    position: relative;
+    overflow: hidden;
+    background: var(--sb-state-face, var(--sb-surface));
+    box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+  }
+  .sb-vrow::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: var(--sb-state-mark, var(--sb-edge));
+  }
+}
+.sb-vcard[data-state="safe"], .sb-vrow[data-state="safe"] { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); }
+.sb-vcard[data-state="warn"], .sb-vrow[data-state="warn"] { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); }
+.sb-vcard[data-state="danger"], .sb-vrow[data-state="danger"] { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); }
+.sb-vcard[data-state="info"], .sb-vrow[data-state="info"] { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); }
+@media (max-width: 767px) {
+  .sb-vrow [class*="text-sb-ink-3"] { color: var(--sb-ink-2); }
+}
+.sb-vcard [class*="text-sb-ink-3"] { color: var(--sb-ink-2); }
+
+/* 短い選択肢を並べる所（空域・飛行の方法）は 56px まで詰める（押す部品の下限 48 は守る。ops の .opx-check-dense と同じ値）。16-M */
+.sb-check-row.sb-check-dense:has(input.sb-check) {
+  min-height: 56px;
+  padding-block: 8px;
+}
+/* 結論のカード：判定の段の行は本文の行の高さを詰める（補足の 1.5。総合の語を出す画面。16-M） */
+.sb-card-state .sb-v-sub {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.sb-card-state .sb-v-total {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+.sb-card-state .sb-lead {
+  line-height: 1.6;
+}

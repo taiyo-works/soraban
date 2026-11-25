@@ -137,6 +137,18 @@ export const VERDICT_KEY: Readonly<Record<ItemVerdict, VerdictKey>> = {
   unknown: "unknown",
 };
 
+/**
+ * 判定の段 → 判定の帯のカード（.sb-card-state）の状態。飛行不可＝危険、要手続き＝注意、手続き済み＝情報、手続き不要＝安全。
+ * 判定不能は帯なし（未確認の灰。undefined）。16-M。
+ */
+export const VERDICT_STATE: Readonly<Record<ItemVerdict, Exclude<StatusTone, "flying"> | undefined>> = {
+  no_fly: "danger",
+  needs_procedure: "warn",
+  procedure_done: "info",
+  no_procedure: "safe",
+  unknown: undefined,
+};
+
 const MARK_PATHS: Record<VerdictKey, ReactNode> = {
   no: (
     <>

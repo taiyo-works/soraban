@@ -10,6 +10,7 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import type { CurrentLocationCandidate } from "@/lib/current-location";
+import { tidyEngineText } from "@/lib/field-message";
 import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import { createRightClickPicker } from "@/lib/right-click";
 import { BASE_ZONE_COLORS, BASE_ZONE_LAYER_IDS, RED_HATCH_IMAGE_ID, makeHatchImage } from "./regulation-map-zones";
@@ -697,7 +698,7 @@ export function RegulationMap({
                     />
                     <span>
                       <strong className="font-bold">{z.label}</strong>
-                      <span className="text-sb-ink-2">：{z.note}</span>
+                      <span className="text-sb-ink-2">：{tidyEngineText(z.note)}</span>
                     </span>
                   </li>
                 ))}
@@ -760,7 +761,7 @@ export function RegulationMap({
                 ))}
                 {g.notes.map((n) => (
                   <li key={n.label} className="text-sm leading-relaxed text-sb-ink-2" data-testid="layer-no-map-row">
-                    <span className="font-bold text-sb-ink">{n.label}</span>：{n.note}
+                    <span className="font-bold text-sb-ink">{n.label}</span>：{tidyEngineText(n.note)}
                   </li>
                 ))}
               </ul>

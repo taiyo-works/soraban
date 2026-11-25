@@ -57,6 +57,7 @@ import {
 } from "@/lib/history";
 import { RegulationCard } from "./regulation-card";
 import { VerdictSummary } from "./verdict-summary";
+import { judgementTotal } from "@/lib/judgement-total";
 import { VERDICT_CHECK_FAILED_NOTE, VERDICT_LABEL } from "@/lib/verdict-display";
 import {
   buildPilotPermits,
@@ -1267,7 +1268,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
   return (
     <div className="sb-check-grid">
       {/* ─── INPUT FORM ───────────────────────────────── */}
-      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-3.5" data-testid="input-block">
+      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-3" data-testid="input-block">
         {/* 住所または緯度・経度（入力欄と 2 つのボタンは最初の画面に入る） */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
@@ -1375,6 +1376,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             verdict={screenVerdict}
             pending={verdictPending}
             failed={conclusionFailed}
+            {...(screenVerdict !== undefined && !verdictPending && !conclusionFailed ? { total: judgementTotal(screenVerdict, false) } : {})}
             {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
             onRetry={retryVerdict}
             meta={
@@ -1490,23 +1492,23 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 </div>
               </div>
 
-              {/* audit meta */}
-              <dl data-note="" className="sb-block-soft grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-sb-ink-3 sm:grid-cols-4">
-                <div className="col-span-2 flex flex-col gap-0.5">
+              {/* audit meta（項目名と値を 1 行に並べる。幅が足りない値は次の行へ折り返す） */}
+              <dl data-note="" className="sb-block-soft flex flex-col gap-y-1.5 text-sm text-sb-ink-3 sm:grid sm:grid-cols-4 sm:gap-x-6 sm:gap-y-3">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:col-span-2 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">証跡 ID</dt>
                   <dd className="sb-num text-sm text-sb-ink" data-testid="evidence-id">
                     {result.evidenceId}
                   </dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">確からしさ</dt>
                   <dd className="text-sm text-sb-ink">{CONFIDENCE_LABEL[result.overallConfidence]}</dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">判定の版</dt>
                   <dd className="sb-num text-sm text-sb-ink">{result.engineVersion}</dd>
                 </div>
-                <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-4">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:col-span-4 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">判定日時</dt>
                   <dd className="text-sm text-sb-ink">{new Date(result.checkedAt).toLocaleString("ja-JP")}</dd>
                 </div>
@@ -1535,7 +1537,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
           <label htmlFor="combined-input" className="sb-label">
             座標または Google マップの URL
           </label>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex items-center gap-2">
             <input
               id="combined-input"
               type="text"
@@ -1564,9 +1566,9 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 });
               }}
               placeholder="例: 35.4278, 133.3314 ／ Google マップの URL（https://maps.google.com/...@35.4283,133.3306,15z）"
-              className={`${fieldClass} sb-num`}
+              className={`${fieldClass} sb-num min-w-0 flex-1`}
             />
-            <button type="button" onClick={() => applyCombined(combined)} disabled={combined.trim().length === 0} className="sb-text-btn">
+            <button type="button" onClick={() => applyCombined(combined)} disabled={combined.trim().length === 0} className="sb-text-btn shrink-0">
               反映
             </button>
           </div>
@@ -1704,7 +1706,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 const isAuto = autoAirspaceFlags.includes(flag);
                 const checked = effectiveAirspaceFlags.includes(flag);
                 return (
-                  <label key={flag} data-testid={`airspace-${flag}`} className={`sb-check-row ${checked ? "is-on" : ""}`}>
+                  <label key={flag} data-testid={`airspace-${flag}`} className={`sb-check-row sb-check-dense ${checked ? "is-on" : ""}`}>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -1760,7 +1762,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             {FLIGHT_METHOD_FLAGS.map((flag) => {
               const checked = methodFlags.includes(flag);
               return (
-                <label key={flag} className={`sb-check-row ${checked ? "is-on" : ""}`}>
+                <label key={flag} className={`sb-check-row sb-check-dense ${checked ? "is-on" : ""}`}>
                   <input type="checkbox" checked={checked} onChange={() => toggleMethodFlag(flag)} className="sb-check" />
                   <span className="text-sm font-bold leading-snug text-sb-ink">{SPECIFIC_FLIGHT_FLAG_LABEL[flag]}</span>
                 </label>
@@ -1823,7 +1825,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   type="button"
                   onClick={() => selectPreset(preset)}
                   title={preset.hint}
-                  className="sb-check-row h-full w-full flex-col !gap-1 text-left"
+                  className="sb-check-row h-full w-full flex-col !gap-0 !py-1.5 text-left"
                 >
                   <span className="flex items-center gap-2">
                     <span className="sb-tag !min-h-6 !px-2  font-bold text-sb-ink">{preset.group}</span>

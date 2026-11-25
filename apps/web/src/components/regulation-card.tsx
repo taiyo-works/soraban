@@ -9,9 +9,10 @@ import {
   type RegulationWithStatus,
   type VerdictItem,
 } from "@soraban/regulations";
-import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_EDGE, VERDICT_LABEL } from "@/lib/verdict-display";
+import { PROVISIONAL_ITEM_NOTE, baseStatusDisplay, regulationBaseLabel, isModelAircraftDidExcluded, regulationNoteDisplay, MODEL_AIRCRAFT_DID_DETAIL_LABEL, EXCLUDED_BY_WEIGHT_HEADING, EXCLUDED_HEADING, statusBeforeExclusionLine, legalTierLabel, VERDICT_LABEL } from "@/lib/verdict-display";
+import { tidyEngineText } from "@/lib/field-message";
 import { TierGauge } from "./verdict-mark";
-import { Disclosure, VerdictTag } from "./ui/sb-parts";
+import { Disclosure, VERDICT_STATE, VerdictTag } from "./ui/sb-parts";
 
 type Props = {
   readonly regulation: RegulationWithStatus;
@@ -92,7 +93,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       data-testid={`regulation-card-${regulation.id}`}
       data-status={regulation.status}
       data-verdict={verdictItem?.verdict ?? ""}
-      className="sb-item-card flex flex-col gap-1.5"
+      className="sb-item-card flex flex-col gap-1"
     >
       <div className="flex items-center gap-2">
         <span
@@ -112,7 +113,8 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         <p
           data-testid="regulation-verdict-line"
           data-note=""
-          className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-sb-m border border-l-4 border-sb-rule py-1.5 pl-2 pr-2 text-sm text-sb-ink-2 ${provisional ? "border-l-sb-rule" : VERDICT_EDGE[verdictItem.verdict]}`}
+          {...(!provisional && VERDICT_STATE[verdictItem.verdict] ? { "data-state": VERDICT_STATE[verdictItem.verdict] } : {})}
+          className="sb-vcard flex flex-wrap items-center gap-x-1.5 gap-y-1 !rounded-sb-m py-1.5 pl-[18px] pr-2 text-sm text-sb-ink-2"
         >
           <span>元の判定 {baseStatusDisplay(verdictItem)}</span>
           <span aria-hidden>→</span>
@@ -151,7 +153,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
       ) : null}
       <p className="border-l border-sb-rule pl-3 text-sb-ink-3">
         <span data-note="" className="sb-eyebrow">この地点</span>{" "}
-        <span className="text-sb-ink-2">{regulationNoteDisplay(regulation)}</span>
+        <span className="text-sb-ink-2">{tidyEngineText(regulationNoteDisplay(regulation))}</span>
       </p>
       {shouldShowAirportMlitNote(regulation, pilotPermits) ? (
         <p
@@ -159,7 +161,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           className="rounded-sb-m border-l-4 border-sb-v-needs-fg bg-sb-sunken px-3 py-2 text-sb-ink-2"
         >
           <span data-note="" className="sb-eyebrow block ">入力した許可について</span>{" "}
-          {AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}
+          {tidyEngineText(AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE)}
         </p>
       ) : null}
       {verdictItem && verdictItem.appliedPermits.length > 0 ? (
@@ -171,7 +173,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           <ul className="mt-1 flex flex-col gap-1">
             {verdictItem.appliedPermits.map((p) => (
               <li key={p.id}>
-                <span>・{p.condition}</span>
+                <span>・{tidyEngineText(p.condition)}</span>
                 {p.machine ? (
                   <span data-note="" className="block pl-2.5 text-sm tracking-wide text-sb-ink-3">{p.machine}</span>
                 ) : null}
@@ -196,7 +198,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
           <ul className="mt-1 flex flex-col gap-1">
             {regulation.appliedExceptions.map((ex) => (
               <li key={ex.id}>
-                <span>・{ex.condition}</span>
+                <span>・{tidyEngineText(ex.condition)}</span>
                 {ex.machine ? (
                   <span data-note="" className="block pl-2.5 text-sm tracking-wide text-sb-v-none-fg">
                     {formatMachineCondition(ex.machine)}
@@ -215,7 +217,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
         note="説明・使用データ・版・改正"
       >
         <p className="text-sb-ink-2" data-testid="regulation-summary">
-          {regulation.summary}
+          {tidyEngineText(regulation.summary)}
         </p>
         {exceptions.length > 0 ? (
           <div data-testid="regulation-exceptions" className="flex flex-col gap-1 text-sb-ink-2">
@@ -223,7 +225,7 @@ export function RegulationCard({ regulation, pilotPermits, verdictItem, provisio
             <ul className="flex flex-col gap-1.5">
               {exceptions.map((ex) => (
                 <li key={ex.id}>
-                  ・{ex.condition}
+                  ・{tidyEngineText(ex.condition)}
                 </li>
               ))}
             </ul>

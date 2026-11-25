@@ -939,9 +939,8 @@ test.describe("Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層
       for (const r of results) console.log(`[画面] Q-20 ${vp} ${r.script}: スクロール ${r.screens} 枚分・押す回数 ${r.taps}`);
       for (const r of results) {
         expect(r.taps, `${vp} ${r.script} の押す回数`).toBeLessThanOrEqual(max[r.script as keyof typeof max]);
-        // 16-B 差し戻し 1 の R1-8（2026-11-22）：実測が 2 を超えた 375x812 の ③詳細（2.1）だけ 2.2 に上げた（2.1×1.03=2.16→0.1 単位で切り上げ）。ほかの台本・幅は 2 のまま。16-M の M-6 で 2 に戻す。
-        const maxScreens = vp === "375x812" && r.script === "3-detail" ? 2.2 : 2;
-        expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(maxScreens);
+        // 16-M の M-6：16-B 差し戻し 1 の R1-8 で 375x812 の ③詳細だけ 2.2 に上げていた上限を、元の 2 に戻した（全台本・全幅で 2 画面分）。
+        expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(2);
       }
       await ctx.close();
     });
@@ -963,8 +962,8 @@ test.describe("B2 縦が長すぎない：規制カード・収録の一覧は�
     expect(h, "ページ全体の高さ（375px）").toBeLessThanOrEqual(16_646);
     expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);
     // Sprint 18-1：申請支援を止めて短くなった（前 12,086px → 後 11,244px の実測）。上の 2 つの上限は変えず、短くなった分が戻らないよう上限を足す。
-    // 16-B 差し戻し 1 の R1-8（2026-11-22）：実測 12,191px が 12,000 を超えたので 12,600 に上げた（12,191×1.03=12,557→100 単位で切り上げ）。16-M の M-6 で 12,000 に戻す。
-    expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_600);
+    // 16-M の M-6：16-B 差し戻し 1 の R1-8 で 12,600 に上げていた上限を、元の 12,000 に戻した。
+    expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_000);
     await expect(page.getByTestId("coverage-details")).not.toHaveAttribute("open", "");
     const cards = page.locator('[data-testid^="regulation-card-"]');
     const n = await cards.count();

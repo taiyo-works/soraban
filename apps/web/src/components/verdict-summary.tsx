@@ -28,11 +28,12 @@ import {
   VERDICT_SCALE,
   VERDICT_SECTION_TITLE,
   VERDICT_TONE,
+  DUTIES_HEADING_SCREEN,
 } from "@/lib/verdict-display";
 import { BOUNDARY_SHORT } from "@/lib/boundary";
 import type { JudgementTotal } from "@/lib/judgement-total";
 import { TierGauge } from "./verdict-mark";
-import { PillButton, VERDICT_KEY, VerdictBig, VerdictSign } from "./ui/sb-parts";
+import { PillButton, VERDICT_KEY, VERDICT_STATE, VerdictBig, VerdictSign, VerdictTag } from "./ui/sb-parts";
 
 type Props = {
   /** 画面の結論に使う判定（/api/diagnose の verdict。飛行の方法を含む。未決 5）。 */
@@ -125,7 +126,7 @@ function VerdictScale({ level }: { level: ItemVerdict }) {
 
 // 規制ごとの判定の表のセル（狭い幅では「列名 値」の 1 行ずつに積む。列名は data-label を ::before で出す）。
 const ITEM_CELL =
-  "flex gap-2 py-0.5 pr-2 max-md:flex-wrap md:table-cell md:py-1.5 max-md:before:w-[5.5rem] max-md:before:shrink-0 max-md:before:text-sm max-md:before:leading-5 max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
+  "flex gap-2 pr-2 max-md:flex-wrap md:table-cell md:py-1.5 max-md:before:shrink-0 max-md:before:text-sm max-md:before:leading-5 max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
 
 /** 段階の言葉。括弧の中（「条件付き」）は折り返しても一塊で読めるよう、小さく続ける（文字列は変えない）。 */
 function LevelWords({ label }: { label: string }) {
@@ -140,7 +141,7 @@ function LevelWords({ label }: { label: string }) {
 }
 
 // 判定（4 段＋判定不能）の結論と段取り（Sprint 11d D1・D2）。
-// 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に必ず行うこと
+// 並び：結論 → 飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み（条件付き）→ 飛行の前後に行うこと
 //       → 規制ごとの判定（元の判定 → 適用した許可 → 判定）。地点判定の PDF も同じ順・同じ言葉。
 /** 理由の末尾の参照先（模型航空機。Sprint 11e）を外し、題名のリンクとして出す。 */
 const hasModelAircraftReferences = (reason: string): boolean => reason.includes(MODEL_AIRCRAFT_REFERENCE_LINE);
@@ -254,6 +255,8 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
   const showDetails = part !== "conclusion";
   // 手続き以降は、結論が確定したときだけ出る。確定していないとき、詳細の部分は何も描かない
   if (part === "details" && !ready) return null;
+  // 結論のカードは「判定の帯のカード」（16-M の M-1）。帯の色は総合の印（総合の語を出さない画面は判定の段）。判定不能・判定中・失敗は帯なし（未確認の灰）。
+  const cardState = ready ? VERDICT_STATE[total ? total.sign : verdict.level] : undefined;
   return (
     <div
       data-testid={part === "details" ? "verdict-details" : "verdict-summary"}
@@ -265,7 +268,8 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
       <div className="flex flex-col items-stretch gap-3">
         <div
           data-testid="verdict-conclusion"
-          className={`sb-block flex min-w-0 flex-1 flex-col gap-3 ${ready ? "sb-rise" : ""}`}
+          className={`sb-block flex min-w-0 flex-1 flex-col gap-2.5 ${cardState ? "sb-card-state" : ""} ${ready ? "sb-rise" : ""}`}
+          {...(cardState ? { "data-state": cardState } : {})}
           aria-labelledby="verdict-heading"
         >
           {ready ? (
@@ -316,7 +320,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   ) : null}
                 </div>
               ) : null}
-              <p className="sb-lead !text-sb-ink">{VERDICT_HELP[verdict.level]}</p>
+              <p className="sb-lead !text-sb-ink">{tidyEngineText(VERDICT_HELP[verdict.level])}</p>
             </>
           ) : failed ? (
             <div data-testid="verdict-failed" role="alert" className="flex flex-col gap-2.5">
@@ -394,7 +398,8 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     key={n.itemId}
                     data-testid="verdict-no-fly-item"
                     data-item-id={n.itemId}
-                    className={`flex items-start gap-2.5 rounded-sb-l border-l-4 bg-sb-base px-4 py-3 text-sb-ink shadow-sb ${VERDICT_EDGE.no_fly}`}
+                    data-state="danger"
+                    className="sb-vcard flex items-start gap-2.5 py-3 pl-[22px] pr-4 text-sb-ink"
                   >
                     <span className="pt-0.5">
                       <VerdictSign level="no_fly" />
@@ -439,11 +444,11 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     {verdict.procedures.map((p, i) => {
                       const countdown = deadlineCountdown(p.deadline.date);
                       const edge = VERDICT_EDGE[isConfirmProcedure(p.id) ? "unknown" : "needs_procedure"];
-                      // 768px 以上は表の行、狭い幅は 1 件ずつの票（左端の帯・番号の列・手続き名 → 出す先 → 期限 → 法的な重さ）。
+                      // 768px 以上は表の行、狭い幅は 1 件ずつの「判定の帯のカード」（面＋左端 6px の帯。手続き名 → 出す先と法的な重さ（2 列）→ 期限）。
                       const cell =
-                        "block bg-sb-base py-1 pr-2 align-top md:table-cell md:border-y md:border-sb-rule md:py-2.5";
+                        "block bg-transparent py-0.5 pr-2 align-top max-md:py-px md:table-cell md:border-y md:border-sb-rule md:bg-sb-base md:py-2.5";
                       const labelled =
-                        "max-md:col-start-2 max-md:before:mb-0.5 max-md:before:block max-md:before:text-sm max-md:before:tracking-[0.08em] max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
+                        "max-md:before:mb-0.5 max-md:before:block max-md:before:text-sm max-md:before:tracking-[0.08em] max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]";
                       return (
                         <tr
                           key={p.id}
@@ -452,10 +457,11 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                           data-item-id={p.itemId}
                           data-legal-tier={p.legalTier}
                           data-deadline-date={p.deadline.date ?? ""}
-                          className={`grid grid-cols-[2.5rem_minmax(0,1fr)] rounded-sb-l border-l-4 bg-sb-base pb-1.5 shadow-sb md:table-row md:rounded-none md:border-0 md:bg-transparent md:pb-0 md:shadow-none ${edge}`}
+                          {...(isConfirmProcedure(p.id) ? {} : { "data-state": "warn" })}
+                          className="sb-vrow grid grid-cols-[2rem_minmax(0,1fr)_auto] rounded-sb-l pb-1 max-md:pl-[6px] md:table-row md:rounded-none md:border-0 md:pb-0"
                         >
                           <td
-                            className={`${cell} pl-2.5 pt-2.5 sb-num text-sm font-medium tnum text-sb-ink max-md:row-span-4 md:border-l-4 md:pl-3 ${edge}`}
+                            className={`${cell} pl-2.5 pt-2.5 sb-num text-sm font-medium tnum text-sb-ink max-md:pl-1.5 max-md:pt-1.5 max-md:row-span-3 max-md:row-start-1 md:border-l-4 md:pl-3 ${edge}`}
                           >
                             {String(i + 1).padStart(2, "0")}
                             {isConfirmProcedure(p.id) ? (
@@ -464,22 +470,23 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                               </svg>
                             ) : null}
                           </td>
-                          <td className={`${cell} max-md:col-start-2 max-md:pt-2.5`}>
+                          <td className={`${cell} max-md:col-span-2 max-md:col-start-2 max-md:row-start-1 max-md:pt-1.5`}>
                             <span className="text-sm font-medium leading-snug text-sb-ink">{p.title}</span>
                             <ReasonWithReferences
                               reason={p.reason}
                               mode="links"
-                              className="mt-0.5 block text-sm leading-relaxed text-sb-ink-3"
+                              className="mt-0.5 block text-sm leading-normal text-sb-ink-3"
                             />
                           </td>
-                          <td data-label={PROCEDURE_COLUMNS[1]} className={`${cell} ${labelled} leading-relaxed text-sb-ink-2`}>
+                          <td data-label={PROCEDURE_COLUMNS[1]} className={`${cell} ${labelled} max-md:col-start-2 max-md:row-start-2 leading-normal text-sb-ink-2`}>
                             {p.submitTo}
                           </td>
                           <td
                             data-testid="verdict-procedure-deadline"
                             data-label={PROCEDURE_COLUMNS[2]}
-                            className={`${cell} ${labelled} text-sb-ink`}
+                            className={`${cell} text-sb-ink max-md:col-span-2 max-md:col-start-2 max-md:row-start-3 max-md:grid max-md:grid-cols-[2.25rem_minmax(0,1fr)] max-md:gap-x-1 max-md:before:whitespace-nowrap max-md:before:text-sm max-md:before:leading-normal max-md:before:text-sb-ink-3 max-md:before:content-[attr(data-label)]`}
                           >
+                            <span className="block min-w-0">
                             {p.deadline.date ? (
                               <span className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="sb-num text-sm font-medium tnum text-sb-ink">{p.deadline.date}</span>
@@ -491,12 +498,13 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                               </span>
                             ) : null}
                             <span
-                              className={`block leading-relaxed ${p.deadline.date ? "text-sm text-sb-ink-3" : "text-sb-ink"}`}
+                              className={`block leading-normal ${p.deadline.date ? "text-sm text-sb-ink-3" : "text-sb-ink"}`}
                             >
                               {p.deadline.label}
                             </span>
+                            </span>
                           </td>
-                          <td data-label={PROCEDURE_COLUMNS[3]} className={`${cell} ${labelled} text-sb-ink-2 md:border-r`}>
+                          <td data-label={PROCEDURE_COLUMNS[3]} className={`${cell} ${labelled} max-md:col-start-3 max-md:row-start-2 text-sb-ink-2 md:border-r`}>
                             <span className="inline-flex items-end gap-1.5">
                               <TierGauge tier={p.legalTier} />
                               <span className="leading-none">{legalTierLabel(p.legalTier)}</span>
@@ -521,7 +529,8 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     key={d.itemId}
                     data-testid="verdict-done-item"
                     data-item-id={d.itemId}
-                    className={`flex flex-col gap-2 border border-sb-rule border-l-4 bg-sb-base px-3 py-2.5 text-sb-ink-2 ${VERDICT_EDGE.procedure_done}`}
+                    data-state="info"
+                    className="sb-vcard flex flex-col gap-2 py-2.5 pl-[18px] pr-3 text-sb-ink-2"
                   >
                     <span className="flex items-start gap-2 font-medium text-sb-ink">
                       <span className="pt-0.5">
@@ -555,9 +564,9 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
             </div>
           ) : null}
 
-          {/* 飛行の前後に必ず行うこと（点検表） */}
+          {/* 飛行の前後に行うこと（点検表。画面の見出しは DUTIES_HEADING_SCREEN。PDF は VERDICT_SECTION_TITLE.duties のまま） */}
           <div data-testid="verdict-duties-section" className="flex flex-col gap-2">
-            <SectionHead count={verdict.perFlightDuties.length}>{VERDICT_SECTION_TITLE.duties}</SectionHead>
+            <SectionHead count={verdict.perFlightDuties.length}>{DUTIES_HEADING_SCREEN}</SectionHead>
             <ul data-testid="verdict-duties" className="flex flex-col divide-y divide-sb-rule rounded-sb-l bg-sb-base px-4 py-1 shadow-sb">
               {verdict.perFlightDuties.map((d) => (
                 <li
@@ -565,20 +574,20 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   data-testid="verdict-duty"
                   data-duty-id={d.id}
                   data-kind={d.kind}
-                  className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1.5 text-sb-ink-2"
+                  className="flex flex-col gap-1 py-2 text-sb-ink-2"
                 >
-                  <span
-                    data-note=""
-                    className={`justify-self-start whitespace-nowrap rounded-sb-pill border px-2 py-px text-sm leading-tight ${
-                      d.kind === "premise" ? "border-sb-rule text-sb-ink-3" : "border-sb-edge text-sb-ink"
-                    }`}
-                  >
-                    {DUTY_KIND_LABEL[d.kind]}
+                  <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                    <span
+                      data-note=""
+                      className={`whitespace-nowrap rounded-sb-pill border px-2 py-px text-sm leading-tight ${
+                        d.kind === "premise" ? "border-sb-rule text-sb-ink-3" : "border-sb-edge text-sb-ink"
+                      }`}
+                    >
+                      {DUTY_KIND_LABEL[d.kind]}
+                    </span>
+                    <span className="font-medium text-sb-ink">{tidyEngineText(d.title)}</span>
                   </span>
-                  <span>
-                    <span className="font-medium text-sb-ink">{d.title}</span>
-                    <span className="block text-sb-ink-3">{d.detail}</span>
-                  </span>
+                  <span className="block text-sb-ink-3">{tidyEngineText(d.detail)}</span>
                 </li>
               ))}
             </ul>
@@ -608,9 +617,10 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       data-item-id={it.id}
                       data-base-status={it.baseStatus}
                       data-verdict={it.verdict}
-                      className={`block rounded-sb-l border-b-0 border-l-4 bg-sb-base py-1.5 pl-2 align-top shadow-sb md:table-row md:rounded-none md:border-b md:border-l-0 md:border-sb-rule md:bg-transparent md:py-0 md:pl-0 md:shadow-none ${VERDICT_EDGE[it.verdict]}`}
+                      {...(VERDICT_STATE[it.verdict] ? { "data-state": VERDICT_STATE[it.verdict] } : {})}
+                      className="sb-vrow block rounded-sb-l py-2 align-top max-md:flex max-md:flex-wrap max-md:items-baseline max-md:gap-x-4 max-md:gap-y-1 max-md:pl-[18px] md:table-row md:rounded-none md:border-b md:border-sb-rule md:py-0"
                     >
-                      <td className={`block pb-1 pr-2 text-sb-ink md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
+                      <td className={`block pr-2 text-sb-ink max-md:basis-full md:table-cell md:border-l-2 md:py-1.5 md:pl-3 ${VERDICT_EDGE[it.verdict]}`}>
                         {it.title}
                         {permitNotes?.item[it.id] ? (
                           <span data-testid="verdict-item-permit-note" className="mt-0.5 block text-sm leading-relaxed text-sb-ink-2">
@@ -632,11 +642,8 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                       <td data-label="適用した許可" className={`${ITEM_CELL} text-sb-ink-2`}>
                         {it.appliedPermits.length > 0 ? it.appliedPermits.map((p) => p.label).join(" / ") : "—"}
                       </td>
-                      <td data-label="判定" className={`${ITEM_CELL} md:whitespace-nowrap md:pr-2`}>
-                        <span className={`inline-flex items-center gap-1.5 font-medium ${VERDICT_TONE[it.verdict]}`}>
-                          <VerdictSign level={it.verdict} />
-                          {VERDICT_LABEL[it.verdict]}
-                        </span>
+                      <td data-label="判定" className={`${ITEM_CELL} max-md:basis-full md:whitespace-nowrap md:pr-2`}>
+                        <VerdictTag level={it.verdict}>{VERDICT_LABEL[it.verdict]}</VerdictTag>
                       </td>
                     </tr>
                   ))}
