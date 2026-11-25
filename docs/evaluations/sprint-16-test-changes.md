@@ -724,3 +724,33 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 - 新規：`e2e/ops-db/sprint16-m-db.spec.ts`（N-2）。いまの判定の画面（`/judgement`）は結論のカードに帯（`sb-card-state`・`data-state`）が付き、スナップショットの画面は帯なし（クラス・`data-state`・`::before` の帯なし）。`--repeat-each=3` で 3/3。旧コード（744afa7）に戻すと落ちる（`sprint-16M-fix1-ops-oldcode.log`）。
 - N-2：`VerdictSummary` に表示だけの `plainCard`（過去の判定。帯なし）を足し、ops のスナップショットの画面だけが渡す。公開 `/`・`/judgement` は未指定のまま（挙動は同じ）。
 - N-5：`regulation-pdf.tsx` の適用した許可・例外の条件に `tidyEngineText` を掛けた（画面と揃う）。N-6：`verdict-summary.tsx` の古いコメントを実態に直した。
+
+## 16-N1 結論の下の説明（Q-L29。2026-11-25）
+
+### 既存の検査
+
+- 既存の E2E・単体の期待は変えていない。`data-testid`・文言・5 段の札・目盛りは変えていない（新しい文言なし）。K-11 の差分は 0。
+- 新規：単体 `apps/web/src/components/verdict-help-n1.test.ts`、E2E `e2e/sprint16-n1.spec.ts`・`e2e/ops-db/sprint16-n1-db.spec.ts`。
+
+### 影響の範囲（N1-3）
+
+`application-pdf.tsx`（申請支援の PDF。フラグ `APPLICATION_SUPPORT_ENABLED` は既定で無効）の 407 行も `PdfVerdictConclusion` を使う。このため、**ファイルは変えていないが、共通部品経由で申請支援の PDF にも同じ扱いが掛かる**（判定不能を含む・項目 0 件のとき、結論の下の説明を出さない）。フラグ有効側は E2E を作らない決まりのため、単体（`PdfVerdictConclusion` の描画）で守る。
+
+### 項目 0 件の扱い（差し戻し 1・R-1）
+
+`hidesVerdictHelp` に `verdict.items.length === 0` の条件を足し、総合の区分（`totalKey`）に頼らなくても項目 0 件で隠れるようにした。判定の PDF（`PdfVerdictConclusion`）とスナップショット（total 無しの `VerdictSummary`）は `totalKey` を渡さないため、以前は項目 0 件でも「手続きを済ませれば飛べます」が残った。単体テストの `tk !== "unknown"` による PDF の除外はやめた。新しい単体は旧コード（e951310 の `verdict-display.ts`）で 3 件落ちる（`sprint-16N1-fix1-unit-oldcode.log`。新コードは 18/18、`sprint-16N1-fix1-unit-new.log`）。
+
+### 長さの前後（N1-6）
+
+基準 29f3616（前）と 16-N1 の HEAD e951310（後）を、同じ条件（空の DB・フルの Chromium・1 ワーカー・`next start`・それぞれの build）で測った。ログ `sprint-16N1-gen-base-pub-dims.log`・`sprint-16N1-gen-pub-all.log`・`sprint-16N1-gen-base-ops-dims.log`・`sprint-16N1-gen-ops-all.log`。
+
+| 検査 | 前（基準） | 後（HEAD） | 上限 |
+|---|---|---|---|
+| `sprint12h-pr2` Q-20 ③ 375×812（スクロール量・枚分） | 2 | 2（同じ） | 2 |
+| `sprint12h-pr2` Q-20 ③ 1280×800 | 1 | 1 | 2 |
+| `sprint12h-pr2` B2 `/` 375px ページ全体 | 11,646px | 11,646px | 12,000 |
+| `sprint17-2-db` 主画面 375×812（draft／pending／reported／change／voidedNone／voidedRecorded） | 2,055／2,055／1,847／2,023／1,351／1,613px | 同じ | 各検査の上限 |
+| 同 1280×800（同じ順） | 1,568／1,568／1,349／1,533／940／1,150px | 同じ | 同上 |
+| `/judgement` | 長さを出力する検査がない。`sprint16-l-db`・`sprint16-m-db` の `/judgement` の検査は前後とも通過 | 同左 | なし |
+
+測れる範囲では長さは変わっていない（説明文を隠すのは判定不能・項目 0 件のときだけで、これらの検査の台本は判定不能を含まない）。`/judgement` の長さは数値では比べていない。
