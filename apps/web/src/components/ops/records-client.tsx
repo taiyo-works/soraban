@@ -17,6 +17,7 @@ import {
   type TimeErrorCode,
 } from "@/lib/ops-time";
 import {
+  INSPECTION_GROUPS,
   INSPECTION_ITEMS,
   INSPECTION_TIMING_LABELS,
   SPECIFIC_FLIGHT_TYPES,
@@ -51,6 +52,7 @@ import {
   versionOf,
   type ApiResult,
 } from "./ops-client";
+import { CheckGroup, StateShape } from "@/components/ui/sb-parts";
 import { Badge, buttonFieldClass, buttonGhostClass, buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "./ui";
 
 /** 通信できない（fetch が例外）場合も ApiResult にする。status 0。 */
@@ -1267,6 +1269,9 @@ export type InspectionFormInitial = {
   readonly specialNotes: string | null;
 };
 
+/** 未記入のまま保存を押したあと、その項目に出す案内（16-I I-2。サーバーの検証の文ではなく、送る前の画面の案内）。 */
+const MISSING_RESULT_MESSAGE = "正常か異常かを選んでください";
+
 const emptyItems = (): Record<InspectionItemKey, ItemState> =>
   Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "", note: "" }])) as Record<InspectionItemKey, ItemState>;
 
@@ -1348,6 +1353,8 @@ export function InspectionForm({
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
   const [restored, setRestored] = useState(false);
+  // 16-I I-2：未完了のまま保存を押したあと、未記入の項目に「選んでください」を出す（端末には残さない）
+  const [showMissing, setShowMissing] = useState(false);
   // 手で入れた実施日時が今日でない下書きを読み込んだとき、その日時（目立たせる。日時を直すと消える）
   const [staleDt, setStaleDt] = useState<string | null>(null);
   // 何も入力のない下書きの実施日時を今に入れ直したとき、その日時（知らせを出す。日時を直すと消える）
@@ -1397,10 +1404,17 @@ export function InspectionForm({
   const set = <K extends keyof InspectionState>(k: K, value: InspectionState[K]) => setV((s) => ({ ...s, [k]: value }));
   const setItem = (key: InspectionItemKey, patch: Partial<ItemState>) =>
     setV((s) => ({ ...s, items: { ...s.items, [key]: { ...s.items[key], ...patch } } }));
-  const allSelected = INSPECTION_ITEMS.every((it) => v.items[it.key].result !== "");
   const selectedCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result !== "").length;
   const abnormalCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result === "abnormal").length;
+  const missingCount = INSPECTION_ITEMS.length - selectedCount;
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
+
+  /** 群（<details>）を開く。畳んだ群の中の項目へ移るとき・誤りを示すときに使う。 */
+  const openGroupOf = (key: InspectionItemKey) => {
+    const g = INSPECTION_GROUPS.find((x) => x.items.includes(key));
+    const el = g ? formRef.current?.querySelector<HTMLDetailsElement>(`[data-testid="inspection-group-${g.key}"]`) : null;
+    if (el) el.open = true;
+  };
 
   const discardDraft = () => {
     clearDraft(draftKey("inspection", memberId));
@@ -1412,9 +1426,22 @@ export function InspectionForm({
     setRestored(false);
     setStaleDt(null);
     setRefreshDt(null);
+    setShowMissing(false);
   };
 
   const submit = async () => {
+    // 16-I I-2：未完了のときは送らずに、表示の順で最初の未記入の項目の群を開き、そこへスクロールしてフォーカスを移す。
+    // サーバーの検証は変えない（全部選ばれているときだけ、今の API へ送る）。
+    const firstMissing = INSPECTION_GROUPS.flatMap((g) => g.items).find((k) => v.items[k].result === "");
+    if (firstMissing) {
+      setShowMissing(true);
+      setMessage(null);
+      openGroupOf(firstMissing);
+      const group = formRef.current?.querySelector<HTMLElement>(`[data-testid="inspection-item-${firstMissing}"] [role="radiogroup"]`);
+      group?.focus({ preventScroll: true });
+      group?.scrollIntoView({ block: "center" });
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const p = posBody(v.pos);
@@ -1446,6 +1473,9 @@ export function InspectionForm({
         setMessage(messageFor(r));
         // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
         if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
+        // 畳んだ群の中に誤りがあるときは開く（誤りの項目へフォーカスを移せるように）
+        const errs = fieldErrorsOf(r);
+        for (const it of INSPECTION_ITEMS) if (errs[`items.${it.key}`] || errs[`items.${it.key}.note`]) openGroupOf(it.key);
       }
       requestErrorFocus();
       return;
@@ -1534,6 +1564,10 @@ export function InspectionForm({
             setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
           }}
         />
+        {/* 16-I I-3：実施日時の欄のすぐ下（日誌から移ったとき、最初の画面で全体が読める位置） */}
+        {flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
+          <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
+        ) : null}
         <ChoiceGroup legend="区分">
           {(["pre_flight", "post_flight"] as const).map((t) => (
             <label key={t} className={choiceClass(v.timing === t)}>
@@ -1542,9 +1576,6 @@ export function InspectionForm({
             </label>
           ))}
         </ChoiceGroup>
-        {flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
-          <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
-        ) : null}
         <PlaceInput
           label="実施場所"
           name={v.placeName}
@@ -1558,72 +1589,102 @@ export function InspectionForm({
 
       <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sb-ink-3 sm:max-w-md">
+          <p data-note="" className="text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
           <button type="button" className={`${tallGhostClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>
-        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num text-sm tnum text-sb-ink-2" aria-live="polite">
+        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num tnum text-sb-ink-2" aria-live="polite" data-testid="inspection-progress">
           <span>
-            選択 {selectedCount} / {INSPECTION_ITEMS.length}
+            記入済み {selectedCount}/{INSPECTION_ITEMS.length}
           </span>
           {abnormalCount > 0 ? <span className="text-sb-v-no-fg">異常 {abnormalCount} 項目</span> : null}
         </p>
-        <ol className="flex flex-col border-t border-sb-rule">
-          {INSPECTION_ITEMS.map((it, i) => {
-            const st = v.items[it.key];
-            const resultError = errors[`items.${it.key}`];
-            const noteError = errors[`items.${it.key}.note`];
-            const abnormal = st.result === "abnormal";
+        <div className="flex flex-col gap-3">
+          {INSPECTION_GROUPS.map((g) => {
+            const done = g.items.filter((k) => v.items[k].result !== "").length;
             return (
-              <li
-                key={it.key}
-                className={`flex flex-col gap-2 border-b border-sb-rule py-2.5 pr-0.5 ${
-                  abnormal ? "-ml-3 border-l-2 border-l-sb-v-no-fg pl-2.5" : ""
-                }`}
-                data-testid={`inspection-item-${it.key}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                  <span className="flex min-w-0 items-baseline gap-2 text-sb-ink">
-                    <span aria-hidden className="sb-num tnum text-sb-ink-3">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    {it.label}
-                  </span>
-                  <div
-                    className="grid grid-cols-2 gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
-                    role="radiogroup"
-                    tabIndex={-1}
-                    aria-label={`${it.label}の結果`}
-                    aria-invalid={resultError ? true : undefined}
-                    aria-describedby={resultError ? `inspection-err-result-${it.key}` : undefined}
-                  >
-                    {(["normal", "abnormal"] as const).map((r) => (
-                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem] !px-3`}>
-                        <input
-                          type="radio"
-                          name={`item-${it.key}`}
-                          className={`${choiceRadioClass} ${r === "abnormal" ? "sb-radio-no" : ""}`}
-                          checked={st.result === r}
-                          onChange={() => setItem(it.key, { result: r })}
-                        />
-                        {r === "normal" ? "正常" : "異常"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <FieldError id={`inspection-err-result-${it.key}`} message={resultError} />
-                {abnormal || st.note || noteError ? (
-                  <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
-                    <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(it.key, { note: e.target.value })} />
-                  </Field>
-                ) : null}
-              </li>
+              <CheckGroup key={g.key} title={g.label} done={done} total={g.items.length} testId={`inspection-group-${g.key}`}>
+                <ol className="m-0 flex list-none flex-col gap-2 p-0">
+                  {g.items.map((key) => {
+                    const it = INSPECTION_ITEMS.find((x) => x.key === key)!;
+                    const no = INSPECTION_ITEMS.findIndex((x) => x.key === key) + 1;
+                    const st = v.items[key];
+                    const resultError = errors[`items.${key}`] ?? (showMissing && st.result === "" ? MISSING_RESULT_MESSAGE : undefined);
+                    const noteError = errors[`items.${key}.note`];
+                    const abnormal = st.result === "abnormal";
+                    return (
+                      <li
+                        key={key}
+                        className={`flex min-h-[72px] flex-col gap-2 rounded-sb-m border-l-[6px] bg-sb-sunken px-3 py-3 ${abnormal ? "border-sb-v-no-fg" : "border-transparent"}`}
+                        data-testid={`inspection-item-${key}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="flex min-w-0 items-baseline gap-2 font-bold text-sb-ink">
+                            <span aria-hidden className="sb-num tnum text-sb-ink-3">
+                              {String(no).padStart(2, "0")}
+                            </span>
+                            <span className="min-w-0 [overflow-wrap:anywhere]">{it.label}</span>
+                          </span>
+                          <span
+                            data-note=""
+                            aria-hidden="true"
+                            data-testid={`inspection-mark-${key}`}
+                            data-state={st.result || "none"}
+                            className={`inline-flex shrink-0 items-center gap-1 font-bold ${abnormal ? "text-sb-v-no-fg" : st.result === "normal" ? "text-sb-ink" : "text-sb-ink-3"}`}
+                          >
+                            {st.result === "normal" ? (
+                              <>
+                                <StateShape tone="safe" />
+                                済
+                              </>
+                            ) : abnormal ? (
+                              <>
+                                <StateShape tone="danger" />
+                                異常
+                              </>
+                            ) : (
+                              "未記入"
+                            )}
+                          </span>
+                        </div>
+                        <div
+                          className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
+                          role="radiogroup"
+                          tabIndex={-1}
+                          aria-label={`${it.label}の結果`}
+                          aria-invalid={resultError ? true : undefined}
+                          aria-describedby={resultError ? `inspection-err-result-${key}` : undefined}
+                        >
+                          {(["normal", "abnormal"] as const).map((r) => (
+                            <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} !min-h-14 !px-3`}>
+                              <input
+                                type="radio"
+                                name={`item-${key}`}
+                                className={`${choiceRadioClass} ${r === "abnormal" ? "sb-radio-no" : ""}`}
+                                checked={st.result === r}
+                                onChange={() => setItem(key, { result: r })}
+                              />
+                              {r === "normal" ? "正常" : "異常"}
+                            </label>
+                          ))}
+                        </div>
+                        <FieldError id={`inspection-err-result-${key}`} message={resultError} />
+                        {abnormal || st.note || noteError ? (
+                          <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
+                            <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(key, { note: e.target.value })} />
+                          </Field>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </CheckGroup>
             );
           })}
-        </ol>
+        </div>
       </Step>
 
       <Field label="特記事項" required={false} error={errors["specialNotes"]} hint="取扱説明書の追加の点検項目など（500 文字以内）">
@@ -1642,13 +1703,10 @@ export function InspectionForm({
         busy={busy}
         label={isEdit ? "訂正する" : "保存"}
         onRetry={() => void submit()}
-        disabled={!allSelected}
       >
-        {!allSelected ? (
-          <span className="text-sm text-sb-ink-3">
-            9 項目すべてを選ぶと保存できます（残り {INSPECTION_ITEMS.length - selectedCount} 項目）
-          </span>
-        ) : null}
+        <span data-note="" className="text-sb-ink-3" aria-live="polite" data-testid="inspection-missing-count" data-missing={missingCount}>
+          {missingCount > 0 ? `未記入 ${missingCount} 項目` : "9 項目すべて記入済み"}
+        </span>
       </SaveRow>
     </form>
   );

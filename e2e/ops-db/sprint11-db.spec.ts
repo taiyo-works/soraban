@@ -361,7 +361,9 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto(`/ops/inspections/new?aircraftId=${withInspection.id}`);
       const iform = page.getByRole("form", { name: "日常点検の入力" });
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("08:00");
-      await expect(page.getByRole("button", { name: "保存", exact: true })).toBeDisabled();
+      // 16-I I-2（意図の変更）：未完了でも保存は押せる。送らずに、未完了の数を文字で示す（以前は押せない）
+      await expect(page.getByRole("button", { name: "保存", exact: true })).toBeEnabled();
+      await expect(page.getByTestId("inspection-missing-count")).toHaveText("未記入 9 項目");
       await iform.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
       await page.getByRole("button", { name: "すべて正常" }).click();
       await page.getByRole("button", { name: "保存", exact: true }).click();

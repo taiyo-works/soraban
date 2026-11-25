@@ -251,7 +251,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     const [yNew, yPending, yRecords] = [await y("inspection-new"), await y("inspection-pending"), await y("inspection-records")];
     expect(yNew).toBeLessThan(yPending);
     expect(yPending).toBeLessThan(yRecords);
-    await expect(page.getByTestId("inspection-new")).toHaveText("新しい点検");
+    await expect(page.getByTestId("inspection-new")).toHaveText("点検を記録");
     await expect(page.getByTestId("inspection-new")).toHaveAttribute("href", "/ops/inspections/new");
     expect((await page.getByTestId("inspection-new").boundingBox())!.height).toBeGreaterThanOrEqual(56);
     // 今日の計画で飛行前の点検がないものが出る（他の計画があっても、この計画の行がある）
@@ -275,7 +275,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     const list = page.getByTestId("inspection-list");
     await expect(list).toBeVisible();
     await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toHaveCount(1);
-    await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toContainText("✓ 正常");
+    await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toContainText("点検済み");
     await expect(page.getByTestId("inspection-timing-all")).toHaveAttribute("aria-current", "true");
     await page.getByTestId("inspection-timing-post_flight").click();
     await page.waitForURL(/timing=post_flight/);
