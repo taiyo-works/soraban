@@ -1,0 +1,9 @@
+typecheck exit 0
+lint exit 0
+unit exit 0
+test:db exit 0
+contrast exit 0
+testids exit 0
+k11 done
+build exit 0
+ALLDONE
