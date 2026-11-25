@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { FlightVerdict, ItemVerdict } from "@soraban/regulations";
+import { aggregateVerdictLevel, type FlightVerdict, type ItemVerdict } from "@soraban/regulations";
 import { judgementTotal, STALE_TOTAL_PREFIX, TILE_RANK, TOTAL_NONE_NOTE } from "./judgement-total";
 
+// level は、エンジンと同じ集約（aggregateVerdictLevel：判定不能と 0 件は要手続き）で求める。
 const mk = (verdicts: readonly ItemVerdict[], unknownCount = 0): FlightVerdict =>
   ({
-    level: "needs_procedure",
+    level: aggregateVerdictLevel(verdicts.map((verdict) => ({ verdict }))),
     unknownCount,
     items: verdicts.map((verdict, i) => ({ id: `i${i}`, verdict })),
     noFly: [],
@@ -68,8 +69,28 @@ describe("judgementTotal（契約 §8.2 の総合の語）", () => {
       }
     }
   });
-  it("項目が無いとき（空）は「手続き不要」の語にならないよう、手続き不要の注記を付ける", () => {
-    expect(judgementTotal(mk([]), false).note).toBe(TOTAL_NONE_NOTE);
+  it("項目が 0 件：未確認にする（手続き不要の語・印にしない。エンジンは 0 件を要手続きに倒す）", () => {
+    const t = judgementTotal(mk([]), false);
+    expect(t.key).not.toBe("none");
+    expect(t.sign).not.toBe("no_procedure");
+    expect(t).toMatchObject({ key: "unknown", sign: "unknown" });
+    expect(t.text).not.toContain("見つかりませんでした");
+    expect(judgementTotal(mk([]), true).text.startsWith(STALE_TOTAL_PREFIX)).toBe(true);
+  });
+  it("守り：総合の重さが、エンジンの段より軽くならない（段の側に倒す。判定不能は要手続きと同じ重さ）", () => {
+    const lv = (level: string, verdicts: readonly ItemVerdict[]) => ({ ...mk(verdicts), level }) as unknown as FlightVerdict;
+    // 段が飛行不可なのに、項目に飛行不可が無い
+    expect(judgementTotal(lv("no_fly", ["no_procedure"]), false)).toMatchObject({ key: "no_fly", sign: "no_fly" });
+    // 段が要手続きなのに、項目が手続き不要・手続き済みだけ
+    expect(judgementTotal(lv("needs_procedure", ["no_procedure"]), false)).toMatchObject({ key: "needs_procedure" });
+    expect(judgementTotal(lv("needs_procedure", ["procedure_done"]), false)).toMatchObject({ key: "needs_procedure" });
+    // 段が手続き済みなのに、項目が手続き不要だけ
+    expect(judgementTotal(lv("procedure_done", ["no_procedure"]), false)).toMatchObject({ key: "done" });
+    // 判定不能は要手続きと同じ重さ：段が要手続きで総合が未確認なら、そのまま（倒さない）
+    expect(judgementTotal(lv("needs_procedure", ["unknown"]), false)).toMatchObject({ key: "unknown" });
+    // 軽くならない場合は変えない
+    expect(judgementTotal(lv("no_procedure", ["no_procedure"]), false)).toMatchObject({ key: "none" });
+    expect(judgementTotal(lv("no_fly", ["no_fly"]), false)).toMatchObject({ key: "no_fly", count: 1 });
   });
   it("タイルの順位は重い順", () => {
     expect(TILE_RANK.no_fly).toBeLessThan(TILE_RANK.needs_procedure);

@@ -24,10 +24,17 @@ export const TOTAL_NONE_NOTE = "調べていない項目があります";
 
 const count = (v: FlightVerdict, k: ItemVerdict): number => v.items.filter((i) => i.verdict === k).length;
 
-export const judgementTotal = (verdict: FlightVerdict | undefined, stale: boolean): JudgementTotal => {
+/** 総合の重さ（判定不能は要手続きと同じ重さに数える）。エンジンの段と比べるための順位。 */
+const TOTAL_WEIGHT: Readonly<Record<TotalKey, number>> = { no_fly: 3, needs_procedure: 2, unknown: 2, missing: 2, done: 1, none: 0 };
+const LEVEL_WEIGHT: Readonly<Record<ItemVerdict, number>> = { no_fly: 3, needs_procedure: 2, unknown: 2, procedure_done: 1, no_procedure: 0 };
+
+const withCount = (n: number, base: string, pre: string): string => `${pre}${base}${n > 0 ? `（${n} 件）` : ""}`;
+
+const fromItems = (verdict: FlightVerdict, stale: boolean): JudgementTotal => {
   const pre = stale ? STALE_TOTAL_PREFIX : "";
-  if (verdict === undefined) {
-    return { key: "missing", sign: "unknown", text: `${pre}未確認（判定の記録がありません）`, stale, count: 0 };
+  // 項目が 0 件のとき、エンジンは要手続きに倒す。ここでは「手続き不要」の語にせず、未確認にする。
+  if (verdict.items.length === 0) {
+    return { key: "unknown", sign: "unknown", text: `${pre}未確認（判定の項目がありません）`, stale, count: 0 };
   }
   const noFly = count(verdict, "no_fly");
   if (noFly > 0) return { key: "no_fly", sign: "no_fly", text: `${pre}飛行不可の項目があります（${noFly} 件）`, stale, count: noFly };
@@ -45,6 +52,26 @@ export const judgementTotal = (verdict: FlightVerdict | undefined, stale: boolea
     stale,
     count: count(verdict, "no_procedure"),
   };
+};
+
+export const judgementTotal = (verdict: FlightVerdict | undefined, stale: boolean): JudgementTotal => {
+  const pre = stale ? STALE_TOTAL_PREFIX : "";
+  if (verdict === undefined) {
+    return { key: "missing", sign: "unknown", text: `${pre}未確認（判定の記録がありません）`, stale, count: 0 };
+  }
+  const t = fromItems(verdict, stale);
+  // 守り：総合の重さが、エンジンの段（verdict.level）より軽くならない。軽くなるときは段の側に倒す。
+  const level = verdict.level as ItemVerdict | undefined;
+  if (level !== undefined && level in LEVEL_WEIGHT && TOTAL_WEIGHT[t.key] < LEVEL_WEIGHT[level]) {
+    if (level === "no_fly") return { key: "no_fly", sign: "no_fly", text: withCount(count(verdict, "no_fly"), "飛行不可の項目があります", pre), stale, count: count(verdict, "no_fly") };
+    if (level === "needs_procedure" || level === "unknown") {
+      const n = count(verdict, "needs_procedure");
+      return { key: "needs_procedure", sign: "needs_procedure", text: withCount(n, "手続きが要る項目があります", pre), stale, count: n };
+    }
+    const n = count(verdict, "procedure_done");
+    return { key: "done", sign: "procedure_done", text: `${pre}調べた項目は手続き済みです。条件を確認してください`, stale, count: n };
+  }
+  return t;
 };
 
 /** タイルを重い順に並べるための順位（飛行不可 → 要手続き → 判定不能 → 手続き済み → 手続き不要）。 */
