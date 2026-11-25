@@ -1281,12 +1281,12 @@ export function FieldClient({
   const expiryHours = clockMs > 0 ? expiringSoon(outbox, clockMs) : null;
   const dayTime = (iso: string): string => `${jstDate(new Date(iso)).slice(5).replace("-", "/")} ${jstTime(new Date(iso))}`;
   // 状態の帯（16-K K2-3）：320・375 幅で「古い可能性」が出ても高さ 100px 以下。帯には短い印と文字（！古い可能性）だけを置き、説明は帯の下の
-  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.3（帯は p・li・dd ではなく、字の大きさ 18px は保つ）。
+  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25（帯は p・li・dd ではなく、字の大きさ 18px は保つ）。
   const bandEl = (
     <>
       <section
         aria-label="接続と送信の状況"
-        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-1 text-lg leading-[1.3]"
+        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-0.5 text-lg leading-[1.25]"
         data-testid="field-status-band"
         data-online={online ? "true" : "false"}
       >

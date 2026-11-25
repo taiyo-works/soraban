@@ -1,0 +1,42 @@
+HEAD 6fa1974, DB k16_a1, build: P2wHucnTJzhuVaqcR93zN
+
+Running 4 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (2.3s)
+  -  2 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help
+  -  3 e2e/ops-db/sprint16-k-db.spec.ts:233:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる
+  -  4 e2e/ops-db/sprint16-k-db.spec.ts:319:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+
+    Error: 320×740 状態の帯の高さ（古い可能性が出た状態・圏外）
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 100
+    Received:    103.5625
+
+      206 |       const bb = (await band.boundingBox())!;
+      207 |       const hb = (await help.boundingBox())!;
+    > 208 |       expect(bb.height, `${vp.name} 状態の帯の高さ（古い可能性が出た状態・圏外）`).toBeLessThanOrEqual(100);
+          |                                                              ^
+      209 |       expect(bb.height, "既存の基準（< 140）").toBeLessThan(140);
+      210 |       expect(hb.y, "説明は帯の下").toBeGreaterThanOrEqual(bb.y + bb.height - 0.5);
+      211 |       // 帯の文字は 18px 以上、4 つの項目が帯の外にはみ出さない
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:208:62
+
+    Error Context: test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+  3 did not run
+exit 1
