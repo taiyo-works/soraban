@@ -594,3 +594,25 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 
 - `e2e/ops-db/sprint16-j-db.spec.ts`（10 件）：J-1（タブがチップ・48 以上・aria-current、カードの時刻と飛行時間の tabular-nums・20px 以上・太字、一覧の取消済み、320・360 幅と文字 200%）、J-2（節の見出し 5 つ・チェック行 72 以上・主ボタン「飛行記録を保存」1 つ、点検の結び付けと保存と下書き、計画からの初期値と `takeoffAt` 付きの点検への移動、320・360 幅と文字 200%、点検の「区分」）。
 - 旧コード（c85445f）に戻して確かめた：10 件中 7 件が落ちる（残る 3 件は、横スクロール 0 などの「悪くなっていない」ことの検査）。
+
+## 16-K 現場・圏外（2026-11-25）
+
+### 書き換えた既存の検査
+
+- なし。12c・12e・14・15 の E2E-DB と、公開側以外の ops E2E 全体（413 件）が、期待値を変えずに通った（空の DB、`--retries=0`。ログ `docs/evaluations/logs/sprint-16K-gen-ops-e2e.log`）。
+- `apps/web/src/components/ops/testids-baseline.test.ts`：基準の一覧の件数の下限 2228→2242 とハッシュ。`field-status-prefetch-stale-help`（K2-3 の説明の置き場）を足して `--write --reason` で書き直した。あわせて、16-J で足して一覧に未記入だった `flight-row`・`flight-section`・`journal-row-*`（4 つ）と prop 形式も入った。消えた識別子は 0（足しただけで、弱めていない）。
+
+### 設計との差・判断
+
+- 状態の帯（`field-status-band`）：帯の中の「古い可能性」は短い印と文字「！古い可能性」（`field-status-prefetch-stale`。以前は説明の全文）、説明は帯の外の `field-status-prefetch-stale-help`（K2-3）。320 幅の圏外では項目が 4 行になるため、帯の行間を 1.5→1.25・上下の余白を 8→4px にして 100px 以下に収めた（文字は 18px のまま。測定の失敗値 103.6 → 通過）。帯は p・li・dd ではないので、本文の行間の基準（1.7）の対象外。
+- 現場の主ボタン（K2-4）：以前は確認・保存・リンクの 12 か所すべてに `data-variant="primary"` があり、飛行前は 10 個以上が同時に見えていた。離陸・着陸（飛行中は着陸）と、着陸後で日誌が未記入のときの「日誌を記入する」だけを主にし、確認・保存・リンクは副（`opx-btn`）、選択中は面だけの主色（`opx-btn-flat`。data-variant なし）にした。着陸後で日誌が未記入のとき「離陸」は副（80px・文字の大きさは変えない。並びは元から日誌が先）。
+- 圏外の現場の画面（`OfflineFieldShell`）は、これまで `FieldModeMark` を置いておらず、圏外では現場の値（56／64px・7:1）が効いていなかった。圏外の画面 4 つと「見つからない」「読み込み」「圏外では行えない」に `FieldModeMark` を置いた（圏外の点検・日誌・今日は、これまで通常の値だった）。
+- 新しい版の知らせ（`pwa-update`）：新しい部品（`opx-box`・`opx-btn`）。ボタンは副（主ボタンを足さない：K-8。以前は藍の面の大きなボタン）。
+- 画面の部品の置き換えは `offline-shells.tsx`（旧い名前 16 か所）と `pwa-register.tsx`（2 か所）だけ。`field-client.tsx`・`incident-quick-client.tsx`・`field-prefetch.tsx`・`field-mode-mark.tsx` はすでに新しいトークンで、旧い名前は 0 だった（単体で固定した）。
+- 圏外の画面・Service Worker・キャッシュの中身と範囲、送信待ちの列・冪等キー・二重防止、端末に残す値は変えていない（`git diff 1daf5fd` で `sw.js`・`lib/pwa.ts`・`field-outbox.ts`・`field-store.ts` に差分 0）。
+
+### 新規
+
+- `e2e/ops-db/sprint16-k-db.spec.ts`（4 件）：K2-3（320×740・375×812。古い可能性が出た圏外・接続ありの帯が 100px 以下、説明は帯の下、新しい先読みでは出ない）、K2-1・K2-2・K2-4（離陸前・飛行中・着陸後・日誌後の現場と、圏外の点検・日誌・今日・行えない・保存されていない計画で、現場モードの印・主ボタン 1 つ・旧い class 0・押す部品 56・本文 18・7:1・日差しの模擬 4.5・動き 0・横スクロール 0）、新しい版の知らせ。
+- `apps/web/src/components/ops/field-offline-tokens.test.ts`（11 件）：旧い名前・色の直書き 0、全画面の `FieldModeMark`、主ボタンの置き場所、帯の構造。
+- 旧コード（1daf5fd）に戻して確かめた：単体 11 件中 7 件が落ちる。E2E は 4 件すべてが落ちる（帯は「！古い可能性」でなく全文・主ボタン 17・`pwa-update` に `opx-box` なし。旧い `offline-shells.tsx` だけを戻すと、圏外の現場に現場モードの印がなく落ちる）。ログ `docs/evaluations/logs/sprint-16K-gen-*-oldcode.log`。
