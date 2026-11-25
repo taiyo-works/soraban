@@ -653,20 +653,28 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   main:has(> .opx-wiz-progress) {
     gap: 8px;
   }
-  /* 帯は 1 行（左に「n/6 段の名前」、右に帯）。最初の画面の高さを使いすぎない */
+  /* 帯は 1 行（左に「n/6 段の名前」、右に細い帯）。文字 200%・320px でも段の名前は読める形で 1 行に残し、帯の方を縮める（積まない） */
   .opx-wiz-progress {
     flex-direction: row-reverse;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding-block: 4px;
+    gap: 8px;
+    padding-block: 2px;
   }
   .opx-wiz-progress .opx-wiz-bar {
-    flex: 0 0 5.5rem;
+    flex: 0 1 5.5rem;
+    min-width: 1.5rem;
   }
   .opx-wiz-progress .opx-wiz-step {
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 0 0 auto;
+    max-width: 100%;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  /* 画面の題は、入力の段では一段小さく（題は残し、入力欄を最初の画面に近づける） */
+  main:has(> .opx-wiz-progress) h1.opx-h1 {
+    font-size: 1.25rem;
+    line-height: 1.3;
   }
 }
 .opx-wiz-heading {
@@ -706,6 +714,8 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
  * 押す部品は 48px 以上・間 8px。選択中は薄い主色の面＋主色の 2px の縁＋チェックの記号（aria-pressed）。色・寸法はトークンだけ。 */
 .opx-quick-head {
   margin: 0;
+  padding-left: 10px;
+  border-left: 4px solid var(--sb-ink);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.7;
@@ -762,26 +772,49 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   display: inline-block;
 }
 
-/* ===== 計画の判定の画面：項目のタイルとシートの詳細（16-H2 H2-2）=====
- * タイルは 1 項目 1 つの押す部品（高さは内容で決まる。固定しない）。左端の 4px の線と形つきの札で区分を示す（色だけにしない）。 */
+/* ===== 計画の判定の画面：総合・古い判定・項目のタイル・シートの詳細（16-H2 H2-2、designer）=====
+ * 区分は「左端の線の太さと形（実線・破線）＋札の形と言葉」で示し、色だけにしない（色なしでも見分けられる）。
+ * 線の太さは重さの順：飛行不可 8px・要手続き 6px・手続き済み 4px・手続き不要 3px・判定不能 4px の破線。 */
+.opx-stale-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-sp-2);
+  padding: var(--sb-sp-3) var(--sb-sp-3) var(--sb-sp-3) 14px;
+  border-left: 6px double var(--sb-ink);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.opx-stale-box > p:first-child {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.opx-stale-box ul {
+  margin: 0;
+}
 .opx-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 100%), 1fr));
-  gap: var(--sb-sp-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+  gap: var(--sb-sp-2);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.opx-tiles > li {
+  display: flex;
 }
 .opx-tile {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--sb-sp-2);
+  gap: 6px;
   width: 100%;
   min-height: var(--sb-hit-min);
-  padding: var(--sb-sp-3) var(--sb-sp-3) var(--sb-sp-3) 14px;
+  padding: 12px 12px 10px 12px;
   border: 0;
-  border-left: 4px solid var(--sb-ink);
+  border-left: 6px solid var(--sb-ink);
   border-radius: var(--sb-r-control);
   background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
@@ -797,11 +830,11 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   outline: 3px solid var(--sb-focus);
   outline-offset: 2px;
 }
-.opx-tile[data-verdict-key="no"] { border-left-color: var(--sb-v-no-fg); }
-.opx-tile[data-verdict-key="needs"] { border-left-color: var(--sb-v-needs-fg); }
-.opx-tile[data-verdict-key="done"] { border-left-color: var(--sb-v-done-fg); }
-.opx-tile[data-verdict-key="none"] { border-left-color: var(--sb-v-none-fg); }
-.opx-tile[data-verdict-key="unknown"] { border-left-style: dashed; border-left-color: var(--sb-v-unknown-fg); }
+.opx-tile[data-verdict-key="no"] { border-left-width: 8px; border-left-color: var(--sb-v-no-fg); }
+.opx-tile[data-verdict-key="needs"] { border-left-width: 6px; border-left-color: var(--sb-v-needs-fg); }
+.opx-tile[data-verdict-key="done"] { border-left-width: 4px; border-left-color: var(--sb-v-done-fg); }
+.opx-tile[data-verdict-key="none"] { border-left-width: 3px; border-left-color: var(--sb-v-none-fg); }
+.opx-tile[data-verdict-key="unknown"] { border-left-width: 4px; border-left-style: dashed; border-left-color: var(--sb-v-unknown-fg); }
 .opx-tile-title {
   font-size: 1rem;
   font-weight: 700;
@@ -813,10 +846,14 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   font-weight: 700;
   line-height: 1.5;
   color: var(--sb-ink);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 .opx-tile-more {
   margin-top: auto;
-  font-size: 0.875rem;
+  align-self: flex-end;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
   color: var(--sb-ink-2);
@@ -833,14 +870,22 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  line-height: 1.5;
 }
 .opx-tile-dl {
   display: flex;
   flex-direction: column;
-  gap: var(--sb-sp-3);
+  gap: 0;
   margin: 0;
+}
+.opx-tile-dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: 10px;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
 }
 .opx-tile-dl dt {
   font-size: 1rem;
@@ -854,13 +899,19 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
 .opx-tile-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.opx-tile-list > li[data-testid="judgement-sheet-procedure"] {
+  padding-left: 12px;
+  border-left: 4px solid var(--sb-ink);
+}
 .opx-tile-h3 {
   margin: 0;
+  padding-left: 10px;
+  border-left: 4px solid var(--sb-ink);
   font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.4;
@@ -894,6 +945,13 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--sb-ink-2);
+}
+.opx-tile-ds-meta[data-testid="judgement-sheet-dataset-ledger-updated"] {
+  margin-top: 2px;
+  padding-left: 8px;
+  border-left: 3px double var(--sb-ink);
+  font-weight: 700;
+  color: var(--sb-ink);
 }
 .opx-tile-link {
   display: inline-flex;

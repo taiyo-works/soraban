@@ -109,7 +109,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
             />
             {/* 古いときは、再判定の導線を総合の直下（タイルより前）に置く。再判定が主ボタン（§17 の 14） */}
             {stale ? (
-              <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
+              <div className="opx-stale-box" data-testid="plan-stale-box">
                 <p className="font-medium text-sb-ink">判定が古くなっています</p>
                 <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
                   {plan.freshness.reasons.map((r) => (

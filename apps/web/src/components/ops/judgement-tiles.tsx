@@ -217,14 +217,14 @@ export function JudgementTiles({
                   {datasets.map((d) => (
                     <li key={d.id} data-testid="judgement-sheet-dataset">
                       <span className="opx-tile-ds-name">{d.name}</span>
-                      {d.provider ? <span className="opx-tile-ds-meta">提供元：{d.provider}</span> : null}
-                      <span className="opx-tile-ds-meta sb-num tnum">
+                      {d.provider ? <span data-note="" className="opx-tile-ds-meta">提供元：{d.provider}</span> : null}
+                      <span data-note="" className="opx-tile-ds-meta sb-num tnum">
                         {d.baseYear !== null ? `基準年 ${d.baseYear}／` : ""}確認日 {d.verifiedAt}
                         {d.version ? `／版 ${d.version}` : ""}
                         {d.unreadable ? `（${VERIFIED_UNREADABLE}）` : d.stale ? "（確認日が古い：90 日超）" : ""}
                       </span>
                       {d.ledgerUpdated ? (
-                        <span className="opx-tile-ds-meta" data-testid="judgement-sheet-dataset-ledger-updated">
+                        <span data-note="" className="opx-tile-ds-meta" data-testid="judgement-sheet-dataset-ledger-updated">
                           {LEDGER_UPDATED_NOTE}
                         </span>
                       ) : null}
