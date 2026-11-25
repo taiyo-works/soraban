@@ -1,0 +1,91 @@
+{
+ "/ops/journal?tab=flights": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [],
+   "nav": 0,
+   "unreach": []
+  }
+ },
+ "/ops/journal?tab=inspections": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [],
+   "nav": 0,
+   "unreach": []
+  }
+ },
+ "/ops/flights": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [],
+   "nav": 0,
+   "unreach": []
+  }
+ },
+ "/ops/flights?includeVoided=1": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [],
+   "nav": 0,
+   "unreach": []
+  }
+ },
+ "/ops/flights/new?planId=6b0475e0-0b4c-4b15-93e8-eee6df3933e5": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [
+    "input[input]「」 幅 98<192",
+    "input[input]「」 幅 98<210",
+    "input[input]「」 幅 98<192",
+    "input[input]「」 幅 98<210"
+   ],
+   "nav": 0,
+   "unreach": []
+  }
+ },
+ "/ops/inspections/new": {
+  "base": {
+   "sw": 360,
+   "cw": 360
+  },
+  "zoom": {
+   "sw": 360,
+   "cw": 360,
+   "clipped": [],
+   "clippedContainers": [],
+   "nav": 0,
+   "unreach": []
+  }
+ }
+}

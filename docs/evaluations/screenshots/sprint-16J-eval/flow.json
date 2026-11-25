@@ -1,0 +1,111 @@
+{
+ "nightChecked": true,
+ "nightText": "夜間飛行",
+ "nightDoneEls": 0,
+ "allTypes": [
+  {
+   "id": "flight-type-airport_vicinity",
+   "t": "空港等周辺"
+  },
+  {
+   "id": "flight-type-emergency_airspace",
+   "t": "緊急用務空域"
+  },
+  {
+   "id": "flight-type-above_150m",
+   "t": "地表・水面から 150m 以上"
+  },
+  {
+   "id": "flight-type-did",
+   "t": "人口集中地区（DID）上空"
+  },
+  {
+   "id": "flight-type-night",
+   "t": "夜間飛行"
+  },
+  {
+   "id": "flight-type-bvlos",
+   "t": "目視外飛行"
+  },
+  {
+   "id": "flight-type-within_30m",
+   "t": "人・物件から 30m 未満"
+  },
+  {
+   "id": "flight-type-event",
+   "t": "催し場所上空"
+  },
+  {
+   "id": "flight-type-dangerous_goods",
+   "t": "危険物輸送"
+  },
+  {
+   "id": "flight-type-dropping",
+   "t": "物件投下"
+  }
+ ],
+ "otherDone": 0,
+ "otherShadow": "rgb(20, 24, 31) 0px 0px 0px 2px inset",
+ "saveBox": {
+  "x": 16,
+  "y": 2957.71875,
+  "width": 343,
+  "height": 56
+ },
+ "url": "http://127.0.0.1:3400/ops/flights/02e87b36-474d-496c-a689-4393b6e4d396",
+ "posts": 1,
+ "postBody": {
+  "aircraftId": "6fcb5c36-29e0-4de1-a34a-391a1d0d8c32",
+  "pilotId": "15e3d42f-3128-4d26-a657-281b5b470803",
+  "dailyInspectionId": null,
+  "purpose": "測量",
+  "waypoints": null,
+  "specificFlightTypes": [
+   "night"
+  ],
+  "takeoffPlace": "試験地点",
+  "takeoffLat": "35.434238",
+  "takeoffLng": "133.380508",
+  "takeoffAccuracyM": null,
+  "landingPlace": "試験地点",
+  "landingLat": "35.434238",
+  "landingLng": "133.380508",
+  "landingAccuracyM": null,
+  "takeoffAt": "2026-11-25T18:20",
+  "landingAt": "2026-11-25T18:20",
+  "safetyIssue": false,
+  "safetyIssueDetail": null,
+  "defects": [],
+  "clientRequestId": "c0b88385-be15-4552-b6f1-3266cbf4acc0",
+  "flightPlanId": "c37ea45a-2bd8-423e-8091-c8a81974b64d"
+ },
+ "errText": [
+  ""
+ ],
+ "countInList": 1,
+ "storage": {
+  "local": [
+   [
+    "soraban:ops-current-member",
+    "8d384ad3-4c5e-4379-8b60-a8ad397f0b7e"
+   ]
+  ],
+  "session": [],
+  "caches": [],
+  "idb": [
+   "soraban-ops"
+  ]
+ },
+ "wordHits": {},
+ "inspMarks": [
+  "済",
+  "済",
+  "済",
+  "済",
+  "済",
+  "済",
+  "済",
+  "済",
+  "済"
+ ]
+}

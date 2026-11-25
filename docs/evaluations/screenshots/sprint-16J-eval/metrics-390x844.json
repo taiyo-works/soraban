@@ -1,0 +1,263 @@
+{
+ "tabs:default": [
+  {
+   "t": "すべて",
+   "cur": "page",
+   "bs": "solid",
+   "bw": "2px",
+   "fw": "700",
+   "h": 48,
+   "w": 104,
+   "before": "\"\" / \"\"",
+   "fs": "16px",
+   "color": "rgb(20, 24, 31)"
+  },
+  {
+   "t": "飛行記録",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "日常点検",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "事故・ヒヤリハット",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 181,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  }
+ ],
+ "tabs:flights": [
+  {
+   "t": "すべて",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 83,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "飛行記録",
+   "cur": "page",
+   "bs": "solid",
+   "bw": "2px",
+   "fw": "700",
+   "h": 48,
+   "w": 122,
+   "before": "\"\" / \"\"",
+   "fs": "16px",
+   "color": "rgb(20, 24, 31)"
+  },
+  {
+   "t": "日常点検",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "事故・ヒヤリハット",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 181,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  }
+ ],
+ "tabs:inspections": [
+  {
+   "t": "すべて",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 83,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "飛行記録",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "日常点検",
+   "cur": "page",
+   "bs": "solid",
+   "bw": "2px",
+   "fw": "700",
+   "h": 48,
+   "w": 122,
+   "before": "\"\" / \"\"",
+   "fs": "16px",
+   "color": "rgb(20, 24, 31)"
+  },
+  {
+   "t": "事故・ヒヤリハット",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 181,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  }
+ ],
+ "tabs:incidents": [
+  {
+   "t": "すべて",
+   "cur": "page",
+   "bs": "solid",
+   "bw": "2px",
+   "fw": "700",
+   "h": 48,
+   "w": 104,
+   "before": "\"\" / \"\"",
+   "fs": "16px",
+   "color": "rgb(20, 24, 31)"
+  },
+  {
+   "t": "飛行記録",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "日常点検",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 101,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  },
+  {
+   "t": "事故・ヒヤリハット",
+   "cur": null,
+   "bs": "dashed",
+   "bw": "2px",
+   "fw": "500",
+   "h": 48,
+   "w": 181,
+   "before": "none",
+   "fs": "16px",
+   "color": "rgb(63, 75, 94)"
+  }
+ ],
+ "journal": {
+  "navTop": 771,
+  "btnBottom": 236.390625,
+  "btnH": 56,
+  "cardBottom": 747.640625,
+  "cardTop": 569.390625,
+  "fvn": "tabular-nums",
+  "fs": "20.8px",
+  "fw": "700",
+  "overnight": [
+   "離陸から着陸23:30–翌日 00:10",
+   "離陸から着陸01:00–01:25"
+  ],
+  "innerH": 844,
+  "sw": 390,
+  "cw": 390
+ },
+ "flights": "飛行年月日\n2026-12-28\n離陸から着陸\n23:30–翌日 00:10\n飛行時間\n0:40\n機体\nJU16JMWVWWE9T9\n機体の総飛行時間\n1:05\n操縦者 操縦 一郎",
+ "flightsMeta": {
+  "sw": 390,
+  "cw": 390
+ },
+ "voidedCount": 3,
+ "voidedText": "取消済み\n飛行年月日\n2026-12-26\n離陸から着陸\n05:00–05:15\n飛行時間\n0:15\n機体\nJU16JMWVWWE9T9\n操縦者 操縦 一郎",
+ "voidedStyle": {
+  "bs": "dashed"
+ },
+ "newPlan": {
+  "rows": [
+   {
+    "id": "flight-type-night",
+    "checked": true,
+    "text": "夜間飛行",
+    "cls": "sb-check-row sb-chk is-on",
+    "shadow": "rgb(20, 24, 31) 0px 0px 0px 2px inset",
+    "h": 72
+   }
+  ],
+  "n": 10,
+  "btns": [
+   "現在地を入れる",
+   "離陸：今",
+   "着陸：今",
+   "現在地を入れる",
+   "不具合を加える",
+   "飛行記録を保存"
+  ],
+  "secs": [
+   "機体・操縦者・日常点検",
+   "離陸",
+   "着陸",
+   "飛行概要",
+   "安全に影響のあった事項・不具合"
+  ],
+  "sw": 390,
+  "cw": 390
+ },
+ "inspLabels": [],
+ "inspDone": {
+  "done": "absent"
+ }
+}
