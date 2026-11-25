@@ -1,0 +1,24 @@
+PASS S1 主ボタン 375 ["judgement-primary"]
+PASS S1 長さ 375（候補が増えた DB） 3919px
+PASS S1 主ボタン 1280 ["judgement-primary"]
+PASS S1 長さ 1280（候補が増えた DB） 2605px
+PASS S2 機体訂正 200 200
+PASS S2 stale 主ボタン 375 ["plan-rejudge"]
+PASS S2 stale-box が総合の直下 375 {"totalBottom":717.625,"boxTop":891,"tilesTop":1092.375,"totalText":"古い判定：手続きが要る項目があります（1 件）","key":"needs_procedure","svgs":0,"signs":[]}
+PASS S2 タイルに古い判定 375 7/7
+PASS S2 シート見出しに古い判定 375 夜間飛行（古い判定）
+PASS S2 stale 主ボタン 1280 ["plan-rejudge"]
+PASS S2 stale-box が総合の直下 1280 {"totalBottom":580.671875,"boxTop":717.859375,"tilesTop":892.046875,"totalText":"古い判定：手続きが要る項目があります（1 件）","key":"needs_procedure","svgs":0,"signs":[]}
+PASS S2 タイルに古い判定 1280 7/7
+PASS S2 シート見出しに古い判定 1280 夜間飛行（古い判定）
+PASS S2 再判定後 judgement-primary が主ボタン ["judgement-primary"] stale-box=0
+PASS S3 viewer 主ボタン 375 ["judgement-primary"] note=1 rejudge=0
+PASS S3 viewer 主ボタン 1280 ["judgement-primary"] note=1 rejudge=0
+PASS S4 フォーカスが新しい見出しへ {"tag":"H2","text":"航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行","inDialog":true} tile=航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行
+PASS S4 isComposing の Esc で閉じない 
+PASS S4 keyCode 229 の Esc で閉じない 
+PASS S4 閉じるとそのタイルへ戻る 
+PASS S4 タイル数 7
+PASS S5 手続きの名前・提出先・期限 ["飛行承認（夜間飛行）\n提出先：国土交通省（DIPS 2.0）\n期限：2026-12-25 まで（飛行予定日 2027-01-10 の 10 開庁日以上前。土日・国民の祝日を除く）"]
+PASS S5 シートに禁止語なし 
+FAILS: 0

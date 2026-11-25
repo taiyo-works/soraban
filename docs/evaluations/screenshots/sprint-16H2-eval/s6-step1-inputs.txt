@@ -1,0 +1,5 @@
+plan-place-name:text
+plan-lat:text
+plan-lng:text
+plan-address-q:text
+plan-radius:text
