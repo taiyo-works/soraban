@@ -1,0 +1,93 @@
+HEAD 7d2b6c5, DB ev16l_d, build: 4d6JytvXwBQ1bDBa0Y4-m
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/_probe-eval-s172.spec.ts -g 'L-1・L-2・J-1' --reporter=list
+
+
+Running 12 tests using 1 worker
+
+[長さ] 主画面 375x812 draft: 2055px
+[初画面] 375x812 draft plan-title-heading 下端 157.0
+[初画面] 375x812 draft plan-tabs 下端 264.4
+[初画面] 375x812 draft plan-report-label 下端 317.6
+[初画面] 375x812 draft plan-primary-action 下端 381.6
+[初画面] 375x812 draft plan-report-status 下端 418.8
+  ✓   1 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・draft）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (1.1s)
+[長さ] 主画面 375x812 pending: 2055px
+[初画面] 375x812 pending plan-title-heading 下端 157.0
+[初画面] 375x812 pending plan-tabs 下端 264.4
+[初画面] 375x812 pending plan-report-label 下端 317.6
+[初画面] 375x812 pending plan-primary-action 下端 381.6
+[初画面] 375x812 pending plan-report-status 下端 418.8
+  ✓   2 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・pending）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (666ms)
+[長さ] 主画面 375x812 reported: 1847px
+[初画面] 375x812 reported plan-title-heading 下端 157.0
+[初画面] 375x812 reported plan-tabs 下端 264.4
+[初画面] 375x812 reported plan-report-label 下端 344.8
+[初画面] 375x812 reported plan-primary-action 下端 408.8
+[初画面] 375x812 reported plan-report-status 下端 500.3
+  ✓   3 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・reported）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (683ms)
+[長さ] 主画面 375x812 change: 2023px
+[初画面] 375x812 change plan-title-heading 下端 157.0
+[初画面] 375x812 change plan-tabs 下端 264.4
+[初画面] 375x812 change plan-report-label 下端 317.6
+[初画面] 375x812 change plan-primary-action 下端 381.6
+[初画面] 375x812 change plan-report-status 下端 607.5
+  ✓   4 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・change）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (711ms)
+[長さ] 主画面 375x812 voidedNone: 1351px
+[初画面] 375x812 voidedNone plan-title-heading 下端 157.0
+[初画面] 375x812 voidedNone plan-tabs 下端 346.8
+[初画面] 375x812 voidedNone plan-report-label 下端 400.0
+[初画面] 375x812 voidedNone plan-primary-action 下端 464.0
+  ✓   5 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・voidedNone）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (628ms)
+[長さ] 主画面 375x812 voidedRecorded: 1613px
+[初画面] 375x812 voidedRecorded plan-title-heading 下端 157.0
+[初画面] 375x812 voidedRecorded plan-tabs 下端 346.8
+[初画面] 375x812 voidedRecorded plan-report-label 下端 400.0
+[初画面] 375x812 voidedRecorded plan-primary-action 下端 464.0
+[初画面] 375x812 voidedRecorded plan-report-status 下端 738.5
+  ✓   6 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（375x812・voidedRecorded）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (701ms)
+[長さ] 主画面 1280x800 draft: 1568px
+[初画面] 1280x800 draft plan-title-heading 下端 186.0
+[初画面] 1280x800 draft plan-tabs 下端 297.8
+[初画面] 1280x800 draft plan-report-label 下端 351.0
+[初画面] 1280x800 draft plan-primary-action 下端 415.0
+[初画面] 1280x800 draft plan-report-status 下端 452.2
+  ✓   7 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・draft）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (714ms)
+[長さ] 主画面 1280x800 pending: 1568px
+[初画面] 1280x800 pending plan-title-heading 下端 186.0
+[初画面] 1280x800 pending plan-tabs 下端 297.8
+[初画面] 1280x800 pending plan-report-label 下端 351.0
+[初画面] 1280x800 pending plan-primary-action 下端 415.0
+[初画面] 1280x800 pending plan-report-status 下端 452.2
+  ✓   8 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・pending）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (847ms)
+[長さ] 主画面 1280x800 reported: 1349px
+[初画面] 1280x800 reported plan-title-heading 下端 186.0
+[初画面] 1280x800 reported plan-tabs 下端 297.8
+[初画面] 1280x800 reported plan-report-label 下端 351.0
+[初画面] 1280x800 reported plan-primary-action 下端 415.0
+[初画面] 1280x800 reported plan-report-status 下端 452.2
+  ✓   9 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・reported）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (786ms)
+[長さ] 主画面 1280x800 change: 1533px
+[初画面] 1280x800 change plan-title-heading 下端 186.0
+[初画面] 1280x800 change plan-tabs 下端 297.8
+[初画面] 1280x800 change plan-report-label 下端 351.0
+[初画面] 1280x800 change plan-primary-action 下端 415.0
+[初画面] 1280x800 change plan-report-status 下端 586.5
+  ✓  10 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・change）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (730ms)
+[長さ] 主画面 1280x800 voidedNone: 940px
+[初画面] 1280x800 voidedNone plan-title-heading 下端 186.0
+[初画面] 1280x800 voidedNone plan-tabs 下端 357.0
+[初画面] 1280x800 voidedNone plan-report-label 下端 410.2
+[初画面] 1280x800 voidedNone plan-primary-action 下端 474.2
+  ✓  11 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・voidedNone）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (811ms)
+[長さ] 主画面 1280x800 voidedRecorded: 1150px
+[初画面] 1280x800 voidedRecorded plan-title-heading 下端 186.0
+[初画面] 1280x800 voidedRecorded plan-tabs 下端 357.0
+[初画面] 1280x800 voidedRecorded plan-report-label 下端 410.2
+[初画面] 1280x800 voidedRecorded plan-primary-action 下端 474.2
+[初画面] 1280x800 voidedRecorded plan-report-status 下端 612.7
+  ✓  12 e2e/ops-db/_probe-eval-s172.spec.ts:172:11 › Sprint 17-2 E2E-DB：通報の主画面と作業台 › L-1・L-2・J-1・J-4・主操作（1280x800・voidedRecorded）：主画面の長さ・最初の画面・判定の 1 行・禁止語 (900ms)
+
+  12 passed (14.4s)
+exit 0
