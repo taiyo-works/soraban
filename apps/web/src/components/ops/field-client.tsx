@@ -107,12 +107,16 @@ import { FIELD_BACK } from "./ops-nav-model";
 // 現場の値（56／64px・7:1・影なし・動きなし）は、現場の 2 画面を開いている間だけ <html data-mode="field"> が付くことで効く（FieldModeMark）。
 // 見た目は ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*。意味は枠の形（実線・破線・太さ）と記号・文字が担い、色は補助。
 const BTN = "opx-btn w-full";
+// 主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（16-K K2-4）：飛行中は「着陸」、着陸後で日誌が未記入なら「日誌を記入する」、それ以外は「離陸」。
+// 確認・保存・リンクの押す部品はすべて副（BTN）。選択中は BTN_SEL（主色の面。data-variant は付けない）。
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
 // 選択中・現在地の面（主色。右端の丸と矢印は付けない：押すと進む意味になるため）
 const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
-const BTN_FLIGHT = "opx-btn opx-btn-primary opx-btn-field w-full min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
+const BTN_FLIGHT_SIZE = "min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
+const BTN_FLIGHT = `${BTN_PRIMARY} ${BTN_FLIGHT_SIZE}`;
+const BTN_FLIGHT_SECOND = `opx-btn opx-btn-field w-full ${BTN_FLIGHT_SIZE}`;
 // Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い地・左寄せ・
 // 太字にしない帯にする（高さ 56px・全幅・文字 18px は保つ）。行き先は右端の矢印で示す。
 const BAND_INCIDENT = "opx-band";
@@ -537,6 +541,8 @@ export function FieldClient({
   const plan = view.plan;
   const allChecked = FIELD_CHECK_ITEMS.every((i) => state.checks[i].done);
   const stage: 1 | 2 | 3 = inFlight ? 2 : state.pendingJournal.length > 0 ? 3 : allChecked ? 2 : 1;
+  // 着陸後で日誌が未記入のとき、主ボタンは「日誌を記入する」（離陸は副。並びも日誌が先）。それ以外は離着陸のボタンが主（K2-4）
+  const journalPrimary = stage === 3 && view.canJournal;
   const hm = (iso: string): string => jstTime(new Date(iso));
   const elapsed = open && nowMs > 0 ? formatElapsed(nowMs - new Date(open.takeoffAt).getTime()) : formatElapsed(0);
   const wlNote = wakeLockNote(wl, inFlight);
@@ -636,7 +642,7 @@ export function FieldClient({
                 </a>
               ) : null}
               {canConfirm ? (
-                <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid={`field-docs-confirm-${d.key}`} onClick={() => onCheck("docs_confirm", { docKey: d.key })}>
+                <button type="button" className={BTN} data-testid={`field-docs-confirm-${d.key}`} onClick={() => onCheck("docs_confirm", { docKey: d.key })}>
                   {FIELD_DOC_CONFIRM_ACTION}
                 </button>
               ) : null}
@@ -683,7 +689,7 @@ export function FieldClient({
         </a>
       ) : null}
       {!rs.done && view.canRecord && !cancelled ? (
-        <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-restriction-submit" onClick={() => onCheck("flight_restriction")}>
+        <button type="button" className={BTN} data-testid="field-restriction-submit" onClick={() => onCheck("flight_restriction")}>
           {FIELD_RESTRICTION_ACTION}
         </button>
       ) : null}
@@ -748,8 +754,7 @@ export function FieldClient({
                       type="button"
                       role="radio"
                       aria-checked={on}
-                      data-variant="primary"
-                      className={on ? BTN_PRIMARY : BTN_OUTLINE}
+                      className={on ? BTN_SEL : BTN_OUTLINE}
                       data-testid={`field-site-${f}-${o.value}`}
                       onClick={() => setSiteSel((cur) => ({ ...cur, [f]: o.value }))}
                     >
@@ -817,7 +822,7 @@ export function FieldClient({
               {siteMsg}
             </p>
           ) : null}
-          <button type="button" data-variant="primary" className={BTN_PRIMARY} disabled={!siteCanSubmit || siteBusy} data-testid="field-site-submit" onClick={() => void onSiteSubmit()}>
+          <button type="button" className={BTN} disabled={!siteCanSubmit || siteBusy} data-testid="field-site-submit" onClick={() => void onSiteSubmit()}>
             現場状況を記録する
           </button>
           {!draftSite ? <p data-testid="field-site-hint">第三者・他機・雨・視程を選ぶと記録できます（風速・気温は未入力でも記録できます）。</p> : null}
@@ -878,7 +883,7 @@ export function FieldClient({
                       <p data-testid="inspection-disclaimer">
                         {DISCLAIMER_INSPECTION}
                       </p>
-                      <a href={inspectionNewHref(planId)} data-variant="primary" className={BTN_PRIMARY} data-testid="field-inspection-link">
+                      <a href={inspectionNewHref(planId)} className={BTN} data-testid="field-inspection-link">
                         {FIELD_CHECK_ACTION_LABEL.inspection}
                       </a>
                     </>
@@ -948,8 +953,7 @@ export function FieldClient({
                       </div>
                       <button
                         type="button"
-                        data-variant="primary"
-                        className={BTN_PRIMARY}
+                        className={BTN}
                         disabled={!sourceChosen}
                         data-testid="field-em-submit"
                         onClick={() => {
@@ -998,7 +1002,7 @@ export function FieldClient({
                     </a>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled && view.report.canRecheck ? (
-                    <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-recheck-submit" onClick={() => onCheck("report_recheck")}>
+                    <button type="button" className={BTN} data-testid="field-recheck-submit" onClick={() => onCheck("report_recheck")}>
                       {FIELD_CHECK_ACTION_LABEL.report_recheck}
                     </button>
                   ) : null}
@@ -1021,7 +1025,7 @@ export function FieldClient({
                     </ul>
                   ) : null}
                   {!c.done && view.canRecord && !cancelled ? (
-                    <button type="button" data-variant="primary" className={BTN_PRIMARY} data-testid="field-carry-submit" onClick={() => onCheck("carry")}>
+                    <button type="button" className={BTN} data-testid="field-carry-submit" onClick={() => onCheck("carry")}>
                       {FIELD_CHECK_ACTION_LABEL.carry}
                     </button>
                   ) : null}
@@ -1068,7 +1072,7 @@ export function FieldClient({
       {inFlight ? (
         <button
           type="button"
-          data-variant="primary"
+          {...(journalPrimary ? {} : { "data-variant": "primary" })}
           className={BTN_FLIGHT}
           data-testid="field-flight-button"
           data-action="landing"
@@ -1081,8 +1085,8 @@ export function FieldClient({
         <>
           <button
             type="button"
-            data-variant="primary"
-            className={BTN_FLIGHT}
+            {...(journalPrimary ? {} : { "data-variant": "primary" })}
+            className={journalPrimary ? BTN_FLIGHT_SECOND : BTN_FLIGHT}
             data-testid="field-flight-button"
             data-action="takeoff"
             disabled={cancelled}
@@ -1196,7 +1200,7 @@ export function FieldClient({
                 ) : null}
                 {!f.post.done && view.canInspect && !later ? (
                   <>
-                    <a href={postInspectionNewHref(planId)} data-variant="primary" className={BTN_PRIMARY} data-testid="field-post-link">
+                    <a href={postInspectionNewHref(planId)} className={BTN} data-testid="field-post-link">
                       {FIELD_POST_INSPECTION_ACTION}
                     </a>
                     <button
@@ -1239,12 +1243,12 @@ export function FieldClient({
         ③ 日誌
       </h2>
       {state.pendingJournal.length > 0 && view.canJournal ? (
-        state.pendingJournal.map((f) => (
+        state.pendingJournal.map((f, i) => (
           <a
             key={f.takeoffEventId}
             href={journalHref(f)}
-            data-variant="primary"
-            className={BTN_PRIMARY}
+            {...(i === 0 && journalPrimary ? { "data-variant": "primary" } : {})}
+            className={i === 0 && journalPrimary ? BTN_PRIMARY : BTN}
             data-testid="field-journal-link"
             onClick={(e) => void goJournal(e, journalHref(f))}
           >
@@ -1276,29 +1280,38 @@ export function FieldClient({
   const bundleStale = bundle !== null && clockMs > 0 && fieldBundleIsStale(bundle.fetchedAt, clockMs);
   const expiryHours = clockMs > 0 ? expiringSoon(outbox, clockMs) : null;
   const dayTime = (iso: string): string => `${jstDate(new Date(iso)).slice(5).replace("-", "/")} ${jstTime(new Date(iso))}`;
+  // 状態の帯（16-K K2-3）：320・375 幅で「古い可能性」が出ても高さ 100px 以下。帯には短い印と文字（！古い可能性）だけを置き、説明は帯の下の
+  // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.3（帯は p・li・dd ではなく、字の大きさ 18px は保つ）。
   const bandEl = (
-    <section
-      aria-label="接続と送信の状況"
-      className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-b-2 border-sb-edge bg-sb-base px-1 py-2 text-lg leading-snug"
-      data-testid="field-status-band"
-      data-online={online ? "true" : "false"}
-    >
-      <span className="font-bold" data-testid="field-status-connection">
-        {online ? "● 接続あり" : "× 接続なし（圏外）"}
-      </span>
-      <span className="font-bold" data-testid="field-status-unsent" data-count={unsent}>
-        送信待ち {unsent} 件
-      </span>
-      <span data-testid="field-status-saved">最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}</span>
-      <span data-testid="field-status-prefetch">
-        先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}
-        {bundleStale ? (
-          <strong className="ml-1" data-testid="field-status-prefetch-stale">
-            （古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）
-          </strong>
-        ) : null}
-      </span>
-    </section>
+    <>
+      <section
+        aria-label="接続と送信の状況"
+        className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-1 text-lg leading-[1.3]"
+        data-testid="field-status-band"
+        data-online={online ? "true" : "false"}
+      >
+        <span className="font-bold" data-testid="field-status-connection">
+          {online ? "● 接続あり" : "× 接続なし（圏外）"}
+        </span>
+        <span className="font-bold" data-testid="field-status-unsent" data-count={unsent}>
+          送信待ち {unsent} 件
+        </span>
+        <span data-testid="field-status-saved">最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : "—"}</span>
+        <span data-testid="field-status-prefetch">
+          先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}
+          {bundleStale ? (
+            <strong className="ml-1 whitespace-nowrap" data-testid="field-status-prefetch-stale">
+              ！古い可能性
+            </strong>
+          ) : null}
+        </span>
+      </section>
+      {bundleStale ? (
+        <p className={BOX_NOTE} data-testid="field-status-prefetch-stale-help">
+          先読みした内容が古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください。
+        </p>
+      ) : null}
+    </>
   );
 
   return (
