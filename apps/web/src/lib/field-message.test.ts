@@ -26,6 +26,9 @@ describe("tidyEngineText（エンジンの文の「必ず」を画面の側で�
     expect(shown).toContain("地理院地図・DIPS で確認してください");
     expect(shown).toContain("確認できません（未確認）");
   });
+  it("「必ずしも」は壊さず、単独の「必ず」だけ外す（N-4）", () => {
+    expect(tidyEngineText("必ずしも該当するとは限りません。DIPS で必ず確認してください")).toBe("必ずしも該当するとは限りません。DIPS で確認してください");
+  });
   it("「必ず」の無い文は変えない", () => {
     expect(tidyEngineText("DID に該当します。")).toBe("DID に該当します。");
   });

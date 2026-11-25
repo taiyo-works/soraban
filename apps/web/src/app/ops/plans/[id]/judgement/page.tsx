@@ -48,9 +48,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
   const j = plan.judgement;
   const stale = plan.freshness.stale;
   const total = judgementTotal(verdict, stale);
-  // 古くて再判定できるときは、再判定が主ボタン。DIPS に出す内容の確認は副ボタン（主ボタンはいつも 1 つ）
-  const rejudgeIsPrimary = stale && updatable;
-  // 16-L の L-4：古い判定のとき、DIPS に出す内容の確認は主にしない。再判定できる人は再判定が主、閲覧だけの人は主ボタン無し（再判定は押せず、
+  // 16-L の L-4：古い判定のとき、DIPS に出す内容の確認は主にしない。再判定できる人は plan-rejudge が主、閲覧だけの人は主ボタン無し（再判定は押せず、
   // 古い判定のまま DIPS へ進む導線を強めないため。サーバーの権限は変えない＝表示だけ）
   const forwardIsPrimary = !stale;
   const fetchedAt = formatJst(new Date(j.checkedAt));
@@ -124,7 +122,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
                     <RejudgeButton planId={plan.id} version={plan.version} highlight />
                   </div>
                 ) : !plan.voided ? (
-                  // 再判定の権限がない（閲覧だけ）利用者には、次に誰が何をするかを 1 行で示す。主ボタンは judgement-primary のまま
+                  // 再判定の権限がない（閲覧だけ）利用者には、次に誰が何をするかを 1 行で示す。古い判定のとき judgement-primary は副で、閲覧だけの人の主ボタンは 0
                   <p data-note="" className="text-sb-ink-2" data-testid="plan-stale-readonly-note">
                     判定のやり直しは、計画を変更できる人が行います
                   </p>

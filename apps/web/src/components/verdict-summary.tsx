@@ -544,7 +544,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                         const replaced = c === PERMIT_SCOPE_NOT_VERIFIED_NOTE ? permitNotes?.applied[d.itemId] : undefined;
                         return (
                           <li key={c} data-testid="verdict-done-condition" {...(replaced ? { "data-permit-registry": "true" } : {})}>
-                            ・{replaced ?? c}
+                            ・{replaced ?? tidyEngineText(c)}
                           </li>
                         );
                       })}
