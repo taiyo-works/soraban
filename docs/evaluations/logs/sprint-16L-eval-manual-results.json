@@ -1,0 +1,399 @@
+{
+ "ids": {
+  "aircraftId": "1bebcf75-69e4-4e58-8269-a8d31fe03aa8",
+  "pilotId": "d14579bd-24b0-4767-9dbd-b40e3762916e",
+  "permitId": "987c49cb-a4fd-4f7a-84af-a4dd6ce4502f",
+  "placeId": "4b999d82-c1db-42b1-81a9-97018a12c92d",
+  "incidentId": "2e39de6f-fb75-436a-b2d6-28cb002f21c6",
+  "planId": "49223ba2-535c-4f44-98ab-35009c204cb3",
+  "staleId": "2f17027b-b881-4ab9-b0aa-65c49fe0ab38",
+  "unknownId": "7af6cc4c-c780-4d74-8ed6-c782689c94ed",
+  "freshId": "349a82a9-7fe6-4b2b-8d1e-c0e61d521c60"
+ },
+ "incident@375": {
+  "base": [
+   "incident-submit"
+  ],
+  "reportOpen": [
+   "incident-submit"
+  ],
+  "reportSubmitVariant": null,
+  "consultOpen": [
+   "incident-submit"
+  ],
+  "followUpVariant": null,
+  "viewer": []
+ },
+ "incident@1280": {
+  "base": [
+   "incident-submit"
+  ],
+  "reportOpen": [
+   "incident-submit"
+  ],
+  "reportSubmitVariant": null,
+  "consultOpen": [
+   "incident-submit"
+  ],
+  "followUpVariant": null,
+  "viewer": []
+ },
+ "judgement@375": {
+  "viewerStale": {
+   "prim": [],
+   "note": "判定のやり直しは、計画を変更できる人が行います",
+   "stale": "true",
+   "rejudge": 0,
+   "jp": null
+  },
+  "viewerFresh": {
+   "prim": [
+    "judgement-primary"
+   ],
+   "stale": "false"
+  },
+  "mgrStale": {
+   "prim": [
+    "plan-rejudge"
+   ],
+   "jpVariant": null
+  },
+  "mgrFresh": {
+   "prim": [
+    "judgement-primary"
+   ]
+  },
+  "unknown": {
+   "tiles": 6,
+   "hasMust": false,
+   "hasUnconfirmed": true,
+   "hasConfirmSentence": 1,
+   "hasOK": false,
+   "sample": "判定不能（データ未整備）\n\n判定の理由\n判定不能（データ未整備）。判定地点の市町村を特定できず（逆ジオコーディング失敗）、同梱の DID にも該当しなかったため、DID 該当／非該当を確認できません（未確認）。地理院地図・DIPS で確認してください。\n元の判定\n判定不能（データ未整備）\n適用した許可\n—\n法的な重さ\n国の法律\n手続き\n航空法第132条の85第1項第2号の該当を確認（データ未整備）\n提出先：国土交通省\n期限：飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）\n判定の取得時刻（日本時間）\n2027-01-05 12:00\n根拠（この判定に使ったデータ）\n\n項目ごとのデータの対応は保存していないため、判定全体で使ったデータを示します。\n\n空港（山陰・但馬の供用中空港）— 公開資料からの概算\n提供元：公開資料（地形図・空港要覧）からの概算（そらばん作成）\n確認日 2026-05-14／版 airports.json（2026-05-14 版）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n国土数値情報 人口集中地区データ（A16）令和2年\n提供元：国土交通省 国土政策局（原典：総務省統計局 令和2年国勢調査 人口集中地区境界データ）\n基準年 2020／確認日 2026-10-18／版 A16-20（2024年6月公開の2020年版）\n出典を開く\n⁠ ↗\n指定史跡（10 市町）— 公開資料からの概算\n提供元：公開資料（文化庁 国指定文化財等データベース等）からの概算（そらばん作成）\n確認日 2026-04-30／版 zones.ts 収録版（2026-04-30）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n工業専用地域（用途地域）— 市町村単位の収録\n提供元：国土交通省（国土数値情報 用途地域 A29。原典は各市町の都市計画決定）\n基準年 2019／確認日 2026-10-18／版 A29-19（令和元年度）。収録範囲台帳 2026-10-18 版\n出典を開く\n⁠ ↗\n都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap\n提供元：公開資料からの概算（そらばん作成）＋ OpenStreetMap contributors（Overpass API）\n確認日 2026-05-19／版 data/parks/by-muni（2026-05-19 マージ版）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算\n提供元：公開資料（地図）からの概算（そらばん作成）\n確認日 2026-04-30／版 zones.ts 収録版（2026-04-30）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n小型無人機等飛行禁止法 対象施設（鳥取県・島根県）\n提供元：防衛省・警察庁・鳥取県警察・島根県警察の公表資料をそらばんが構造化\n基準年 2026／確認日 2026-10-19／版 facilities.json 2026-10-19 版\n出典を開く\n⁠ ↗"
+  },
+  "unknownTotal": "古い判定：未確認の項目があります（4 件）"
+ },
+ "judgement@1280": {
+  "viewerStale": {
+   "prim": [],
+   "note": "判定のやり直しは、計画を変更できる人が行います",
+   "stale": "true",
+   "rejudge": 0,
+   "jp": null
+  },
+  "viewerFresh": {
+   "prim": [
+    "judgement-primary"
+   ],
+   "stale": "false"
+  },
+  "mgrStale": {
+   "prim": [
+    "plan-rejudge"
+   ],
+   "jpVariant": null
+  },
+  "mgrFresh": {
+   "prim": [
+    "judgement-primary"
+   ]
+  },
+  "unknown": {
+   "tiles": 6,
+   "hasMust": false,
+   "hasUnconfirmed": true,
+   "hasConfirmSentence": 1,
+   "hasOK": false,
+   "sample": "判定不能（データ未整備）\n\n判定の理由\n判定不能（データ未整備）。判定地点の市町村を特定できず（逆ジオコーディング失敗）、同梱の DID にも該当しなかったため、DID 該当／非該当を確認できません（未確認）。地理院地図・DIPS で確認してください。\n元の判定\n判定不能（データ未整備）\n適用した許可\n—\n法的な重さ\n国の法律\n手続き\n航空法第132条の85第1項第2号の該当を確認（データ未整備）\n提出先：国土交通省\n期限：飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）\n判定の取得時刻（日本時間）\n2027-01-05 12:00\n根拠（この判定に使ったデータ）\n\n項目ごとのデータの対応は保存していないため、判定全体で使ったデータを示します。\n\n空港（山陰・但馬の供用中空港）— 公開資料からの概算\n提供元：公開資料（地形図・空港要覧）からの概算（そらばん作成）\n確認日 2026-05-14／版 airports.json（2026-05-14 版）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n国土数値情報 人口集中地区データ（A16）令和2年\n提供元：国土交通省 国土政策局（原典：総務省統計局 令和2年国勢調査 人口集中地区境界データ）\n基準年 2020／確認日 2026-10-18／版 A16-20（2024年6月公開の2020年版）\n出典を開く\n⁠ ↗\n指定史跡（10 市町）— 公開資料からの概算\n提供元：公開資料（文化庁 国指定文化財等データベース等）からの概算（そらばん作成）\n確認日 2026-04-30／版 zones.ts 収録版（2026-04-30）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n工業専用地域（用途地域）— 市町村単位の収録\n提供元：国土交通省（国土数値情報 用途地域 A29。原典は各市町の都市計画決定）\n基準年 2019／確認日 2026-10-18／版 A29-19（令和元年度）。収録範囲台帳 2026-10-18 版\n出典を開く\n⁠ ↗\n都市公園（12 市町村）— 公開資料からの概算 ＋ OpenStreetMap\n提供元：公開資料からの概算（そらばん作成）＋ OpenStreetMap contributors（Overpass API）\n確認日 2026-05-19／版 data/parks/by-muni（2026-05-19 マージ版）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n県条例の対象施設（病院・学校・庁舎・駅・温泉街 等）— 公開資料からの概算\n提供元：公開資料（地図）からの概算（そらばん作成）\n確認日 2026-04-30／版 zones.ts 収録版（2026-04-30）（確認日が古い：90 日超）\n出典を開く\n⁠ ↗\n小型無人機等飛行禁止法 対象施設（鳥取県・島根県）\n提供元：防衛省・警察庁・鳥取県警察・島根県警察の公表資料をそらばんが構造化\n基準年 2026／確認日 2026-10-19／版 facilities.json 2026-10-19 版\n出典を開く\n⁠ ↗"
+  },
+  "unknownTotal": "古い判定：未確認の項目があります（4 件）"
+ },
+ "public/35.0,133.0": {
+  "must": true,
+  "unconfirmed": true,
+  "confirmSentence": [
+   "飛行の可否は、国土交通省（DIPS 2.0）・警察・各自治体で最終確認してください",
+   "地理院地図・DIPS で確認してください",
+   "飛行の前に、国土交通省（DIPS 2.0）・警察・各自治体の最新の情報を確認してください",
+   "地理院地図・DIPS で必ず確認してください"
+  ],
+  "okWords": [],
+  "mustContext": [
+   "飛行の前後に必ず行うこと",
+   "せん（未確認）。地理院地図・DIPS で必ず確認してください。"
+  ]
+ },
+ "inspection@360x740": {
+  "noteBottom": 663.953125,
+  "navTop": 667,
+  "margin": 3.046875,
+  "nowBtn": {
+   "x": 264,
+   "y": 371.953125,
+   "width": 64,
+   "height": 48
+  }
+ },
+ "inspection-200@390": {
+  "scrollW": 390,
+  "clientW": 390,
+  "now": {
+   "x": 214,
+   "y": 1019,
+   "w": 128,
+   "h": 48
+  },
+  "legend": {
+   "x": 48,
+   "y": 996,
+   "w": 143,
+   "h": 95
+  },
+  "legendText": "実施時刻必須",
+  "inputs": [
+   {
+    "x": 48,
+    "y": 1149,
+    "w": 143,
+    "h": 56
+   },
+   {
+    "x": 199,
+    "y": 1149,
+    "w": 143,
+    "h": 56
+   }
+  ],
+  "fieldset": {
+   "x": 48,
+   "y": 996,
+   "w": 294,
+   "h": 210
+  }
+ },
+ "inspection-200@430": {
+  "scrollW": 430,
+  "clientW": 430,
+  "now": {
+   "x": 254,
+   "y": 898,
+   "w": 128,
+   "h": 48
+  },
+  "legend": {
+   "x": 48,
+   "y": 875,
+   "w": 163,
+   "h": 95
+  },
+  "legendText": "実施時刻必須",
+  "inputs": [
+   {
+    "x": 48,
+    "y": 1028,
+    "w": 163,
+    "h": 56
+   },
+   {
+    "x": 219,
+    "y": 1028,
+    "w": 163,
+    "h": 56
+   }
+  ],
+  "fieldset": {
+   "x": 48,
+   "y": 875,
+   "w": 334,
+   "h": 210
+  }
+ },
+ "report-rows": {
+  "n": 37,
+  "bad": [
+   {
+    "id": "report-item-reporter_tel_country",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | 電話番号の国コード（通報者） | telephoneCountry | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-reporter_email",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | メールアドレス（通報者） | email | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-pilot_tel_country",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | 電話番号の国コード（操縦者） | telephoneCountry | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-pilot_email",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | メールアドレス（操縦者） | email | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-permit_contact_tel_country",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | 電話番号の国コード（許可・承認） | telephoneCountry | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-permit_contact_email",
+    "st": "dips_only",
+    "dashes": 2,
+    "text": "－ | メールアドレス（許可・承認） | email | そらばんは保持しません。DIPS で入力してください"
+   }
+  ],
+  "sample": [
+   {
+    "id": "report-item-other_business_text",
+    "st": "not_applicable",
+    "dashes": 1,
+    "text": "その他1理由入力 | othergyomutext | － | 該当なし"
+   },
+   {
+    "id": "report-item-other_non_business_text",
+    "st": "not_applicable",
+    "dashes": 1,
+    "text": "その他2理由入力 | othergyomugaitext | － | 該当なし"
+   },
+   {
+    "id": "report-item-insurance_company",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 保険会社名 | insuranceCompany | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-insurance_product",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 商品名 | insuranceProduct | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-insurance_person",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 補償金額(対人) | interPerson | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-insurance_object",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 補償金額(対物) | interObject | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-insurance_ability",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 賠償能力 | insuranceAbility | そらばんは保持しません。DIPS で入力してください"
+   },
+   {
+    "id": "report-item-contact_reporter_flag",
+    "st": "dips_only",
+    "dashes": 1,
+    "text": "－ | 連絡先フラグ（通報者） | contactReporterFlag | そらばんは保持しません。DIPS で入力してください"
+   }
+  ]
+ },
+ "320-200": {
+  "main": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [
+    [
+     "判定",
+     "（補助）：",
+     "要手続き",
+     "（判定不能 2",
+     "件",
+     "（データ未整",
+     "備））",
+     "!判定が",
+     "古い",
+     "!出典が",
+     "古い",
+     "判定を見る →"
+    ],
+    [
+     "確認：",
+     "…確認待",
+     "ち",
+     "計画の確認へ →"
+    ]
+   ],
+   "over": []
+  },
+  "overview": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  },
+  "report": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  },
+  "plans": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  },
+  "about": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  },
+  "incident": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  },
+  "judgement": {
+   "scrollW": 320,
+   "clientW": 320,
+   "links": [],
+   "over": []
+  }
+ },
+ "wording": {
+  "/ops/about": [
+   "承認、機体登録、操縦者登録などの申請の作成・提出とその支援を行いませ",
+   "りえます。制度の最新性・正確性は保証しません。飛行の前に、国土交通省"
+  ],
+  "/ops/permits": [
+   "TEST-PERMIT-REVOKED-004"
+  ],
+  "/ops/incidents/2e39de6f-fb75-436a-b2d6-28cb002f21c6": [
+   "必要かどうかを判断するものでも、保証するものでもありません。類型は国",
+   "必要かどうかを判断するものでも、保証するものでもありません。類型は国"
+  ],
+  "/ops/incidents/new": [
+   "記録は、安全を確保したあとで構いません。"
+  ],
+  "/ops/plans": [
+   "の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が",
+   "のとして扱いません。許可・承認の申請と飛行計画の通報は、利用者本人が"
+  ],
+  "/ops/plans/49223ba2-535c-4f44-98ab-35009c204cb3": [
+   "の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が"
+  ],
+  "/ops/plans/49223ba2-535c-4f44-98ab-35009c204cb3/judgement": [
+   "の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が"
+  ],
+  "/ops/plans/2f17027b-b881-4ab9-b0aa-65c49fe0ab38/judgement": [
+   "の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が"
+  ],
+  "/ops/plans/7af6cc4c-c780-4d74-8ed6-c782689c94ed/judgement": [
+   "の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が"
+  ]
+ }
+}
