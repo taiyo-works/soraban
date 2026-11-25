@@ -446,7 +446,8 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     await expect(sheet).toHaveCount(0);
 
     // N-7：シートが開いたまま別のタイルを押したら、フォーカスは新しい見出しへ。閉じたときは、そのタイルへ戻る
-    if (items.length >= 2) {
+    expect(items.length, "N-7 の前提：タイルが 2 つ以上（夜間飛行の計画は項目が 2 つ以上になる）").toBeGreaterThanOrEqual(2);
+    {
       const a = tiles.nth(0);
       const b = tiles.nth(1);
       await a.click();
@@ -465,19 +466,20 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     };
     const procs = verdictFull.result.verdict.procedures;
     const needsTile = page.locator('[data-testid="judgement-tile"][data-verdict="needs_procedure"]').first();
-    if ((await needsTile.count()) > 0) {
+    // 前提（夜間飛行の計画は、要手続きの項目と、その項目の手続きを持つ）。満たさないときは何も確かめずに通らず、ここで落とす
+    expect(await needsTile.count(), "要手続きのタイルがある").toBeGreaterThan(0);
+    {
       const needsId = (await needsTile.getAttribute("data-item-id"))!;
       const mine = procs.filter((p) => p.itemId === needsId);
+      expect(mine.length, "要手続きの項目に、手続きがある").toBeGreaterThan(0);
       await needsTile.click();
       await expect(sheet).toBeVisible();
-      if (mine.length > 0) {
-        const rows = page.getByTestId("judgement-sheet-procedure");
-        await expect(rows).toHaveCount(mine.length);
-        for (const p of mine) {
-          const t = await rows.filter({ hasText: p.title }).first().innerText();
-          expect(t).toContain(`提出先：${p.submitTo}`);
-          expect(t).toContain(`期限：${p.deadline.label}`);
-        }
+      const rows = page.getByTestId("judgement-sheet-procedure");
+      await expect(rows).toHaveCount(mine.length);
+      for (const p of mine) {
+        const t = await rows.filter({ hasText: p.title }).first().innerText();
+        expect(t).toContain(`提出先：${p.submitTo}`);
+        expect(t).toContain(`期限：${p.deadline.label}`);
       }
       await page.keyboard.press("Escape");
       await expect(sheet).toHaveCount(0);
@@ -550,6 +552,34 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     await expect(page.getByTestId("judgement-total")).toHaveAttribute("data-stale", "false");
     await expect(page.getByTestId("judgement-primary")).toBeVisible(); // 再読み込みの直後は本文が display:none の中（Suspense）
     expect(await visiblePrimaries(page), "再判定の後").toEqual(["judgement-primary"]);
+  });
+
+  test("N-e. 判定が古く、再判定の権限がない（閲覧だけの）利用者：主ボタンは judgement-primary の 1 つだけ。「判定のやり直しは、計画を変更できる人が行います」の案内が出て、再判定のボタンは出ない", async ({ page }) => {
+    const ac = await mkAircraft({ maxTakeoffWeightKg: 0.9 });
+    const plan = await mkPlan(ac.id);
+    const patch = await manager.patch(`/api/ops/aircraft/${ac.id}`, { data: { maxTakeoffWeightKg: 1.5, expectedVersion: ac.version, reason: "重量の訂正" } });
+    expect(patch.status(), await patch.text()).toBe(200);
+    // 閲覧者（a-viewer）は計画を変更できない（既存の E2E と同じ、シードの閲覧者）
+    const viewer = await apiAs(seeded("a-viewer"));
+    expect((await viewer.patch(`/api/ops/plans/${plan.id}`, { data: { expectedVersion: plan.version, reason: "x", title: "x" } })).status()).toBe(403);
+    await viewer.dispose();
+    await login(page, "a-viewer");
+    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await expect(page.getByTestId("judgement-total")).toHaveAttribute("data-stale", "true");
+    await expect(page.getByTestId("plan-stale-box")).toBeVisible();
+    const note = page.getByTestId("plan-stale-readonly-note");
+    await expect(note).toBeVisible();
+    await expect(note).toHaveText("判定のやり直しは、計画を変更できる人が行います");
+    for (const w of ["完璧", "保証", "必ず", "代行", "代理", "申請", "通報不要", "問題なし"]) expect(await note.innerText(), w).not.toContain(w);
+    await expect(page.getByTestId("plan-rejudge")).toHaveCount(0);
+    await expect(page.getByTestId("judgement-primary")).toBeVisible();
+    expect(await visiblePrimaries(page), "閲覧だけ・古いとき").toEqual(["judgement-primary"]);
+    await expect(page.getByTestId("judgement-primary")).toHaveAttribute("data-variant", "primary");
+    // 計画を変更できる人（運航管理者）には、案内は出ず、再判定が主ボタン
+    await login(page, "a-manager");
+    await page.goto(`/ops/plans/${plan.id}/judgement`);
+    await expect(page.getByTestId("plan-rejudge")).toBeVisible();
+    await expect(page.getByTestId("plan-stale-readonly-note")).toHaveCount(0);
   });
 
   test("K-4・K-5・K-8. 判定の画面：320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし。シートを開いても横スクロールなし", async ({ page }) => {

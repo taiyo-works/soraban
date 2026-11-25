@@ -484,13 +484,17 @@ judgement-primary
 judgement-scope-plan
 judgement-scope-snapshot
 judgement-sheet-dataset
+judgement-sheet-dataset-ledger-updated
 judgement-sheet-datasets
 judgement-sheet-detail
 judgement-sheet-fetched-at
+judgement-sheet-procedure
+judgement-sheet-procedures
 judgement-sheet-reason
 judgement-sheet-refs
 judgement-sheet-verdict
 judgement-tile
+judgement-tile-stale
 judgement-tiles
 judgement-tiles-section
 judgement-total
@@ -789,6 +793,7 @@ plan-snapshot-seq
 plan-snapshots-link
 plan-source-stale
 plan-stale-box
+plan-stale-readonly-note
 plan-stale-reasons
 plan-stale-sources
 plan-stale-sources-details
@@ -1342,13 +1347,17 @@ prop: judgement-scope-plan
 prop: judgement-scope-snapshot
 prop: judgement-sheet
 prop: judgement-sheet-dataset
+prop: judgement-sheet-dataset-ledger-updated
 prop: judgement-sheet-datasets
 prop: judgement-sheet-detail
 prop: judgement-sheet-fetched-at
+prop: judgement-sheet-procedure
+prop: judgement-sheet-procedures
 prop: judgement-sheet-reason
 prop: judgement-sheet-refs
 prop: judgement-sheet-verdict
 prop: judgement-tile
+prop: judgement-tile-stale
 prop: judgement-tiles
 prop: judgement-tiles-section
 prop: judgement-total
@@ -1668,6 +1677,7 @@ prop: plan-snapshot-seq
 prop: plan-snapshots-link
 prop: plan-source-stale
 prop: plan-stale-box
+prop: plan-stale-readonly-note
 prop: plan-stale-reasons
 prop: plan-stale-sources
 prop: plan-stale-sources-details

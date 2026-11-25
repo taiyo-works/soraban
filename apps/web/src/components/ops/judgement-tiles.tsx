@@ -62,6 +62,7 @@ export function JudgementTiles({
   fetchedAt,
   fetchedAtIso,
   stale = false,
+  initialOpenId = null,
 }: {
   readonly items: readonly TileItem[];
   readonly datasets: readonly TileDataset[];
@@ -69,8 +70,10 @@ export function JudgementTiles({
   readonly fetchedAtIso: string;
   /** 判定が古い（計画が判定の後に変わった）。タイルとシートの見出しに文字で示す。 */
   readonly stale?: boolean;
+  /** 最初から開いておくタイル（単体テストがシートの中身を描くための入口。画面では使わない）。 */
+  readonly initialOpenId?: string | null;
 }) {
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(initialOpenId);
   const close = useCallback(() => setOpenId(null), []);
   // 閉じたときにフォーカスを戻す先は、最後に開いたタイル（開いたまま別のタイルを押したときも、そのタイル）
   const tileEls = useRef(new Map<string, HTMLButtonElement>());

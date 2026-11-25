@@ -5,3 +5,5 @@
 2026-11-23T23:31:16.652Z	2067	16-E：見本の節 cat-orange を cat-primary-use に置き換え（橙の名前を残さない。K-13）。cat-type・cat-primary-use・cat-status・cat-state-labels・cat-logo・cat-order・cat-bottomnav*・cat-prep* ほか、並べ見本・準備カード・下部ナビの見本の識別子を追加
 2026-11-24T16:48:39.448Z	2150	16-H1 計画作成の 6 段（plan-wizard-*・plan-step-heading・plan-review-*・plan-when-section を足した。消したものは無い）
 2026-11-24T23:02:11.167Z	2209	16-H2 判定の画面の 3 層（judgement-total・judgement-fetched-at・judgement-tile*・judgement-sheet*・judgement-primary・judgement-next・plan-judgement-full・plan-permit-candidates-more）、段 2 のクイック選択（plan-quick*）、訂正の節（plan-edit-*）を足した。消したものは無い
+2026-11-25T00:50:14.881Z	2217	16-H2 差し戻し 1：判定のタイル・シートの識別子 4 つ
+2026-11-25T00:51:27.300Z	2219	16-H2 差し戻し 2：閲覧だけの利用者向けの案内 plan-stale-readonly-note

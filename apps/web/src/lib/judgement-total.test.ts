@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { aggregateVerdictLevel, type FlightVerdict, type ItemVerdict } from "@soraban/regulations";
-import { judgementTotal, STALE_TOTAL_PREFIX, TILE_RANK, TOTAL_NONE_NOTE } from "./judgement-total";
+import { judgementTotal, STALE_TOTAL_PREFIX, TILE_RANK, TOTAL_LEVEL_ADJUSTED_NOTE, TOTAL_NONE_NOTE } from "./judgement-total";
 
 // level は、エンジンと同じ集約（aggregateVerdictLevel：判定不能と 0 件は要手続き）で求める。
 const mk = (verdicts: readonly ItemVerdict[], unknownCount = 0): FlightVerdict =>
@@ -98,6 +98,23 @@ describe("judgementTotal（契約 §8.2 の総合の語）", () => {
     // 軽くならない場合は変えない
     expect(judgementTotal(lv("no_procedure", ["no_procedure"]), false)).toMatchObject({ key: "none" });
     expect(judgementTotal(lv("no_fly", ["no_fly"]), false)).toMatchObject({ key: "no_fly", count: 1 });
+  });
+  it("N-f：段の側に倒したときだけ「判定の段に合わせています」の注記。倒さないときは出ない（手続き不要の注記は別）", () => {
+    const lv = (level: string, verdicts: readonly ItemVerdict[]) => ({ ...mk(verdicts), level }) as unknown as FlightVerdict;
+    expect(TOTAL_LEVEL_ADJUSTED_NOTE).toBe("判定の段に合わせています");
+    for (const [level, verdicts] of [
+      ["no_fly", ["no_procedure"]],
+      ["needs_procedure", ["no_procedure"]],
+      ["needs_procedure", ["procedure_done"]],
+      ["procedure_done", ["no_procedure"]],
+    ] as const) {
+      expect(judgementTotal(lv(level, verdicts), false).note, `${level}/${verdicts.join()}`).toBe(TOTAL_LEVEL_ADJUSTED_NOTE);
+      expect(judgementTotal(lv(level, verdicts), true).note, `古い ${level}`).toBe(TOTAL_LEVEL_ADJUSTED_NOTE);
+    }
+    expect(judgementTotal(lv("needs_procedure", ["unknown"]), false).note).toBeUndefined();
+    expect(judgementTotal(lv("no_fly", ["no_fly"]), false).note).toBeUndefined();
+    expect(judgementTotal(lv("no_procedure", ["no_procedure"]), false).note).toBe(TOTAL_NONE_NOTE);
+    expect(judgementTotal(mk(["needs_procedure"]), false).note).toBeUndefined();
   });
   it("タイルの順位は重い順", () => {
     expect(TILE_RANK.no_fly).toBeLessThan(TILE_RANK.needs_procedure);

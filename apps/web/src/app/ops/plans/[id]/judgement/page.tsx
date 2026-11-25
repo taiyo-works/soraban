@@ -120,6 +120,11 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
                   <div id="rejudge" className="scroll-mt-4">
                     <RejudgeButton planId={plan.id} version={plan.version} highlight />
                   </div>
+                ) : !plan.voided ? (
+                  // 再判定の権限がない（閲覧だけ）利用者には、次に誰が何をするかを 1 行で示す。主ボタンは judgement-primary のまま
+                  <p data-note="" className="text-sb-ink-2" data-testid="plan-stale-readonly-note">
+                    判定のやり直しは、計画を変更できる人が行います
+                  </p>
                 ) : null}
               </div>
             ) : null}

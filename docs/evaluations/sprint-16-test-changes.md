@@ -512,3 +512,14 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 | 同・訂正の緯度・経度 | — | 文字 200%（320・390・430）で、値を持つ緯度・経度の欄が `scrollWidth <= clientWidth` の検査を足した（N-5。既存の検査は値を空にして測っていた） | 値が全部見えるかを別に確かめる | 強めた |
 | `e2e/ops-db/sprint17-2-db.spec.ts` L-4（判定の長さ） | 候補 0 件に固定した計画は draft のまま測っていた | `activate()`（確認の依頼）してから測る。候補が 3 件見える計画も、同じ上限（375x812 は 4,600、1280x800 は 3,300）で測る | N-3。上限は上げていない | 強めた |
 | `apps/web/src/lib/judgement-datasets.test.ts`（新規） | — | 台帳の確認日が保存した値と一致／不一致／台帳に無い／確認日を読めない | R-3・N-7 | 新規 |
+
+## 16-H2 差し戻し 2（再レビューの申し送り N-a〜N-f。2026-11-25）
+
+| テスト | 変更前 | 変更後 | 理由 | 強さ |
+|---|---|---|---|---|
+| `docs/evaluations/sprint-17-testids-baseline.txt`・`testids-baseline.test.ts` | 2,209 件・旧ハッシュ | 2,219 件（判定のタイル・シートの 4 つと `plan-stale-readonly-note`。各 prop 込み）・新ハッシュ `84a540ec…`。記録 2 行（`sprint-17-testids-baseline-log.txt`） | N-a。消した識別子は 0 | 強めた（足しただけ） |
+| `apps/web/src/components/ops/judgement-tiles.test.ts`（新規） | — | `JudgementTiles` を描く：台帳と一致しないとき「版」「提供元」「出典を開く」0 件・`judgement-sheet-dataset-ledger-updated` 1 件／確認日を読めないとき「確認日を読めません」が出て「90 日超」が出ない。対比に、一致するとき・読めて古いとき。描くための入口として `initialOpenId`（任意の props。画面では使わない）を足した | N-b | 新規 |
+| `sprint16-h2-db.spec.ts` の H2-2・H2-3（N-7・N-2） | `if (items.length >= 2)`・`if (needsTile.count() > 0)`・`if (mine.length > 0)` の中で検査 | 3 つとも前提を `expect` で固定（タイル 2 つ以上・要手続きのタイルあり・その項目の手続きあり）。夜間飛行の計画がこれを満たす | N-c。前提を満たさないと何も確かめずに通った | 強めた |
+| `sprint17-2-db.spec.ts` L-4（判定の長さ） | 「見えている候補 ≤ 3」と、その計画の長さ。候補の件数は実行の順序で変わる | 有効期間に入る包括・全国・夜間の許可を、テストの中で 3 件登録した計画で、`shown === 3`・`all >= 3` を固定して測る。上限は 4,600 / 3,300 のまま | N-d | 強めた |
+| `sprint16-h2-db.spec.ts` N-e（新規） | — | 判定が古く、閲覧者（a-viewer）：主ボタンは `judgement-primary` の 1 つ・案内が出る・再判定のボタンは出ない。運航管理者には案内は出ず再判定が主ボタン | N-e | 新規 |
+| `judgement-total.test.ts` | — | 段の側に倒したときだけ「判定の段に合わせています」の注記。倒さないときは出ない | N-f | 強めた |

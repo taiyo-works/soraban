@@ -21,6 +21,8 @@ export type JudgementTotal = {
 
 export const STALE_TOTAL_PREFIX = "古い判定：";
 export const TOTAL_NONE_NOTE = "調べていない項目があります";
+/** 総合を、エンジンの段（verdict.level）の側に倒したときの注記（項目の数え方だけでは軽くなる場合）。 */
+export const TOTAL_LEVEL_ADJUSTED_NOTE = "判定の段に合わせています";
 
 const count = (v: FlightVerdict, k: ItemVerdict): number => v.items.filter((i) => i.verdict === k).length;
 
@@ -69,13 +71,14 @@ const judgementTotalRaw = (verdict: FlightVerdict | undefined, stale: boolean): 
   // 守り：総合の重さが、エンジンの段（verdict.level）より軽くならない。軽くなるときは段の側に倒す。
   const level = verdict.level as ItemVerdict | undefined;
   if (level !== undefined && level in LEVEL_WEIGHT && TOTAL_WEIGHT[t.key] < LEVEL_WEIGHT[level]) {
-    if (level === "no_fly") return { key: "no_fly", sign: "no_fly", text: withCount(count(verdict, "no_fly"), "飛行不可の項目があります", pre), stale, count: count(verdict, "no_fly") };
+    const note = TOTAL_LEVEL_ADJUSTED_NOTE;
+    if (level === "no_fly") return { key: "no_fly", sign: "no_fly", text: withCount(count(verdict, "no_fly"), "飛行不可の項目があります", pre), note, stale, count: count(verdict, "no_fly") };
     if (level === "needs_procedure" || level === "unknown") {
       const n = count(verdict, "needs_procedure");
-      return { key: "needs_procedure", sign: "needs_procedure", text: withCount(n, "手続きが要る項目があります", pre), stale, count: n };
+      return { key: "needs_procedure", sign: "needs_procedure", text: withCount(n, "手続きが要る項目があります", pre), note, stale, count: n };
     }
     const n = count(verdict, "procedure_done");
-    return { key: "done", sign: "procedure_done", text: `${pre}調べた項目は手続き済みです。条件を確認してください`, stale, count: n };
+    return { key: "done", sign: "procedure_done", text: `${pre}調べた項目は手続き済みです。条件を確認してください`, note, stale, count: n };
   }
   return t;
 };
