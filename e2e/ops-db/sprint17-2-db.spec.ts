@@ -310,7 +310,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       // 組織の登録が増え、同じ計画でも候補が増えて長さが変わっていた（候補 10 件で 5,068px）。そこで (1) 登録のどれの有効期間にも入らない
       // 日付（2031-06-15）の計画で測り、候補を 0 件に固定する。(2) 候補が何件あっても、見えている候補は 3 件まで（残りは畳む）ことを、
       // 登録の件数が変わりうる計画（pending）で確かめる。
-      const fixed = await createPlan({ plannedStartAt: "2031-06-15T10:00", title: `S172 len ${stamp}-${seq++}` });
+      const fixed = await activate(await createPlan({ plannedStartAt: "2031-06-15T10:00", title: `S172 len ${stamp}-${seq++}` }));
       await gotoPlan(page, `/ops/plans/${fixed.id}/judgement`);
       await page.waitForLoadState("networkidle").catch(() => undefined);
       await expect(page.getByTestId("plan-permit-candidate")).toHaveCount(0);
@@ -323,6 +323,10 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       const all = await page.locator('[data-testid="plan-permit-candidate"]').count();
       console.log(`[長さ] 判定（登録の件数が変わりうる計画）${size.name}: ${await height(page)}px、候補 ${all} 件のうち見えるのは ${shown} 件`);
       expect(shown, "見えている候補は 3 件まで").toBeLessThanOrEqual(3);
+      // 候補が 3 件見える計画も、同じ上限で測る（上限は上げない。超えたら値を報告して止まる）
+      const hp = await height(page);
+      console.log(`[長さ] 判定（候補 ${shown} 件が見える計画）${size.name}: ${hp}px`);
+      expect(hp, `判定（候補 ${shown} 件が見える）`).toBeLessThanOrEqual(size.judgement);
     });
   }
 

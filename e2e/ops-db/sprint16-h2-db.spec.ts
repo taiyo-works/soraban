@@ -445,6 +445,44 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     await page.getByTestId("judgement-sheet-close").click();
     await expect(sheet).toHaveCount(0);
 
+    // N-7：シートが開いたまま別のタイルを押したら、フォーカスは新しい見出しへ。閉じたときは、そのタイルへ戻る
+    if (items.length >= 2) {
+      const a = tiles.nth(0);
+      const b = tiles.nth(1);
+      await a.click();
+      await expect(sheet).toBeVisible();
+      await b.evaluate((el: HTMLElement) => el.click()); // 地のタイルを押す（ピーク段では暗幕が無く、地のタイルを押せる）
+      await expect(b).toHaveAttribute("aria-expanded", "true");
+      await expect(sheet.getByRole("heading").first()).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(sheet).toHaveCount(0);
+      await expect(b).toBeFocused();
+    }
+
+    // N-2：要手続きの項目のシートに、その項目の手続き（itemId が一致するもの）の名前・提出先・期限を出す（エンジンが保存した値）
+    const verdictFull = (await (await manager.get(`/api/ops/plans/${plan.id}/snapshots/${plan.currentSnapshotId}`)).json()) as {
+      result: { verdict: { procedures: { id: string; title: string; submitTo: string; itemId: string; deadline: { label: string } }[] } };
+    };
+    const procs = verdictFull.result.verdict.procedures;
+    const needsTile = page.locator('[data-testid="judgement-tile"][data-verdict="needs_procedure"]').first();
+    if ((await needsTile.count()) > 0) {
+      const needsId = (await needsTile.getAttribute("data-item-id"))!;
+      const mine = procs.filter((p) => p.itemId === needsId);
+      await needsTile.click();
+      await expect(sheet).toBeVisible();
+      if (mine.length > 0) {
+        const rows = page.getByTestId("judgement-sheet-procedure");
+        await expect(rows).toHaveCount(mine.length);
+        for (const p of mine) {
+          const t = await rows.filter({ hasText: p.title }).first().innerText();
+          expect(t).toContain(`提出先：${p.submitTo}`);
+          expect(t).toContain(`期限：${p.deadline.label}`);
+        }
+      }
+      await page.keyboard.press("Escape");
+      await expect(sheet).toHaveCount(0);
+    }
+
     // H2-3：主ボタンは 1 つ。「DIPS に出す内容を確認」。送信・通報すると読める語を使わない
     expect(await visiblePrimaries(page)).toEqual(["judgement-primary"]);
     const primary = page.getByTestId("judgement-primary");
@@ -462,7 +500,7 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     await tapUntil(page, primary, new RegExp(`/ops/plans/${plan.id}$`));
   });
 
-  test("H2-2. 判定が古いとき：総合の語の前に「古い判定：」。再判定の案内は今のまま（plan-stale・plan-rejudge）。再判定後は外れる", async ({ page }) => {
+  test("H2-2・R-2・N-4. 判定が古いとき：総合の語の前に「古い判定：」、再判定が主ボタンの 1 つだけで judgement-primary は副ボタン、再判定の導線は総合の直下。再判定後は judgement-primary の 1 つだけ", async ({ page }) => {
     const ac = await mkAircraft({ maxTakeoffWeightKg: 0.9 });
     const plan = await mkPlan(ac.id);
     await login(page);
@@ -470,6 +508,9 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     await expect(page.getByTestId("judgement-total")).toBeVisible();
     await expect(page.getByTestId("judgement-total")).toHaveAttribute("data-stale", "false");
     expect((await page.getByTestId("judgement-total").innerText()).startsWith("古い判定：")).toBe(false);
+    // 新しいとき：主ボタンは judgement-primary の 1 つだけ
+    expect(await visiblePrimaries(page), "新しいとき").toEqual(["judgement-primary"]);
+    await expect(page.getByTestId("judgement-tile-stale")).toHaveCount(0);
     const patch = await manager.patch(`/api/ops/aircraft/${ac.id}`, { data: { maxTakeoffWeightKg: 1.5, expectedVersion: ac.version, reason: "重量の訂正" } });
     expect(patch.status(), await patch.text()).toBe(200);
     await page.goto(`/ops/plans/${plan.id}/judgement`);
@@ -477,7 +518,26 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     expect((await page.getByTestId("judgement-total").innerText()).startsWith("古い判定：")).toBe(true);
     await expect(page.getByTestId("plan-stale-box")).toBeVisible();
     await expect(page.getByTestId("plan-rejudge")).toBeVisible();
-    expect(await visiblePrimaries(page), "古いときも主ボタンは 1 つ").toEqual(["judgement-primary"]);
+    // 古いとき：主ボタンは再判定の 1 つだけ。judgement-primary は副ボタン
+    expect(await visiblePrimaries(page), "古いとき").toEqual(["plan-rejudge"]);
+    await expect(page.getByTestId("judgement-primary")).not.toHaveAttribute("data-variant", "primary");
+    await expect(page.getByTestId("judgement-primary")).toBeVisible();
+    // 再判定の導線（plan-stale-box）は、総合の直下（タイルより前）
+    const order = await page.evaluate(() => {
+      const y = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`)!.getBoundingClientRect().top;
+      return { total: y("judgement-total"), box: y("plan-stale-box"), rejudge: y("plan-rejudge"), tiles: y("judgement-tiles") };
+    });
+    expect(order.box).toBeGreaterThan(order.total);
+    expect(order.box).toBeLessThan(order.tiles);
+    expect(order.rejudge).toBeLessThan(order.tiles);
+    // 総合の印は注意側（手続き済み・手続き不要の印のままにしない）、タイルとシートに文字で「古い判定」
+    const tileCount = await page.getByTestId("judgement-tile").count();
+    await expect(page.getByTestId("judgement-tile-stale")).toHaveCount(tileCount);
+    await expect(page.getByTestId("judgement-tile-stale").first()).toHaveText("古い判定");
+    await page.getByTestId("judgement-tile").first().click();
+    await expect(page.getByRole("dialog").getByRole("heading").first()).toContainText("古い判定");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     for (let i = 0; i < 4; i++) {
       await page.getByTestId("plan-rejudge").click();
       try {
@@ -488,6 +548,7 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
       }
     }
     await expect(page.getByTestId("judgement-total")).toHaveAttribute("data-stale", "false");
+    expect(await visiblePrimaries(page), "再判定の後").toEqual(["judgement-primary"]);
   });
 
   test("K-4・K-5・K-8. 判定の画面：320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし。シートを開いても横スクロールなし", async ({ page }) => {
@@ -595,6 +656,28 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     // 入力欄の値は、入力欄の中で横に動く（1 行の入力欄の仕様で、文字の切れではない）。共通の測定は入れ物の切れとして数えるので、値を空にしてから測る
     for (const el of await page.locator("form[data-testid=plan-form] input:not([type=checkbox]):not([type=date]):not([type=time]):not([disabled])").all()) await el.fill("");
     await expectTextZoom(page, "訂正（H2）");
+  });
+
+  test("N-5・H2-4. 訂正の画面：文字 200% で、緯度・経度の欄が値を全部見せる（scrollWidth <= clientWidth）", async ({ page }) => {
+    const ac = await mkAircraft();
+    const plan = await mkPlan(ac.id);
+    await login(page);
+    await page.goto(`/ops/plans/${plan.id}/edit`);
+    await expect(page.getByTestId("plan-form")).toBeVisible();
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    for (const w of [320, 390, 430]) {
+      await page.setViewportSize({ width: w, height: 800 });
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = "32px";
+      });
+      await waitForSettledStyles(page);
+      for (const id of ["plan-lat", "plan-lng"]) {
+        const el = page.getByTestId(id);
+        await expect(el, `${id} は値を持つ`).not.toHaveValue("");
+        const r = await el.evaluate((e: HTMLInputElement) => ({ sw: e.scrollWidth, cw: e.clientWidth, len: e.value.length }));
+        expect(r.sw, `${w}px 200% ${id}（値 ${r.len} 文字）の scrollWidth ${r.sw} <= clientWidth ${r.cw}`).toBeLessThanOrEqual(r.cw);
+      }
+    }
   });
 
   // ---------------- 422 の一覧（§17 申し送り 12） ----------------
