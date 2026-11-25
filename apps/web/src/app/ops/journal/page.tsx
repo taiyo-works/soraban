@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MismatchBadges } from "@/components/ops/journal-ui";
 import { Icon } from "@/components/ui/icons";
+import { ListCardLink, StatusLabel } from "@/components/ui/sb-parts";
 import { Notice, PageHeader } from "@/components/ops/ui";
 import { INSPECTION_TIMING_LABELS } from "@/lib/ops-records";
 import { formatHm, jstDate } from "@/lib/ops-time";
@@ -94,10 +95,10 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
       {denied ? (
         <Notice>{denied}</Notice>
       ) : null}
-      <nav aria-label="表示する記録" className="opx-seg" data-testid="journal-tabs">
+      <nav aria-label="表示する記録" className="sb-chips" data-testid="journal-tabs">
         {TABS.map(([key, label, href]) => (
           // 同じ画面の ?tab= の切り替えは通常のリンク（<a>）。理由は点検の一覧のチップと同じ
-          <a key={key} href={href} aria-current={tab === key ? "page" : undefined} data-testid={`journal-tab-${key}`}>
+          <a key={key} href={href} aria-current={tab === key ? "page" : undefined} className="sb-chip" data-testid={`journal-tab-${key}`}>
             {label}
           </a>
         ))}
@@ -110,52 +111,85 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
           最近 {RECENT_DAYS} 日の記録はありません。
         </p>
       ) : (
-        <ul className="sb-block sb-rows !py-1" data-testid="journal-list">
+        <ul className="m-0 flex list-none flex-col gap-3 p-0" data-testid="journal-list">
           {rows.map((r) =>
             r.kind === "flight" ? (
               <li key={`f-${r.f.id}`} data-testid="journal-row" data-kind="flight">
-                <Link prefetch={false} href={`/ops/flights/${r.f.id}`} className="sb-row !flex-col !items-stretch !gap-2" data-testid="journal-row-link">
-                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <KindTag kind="flight" />
+                <ListCardLink href={`/ops/flights/${r.f.id}`} data-testid="journal-row-link">
+                  <span className="flex flex-wrap items-center gap-2">
                     {r.f.voided ? (
-                      <span className="sb-tag">取消済み</span>
+                      // 取消済みは、情報の「取消済み」1 つだけ（正常・完了と読める表示を出さない）。カードは破線の縁（点検の一覧と同じ）
+                      <span data-result="voided">
+                        <StatusLabel tone="info">取消済み</StatusLabel>
+                      </span>
                     ) : null}
-                    <span className="sb-num text-[1rem] font-bold text-sb-ink">{r.f.flightDate}</span>
-                    <span className="sb-num text-[1rem] font-bold text-sb-ink">
+                    <KindTag kind="flight" />
+                  </span>
+                  <span className={`text-body font-bold ${r.f.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`}>
+                    <span className="sr-only">飛行年月日</span>
+                    <span className="sb-num">{r.f.flightDate}</span>
+                  </span>
+                  <span className={`flex flex-wrap items-baseline gap-x-5 gap-y-1 ${r.f.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`} data-testid="journal-row-times">
+                    <span className="sb-num sb-stat-num" data-testid="journal-row-takeoff-landing">
+                      <span className="sr-only">離陸から着陸</span>
                       {r.f.takeoffAtJst.slice(11)}–{r.f.landingAtJst}
                     </span>
-                    <span className="sb-num text-sb-ink-2">{formatHm(r.f.flightMinutes)}</span>
+                    <span className="inline-flex items-baseline gap-2">
+                      <span data-note="" className="text-sm font-medium text-sb-ink-2">
+                        飛行時間
+                      </span>
+                      <span className="sb-num sb-stat-num" data-testid="journal-row-minutes">
+                        {formatHm(r.f.flightMinutes)}
+                      </span>
+                    </span>
                   </span>
-                  <span className="text-sb-ink-2">
-                    <span className="sb-num">{r.f.registrationMark}</span>／{r.f.pilotName}
+                  <span data-note="" className="break-words text-sb-ink-2">
+                    <span className="sr-only">機体</span>
+                    <span className="sb-num break-all">{r.f.registrationMark}</span>
+                    <span className="mx-1.5" aria-hidden="true">
+                      ／
+                    </span>
+                    <span className="text-sb-ink-3">操縦者 </span>
+                    {r.f.pilotName}
                   </span>
                   <MismatchBadges mismatches={r.f.mismatches} />
-                </Link>
+                </ListCardLink>
               </li>
             ) : (
               <li key={`i-${r.i.id}`} data-testid="journal-row" data-kind="inspection">
-                <Link prefetch={false} href={`/ops/inspections/${r.i.id}`} className="sb-row !flex-col !items-stretch !gap-2" data-testid="journal-row-link">
-                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <ListCardLink href={`/ops/inspections/${r.i.id}`} data-testid="journal-row-link">
+                  <span className="flex flex-wrap items-center gap-2">
                     <KindTag kind="inspection" />
                     {r.i.voided ? (
-                      <span className="sb-tag">取消済み</span>
-                    ) : null}
-                    <span className="sb-num text-[1rem] font-bold text-sb-ink">{r.i.inspectedAtJst}</span>
-                    <span className="text-sb-ink-2">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
-                    {r.i.hasAbnormal ? (
-                      <span className="sb-tag sb-tag-strong">
-                        <span aria-hidden="true">！ </span>異常あり
+                      // 点検の一覧と同じ：取消済みは結果（点検済み・異常あり）を出さず、情報の「取消済み」1 つだけ
+                      <span data-result="voided">
+                        <StatusLabel tone="info">取消済み</StatusLabel>
+                      </span>
+                    ) : r.i.hasAbnormal ? (
+                      <span data-result="abnormal">
+                        <StatusLabel tone="danger">異常あり</StatusLabel>
                       </span>
                     ) : (
-                      <span className="sb-tag">
-                        <span aria-hidden="true">✓ </span>異常なし
+                      <span data-result="normal">
+                        <StatusLabel tone="safe">点検済み</StatusLabel>
                       </span>
                     )}
                   </span>
-                  <span className="text-sb-ink-2">
-                    <span className="sb-num">{r.i.registrationMark}</span>／{r.i.inspectorName}
+                  <span className={`text-body font-bold ${r.i.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`}>
+                    <span className="sr-only">実施日時</span>
+                    <span className="sb-num">{r.i.inspectedAtJst}</span>
+                    <span className="ml-3 text-table font-medium">{INSPECTION_TIMING_LABELS[r.i.timing]}</span>
                   </span>
-                </Link>
+                  <span data-note="" className="break-words text-sb-ink-2">
+                    <span className="sr-only">機体</span>
+                    <span className="sb-num break-all">{r.i.registrationMark}</span>
+                    <span className="mx-1.5" aria-hidden="true">
+                      ／
+                    </span>
+                    <span className="text-sb-ink-3">実施者 </span>
+                    {r.i.inspectorName}
+                  </span>
+                </ListCardLink>
               </li>
             ),
           )}

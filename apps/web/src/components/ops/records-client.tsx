@@ -52,7 +52,7 @@ import {
   versionOf,
   type ApiResult,
 } from "./ops-client";
-import { CheckGroup, StateShape } from "@/components/ui/sb-parts";
+import { CheckGroup, CheckRow, SectionHead, StateShape } from "@/components/ui/sb-parts";
 import { Badge, buttonFieldClass, buttonGhostClass, buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "./ui";
 
 /** 通信できない（fetch が例外）場合も ApiResult にする。status 0。 */
@@ -81,8 +81,6 @@ const choiceClass = (checked: boolean, tone: "brand" | "red" = "brand") =>
         : "border-2 border-sb-ink bg-sb-control font-bold text-sb-ink"
       : "border-2 border-sb-rule bg-sb-surface text-sb-ink-2 hover:bg-sb-hover"
   }`;
-/** 選択肢の入力：複数選択は丸いチェック（sb-check）、単一選択はラジオ（sb-radio）。見た目は共通部品に揃える */
-const choiceCheckClass = "sb-check";
 const choiceRadioClass = "sb-radio";
 
 /**
@@ -94,6 +92,20 @@ function Step({ title, children }: { readonly title: string; readonly children: 
       <legend>{title}</legend>
       {children}
     </fieldset>
+  );
+}
+
+/**
+ * 飛行記録の入力の節（16-J J-2）：共通の節の見出し（SectionHead。左 5px の墨の線）に、入力欄を並べる。点検の入力は 16-I のまま Step を使う。
+ * 見出しは section の名前（aria-labelledby）にする。
+ */
+function FormSection({ title, note, children }: { readonly title: string; readonly note?: string; readonly children: ReactNode }) {
+  const id = useId();
+  return (
+    <section aria-labelledby={id} className="flex min-w-0 flex-col gap-4" data-testid="flight-section">
+      <SectionHead id={id} title={title} {...(note ? { note } : {})} />
+      {children}
+    </section>
   );
 }
 
@@ -123,7 +135,7 @@ function ChoiceGroup({
       </legend>
       <div
         className={`grid gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus ${
-          columns === 2 ? "grid-cols-2 sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
+          columns === 2 ? "grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
         }`}
         {...(radiogroupLabel
           ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined, "aria-describedby": error ? errId : undefined }
@@ -975,7 +987,7 @@ export function FlightForm({
         />
       ) : null}
 
-      <Step title="機体・操縦者・日常点検">
+      <FormSection title="機体・操縦者・日常点検">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。誤った場合は取り消して作り直してください。" : undefined}>
           <select
             className={`${inputClass} min-h-12`}
@@ -1027,9 +1039,9 @@ export function FlightForm({
             日常点検を入力する
           </a>
         ) : null}
-      </Step>
+      </FormSection>
 
-      <Step title="離陸">
+      <FormSection title="離陸">
         <PlaceInput
           label="離陸場所"
           name={v.takeoffPlace}
@@ -1052,9 +1064,9 @@ export function FlightForm({
             setV((s) => ({ ...s, takeoffDate: d, takeoffTime: t, landingDate: s.landingDate || d }));
           }}
         />
-      </Step>
+      </FormSection>
 
-      <Step title="着陸">
+      <FormSection title="着陸">
         <DateTimeInput
           label="着陸時刻"
           nowLabel="着陸：今"
@@ -1107,9 +1119,9 @@ export function FlightForm({
             離陸場所と同じにする
           </button>
         ) : null}
-      </Step>
+      </FormSection>
 
-      <Step title="飛行概要">
+      <FormSection title="飛行概要">
         <Field label="飛行の目的" required error={errors["purpose"]} hint="例：空撮、インフラ点検、測量（100 文字以内）">
           <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} />
         </Field>
@@ -1134,21 +1146,16 @@ export function FlightForm({
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SPECIFIC_FLIGHT_TYPES.filter((t) => t.group === group).map((t) => {
                   const checked = v.specificFlightTypes.includes(t.key);
-                  return (
-                    <label key={t.key} className={choiceClass(checked)}>
-                      <input type="checkbox" className={choiceCheckClass} checked={checked} onChange={() => toggleType(t.key)} />
-                      {t.label}
-                    </label>
-                  );
+                  return <CheckRow key={t.key} label={t.label} checked={checked} onChange={() => toggleType(t.key)} rowTestId={`flight-type-${t.key}`} />;
                 })}
               </div>
             </div>
           ))}
           <FieldError id="record-err-specificFlightTypes" message={errors["specificFlightTypes"]} />
         </fieldset>
-      </Step>
+      </FormSection>
 
-      <Step title="安全に影響のあった事項・不具合">
+      <FormSection title="安全に影響のあった事項・不具合">
         <ChoiceGroup
           legend="飛行の安全に影響のあった事項"
           required
@@ -1229,7 +1236,7 @@ export function FlightForm({
           </button>
           <span className="text-sm text-sb-ink-3">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
         </fieldset>
-      </Step>
+      </FormSection>
 
       {isEdit ? (
         <Field label="訂正の理由" required error={errors["reason"]} hint="版の一覧に、訂正した人・日時とともに残ります。">
@@ -1237,7 +1244,7 @@ export function FlightForm({
         </Field>
       ) : null}
 
-      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "保存"} onRetry={() => void submit()} />
+      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "飛行記録を保存"} onRetry={() => void submit()} />
     </form>
   );
 }

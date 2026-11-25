@@ -1803,11 +1803,19 @@ a.sb-row:focus-visible .sb-go-dot {
 .sb-chip:hover {
   background: var(--sb-hover);
 }
-.sb-chip[aria-current="true"] {
+.sb-chip[aria-current="true"],
+.sb-chip[aria-current="page"] {
   border: 2px solid var(--sb-ink);
   background: var(--sb-control);
   color: var(--sb-ink);
   font-weight: 700;
+}
+
+/* 数値の強調（16-J J-1。日誌の飛行記録の離陸・着陸の時刻と飛行時間。桁をそろえる tabular-nums は .sb-num が持つ。屋外で読めるよう 1.25rem・太字） */
+.sb-stat-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 /* 点検の一覧（16-I 磨き込み）：取消済みのカードは、面を地に近づけて破線の縁にする（有効な記録の実線の縁と形で見分ける。状態は情報の「取消済み」と取り消し線の文字も示す）。
