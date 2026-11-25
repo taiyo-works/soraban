@@ -1,0 +1,4 @@
+NOTICE:  database "ev16n1_a" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+CREATE EXTENSION
