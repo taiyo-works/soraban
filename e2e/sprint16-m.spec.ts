@@ -215,6 +215,38 @@ test.describe("16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の�
     const sorted = [...btns].sort((a, b) => a.top - b.top);
     for (let i = 1; i < sorted.length; i++) expect(sorted[i]!.top - sorted[i - 1]!.bottom, "部品の間").toBeGreaterThanOrEqual(8 - 0.5);
   });
+
+  test("M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない）", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const btns = page.locator(".sb-map-frame .maplibregl-ctrl-group button");
+    const count = await btns.count();
+    expect(count).toBeGreaterThanOrEqual(2);
+    const shape = (i: number) =>
+      btns.nth(i).evaluate((e) => {
+        const cs = getComputedStyle(e);
+        const r = e.getBoundingClientRect();
+        return { w: r.width, h: r.height, tl: cs.borderTopLeftRadius, br: cs.borderBottomRightRadius, shadow: cs.boxShadow, focused: document.activeElement === e, ring: cs.outlineStyle };
+      });
+    const expectRound = (s: Awaited<ReturnType<typeof shape>>, what: string) => {
+      for (const rad of [s.tl, s.br]) expect(rad.includes("%") || parseFloat(rad) >= s.w / 2 - 1, `${what}：角丸 ${rad}`).toBe(true);
+      expect(s.shadow, `${what}：縁（inset の影）が残る`).toMatch(/inset/);
+      expect(s.shadow, `${what}：縁は none でない`).not.toBe("none");
+    };
+    for (let i = 0; i < count; i++) {
+      await btns.nth(i).focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      const kbd = await shape(i);
+      expect(kbd.focused, `${i} 番にフォーカス`).toBe(true);
+      expect(kbd.ring, `${i} 番：フォーカスの輪（outline）が出る`).not.toBe("none");
+      expectRound(kbd, `${i} 番（キーボードのフォーカス中）`);
+      await btns.nth(i).click();
+      const clicked = await shape(i);
+      expect(clicked.focused, `${i} 番をクリック後もフォーカス`).toBe(true);
+      expectRound(clicked, `${i} 番（クリック後）`);
+    }
+  });
 });
 
 test.describe("16-M M-4 静的なシェルと申請支援", () => {

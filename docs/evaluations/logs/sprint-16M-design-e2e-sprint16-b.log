@@ -1,0 +1,48 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint16-b.spec.ts
+
+
+Running 37 tests using 1 worker
+
+  ✓   1 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.2s)
+  ✓   2 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.3s)
+  ✓   3 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓   4 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.4s)
+  ✓   5 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (1.0s)
+  ✓   6 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (932ms)
+  ✓   7 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (801ms)
+  ✓   8 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (683ms)
+  ✓   9 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (899ms)
+  ✓  10 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (796ms)
+  ✓  11 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (740ms)
+  ✓  12 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (830ms)
+  ✓  13 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (788ms)
+  ✓  14 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (798ms)
+  ✓  15 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (710ms)
+  ✓  16 e2e/sprint16-b.spec.ts:81:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (7.7s)
+  ✓  17 e2e/sprint16-b.spec.ts:86:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.5s)
+  ✓  18 e2e/sprint16-b.spec.ts:109:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (4.1s)
+  ✓  19 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.2s)
+  ✓  20 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.4s)
+  ✓  21 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✓  22 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.3s)
+  ✓  23 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.1s)
+  ✓  24 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  25 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  26 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  27 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  28 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (860ms)
+  ✓  29 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (852ms)
+  ✓  30 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (804ms)
+  ✓  31 e2e/sprint16-b.spec.ts:172:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 印のない 14px の p は失敗する。16px・1.7 の p は通る (187ms)
+  ✓  32 e2e/sprint16-b.spec.ts:179:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する (173ms)
+  ✓  33 e2e/sprint16-b.spec.ts:186:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す (218ms)
+  ✓  34 e2e/sprint16-b.spec.ts:192:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す (231ms)
+  ✓  35 e2e/sprint16-b.spec.ts:201:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く (191ms)
+  ✓  36 e2e/sprint16-b.spec.ts:207:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 大きな文字（本文の基準より 2px 以上大きい）は行の高さ 1.25 以上で通る。本文の大きさは 1.7 のまま (370ms)
+  ✓  37 e2e/sprint16-b.spec.ts:224:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ (176ms)
+
+  37 passed (1.6m)
+::notice title=🎭 Playwright Run Summary::  37 passed (1.6m)
+exit=0

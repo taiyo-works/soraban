@@ -2128,3 +2128,23 @@ a.sb-card-list:has([data-result="voided"]):hover {
   background-color: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
+/* maplibre-gl の既定は、フォーカス中の先頭・末尾の部品を角丸 4px の四角にし（:focus:first-child／:last-child）、クリック後は縁の影を消し（:focus:not(:focus-visible){box-shadow:none}）、キーボードでは青い光彩を足す。
+   どれも詳細度 0,3,1。クラスを重ねて 0,4,1 にし、フォーカス中・クリック後も円と縁（--sb-edge の 1px）を保つ。フォーカスの輪は .sb-page *:focus-visible の outline（3px・--sb-focus）が円に沿って出る。16-M の N-4 */
+.sb-map-frame .maplibregl-ctrl-group.maplibregl-ctrl-group button:focus,
+.sb-map-frame .maplibregl-ctrl-group.maplibregl-ctrl-group button:focus:is(:first-child, :last-child, :only-child) {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
+}
+
+/* 区切りの見出し（SectionHead）の件数：見出しが 2 行に折り返すと、2 桁の数（「06」）が 1 桁ずつ縦に割れていた（375px の「規制ごとの判定」）。
+   数は割らずに右端へ置く。見出しの文字だけが折り返す。16-M の designer */
+.sb-page div:has(> p.sb-eyebrow) > span.sb-num {
+  flex: none;
+  white-space: nowrap;
+}
+/* 手続きの票（768px 以上の表）：「出す先」の列が詰まり、1 語ずつ 4 行に折れていた（1280px）。列に最低の幅を持たせる（狭い幅のカードは対象外＝長さは変わらない）。 */
+@media (min-width: 768px) {
+  [data-testid="verdict-procedures"] td[data-label="出す先"] {
+    min-width: 8.5rem;
+  }
+}
