@@ -1437,9 +1437,8 @@ export function InspectionForm({
       setShowMissing(true);
       setMessage(null);
       openGroupOf(firstMissing);
-      const group = formRef.current?.querySelector<HTMLElement>(`[data-testid="inspection-item-${firstMissing}"] [role="radiogroup"]`);
-      group?.focus({ preventScroll: true });
-      group?.scrollIntoView({ block: "center" });
+      // フォーカスは描画の後に移す（aria-invalid と誤りの文が付いてから。読み上げが誤りの文を拾えるように）
+      requestErrorFocus();
       return;
     }
     setBusy(true);
@@ -1498,13 +1497,13 @@ export function InspectionForm({
     }
   };
 
+  // 未記入の項目だけを正常で埋める。選んであった「異常」「正常」は上書きしない（全部記入済みなら何も変わらない）
   const setAllNormal = () =>
     setV((s) => ({
       ...s,
-      items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal", note: s.items[it.key].note }])) as Record<
-        InspectionItemKey,
-        ItemState
-      >,
+      items: Object.fromEntries(
+        INSPECTION_ITEMS.map((it) => [it.key, s.items[it.key].result === "" ? { result: "normal", note: s.items[it.key].note } : s.items[it.key]]),
+      ) as Record<InspectionItemKey, ItemState>,
     }));
 
   const draftBar = !isEdit ? (
@@ -1609,17 +1608,20 @@ export function InspectionForm({
             すべて正常
           </button>
         </div>
-        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num tnum text-sb-ink-2" aria-live="polite" data-testid="inspection-progress">
+        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num tnum text-sb-ink-2" data-testid="inspection-progress">
           <span>
             記入済み {selectedCount}/{INSPECTION_ITEMS.length}
           </span>
           {abnormalCount > 0 ? <span className="text-sb-v-no-fg">異常 {abnormalCount} 項目</span> : null}
         </p>
+        <p data-note="" className="text-sb-ink-3" data-testid="inspection-group-note">
+          見やすさのために分けています（様式2 の区分ではありません）。
+        </p>
         <div className="flex flex-col gap-3">
           {INSPECTION_GROUPS.map((g) => {
             const done = g.items.filter((k) => v.items[k].result !== "").length;
             return (
-              <CheckGroup key={g.key} title={g.label} done={done} total={g.items.length} testId={`inspection-group-${g.key}`}>
+              <CheckGroup key={g.key} title={g.label} done={done} total={g.items.length} doneLabel="項目" testId={`inspection-group-${g.key}`}>
                 <ol className="m-0 flex list-none flex-col gap-2 p-0">
                   {g.items.map((key) => {
                     const it = INSPECTION_ITEMS.find((x) => x.key === key)!;

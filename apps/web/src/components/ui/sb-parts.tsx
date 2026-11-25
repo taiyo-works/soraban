@@ -339,20 +339,30 @@ export function CheckGroup({
   children,
   defaultOpen = true,
   testId,
+  doneLabel,
 }: {
   readonly title: string;
   readonly done: number;
   readonly total: number;
   readonly children: ReactNode;
   readonly defaultOpen?: boolean;
+  /** 読み上げ用の単位（例「項目」。数の見た目は「2/3」のまま、sr-only で「完了 2/3 項目」と補う）。 */
+  readonly doneLabel?: string;
   readonly testId?: string;
 }) {
   return (
     <details className="sb-chk-group" {...(defaultOpen ? { open: true } : {})} {...(testId ? { "data-testid": testId } : {})}>
       <summary>
         <span className="sb-chk-title">{title}</span>
-        <span className="sb-chk-count" data-testid={testId ? `${testId}-count` : undefined}>
-          {done}/{total}
+        <span className="sb-chk-count">
+          <span aria-hidden={doneLabel ? "true" : undefined} data-testid={testId ? `${testId}-count` : undefined}>
+            {done}/{total}
+          </span>
+          {doneLabel ? (
+            <span className="sr-only">
+              完了 {done}/{total} {doneLabel}
+            </span>
+          ) : null}
         </span>
         <svg className="sb-chk-chev" viewBox="0 0 20 20" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M5 8 L10 13 L15 8" />

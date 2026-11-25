@@ -450,7 +450,7 @@ inspection-detail
 inspection-disclaimer
 inspection-empty
 inspection-group-${g.key}
-inspection-item-${firstMissing}
+inspection-group-note
 inspection-list
 inspection-missing-count
 inspection-new
@@ -1314,7 +1314,7 @@ prop: inspection-detail
 prop: inspection-disclaimer
 prop: inspection-empty
 prop: inspection-group-${g.key}
-prop: inspection-item-${firstMissing}
+prop: inspection-group-note
 prop: inspection-list
 prop: inspection-missing-count
 prop: inspection-new

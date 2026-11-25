@@ -156,7 +156,12 @@ export default async function InspectionListPage({
                 <ListCardLink href={`/ops/inspections/${i.id}`} data-testid="inspection-row">
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="sr-only">結果</span>
-                    {i.hasAbnormal ? (
+                    {i.voided ? (
+                      // 取消済みは、結果（点検済み・異常あり）の状態ラベルを出さず、情報の「取消済み」1 つだけにする（安全・危険に見せない）
+                      <span data-result="voided">
+                        <StatusLabel tone="info">取消済み</StatusLabel>
+                      </span>
+                    ) : i.hasAbnormal ? (
                       <span data-result="abnormal">
                         <StatusLabel tone="danger">異常あり</StatusLabel>
                       </span>
@@ -169,7 +174,6 @@ export default async function InspectionListPage({
                       <span className="sr-only">区分</span>
                       {INSPECTION_TIMING_LABELS[i.timing]}
                     </span>
-                    {i.voided ? <span className="sb-tag">取消済み</span> : null}
                   </span>
                   <span className={`text-body font-bold ${i.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`}>
                     <span className="sr-only">機体</span>

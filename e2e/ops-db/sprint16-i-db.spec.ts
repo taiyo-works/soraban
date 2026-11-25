@@ -175,6 +175,17 @@ test.describe("16-I 点検の入力", () => {
     await expect(page.getByRole("radiogroup", { name: "機体全般の結果" })).toBeFocused();
     await expect(item(page, "general")).toContainText("正常か異常かを選んでください");
     await expect(page.getByRole("radiogroup", { name: "機体全般の結果" })).toHaveAttribute("aria-invalid", "true");
+    // N-2：フォーカスが移った時点で、aria-invalid と aria-describedby（誤りの文）が付いている（描画の後に移す）
+    const firstGroup = page.getByRole("radiogroup", { name: "機体全般の結果" });
+    const describedBy = await firstGroup.evaluate((el) => {
+      if (document.activeElement !== el) return { focused: false, invalid: null, id: null, text: null };
+      const id = el.getAttribute("aria-describedby");
+      return { focused: true, invalid: el.getAttribute("aria-invalid"), id, text: id ? (document.getElementById(id)?.textContent ?? null) : null };
+    });
+    expect(describedBy.focused).toBe(true);
+    expect(describedBy.invalid).toBe("true");
+    expect(describedBy.id).toBe("inspection-err-result-general");
+    expect(describedBy.text ?? "").toContain("正常か異常かを選んでください");
     const inView = async (testId: string) =>
       page.getByTestId(testId).evaluate((el) => {
         const r = el.getBoundingClientRect();
@@ -211,6 +222,45 @@ test.describe("16-I 点検の入力", () => {
     await save.click();
     await expect(page).toHaveURL(/\/ops\/inspections\/[0-9a-f-]{36}$/);
     expect(posts).toHaveLength(1);
+  });
+
+  test("N-1. 「すべて正常」は未記入の項目だけを正常にする。選んだ「異常」は、群を畳んでから押しても異常のまま。全部記入済みなら何も変えない", async ({ page }) => {
+    await signIn(page.request, seeded("a-pilot"));
+    await openNew(page);
+    await pick(page, "propeller", "異常");
+    await pick(page, "battery", "正常");
+    await group(page, "body").locator("> summary").click();
+    await expect(group(page, "body")).not.toHaveAttribute("open", "");
+    await page.getByRole("button", { name: "すべて正常" }).click();
+    await group(page, "body").locator("> summary").click();
+    await expect(group(page, "body")).toHaveAttribute("open", "");
+    const checked = async (key: (typeof KEYS)[number]) => {
+      const rg = page.getByRole("radiogroup", { name: `${LABEL[key]}の結果` });
+      return { normal: await rg.getByRole("radio", { name: "正常" }).isChecked(), abnormal: await rg.getByRole("radio", { name: "異常" }).isChecked() };
+    };
+    expect(await checked("propeller"), "異常のまま").toEqual({ normal: false, abnormal: true });
+    for (const k of KEYS.filter((x) => x !== "propeller")) expect(await checked(k), k).toEqual({ normal: true, abnormal: false });
+    await expect(page.getByTestId("inspection-missing-count")).toHaveText("9 項目すべて記入済み");
+    await expect(page.getByTestId("inspection-progress")).toContainText("異常 1 項目");
+    // 全部記入済みでもう一度押しても何も変わらない
+    await page.getByRole("button", { name: "すべて正常" }).click();
+    expect(await checked("propeller")).toEqual({ normal: false, abnormal: true });
+    await expect(page.getByTestId("inspection-progress")).toContainText("記入済み 9/9");
+    await expect(page.getByTestId("inspection-progress")).toContainText("異常 1 項目");
+  });
+
+  test("N-3. aria-live は未記入の数の 1 つだけ。群の数には読み上げ用の補い（完了 n/3 項目）があり、群の名前の近くに 14px の補足がある", async ({ page }) => {
+    await signIn(page.request, seeded("a-pilot"));
+    await openNew(page);
+    await expect(form(page).locator('[aria-live]')).toHaveCount(1);
+    await expect(form(page).locator('[aria-live]')).toHaveAttribute("data-testid", "inspection-missing-count");
+    await pick(page, "general", "正常");
+    await pick(page, "propeller", "正常");
+    await expect(group(page, "body").locator("> summary .sr-only")).toHaveText("完了 2/3 項目");
+    await expect(page.getByTestId("inspection-group-body-count")).toHaveText("2/3");
+    const note = page.getByTestId("inspection-group-note");
+    await expect(note).toContainText("見やすさのために分けています（様式2 の区分ではありません）");
+    expect(await note.evaluate((e) => ({ fs: parseFloat(getComputedStyle(e).fontSize), hasNote: e.hasAttribute("data-note") }))).toEqual({ fs: 14, hasNote: true });
   });
 
   test("I-2. 異常で備考なしの保存は、今のサーバーの検証の誤りが、畳んだ群の中でも開いて示される", async ({ page }) => {
@@ -312,8 +362,10 @@ test.describe("16-I 点検の一覧", () => {
     const abnormalAc = await mk(abnormalMark);
     const ok = await manager.post("/api/ops/inspections", { data: { aircraftId: normalAc, pilotId, inspectedAt: `${DAY}T08:00`, timing: "pre_flight", placeName: "本社", items: Object.fromEntries(KEYS.map((k) => [k, { result: "normal" }])) } });
     expect(ok.status(), await ok.text()).toBe(201);
+    const voidIds: string[] = [((await ok.json()) as { id: string }).id];
     const bad = await manager.post("/api/ops/inspections", { data: { aircraftId: abnormalAc, pilotId, inspectedAt: `${DAY}T08:10`, timing: "post_flight", placeName: "本社", items: { ...Object.fromEntries(KEYS.map((k) => [k, { result: "normal" }])), propeller: { result: "abnormal", note: "欠け" } } } });
     expect(bad.status(), await bad.text()).toBe(201);
+    voidIds.push(((await bad.json()) as { id: string }).id);
     // 今日の飛行前の点検がない計画（未実施のカード）
     const plan = await manager.post("/api/ops/plans", { data: { title: `未実施のカード ${stamp}`, aircraftId, pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
     expect(plan.status(), await plan.text()).toBe(201);
@@ -360,6 +412,42 @@ test.describe("16-I 点検の一覧", () => {
     // 押すと詳細へ
     await Promise.all([page.waitForURL(/\/ops\/inspections\/[0-9a-f-]{36}$/), okRow.click()]);
     await page.goBack();
+
+    // N-4：状態ラベルの地の色は、状態トークン（--sb-st-safe-face / --sb-st-danger-face）の計算値と一致する
+    const faceOf = async (token: string) =>
+      page.evaluate((t) => {
+        const probe = document.createElement("span");
+        probe.style.backgroundColor = `var(${t})`;
+        document.body.appendChild(probe);
+        const c = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return c;
+      }, token);
+    const bgOf = (loc: ReturnType<typeof rowOf>, tone: string) => loc.locator(`[data-tone="${tone}"]`).evaluate((e) => getComputedStyle(e).backgroundColor);
+    const safeFace = await faceOf("--sb-st-safe-face");
+    const dangerFace = await faceOf("--sb-st-danger-face");
+    expect(safeFace).not.toBe(dangerFace);
+    expect(await bgOf(okRow, "safe"), "点検済みの地").toBe(safeFace);
+    expect(await bgOf(badRow, "danger"), "異常ありの地").toBe(dangerFace);
+
+    // R-1：取消済みの点検は、情報の「取消済み」1 つだけ。安全・危険のラベルは 0（正常の点検を取り消した場合・異常ありを取り消した場合の両方）
+    for (const id of voidIds) {
+      const v = await manager.post(`/api/ops/inspections/${id}/void`, { data: { expectedVersion: 1, reason: "試験の取消" } });
+      expect(v.status(), await v.text()).toBe(200);
+    }
+    await page.goto("/ops/inspections?includeVoided=1");
+    await expect(page.getByTestId("inspection-list")).toBeVisible();
+    for (const m of [normalMark, abnormalMark]) {
+      const vr = rowOf(m);
+      await expect(vr).toHaveCount(1);
+      await expect(vr.locator('[data-tone="safe"]')).toHaveCount(0);
+      await expect(vr.locator('[data-tone="danger"]')).toHaveCount(0);
+      await expect(vr.locator(".sb-state")).toHaveCount(1);
+      await expect(vr.locator('[data-tone="info"]')).toHaveText("取消済み");
+      await expect(vr.getByText("取消済み")).toHaveCount(1);
+      await expect(vr.locator('[data-tone="info"] svg')).toHaveCount(1);
+      expect(await vr.locator(".line-through").count(), "線を引く表示は今のまま").toBeGreaterThan(0);
+    }
 
     // 未実施のカード：状態ラベル「未実施」・カード全体が点検の入力へのリンク
     const pending = page.locator('[data-testid="inspection-pending-row"]', { hasText: `未実施のカード ${stamp}` });
