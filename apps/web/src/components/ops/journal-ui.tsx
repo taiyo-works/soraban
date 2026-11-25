@@ -107,7 +107,7 @@ export function FlightCardBody({
             <span className="mx-1.5" aria-hidden="true">
               ／
             </span>
-            <span className="text-sb-ink-3">総飛行時間 </span>
+            <span className="text-sb-ink-3">機体の総飛行時間 </span>
             <span className="sb-num" data-testid="journal-row-total">
               {formatHm(f.totalFlightMinutes)}
             </span>

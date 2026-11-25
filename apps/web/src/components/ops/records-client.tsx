@@ -1146,7 +1146,7 @@ export function FlightForm({
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SPECIFIC_FLIGHT_TYPES.filter((t) => t.group === group).map((t) => {
                   const checked = v.specificFlightTypes.includes(t.key);
-                  return <CheckRow key={t.key} label={t.label} checked={checked} onChange={() => toggleType(t.key)} rowTestId={`flight-type-${t.key}`} />;
+                  return <CheckRow key={t.key} label={t.label} checked={checked} onChange={() => toggleType(t.key)} doneMark={false} rowTestId={`flight-type-${t.key}`} />;
                 })}
               </div>
             </div>

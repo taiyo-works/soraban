@@ -316,17 +316,21 @@ export function TextField({ id, label, hint, error, requiredMark, className, ...
 type CheckRowProps = Omit<ComponentPropsWithRef<"input">, "type" | "children"> & {
   readonly label: ReactNode;
   readonly rowTestId?: string;
+  /** 既定 true。「該当するか」を選ぶ欄（作業の完了ではない）では false にし、「済」を出さない。選択中は丸のチェックと縁（is-on）で示す。 */
+  readonly doneMark?: boolean;
 };
 
-/** チェック行：行全体が <label>。左に 32 の丸いチェック、右に項目名、済みのときは行末に文字「済」（色だけに頼らない）。 */
-export function CheckRow({ label, rowTestId, className, ...rest }: CheckRowProps) {
+/** チェック行：行全体が <label>。左に 32 の丸いチェック、右に項目名、済みのときは行末に文字「済」（色だけに頼らない）。doneMark={false} では「済」を出さず、選択中は丸のチェックと縁で示す。 */
+export function CheckRow({ label, rowTestId, className, doneMark = true, ...rest }: CheckRowProps) {
   return (
-    <label className={cx("sb-check-row", "sb-chk", className)} {...(rowTestId ? { "data-testid": rowTestId } : {})}>
+    <label className={cx("sb-check-row", "sb-chk", !doneMark && rest.checked && "is-on", className)} {...(rowTestId ? { "data-testid": rowTestId } : {})}>
       <input {...rest} type="checkbox" className="sb-check" />
       <span className="sb-chk-text">{label}</span>
-      <span className="sb-chk-done" aria-hidden="true">
-        済
-      </span>
+      {doneMark ? (
+        <span className="sb-chk-done" aria-hidden="true">
+          済
+        </span>
+      ) : null}
     </label>
   );
 }

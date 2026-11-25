@@ -191,6 +191,8 @@ test.describe("16-J 日誌（J-1）", () => {
     await expect(liveRow.getByTestId("journal-row-takeoff-landing")).toContainText(`${live.s.takeoff}–${live.s.landing}`);
     await expect(liveRow.getByTestId("journal-row-minutes")).toHaveText("0:40");
     await expect(liveRow.getByTestId("journal-row-total")).toHaveText("0:40");
+    // 機体の累計は「機体の総飛行時間」（操縦者の総飛行時間と読めない）
+    await expect(liveRow).toContainText("機体の総飛行時間");
     await expect(liveRow.locator("[data-tone]")).toHaveCount(0);
     expect(await liveRow.getByTestId("journal-row-minutes").evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toContain("tabular-nums");
     // 取消済みを含める：「取消済み」の情報ラベル 1 つ。安全・注意の状態ラベルと「正常・完了」の語を出さない。総飛行時間も出さない。破線の縁
@@ -228,6 +230,40 @@ test.describe("16-J 日誌（J-1）", () => {
   }
 });
 
+test.describe("16-J 日をまたぐ着陸（N-3）", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  test("N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧）", async ({ page }) => {
+    const a = await createAircraft();
+    // 重なりを避けるため、前の日の 23:30 に離陸して翌日 00:10 に着陸（40 分）。重なったら日をずらす
+    let f: Awaited<ReturnType<typeof createFlight>> | null = null;
+    for (let i = 0; i < 40 && !f; i++) {
+      // 日誌の範囲（最近 14 日）に入る日（12-23 〜 01-02 に離陸）
+      const ymd = (n: number) => (n <= 31 ? `2026-12-${p2(n)}` : `2027-01-${p2(n - 31)}`);
+      const dayNo = 23 + Math.floor(Math.random() * 11);
+      const day = ymd(dayNo);
+      const next = ymd(dayNo + 1);
+      const r = await manager.post("/api/ops/flights", {
+        data: { aircraftId: a.id, pilotId, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, takeoffAt: `${day}T23:30`, landingAt: `${next}T00:10` },
+      });
+      if (r.status() === 409 && (await r.text()).includes("overlap")) continue;
+      expect(r.status(), await r.text()).toBe(201);
+      const j = (await r.json()) as { id: string; version?: number };
+      f = { id: j.id, version: j.version ?? 1, s: slot() };
+    }
+    if (!f) throw new Error("空いている枠が見つかりません");
+    await signIn(page.request, seeded("a-manager"));
+    await page.goto("/ops/journal?tab=flights");
+    const row = rowOf(page, f.id, "flight");
+    await expect(row).toBeVisible();
+    await expect(row.getByTestId("journal-row-takeoff-landing")).toContainText("23:30–翌日 00:10");
+    await expect(row.getByTestId("journal-row-minutes")).toHaveText("0:40");
+    await page.goto(`/ops/flights?aircraftId=${a.id}`);
+    const liveRow = page.getByTestId("flight-row").first();
+    await expect(liveRow.getByTestId("journal-row-takeoff-landing")).toContainText("23:30–翌日 00:10");
+    await expect(liveRow.getByTestId("journal-row-minutes")).toHaveText("0:40");
+  });
+});
+
 test.describe("16-J 飛行記録の入力（J-2）", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const form = (page: Page) => page.getByRole("form", { name: "飛行記録の入力" });
@@ -249,13 +285,16 @@ test.describe("16-J 飛行記録の入力（J-2）", () => {
     for (let i = 0; i < n; i++) expect((await rows.nth(i).boundingBox())!.height, `チェック行 ${i}`).toBeGreaterThanOrEqual(72);
     const cb = rows.first().locator("input[type=checkbox]");
     expect(await cb.evaluate((el) => [el.getBoundingClientRect().width, el.getBoundingClientRect().height])).toEqual([32, 32]);
-    // 選ぶと「済」が出て、読み上げ名は項目名のまま
+    // 選んでも「済」は出ない（「該当するか」を選ぶ欄で、作業の完了ではない）。選択中は丸のチェックと is-on の縁で示し、読み上げ名は項目名のまま
     const first = rows.first();
     const name = ((await first.locator(".sb-chk-text").textContent()) ?? "").trim();
-    await expect(first.locator(".sb-chk-done")).toBeHidden();
+    await expect(first.locator(".sb-chk-done")).toHaveCount(0);
     await form(page).getByRole("checkbox", { name, exact: true }).check();
-    await expect(first.locator(".sb-chk-done")).toBeVisible();
-    await expect(first.locator(".sb-chk-done")).toHaveText("済");
+    await expect(form(page).getByRole("checkbox", { name, exact: true })).toBeChecked();
+    await expect(first).toHaveClass(/\bis-on\b/);
+    await expect(first.locator(".sb-chk-done")).toHaveCount(0);
+    await expect(first).not.toContainText("済");
+    await expect(form(page).locator(".sb-chk-done")).toHaveCount(0);
     // 主ボタン：見えている主は 1 つで、文字は「飛行記録を保存」。「今」・補助の操作は主ではない
     expect(await visiblePrimaries(page)).toEqual(["飛行記録を保存"]);
     await expect(page.getByRole("button", { name: "飛行記録を保存", exact: true })).toBeVisible();
@@ -317,7 +356,7 @@ test.describe("16-J 飛行記録の入力（J-2）", () => {
   test("J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない", async ({ page }) => {
     const a = await createAircraft();
     const plan = await manager.post("/api/ops/plans", {
-      data: { title: `日誌の確認 ${stamp}${seq++}`, aircraftId: a.id, pilotId, plannedStartAt: `${NOW_DAY}T15:00`, durationMinutes: 60, purpose: "測量", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] },
+      data: { title: `日誌の確認 ${stamp}${seq++}`, aircraftId: a.id, pilotId, plannedStartAt: `${NOW_DAY}T15:00`, durationMinutes: 60, purpose: "測量", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] },
     });
     expect(plan.status(), await plan.text()).toBe(201);
     const planId = ((await plan.json()) as { id: string }).id;
@@ -330,6 +369,11 @@ test.describe("16-J 飛行記録の入力（J-2）", () => {
     await expect(f.getByRole("combobox", { name: "操縦者", exact: true })).toHaveValue(pilotId);
     await expect(f.getByLabel("飛行の目的")).toHaveValue("測量");
     await expect(f.getByRole("textbox", { name: "離陸場所", exact: true })).toHaveValue("試験地点");
+    // 計画の形態（夜間飛行）は最初から選ばれているが、「済」は出ない（読み上げ名・選択状態は変わらない）
+    await expect(f.getByRole("checkbox", { name: /夜間飛行/ })).toBeChecked();
+    await expect(page.getByTestId("flight-type-night")).toHaveClass(/\bis-on\b/);
+    await expect(f.locator(".sb-chk-done")).toHaveCount(0);
+    await expect(page.getByTestId("flight-type-night")).not.toContainText("済");
     // 計画の予定時刻は離着陸の時刻に入れない
     await expect(f.getByLabel("離陸時刻", { exact: true })).toHaveValue("");
     // 点検がない日：日誌から点検へ。離陸の日時を入れると takeoffAt が付き、計画の機体と同じなので planId・returnTo も付く
