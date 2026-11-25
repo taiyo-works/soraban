@@ -548,6 +548,7 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
       }
     }
     await expect(page.getByTestId("judgement-total")).toHaveAttribute("data-stale", "false");
+    await expect(page.getByTestId("judgement-primary")).toBeVisible(); // 再読み込みの直後は本文が display:none の中（Suspense）
     expect(await visiblePrimaries(page), "再判定の後").toEqual(["judgement-primary"]);
   });
 
