@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MismatchBadges } from "@/components/ops/journal-ui";
+import { FlightCardBody } from "@/components/ops/journal-ui";
 import { Icon } from "@/components/ui/icons";
 import { ListCardLink, StatusLabel } from "@/components/ui/sb-parts";
 import { Notice, PageHeader } from "@/components/ops/ui";
 import { INSPECTION_TIMING_LABELS } from "@/lib/ops-records";
-import { formatHm, jstDate } from "@/lib/ops-time";
+import { jstDate } from "@/lib/ops-time";
 import { DraftOwnerGuard } from "@/components/ops/ops-client";
 import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
@@ -116,43 +116,7 @@ export default async function OpsJournalPage({ searchParams }: { readonly search
             r.kind === "flight" ? (
               <li key={`f-${r.f.id}`} data-testid="journal-row" data-kind="flight">
                 <ListCardLink href={`/ops/flights/${r.f.id}`} data-testid="journal-row-link">
-                  <span className="flex flex-wrap items-center gap-2">
-                    {r.f.voided ? (
-                      // 取消済みは、情報の「取消済み」1 つだけ（正常・完了と読める表示を出さない）。カードは破線の縁（点検の一覧と同じ）
-                      <span data-result="voided">
-                        <StatusLabel tone="info">取消済み</StatusLabel>
-                      </span>
-                    ) : null}
-                    <KindTag kind="flight" />
-                  </span>
-                  <span className={`text-body font-bold ${r.f.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`}>
-                    <span className="sr-only">飛行年月日</span>
-                    <span className="sb-num">{r.f.flightDate}</span>
-                  </span>
-                  <span className={`flex flex-wrap items-baseline gap-x-5 gap-y-1 ${r.f.voided ? "text-sb-ink-3 line-through" : "text-sb-ink"}`} data-testid="journal-row-times">
-                    <span className="sb-num sb-stat-num" data-testid="journal-row-takeoff-landing">
-                      <span className="sr-only">離陸から着陸</span>
-                      {r.f.takeoffAtJst.slice(11)}–{r.f.landingAtJst}
-                    </span>
-                    <span className="inline-flex items-baseline gap-2">
-                      <span data-note="" className="text-sm font-medium text-sb-ink-2">
-                        飛行時間
-                      </span>
-                      <span className="sb-num sb-stat-num" data-testid="journal-row-minutes">
-                        {formatHm(r.f.flightMinutes)}
-                      </span>
-                    </span>
-                  </span>
-                  <span data-note="" className="break-words text-sb-ink-2">
-                    <span className="sr-only">機体</span>
-                    <span className="sb-num break-all">{r.f.registrationMark}</span>
-                    <span className="mx-1.5" aria-hidden="true">
-                      ／
-                    </span>
-                    <span className="text-sb-ink-3">操縦者 </span>
-                    {r.f.pilotName}
-                  </span>
-                  <MismatchBadges mismatches={r.f.mismatches} />
+                  <FlightCardBody f={r.f} kindTag={<KindTag kind="flight" />} />
                 </ListCardLink>
               </li>
             ) : (

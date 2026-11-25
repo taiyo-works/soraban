@@ -1,6 +1,11 @@
+import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/icons";
+import { StatusLabel } from "@/components/ui/sb-parts";
+import { JudgementMissing } from "@/components/ops/plan-ui";
 import type { JournalMismatch } from "@/server/ops/journal-logic";
 import { fieldGapLabel, type FieldGapLike } from "@/lib/ops-field";
+import { formatHm } from "@/lib/ops-time";
+import { JUDGEMENT_LINK_MISSING_LABEL, type FlightDto } from "@/server/ops/records";
 
 // 日誌の食い違いの札・離陸時の未了事項の写し（Sprint 12c 設計 D）。知らせるだけで、保存は止めない。
 // 札は記号と文字で示す（色だけにしない）。表示の文言はサーバーが導出した label をそのまま使う。
@@ -38,5 +43,83 @@ export function TakeoffGaps({ gaps }: { readonly gaps: readonly FieldGapLike[] |
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * 飛行記録の一覧カードの中身（16-J J-1。日誌 /ops/journal と飛行記録の一覧 /ops/flights が同じ）。ListCardLink の中に置く。
+ * 見出し（種別・状態）→ 飛行年月日 → 離陸–着陸の時刻と飛行時間（数値の強調・tabular-nums）→ 機体／操縦者 → 総飛行時間 → 食い違い・判定の根拠の札。
+ * 取消済みは、情報の「取消済み」1 つだけを出す（正常・完了と読める表示を出さない。カードは破線の縁。時刻と日付は取り消し線）。
+ * 取り消されていない記録には、状態ラベルを付けない（記録の事実だけ。食い違いの札は注意として別に出る）。
+ */
+export function FlightCardBody({
+  f,
+  kindTag,
+  showTotal = false,
+}: {
+  readonly f: FlightDto;
+  /** 先頭に置く種別の札（日誌の合算の一覧だけ）。 */
+  readonly kindTag?: ReactNode;
+  /** 機体の総飛行時間を出す（飛行記録の一覧だけ。取消済みは出さない）。 */
+  readonly showTotal?: boolean;
+}) {
+  const muted = f.voided ? "text-sb-ink-3 line-through" : "text-sb-ink";
+  return (
+    <>
+      {f.voided || kindTag ? (
+        <span className="flex flex-wrap items-center gap-2">
+          {f.voided ? (
+            <span data-result="voided">
+              <StatusLabel tone="info">取消済み</StatusLabel>
+            </span>
+          ) : null}
+          {kindTag}
+        </span>
+      ) : null}
+      <span className={`text-body font-bold ${muted}`}>
+        <span className="sr-only">飛行年月日</span>
+        <span className="sb-num">{f.flightDate}</span>
+      </span>
+      <span className={`flex flex-wrap items-baseline gap-x-5 gap-y-1 ${muted}`} data-testid="journal-row-times">
+        <span className="sb-num sb-stat-num" data-testid="journal-row-takeoff-landing">
+          <span className="sr-only">離陸から着陸</span>
+          {f.takeoffAtJst.slice(11)}–{f.landingAtJst}
+        </span>
+        <span className="inline-flex items-baseline gap-2">
+          <span data-note="" className="text-sm font-medium text-sb-ink-2">
+            飛行時間
+          </span>
+          <span className="sb-num sb-stat-num" data-testid="journal-row-minutes">
+            {formatHm(f.flightMinutes)}
+          </span>
+        </span>
+      </span>
+      <span data-note="" className="break-words text-sb-ink-2">
+        <span className="sr-only">機体</span>
+        <span className="sb-num break-all">{f.registrationMark}</span>
+        <span className="mx-1.5" aria-hidden="true">
+          ／
+        </span>
+        <span className="text-sb-ink-3">操縦者 </span>
+        {f.pilotName}
+        {showTotal && f.totalFlightMinutes !== null ? (
+          <>
+            <span className="mx-1.5" aria-hidden="true">
+              ／
+            </span>
+            <span className="text-sb-ink-3">総飛行時間 </span>
+            <span className="sb-num" data-testid="journal-row-total">
+              {formatHm(f.totalFlightMinutes)}
+            </span>
+          </>
+        ) : null}
+      </span>
+      <MismatchBadges mismatches={f.mismatches} />
+      {f.judgementLink === "missing" ? (
+        <span data-testid="flight-judgement-missing">
+          <JudgementMissing label={JUDGEMENT_LINK_MISSING_LABEL} />
+        </span>
+      ) : null}
+    </>
   );
 }
