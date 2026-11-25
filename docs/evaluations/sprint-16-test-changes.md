@@ -669,7 +669,7 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 
 ### 新規
 
-- `e2e/ops-db/sprint16-l-db.spec.ts`（9 件）：L-1（21 画面：旧い class 0・主ボタンの数・48px・14px・320〜430 幅の横スクロール 0／文字 200% の 320・390・430）、事故の詳細の主ボタン 1 つ（フォームを開いても。閲覧者は 0）、事故の記録の 320・200%、`/ops/about` の 200%、計画の一覧の札の 320・200%、E-5（360×740）、L-3、L-4、K-15。
-- 旧コード（3c03fa7）に戻して確かめた：9 件中 8 件が落ちる（残る 1 件は K-15。端末データを増やさないことの守りの検査）。ログ `docs/evaluations/logs/sprint-16L-gen-spec-l-oldcode.log`。
+- `e2e/ops-db/sprint16-l-db.spec.ts`（10 件）：L-1（21 画面：旧い class 0・主ボタンの数・48px・14px・320〜430 幅の横スクロール 0／文字 200% の 320・390・430）、事故の詳細の主ボタン 1 つ（フォームを開いても。閲覧者は 0）、事故の記録の 320・200%、`/ops/about` の 200%、計画の一覧の札の 320・200%、E-5（360×740）、L-3、L-4、K-15。
+- 旧コード（3c03fa7）に戻して確かめた：K-15 を除く 9 件がすべて落ちる（K-15 は端末データを増やさないことの守りの検査で、旧コードでは流していない）。ログ `docs/evaluations/logs/sprint-16L-gen-spec-l-oldcode.log`。
 - `apps/web/src/lib/field-message.test.ts`：`tidyEngineText` の 2 件（エンジンの文は変えず、画面の文から「必ず」を外す）。
 - 入れ物の切れの検査（`measureTextZoom` の `clippedContainers`）から、`input` だけを `sprint16-l-db` の側で除いた（入力欄の中の長い値は欄の中で読む。`field-checks.ts` の共通の除外は変えていない）。

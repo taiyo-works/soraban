@@ -11,7 +11,7 @@
 - [x] 4b. 主ボタンの数（事故の詳細 4→1、作業台の行操作は副）。載せ替えは既存部品で済んでいた（旧い class 0）
 - [x] 5. L-3（tidyEngineText）、L-4（古い判定は judgement-primary を副に）
 - [x] 6. E-5（今ボタンを見出し行へ。660 ≤ 667）
-- [x] 7. sprint16-l-db 9 件、旧コード 3c03fa7 で 8/9 が落ちることを確認（K-15 は守りの検査）。コミット 035a685
+- [x] 7. sprint16-l-db 10 件、旧コード 3c03fa7 で K-15 を除く 9 件が落ちることを確認。コミット 035a685
 - [ ] 8. 全検証・ログ・test-changes・報告
 
 ## メモ
@@ -20,3 +20,4 @@
 - 検証用: scratchpad の newdb.sh（新しい DB）・e2e.sh（ops E2E）。e2e/ops-db/_probe-*.spec.ts は調査用でコミットしない（最後に削除）。
 - DB: postgres/postgres、soraban_app/soraban_app_ci_only を設定済み。
 - 全検証: typecheck・lint・unit(3103)・test:db(289)・testids・contrast は通過。build 済み。ops E2E 全体は l16_full1 で実行中（ログ sprint-16L-gen-ops-e2e.log）。残り: spec ×3、test-changes 追記、最終コミット、報告。
+- 全検証完了: ops E2E 431/431（30.2 分、空の DB l16_full1）、sprint16-l-db ×3 = 30/30。残り: 最終コミットと報告。
