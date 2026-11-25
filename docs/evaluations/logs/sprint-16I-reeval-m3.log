@@ -1,0 +1,5 @@
+describedby(note shown) [{"id":"_R_4lubsnqeivb_","exists":true,"text":"日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在","hidden":false}]
+noteCount 0
+describedby(note gone) [{"id":"_R_4lubsnqeivb_","exists":true,"text":"日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在","hidden":false}]
+gap hint-below-field (no note) {"fieldBottom":546,"hintTop":562,"gap":16}
+describedby(error?) [{"id":"_R_4lubsnqeivb_","exists":true,"text":"日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在","hidden":false}]
