@@ -1,0 +1,37 @@
+HEAD 581aa18, DB m16_full1, build: trMwAKlXlE71DN439uLdx
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0
+
+
+Running 433 tests using 1 worker
+
+  ✓    1 e2e/ops-db/sprint10-db.spec.ts:49:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済み・確認済みのメールアドレスで初回ログインすると結び付き、/ops に表示名と役割が出る (995ms)
+  ✓    2 e2e/ops-db/sprint10-db.spec.ts:60:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待されていないアドレスでは /ops/no-access が表示され、/api/ops/me が 403 (550ms)
+  ✓    3 e2e/ops-db/sprint10-db.spec.ts:68:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済みのアドレスでも emailVerified: false では結び付かない (94ms)
+  ✓    4 e2e/ops-db/sprint10-db.spec.ts:83:7 › Sprint 10 E2E-DB：運航管理 › 8. 役割ごとの API の状態コード（機体・操縦者・利用者） (423ms)
+  ✓    5 e2e/ops-db/sprint10-db.spec.ts:197:7 › Sprint 10 E2E-DB：運航管理 › 14. 理由なしの訂正・取消は 400。取消した機体は既定の一覧に出ず、詳細と版の一覧には残る。DELETE は 405 で行が残る (133ms)
+  ✓    6 e2e/ops-db/sprint10-db.spec.ts:228:7 › Sprint 10 E2E-DB：運航管理 › 17. 運航管理者が画面で機体を登録し、型式名を理由付きで訂正すると、版の一覧に登録・訂正の 2 行が出る (2.4s)
+  ✓    7 e2e/ops-db/sprint10-db.spec.ts:271:7 › Sprint 10 E2E-DB：運航管理 › 18. 技能証明書番号：一覧は末尾 4 桁以外を伏せ、詳細は運航管理者と本人にだけ全桁 (137ms)
+  ✓    8 e2e/ops-db/sprint10-db.spec.ts:316:7 › Sprint 10 E2E-DB：運航管理 › 20. スマートフォン幅 375px で /ops/aircraft と /ops/aircraft/new に横スクロールがない (1.7s)
+  ✓    9 e2e/ops-db/sprint10-db.spec.ts:330:7 › Sprint 10 E2E-DB：運航管理 › 21. 画面の操作の結果：入力の誤りは最初の項目へフォーカス、取消・利用者の変更は結果を一度だけ示す (3.9s)
+  ✓   10 e2e/ops-db/sprint10-neon.spec.ts:24:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › 未ログインで /ops を開くとサインイン画面（Google のボタン）に移る (580ms)
+  ✓   11 e2e/ops-db/sprint10-neon.spec.ts:30:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › (a) Google から戻ると verifier がセッションに交換され、session_token が設定されて /ops が表示される (1.2s)
+[WebServer] [getSessionDataFromCookie] Invalid session cookie: {
+[WebServer]   error: 'JWS Protected Header is invalid',
+[WebServer]   cookieName: '__Secure-neon-auth.local.session_data'
+[WebServer] }
+  ✓   12 e2e/ops-db/sprint10-neon.spec.ts:47:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › (b) session_token だけ（session_data なし・壊れた session_data）でも、Cookie を更新して /ops が表示される (1.1s)
+  ✓   13 e2e/ops-db/sprint10-neon.spec.ts:68:7 › Sprint 10 E2E-DB：Neon Auth（模擬の上流） › サインイン画面・権限なしの画面は保護しないが、Google から戻ったときの交換は行う (550ms)
+  ✓   14 e2e/ops-db/sprint11-db.spec.ts:123:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 7. 機体は訂正で変えられない（400）。取消済み・抹消の機体への作成は 409。他の組織の ID は 404。別の機体の点検の紐付けは 400 (254ms)
+  ✓   15 e2e/ops-db/sprint11-db.spec.ts:175:7 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 15. 役割ごとの状態コード（作成・訂正・取消）。理由なしは 400、古い版は 409、DELETE は 405 で行が残る (457ms)
+  ✓   16 e2e/ops-db/sprint11-db.spec.ts:261:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 16. 「離陸：今」「着陸：今」、再読み込みで下書きが残り、保存すると詳細に飛行年月日・時刻・飛行時間 0:01・総飛行時間が出て、下書きが消える (2.3s)
+  ✓   17 e2e/ops-db/sprint11-db.spec.ts:309:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 17. 同じ clientRequestId の POST は 2 回目が 200 で同じ ID、記録は 1 件。保存の要求を遮断すると下書きが残り、再送ボタンで保存できる (1.5s)
+  ✓   18 e2e/ops-db/sprint11-db.spec.ts:353:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 18. 日常点検を「すべて正常」で保存し、進んだ飛行記録の入力画面に点検が候補として入る。当日の点検がない機体は警告が出るが保存できる。「異常」で備考なしはその項目に誤り (3.4s)
+  ✓   19 e2e/ops-db/sprint11-db.spec.ts:409:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 19. 375px で一覧・入力・詳細に横スクロールがなく、「離陸：今」「着陸：今」「保存」「すべて正常」の高さが 44px 以上 (3.0s)
+  ✓   20 e2e/ops-db/sprint11-db.spec.ts:445:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1・2：何も入力のない日常点検の下書きは、日をまたぐと今の分に入れ直して知らせる。手で入れた日時は残し「前回の入力のまま」と示す (2.6s)
+  ✓   21 e2e/ops-db/sprint11-db.spec.ts:491:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 2：9 項目を入れて保存に失敗した点検を翌日開き直すと、実施日時は保たれ「前回の入力のまま」と示す (1.6s)
+  ✓   22 e2e/ops-db/sprint11-db.spec.ts:519:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 2：「今」を押した後に再読み込みしても、実施日時は押したときのまま (1.1s)
+  ✓   23 e2e/ops-db/sprint11-db.spec.ts:537:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：下書きは利用者ごと。別の利用者でログインすると前の人の下書きは読まれず、端末から消える (926ms)
+  ✓   24 e2e/ops-db/sprint11-db.spec.ts:557:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：日常点検の候補を取得できないときは「点検がない」とは示さず、取得できないと示す (831ms)
+  ✓   25 e2e/ops-db/sprint11-db.spec.ts:571:9 › Sprint 11 E2E-DB：飛行記録・日常点検記録 › 現場の画面（375px・America/Los_Angeles） › 差し戻し 1：「← 一覧」などのリンクの押せる範囲が高さ 44px 以上 (1.5s)

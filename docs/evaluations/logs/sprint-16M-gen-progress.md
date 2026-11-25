@@ -14,3 +14,7 @@
 - 検証用スクリプト（scratchpad）: pub.sh（CI と同じ条件で公開側 E2E）、bp.sh（build + 寸法の probe）。e2e/_probe-*.spec.ts は調査用でコミットしない（最後に削除）。
 - 寸法の実測（375×812）: 基準 12,418 → 11,643。Q-20 ③ は固定の台本（フィクスチャのサーバー）で 2.1 → 2.0（scrollPx 1,637／上限 1,664）。
 - ダイナミックな dev サーバーは 127.0.0.1 でハイドレートしない（allowedDevOrigins）。寸法は必ず `next build` + `next start` で測る。
+
+## 状態（中間）
+- 1b〜3 完了: sprint16-m（29 件、×3 で 87/87、旧コード c3dfe5e で 16 件落ちる）。公開側全体 353 件中 351 通過（落ちたのは sprint9 306 と sprint18-3-wording。後者は PDF の「必ず」の許可が画面依存だったため。検査を緩める変更なので適用せず、報告に上げる）。
+- 残り: ops E2E 全体（空の DB m16_full1、ログ sprint-16M-gen-ops-e2e.log）、test-changes・コミット、報告。

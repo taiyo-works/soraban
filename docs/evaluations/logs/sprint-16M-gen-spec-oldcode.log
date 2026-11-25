@@ -1,0 +1,609 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint16-m.spec.ts
+
+
+Running 29 tests using 1 worker
+
+  ✘   1 e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま (31.6s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま,line=71,col=24::  1) e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま %0A    Error: expect(locator).toHaveClass(expected) failed%0A%0A    Locator: getByTestId('verdict-conclusion')%0A    Expected pattern: /sb-card-state/%0A    Received string:  "sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise"%0A    Timeout: 30000ms%0A%0A    Call log:%0A      - Expect "toHaveClass" getByTestId('verdict-conclusion') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion')%0A        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>%0A           - unexpected value "sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise"%0A%0A%0A      69 |     await openReady(page);%0A      70 |     const card = page.getByTestId("verdict-conclusion");%0A    > 71 |     await expect(card).toHaveClass(/sb-card-state/);%0A         |                        ^%0A      72 |     await expect(card).toHaveAttribute("data-state", /^(danger|warn|info|safe)$/);%0A      73 |     const look = await card.evaluate((el) => {%0A      74 |       const cs = getComputedStyle(el);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:71:24
+  ✓   2 e2e/sprint16-m.spec.ts:88:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1b. 判定の札：規制ごとの判定・規制カードの判定は、形（SVG）と言葉を持つ札（5 段の言葉は変えない） (1.7s)
+  ✘   3 e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま (1.7s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま,line=110,col=32::  2) e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま %0A    Error: expect(received).toBeGreaterThanOrEqual(expected)%0A%0A    Expected: >= 1%0A    Received:    0%0A%0A      108 |     await openReady(page);%0A      109 |     const rows = page.locator('[data-testid="verdict-procedure"][data-state="warn"]');%0A    > 110 |     expect(await rows.count()).toBeGreaterThanOrEqual(1);%0A          |                                ^%0A      111 |     const look = await rows.first().evaluate((el) => {%0A      112 |       const band = getComputedStyle(el, "::before");%0A      113 |       return { display: getComputedStyle(el).display, band: band.width, bg: getComputedStyle(el).backgroundColor, radius: parseFloat(getComputedStyle(el).borderTopLeftRadius) };%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:110:32
+  ✘   4 e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま (31.4s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま,line=137,col=39::  3) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま %0A    Error: expect(locator).toHaveAttribute(expected) failed%0A%0A    Locator:  getByTestId('verdict-conclusion')%0A    Expected: "danger"%0A    Received: ""%0A    Timeout:  30000ms%0A%0A    Call log:%0A      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion')%0A        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>%0A           - unexpected value "null"%0A%0A%0A      135 |       await openReady(page);%0A      136 |       const card = page.getByTestId("verdict-conclusion");%0A    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);%0A          |                                       ^%0A      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);%0A      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);%0A      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+  ✘   5 e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま (31.3s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま,line=137,col=39::  4) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま %0A    Error: expect(locator).toHaveAttribute(expected) failed%0A%0A    Locator:  getByTestId('verdict-conclusion')%0A    Expected: "warn"%0A    Received: ""%0A    Timeout:  30000ms%0A%0A    Call log:%0A      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion')%0A        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>%0A           - unexpected value "null"%0A%0A%0A      135 |       await openReady(page);%0A      136 |       const card = page.getByTestId("verdict-conclusion");%0A    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);%0A          |                                       ^%0A      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);%0A      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);%0A      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+  ✓   6 e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま (1.5s)
+  ✘   7 e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま (31.3s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま,line=137,col=39::  5) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま %0A    Error: expect(locator).toHaveAttribute(expected) failed%0A%0A    Locator:  getByTestId('verdict-conclusion')%0A    Expected: "info"%0A    Received: ""%0A    Timeout:  30000ms%0A%0A    Call log:%0A      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion')%0A        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>%0A           - unexpected value "null"%0A%0A%0A      135 |       await openReady(page);%0A      136 |       const card = page.getByTestId("verdict-conclusion");%0A    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);%0A          |                                       ^%0A      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);%0A      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);%0A      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+  ✘   8 e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま (31.5s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま,line=137,col=39::  6) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま %0A    Error: expect(locator).toHaveAttribute(expected) failed%0A%0A    Locator:  getByTestId('verdict-conclusion')%0A    Expected: "safe"%0A    Received: ""%0A    Timeout:  30000ms%0A%0A    Call log:%0A      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion')%0A        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>%0A           - unexpected value "null"%0A%0A%0A      135 |       await openReady(page);%0A      136 |       const card = page.getByTestId("verdict-conclusion");%0A    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);%0A          |                                       ^%0A      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);%0A      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);%0A      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+  ✘   9 e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.5s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=152,col=27::  7) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('judgement-total')%0A%0A%0A      150 |       await openReady(page);%0A      151 |       const total = page.getByTestId("judgement-total");%0A    > 152 |       await expect(total).toBeVisible();%0A          |                           ^%0A      153 |       expect((await total.innerText()).trim()).toMatch(s.total);%0A      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();%0A      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+  ✘  10 e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.5s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=152,col=27::  8) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('judgement-total')%0A%0A%0A      150 |       await openReady(page);%0A      151 |       const total = page.getByTestId("judgement-total");%0A    > 152 |       await expect(total).toBeVisible();%0A          |                           ^%0A      153 |       expect((await total.innerText()).trim()).toMatch(s.total);%0A      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();%0A      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+  ✘  11 e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.6s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=152,col=27::  9) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('judgement-total')%0A%0A%0A      150 |       await openReady(page);%0A      151 |       const total = page.getByTestId("judgement-total");%0A    > 152 |       await expect(total).toBeVisible();%0A          |                           ^%0A      153 |       expect((await total.innerText()).trim()).toMatch(s.total);%0A      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();%0A      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+  ✘  12 e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.5s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=152,col=27::  10) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('judgement-total')%0A%0A%0A      150 |       await openReady(page);%0A      151 |       const total = page.getByTestId("judgement-total");%0A    > 152 |       await expect(total).toBeVisible();%0A          |                           ^%0A      153 |       expect((await total.innerText()).trim()).toMatch(s.total);%0A      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();%0A      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+  ✘  13 e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.7s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=152,col=27::  11) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('judgement-total')%0A%0A%0A      150 |       await openReady(page);%0A      151 |       const total = page.getByTestId("judgement-total");%0A    > 152 |       await expect(total).toBeVisible();%0A          |                           ^%0A      153 |       expect((await total.innerText()).trim()).toMatch(s.total);%0A      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();%0A      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+  ✘  14 e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） (31.4s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない）,line=167,col=55::  12) e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('verdict-conclusion').getByTestId('judgement-total')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('verdict-conclusion').getByTestId('judgement-total') with timeout 30000ms%0A      - waiting for getByTestId('verdict-conclusion').getByTestId('judgement-total')%0A%0A%0A      165 |     await openReady(page);%0A      166 |     const card = page.getByTestId("verdict-conclusion");%0A    > 167 |     await expect(card.getByTestId("judgement-total")).toBeVisible();%0A          |                                                       ^%0A      168 |     await expect(card.getByTestId("verdict-checked-date")).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);%0A      169 |     await expect(card.getByTestId("verdict-sourced")).toContainText("出典つき");%0A      170 |     await expect(card.getByTestId("verdict-responsibility")).toContainText("申請");%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:167:55
+  ✓  15 e2e/sprint16-m.spec.ts:175:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3a. 主ボタンは「この地点を判定する」だけ（初期・結果あり・飛行不可・判定不能の各状態） (2.0s)
+  ✘  16 e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる (1.6s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる,line=212,col=107::  13) e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる %0A    Error: Zoom in の角丸 0px%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: true%0A    Received: false%0A%0A      210 |       expect(b.h, `${b.label} の高さ`).toBeGreaterThanOrEqual(48);%0A      211 |       expect(Math.abs(b.w - b.h), `${b.label} は円（縦横が同じ）`).toBeLessThan(1);%0A    > 212 |       expect(parseFloat(b.radius) >= b.w / 2 - 1 || b.radius.includes("%"), `${b.label} の角丸 ${b.radius}`).toBe(true);%0A          |                                                                                                           ^%0A      213 |     }%0A      214 |     const sorted = [...btns].sort((a, b) => a.top - b.top);%0A      215 |     for (let i = 1; i < sorted.length; i++) expect(sorted[i]!.top - sorted[i - 1]!.bottom, "部品の間").toBeGreaterThanOrEqual(8 - 0.5);%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:212:107
+  ✓  17 e2e/sprint16-m.spec.ts:220:7 › 16-M M-4 静的なシェルと申請支援 › M-4a. 静的な HTML に見出し・入力欄・主ボタンが入り、申請支援・結論の値は入っていない。画面にも申請支援は出ない (1.8s)
+  ✘  18 e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない (31.3s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない,line=248,col=27::  14) e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない %0A    Error: expect(locator).toContainText(expected) failed%0A%0A    Locator: getByTestId('verdict-duties-section')%0A    Expected substring: "飛行の前後に行うこと"%0A    Received string:    "飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。飛行ごと飛行計画の通報特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。飛行ごと飛行日誌の作成・記録特定飛行のたびに、飛行・日常点検・点検整備を記録します。飛行ごと緊急用務空域の指定の確認飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"%0A    Timeout: 30000ms%0A%0A    Call log:%0A      - Expect "toContainText" getByTestId('verdict-duties-section') with timeout 30000ms%0A      - waiting for getByTestId('verdict-duties-section')%0A        63 × locator resolved to <div class="flex flex-col gap-2" data-testid="verdict-duties-section">…</div>%0A           - unexpected value "飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。飛行ごと飛行計画の通報特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。飛行ごと飛行日誌の作成・記録特定飛行のたびに、飛行・日常点検・点検整備を記録します。飛行ごと緊急用務空域の指定の確認飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"%0A%0A%0A      246 |     await openReady(page);%0A      247 |     const section = page.getByTestId("verdict-duties-section");%0A    > 248 |     await expect(section).toContainText("飛行の前後に行うこと");%0A          |                           ^%0A      249 |     await expect(section).not.toContainText("必ず");%0A      250 |     expect(await page.locator("body").innerText()).not.toContain("飛行の前後に必ず行うこと");%0A      251 |     // 節の見出しの語（結論・飛行できない理由ほか）は変えない%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:248:27
+  ✘  19 e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 (1.7s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」,line=259,col=31::  15) e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 %0A    Error: 本文の「必ず」%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: 0%0A    Received: 2%0A%0A      257 |     await openReady(page);%0A      258 |     const r = await countMust(page);%0A    > 259 |     expect(r.text, "本文の「必ず」").toBe(0);%0A          |                               ^%0A      260 |     expect(r.attrs, "属性の「必ず」").toEqual([]);%0A      261 |     await expect(page.getByTestId("layer-no-map-row").first()).toContainText("飛行の前に DIPS でご確認ください");%0A      262 |   });%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:259:31
+  ✘  20 e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） (1.6s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない）,line=286,col=31::  16) e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） %0A    Error: 本文の「必ず」%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: 0%0A    Received: 16%0A%0A      284 |     await openReady(page);%0A      285 |     const r = await countMust(page);%0A    > 286 |     expect(r.text, "本文の「必ず」").toBe(0);%0A          |                               ^%0A      287 |     await expect(page.getByTestId("regulation-card-aviation-law-did")).toContainText("DIPS で確認してください");%0A      288 |     await expect(page.getByTestId("verdict-duties").locator("li").first()).toContainText("確認します。");%0A      289 |   });%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:286:31
+  ✓  21 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. no_fly：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.2s)
+  ✓  22 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.3s)
+  ✓  23 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. procedure_done：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.1s)
+  ✓  24 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. no_procedure：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.2s)
+  ✓  25 e2e/sprint16-m.spec.ts:303:7 › 16-M 共通条件 › K-3. 初期の状態（要手続き）：結論・詳細の文字は 4.5:1 以上。面の上の補足の文字も (10.3s)
+  ✓  26 e2e/sprint16-m.spec.ts:313:7 › 16-M 共通条件 › K-4. 320・360・375・390・430・768・1024・1280 の幅で横スクロールがない（結果あり） (3.0s)
+  ✓  27 e2e/sprint16-m.spec.ts:321:7 › 16-M 共通条件 › K-5. 文字 200%（390・430 幅）：結論・手続き・規制ごとの判定が切れず、横スクロールがない (7.8s)
+  ✓  28 e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ (8.7s)
+  ✓  29 e2e/sprint16-m.spec.ts:346:7 › 16-M 共通条件 › K-15. 端末のストレージに新しい鍵を作らない（判定・条件の変更・例の選択のあとで、鍵の集合が増えない） (1.8s)
+
+
+  1) e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま 
+
+    Error: expect(locator).toHaveClass(expected) failed
+
+    Locator: getByTestId('verdict-conclusion')
+    Expected pattern: /sb-card-state/
+    Received string:  "sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toHaveClass" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>
+           - unexpected value "sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise"
+
+
+      69 |     await openReady(page);
+      70 |     const card = page.getByTestId("verdict-conclusion");
+    > 71 |     await expect(card).toHaveClass(/sb-card-state/);
+         |                        ^
+      72 |     await expect(card).toHaveAttribute("data-state", /^(danger|warn|info|safe)$/);
+      73 |     const look = await card.evaluate((el) => {
+      74 |       const cs = getComputedStyle(el);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:71:24
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-15812-px-の帯（375px）。判定の段の語と形は従来のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-15812-px-の帯（375px）。判定の段の語と形は従来のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-15812-px-の帯（375px）。判定の段の語と形は従来のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1
+    Received:    0
+
+      108 |     await openReady(page);
+      109 |     const rows = page.locator('[data-testid="verdict-procedure"][data-state="warn"]');
+    > 110 |     expect(await rows.count()).toBeGreaterThanOrEqual(1);
+          |                                ^
+      111 |     const look = await rows.first().evaluate((el) => {
+      112 |       const band = getComputedStyle(el, "::before");
+      113 |       return { display: getComputedStyle(el).display, band: band.width, bg: getComputedStyle(el).backgroundColor, radius: parseFloat(getComputedStyle(el).borderTopLeftRadius) };
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:110:32
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-0c3ec-判定の帯（375px）。768px-以上は表の行のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-0c3ec-判定の帯（375px）。768px-以上は表の行のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-0c3ec-判定の帯（375px）。768px-以上は表の行のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  getByTestId('verdict-conclusion')
+    Expected: "danger"
+    Received: ""
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>
+           - unexpected value "null"
+
+
+      135 |       await openReady(page);
+      136 |       const card = page.getByTestId("verdict-conclusion");
+    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);
+          |                                       ^
+      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);
+      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);
+      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-93812-態は-danger。判定の段の行は-5-段の言葉のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-93812-態は-danger。判定の段の行は-5-段の言葉のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-93812-態は-danger。判定の段の行は-5-段の言葉のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  getByTestId('verdict-conclusion')
+    Expected: "warn"
+    Received: ""
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>
+           - unexpected value "null"
+
+
+      135 |       await openReady(page);
+      136 |       const card = page.getByTestId("verdict-conclusion");
+    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);
+          |                                       ^
+      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);
+      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);
+      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-3458b-の状態は-warn。判定の段の行は-5-段の言葉のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-3458b-の状態は-warn。判定の段の行は-5-段の言葉のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-3458b-の状態は-warn。判定の段の行は-5-段の言葉のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  getByTestId('verdict-conclusion')
+    Expected: "info"
+    Received: ""
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>
+           - unexpected value "null"
+
+
+      135 |       await openReady(page);
+      136 |       const card = page.getByTestId("verdict-conclusion");
+    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);
+          |                                       ^
+      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);
+      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);
+      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-0d0e5-の状態は-info。判定の段の行は-5-段の言葉のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-0d0e5-の状態は-info。判定の段の行は-5-段の言葉のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-0d0e5-の状態は-info。判定の段の行は-5-段の言葉のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  getByTestId('verdict-conclusion')
+    Expected: "safe"
+    Received: ""
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveAttribute" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-3 sb-rise">…</div>
+           - unexpected value "null"
+
+
+      135 |       await openReady(page);
+      136 |       const card = page.getByTestId("verdict-conclusion");
+    > 137 |       if (s.state) await expect(card).toHaveAttribute("data-state", s.state);
+          |                                       ^
+      138 |       else await expect(card).not.toHaveAttribute("data-state", /.+/);
+      139 |       await expect(page.getByTestId("verdict-level")).toHaveText(VERDICT_LABEL[s.level]);
+      140 |       await expect(page.getByTestId("verdict-level")).toHaveAttribute("data-verdict-key", /^(no|needs|done|none|unknown)$/);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:137:39
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-94e76-の状態は-safe。判定の段の行は-5-段の言葉のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-94e76-の状態は-safe。判定の段の行は-5-段の言葉のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-94e76-の状態は-safe。判定の段の行は-5-段の言葉のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('judgement-total')
+
+
+      150 |       await openReady(page);
+      151 |       const total = page.getByTestId("judgement-total");
+    > 152 |       await expect(total).toBeVisible();
+          |                           ^
+      153 |       expect((await total.innerText()).trim()).toMatch(s.total);
+      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();
+      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-b47b0-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-b47b0-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-b47b0-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('judgement-total')
+
+
+      150 |       await openReady(page);
+      151 |       const total = page.getByTestId("judgement-total");
+    > 152 |       await expect(total).toBeVisible();
+          |                           ^
+      153 |       expect((await total.innerText()).trim()).toMatch(s.total);
+      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();
+      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-be064-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-be064-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-be064-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('judgement-total')
+
+
+      150 |       await openReady(page);
+      151 |       const total = page.getByTestId("judgement-total");
+    > 152 |       await expect(total).toBeVisible();
+          |                           ^
+      153 |       expect((await total.innerText()).trim()).toMatch(s.total);
+      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();
+      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('judgement-total')
+
+
+      150 |       await openReady(page);
+      151 |       const total = page.getByTestId("judgement-total");
+    > 152 |       await expect(total).toBeVisible();
+          |                           ^
+      153 |       expect((await total.innerText()).trim()).toMatch(s.total);
+      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();
+      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-23f5c-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-23f5c-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-23f5c-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('judgement-total')
+
+
+      150 |       await openReady(page);
+      151 |       const total = page.getByTestId("judgement-total");
+    > 152 |       await expect(total).toBeVisible();
+          |                           ^
+      153 |       expect((await total.innerText()).trim()).toMatch(s.total);
+      154 |       const conclusion = await page.getByTestId("verdict-conclusion").innerText();
+      155 |       for (const w of BANNED) expect(conclusion, `結論に「${w}」`).not.toContain(w);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:152:27
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-86994-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-86994-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-86994-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('verdict-conclusion').getByTestId('judgement-total')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('verdict-conclusion').getByTestId('judgement-total') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion').getByTestId('judgement-total')
+
+
+      165 |     await openReady(page);
+      166 |     const card = page.getByTestId("verdict-conclusion");
+    > 167 |     await expect(card.getByTestId("judgement-total")).toBeVisible();
+          |                                                       ^
+      168 |     await expect(card.getByTestId("verdict-checked-date")).toContainText(/確認日 \d{4}-\d{2}-\d{2}/);
+      169 |     await expect(card.getByTestId("verdict-sourced")).toContainText("出典つき");
+      170 |     await expect(card.getByTestId("verdict-responsibility")).toContainText("申請");
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:167:55
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-940c4-典つきの札と境界の注記は結論のまま（N1-を弱めない）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-940c4-典つきの札と境界の注記は結論のまま（N1-を弱めない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-940c4-典つきの札と境界の注記は結論のまま（N1-を弱めない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる 
+
+    Error: Zoom in の角丸 0px
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      210 |       expect(b.h, `${b.label} の高さ`).toBeGreaterThanOrEqual(48);
+      211 |       expect(Math.abs(b.w - b.h), `${b.label} は円（縦横が同じ）`).toBeLessThan(1);
+    > 212 |       expect(parseFloat(b.radius) >= b.w / 2 - 1 || b.radius.includes("%"), `${b.label} の角丸 ${b.radius}`).toBe(true);
+          |                                                                                                           ^
+      213 |     }
+      214 |     const sorted = [...btns].sort((a, b) => a.top - b.top);
+      215 |     for (let i = 1; i < sorted.length; i++) expect(sorted[i]!.top - sorted[i - 1]!.bottom, "部品の間").toBeGreaterThanOrEqual(8 - 0.5);
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:212:107
+
+    Error Context: test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('verdict-duties-section')
+    Expected substring: "飛行の前後に行うこと"
+    Received string:    "飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。飛行ごと飛行計画の通報特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。飛行ごと飛行日誌の作成・記録特定飛行のたびに、飛行・日常点検・点検整備を記録します。飛行ごと緊急用務空域の指定の確認飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toContainText" getByTestId('verdict-duties-section') with timeout 30000ms
+      - waiting for getByTestId('verdict-duties-section')
+        63 × locator resolved to <div class="flex flex-col gap-2" data-testid="verdict-duties-section">…</div>
+           - unexpected value "飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g 以上の機体の前提です（判定の段階には影響しません）。登録記号の表示とリモート ID の搭載を確かめてください。飛行ごと飛行計画の通報特定飛行のたびに、飛行の前に DIPS 2.0 で通報します。飛行ごと飛行日誌の作成・記録特定飛行のたびに、飛行・日常点検・点検整備を記録します。飛行ごと緊急用務空域の指定の確認飛行の直前に、緊急用務空域が指定されていないかを確認します（指定中は飛行できません。機体の重量を問いません）。"
+
+
+      246 |     await openReady(page);
+      247 |     const section = page.getByTestId("verdict-duties-section");
+    > 248 |     await expect(section).toContainText("飛行の前後に行うこと");
+          |                           ^
+      249 |     await expect(section).not.toContainText("必ず");
+      250 |     expect(await page.locator("body").innerText()).not.toContain("飛行の前後に必ず行うこと");
+      251 |     // 節の見出しの語（結論・飛行できない理由ほか）は変えない
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:248:27
+
+    Error Context: test-results/sprint16-m-16-M-M-5-「必ず」が描-0db41-行の前後に行うこと」。「必ず」を含む旧い見出しは出ない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-5-「必ず」が描-0db41-行の前後に行うこと」。「必ず」を含む旧い見出しは出ない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-5-「必ず」が描-0db41-行の前後に行うこと」。「必ず」を含む旧い見出しは出ない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 
+
+    Error: 本文の「必ず」
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 2
+
+      257 |     await openReady(page);
+      258 |     const r = await countMust(page);
+    > 259 |     expect(r.text, "本文の「必ず」").toBe(0);
+          |                               ^
+      260 |     expect(r.attrs, "属性の「必ず」").toEqual([]);
+      261 |     await expect(page.getByTestId("layer-no-map-row").first()).toContainText("飛行の前に DIPS でご確認ください");
+      262 |   });
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:259:31
+
+    Error Context: test-results/sprint16-m-16-M-M-5-「必ず」が描-1daae-）に「必ず」が-0。地図の注記は「…でご確認ください」/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-5-「必ず」が描-1daae-）に「必ず」が-0。地図の注記は「…でご確認ください」/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-5-「必ず」が描-1daae-）に「必ず」が-0。地図の注記は「…でご確認ください」/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） 
+
+    Error: 本文の「必ず」
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 16
+
+      284 |     await openReady(page);
+      285 |     const r = await countMust(page);
+    > 286 |     expect(r.text, "本文の「必ず」").toBe(0);
+          |                               ^
+      287 |     await expect(page.getByTestId("regulation-card-aviation-law-did")).toContainText("DIPS で確認してください");
+      288 |     await expect(page.getByTestId("verdict-duties").locator("li").first()).toContainText("確認します。");
+      289 |   });
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:286:31
+
+    Error Context: test-results/sprint16-m-16-M-M-5-「必ず」が描-382ae-結論の説明の表示では外れる（エンジンの応答は変えない）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-5-「必ず」が描-382ae-結論の説明の表示では外れる（エンジンの応答は変えない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-5-「必ず」が描-382ae-結論の説明の表示では外れる（エンジンの応答は変えない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16 failed
+    e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま 
+    e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま 
+    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま 
+    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま 
+    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま 
+    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま 
+    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） 
+    e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる 
+    e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない 
+    e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 
+    e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） 
+  13 passed (7.8m)
+::notice title=🎭 Playwright Run Summary::  16 failed%0A    e2e/sprint16-m.spec.ts:67:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま %0A    e2e/sprint16-m.spec.ts:106:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま %0A    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま %0A    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま %0A    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま %0A    e2e/sprint16-m.spec.ts:132:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま %0A    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:147:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:163:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） %0A    e2e/sprint16-m.spec.ts:197:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる %0A    e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない %0A    e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 %0A    e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） %0A  13 passed (7.8m)
+ ELIFECYCLE  Command failed with exit code 1.
+exit=1
