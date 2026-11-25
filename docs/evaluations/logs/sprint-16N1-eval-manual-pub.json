@@ -1,0 +1,644 @@
+{
+ "pub-375-unknown": {
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（2 件）",
+  "unknownCount": "判定不能 1 件（データ未整備）",
+  "conclusionText": "結論\n\n手続きが要る項目があります（2 件）\n\n判定の段：要手続き\n\n35.4936°N · 133.26604°E — 小篠津町\n\n判定不能 1 件（データ未整備）\n\n確認日\n2026-10-19\n出典つき\n（6 件）\n\n許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。\n\nPDF 出力",
+  "tobe_in_conclusion": 0,
+  "tobe_in_body": 0,
+  "helpPhrase": false,
+  "banned_conclusion": [],
+  "banned_body": [],
+  "scaleLevel": null,
+  "scaleCount": 0
+ },
+ "pub-375-metrics": {
+  "smallTargets": [
+   {
+    "tag": "A",
+    "txt": "MapLibre",
+    "w": 63,
+    "h": 17,
+    "inline": true
+   },
+   {
+    "tag": "A",
+    "txt": "国土地理院",
+    "w": 71,
+    "h": 17,
+    "inline": true
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "A",
+    "txt": "国土交通省 DIPS",
+    "w": 107,
+    "h": 20,
+    "inline": true
+   }
+  ],
+  "tinyTextCount": 555,
+  "tinySamples": [
+   {
+    "t": "ドローンの飛行計画の通報・点検・飛行日誌",
+    "fs": 14
+   },
+   {
+    "t": "通報の記録・点検・飛行日誌は、運航管理の",
+    "fs": 14
+   },
+   {
+    "t": "提供元",
+    "fs": 14
+   },
+   {
+    "t": "フューチャーテック株式会社",
+    "fs": 14
+   },
+   {
+    "t": "利用の範囲",
+    "fs": 14
+   },
+   {
+    "t": "現在は社内での試験運用中",
+    "fs": 14
+   },
+   {
+    "t": "対象地域",
+    "fs": 14
+   },
+   {
+    "t": "現在は鳥取県・島根県（条例データを収録し",
+    "fs": 14
+   }
+  ],
+  "primaryH": 56,
+  "bodyFont": "16px",
+  "conclBg": "rgb(253, 241, 220)",
+  "concolors": [
+   "rgb(20, 24, 31)",
+   "rgba(0, 0, 0, 0)",
+   "rgb(255, 255, 255)",
+   "rgb(154, 91, 0)",
+   "rgb(91, 101, 115)",
+   "rgb(63, 75, 94)",
+   "rgb(225, 229, 235)",
+   "rgb(238, 241, 245)",
+   "rgb(107, 117, 134)"
+  ],
+  "hasShadow": true,
+  "grad": false,
+  "hscroll": 0
+ },
+ "pub-375-unknown-pdf": {
+  "pages": 4,
+  "tobe": 0,
+  "help": false,
+  "banned": [],
+  "hasUnknownWord": true,
+  "len": 4760
+ },
+ "pub-375-known": {
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "unknownCount": null,
+  "conclusionText": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n35.38°N · 133.35°E — 加茂町\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。\n\n確認日\n2026-10-19\n出典つき\n（6 件）\n\n許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。\n\nPDF 出力",
+  "tobe_in_conclusion": 1,
+  "tobe_in_body": 1,
+  "helpPhrase": true,
+  "banned_conclusion": [],
+  "banned_body": [],
+  "scaleLevel": null,
+  "scaleCount": 0
+ },
+ "pub-375-known-pdf": {
+  "pages": 3,
+  "tobe": 1,
+  "help": true,
+  "banned": []
+ },
+ "pub-375-errors": [],
+ "pub-1280-unknown": {
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（2 件）",
+  "unknownCount": "判定不能 1 件（データ未整備）",
+  "conclusionText": "結論\n\n手続きが要る項目があります（2 件）\n\n判定の段：要手続き\n\n35.4936°N · 133.26604°E — 小篠津町\n\n判定不能 1 件（データ未整備）\n\n確認日\n2026-10-19\n出典つき\n（6 件）\n\n許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。\n\nPDF 出力",
+  "tobe_in_conclusion": 0,
+  "tobe_in_body": 0,
+  "helpPhrase": false,
+  "banned_conclusion": [],
+  "banned_body": [],
+  "scaleLevel": null,
+  "scaleCount": 0
+ },
+ "pub-1280-metrics": {
+  "smallTargets": [
+   {
+    "tag": "A",
+    "txt": "MapLibre",
+    "w": 63,
+    "h": 17,
+    "inline": true
+   },
+   {
+    "tag": "A",
+    "txt": "国土地理院",
+    "w": 71,
+    "h": 17,
+    "inline": true
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 22,
+    "h": 22,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "INPUT",
+    "txt": "",
+    "w": 32,
+    "h": 32,
+    "inline": false
+   },
+   {
+    "tag": "A",
+    "txt": "国土交通省 DIPS",
+    "w": 107,
+    "h": 20,
+    "inline": true
+   }
+  ],
+  "tinyTextCount": 564,
+  "tinySamples": [
+   {
+    "t": "通報の記録・点検・飛行日誌は、運航管理の",
+    "fs": 14
+   },
+   {
+    "t": "提供元",
+    "fs": 14
+   },
+   {
+    "t": "フューチャーテック株式会社",
+    "fs": 14
+   },
+   {
+    "t": "利用の範囲",
+    "fs": 14
+   },
+   {
+    "t": "現在は社内での試験運用中",
+    "fs": 14
+   },
+   {
+    "t": "対象地域",
+    "fs": 14
+   },
+   {
+    "t": "現在は鳥取県・島根県（条例データを収録し",
+    "fs": 14
+   },
+   {
+    "t": "判定結果は参考情報です。飛行の可否は、国",
+    "fs": 14
+   }
+  ],
+  "primaryH": 56,
+  "bodyFont": "16px",
+  "conclBg": "rgb(253, 241, 220)",
+  "concolors": [
+   "rgb(20, 24, 31)",
+   "rgba(0, 0, 0, 0)",
+   "rgb(255, 255, 255)",
+   "rgb(154, 91, 0)",
+   "rgb(91, 101, 115)",
+   "rgb(63, 75, 94)",
+   "rgb(225, 229, 235)",
+   "rgb(238, 241, 245)",
+   "rgb(107, 117, 134)"
+  ],
+  "hasShadow": true,
+  "grad": false,
+  "hscroll": 0
+ },
+ "pub-1280-unknown-pdf": {
+  "pages": 4,
+  "tobe": 0,
+  "help": false,
+  "banned": [],
+  "hasUnknownWord": true,
+  "len": 4760
+ },
+ "pub-1280-known": {
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "unknownCount": null,
+  "conclusionText": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n35.38°N · 133.35°E — 加茂町\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。\n\n確認日\n2026-10-19\n出典つき\n（6 件）\n\n許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。\n\nPDF 出力",
+  "tobe_in_conclusion": 1,
+  "tobe_in_body": 1,
+  "helpPhrase": true,
+  "banned_conclusion": [],
+  "banned_body": [],
+  "scaleLevel": null,
+  "scaleCount": 0
+ },
+ "pub-1280-known-pdf": {
+  "pages": 3,
+  "tobe": 1,
+  "help": true,
+  "banned": []
+ },
+ "pub-1280-errors": []
+}

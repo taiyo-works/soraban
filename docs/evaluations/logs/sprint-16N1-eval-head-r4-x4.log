@@ -1,0 +1,54 @@
+
+Running 12 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.9s)
+  ✓   2 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.4s)
+  ✓   3 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (2.1s)
+  ✓   4 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.7s)
+  ✓   5 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.3s)
+  ✓   6 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (2.1s)
+  ✓   7 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.5s)
+  ✓   8 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.4s)
+  ✘   9 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (31.3s)
+  ✓  10 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.5s)
+  ✓  11 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.4s)
+  ✓  12 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (2.2s)
+
+
+  1) e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('plan-form')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('plan-form') with timeout 30000ms
+      - waiting for getByTestId('plan-form')
+
+
+      213 |     await page.waitForLoadState("networkidle").catch(() => undefined);
+      214 |     await page.getByTestId("plan-new-link").click();
+    > 215 |     await expect(page.getByTestId("plan-form")).toBeVisible();
+          |                                                 ^
+      216 |     await page.waitForLoadState("networkidle").catch(() => undefined);
+      217 |   };
+      218 |
+        at viaList (/home/user/soraban/e2e/ops-db/sprint16-h1-fix1-db.spec.ts:215:49)
+        at /home/user/soraban/e2e/ops-db/sprint16-h1-fix1-db.spec.ts:262:5
+
+    Error Context: test-results/ops/sprint16-h1-fix1-db-R-4-ブラ-20d02-戻る・進む（段-②-から-①-など）では確認を出さない-repeat2/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-h1-fix1-db-R-4-ブラ-20d02-戻る・進む（段-②-から-①-など）では確認を出さない-repeat2/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-h1-fix1-db-R-4-ブラ-20d02-戻る・進む（段-②-から-①-など）では確認を出さない-repeat2/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない 
+  11 passed (56.6s)
