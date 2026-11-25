@@ -829,6 +829,11 @@ input.sb-radio:disabled {
   align-items: center;
   padding-block: 12px;
 }
+/* 短い選択肢を多数並べる所（通報の飛行目的など）は 56px まで詰める（押す部品の下限 48 は守る）。16-L の L-5 */
+.opx-check-row.opx-check-dense:has(input.sb-check) {
+  min-height: 56px;
+  padding-block: 8px;
+}
 /* 説明文を持つ複数行の行（items-start を付けた行）は、丸を先頭の行にそろえる */
 .opx-check-row.items-start:has(input.sb-check) {
   align-items: flex-start;

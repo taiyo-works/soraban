@@ -56,10 +56,10 @@ export function PlanFrame({
   readonly children: ReactNode;
 }) {
   return (
-    <main className="flex flex-col gap-4">
-      <div className="flex flex-col gap-4">
+    <main className="flex flex-col gap-3 lg:gap-3">
+      <div className="flex flex-col gap-3 lg:gap-4">
         <PageHeader
-          eyebrow={eyebrow}
+          meta={eyebrow}
           back={back ?? { href: "/ops/plans", label: "飛行計画の一覧" }}
           title={<span className="break-words" data-testid="plan-title-heading">{plan.title}</span>}
         >

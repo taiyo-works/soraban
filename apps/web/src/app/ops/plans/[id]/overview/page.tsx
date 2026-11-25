@@ -164,7 +164,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
           {!manager && plan.status === "active" && !plan.voided ? <Note body>確認・差し戻しは運航管理者だけが行えます。</Note> : null}
         </Section>
 
-        <VersionList versions={versions} recent={5} />
+        <VersionList versions={versions} recent={3} />
 
         {cancellable ? (
           <Section

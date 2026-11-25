@@ -62,7 +62,7 @@ const expectInViewport = async (page: Page, id: string, label: string) => {
 
 
 const SIZES = [
-  { name: "375x812", width: 375, height: 812, firstScreen: 748, main: 2600, report: 10400, judgement: 4600, overview: 3000, journal: 1400 },
+  { name: "375x812", width: 375, height: 812, firstScreen: 748, main: 2600, report: 9500, judgement: 4600, overview: 3000, journal: 1400 },
   { name: "1280x800", width: 1280, height: 800, firstScreen: 800, main: 1800, report: 7000, judgement: 3300, overview: 2200, journal: 1100 },
 ] as const;
 
@@ -181,9 +181,8 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
         // L-2：スクロールなしで、タイトル・タブ・状況・主操作が入る
         // 契約どおり plan-report-status も（中止・記録なしでは状況の行を出さず、事実の 1 行 plan-report-label に代える）
         const firstScreenIds = ["plan-title-heading", "plan-tabs", "plan-report-label", "plan-primary-action", ...(key === "voidedNone" ? [] : ["plan-report-status"])];
-        // 2026-11-23 ユーザーの決定（16-B 差し戻し 1）：中止済みかつ通報を記録済み（voidedRecorded）の 375 幅だけ 748→800 に一時的に緩める。
-        // ほかの状態・幅は変えない。16-L の L-5 で 748 に戻す。
-        const firstScreenLimit = key === "voidedRecorded" && size.width === 375 ? 800 : size.firstScreen;
+        // 16-L の L-5：voidedRecorded の 375 幅だけ一時的に緩めていた 800 を、元の 748 に戻した（全状態・全幅で size.firstScreen）。
+        const firstScreenLimit = size.firstScreen;
         for (const id of firstScreenIds) {
           const box = await page.getByTestId(id).first().boundingBox();
           expect(box, `${key} ${id}`).not.toBeNull();
@@ -436,9 +435,8 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       await page.waitForLoadState("networkidle").catch(() => undefined);
       const report = await height(page);
       console.log(`[長さ・長い計画] ${size.name} 変更点 ${changes} 件: 主画面 ${main}px / 計画 ${overview}px / 作業台 ${report}px`);
-      // 16-B 差し戻し 1 の R1-8（2026-11-22）：この検査の実測が上限を超えたものだけ上げた（計画 375：3,000→3,300、1280：2,200→2,400、作業台 375：10,400→11,500。
-      // 作業台 1280 の 7,000 と主画面は超えていないので元のまま）。L-4 の計画の上限（SIZES.overview）は上げていない。16-L の L-5 で元に戻す。
-      const longLimit = size.width === 375 ? { overview: 3300, report: 11500 } : { overview: 2400, report: size.report };
+      // 16-L の L-5：16-B 差し戻し 1 で上げていた長さの上限（計画 375：3,300、1280：2,400、作業台 375：11,500）を元の値（3,000／2,200／10,400）に戻した。
+      const longLimit = size.width === 375 ? { overview: 3000, report: 10400 } : { overview: 2200, report: size.report };
       expect(main, "主画面").toBeLessThanOrEqual(size.main);
       expect(overview, "計画").toBeLessThanOrEqual(longLimit.overview);
       expect(report, "作業台").toBeLessThanOrEqual(longLimit.report);
@@ -519,8 +517,8 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       });
       expect(f.status(), await f.text()).toBeLessThan(300);
     }
-    // 16-B 差し戻し 1 の R1-8（2026-11-22）：実測が超えた計画・作業台（375）と計画（1280）だけ上げた（375：計画 3,000→3,200・作業台 10,400→11,400、1280：計画 2,200→2,400）。日誌と 1280 の作業台は元のまま。16-L の L-5 で戻す。
-    const limits = { 375: { report: 11400, overview: 3200, journal: 1400 }, 1280: { report: 7000, overview: 2400, journal: 1100 } } as const;
+    // 16-L の L-5：16-B 差し戻し 1 で上げていた上限（375：計画 3,200・作業台 11,400、1280：計画 2,400）を元の値に戻した。
+    const limits = { 375: { report: 10400, overview: 3000, journal: 1400 }, 1280: { report: 7000, overview: 2200, journal: 1100 } } as const;
     for (const size of SIZES) {
       await page.setViewportSize({ width: size.width, height: size.height });
       const lim = limits[size.width];

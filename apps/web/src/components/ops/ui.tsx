@@ -107,7 +107,7 @@ export function Section({
   readonly tone?: "default" | "danger";
 } & Record<`aria-${string}`, string>) {
   return (
-    <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4">
+    <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4 lg:gap-3">
       <div className="sb-sec-head" {...(tone === "danger" ? { "data-tone": "danger" } : {})}>
         <h2>{title}</h2>
         {description ? <p className="sb-sec-note sb-sec-note-body">{description}</p> : null}

@@ -189,7 +189,7 @@ function InputsPanel({
           {Object.entries(purposeCodes).map(([code, label]) => {
             const n = Number(code);
             return (
-              <label key={code} className={`${confirmRowClass} gap-2 px-2.5 sm:gap-3 sm:px-3`}>
+              <label key={code} className={`${confirmRowClass} opx-check-dense gap-2 px-2.5 sm:gap-3 sm:px-3`}>
                 <input
                   type="checkbox"
                   className={confirmBoxClass}
@@ -247,13 +247,14 @@ function ItemRow({
     <li
       className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-0.5 ${
         item.status === "missing" ? "bg-sb-sunken" : ""
-      }`}
+      } ${compact ? "max-sm:px-0" : ""}`}
       data-testid={`report-item-${item.key}`}
       data-status={item.status}
     >
       {/* 項目名（左）。必須は項目名に並べ、API 名・DIPS の画面での名前は 1 行の小さな字にまとめる */}
       <div className="col-start-1 row-start-1 flex min-w-0 flex-col">
         <span data-note="" className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium leading-snug text-sb-ink">
+          {compact ? <span aria-hidden className="sb-num text-sb-ink-3">－</span> : null}
           <span data-testid={`report-item-label-${item.key}`}>{item.label}</span>
           {item.required && item.status !== "dips_only" ? <span className="opx-required">必須</span> : null}
           {item.apiField || item.dipsScreenLabel ? (
@@ -301,8 +302,7 @@ function ItemRow({
             <span>{MISSING_VALUE_LABEL}</span>
           </span>
         ) : item.status === "dips_only" ? (
-          <span data-note="" className="inline-flex items-start gap-1 text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
-            <span aria-hidden className="w-4 shrink-0 text-center sb-num text-sb-ink-3">－</span>
+          <span data-note="" className="text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
             <span>{item.apiField && item.value ? item.value.replace(`（${item.apiField}）`, "") : (item.value ?? DIPS_ONLY_LABEL)}</span>
           </span>
         ) : item.status === "not_applicable" ? (
@@ -836,7 +836,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   };
 
   return (
-    <div className="flex flex-col gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
+    <div className="flex flex-col gap-4 sm:gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
@@ -987,7 +987,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                 ))}
               </ul>
             ) : null}
-            <div className="flex flex-col gap-4" data-testid="report-groups">
+            <div className="flex flex-col gap-2 sm:gap-4" data-testid="report-groups">
               {view.prepared.groups.map((g) => (
                 <section key={g.id} aria-label={g.label} className="flex flex-col" data-testid={`report-group-${g.id}`} data-needs-confirmation={g.needsConfirmation ? "1" : "0"}>
                   <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-sunken px-2 py-1 text-sm font-medium text-sb-ink sm:px-3">

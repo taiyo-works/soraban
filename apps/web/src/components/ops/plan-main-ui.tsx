@@ -20,7 +20,7 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
     <section
       id="sec-report"
       aria-label="通報の状況"
-      className="flex scroll-mt-4 flex-col gap-3 rounded-sb-l bg-sb-base px-4 py-4 opx-shadow"
+      className="flex scroll-mt-4 flex-col gap-2 rounded-sb-l bg-sb-base px-4 py-3 opx-shadow"
       data-testid="plan-report-card"
       data-code={status.code}
     >
@@ -29,7 +29,7 @@ export function ReportStatusCard({ plan }: { readonly plan: PlanDetailDto }) {
         {action.label}
       </a>
       {cancelNotice ? (
-        <p className="rounded-sb-m border-[1.5px] border-sb-v-no-fg bg-sb-base px-3 py-2 font-bold text-sb-ink" data-testid="plan-cancel-needed">
+        <p className="rounded-sb-m border-[1.5px] border-sb-v-no-fg bg-sb-base px-2 py-1 font-bold text-sb-ink" data-testid="plan-cancel-needed">
           <span aria-hidden className="mr-1">!!</span>
           {cancelNotice}
         </p>
