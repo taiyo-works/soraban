@@ -74,7 +74,7 @@ test.describe("16-I 点検の入力", () => {
     await signIn(page.request, seeded("a-manager"));
     await openNew(page);
     // 群は 3 つ。9 項目がちょうど 1 回ずつ、決めた群に入る
-    await expect(page.locator('[data-testid^="inspection-group-"]:not([data-testid$="-count"])')).toHaveCount(3);
+    await expect(page.locator('[data-testid^="inspection-group-"]:not([data-testid$="-count"]):not([data-testid="inspection-group-note"])')).toHaveCount(3);
     for (const [g, keys] of Object.entries(GROUPS) as [keyof typeof GROUPS, readonly (typeof KEYS)[number][]][]) {
       await expect(group(page, g).locator('[data-testid^="inspection-item-"]')).toHaveCount(3);
       for (const k of keys) await expect(group(page, g).getByTestId(`inspection-item-${k}`)).toHaveCount(1);
@@ -252,8 +252,12 @@ test.describe("16-I 点検の入力", () => {
   test("N-3. aria-live は未記入の数の 1 つだけ。群の数には読み上げ用の補い（完了 n/3 項目）があり、群の名前の近くに 14px の補足がある", async ({ page }) => {
     await signIn(page.request, seeded("a-pilot"));
     await openNew(page);
-    await expect(form(page).locator('[aria-live]')).toHaveCount(1);
-    await expect(form(page).locator('[aria-live]')).toHaveAttribute("data-testid", "inspection-missing-count");
+    // 進み具合と未記入の数のうち、aria-live は未記入の数だけ（送信中の表示の領域は、送っていない間は空）
+    await expect(page.getByTestId("inspection-progress")).not.toHaveAttribute("aria-live", /.*/);
+    await expect(page.getByTestId("inspection-progress").locator("[aria-live]")).toHaveCount(0);
+    await expect(page.getByTestId("inspection-missing-count")).toHaveAttribute("aria-live", "polite");
+    const liveWithText = await form(page).locator("[aria-live]").evaluateAll((els) => els.filter((e) => (e.textContent ?? "").trim() !== "").map((e) => e.getAttribute("data-testid")));
+    expect(liveWithText).toEqual(["inspection-missing-count"]);
     await pick(page, "general", "正常");
     await pick(page, "propeller", "正常");
     await expect(group(page, "body").locator("> summary .sr-only")).toHaveText("完了 2/3 項目");
