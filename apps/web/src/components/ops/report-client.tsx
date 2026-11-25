@@ -254,7 +254,7 @@ function ItemRow({
       {/* 項目名（左）。必須は項目名に並べ、API 名・DIPS の画面での名前は 1 行の小さな字にまとめる */}
       <div className="col-start-1 row-start-1 flex min-w-0 flex-col">
         <span data-note="" className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium leading-snug text-sb-ink">
-          {compact ? <span aria-hidden className="sb-num text-sb-ink-3">－</span> : null}
+          {item.status === "dips_only" ? <span aria-hidden className="sb-num text-sb-ink-3">－</span> : null}
           <span data-testid={`report-item-label-${item.key}`}>{item.label}</span>
           {item.required && item.status !== "dips_only" ? <span className="opx-required">必須</span> : null}
           {item.apiField || item.dipsScreenLabel ? (

@@ -1001,23 +1001,47 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   .opx-form[data-date-first] > .opx-step {
     gap: 8px;
   }
+  /* 見出しと「今」を同じ行（グリッドの 1 行目）に並べ、日付・時刻はその下の行に置く。行の高さは中身で決まるので、文字 200% で見出しが 2 行になっても
+   * 「今」が高くなっても、日付・時刻のラベルとは重ならない（固定の位置に頼らない）。見出し（legend）は float で「描かれる見出し」から外し、通常の子としてグリッドに載せる。 */
   .opx-form[data-date-first] [data-testid="inspected"] {
-    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 8px;
+    row-gap: 8px;
+    align-items: start;
   }
   .opx-form[data-date-first] [data-testid="inspected"] > legend {
+    float: left;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
     min-height: 48px;
-    margin-bottom: 4px;
-    padding-right: 4.5rem;
+    margin: 0;
+    padding: 0;
     max-width: 100%;
     box-sizing: border-box;
     flex-wrap: wrap;
   }
-  /* fieldset の中の絶対配置は、見出し（legend）の下から数える。見出しの行（48px）と下の余白（4px）の分だけ上へ */
+  .opx-form[data-date-first] [data-testid="inspected"] > div {
+    display: contents;
+  }
   .opx-form[data-date-first] [data-testid="inspected"] > div > button:first-child {
-    position: absolute;
-    top: -52px;
-    right: 0;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
     width: auto;
     min-width: 4rem;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > div > div:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > div > div:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > :not(legend):not(div) {
+    grid-column: 1 / -1;
   }
 }

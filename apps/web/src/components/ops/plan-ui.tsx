@@ -292,14 +292,14 @@ export function PlanDigest({
           {m.stale ? <StaleBadge bare /> : null}
           {m.sourcesStale ? <SourceStaleBadge /> : null}
         </span>
-        <span className="ml-auto min-w-0 text-sm font-bold text-sb-ink [overflow-wrap:anywhere]">判定を見る →</span>
+        <span className="ml-auto max-w-full whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
       </a>
       <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row} data-testid="plan-confirm-link">
         <span className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 [overflow-wrap:anywhere]">
           <span className="text-sm text-sb-ink-2">確認：</span>
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span className="ml-auto min-w-0 text-sm font-bold text-sb-ink [overflow-wrap:anywhere]">計画の確認へ →</span>
+        <span className="ml-auto max-w-full whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
       </a>
     </nav>
   );

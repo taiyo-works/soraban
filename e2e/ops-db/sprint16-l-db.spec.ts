@@ -307,6 +307,49 @@ test.describe("§17 申し送り（16-L）", () => {
       // 320 幅の標準の日付・時刻の入力欄は、文字 200% で 2 列に収まらない（16-J の S-2。基準でも同じ。16-N で扱う）ので、390・430 で測る
       await zoom200(page, "点検の入力（日誌から）", [390, 430]);
     });
+    // 文字 200% では見出しが 2 行になる・「今」が高くなることがある。固定の位置に頼らず、「今」が日付・時刻の見出し・入力欄と重ならず 8px 以上あく
+    for (const w of [390, 430]) {
+      test(`文字 200%・${w}px でも「今」は日付・時刻のラベル・入力欄と重ならず、8px 以上あく`, async ({ page }) => {
+        await login(page);
+        await page.clock.setFixedTime(new Date("2027-01-05T11:30:00+09:00"));
+        await page.setViewportSize({ width: w, height: 844 });
+        await page.goto(`/ops/inspections/new?aircraftId=${ids.aircraftId}&takeoffAt=2027-01-05T11:00`);
+        await expect(page.getByTestId("inspection-after-takeoff")).toBeVisible();
+        await waitForSettledStyles(page);
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "200%";
+        });
+        await page.waitForTimeout(200);
+        const now = (await page.getByRole("button", { name: "今", exact: true }).boundingBox())!;
+        expect(now.height).toBeGreaterThanOrEqual(47.5);
+        const rects: { name: string; r: { x: number; y: number; width: number; height: number } }[] = [];
+        for (const label of ["実施日", "実施時刻"]) {
+          rects.push({ name: `${label} の入力欄`, r: (await page.getByLabel(label, { exact: true }).first().boundingBox())! });
+        }
+        // ラベル・見出しの文字（legend と label の本文）
+        const texts = await page.evaluate(() => {
+          const out: { name: string; x: number; y: number; width: number; height: number }[] = [];
+          for (const e of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="inspected"] legend, [data-testid="inspected"] label, [data-testid="inspected"] legend *, [data-testid="inspected"] label > span'))) {
+            const t = (e.textContent ?? "").trim();
+            if (!t || t === "今") continue;
+            const rg = document.createRange();
+            rg.selectNodeContents(e);
+            for (const b of Array.from(rg.getClientRects())) if (b.width > 0 && b.height > 0) out.push({ name: `文字「${t.slice(0, 10)}」`, x: b.x, y: b.y, width: b.width, height: b.height });
+          }
+          return out;
+        });
+        for (const t of texts) rects.push({ name: t.name, r: t });
+        expect(rects.length, "測る対象がある").toBeGreaterThan(2);
+        for (const { name, r } of rects) {
+          const overlap = now.x < r.x + r.width && now.x + now.width > r.x && now.y < r.y + r.height && now.y + now.height > r.y;
+          expect(overlap, `${w}px 200%: 「今」と ${name} が重ならない`).toBe(false);
+          // 縦にも横にも 8px 未満まで近づかない（どちらかで 8px 以上離れていればよい）
+          const gapX = Math.max(r.x - (now.x + now.width), now.x - (r.x + r.width));
+          const gapY = Math.max(r.y - (now.y + now.height), now.y - (r.y + r.height));
+          expect(Math.max(gapX, gapY), `${w}px 200%: 「今」と ${name} の間（8px 以上）`).toBeGreaterThanOrEqual(8 - 0.5);
+        }
+      });
+    }
   });
 });
 
