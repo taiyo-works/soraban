@@ -1,0 +1,483 @@
+import fs from "node:fs";
+import { expect, request as pwRequest, test, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
+import { collectTapTargets, collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets, relativeLuminance, waitForSettledStyles } from "../field-checks";
+
+// 評価者の手動シナリオ（一時ファイル。実行後は logs に .txt で退避して削除する）
+const PORT = process.env.E2E_OPS_PORT ?? "3400";
+const BASE = `http://127.0.0.1:${PORT}`;
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16K-eval";
+const OUT = "/home/user/soraban/docs/evaluations/logs/sprint-16K-eval-manual-results.jsonl";
+fs.mkdirSync(SHOT, { recursive: true });
+const rec = (o: Record<string, unknown>) => fs.appendFileSync(OUT, JSON.stringify(o) + "\n");
+type Who = { readonly authUserId: string; readonly email: string };
+const seeded = (key: string): Who => ({ authUserId: key, email: `${key}@example.test` });
+const signIn = async (ctx: APIRequestContext, who: Who) => {
+  const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: who.authUserId, email: who.email, emailVerified: true, name: who.authUserId } });
+  expect(r.status()).toBe(200);
+};
+const apiAs = async (who: Who) => {
+  const ctx = await pwRequest.newContext({ baseURL: BASE });
+  await signIn(ctx, who);
+  return ctx;
+};
+const DAY = "2027-01-05";
+const HQ = { lat: 35.434238, lng: 133.380508 };
+const at = (hms: string) => new Date(`${DAY}T${hms}+09:00`);
+const stamp = Date.now().toString(36).toUpperCase();
+let seq = 0;
+const PILOT_NAME = `評価 氏名${stamp}`;
+const NOTE = `EVALNOTE${stamp}`;
+const prepare = async (page: Page) => {
+  const manager = await apiAs(seeded("a-manager"));
+  await signIn(page.request, seeded("a-manager"));
+  const registrationMark = `JUE16${stamp}${seq++}`;
+  const a = await manager.post("/api/ops/aircraft", { data: { registrationMark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${registrationMark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  expect(a.status(), await a.text()).toBe(201);
+  const aircraft = (await a.json()) as { id: string };
+  const p = await manager.post("/api/ops/pilots", { data: { fullName: `${PILOT_NAME}${seq++}`, hasLicense: false } });
+  expect(p.status(), await p.text()).toBe(201);
+  const pilot = (await p.json()) as { id: string };
+  const title = `E16K ${stamp}-${seq++}`;
+  const pl = await manager.post("/api/ops/plans", { data: { title, aircraftId: aircraft.id, pilotId: pilot.id, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "現場の空撮", placeName: "試験地点", latitude: HQ.lat, longitude: HQ.lng, flags: [] } });
+  expect(pl.status(), await pl.text()).toBe(201);
+  const plan = (await pl.json()) as { id: string };
+  return { manager, aircraft, pilot, plan, registrationMark };
+};
+const openField = async (page: Page, planId: string) => {
+  await page.goto(`/ops/plans/${planId}/field`);
+  await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+};
+const waitSw = (page: Page) => page.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 60_000 });
+const bundleKeys = (page: Page): Promise<string[]> =>
+  page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const r = indexedDB.open("soraban-ops");
+        r.onsuccess = () => {
+          try {
+            const q = r.result.transaction("field-bundles", "readonly").objectStore("field-bundles").getAllKeys();
+            q.onsuccess = () => resolve(q.result.map(String));
+            q.onerror = () => resolve([]);
+          } catch {
+            resolve([]);
+          }
+        };
+        r.onerror = () => resolve([]);
+      }),
+  );
+const waitBundle = (page: Page, planId: string) => expect.poll(async () => (await bundleKeys(page)).some((k) => k.endsWith(`:${planId}`)), { timeout: 30_000 }).toBe(true);
+const setOnline = async (page: Page, context: BrowserContext, online: boolean) => {
+  await context.setOffline(!online);
+  await page.evaluate((on) => window.dispatchEvent(new Event(on ? "online" : "offline")), online).catch(() => undefined);
+};
+const gray = async (page: Page, on: boolean) => {
+  const s = await page.context().newCDPSession(page);
+  await s.send("Emulation.setEmulatedVisionDeficiency", { type: on ? "achromatopsia" : "none" });
+};
+const FORBIDDEN = ["完璧", "保証", "必ず", "代行", "代理", "申請", "通報不要", "問題なし"];
+const wordHits = async (page: Page, label: string) => {
+  const text = await page.evaluate(() => document.body.innerText);
+  const hits = FORBIDDEN.filter((w) => text.includes(w));
+  rec({ kind: "words", label, hits });
+  return hits;
+};
+/** 見えている主ボタン（data-variant）と、主色（#1F5FE0）の面を持つ見えている要素の数 */
+const primaryProbe = async (page: Page, root: string) =>
+  page.evaluate((sel) => {
+    const rootEl = document.querySelector(sel) ?? document.body;
+    const vis = (e: Element) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden";
+    };
+    const ids = Array.from(rootEl.querySelectorAll('[data-variant="primary"]')).filter(vis).map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    const blue = Array.from(rootEl.querySelectorAll("button, a, [role=radio]"))
+      .filter(vis)
+      .filter((e) => getComputedStyle(e).backgroundColor === "rgb(31, 95, 224)")
+      .map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    return { ids, blue };
+  }, root);
+const sunlight = async (page: Page, root: string, min: number) => {
+  const G = 0.1;
+  const samples = (await collectTextSamples(page, root)).filter((s) => !s.disabled);
+  const worst = samples
+    .map((s) => {
+      const a = relativeLuminance(s.fg);
+      const b = relativeLuminance(s.bg);
+      return { id: s.testId ?? s.tag, r: (Math.max(a, b) + 0.05 + G) / (Math.min(a, b) + 0.05 + G) };
+    })
+    .sort((x, y) => x.r - y.r)[0];
+  return { n: samples.length, worst, ok: worst ? worst.r >= min : false };
+};
+const standards = async (page: Page, root: string, label: string, big?: string) => {
+  await waitForSettledStyles(page);
+  const out: Record<string, unknown> = { kind: "standards", label };
+  for (const [name, fn] of [
+    ["tap", () => expectTapTargets(page, root, label, big ? { bigTestId: big } : {})],
+    ["font18", () => expectFontSize(page, root, 18, label)],
+    ["contrast7", () => expectContrast(page, root, 7, label)],
+    ["noHScroll", () => expectNoHorizontalScroll(page, label)],
+  ] as const) {
+    try {
+      await fn();
+      out[name] = "ok";
+    } catch (e) {
+      out[name] = "FAIL " + String(e).slice(0, 300);
+    }
+  }
+  out.sun = await sunlight(page, root, 4.5);
+  out.mode = await page.locator("html").getAttribute("data-mode");
+  out.viewport = page.viewportSize();
+  rec(out);
+};
+const dumpStorage = async (page: Page) =>
+  page.evaluate(async () => {
+    const ls: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)!;
+      ls[k] = localStorage.getItem(k) ?? "";
+    }
+    const ss: Record<string, string> = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i)!;
+      ss[k] = sessionStorage.getItem(k) ?? "";
+    }
+    const idb: Record<string, Record<string, string[]>> = {};
+    const idbValues: string[] = [];
+    const dbs = (await indexedDB.databases?.()) ?? [];
+    for (const d of dbs) {
+      if (!d.name) continue;
+      await new Promise<void>((res) => {
+        const r = indexedDB.open(d.name!);
+        r.onsuccess = async () => {
+          const db = r.result;
+          idb[d.name!] = {};
+          for (const s of Array.from(db.objectStoreNames)) {
+            await new Promise<void>((res2) => {
+              const tx = db.transaction(s, "readonly");
+              const st = tx.objectStore(s);
+              const kq = st.getAllKeys();
+              const vq = st.getAll();
+              tx.oncomplete = () => {
+                idb[d.name!]![s] = kq.result.map(String);
+                for (const v of vq.result) idbValues.push(`${s}::` + JSON.stringify(v));
+                res2();
+              };
+              tx.onerror = () => res2();
+            });
+          }
+          db.close();
+          res();
+        };
+        r.onerror = () => res();
+      });
+    }
+    const cacheMap: Record<string, string[]> = {};
+    for (const n of await self.caches.keys()) cacheMap[n] = (await (await self.caches.open(n)).keys()).map((q) => new URL(q.url).pathname);
+    return { ls, ss, idb, idbValues, caches: cacheMap };
+  });
+
+test.use({ serviceWorkers: "allow", timezoneId: "America/Los_Angeles", hasTouch: true });
+test.describe.configure({ mode: "serial" });
+
+for (const vp of [
+  { w: 320, h: 740 },
+  { w: 375, h: 812 },
+  { w: 1280, h: 800 },
+]) {
+  test.describe(`M1 現場の 4 状態 ${vp.w}`, () => {
+    test.use({ viewport: { width: vp.w, height: vp.h } });
+    test(`online ${vp.w}`, async ({ page }) => {
+      const { manager, plan } = await prepare(page);
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      const F = '[data-testid="field-root"]';
+      const band = (await page.getByTestId("field-status-band").boundingBox())!;
+      rec({ kind: "band-online", vp: vp.w, h: band.height });
+      // 離陸前
+      await page.screenshot({ path: `${SHOT}/${vp.w}-1-preflight-first.png` });
+      rec({ kind: "probe", state: "preflight", vp: vp.w, ...(await primaryProbe(page, F)) });
+      await standards(page, F, `離陸前 ${vp.w}`, "field-flight-button");
+      const takeoff = (await page.getByTestId("field-flight-button").boundingBox())!;
+      rec({ kind: "takeoffBox", vp: vp.w, h: takeoff.height, w: takeoff.width });
+      // 選択 4 つ
+      const groups = page.locator('[data-testid="field-site-form"] [role=radiogroup]');
+      const n = await groups.count();
+      for (let i = 0; i < n; i++) await groups.nth(i).locator('[role=radio]').first().click();
+      await waitForSettledStyles(page);
+      const selProbe = await primaryProbe(page, F);
+      rec({ kind: "probe", state: "preflight-4selected", vp: vp.w, groups: n, ...selProbe });
+      const selStyle = await page.locator('[data-testid="field-site-form"] [role=radio][aria-checked=true]').first().evaluate((e) => {
+        const cs = getComputedStyle(e);
+        const r = e.getBoundingClientRect();
+        return { bg: cs.backgroundColor, border: cs.borderTopWidth + " " + cs.borderTopColor, weight: cs.fontWeight, color: cs.color, h: r.height, w: r.width, fs: cs.fontSize, text: e.textContent };
+      });
+      const unsel = await page.locator('[data-testid="field-site-form"] [role=radio][aria-checked=false]').first().evaluate((e) => {
+        const cs = getComputedStyle(e);
+        const r = e.getBoundingClientRect();
+        return { bg: cs.backgroundColor, border: cs.borderTopWidth + " " + cs.borderTopColor, weight: cs.fontWeight, h: r.height, w: r.width, text: e.textContent };
+      });
+      rec({ kind: "sel-style", vp: vp.w, selStyle, unsel });
+      await standards(page, F, `離陸前・選択後 ${vp.w}`, "field-flight-button");
+      await page.getByTestId("field-site-form").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOT}/${vp.w}-2-preflight-selected.png` });
+      if (vp.w !== 1280) {
+        await page.screenshot({ path: `${SHOT}/${vp.w}-2-preflight-selected-full.png`, fullPage: true });
+        await gray(page, true);
+        await page.screenshot({ path: `${SHOT}/${vp.w}-2-preflight-selected-gray.png` });
+        await gray(page, false);
+      }
+      // 選択ボタンの寸法（選ぶ前後で文字位置が変わらないか）：未選択の同じ位置のボタンと高さを比べる
+      await wordHits(page, `現場 離陸前 ${vp.w}`);
+      // 離陸
+      const btn = page.getByTestId("field-flight-button");
+      // 点検を先に済ませる（API）と離陸が確実
+      await btn.click();
+      await expect(btn).toHaveText("着陸");
+      rec({ kind: "probe", state: "inflight", vp: vp.w, ...(await primaryProbe(page, F)) });
+      await standards(page, F, `飛行中 ${vp.w}`, "field-flight-button");
+      await page.screenshot({ path: `${SHOT}/${vp.w}-3-inflight.png` });
+      const stat = await page.evaluate(() => {
+        const out: Record<string, number> = {};
+        for (const id of ["field-elapsed", "field-flight-elapsed", "field-timer"]) {
+          const e = document.querySelector(`[data-testid="${id}"]`);
+          if (e) out[id] = parseFloat(getComputedStyle(e).fontSize);
+        }
+        return out;
+      });
+      rec({ kind: "elapsed", vp: vp.w, stat });
+      // 着陸
+      await page.clock.setFixedTime(at("11:58:05"));
+      await page.waitForTimeout(1600);
+      await btn.click();
+      await expect(btn).toHaveText("離陸");
+      await expect(page.getByTestId("field-journal-link")).toBeVisible();
+      rec({ kind: "probe", state: "landed", vp: vp.w, ...(await primaryProbe(page, F)) });
+      await standards(page, F, `着陸後 ${vp.w}`, "field-flight-button");
+      await page.screenshot({ path: `${SHOT}/${vp.w}-4-landed.png` });
+      await wordHits(page, `現場 着陸後 ${vp.w}`);
+      await manager.dispose();
+    });
+  });
+}
+
+// M2：先読みが古い・圏外。帯の高さ、200%、緊急用務空域、閾値
+for (const vp of [
+  { w: 320, h: 740 },
+  { w: 375, h: 812 },
+  { w: 1280, h: 800 },
+]) {
+  test.describe(`M2 帯 ${vp.w}`, () => {
+    test.use({ viewport: { width: vp.w, height: vp.h } });
+    test(`stale ${vp.w}`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      // 緊急用務空域が指定されている状態
+      const post = async (body: Record<string, unknown>, hm: string) => {
+        const r = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), occurredAt: `${DAY}T${hm}`, ...body } });
+        expect(r.status(), await r.text()).toBe(201);
+      };
+      await post({ kind: "check", item: "emergency_airspace", result: "designated", source: "mlit-emergency-airspace-qa" }, "11:55");
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      // 閾値の前後：11 時間 50 分（古くない）と 12 時間 10 分（古い）
+      await setOnline(page, context, false);
+      await page.clock.setFixedTime(new Date(at("11:56:00").getTime() + (11 * 60 + 50) * 60_000));
+      await page.reload();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      rec({ kind: "stale-boundary", vp: vp.w, at: "+11h50", staleCount: await page.getByTestId("field-status-prefetch-stale").count(), helpCount: await page.getByTestId("field-status-prefetch-stale-help").count() });
+      await page.clock.setFixedTime(new Date(at("11:56:00").getTime() + (12 * 60 + 10) * 60_000));
+      await page.reload();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      rec({ kind: "stale-boundary", vp: vp.w, at: "+12h10", staleCount: await page.getByTestId("field-status-prefetch-stale").count(), helpCount: await page.getByTestId("field-status-prefetch-stale-help").count() });
+      await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+      await page.reload();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      await waitForSettledStyles(page);
+      const band = page.getByTestId("field-status-band");
+      const bb = (await band.boundingBox())!;
+      const docBox = (id: string) => page.getByTestId(id).evaluate((e) => ({ top: e.getBoundingClientRect().top + scrollY, bottom: e.getBoundingClientRect().bottom + scrollY, h: e.getBoundingClientRect().height }));
+      const w = await docBox("field-emergency-warning");
+      const h = await docBox("field-status-prefetch-stale-help");
+      const head = await docBox("field-plan-title");
+      const wFont = await page.getByTestId("field-emergency-warning").evaluate((e) => ({ fs: getComputedStyle(e).fontSize, fw: getComputedStyle(e).fontWeight, bg: getComputedStyle(e).backgroundColor }));
+      const hFont = await page.getByTestId("field-status-prefetch-stale-help").evaluate((e) => ({ fs: getComputedStyle(e).fontSize, fw: getComputedStyle(e).fontWeight, bg: getComputedStyle(e).backgroundColor }));
+      rec({ kind: "band-stale", vp: vp.w, bandH: bb.height, margin100: 100 - bb.height, warn: w, help: h, head, wFont, hFont, order: w.bottom <= h.top + 0.5 && h.bottom <= head.top + 0.5 && w.top >= bb.height - 0.5 });
+      const bandTexts = await band.innerText();
+      rec({ kind: "band-text", vp: vp.w, text: bandTexts });
+      await page.screenshot({ path: `${SHOT}/${vp.w}-5-stale-emergency.png` });
+      await wordHits(page, `帯 古い ${vp.w}`);
+      rec({ kind: "stale-aria", vp: vp.w, describedby: await page.getByTestId("field-status-prefetch-stale").getAttribute("aria-describedby"), role: await page.getByTestId("field-status-prefetch-stale-help").getAttribute("role") });
+      // 文字 200%
+      await page.addStyleTag({ content: "html{font-size:200% !important}" });
+      await page.waitForTimeout(300);
+      const b2 = (await band.boundingBox())!;
+      const sw = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+      rec({ kind: "band-200", vp: vp.w, h: b2.height, share: b2.height / vp.h, sw });
+      await page.screenshot({ path: `${SHOT}/${vp.w}-6-stale-200pct.png` });
+      await page.evaluate(() => window.scrollTo(0, 400));
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: `${SHOT}/${vp.w}-6b-stale-200pct-scrolled.png` });
+      await manager.dispose();
+    });
+  });
+}
+
+// M3：圏外の画面と送信待ち・再送・二重防止・端末データ（375）
+test.describe("M3 圏外の記録と再送 375", () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+  test("offline flow", async ({ page, context }) => {
+    const { manager, plan, registrationMark } = await prepare(page);
+    const pageErrors: string[] = [];
+    page.on("pageerror", (e) => pageErrors.push(String(e)));
+    await page.clock.setFixedTime(at("11:56:00"));
+    await openField(page, plan.id);
+    await waitSw(page);
+    await waitBundle(page, plan.id);
+    const before = await dumpStorage(page);
+    rec({ kind: "storage-online", ls: Object.keys(before.ls), ss: Object.keys(before.ss), idb: before.idb, caches: before.caches });
+    await setOnline(page, context, false);
+    await page.reload();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    const F = '[data-testid="field-root"]';
+    const OFF = '[data-testid="offline-root"]';
+    // 圏外：点検
+    await page.getByTestId("field-inspection-link").click();
+    await expect(page.getByTestId("offline-banner")).toBeVisible();
+    await standards(page, OFF, "圏外の点検 375");
+    rec({ kind: "probe", state: "offline-inspection", ...(await primaryProbe(page, OFF)) });
+    await page.screenshot({ path: `${SHOT}/375-7-offline-inspection.png` });
+    await page.screenshot({ path: `${SHOT}/375-7-offline-inspection-full.png`, fullPage: true });
+    await wordHits(page, "圏外の点検");
+    await page.getByTestId("offline-inspection-all-normal").click();
+    await page.getByTestId("offline-inspection-save").click();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    // 離着陸を 3 回、圏外で
+    const btn = page.getByTestId("field-flight-button");
+    for (let i = 0; i < 3; i++) {
+      await page.clock.setFixedTime(at(`11:5${7 + i}:00`));
+      await page.waitForTimeout(1600);
+      await btn.click();
+      await expect(btn).toHaveText("着陸");
+      await page.clock.setFixedTime(at(`11:5${7 + i}:30`));
+      await page.waitForTimeout(1600);
+      await btn.click();
+      await expect(btn).toHaveText("離陸");
+    }
+    const unsentOffline = await page.getByTestId("field-status-unsent").getAttribute("data-count");
+    const bandOff = (await page.getByTestId("field-status-band").boundingBox())!;
+    rec({ kind: "offline-queue", unsent: unsentOffline, bandH: bandOff.height });
+    const midStore = await dumpStorage(page);
+    rec({ kind: "storage-offline", ls: Object.keys(midStore.ls), idb: midStore.idb, caches: midStore.caches });
+    await expect(page.getByTestId("field-journal-link")).toHaveCount(3);
+    rec({ kind: "probe", state: "offline-3-landed", ...(await primaryProbe(page, F)) });
+    await page.screenshot({ path: `${SHOT}/375-8-offline-3landed.png`, fullPage: true });
+    await standards(page, F, "圏外・着陸 3 件", "field-flight-button");
+    // 圏外の日誌：ダブルタップで 1 件
+    await page.getByTestId("field-journal-link").first().click();
+    await expect(page.getByTestId("offline-journal-times")).toBeVisible();
+    await standards(page, OFF, "圏外の日誌 375");
+    rec({ kind: "probe", state: "offline-journal", ...(await primaryProbe(page, OFF)) });
+    await page.screenshot({ path: `${SHOT}/375-9-offline-journal.png`, fullPage: true });
+    await wordHits(page, "圏外の日誌");
+    await page.getByTestId("offline-journal-safety-yes").click();
+    await page.getByTestId("offline-journal-safety-detail").fill(NOTE);
+    await page.getByTestId("offline-journal-safety-no").click();
+    await page.getByTestId("offline-journal-save").dblclick();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    await expect(page.getByTestId("field-journal-link")).toHaveCount(2);
+    const unsent2 = await page.getByTestId("field-status-unsent").getAttribute("data-count");
+    rec({ kind: "after-journal-dbl", unsent: unsent2, journalLinks: await page.getByTestId("field-journal-link").count() });
+    const midStore2 = await dumpStorage(page);
+    const blob = JSON.stringify(midStore2);
+    rec({ kind: "forbidden-in-storage-while-pending", pilotName: blob.includes(PILOT_NAME), mark: blob.includes(registrationMark), lat: blob.includes("35.4342"), lng: blob.includes("133.3805"), note: blob.includes(NOTE) });
+    // 通信を戻す
+    await setOnline(page, context, true);
+    await expect.poll(async () => page.getByTestId("field-status-unsent").getAttribute("data-count"), { timeout: 60_000 }).toBe("0");
+    rec({ kind: "flushed", unsent: await page.getByTestId("field-status-unsent").getAttribute("data-count") });
+    await page.reload();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    const rows = await page.getByTestId("field-flight-row").count();
+    const phases = await page.getByTestId("field-flight-row").evaluateAll((els) => els.map((e) => e.getAttribute("data-phase")));
+    rec({ kind: "after-flush-rows", rows, phases, journalLinks: await page.getByTestId("field-journal-link").count() });
+    // サーバー側の件数
+    const fl = await manager.get(`/api/ops/flights`);
+    const body = fl.ok() ? ((await fl.json()) as unknown) : null;
+    const list = Array.isArray(body) ? body : ((body as { flights?: unknown[]; items?: unknown[] } | null)?.flights ?? (body as { items?: unknown[] } | null)?.items ?? []);
+    const mine = (list as Array<{ aircraftRegistrationMark?: string; registrationMark?: string; aircraft?: { registrationMark?: string }; safetyIssue?: boolean }>).filter((f) => JSON.stringify(f).includes(registrationMark));
+    rec({ kind: "server-flights", status: fl.status(), total: (list as unknown[]).length, mine: mine.length });
+    const after = await dumpStorage(page);
+    const blob2 = JSON.stringify(after);
+    rec({ kind: "storage-after", ls: Object.keys(after.ls), idb: after.idb, caches: after.caches, pilotName: blob2.includes(PILOT_NAME), mark: blob2.includes(registrationMark), lat: blob2.includes("35.4342"), note: blob2.includes(NOTE) });
+    rec({ kind: "pageErrors", errors: pageErrors });
+    await manager.dispose();
+  });
+});
+
+// M4：圏外の今日・見つからない・行えない（3 幅）と閲覧者・API
+for (const vp of [
+  { w: 320, h: 740 },
+  { w: 375, h: 812 },
+  { w: 1280, h: 800 },
+]) {
+  test.describe(`M4 圏外の画面 ${vp.w}`, () => {
+    test.use({ viewport: { width: vp.w, height: vp.h } });
+    test(`offline screens ${vp.w}`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      await page.goto("/ops");
+      await expect(page.getByTestId("today-heading")).toBeVisible();
+      await page.waitForTimeout(1500);
+      await setOnline(page, context, false);
+      const OFF = '[data-testid="offline-root"]';
+      await page.goto("/ops");
+      await expect(page.getByTestId("offline-today-plan").first()).toBeVisible();
+      await standards(page, OFF, `圏外の今日 ${vp.w}`);
+      rec({ kind: "probe", state: "offline-today", vp: vp.w, ...(await primaryProbe(page, OFF)) });
+      await page.screenshot({ path: `${SHOT}/${vp.w}-10-offline-today.png` });
+      await wordHits(page, `圏外の今日 ${vp.w}`);
+      await page.goto("/ops/plans/new");
+      await expect(page.getByTestId("offline-unavailable")).toBeVisible();
+      await standards(page, OFF, `圏外では行えない ${vp.w}`);
+      await page.screenshot({ path: `${SHOT}/${vp.w}-11-offline-unavailable.png` });
+      await wordHits(page, `行えない ${vp.w}`);
+      await page.goto(`/ops/plans/00000000-0000-4000-8000-000000000000/field`);
+      await expect(page.getByTestId("offline-not-saved")).toBeVisible();
+      await standards(page, OFF, `保存されていない ${vp.w}`);
+      await page.screenshot({ path: `${SHOT}/${vp.w}-12-offline-notsaved.png` });
+      // ブラウザの横幅 200%
+      await page.addStyleTag({ content: "html{font-size:200% !important}" });
+      await page.waitForTimeout(300);
+      rec({ kind: "offline-200", vp: vp.w, sw: await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth })) });
+      await setOnline(page, context, true);
+      await manager.dispose();
+    });
+  });
+}
+
+test.describe("M5 権限・API", () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+  test("viewer / anon / boundary", async ({ page }) => {
+    const { manager, plan } = await prepare(page);
+    const anon = await pwRequest.newContext({ baseURL: BASE });
+    const a = await anon.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), kind: "takeoff", occurredAt: `${DAY}T11:55` } });
+    const viewer = await apiAs(seeded("a-viewer"));
+    const v = await viewer.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), kind: "takeoff", occurredAt: `${DAY}T11:55` } });
+    const cid = crypto.randomUUID();
+    const p1 = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: cid, kind: "takeoff", occurredAt: `${DAY}T11:55` } });
+    const p2 = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: cid, kind: "takeoff", occurredAt: `${DAY}T11:55` } });
+    const bad = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: "not-a-uuid", kind: "takeoff", occurredAt: "garbage" } });
+    rec({ kind: "api", anon: a.status(), viewer: v.status(), first: p1.status(), dup: p2.status(), bad: bad.status() });
+    // 閲覧者の現場
+    await signIn(page.request, seeded("a-viewer"));
+    await openField(page, plan.id);
+    const F = '[data-testid="field-root"]';
+    rec({ kind: "probe", state: "viewer", ...(await primaryProbe(page, F)) });
+    await page.screenshot({ path: `${SHOT}/375-13-viewer.png` });
+    await standards(page, F, "閲覧者 375", undefined);
+    await manager.dispose();
+  });
+});
