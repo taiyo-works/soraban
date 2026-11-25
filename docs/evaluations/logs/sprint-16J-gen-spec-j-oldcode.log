@@ -1,0 +1,288 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-j-db.spec.ts
+
+
+Running 10 tests using 1 worker
+
+  ✘   1 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (30.9s)
+  ✘   2 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (30.8s)
+  ✘   3 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (31.3s)
+  ✓   4 e2e/ops-db/sprint16-j-db.spec.ts:216:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (966ms)
+  ✓   5 e2e/ops-db/sprint16-j-db.spec.ts:216:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (790ms)
+  ✘   6 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (30.7s)
+  ✘   7 e2e/ops-db/sprint16-j-db.spec.ts:270:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (2.0m)
+  ✘   8 e2e/ops-db/sprint16-j-db.spec.ts:317:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (1.2s)
+  ✘   9 e2e/ops-db/sprint16-j-db.spec.ts:350:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (907ms)
+  ✓  10 e2e/ops-db/sprint16-j-db.spec.ts:350:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+
+
+  1) e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+
+    Error: expect(locator).toHaveClass(expected) failed
+
+    Locator: getByTestId('journal-tab-all')
+    Expected pattern: /\bsb-chip\b/
+    Received string:  ""
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toHaveClass" getByTestId('journal-tab-all') with timeout 30000ms
+      - waiting for getByTestId('journal-tab-all')
+        63 × locator resolved to <a href="/ops/journal" aria-current="page" data-testid="journal-tab-all">すべて</a>
+           - unexpected value ""
+
+
+      112 |     for (const k of tabs) {
+      113 |       const t = page.getByTestId(`journal-tab-${k}`);
+    > 114 |       await expect(t).toHaveClass(/\bsb-chip\b/);
+          |                       ^
+      115 |       expect((await t.boundingBox())!.height, `${k} の高さ`).toBeGreaterThanOrEqual(48);
+      116 |     }
+      117 |     await expect(page.getByTestId("journal-tab-all")).toHaveAttribute("aria-current", "page");
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:114:23
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/991ed843-0408-4822-932e-205c0ed6ace4"])').getByTestId('journal-row-takeoff-landing')
+    Expected: "離陸から着陸06:11–06:56"
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/991ed843-0408-4822-932e-205c0ed6ace4"])').getByTestId('journal-row-takeoff-landing') with timeout 30000ms
+      - waiting for locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/991ed843-0408-4822-932e-205c0ed6ace4"])').getByTestId('journal-row-takeoff-landing')
+
+
+      149 |     // カード全体が 1 つのリンク（見出しの種別・日付・時刻・機体・操縦者が同じ a の中）
+      150 |     await expect(link).toContainText(s.day);
+    > 151 |     await expect(row.getByTestId("journal-row-takeoff-landing")).toHaveText(`離陸から着陸${s.takeoff}–${s.landing}`);
+          |                                                                  ^
+      152 |     await expect(row.getByTestId("journal-row-minutes")).toHaveText("0:45");
+      153 |     await expect(link).toContainText(a.mark);
+      154 |     for (const id of ["journal-row-takeoff-landing", "journal-row-minutes"] as const) {
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:151:66
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-75265-す。カード全体が押せて-72-以上。主ボタンは-1-つ/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-75265-す。カード全体が押せて-72-以上。主ボタンは-1-つ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-75265-す。カード全体が押せて-72-以上。主ボタンは-1-つ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-75265-す。カード全体が押せて-72-以上。主ボタンは-1-つ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('flight-row').first()
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('flight-row').first() with timeout 30000ms
+      - waiting for getByTestId('flight-row').first()
+
+
+      187 |     await waitForSettledStyles(page);
+      188 |     const liveRow = page.getByTestId("flight-row").first();
+    > 189 |     await expect(liveRow).toBeVisible();
+          |                           ^
+      190 |     expect((await liveRow.boundingBox())!.height).toBeGreaterThanOrEqual(72);
+      191 |     await expect(liveRow.getByTestId("journal-row-takeoff-landing")).toContainText(`${live.s.takeoff}–${live.s.landing}`);
+      192 |     await expect(liveRow.getByTestId("journal-row-minutes")).toHaveText("0:40");
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:189:27
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('form', { name: '飛行記録の入力' }).locator('.sb-sec-head h2')
+    Timeout: 30000ms
+    - Expected  - 7
+    + Received  + 1
+
+    - Array [
+    -   "機体・操縦者・日常点検",
+    -   "離陸",
+    -   "着陸",
+    -   "飛行概要",
+    -   "安全に影響のあった事項・不具合",
+    - ]
+    + Array []
+
+    Call log:
+      - Expect "toHaveText" getByRole('form', { name: '飛行記録の入力' }).locator('.sb-sec-head h2') with timeout 30000ms
+      - waiting for getByRole('form', { name: '飛行記録の入力' }).locator('.sb-sec-head h2')
+        63 × locator resolved to 0 elements
+
+
+      240 |     // 節の見出し：.sb-sec-head（左の線）。旧い fieldset の見出しではない。名前は section の名前になる
+      241 |     const titles = ["機体・操縦者・日常点検", "離陸", "着陸", "飛行概要", "安全に影響のあった事項・不具合"];
+    > 242 |     await expect(form(page).locator(".sb-sec-head h2")).toHaveText(titles);
+          |                                                         ^
+      243 |     for (const t of titles) await expect(page.getByRole("region", { name: t, exact: true })).toHaveCount(1);
+      244 |     expect(await form(page).locator("fieldset.opx-step").count()).toBe(0);
+      245 |     // チェック行（CheckRow）：特定飛行の形態の全項目。行 72 以上・丸 32
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:242:57
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/ops-db/sprint16-j-db.spec.ts:270:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForRequest: Test timeout of 120000ms exceeded.
+
+      298 |     expect(store.local.filter((k) => !k.startsWith("soraban:ops-draft:flight:")).filter((k) => k.includes("draft") || k.includes("flight")), "下書き以外の鍵").toEqual([]);
+      299 |     expect(store.session).toEqual([]);
+    > 300 |     const posted = page.waitForRequest((r) => r.url().endsWith("/api/ops/flights") && r.method() === "POST");
+          |                         ^
+      301 |     await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
+      302 |     const body = (await posted).postDataJSON() as Record<string, unknown>;
+      303 |     expect(body["dailyInspectionId"]).toBe(insp.id);
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:300:25
+
+    Error: locator.click: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: '飛行記録を保存', exact: true })
+
+
+      299 |     expect(store.session).toEqual([]);
+      300 |     const posted = page.waitForRequest((r) => r.url().endsWith("/api/ops/flights") && r.method() === "POST");
+    > 301 |     await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
+          |                                                                      ^
+      302 |     const body = (await posted).postDataJSON() as Record<string, unknown>;
+      303 |     expect(body["dailyInspectionId"]).toBe(insp.id);
+      304 |     expect(body["takeoffAt"]).toBe(s.takeoffAt);
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:301:70
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-94bb1-きは消える。端末に残すのは今までの下書きの-1-つだけ/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-94bb1-きは消える。端末に残すのは今までの下書きの-1-つだけ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-94bb1-きは消える。端末に残すのは今までの下書きの-1-つだけ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-94bb1-きは消える。端末に残すのは今までの下書きの-1-つだけ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/ops-db/sprint16-j-db.spec.ts:317:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "飛行記録を保存",
+    +   "保存",
+      ]
+
+      344 |     expect(href).toContain(`takeoffAt=${encodeURIComponent(s.takeoffAt)}`);
+      345 |     expect(href).toContain("returnTo=");
+    > 346 |     expect(await visiblePrimaries(page)).toEqual(["飛行記録を保存"]);
+          |                                          ^
+      347 |   });
+      348 |
+      349 |   for (const w of [320, 360]) {
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:346:42
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/ops-db/sprint16-j-db.spec.ts:350:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） 
+
+    Error: 飛行記録の入力 文字 200%・320px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 320
+    Received:    324
+
+       at ../field-checks.ts:484
+
+      482 |     if (r.excludedContainers.length > 0) test.info().annotations.push({ type: "clip-excluded", description: `${l}: 入れ物の切れの検査から除外 ${r.excludedContainers.join(" / ")}` });
+      483 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    > 484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+          |                                              ^
+      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+      486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
+      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:484:46)
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:357:7
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-87df8--幅・200-で収まる（16-I-の申し送り-E-3）/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-87df8--幅・200-で収まる（16-I-の申し送り-E-3）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-87df8--幅・200-で収まる（16-I-の申し送り-E-3）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-87df8--幅・200-で収まる（16-I-の申し送り-E-3）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+    e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ 
+    e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） 
+    e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ 
+    e2e/ops-db/sprint16-j-db.spec.ts:270:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ 
+    e2e/ops-db/sprint16-j-db.spec.ts:317:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない 
+    e2e/ops-db/sprint16-j-db.spec.ts:350:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） 
+  3 passed (4.3m)
+ ELIFECYCLE  Command failed with exit code 1.
