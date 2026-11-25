@@ -1,0 +1,7 @@
+
+> soraban@0.0.0 lint /home/user/soraban
+> pnpm -r lint
+
+Scope: 6 of 7 workspace projects
+apps/web lint$ eslint
+apps/web lint: Done
