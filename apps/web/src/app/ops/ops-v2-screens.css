@@ -808,6 +808,12 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
+.opx-tile-stale {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink);
+}
 .opx-tile-more {
   margin-top: auto;
   font-size: 0.875rem;

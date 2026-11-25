@@ -5,7 +5,7 @@
 // - シートの詳細は、保存した判定の理由・元の判定・適用した許可と、判定に使ったデータ（台帳 sources.json の値だけ：名称・提供元・版・基準年・確認日・出典）。
 //   項目ごとのデータの対応は保存していないので、データは「この判定全体で使ったもの」として出す。
 // - 端末のストレージには書かない。開いているタイルの印は画面の状態だけ。
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { ItemVerdict } from "@soraban/regulations";
 import { Sheet } from "@/components/ui/sheet";
 import { VerdictSign, VerdictTag, VERDICT_KEY } from "@/components/ui/sb-parts";
@@ -22,7 +22,18 @@ export type TileDataset = {
   readonly verifiedAt: string;
   readonly url?: string;
   readonly stale: boolean;
+  /** 確認日を読めない（日付として解釈できない）。「90 日超」とは書かない。 */
+  readonly unreadable?: boolean;
+  /** 台帳（sources.json）が、この判定の後に更新されている（保存した確認日と台帳の確認日が違う）。 */
+  readonly ledgerUpdated?: boolean;
 };
+
+/** 要手続きの項目の手続き（エンジンが返した値だけ。創作しない）。 */
+export type TileProcedure = { readonly id: string; readonly title: string; readonly submitTo: string; readonly deadline: string };
+
+export const STALE_TILE_LABEL = "古い判定";
+export const LEDGER_UPDATED_NOTE = "台帳はこの判定の後に更新されています";
+export const VERIFIED_UNREADABLE = "確認日を読めません";
 
 export type TileRef = { readonly title: string; readonly url: string };
 
@@ -41,6 +52,8 @@ export type TileItem = {
   readonly permitNote?: string;
   /** 手続き済み（条件付き）の項目の守る条件。 */
   readonly conditions: readonly string[];
+  /** 要手続きの項目の手続き（itemId が一致するもの）。 */
+  readonly procedures: readonly TileProcedure[];
 };
 
 export function JudgementTiles({
@@ -48,14 +61,22 @@ export function JudgementTiles({
   datasets,
   fetchedAt,
   fetchedAtIso,
+  stale = false,
 }: {
   readonly items: readonly TileItem[];
   readonly datasets: readonly TileDataset[];
   readonly fetchedAt: string;
   readonly fetchedAtIso: string;
+  /** 判定が古い（計画が判定の後に変わった）。タイルとシートの見出しに文字で示す。 */
+  readonly stale?: boolean;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const close = useCallback(() => setOpenId(null), []);
+  // 閉じたときにフォーカスを戻す先は、最後に開いたタイル（開いたまま別のタイルを押したときも、そのタイル）
+  const tileEls = useRef(new Map<string, HTMLButtonElement>());
+  const lastOpenId = useRef<string | null>(null);
+  if (openId !== null) lastOpenId.current = openId;
+  const returnFocusTo = useCallback(() => (lastOpenId.current ? (tileEls.current.get(lastOpenId.current) ?? null) : null), []);
   const open = items.find((i) => i.id === openId) ?? null;
   return (
     <>
@@ -66,6 +87,10 @@ export function JudgementTiles({
               type="button"
               className="opx-tile"
               data-testid="judgement-tile"
+              ref={(el) => {
+                if (el) tileEls.current.set(it.id, el);
+                else tileEls.current.delete(it.id);
+              }}
               data-item-id={it.id}
               data-verdict={it.verdict}
               data-verdict-key={VERDICT_KEY[it.verdict]}
@@ -75,6 +100,11 @@ export function JudgementTiles({
             >
               <span className="opx-tile-title">{it.title}</span>
               <VerdictTag level={it.verdict}>{it.verdictLabel}</VerdictTag>
+              {stale ? (
+                <span className="opx-tile-stale" data-testid="judgement-tile-stale">
+                  {STALE_TILE_LABEL}
+                </span>
+              ) : null}
               <span className="opx-tile-more" aria-hidden="true">
                 詳細 <span aria-hidden>›</span>
               </span>
@@ -82,7 +112,15 @@ export function JudgementTiles({
           </li>
         ))}
       </ul>
-      <Sheet open={open !== null} onClose={close} title={open?.title ?? ""} testId="judgement-sheet" defaultStage="half">
+      <Sheet
+        open={open !== null}
+        onClose={close}
+        title={open ? (stale ? `${open.title}（${STALE_TILE_LABEL}）` : open.title) : ""}
+        testId="judgement-sheet"
+        defaultStage="half"
+        focusKey={open?.id}
+        returnFocusTo={returnFocusTo}
+      >
         {open ? (
           <div className="opx-tile-detail" data-testid="judgement-sheet-detail" data-item-id={open.id}>
             <p className="opx-tile-state">
@@ -110,6 +148,22 @@ export function JudgementTiles({
                 <div>
                   <dt>許可・承認の登録</dt>
                   <dd>{open.permitNote}</dd>
+                </div>
+              ) : null}
+              {open.procedures.length > 0 ? (
+                <div>
+                  <dt>手続き</dt>
+                  <dd>
+                    <ul className="opx-tile-list" data-testid="judgement-sheet-procedures">
+                      {open.procedures.map((p) => (
+                        <li key={p.id} data-testid="judgement-sheet-procedure">
+                          <span className="font-medium">{p.title}</span>
+                          <span className="block">提出先：{p.submitTo}</span>
+                          <span className="block">期限：{p.deadline}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
                 </div>
               ) : null}
               {open.conditions.length > 0 ? (
@@ -162,8 +216,13 @@ export function JudgementTiles({
                       <span className="opx-tile-ds-meta sb-num tnum">
                         {d.baseYear !== null ? `基準年 ${d.baseYear}／` : ""}確認日 {d.verifiedAt}
                         {d.version ? `／版 ${d.version}` : ""}
-                        {d.stale ? "（確認日が古い：90 日超）" : ""}
+                        {d.unreadable ? `（${VERIFIED_UNREADABLE}）` : d.stale ? "（確認日が古い：90 日超）" : ""}
                       </span>
+                      {d.ledgerUpdated ? (
+                        <span className="opx-tile-ds-meta" data-testid="judgement-sheet-dataset-ledger-updated">
+                          {LEDGER_UPDATED_NOTE}
+                        </span>
+                      ) : null}
                       {d.url ? (
                         <a href={d.url} target="_blank" rel="noopener noreferrer" aria-label={`出典：${d.name}（新しいタブで開く）`} className="opx-tile-link">
                           出典を開く<span aria-hidden>{LINK_ARROW}</span>

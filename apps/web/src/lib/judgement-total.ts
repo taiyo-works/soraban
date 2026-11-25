@@ -54,7 +54,13 @@ const fromItems = (verdict: FlightVerdict, stale: boolean): JudgementTotal => {
   };
 };
 
-export const judgementTotal = (verdict: FlightVerdict | undefined, stale: boolean): JudgementTotal => {
+/** 古い判定のときは、総合の印を注意側にする（軽い印「手続き済み」「手続き不要」のままにしない。重い印はそのまま）。 */
+const forStale = (t: JudgementTotal): JudgementTotal =>
+  t.stale && (t.sign === "procedure_done" || t.sign === "no_procedure") ? { ...t, sign: "unknown" } : t;
+
+export const judgementTotal = (verdict: FlightVerdict | undefined, stale: boolean): JudgementTotal => forStale(judgementTotalRaw(verdict, stale));
+
+const judgementTotalRaw = (verdict: FlightVerdict | undefined, stale: boolean): JudgementTotal => {
   const pre = stale ? STALE_TOTAL_PREFIX : "";
   if (verdict === undefined) {
     return { key: "missing", sign: "unknown", text: `${pre}未確認（判定の記録がありません）`, stale, count: 0 };

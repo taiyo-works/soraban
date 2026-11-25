@@ -4,6 +4,7 @@
 // - 計画の保存では、サーバーが判定を実行して保存する（画面は判定の結果を送らない）。保存中は「判定中」と出す。
 // - 現在地・住所検索の結果は「候補」として示し、利用者が「この地点を使う」で確定するまで入力欄に入れない。
 //   計画を保存するまで座標は送らない（Sprint 9 の方針）。
+import { tidyFieldErrors } from "@/lib/field-message";
 import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
 import { SPECIFIC_FLIGHT_FLAG_LABEL, type SpecificFlightFlag } from "@soraban/regulations";
 import { searchAddress, type GeocodeResult } from "@/lib/geocode";
@@ -404,7 +405,7 @@ export function PlanForm({
       : await call("POST", "/api/ops/plans", { ...planBody(v), clientRequestId });
     setBusy(false);
     if (!r.ok) {
-      setErrors(fieldErrorsOf(r));
+      setErrors(tidyFieldErrors(fieldErrorsOf(r)));
       setMessage(failMessage(r));
       requestErrorFocus();
       return;

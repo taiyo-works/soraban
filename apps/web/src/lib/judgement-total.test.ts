@@ -58,6 +58,13 @@ describe("judgementTotal（契約 §8.2 の総合の語）", () => {
       expect(judgementTotal(v, false).text.startsWith(STALE_TOTAL_PREFIX)).toBe(false);
     }
   });
+  it("古い判定：総合の印を注意側にする（軽い印のままにしない。重い印はそのまま）", () => {
+    expect(judgementTotal(mk(["no_procedure"]), true)).toMatchObject({ key: "none", sign: "unknown" });
+    expect(judgementTotal(mk(["procedure_done"]), true)).toMatchObject({ key: "done", sign: "unknown" });
+    expect(judgementTotal(mk(["no_fly"]), true).sign).toBe("no_fly");
+    expect(judgementTotal(mk(["needs_procedure"]), true).sign).toBe("needs_procedure");
+    expect(judgementTotal(mk(["no_procedure"]), false).sign).toBe("no_procedure");
+  });
   it("禁止語を含まない（どの状態でも）", () => {
     for (const v of [mk(["no_fly"]), mk(["needs_procedure"]), mk(["unknown"], 1), mk(["procedure_done"]), mk(["no_procedure"]), mk([]), undefined]) {
       for (const stale of [false, true]) {

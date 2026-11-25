@@ -186,8 +186,14 @@ export function PlanWizard({
   const [initialJson] = useState(() => JSON.stringify({ ...initial, pilotId: fixedPilotId ?? initial.pilotId }));
   const [clientRequestId] = useState(() => newRequestId());
   const [step, setStep] = useState(1);
-  // クイック選択の「今日・明日・次の 30 分」の基準（画面を開いた時刻。段 ② は利用者の操作の後に描くので、サーバーの描画とずれない）
-  const [now] = useState(() => new Date());
+  // クイック選択の「今日・明日・次の 30 分」の基準。段 ② に入るたびに作り直す（日付をまたいだり、時間が経って過ぎた時刻が候補に残らないように）。
+  // 段 ② は利用者の操作の後に描くので、サーバーの描画とずれない。
+  const [now, setNow] = useState(() => new Date());
+  const [nowStep, setNowStep] = useState(step);
+  if (nowStep !== step) {
+    setNowStep(step);
+    if (step === 2) setNow(new Date());
+  }
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);

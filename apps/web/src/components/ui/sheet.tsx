@@ -22,6 +22,8 @@ export function Sheet({
   children,
   defaultStage = "half",
   testId = "sheet",
+  focusKey,
+  returnFocusTo,
 }: {
   readonly open: boolean;
   readonly onClose: () => void;
@@ -29,10 +31,14 @@ export function Sheet({
   readonly children: ReactNode;
   readonly defaultStage?: SheetStage;
   readonly testId?: string;
+  /** 開いたまま中身が替わるとき（別のタイルを押したとき）に変える値。変わると、フォーカスを新しい見出しに移す。 */
+  readonly focusKey?: string;
+  /** 閉じたときにフォーカスを戻す先（既定は開いたときのフォーカス元）。 */
+  readonly returnFocusTo?: () => HTMLElement | null;
 }) {
   // 開いているときだけ中身を持つ（閉じると段の状態も捨てる。次に開いたときは defaultStage から始まる）
   return open ? (
-    <SheetOpen onClose={onClose} title={title} defaultStage={defaultStage} testId={testId}>
+    <SheetOpen onClose={onClose} title={title} defaultStage={defaultStage} testId={testId} focusKey={focusKey} returnFocusTo={returnFocusTo}>
       {children}
     </SheetOpen>
   ) : null;
@@ -44,12 +50,16 @@ function SheetOpen({
   children,
   defaultStage,
   testId,
+  focusKey,
+  returnFocusTo,
 }: {
   readonly onClose: () => void;
   readonly title: string;
   readonly children: ReactNode;
   readonly defaultStage: SheetStage;
   readonly testId: string;
+  readonly focusKey?: string;
+  readonly returnFocusTo?: () => HTMLElement | null;
 }) {
   const [stage, setStage] = useState<SheetStage>(defaultStage);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -62,15 +72,26 @@ function SheetOpen({
   const canExpand = idx < ORDER.length - 1;
   const canShrink = idx > 0;
 
+  const returnRef = useRef(returnFocusTo);
+  returnRef.current = returnFocusTo;
   // 開いた元の部品を覚え、見出しにフォーカスする。閉じる（この部品が外れる）とき、元にフォーカスを戻す。
   useEffect(() => {
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     titleRef.current?.focus();
     const back = opener.current;
     return () => {
-      if (back && back.isConnected) back.focus();
+      const target = returnRef.current?.() ?? back;
+      if (target && target.isConnected) target.focus();
     };
   }, []);
+
+  // 開いたまま中身が替わったら、新しい見出しにフォーカスを移す（最初の描画では、上の処理が移す）。
+  const firstKey = useRef(focusKey);
+  useEffect(() => {
+    if (firstKey.current === focusKey) return;
+    firstKey.current = focusKey;
+    titleRef.current?.focus();
+  }, [focusKey]);
 
   // Esc で閉じる（フォーカスがシートの中にあっても外にあっても）。
   const close = useCallback(() => onClose(), [onClose]);

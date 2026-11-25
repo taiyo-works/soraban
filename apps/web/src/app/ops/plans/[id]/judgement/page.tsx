@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  getDataset,
   MODEL_AIRCRAFT_REFERENCE_LINE,
   MODEL_AIRCRAFT_REFERENCES,
   PLAN_JUDGEMENT_DISCLAIMER,
@@ -15,6 +14,7 @@ import { RejudgeButton } from "@/components/ops/plans-client";
 import { buttonOutlineBrandClass, buttonPrimaryClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { VerdictSummary } from "@/components/verdict-summary";
 import { isApplicationSupportEnabled } from "@/lib/boundary";
+import { datasetInfo } from "@/lib/judgement-datasets";
 import { judgementTotal, TILE_RANK } from "@/lib/judgement-total";
 import { formatJst } from "@/lib/ops-time";
 import { baseStatusDisplay, legalTierLabel, VERDICT_LABEL } from "@/lib/verdict-display";
@@ -36,16 +36,6 @@ const splitReason = (reason: string): { readonly text: string; readonly refs: re
     ? { text: reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim(), refs: MODEL_AIRCRAFT_REFERENCES.map((r) => ({ title: r.title, url: r.url })) }
     : { text: reason, refs: [] };
 
-/** 台帳（sources.json）の値だけを引く。台帳に無いデータセットは、保存した名称・基準年・確認日だけにする。 */
-const datasetInfo = (d: { id: string; name: string; baseYear: number | null; verifiedAt: string }, stale: boolean): TileDataset => {
-  try {
-    const r = getDataset(d.id);
-    return { id: d.id, name: r.name, provider: r.provider, version: r.version, baseYear: r.baseYear, verifiedAt: d.verifiedAt, url: r.url, stale };
-  } catch {
-    return { id: d.id, name: d.name, baseYear: d.baseYear, verifiedAt: d.verifiedAt, stale };
-  }
-};
-
 // 判定の画面（Sprint 17-1）。判定は補助。中身は計画の詳細にあった「判定の要約」「許可・承認の照合」をそのまま移した（再設計しない）。
 // 判定を見なくても、通報の準備と記録は止まらない（通報の主画面と /report で完結する）。
 export default async function PlanJudgementPage({ params }: { readonly params: Promise<{ id: string }> }) {
@@ -56,7 +46,10 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
   const verdict = (snapshot.result as { verdict?: FlightVerdict }).verdict;
   const updatable = !plan.voided && canUpdatePlan(me, plan.isSelf);
   const j = plan.judgement;
-  const total = judgementTotal(verdict, plan.freshness.stale);
+  const stale = plan.freshness.stale;
+  const total = judgementTotal(verdict, stale);
+  // 古くて再判定できるときは、再判定が主ボタン。DIPS に出す内容の確認は副ボタン（主ボタンはいつも 1 つ）
+  const rejudgeIsPrimary = stale && updatable;
   const fetchedAt = formatJst(new Date(j.checkedAt));
   const staleIds = new Set(snapshot.staleSources.map((x) => x.id));
   const datasets = snapshot.datasets.map((d) => datasetInfo(d, staleIds.has(d.id)));
@@ -78,6 +71,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
         refs: r.refs,
         appliedPermits: it.appliedPermits.map((p) => p.label),
         ...(note ? { permitNote: note } : {}),
+        procedures: (verdict?.procedures ?? []).filter((p) => p.itemId === it.id).map((p) => ({ id: p.id, title: p.title, submitTo: p.submitTo, deadline: p.deadline.label })),
         conditions: (done?.conditions ?? []).map((c) => (c === PERMIT_SCOPE_NOT_VERIFIED_NOTE ? (permitNotes.applied[it.id] ?? c) : c)),
       };
     });
@@ -113,12 +107,28 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
                 </p>
               }
             />
+            {/* 古いときは、再判定の導線を総合の直下（タイルより前）に置く。再判定が主ボタン（§17 の 14） */}
+            {stale ? (
+              <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
+                <p className="font-medium text-sb-ink">判定が古くなっています</p>
+                <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
+                  {plan.freshness.reasons.map((r) => (
+                    <li key={r.code}>{r.label}</li>
+                  ))}
+                </ul>
+                {updatable ? (
+                  <div id="rejudge" className="scroll-mt-4">
+                    <RejudgeButton planId={plan.id} version={plan.version} highlight />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             {/* 第 2 層：項目のタイル（押すと第 3 層のボトムシートで詳細） */}
             {tiles.length > 0 ? (
               <div className="flex flex-col gap-3" data-testid="judgement-tiles-section">
                 <h3 className="opx-tile-h3">項目ごとの判定（{tiles.length} 件）</h3>
                 <p data-note="" className="opx-tile-aside">調べた項目だけです。項目を押すと、理由と根拠を開きます。気象・標高・ハザードは、まだ調べていません。</p>
-                <JudgementTiles items={tiles} datasets={datasets} fetchedAt={fetchedAt} fetchedAtIso={j.checkedAt} />
+                <JudgementTiles items={tiles} datasets={datasets} fetchedAt={fetchedAt} fetchedAtIso={j.checkedAt} stale={stale} />
               </div>
             ) : null}
             {/* 手続き・手続き済み・飛行の前後の確認・規制ごとの表（従来の全体）。長さのため畳む */}
@@ -131,19 +141,15 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               </details>
             ) : null}
           </div>
-          {plan.freshness.stale ? (
-            <div className="flex flex-col gap-2 border-l-2 border-sb-ink pl-3" data-testid="plan-stale-box">
-              <p className="font-medium text-sb-ink">判定が古くなっています</p>
-              <ul className="list-disc pl-5 text-sb-ink-2" data-testid="plan-stale-reasons">
-                {plan.freshness.reasons.map((r) => (
-                  <li key={r.code}>{r.label}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {/* 主ボタンは 1 つ（H2-3）。アプリからは送らない。DIPS へ出す内容の確認（通報の主画面）へ進む */}
+          {/* 主ボタンは 1 つ（H2-3）。判定が新しいときはこれ。アプリからは送らない。DIPS へ出す内容の確認（通報の主画面）へ進む */}
           <div className="flex flex-col gap-2" data-testid="judgement-next">
-            <Link prefetch={false} href={`/ops/plans/${plan.id}`} data-variant="primary" className={`${buttonPrimaryClass} self-start`} data-testid="judgement-primary">
+            <Link
+              prefetch={false}
+              href={`/ops/plans/${plan.id}`}
+              {...(rejudgeIsPrimary ? {} : { "data-variant": "primary" })}
+              className={`${rejudgeIsPrimary ? buttonOutlineBrandClass : buttonPrimaryClass} self-start`}
+              data-testid="judgement-primary"
+            >
               DIPS に出す内容を確認
             </Link>
             <p data-note="" className="text-sb-ink-2">判定は補助です。通報は、ご本人が DIPS で行います。</p>
@@ -170,7 +176,7 @@ export default async function PlanJudgementPage({ params }: { readonly params: P
               判定の履歴を見る
             </Link>
           </div>
-          {updatable ? (
+          {updatable && !stale ? (
             <div id="rejudge" className="scroll-mt-4">
               <RejudgeButton planId={plan.id} version={plan.version} />
             </div>
