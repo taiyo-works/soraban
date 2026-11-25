@@ -282,32 +282,50 @@ test.describe("16-I 点検の入力", () => {
     await expect(page).toHaveURL(/\/ops\/inspections\/new/);
   });
 
-  test("I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る", async ({ page }) => {
-    await signIn(page.request, seeded("a-manager"));
-    await page.setViewportSize({ width: 375, height: 812 });
-    await page.clock.setFixedTime(at("11:30:00"));
-    await openNew(page, `aircraftId=${aircraftId}&takeoffAt=${DAY}T11:00`);
-    const note = page.getByTestId("inspection-after-takeoff");
-    await expect(note).toBeVisible();
-    await expect(note).toContainText("離陸（11:00）より後");
-    await expect(note).toContainText("飛行前点検として扱いません");
-    await waitForSettledStyles(page);
-    const dt = (await page.getByTestId("inspected").boundingBox())!;
-    const n = (await note.boundingBox())!;
-    // すぐ下：実施日時の欄の下端と注記の上端の間が 24px 以内で、注記は欄の後ろ
-    expect(n.y, "注記は実施日時の欄の下").toBeGreaterThanOrEqual(dt.y + dt.height - 1);
-    expect(n.y - (dt.y + dt.height), "実施日時の欄と注記の間").toBeLessThanOrEqual(24);
-    // 区分の選択は注記より後
-    const timing = (await page.getByRole("radio", { name: "飛行前", exact: true }).first().boundingBox())!;
-    expect(timing.y).toBeGreaterThan(n.y);
-    // 最初の画面（スクロールなし）に注記の全体が入る
-    const scrollY = await page.evaluate(() => window.scrollY);
-    expect(scrollY).toBe(0);
-    expect(n.y + n.height, `注記の下端 ${n.y + n.height} は 812 以内`).toBeLessThanOrEqual(812);
-    // 実施日時を離陸より前に直すと注記は消える（今までと同じ）
-    await form(page).getByLabel("実施時刻", { exact: true }).fill("10:50");
-    await expect(note).toHaveCount(0);
-  });
+  // 差し戻し 1：「≤ 812」では固定の下部ナビの背後に入る行を見逃した。注記の下端を、下部ナビの上端（ナビがない広い画面は画面の下端）以下で測る。
+  for (const vp of [
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 1280, height: 800 },
+  ]) {
+    test(`I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、${vp.width}×${vp.height} の最初の画面に全体が入る（下部ナビの背後に入らない）`, async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      await page.setViewportSize(vp);
+      await page.clock.setFixedTime(at("11:30:00"));
+      await openNew(page, `aircraftId=${aircraftId}&takeoffAt=${DAY}T11:00`);
+      const note = page.getByTestId("inspection-after-takeoff");
+      await expect(note).toBeVisible();
+      await expect(note).toContainText("離陸（11:00）より後");
+      await expect(note).toContainText("飛行前点検として扱いません");
+      await waitForSettledStyles(page);
+      const dt = (await page.getByTestId("inspected").boundingBox())!;
+      const n = (await note.boundingBox())!;
+      // すぐ下：実施日時の欄の下端と注記の上端の間が 24px 以内で、注記は欄の後ろ
+      expect(n.y, "注記は実施日時の欄の下").toBeGreaterThanOrEqual(dt.y + dt.height - 1);
+      expect(n.y - (dt.y + dt.height), "実施日時の欄と注記の間").toBeLessThanOrEqual(24);
+      // 区分の選択は注記より後
+      const timing = (await page.getByRole("radio", { name: "飛行前", exact: true }).first().boundingBox())!;
+      expect(timing.y).toBeGreaterThan(n.y);
+      // 実施時刻の補足は、欄との関連付け（aria-describedby）を保ったまま、注記の後ろにある
+      const hintId = await page.getByLabel("実施時刻", { exact: true }).getAttribute("aria-describedby");
+      expect(hintId, "実施時刻の aria-describedby").toBeTruthy();
+      const hint = page.locator(`[id="${hintId!.split(" ").pop()}"]`);
+      await expect(hint).toContainText("日本時間（24 時間制、分まで）");
+      expect((await hint.boundingBox())!.y, "補足は注記の後ろ").toBeGreaterThanOrEqual(n.y + n.height - 1);
+      // 最初の画面（スクロールなし）に注記の全体が入り、固定の下部ナビの上端より上にある
+      const scrollY = await page.evaluate(() => window.scrollY);
+      expect(scrollY).toBe(0);
+      const navVisible = await page.getByTestId("ops-bottom-nav").isVisible();
+      const navBox = navVisible ? await page.getByTestId("ops-bottom-nav").boundingBox() : null;
+      const limit = navBox ? navBox.y : vp.height;
+      if (vp.width < 640) expect(navVisible, "狭い画面は下部ナビがある").toBe(true);
+      expect(n.y + n.height, `注記の下端 ${n.y + n.height} は下部ナビの上端（${limit}）以内`).toBeLessThanOrEqual(limit);
+      if (vp.width < 640) expect(n.y + n.height, `注記の下端 ${n.y + n.height} は 720 以内（ナビの手前に余白）`).toBeLessThanOrEqual(720);
+      // 実施日時を離陸より前に直すと注記は消える（今までと同じ）
+      await form(page).getByLabel("実施時刻", { exact: true }).fill("10:50");
+      await expect(note).toHaveCount(0);
+    });
+  }
 });
 
 test.describe("16-I 横スクロール 0（360 幅・文字 200%）", () => {

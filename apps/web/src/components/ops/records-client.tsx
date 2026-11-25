@@ -172,6 +172,8 @@ type InspectionCandidate = {
 // ---- 部品 ----------------------------------------------------
 
 /** 日付と時刻（HH:MM）の入力。「今」ボタン付き。値は日本時間。 */
+const DATETIME_HINT = "日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。";
+
 function DateTimeInput({
   label,
   nowLabel,
@@ -183,6 +185,7 @@ function DateTimeInput({
   testId,
   onNow,
   stale,
+  externalHintId,
 }: {
   readonly label: string;
   readonly nowLabel?: string;
@@ -196,10 +199,12 @@ function DateTimeInput({
   readonly onNow?: (date: string, time: string) => void;
   /** 前回の入力の続きで、日時が今日でない（目立たせる）。 */
   readonly stale?: boolean;
+  /** 補足を欄の外（親が別の場所）に置くとき、その要素の id。aria-describedby の関連付けはこの id で保つ。 */
+  readonly externalHintId?: string;
 }) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
-  const hintId = `${id}-hint`;
+  const hintId = externalHintId ?? `${id}-hint`;
   const describedBy = [errorId, hintId].filter(Boolean).join(" ");
   const now = () => {
     const v = nowJstInput(new Date());
@@ -254,9 +259,11 @@ function DateTimeInput({
         </div>
       </div>
       <FieldError id={errorId} message={error} />
-      <span id={hintId} className="text-sm text-sb-ink-3">
-        日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。
-      </span>
+      {externalHintId ? null : (
+        <span id={hintId} className="text-sm text-sb-ink-3">
+          {DATETIME_HINT}
+        </span>
+      )}
     </fieldset>
   );
 }
@@ -1518,6 +1525,8 @@ export function InspectionForm({
   // 16-I I-3：日誌から移ったとき（離陸の日時が渡されたとき）は、実施日時の欄を先頭にして、その直下に注記を置く。375×812 の最初の画面に注記の全体が入るよう、
   // 下書きの案内は最初の群（機体・実施者・日時・場所）の後ろに置く（下書きの扱いは同じ。置き場所だけ）。
   const dateFirst = flightTakeoffAt !== undefined && !isEdit;
+  // 日誌から移ったときだけ、実施時刻の補足を注記の後ろへ移す（欄との関連付け aria-describedby は同じ id で保つ）。注記を最初の画面に収めるため（差し戻し 1）
+  const dateHintId = useId();
 
   const dateBlock = (
     <DateTimeInput
@@ -1528,6 +1537,7 @@ export function InspectionForm({
           time={v.time}
           error={errors["inspectedAt"]}
           stale={staleDt !== null}
+          {...(dateFirst ? { externalHintId: dateHintId } : {})}
           onChange={(d, t) => {
             setStaleDt(null);
             setRefreshDt(null);
@@ -1549,6 +1559,7 @@ export function InspectionForm({
         void submit();
       }}
       className="opx-form flex flex-col gap-6"
+      {...(dateFirst ? { "data-date-first": "" } : {})}
       aria-label={isEdit ? "日常点検の訂正" : "日常点検の入力"}
     >
       {!dateFirst ? draftBar : null}
@@ -1556,6 +1567,11 @@ export function InspectionForm({
       <Step title="機体・実施者・日時・場所">
         {dateFirst ? dateBlock : null}
         {dateFirst ? takeoffNote : null}
+        {dateFirst ? (
+          <span id={dateHintId} className="sb-insp-dt-hint text-sm text-sb-ink-3">
+            {DATETIME_HINT}
+          </span>
+        ) : null}
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
           <select className={`${inputClass} min-h-12`} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
             <option value="">選んでください</option>
