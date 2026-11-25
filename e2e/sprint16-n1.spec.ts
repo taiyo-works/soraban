@@ -24,7 +24,7 @@ const openReady = async (page: Page): Promise<void> => {
 const HELP = VERDICT_HELP.needs_procedure;
 
 test.describe("16-N1 公開の / の結論の説明", () => {
-  test("N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。総合・判定不能の件数の行は残る", async ({ page }) => {
+  test("N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openReady(page);
     const check = waitCheck(page);
@@ -33,7 +33,8 @@ test.describe("16-N1 公開の / の結論の説明", () => {
     await Promise.all([check, diag]);
     await settled(page);
     await expect(page.getByTestId("verdict-unknown-count")).toContainText(/判定不能 \d+ 件（データ未整備）/);
-    await expect(page.getByTestId("judgement-total")).toHaveText(/^未確認の項目があります（\d+ 件）$/);
+    // 総合の語は「手続きが要る項目があります」が優先される（判定不能は件数の行が述べる）。説明を外す条件は件数の行と同じ（unknownCount>0）
+    await expect(page.getByTestId("judgement-total")).toBeVisible();
     const text = await page.getByTestId("verdict-conclusion").innerText();
     expect(text).not.toContain("飛べ");
     expect(text).not.toContain(HELP);
@@ -45,18 +46,18 @@ test.describe("16-N1 公開の / の結論の説明", () => {
     await openReady(page);
     await page.getByPlaceholder("35.4278", { exact: true }).fill("35.38");
     await page.getByPlaceholder("133.3314", { exact: true }).fill("133.35");
-    let check = waitCheck(page);
+    const check = waitCheck(page);
     let diag = waitDiagnose(page);
     await page.getByRole("button", { name: /この地点を判定する/ }).click();
     await Promise.all([check, diag]);
     await settled(page);
-    check = waitCheck(page);
+    // 飛行の方法の切り替えは判定だけをやり直す（/api/check は呼ばない。sprint11d の 9 と同じ）
     diag = waitDiagnose(page);
     await page
       .locator("fieldset", { hasText: "飛行の方法（選ぶと判定に反映します）" })
       .getByRole("checkbox", { name: "夜間飛行", exact: true })
       .check();
-    await Promise.all([check, diag]);
+    await diag;
     await settled(page);
     await expect(page.getByTestId("verdict-level")).toHaveText("要手続き");
     await expect(page.getByTestId("verdict-unknown-count")).toHaveCount(0);

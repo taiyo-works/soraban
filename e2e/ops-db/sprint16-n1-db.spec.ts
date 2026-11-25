@@ -4,7 +4,7 @@ import { gotoPlanOpen } from "./plan-screen";
 
 // Sprint 16-N1（N1-2）の E2E-DB。判定の画面 /ops/plans/[id]/judgement と、過去の判定 /ops/plans/[id]/snapshots/[sid]。
 //   判定不能を含む計画（DID の該当を確認できない地点。16-L の unknownPlan と同じ座標）：結論に「飛べ」・VERDICT_HELP の文が 0。
-//   判定不能を含まない要手続きの計画（夜間飛行の松江の地点）：今の説明が出る。
+//   判定不能を含まない要手続きの計画（夜間飛行の、どの規制にも当たらない地点（sprint11d の QUIET と同じ。松江の 35.434238, 133.380508 は判定不能が出る））：今の説明が出る。
 const BASE = `http://127.0.0.1:${process.env.E2E_OPS_PORT ?? 3300}`;
 const stamp = Date.now().toString(36).toUpperCase();
 let seq = 0;
@@ -41,7 +41,7 @@ test.beforeAll(async () => {
     return (await p.json()) as Plan;
   };
   unknownPlan = await mkPlan({ latitude: 35.0, longitude: 133.0, flags: [] });
-  knownPlan = await mkPlan({ latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] });
+  knownPlan = await mkPlan({ latitude: 35.38, longitude: 133.35, flags: ["method_night"] });
 });
 test.afterAll(async () => {
   await manager.dispose();
