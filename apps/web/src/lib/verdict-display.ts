@@ -242,3 +242,13 @@ export const isModelAircraftDiagnosis = (d: {
   readonly droneWeightG?: number;
 }): boolean =>
   d.category === "I" && typeof d.droneWeightG === "number" && d.droneWeightG < DRONE_THRESHOLD_G;
+
+/**
+ * 16-N1（Q-L29）：結論の下の段の説明（VERDICT_HELP）を出さない条件。
+ * 判定不能の項目が 1 件以上、または総合の区分が unknown（項目 0 件の「未確認」を含む）のとき、
+ * 「飛べます」と読める文を未確認の状態で見せない。代わりの文は足さない。
+ */
+export const hidesVerdictHelp = (
+  verdict: Pick<FlightVerdict, "unknownCount" | "items">,
+  totalKey?: string,
+): boolean => verdict.unknownCount > 0 || verdict.items.some((i) => i.verdict === "unknown") || totalKey === "unknown";

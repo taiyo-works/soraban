@@ -15,6 +15,7 @@ import {
   baseStatusDisplay,
   CONDITIONAL_NOTE,
   deadlineCountdown,
+  hidesVerdictHelp,
   isConfirmProcedure,
   legalTierLabel,
   PROCEDURE_COLUMNS,
@@ -325,7 +326,9 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                   ) : null}
                 </div>
               ) : null}
-              <p className="sb-lead !text-sb-ink">{tidyEngineText(VERDICT_HELP[verdict.level])}</p>
+              {hidesVerdictHelp(verdict, total?.key) ? null : (
+                <p className="sb-lead !text-sb-ink">{tidyEngineText(VERDICT_HELP[verdict.level])}</p>
+              )}
             </>
           ) : failed ? (
             <div data-testid="verdict-failed" role="alert" className="flex flex-col gap-2.5">

@@ -33,6 +33,7 @@ import {
   VERDICT_SCALE,
   VERDICT_SECTION_TITLE,
   VERDICT_SHAPE,
+  hidesVerdictHelp,
 } from "@/lib/verdict-display";
 import { tidyEngineText } from "@/lib/field-message";
 import { keepSpaces } from "./pdf-hyphenation";
@@ -303,7 +304,7 @@ export const PdfVerdictConclusion = ({
           ) : null}
         </View>
       ) : null}
-      <Text style={s.line}>{keepSpaces(tidyEngineText(VERDICT_HELP[verdict.level]))}</Text>
+      {hidesVerdictHelp(verdict) ? null : <Text style={s.line}>{keepSpaces(tidyEngineText(VERDICT_HELP[verdict.level]))}</Text>}
       {locLine}
     </View>
   </View>
