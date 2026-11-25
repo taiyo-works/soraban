@@ -1,0 +1,945 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1
+
+
+Running 324 tests using 1 worker
+
+div.sb-page.flex top=0 h=11643
+  a.sb-skip top=-80 h=48
+  header top=0 h=473
+    div.sb-hero top=0 h=128
+      div[hero-art].sb-hero-art top=0 h=128
+        div.sb-art-m top=88 h=40
+      div.sb-hero-text top=0 h=83
+        h1 top=14 h=69
+          span.sb-brand top=14 h=44
+            span.sb-brand-mark top=14 h=44
+    div.sb-intro top=128 h=345
+      div.sb-intro-inner top=136 h=333
+        p[site-lead].sb-lead top=136 h=109
+          strong top=137 h=51
+        p[site-ops-note].sb-ops-note top=250 h=42
+        dl[site-facts].sb-facts top=297 h=104
+          div top=355 h=46
+            dd top=357 h=42
+        p[site-disclaimer].sb-disclaimer-short top=406 h=63
+  main.flex.flex-1 top=473 h=11170
+    section.sb-band.sb-band-off top=473 h=10087
+      div.sb-check-grid top=531 h=10017
+        form[input-block].sb-block.sb-area-input top=531 h=352
+          div.flex.flex-col top=543 h=108
+            div.flex.items-center top=543 h=48
+              button.sb-text-btn top=543 h=48
+            input.sb-input top=599 h=52
+          div[current-location].flex.flex-col top=663 h=208
+            div.sb-btn-row.!mt-0 top=663 h=112
+              button.sb-pill.sb-pill-primary top=663 h=56
+              button[current-location-button].sb-pill.sb-pill-secondary top=727 h=48
+            div.flex.flex-col top=787 h=84
+              p[current-location-privacy].sb-hint top=787 h=84
+        section[result-section].sb-area-result.flex top=891 h=382
+          div[verdict-summary].flex.flex-col top=891 h=382
+            div.flex.flex-col top=891 h=382
+              div[verdict-conclusion].sb-block.flex top=891 h=382
+                div.flex.items-center top=903 h=121
+                  div.sb-v-big.sb-vb-needs top=929 h=68
+                  div.min-w-0 top=903 h=121
+                p.sb-lead.!text-sb-ink top=1034 h=51
+                div[verdict-evidence].flex.flex-col top=1095 h=108
+                  p[verdict-responsibility].text-sm.leading-snug top=1140 h=63
+                div.flex.flex-wrap top=1213 h=48
+                  div.flex.flex-col top=1213 h=48
+        div.sb-area-map.flex top=1281 h=848
+          div[map-block].sb-block.sb-map-block top=1281 h=848
+            div.sb-map-frame top=1289 h=367
+              p[map-pick-hint].flex.items-start top=1290 h=55
+                span top=1296 h=42
+                  span.hidden.pointer-fine:inline top=1296 h=41
+              div[regulation-map].sb-map-canvas.w-full top=1345 h=310
+            section[layer-list].flex.flex-col top=1668 h=453
+              ul.sb-layer-list top=1697 h=368
+                li top=1697 h=48
+                  label.sb-layer.is-on top=1697 h=48
+                li top=1697 h=48
+                  label.sb-layer.is-on top=1697 h=48
+                li top=1753 h=48
+                  label.sb-layer.is-on top=1753 h=48
+                li top=1753 h=48
+                  label.sb-layer.is-on top=1753 h=48
+                li top=1809 h=48
+                  label.sb-layer.is-on top=1809 h=48
+                li top=1809 h=48
+                  label.sb-layer.is-on top=1809 h=48
+                li.col-span-2.lg:col-span-3 top=1865 h=200
+                  label.sb-layer.is-on top=1865 h=200
+              details.sb-layer-sources top=2073 h=48
+                summary top=2073 h=48
+                div.flex.flex-col top=2121 h=300
+                  ul.flex.flex-col top=2164 h=257
+                div.flex.flex-col top=2421 h=238
+                  ul.flex.flex-col top=2464 h=195
+                div.flex.flex-col top=2659 h=106
+                  ul.flex.flex-col top=2702 h=63
+                div.flex.flex-col top=2765 h=476
+                  ul.flex.flex-col top=2808 h=433
+        section[result-details].sb-area-wide.flex top=2137 h=5500
+          div[verdict-details].flex.flex-col top=2137 h=1930
+            div[verdict-procedures-section].flex.flex-col top=2137 h=519
+              div.overflow-x-auto top=2171 h=485
+                table[verdict-procedures].block.w-full top=2171 h=485
+                  tbody.flex.flex-col top=2171 h=485
+            div[verdict-duties-section].flex.flex-col top=2684 h=533
+              ul[verdict-duties].flex.flex-col top=2718 h=499
+                li[verdict-duty].flex.flex-col top=2722 h=130
+                  span.block.text-sb-ink-3 top=2761 h=82
+                li[verdict-duty].flex.flex-col top=2852 h=103
+                  span.block.text-sb-ink-3 top=2891 h=54
+                li[verdict-duty].flex.flex-col top=2954 h=103
+                  span.block.text-sb-ink-3 top=2994 h=54
+                li[verdict-duty].flex.flex-col top=3057 h=156
+                  span.block.text-sb-ink-3 top=3096 h=109
+            div.flex.flex-col top=3245 h=822
+              div.flex.items-baseline top=3245 h=47
+                p.sb-eyebrow.!text-sb-ink-2 top=3245 h=42
+                span.ml-auto.sb-num top=3245 h=42
+              div.overflow-x-auto top=3300 h=767
+                table[verdict-items].block.w-full top=3300 h=767
+                  tbody.flex.flex-col top=3300 h=767
+          div.sb-note-card.is-warn top=4091 h=117
+          div.sb-note-card.border-l-4 top=4232 h=138
+          div.flex.flex-col top=4394 h=2880
+            div.grid.grid-cols-1 top=4431 h=2843
+              article[regulation-card-aviation-law-did].sb-item-card.flex top=4431 h=527
+                p[regulation-verdict-line].sb-vcard.flex top=4476 h=67
+                h3.text-base.font-bold top=4547 h=46
+                p.border-l.border-sb-rule top=4628 h=163
+                  span.text-sb-ink-2 top=4629 h=160
+                details[regulation-detail].sb-disc.sb-disc-plain top=4796 h=62
+                  summary top=4801 h=57
+                  div.sb-disc-body top=4858 h=708
+                div.mt-auto.flex top=4862 h=84
+                  a.inline-flex.min-h-12 top=4873 h=48
+              article[regulation-card-aviation-law-airport].sb-item-card.flex top=4970 h=414
+                p[regulation-verdict-line].sb-vcard.flex top=5015 h=67
+                h3.text-base.font-bold top=5086 h=46
+                p.border-l.border-sb-rule top=5136 h=82
+                  span.text-sb-ink-2 top=5137 h=78
+                details[regulation-detail].sb-disc.sb-disc-plain top=5222 h=62
+                  summary top=5227 h=57
+                  div.sb-disc-body top=5284 h=353
+                div.mt-auto.flex top=5288 h=84
+                  a.inline-flex.min-h-12 top=5299 h=48
+              article[regulation-card-small-drone-law].sb-item-card.flex top=5396 h=490
+                div.flex.items-center top=5408 h=50
+                  span.text-sm.text-sb-ink-3 top=5412 h=42
+                  span[regulation-base-status].ml-auto.inline-flex top=5408 h=50
+                p[regulation-verdict-line].sb-vcard.flex top=5462 h=67
+                h3.text-base.font-bold top=5533 h=46
+                p.border-l.border-sb-rule top=5584 h=136
+                  span.text-sb-ink-2 top=5585 h=133
+                details[regulation-detail].sb-disc.sb-disc-plain top=5724 h=62
+                  summary top=5729 h=57
+                  div.sb-disc-body top=5786 h=985
+                div.mt-auto.flex top=5790 h=84
+                  a.inline-flex.min-h-12 top=5801 h=48
+              article[regulation-card-31202-park-ordinance].sb-item-card.flex top=5898 h=442
+                p[regulation-verdict-line].sb-vcard.flex top=5943 h=67
+                h3.text-base.font-bold top=6014 h=46
+                p.border-l.border-sb-rule top=6064 h=109
+                  span.text-sb-ink-2 top=6065 h=106
+                details[regulation-detail].sb-disc.sb-disc-plain top=6177 h=62
+                  summary top=6182 h=57
+                  div.sb-disc-body top=6240 h=441
+                div.mt-auto.flex top=6244 h=84
+                  a.inline-flex.min-h-12 top=6255 h=48
+              article[regulation-card-31202-heritage-protection].sb-item-card.flex top=6352 h=469
+                p[regulation-verdict-line].sb-vcard.flex top=6397 h=67
+                h3.text-base.font-bold top=6468 h=46
+                p.border-l.border-sb-rule top=6518 h=136
+                  span.text-sb-ink-2 top=6519 h=133
+                details[regulation-detail].sb-disc.sb-disc-plain top=6658 h=62
+                  summary top=6663 h=57
+                  div.sb-disc-body top=6720 h=495
+                div.mt-auto.flex top=6724 h=84
+                  a.inline-flex.min-h-12 top=6735 h=48
+              article[regulation-card-31-pref-nuisance-prevention].sb-item-card.flex top=6832 h=442
+                p[regulation-verdict-line].sb-vcard.flex top=6877 h=67
+                h3.text-base.font-bold top=6948 h=46
+                p.border-l.border-sb-rule top=6999 h=109
+                  span.text-sb-ink-2 top=7000 h=106
+                details[regulation-detail].sb-disc.sb-disc-plain top=7111 h=62
+                  summary top=7116 h=57
+                  div.sb-disc-body top=7174 h=495
+                div.mt-auto.flex top=7178 h=84
+                  a.inline-flex.min-h-12 top=7189 h=48
+          div[verdict-legend].sb-block-soft.flex top=7298 h=193
+            div.flex.flex-wrap top=7337 h=144
+          dl.sb-block-soft.flex top=7515 h=122
+        section[detail-block].sb-block.sb-area-wide top=7645 h=2654
+          fieldset.flex.flex-col top=7698 h=218
+            legend.sb-eyebrow top=7698 h=42
+              span.ml-2.font-normal top=7698 h=41
+            div.flex.items-center top=7773 h=52
+              input.sb-input.sb-num top=7773 h=52
+              button.sb-text-btn.shrink-0 top=7775 h=48
+            div.grid.grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] top=7837 h=79
+              label.flex.flex-col top=7837 h=79
+                input.sb-input.sb-num top=7864 h=52
+              label.flex.flex-col top=7837 h=79
+                input.sb-input.sb-num top=7864 h=52
+          details.flex.flex-col top=7936 h=81
+            summary.sb-eyebrow.flex top=7957 h=48
+              span.ml-2.font-normal top=7960 h=42
+            div.mt-3.flex top=8029 h=1450
+              div.grid.grid-cols-1 top=8029 h=291
+                label.flex.flex-col top=8029 h=169
+                  div.flex.items-center top=8056 h=52
+                  span[model-aircraft-weight-note].text-sm.leading-relaxed top=8114 h=84
+                label.flex.flex-col top=8214 h=106
+                  select.sb-input top=8241 h=52
+              div.flex.flex-col top=8336 h=1143
+                div[dips-permits].flex.flex-col top=8365 h=739
+                  p.text-sb-ink-3 top=8365 h=82
+                  div.grid.grid-cols-1 top=8454 h=649
+                div.grid.grid-cols-1 top=9111 h=152
+                  label.sb-check-row. top=9111 h=72
+                  label.sb-check-row. top=9191 h=72
+                div.border-l-4.border-sb-edge top=9271 h=207
+                  div.grid.grid-cols-1 top=9271 h=207
+          fieldset.flex.flex-col top=8037 h=855
+            div.flex.flex-col top=8078 h=256
+              div.grid.grid-cols-1 top=8107 h=186
+                label[airspace-airspace_did].sb-check-row.sb-check-dense top=8107 h=58
+                  span.text-sm.font-bold top=8115 h=42
+                label[airspace-airspace_airport].sb-check-row.sb-check-dense top=8173 h=56
+                label[airspace-airspace_emergency].sb-check-row.sb-check-dense top=8237 h=56
+            div.grid.grid-cols-2 top=8379 h=252
+              label.sb-check-row.sb-check-dense top=8379 h=56
+              label.sb-check-row.sb-check-dense top=8379 h=56
+              label.sb-check-row.sb-check-dense top=8443 h=58
+                span.text-sm.font-bold top=8451 h=42
+              label.sb-check-row.sb-check-dense top=8443 h=58
+              label.sb-check-row.sb-check-dense top=8509 h=56
+              label.sb-check-row.sb-check-dense top=8509 h=56
+              label.sb-check-row.sb-check-dense top=8573 h=58
+                span.text-sm.font-bold top=8581 h=42
+            div.grid.grid-cols-1 top=8643 h=249
+              label.flex.flex-col top=8643 h=106
+                input.sb-input.sb-num top=8670 h=52
+              label.flex.flex-col top=8765 h=127
+                select.sb-input top=8792 h=52
+                span.text-sm.leading-relaxed top=8850 h=42
+          div.flex.flex-col top=8912 h=1217
+            ul.grid.grid-cols-1 top=8966 h=1163
+              li top=8966 h=80
+                button.sb-check-row.h-full top=8966 h=80
+                  span.text-sm.leading-snug top=8997 h=42
+              li top=9053 h=80
+                button.sb-check-row.h-full top=9053 h=80
+                  span.text-sm.leading-snug top=9085 h=42
+              li top=9141 h=80
+                button.sb-check-row.h-full top=9141 h=80
+                  span.text-sm.leading-snug top=9173 h=42
+              li top=9229 h=59
+                button.sb-check-row.h-full top=9229 h=59
+              li top=9295 h=59
+                button.sb-check-row.h-full top=9295 h=59
+              li top=9362 h=59
+                button.sb-check-row.h-full top=9362 h=59
+              li top=9428 h=59
+                button.sb-check-row.h-full top=9428 h=59
+              li top=9495 h=80
+                button.sb-check-row.h-full top=9495 h=80
+                  span.text-sm.leading-snug top=9527 h=42
+              li top=9583 h=59
+                button.sb-check-row.h-full top=9583 h=59
+              li top=9649 h=59
+                button.sb-check-row.h-full top=9649 h=59
+              li top=9716 h=80
+                button.sb-check-row.h-full top=9716 h=80
+                  span.text-sm.leading-snug top=9747 h=42
+              li top=9803 h=59
+                button.sb-check-row.h-full top=9803 h=59
+              li top=9870 h=59
+                button.sb-check-row.h-full top=9870 h=59
+              li top=9936 h=59
+                button.sb-check-row.h-full top=9936 h=59
+              li top=10003 h=59
+                button.sb-check-row.h-full top=10003 h=59
+              li top=10070 h=59
+                button.sb-check-row.h-full top=10070 h=59
+          p.sb-note-card.border-l-4 top=10148 h=138
+        section.sb-block.sb-area-wide top=10306 h=241
+          div.flex.items-end top=10318 h=80
+            div.flex.flex-col top=10318 h=71
+              h3.text-base.font-bold top=10318 h=48
+                span.ml-2.text-sm top=10321 h=44
+            button.sb-text-btn top=10341 h=48
+          ul.flex.flex-col top=10414 h=121
+            li[history-item].flex.items-center top=10414 h=121
+              button.flex.min-h-12 top=10422 h=105
+                span.flex.flex-1 top=10422 h=105
+                  span.sb-num.text-sm top=10464 h=63
+              button.sb-text-btn.!min-w-12 top=10451 h=48
+    section.sb-band.sb-band-white top=10559 h=204
+      div.sb-sec-head top=10584 h=62
+      details[coverage-details].sb-disc.sb-block top=10658 h=81
+        summary top=10670 h=57
+          span.sb-disc-text top=10670 h=57
+          span.sb-disc-hint top=10677 h=44
+        div.sb-disc-body top=10727 h=1378
+          p.max-w-2xl.text-sb-ink-2 top=10739 h=136
+          ul.grid.grid-cols-1 top=10885 h=1221
+            li.sb-block.flex top=10885 h=214
+              p.text-[1rem].font-bold top=10937 h=54
+              p.text-sm.leading-relaxed top=11000 h=84
+            li.sb-block.flex top=11112 h=145
+              p.text-sm.leading-relaxed top=11199 h=42
+            li.sb-block.flex top=11269 h=218
+              div.flex.flex-wrap top=11285 h=53
+              p.text-[1rem].font-bold top=11346 h=54
+              p.text-sm.leading-relaxed top=11408 h=63
+            li.sb-block.flex top=11499 h=187
+              p.text-sm.leading-relaxed top=11587 h=84
+                span.sb-num top=11588 h=81
+            li.sb-block.flex top=11699 h=187
+              p.text-sm.leading-relaxed top=11786 h=84
+                span.sb-num top=11808 h=60
+            li.sb-block.flex top=11898 h=208
+              p.text-sm.leading-relaxed top=11985 h=105
+                span.sb-num top=12007 h=81
+    section.sb-band.sb-band-beige top=10763 h=879
+      div.flex.flex-col top=10788 h=222
+        p.max-w-3xl.text-sm top=10821 h=189
+      footer.mt-6.flex top=11034 h=584
+        dl[site-provider].grid.grid-cols-[auto_1fr] top=11084 h=203
+        p[site-boundary].max-w-3xl.text-sm top=11296 h=126
+        p.max-w-3xl.leading-relaxed top=11430 h=189
+TOTAL 11643
+PROC-ROW top=2171 h=249
+PROC-H 249,228
+ITEM-H 117,117,117,117,117,142
+DUTY-H 130,103,103,156
+CARD-H 527,414,490,442,469,442
+EX-H 80,80,80,59,59,59,59,80,59,59,80,59,59,59,59,59
+  ✓    1 e2e/_probe-m.spec.ts:10:5 › probe 375 (2.2s)
+Q20INFO {"proc":"2171+270,2449+228","concl":"891+382","map":"1281+848","total":11760,"head":"0+473","input":"531+352"}
+Q20 scrollPx 1637
+  ✓    2 e2e/_probe-q20.spec.ts:5:5 › q20 probe (3.7s)
+  ✓    3 e2e/_probe-shot.spec.ts:11:5 › shots 375 (5.0s)
+  ✓    4 e2e/_probe-shot.spec.ts:20:5 › shots 1280 (2.8s)
+  ✓    5 e2e/map-layers.spec.ts:23:7 › 地図の規制レイヤー › タイルの読み込み中にチェックを切り替えても、地図に反映される (6.8s)
+  ✓    6 e2e/map-layers.spec.ts:43:7 › 地図の規制レイヤー › 判定で島根県に移ったら、DID も島根県のものに切り替わる (2.7s)
+  ✓    7 e2e/map-layers.spec.ts:53:7 › 飛行禁止法 対象施設レイヤーの塗り分け › 凡例に『敷地・区域』『周辺地域』『要確認帯』の文字ラベルが 3 つあり、未収録の施設が書かれている (1.8s)
+  ✓    8 e2e/map-layers.spec.ts:71:7 › 飛行禁止法 対象施設レイヤーの塗り分け › 地図には要確認帯（灰の点線）のレイヤーが赤・黄と別に載り、チェックで一括して切り替わる (2.5s)
+  ✓    9 e2e/reliability.spec.ts:12:5 › 地点切替 → 条件変更 → 履歴復元 → PDF 出力（空域フラグの持ち越し・無限ループなし） (14.8s)
+  ✓   10 e2e/sprint10.spec.ts:6:7 › Sprint 10: 利用者機能が無効のとき › 運航管理の画面と API はすべて 404 (115ms)
+  ✓   11 e2e/sprint10.spec.ts:24:7 › Sprint 10: 利用者機能が無効のとき › 判定画面に運航管理へのリンクがない (1.3s)
+  ✓   12 e2e/sprint10a.spec.ts:76:7 › A. トップ画面の文言 › 1. 初回の判定が終わった画面テキストに社内向け・特許の語が 1 つもない (1.2s)
+  ✓   13 e2e/sprint10a.spec.ts:82:7 › A. トップ画面の文言 › 2. 見出し領域に名前と目的があり、エンジンの版の表示がない (1.6s)
+  ✓   14 e2e/sprint10a.spec.ts:96:7 › A. トップ画面の文言 › 3. site-facts に提供元（旧「運営者」）と利用の範囲がある (1.3s)
+  ✓   15 e2e/sprint10a.spec.ts:104:7 › A. トップ画面の文言 › 4. 幅 375px・高さ 812px の初期表示で site-disclaimer がビューポート内にある (1.3s)
+  ✓   16 e2e/sprint10a.spec.ts:112:7 › A. トップ画面の文言 › 5. 画面のフッターに運営者の著作権表示がある (1.2s)
+  ✓   17 e2e/sprint10a.spec.ts:117:7 › A. トップ画面の文言 › 6. document.title と meta description (1.1s)
+  ✓   18 e2e/sprint10a.spec.ts:131:9 › B. 表示の崩れ › 7. 幅 375px で横スクロールが出ず、見出し・site-facts・site-disclaimer・フッターがビューポート内に収まる (1.7s)
+  ✓   19 e2e/sprint10a.spec.ts:131:9 › B. 表示の崩れ › 7. 幅 1280px で横スクロールが出ず、見出し・site-facts・site-disclaimer・フッターがビューポート内に収まる (2.0s)
+  ✓   20 e2e/sprint10a.spec.ts:158:7 › C. PDF › 8. 地点判定 PDF に運営者・免責・「判定の版」があり、特許・社内向けの語がない (4.0s)
+  ✓   21 e2e/sprint10a.spec.ts:174:7 › C. PDF › 9. 申請支援の束ね PDF は出ない（Sprint 18-1。運営者・免責・判定の版は 8 の地点判定 PDF が検査する） (1.8s)
+  ✓   22 e2e/sprint11.spec.ts:5:7 › Sprint 11: 利用者機能が無効のとき › 飛行記録・日常点検の画面と API はすべて 404 (65ms)
+  ✓   23 e2e/sprint11a.spec.ts:50:7 › A. 地点の例と初期表示 › 1. 判定の節の画面テキストと placeholder に「本社」「拠点」「日吉津」がない (1.2s)
+  ✓   24 e2e/sprint11a.spec.ts:63:7 › A. 地点の例と初期表示 › 2. 鳥取県の群の先頭が 米子市役所・美保基地の周辺・鳥取市の工業専用地域 の順で、既存の例も残る (1.7s)
+  ✓   25 e2e/sprint11a.spec.ts:80:7 › A. 地点の例と初期表示 › 3. 美保基地の周辺：飛行禁止法 red（1,000m）、DID green (2.5s)
+  ✓   26 e2e/sprint11a.spec.ts:88:7 › A. 地点の例と初期表示 › 4. 鳥取市の工業専用地域：DID green・「DID：非該当（工業専用地域）」・DID 自動判定も非該当（工業専用地域） (2.7s)
+  ✓   27 e2e/sprint11a.spec.ts:100:7 › A. 地点の例と初期表示 › 5. 開いた直後は米子市役所で、初回の判定は DID red・unknown なし・証跡 ID あり (1.9s)
+  ✓   28 e2e/sprint11a.spec.ts:115:7 › B. トップの意図 › 7. site-lead に対象と得られることがあり、地域名がない (1.4s)
+  ✓   29 e2e/sprint11a.spec.ts:130:7 › B. トップの意図 › 8. site-ops-note に運航管理・社内で試験運用があり、見出し領域に誇張の語がない (1.3s)
+  ✓   30 e2e/sprint11a.spec.ts:144:7 › C. 制度の最新化（申請支援は止めてある。Sprint 18-1） › 12. 物件の投下を選んでも、通達の注記・リンク・束ね PDF は出ない（申請支援が無効）。判定の手続きには物件の投下が出る (2.0s)
+  ✓   31 e2e/sprint11a.spec.ts:159:7 › C. 制度の最新化（申請支援は止めてある。Sprint 18-1） › 17. 緊急用務空域にチェックすると結論は「飛行不可」。提出期限の逆算は出ない（全体で）。地点判定の PDF は出る (4.1s)
+  ✓   32 e2e/sprint11a.spec.ts:185:7 › D. 過去の履歴は不変 › 21. 変更前の形式の履歴（II_A・申請支援の証跡 ID）は書き換えられずにそのまま出る (1.5s)
+  ✓   33 e2e/sprint11b.spec.ts:39:7 › A. 表示と配置 › 1. 幅 1280px で見出しの中に絵（装飾の SVG）が出て、右端がビューポート内で、高さは 320px 以下。本文の塊（site-*）と重ならない (1.9s)
+  ✓   34 e2e/sprint11b.spec.ts:71:7 › A. 表示と配置 › 2. 全幅（375・768・1023・1024・1280・1440px）で出る。スマホの高さは 232px 以下。375px で免責が初期表示に入り、横スクロールがなく、画像を要求しない (4.0s)
+  ✓   35 e2e/sprint11b.spec.ts:114:9 › A. 表示と配置 › 3. 幅 375px で初回の判定までに見出し内のレイアウトのずれが 0、LCP が絵・結論カードでない、画像の優先読み込みがない (2.6s)
+  ✓   36 e2e/sprint11b.spec.ts:114:9 › A. 表示と配置 › 3. 幅 1280px で初回の判定までに見出し内のレイアウトのずれが 0、LCP が絵・結論カードでない、画像の優先読み込みがない (2.6s)
+  ✓   37 e2e/sprint11b.spec.ts:167:7 › B. 装飾としての扱い › 4. 絵に aria-hidden。見出しに role=img・img がなく、`/` に h1 は 1 つ (1.3s)
+  ✓   38 e2e/sprint11b.spec.ts:176:7 › B. 装飾としての扱い › 5. 絵が文字を足さない（textContent が空、svg の text 要素がない）。svg は装飾（aria-hidden）だけ (1.2s)
+  ✓   39 e2e/sprint11b.spec.ts:224:9 › C. 色とダークモード › 6. light：見出しの文字が挿絵の空の上で 4.5:1 以上。挿絵の空の色は --sb-art-sky から来る (1.1s)
+  ✓   40 e2e/sprint11b.spec.ts:224:9 › C. 色とダークモード › 6. dark：見出しの文字が挿絵の空の上で 4.5:1 以上。挿絵の空の色は --sb-art-sky から来る (1.1s)
+  ✓   41 e2e/sprint11b.spec.ts:234:7 › C. 色とダークモード › 7. OS が暗でも挿絵の空は明るいまま（常に明るい表示。昼の景色が夜にならない） (1.2s)
+  ✓   42 e2e/sprint11c.spec.ts:91:7 › A. 飛行禁止法の同意と通報 › 3. 美保基地の周辺：同意だけ・通報だけでは飛行禁止法のカードが red のままで、例外が当たらない (3.5s)
+  ✓   43 e2e/sprint11c.spec.ts:112:7 › A. 飛行禁止法の同意と通報 › 4・11. 同意と通報の両方で例外が適用と表示され、PDF の取得済み許可に同意と通報が別の語で出る (5.6s)
+  ✓   44 e2e/sprint11c.spec.ts:132:7 › A. 飛行禁止法の同意と通報 › 5. 県条例（迷惑行為等防止条例）は同意だけで従来どおり例外が当たる (3.1s)
+  ✓   45 e2e/sprint11c.spec.ts:150:7 › A. 飛行禁止法の同意と通報 › 6. 判定の『同意＋事前通報』は同意・通報のチェックの有無にかかわらず美保基地の周辺で出る（診断パネルは出ない） (3.8s)
+  ✓   46 e2e/sprint11c.spec.ts:178:7 › B. DIPS の説明 › 7. 「国交省 DIPS」（DID 上空の許可）の説明に「空港」がなく「DID」を含む (1.8s)
+  ✓   47 e2e/sprint11c.spec.ts:190:7 › B. DIPS の説明 › 8. 米子鬼太郎空港：DIPS をチェックしても空港等周辺の状態は変わらず補足が出る。外すと補足は出ない (5.2s)
+  ✓   48 e2e/sprint11c.spec.ts:224:9 › C. 旧形式の判定履歴の復元（evaluator 差し戻し 1 回目） › Sprint 11b までの形式の履歴を復元しても飛行禁止法は red のままで例外が当たらず、/api/check に両方の値を送らない (4.1s)
+  ✓   49 e2e/sprint11c.spec.ts:224:9 › C. 旧形式の判定履歴の復元（evaluator 差し戻し 1 回目） › Sprint 6 形式の履歴を復元しても飛行禁止法は red のままで例外が当たらず、/api/check に両方の値を送らない (4.1s)
+  ✓   50 e2e/sprint11d.spec.ts:119:7 › A. 規則（契約 3） › 3. 空港の敷地内は全ての許可を入れても飛行不可。緊急用務空域も飛行不可 (6.8s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   51 e2e/sprint11d.spec.ts:143:7 › A. 規則（差し戻し 1 回目 F1） › 3. 空港の敷地内（出雲縁結び空港）は 50g・150m 以上・全ての許可でも飛行不可で、手続き不要にならない (9.1s)
+  ✓   52 e2e/sprint11d.spec.ts:171:7 › B. 地点と飛び方での結果 › 6. 米子市役所：許可なし → 要手続き（DID の許可と期限）。DID の DIPS 許可 → DID は手続き済み（条件付き） (2.5s)
+  ✓   53 e2e/sprint11d.spec.ts:202:7 › B. 地点と飛び方での結果 › 7. 空港等周辺（該当の可能性）：DIPS の全種類を入れても要手続きのまま、個別許可と調整の理由、空港等周辺の飛行許可が手続きに出る (6.8s)
+  ✓   54 e2e/sprint11d.spec.ts:222:7 › B. 地点と飛び方での結果 › 8・10. 美保基地の周辺：同意だけ → 要手続き、同意＋通報 → 飛行禁止法は手続き済み。通報の期限は飛行予定日の 2 日前。判定不能の件数が結論に出る (5.8s)
+  ✓   55 e2e/sprint11d.spec.ts:248:7 › B. 地点と飛び方での結果 › 9. どの規制にも当たらない地点：手続き不要（機体登録は前提）→ 夜間で要手続き → 夜間の承認で手続き済み。特定飛行で飛行計画の通報と飛行日誌 (5.2s)
+  ✓   56 e2e/sprint11d.spec.ts:275:7 › B. 地点と飛び方での結果 › 11. 手続きの並び：法的な重さ（国の法律 → 条例）、同じ重さでは期限の早い順（期限のないものは最後） (7.0s)
+  ✓   57 e2e/sprint11d.spec.ts:325:7 › C. 表示・PDF・履歴 › 12・13. 画面と地点判定の PDF：禁止語が出ず、結論・手続きと期限・手続き済みの元の判定と許可と条件が同じ言葉で出る (5.1s)
+  ✓   58 e2e/sprint11d.spec.ts:355:7 › C. 表示・PDF・履歴 › 14. 旧形式の履歴（verdict なし・0.3.0）が旧版の判定と分かる表示になり、旧値 mlit は DID 上空の許可として復元される (2.3s)
+  ✓   59 e2e/sprint11d.spec.ts:414:7 › C. 表示・PDF・履歴 › 14b. 区域外の地点で夜間を選ぶと、履歴の項目も要手続きになり、外すと手続き不要に戻る (5.0s)
+  ✓   60 e2e/sprint11d.spec.ts:429:7 › C. 表示・PDF・履歴 › 13b. 飛行の方法・飛行予定日だけを変えた後の PDF に、その診断の証跡 ID が出て、ファイル名も変わる (8.7s)
+  ✓   61 e2e/sprint11d.spec.ts:490:7 › C. 表示・PDF・履歴 › 15. C1：区域外で夜間を選んだ後に診断が失敗すると、結論・履歴・PDF のどれにも手続き不要が出ず、再試行で戻る (5.0s)
+  ✓   62 e2e/sprint11d.spec.ts:512:7 › C. 表示・PDF・履歴 › 15. C2：夜間を選んだまま新しい地点で判定し、診断が失敗しても、地点だけの判定で手続き不要と出さない (4.1s)
+  ✓   63 e2e/sprint11d.spec.ts:536:7 › C. 表示・PDF・履歴 › 16. F3：/api/check が失敗して地点を移すと、古い証跡 ID とカードを出さず、PDF を出さず、再試行で回復する (4.7s)
+  ✓   64 e2e/sprint11d.spec.ts:572:7 › C. 表示・PDF・履歴 › 17. 結論が未確定の間、カードに地点だけの判定の札を出さない (4.7s)
+  ✓   65 e2e/sprint11d.spec.ts:588:7 › C. 表示・PDF・履歴 › 18. 診断が応答しないと、上限の時間で「判定できません」になり、履歴は判定未確定 (25.3s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   66 e2e/sprint11e.spec.ts:130:7 › Sprint 11e：100g 未満の機体（模型航空機） › 12. 出雲縁結び空港の周辺で 50g：要手続き、第134条の3 の許可・出す先・事前に・参照先。PDF も同じ言葉と URL (6.8s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   67 e2e/sprint11e.spec.ts:155:7 › Sprint 11e：100g 未満の機体（模型航空機） › 13. 米子市役所で 50g＋150m 以上：要手続き、通報と 150m／250m の注記、DID は対象外（模型航空機）、申請支援のカテゴリー・束ね PDF・マニュアル骨子は出ない (3.9s)
+  ✓   68 e2e/sprint11e.spec.ts:180:7 › Sprint 11e：100g 未満の機体（模型航空機） › 14. 重さの欄に 50 を入れると、模型航空機の補足と中立の札が出る（緩和を示す表示はない） (3.9s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   69 e2e/sprint11f.spec.ts:130:7 › Sprint 11f › 3・4. 米子市役所：50g は DID を対象外（模型航空機）と出し、900g は該当のまま (5.5s)
+  ✓   70 e2e/sprint11f.spec.ts:169:7 › Sprint 11f › 6. 区域外で手続き不要の後、診断の応答が遅れる間、履歴は判定中で手続き不要も前の入力の表示も出ない (8.6s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   71 e2e/sprint11f.spec.ts:200:7 › Sprint 11f › 10. 出雲縁結び空港の周辺で 50g：参照先に航空法と航空法施行規則が別々に出る。PDF に両方の URL (7.0s)
+  ✓   72 e2e/sprint11f.spec.ts:220:7 › Sprint 11f › 11・13. 境港市の地点：未収録の史跡の題名に米子市の名前が出ず、判定不能の件数が結論の横に出る (4.4s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   73 e2e/sprint11f.spec.ts:238:7 › Sprint 11f › カード：50g の米子市役所は DID の行を模型航空機のため対象外と出し、許可・承認なく飛行できませんを出さない。900g は従来どおり (4.7s)
+  ✓   74 e2e/sprint11f.spec.ts:257:7 › Sprint 11f › 診断が失敗した後の履歴は判定未確定で、前の診断のカテゴリー・DID・手続きの件数・診断の証跡 ID を出さない。回復すると戻る (5.2s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   75 e2e/sprint11g.spec.ts:134:7 › Sprint 11g：許可または通報 › 14. 出雲縁結び空港の周辺で 50g：許可または通報、内側＝許可・外側＝通報、参照先 9 件（読み上げの名前が異なる）。PDF に同じ手続き名・理由と 9 件の URL (7.5s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   76 e2e/sprint11g.spec.ts:163:7 › Sprint 11g：許可または通報 › 15. 米子市役所で 50g＋150m 以上：許可または通報（高い空域）、確認の義務項目、申請支援の注記・束ね PDF・飛行マニュアル骨子は出ない (4.9s)
+  ✓   77 e2e/sprint11g.spec.ts:192:7 › Sprint 11g：許可または通報 › 16. 出雲縁結び空港の敷地内で 50g：飛行不可。新しい note（画面と PDF）。「航空法に基づき」が出ない (6.3s)
+  ✓   78 e2e/sprint12a.spec.ts:16:7 › Sprint 12a 契約 18：運航管理が無効のとき › `/` に運航管理のリンクも「この判定で飛行計画を作る」もなく、追加の要求もコンソールのエラーもない (1.6s)
+  ✓   79 e2e/sprint12a.spec.ts:49:7 › Sprint 12a 契約 18：運航管理が無効のとき › `/ops/plans` と `/api/ops/plans` は 404（画面・API とも） (168ms)
+  ✓   80 e2e/sprint12a.spec.ts:61:7 › Sprint 12a 契約 18：運航管理が無効のとき › pnpm build の出力で `/` は静的シェル（部分的な事前描画）のまま (2ms)
+  ✓   81 e2e/sprint12b.spec.ts:15:7 › Sprint 12b：運航管理が無効のとき › 通報の画面と API は 404（画面・API とも）。通報の要求は DIPS にも他にも出ない (173ms)
+  ✓   82 e2e/sprint12b.spec.ts:43:7 › Sprint 12b：運航管理が無効のとき › `/` は 12a のまま：運航管理のリンクも通報に関する表示もなく、通報・DIPS への追加の要求も出ない (1.2s)
+  ✓   83 e2e/sprint12c.spec.ts:15:7 › Sprint 12c：運航管理が無効のとき › `/ops/journal`・`/ops/more`・`/ops/plans/[id]/field` と `/api/ops/today`・現場の API は 404 (197ms)
+  ✓   84 e2e/sprint12c.spec.ts:26:7 › Sprint 12c：運航管理が無効のとき › `/` に下メニューも「今日」の帯もなく、追加の要求もコンソールのエラーもない (1.3s)
+  ✓   85 e2e/sprint12c.spec.ts:53:7 › 色の比の補助関数（WCAG 2.x の式） › 白と黒は 21:1、同じ色は 1:1、既知の組み合わせの値が合う (3ms)
+  ✓   86 e2e/sprint12d.spec.ts:13:7 › Sprint 12d：運航管理が無効のとき › `/ops/permits*` の画面は 404 (188ms)
+  ✓   87 e2e/sprint12d.spec.ts:20:7 › Sprint 12d：運航管理が無効のとき › `/api/ops/permits*` と `/api/ops/plans/[id]/permits` は 404（読み取りも書き込みも） (41ms)
+  ✓   88 e2e/sprint12d.spec.ts:31:7 › Sprint 12d：運航管理が無効のとき › `/` は変わらない：DIPS の許可を持っている／いないで入力でき、範囲を照合していない旨の注記が出る。運航管理への通信はない (2.5s)
+  ✓   89 e2e/sprint12e.spec.ts:10:7 › Sprint 12e：運航管理が無効のとき › `/ops/incidents*` と現場の簡易記録の画面は 404 (329ms)
+  ✓   90 e2e/sprint12e.spec.ts:17:7 › Sprint 12e：運航管理が無効のとき › `/api/ops/incidents*` と `/api/ops/plans/[id]/incidents`・`/api/ops/flights/[id]/incidents` は 404（読み取りも書き込みも） (49ms)
+  ✓   91 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (3.8s)
+  ✓   92 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (3.5s)
+  ✓   93 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › light：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (2.0s)
+  ✓   94 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › dark：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (2.1s)
+  ✓   95 e2e/sprint12h-pr2.spec.ts:196:7 › Q-9 判定の 5 段（形と語。橙は使わない） › グレースケール（彩度 0）にしても、結論の語と形が読める（形と語が色に頼らない） (2.2s)
+  ✓   96 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・light (3.2s)
+  ✓   97 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・dark (3.1s)
+  ✓   98 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・light (2.8s)
+  ✓   99 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・dark (2.8s)
+  ✓  100 e2e/sprint12h-pr2.spec.ts:359:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える (2.3s)
+  ✓  101 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.5s)
+  ✓  102 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.5s)
+  ✓  103 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.9s)
+  ✓  104 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.3s)
+  ✓  105 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.3s)
+  ✓  106 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.5s)
+  ✓  107 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.6s)
+  ✓  108 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.4s)
+  ✓  109 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.7s)
+  ✓  110 e2e/sprint12h-pr2.spec.ts:464:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 動きを減らす設定と現場モードでは、結論へ瞬間に移る（滑らかなスクロールにしない） (4.4s)
+  ✓  111 e2e/sprint12h-pr2.spec.ts:490:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 判定の応答を待つ間に利用者がスクロールしたら、結論が出たあとに引き戻さない (7.8s)
+  ✓  112 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.2s)
+  ✓  113 e2e/sprint12h-pr2.spec.ts:541:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 通常は滑らかに移る（smooth）。初回の自動判定では動かさない (2.4s)
+  ✓  114 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 320px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.3s)
+  ✓  115 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 320px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓  116 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 360px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓  117 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 360px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓  118 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 375px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.7s)
+  ✓  119 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 375px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.5s)
+  ✓  120 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 768px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓  121 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 768px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.0s)
+  ✓  122 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1024px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓  123 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1024px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.0s)
+  ✓  124 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1280px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.6s)
+  ✓  125 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1280px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.4s)
+  ✓  126 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1440px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.5s)
+  ✓  127 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1440px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.4s)
+  ✓  128 e2e/sprint12h-pr2.spec.ts:618:7 › Q-21 地図の層（追加） › (a) 画面幅を 1023↔1024px に切り替えた直後（地図のサイズ変更中）に層を切り替えても、地図に反映される (6.0s)
+  ✓  129 e2e/sprint12h-pr2.spec.ts:635:7 › Q-21 地図の層（追加） › (b) 7 層を 1 つずつ off／on し、data-hidden-layers と MapLibre から読み戻した実際の visibility が一致する (13.1s)
+  ✓  130 e2e/sprint12h-pr2.spec.ts:670:7 › Q-21 地図の層（追加） › (c) 判定で島根県に移ると DID が島根県のものに替わり（data-did-pref）、スマホ幅・PC 幅のどちらでも同じ (6.4s)
+  ✓  131 e2e/sprint12h-pr2.spec.ts:686:7 › Q-22 キーボードとランドマーク › 最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 結論 → 地図 で、DOM の順と同じ (2.0s)
+  ✓  132 e2e/sprint12h-pr2.spec.ts:729:7 › Q-22 キーボードとランドマーク › フォーカスの輪が見える（3px の輪・要素から離す。--sb-focus）。入力欄・ボタン・チェック・リンクのどれでも消えない (2.0s)
+  ✓  133 e2e/sprint12h-pr2.spec.ts:757:7 › Q-22 キーボードとランドマーク › 地図のドラッグ以外の操作はキーボードでできる：層の切り替え（Space）、現在地ボタン（Enter）、地点の例（Enter）、住所の入力（Enter で検索） (3.3s)
+  ✓  134 e2e/sprint12h-pr2.spec.ts:782:7 › Q-24 根拠欄（既存の出典・確認日・版・改正・確からしさを整えて見せる） › 規制カードごとに、使用データ（名前・基準年・確認日・版）・反映済みの改正・出典・確からしさ・条文確認日が出る。出さないもの（判例・確認の状態の 3 段階）を出していない (2.4s)
+  ✓  135 e2e/sprint12h-pr2.spec.ts:824:7 › Q-26 動き › せり上がりは結論カードだけ（0.6s・1 回）。h1・site-lead・入力・地図は動かない (1.5s)
+  ✓  136 e2e/sprint12h-pr2.spec.ts:847:7 › Q-26 動き › reducedMotion: reduce で、せり上がり・ボタンの動きの時間が 0 (1.6s)
+  ✓  137 e2e/sprint12h-pr2.spec.ts:865:7 › Q-26 動き › 通常：ボタンの背景は標準の動き 0.18s、押下の縮みは 0.12s（16-C。矢印の入れ替えは外した） (1.2s)
+[画面] Q-20 375x812 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 375x812 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 375x812 3-detail: スクロール 2 枚分・押す回数 0
+[画面] Q-20 375x812 4-layer: スクロール 1.1 枚分・押す回数 1
+  ✓  138 e2e/sprint12h-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 (13.2s)
+[画面] Q-20 1280x800 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 1280x800 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 1280x800 3-detail: スクロール 1 枚分・押す回数 0
+[画面] Q-20 1280x800 4-layer: スクロール 0.4 枚分・押す回数 1
+  ✓  139 e2e/sprint12h-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 (13.6s)
+[長さ] / 375x812 ページ全体: 11643px
+  ✓  140 e2e/sprint12h-pr2.spec.ts:953:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている (1.6s)
+  ✓  141 e2e/sprint12h-pr2.spec.ts:974:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 畳んだままでも見える要約：規制カードの名称・段・判定・この地点の理由・出典・確認日・確からしさ。結論の札（確認日・出典つき）と免責 (1.7s)
+  ✓  142 e2e/sprint12h-pr2.spec.ts:993:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる (1.8s)
+  ✓  143 e2e/sprint12h-pr2.spec.ts:1024:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 収録の一覧は閉じていて、開くと一覧が出る (1.7s)
+  ✓  144 e2e/sprint12h-pr2.spec.ts:1035:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 「申請の準備」は無い：必要手続きのチェックリスト・提出期限・束ね PDF が出ない（Sprint 18-1） (2.0s)
+  ✓  145 e2e/sprint12h-pr2.spec.ts:1049:7 › N1 結論の札と責任の注記 › 結論に「確認日」「出典つき」の札と境界の注記（BOUNDARY_SHORT）。代行・代理申請の語がない (1.6s)
+  ✓  146 e2e/sprint12h-pr2.spec.ts:1064:7 › N1 結論の札と責任の注記 › 「手続き済み」の記録の注記は、結論が「手続き済み」のときだけ付く (2.0s)
+  ✓  147 e2e/sprint12h-pr2.spec.ts:1086:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.6s)
+  ✓  148 e2e/sprint12h-pr2.spec.ts:1086:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.5s)
+  ✓  149 e2e/sprint12h-pr2.spec.ts:1096:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 375×812 (1.4s)
+  ✓  150 e2e/sprint12h-pr2.spec.ts:1096:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 390×700 (1.4s)
+  ✓  151 e2e/sprint12h-pr2.spec.ts:1096:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 360×740 (1.4s)
+  ✓  152 e2e/sprint12h-pr2.spec.ts:1096:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 393×727 (1.5s)
+  ✓  153 e2e/sprint12h-pr2.spec.ts:1108:7 › N4 結論より下の箱も v2 の丸み › 手続きの票・規制ごとの判定・飛行の前後の点検・規制カードの角が丸い（12px 以上） (1.5s)
+  ✓  154 e2e/sprint12h-pr2.spec.ts:1130:9 › N5 PC の最初の画面に 2 つのピル › 1280×800：「この地点を判定する」「現在地で判定」が最初の画面に入る (1.9s)
+  ✓  155 e2e/sprint12h-pr2.spec.ts:1130:9 › N5 PC の最初の画面に 2 つのピル › 1440×900：「この地点を判定する」「現在地で判定」が最初の画面に入る (2.0s)
+  ✓  156 e2e/sprint15.spec.ts:7:5 › A-2：運航管理が無効なら /ops・/ops/sw.js・/ops/manifest.webmanifest・圏外用の枠は 404。/ に Service Worker を登録しない (1.9s)
+  ✓  157 e2e/sprint16-a.spec.ts:21:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /（公開の判定画面）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (3.9s)
+  ✓  158 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /（公開の判定画面）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (4.1s)
+  ✓  159 e2e/sprint16-a.spec.ts:21:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（通常）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (778ms)
+  ✓  160 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（通常）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (747ms)
+  ✓  161 e2e/sprint16-a.spec.ts:21:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（現場）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (789ms)
+  ✓  162 e2e/sprint16-a.spec.ts:28:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（現場）：文字は 7:1 以上（無効の部品を除く）。横スクロールなし (833ms)
+  ✓  163 e2e/sprint16-a.spec.ts:41:7 › 16-A 公開側：K-3・K-13・K-14 › K-14. OS が暗でも、`/` と見本は明で描かれる（地 #F6F7F9・文字 #14181F）。強制の暗は見本の ?theme=dark だけ (1.5s)
+  ✓  164 e2e/sprint16-a.spec.ts:53:7 › 16-A 公開側：K-3・K-13・K-14 › 休眠の暗（見本の ?theme=dark）：文字は 4.5:1 以上で、色は暗のトークンの集合に入る (759ms)
+  ✓  165 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓  166 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓  167 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (3.9s)
+  ✓  168 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.3s)
+  ✓  169 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (936ms)
+  ✓  170 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (805ms)
+  ✓  171 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (778ms)
+  ✓  172 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (953ms)
+  ✓  173 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (766ms)
+  ✓  174 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (589ms)
+  ✓  175 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (883ms)
+  ✓  176 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (886ms)
+  ✓  177 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (826ms)
+  ✓  178 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (798ms)
+  ✓  179 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (748ms)
+  ✓  180 e2e/sprint16-b.spec.ts:81:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (7.5s)
+  ✓  181 e2e/sprint16-b.spec.ts:86:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.4s)
+  ✓  182 e2e/sprint16-b.spec.ts:109:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (4.1s)
+  ✓  183 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (958ms)
+  ✓  184 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✓  185 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.2s)
+  ✘  186 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  1) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（判定の結果を出した状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✘  187 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.5s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  2) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（判定の結果を出した状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✘  188 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.8s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  3) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（判定の結果を出した状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✘  189 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.7s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  4) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（details を開いた状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✘  190 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.9s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  5) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（details を開いた状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✘  191 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.8s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい,line=247,col=106::  6) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    Error: /（details を開いた状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 3%0A%0A    - Array []%0A    + Array [%0A    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",%0A    + ]%0A%0A       at field-checks.ts:247%0A%0A      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);%0A      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);%0A    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);%0A          |                                                                                                          ^%0A      248 | };%0A      249 |%0A      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+  ✓  192 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (985ms)
+  ✓  193 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (718ms)
+  ✓  194 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (789ms)
+  ✓  195 e2e/sprint16-b.spec.ts:172:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 印のない 14px の p は失敗する。16px・1.7 の p は通る (186ms)
+  ✓  196 e2e/sprint16-b.spec.ts:179:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する (206ms)
+  ✓  197 e2e/sprint16-b.spec.ts:186:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す (229ms)
+  ✓  198 e2e/sprint16-b.spec.ts:192:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す (240ms)
+  ✓  199 e2e/sprint16-b.spec.ts:201:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く (197ms)
+  ✓  200 e2e/sprint16-b.spec.ts:207:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 大きな文字（本文の基準より 2px 以上大きい）は行の高さ 1.25 以上で通る。本文の大きさは 1.7 のまま (370ms)
+  ✓  201 e2e/sprint16-b.spec.ts:224:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ (215ms)
+  ✓  202 e2e/sprint16-c.spec.ts:35:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 通常：主・副・文字・危険・無効の計算されたスタイル（cat-） (706ms)
+  ✓  203 e2e/sprint16-c.spec.ts:73:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 無効の理由：ボタンの下に 1 行（cat-disabled-reason）。aria-describedby で結ぶ。補足の文字 14px 以上 (746ms)
+  ✓  204 e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-primary） (1.2s)
+  ✓  205 e2e/sprint16-c.spec.ts:104:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 現場：主ボタン 64px 以上・濃い主色。副・文字・危険・無効は 56px 以上（cat-） (699ms)
+  ✓  206 e2e/sprint16-c.spec.ts:35:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 通常：主・副・文字・危険・無効の計算されたスタイル（cat-opx-） (702ms)
+  ✓  207 e2e/sprint16-c.spec.ts:73:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 無効の理由：ボタンの下に 1 行（cat-opx-disabled-reason）。aria-describedby で結ぶ。補足の文字 14px 以上 (777ms)
+  ✓  208 e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） (1.1s)
+  ✓  209 e2e/sprint16-c.spec.ts:104:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 現場：主ボタン 64px 以上・濃い主色。副・文字・危険・無効は 56px 以上（cat-opx-） (831ms)
+  ✓  210 e2e/sprint16-c.spec.ts:115:7 › C-2 `/` と `/ops` の主ボタンは同じ計算スタイル（見本の上で比べる。実画面の比較は sprint16-c-db） › 面・文字・高さ・角丸・太さ・縁が一致する。丸と矢印の疑似要素・子要素がない (818ms)
+  ✓  211 e2e/sprint16-c.spec.ts:131:7 › C-3 カード 3 種 › 通常：白い面・角丸 16・1px の罫（inset）・内側 16。影なし (777ms)
+  ✓  212 e2e/sprint16-c.spec.ts:143:7 › C-3 カード 3 種 › 一覧：最小の高さ 72・カード全体がリンク・中は見出し→主情報→補足の 3 段まで (893ms)
+  ✓  213 e2e/sprint16-c.spec.ts:162:7 › C-3 カード 3 種 › 判定・状態：状態の面＋左端 6px の状態の印の色の帯。帯は角丸に沿って切る (734ms)
+  ✓  214 e2e/sprint16-c.spec.ts:189:9 › C-4 状態ラベル（K-7：記号＋文字） › 待機中（info）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px (684ms)
+  ✓  215 e2e/sprint16-c.spec.ts:189:9 › C-4 状態ラベル（K-7：記号＋文字） › 飛行中（flying）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px (624ms)
+  ✓  216 e2e/sprint16-c.spec.ts:189:9 › C-4 状態ラベル（K-7：記号＋文字） › 飛行済（safe）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px (791ms)
+  ✓  217 e2e/sprint16-c.spec.ts:189:9 › C-4 状態ラベル（K-7：記号＋文字） › 期限が近い（warn）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px (709ms)
+  ✓  218 e2e/sprint16-c.spec.ts:189:9 › C-4 状態ラベル（K-7：記号＋文字） › 中止（danger）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 12px の形（aria-hidden。G-1 の反映）と文字。形と文字の縦の中心が ±1px (627ms)
+  ✓  219 e2e/sprint16-c.spec.ts:224:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） (844ms)
+  ✓  220 e2e/sprint16-c.spec.ts:239:7 › C-4 状態ラベル（K-7：記号＋文字） › G-1 の反映：状態ごとに先頭の形が違う（5 つの SVG の中身が全部違う）。色なしでも形で区別できる (602ms)
+  ✓  221 e2e/sprint16-c.spec.ts:245:7 › C-4 状態ラベル（K-7：記号＋文字） › 色なし（グレースケール）でも 4 つは文字で区別できる：各ラベルは空でない文字を持ち、4 つとも文字が違う (790ms)
+  ✓  222 e2e/sprint16-c.spec.ts:255:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ › `/`（初期の状態）：見えている data-variant="primary" は 1 つ（375・390・1280） (2.7s)
+  ✓  223 e2e/sprint16-c.spec.ts:268:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ › `/`：文字 200% でも主ボタンに届き、横スクロール・文字の切れがない（未ログイン） (8.2s)
+  ✓  224 e2e/sprint16-d.spec.ts:30:7 › D-1 入力欄 › 通常：高さ 52 以上・角丸 12・面 sunken・縁 edge の 1px・ラベルは入力欄の上に見える (645ms)
+  ✓  225 e2e/sprint16-d.spec.ts:45:7 › D-1 入力欄 › フォーカス：主色の輪が 1 本（3px。D-1 の「2px 以上」を満たす）。枠・内側の影を足さない（輪が二重に見えない）。エラー中もエラーが分かる (2.4s)
+  ✓  226 e2e/sprint16-d.spec.ts:81:7 › D-1 入力欄 › ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない (937ms)
+  ✓  227 e2e/sprint16-d.spec.ts:91:7 › D-1 入力欄 › エラー：縁が危険の印の色。下に記号（SVG）付きの 1 行。aria-describedby で結ぶ。role は alert にしない。入力すると消える (966ms)
+  ✓  228 e2e/sprint16-d.spec.ts:121:7 › D-1 入力欄 › 現場：高さ 56 以上 (796ms)
+  ✓  229 e2e/sprint16-d.spec.ts:130:7 › D-2 チェック行 › 行の高さ 72 以上・32 の丸いチェック・行全体が <label>・クリックで切り替わる。群の見出しに完了数/総数 (907ms)
+  ✓  230 e2e/sprint16-d.spec.ts:158:7 › D-2 チェック行 › K-7 チェック済みは記号（塗りの丸）と文字「済」。未チェックには「済」が出ない (820ms)
+  ✓  231 e2e/sprint16-d.spec.ts:184:7 › D-2 チェック行 › 群：折りたためる（summary を Enter で開閉）。畳んでも完了数/総数は見出しに残る (779ms)
+  ✓  232 e2e/sprint16-d.spec.ts:201:7 › D-2 チェック行 › 現場：行は 72 以上のまま・済みの色は濃い主色 (747ms)
+  ✓  233 e2e/sprint16-d.spec.ts:218:7 › D-3 ボトムシート › キーボードだけで：開く→見出しにフォーカス→段を変える→閉じる→元にフォーカスが戻る。3 段の高さ・暗幕・角丸・つまみ (2.3s)
+  ✓  234 e2e/sprint16-d.spec.ts:284:7 › D-3 ボトムシート › 「閉じる」ボタンと暗幕のクリックでも閉じ、そのつど元にフォーカスが戻る。ピークは暗幕なしで地の画面を操作できる (1.6s)
+  ✓  235 e2e/sprint16-d.spec.ts:312:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） (2.4s)
+  ✓  236 e2e/sprint16-d.spec.ts:339:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない（暗幕の下の主ボタンは対象外） (1.6s)
+  ✓  237 e2e/sprint16-d.spec.ts:357:7 › D-4 スケルトン › カードの形の静止した帯（sunken）。帯は aria-hidden・親に aria-busy と「読み込み中」。動きなし (601ms)
+  ✓  238 e2e/sprint16-d.spec.ts:382:7 › D-4 スケルトン › K-6：見本の中に、animation-iteration-count が infinite の要素・動いているアニメーションがない (717ms)
+  ✓  239 e2e/sprint16-d.spec.ts:391:7 › D-5 空の状態と通信エラー › 空の状態：アイコン（装飾）・一文・主ボタン 1 つだけ (826ms)
+  ✓  240 e2e/sprint16-d.spec.ts:406:7 › D-5 空の状態と通信エラー › 通信エラー：該当のカードの中に一文と「再読み込み」。画面全体を止めない（ほかの部品は操作できる）。role は付けない (885ms)
+  ✓  241 e2e/sprint16-d.spec.ts:424:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本の操作（入力・チェック・シート・再読み込み）の前後で、端末のストレージの鍵が増えない (2.9s)
+  ✓  242 e2e/sprint16-d.spec.ts:439:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本全体：文字 200%（390・430）で、横スクロール・文字の切れ・入れ物の切れがない (1.4s)
+  ✓  243 e2e/sprint16-d.spec.ts:444:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 入れ物の切れの検査が働く：子だけを持つ入れ物（直接の文字なし）が横に切れていると失敗し、除外の要素なら通る (1.4s)
+  ✓  244 e2e/sprint16-d.spec.ts:470:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（375px。畳んだ項目を開いた状態） (5.3s)
+  ✓  245 e2e/sprint16-d.spec.ts:470:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（390px。畳んだ項目を開いた状態） (5.5s)
+  ✓  246 e2e/sprint16-d.spec.ts:470:9 › D-1 実画面（公開の `/`） › 全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12（1280px。畳んだ項目を開いた状態） (5.6s)
+  ✓  247 e2e/sprint16-design.spec.ts:33:7 › A. 見本の表示と 404（R-5） › 1. フラグ無効のサーバーでは 404。配下の別のパスも 404 (245ms)
+  ✓  248 e2e/sprint16-design.spec.ts:41:7 › A. 見本の表示と 404（R-5） › 2. 有効のサーバーでは 200・noindex。見出しは 1 つ。外部通信・API 呼び出しがない。運航管理の枠が付かない。旧い見本の部品が無い (1.3s)
+  ✓  249 e2e/sprint16-design.spec.ts:66:7 › A. 見本の表示と 404（R-5） › 3. 判定の 5 段が形と言葉を持つ（色だけで区別しない） (722ms)
+  ✓  250 e2e/sprint16-design.spec.ts:79:9 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 4. 幅 375px：見本のページの地は #F6F7F9、面は白、くぼみは一段濃いグレー。横スクロールなし。影なし (755ms)
+  ✓  251 e2e/sprint16-design.spec.ts:79:9 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 4. 幅 1280px：見本のページの地は #F6F7F9、面は白、くぼみは一段濃いグレー。横スクロールなし。影なし (749ms)
+  ✓  252 e2e/sprint16-design.spec.ts:101:7 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 5. `/`：ページの地は #F6F7F9（帯の交互のベージュ・オフホワイトが無い）。見出しの背後の大きな数字が無い。ブロックは罫（内側の 1px の輪）で分け、外へ広がる影が無い (1.0s)
+  ✓  253 e2e/sprint16-design.spec.ts:121:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 6. 見本（通常）：主ボタンは主色の面＋白の文字。面と地の比は 3 以上。橙系の文字・面が無い (644ms)
+  ✓  254 e2e/sprint16-design.spec.ts:161:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 7. 見本（現場）：主ボタン 64px 以上・縁 1.5px・影なし・動き 0。面は現場の濃い主色 (754ms)
+  ✓  255 e2e/sprint16-design.spec.ts:177:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 7b. 見本（現場）：判定の札は状態の語 20px 以上・56px 以上、本文 18px、押す部品 56px 以上 (691ms)
+  ✓  256 e2e/sprint16-design.spec.ts:190:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 8. `/` の主ボタン（.sb-pill-primary）も主色の面＋白の文字で、面と地の比が 3 以上 (1.5s)
+  ✓  257 e2e/sprint16-design.spec.ts:205:7 › D. 常に明るい表示（D-1・D-2） › 9. OS が暗でも `/` と見本は明で描かれる（body が #F6F7F9、color-scheme が light） (1.6s)
+  ✓  258 e2e/sprint16-design.spec.ts:218:7 › D. 常に明るい表示（D-1・D-2） › 10. 強制の暗（?theme=dark）は見本だけで効く（休眠の値の確認）。見本を離れて `/` を開くと付かない (1.7s)
+  ✓  259 e2e/sprint16-design.spec.ts:228:7 › D. 常に明るい表示（D-1・D-2） › 11. 日差しの模擬（?veil=1）：白い膜が画面を覆い、押す操作を妨げない（pointer-events: none） (1.1s)
+  ✓  260 e2e/sprint16-design.spec.ts:246:9 › E. `/` の挿絵（Q2：線画） › 12. スマホ：挿絵に塗りの色（ティール・水色・グラデーション）が無い。塗りは墨と、白（背後の線を隠すだけ）だけ。橙は無い。高さは変えない (1.2s)
+  ✓  261 e2e/sprint16-design.spec.ts:246:9 › E. `/` の挿絵（Q2：線画） › 12. PC：挿絵に塗りの色（ティール・水色・グラデーション）が無い。塗りは墨と、白（背後の線を隠すだけ）だけ。橙は無い。高さは変えない (1.2s)
+  ✓  262 e2e/sprint16-design.spec.ts:273:7 › N. 16-E の新しい節 › N-1. 契約の節がそろい、契約の順に並ぶ（E-1）。節ごとに見出し h2 がある (902ms)
+  ✓  263 e2e/sprint16-design.spec.ts:288:7 › N. 16-E の新しい節 › N-2. 状態 5 種＋未確認：記号（SVG）と空でない文字を持ち、面の色が互いに違う（色だけに頼らない） (572ms)
+  ✓  264 e2e/sprint16-design.spec.ts:302:7 › N. 16-E の新しい節 › N-3. 文字の段：題 24px・節 18px・カード 16px/600・本文 16px・補足 14px・数値 28px（桁をそろえる）。通常は rem で拡大する (727ms)
+  ✓  265 e2e/sprint16-design.spec.ts:317:7 › N. 16-E の新しい節 › N-4. 主色の節：面・押下・薄い面・輪の 4 つ。面は主色、薄い面は --sb-primary-soft、輪は 3px (754ms)
+  ✓  266 e2e/sprint16-design.spec.ts:331:7 › N. 16-E の新しい節 › N-5. 並べ見本（G-1 の決定）：ロゴ・点の形・矢印・段の順は「採用」と「不採用（記録）」が 1 つずつ。ロゴの丸は墨が採用、実画面も墨 (1.9s)
+  ✓  267 e2e/sprint16-design.spec.ts:345:7 › N. 16-E の新しい節 › N-6. 点の形：不採用（記録）は 4 状態とも同じ丸（8px）、採用は状態ごとに形が違う（SVG の中身が全部違う・12px）。どちらも文字を持つ (664ms)
+  ✓  268 e2e/sprint16-design.spec.ts:357:7 › N. 16-E の新しい節 › N-7. 一覧のカードの矢印：なし（不採用）とあり（採用）はどちらも全体が押せて高さ 72 以上。ありは矢印が装飾（aria-hidden） (769ms)
+  ✓  269 e2e/sprint16-design.spec.ts:369:7 › N. 16-E の新しい節 › N-8b. 計画作成の段の順：480px 未満は 1 列に積み、段の名前が語の途中で折れない（390・430） (1.3s)
+  ✓  270 e2e/sprint16-design.spec.ts:391:7 › N. 16-E の新しい節 › N-8. 計画作成の段の順：この計画の順は 6 段（場所→日時→飛行の方法と目的→操縦者・機体・許可→内容の確認→判定と通報の準備）。方針書の順と並べ、進捗の帯は progressbar (775ms)
+  ✓  271 e2e/sprint16-design.spec.ts:403:7 › N. 16-E の新しい節 › N-9. チェック（32px の丸）とラジオ（24px の輪）：寸法・選択の動作・選択の印（点）・異常の色 (847ms)
+  ✓  272 e2e/sprint16-design.spec.ts:425:7 › N. 16-E の新しい節 › N-10. 入力欄：通常・フォーカス・エラー・無効の 4 状態がそろう（無効は押せない・フォーカスの輪は 3px） (900ms)
+  ✓  273 e2e/sprint16-design.spec.ts:434:7 › N. 16-E の新しい節 › N-11. 下部ナビの見本：4 項目（ホーム・計画・日誌・機体と書類）。高さ 64 以上・文字 14 以上・現在地は 1 つだけ（aria-current・主色・薄い主色の面）。折り返さない (744ms)
+  ✓  274 e2e/sprint16-design.spec.ts:447:7 › N. 16-E の新しい節 › N-12. 下部ナビの見本（現場）：影なし・高さ 64 以上。`ops-bottom-nav`（実画面の識別子）は見本に出さない (662ms)
+  ✓  275 e2e/sprint16-design.spec.ts:455:7 › N. 16-E の新しい節 › N-13. 準備カード（§8）：行の状態 3＋3、カード 5 種（帯＝重い状態）、判定の総合の語 8 状態。読み上げの文は aria-label に 1 文 (663ms)
+  ✓  276 e2e/sprint16-design.spec.ts:484:7 › N. 16-E の新しい節 › N-14. K-8 主ボタンは 1 つの組に 1 つ。見えている主ボタンは 3 組の各 1 つだけ（準備カード・並べ見本・下部ナビに無い） (684ms)
+  ✓  277 e2e/sprint16-design.spec.ts:496:7 › N. 16-E の新しい節 › N-15. 禁止語：見本の文に、全面禁止語・限定語（申請・保証・必ず）・「問題なし」「飛行可」が無い (692ms)
+  ✓  278 e2e/sprint16-design.spec.ts:503:7 › N. 16-E の新しい節 › N-16. 押す部品は 48px 以上・隣と 8px 以上（K-1。390px）。ナビの見本・カード・ラベルのリンクを含む (733ms)
+  ✓  279 e2e/sprint16-design.spec.ts:523:9 › N. 16-E の新しい節 › N-17. K-3・K-13（通常）：新しい節の文字は 4.5:1 以上（無効を除く）、色はトークンの集合に入る (1.3s)
+  ✓  280 e2e/sprint16-design.spec.ts:523:9 › N. 16-E の新しい節 › N-17. K-3・K-13（現場）：新しい節の文字は 7:1 以上（無効を除く）、色はトークンの集合に入る (1.2s)
+  ✓  281 e2e/sprint16-design.spec.ts:536:7 › N. 16-E の新しい節 › N-18. K-4：幅 320・360・375・390・430・768・1024・1280・1440 で横スクロールなし (3.8s)
+  ✓  282 e2e/sprint16-design.spec.ts:543:7 › N. 16-E の新しい節 › N-19. K-5：文字 200%（390・430）で、新しい節も横スクロール・文字の切れ・入れ物の切れがない（通常・現場） (2.1s)
+  ✓  283 e2e/sprint16-design.spec.ts:550:7 › N. 16-E の新しい節 › N-20. K-15：見本の新しい操作（ラジオ・チェック）の前後で、端末のストレージの鍵が増えない (834ms)
+  ✓  284 e2e/sprint16-design.spec.ts:559:7 › N. 16-E の新しい節 › N-21. K-6：見本の新しい部品に無限の動きがなく、現場では遷移 0。ナビ・ラベル・カードに animation がない (711ms)
+  ✓  285 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（375×812） › 米子市役所（初期表示）：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (1.8s)
+  ✓  286 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（375×812） › 美保基地の周辺（境港市）：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (2.5s)
+  ✓  287 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（375×812） › 鳥取市の工業専用地域：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (2.4s)
+  ✓  288 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（375×812） › 米子市役所＋緊急用務空域：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (1.7s)
+  ✓  289 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（1280×900） › 米子市役所（初期表示）：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (2.0s)
+  ✓  290 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（1280×900） › 美保基地の周辺（境港市）：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (3.1s)
+  ✓  291 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（1280×900） › 鳥取市の工業専用地域：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (3.2s)
+  ✓  292 e2e/sprint18-1.spec.ts:91:11 › 1-1 申請支援は出ない（1280×900） › 米子市役所＋緊急用務空域：本文に申請支援の語が 0 件。診断の部品が 0 個。畳みを全部開いても同じ (2.2s)
+  ✓  293 e2e/sprint18-1.spec.ts:110:7 › 1-2 判定は残る › 結論・要手続きの手続き・義務・規制ごとの判定・責任の注記・DID 自動判定・証跡 ID が見え、地点判定の PDF が出る (4.1s)
+  ✓  294 e2e/sprint18-1.spec.ts:139:7 › 1-2 判定は残る › 4 地点 × 飛行の方法 2 通り（なし・夜間）で、結論の data-verdict-key が前と同じ (6.4s)
+  ✓  295 e2e/sprint18-1.spec.ts:159:7 › 1-3 責任の注記は境界の文 › verdict-responsibility の文が BOUNDARY_SHORT。「下書き」「手伝います」が無く、代行・代理の語が無い (1.5s)
+  ✓  296 e2e/sprint18-1.spec.ts:171:7 › 1-4 /api/diagnose の応答に prefill が無い › verdict・procedures・evidenceId はある。prefill は無い (33ms)
+  ✓  297 e2e/sprint18-1.spec.ts:186:7 › 1-4b /api/diagnose の応答に申請期限の逆算・診断の説明が無い（レビュー M1） › deadlines・categoryNote が無く、「開庁日」「提出期限の目安」が応答のどこにも無い。category・procedures・verdict は残る (14ms)
+  ✓  298 e2e/sprint18-1.spec.ts:203:7 › 1-5 文言 › 凡例「飛行の方法」・予定日と補助者の説明・常設の免責 DISCLAIMER_JUDGEMENT。「起算日」「提出期限の逆算」「プリフィル」が無い (1.9s)
+  ✓  299 e2e/sprint18-1.spec.ts:223:7 › 1-5 文言 › 判定に失敗したときの文は「飛行の方法を含む判定」。「申請支援」の語が無い (1.9s)
+  ✓  300 e2e/sprint18-1.spec.ts:233:7 › 1-5 文言 › 地点判定の PDF に「許可申請」が無い (2.9s)
+  ✓  301 e2e/sprint18-1.spec.ts:268:7 › 1-6 判定履歴 › 旧い形式の項目が一覧に出て、行に「手続き」の件数と「申請支援」が出ない。localStorage の項目は書き換わらず、押すと復元・再判定できる (2.4s)
+  ✓  302 e2e/sprint18-3-wording.spec.ts:57:9 › 3-2・3-4・3-11 提供元の表記と題名（375×812） › フッターの site-provider に確認済みの 6 項目と境界の文。未確認の項目は出ない。見出しの副題・説明は新しい値 (1.8s)
+  ✓  303 e2e/sprint18-3-wording.spec.ts:57:9 › 3-2・3-4・3-11 提供元の表記と題名（1280×900） › フッターの site-provider に確認済みの 6 項目と境界の文。未確認の項目は出ない。見出しの副題・説明は新しい値 (1.9s)
+  ✘  304 e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 (9.6s)
+
+::error file=e2e/sprint18-3-wording.spec.ts,title=e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0,line=140,col=31::  7) e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 %0A    Error: expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地理院地図・DIPSで必ず確認してください。…（限定語が許可リストの外）",%0A    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地点の都道府県・周辺の施設の管理者飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）条例©2026フューチャーテック株式会社出典:国交省国土数値情報/国土地理院/警察庁・防衛省/各自治体例規集飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g以上の機体の前提です（判定の段階には影響しません）。…（限定語が許可リストの外）",%0A    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地理院地図・DIPSで必ず確認してください。…（限定語が許可リストの外）",%0A    + ]%0A%0A      138 |     all.push(...scanString("PDF（地点判定）", "米子市役所＋緊急用務空域", t.replace(/\s+/g, ""), { extraAllowed: screenJudgement, squash: true }));%0A      139 |     saveScan("public", all);%0A    > 140 |     expect(violationsOf(all)).toEqual([]);%0A          |                               ^%0A      141 |     // 空振りでないこと：`/` の記録に、境界の文（印の外・全文）と BOUNDARY_SHORT（判定の結論の直下。印の中）が許可リストの文として入っている%0A      142 |     const allowedOn = (sentence: string) => all.some((r) => r.kind === "allowed" && r.route === "/" && r.sentence === sentence);%0A      143 |     expect(allowedOn(BOUNDARY_FULL), "BOUNDARY_FULL が / の記録にある").toBe(true);%0A        at /home/user/soraban/e2e/sprint18-3-wording.spec.ts:140:31
+  ✓  305 e2e/sprint18-3-wording.spec.ts:149:7 › 3-8 禁止語・限定語の走査（公開の /） › 走査が働いていること：印の外に「申請します」、印の中に「代行」を差し込むと、それぞれ違反・全面禁止語になる。印を大きな要素に付けると違反になる (1.8s)
+  ✓  306 e2e/sprint7.spec.ts:71:7 › A. 小型無人機等飛行禁止法（本番相当サーバー） › 境界から 700m の地点は飛行禁止法のカードが red で『1,000m』を含み、300m・1.5km の表記がない。PDF も同様 (4.7s)
+  ✓  307 e2e/sprint7.spec.ts:98:7 › A. 小型無人機等飛行禁止法（本番相当サーバー） › 飛行禁止法が red の地点で判定の手続きに『同意＋事前通報』が出て、規制カードに出典リンクがある。green の地点では出ない (3.4s)
+  ✓  308 e2e/sprint7.spec.ts:124:7 › B. DID データ（本番相当サーバー・DID_DATA_DIR なし） › 米子市役所は DID 該当（red）で未確認にならない／収録範囲外の地点（日吉津村）は非該当（green） (2.2s)
+  ✓  309 e2e/sprint7.spec.ts:136:7 › C. 工業専用地域の除外（本番相当サーバー・実データ） › 境港市の工業専用地域内（実データ）では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク (2.7s)
+  ✓  310 e2e/sprint7.spec.ts:159:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内・工専未収録では『工業専用地域の除外：未確認』、収録済み市町村の DID 内・工専外では出ない (2.3s)
+  ✓  311 e2e/sprint7.spec.ts:173:7 › C. 工業専用地域の除外（フィクスチャ用サーバー） › DID 内かつ工専内では DID カードが green・『非該当（工業専用地域）』・告示第435号の出典リンク (2.3s)
+  ✓  312 e2e/sprint7.spec.ts:191:7 › D. データ出典と確認日（本番相当サーバー） › 米子市役所の判定で DID と飛行禁止法のカードにデータ名・基準年・確認日が出る (1.9s)
+  ✓  313 e2e/sprint7.spec.ts:204:7 › D. データ出典と確認日（本番相当サーバー） › 地点判定 PDF にデータ名・確認日・反映済みの改正が入る（申請支援の束ね PDF は出ない） (3.3s)
+  ✓  314 e2e/sprint8.spec.ts:5:7 › Sprint 8: DB なしでの動作 › GET /api/health/db は 200・configured: false (18ms)
+  ✓  315 e2e/sprint8.spec.ts:12:7 › Sprint 8: DB なしでの動作 › POST /api/check は DB なしでも判定と証跡 ID を返す (14ms)
+  ✓  316 e2e/sprint9.spec.ts:78:7 › C・E. 現在地（本番相当サーバー） › 開いただけでは位置を要求せず、押すまで通信がない。押すと判定の通信が 1 回ずつ（check・diagnose）で、与えた座標（小数 6 桁）だけを送り、要求本文に精度・時刻・指定方法がない。結果に「現在地（精度 約 30 m）」を添える (4.8s)
+  ✓  317 e2e/sprint9.spec.ts:153:7 › C・E. 現在地（本番相当サーバー） › 精度 150m では、精度が低い旨と「この位置で判定しますか」の確認を 1 回出し、確認の前は判定の通信がない。『この地点で判定』で 1 回ずつ判定する (5.6s)
+  ✓  318 e2e/sprint9.spec.ts:186:7 › C・E. 現在地（本番相当サーバー） › 確認で取消した後は判定せず、localStorage・Cookie に現在地の座標と精度がない (4.3s)
+  ✓  319 e2e/sprint9.spec.ts:219:7 › C・E. 現在地（本番相当サーバー） › `/?start=here`・`/?start=search`：位置の要求は 0 のまま、フォーカスだけが「現在地で判定」・住所の入力欄に移る（押すのは利用者） (6.3s)
+  ✓  320 e2e/sprint9.spec.ts:240:7 › C・E. 現在地（本番相当サーバー） › 位置情報を許可しないと、許可されていない旨と案内を表示し、それまでの地点と判定結果は変わらない (2.8s)
+  ✓  321 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (5.9s)
+  ✓  322 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (6.5s)
+  ✓  323 e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す (4.4s)
+  ✓  324 e2e/sprint9.spec.ts:387:7 › A・B. 住所検索 › 出典の表示（同梱索引があるときだけ ABR を示す）と、台帳の 2 件の出典 (2.0s)
+
+
+  1) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--eedd3-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--3fd71-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（判定の結果を出した状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--ed5f2-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--63f51-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--866d7-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: /（details を開いた状態）1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[verdict-conclusion]「手続きを済ませれば飛べます。下の手続きを」 16px / 行の高さ 1.60（16px・1.70 以上が必要）",
+    + ]
+
+       at field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:145:9
+
+    Error Context: test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-差し戻し-1-R1--f9825-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地理院地図・DIPSで必ず確認してください。…（限定語が許可リストの外）",
+    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地点の都道府県・周辺の施設の管理者飛行の前に（データが未整備のため、該当するかを管理者・一次資料で確かめる）条例©2026フューチャーテック株式会社出典:国交省国土数値情報/国土地理院/警察庁・防衛省/各自治体例規集飛行の前後に必ず行うこと04前提機体登録（DRS）＋リモートID100g以上の機体の前提です（判定の段階には影響しません）。…（限定語が許可リストの外）",
+    +   "PDF（地点判定）［米子市役所＋緊急用務空域］「必ず」…地理院地図・DIPSで必ず確認してください。…（限定語が許可リストの外）",
+    + ]
+
+      138 |     all.push(...scanString("PDF（地点判定）", "米子市役所＋緊急用務空域", t.replace(/\s+/g, ""), { extraAllowed: screenJudgement, squash: true }));
+      139 |     saveScan("public", all);
+    > 140 |     expect(violationsOf(all)).toEqual([]);
+          |                               ^
+      141 |     // 空振りでないこと：`/` の記録に、境界の文（印の外・全文）と BOUNDARY_SHORT（判定の結論の直下。印の中）が許可リストの文として入っている
+      142 |     const allowedOn = (sentence: string) => all.some((r) => r.kind === "allowed" && r.route === "/" && r.sentence === sentence);
+      143 |     expect(allowedOn(BOUNDARY_FULL), "BOUNDARY_FULL が / の記録にある").toBe(true);
+        at /home/user/soraban/e2e/sprint18-3-wording.spec.ts:140:31
+
+    Error Context: test-results/sprint18-3-wording-3-8-禁止語-d786a-F-で、全面禁止語が-0、限定語が許可リストの外に-0/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint18-3-wording-3-8-禁止語-d786a-F-で、全面禁止語が-0、限定語が許可リストの外に-0/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint18-3-wording-3-8-禁止語-d786a-F-で、全面禁止語が-0、限定語が許可リストの外に-0/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 
+  317 passed (14.5m)
+::notice title=🎭 Playwright Run Summary::  7 failed%0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい %0A    e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 %0A  317 passed (14.5m)
+ ELIFECYCLE  Command failed with exit code 1.
+exit=1

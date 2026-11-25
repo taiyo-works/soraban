@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/_probe-shot.spec.ts
+
+
+Running 2 tests using 1 worker
+
+  ✓  1 e2e/_probe-shot.spec.ts:11:5 › shots 375 (4.7s)
+  ✓  2 e2e/_probe-shot.spec.ts:20:5 › shots 1280 (2.6s)
+
+  2 passed (10.4s)
+::notice title=🎭 Playwright Run Summary::  2 passed (10.4s)
+exit=0

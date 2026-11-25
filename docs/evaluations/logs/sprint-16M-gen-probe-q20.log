@@ -1,0 +1,14 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/_probe-q20.spec.ts
+
+
+Running 1 test using 1 worker
+
+Q20INFO {"proc":"2171+270,2449+228","concl":"891+382","map":"1281+848","total":11760,"head":"0+473","input":"531+352"}
+Q20 scrollPx 1637
+  ✓  1 e2e/_probe-q20.spec.ts:5:5 › q20 probe (2.9s)
+
+  1 passed (6.1s)
+::notice title=🎭 Playwright Run Summary::  1 passed (6.1s)
+exit=0

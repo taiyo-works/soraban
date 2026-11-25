@@ -268,7 +268,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
       <div className="flex flex-col items-stretch gap-3">
         <div
           data-testid="verdict-conclusion"
-          className={`sb-block flex min-w-0 flex-1 flex-col gap-2.5 ${cardState ? "sb-card-state" : ""} ${ready ? "sb-rise" : ""}`}
+          className={`sb-block flex min-w-0 flex-1 flex-col gap-2.5 ${ready ? "sb-rise" : ""} ${cardState ? "sb-card-state" : ""}`}
           {...(cardState ? { "data-state": cardState } : {})}
           aria-labelledby="verdict-heading"
         >

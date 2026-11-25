@@ -1334,8 +1334,9 @@ input.sb-radio:disabled {
 }
 /* 地図の標準ズームボタンは 48px（--sb-hit-min。押す部品の下限）にする。スマホはピンチで足りるが、キーボード・マウスのために残す */
 .sb-map-frame .maplibregl-ctrl-group {
-  border-radius: var(--sb-r-m);
-  box-shadow: var(--sb-shadow);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 .sb-map-frame .maplibregl-ctrl-group button {
   width: var(--sb-hit-min);
@@ -2113,6 +2114,17 @@ a.sb-card-list:has([data-result="voided"]):hover {
   font-size: 1.25rem;
   line-height: 1.4;
 }
-.sb-card-state .sb-lead {
-  line-height: 1.6;
+
+/* 地図の上の部品（ズームほか）は 48px の円。面は白（--sb-surface）、縁は --sb-edge の 1px、隣とは 8px 離す（影は使わない）。16-M の M-3 */
+.sb-map-frame .maplibregl-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sb-map-frame .maplibregl-ctrl-group button,
+.sb-map-frame .maplibregl-ctrl-group button + button {
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--sb-surface);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
