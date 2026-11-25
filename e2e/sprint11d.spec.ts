@@ -349,7 +349,9 @@ test.describe("C. 表示・PDF・履歴", () => {
     expect(t).toContain(squash("元の判定：該当"));
     expect(t).toContain(squash("適用した許可：国交省 DIPS：DID 上空の飛行許可"));
     expect(t).toContain(squash("許可の範囲と有効期間は照合していません。許可書で確認してください。"));
-    expect(t).toContain(squash("飛行の前後に必ず行うこと"));
+    // 16-M：「必ず」は禁止語なので、画面と同じく「飛行の前後に行うこと」に言い換えた（検査は見出しの有無のまま）
+    expect(t).toContain(squash("飛行の前後に行うこと"));
+    expect(t).not.toContain(squash("飛行の前後に必ず行うこと"));
   });
 
   test("14. 旧形式の履歴（verdict なし・0.3.0）が旧版の判定と分かる表示になり、旧値 mlit は DID 上空の許可として復元される", async ({

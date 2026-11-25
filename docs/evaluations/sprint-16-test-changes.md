@@ -700,7 +700,11 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 |---|---|---|---|---|
 | `sprint12h-pr2` B2・Q-20 | 上のとおり | 上のとおり（元の値） | M-6 | 検査を強めた（元の値に戻した） |
 
-**変えていない（変えると弱めることになるので止めて上げる）**：`e2e/sprint18-3-wording.spec.ts` の「3-8 禁止語・限定語の走査（公開の /）」が、この PR で**落ちる**。PDF（`pdf-verdict.tsx`。Sprint 17 の範囲で変えていない）の判定エンジンの文・節の見出し（「…DIPS で必ず確認してください」「飛行の前後に必ず行うこと」）は、これまで「画面の印の中に同じ文が出た」ことで許可されていた（`extraAllowed: screenJudgement`）。画面側で「必ず」を外した（M-5・§17 の 23）ので、画面に同じ文が出なくなり、PDF の 2 つの文が許可リストの外の限定語と判定される。対処の選択肢（オーケストレーターの判断）：(a) このテストの PDF の部分に、2 つの文を名指しで許す一覧を足す（Sprint 17 で PDF を整えたら消す）、(b) PDF の文も整える（Sprint 17 の範囲を先取り）、(c) 画面側の「必ず」を残す（M-5 に反する）。generator は (a) の案を書いたが、検査を緩める変更になるので適用していない。
+**`sprint18-3-wording` の 3-8（PDF の「必ず」）**：画面側で「必ず」を外すと、PDF の判定エンジンの文・節の見出しが「画面の印の中に同じ文が出た」許可から外れて落ちた。ユーザーの決定（§17 の 24：(b) PDF の文も今整える。許可一覧は入れない）に従い、PDF も整えた。`sprint18-3-wording.spec.ts` は変えていない（通る）。
+
+- PDF（`pdf-verdict.tsx`・`regulation-pdf.tsx`）：規制カードの概要・注記、手続きの理由・飛行不可の理由・守る条件・義務の題と説明、結論の説明に `tidyEngineText` を掛けた。義務の見出しは `VERDICT_SECTION_TITLE.duties` 自体を「飛行の前後に行うこと」にして画面・PDF 共通にした（`DUTIES_HEADING_SCREEN` はその別名）。判定エンジンの文・`ENGINE_VERSION`・証跡・`application-pdf.tsx` は変えていない。
+- 変えたテスト（意図の変更。いずれも見出しの言い換えによる。検査の強さは同じか強い）：`sprint11d` 13 の PDF の見出しの期待を「飛行の前後に行うこと」に（旧い見出しが出ないことも追加）。`wording-policy.ts` の `JUDGEMENT_OWN_HEADINGS` を新しい見出しに（単体 `wording-policy.test` は `VERDICT_SECTION_TITLE.duties` との一致を見るので、そのまま通る）。
+- 新規：`sprint16-m` の M-5d（PDF の本文に「必ず」が 0・見出しは新しい語）。旧コード 60d97d8 の PDF 側に戻すと落ちる（`sprint-16M-gen-pdf-oldcode.log`）。
 
 ### 弱めていない確認
 
@@ -710,6 +714,6 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 
 ### 新規
 
-- `e2e/sprint16-m.spec.ts`（29 件）：M-1（帯のカード・札の形と言葉・行の帯・5 状態の帯）、M-2（5 状態の総合の語・禁止語・注記）、M-3（主ボタン 1 つ・地図の部品の円）、M-4（静的な HTML）、M-5（見出し・初期・エンジンの文の「必ず」を描画後の本文で 0）、K-3（5 状態のコントラスト）、K-4・K-5・K-14・K-15。`--repeat-each=3` で 87/87。
+- `e2e/sprint16-m.spec.ts`（30 件）：M-1（帯のカード・札の形と言葉・行の帯・5 状態の帯）、M-2（5 状態の総合の語・禁止語・注記）、M-3（主ボタン 1 つ・地図の部品の円）、M-4（静的な HTML）、M-5（見出し・初期・エンジンの文の「必ず」を描画後の本文で 0）、K-3（5 状態のコントラスト）、K-4・K-5・K-14・K-15。`--repeat-each=3` で 87/87。
 - 旧コード（c3dfe5e）に戻して確かめた：29 件中 16 件が落ちる（残りは守りの検査＝K-3・K-4・K-5・K-14・K-15・M-1b・M-3a・M-4a・unknown の帯なし）。ログ `docs/evaluations/logs/sprint-16M-gen-spec-oldcode.log`。
 - 空の判定の状態は、`/api/diagnose`・`/api/check` の応答を `page.route` で書き換えて作る（エンジンの結果の代わりに画面へ渡す。エンジンの段は 4 段で、判定不能の項目があるときは要手続きに倒れて `unknownCount` に出る）。

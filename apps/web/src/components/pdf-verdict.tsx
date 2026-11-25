@@ -34,6 +34,7 @@ import {
   VERDICT_SECTION_TITLE,
   VERDICT_SHAPE,
 } from "@/lib/verdict-display";
+import { tidyEngineText } from "@/lib/field-message";
 import { keepSpaces } from "./pdf-hyphenation";
 import { MonoText } from "./pdf-mono-text";
 
@@ -258,12 +259,12 @@ const refNo = (i: number): string => `[${i + 1}]`;
 const PdfReason = ({ reason }: { reason: string }) =>
   hasRefs(reason) ? (
     <Text style={s.reason}>
-      {keepSpaces(reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim())}
+      {keepSpaces(tidyEngineText(reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim()))}
       {"\n"}
       {keepSpaces(`参照先：${refNo(0)}〜${refNo(MODEL_AIRCRAFT_REFERENCES.length - 1)}（参照先の一覧）`)}
     </Text>
   ) : (
-    <Text style={s.reason}>{keepSpaces(reason)}</Text>
+    <Text style={s.reason}>{keepSpaces(tidyEngineText(reason))}</Text>
   );
 
 const SectionHead = ({ title, count }: { title: string; count?: number }) => (
@@ -302,13 +303,13 @@ export const PdfVerdictConclusion = ({
           ) : null}
         </View>
       ) : null}
-      <Text style={s.line}>{keepSpaces(VERDICT_HELP[verdict.level])}</Text>
+      <Text style={s.line}>{keepSpaces(tidyEngineText(VERDICT_HELP[verdict.level]))}</Text>
       {locLine}
     </View>
   </View>
 );
 
-/** 結論の下の段取り：飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み → 飛行の前後に必ず行うこと → 規制ごとの判定。 */
+/** 結論の下の段取り：飛行できない理由 → 要手続きの手続き（期限順）→ 手続き済み → 飛行の前後に行うこと → 規制ごとの判定。 */
 export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
   <View>
     {verdict.noFly.length > 0 ? (
@@ -322,7 +323,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
             <PdfVerdictMark level="no_fly" size={10} />
             <View style={{ flex: 1 }}>
               <Text style={s.strong}>{n.title}</Text>
-              <Text style={s.reason}>{keepSpaces(n.reason)}</Text>
+              <Text style={s.reason}>{keepSpaces(tidyEngineText(n.reason))}</Text>
             </View>
           </View>
         ))}
@@ -404,7 +405,7 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
             <View style={s.doneConditions}>
               {d.conditions.map((c) => (
                 <Text key={c} style={s.line}>
-                  ・{keepSpaces(c)}
+                  ・{keepSpaces(tidyEngineText(c))}
                 </Text>
               ))}
             </View>
@@ -426,8 +427,8 @@ export const PdfVerdictDetails = ({ verdict }: { verdict: FlightVerdict }) => (
             {d.kind === "premise" ? "前提" : "飛行ごと"}
           </Text>
           <View style={{ flex: 1 }}>
-            <Text style={[s.line, { fontWeight: 700, color: INK }]}>{d.title}</Text>
-            <Text style={s.reason}>{keepSpaces(d.detail)}</Text>
+            <Text style={[s.line, { fontWeight: 700, color: INK }]}>{tidyEngineText(d.title)}</Text>
+            <Text style={s.reason}>{keepSpaces(tidyEngineText(d.detail))}</Text>
           </View>
         </View>
       ))}

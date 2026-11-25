@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { collectTextSamples, expectContrast, expectNoApplicationSupport, expectNoHorizontalScroll, expectTextZoom, waitForSettledStyles } from "./field-checks";
 import { VERDICT_LABEL } from "../apps/web/src/lib/verdict-display";
@@ -360,5 +361,30 @@ test.describe("16-M 共通条件", () => {
     await check;
     const after = await keys();
     expect(after.filter((k) => !before.includes(k)), "増えた鍵").toEqual([]);
+  });
+});
+
+test.describe("16-M PDF（地点判定）の「必ず」", () => {
+  test("M-5d. 判定の PDF の本文に「必ず」が 0（義務の見出しは「飛行の前後に行うこと」。緊急用務空域を選んだ状態）。画面と同じ見出し", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openReady(page);
+    const diag = waitDiagnose(page);
+    await page.getByTestId("airspace-airspace_emergency").locator("input").check();
+    await diag;
+    await expect(page.getByTestId("verdict-level")).toHaveText("飛行不可");
+    const dl = page.waitForEvent("download");
+    await page.getByRole("button", { name: /PDF 出力/ }).first().click();
+    const file = await (await dl).path();
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(await readFile(file)), useSystemFonts: false }).promise;
+    let text = "";
+    for (let i = 1; i <= doc.numPages; i++) {
+      const content = await (await doc.getPage(i)).getTextContent();
+      text += content.items.map((it) => ("str" in it ? it.str : "")).join("") + "\n";
+    }
+    const t = text.replace(/\s+/g, "");
+    expect(t.length).toBeGreaterThan(200);
+    expect(t, "PDF の「必ず」").not.toContain("必ず");
+    expect(t).toContain("飛行の前後に行うこと");
   });
 });

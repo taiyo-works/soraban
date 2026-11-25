@@ -136,15 +136,12 @@ export const VERDICT_SECTION_TITLE = {
   noFly: "飛行できない理由",
   procedures: "要手続きの手続き（期限順）",
   done: "手続き済み（条件付き）",
-  duties: "飛行の前後に必ず行うこと",
+  duties: "飛行の前後に行うこと",
   items: "規制ごとの判定（元の判定 → 適用した許可 → 判定）",
 } as const;
 
-/**
- * 画面の見出し（飛行ごとの義務の節）。16-M の M-5：「必ず」は不変条件 3 の禁止語なので、画面では言い換える。
- * PDF（pdf-verdict.tsx。Sprint 17 の範囲）は VERDICT_SECTION_TITLE.duties のまま。
- */
-export const DUTIES_HEADING_SCREEN = "飛行の前後に行うこと";
+/** 画面の見出し（飛行ごとの義務の節）。画面・PDF 共通（16-M の M-5：「必ず」は不変条件 3 の禁止語なので言い換えた）。 */
+export const DUTIES_HEADING_SCREEN = VERDICT_SECTION_TITLE.duties;
 
 /** 段取り表の列（画面・PDF 共通）。 */
 export const PROCEDURE_COLUMNS = ["手続き", "出す先", "期限", "法的な重さ"] as const;

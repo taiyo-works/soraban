@@ -178,4 +178,4 @@ export const classifyLimited = (
  * 判定の表示の自前の見出し（lib/verdict-display.ts の VERDICT_SECTION_TITLE.duties）。判定エンジンの文言ではなく、アプリ側の見出し。
  * 棚卸し（docs/legal/screen-wording-inventory.md）で「判定エンジン由来」と分けて載せる。
  */
-export const JUDGEMENT_OWN_HEADINGS: readonly string[] = ["飛行の前後に必ず行うこと"];
+export const JUDGEMENT_OWN_HEADINGS: readonly string[] = ["飛行の前後に行うこと"];
