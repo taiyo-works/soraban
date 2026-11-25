@@ -9,7 +9,7 @@ import {
 import { ChangeNotice } from "@/components/ops/change-notice";
 import { PermitDeclaration, PlanPermitList } from "@/components/ops/permit-ui";
 import { PlanFrame } from "@/components/ops/plan-frame";
-import { JudgementTiles, type TileDataset, type TileItem } from "@/components/ops/judgement-tiles";
+import { JudgementTiles, type TileItem } from "@/components/ops/judgement-tiles";
 import { RejudgeButton } from "@/components/ops/plans-client";
 import { buttonOutlineBrandClass, buttonPrimaryClass, DetailList, Note, Section, VERSION_NOTICE_TARGET } from "@/components/ops/ui";
 import { VerdictSummary } from "@/components/verdict-summary";

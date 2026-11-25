@@ -73,7 +73,9 @@ function SheetOpen({
   const canShrink = idx > 0;
 
   const returnRef = useRef(returnFocusTo);
-  returnRef.current = returnFocusTo;
+  useEffect(() => {
+    returnRef.current = returnFocusTo;
+  });
   // 開いた元の部品を覚え、見出しにフォーカスする。閉じる（この部品が外れる）とき、元にフォーカスを戻す。
   useEffect(() => {
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;

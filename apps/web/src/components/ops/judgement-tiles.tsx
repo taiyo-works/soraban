@@ -5,7 +5,7 @@
 // - シートの詳細は、保存した判定の理由・元の判定・適用した許可と、判定に使ったデータ（台帳 sources.json の値だけ：名称・提供元・版・基準年・確認日・出典）。
 //   項目ごとのデータの対応は保存していないので、データは「この判定全体で使ったもの」として出す。
 // - 端末のストレージには書かない。開いているタイルの印は画面の状態だけ。
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ItemVerdict } from "@soraban/regulations";
 import { Sheet } from "@/components/ui/sheet";
 import { VerdictSign, VerdictTag, VERDICT_KEY } from "@/components/ui/sb-parts";
@@ -75,7 +75,9 @@ export function JudgementTiles({
   // 閉じたときにフォーカスを戻す先は、最後に開いたタイル（開いたまま別のタイルを押したときも、そのタイル）
   const tileEls = useRef(new Map<string, HTMLButtonElement>());
   const lastOpenId = useRef<string | null>(null);
-  if (openId !== null) lastOpenId.current = openId;
+  useEffect(() => {
+    if (openId !== null) lastOpenId.current = openId;
+  }, [openId]);
   const returnFocusTo = useCallback(() => (lastOpenId.current ? (tileEls.current.get(lastOpenId.current) ?? null) : null), []);
   const open = items.find((i) => i.id === openId) ?? null;
   return (
