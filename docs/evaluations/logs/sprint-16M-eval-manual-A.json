@@ -1,0 +1,338 @@
+{
+ "A-375": {
+  "primaries": [
+   {
+    "t": "この地点を判定する",
+    "h": 56,
+    "w": 323
+   }
+  ],
+  "ctrl": [
+   {
+    "label": "Zoom in",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Zoom out",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Drag to rotate map, click to reset north",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   }
+  ],
+  "focus": [
+   {
+    "i": 0,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 1,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 2,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   }
+  ],
+  "cls": 0.0011374032371569316,
+  "lcp": 344,
+  "height": 11646,
+  "hscroll": 0,
+  "static": {
+   "lead": true,
+   "input": true,
+   "diag": false,
+   "total": false
+  },
+  "appSupport": [],
+  "appSupportTestids": 0
+ },
+ "A-390": {
+  "primaries": [
+   {
+    "t": "この地点を判定する",
+    "h": 56,
+    "w": 338
+   }
+  ],
+  "ctrl": [
+   {
+    "label": "Zoom in",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Zoom out",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Drag to rotate map, click to reset north",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   }
+  ],
+  "focus": [
+   {
+    "i": 0,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 1,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 2,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   }
+  ],
+  "cls": 0.0010192791474377693,
+  "lcp": 368,
+  "height": 11496,
+  "hscroll": 0,
+  "static": {
+   "lead": true,
+   "input": true,
+   "diag": false,
+   "total": false
+  },
+  "appSupport": [],
+  "appSupportTestids": 0
+ },
+ "A-1280": {
+  "primaries": [
+   {
+    "t": "この地点を判定する",
+    "h": 56,
+    "w": 201.15625
+   }
+  ],
+  "ctrl": [
+   {
+    "label": "Zoom in",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Zoom out",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   },
+   {
+    "label": "Drag to rotate map, click to reset north",
+    "w": 48,
+    "h": 48,
+    "radius": "50%",
+    "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset"
+   }
+  ],
+  "focus": [
+   {
+    "i": 0,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 1,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   },
+   {
+    "i": 2,
+    "kbd": {
+     "focused": true,
+     "fv": true,
+     "tl": "50%",
+     "tr": "50%",
+     "bl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px rgb(31, 95, 224)",
+     "w": 48,
+     "h": 48
+    },
+    "click": {
+     "focused": true,
+     "tl": "50%",
+     "br": "50%",
+     "shadow": "rgb(107, 117, 134) 0px 0px 0px 1px inset",
+     "outline": "solid 3px"
+    }
+   }
+  ],
+  "cls": 0.00021455955505371096,
+  "lcp": 320,
+  "height": 6703,
+  "hscroll": 0,
+  "static": {
+   "lead": true,
+   "input": true,
+   "diag": false,
+   "total": false
+  },
+  "appSupport": [],
+  "appSupportTestids": 0
+ }
+}

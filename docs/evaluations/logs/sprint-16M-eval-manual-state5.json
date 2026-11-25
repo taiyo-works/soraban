@@ -1,0 +1,461 @@
+{
+ "notes": [],
+ "state5": {
+  "375-no_fly": {
+   "info": {
+    "dataState": "danger",
+    "face": "rgb(253, 232, 230)",
+    "bandW": "6px",
+    "bandColor": "rgb(180, 35, 24)"
+   },
+   "total": "飛行不可の項目があります（6 件）",
+   "level": "飛行不可",
+   "levelBlock": "結論 飛行不可の項目があります（6 件） 判定の段：飛行不可 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_fly:danger:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "375-needs_procedure": {
+   "info": {
+    "dataState": "warn",
+    "face": "rgb(253, 241, 220)",
+    "bandW": "6px",
+    "bandColor": "rgb(154, 91, 0)"
+   },
+   "total": "手続きが要る項目があります（2 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 手続きが要る項目があります（2 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "needs_procedure:warn:6px",
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "375-unknown": {
+   "info": {
+    "dataState": null,
+    "face": "rgb(255, 255, 255)",
+    "bandW": "auto",
+    "bandColor": "rgba(0, 0, 0, 0)"
+   },
+   "total": "未確認の項目があります（1 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 未確認の項目があります（1 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "unknown:null:6px",
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "375-procedure_done": {
+   "info": {
+    "dataState": "info",
+    "face": "rgb(234, 238, 243)",
+    "bandW": "6px",
+    "bandColor": "rgb(63, 75, 94)"
+   },
+   "total": "調べた項目は手続き済みです。条件を確認してください",
+   "level": "手続き済み（条件付き）",
+   "levelBlock": "結論 調べた項目は手続き済みです。条件を確認してください 判定の段：手続き済み（条件付き） 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "procedure_done:info:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "375-no_procedure": {
+   "info": {
+    "dataState": "safe",
+    "face": "rgb(230, 244, 236)",
+    "bandW": "6px",
+    "bandColor": "rgb(23, 121, 74)"
+   },
+   "total": "調べた項目では、手続きが要るものは見つかりませんでした",
+   "level": "手続き不要",
+   "levelBlock": "結論 調べた項目では、手続きが要るものは見つかりませんでした 判定の段：手続き不要 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "390-no_fly": {
+   "info": {
+    "dataState": "danger",
+    "face": "rgb(253, 232, 230)",
+    "bandW": "6px",
+    "bandColor": "rgb(180, 35, 24)"
+   },
+   "total": "飛行不可の項目があります（6 件）",
+   "level": "飛行不可",
+   "levelBlock": "結論 飛行不可の項目があります（6 件） 判定の段：飛行不可 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_fly:danger:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "390-needs_procedure": {
+   "info": {
+    "dataState": "warn",
+    "face": "rgb(253, 241, 220)",
+    "bandW": "6px",
+    "bandColor": "rgb(154, 91, 0)"
+   },
+   "total": "手続きが要る項目があります（2 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 手続きが要る項目があります（2 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "needs_procedure:warn:6px",
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "390-unknown": {
+   "info": {
+    "dataState": null,
+    "face": "rgb(255, 255, 255)",
+    "bandW": "auto",
+    "bandColor": "rgba(0, 0, 0, 0)"
+   },
+   "total": "未確認の項目があります（1 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 未確認の項目があります（1 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "unknown:null:6px",
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "390-procedure_done": {
+   "info": {
+    "dataState": "info",
+    "face": "rgb(234, 238, 243)",
+    "bandW": "6px",
+    "bandColor": "rgb(63, 75, 94)"
+   },
+   "total": "調べた項目は手続き済みです。条件を確認してください",
+   "level": "手続き済み（条件付き）",
+   "levelBlock": "結論 調べた項目は手続き済みです。条件を確認してください 判定の段：手続き済み（条件付き） 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "procedure_done:info:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "390-no_procedure": {
+   "info": {
+    "dataState": "safe",
+    "face": "rgb(230, 244, 236)",
+    "bandW": "6px",
+    "bandColor": "rgb(23, 121, 74)"
+   },
+   "total": "調べた項目では、手続きが要るものは見つかりませんでした",
+   "level": "手続き不要",
+   "levelBlock": "結論 調べた項目では、手続きが要るものは見つかりませんでした 判定の段：手続き不要 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_procedure:safe:6px"
+   ],
+   "procStates": [
+    "warn:6px"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "1280-no_fly": {
+   "info": {
+    "dataState": "danger",
+    "face": "rgb(253, 232, 230)",
+    "bandW": "6px",
+    "bandColor": "rgb(180, 35, 24)"
+   },
+   "total": "飛行不可の項目があります（6 件）",
+   "level": "飛行不可",
+   "levelBlock": "結論 飛行不可の項目があります（6 件） 判定の段：飛行不可 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_fly:danger:auto"
+   ],
+   "procStates": [
+    "warn:auto"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "1280-needs_procedure": {
+   "info": {
+    "dataState": "warn",
+    "face": "rgb(253, 241, 220)",
+    "bandW": "6px",
+    "bandColor": "rgb(154, 91, 0)"
+   },
+   "total": "手続きが要る項目があります（2 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 手続きが要る項目があります（2 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "needs_procedure:warn:auto",
+    "no_procedure:safe:auto"
+   ],
+   "procStates": [
+    "warn:auto"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "1280-unknown": {
+   "info": {
+    "dataState": null,
+    "face": "rgb(255, 255, 255)",
+    "bandW": "auto",
+    "bandColor": "rgba(0, 0, 0, 0)"
+   },
+   "total": "未確認の項目があります（1 件）",
+   "level": "要手続き",
+   "levelBlock": "結論 未確認の項目があります（1 件） 判定の段：要手続き 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "unknown:null:auto",
+    "no_procedure:safe:auto"
+   ],
+   "procStates": [
+    "warn:auto"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "1280-procedure_done": {
+   "info": {
+    "dataState": "info",
+    "face": "rgb(234, 238, 243)",
+    "bandW": "6px",
+    "bandColor": "rgb(63, 75, 94)"
+   },
+   "total": "調べた項目は手続き済みです。条件を確認してください",
+   "level": "手続き済み（条件付き）",
+   "levelBlock": "結論 調べた項目は手続き済みです。条件を確認してください 判定の段：手続き済み（条件付き） 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "procedure_done:info:auto"
+   ],
+   "procStates": [
+    "warn:auto"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  },
+  "1280-no_procedure": {
+   "info": {
+    "dataState": "safe",
+    "face": "rgb(230, 244, 236)",
+    "bandW": "6px",
+    "bandColor": "rgb(23, 121, 74)"
+   },
+   "total": "調べた項目では、手続きが要るものは見つかりませんでした",
+   "level": "手続き不要",
+   "levelBlock": "結論 調べた項目では、手続きが要るものは見つかりませんでした 判定の段：手続き不要 35.4278°N · 133.3314°E — 加茂町",
+   "itemsN": 6,
+   "itemStates": [
+    "no_procedure:safe:auto"
+   ],
+   "procStates": [
+    "warn:auto"
+   ],
+   "legend": [
+    "飛行不可",
+    "要手続き",
+    "手続き済み（条件付き）",
+    "手続き不要",
+    "判定不能（データ未整備）"
+   ],
+   "banned": [
+    "安全",
+    "保証"
+   ],
+   "must": 0
+  }
+ }
+}
