@@ -26,6 +26,7 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - 計画の新しい画面（`/overview`・`/judgement`・`/journal`・主画面）は Suspense でストリーミングされ、描画の直後は本文が `display:none` の中にある。`goto` の直後に `boundingBox()` や `toHaveCount(0)` を使うと偽の失敗・偽の成功になる。`e2e/ops-db/plan-screen.ts` の `gotoPlan`（可視のタブが出るまで待つ）を使う。
 - 色・コントラストを測る E2E は、`document.getAnimations()` が空になってから測る。背景色の遷移（180ms）の途中を拾うと、比が 1.1〜4 で揺れる（`sprint16-a` A-7/K-3 で観測。`--repeat-each=25` で 14/25）。
 - `sprint12g-1b` A7 の追記: 後続の `sprint12g-1b-fix-db` M-4 が作る期限切れの許可（validTo 2026-12-20）が使い回した DB に残り、期限の先頭に出るのが原因（16-A の評価で特定）。
+- `sprint16-f-db` R-3（320px の `/ops` で本文の末尾が下部ナビの上端から 4px 未満）。観測: 16-J の generator・designer の実行で -4.56px。`/ops` の本文が約 35px 長くなる DB の状態で起きる（何が増えたかは未特定）。16-J の評価では、空の DB で HEAD 3 回・基準 c85445f 1 回すべて余裕 31px で通過（`docs/evaluations/sprint-16J-eval.md` §2）。
 - 基準のコミットでも落ちるかを比べて、変更が原因かを切り分ける。
 
 ## 落とし穴
