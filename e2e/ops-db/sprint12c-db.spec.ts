@@ -908,7 +908,7 @@ test.describe("Sprint 12c E2E-DB：ホーム・メニュー・日誌・登録", 
     await expect(form.getByRole("checkbox", { name: /夜間飛行/ })).toBeChecked();
     // 「安全に影響のあった事項」を確かめて保存
     await form.getByRole("radio", { name: "なし" }).check();
-    await page.getByRole("button", { name: "保存", exact: true }).click();
+    await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
     await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
     const flightId = page.url().split("/").pop()!;
 

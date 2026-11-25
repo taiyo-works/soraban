@@ -289,7 +289,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       // 読み上げ名は項目名だけで、案内は説明（aria-describedby）として読まれる
       await expect(form.getByRole("textbox", { name: "飛行の目的", exact: true })).toHaveAccessibleDescription(/例：空撮/);
       await form.getByRole("radio", { name: "なし" }).check();
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
       await expect(page.getByTestId("flight-date")).toHaveText(FIELD_DAY);
       await expect(page.getByTestId("flight-takeoff")).toHaveText("09:30");
@@ -335,7 +335,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await form.getByLabel("飛行の目的").fill("インフラ点検");
       await form.getByRole("radio", { name: "なし" }).check();
       await page.route("**/api/ops/flights", (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.continue()));
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(form.getByText(/保存できませんでした。通信が戻ったら/)).toBeVisible();
       await expect(page).toHaveURL(/\/ops\/flights\/new$/);
       const draft = await draftText(page, "flight");
@@ -390,7 +390,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await form.getByRole("textbox", { name: "着陸場所", exact: true }).fill("本社");
       await form.getByLabel("飛行の目的").fill("試験飛行");
       await form.getByRole("radio", { name: "なし" }).check();
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
       await expect(page.getByTestId("ops-change-notice")).toContainText("飛行日の日常点検がありません");
 
@@ -438,7 +438,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
           expect(box!.height, name).toBeGreaterThanOrEqual(48);
         }
       };
-      await minHeight("/ops/flights/new", ["離陸：今", "着陸：今", "保存"]);
+      await minHeight("/ops/flights/new", ["離陸：今", "着陸：今", "飛行記録を保存"]);
       await minHeight("/ops/inspections/new", ["すべて正常", "保存"]);
     });
 
