@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ItemVerdict } from "@soraban/regulations";
 import { Sheet } from "@/components/ui/sheet";
+import { tidyEngineText } from "@/lib/field-message";
 import { VerdictSign, VerdictTag, VERDICT_KEY } from "@/components/ui/sb-parts";
 
 const LINK_ARROW = "\u2060\u00a0↗";
@@ -135,7 +136,7 @@ export function JudgementTiles({
             <dl className="opx-tile-dl">
               <div>
                 <dt>判定の理由</dt>
-                <dd data-testid="judgement-sheet-reason">{open.reason}</dd>
+                <dd data-testid="judgement-sheet-reason">{tidyEngineText(open.reason)}</dd>
               </div>
               <div>
                 <dt>元の判定</dt>
@@ -177,7 +178,7 @@ export function JudgementTiles({
                   <dd>
                     <ul className="opx-tile-list">
                       {open.conditions.map((c) => (
-                        <li key={c}>{c}</li>
+                        <li key={c}>{tidyEngineText(c)}</li>
                       ))}
                     </ul>
                   </dd>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { tidyEngineText } from "@/lib/field-message";
 import {
   MODEL_AIRCRAFT_REFERENCE_LINE,
   MODEL_AIRCRAFT_REFERENCES,
@@ -181,9 +182,9 @@ function ReasonWithReferences({
   readonly mode: "links" | "pointer";
 }) {
   if (!hasModelAircraftReferences(reason)) {
-    return <span className={className}>{reason}</span>;
+    return <span className={className}>{tidyEngineText(reason)}</span>;
   }
-  const text = reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim();
+  const text = tidyEngineText(reason.replace(MODEL_AIRCRAFT_REFERENCE_LINE, "").trim());
   return (
     <span className={className} {...(testId ? { "data-testid": testId } : {})}>
       {text}
@@ -400,7 +401,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
                     </span>
                     <span>
                       <span className="font-medium">{n.title}</span>
-                      <span className="block text-sb-ink-2">{n.reason}</span>
+                      <span className="block text-sb-ink-2">{tidyEngineText(n.reason)}</span>
                     </span>
                   </li>
                 ))}

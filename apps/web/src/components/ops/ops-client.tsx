@@ -178,7 +178,7 @@ export const Field = ({
   return (
     <div className="flex min-w-0 flex-col gap-1.5 text-sm text-sb-ink">
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <label htmlFor={controlId} className="font-bold">
+        <label htmlFor={controlId} className="font-bold [overflow-wrap:anywhere]">
           {label}
         </label>
         <RequiredTag required={required} />

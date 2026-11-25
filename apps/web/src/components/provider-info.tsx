@@ -20,7 +20,7 @@ export function ProviderInfo({ testId, className = "", compact = false, links = 
             {links && (r.key === "phone" || r.key === "email") ? (
               <a
                 href={r.key === "phone" ? `tel:${PROVIDER.phone}` : `mailto:${PROVIDER.email}`}
-                className="inline-flex min-h-12 items-center underline decoration-sb-primary decoration-2 underline-offset-4"
+                className="inline-flex min-h-12 max-w-full items-center [overflow-wrap:anywhere] underline decoration-sb-primary decoration-2 underline-offset-4"
               >
                 {r.value}
               </a>

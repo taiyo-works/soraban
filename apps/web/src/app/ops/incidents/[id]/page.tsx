@@ -4,7 +4,7 @@ import { ChangeNotice } from "@/components/ops/change-notice";
 import { DraftOwnerGuard, VoidForm } from "@/components/ops/ops-client";
 import { IncidentConsultedForm, IncidentFollowUpForm, IncidentForm, IncidentReportedForm, IncidentRetractForm } from "@/components/ops/incident-client";
 import { IncidentFactNotice, IncidentGuidanceView, IncidentOfficialNotice, IncidentReportRecordNotice, IncidentReportStateView } from "@/components/ops/incident-ui";
-import { Badge, buttonGhostClass, buttonPrimaryClass, DetailList, PageHeader, Section } from "@/components/ops/ui";
+import { Badge, buttonGhostClass, buttonOutlineBrandClass, DetailList, PageHeader, Section } from "@/components/ops/ui";
 import { VersionList } from "@/components/ops/versions";
 import { INCIDENT_REPORT_REFERENCE_ABSENT_LABEL } from "@/lib/ops-incident";
 import { toJstInput } from "@/lib/ops-time";
@@ -109,7 +109,7 @@ export default async function IncidentDetailPage({ params }: { readonly params: 
             {d.detailPendingLabel}
           </p>
           {canUpdate ? (
-            <a href="#correct" data-variant="primary" className={`${buttonPrimaryClass} self-start`} data-testid="incident-detail-fill">
+            <a href="#correct" className={`${buttonOutlineBrandClass} self-start`} data-testid="incident-detail-fill">
               詳細を記入する
             </a>
           ) : (

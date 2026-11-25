@@ -47,7 +47,7 @@ import { newRequestId } from "./drafts";
 import { IncidentGuidanceView, IncidentReportRecordNotice } from "./incident-ui";
 import { Field, FieldError, FormError, fieldErrorsOf, inputClass, reloadAfterChange, send, SubmitRow, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, JstDateTimeField, joinJst, splitJst } from "./report-parts";
-import { buttonPrimaryClass, buttonDangerClass, VERSION_NOTICE_TARGET } from "./ui";
+import { buttonPrimaryClass, buttonDangerClass, buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "./ui";
 
 const radioRowClass =
   "opx-check-row border-[1.5px] border-transparent has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover";
@@ -491,7 +491,7 @@ export function IncidentFollowUpForm({ id, version, status, on }: { readonly id:
         <textarea className={inputClass} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} data-testid="incident-follow-up-update-reason" />
       </Field>
       <SubmitRow message={message}>
-        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="incident-follow-up-update-submit">
+        <button type="submit" className={buttonOutlineBrandClass} disabled={busy} data-testid="incident-follow-up-update-submit">
           対応の状況を更新する
         </button>
       </SubmitRow>
@@ -573,7 +573,7 @@ export function IncidentReportedForm({ id, defaultDoneAt }: { readonly id: strin
       </label>
       <FieldError id="incident-report-err-checks" message={errors["checks"]} />
       <SubmitRow message={message}>
-        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-report-submit">
+        <button type="submit" className={buttonOutlineBrandClass} disabled={busy || !checked} data-testid="incident-report-submit">
           報告の結果を記録する
         </button>
         {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}
@@ -625,7 +625,7 @@ export function IncidentConsultedForm({ id, defaultDoneAt }: { readonly id: stri
       </label>
       <FieldError id="incident-consult-err-checks" message={errors["checks"]} />
       <SubmitRow message={message}>
-        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || !checked} data-testid="incident-consult-submit">
+        <button type="submit" className={buttonOutlineBrandClass} disabled={busy || !checked} data-testid="incident-consult-submit">
           要否を確かめたことを記録する
         </button>
         {!checked ? <span className="text-sm text-sb-ink-2">確認のチェックを入れると記録できます。</span> : null}

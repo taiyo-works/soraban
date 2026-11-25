@@ -600,7 +600,7 @@ function RowActions({ report }: { readonly report: ReportDto }) {
           )}
           <FormError message={message} />
           <div>
-            <button type="submit" data-variant={open === "retract" ? undefined : "primary"} className={open === "retract" ? buttonDangerClass : buttonPrimaryClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
+            <button type="submit" className={open === "retract" ? buttonDangerClass : buttonOutlineBrandClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
               {open === "correct" ? "訂正を保存する" : open === "retract" ? "取り下げる" : open === "resolve" ? "確定する" : "再送する"}
             </button>
           </div>
@@ -849,7 +849,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           <details>
             <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
               <span className="underline underline-offset-2">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</span>
-              <span className="ml-auto flex items-center gap-x-2 text-sm text-sb-ink-2">
+              <span className="ml-auto flex min-w-0 flex-wrap items-center gap-x-2 text-sm text-sb-ink-2">
                 <span>送信元：</span>
                 <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
                   {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}

@@ -221,6 +221,8 @@ html:has(.ops-v2) body {
 .opx-h1 {
   font-feature-settings: "palt" 1;
   text-wrap: balance;
+  /* 文字 200%・320 幅で、切れ目のない長い題（「事故・ヒヤリハットの記録」）が横にあふれない（16-L） */
+  overflow-wrap: anywhere;
 }
 .opx-eyebrow {
   font-size: 0.875rem;
@@ -409,7 +411,8 @@ html:has(.ops-v2) body {
 
 /* 項目の並び（compact）：狭い画面でも項目名を左・値を右の 2 列にして、縦を詰める（Sprint 17-2） */
 .opx-detail-compact > div {
-  grid-template-columns: 8rem minmax(0, 1fr);
+  /* 文字 200%・320 幅では 8rem（256px）が幅を食うので、列の幅の 40% までに抑える（16-L） */
+  grid-template-columns: minmax(0, min(8rem, 40%)) minmax(0, 1fr);
   gap: 8px;
   padding: 6px 0;
   align-items: baseline;

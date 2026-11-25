@@ -61,7 +61,7 @@ function Chip({ tone, glyph, children, ...rest }: ChipProps) {
   return (
     <span
       {...attrs}
-      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-sm font-medium leading-5 ${CHIP_BOX[tone]}`}
+      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 [overflow-wrap:anywhere] rounded-sb-pill px-3 py-0.5 text-sm font-medium leading-5 ${CHIP_BOX[tone]}`}
     >
       <span aria-hidden className={`inline-flex h-5 w-3 shrink-0 items-center justify-center sb-num text-sm font-bold leading-none ${CHIP_GLYPH[tone]}`}>
         {glyph}
@@ -511,7 +511,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
           <span aria-hidden data-note="" className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
             {DEADLINE_GLYPH[deadline.state]}
           </span>
-          <span className="pt-0.5" data-testid="plan-report-deadline-message">{deadline.message}</span>
+          <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-deadline-message">{deadline.message}</span>
         </p>
         {deadline.guideAtJst ? (
           <p className="pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
@@ -552,7 +552,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
         >
           {DEADLINE_GLYPH[deadline.state]}
         </span>
-        <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
+        <span className={`min-w-0 pt-0.5 [overflow-wrap:anywhere] ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
