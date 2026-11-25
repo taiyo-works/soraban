@@ -1130,8 +1130,8 @@ export function FlightForm({
         </Field>
         <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["specificFlightTypes"] ? "record-err-specificFlightTypes" : undefined}>
           <legend className="mb-1 text-sm text-sb-ink">
-            特定飛行の形態
-            <span className="ml-2 text-sm text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
+            <span className="font-semibold">特定飛行の形態</span>
+            <span className="mt-0.5 block text-sm text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
           </legend>
           {(
             [
@@ -1140,7 +1140,7 @@ export function FlightForm({
             ] as const
           ).map(([group, title]) => (
             <div key={group} className="flex flex-col gap-2">
-              <p data-note="" aria-hidden className="sb-num text-sm uppercase tracking-wider text-sb-ink-3">
+              <p data-note="" aria-hidden className="mt-1 border-b border-sb-rule pb-1 text-base font-semibold text-sb-ink-2">
                 {title}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
