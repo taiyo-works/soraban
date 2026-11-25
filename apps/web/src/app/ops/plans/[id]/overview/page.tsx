@@ -116,7 +116,7 @@ export default async function PlanOverviewPage({ params }: { readonly params: Pr
                 ) : (
                   <details data-testid="plan-stale-sources-details">
                     <summary className="flex min-h-12 cursor-pointer select-none items-center font-medium text-sb-ink">{plan.staleSources.length} 件あります（開く）</summary>
-                    <ul data-note="" className="flex list-disc flex-col gap-1 pl-5">
+                    <ul data-note="" className="flex list-disc flex-col gap-1 pl-5 [overflow-wrap:anywhere]">
                       {plan.staleSources.map((s) => (
                         <li key={s.id}>
                           {s.name}：確認日 {s.verifiedAt}

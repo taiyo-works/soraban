@@ -48,7 +48,7 @@ export default async function PlanReportPage({
       <PageHeader
         eyebrow="通報の内容"
         back={safeReturnTo(sp["returnTo"]) ? { href: safeReturnTo(sp["returnTo"])!, label: "現場モードへ戻る" } : { href: `/ops/plans/${view.planId}`, label: "通報の状況" }}
-        title={<span className="break-words" data-testid="report-plan-title">{view.planTitle}</span>}
+        title={<span className="[overflow-wrap:anywhere]" data-testid="report-plan-title">{view.planTitle}</span>}
       />
       <PlanTabs planId={view.planId} current="report" />
       <HashScroll offset={REPORT_SCROLL_OFFSET_PX} offsetLg={REPORT_SCROLL_OFFSET_LG_PX} />

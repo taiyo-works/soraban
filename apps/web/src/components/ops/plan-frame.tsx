@@ -61,7 +61,7 @@ export function PlanFrame({
         <PageHeader
           meta={eyebrow}
           back={back ?? { href: "/ops/plans", label: "飛行計画の一覧" }}
-          title={<span className="break-words" data-testid="plan-title-heading">{plan.title}</span>}
+          title={<span className="[overflow-wrap:anywhere]" data-testid="plan-title-heading">{plan.title}</span>}
         >
           <div className="flex flex-wrap items-center gap-2">
             <PlanStateBadge state={plan.state} label={plan.stateLabel} />

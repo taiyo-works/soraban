@@ -135,7 +135,7 @@ export function ReportBox({
           <span aria-hidden data-note="" className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
             {glyph}
           </span>
-          <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
+          <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
         </p>
         ) : null}
         {!body ? null : voidedNoRecord ? (
@@ -196,7 +196,7 @@ export function ReportBox({
         >
           {REPORT_GLYPH[report.kind]}
         </span>
-        <span className="pt-0.5" data-testid="plan-report-label">{report.label}</span>
+        <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-label">{report.label}</span>
       </p>
       {report.reasons.length > 0 ? (
         <ul className="flex list-disc flex-col gap-1 pl-12 text-sb-ink-2" data-testid="plan-report-reasons">
@@ -231,7 +231,7 @@ export function VerdictBadge({ level, unknownCount, bare }: { readonly level: st
   const label = VERDICT_LABEL[level as ItemVerdict] ?? level;
   const known = level in VERDICT_LABEL;
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-sb-ink" {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}>
+    <span className="inline-flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-sb-ink" {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}>
       {known ? (
         <VerdictTag level={level as ItemVerdict}>{label}</VerdictTag>
       ) : (
@@ -286,20 +286,20 @@ export function PlanDigest({
   return (
     <nav aria-label="ほかの要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
       <a href={`/ops/plans/${planId}/judgement`} className={row} data-testid="plan-judge-link">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="plan-judge-line" data-wording-scope="judgement">
+        <span className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 [overflow-wrap:anywhere]" data-testid="plan-judge-line" data-wording-scope="judgement">
           <span className="text-sm text-sb-ink-2">{JUDGE_LINE_PREFIX}</span>
           {m.kind === "ok" ? <VerdictBadge level={m.level} unknownCount={m.unknownCount} bare /> : <span className="text-sm font-bold text-sb-ink">{JUDGE_UNREADABLE}</span>}
           {m.stale ? <StaleBadge bare /> : null}
           {m.sourcesStale ? <SourceStaleBadge /> : null}
         </span>
-        <span className="ml-auto shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
+        <span className="ml-auto min-w-0 text-sm font-bold text-sb-ink [overflow-wrap:anywhere]">判定を見る →</span>
       </a>
       <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row} data-testid="plan-confirm-link">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 [overflow-wrap:anywhere]">
           <span className="text-sm text-sb-ink-2">確認：</span>
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span className="ml-auto shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
+        <span className="ml-auto min-w-0 text-sm font-bold text-sb-ink [overflow-wrap:anywhere]">計画の確認へ →</span>
       </a>
     </nav>
   );
@@ -514,7 +514,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
           <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-deadline-message">{deadline.message}</span>
         </p>
         {deadline.guideAtJst ? (
-          <p className="pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
+          <p className="min-w-0 pl-11 text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="plan-report-guide-at">
             社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
           </p>
         ) : null}
@@ -555,7 +555,7 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
         <span className={`min-w-0 pt-0.5 [overflow-wrap:anywhere] ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sb-ink-2" data-testid="plan-report-guide-at">
+        <p className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="plan-report-guide-at">
           社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
         </p>
       ) : null}

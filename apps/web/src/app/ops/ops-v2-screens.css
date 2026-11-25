@@ -1008,6 +1008,9 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     min-height: 48px;
     margin-bottom: 4px;
     padding-right: 4.5rem;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
   }
   /* fieldset の中の絶対配置は、見出し（legend）の下から数える。見出しの行（48px）と下の余白（4px）の分だけ上へ */
   .opx-form[data-date-first] [data-testid="inspected"] > div > button:first-child {

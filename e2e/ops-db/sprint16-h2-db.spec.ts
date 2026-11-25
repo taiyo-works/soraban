@@ -554,7 +554,7 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     expect(await visiblePrimaries(page), "再判定の後").toEqual(["judgement-primary"]);
   });
 
-  test("N-e. 判定が古く、再判定の権限がない（閲覧だけの）利用者：主ボタンは judgement-primary の 1 つだけ。「判定のやり直しは、計画を変更できる人が行います」の案内が出て、再判定のボタンは出ない", async ({ page }) => {
+  test("N-e. 判定が古く、再判定の権限がない（閲覧だけの）利用者：主ボタンは無し（16-L の L-4 で、judgement-primary は副ボタンに）。「判定のやり直しは、計画を変更できる人が行います」の案内が出て、再判定のボタンは出ない", async ({ page }) => {
     const ac = await mkAircraft({ maxTakeoffWeightKg: 0.9 });
     const plan = await mkPlan(ac.id);
     const patch = await manager.patch(`/api/ops/aircraft/${ac.id}`, { data: { maxTakeoffWeightKg: 1.5, expectedVersion: ac.version, reason: "重量の訂正" } });
@@ -573,8 +573,9 @@ test.describe("Sprint 16-H2 E2E-DB：計画作成 2", () => {
     for (const w of ["完璧", "保証", "必ず", "代行", "代理", "申請", "通報不要", "問題なし"]) expect(await note.innerText(), w).not.toContain(w);
     await expect(page.getByTestId("plan-rejudge")).toHaveCount(0);
     await expect(page.getByTestId("judgement-primary")).toBeVisible();
-    expect(await visiblePrimaries(page), "閲覧だけ・古いとき").toEqual(["judgement-primary"]);
-    await expect(page.getByTestId("judgement-primary")).toHaveAttribute("data-variant", "primary");
+    // 16-L の L-4（§17 の 15）：古い判定のまま DIPS へ進む導線を、再判定を押せない人の主にしない（表示だけ。サーバーの権限は同じ）。前は judgement-primary が主ボタンだった
+    expect(await visiblePrimaries(page), "閲覧だけ・古いとき").toEqual([]);
+    await expect(page.getByTestId("judgement-primary")).not.toHaveAttribute("data-variant", "primary");
     // 計画を変更できる人（運航管理者）には、案内は出ず、再判定が主ボタン
     await login(page, "a-manager");
     await page.goto(`/ops/plans/${plan.id}/judgement`);

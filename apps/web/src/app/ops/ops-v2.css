@@ -667,7 +667,9 @@ html:has(.ops-v2) body {
   row-gap: 0;
 }
 [data-testid="report-notice"] summary > .ml-auto > * {
-  white-space: nowrap;
+  /* 16-L：文字 200%・320 幅では、札と送信元の語が行より広くなる。行の中に収まるときは今までどおり 1 行（flex-wrap が項目ごとに折り返す）、収まらないときだけ折り返す */
+  white-space: normal;
+  overflow-wrap: anywhere;
   letter-spacing: 0;
 }
 [data-testid="report-notice"] summary .opx-badge {
