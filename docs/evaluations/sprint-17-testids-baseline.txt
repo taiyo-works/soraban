@@ -256,6 +256,7 @@ field-status-band
 field-status-connection
 field-status-prefetch
 field-status-prefetch-stale
+field-status-prefetch-stale-help
 field-status-saved
 field-status-unsent
 field-steps
@@ -284,6 +285,8 @@ flight-mismatches
 flight-pilot-name
 flight-plan-link
 flight-plan-link-box
+flight-row
+flight-section
 flight-takeoff
 flight-takeoff-gap
 flight-takeoff-gaps
@@ -478,6 +481,10 @@ journal-new-inspection
 journal-range
 journal-row
 journal-row-link
+journal-row-minutes
+journal-row-takeoff-landing
+journal-row-times
+journal-row-total
 journal-tabs
 journal-to-inspections
 judge-pill-here
@@ -1108,6 +1115,7 @@ prop: field-status-band
 prop: field-status-connection
 prop: field-status-prefetch
 prop: field-status-prefetch-stale
+prop: field-status-prefetch-stale-help
 prop: field-status-saved
 prop: field-status-unsent
 prop: field-steps
@@ -1136,6 +1144,8 @@ prop: flight-mismatches
 prop: flight-pilot-name
 prop: flight-plan-link
 prop: flight-plan-link-box
+prop: flight-row
+prop: flight-section
 prop: flight-takeoff
 prop: flight-takeoff-gap
 prop: flight-takeoff-gaps
@@ -1343,6 +1353,10 @@ prop: journal-new-inspection
 prop: journal-range
 prop: journal-row
 prop: journal-row-link
+prop: journal-row-minutes
+prop: journal-row-takeoff-landing
+prop: journal-row-times
+prop: journal-row-total
 prop: journal-tabs
 prop: journal-to-inspections
 prop: judge-pill-here
