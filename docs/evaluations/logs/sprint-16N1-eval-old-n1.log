@@ -1,0 +1,60 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --reporter=list e2e/sprint16-n1.spec.ts
+
+
+Running 2 tests using 1 worker
+
+  ✘  1 e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る (2.6s)
+  ✓  2 e2e/sprint16-n1.spec.ts:44:7 › 16-N1 公開の / の結論の説明 › N1-2b. 判定不能を含まない要手続きの地点（夜間飛行）：今の説明が出る (3.7s)
+
+
+  1) e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る 
+
+    Error: expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "飛べ"
+    Received string:        "結論
+    
+    手続きが要る項目があります（2 件）
+    
+    判定の段：要手続き
+    
+    35.4936°N · 133.26604°E — 小篠津町
+    
+    判定不能 1 件（データ未整備）
+    
+    手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。
+    
+    確認日
+    2026-10-19
+    出典つき
+    （6 件）
+    
+    許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。
+    
+    PDF 出力"
+
+      37 |     await expect(page.getByTestId("judgement-total")).toBeVisible();
+      38 |     const text = await page.getByTestId("verdict-conclusion").innerText();
+    > 39 |     expect(text).not.toContain("飛べ");
+         |                      ^
+      40 |     expect(text).not.toContain(HELP);
+      41 |     expect(text).not.toContain("手続きを済ませれば");
+      42 |   });
+        at /home/user/soraban/e2e/sprint16-n1.spec.ts:39:22
+
+    Error Context: test-results/sprint16-n1-16-N1-公開の-の結論の-36e2e-ICT-HELP-の文が-0。判定不能の件数の行は残る/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-n1-16-N1-公開の-の結論の-36e2e-ICT-HELP-の文が-0。判定不能の件数の行は残る/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-n1-16-N1-公開の-の結論の-36e2e-ICT-HELP-の文が-0。判定不能の件数の行は残る/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る 
+  1 passed (10.3s)
+ ELIFECYCLE  Command failed with exit code 1.

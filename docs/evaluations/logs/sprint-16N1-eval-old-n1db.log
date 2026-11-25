@@ -1,0 +1,48 @@
+
+Running 2 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-n1-db.spec.ts:56:7 › 16-N1 判定の画面と過去の判定の説明 › N1-2c. 判定不能を含む計画：/judgement とスナップショットの結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数・総合は残る (1.0s)
+  ✓  2 e2e/ops-db/sprint16-n1-db.spec.ts:73:7 › 16-N1 判定の画面と過去の判定の説明 › N1-2d. 判定不能を含まない要手続きの計画：/judgement とスナップショットで、今の説明が出る（変えていない） (1.2s)
+
+
+  1) e2e/ops-db/sprint16-n1-db.spec.ts:56:7 › 16-N1 判定の画面と過去の判定の説明 › N1-2c. 判定不能を含む計画：/judgement とスナップショットの結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数・総合は残る 
+
+    Error: expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "飛べ"
+    Received string:        "結論
+    
+    未確認の項目があります（4 件）
+    
+    判定の段：要手続き
+    
+    判定の取得時刻（日本時間）：2027-01-05 12:00
+    
+    判定不能 4 件（データ未整備）
+    
+    手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。"
+
+      60 |     await expect(page.getByTestId("verdict-unknown-count")).toBeVisible();
+      61 |     const now = await page.getByTestId("verdict-conclusion").innerText();
+    > 62 |     expect(now).not.toContain("飛べ");
+         |                     ^
+      63 |     expect(now).not.toContain(HELP);
+      64 |
+      65 |     await page.goto(`/ops/plans/${unknownPlan.id}/snapshots/${unknownPlan.currentSnapshotId}`);
+        at /home/user/soraban/e2e/ops-db/sprint16-n1-db.spec.ts:62:21
+
+    Error Context: test-results/ops/sprint16-n1-db-16-N1-判定の画面-294b8-CT-HELP-の文が-0。判定不能の件数・総合は残る/error-context.md
+
+    Error Context: test-results/ops/sprint16-n1-db-16-N1-判定の画面-294b8-CT-HELP-の文が-0。判定不能の件数・総合は残る/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n1-db-16-N1-判定の画面-294b8-CT-HELP-の文が-0。判定不能の件数・総合は残る/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n1-db-16-N1-判定の画面-294b8-CT-HELP-の文が-0。判定不能の件数・総合は残る/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-n1-db.spec.ts:56:7 › 16-N1 判定の画面と過去の判定の説明 › N1-2c. 判定不能を含む計画：/judgement とスナップショットの結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数・総合は残る 
+  1 passed (7.5s)
