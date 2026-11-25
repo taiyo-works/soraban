@@ -1,0 +1,173 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-j-db.spec.ts
+
+
+Running 11 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (1.3s)
+  ✓   2 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (621ms)
+  ✘   3 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (31.1s)
+  ✓   4 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (851ms)
+  ✓   5 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (685ms)
+  ✘   6 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (30.5s)
+  ✘   7 e2e/ops-db/sprint16-j-db.spec.ts:269:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (31.0s)
+  ✓   8 e2e/ops-db/sprint16-j-db.spec.ts:307:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (1.8s)
+  ✘   9 e2e/ops-db/sprint16-j-db.spec.ts:354:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (30.9s)
+  ✓  10 e2e/ops-db/sprint16-j-db.spec.ts:392:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+  ✓  11 e2e/ops-db/sprint16-j-db.spec.ts:392:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+
+
+  1) e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('flight-row').first()
+    Expected substring: "機体の総飛行時間"
+    Received string:    "飛行年月日2026-12-23離陸から着陸10:34–11:14飛行時間0:40機体JU16JMWVTFAF62／操縦者 操縦 一郎／総飛行時間 0:40"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toContainText" getByTestId('flight-row').first() with timeout 30000ms
+      - waiting for getByTestId('flight-row').first()
+        63 × locator resolved to <a data-testid="flight-row" class="sb-card sb-card-list sb-card-list-go" href="/ops/flights/3a8bf9cc-04a0-470d-9d59-ee0e75ccdb08">…</a>
+           - unexpected value "飛行年月日2026-12-23離陸から着陸10:34–11:14飛行時間0:40機体JU16JMWVTFAF62／操縦者 操縦 一郎／総飛行時間 0:40"
+
+
+      193 |     await expect(liveRow.getByTestId("journal-row-total")).toHaveText("0:40");
+      194 |     // 機体の累計は「機体の総飛行時間」（操縦者の総飛行時間と読めない）
+    > 195 |     await expect(liveRow).toContainText("機体の総飛行時間");
+          |                           ^
+      196 |     await expect(liveRow.locator("[data-tone]")).toHaveCount(0);
+      197 |     expect(await liveRow.getByTestId("journal-row-minutes").evaluate((el) => getComputedStyle(el).fontVariantNumeric)).toContain("tabular-nums");
+      198 |     // 取消済みを含める：「取消済み」の情報ラベル 1 つ。安全・注意の状態ラベルと「正常・完了」の語を出さない。総飛行時間も出さない。破線の縁
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:195:27
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-37b62-表示と総飛行時間を出さない（日誌には取消済みは出ない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/d9019173-aa7c-4981-a1ad-9df45d96a07b"])')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/d9019173-aa7c-4981-a1ad-9df45d96a07b"])') with timeout 30000ms
+      - waiting for locator('[data-testid="journal-row"][data-kind="flight"]:has(a[href="/ops/flights/d9019173-aa7c-4981-a1ad-9df45d96a07b"])')
+
+
+      253 |     await page.goto("/ops/journal?tab=flights");
+      254 |     const row = rowOf(page, f.id, "flight");
+    > 255 |     await expect(row).toBeVisible();
+          |                       ^
+      256 |     await expect(row.getByTestId("journal-row-takeoff-landing")).toContainText("23:30–翌日 00:10");
+      257 |     await expect(row.getByTestId("journal-row-minutes")).toHaveText("0:40");
+      258 |     await page.goto(`/ops/flights?aircraftId=${a.id}`);
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:255:23
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日をまたぐ着陸-e5ccd-ドは「翌日-HH-MM」と出る（日誌・飛行記録の一覧）/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日をまたぐ着陸-e5ccd-ドは「翌日-HH-MM」と出る（日誌・飛行記録の一覧）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日をまたぐ着陸-e5ccd-ドは「翌日-HH-MM」と出る（日誌・飛行記録の一覧）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-日をまたぐ着陸-e5ccd-ドは「翌日-HH-MM」と出る（日誌・飛行記録の一覧）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-j-db.spec.ts:269:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('form', { name: '飛行記録の入力' }).locator('.sb-chk').first().locator('.sb-chk-done')
+    Expected: 0
+    Received: 1
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('form', { name: '飛行記録の入力' }).locator('.sb-chk').first().locator('.sb-chk-done') with timeout 30000ms
+      - waiting for getByRole('form', { name: '飛行記録の入力' }).locator('.sb-chk').first().locator('.sb-chk-done')
+        63 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      287 |     const first = rows.first();
+      288 |     const name = ((await first.locator(".sb-chk-text").textContent()) ?? "").trim();
+    > 289 |     await expect(first.locator(".sb-chk-done")).toHaveCount(0);
+          |                                                 ^
+      290 |     await form(page).getByRole("checkbox", { name, exact: true }).check();
+      291 |     await expect(form(page).getByRole("checkbox", { name, exact: true })).toBeChecked();
+      292 |     await expect(first).toHaveClass(/\bis-on\b/);
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:289:49
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-79306-2-以上）。主ボタンは「飛行記録を保存」の-1-つだけ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-j-db.spec.ts:354:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない 
+
+    Error: expect(locator).toHaveClass(expected) failed
+
+    Locator: getByTestId('flight-type-night')
+    Expected pattern: /\bis-on\b/
+    Received string:  "sb-check-row sb-chk"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "toHaveClass" getByTestId('flight-type-night') with timeout 30000ms
+      - waiting for getByTestId('flight-type-night')
+        63 × locator resolved to <label class="sb-check-row sb-chk" data-testid="flight-type-night">…</label>
+           - unexpected value "sb-check-row sb-chk"
+
+
+      370 |     // 計画の形態（夜間飛行）は最初から選ばれているが、「済」は出ない（読み上げ名・選択状態は変わらない）
+      371 |     await expect(f.getByRole("checkbox", { name: /夜間飛行/ })).toBeChecked();
+    > 372 |     await expect(page.getByTestId("flight-type-night")).toHaveClass(/\bis-on\b/);
+          |                                                         ^
+      373 |     await expect(f.locator(".sb-chk-done")).toHaveCount(0);
+      374 |     await expect(page.getByTestId("flight-type-night")).not.toContainText("済");
+      375 |     // 計画の予定時刻は離着陸の時刻に入れない
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:372:57
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-j-db-16-J-飛行記録の入力-62ffe-ら点検への移動（takeoffAt-付き）は変わらない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） 
+    e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） 
+    e2e/ops-db/sprint16-j-db.spec.ts:269:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ 
+    e2e/ops-db/sprint16-j-db.spec.ts:354:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない 
+  7 passed (2.3m)
+ ELIFECYCLE  Command failed with exit code 1.
