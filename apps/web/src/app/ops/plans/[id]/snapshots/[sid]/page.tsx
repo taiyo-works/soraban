@@ -60,7 +60,7 @@ export default async function SnapshotDetailPage({ params }: { readonly params: 
       <Section title="判定の結果" aria-label="判定の結果" description="計画を保存したときにサーバーが実行して保存した結果です。ここでは再計算しません。">
         {/* 判定エンジンの文言を出す領域の印（Sprint 18-3。限定語の検査から外す。lib/wording-policy.ts） */}
         <div data-wording-scope="judgement" data-testid="judgement-scope-snapshot">
-          <VerdictSummary verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={verdictPermitNotesFromBasis(s.permitBasis)} />
+          <VerdictSummary plainCard verdict={verdict} pending={false} failed={verdict === undefined} permitNotes={verdictPermitNotesFromBasis(s.permitBasis)} />
         </div>
       </Section>
 

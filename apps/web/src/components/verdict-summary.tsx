@@ -74,6 +74,11 @@ type Props = {
    * 判定エンジンの段（`verdict-level`）はその下の「判定の段」に小さく出す。判定の結果は変えない。
    */
   readonly total?: JudgementTotal;
+  /**
+   * 過去の判定の表示（運航管理のスナップショットの画面）。結論のカードに状態の面と帯を付けず、判定不能と同じ灰にする。
+   * 帯は「いまの判定」の色なので、過去の記録には付けない。5 段の札・文言・目盛り・data-testid は変えない（表示だけの指定）。
+   */
+  readonly plainCard?: boolean;
 };
 
 /** 手続きの責任の線（北極星：本人名義・本人提出）。境界の文（lib/boundary.ts）をそのまま使う。 */
@@ -248,15 +253,15 @@ function ModelAircraftReferenceList() {
   );
 }
 
-export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes, part = "all", evidence, total }: Props) {
+export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, actions, meta, permitNotes, part = "all", evidence, total, plainCard }: Props) {
   // 診断が失敗したときは判定を出さない（古い判定・地点だけの判定で代えない。差し戻し 2 回目）。
   const ready = verdict !== undefined && !pending && !failed;
   const showConclusion = part !== "details";
   const showDetails = part !== "conclusion";
   // 手続き以降は、結論が確定したときだけ出る。確定していないとき、詳細の部分は何も描かない
   if (part === "details" && !ready) return null;
-  // 結論のカードは「判定の帯のカード」（16-M の M-1）。帯の色は総合の印（総合の語を出さない画面は判定の段）。判定不能・判定中・失敗は帯なし（未確認の灰）。
-  const cardState = ready ? VERDICT_STATE[total ? total.sign : verdict.level] : undefined;
+  // 結論のカードは「判定の帯のカード」（16-M の M-1）。帯の色は総合の印（総合の語を出さない画面は判定の段）。判定不能・判定中・失敗・過去の判定（plainCard）は帯なし（未確認の灰）。
+  const cardState = ready && !plainCard ? VERDICT_STATE[total ? total.sign : verdict.level] : undefined;
   return (
     <div
       data-testid={part === "details" ? "verdict-details" : "verdict-summary"}
@@ -564,7 +569,7 @@ export function VerdictSummary({ verdict, pending, failed, failedNote, onRetry, 
             </div>
           ) : null}
 
-          {/* 飛行の前後に行うこと（点検表。画面の見出しは DUTIES_HEADING_SCREEN。PDF は VERDICT_SECTION_TITLE.duties のまま） */}
+          {/* 飛行の前後に行うこと（点検表。見出しは画面・PDF 共通の VERDICT_SECTION_TITLE.duties。DUTIES_HEADING_SCREEN はその別名） */}
           <div data-testid="verdict-duties-section" className="flex flex-col gap-2">
             <SectionHead count={verdict.perFlightDuties.length}>{DUTIES_HEADING_SCREEN}</SectionHead>
             <ul data-testid="verdict-duties" className="flex flex-col divide-y divide-sb-rule rounded-sb-l bg-sb-base px-4 py-1 shadow-sb">

@@ -593,7 +593,7 @@ export const RegulationPdfDocument = ({
                 <Text style={[styles.appliedTitle, { color: COLOR.brand }]}>適用した許可・同意・目的（元の判定は変えない）</Text>
                 {itemById.get(reg.id)!.appliedPermits.map((p) => (
                   <View key={p.id}>
-                    <Text style={[styles.appliedItem, { color: COLOR.ink }]}>・{p.condition}</Text>
+                    <Text style={[styles.appliedItem, { color: COLOR.ink }]}>・{tidyEngineText(p.condition)}</Text>
                     {p.machine ? (
                       <Text style={[styles.appliedMachine, { color: COLOR.inkMute }]}>{p.machine}</Text>
                     ) : null}
@@ -611,7 +611,7 @@ export const RegulationPdfDocument = ({
                 ) : null}
                 {reg.appliedExceptions.map((ex) => (
                   <View key={ex.id}>
-                    <Text style={styles.appliedItem}>・{ex.condition}</Text>
+                    <Text style={styles.appliedItem}>・{tidyEngineText(ex.condition)}</Text>
                     {ex.machine ? (
                       <Text style={styles.appliedMachine}>
                         {formatMachineCondition(ex.machine)}

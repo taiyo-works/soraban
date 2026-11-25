@@ -717,3 +717,10 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 - `e2e/sprint16-m.spec.ts`（30 件）：M-1（帯のカード・札の形と言葉・行の帯・5 状態の帯）、M-2（5 状態の総合の語・禁止語・注記）、M-3（主ボタン 1 つ・地図の部品の円）、M-4（静的な HTML）、M-5（見出し・初期・エンジンの文の「必ず」を描画後の本文で 0）、K-3（5 状態のコントラスト）、K-4・K-5・K-14・K-15。`--repeat-each=3` で 87/87。
 - 旧コード（c3dfe5e）に戻して確かめた：29 件中 16 件が落ちる（残りは守りの検査＝K-3・K-4・K-5・K-14・K-15・M-1b・M-3a・M-4a・unknown の帯なし）。ログ `docs/evaluations/logs/sprint-16M-gen-spec-oldcode.log`。
 - 空の判定の状態は、`/api/diagnose`・`/api/check` の応答を `page.route` で書き換えて作る（エンジンの結果の代わりに画面へ渡す。エンジンの段は 4 段で、判定不能の項目があるときは要手続きに倒れて `unknownCount` に出る）。
+
+## 16-M 修正 1（レビュー N-2・N-5・N-6）
+
+- 既存のテストは変えていない（期待の変更なし）。`data-testid`・5 段の札・文言・目盛りは変えていない（`scripts/testids.mjs --check` で消えたもの 0）。
+- 新規：`e2e/ops-db/sprint16-m-db.spec.ts`（N-2）。いまの判定の画面（`/judgement`）は結論のカードに帯（`sb-card-state`・`data-state`）が付き、スナップショットの画面は帯なし（クラス・`data-state`・`::before` の帯なし）。`--repeat-each=3` で 3/3。旧コード（744afa7）に戻すと落ちる（`sprint-16M-fix1-ops-oldcode.log`）。
+- N-2：`VerdictSummary` に表示だけの `plainCard`（過去の判定。帯なし）を足し、ops のスナップショットの画面だけが渡す。公開 `/`・`/judgement` は未指定のまま（挙動は同じ）。
+- N-5：`regulation-pdf.tsx` の適用した許可・例外の条件に `tidyEngineText` を掛けた（画面と揃う）。N-6：`verdict-summary.tsx` の古いコメントを実態に直した。
