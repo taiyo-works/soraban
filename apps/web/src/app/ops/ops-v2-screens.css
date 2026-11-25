@@ -666,10 +666,9 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     min-width: 1.5rem;
   }
   .opx-wiz-progress .opx-wiz-step {
-    flex: 0 0 auto;
-    max-width: 100%;
-    line-height: 1.4;
-    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   /* 画面の題は、入力の段では一段小さく（題は残し、入力欄を最初の画面に近づける） */
   main:has(> .opx-wiz-progress) h1.opx-h1 {
