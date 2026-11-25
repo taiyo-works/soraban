@@ -557,3 +557,15 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 ### 検証（空の DB から。ログ `docs/evaluations/logs/sprint-16I-gen-*.log`）
 
 typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,090 通過（15 skip）・build・コントラスト（組 101、満たさない 0）・`testids --check`（消えた 0）。`sprint16-i-db.spec.ts` は `--repeat-each=3` で 21/21。**ops の E2E 全体 394/394 通過**（空の DB `i_all`、`--retries=0`、26.4 分、HEAD `cfadd22`、同じ HEAD の build。`sprint-16I-gen-ops-e2e.log`）。公開側の画面は変えていないので、公開の E2E は流していない（`soraban-ui.css` には `.sb-check-no`＝点検の「異常」の丸だけを足した）。K-11 の差分は 0（`packages`・`apps/web/src/server`・`apps/web/src/app/api`・マイグレーション・package.json・lockfile は変更なし）。
+
+### 16-I 差し戻し 1（reviewer の指摘 R-1・N-1〜N-4・N-6。2026-11-25）
+
+- **既存の期待を書き換えた検査: 0。** 「すべて正常」を使う既存の E2E 10 か所（`sprint11-db` 18 ほか）は、いずれも未記入の状態から押している（異常を選んでから押すものは無い）ので、N-1 の動き（未記入だけ埋める）と矛盾しない。矛盾する期待は見つからなかった。
+- **足した検査（すべて `sprint16-i-db.spec.ts`）**:
+  - I-4（一覧）に、R-1：正常の点検・異常ありの点検を取り消し、`?includeVoided=1` で、取消済みの行に `[data-tone="safe"]`・`[data-tone="danger"]` が 0 件、`.sb-state` が 1 つで情報の「取消済み」、文言「取消済み」が 1 回だけ、線を引く表示は今のまま。N-4：点検済み・異常ありの状態ラベルの `backgroundColor` が `--sb-st-safe-face`・`--sb-st-danger-face` の計算値と一致。
+  - N-1：1 項目を異常、1 項目を正常にして群を畳み、「すべて正常」を押しても異常のまま残る・ほかは正常・全部記入済みでもう一度押しても変わらない。
+  - N-3：進み具合に `aria-live` が無く、未記入の数が 1 つだけ持つ（読み上げのある `aria-live` の領域は 1 つ）。群の数に sr-only「完了 2/3 項目」。群の補足が 14px・`data-note`。
+  - N-2：未完了で保存を押してフォーカスが移った時点で、radiogroup が `aria-invalid="true"`、`aria-describedby` が `inspection-err-result-general` で、その要素の文に「正常か異常かを選んでください」がある（I-2 の既存の検査に追記）。
+- **選択子の調整（弱めていない）**: I-1 の群の数（3）の数え方から、足した補足 `inspection-group-note` を除いた（群ではないため。数える対象は変わらない）。N-3 の初版は「フォーム内の `aria-live` が 1 つ」としたが、保存の横の送信中の領域（`SaveRow`。送っていない間は空。以前からある）が別にあるので、「中身のある `aria-live` が未記入の数の 1 つ」に直した（ログ `sprint-16I-fix1-spec-i-run1-selector-fail.log` は直す前）。
+- **画面の変更に伴う変更**: 一覧の取消済みの行は、以前は「区分の札と同じ形の『取消済み』の札」と結果のラベル（点検済み／異常あり）が並んでいた。いまは情報の状態ラベル「取消済み」1 つ。既存の E2E に、この行の `.sb-tag` や結果ラベルを見るものは無かった。
+- **識別子の基準**: `inspection-group-note` を足した。基準から外した 2 件（`inspection-item-${firstMissing}`・`prop: 同`）は、16-I で足した `querySelector` の文字列の中の式を拾った誤りで、画面に出る識別子ではない（N-2 で外した）。画面に出る識別子の消失は 0。件数 2,228（同じ）、ハッシュを更新した（記録は `sprint-17-testids-baseline-log.txt`）。

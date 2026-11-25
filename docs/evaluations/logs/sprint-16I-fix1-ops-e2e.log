@@ -1,0 +1,14 @@
+HEAD 9bb3874, 空の DB f1_b1795577016, build は fix1 の変更後
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts
+
+
+Running 396 tests using 1 worker
+
+  ✓    1 e2e/ops-db/sprint10-db.spec.ts:49:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済み・確認済みのメールアドレスで初回ログインすると結び付き、/ops に表示名と役割が出る (843ms)
+  ✓    2 e2e/ops-db/sprint10-db.spec.ts:60:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待されていないアドレスでは /ops/no-access が表示され、/api/ops/me が 403 (663ms)
+  ✓    3 e2e/ops-db/sprint10-db.spec.ts:68:7 › Sprint 10 E2E-DB：運航管理 › 6. 招待済みのアドレスでも emailVerified: false では結び付かない (78ms)
+  ✓    4 e2e/ops-db/sprint10-db.spec.ts:83:7 › Sprint 10 E2E-DB：運航管理 › 8. 役割ごとの API の状態コード（機体・操縦者・利用者） (436ms)
+  ✓    5 e2e/ops-db/sprint10-db.spec.ts:197:7 › Sprint 10 E2E-DB：運航管理 › 14. 理由なしの訂正・取消は 400。取消した機体は既定の一覧に出ず、詳細と版の一覧には残る。DELETE は 405 で行が残る (174ms)
+  ✓    6 e2e/ops-db/sprint10-db.spec.ts:228:7 › Sprint 10 E2E-DB：運航管理 › 17. 運航管理者が画面で機体を登録し、型式名を理由付きで訂正すると、版の一覧に登録・訂正の 2 行が出る (2.4s)
