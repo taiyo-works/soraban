@@ -662,7 +662,7 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     padding-block: 2px;
   }
   .opx-wiz-progress .opx-wiz-bar {
-    flex: 0 1 5.5rem;
+    flex: 0 1 3rem;
     min-width: 1.5rem;
   }
   .opx-wiz-progress .opx-wiz-step {
