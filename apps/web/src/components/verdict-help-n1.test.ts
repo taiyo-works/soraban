@@ -48,6 +48,7 @@ const cases: ReadonlyArray<[string, FlightVerdict, string | undefined, boolean]>
   ["判定不能 1 件＋要手続き", mk("needs_procedure", ["needs_procedure", "unknown"]), undefined, true],
   ["判定不能だけ", mk("needs_procedure", ["unknown"]), undefined, true],
   ["項目 0 件（総合 unknown）", mk("needs_procedure", [], 0), "unknown", true],
+  ["項目 0 件（total なし。PDF・スナップショット）", mk("needs_procedure", [], 0), undefined, true],
   ["過去の判定（total なし）で unknownCount>0", mk("needs_procedure", ["needs_procedure"], 1), undefined, true],
   ["no_fly", mk("no_fly", ["no_fly"]), undefined, false],
   ["needs_procedure（判定不能なし）", mk("needs_procedure", ["needs_procedure"]), "needs_procedure", false],
@@ -68,14 +69,12 @@ describe("16-N1 判定不能のときの説明文", () => {
         expect(h).toContain(help(v.level));
       }
     });
-    if (tk === undefined || tk !== "unknown") {
-      it(`PDF：${name}`, () => {
-        const t = pdf(v);
-        if (hidden) {
-          expect(t).not.toContain("飛べ");
-          expect(t).not.toContain(help(v.level));
-        } else expect(t).toContain(help(v.level).replace(/\s/g, ""));
-      });
-    }
+    it(`PDF：${name}`, () => {
+      const t = pdf(v);
+      if (hidden) {
+        expect(t).not.toContain("飛べ");
+        expect(t).not.toContain(help(v.level).replace(/\s/g, ""));
+      } else expect(t).toContain(help(v.level).replace(/\s/g, ""));
+    });
   }
 });
