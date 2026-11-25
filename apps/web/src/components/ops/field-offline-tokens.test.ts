@@ -54,11 +54,12 @@ describe("16-K K2-1 現場・圏外・PWA の案内は新しいトークンだ�
 });
 
 describe("16-K K2-4 現場の主ボタンは 1 つの状態に 1 つ", () => {
-  it("field-client：data-variant を持つのは離着陸のボタンと日誌へのリンクだけ。確認・保存・リンクは副", () => {
+  it("field-client：data-variant を持つのは離着陸のボタンだけ。日誌へのリンク・確認・保存・リンクは副", () => {
     const src = stripComments(read("components/ops/field-client.tsx"));
     const found = [...src.matchAll(/["']?data-variant["']?\s*[=:]/g)].length;
-    expect(found).toBe(3); // 着陸・離陸・日誌を記入する
-    for (const id of ["field-docs-confirm", "field-restriction-submit", "field-site-submit", "field-inspection-link", "field-em-submit", "field-recheck-submit", "field-carry-submit", "field-post-link"]) {
+    expect(found).toBe(2); // 着陸・離陸（§17-20：日誌を記入するは副）
+    expect(src).not.toMatch(/journalPrimary/);
+    for (const id of ["field-journal-link", "field-docs-confirm", "field-restriction-submit", "field-site-submit", "field-inspection-link", "field-em-submit", "field-recheck-submit", "field-carry-submit", "field-post-link"]) {
       const i = src.indexOf(id);
       expect(i, id).toBeGreaterThan(0);
       expect(src.slice(Math.max(0, i - 400), i + 120), id).not.toMatch(/BTN_PRIMARY|data-variant/);
@@ -78,7 +79,8 @@ describe("16-K K2-3 状態の帯", () => {
     const band = src.slice(src.indexOf('data-testid="field-status-band"'), src.indexOf("</section>", src.indexOf('data-testid="field-status-band"')));
     expect(band).toMatch(/data-testid="field-status-prefetch-stale"/);
     expect(band).toMatch(/！古い可能性/);
-    expect(band).not.toMatch(/field-status-prefetch-stale-help/);
+    expect(band).not.toMatch(/data-testid="field-status-prefetch-stale-help"/);
+    expect(band).toMatch(/aria-describedby="field-status-prefetch-stale-help"/);
     expect(band).not.toMatch(/登録が変わっていないか/);
     expect(src).toMatch(/data-testid="field-status-prefetch-stale-help"/);
   });

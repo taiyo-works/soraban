@@ -1,10 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
 import { collectTapTargets, collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets, relativeLuminance, waitForSettledStyles } from "../field-checks";
 
 // Sprint 16-K の E2E-DB（契約 K2-1・K2-3・K2-4。K2-2・K2-5 は 12c・12e・14・15 の既存の E2E が期待値を変えずに通ることで確かめる）。
 //   K2-1  現場と圏外の画面 4 つ（今日・現場・点検・日誌）と PWA の新しい版の知らせが新しい部品・現場の値で描かれる（旧い class 0、現場モードの印、56px・18px・7:1）。
 //   K2-3  320・375 幅で、先読みの「古い可能性」が出ても状態の帯は 100px 以下。説明は帯の下の field-status-prefetch-stale-help。
-//   K2-4  主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（離陸前＝離陸、飛行中＝着陸、着陸後で日誌が未記入＝日誌を記入する）。現場の動きは 0。日差しの模擬で文字 4.5 以上。
+//   K2-4  主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（離陸前＝離陸、飛行中＝着陸、着陸後＝離陸。日誌へのリンクは副。§17-20）。現場の動きは 0。日差しの模擬で文字 4.5 以上。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1 を与えた next start（本番のビルド）に対して実行する。Service Worker はこの仕様書だけ許可する（sprint15-db と同じ）。
 // サーバーの時計は OPS_TEST_NOW（JST 2027-01-05 12:00）。ブラウザの時計は page.clock で合わせる。
 const BASE = `http://127.0.0.1:${process.env.E2E_OPS_PORT ?? 3300}`;
@@ -204,11 +205,12 @@ for (const vp of [
       await expect(help).toContainText("電波のある場所で開き直してください");
       await waitForSettledStyles(page);
       const bb = (await band.boundingBox())!;
-      const hb = (await help.boundingBox())!;
+      // 帯は sticky なので、説明の位置は文書の上端からの距離で比べる（スクロール位置に左右されない）
+      const helpTop = await help.evaluate((e) => e.getBoundingClientRect().top + window.scrollY);
       test.info().annotations.push({ type: "band-height", description: `${vp.name} 圏外・古い可能性: ${bb.height.toFixed(2)}px` });
       expect(bb.height, `${vp.name} 状態の帯の高さ（古い可能性が出た状態・圏外）`).toBeLessThanOrEqual(100);
       expect(bb.height, "既存の基準（< 140）").toBeLessThan(140);
-      expect(hb.y, "説明は帯の下").toBeGreaterThanOrEqual(bb.y + bb.height - 0.5);
+      expect(helpTop, "説明は帯の下").toBeGreaterThanOrEqual(bb.height - 0.5);
       // 帯の文字は 18px 以上、4 つの項目が帯の外にはみ出さない
       for (const id of ["field-status-connection", "field-status-unsent", "field-status-saved", "field-status-prefetch"]) {
         const b = (await page.getByTestId(id).boundingBox())!;
@@ -272,14 +274,15 @@ test.describe("K2-1・K2-2・K2-4 現場と圏外の画面 375×812", () => {
     await expect(btn).toHaveText("着陸");
     await expectOnePrimary(page, FIELD, "field-flight-button", "飛行中");
     await expectFieldStandards(page, FIELD, "飛行中", "field-flight-button");
-    // 着陸後（日誌が未記入）：主ボタンは「日誌を記入する」の 1 つ。離陸は副（80px は保つ）
+    // 着陸後（日誌が未記入）：主ボタンは「離陸」の 1 つ（§17-20。日誌へのリンクは副。並びは日誌が先）
     await page.clock.setFixedTime(at("11:58:05"));
     await page.waitForTimeout(1600);
     await btn.click();
     await expect(btn).toHaveText("離陸");
     await expect(page.getByTestId("field-journal-link")).toBeVisible();
-    await expectOnePrimary(page, FIELD, "field-journal-link", "着陸後（日誌が未記入）");
-    await expect(btn).not.toHaveAttribute("data-variant", "primary");
+    await expectOnePrimary(page, FIELD, "field-flight-button", "着陸後（日誌が未記入）");
+    await expect(btn).toHaveAttribute("data-variant", "primary");
+    await expect(page.getByTestId("field-journal-link")).not.toHaveAttribute("data-variant", "primary");
     await expectFieldStandards(page, FIELD, "着陸後（日誌が未記入）", "field-flight-button");
 
     // 圏外の日誌
@@ -339,3 +342,94 @@ test.describe("K2-1・K2-2・K2-4 現場と圏外の画面 375×812", () => {
   });
 });
 
+
+// ---- fix1：主ボタンの数え方（N-6）と、帯・警告・説明の並び（R-1）・読み上げの結び付き（N-1） ----------------------------------
+const postFieldEvent = async (ctx: APIRequestContext, planId: string, body: Record<string, unknown>, hm: string): Promise<void> => {
+  const r = await ctx.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T${hm}`, ...body } });
+  expect(r.status(), await r.text()).toBe(201);
+};
+const landTwice = async (manager: APIRequestContext, planId: string): Promise<void> => {
+  await postFieldEvent(manager, planId, { kind: "takeoff" }, "11:55");
+  await postFieldEvent(manager, planId, { kind: "landing" }, "11:56");
+  await postFieldEvent(manager, planId, { kind: "takeoff" }, "11:57");
+  await postFieldEvent(manager, planId, { kind: "landing" }, "11:58");
+};
+
+test.describe("fix1 N-6 主ボタンの数え方 375×812", () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
+  const FIELD = '[data-testid="field-root"]';
+
+  test("着陸後で日誌が未記入の飛行が 2 件以上：主ボタンは離陸の 1 つ、日誌へのリンクは副", async ({ page }) => {
+    const { manager, plan } = await prepare(page);
+    await landTwice(manager, plan.id);
+    await openField(page, plan.id);
+    await expect(page.getByTestId("field-journal-link")).toHaveCount(2);
+    await expect(page.getByTestId("field-flight-button")).toHaveText("離陸");
+    await expectOnePrimary(page, FIELD, "field-flight-button", "日誌未記入 2 件");
+    await expect(page.locator('[data-testid="field-journal-link"][data-variant="primary"]')).toHaveCount(0);
+    await manager.dispose();
+  });
+
+  test("日誌を書けない人（閲覧者）が、着陸した飛行のある計画を開く：主ボタンは 1 つ以下で、日誌へのリンクは主にならない", async ({ page }) => {
+    const { manager, plan } = await prepare(page);
+    await landTwice(manager, plan.id);
+    await signIn(page.request, seeded("a-viewer"));
+    await openField(page, plan.id);
+    await expect(page.getByTestId("field-journal-none")).toBeVisible();
+    await expect(page.getByTestId("field-journal-link")).toHaveCount(0);
+    const p = await primaryState(page, FIELD);
+    expect(p.ids.length, "見えている主ボタン").toBeLessThanOrEqual(1);
+    expect(p.ids.filter((x) => x === "field-journal-link")).toEqual([]);
+    expect(p.stray).toBe(0);
+    await manager.dispose();
+  });
+
+  test("計画の中止後（着陸した飛行あり・日誌未記入）：主ボタンは離陸の 1 つ（押せない）", async ({ page }) => {
+    const { manager, plan } = await prepare(page);
+    await landTwice(manager, plan.id);
+    const v = (await (await manager.get(`/api/ops/plans/${plan.id}`)).json()) as { version: number };
+    expect((await manager.post(`/api/ops/plans/${plan.id}/void`, { data: { expectedVersion: v.version, reason: "試験" } })).status()).toBe(200);
+    await openField(page, plan.id);
+    await expect(page.getByTestId("field-cancelled")).toBeVisible();
+    await expect(page.getByTestId("field-flight-button")).toBeDisabled();
+    await expectOnePrimary(page, FIELD, "field-flight-button", "中止後");
+    await expect(page.locator('[data-testid="field-journal-link"][data-variant="primary"]')).toHaveCount(0);
+    await manager.dispose();
+  });
+});
+
+test.describe("fix1 R-1・N-1 警告と説明の並び 375×812", () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
+
+  test("緊急用務空域が指定されていて先読みが古い：並びは 帯 → 警告 → 説明 → header。説明は古い可能性の印と aria-describedby で結ぶ", async ({ page, context }) => {
+    const { manager, plan } = await prepare(page);
+    await postFieldEvent(manager, plan.id, { kind: "check", item: "emergency_airspace", result: "designated", source: "mlit-emergency-airspace-qa" }, "11:55");
+    await page.clock.setFixedTime(at("11:56:00"));
+    await openField(page, plan.id);
+    await waitSw(page);
+    await waitBundle(page, plan.id);
+    await setOnline(page, context, false);
+    await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+    await page.reload();
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    const warn = page.getByTestId("field-emergency-warning");
+    const help = page.getByTestId("field-status-prefetch-stale-help");
+    await expect(warn).toBeVisible();
+    await expect(help).toBeVisible();
+    await waitForSettledStyles(page);
+    // 帯は sticky なので、文書の上端からの距離（top・bottom）で並びを比べる
+    const docBox = (id: string) => page.getByTestId(id).evaluate((e) => ({ top: e.getBoundingClientRect().top + window.scrollY, bottom: e.getBoundingClientRect().bottom + window.scrollY }));
+    const bandH = (await page.getByTestId("field-status-band").boundingBox())!.height;
+    const w = await docBox("field-emergency-warning");
+    const h = await docBox("field-status-prefetch-stale-help");
+    const head = await docBox("field-plan-title");
+    expect(w.top, "警告は帯の下").toBeGreaterThanOrEqual(bandH - 0.5);
+    expect(h.top, "説明は警告より下").toBeGreaterThanOrEqual(w.bottom - 0.5);
+    expect(head.top, "header は説明より下").toBeGreaterThanOrEqual(h.bottom - 0.5);
+    await expect(page.getByTestId("field-status-prefetch-stale")).toHaveAttribute("aria-describedby", "field-status-prefetch-stale-help");
+    await expect(help).toHaveAttribute("id", "field-status-prefetch-stale-help");
+    await expect(help).toHaveAttribute("role", "status");
+    await setOnline(page, context, true);
+    await manager.dispose();
+  });
+});

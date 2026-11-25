@@ -107,7 +107,7 @@ import { FIELD_BACK } from "./ops-nav-model";
 // 現場の値（56／64px・7:1・影なし・動きなし）は、現場の 2 画面を開いている間だけ <html data-mode="field"> が付くことで効く（FieldModeMark）。
 // 見た目は ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*。意味は枠の形（実線・破線・太さ）と記号・文字が担い、色は補助。
 const BTN = "opx-btn w-full";
-// 主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（16-K K2-4）：飛行中は「着陸」、着陸後で日誌が未記入なら「日誌を記入する」、それ以外は「離陸」。
+// 主ボタン（data-variant="primary"）は 1 つの状態に 1 つ（16-K K2-4）：飛行中は「着陸」、それ以外（離陸前・着陸後）は「離陸」。日誌へのリンクは副（着陸後も主は離陸。§17-20）。
 // 確認・保存・リンクの押す部品はすべて副（BTN）。選択中は BTN_SEL（主色の面。data-variant は付けない）。
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
@@ -116,7 +116,6 @@ const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 const BTN_FLIGHT_SIZE = "min-h-24 text-4xl tracking-[0.2em] indent-[0.2em]";
 const BTN_FLIGHT = `${BTN_PRIMARY} ${BTN_FLIGHT_SIZE}`;
-const BTN_FLIGHT_SECOND = `opx-btn opx-btn-field w-full ${BTN_FLIGHT_SIZE}`;
 // Sprint 12e：事故・ヒヤリハットの簡易記録への帯。離着陸の「1 つの大きなボタン」と競わないよう、塗りのない淡い地・左寄せ・
 // 太字にしない帯にする（高さ 56px・全幅・文字 18px は保つ）。行き先は右端の矢印で示す。
 const BAND_INCIDENT = "opx-band";
@@ -541,8 +540,6 @@ export function FieldClient({
   const plan = view.plan;
   const allChecked = FIELD_CHECK_ITEMS.every((i) => state.checks[i].done);
   const stage: 1 | 2 | 3 = inFlight ? 2 : state.pendingJournal.length > 0 ? 3 : allChecked ? 2 : 1;
-  // 着陸後で日誌が未記入のとき、主ボタンは「日誌を記入する」（離陸は副。並びも日誌が先）。それ以外は離着陸のボタンが主（K2-4）
-  const journalPrimary = stage === 3 && view.canJournal;
   const hm = (iso: string): string => jstTime(new Date(iso));
   const elapsed = open && nowMs > 0 ? formatElapsed(nowMs - new Date(open.takeoffAt).getTime()) : formatElapsed(0);
   const wlNote = wakeLockNote(wl, inFlight);
@@ -1072,7 +1069,7 @@ export function FieldClient({
       {inFlight ? (
         <button
           type="button"
-          {...(journalPrimary ? {} : { "data-variant": "primary" })}
+          data-variant="primary"
           className={BTN_FLIGHT}
           data-testid="field-flight-button"
           data-action="landing"
@@ -1085,8 +1082,8 @@ export function FieldClient({
         <>
           <button
             type="button"
-            {...(journalPrimary ? {} : { "data-variant": "primary" })}
-            className={journalPrimary ? BTN_FLIGHT_SECOND : BTN_FLIGHT}
+            data-variant="primary"
+            className={BTN_FLIGHT}
             data-testid="field-flight-button"
             data-action="takeoff"
             disabled={cancelled}
@@ -1247,8 +1244,7 @@ export function FieldClient({
           <a
             key={f.takeoffEventId}
             href={journalHref(f)}
-            {...(i === 0 && journalPrimary ? { "data-variant": "primary" } : {})}
-            className={i === 0 && journalPrimary ? BTN_PRIMARY : BTN}
+            className={BTN}
             data-testid="field-journal-link"
             onClick={(e) => void goJournal(e, journalHref(f))}
           >
@@ -1300,19 +1296,20 @@ export function FieldClient({
         <span data-testid="field-status-prefetch">
           先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : "なし"}
           {bundleStale ? (
-            <strong className="ml-1 whitespace-nowrap" data-testid="field-status-prefetch-stale">
+            <strong className="ml-1 whitespace-nowrap" data-testid="field-status-prefetch-stale" aria-describedby="field-status-prefetch-stale-help">
               ！古い可能性
             </strong>
           ) : null}
         </span>
       </section>
-      {bundleStale ? (
-        <p className={BOX_NOTE} data-testid="field-status-prefetch-stale-help">
-          先読みした内容が古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください。
-        </p>
-      ) : null}
     </>
   );
+  // 古い可能性の説明（帯の外。緊急用務空域の警告より下、header の上）。開いている間に古くなったときも読み上げで伝わるよう role="status"
+  const staleHelpEl = bundleStale ? (
+    <p className={BOX_NOTE} id="field-status-prefetch-stale-help" role="status" data-testid="field-status-prefetch-stale-help">
+      先読みした内容が古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください。
+    </p>
+  ) : null;
 
   return (
     <main
@@ -1330,6 +1327,7 @@ export function FieldClient({
           <span>{EMERGENCY_DESIGNATED_WARNING}</span>
         </p>
       ) : null}
+      {staleHelpEl}
 
       {/* 上部：計画の要点（運航票の見出し）と「ホームへ戻る」 */}
       <header className="flex flex-col gap-3 border-b-[length:var(--sb-mark-w)] border-sb-edge pb-4">
