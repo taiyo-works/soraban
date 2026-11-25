@@ -923,6 +923,140 @@ input.sb-radio:disabled {
   padding: 4px 12px 12px;
 }
 
+/* ===== 点検の入力（Sprint 16-I 磨き込み。見本：design-direction-2026-11.md D-2 チェック行）=====
+ * 行は面を持たず罫で区切る（白い群の中に灰色の面を重ねない）。面と左の帯を使うのは「異常」の行だけで、そこに目が行く。
+ * 状態は記号＋文字（済・異常・未記入）。色は補助。.sb-insp-* は点検の入力だけの部品（スタイルだけ。識別子・aria は変えない） */
+.sb-chk-group:has(.sb-insp-list) > summary {
+  min-height: 56px;
+}
+.sb-chk-group:has(.sb-insp-list)[open] > summary {
+  border-bottom: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-card) var(--sb-r-card) 0 0;
+}
+.sb-chk-group:has(.sb-insp-list) .sb-chk-list {
+  padding: 0 12px 8px;
+}
+.sb-insp-list > li {
+  display: block;
+}
+.sb-insp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 72px;
+  padding: 12px 12px 14px;
+  border-left: 6px solid transparent;
+  background: transparent;
+}
+.sb-insp-row + .sb-insp-row {
+  box-shadow: inset 0 var(--sb-rule-w) 0 var(--sb-rule);
+}
+.sb-insp-row:has([data-state="abnormal"]) {
+  border-radius: var(--sb-r-m);
+  border-left-color: var(--sb-st-danger-mark);
+  background: var(--sb-st-danger-face);
+  box-shadow: none;
+}
+/* 異常の行の前後の罫は消す（面が区切りになる） */
+.sb-insp-row:has([data-state="abnormal"]) + .sb-insp-row {
+  box-shadow: none;
+}
+/* 結果の印：済＝実線なし・安全の文字、異常＝危険の文字、未記入＝破線の枠（記入を促す形）。どれも先頭の形＋文字で、色だけに頼らない */
+.sb-insp-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1.5px dashed var(--sb-edge);
+  border-radius: var(--sb-pill);
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.sb-insp-mark[data-state="normal"] {
+  border-color: transparent;
+  color: var(--sb-st-safe-text);
+}
+.sb-insp-mark[data-state="abnormal"] {
+  border: 1.5px solid var(--sb-st-danger-mark);
+  color: var(--sb-st-danger-text);
+}
+/* 進み具合：文字（記入済み n/9）の下に細い線。線は補助で、数は文字が担う */
+.sb-insp-progress {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding-bottom: 10px;
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-insp-progress::before,
+.sb-insp-progress::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 2px;
+}
+.sb-insp-progress::before {
+  right: 0;
+  background: var(--sb-sunken);
+}
+.sb-insp-progress::after {
+  width: calc(var(--sb-prog, 0) * 100%);
+  background: var(--sb-primary);
+  transition: width var(--sb-dur) var(--sb-ease);
+}
+.sb-insp-abn {
+  color: var(--sb-st-danger-text);
+}
+/* 群の補足：群のすぐ上（進み具合とは離し、群と対にする） */
+.sb-insp-note {
+  margin-bottom: -6px;
+  color: var(--sb-ink-2);
+}
+/* 未記入の数：保存の押す部品の上に、文字を濃く（スマホ）。広い画面は従来どおりボタンの右 */
+.sb-insp-missing {
+  order: -1;
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-insp-missing[data-missing="0"] {
+  color: var(--sb-st-safe-text);
+}
+@media (min-width: 640px) {
+  .sb-insp-missing {
+    order: 0;
+  }
+}
+/* 日誌から移ったときの注記（離陸より後の実施日時）：注意の面＋左の帯＋「!」。大きさは従来の補足（14px）のまま：16px にすると 375×812 の最初の画面（I-3）に全体が入らない。
+ * 余白を詰め、見出しの行は 1 行に収める。保存は止めない */
+.opx-form [data-testid="inspection-after-takeoff"] {
+  gap: 2px;
+  margin-top: -8px;
+  padding: 8px 10px;
+  border: 0;
+  border-left: 5px solid var(--sb-st-warn-mark);
+  border-radius: var(--sb-r-m);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
+}
+.opx-form [data-testid="inspection-after-takeoff"] :is(p, ul, li) {
+  color: var(--sb-ink);
+}
+.opx-form [data-testid="inspection-after-takeoff"] > p {
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+}
+.opx-form [data-testid="inspection-after-takeoff"] li > span[aria-hidden] {
+  font-weight: 700;
+  color: var(--sb-st-warn-text);
+}
+
 /* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を墨の経路が進む。スマホ 128px、PC 240px） ===== */
 .sb-hero {
   position: relative;
@@ -1674,6 +1808,18 @@ a.sb-row:focus-visible .sb-go-dot {
   background: var(--sb-control);
   color: var(--sb-ink);
   font-weight: 700;
+}
+
+/* 点検の一覧（16-I 磨き込み）：取消済みのカードは、面を地に近づけて破線の縁にする（有効な記録の実線の縁と形で見分ける。状態は情報の「取消済み」と取り消し線の文字も示す）。
+ * 縁の太さの分だけ内側の余白を引いて、カードの高さを変えない */
+a.sb-card-list:has([data-result="voided"]) {
+  padding: calc(var(--sb-sp-4) - 1.5px);
+  border: 1.5px dashed var(--sb-edge);
+  background: var(--sb-base);
+  box-shadow: none;
+}
+a.sb-card-list:has([data-result="voided"]):hover {
+  background: var(--sb-hover);
 }
 
 /* ===== 空の状態・通信エラー（Sprint 16-D D-5） ===== */

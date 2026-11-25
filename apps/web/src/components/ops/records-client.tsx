@@ -6,7 +6,7 @@
 // - 下書きごとの送信の識別子（clientRequestId）を付けて送るため、応答が分からないまま再送しても記録は 2 件にならない。
 // - 「現在地」ボタンは押したときだけ端末の位置を 1 回取得する。保存を押すまで送らない（保存すると離着陸場所として記録される）。
 // 判断（飛行時間・総飛行時間・認可）はサーバーと DB が行う。ここでの飛行時間の表示は同じ関数（lib/ops-time.ts）で求める。
-import { useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import {
   flightMinutesFromInput,
   formatHm,
@@ -1608,13 +1608,13 @@ export function InspectionForm({
             すべて正常
           </button>
         </div>
-        <p data-note="" className="flex flex-wrap items-baseline gap-x-3 sb-num tnum text-sb-ink-2" data-testid="inspection-progress">
+        <p data-note="" className="sb-insp-progress sb-num tnum" style={{ "--sb-prog": selectedCount / INSPECTION_ITEMS.length } as CSSProperties} data-testid="inspection-progress">
           <span>
             記入済み {selectedCount}/{INSPECTION_ITEMS.length}
           </span>
-          {abnormalCount > 0 ? <span className="text-sb-v-no-fg">異常 {abnormalCount} 項目</span> : null}
+          {abnormalCount > 0 ? <span className="sb-insp-abn">異常 {abnormalCount} 項目</span> : null}
         </p>
-        <p data-note="" className="text-sb-ink-3" data-testid="inspection-group-note">
+        <p data-note="" className="sb-insp-note" data-testid="inspection-group-note">
           見やすさのために分けています（様式2 の区分ではありません）。
         </p>
         <div className="flex flex-col gap-3">
@@ -1622,7 +1622,7 @@ export function InspectionForm({
             const done = g.items.filter((k) => v.items[k].result !== "").length;
             return (
               <CheckGroup key={g.key} title={g.label} done={done} total={g.items.length} doneLabel="項目" testId={`inspection-group-${g.key}`}>
-                <ol className="m-0 flex list-none flex-col gap-2 p-0">
+                <ol className="sb-insp-list m-0 list-none p-0">
                   {g.items.map((key) => {
                     const it = INSPECTION_ITEMS.find((x) => x.key === key)!;
                     const no = INSPECTION_ITEMS.findIndex((x) => x.key === key) + 1;
@@ -1633,7 +1633,7 @@ export function InspectionForm({
                     return (
                       <li
                         key={key}
-                        className={`flex min-h-[72px] flex-col gap-2 rounded-sb-m border-l-[6px] bg-sb-sunken px-3 py-3 ${abnormal ? "border-sb-v-no-fg" : "border-transparent"}`}
+                        className="sb-insp-row"
                         data-testid={`inspection-item-${it.key}`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -1648,7 +1648,7 @@ export function InspectionForm({
                             aria-hidden="true"
                             data-testid={`inspection-mark-${key}`}
                             data-state={st.result || "none"}
-                            className={`inline-flex shrink-0 items-center gap-1 font-bold ${abnormal ? "text-sb-v-no-fg" : st.result === "normal" ? "text-sb-ink" : "text-sb-ink-3"}`}
+                            className="sb-insp-mark"
                           >
                             {st.result === "normal" ? (
                               <>
@@ -1719,7 +1719,7 @@ export function InspectionForm({
         label={isEdit ? "訂正する" : "保存"}
         onRetry={() => void submit()}
       >
-        <span data-note="" className="text-sb-ink-3" aria-live="polite" data-testid="inspection-missing-count" data-missing={missingCount}>
+        <span data-note="" className="sb-insp-missing" aria-live="polite" data-testid="inspection-missing-count" data-missing={missingCount}>
           {missingCount > 0 ? `未記入 ${missingCount} 項目` : "9 項目すべて記入済み"}
         </span>
       </SaveRow>
