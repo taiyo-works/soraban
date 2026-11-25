@@ -1,0 +1,52 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12h-pr3-db.spec.ts:94:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-1. 下タブ：ホーム／計画／日誌／機体と書類 の 4 つ（16-F。高さ 64px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし。点検は日誌が現在地 (29.2s)
+  ✓  2 e2e/ops-db/sprint12h-pr3-db.spec.ts:148:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は薄い主色の面・見出し 12px 以上。1280・1440px × 明・暗 (18.2s)
+  ✓  3 e2e/ops-db/sprint12h-pr3-db.spec.ts:181:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-3. 判定への入口：ホームと計画の作成画面の上部のピル（48px 以上・2 列・間 8px 以上）。押すと `/?start=…`、押すまで位置の要求は 0。360・375・768・1280px × 明・暗 (12.7s)
+  ✘  4 e2e/ops-db/sprint12h-pr3-db.spec.ts:236:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-4. 点検の 1 段目：新しい点検 → 未実施（今日の飛行前。記録より上）→ 記録。点検を記録すると未実施から消える。戻りリンクなし。結果の札に判定色を使わない (1.1s)
+  -  5 e2e/ops-db/sprint12h-pr3-db.spec.ts:319:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-5. 点検の一覧：閲覧者は「新しい点検」が出ず注記が出る。未実施の行は押せず、理由を文で示す。日誌には点検の一覧へのリンクがある
+  -  6 e2e/ops-db/sprint12h-pr3-db.spec.ts:345:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 320・360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上
+  -  7 e2e/ops-db/sprint12h-pr3-db.spec.ts:372:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-7. 現場モード：メニューは出さず「ホームへ戻る」（56px 以上）だけ。ホーム・点検の一覧から現場の入口までの導線は変わらない
+
+
+  1) e2e/ops-db/sprint12h-pr3-db.spec.ts:236:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-4. 点検の 1 段目：新しい点検 → 未実施（今日の飛行前。記録より上）→ 記録。点検を記録すると未実施から消える。戻りリンクなし。結果の札に判定色を使わない 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('main').getByRole('link', { name: /日誌/ })
+    Expected: "/ops/journal"
+    Error: strict mode violation: locator('main').getByRole('link', { name: /日誌/ }) resolved to 4 elements:
+        1) <a class="opx-back" href="/ops/journal">…</a> aka getByTestId('ops-inspections').getByRole('link', { name: '日誌', exact: true })
+        2) <a aria-label="点検を入力する：日誌の確認 MWVU0OQ49" data-testid="inspection-pending-link" class="sb-card sb-card-list sb-card-list-go" href="/ops/inspections/new?planId=87444753-5810-44c2-934a-bd2e85023e1f&returnTo=%2Fops%2Fplans%2F87444753-5810-44c2-934a-bd2e85023e1f%2Ffield%23preflight">…</a> aka getByRole('link', { name: '点検を入力する：日誌の確認 MWVU0OQ49' })
+        3) <a aria-label="点検を入力する：日誌の確認 MWVU056Q9" data-testid="inspection-pending-link" class="sb-card sb-card-list sb-card-list-go" href="/ops/inspections/new?planId=99ad304c-65c2-4d26-932d-2c70d10c6f55&returnTo=%2Fops%2Fplans%2F99ad304c-65c2-4d26-932d-2c70d10c6f55%2Ffield%23preflight">…</a> aka getByRole('link', { name: '点検を入力する：日誌の確認 MWVU056Q9' })
+        4) <a aria-label="点検を入力する：日誌の確認 MWVU0F9Z9" data-testid="inspection-pending-link" class="sb-card sb-card-list sb-card-list-go" href="/ops/inspections/new?planId=b3245b04-13ca-4c4c-b778-33da1c0b0813&returnTo=%2Fops%2Fplans%2Fb3245b04-13ca-4c4c-b778-33da1c0b0813%2Ffield%23preflight">…</a> aka getByRole('link', { name: '点検を入力する：日誌の確認 MWVU0F9Z9' })
+
+    Call log:
+      - Expect "toHaveAttribute" locator('main').getByRole('link', { name: /日誌/ }) with timeout 30000ms
+      - waiting for locator('main').getByRole('link', { name: /日誌/ })
+
+
+      246 |     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/点検/);
+      247 |     await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(1);
+    > 248 |     await expect(page.locator("main").getByRole("link", { name: /日誌/ })).toHaveAttribute("href", "/ops/journal");
+          |                                                                          ^
+      249 |     // 並び：新しい点検 → 未実施 → 記録
+      250 |     const y = async (id: string): Promise<number> => (await page.getByTestId(id).boundingBox())!.y;
+      251 |     const [yNew, yPending, yRecords] = [await y("inspection-new"), await y("inspection-pending"), await y("inspection-records")];
+        at /home/user/soraban/e2e/ops-db/sprint12h-pr3-db.spec.ts:248:74
+
+    Error Context: test-results/ops/sprint12h-pr3-db-Sprint-12-f25cb-から消える。戻りリンクなし。結果の札に判定色を使わない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint12h-pr3-db-Sprint-12-f25cb-から消える。戻りリンクなし。結果の札に判定色を使わない/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ops/sprint12h-pr3-db-Sprint-12-f25cb-から消える。戻りリンクなし。結果の札に判定色を使わない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint12h-pr3-db.spec.ts:236:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-4. 点検の 1 段目：新しい点検 → 未実施（今日の飛行前。記録より上）→ 記録。点検を記録すると未実施から消える。戻りリンクなし。結果の札に判定色を使わない 
+  3 did not run
+  3 passed (1.1m)

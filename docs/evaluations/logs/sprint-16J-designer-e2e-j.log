@@ -1,0 +1,127 @@
+
+Running 33 tests using 1 worker
+
+  ✘   1 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (1.0s)
+  ✓   2 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (721ms)
+  ✓   3 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (1.8s)
+  ✓   4 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (829ms)
+  ✓   5 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (882ms)
+  ✓   6 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (719ms)
+  ✓   7 e2e/ops-db/sprint16-j-db.spec.ts:271:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (1.1s)
+  ✓   8 e2e/ops-db/sprint16-j-db.spec.ts:309:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (1.9s)
+  ✓   9 e2e/ops-db/sprint16-j-db.spec.ts:356:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (918ms)
+  ✓  10 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.2s)
+  ✓  11 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.2s)
+  ✘  12 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (881ms)
+  ✓  13 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (597ms)
+  ✓  14 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (1.4s)
+  ✓  15 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (777ms)
+  ✓  16 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (790ms)
+  ✓  17 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (780ms)
+  ✓  18 e2e/ops-db/sprint16-j-db.spec.ts:271:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (1.1s)
+  ✓  19 e2e/ops-db/sprint16-j-db.spec.ts:309:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (1.7s)
+  ✓  20 e2e/ops-db/sprint16-j-db.spec.ts:356:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (782ms)
+  ✓  21 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+  ✓  22 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+  ✘  23 e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる (827ms)
+  ✓  24 e2e/ops-db/sprint16-j-db.spec.ts:138:7 › 16-J 日誌（J-1） › J-1. 飛行記録のカード：離陸–着陸の時刻と飛行時間を数値の強調（tabular-nums・20px 以上・太字）で出す。カード全体が押せて 72 以上。主ボタンは 1 つ (660ms)
+  ✓  25 e2e/ops-db/sprint16-j-db.spec.ts:173:7 › 16-J 日誌（J-1） › J-1. 飛行記録の一覧（/ops/flights）も同じカード：時刻・飛行時間・総飛行時間。取消済みは「取消済み」だけで、正常・完了と読める表示と総飛行時間を出さない（日誌には取消済みは出ない） (1.7s)
+  ✓  26 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 320 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (851ms)
+  ✓  27 e2e/ops-db/sprint16-j-db.spec.ts:218:9 › 16-J 日誌（J-1） › J-1. 日誌は 360 幅で横スクロールがなく、文字 200% でも切れない（飛行記録・点検のカードがある状態） (745ms)
+  ✓  28 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (861ms)
+  ✓  29 e2e/ops-db/sprint16-j-db.spec.ts:271:7 › 16-J 飛行記録の入力（J-2） › J-2. 節は共通の節の見出し（5 つ）、特定飛行の形態はチェック行（72 以上）。主ボタンは「飛行記録を保存」の 1 つだけ (1.1s)
+  ✓  30 e2e/ops-db/sprint16-j-db.spec.ts:309:7 › 16-J 飛行記録の入力（J-2） › J-2. 流れは変わらない：点検を結び付けて保存でき、POST に点検の ID が入る。保存後は詳細へ移り、下書きは消える。端末に残すのは今までの下書きの 1 つだけ (1.7s)
+  ✓  31 e2e/ops-db/sprint16-j-db.spec.ts:356:7 › 16-J 飛行記録の入力（J-2） › J-2. 計画からの初期値と、日誌から点検への移動（takeoffAt 付き）は変わらない (860ms)
+  ✓  32 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 320 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.2s)
+  ✓  33 e2e/ops-db/sprint16-j-db.spec.ts:394:9 › 16-J 飛行記録の入力（J-2） › J-2. 飛行記録の入力は 360 幅・文字 200% で横にはみ出さず、点検の入力の「区分」も 320 幅・200% で収まる（16-I の申し送り E-3） (1.5s)
+
+
+  1) e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "dashed"
+    Received: "solid"
+
+      124 |     ]);
+      125 |     expect(cur.w).toBe("solid");
+    > 126 |     expect(other.w).toBe("dashed");
+          |                     ^
+      127 |     expect(Number(cur.fw)).toBeGreaterThan(Number(other.fw));
+      128 |     await page.goto("/ops/journal?tab=flights");
+      129 |     await expect(page.getByTestId("journal-tab-flights")).toHaveAttribute("aria-current", "page");
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:126:21
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "dashed"
+    Received: "solid"
+
+      124 |     ]);
+      125 |     expect(cur.w).toBe("solid");
+    > 126 |     expect(other.w).toBe("dashed");
+          |                     ^
+      127 |     expect(Number(cur.fw)).toBeGreaterThan(Number(other.fw));
+      128 |     await page.goto("/ops/journal?tab=flights");
+      129 |     await expect(page.getByTestId("journal-tab-flights")).toHaveAttribute("aria-current", "page");
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:126:21
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat1/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "dashed"
+    Received: "solid"
+
+      124 |     ]);
+      125 |     expect(cur.w).toBe("solid");
+    > 126 |     expect(other.w).toBe("dashed");
+          |                     ^
+      127 |     expect(Number(cur.fw)).toBeGreaterThan(Number(other.fw));
+      128 |     await page.goto("/ops/journal?tab=flights");
+      129 |     await expect(page.getByTestId("journal-tab-flights")).toHaveAttribute("aria-current", "page");
+        at /home/user/soraban/e2e/ops-db/sprint16-j-db.spec.ts:126:21
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat2/error-context.md
+
+    Error Context: test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat2/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat2/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ops/sprint16-j-db-16-J-日誌（J-1）-1bd7f-a-current-page。切り替えると一覧が変わる-repeat2/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+    e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+    e2e/ops-db/sprint16-j-db.spec.ts:104:7 › 16-J 日誌（J-1） › J-1. タブ（すべて・飛行記録・日常点検・事故）は共通のチップ（48 以上）。選択中は aria-current=page。切り替えると一覧が変わる 
+  30 passed (45.1s)
