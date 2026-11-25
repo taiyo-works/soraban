@@ -671,5 +671,11 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 
 - `e2e/ops-db/sprint16-l-db.spec.ts`（10 件）：L-1（21 画面：旧い class 0・主ボタンの数・48px・14px・320〜430 幅の横スクロール 0／文字 200% の 320・390・430）、事故の詳細の主ボタン 1 つ（フォームを開いても。閲覧者は 0）、事故の記録の 320・200%、`/ops/about` の 200%、計画の一覧の札の 320・200%、E-5（360×740）、L-3、L-4、K-15。
 - 旧コード（3c03fa7）に戻して確かめた：K-15 を除く 9 件がすべて落ちる（K-15 は端末データを増やさないことの守りの検査で、旧コードでは流していない）。ログ `docs/evaluations/logs/sprint-16L-gen-spec-l-oldcode.log`。
-- `apps/web/src/lib/field-message.test.ts`：`tidyEngineText` の 2 件（エンジンの文は変えず、画面の文から「必ず」を外す）。
+- `apps/web/src/lib/field-message.test.ts`：`tidyEngineText` の 3 件（エンジンの文は変えず、画面の文から「必ず」を外す／「必ずしも」は残す〔fix1 で追加〕／「必ず」の無い文は変えない）。
 - 入れ物の切れの検査（`measureTextZoom` の `clippedContainers`）から、`input` だけを `sprint16-l-db` の側で除いた（入力欄の中の長い値は欄の中で読む。`field-checks.ts` の共通の除外は変えていない）。
+
+### 16-L 修正 1（レビュー R-1・N-2・N-4・N-9。2026-11-25）
+
+- **N-2**：`judgement/page.tsx` の未使用の `rejudgeIsPrimary` を削除し、古いコメントを今の挙動（古い判定のとき `judgement-primary` は副、再判定できる人は `plan-rejudge` が主、閲覧だけは主 0）に直した。lint の警告は 0（16-L の HEAD では、この変数の 1 件だけだった）。上の 16-L の節の検証にある「警告 1」は、この変数のことで、`report-client.tsx` のものではない。
+- **N-4**：`tidyEngineText` を `/必ず(?!しも)/g` にし、「必ずしも」を残す単体テストを 1 件足した。`verdict-summary.tsx` の「守る条件」にも `tidyEngineText` を掛けた（判定の画面のシート側と同じ。許可の登録による置き換えの文には掛けない）。エンジンの文・PDF・保存データは変えていない。
+- 既存の検査の期待は変えていない。
