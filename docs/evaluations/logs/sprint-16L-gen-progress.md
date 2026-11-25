@@ -24,6 +24,6 @@
 
 ## 修正 1（レビュー R-1・N-2・N-4・N-9。基準 HEAD 8b09b57）
 - [x] N-2・N-4 のコード（コミット 6ef2acf）：rejudgeIsPrimary 削除とコメント、`必ず(?!しも)`、守る条件に整え、単体 1 件追加。typecheck・lint（警告 0）・unit 3104 通過
-- [ ] R-1 公開側 E2E（ログ sprint-16L-fix1-public-e2e.log）
-- [ ] DB spec（sprint16-l-db・sprint16-h2-db）、build
-- [ ] test-changes・progress の更新、最終報告
+- [x] R-1 公開側 E2E（build 済み HEAD 12a7e46、CI=1・next start・1 ワーカー・--retries=0・フル Chromium）：319 通過・1 失敗（`sprint9` 306 右クリック。runbook の既知の不安定）。単独 --repeat-each=6 は 2 通過・4 失敗（runbook に基準 c58d92e で 3/6 とある）。ログ sprint-16L-fix1-public-e2e.log・-public-s9-306.log
+- [x] DB spec：sprint16-l-db（10）・sprint16-h2-db・sprint12d-db（verdict-done-condition を使う）計 34 通過（空の DB l16_fix1。ログ sprint-16L-fix1-ops-e2e.log）、build（-build.log）
+- [x] test-changes・progress の更新
