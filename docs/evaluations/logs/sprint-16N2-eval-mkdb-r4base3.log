@@ -1,0 +1,9 @@
+NOTICE:  database "ev16n2_r4base3" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+CREATE EXTENSION
+[db:migrate] 適用 0016_incident_records.sql（27 ms）
+[db:migrate] 適用 0017_field_round_records.sql（5 ms）
+[db:migrate] 適用 0018_flight_areas.sql（4 ms）
+
+[db:seed:ops-test] テスト用の初期データを投入しました
