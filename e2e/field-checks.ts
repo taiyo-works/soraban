@@ -1,4 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { describeControl, findControlsBelowMin, isTextControl, type ControlSample } from "./control-font-size";
+
+export { CONTROL_FONT_MIN, findControlsBelowMin, type ControlSample } from "./control-font-size";
 
 // 現場モードの見た目の基準（Sprint 12c 契約 15）を検査する補助。ブラウザで計算した色・寸法から、WCAG の式で比を求める。
 // 明るい配色と暗い配色は、呼び出し側が page.emulateMedia({ colorScheme }) で切り替えてから呼ぶ。
@@ -245,6 +248,51 @@ export const expectFontSize = async (page: Page, rootSelector: string, min: numb
   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+};
+
+/**
+ * root の中の入力欄（input・textarea・select）の、計算後の文字サイズを集める（Sprint 37 K-12）。
+ * collectTextSamples は文字の子ノードを持つ要素だけを見るため、入力欄はこちらで集める。判定は e2e/control-font-size.ts。
+ */
+export const collectControlSamples = async (page: Page, rootSelector: string): Promise<ControlSample[]> =>
+  page.evaluate((sel) => {
+    const root = document.querySelector(sel);
+    if (!root) return [];
+    const out: {
+      tag: "input" | "textarea" | "select";
+      type: string | null;
+      testId: string | null;
+      name: string | null;
+      fontSize: number;
+      disabled: boolean;
+      hidden: boolean;
+    }[] = [];
+    for (const el of Array.from(root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select"))) {
+      const tag = el.tagName.toLowerCase() as "input" | "textarea" | "select";
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      out.push({
+        tag,
+        type: tag === "input" ? ((el.getAttribute("type") ?? "text").toLowerCase() || "text") : null,
+        testId: el.getAttribute("data-testid"),
+        name: el.getAttribute("name"),
+        fontSize: parseFloat(cs.fontSize),
+        disabled: el.disabled,
+        hidden: r.width === 0 || r.height === 0 || cs.display === "none" || cs.visibility === "hidden",
+      });
+    }
+    return out;
+  }, rootSelector);
+
+/**
+ * 入力欄の文字サイズが min px 以上であること（本文 16px：CONTROL_FONT_MIN.body、現場 18px：CONTROL_FONT_MIN.field）。
+ * 入力欄が 1 つも無い root に当てると空振りになるので、既定では落とす（入力欄の無い画面と分かっているときだけ allowEmpty）。
+ */
+export const expectControlFontSize = async (page: Page, rootSelector: string, min: number, label: string, opts: { allowEmpty?: boolean } = {}): Promise<void> => {
+  const samples = await collectControlSamples(page, rootSelector);
+  if (!opts.allowEmpty) expect(samples.filter((s) => !s.hidden && isTextControl(s)).length, `${label}: 入力欄がない`).toBeGreaterThan(0);
+  const bad = findControlsBelowMin(samples, min).map(describeControl);
+  expect(bad, `${label}: ${min}px 未満の入力欄`).toEqual([]);
 };
 
 export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
