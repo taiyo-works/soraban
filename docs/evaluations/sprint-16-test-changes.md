@@ -752,5 +752,102 @@ typecheck・lint（警告 1 は既存の `report-client.tsx`）・`pnpm test` 3,
 | `sprint17-2-db` 主画面 375×812（draft／pending／reported／change／voidedNone／voidedRecorded） | 2,055／2,055／1,847／2,023／1,351／1,613px | 同じ | 各検査の上限 |
 | 同 1280×800（同じ順） | 1,568／1,568／1,349／1,533／940／1,150px | 同じ | 同上 |
 | `/judgement` | 長さを出力する検査がない。`sprint16-l-db`・`sprint16-m-db` の `/judgement` の検査は前後とも通過 | 同左 | なし |
+| `sprint17-2-db` 長い計画 375 の作業台（**16-N2 で `sprint-16N1-eval.md` §7 から転記**） | 10,385px | 10,385px | 10,400（余裕 15px、変わらず） |
+| `sprint16-l-db` E-5（360×740 の点検の注記）下端／ナビ上端（同） | 663.95／667（約 3px） | 663.95／667 | 同じ。通過 |
+| ホームの A7（`sprint12g-1b-db`）（同） | 通過 | 通過（空の DB の全体でも通過） | 752。検査は値を出力しない（16-N2 の基準の実測は下の 16-N2 の節：期限の最初の行の下端 411.9px） |
 
 測れる範囲では長さは変わっていない（説明文を隠すのは判定不能・項目 0 件のときだけで、これらの検査の台本は判定不能を含まない）。`/judgement` の長さは数値では比べていない。
+
+## 16-N2 旧い層の撤去・全体の検査・許可リストと棚卸しの整理（2026-11-26）
+
+ログは `docs/evaluations/logs/sprint-16N2-gen-*.log`。基準は 16-N1 の HEAD `44d3266`（前）、16-N2 の最後のコミット（後）。空の DB・フルの Chromium・1 ワーカー・`next start`（それぞれの build）で測った。
+
+### 撤去したもの（N-1）
+
+- `globals.css`：初期の `--color-*`（紙・墨・藍・信号・判定）と Tailwind の旧い対応（paper・ink・indigo・brand・signal・verdict・`--radius-sharp/soft`・`--font-display/mono`）、`.eyebrow`・`.bearing-mark`・`.contour-rule`、Sprint 12g の色の層（`:root` の `--bg-*`・`--fg-*`・`--accent*`・意味の 5 色・`--verdict-*`・`--scrim`・`--r-*`・`--dur*`・`--ease`、`:root .field`、暗の強制 2 規則、`@theme inline` の色・角丸・文字の名前のうち未使用のもの、`@custom-variant` の hov・foc・act・field・compact、`.ds .field`、旧名の写像、ダイアログ・表・スケルトン・ボトムシートの規則と keyframes）。
+- `ops-v2.css` の「旧い名前を v2 の値へ」（色の付け替え）、`soraban-ui.css` の `.ds.ds-sb` の色の付け替え（地 `--sb-surface` の指定だけ残した）。
+- `components/ui/primitives.tsx`・`overlays.tsx`・`forms.tsx`・`data.tsx`・`workspace.tsx`・`tabs.tsx`・`command-palette.tsx`・`journey-line.tsx`・`verdict-stamp.tsx`（参照 0 になったもの。使っていたのは `ops-client.tsx` の `buttonClass` と `ops-nav.tsx` の `InfoPopover` だけ）。
+- 残したもの（理由）：`.ds`（運航管理の枠と下メニューの根。組版・本文の大きさの名前 `text-h2・text-body・text-table・text-aux` が参照されている。色は `--sb-*` を直接引く形にした）、`.ds-pop`（利用者メニュー・ⓘの出現。動きは `--sb-dur`）、`ui/hooks.ts`（info-popover が使う）、`ui/icons.tsx`・`sheet.tsx`・`skeleton.tsx`・`sb-parts.tsx`・`cx.ts`（参照あり）、`ui/brand-marks.tsx`（参照 0 だが契約の列挙の外。`--appicon-*` が無いときの仮の青と白で動く。N-2 の検査の例外の表に理由つきで載せた）。
+- 置き換え：`InfoPopover` → `ui/info-popover.tsx`（色・角丸を `bg-sb-*`・`text-sb-*`・`rounded-sb-m` に。位置の計算・Escape・外側の押下は同じ）。ログアウトの 4 つのボタン（`signout`・`signout-send`・`signout-cancel`・`signout-keep`・`signout-discard`）→ 共通のボタン `.opx-btn`（主は `opx-btn-primary`、記録を捨てるのは `opx-btn-danger`。`data-variant="primary"` は付けていない＝K-8 の数は前と同じ）。`plan-ui.tsx` の行の `duration-[var(--dur)]` → `duration-[var(--sb-dur)]`。
+
+### 書き換えた既存の検査（K-10。弱めていない根拠つき）
+
+| 検査 | 前 | 後 | 理由・弱めていない根拠 |
+|---|---|---|---|
+| `design-tokens.test.ts` の「1a-1 トークンの構造」「1a-2 コントラスト」（12g の色の層の構造・組の比・実測の記録） | `globals.css` の 12g の色の層を解いて比を測る | 撤去の確認（旧い層が 0）、`prefers-color-scheme: dark` 0、影・ガラスのトークン 0、`.ds` の組版（色の指定・行間 1.7・行頭禁則・`color-scheme: light`）に置き換え | 検査の対象（層）そのものを消したため。実画面の比は `check-contrast-v2.mjs`（組 101・402 件・日差し 194 件。下の通り不足 0）と各 E2E の実測が引き続き確かめる。P1-5〜P1-7（`--sb-*` の構造・見本との一致）は変えていない |
+| `ui-parts.test.ts` | 12g の部品（ピル・ボタン・入力欄・判定の印・注意バー・フォーム・タブ・データ表・ワークスペース・行程）の描画 | brand-marks（アプリのアイコン案・線画）の検査だけ | 描画する部品を削除したため（参照 0・画面に出たことがない）。画面で使う部品は `sb-parts` で、E2E が確かめている |
+| `icons.test.ts` の「`components/ui` のソースが 10 より多い」 | `toBeGreaterThan(10)` | `toBeGreaterThanOrEqual(8)` | 削除でファイルが 16→8 になった。見つけたファイルが空でないことの下限（import が react・next・自分たちのコードだけ、外部 URL 0 の検査の本体は同じ） |
+| `testids-baseline.test.ts`（件数の下限・ハッシュ）と `sprint-17-testids-baseline.txt` | 2,242 件 | 2,215 件（下限 2,215。ハッシュを更新） | 削除した部品だけが持っていた 27 件（`workspace-*`・`toast`・`toast-region`・`command-palette`・`shortcut-sheet`・`filter-count` と prop・式）。どの画面・E2E にも出たことがない（参照 0 の部品）。一覧は `sprint-16N2-removed-testids.txt`、理由は `sprint-17-testids-baseline-log.txt`。**実画面の識別子の消失は 0**（`scripts/testids.mjs --check` は書き直した一覧に対して 0。足したものも 0） |
+| `wording-policy.test.ts`「許可リストの文が…実在する」 | 凡例の注記の文が `regulation-map-layers.ts` にあることを確かめる | 許可リストに「必ず」の行が無いことと、`regulation-map.tsx` が `tidyEngineText` で整えていることを確かめる | N2-1 で行を外したため（下） |
+| `ops/ops-v2-conventions.test.ts`・`sb-conventions.test.ts` | 列挙したファイルの旧トークン 0 | 変えていない | 新しい `legacy-sweep.test.ts` が全体に広げた（足した検査。下） |
+
+### 許可リストの整理（N2-1）
+
+`ALLOWED_SENTENCES` の 6 行について、公開の `/`・ops の全ルート・判定の PDF の走査（`sprint18-3-wording`・`sprint18-3-wording-db`。出力の記録は `docs/legal/screen-wording-inventory.md` §2）で、描画されるかを確かめた。
+
+| 行 | 結果 | 根拠 |
+|---|---|---|
+| 申請：`BOUNDARY_SHORT` | 残す | `/`（印の中） |
+| 申請：`BOUNDARY_FULL` | 残す | `/ops/about`・`/` |
+| 申請：`OFFICIAL_PROCEDURE_NOTE_TEXT` | 残す | `/ops`・`/ops/plans` ほか 10 ルート |
+| 保証：`DISCLAIMER_JUDGEMENT` | 残す | `/ops/about`・`/`・PDF（地点判定） |
+| 保証：事故・ヒヤリハットの目安 | 残す | `/ops/incidents/[id]` |
+| 必ず：「飛行の前に必ず DIPS でご確認ください」（地図の凡例の注記） | **外した** | 16-M から画面は `tidyEngineText` で「必ず」を外して描く（`regulation-map.tsx` の 2 か所）。走査の記録は 0 件（前回の棚卸しには `/` に 1 件あったが、16-M の前の記録）。もとの定数は表示の前の文のまま（データ）で、戻すと描かれない文を許すことになる |
+
+`JUDGEMENT_OWN_HEADINGS`（「飛行の前後に行うこと」）は許可リストではなく、棚卸しの分類の名前で、見出しから「必ず」が消えたので当てはまる文が出なくなった（§3a は「（なし）」）。許可リストではないので触っていない（迷った点）。棚卸し §1〜§4 は `scripts/wording-inventory.mjs` を流し直して作り直した（手では直していない。§5 の手書きは残る）。
+
+### 足した検査
+
+- `apps/web/src/app/legacy-sweep.test.ts`（N-2）：`apps/web/src/**` 全体（テストを除く TS・TSX 100 ファイル以上、CSS 5 以上）で、旧い Tailwind 名・variant・旧い class・旧い変数・色の名前の直指定・16 進/rgb/hsl が 0。例外は表 3 つ（PDF 系・地図の固定色・`verdict-display.ts` の PDF の 16 進・`pwa.ts` のマニフェスト・`proxy.ts`・`brand-marks.tsx` と、CSS の `--sb-map-*`・見本の日差しの模擬の白い膜）で、表の行が実際に直書きを持つことも確かめる（持たなくなった行は外す。`application-pdf.tsx`・`pdf-mono-text.tsx` は持たないので載せていない）。
+- `e2e/ops-db/sprint16-n2-db.spec.ts`（N-3）：`/` と `/ops` で、地・本文（何も指定しない段落）・主ボタン・副ボタン（ログアウト）・入力欄・判定の札（形は段によらず同じ・同じ段の色が同じ）・フォーカスの輪の計算されたスタイルが一致。現場は角丸・太さ・字形が通常と同じで、高さ 64 以上・影なし。
+- `e2e/ops-db/sprint16-n2-shots.spec.ts`（N2-3 の撮影。`N2_SHOTS_DIR` を与えたときだけ動く）。
+
+### 旧コードで落ちること（§17 の 17）
+
+`44d3266` の `apps/web/src` に戻して確かめた（`sprint-16N2-gen-oldcode-*.log`）。`legacy-sweep` の 3 件（TS の旧い名前・TS の直書き・CSS）、`wording-policy` の 1 件、N-3 の E2E の「副ボタン」（ログアウトの背景 `rgb(246,247,249)`・角丸 8px・太さ 500 が、`/` の副ボタン `rgb(238,241,245)`・12px・600 と食い違う）が落ちた。
+
+### 撮影の差（N2-3）
+
+`docs/evaluations/screenshots/sprint-16N2/before`・`after`（375×812・1280×800・ページ全体。ホーム・計画の一覧・日誌・点検の一覧と入力・飛行記録・登録・このアプリについて・機体・事故・計画作成 ①〜⑤・計画の主画面・判定・現場（離陸前）・利用者メニュー・ⓘ・公開の `/`）。画素の比較（`sprint-16N2-gen-shots-diff.log`）と、要素ごとの計算されたスタイル 56 項目の比較で、差は次の 2 つだけ。同じコードを 2 回撮った差（揺れの下限。`sprint-16N2-gen-noise-floor.log`）は、公開の `/` の地図の描画と ops ホームの 96 画素。
+
+1. **利用者メニューのログアウトのボタン**（意図した差）：旧い `ui/primitives` の副ボタン（面 `#F6F7F9`・角丸 8px・太さ 500・高さ 48）が、共通のボタン `.opx-btn`（面 `#EEF1F5`・角丸 12px・太さ 600・高さ 56）になった。375 と 1280 の `user-menu*.png` の 6 枚に出る。ログアウトの確認（`signout-warning` の 4 つのボタン）は、送信待ちがある状態を作っていないので撮っていない（同じ部品の置き換え）。
+2. **動きの時間**（画素に出ない）：行の遷移（`plan-row-next-action-link` ほか 12 要素）と利用者メニューの出現が 0.2s → 0.18s（`--dur` → `--sb-dur`）。現場・動きを減らす設定では 0 のまま（K-6）。
+
+公開の `/`・ホーム・計画作成・点検の入力・日誌・現場には、画素にも計算されたスタイルにも差がない（揺れの範囲を除く）。公開の `/` の DOM は、末尾の `<script>` が 1 つ少ない撮影が出た（Next が差し込むもので、撤去とは関係しない）。
+
+### 寸法の前後（余裕の薄い検査。上限は上げていない）
+
+| 検査 | 前（44d3266） | 後 | 上限 |
+|---|---|---|---|
+| `sprint12h-pr2` Q-20 ③ 375×812（スクロール量） | 1,640px（2.0 枚分） | 1,640px（2.0 枚分。同じ） | 1,664px（余裕 24px） |
+| 同 1280×800 | 830px | 830px（同じ） | 2 枚分 |
+| 同 B2（`/` 375 の全体） | 11,646px | 11,646px（同じ） | 12,000px |
+| `sprint12h-pr2` B1・Q-20 の他の台本 | 375: 0／0／2／1.1 枚分 | 同じ（`sprint-16N2-gen-pub-all.log`） | 2 枚分 |
+| `sprint17-2-db` 長い計画 375 の作業台 | 10,385px | 10,385px | 10,400px（余裕 15px） |
+| 同 主画面 375×812（draft／pending／reported／change／voidedNone／voidedRecorded） | 2,055／2,055／1,847／2,023／1,351／1,613px | 同じ | 各検査の上限 |
+| 同 voidedRecorded の最初の画面（`plan-report-status` の下端） | 738.45px | 738.45px | 748px（約 9.5px） |
+| `sprint16-l-db` E-5（360×740）注記の下端／ナビ上端 | 663.95／667 | 663.95／667 | 同じ（約 3px） |
+| `sprint12g-1b-db` A7（ホームの期限の最初の行の下端） | 411.89px | 411.89px | 752px |
+
+（ホームの題が 2 行・期限の対象が 40 字のときの余裕の薄さ（§17 の 11）は、16-N3 の N3-8 で扱う。ここでは測っていない。）
+
+### K-11（範囲）
+
+`packages`・`apps/web/src/app/api`・マイグレーション・`package.json`・lockfile・`ENGINE_VERSION`・証跡に差分は 0。`apps/web/src/server` の差分は **`ops/prep-card-logic.ts` の 3 行目の注釈 1 行だけ**（`Q-L16〜Q-L18` → `Q-L24〜Q-L26`。コードではなくコメント。N2-2）。`grep -rn "Q-L1[6-9]" apps packages e2e scripts`（`.next` を除く）は 0。
+
+### 実行した確認
+
+`pnpm typecheck`・`pnpm lint`・`pnpm test`（単体 3,097 件通過・15 件スキップ）・`REQUIRE_DB_TESTS=1 pnpm test:db`（289 件通過）・`pnpm build`・`node scripts/testids.mjs --check`（0）・`check-contrast-v2.mjs`（不足 0）・ops E2E 全体・公開側 E2E 全体。結果は完了報告と各ログ。
+
+### 全体の検査の結果（16-N2 の最後のコミット。空の DB から）
+
+| 検査 | 結果 | ログ |
+|---|---|---|
+| typecheck・lint | 通過 | `sprint-16N2-gen-typecheck.log`・`-lint.log` |
+| 単体 `pnpm test` | 134 ファイル・3,097 件通過（15 件スキップ） | `-unit.log` |
+| `REQUIRE_DB_TESTS=1 pnpm test:db` | 10 ファイル・289 件通過 | `-test-db.log` |
+| `pnpm build` | 通過 | `-build.log`・`-build-2.log` |
+| ops E2E 全体（`test:e2e:ops --retries=0`） | **437 通過・8 スキップ・1 失敗**。失敗は `sprint16-h1-fix1-db` R-4（段 ① でブラウザの戻る。`plan-new-link` を押しても計画の作成の画面が出ない）。runbook の既知の不安定なテスト。切り分け：同じ build で R-4 を単独 ×4（12/12 通過）、ファイル全体は 1 回失敗・3 回通過。基準 `44d3266` の build ではファイル全体を 2 回流して 16/16 ずつ通過。**16-N2 の変更が原因とは言えないが、失敗は HEAD 側だけに出た（全体 1／ファイル 1／計 6 回中 2 回、基準は 0／2 回）** | `-ops-all.log`・`-r4-isolate.log`・`-r4-file.log`・`-head-r4-file-*.log`・`-base-r4-file-*.log` |
+| 公開側 E2E 全体（CI と同じ `next start`・1 ワーカー・フルの Chromium・`--retries=0`） | **352 通過・1 失敗**。失敗は `sprint9` 306（右クリック）。runbook の既知の不安定なテスト（単独 ×6 で HEAD は 4 回失敗。runbook の基準の記録は 3/6〜6/6 失敗） | `-pub-all.log`・`-pub-s9-306.log` |
+| `sprint16-n2-db`（N-3） | 通過（旧コードでは落ちる） | `-n3-try5.log`・`-oldcode-e2e-n3.log` |
+| 識別子（K-9）・コントラスト | 消えた識別子 0（書き直した一覧に対して。27 件を理由つきで外した）・不足 0 | `-test-db.log` の続き（コマンドの出力は完了報告） |

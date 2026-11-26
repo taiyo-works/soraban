@@ -2,7 +2,7 @@
 
 > Sprint 18-3 契約 3-10。**`scripts/wording-inventory.mjs` が、E2E の走査の出力（`test-results/wording/*.json`）から作る。手で書き足さない。**
 > 走査の仕様は `docs/sprints/sprint-18.md` §6、語の一覧は `apps/web/src/lib/wording-policy.ts`。専門家確認（`legal-info-plan.md` Q-L1・Q-L2）の資料。
-> 入力: ops-A.json、ops-B.json、ops-C.json、ops-D.json、public.json（記録 87 件）。
+> 入力: ops-A.json、ops-B.json、ops-C.json、ops-D.json、ops-plan-wizard-steps.json、public.json（記録 99 件）。
 
 ## 1. 違反（全面禁止語・許可リストの外の限定語）
 

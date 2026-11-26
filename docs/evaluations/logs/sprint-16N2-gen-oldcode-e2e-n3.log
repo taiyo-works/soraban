@@ -1,0 +1,55 @@
+
+Running 2 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する (10.5s)
+  ✓  2 e2e/ops-db/sprint16-n2-db.spec.ts:157:7 › N-3 現場は色以外の形が同じで、寸法と線の太さだけ大きい › 主ボタン：角丸・太さ・字形が通常と同じ。高さと文字は通常以上（64 以上） (1.6s)
+
+
+  1) e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+
+    Error: 副ボタン
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Object {
+    -   "background-color": "rgb(238, 241, 245)",
+    -   "border-radius": "12px",
+    +   "background-color": "rgb(246, 247, 249)",
+    +   "border-radius": "8px",
+        "border-top-color": "rgb(107, 117, 134)",
+        "border-top-style": "solid",
+        "border-top-width": "1px",
+        "box-shadow": "none",
+        "color": "rgb(20, 24, 31)",
+        "font-size": "16px",
+    -   "font-weight": "600",
+    +   "font-weight": "500",
+        "min-height": "48px",
+      }
+
+      142 |     expect.soft(ops.para, "本文").toEqual(pub.para);
+      143 |     expect.soft(ops.primary, "主ボタン").toEqual(pub.primary);
+    > 144 |     expect.soft(ops.secondary, "副ボタン").toEqual(pub.secondary);
+          |                                        ^
+      145 |     expect.soft(ops.input, "入力欄").toEqual(pub.input);
+      146 |     const shapes = (x: Sample): string[] => [...new Set(Object.values(x.tags).map((t) => JSON.stringify(t.shape)))];
+      147 |     expect.soft(shapes(pub), "判定の札の形（`/`。段によらず同じ）").toHaveLength(1);
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:144:40
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+  1 passed (17.8s)
+exit=1

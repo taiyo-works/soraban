@@ -1,0 +1,9 @@
+NOTICE:  database "n2_after_dims" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+[db:migrate] 適用 0016_incident_records.sql（30 ms）
+[db:migrate] 適用 0017_field_round_records.sql（7 ms）
+[db:migrate] 適用 0018_flight_areas.sql（4 ms）
+> tsx packages/db/src/ops-seed-cli.ts
+
+[db:seed:ops-test] テスト用の初期データを投入しました
