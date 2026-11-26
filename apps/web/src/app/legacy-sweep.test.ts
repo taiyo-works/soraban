@@ -28,15 +28,26 @@ const HEX_EXEMPT: Readonly<Record<string, string>> = {
   "components/pdf-verdict.tsx": "PDF（同上）",
   "components/regulation-map-layers.ts": "地図の固定色（--sb-map-* と同じ値。地図の外の色ではない）",
   "components/regulation-map-zones.ts": "地図の層の印の線（地図の中の色）",
-  "lib/verdict-display.ts": "判定の PDF の 16 進（VERDICT_PDF_COLOR）。画面の色は --sb-v-*",
   "lib/pwa.ts": "PWA の theme_color・background_color（マニフェストは CSS の変数を読めない。値は地 #F6F7F9）",
   "proxy.ts": "エラー画面の組み込みの CSS（アプリの CSS を読まない応答。色の名前も自前）",
   "components/ui/brand-marks.tsx": "アプリのアイコン案（参照 0。--appicon-* が無いときの仮の青と白）",
 };
 
+/** ファイルの一部だけ色の直書きを許す。許す範囲（正規表現で切り出す塊）と理由。塊の外と、同じファイルの他の定数（VERDICT_TONE など）は検査する。 */
+const HEX_EXEMPT_PART: Readonly<Record<string, { readonly part: RegExp; readonly reason: string }>> = {
+  "lib/verdict-display.ts": { part: /export const VERDICT_PDF_COLOR\b[\s\S]*?\n\};/, reason: "判定の PDF の 16 進（VERDICT_PDF_COLOR だけ）。画面の色（VERDICT_TONE など）は --sb-v-*" },
+};
+/** コメントと、部分的に許した塊を除いた本文。色の直書き・色の名前の検査はこれを読む。 */
+const scanned = (f: string): string => {
+  let src = stripComments(read(f));
+  const p = HEX_EXEMPT_PART[f];
+  if (p) src = src.replace(p.part, "");
+  return src;
+};
+
 const LEGACY =
-  /(?<![\w-])(?:[a-z-]+:)*(?:rounded-(?:ctl|sharp|soft|t-sharp|b-sharp|pill)|(?:bg|text|border|border-[lrtbxy]|ring|ring-offset|fill|stroke|divide|decoration|accent|from|to|via|outline|placeholder:text)-(?:paper(?:-soft|-deep)?|ink(?:-soft|-mute)?|rule(?:-soft)?|indigo-\d+|brand-\d+|signal-[a-z-]+|verdict-(?:no-fly|needs|done|clear|unknown)|fg(?:-soft|-mute)?|accent(?:-soft|-solid|-fg)?|surface|sunken|app|line(?:-strong)?|(?:ok|warn|danger|info|neutral)-(?:fg|bg|line))|hov:|(?:foc|act|field|compact):(?:min-|max-|px-|py-|p-|h-|w-|text-|bg-|border-|font-|gap-|underline|translate|brightness))(?![\w-])/;
-const OLD_VAR = /var\(--(?:bg-(?:app|surface|sunken)|fg(?:-soft|-mute)?|line(?:-strong)?|accent(?:-soft|-solid(?:-hover)?|-fg)?|(?:ok|warn|danger|info|neutral)-(?:fg|bg|line)|verdict-[a-z-]+|scrim|r-journal|r-pill|color-(?:paper|ink|rule|indigo|brand|signal|verdict)[\w-]*|dur(?:-sheet)?|ease)\b/;
+  /(?<![\w-])(?:[a-z-]+:)*(?:rounded-(?:ctl|sharp|soft|t-sharp|b-sharp|pill)|text-(?:h1|h3|stat|state)|font-display|(?:bg|text|border|border-[lrtbxy]|ring|ring-offset|fill|stroke|divide|decoration|accent|from|to|via|outline|placeholder:text)-(?:paper(?:-soft|-deep)?|ink(?:-soft|-mute)?|rule(?:-soft)?|indigo-\d+|brand-\d+|signal-[a-z-]+|verdict-(?:no-fly|needs|done|clear|unknown)|fg(?:-soft|-mute)?|accent(?:-soft|-solid|-fg)?|surface|sunken|app|line(?:-strong)?|(?:ok|warn|danger|info|neutral)-(?:fg|bg|line))|hov:|(?:foc|act|field|compact):(?:min-|max-|px-|py-|p-|h-|w-|text-|bg-|border-|font-|gap-|underline|translate|brightness))(?![\w-])/;
+const OLD_VAR = /var\(--(?:bg-(?:app|surface|sunken)|fg(?:-soft|-mute)?|line(?:-strong)?|accent(?:-soft|-solid(?:-hover)?|-fg)?|(?:ok|warn|danger|info|neutral)-(?:fg|bg|line)|verdict-[a-z-]+|scrim|r-journal|r-pill|color-(?:paper|ink|rule|indigo|brand|signal|verdict)[\w-]*|dur(?:-sheet)?|ease|tap|fs-h1|hairline|sheet-h)\b/;
 const OLD_CLASS = /(?<![\w-])(?:ds-dialog|ds-dialog-panel|ds-table|ds-table-link|ds-skeleton|bearing-mark|contour-rule)(?![\w-])/;
 const TAILWIND_PALETTE =
   /(?<![\w-])(?:bg|text|border|ring|fill|stroke|divide)-(?:red|amber|yellow|orange|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|pink|rose|slate|gray|zinc|neutral|stone|black|white)(?:-\d{2,3})?(?![\w-])/;
@@ -51,10 +62,10 @@ describe("N-2 旧トークン・色の直書きの検査は apps/web/src 全体"
   it("TS・TSX（テストを除く）に、旧い色・角丸の Tailwind 名、variant、旧い class の名前、旧い CSS 変数の参照が 0", () => {
     const bad: string[] = [];
     for (const f of CODE) {
-      const src = stripComments(read(f));
+      const src = scanned(f);
       for (const [label, re] of [["旧い Tailwind 名", LEGACY], ["旧い class", OLD_CLASS], ["旧い変数", OLD_VAR], ["色の名前の直指定", TAILWIND_PALETTE]] as const) {
         // 色の直書きを許したファイル（PDF・地図）は、Tailwind の色の名前の直指定も同じ理由で許す
-        if (re === TAILWIND_PALETTE && f in HEX_EXEMPT) continue;
+        if (re === TAILWIND_PALETTE && (f in HEX_EXEMPT || f in HEX_EXEMPT_PART)) continue;
         const m = src.match(re)?.[0];
         if (m) bad.push(`${f}: ${label} ${m}`);
       }
@@ -66,7 +77,7 @@ describe("N-2 旧トークン・色の直書きの検査は apps/web/src 全体"
     const bad: string[] = [];
     for (const f of CODE) {
       if (f in HEX_EXEMPT) continue;
-      const m = stripComments(read(f)).match(HEX)?.[0];
+      const m = scanned(f).match(HEX)?.[0];
       if (m) bad.push(`${f}: ${m}`);
     }
     expect(bad).toEqual([]);
@@ -75,6 +86,19 @@ describe("N-2 旧トークン・色の直書きの検査は apps/web/src 全体"
   it("例外の表の行は、いまも色の直書きを持つファイルだけ（持たなくなった行は外す）", () => {
     const stale = Object.keys(HEX_EXEMPT).filter((f) => !CODE.includes(f) || !HEX.test(stripComments(read(f))));
     expect(stale).toEqual([]);
+    // 部分の例外は、塊が実在し、その中に直書きがあり、塊の外には無いこと
+    const stalePart = Object.entries(HEX_EXEMPT_PART).filter(([f, e]) => {
+      const whole = stripComments(read(f));
+      const m = whole.match(e.part);
+      return !CODE.includes(f) || !m || !HEX.test(m[0]) || HEX.test(scanned(f));
+    }).map(([f]) => f);
+    expect(stalePart).toEqual([]);
+  });
+
+  it("部分の例外の外（VERDICT_TONE など）は検査の対象に入っている", () => {
+    const f = "lib/verdict-display.ts";
+    expect(scanned(f)).toContain("VERDICT_TONE");
+    expect(scanned(f)).not.toContain("VERDICT_PDF_COLOR");
   });
 
   it("CSS：旧い色の変数・旧い class が 0。16 進・rgb は soraban-tokens.css の値と --sb-map-*（地図の固定色）、見本の日差しの模擬の白い膜だけ", () => {

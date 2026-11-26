@@ -76,7 +76,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
 export function Forbidden({ message = "この操作は運航管理者だけが行えます。" }: { readonly message?: string }) {
   return (
     <main className="flex max-w-xl flex-col gap-4">
-      <h1 className="font-display text-2xl font-light leading-tight text-sb-ink sm:text-3xl">権限がありません</h1>
+      <h1 className="text-2xl font-light leading-tight text-sb-ink sm:text-3xl">権限がありません</h1>
       <p className="opx-note">{message}</p>
     </main>
   );
