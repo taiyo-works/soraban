@@ -518,3 +518,46 @@ test.describe("N3-8 ホームの余裕", () => {
     await bm.dispose();
   });
 });
+
+// ---------------------------------------------------------------- ログアウトの確認の説明文（§17 の 30）
+test.describe("ログアウトの確認：signout-keep の説明文", () => {
+  for (const w of [320, 375]) {
+    test.describe(`${w}`, () => {
+      test.use({ viewport: { width: w, height: 812 } });
+      test(`文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（${w}px）`, async ({ page, context }) => {
+        const { manager, plan } = await prepare(page);
+        await openField(page, plan.id);
+        // 圏外で押して、端末に送信待ちを 1 件作る（サーバーには届かない）。ログアウトの確認が出る
+        await context.setOffline(true);
+        await page.getByTestId("field-flight-button").click();
+        await expect(page.getByTestId("field-unsent")).toContainText("未送信 1 件");
+        await context.setOffline(false);
+        await page.goto("/ops/more");
+        await expect(async () => {
+          await page.getByTestId("user-menu-button").click();
+          await page.getByTestId("signout").click();
+          await expect(page.getByTestId("signout-warning")).toBeVisible({ timeout: 2000 });
+        }).toPass({ timeout: 20_000 });
+        await waitForSettledStyles(page);
+        const keep = page.getByTestId("signout-keep");
+        await expect(keep).toContainText("（先読みは消します。同じ人がログインすると続きを送ります）");
+        const r = await keep.evaluate((btn) => {
+          const note = btn.querySelector<HTMLElement>("span:last-child")!;
+          const segs = Array.from(note.querySelectorAll<HTMLElement>("span")).map((s) => {
+            const cs = getComputedStyle(s);
+            return { text: s.textContent, lines: Math.round(s.getBoundingClientRect().height / parseFloat(cs.lineHeight)), right: s.getBoundingClientRect().right };
+          });
+          return { text: note.textContent, segs, vw: document.documentElement.clientWidth, noteH: note.getBoundingClientRect().height, lh: parseFloat(getComputedStyle(note).lineHeight) };
+        });
+        note("signout-keep", `${w}: ${r.segs.map((s) => `「${s.text}」${s.lines} 行`).join(" / ")}・説明の高さ ${r.noteH.toFixed(1)}px`);
+        expect(r.text).toBe("（先読みは消します。同じ人がログインすると続きを送ります）");
+        expect(r.segs.length, "文節のまとまり").toBe(3);
+        for (const s of r.segs) {
+          expect(s.lines, `「${s.text}」は途中で折れない`).toBe(1);
+          expect(s.right, `「${s.text}」の右端が画面の中`).toBeLessThanOrEqual(r.vw);
+        }
+        await manager.dispose();
+      });
+    });
+  }
+});
