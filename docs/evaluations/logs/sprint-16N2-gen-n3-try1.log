@@ -1,0 +1,164 @@
+
+Running 7 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-n2-db.spec.ts:82:7 › N-3 `/` と `/ops` の一貫性 › 部品の計算されたスタイルを集める（`/` と `/ops`） (2.0m)
+  ✘  2 e2e/ops-db/sprint16-n2-db.spec.ts:129:7 › N-3 `/` と `/ops` の一貫性 › 地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ (2ms)
+  ✘  3 e2e/ops-db/sprint16-n2-db.spec.ts:133:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ (1ms)
+  ✘  4 e2e/ops-db/sprint16-n2-db.spec.ts:137:7 › N-3 `/` と `/ops` の一貫性 › 入力欄：面・文字・縁・角丸・大きさが同じ (1ms)
+  ✘  5 e2e/ops-db/sprint16-n2-db.spec.ts:140:7 › N-3 `/` と `/ops` の一貫性 › 判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ (1ms)
+  ✘  6 e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › フォーカスの輪：太さ・線種・色・離れ具合が同じ (4ms)
+  ✓  7 e2e/ops-db/sprint16-n2-db.spec.ts:154:7 › N-3 現場は色以外の形が同じで、寸法と線の太さだけ大きい › 主ボタン：角丸・太さ・字形が通常と同じ。高さと文字は通常以上（64 以上） (1.3s)
+
+
+  1) e2e/ops-db/sprint16-n2-db.spec.ts:82:7 › N-3 `/` と `/ops` の一貫性 › 部品の計算されたスタイルを集める（`/` と `/ops`） 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: locator.evaluate: Target page, context or browser has been closed
+
+      36 | type Style = Readonly<Record<string, string>>;
+      37 | const read = (loc: Locator, props: readonly string[]): Promise<Style> =>
+    > 38 |   loc.evaluate((el, ps) => {
+         |       ^
+      39 |     const cs = getComputedStyle(el);
+      40 |     return Object.fromEntries(ps.map((p) => [p, cs.getPropertyValue(p)]));
+      41 |   }, props as string[]);
+        at read (/home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:38:7)
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:94:118
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:94:13
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-部品の計算されたスタイルを集める（-と-ops-）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-部品の計算されたスタイルを集める（-と-ops-）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-部品の計算されたスタイルを集める（-と-ops-）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-n2-db.spec.ts:129:7 › N-3 `/` と `/ops` の一貫性 › 地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ 
+
+    TypeError: Cannot read properties of undefined (reading 'body')
+
+      128 |
+      129 |   test("地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ", async () => {
+    > 130 |     expect(ops.body).toEqual(pub.body);
+          |                ^
+      131 |     expect(ops.para).toEqual(pub.para);
+      132 |   });
+      133 |   test("主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ", async () => {
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:130:16
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-n2-db.spec.ts:133:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ 
+
+    TypeError: Cannot read properties of undefined (reading 'primary')
+
+      132 |   });
+      133 |   test("主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ", async () => {
+    > 134 |     expect(ops.primary).toEqual(pub.primary);
+          |                ^
+      135 |     expect(ops.secondary).toEqual(pub.secondary);
+      136 |   });
+      137 |   test("入力欄：面・文字・縁・角丸・大きさが同じ", async () => {
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:134:16
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-n2-db.spec.ts:137:7 › N-3 `/` と `/ops` の一貫性 › 入力欄：面・文字・縁・角丸・大きさが同じ ────────
+
+    TypeError: Cannot read properties of undefined (reading 'input')
+
+      136 |   });
+      137 |   test("入力欄：面・文字・縁・角丸・大きさが同じ", async () => {
+    > 138 |     expect(ops.input).toEqual(pub.input);
+          |                ^
+      139 |   });
+      140 |   test("判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ", async () => {
+      141 |     const shapes = (s: Sample): string[] => [...new Set(Object.values(s.tags).map((t) => JSON.stringify(t.shape)))];
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:138:16
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-入力欄：面・文字・縁・角丸・大きさが同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-入力欄：面・文字・縁・角丸・大きさが同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-入力欄：面・文字・縁・角丸・大きさが同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/ops-db/sprint16-n2-db.spec.ts:140:7 › N-3 `/` と `/ops` の一貫性 › 判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ 
+
+    TypeError: Cannot read properties of undefined (reading 'tags')
+
+      139 |   });
+      140 |   test("判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ", async () => {
+    > 141 |     const shapes = (s: Sample): string[] => [...new Set(Object.values(s.tags).map((t) => JSON.stringify(t.shape)))];
+          |                                                                         ^
+      142 |     expect(shapes(pub)).toHaveLength(1);
+      143 |     expect(shapes(ops)).toEqual(shapes(pub));
+      144 |     for (const key of Object.keys(pub.tags)) if (key in ops.tags) expect(ops.tags[key]!.color, `段 ${key} の色`).toEqual(pub.tags[key]!.color);
+        at shapes (/home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:141:73)
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:142:12
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-8ec96-：形・大きさ・太さが段によらず同じで、同じ段の色が同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-8ec96-：形・大きさ・太さが段によらず同じで、同じ段の色が同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-8ec96-：形・大きさ・太さが段によらず同じで、同じ段の色が同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › フォーカスの輪：太さ・線種・色・離れ具合が同じ ─────
+
+    TypeError: Cannot read properties of undefined (reading 'primaryFocus')
+
+      145 |   });
+      146 |   test("フォーカスの輪：太さ・線種・色・離れ具合が同じ", async () => {
+    > 147 |     expect(pub.primaryFocus["outline-style"]).toBe("solid");
+          |                ^
+      148 |     expect(ops.primaryFocus).toEqual(pub.primaryFocus);
+      149 |   });
+      150 | });
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:147:16
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-フォーカスの輪：太さ・線種・色・離れ具合が同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-フォーカスの輪：太さ・線種・色・離れ具合が同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の一貫性-フォーカスの輪：太さ・線種・色・離れ具合が同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    e2e/ops-db/sprint16-n2-db.spec.ts:82:7 › N-3 `/` と `/ops` の一貫性 › 部品の計算されたスタイルを集める（`/` と `/ops`） 
+    e2e/ops-db/sprint16-n2-db.spec.ts:129:7 › N-3 `/` と `/ops` の一貫性 › 地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ 
+    e2e/ops-db/sprint16-n2-db.spec.ts:133:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ 
+    e2e/ops-db/sprint16-n2-db.spec.ts:137:7 › N-3 `/` と `/ops` の一貫性 › 入力欄：面・文字・縁・角丸・大きさが同じ ─────────
+    e2e/ops-db/sprint16-n2-db.spec.ts:140:7 › N-3 `/` と `/ops` の一貫性 › 判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ 
+    e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › フォーカスの輪：太さ・線種・色・離れ具合が同じ ──────
+  1 passed (2.2m)
+exit=1

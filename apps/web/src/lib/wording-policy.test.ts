@@ -91,8 +91,11 @@ describe("語の一覧（lib/wording-policy.ts）", () => {
     expect(BOUNDARY.BOUNDARY_SHORT).toBe(ALLOWED_SENTENCES.find((a) => a.source.includes("BOUNDARY_SHORT"))!.sentence);
     expect(DISCLAIMERS.DISCLAIMER_JUDGEMENT).toContain("制度の最新性・正確性は保証しません");
     expect(INCIDENT.INCIDENT_GUIDANCE_NOTICE_BASE).toContain("報告が必要かどうかを判断するものでも、保証するものでもありません");
-    const layers = readFileSync(path.join(SRC, "components", "regulation-map-layers.ts"), "utf8");
-    expect(layers).toContain("飛行の前に必ず DIPS でご確認ください");
+    // 16-N2：地図の凡例の注記の「必ず」は表示の側で外す（tidyEngineText）ので、許可リストに文はない。描く側が整えていることを確かめる
+    expect(ALLOWED_SENTENCES.filter((a) => a.word === "必ず")).toEqual([]);
+    const map = readFileSync(path.join(SRC, "components", "regulation-map.tsx"), "utf8");
+    expect(map).toMatch(/tidyEngineText\(n\.note\)/);
+    expect(map).toMatch(/tidyEngineText\(z\.note\)/);
   });
   it("検査の関数：全面禁止語は許可リストの文の中でも検出し、限定語は許可リストの文の外だけ検出する", () => {
     expect(findForbidden("この計画は問題ありません").map((h) => h.word)).toEqual(["問題ありません"]);

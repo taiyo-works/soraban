@@ -2,7 +2,7 @@
 
 > Sprint 18-3 契約 3-10。**`scripts/wording-inventory.mjs` が、E2E の走査の出力（`test-results/wording/*.json`）から作る。手で書き足さない。**
 > 走査の仕様は `docs/sprints/sprint-18.md` §6、語の一覧は `apps/web/src/lib/wording-policy.ts`。専門家確認（`legal-info-plan.md` Q-L1・Q-L2）の資料。
-> 入力: ops-A.json、ops-B.json、ops-C.json、ops-D.json、public.json（記録 111 件）。
+> 入力: ops-A.json、ops-B.json、ops-C.json、ops-D.json、public.json（記録 87 件）。
 
 ## 1. 違反（全面禁止語・許可リストの外の限定語）
 
@@ -14,23 +14,18 @@
 |---|---|---|---|---|
 | 保証 | 制度の最新性・正確性は保証しません | 印の外・印の中 | `/ops/about`<br>`/`<br>`PDF（地点判定）` | lib/disclaimers.ts DISCLAIMER_JUDGEMENT |
 | 保証 | 報告が必要かどうかを判断するものでも、保証するものでもありません | 印の外 | `/ops/incidents/[id]` | lib/ops-incident.ts（事故・ヒヤリハットの目安） |
-| 必ず | 飛行の前に必ず DIPS でご確認ください | 印の外 | `/` | components/regulation-map-layers.ts（地図の凡例の注記） |
 | 申請 | そらばんは、許可・承認、機体登録、操縦者登録などの申請の作成・提出とその支援を行いません。飛行計画の通報は、利用者本人が DIPS 2.0 の認証と最終確認のもとで行います。そらばんは、通報の内容の整理と、通報した結果の記録を扱います。 | 印の外 | `/ops/about`<br>`/` | lib/boundary.ts BOUNDARY_FULL（このアプリについて） |
 | 申請 | 許可・承認などの申請は、ご本人が DIPS 2.0 などで行います。そらばんは、申請の作成・提出とその支援を行いません。 | 印の中 | `/` | lib/boundary.ts BOUNDARY_SHORT（判定の結論の直下） |
 | 申請 | 許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います。 | 印の外 | `/ops`<br>`/ops/plans`<br>`/ops/plans/new`<br>`/ops/plans/[id]`<br>`/ops/plans/[id]/overview`<br>`/ops/plans/[id]/report`<br>`/ops/plans/[id]/judgement`<br>`/ops/plans/[id]/snapshots`<br>`/ops/plans/[id]/snapshots/[id]`<br>`/ops/plans/[id]/edit` | packages/dips OFFICIAL_PROCEDURE_NOTE（公式の手続きの文） |
 
 ## 3a. 分類「判定の表示（アプリ側の見出し）」（印の中に出る、アプリ自前の見出し。`VERDICT_SECTION_TITLE.duties`）
 
-| 語 | 文 | ルート |
-|---|---|---|
-| 必ず | 飛行の前後に必ず行うこと | `/ops/plans/[id]/judgement`<br>`/ops/plans/[id]/snapshots/[id]`<br>`/`<br>`PDF（地点判定）` |
-| 必ず | 飛行の前後に必ず行うことは下を確認してください。 | `/` |
+（なし）
 
 ## 3. 分類「判定エンジン由来」（判定の領域の印 `data-wording-scope="judgement"` の中で出た限定語。文言は変えていない）
 
 | 語 | 文 | ルート |
 |---|---|---|
-| 必ず | 地理院地図・DIPS で必ず確認してください。 | `/`<br>`PDF（地点判定）` |
 | 申請 | 境港市内の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要です。 | `/` |
 | 申請 | 市町村の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要な場合があります。 | `/`<br>`PDF（地点判定）` |
 | 申請 | 米子市内の都市公園内では、利用者の安全確保のため無人航空機（ドローン）の飛行は原則として禁止または事前申請が必要です。 | `/` |

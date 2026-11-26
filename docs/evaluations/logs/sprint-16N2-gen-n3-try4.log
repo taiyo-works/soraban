@@ -1,0 +1,40 @@
+
+Running 2 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する (2.0m)
+  ✓  2 e2e/ops-db/sprint16-n2-db.spec.ts:154:7 › N-3 現場は色以外の形が同じで、寸法と線の太さだけ大きい › 主ボタン：角丸・太さ・字形が通常と同じ。高さと文字は通常以上（64 以上） (1.2s)
+
+
+  1) e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: locator.evaluate: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for locator('main :is(a, button).opx-btn:not([data-variant="primary"]):visible, main :is(a, button).sb-pill-secondary:visible').first()
+
+
+      36 | type Style = Readonly<Record<string, string>>;
+      37 | const read = (loc: Locator, props: readonly string[]): Promise<Style> =>
+    > 38 |   loc.evaluate((el, ps) => {
+         |       ^
+      39 |     const cs = getComputedStyle(el);
+      40 |     return Object.fromEntries(ps.map((p) => [p, cs.getPropertyValue(p)]));
+      41 |   }, props as string[]);
+        at read (/home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:38:7)
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:129:29
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+  1 passed (2.1m)
+exit=1

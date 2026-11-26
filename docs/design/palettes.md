@@ -1,5 +1,7 @@
 # スタイル案 6 パレットの実測（2026-10-25）
 
+> 注（Sprint 16-N2、2026-11-26）：橙を主役とする案は置き換え済み。採用は空色 `#1F5FE0` の 1 色（橙はロゴだけ。`docs/design/design-direction-2026-11.md`）。この表は当時の記録として残し、本文は書き換えない。
+
 > 注（Sprint 16-1）：下の見本（`?view=style`）と `components/ui/catalog/style-palettes.ts`・`scripts/style-palette-report.ts` は削除した。表は当時の記録として残す。
 
 見本：`/ops/design?view=style&palette=1..6`。方針は `ui-direction.md` §0.1。この表は、`apps/web/src/components/ui/catalog/style-palettes.ts` の色から `scripts/style-palette-report.ts` が出した（同じ計算を `style-palettes.test.ts` が合否にしている。24 の組すべてが合格）。

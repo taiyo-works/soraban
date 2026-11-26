@@ -1,5 +1,7 @@
 # そらばん デザインシステム v2（草案）
 
+> **注（Sprint 16-N2、2026-11-26）：この草案は Sprint 16 で置き換えた。** 主色は橙 `#F89B48` ではなく空色 `#1F5FE0` の 1 色、地は白基調（`#F6F7F9`・面 `#FFFFFF`）、橙はロゴ（提供元の表記）だけに使う。ピルの右端の丸と矢印・影・橙の面は使わない。現在の値と決定は `docs/design/design-direction-2026-11.md` の決定事項、トークンの値は `apps/web/src/app/soraban-tokens.css`、部品と動きは `docs/design/design-system.md` が正。以下は当時の記録として残し、本文は書き換えない。
+
 2026-10-25。のりさんが選んだ「A（角を少しだけ丸める）を土台に、C の挿絵（丘と雲）をトップ画面だけに足す」案の土台を、v1（`docs/design/design-system.md`）との差分で書く。**草案。`apps/web` には入れていない。** 見た目の見本は `docs/design/warm-final/`、値は `docs/design/tokens-v2/soraban-tokens-v2.css`、検査は `docs/design/tokens-v2/check-contrast-v2.mjs`（通常・現場・暗・現場の暗の 4 通りで計 274 件と、寸法・動き・暗の構造を検査、0 件失敗）。**暗い表示は §9**（2026-10-26 に追加）。
 
 配色は FINESYSTEM（fg-finesystem.co.jp）準拠：橙 `#F89B48` が主役、白とオフホワイトを交互、ピルボタン＋右端の墨の丸と矢印、角丸 16/8/4、影は `0 0 24px` に黒 10% だけ。

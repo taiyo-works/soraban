@@ -1,0 +1,10 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint18-3-wording-db.spec.ts:129:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › A：ホーム・計画の一覧・計画の各画面（通報の記録あり・なし、許可・承認と飛行禁止法の手続き） (21.0s)
+  ✓  2 e2e/ops-db/sprint18-3-wording-db.spec.ts:152:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › B：点検・飛行記録・日誌・事故・ヒヤリハット (8.6s)
+  ✓  3 e2e/ops-db/sprint18-3-wording-db.spec.ts:168:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › C：登録（機体・操縦者・許可・承認・地点・利用者・登録・このアプリについて） (13.1s)
+  ✓  4 e2e/ops-db/sprint18-3-wording-db.spec.ts:195:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › D：圏外の殻（5 つ）・マニフェスト・操縦者と閲覧者のこのアプリについて (3.9s)
+
+  4 passed (51.0s)
+exit=0

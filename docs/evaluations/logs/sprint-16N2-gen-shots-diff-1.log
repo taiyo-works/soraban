@@ -1,0 +1,40 @@
+DIFF ops-home-1280.png 16 px bbox 822 476 823 517
+DIFF pub-top-1280.png 4937 px bbox 116 3772 665 5738
+DIFF pub-top-375.png 4572 px bbox 87 7533 255 10525
+DIFF user-menu-1280.png 11514 px bbox 977 248 1230 295
+DIFF user-menu-375.png 11514 px bbox 88 244 341 291
+DIFF user-menu-info-1280.png 6486 px bbox 977 268 1230 295
+DIFF user-menu-info-375.png 6482 px bbox 88 265 341 291
+DIFF user-menu-signout-1280.png 40412 px bbox 974 152 1261 295
+DIFF user-menu-signout-375.png 40516 px bbox 70 148 358 291
+files differing: 9
+STYLE-DIFF field-before-1280.txt 2 elements
+STYLE-DIFF ops-plans-1280.txt 1 elements
+STYLE-DIFF ops-plans-375.txt 1 elements
+STYLE-DIFF plan-main-1280.txt 2 elements
+STYLE-DIFF plan-main-375.txt 2 elements
+DOM-COUNT pub-top-1280.txt 1231 1230
+STYLE-DIFF pub-top-1280.txt 3 elements
+DOM-COUNT pub-top-375.txt 1231 1230
+STYLE-DIFF pub-top-375.txt 3 elements
+STYLE-DIFF user-menu-1280.txt 5 elements
+STYLE-DIFF user-menu-375.txt 5 elements
+STYLE-DIFF user-menu-info-1280.txt 5 elements
+STYLE-DIFF user-menu-info-375.txt 5 elements
+STYLE-DIFF user-menu-signout-1280.txt 5 elements
+STYLE-DIFF user-menu-signout-375.txt 5 elements
+files with diffs: 13
+  font-weight 18 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '500', '600')
+  line-height 18 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '22px', '20.8px')
+  text-wrap-style 18 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', 'balance', 'auto')
+  overflow-wrap 18 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', 'anywhere', 'break-word')
+  transition-duration 12 ('ops-plans-1280.txt', '#0>main#3>ul[plan-list]#0>li#1>div[plan-row-next]#0>a[plan-row-next-action-link]', '0.2s', '0.18s')
+  animation-duration 12 ('user-menu-1280.txt', '>body#1>div[ops-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]', '0.2s', '0.18s')
+  background-color 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', 'rgb(246, 247, 249)', 'rgb(238, 241, 245)')
+  border-radius 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '8px', '12px')
+  padding-top 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '8px', '0px')
+  padding-right 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '16px', '20px')
+  padding-bottom 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '8px', '0px')
+  padding-left 6 ('user-menu-1280.txt', '-root]#2>div#0>header[ops-header]#1>div#1>div[user-menu]#2>div#0>button[signout]', '16px', '20px')
+  (path) 4 ('field-before-1280.txt', '>body#20>next-route-announcer', '>body#20>script')
+  width 4 ('pub-top-1280.txt', 'iv#2>main#0>section#1>div#3>section[result-details]#5>dl#0>div#1>dd[evidence-id]', '158.328px', '154.141px')
