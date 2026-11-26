@@ -1,0 +1,22 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-h1-fix1-db.spec.ts -g R-4 --repeat-each=4
+
+
+Running 12 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.8s)
+  ✓   2 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.2s)
+  ✓   3 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (1.9s)
+  ✓   4 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.3s)
+  ✓   5 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.3s)
+  ✓   6 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (2.0s)
+  ✓   7 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.4s)
+  ✓   8 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.2s)
+  ✓   9 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (1.9s)
+  ✓  10 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.5s)
+  ✓  11 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.2s)
+  ✓  12 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (1.8s)
+
+  12 passed (25.2s)
+exit 0
