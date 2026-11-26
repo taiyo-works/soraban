@@ -1,0 +1,14 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/zz-eval-n2-note.spec.ts
+
+
+Running 1 test using 1 worker
+
+NOTE_FOUND true "その他\n\n緊急用務空域：動的な情報のため、地図には出しません。この判定にも反映していません。飛行の前に DIPS でご確認ください\n\nそらばん追加\n\n都市公園（鳥取"
+innerText 必ず: false  textContent 必ず: false
+  ✓  1 e2e/zz-eval-n2-note.spec.ts:2:5 › 凡例の注記（緊急用務空域）は描画後の本文に「必ず」なしで出る (1.7s)
+
+  1 passed (4.8s)
+::notice title=🎭 Playwright Run Summary::  1 passed (4.8s)
+EXIT 0

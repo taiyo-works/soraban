@@ -1,0 +1,98 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban-base
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-n2-db.spec.ts e2e/ops-db/sprint16-c-db.spec.ts -g '一貫性|現場は色以外|ログアウトの確認'
+
+
+Running 3 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） (32.3s)
+  ✘  2 e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する (10.1s)
+  ✓  3 e2e/ops-db/sprint16-n2-db.spec.ts:161:7 › N-3 現場は色以外の形が同じで、寸法と線の太さだけ大きい › 主ボタン：角丸・太さ・字形が通常と同じ。高さと文字は通常以上（64 以上） (1.1s)
+
+
+  1) e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） 
+
+    Error: シートの中の主ボタン
+
+    expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByTestId('user-menu').locator('[data-variant="primary"]:visible')
+    Expected: 1
+    Received: 0
+    Timeout:  30000ms
+
+    Call log:
+      - シートの中の主ボタン getByTestId('user-menu').locator('[data-variant="primary"]:visible') with timeout 30000ms
+      - waiting for getByTestId('user-menu').locator('[data-variant="primary"]:visible')
+        63 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      181 |     await waitForSettledStyles(page);
+      182 |     const menu = page.getByTestId("user-menu");
+    > 183 |     await expect(menu.locator('[data-variant="primary"]:visible'), "シートの中の主ボタン").toHaveCount(1);
+          |                                                                                  ^
+      184 |     await expect(page.getByTestId("signout-send")).toHaveAttribute("data-variant", "primary");
+      185 |     for (const id of ["signout", "signout-cancel", "signout-keep", "signout-discard"]) await expect(page.getByTestId(id)).not.toHaveAttribute("data-variant", "primary");
+      186 |     const stray = await menu.locator(".opx-btn-primary:not([data-variant]):not(.opx-btn-flat)").evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).length);
+        at /home/user/soraban-base/e2e/ops-db/sprint16-c-db.spec.ts:183:82
+
+    Error Context: test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+
+    Error: 副ボタン
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Object {
+    -   "background-color": "rgb(238, 241, 245)",
+    -   "border-radius": "12px",
+    +   "background-color": "rgb(246, 247, 249)",
+    +   "border-radius": "8px",
+        "border-top-color": "rgb(107, 117, 134)",
+        "border-top-style": "solid",
+        "border-top-width": "1px",
+        "box-shadow": "none",
+        "color": "rgb(20, 24, 31)",
+        "font-size": "16px",
+    -   "font-weight": "600",
+    +   "font-weight": "500",
+        "min-height": "48px",
+      }
+
+      142 |     expect.soft(ops.para, "本文").toEqual(pub.para);
+      143 |     expect.soft(ops.primary, "主ボタン").toEqual(pub.primary);
+    > 144 |     expect.soft(ops.secondary, "副ボタン").toEqual(pub.secondary);
+          |                                        ^
+      145 |     expect.soft(ops.input, "入力欄").toEqual(pub.input);
+      146 |     const shapes = (x: Sample): string[] => [...new Set(Object.values(x.tags).map((t) => JSON.stringify(t.shape)))];
+      147 |     expect.soft(shapes(pub), "判定の札の形（`/`。段によらず同じ）").toHaveLength(1);
+        at /home/user/soraban-base/e2e/ops-db/sprint16-n2-db.spec.ts:144:40
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） 
+    e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+  1 passed (50.0s)
+ ELIFECYCLE  Command failed with exit code 1.
