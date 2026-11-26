@@ -1,0 +1,85 @@
+import { randomUUID } from "node:crypto";
+import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { openUserMenu } from "../ops-menu";
+import { waitForSettledStyles } from "../field-checks";
+
+const OUT = process.env.EVAL_N4_DIR ?? "";
+test.skip(!OUT, "EVAL_N4_DIR");
+const BASE = `http://127.0.0.1:${process.env.E2E_OPS_PORT ?? 3300}`;
+const stamp = Date.now().toString(36).toUpperCase();
+const DAY = "2027-01-05";
+const signIn = async (ctx: APIRequestContext, key: string) => {
+  const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: key, email: `${key}@example.test`, emailVerified: true, name: key } });
+  expect(r.status()).toBe(200);
+};
+let planId = "";
+test.beforeAll(async () => {
+  mkdirSync(OUT, { recursive: true });
+  const manager = await pwRequest.newContext({ baseURL: BASE });
+  await signIn(manager, "a-manager");
+  const pilot = await pwRequest.newContext({ baseURL: BASE });
+  await signIn(pilot, "a-pilot");
+  const me = (await (await pilot.get("/api/ops/me")).json()) as { pilotId: string };
+  const mark = `JUEV${stamp}`.slice(0, 20);
+  const ac = await manager.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  expect(ac.status(), await ac.text()).toBe(201);
+  const aircraftId = ((await ac.json()) as { id: string }).id;
+  const plan = await manager.post("/api/ops/plans", { data: { title: `評価 ${stamp}`, aircraftId, pilotId: me.pilotId, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "空撮", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: [] } });
+  expect(plan.status(), await plan.text()).toBe(201);
+  planId = ((await plan.json()) as { id: string }).id;
+  await pilot.post(`/api/ops/plans/${planId}/field-events`, { data: { clientEventId: randomUUID(), occurredAt: `${DAY}T12:00`, kind: "takeoff" } });
+  await manager.dispose(); await pilot.dispose();
+});
+const PROPS = ["background-color", "color", "border-top-color", "border-top-width", "border-radius", "font-size", "font-weight", "min-height", "height", "width", "box-shadow", "gap", "padding-top", "padding-left", "flex-direction"];
+const m = async (page: Page, id: string) => page.getByTestId(id).evaluate((el, ps) => { const cs = getComputedStyle(el); const r = el.getBoundingClientRect(); return { ...Object.fromEntries(ps.map((p) => [p, cs.getPropertyValue(p)])), rectH: r.height, rectW: r.width, rectY: r.y }; }, PROPS);
+
+for (const size of [{ w: 375, h: 812 }, { w: 1280, h: 800 }]) {
+  test.describe(`${size.w}`, () => {
+    test.use({ viewport: { width: size.w, height: size.h }, hasTouch: size.w < 500 });
+    test("ログアウトの確認（送信待ちあり）", async ({ page, context }) => {
+      await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, (r) => r.abort());
+      await signIn(page.request, "a-pilot");
+      await page.goto(`/ops/plans/${planId}/field`);
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      await context.setOffline(true);
+      await page.getByTestId("field-flight-button").click();
+      await expect(page.getByTestId("field-unsent")).toContainText("未送信 1 件");
+      await context.setOffline(false);
+      await page.goto("/ops/more");
+      await expect(async () => {
+        await openUserMenu(page);
+        await page.getByTestId("signout").click();
+        await expect(page.getByTestId("signout-warning")).toBeVisible({ timeout: 2000 });
+      }).toPass({ timeout: 20_000 });
+      await waitForSettledStyles(page);
+      await page.waitForTimeout(400);
+      const out: Record<string, unknown> = {};
+      for (const id of ["signout", "signout-send", "signout-cancel", "signout-keep", "signout-discard", "signout-warning"]) out[id] = await m(page, id);
+      writeFileSync(path.join(OUT, `signout-metrics-${size.w}.json`), JSON.stringify(out, null, 1));
+      await page.screenshot({ path: path.join(OUT, `signout-confirm-${size.w}.png`), animations: "disabled" });
+      await page.getByTestId("signout-warning").screenshot({ path: path.join(OUT, `signout-warning-${size.w}.png`), animations: "disabled" });
+      // 各ボタンの文言
+      writeFileSync(path.join(OUT, `signout-text-${size.w}.txt`), await page.getByTestId("signout-warning").innerText());
+    });
+    test("ログイン済みの / と下メニュー", async ({ page }) => {
+      await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, (r) => r.abort());
+      await signIn(page.request, "a-manager");
+      await page.clock.setFixedTime(new Date("2027-01-05T11:56:00+09:00"));
+      await page.goto("/");
+      await expect(page.getByTestId("verdict-conclusion").or(page.locator("main")).first()).toBeVisible();
+      await waitForSettledStyles(page);
+      await page.waitForTimeout(600);
+      const nav = page.getByTestId("ops-bottom-nav");
+      const info: Record<string, unknown> = { navCount: await nav.count() };
+      if (await nav.count()) {
+        info["nav"] = await nav.evaluate((el, ps) => { const cs = getComputedStyle(el); return Object.fromEntries(ps.map((p) => [p, cs.getPropertyValue(p)])); }, PROPS);
+        info["tabs"] = await nav.locator("a, button").evaluateAll((els, ps) => els.map((el) => { const cs = getComputedStyle(el); const r = el.getBoundingClientRect(); return { text: (el as HTMLElement).innerText.trim(), h: r.height, w: r.width, ...Object.fromEntries(ps.map((p) => [p, cs.getPropertyValue(p)])) }; }), PROPS);
+      }
+      writeFileSync(path.join(OUT, `pub-loggedin-nav-${size.w}.json`), JSON.stringify(info, null, 1));
+      await page.screenshot({ path: path.join(OUT, `pub-loggedin-top-${size.w}.png`), animations: "disabled" });
+      await page.screenshot({ path: path.join(OUT, `pub-loggedin-full-${size.w}.png`), fullPage: true, animations: "disabled" });
+    });
+  });
+}
