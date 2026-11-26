@@ -25,7 +25,7 @@
 
 ## 2. 確認表
 
-URL の `{origin}` は試験用の環境の URL、`{plan}` は上の計画 1 の ID。画面の中の文言は、画面に出ているとおり。
+URL の `{origin}` は試験用の環境の URL（作り方と片付け方は `docs/runbooks/g2-preview-env.md`。Vercel の Preview のブランチドメイン）、`{plan}` は上の計画 1 の ID。画面の中の文言は、画面に出ているとおり。
 
 ### G2-1 屋外の見え方（N-5 の元の項目）
 
