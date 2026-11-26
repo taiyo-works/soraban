@@ -1280,6 +1280,16 @@ export function FieldClient({
   // field-status-prefetch-stale-help（帯の外。固定しない）に出す。行間は 1.25・上下の余白 1px・値（日時）は途中で折り返さない（ラベルと日時は別の塊。16-K designer N-2・fix R-1：4 行で約 94px。字の大きさ 18px は保つ。帯は p・li・dd ではない）。固定（sticky）は CSS の .field-band（文字が大きいときは外す）。
   const bandEl = (
     <>
+      {/* 16-N3 N3-1：文字が大きくて上の帯の固定が外れる倍率（CSS の .field-band-compact が出す・出さないを決める）で、接続と送信待ちの件数だけを
+          1 行で画面の上端に固定して残す。文言・記号は上の帯と同じ（新しい語を足さない）。上の帯が読み上げの正なので、これは見た目だけ（aria-hidden）。 */}
+      <div className="field-band-compact" aria-hidden="true" data-testid="field-band-compact" data-online={online ? "true" : "false"}>
+        <span className="font-bold" data-testid="field-band-compact-connection">
+          {online ? "● 接続あり" : "× 接続なし（圏外）"}
+        </span>
+        <span className="font-bold" data-testid="field-band-compact-unsent" data-count={unsent}>
+          送信待ち <span>{unsent} 件</span>
+        </span>
+      </div>
       <section
         aria-label="接続と送信の状況"
         className="field-band z-20 -mx-1 flex flex-wrap items-center gap-x-4 gap-y-0 border-b-2 border-sb-edge bg-sb-base px-1 py-px text-lg leading-[1.25]"
@@ -1350,7 +1360,7 @@ export function FieldClient({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <a href={FIELD_BACK.href} className={`${BTN_OUTLINE} !w-auto shrink-0`} data-testid="field-back">
+          <a href={FIELD_BACK.href} className={`${BTN_OUTLINE} !w-auto max-w-full`} data-testid="field-back">
             <span aria-hidden>←</span> {FIELD_BACK.label}
           </a>
           {view.sameDayPlans.length > 1 ? (
@@ -1367,7 +1377,7 @@ export function FieldClient({
                     {p.isCurrent ? "▶ " : ""}
                     {p.timeLabel}
                   </span>
-                  <span className="w-full truncate text-center">{p.title}</span>
+                  <span className="field-chip-title w-full truncate text-center">{p.title}</span>
                 </a>
               ))}
             </nav>

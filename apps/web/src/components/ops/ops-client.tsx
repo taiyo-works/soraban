@@ -959,7 +959,12 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
               data-testid="signout-keep"
             >
               <span>送信待ちを残してログアウト</span>
-              <span className="text-aux font-normal">（先読みは消します。同じ人がログインすると続きを送ります）</span>
+              {/* 16-N3：375 で文の途中（「ログインすると」の前後）で折れていた。文言は同じまま、文節ごとのまとまり（inline-block）にして、折れるのを文節の切れ目だけにする。 */}
+              <span className="text-aux font-normal [text-wrap:balance]">
+                <span className="inline-block">（先読みは消します。</span>
+                <span className="inline-block">同じ人がログインすると</span>
+                <span className="inline-block">続きを送ります）</span>
+              </span>
             </button>
             <button type="button" className={"opx-btn opx-btn-danger mt-2 min-h-14 w-full flex-col gap-0 py-1.5"} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
               <span>送らずにログアウト</span>

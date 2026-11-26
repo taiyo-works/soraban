@@ -476,10 +476,10 @@ export function PlanWizard({
             />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field label="予定開始（日付）" required error={err("startDate") ?? err("plannedStartAt")} hint="日本時間">
-                <input type="date" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />
+                <input type="date" className={`${inputClass} min-h-12 tnum`} value={v.startDate} onChange={(e) => set("startDate", e.target.value)} data-testid="plan-start-date" />
               </Field>
               <Field label="予定開始（時刻）" required error={err("startTime")} hint="日本時間。分まで">
-                <input type="time" className={`${inputClass} min-h-12 sb-num tnum`} value={v.startTime} onChange={(e) => set("startTime", e.target.value)} data-testid="plan-start-time" />
+                <input type="time" className={`${inputClass} min-h-12 tnum`} value={v.startTime} onChange={(e) => set("startTime", e.target.value)} data-testid="plan-start-time" />
               </Field>
               <Field label="所要時間（分）" required error={err("durationMinutes")} hint="1〜1440 分。24 時間を超える飛行は別の計画に分けます。">
                 <input inputMode="numeric" className={`${inputClass} min-h-12 sb-num tnum`} value={v.duration} onChange={(e) => set("duration", e.target.value)} data-testid="plan-duration" />

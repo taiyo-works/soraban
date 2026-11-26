@@ -71,9 +71,14 @@ describe("ホームの準備カード（16-G HM-1 ②・HM-5）", () => {
     expect(h).not.toContain("見つかりませんでした");
   });
 
-  it("読み上げの 1 文を region の名前にする。端末に残すもの（氏名・座標・自由記述）は props に無い", () => {
+  it("region の名前は見出し（aria-labelledby）。名前と中の文が 2 回読まれない（16-N3 N3-7）。端末に残すもの（氏名・座標・自由記述）は props に無い", () => {
     const h = render({ report: "cancelled", inspection: "abnormal", judgement: { kind: "counts", stale: false, counts: { noFly: 2, needs: 0, unknown: 0, done: 0, none: 0 } } });
-    expect(h).toContain('aria-label="次の飛行の準備。通報、取り消し済み。飛行前点検、異常あり。判定、飛行不可の項目が 2 件あります。"');
+    expect(h).not.toContain("aria-label=");
+    const by = /aria-labelledby="([^"]+)"/.exec(h)?.[1];
+    expect(by).toBeTruthy();
+    expect(h).toContain(`<h2 id="${by}" class="home-prep-title" data-testid="home-prep-title">次の飛行の準備</h2>`);
+    // 中の 3 行の文は、それぞれ 1 回だけ
+    for (const t of ["取り消し済み", "異常あり", "飛行不可の項目があります（2 件）"]) expect(h.split(t).length - 1, t).toBe(1);
     expect(h).toContain('data-state="danger"');
   });
 });

@@ -250,8 +250,10 @@ export function OpsTopBar({ user }: { readonly user: OpsNavUser }) {
   const pathname = usePathname() ?? "";
   if (navHiddenOn(pathname)) return null;
   return (
-    <header data-testid="ops-header" className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-sb-rule bg-sb-base px-4 max-lg:h-12 lg:sticky lg:top-0 lg:z-30 lg:px-8">
-      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理 ホームへ" className="mr-auto flex min-h-12 items-center gap-2 lg:hidden" data-testid="ops-brand-mark">
+    <header data-testid="ops-header" className="flex h-14 shrink-0 items-center justify-end gap-[12px] border-b border-sb-rule bg-sb-base px-[16px] max-lg:h-12 lg:sticky lg:top-0 lg:z-30 lg:px-8">
+      {/* 16-N3 N3-6：文字 200%・320 幅で「そらばん」が左で欠けた（余白・間が rem で増え、中身が justify-end で左へはみ出した）。余白は px にし、ロゴは縮んで
+          折り返せる（「運航管理」が下の行へ）ようにする。 */}
+      <Link href="/ops" prefetch={false} aria-label="そらばん 運航管理 ホームへ" className="mr-auto flex min-h-12 min-w-0 flex-wrap items-center gap-x-2 lg:hidden" data-testid="ops-brand-mark">
         <span className="text-h2 font-semibold leading-none text-sb-ink">そらばん</span>
         <span className="text-aux text-sb-ink-3">運航管理</span>
       </Link>

@@ -140,9 +140,11 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
     );
     // 判定不能がある文は、手続き済み・手続き不要の語にならない
     if (/未確認の項目/.test(j)) expect(j).not.toMatch(/手続き済み|見つかりませんでした/);
-    // 読み上げは 1 文
-    const label = (await page.getByTestId("home-prep").getAttribute("aria-label")) ?? "";
-    expect(label).toMatch(/^次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、.+。/);
+    // 読み上げ（16-N3 N3-7 で変更）：カードの名前は 1 文ではなく見出しの文だけ（aria-labelledby）。通報・点検・判定の文は、中の行が 1 回ずつ読まれる
+    expect(await page.getByTestId("home-prep").getAttribute("aria-label")).toBeNull();
+    expect(await page.getByRole("region", { name: "次の飛行の準備", exact: true }).count()).toBe(1);
+    expect(await page.getByTestId("home-prep-report").innerText()).toContain("DIPS に出す内容を確認する");
+    expect(await page.getByTestId("home-prep-inspection").innerText()).toContain("未記録");
     // 3 行の記号（形）は svg で、文字が状態を伝える
     for (const r of ["report", "inspection", "judgement"]) await expect(page.getByTestId(`home-prep-${r}`).locator("svg")).toHaveCount(1);
     // 禁止語（準備カード・次の予定・クイック操作・主ボタン）
@@ -329,8 +331,8 @@ test.describe("Sprint 16-G E2E-DB：ホーム", () => {
         await expect(page.getByTestId("home-prep")).toBeVisible();
         await expect(page.getByTestId("home-prep-report-text")).toHaveText(v.text);
         await expect(page.getByTestId("home-prep-report")).toHaveAttribute("data-tone", v.tone);
-        const label = (await page.getByTestId("home-prep").getAttribute("aria-label")) ?? "";
-        expect(label).toContain(`通報、${v.text}。`);
+        // 16-N3 N3-7：名前は見出しだけ。通報の文は、通報の行の中の文として読まれる
+        expect(await page.getByTestId("home-prep-report").innerText()).toContain(v.text);
         if (v.key === "nonum") {
           await expect(page.getByTestId("home-prep-report-text")).not.toContainText("受付番号を記録済み");
           // 帯は注意以上（番号なしを良い側に見せない）

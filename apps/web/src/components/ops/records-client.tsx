@@ -231,14 +231,16 @@ function DateTimeInput({
         {stale ? <Badge tone="amber" data-testid={`${testId}-stale`}>前回の入力のまま</Badge> : null}
       </legend>
       {/* 狭い画面：「今」を 1 行で大きく、その下に日付と時刻を 2 列。広い画面：1 行に並べる。 */}
-      <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+      {/* 16-N3 N3-4：日付と時刻は、列の最小幅を rem で持つ折り返し（9rem・7rem）。等倍の 320 以上は 2 列のまま、文字が大きくなると rem が増えて自然に 1 列になる
+          （以前の grid-cols-2 は、文字 200%・320 幅で 1 列 78px になり、値が欄の外へ切れた）。 */}
+      <div className="flex min-w-0 flex-wrap gap-2 sm:items-center">
         {nowLabel ? (
-          <button type="button" className={`${nowButtonClass} col-span-2`} onClick={now}>
+          <button type="button" className={`${nowButtonClass} basis-full sm:basis-auto`} onClick={now}>
             {nowLabel}
           </button>
         ) : null}
         {/* 16-D D-1：見えるラベル（日付・時刻）を入力欄の上に置く。読み上げ名は従来の aria-label のまま */}
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-[1_1_9rem] flex-col gap-1 sm:flex-none">
           <label htmlFor={`${id}-date`} className="sb-label">
             日付
           </label>
@@ -253,7 +255,7 @@ function DateTimeInput({
             onChange={(e) => onChange(e.target.value, time)}
           />
         </div>
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-[1_1_7rem] flex-col gap-1 sm:flex-none">
           <label htmlFor={`${id}-time`} className="sb-label">
             時刻
           </label>

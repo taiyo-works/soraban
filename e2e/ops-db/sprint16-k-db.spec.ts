@@ -436,7 +436,7 @@ test.describe("fix1 R-1・N-1 警告と説明の並び 375×812", () => {
 
 // 16-K 差し戻し 1（fix designer）R-1：文字 200%（html の文字の大きさ）で、帯の「先読みの最終更新 日時」が横スクロール・日時の切れを起こさない。
 // 帯が古い状態（圏外・13 時間後）と新しい状態（接続あり）の両方で測る。固定（sticky）は、等倍で sticky、文字 200% で static（意見 8）。
-// 320 は帯と無関係の既存の幅（見出し・「計画へ戻る」で 368px。K-5 の範囲外の幅）が残るので、文書の scrollWidth ではなく「帯の中身が帯と画面からはみ出さない」で確かめる。
+// （16-N3 N3-2 で、320 も文書の scrollWidth を確かめる。以前は 320 の既存の幅 368px が残っていたため除外していた。）
 type ZoomProbe = { sw: number; cw: number; bandH: number; bandSw: number; bandCw: number; bandPos: string; overflow: string[]; wide: string[]; dateRects: number; dateText: string };
 const probeZoomBand = async (page: Page, width: number): Promise<ZoomProbe> => {
   const orig = page.viewportSize()!;
@@ -504,7 +504,8 @@ for (const w of [320, 375, 390, 430]) {
         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
-        if (w >= 375) expect(z.sw, `${w} ${state} 文字 200%：現場の横スクロール（画面より右にはみ出す要素 ${z.wide.join(" / ")}）`).toBeLessThanOrEqual(z.cw);
+        // 16-N3 N3-2：320 も含めて文書の横スクロール 0（以前は 320 を除外していた。見出し・「ホームへ戻る」・状態の語が 368px まで出ていた）
+        expect(z.sw, `${w} ${state} 文字 200%：現場の横スクロール（画面より右にはみ出す要素 ${z.wide.join(" / ")}）`).toBeLessThanOrEqual(z.cw);
       };
       await expect(page.getByTestId("field-status-prefetch-stale")).toHaveCount(0);
       await check("新しい先読み・接続あり");

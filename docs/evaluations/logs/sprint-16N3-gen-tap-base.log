@@ -1,0 +1,4 @@
+320 100% first-tap ok 28/30 失敗のうち click 到達 2・preventDefault 2 遷移までの時間 中央値 30ms 最大 43ms
+  失敗: #7 click=1 prevented=1 path=/ops | #21 click=1 prevented=1 path=/ops
+390 100% first-tap ok 25/30 失敗のうち click 到達 5・preventDefault 5 遷移までの時間 中央値 29ms 最大 69ms
+  失敗: #9 click=1 prevented=1 path=/ops | #11 click=1 prevented=1 path=/ops | #20 click=1 prevented=1 path=/ops | #23 click=1 prevented=1 path=/ops | #27 click=1 prevented=1 path=/ops

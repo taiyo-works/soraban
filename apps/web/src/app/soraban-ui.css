@@ -638,6 +638,13 @@ button.sb-state::after {
   color: var(--sb-ink);
   letter-spacing: 0.03em;
 }
+/* 日付・時刻の標準入力欄（16-N3 N3-4・N3-5）：左右の余白 16 → 8px、字間 0。値の文字とカレンダーの絵が重ならない幅を、狭い画面・文字 200% でも取るため
+ * （値＋絵＋間は、等倍で約 110px、文字 200% で約 200px）。 */
+.sb-input[type="date"],
+.sb-input[type="time"] {
+  padding-inline: 8px;
+  letter-spacing: 0;
+}
 .sb-input[aria-invalid="true"] {
   border-color: var(--sb-st-danger-mark);
   box-shadow: inset 0 0 0 1px var(--sb-st-danger-mark);

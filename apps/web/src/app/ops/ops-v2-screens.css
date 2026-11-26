@@ -982,9 +982,48 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   position: sticky;
   top: 0;
 }
+.field-band-compact {
+  display: none;
+}
 @container field (max-width: 16rem) {
   .field-band {
     position: static;
+  }
+  /* 16-N3 N3-1：固定が外れたとき（文字 125〜200%）の 1 行の帯。接続と送信待ちの件数だけ。折り返さない（nowrap）。文字の大きさは、端末の倍率（1.125rem）に追従しつつ、
+   * 1 行に入る大きさ（画面の幅 ÷ 18。圏外の「× 接続なし（圏外）」と件数で最長約 17.6 字分）で止め、18px（現場の下限）を下回らない：文字 200%・320 幅では 18px、
+   * 幅に余裕があれば大きくなる。幅は画面いっぱい（ページの左右の余白 1rem まで広げる）。本文はこの下で倍率どおりに拡大される。
+   * 直下の要素との間（main の gap）は負の余白で詰め、押す部品が帯に覆われないよう scroll-margin を取る。 */
+  .field-band-compact {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-inline: -1rem;
+    margin-bottom: -1.25rem;
+    padding: 2px;
+    border-bottom: 2px solid var(--sb-edge);
+    background: var(--sb-base);
+    font-size: max(18px, min(1.125rem, calc((100cqw + 2rem) / 18)));
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  [data-testid="field-root"] :is(a, button, input, select, textarea, summary) {
+    scroll-margin-top: 44px;
+  }
+  /* 16-N3 N3-2：文字が大きいとき、語（自動の文節）が列の幅より長いと、折り返しの余地がなく画面の右へはみ出した（320・200% で H3「飛行自粛要請の確認」・
+   * H4・「ホームへ戻る」・状態の語「指定されていない」。break-word は、flex の項目の最小の幅を縮めない）。anywhere で、必要なときだけ語の途中でも折る。 */
+  [data-testid="field-root"] > * {
+    overflow-wrap: anywhere;
+  }
+  /* 16-N3 N3-3：同じ日の他の計画へのチップの題名は、等倍では 1 行で省略（truncate）のまま。文字が大きいとき（上の帯の固定が外れる倍率）は省略せず折り返して全文を見せる。 */
+  .field-chip-title {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -1003,17 +1042,18 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
   }
   /* 見出しと「今」を同じ行（グリッドの 1 行目）に並べ、日付・時刻はその下の行に置く。行の高さは中身で決まるので、文字 200% で見出しが 2 行になっても
    * 「今」が高くなっても、日付・時刻のラベルとは重ならない（固定の位置に頼らない）。見出し（legend）は float で「描かれる見出し」から外し、通常の子としてグリッドに載せる。 */
+  /* 16-N3 N3-4・N3-5：列は「2 列まで。1 列の最小幅を 8.5rem（rem なので文字の拡大で増える）」にした。等倍の 320 幅以上は 2 列のまま（見出し｜今、日付｜時刻）、
+   * 文字が大きくなって 2 列が入らなくなると 1 列（見出し・今・日付・時刻の順）に自然に落ちる。以前の固定の 2 列は、文字 200%・320 幅で 1 列 78px になり、
+   * 値が欄の外へ切れた。置き場所（grid-column・grid-row）は自動配置にして、列が 1 つになっても 2 列目の暗黙の列（はみ出し）を作らない。 */
   .opx-form[data-date-first] [data-testid="inspected"] {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(max(8.5rem, calc((100% - 8px) / 2)), 1fr));
     column-gap: 8px;
     row-gap: 8px;
     align-items: start;
   }
   .opx-form[data-date-first] [data-testid="inspected"] > legend {
     float: left;
-    grid-column: 1;
-    grid-row: 1;
     align-self: center;
     min-height: 48px;
     margin: 0;
@@ -1026,20 +1066,10 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     display: contents;
   }
   .opx-form[data-date-first] [data-testid="inspected"] > div > button:first-child {
-    grid-column: 2;
-    grid-row: 1;
     align-self: center;
     justify-self: end;
     width: auto;
     min-width: 4rem;
-  }
-  .opx-form[data-date-first] [data-testid="inspected"] > div > div:nth-of-type(1) {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .opx-form[data-date-first] [data-testid="inspected"] > div > div:nth-of-type(2) {
-    grid-column: 2;
-    grid-row: 2;
   }
   .opx-form[data-date-first] [data-testid="inspected"] > :not(legend):not(div) {
     grid-column: 1 / -1;
