@@ -945,7 +945,7 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
             </span>
           </p>
           <div className="flex flex-col gap-2">
-            <button type="button" className={"opx-btn opx-btn-primary w-full"} onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
+            <button type="button" className={"opx-btn opx-btn-primary w-full"} data-variant="primary" onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
               送ってからログアウト
             </button>
             <button type="button" className={"opx-btn min-h-14 w-full"} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">

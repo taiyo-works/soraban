@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll, expectTextZoom, waitForSettledStyles } from "../field-checks";
+import { openUserMenu } from "../ops-menu";
 import { gotoPlan } from "./plan-screen";
 
 // Sprint 16-C の E2E-DB：部品 1 の実画面（契約 C-2・C-6、K-8、持ち越し 1〜3）。
@@ -157,6 +158,33 @@ test.describe("C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant=\"prim
     await expect(page.getByTestId("today-heading")).toBeVisible();
     await waitForSettledStyles(page);
     expect(await page.locator('[data-variant="primary"]:visible').count()).toBe(1);
+  });
+});
+
+test.describe("C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ", () => {
+  test("signout-send だけが data-variant=\"primary\"。クラスだけの主ボタンは無い（16-N2 レビュー R-3）", async ({ page, context }) => {
+    await signIn(page.request, seeded("a-pilot"));
+    await page.goto(`/ops/plans/${planId}/field`);
+    await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+    // 圏外で押して、端末に送信待ちを 1 件作る。サーバーには届かない
+    await context.setOffline(true);
+    await page.getByTestId("field-flight-button").click();
+    await expect(page.getByTestId("field-unsent")).toContainText("未送信 1 件");
+    await context.setOffline(false);
+    await page.goto("/ops/more");
+    // ハイドレーション前の押下は何も起こさない。送信待ちがあるときの押下は警告を開くだけ（ログアウトしない）なので、出るまで押し直してよい
+    await expect(async () => {
+      await openUserMenu(page);
+      await page.getByTestId("signout").click();
+      await expect(page.getByTestId("signout-warning")).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
+    await waitForSettledStyles(page);
+    const menu = page.getByTestId("user-menu");
+    await expect(menu.locator('[data-variant="primary"]:visible'), "シートの中の主ボタン").toHaveCount(1);
+    await expect(page.getByTestId("signout-send")).toHaveAttribute("data-variant", "primary");
+    for (const id of ["signout", "signout-cancel", "signout-keep", "signout-discard"]) await expect(page.getByTestId(id)).not.toHaveAttribute("data-variant", "primary");
+    const stray = await menu.locator(".opx-btn-primary:not([data-variant]):not(.opx-btn-flat)").evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).length);
+    expect(stray, "data-variant の付いていない主ボタン").toBe(0);
   });
 });
 

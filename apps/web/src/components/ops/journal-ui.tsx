@@ -12,7 +12,7 @@ import { JUDGEMENT_LINK_MISSING_LABEL, type FlightDto } from "@/server/ops/recor
 
 export function MismatchBadges({ mismatches }: { readonly mismatches: readonly JournalMismatch[] }) {
   if (mismatches.length === 0) return null;
-  // 注意の印（ui/primitives の StatusPill と同じ作り）。折り返す文なので札の高さは固定せず、アイコンは先頭に揃える。
+  // 注意の印（記号＋文字の札。共通の札 .sb-vtag と同じ「色だけにしない」作り）。折り返す文なので札の高さは固定せず、アイコンは先頭に揃える。
   return (
     <span className="flex flex-col items-stretch gap-1.5" data-testid="flight-mismatches">
       {mismatches.map((m) => (
