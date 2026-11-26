@@ -1779,16 +1779,17 @@ input.sb-radio:disabled {
   flex: none;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--sb-pill);
-  background: var(--sb-ink);
-  color: var(--sb-on-dot);
+  width: 24px;
+  height: 24px;
+  color: var(--sb-ink-2);
+}
+.sb-go-dot svg {
+  width: 24px;
+  height: 24px;
 }
 a.sb-row:hover .sb-go-dot,
 a.sb-row:focus-visible .sb-go-dot {
-  background: var(--sb-primary);
-  color: var(--sb-on-primary);
+  color: var(--sb-primary);
 }
 .sb-chips {
   display: flex;

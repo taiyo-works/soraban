@@ -1,0 +1,7 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0
+
+
+Running 353 tests using 1 worker
+

@@ -510,9 +510,8 @@ test.describe("N3-8 ホームの余裕", () => {
     });
     note("n3-8", `余裕 ${m.margin.toFixed(2)}px（クイック下端 ${m.quickBottom.toFixed(1)}・ナビ上端 ${m.navTop.toFixed(1)}）・題の行数 ${m.titleLines}・期限 ${m.deadlineText}（${m.deadlineLines} 行相当）`);
     expect(m.scrollY).toBe(0);
-    // 着手時の実測（基準 a12cef5）は -14.88px：期限の対象が 40 字（4 行）の分が重い。契約 N3-8 は「収まらなければ、題の行数の扱いを designer が決める」。
-    // designer が収めたら、この fixme は外れて下の検査が働く（余裕が 8px 未満のあいだは、測った値を記録して飛ばす。検査を弱めるためではなく、判断待ちの印）。
-    if (m.margin < 8) test.fixme(true, `N3-8：余裕 ${m.margin.toFixed(2)}px（< 8）。designer の判断待ち（sprint-16-test-changes.md の 16-N3）`);
+    // 着手時の実測（基準 a12cef5）は -14.88px。designer が収めた（準備カードの見出しと日時を 1 行・上下の余白 10→8px。余裕 11.13px）。
+    // 以前あった「8px 未満なら fixme で飛ばす」は外した（退行したら落ちる）。
     expect(m.margin, `クイック操作の下端とナビの上端の余裕 ${m.margin}px`).toBeGreaterThanOrEqual(8);
     void plan;
     await bm.dispose();

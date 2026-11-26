@@ -383,14 +383,17 @@
   gap: 6px;
 }
 .sb-card.home-prep {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 /* 見出しの下に、日時と場所（補足）。長い場所の名前は折り返す（文字 200% でも切らない。省略記号は使わない） */
+/* 16-N3 N3-8（designer）：見出しと日時は 1 行に並べる（baseline）。日時は次の予定のカード（直下）にも出るので、行を分けて 1 行ぶん（約 22px）使うのをやめた。
+ * 文字が大きい・幅が足りないときは、日時が次の行へ折り返す（flex-wrap。切らない・省略しない）。DOM の順（見出し→日時）・読み上げは変えない。 */
 .home-prep-head {
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  flex-flow: row wrap;
+  align-items: baseline;
+  gap: 0 12px;
   min-width: 0;
 }
 .home-prep-title {
@@ -1003,7 +1006,8 @@ main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form
     gap: 4px;
     margin-inline: -1rem;
     margin-bottom: -1.25rem;
-    padding: 2px;
+    /* 左右 8px（designer。以前は 2px で字が画面の端に付いた）。圏外＋3 桁の件数の最悪でも 1 行・横スクロール 0（320・200% で右端 315／320、間は 4px。実測は sprint-16N3-design-band.mjs） */
+    padding: 2px 8px;
     border-bottom: 2px solid var(--sb-edge);
     background: var(--sb-base);
     font-size: max(18px, min(1.125rem, calc((100cqw + 2rem) / 18)));
