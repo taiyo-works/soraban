@@ -238,6 +238,8 @@ test.describe("N3-2・N3-3 現場の 320・文字 200%", () => {
   test.use({ viewport: { width: 320, height: 800 } });
 
   test("文書の横スクロール 0。H3「飛行自粛要請の確認」・H4「飛行マニュアルの組み合わせ制限」・「ホームへ戻る」が画面の幅を超えない。同じ日のチップは題名が省略されない", async ({ page }) => {
+    // 実行ごとに一意の値（同じ DB・同じワーカーで --repeat-each しても、今回作った計画だけを数える。F-1）
+    const run = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
     const manager = await apiAs(seeded("a-manager"));
     await signIn(page.request, seeded("a-manager"));
     const aircraft = await createAircraft(manager);
@@ -245,12 +247,12 @@ test.describe("N3-2・N3-3 現場の 320・文字 200%", () => {
     // 同じ日の別の計画（別の機体・操縦者。時間も重ならない）。題名は長め（省略されやすい）
     const aircraft2 = await createAircraft(manager);
     const pilot2 = await createPilot(manager);
-    const plan = await createPlan(manager, aircraft.id, pilot.id, { title: `朝の河川敷の橋梁点検撮影 ${stamp}`, hour: 9 });
-    await createPlan(manager, aircraft2.id, pilot2.id, { title: `午後の山あいの送電線の巡視撮影 ${stamp}`, hour: 15 });
+    const plan = await createPlan(manager, aircraft.id, pilot.id, { title: `朝の河川敷の橋梁点検撮影 ${run}`, hour: 9 });
+    await createPlan(manager, aircraft2.id, pilot2.id, { title: `午後の山あいの送電線の巡視撮影 ${run}`, hour: 15 });
     await openField(page, plan.id);
-    await expect(page.getByTestId("field-same-day-link").filter({ hasText: /橋梁点検撮影|送電線の巡視撮影/ })).toHaveCount(2);
+    await expect(page.getByTestId("field-same-day-link").filter({ hasText: new RegExp(`(橋梁点検撮影|送電線の巡視撮影) ${run}`) })).toHaveCount(2);
     await zoomTo(page, 200);
-    const r = await page.evaluate(() => {
+    const r = await page.evaluate((runId) => {
       const de = document.documentElement;
       const box = (el: Element | null) => (el ? el.getBoundingClientRect() : null);
       const byText = (sel: string, t: string): HTMLElement | null => Array.from(document.querySelectorAll<HTMLElement>(sel)).find((e) => (e.textContent ?? "").includes(t)) ?? null;
@@ -262,7 +264,7 @@ test.describe("N3-2・N3-3 現場の 320・文字 200%", () => {
         const b = el.getBoundingClientRect();
         if (b.width > 0 && b.right > de.clientWidth + 0.5) wide.push(`${el.getAttribute("data-testid") ?? el.tagName.toLowerCase()} →${b.right.toFixed(0)}`);
       }
-      const chips = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="field-same-day-link"]')).filter((a) => /橋梁点検撮影|送電線の巡視撮影/.test(a.textContent ?? "")).map((a) => {
+      const chips = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="field-same-day-link"]')).filter((a) => new RegExp(`(橋梁点検撮影|送電線の巡視撮影) ${runId}`).test(a.textContent ?? "")).map((a) => {
         const t = a.querySelector<HTMLElement>("span:last-child")!;
         const cs = getComputedStyle(t);
         return { text: t.textContent, ellipsis: cs.textOverflow === "ellipsis" && cs.overflow !== "visible", sw: t.scrollWidth, cw: t.clientWidth, h: a.getBoundingClientRect().height, lines: Math.round(t.getBoundingClientRect().height / parseFloat(cs.lineHeight)), right: a.getBoundingClientRect().right };
@@ -276,9 +278,10 @@ test.describe("N3-2・N3-3 現場の 320・文字 200%", () => {
         wide: wide.slice(0, 8),
         chips,
       };
-    });
+    }, run);
     note("n3-2", `文書 ${r.sw}/${r.cw}・H3 ${JSON.stringify(r.h3)}・H4 ${JSON.stringify(r.h4)}・戻る ${JSON.stringify(r.back)}・はみ出し ${r.wide.join(" / ")}`);
     note("n3-3", `チップ ${JSON.stringify(r.chips)}`);
+    expect(r.chips, "今回作った 2 件の計画のチップ（題に今回の値を含むもの）").toHaveLength(2);
     expect(r.h3, "H3 が見つかる").not.toBeNull();
     expect(r.back, "ホームへ戻るが見つかる").not.toBeNull();
     expect(r.wide, `画面の右端（${r.cw}）を超える要素`).toEqual([]);

@@ -949,6 +949,10 @@ a12cef5 の `apps/web/src` に戻して `pnpm build`、同じ新しい spec を�
 | 公開側 E2E 全体（CI と同じ `next start`・1 ワーカー・フルの Chromium・`--retries=0`） | **353 通過・0 失敗**（`sprint9` 306 も今回は通過） | `-pub-all.log` |
 | コントラスト（`check-contrast-v2.mjs`）・識別子（`testids.mjs --check`） | 不足 0・消えた識別子 0 | `-contrast.log`・`-testids.log` |
 
+### 16-N3 差し戻し 1（F-1。2026-11-26）
+
+`sprint16-n3-db` の N3-2・N3-3 の題に、実行ごとの一意の値（`run`）を入れ、チップの数え方（`toHaveCount(2)`・計測側の絞り込み）を「今回の題」だけにした。検査は緩めていない（今回の 2 件のチップの件数・題名が省略されないこと・高さ・右端は同じ強さ。計測した件数が 2 であることの `toHaveLength(2)` を追加）。使い回した DB で `--repeat-each=3` を 2 回（各 84/84 通過）、新しい DB で 1 回（28/28 通過）。ログ `docs/evaluations/logs/sprint-16N3-fix1-*.log`。
+
 ## 16-N3 designer 工程（2026-11-26）
 
 スタイル層と表示の構造だけを変えた（ロジック・ルート・データ・`data-testid` は変えていない）。変えたファイル：`apps/web/src/app/ops/ops-v2-screens.css`（準備カードの見出し行・上下の余白、現場の 1 行の帯の左右）、`apps/web/src/app/soraban-ui.css`（`.sb-go-dot`）、`e2e/ops-db/sprint16-n3-db.spec.ts`（N3-8 の `fixme` を外した）。測りと撮影は `docs/evaluations/logs/sprint-16N3-design-*`、撮影は `docs/evaluations/screenshots/sprint-16N3/design/`（`-before`＝generator の最後のコミット 253ebe5、`-after`＝今）。
