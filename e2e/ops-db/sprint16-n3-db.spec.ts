@@ -561,3 +561,47 @@ test.describe("ログアウトの確認：signout-keep の説明文", () => {
     });
   }
 });
+
+// ---------------------------------------------------------------- 判断して記録する項目（記録のみ。直すかは designer が決める）
+// 契約の「判断して記録する項目」のうち、計画作成の 2 件の実測値を残す（検査はしない。値は注記とログに出る）。
+//   ・320・文字 200% の段 ③〜⑤ で、進捗の帯と下部ナビが表示を占める割合（16-H2 L-1）
+//   ・段 ② の日付の標準入力欄が最初の画面に入るか（§17 の 15）
+// N3_SHOTS_DIR を与えたときだけ、各段の撮影をそのディレクトリへ書く。
+test.describe("判断項目の実測（記録のみ）", () => {
+  for (const [w, h] of [[320, 640], [360, 740]] as const) {
+    test(`計画作成 ${w}×${h}・文字 200%：進捗の帯と下部ナビの占める割合・段 ② の日付欄の位置`, async ({ page }) => {
+      await signIn(page.request, seeded("a-manager"));
+      const manager = await apiAs(seeded("a-manager"));
+      const aircraft = await createAircraft(manager);
+      const pilot = await createPilot(manager);
+      await resize(page, w, h);
+      await page.goto("/ops/plans/new");
+      await expect(page.getByTestId("plan-form")).toBeVisible();
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      const values = { placeName: "N3 判断項目の地点", lat: "35.123456", lng: "133.654321", radius: "120", date: "2027-01-05", time: "13:00", duration: "30", title: `N3 判断 ${stamp}`, purpose: "橋梁の点検", altitude: "60", aircraftId: aircraft.id, pilotId: pilot.id };
+      const shotDir = process.env["N3_SHOTS_DIR"];
+      for (let step = 1; step <= 5; step++) {
+        await expectStep(page, step);
+        await waitForSettledStyles(page);
+        await zoomTo(page, 200);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const m = await page.evaluate(() => {
+          const box = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`)?.getBoundingClientRect() ?? null;
+          const prog = box("plan-wizard-progress-band");
+          const nav = box("ops-bottom-nav");
+          const date = box("plan-start-date");
+          return { vh: window.innerHeight, progH: prog?.height ?? 0, progTop: prog?.top ?? 0, navH: nav?.height ?? 0, navTop: nav?.top ?? 0, dateTop: date?.top ?? null, dateBottom: date?.bottom ?? null };
+        });
+        const share = ((m.progH + m.navH) / m.vh) * 100;
+        note("n3-judge", `${w}×${h}・200%・段 ${step}: 進捗の帯 ${m.progH.toFixed(0)}px + 下部ナビ ${m.navH.toFixed(0)}px = 表示の ${share.toFixed(1)}%${m.dateBottom !== null ? `・日付欄 ${m.dateTop!.toFixed(0)}〜${m.dateBottom.toFixed(0)}px（ナビ上端 ${m.navTop.toFixed(0)}px。${m.dateBottom <= m.navTop ? "最初の画面に入る" : "最初の画面に入らない"}）` : ""}`);
+        if (shotDir) await page.screenshot({ path: `${shotDir}/wizard-step${step}-${w}-200.png` });
+        await zoomTo(page, 100);
+        if (step < 5) {
+          await fillStep(page, step, values);
+          await tapNext(page);
+        }
+      }
+      await manager.dispose();
+    });
+  }
+});

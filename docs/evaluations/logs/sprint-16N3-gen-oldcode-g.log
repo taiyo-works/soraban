@@ -1,0 +1,52 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-g-db.spec.ts
+
+
+Running 12 tests using 1 worker
+
+  ✘   1 e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (1.1s)
+  -   2 e2e/ops-db/sprint16-g-db.spec.ts:165:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ
+  -   3 e2e/ops-db/sprint16-g-db.spec.ts:191:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上
+  -   4 e2e/ops-db/sprint16-g-db.spec.ts:191:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上
+  -   5 e2e/ops-db/sprint16-g-db.spec.ts:233:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない
+  -   6 e2e/ops-db/sprint16-g-db.spec.ts:251:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない
+  -   7 e2e/ops-db/sprint16-g-db.spec.ts:260:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中
+  -   8 e2e/ops-db/sprint16-g-db.spec.ts:300:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△）
+  -   9 e2e/ops-db/sprint16-g-db.spec.ts:350:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない
+  -  10 e2e/ops-db/sprint16-g-db.spec.ts:377:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」
+  -  11 e2e/ops-db/sprint16-g-db.spec.ts:386:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 375×812 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ
+  -  12 e2e/ops-db/sprint16-g-db.spec.ts:386:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 390×844 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ
+
+
+  1) e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき 
+
+    Error: expect(received).toBeNull()
+
+    Received: "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、未確認の項目が 2 件あります。"
+
+      142 |     if (/未確認の項目/.test(j)) expect(j).not.toMatch(/手続き済み|見つかりませんでした/);
+      143 |     // 読み上げ（16-N3 N3-7 で変更）：カードの名前は 1 文ではなく見出しの文だけ（aria-labelledby）。通報・点検・判定の文は、中の行が 1 回ずつ読まれる
+    > 144 |     expect(await page.getByTestId("home-prep").getAttribute("aria-label")).toBeNull();
+          |                                                                            ^
+      145 |     expect(await page.getByRole("region", { name: "次の飛行の準備", exact: true }).count()).toBe(1);
+      146 |     expect(await page.getByTestId("home-prep-report").innerText()).toContain("DIPS に出す内容を確認する");
+      147 |     expect(await page.getByTestId("home-prep-inspection").innerText()).toContain("未記録");
+        at /home/user/soraban/e2e/ops-db/sprint16-g-db.spec.ts:144:76
+
+    Error Context: test-results/ops/sprint16-g-db-Sprint-16-G--8f1fd-ドは-3-行と-1-文の読み上げ、判定は参考の注記つき/error-context.md
+
+    Error Context: test-results/ops/sprint16-g-db-Sprint-16-G--8f1fd-ドは-3-行と-1-文の読み上げ、判定は参考の注記つき/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-g-db-Sprint-16-G--8f1fd-ドは-3-行と-1-文の読み上げ、判定は参考の注記つき/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-g-db-Sprint-16-G--8f1fd-ドは-3-行と-1-文の読み上げ、判定は参考の注記つき/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき 
+  11 did not run
+ ELIFECYCLE  Command failed with exit code 1.

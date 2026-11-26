@@ -28,6 +28,7 @@ generator・evaluator・reviewer が毎回同じ準備をやり直さないた�
 - `sprint12g-1b` A7 の追記: 後続の `sprint12g-1b-fix-db` M-4 が作る期限切れの許可（validTo 2026-12-20）が使い回した DB に残り、期限の先頭に出るのが原因（16-A の評価で特定）。
 - `sprint16-f-db` R-3（320px の `/ops` で本文の末尾が下部ナビの上端から 4px 未満）。観測: 16-J の generator・designer の実行で -4.56px。`/ops` の本文が約 35px 長くなる DB の状態で起きる（何が増えたかは未特定）。16-J の評価では、空の DB で HEAD 3 回・基準 c85445f 1 回すべて余裕 31px で通過（`docs/evaluations/sprint-16J-eval.md` §2）。
 - `sprint16-h1-fix1-db` R-4（計画の作成へのリンクを押しても画面が出ない）。観測: 16-K の再評価の ops 全体で 1 回失敗、新しい DB で単独 ×4 は 12/12、ファイル全体 16/16 通過。P3b2b-6 と同系統（クライアントルーターの遷移が完了しない）とみられる。
+- **下部ナビ・「次へ」の最初のタップ／クリックが遷移しない**（16-F の F-4、16-F2 の評価、16-N3 N3-9 で切り分け）。ローカルの自動操作で、`/ops` から `/ops/more`（ほか `/ops/permits`・`/ops/members`）への遷移が 5〜20% 起きない（320・100% で前 28/30・後 24/30、390・100% で 25/30・25/30。基準 a12cef5 でも同じ）。**タップは届き、Link の `click` は `preventDefault` され、RSC の要求は 200 で全文を受け取る**が、`history.pushState` が呼ばれず URL が変わらない（10 秒待っても同じ。もう一度押すと通る）。マウスの `click`・`a.click()`・`window.next.router.push` でも起き、幅・文字の倍率・ハイドレーションの待ちに依らない。遷移先による（`/ops/journal`・`/ops/plans`・`/ops/about`・`/ops/aircraft`・`/ops/pilots` は 0 件）。RSC 応答に 150ms の遅れを足しても減らない。**E2E の台本の揺れではなく、クライアントのルーターの遷移の未完了で、利用者にも起こりうる**。原因はアプリのコードからは特定できず、直せていない。E2E は `plan-wizard.ts` の `tapUntilStep` のように、遷移・段の変化を待って押し直す。実機（G2-8）で確かめる。ログ `docs/evaluations/logs/sprint-16N3-gen-tap*.log`、スクリプト `sprint-16N3-gen-tap.mjs`。
 - 基準のコミットでも落ちるかを比べて、変更が原因かを切り分ける。
 
 ## 落とし穴
