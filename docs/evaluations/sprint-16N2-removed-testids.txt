@@ -1,0 +1,1 @@
+# Sprint 16-N2 N-1 で撤去した旧い部品（ui/workspace・overlays・data・command-palette・forms）だけが持っていた data-testid（27 件）。どの画面・E2E にも使われていない（参照 0 の部品）。実画面の識別子は 0 件。

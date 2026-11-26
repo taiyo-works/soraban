@@ -1503,22 +1503,10 @@ input.sb-radio:disabled {
   top: 8px;
 }
 
-/* 公開の判定画面 `/` に置く運航管理の下メニューだけ、`.ds` の色の名前を v2 に付け替える（形・寸法は変えない。③ で置き換える）。
- * /ops 本体と見本（/ops/design）の `.ds` は触らない。 */
+/* 公開の判定画面 `/` に置く運航管理の下メニューだけ、根（.ds）の地を一段上の面（--sb-surface）にする（形・寸法は変えない）。
+ * 16-N2：旧い色の名前（--bg-app ほか）の付け替えは撤去し、地だけを直接指定する。/ops 本体の `.ds` は触らない。 */
 .ds.ds-sb {
-  --bg-app: var(--sb-surface);
-  --bg-surface: var(--sb-base);
-  --bg-sunken: var(--sb-sunken);
-  --fg: var(--sb-ink);
-  --fg-soft: var(--sb-ink-2);
-  --fg-mute: var(--sb-ink-3);
-  --line: var(--sb-rule);
-  --line-strong: var(--sb-edge);
-  --accent: var(--sb-ink);
-  --accent-soft: var(--sb-primary-soft);
-  --accent-solid: var(--sb-primary);
-  --accent-solid-hover: var(--sb-primary-press);
-  --accent-fg: var(--sb-on-primary);
+  background: var(--sb-surface);
 }
 
 /* 地図の出典表記の開閉ボタンも 48px（--sb-hit-min。押す部品の下限）。出典の文は地図の右下に収める。文字は 14px（--sb-fs-note）以上（MapLibre 既定の 12px を上げる） */

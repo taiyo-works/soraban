@@ -429,7 +429,7 @@ export function NextActionItem({
       {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-sb-ink-3" /> : null}
     </>
   );
-  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-12", flush ? "" : "px-3");
+  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--sb-dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-12", flush ? "" : "px-3");
   return action.canAct ? (
     <a href={action.href} className={cx(box, "hover:bg-sb-hover")} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}

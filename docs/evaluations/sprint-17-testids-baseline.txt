@@ -267,7 +267,6 @@ field-undo-takeoff
 field-unsent
 field-wake-note
 field-window-notice
-filter-count
 flight-basis-link
 flight-date
 flight-detail
@@ -990,7 +989,6 @@ prop: cat-type-title
 prop: cat-veil
 prop: cat-veil-toggle
 prop: cat-verdict
-prop: command-palette
 prop: coverage-details
 prop: create-plan-from-verdict
 prop: current-location
@@ -1126,7 +1124,6 @@ prop: field-undo-takeoff
 prop: field-unsent
 prop: field-wake-note
 prop: field-window-notice
-prop: filter-count
 prop: flight-basis-link
 prop: flight-date
 prop: flight-detail
@@ -1816,7 +1813,6 @@ prop: route
 prop: send-confirm
 prop: send-scenario
 prop: sheet
-prop: shortcut-sheet
 prop: signout
 prop: signout-cancel
 prop: signout-discard
@@ -1837,8 +1833,6 @@ prop: snapshot-reason
 prop: snapshot-row
 prop: snapshot-seq
 prop: takeoff
-prop: toast
-prop: toast-region
 prop: today-badge
 prop: today-card
 prop: today-card-aircraft
@@ -1917,14 +1911,6 @@ prop: version-op
 prop: version-reason
 prop: version-row
 prop: version-time
-prop: workspace-handle
-prop: workspace-input
-prop: workspace-map
-prop: workspace-maximize
-prop: workspace-peek
-prop: workspace-result
-prop: workspace-sheet
-prop: workspace-tabs
 pwa-install-guide
 pwa-prefetch-status
 pwa-update
@@ -2021,8 +2007,6 @@ snapshot-past
 snapshot-reason
 snapshot-row
 snapshot-seq
-toast
-toast-region
 today-badge
 today-card
 today-card-aircraft
@@ -2100,14 +2084,6 @@ version-op
 version-reason
 version-row
 version-time
-workspace-handle
-workspace-input
-workspace-map
-workspace-maximize
-workspace-peek
-workspace-result
-workspace-sheet
-workspace-tabs
 式: REFERENCE_LIST_ID
 式: `${id}-error`
 式: `${testIdPrefix}-${v}`
@@ -2227,7 +2203,6 @@ workspace-tabs
 式: `report-item-value-${item.key}`
 式: `report-item-warnings-${item.key}`
 式: `report-kind-${k}`
-式: `workspace-toggle-${side}`
 式: bare ? undefined : "plan-report"
 式: bare ? undefined : "plan-report-status-badge"
 式: bare ? undefined : "plan-stale"
@@ -2235,9 +2210,7 @@ workspace-tabs
 式: d.status === "unmet" ? `field-docs-fix-${d.key
 式: direct && !isCancel ? "send-submit" : "record-submit"
 式: id
-式: labelTestId
 式: part === "details" ? "verdict-details" : "verdict-summary"
 式: r.testId
-式: rowTestId?.(row)
 式: testId
 式: testId ? `${testId

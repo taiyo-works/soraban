@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { cx } from "@/components/ui/cx";
 import { Icon, type IconName } from "@/components/ui/icons";
-import { InfoPopover } from "@/components/ui/overlays";
+import { InfoPopover } from "@/components/ui/info-popover";
 import type { MemberRoleDb } from "@soraban/db";
 import { SignOutButton } from "./ops-client";
 import { BOTTOM_TABS, currentChildKey, currentNavKey, hasVisibleCurrentChild, NAV_GROUPS, NAV_ITEM, navHiddenOn, OPS_MAIN_ID, type NavParentKey, visibleChildrenOf } from "./ops-nav-model";

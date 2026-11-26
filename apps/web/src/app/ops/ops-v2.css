@@ -1,56 +1,18 @@
 /* 運航管理 `/ops` の v2（そらばん デザインシステム v2。Sprint 12h PR ③b）。見本：docs/design/warm-final/（home・inspections・plan-new・journal）。
  * このファイルは app/ops/layout.tsx だけが読み込む（公開の `/` は読まない。`/` の CSS を増やさないため）。値は持たず、soraban-tokens.css の --sb-* だけを使う。
- * 構成：1 新しい名前の置き換え（.ds が持つ旧い名前を v2 の値に付け替え、触っていない画面も色が v2 になる）、2 ページの骨格、3 部品（.opx-*）。
- * 旧い名前（--bg-*、--fg-*、--color-ink ほか）は、③b2 で全画面が .opx-*／.sb-* に移ったあと、④ で消す。 */
+ * 構成：1 書体と文字の大きさ（旧い色の名前の付け替えは 16-N2 で撤去）、2 ページの骨格、3 部品（.opx-*）。 */
 
 @layer theme, base, components, utilities;
 
-/* ===== 1 旧い名前を v2 の値へ（運航管理の枠 .ops-v2 の中だけ。見本ページ /ops/design は枠を持たないので影響しない） ===== */
+/* ===== 1 運航管理の枠の書体と文字の大きさ（.ops-v2 の中だけ）=====
+ * 16-N2：Sprint 12g の旧い色の名前（--bg-*・--fg-*・--accent*・意味の 5 色・判定の色・--scrim ほか）の付け替えは撤去した（参照 0）。
+ * 残すのは、globals.css の `.ds` が持つ書体と文字の大きさの名前を、v2 の値に付け替えるものだけ。 */
 .ds.ops-v2 {
-  --bg-app: var(--sb-base);
-  --bg-surface: var(--sb-base);
-  --bg-sunken: var(--sb-sunken);
-  --fg: var(--sb-ink);
-  --fg-soft: var(--sb-ink-2);
-  --fg-mute: var(--sb-ink-3);
-  --line: var(--sb-rule);
-  --line-strong: var(--sb-edge);
-  /* 文字・リンク・フォーカスは墨。主色は主ボタンの面・選択中・現在地 */
-  --accent: var(--sb-ink);
-  --accent-soft: var(--sb-hover);
-  --accent-solid: var(--sb-primary);
-  --accent-solid-hover: var(--sb-primary-press);
-  --accent-fg: var(--sb-on-primary);
-  --ok-fg: var(--sb-v-none-fg);
-  --ok-bg: var(--sb-st-safe-face);
-  --ok-line: var(--sb-v-none-fg);
-  --warn-fg: var(--sb-v-needs-fg);
-  --warn-bg: var(--sb-st-warn-face);
-  --warn-line: var(--sb-v-needs-fg);
-  --danger-fg: var(--sb-v-no-fg);
-  --danger-bg: var(--sb-st-danger-face);
-  --danger-line: var(--sb-v-no-fg);
-  --info-fg: var(--sb-ink-2);
-  --info-bg: var(--sb-sunken);
-  --info-line: var(--sb-edge);
-  --neutral-fg: var(--sb-ink-2);
-  --neutral-bg: var(--sb-sunken);
-  --neutral-line: var(--sb-edge);
-  --verdict-no-fly: var(--sb-v-no-fg);
-  --verdict-needs: var(--sb-v-needs-fg);
-  --verdict-done: var(--sb-v-done-fg);
-  --verdict-clear: var(--sb-v-none-fg);
-  --verdict-unknown: var(--sb-v-unknown-fg);
-  --r-journal: var(--sb-r-m);
-  --scrim: color-mix(in srgb, var(--sb-ink) 45%, transparent);
   --ds-font-sans: var(--font-noto-jp), "Soraban Latin Fallback", "Soraban JP Fallback", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
-  --fs-h1: var(--sb-fs-h);
   --fs-body: var(--sb-fs-body);
   --fs-table: 0.875rem;
   --fs-aux: var(--sb-fs-note);
-  --tap: var(--sb-hit-min);
 }
-/* 現場の画面（.field）は ③b2 で v2 の現場の値に付け替える。それまで枠の色・文字は旧いまま変えない */
 
 /* ===== 2 ページの骨格 ===== */
 .ds.ops-v2 {

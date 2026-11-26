@@ -60,7 +60,7 @@ describe("外部の画像・ライブラリに依存しない（components/ui）
   const sources = walk(dir).filter((f) => /\.(ts|tsx)$/.test(f) && !/\.test\./.test(f));
 
   it("import は react・next・自分たちのコードだけ。画像ファイル・外部 URL を読まない", () => {
-    expect(sources.length).toBeGreaterThan(10);
+    expect(sources.length).toBeGreaterThanOrEqual(8);
     const ALLOWED = /^(react|react-dom|next\/[a-z-]+|@\/|@soraban\/regulations|\.{1,2}\/)/;
     for (const f of sources) {
       const text = readFileSync(f, "utf8");

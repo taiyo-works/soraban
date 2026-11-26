@@ -4,114 +4,10 @@
 @import "./soraban-theme.css";
 @import "./soraban-ui.css";
 
-/* ============================================================
- * Soraban — design tokens
- * ----------------------------------------------------------
- * Aesthetic: 「測量野帳 (Surveyor's Field Notebook)」
- *   - 紙: 暖色オフホワイト (paper)
- *   - インク: 黒よりわずかに青寄り (ink)
- *   - ブランドアクセント: 藍 (indigo) 1色のみ
- *   - 信号 (signal): rose / amber / emerald を製図インク調に減彩
- *   - 線: 1px hairline。たまに dotted (等高線の語彙)
- *   - 角丸: 2px シャープ
- *   - 影: 原則 0
- *
- *   信号と amber バッジが意味的に競合しないよう、ブランドアクセントは
- *   完全に独立した藍系に固定する。
- * ============================================================ */
-
-:root {
-  /* Paper / Ink */
-  --color-paper: #f5f2ea;
-  --color-paper-soft: #ede9dd;
-  --color-paper-deep: #e7e1d1;
-  --color-ink: #0e1421;
-  --color-ink-soft: #2a2f3a;
-  --color-ink-mute: #5b6170;
-  --color-rule: #c9c2ad;
-  --color-rule-soft: #d8d1bd;
-
-  /* Brand accent — 藍 (single color, 5 stops) */
-  --color-indigo-50: #e9edf3;
-  --color-indigo-100: #c3cedc;
-  --color-indigo-300: #6c83a4;
-  --color-indigo-500: #2f4868;
-  --color-indigo-700: #1d3557;
-  --color-indigo-900: #0e1d34;
-
-  /* Semantic signal — 製図インク調に減彩 */
-  --color-signal-red: #b53a3a;
-  --color-signal-red-soft: #f1d9d9;
-  --color-signal-amber: #b97e1e;
-  --color-signal-amber-soft: #f3e6c8;
-  --color-signal-green: #3a7a4f;
-  --color-signal-green-soft: #d6e6da;
-  --color-signal-mute: #9da4b1;
-  --color-signal-mute-soft: #e6e6e2;
-
-  /* Verdict（判定の 4 段＋判定不能。Sprint 11d D2）
-   * 文字にも使うため紙の上で 4.5:1 以上（実測：飛行不可 6.14 / 要手続き 5.29 / 手続き済み 11.05 /
-   * 手続き不要 5.76 / 判定不能 6.67）。意味は言葉と形が担い、色は補助。 */
-  --color-verdict-no-fly: #a33232;
-  --color-verdict-needs: #8a5a0e;
-  --color-verdict-done: #1d3557;
-  --color-verdict-clear: #2e6a42;
-  --color-verdict-unknown: #4f5564;
-
-  /* Geometry */
-  --radius-sharp: 2px;
-  --radius-soft: 6px;
-  --hairline: 1px;
-}
-
+/* 書体（本文は Noto Sans JP）。16-N2 で、初期の紙・墨・藍の `--color-*` と Tailwind の旧い対応（paper・ink・indigo・brand・signal・verdict）を撤去した。
+ * 色・角丸・影・動きの値は soraban-tokens.css の --sb-*（名前は soraban-theme.css）が正。 */
 @theme inline {
-  /* Surfaces */
-  --color-paper: var(--color-paper);
-  --color-paper-soft: var(--color-paper-soft);
-  --color-paper-deep: var(--color-paper-deep);
-
-  /* Type */
-  --color-ink: var(--color-ink);
-  --color-ink-soft: var(--color-ink-soft);
-  --color-ink-mute: var(--color-ink-mute);
-
-  /* Lines */
-  --color-rule: var(--color-rule);
-  --color-rule-soft: var(--color-rule-soft);
-
-  /* Brand */
-  --color-brand-50: var(--color-indigo-50);
-  --color-brand-100: var(--color-indigo-100);
-  --color-brand-300: var(--color-indigo-300);
-  --color-brand-500: var(--color-indigo-500);
-  --color-brand-700: var(--color-indigo-700);
-  --color-brand-900: var(--color-indigo-900);
-
-  /* Semantic signals */
-  --color-signal-red: var(--color-signal-red);
-  --color-signal-red-soft: var(--color-signal-red-soft);
-  --color-signal-amber: var(--color-signal-amber);
-  --color-signal-amber-soft: var(--color-signal-amber-soft);
-  --color-signal-green: var(--color-signal-green);
-  --color-signal-green-soft: var(--color-signal-green-soft);
-  --color-signal-mute: var(--color-signal-mute);
-  --color-signal-mute-soft: var(--color-signal-mute-soft);
-
-  /* Verdict */
-  --color-verdict-no-fly: var(--color-verdict-no-fly);
-  --color-verdict-needs: var(--color-verdict-needs);
-  --color-verdict-done: var(--color-verdict-done);
-  --color-verdict-clear: var(--color-verdict-clear);
-  --color-verdict-unknown: var(--color-verdict-unknown);
-
-  /* Geometry */
-  --radius-sharp: var(--radius-sharp);
-  --radius-soft: var(--radius-soft);
-
-  /* Fonts */
-  --font-display: var(--font-noto-jp), sans-serif;
   --font-sans: var(--font-noto-jp), sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 /* --------------------------------------------------
@@ -128,35 +24,6 @@ body {
 /* 数字を全幅でカチッと並べる用 (座標 / ms / カウンタ向け) */
 .tnum {
   font-variant-numeric: tabular-nums;
-}
-
-/* 小見出し・項目名のラベル。日本語の見出しが多いため斜体（日本語では機械的な斜体になる）を使わず、
- * 本文と同じ書体を小さく、字間を少し空けて置く。英字（証跡 ID などの項目名）は大文字で揃える。 */
-.eyebrow {
-  font-family: var(--font-sans);
-  font-style: normal;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  color: var(--color-ink-mute);
-}
-
-/* 見出し横の方位記（旧デザインの飾り）。意味を持たないため表示しない。
- * 各所の aria-hidden の span は残っているが、ここで描画を止める。 */
-.bearing-mark {
-  display: none;
-}
-
-/* 等高線風の点線 hr */
-.contour-rule {
-  border: 0;
-  height: 1px;
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--color-rule) 0 4px,
-    transparent 4px 8px
-  );
 }
 
 /* テキストリンクの控えめな下線 */
@@ -245,362 +112,66 @@ html:has(body.has-bottom-nav) {
 }
 
 /* ============================================================
- * Sprint 12g stage 1a — new design system tokens: 「航空日誌の紙面」
- * ----------------------------------------------------------
- * Direction: docs/design/ui-direction.md (paper ground, ink text, one indigo accent, five semantic colors).
- * Scope: these tokens are only *used* under `.ds` (the design catalog root today; the ops shell from stage 1b).
- * Nothing outside `.ds` reads them, so existing screens keep their current look.
- *
- * Shape: one corner radius (--r-journal), no shadows, no translucency. Layers are told apart by a 1px rule and
- * a step of ground colour. The pill (--r-pill) is only for small counts.
- *
- * Structure (the cascade order below is relied on by design-tokens.test.ts):
- *   1. :root                                  light (paper, ink, indigo, meanings, verdict)
- *   2. :root .field                           field mode (light), 7:1 body
- *   3. (removed in Sprint 16: no OS-dark rules; the page is always light)
- *   4. :root[data-theme="dark"] ...           dark (forced only; dormant)
- * Dark is its own set (a deep blue-black ground, paper-white text dimmed), not the light set inverted.
+ * 運航管理の枠 `.ds` の組版と、本文の大きさの名前（text-h2・text-body・text-table・text-aux）。
+ * 16-N2：Sprint 12g の色の層（紙・墨・藍の `--bg-*`・`--fg-*`・`--accent*`・意味の 5 色・判定の色・暗・現場の `.field`・Tailwind の対応・
+ * hov/foc/act/field/compact の variant・ダイアログ・表・スケルトン・ボトムシートの旧い規則）を撤去した。
+ * 残したのは、参照のある組版・文字の大きさの名前・下メニューの根（`.ds`）・利用者メニューの出現（`.ds-pop`）だけ。色は --sb-* を直接引く。
+ * 運航管理の枠では、文字の大きさと書体を運航管理の側のスタイルが --sb-* に付け替える。
  * ============================================================ */
-
-/* 1. light */
-:root {
-  --bg-app: #f1ede1;
-  --bg-surface: #fbf9f3;
-  --bg-sunken: #ebe6d7;
-  --fg: #171b22;
-  --fg-soft: #3b3f47;
-  --fg-mute: #5c5f66;
-  --line: #d8d1bd;
-  --line-strong: #857f6c;
-
-  /* Indigo. `accent` is for text, links and the focus ring; `accent-solid` is the fill of a primary button. */
-  --accent: #1f4a99;
-  --accent-soft: #e7ecf7;
-  --accent-solid: #1f4a99;
-  --accent-solid-hover: #183b7c;
-  --accent-fg: #ffffff;
-
-  --ok-fg: #1a6b3a;
-  --ok-bg: #e6f4ea;
-  --ok-line: #2e8b57;
-  --warn-fg: #7a4a06;
-  --warn-bg: #fdf1dc;
-  --warn-line: #a86a0e;
-  --danger-fg: #b3261e;
-  --danger-bg: #fdeceb;
-  --danger-line: #d14343;
-  --info-fg: #1f4a99;
-  --info-bg: #e7ecf7;
-  --info-line: #2f5fb8;
-  --neutral-fg: #48484a;
-  --neutral-bg: #efeff4;
-  --neutral-line: #77777c;
-
-  /* Verdict (4 steps + unknown). Re-measured on the paper surfaces (see design-tokens.test.ts). */
-  --verdict-no-fly: #a33232;
-  --verdict-needs: #8a5a0e;
-  --verdict-done: #1d3557;
-  --verdict-clear: #2e6a42;
-  --verdict-unknown: #4f5564;
-
-  /* Shape and motion. The one radius lives here; `rounded-ctl` is the only radius utility (see @theme below). */
-  --r-journal: 5px;
-  --r-pill: 999px;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --dur: 200ms;
-  --dur-sheet: 240ms;
-  --scrim: rgb(0 0 0 / 0.4);
-}
-
-/* 2. field mode (light). Own system: 7:1 body, fixed deep-indigo accent. */
-:root .field {
-  --bg-app: #f3f4f6;
-  --bg-surface: #ffffff;
-  --bg-sunken: #e9ebef;
-  --fg: #0e1421;
-  --fg-soft: #232a36;
-  --fg-mute: #424a59;
-  --line: #c4c9d2;
-  --line-strong: #5c6573;
-  --accent: #1f4a99;
-  --accent-soft: #e7ecf7;
-  --accent-solid: #1f4a99;
-  --accent-solid-hover: #183b7c;
-  --accent-fg: #ffffff;
-  --ok-fg: #174c2c;
-  --ok-bg: #e4f3ea;
-  --ok-line: #174c2c;
-  --warn-fg: #6b4004;
-  --warn-bg: #fbf0d9;
-  --warn-line: #6b4004;
-  --danger-fg: #862020;
-  --danger-bg: #fbe6e6;
-  --danger-line: #862020;
-  --info-fg: #17376f;
-  --info-bg: #e6edfa;
-  --info-line: #17376f;
-  --neutral-fg: #2f3542;
-  --neutral-bg: #e9ebef;
-  --neutral-line: #2f3542;
-}
-
-/* 4. dark (forced only; dormant — no screen switches to it, and the OS dark setting is not followed). */
-:root[data-theme="dark"] {
-  --bg-app: #0d1118;
-  --bg-surface: #151b25;
-  --bg-sunken: #1f2733;
-  --fg: #ebe7da;
-  --fg-soft: #cfcbbf;
-  --fg-mute: #9ea3ad;
-  --line: #2b3444;
-  --line-strong: #7e8aa0;
-
-  --accent: #8fb0f0;
-  --accent-soft: #16213a;
-  --accent-solid: #4a72c4;
-  --accent-solid-hover: #3f66b8;
-  --accent-fg: #ffffff;
-
-  --ok-fg: #6fd38f;
-  --ok-bg: #10261a;
-  --ok-line: #3fa564;
-  --warn-fg: #f0c060;
-  --warn-bg: #2b200a;
-  --warn-line: #c18f2a;
-  --danger-fg: #ff9f98;
-  --danger-bg: #321412;
-  --danger-line: #e5645b;
-  --info-fg: #8cb8ff;
-  --info-bg: #0f1d36;
-  --info-line: #4e8fe8;
-  --neutral-fg: #d1d1d6;
-  --neutral-bg: #2c2c2e;
-  --neutral-line: #8e8e93;
-
-  --verdict-no-fly: #e27a72;
-  --verdict-needs: #dcaa4e;
-  --verdict-done: #a9bedc;
-  --verdict-clear: #74b98a;
-  --verdict-unknown: #a3a39c;
-
-  --scrim: rgb(0 0 0 / 0.6);
-}
-:root[data-theme="dark"] .field {
-  --bg-app: #000000;
-  --bg-surface: #1c1c1e;
-  --bg-sunken: #2c2c2e;
-  --fg: #ffffff;
-  --fg-soft: #e5e5ea;
-  --fg-mute: #b8b8be;
-  --line: #48484a;
-  --line-strong: #a1a1a6;
-  --accent: #a6c0f4;
-  --accent-soft: #16213a;
-  --accent-solid: #a6c0f4;
-  --accent-solid-hover: #bccff7;
-  --accent-fg: #0b0d10;
-  --ok-fg: #6fd38f;
-  --ok-bg: #10261a;
-  --ok-line: #6fd38f;
-  --warn-fg: #f0c060;
-  --warn-bg: #2b200a;
-  --warn-line: #f0c060;
-  --danger-fg: #ff9f98;
-  --danger-bg: #321412;
-  --danger-line: #ff9f98;
-  --info-fg: #8cb8ff;
-  --info-bg: #0f1d36;
-  --info-line: #8cb8ff;
-  --neutral-fg: #e5e5ea;
-  --neutral-bg: #2c2c2e;
-  --neutral-line: #e5e5ea;
-}
-
-/* Tailwind names for the new tokens (bg-surface, text-fg-mute, border-line-strong, bg-ok-bg, ...).
- * The type sizes carry the small-screen value as a fallback, so a part that is drawn outside `.ds` (the signed-in band on `/`)
- * still gets a size instead of inheriting one. Inside `.ds` the `--fs-*` values win, as before. */
 @theme inline {
-  --color-app: var(--bg-app);
-  --color-surface: var(--bg-surface);
-  --color-sunken: var(--bg-sunken);
-  --color-fg: var(--fg);
-  --color-fg-soft: var(--fg-soft);
-  --color-fg-mute: var(--fg-mute);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-solid: var(--accent-solid);
-  --color-accent-solid-hover: var(--accent-solid-hover);
-  --color-accent-fg: var(--accent-fg);
-  --color-ok-fg: var(--ok-fg);
-  --color-ok-bg: var(--ok-bg);
-  --color-ok-line: var(--ok-line);
-  --color-warn-fg: var(--warn-fg);
-  --color-warn-bg: var(--warn-bg);
-  --color-warn-line: var(--warn-line);
-  --color-danger-fg: var(--danger-fg);
-  --color-danger-bg: var(--danger-bg);
-  --color-danger-line: var(--danger-line);
-  --color-info-fg: var(--info-fg);
-  --color-info-bg: var(--info-bg);
-  --color-info-line: var(--info-line);
-  --color-neutral-fg: var(--neutral-fg);
-  --color-neutral-bg: var(--neutral-bg);
-  --color-neutral-line: var(--neutral-line);
-  --radius-ctl: var(--r-journal);
-  --radius-pill: var(--r-pill);
-  --text-h1: var(--fs-h1, 1.375rem);
-  --text-h1--line-height: 1.4;
   --text-h2: var(--fs-h2, 1.0625rem);
   --text-h2--line-height: 1.45;
-  --text-h3: var(--fs-h3, 1rem);
-  --text-h3--line-height: 1.5;
   --text-body: var(--fs-body, 1rem);
   --text-body--line-height: 1.7;
   --text-table: var(--fs-table, 0.875rem);
   --text-table--line-height: 1.7;
   --text-aux: var(--fs-aux, 0.875rem);
   --text-aux--line-height: 1.7;
-  --text-stat: var(--fs-stat, 1.875rem);
-  --text-stat--line-height: 1.1;
-  --text-state: var(--fs-state, 0.875rem);
-  --text-state--line-height: 1.4;
 }
 
-/* Variants: force a state in the catalog (data-force="hover focus active") and key off field mode / density. */
-@custom-variant hov (&:is(:hover, [data-force~="hover"]));
-@custom-variant foc (&:is(:focus-visible, [data-force~="focus"]));
-/* Pressed; declared after `hov` so it wins when both apply. */
-@custom-variant act (&:is(:active, [data-force~="active"]));
-@custom-variant field (&:where(.field, .field *));
-@custom-variant compact (&:where([data-density="compact"], [data-density="compact"] *));
-
-/* ------------------------------------------------------------
- * `.ds` — the scope in which the new system applies.
- * ---------------------------------------------------------- */
 .ds {
-  /* Sprint 16: always light. Browser-drawn parts (select popups, scrollbars, form controls) are drawn light even when the OS is dark.
-   * A forced theme (html[data-theme="dark"], used only by the design catalog and checks) sets a single value right below. */
+  /* 常に明るく描く（選択肢の枠・スクロールバーなど、ブラウザが描く部品も OS が暗でも明）。 */
   color-scheme: light;
   --ds-font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
     "Yu Gothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
-  --ds-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace;
 
-  /* type scale (docs/design/ui-direction.md 3.2) */
-  --fs-h1: 1.375rem;
   --fs-h2: 1.0625rem;
-  --fs-h3: 1rem;
   --fs-body: 1rem;
   --fs-table: 0.875rem;
   --fs-aux: 0.875rem;
-  --fs-stat: 1.875rem;
-  --fs-state: 0.875rem;
-  --tap: 48px;
 
-  background: var(--bg-app);
-  color: var(--fg);
+  background: var(--sb-base);
+  color: var(--sb-ink);
   font-family: var(--ds-font-sans);
   font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.7;
   font-feature-settings: normal;
   -webkit-text-size-adjust: 100%;
-  /* Japanese typesetting: no small kana or punctuation at the start of a line; a long unbroken string wraps. */
+  /* 日本語の組版：行頭に小さい仮名・句読点を置かない。長い文字列は折り返す。 */
   line-break: strict;
   word-break: auto-phrase;
   overflow-wrap: break-word;
 }
-
-:root[data-theme="light"],
-:root[data-theme="light"] .ds {
-  color-scheme: light;
-}
-:root[data-theme="dark"],
-:root[data-theme="dark"] .ds {
-  color-scheme: dark;
-}
-
-/* Old token names resolve to the new values under `.ds` (removed in stage 5). Re-declared on the field scope
- * because a custom property holding var() is resolved where it is declared. */
-.ds,
-.ds .field {
-  --color-paper: var(--bg-surface);
-  --color-paper-soft: var(--bg-sunken);
-  --color-paper-deep: var(--bg-sunken);
-  --color-ink: var(--fg);
-  --color-ink-soft: var(--fg-soft);
-  --color-ink-mute: var(--fg-mute);
-  --color-rule: var(--line);
-  --color-rule-soft: var(--line);
-  --color-indigo-50: var(--accent-soft);
-  --color-indigo-100: var(--accent-soft);
-  --color-indigo-300: var(--accent);
-  --color-indigo-500: var(--accent);
-  --color-indigo-700: var(--accent);
-  --color-indigo-900: var(--fg);
-  --color-signal-red: var(--danger-line);
-  --color-signal-red-soft: var(--danger-bg);
-  --color-signal-amber: var(--warn-line);
-  --color-signal-amber-soft: var(--warn-bg);
-  --color-signal-green: var(--ok-line);
-  --color-signal-green-soft: var(--ok-bg);
-  --color-signal-mute: var(--neutral-line);
-  --color-signal-mute-soft: var(--neutral-bg);
-  --color-verdict-no-fly: var(--verdict-no-fly);
-  --color-verdict-needs: var(--verdict-needs);
-  --color-verdict-done: var(--verdict-done);
-  --color-verdict-clear: var(--verdict-clear);
-  --color-verdict-unknown: var(--verdict-unknown);
-  --radius-sharp: var(--r-journal);
-  --radius-soft: var(--r-journal);
-  /* App icon proposals: the accent fill (a placeholder) and the text-on-accent colour. */
-  --appicon-bg: var(--accent-solid);
-  --appicon-fg: var(--accent-fg);
-  --font-sans: var(--ds-font-sans);
-  --font-display: var(--ds-font-sans);
-  --font-mono: var(--ds-font-mono);
-}
 @media (min-width: 1024px) {
   .ds {
-    --fs-h1: 1.5rem;
     --fs-h2: 1.125rem;
-    --fs-body: 1rem;
-    --fs-table: 0.875rem;
   }
 }
-.ds.field,
-.ds .field {
-  --fs-h1: 1.625rem;
-  --fs-h2: 1.375rem;
-  --fs-h3: 1.25rem;
-  --fs-body: 1.125rem;
-  --fs-table: 1.125rem;
-  --fs-aux: 0.875rem;
-  --fs-state: 1.25rem;
-  --tap: 56px;
-  font-size: var(--fs-body);
-}
-.ds .field {
-  background: var(--bg-app);
-  color: var(--fg);
-}
 
-/* The catalog root paints the whole page (the global paper grid stays behind it). */
 html:has(.ds-page) {
-  background: var(--bg-app);
+  background: var(--sb-base);
 }
 .ds-page {
   min-height: 100dvh;
 }
-/* The old paper grid belongs to the old screens. Under the new ground it would show through the room kept for the bottom menu. */
+/* 旧い紙の方眼は使わない。下メニューの余白の下にも透けない。 */
 html:has(.ds-page) body {
-  background: var(--bg-app);
+  background: var(--sb-base);
   background-image: none;
-  color: var(--fg);
+  color: var(--sb-ink);
 }
-.ds .tnum,
-.ds .num {
+.ds .tnum {
   font-variant-numeric: tabular-nums;
 }
 .ds {
@@ -613,70 +184,28 @@ html:has(.ds-page) body {
   letter-spacing: -0.012em;
   text-wrap: balance;
 }
-/* Paragraphs avoid a one-character last line. */
+/* 段落は 1 文字だけの最終行を避ける */
 .ds :is(p, li, dd) {
   text-wrap: pretty;
 }
-.ds :is(.tnum, .num, time, td, [data-num]) {
+.ds :is(.tnum, time, td, [data-num]) {
   font-variant-numeric: tabular-nums;
 }
 
-/* Focus: 2px accent ring, visible on every interactive element (never removed). */
-.ds :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
-.ds [data-force~="focus"] {
-  outline: 2px solid var(--accent);
+/* フォーカスの輪（消さない）。運航管理の枠の中は 運航管理の側の輪（3px）が優先する */
+.ds :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--sb-ink);
   outline-offset: 2px;
 }
 .ds :is(input, select, textarea):focus-visible {
   outline-offset: 0;
 }
 .ds ::selection {
-  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  background: color-mix(in srgb, var(--sb-ink) 24%, transparent);
   color: inherit;
 }
 
-/* Native <dialog> as dialog / bottom sheet / drawer. */
-.ds dialog.ds-dialog {
-  /* The dialog element is the full-viewport transparent layer (a click on it, outside the panel, closes);
-   * the panel inside is positioned as a centred dialog, a bottom sheet or a drawer. */
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  max-width: none;
-  max-height: none;
-  overflow: visible;
-}
-.ds-dialog::backdrop {
-  background: var(--scrim);
-}
-.ds dialog.ds-dialog[open] > .ds-dialog-panel {
-  animation: ds-rise var(--dur-sheet) var(--ease);
-}
-.ds dialog.ds-dialog[open]::backdrop {
-  animation: ds-fade var(--dur) var(--ease);
-}
-@keyframes ds-rise {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes ds-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+/* 利用者メニュー・ⓘの説明の出現（動きは --sb-dur。現場と動きを減らす設定では 0） */
 @keyframes ds-pop {
   from {
     opacity: 0;
@@ -687,70 +216,11 @@ html:has(.ds-page) body {
     transform: none;
   }
 }
-@keyframes ds-skeleton {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-}
 .ds .ds-pop {
-  animation: ds-pop var(--dur) var(--ease);
+  animation: ds-pop var(--sb-dur) var(--sb-ease);
 }
-.ds .ds-skeleton {
-  animation: ds-skeleton 1.4s ease-in-out infinite;
-}
-
-/* Data table: row-wide link, and stacked layout below 768px (no horizontal scroll). */
-.ds .ds-table tbody tr {
-  position: relative;
-}
-.ds .ds-table-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-}
-@media (max-width: 767px) {
-  .ds .ds-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .ds .ds-table,
-  .ds .ds-table tbody,
-  .ds .ds-table tr,
-  .ds .ds-table td {
-    display: block;
-  }
-  .ds .ds-table td[data-label]:not([data-primary])::before {
-    content: attr(data-label);
-    display: block;
-    color: var(--fg-mute);
-    font-size: var(--fs-aux);
-    line-height: 1.4;
-  }
-}
-
-/* Bottom sheet stages (workspace, below 1024px). Heights are fractions of the workspace frame. */
-.ds [data-sheet-stage="peek"] {
-  --sheet-h: 76px;
-}
-.ds [data-sheet-stage="half"] {
-  --sheet-h: 52%;
-}
-.ds [data-sheet-stage="full"] {
-  --sheet-h: 92%;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .ds .ds-pop,
-  .ds .ds-skeleton,
-  .ds dialog.ds-dialog[open] > .ds-dialog-panel,
-  .ds dialog.ds-dialog[open]::backdrop {
+  .ds .ds-pop {
     animation: none;
   }
 }

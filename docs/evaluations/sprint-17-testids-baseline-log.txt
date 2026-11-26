@@ -10,3 +10,4 @@
 2026-11-25T02:42:48.267Z	2228	16-I 点検の群（inspection-group-*）・記入の印（inspection-mark-*）・進み具合（inspection-progress）・未記入の数（inspection-missing-count）を足した。消した識別子は 0
 2026-11-25T03:16:37.444Z	2228	16-I 差し戻し 1 点検の群の補足（inspection-group-note）を足した。基準から外した 2 件（inspection-item-${firstMissing}、prop: 同）は、16-I で足した querySelector の文字列の中の式を拾った誤りで、画面に出る識別子ではない（N-2 でその querySelector を外した）。画面に出る識別子の消失は 0
 2026-11-25T09:40:06.036Z	2242	16-K: 状態の帯の説明を帯の外へ出す field-status-prefetch-stale-help を追加
+2026-11-26T00:04:04.100Z	2215	16-N2 N-1：参照 0 の旧い部品（ui/workspace・ui/overlays・ui/data・ui/command-palette）の撤去で、画面に描かれたことのない 27 件が消えた（workspace-*・toast・toast-region・command-palette・shortcut-sheet・filter-count と、その prop・式）。実画面の識別子の消失は 0
