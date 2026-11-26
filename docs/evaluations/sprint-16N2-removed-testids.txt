@@ -1,1 +1,29 @@
 # Sprint 16-N2 N-1 で撤去した旧い部品（ui/workspace・overlays・data・command-palette・forms）だけが持っていた data-testid（27 件）。どの画面・E2E にも使われていない（参照 0 の部品）。実画面の識別子は 0 件。
+# 基準 44d3266 の apps/web/src から scripts/testids.mjs の collect で集めた一覧と、16-N2 後（fix1）の一覧の差分。ids の表記は testids.mjs と同じ（"prop: ..." と "式: ..." はコード上の渡し方の記録）。
+filter-count
+prop: command-palette
+prop: filter-count
+prop: shortcut-sheet
+prop: toast
+prop: toast-region
+prop: workspace-handle
+prop: workspace-input
+prop: workspace-map
+prop: workspace-maximize
+prop: workspace-peek
+prop: workspace-result
+prop: workspace-sheet
+prop: workspace-tabs
+toast
+toast-region
+workspace-handle
+workspace-input
+workspace-map
+workspace-maximize
+workspace-peek
+workspace-result
+workspace-sheet
+workspace-tabs
+式: `workspace-toggle-${side}`
+式: labelTestId
+式: rowTestId?.(row)
