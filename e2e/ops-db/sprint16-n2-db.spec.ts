@@ -146,7 +146,11 @@ test.describe("N-3 `/` と `/ops` の一貫性", () => {
     const shapes = (x: Sample): string[] => [...new Set(Object.values(x.tags).map((t) => JSON.stringify(t.shape)))];
     expect.soft(shapes(pub), "判定の札の形（`/`。段によらず同じ）").toHaveLength(1);
     expect.soft(shapes(ops), "判定の札の形（/ops。`/` と同じ）").toEqual(shapes(pub));
-    for (const key of Object.keys(pub.tags)) if (key in ops.tags) expect.soft(ops.tags[key]!.color, `判定の札の色（段 ${key}）`).toEqual(pub.tags[key]!.color);
+    // 重ならない計画では比較が 0 回になり、色の差を見逃す。比べる段（needs）を名指しで固定し、重なる段が 1 以上あることを確かめる（16-N2 レビュー R-1）
+    const overlap = Object.keys(pub.tags).filter((k) => k in ops.tags);
+    expect(overlap.length, `判定の札の色：\`/\` と \`/ops\` で重なる段（${overlap.join("・") || "なし"}）が 1 以上`).toBeGreaterThanOrEqual(1);
+    expect(overlap, "判定の札の色：比べる段 needs が両方にある").toContain("needs");
+    for (const key of overlap) expect.soft(ops.tags[key]!.color, `判定の札の色（段 ${key}）`).toEqual(pub.tags[key]!.color);
     expect.soft(pub.primaryFocus["outline-style"], "フォーカスの輪（`/`）は実線").toBe("solid");
     expect.soft(ops.primaryFocus, "フォーカスの輪").toEqual(pub.primaryFocus);
   });
