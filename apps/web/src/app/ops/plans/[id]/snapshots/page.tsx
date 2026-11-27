@@ -23,7 +23,7 @@ export default async function SnapshotListPage({ params }: { readonly params: Pr
   return (
     <main className="flex flex-col gap-6">
       <PageHeader title="判定の履歴" eyebrow={plan.title} back={{ href: `/ops/plans/${id}/judgement`, label: "判定" }}>
-        <Note>判定をやり直しても、前の判定は書き換えられず、ここに残ります。</Note>
+        <Note body>判定をやり直しても、前の判定は書き換えられず、ここに残ります。</Note>
       </PageHeader>
       <ol className="flex flex-col gap-3" data-testid="snapshot-list">
         {[...list].reverse().map((s) => (
@@ -38,20 +38,20 @@ export default async function SnapshotListPage({ params }: { readonly params: Pr
                   判定 {s.seq}
                 </span>
                 {s.isCurrent ? <Badge tone="brand" data-testid="snapshot-current">現在の判定</Badge> : null}
-                <time dateTime={s.createdAt} className="sb-num text-xs tnum text-sb-ink-2">
+                <time dateTime={s.createdAt} className="sb-num text-sm tnum text-sb-ink-2">
                   {formatJst(new Date(s.createdAt))}
                 </time>
-                <span className="text-xs text-sb-ink-2" data-testid="snapshot-reason">
+                <span className="text-sm text-sb-ink-2" data-testid="snapshot-reason">
                   {SNAPSHOT_REASON_LABEL[s.reason] ?? s.reason}
                 </span>
               </span>
               <VerdictBadge level={s.verdictLevel} unknownCount={s.verdictUnknownCount} />
-              <span className="break-all sb-num text-xs tnum text-sb-ink-3">
+              <span className="break-all sb-num text-sm tnum text-sb-ink-3">
                 地点判定 {s.checkEvidenceId}
                 <span aria-hidden className="mx-1.5">／</span>
                 方法を含む判定 {s.diagnosisEvidenceId}
               </span>
-              <span className="break-all sb-num text-xs tnum text-sb-ink-3">{s.engineVersion}</span>
+              <span className="break-all sb-num text-sm tnum text-sb-ink-3">{s.engineVersion}</span>
             </Link>
           </li>
         ))}

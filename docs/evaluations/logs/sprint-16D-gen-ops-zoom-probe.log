@@ -1,0 +1,50 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-c-db.spec.ts -g '持ち越し 3'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-c-db.spec.ts:219:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） (7.8s)
+
+
+  1) e2e/ops-db/sprint16-c-db.spec.ts:219:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） 
+
+    Error: ログイン状態の / 文字 200%・390px: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "input[text]「」 幅 155<164",
+    +   "input[text]「」 幅 155<184",
+    + ]
+
+       at ../field-checks.ts:486
+
+      484 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+      485 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+    > 486 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
+          |                                                                                                             ^
+      487 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+      488 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+      489 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:486:109)
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:225:5
+
+    Error Context: test-results/ops/sprint16-c-db-持ち越し-3：運航管理に-4e296-0-にしても横スクロールがない（入口の丸い矢印が無い）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-持ち越し-3：運航管理に-4e296-0-にしても横スクロールがない（入口の丸い矢印が無い）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-持ち越し-3：運航管理に-4e296-0-にしても横スクロールがない（入口の丸い矢印が無い）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-c-db.spec.ts:219:7 › 持ち越し 3：運航管理にログインした状態の `/`（K-5 文字 200%） › `/` を 390・430 幅・文字 200% にしても横スクロールがない（入口の丸い矢印が無い） 
+ ELIFECYCLE  Command failed with exit code 1.

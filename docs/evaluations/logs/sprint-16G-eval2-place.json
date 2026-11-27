@@ -1,0 +1,272 @@
+[
+ {
+  "label": "short",
+  "w": 375,
+  "h": 812,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "地点MWUUSXKB",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": 202.5,
+  "quickBottom": 536.5,
+  "navTop": 739,
+  "scrollW": 375,
+  "innerW": 375,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "short",
+  "w": 390,
+  "h": 844,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "地点MWUUSXKB",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": 234.5,
+  "quickBottom": 536.5,
+  "navTop": 771,
+  "scrollW": 390,
+  "innerW": 390,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "short",
+  "w": 1280,
+  "h": 800,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 428,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "地点MWUUSXKB",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": -214.6,
+  "quickBottom": 214.6,
+  "navTop": 0,
+  "scrollW": 1280,
+  "innerW": 1280,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30",
+  "w": 375,
+  "h": 812,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": 181.5,
+  "quickBottom": 557.5,
+  "navTop": 739,
+  "scrollW": 375,
+  "innerW": 375,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30",
+  "w": 390,
+  "h": 844,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": 213.5,
+  "quickBottom": 557.5,
+  "navTop": 771,
+  "scrollW": 390,
+  "innerW": 390,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30",
+  "w": 1280,
+  "h": 800,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 428,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。",
+  "gap": -214.6,
+  "quickBottom": 214.6,
+  "navTop": 0,
+  "scrollW": 1280,
+  "innerW": 1280,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30-noflag",
+  "w": 375,
+  "h": 812,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、未確認の項目が 4 件あります。",
+  "gap": 181.5,
+  "quickBottom": 557.5,
+  "navTop": 739,
+  "scrollW": 375,
+  "innerW": 375,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30-noflag",
+  "w": 390,
+  "h": 844,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 367,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、未確認の項目が 4 件あります。",
+  "gap": 213.5,
+  "quickBottom": 557.5,
+  "navTop": 771,
+  "scrollW": 390,
+  "innerW": 390,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ },
+ {
+  "label": "long30-noflag",
+  "w": 1280,
+  "h": 800,
+  "innerTextCount": 1,
+  "htmlCount": 2,
+  "holders": [
+   {
+    "id": "home-next-place",
+    "top": 428,
+    "inFirstScreen": true
+   }
+  ],
+  "attrHits": [],
+  "todayPlace": 0,
+  "heading": "ホーム",
+  "prepWhen": "1/5（火） 13:00〜13:30",
+  "prepWhenTitle": null,
+  "nextPlace": "鳥取県米子市皆生温泉三丁目の海岸ひろば北側の臨時駐車場前広場",
+  "prepAria": "次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、未確認の項目が 4 件あります。",
+  "gap": -214.6,
+  "quickBottom": 214.6,
+  "navTop": 0,
+  "scrollW": 1280,
+  "innerW": 1280,
+  "deadlineH": null,
+  "bad": [
+   "申請"
+  ]
+ }
+]

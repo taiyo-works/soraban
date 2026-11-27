@@ -1,0 +1,53 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-n2-db.spec.ts:95:7 › N-3 `/` と `/ops` の一貫性 › 部品の計算されたスタイルを集める（`/` と `/ops`） (9.3s)
+  ✓  2 e2e/ops-db/sprint16-n2-db.spec.ts:142:7 › N-3 `/` と `/ops` の一貫性 › 地・本文：地の色・文字の色・本文の大きさ・行間・太さが同じ (1ms)
+  ✘  3 e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ (4ms)
+  -  4 e2e/ops-db/sprint16-n2-db.spec.ts:150:7 › N-3 `/` と `/ops` の一貫性 › 入力欄：面・文字・縁・角丸・大きさが同じ
+  -  5 e2e/ops-db/sprint16-n2-db.spec.ts:153:7 › N-3 `/` と `/ops` の一貫性 › 判定の札：形・大きさ・太さが段によらず同じで、同じ段の色が同じ
+  -  6 e2e/ops-db/sprint16-n2-db.spec.ts:159:7 › N-3 `/` と `/ops` の一貫性 › フォーカスの輪：太さ・線種・色・離れ具合が同じ
+  ✓  7 e2e/ops-db/sprint16-n2-db.spec.ts:167:7 › N-3 現場は色以外の形が同じで、寸法と線の太さだけ大きい › 主ボタン：角丸・太さ・字形が通常と同じ。高さと文字は通常以上（64 以上） (1.0s)
+
+
+  1) e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -6,7 +6,7 @@
+        "border-top-width": "1px",
+        "box-shadow": "none",
+        "color": "rgb(20, 24, 31)",
+        "font-size": "16px",
+        "font-weight": "600",
+    -   "min-height": "48px",
+    +   "min-height": "64px",
+      }
+
+      146 |   test("主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ", async () => {
+      147 |     expect(ops.primary).toEqual(pub.primary);
+    > 148 |     expect(ops.secondary).toEqual(pub.secondary);
+          |                           ^
+      149 |   });
+      150 |   test("入力欄：面・文字・縁・角丸・大きさが同じ", async () => {
+      151 |     expect(ops.input).toEqual(pub.input);
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:148:27
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-bd011-・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-n2-db.spec.ts:146:7 › N-3 `/` と `/ops` の一貫性 › 主ボタン・副ボタン：面・文字・縁・角丸・大きさ・太さ・影が同じ 
+  3 did not run
+  3 passed (15.2s)
+exit=1

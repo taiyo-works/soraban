@@ -133,12 +133,13 @@ describe("Q-26 動き", () => {
     expect(vs).toMatch(/data-testid="verdict-conclusion"[\s\S]{0,80}\$\{ready \? "sb-rise" : ""\}/);
   });
 
-  it("減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。矢印の入れ替えは止まる（soraban-ui.css）", () => {
+  it("減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。ボタンの動きの時間はトークンだけ（soraban-ui.css）", () => {
     const tokens = stripComments(read("app/soraban-tokens.css"));
-    expect(tokens).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-rise: 0ms; \}/);
-    expect(tokens).toMatch(/:root\[data-mode="field"\]\s*\{[^}]*--sb-dur: 0ms;[^}]*--sb-dur-rise: 0ms;/);
-    expect(ui).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.sb-pill-arrow \.sb-a2 \{\s*display: none;/);
-    expect(ui).toMatch(/:root\[data-mode="field"\] \.sb-pill-arrow \.sb-a2 \{\s*display: none;/);
+    expect(tokens).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-press: 0ms; --sb-dur-sheet: 0ms; --sb-dur-state: 0ms; --sb-dur-rise: 0ms; \}/);
+    expect(tokens).toMatch(/:root\[data-mode="field"\]\s*\{[^}]*--sb-dur: 0ms;[^}]*--sb-dur-press: 0ms;[^}]*--sb-dur-sheet: 0ms;[^}]*--sb-dur-state: 0ms;[^}]*--sb-dur-rise: 0ms;/);
+    // 16-C：ピルの右端の丸と矢印（入れ替えの動き）は外した。ボタンの動きは背景と押下の 2 つで、時間はトークンだけ（0 になる）
+    expect(ui).not.toMatch(/sb-pill-arrow|sb-a1|sb-a2/);
+    expect(ui).toMatch(/\.sb-pill \{[^}]*transition:\s*background var\(--sb-dur\) var\(--sb-ease\),\s*transform var\(--sb-dur-press\) var\(--sb-ease\);/);
   });
 
   it("動きのライブラリを足していない（package.json に差分がない前提の確認：framer-motion・gsap などが依存にない）", () => {

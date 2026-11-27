@@ -1,0 +1,15 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --reporter=list --repeat-each=3 e2e/sprint16-n1.spec.ts
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る (2.1s)
+  ✓  2 e2e/sprint16-n1.spec.ts:44:7 › 16-N1 公開の / の結論の説明 › N1-2b. 判定不能を含まない要手続きの地点（夜間飛行）：今の説明が出る (3.6s)
+  ✓  3 e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る (1.8s)
+  ✓  4 e2e/sprint16-n1.spec.ts:44:7 › 16-N1 公開の / の結論の説明 › N1-2b. 判定不能を含まない要手続きの地点（夜間飛行）：今の説明が出る (3.6s)
+  ✓  5 e2e/sprint16-n1.spec.ts:27:7 › 16-N1 公開の / の結論の説明 › N1-2a. 判定不能を含む地点（美保基地の周辺）：結論に「飛べ」と VERDICT_HELP の文が 0。判定不能の件数の行は残る (1.9s)
+  ✓  6 e2e/sprint16-n1.spec.ts:44:7 › 16-N1 公開の / の結論の説明 › N1-2b. 判定不能を含まない要手続きの地点（夜間飛行）：今の説明が出る (3.7s)
+
+  6 passed (21.0s)

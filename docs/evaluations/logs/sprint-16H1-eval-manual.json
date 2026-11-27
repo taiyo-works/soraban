@@ -1,0 +1,1199 @@
+[
+ {
+  "w": 375,
+  "step": 1,
+  "phase": "initial",
+  "info": {
+   "pb": {
+    "now": "1",
+    "text": "1/6 場所",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "① 場所",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 1719,
+   "navTop": 739,
+   "scrollW": 375,
+   "innerW": 375,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "地点がまだ決まっていないときは、先に判定画面で調"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "",
+   "hist": "{\"sbWiz\":0,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 2
+  }
+ },
+ {
+  "w": 375,
+  "step": 1,
+  "phase": "empty-next",
+  "e1": {
+   "step": "1",
+   "focus": "plan-place-name",
+   "invalid": [
+    "plan-place-name",
+    "plan-lat",
+    "plan-lng"
+   ],
+   "errs": [
+    {
+     "id": "_R_qmlubsnqeivb_-error",
+     "t": "場所の名称を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_32mlubsnqeivb_-error",
+     "t": "緯度を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_52mlubsnqeivb_-error",
+     "t": "経度を入力してください",
+     "svg": true,
+     "role": null
+    }
+   ]
+  }
+ },
+ {
+  "w": 375,
+  "step": 1,
+  "phase": "next",
+  "r": {
+   "attempts": 1
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 375,
+  "step": 2,
+  "info": {
+   "pb": {
+    "now": "2",
+    "text": "2/6 日時",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "② 日時",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 782,
+   "navTop": 739,
+   "scrollW": 375,
+   "innerW": 375,
+   "visibleNotes": []
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 375,
+  "step": 2,
+  "phase": "empty-next",
+  "step_after": "2",
+  "focus": "plan-start-date",
+  "invalid": [
+   "plan-start-date",
+   "plan-start-time",
+   "plan-duration"
+  ]
+ },
+ {
+  "w": 375,
+  "step": 3,
+  "info": {
+   "pb": {
+    "now": "3",
+    "text": "3/6 飛行の方法と目的",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "③ 飛行の方法と目的",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 1692,
+   "navTop": 739,
+   "scrollW": 375,
+   "innerW": 375,
+   "visibleNotes": [
+    "DID（人口集中地区）と空港等周辺は、地点から判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=3",
+   "hist": "{\"sbWiz\":3,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 5
+  }
+ },
+ {
+  "w": 375,
+  "step": 3,
+  "phase": "empty-next",
+  "step_after": "3",
+  "focus": "plan-title"
+ },
+ {
+  "w": 375,
+  "step": 4,
+  "info": {
+   "pb": {
+    "now": "4",
+    "text": "4/6 操縦者・機体・許可",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "④ 操縦者・機体・許可",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 2638,
+   "navTop": 739,
+   "scrollW": 375,
+   "innerW": 375,
+   "visibleNotes": [
+    "国土交通省の許可・承認（DIPS）は、ここでは選",
+    "これらの同意・通報・許可は、範囲と有効期間を照合",
+    "登録済みの許可・承認",
+    "登録は利用者の入力です。許可書で確認してください"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=4",
+   "hist": "{\"sbWiz\":4,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 6
+  }
+ },
+ {
+  "w": 375,
+  "step": 4,
+  "phase": "empty-next",
+  "step_after": "4",
+  "focus": "plan-aircraft"
+ },
+ {
+  "w": 375,
+  "step": 5,
+  "info": {
+   "pb": {
+    "now": "5",
+    "text": "5/6 内容の確認",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "⑤ 内容の確認",
+   "primaries": [
+    {
+     "id": "plan-submit",
+     "t": "計画を保存",
+     "h": 56,
+     "w": 123
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 2106,
+   "navTop": 739,
+   "scrollW": 375,
+   "innerW": 375,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "保存すると、サーバーが判定を実行し、その結果を判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=5",
+   "hist": "{\"sbWiz\":5,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 7
+  },
+  "cards": [
+   "plan-review-1=場所修正場所の名称評価地点375MWV48YO9緯度・経度35.123456, 133.654321範囲の半径150 m",
+   "plan-review-edit-1=修正",
+   "plan-review-place-name=評価地点375MWV48YO9",
+   "plan-review-coords=35.123456, 133.654321",
+   "plan-review-2=日時修正予定開始（日本時間）2027-04-08 14:30所要時間55 分",
+   "plan-review-edit-2=修正",
+   "plan-review-start=2027-04-08 14:30",
+   "plan-review-duration=55 分",
+   "plan-review-3=飛行の方法と目的修正計画名評価計画375MWV48YO9飛行の目的評価の目的最大高度70 m飛行の方法・空域夜間飛行運航の目的（例外）通常運航立入管理措置／第三者上空入力なし",
+   "plan-review-edit-3=修正",
+   "plan-review-title=評価計画375MWV48YO9",
+   "plan-review-purpose=評価の目的",
+   "plan-review-flags=夜間飛行",
+   "plan-review-4=操縦者・機体・許可修正機体JUH1MWV48YO9（評価機）操縦者操縦 一郎同意・通報・許可入力なし許可・承認の番号入力なしメモ評価メモ375",
+   "plan-review-edit-4=修正",
+   "plan-review-aircraft=JUH1MWV48YO9（評価機）",
+   "plan-review-pilot=操縦 一郎",
+   "plan-review-permit-numbers=入力なし"
+  ]
+ },
+ {
+  "w": 375,
+  "phase": "edit2",
+  "step": "2",
+  "nextLabel": "確認に戻る",
+  "btn": 0
+ },
+ {
+  "w": 375,
+  "phase": "back-to-review",
+  "step": "5",
+  "dur": "50 分"
+ },
+ {
+  "w": 375,
+  "phase": "edit-btn",
+  "boxes": [
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ]
+  ]
+ },
+ {
+  "w": 375,
+  "phase": "saved",
+  "id": "a58d3382-060c-4376-9d18-202b3acf510c",
+  "saved": {
+   "title": "評価計画375MWV48YO9",
+   "place": "評価地点375MWV48YO9",
+   "lat": 35.123456,
+   "lng": 133.654321,
+   "start": "2027-04-08T14:30",
+   "dur": 50,
+   "purpose": "評価の目的",
+   "status": "draft",
+   "aircraftId": true,
+   "pilotId": true,
+   "notes": "評価メモ375",
+   "flags": [
+    "method_night"
+   ],
+   "alt": 70,
+   "radius": 150,
+   "areas": "[{\"id\":\"plan-circle\",\"kind\":\"circle\",\"name\":null,\"center\":[133.654321,35.123456]"
+  },
+  "expected": {
+   "placeName": "評価地点375MWV48YO9",
+   "lat": "35.123456",
+   "lng": "133.654321",
+   "radius": "150",
+   "date": "2027-04-08",
+   "time": "14:30",
+   "duration": "50",
+   "title": "評価計画375MWV48YO9",
+   "purpose": "評価の目的",
+   "altitude": "70",
+   "notes": "評価メモ375"
+  }
+ },
+ {
+  "w": 390,
+  "step": 1,
+  "phase": "initial",
+  "info": {
+   "pb": {
+    "now": "1",
+    "text": "1/6 場所",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "① 場所",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 1626,
+   "navTop": 771,
+   "scrollW": 390,
+   "innerW": 390,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "地点がまだ決まっていないときは、先に判定画面で調"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "",
+   "hist": "{\"sbWiz\":0,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 2
+  }
+ },
+ {
+  "w": 390,
+  "step": 1,
+  "phase": "empty-next",
+  "e1": {
+   "step": "1",
+   "focus": "plan-place-name",
+   "invalid": [
+    "plan-place-name",
+    "plan-lat",
+    "plan-lng"
+   ],
+   "errs": [
+    {
+     "id": "_R_qmlubsnqeivb_-error",
+     "t": "場所の名称を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_32mlubsnqeivb_-error",
+     "t": "緯度を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_52mlubsnqeivb_-error",
+     "t": "経度を入力してください",
+     "svg": true,
+     "role": null
+    }
+   ]
+  }
+ },
+ {
+  "w": 390,
+  "step": 1,
+  "phase": "next",
+  "r": {
+   "attempts": 1
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 390,
+  "step": 2,
+  "info": {
+   "pb": {
+    "now": "2",
+    "text": "2/6 日時",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "② 日時",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 782,
+   "navTop": 771,
+   "scrollW": 390,
+   "innerW": 390,
+   "visibleNotes": []
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 390,
+  "step": 2,
+  "phase": "empty-next",
+  "step_after": "2",
+  "focus": "plan-start-date",
+  "invalid": [
+   "plan-start-date",
+   "plan-start-time",
+   "plan-duration"
+  ]
+ },
+ {
+  "w": 390,
+  "step": 3,
+  "info": {
+   "pb": {
+    "now": "3",
+    "text": "3/6 飛行の方法と目的",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "③ 飛行の方法と目的",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 1692,
+   "navTop": 771,
+   "scrollW": 390,
+   "innerW": 390,
+   "visibleNotes": [
+    "DID（人口集中地区）と空港等周辺は、地点から判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=3",
+   "hist": "{\"sbWiz\":3,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 5
+  }
+ },
+ {
+  "w": 390,
+  "step": 3,
+  "phase": "empty-next",
+  "step_after": "3",
+  "focus": "plan-title"
+ },
+ {
+  "w": 390,
+  "step": 4,
+  "info": {
+   "pb": {
+    "now": "4",
+    "text": "4/6 操縦者・機体・許可",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "④ 操縦者・機体・許可",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 2617,
+   "navTop": 771,
+   "scrollW": 390,
+   "innerW": 390,
+   "visibleNotes": [
+    "国土交通省の許可・承認（DIPS）は、ここでは選",
+    "これらの同意・通報・許可は、範囲と有効期間を照合",
+    "登録済みの許可・承認",
+    "登録は利用者の入力です。許可書で確認してください"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=4",
+   "hist": "{\"sbWiz\":4,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 6
+  }
+ },
+ {
+  "w": 390,
+  "step": 4,
+  "phase": "empty-next",
+  "step_after": "4",
+  "focus": "plan-aircraft"
+ },
+ {
+  "w": 390,
+  "step": 5,
+  "info": {
+   "pb": {
+    "now": "5",
+    "text": "5/6 内容の確認",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "⑤ 内容の確認",
+   "primaries": [
+    {
+     "id": "plan-submit",
+     "t": "計画を保存",
+     "h": 56,
+     "w": 123
+    }
+   ],
+   "bandTop": 64,
+   "bandH": 35,
+   "btnBottom": 2064,
+   "navTop": 771,
+   "scrollW": 390,
+   "innerW": 390,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "保存すると、サーバーが判定を実行し、その結果を判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=5",
+   "hist": "{\"sbWiz\":5,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 7
+  },
+  "cards": [
+   "plan-review-1=場所修正場所の名称評価地点390MWV48YO9緯度・経度35.123456, 133.654321範囲の半径150 m",
+   "plan-review-edit-1=修正",
+   "plan-review-place-name=評価地点390MWV48YO9",
+   "plan-review-coords=35.123456, 133.654321",
+   "plan-review-2=日時修正予定開始（日本時間）2027-04-08 14:30所要時間55 分",
+   "plan-review-edit-2=修正",
+   "plan-review-start=2027-04-08 14:30",
+   "plan-review-duration=55 分",
+   "plan-review-3=飛行の方法と目的修正計画名評価計画390MWV48YO9飛行の目的評価の目的最大高度70 m飛行の方法・空域夜間飛行運航の目的（例外）通常運航立入管理措置／第三者上空入力なし",
+   "plan-review-edit-3=修正",
+   "plan-review-title=評価計画390MWV48YO9",
+   "plan-review-purpose=評価の目的",
+   "plan-review-flags=夜間飛行",
+   "plan-review-4=操縦者・機体・許可修正機体JUH1MWV48YO9（評価機）操縦者操縦 一郎同意・通報・許可入力なし許可・承認の番号入力なしメモ評価メモ390",
+   "plan-review-edit-4=修正",
+   "plan-review-aircraft=JUH1MWV48YO9（評価機）",
+   "plan-review-pilot=操縦 一郎",
+   "plan-review-permit-numbers=入力なし"
+  ]
+ },
+ {
+  "w": 390,
+  "phase": "edit2",
+  "step": "2",
+  "nextLabel": "確認に戻る",
+  "btn": 0
+ },
+ {
+  "w": 390,
+  "phase": "back-to-review",
+  "step": "5",
+  "dur": "50 分"
+ },
+ {
+  "w": 390,
+  "phase": "edit-btn",
+  "boxes": [
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ]
+  ]
+ },
+ {
+  "w": 390,
+  "phase": "saved",
+  "id": "f524e9d0-713b-4356-b8e8-31f1127651c4",
+  "saved": {
+   "title": "評価計画390MWV48YO9",
+   "place": "評価地点390MWV48YO9",
+   "lat": 35.123456,
+   "lng": 133.654321,
+   "start": "2027-04-08T14:30",
+   "dur": 50,
+   "purpose": "評価の目的",
+   "status": "draft",
+   "aircraftId": true,
+   "pilotId": true,
+   "notes": "評価メモ390",
+   "flags": [
+    "method_night"
+   ],
+   "alt": 70,
+   "radius": 150,
+   "areas": "[{\"id\":\"plan-circle\",\"kind\":\"circle\",\"name\":null,\"center\":[133.654321,35.123456]"
+  },
+  "expected": {
+   "placeName": "評価地点390MWV48YO9",
+   "lat": "35.123456",
+   "lng": "133.654321",
+   "radius": "150",
+   "date": "2027-04-08",
+   "time": "14:30",
+   "duration": "50",
+   "title": "評価計画390MWV48YO9",
+   "purpose": "評価の目的",
+   "altitude": "70",
+   "notes": "評価メモ390"
+  }
+ },
+ {
+  "w": 1280,
+  "step": 1,
+  "phase": "initial",
+  "info": {
+   "pb": {
+    "now": "1",
+    "text": "1/6 場所",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "① 場所",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 88,
+   "bandH": 51,
+   "btnBottom": 1502,
+   "navTop": 0,
+   "scrollW": 1280,
+   "innerW": 1280,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "地点がまだ決まっていないときは、先に判定画面で調"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "",
+   "hist": "{\"sbWiz\":0,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 2
+  }
+ },
+ {
+  "w": 1280,
+  "step": 1,
+  "phase": "empty-next",
+  "e1": {
+   "step": "1",
+   "focus": "plan-place-name",
+   "invalid": [
+    "plan-place-name",
+    "plan-lat",
+    "plan-lng"
+   ],
+   "errs": [
+    {
+     "id": "_R_qmlubsnqeivb_-error",
+     "t": "場所の名称を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_32mlubsnqeivb_-error",
+     "t": "緯度を入力してください",
+     "svg": true,
+     "role": null
+    },
+    {
+     "id": "_R_52mlubsnqeivb_-error",
+     "t": "経度を入力してください",
+     "svg": true,
+     "role": null
+    }
+   ]
+  }
+ },
+ {
+  "w": 1280,
+  "step": 1,
+  "phase": "next",
+  "r": {
+   "attempts": 1
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 1280,
+  "step": 2,
+  "info": {
+   "pb": {
+    "now": "2",
+    "text": "2/6 日時",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "② 日時",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 88,
+   "bandH": 51,
+   "btnBottom": 624,
+   "navTop": 0,
+   "scrollW": 1280,
+   "innerW": 1280,
+   "visibleNotes": []
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=2",
+   "hist": "{\"sbWiz\":2,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 4
+  }
+ },
+ {
+  "w": 1280,
+  "step": 2,
+  "phase": "empty-next",
+  "step_after": "2",
+  "focus": "plan-start-date",
+  "invalid": [
+   "plan-start-date",
+   "plan-start-time",
+   "plan-duration"
+  ]
+ },
+ {
+  "w": 1280,
+  "step": 3,
+  "info": {
+   "pb": {
+    "now": "3",
+    "text": "3/6 飛行の方法と目的",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "③ 飛行の方法と目的",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 88,
+   "bandH": 51,
+   "btnBottom": 1436,
+   "navTop": 0,
+   "scrollW": 1280,
+   "innerW": 1280,
+   "visibleNotes": [
+    "DID（人口集中地区）と空港等周辺は、地点から判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=3",
+   "hist": "{\"sbWiz\":3,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 5
+  }
+ },
+ {
+  "w": 1280,
+  "step": 3,
+  "phase": "empty-next",
+  "step_after": "3",
+  "focus": "plan-title"
+ },
+ {
+  "w": 1280,
+  "step": 4,
+  "info": {
+   "pb": {
+    "now": "4",
+    "text": "4/6 操縦者・機体・許可",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "④ 操縦者・機体・許可",
+   "primaries": [
+    {
+     "id": "plan-wizard-next",
+     "t": "次へ",
+     "h": 56,
+     "w": 74
+    }
+   ],
+   "bandTop": 88,
+   "bandH": 51,
+   "btnBottom": 1956,
+   "navTop": 0,
+   "scrollW": 1280,
+   "innerW": 1280,
+   "visibleNotes": [
+    "国土交通省の許可・承認（DIPS）は、ここでは選",
+    "これらの同意・通報・許可は、範囲と有効期間を照合",
+    "登録済みの許可・承認",
+    "登録は利用者の入力です。許可書で確認してください"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=4",
+   "hist": "{\"sbWiz\":4,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 6
+  }
+ },
+ {
+  "w": 1280,
+  "step": 4,
+  "phase": "empty-next",
+  "step_after": "4",
+  "focus": "plan-aircraft"
+ },
+ {
+  "w": 1280,
+  "step": 5,
+  "info": {
+   "pb": {
+    "now": "5",
+    "text": "5/6 内容の確認",
+    "min": "1",
+    "max": "6",
+    "h": 4
+   },
+   "heading": "⑤ 内容の確認",
+   "primaries": [
+    {
+     "id": "plan-submit",
+     "t": "計画を保存",
+     "h": 56,
+     "w": 123
+    }
+   ],
+   "bandTop": 88,
+   "bandH": 51,
+   "btnBottom": 1655,
+   "navTop": 0,
+   "scrollW": 1280,
+   "innerW": 1280,
+   "visibleNotes": [
+    "判定は入力された情報の範囲での目安です。許可・承",
+    "そらばんは DIPS に送信しません。通報は D",
+    "保存すると、サーバーが判定を実行し、その結果を判"
+   ]
+  },
+  "snap": {
+   "local": [
+    "soraban:ops-current-member"
+   ],
+   "session": [],
+   "idb": [
+    "soraban-ops"
+   ],
+   "caches": [],
+   "url": "?step=5",
+   "hist": "{\"sbWiz\":5,\"__NA\":true,\"__PRIVATE_NEXTJS_INTERNALS_TREE\":{\"tree\":[\"\",{\"children\":[\"ops\",{\"children\":[\"plans\",{\"children\":[\"new\",{\"children\":[\"__PAGE__\",{},null,null,0]},null,null,0]},null,null,0]},null,null,0]},null,null,16],\"renderedSearch\":\"\"}}",
+   "len": 7
+  },
+  "cards": [
+   "plan-review-1=場所修正場所の名称評価地点1280MWV48YO9緯度・経度35.123456, 133.654321範囲の半径150 m",
+   "plan-review-edit-1=修正",
+   "plan-review-place-name=評価地点1280MWV48YO9",
+   "plan-review-coords=35.123456, 133.654321",
+   "plan-review-2=日時修正予定開始（日本時間）2027-04-08 14:30所要時間55 分",
+   "plan-review-edit-2=修正",
+   "plan-review-start=2027-04-08 14:30",
+   "plan-review-duration=55 分",
+   "plan-review-3=飛行の方法と目的修正計画名評価計画1280MWV48YO9飛行の目的評価の目的最大高度70 m飛行の方法・空域夜間飛行運航の目的（例外）通常運航立入管理措置／第三者上空入力なし",
+   "plan-review-edit-3=修正",
+   "plan-review-title=評価計画1280MWV48YO9",
+   "plan-review-purpose=評価の目的",
+   "plan-review-flags=夜間飛行",
+   "plan-review-4=操縦者・機体・許可修正機体JUH1MWV48YO9（評価機）操縦者操縦 一郎同意・通報・許可入力なし許可・承認の番号入力なしメモ評価メモ1280",
+   "plan-review-edit-4=修正",
+   "plan-review-aircraft=JUH1MWV48YO9（評価機）",
+   "plan-review-pilot=操縦 一郎",
+   "plan-review-permit-numbers=入力なし"
+  ]
+ },
+ {
+  "w": 1280,
+  "phase": "edit2",
+  "step": "2",
+  "nextLabel": "確認に戻る",
+  "btn": 0
+ },
+ {
+  "w": 1280,
+  "phase": "back-to-review",
+  "step": "5",
+  "dur": "50 分"
+ },
+ {
+  "w": 1280,
+  "phase": "edit-btn",
+  "boxes": [
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ],
+   [
+    74,
+    48
+   ]
+  ]
+ },
+ {
+  "w": 1280,
+  "phase": "saved",
+  "id": "3eeab020-2cd5-4931-be74-8016b3682d0b",
+  "saved": {
+   "title": "評価計画1280MWV48YO9",
+   "place": "評価地点1280MWV48YO9",
+   "lat": 35.123456,
+   "lng": 133.654321,
+   "start": "2027-04-08T14:30",
+   "dur": 50,
+   "purpose": "評価の目的",
+   "status": "draft",
+   "aircraftId": true,
+   "pilotId": true,
+   "notes": "評価メモ1280",
+   "flags": [
+    "method_night"
+   ],
+   "alt": 70,
+   "radius": 150,
+   "areas": "[{\"id\":\"plan-circle\",\"kind\":\"circle\",\"name\":null,\"center\":[133.654321,35.123456]"
+  },
+  "expected": {
+   "placeName": "評価地点1280MWV48YO9",
+   "lat": "35.123456",
+   "lng": "133.654321",
+   "radius": "150",
+   "date": "2027-04-08",
+   "time": "14:30",
+   "duration": "50",
+   "title": "評価計画1280MWV48YO9",
+   "purpose": "評価の目的",
+   "altitude": "70",
+   "notes": "評価メモ1280"
+  }
+ }
+]

@@ -1,0 +1,41 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts sprint16-n2-db -g '一貫性'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する (10.8s)
+
+
+  1) e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+
+    Error: 判定の札の色：比べる段 needs が両方にある
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "needs"
+    Received array: ["none"]
+
+      150 |     const overlap = Object.keys(pub.tags).filter((k) => k in ops.tags && k === "none");
+      151 |     expect(overlap.length, `判定の札の色：\`/\` と \`/ops\` で重なる段（${overlap.join("・") || "なし"}）が 1 以上`).toBeGreaterThanOrEqual(1);
+    > 152 |     expect(overlap, "判定の札の色：比べる段 needs が両方にある").toContain("needs");
+          |                                                 ^
+      153 |     for (const key of overlap) expect.soft(ops.tags[key]!.color, `判定の札の色（段 ${key}）`).toEqual(pub.tags[key]!.color);
+      154 |     expect.soft(pub.primaryFocus["outline-style"], "フォーカスの輪（`/`）は実線").toBe("solid");
+      155 |     expect.soft(ops.primaryFocus, "フォーカスの輪").toEqual(pub.primaryFocus);
+        at /home/user/soraban/e2e/ops-db/sprint16-n2-db.spec.ts:152:49
+
+    Error Context: test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n2-db-N-3-と-ops-の-c3025-スの輪）の計算されたスタイルが-と-ops-で一致する/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する 
+ ELIFECYCLE  Command failed with exit code 1.

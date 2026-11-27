@@ -7,11 +7,11 @@ import { can } from "@/server/ops/authz";
 import { requireOpsMember } from "@/server/ops/page";
 import { getRegisterCounts } from "@/server/ops/register-counts";
 
-// 登録（Sprint 12c 設計 G の「その他」を、Sprint 12g-1b で改名）：機体・操縦者・許可・承認・よく使う地点の入口（件数つき）と、
+// 機体と書類（Sprint 12c 設計 G の「その他」を 12g-1b で「登録」に、16-F で「機体と書類」に改名。URL は /ops/more のまま）：機体・操縦者・許可・承認・よく使う地点の入口（件数つき）と、
 // 管理（利用者。運航管理者のみ）。ログイン中の利用者の名前・役割・ログアウトは、右上の利用者メニューにある。
 // 事故・ヒヤリハットは日誌の中へ移した（/ops/journal の「事故・ヒヤリハット」）。期限一覧（12f）の枠は作らない。
 // DIPS との接続は未実装（保留）。「未接続」を静かに 1 行で示すだけで、操作も約束もしない。
-export const metadata: Metadata = { title: "登録" };
+export const metadata: Metadata = { title: "機体と書類" };
 
 export default async function OpsMorePage() {
   const { ctx, me } = await requireOpsMember();
@@ -26,18 +26,18 @@ export default async function OpsMorePage() {
   return (
     <main className="flex flex-col gap-6" data-testid="ops-more">
       <DraftOwnerGuard memberId={me.member.id} />
-      <PageHeader title="登録" meta={me.org.name} />
-      <nav aria-label="登録のメニュー">
+      <PageHeader title="機体と書類" meta={me.org.name} />
+      <nav aria-label="機体と書類のメニュー">
         <ul className="sb-block sb-rows !py-1" data-testid="more-menu">
           {items.map((m) => (
             <li key={m.href}>
               <Link href={m.href} prefetch={false} data-testid={`more-link-${m.id}`} className="sb-row min-h-16 w-full">
                 <Icon name={m.icon} size={22} className="shrink-0 text-sb-ink-2" />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[15px] font-bold text-sb-ink">{m.title}</span>
-                  <span className="text-[13px] text-sb-ink-2">{m.body}</span>
+                  <span className="text-[1rem] font-bold text-sb-ink">{m.title}</span>
+                  <span className="text-sm text-sb-ink-2">{m.body}</span>
                 </span>
-                <span className="shrink-0 sb-num text-[14px] tnum text-sb-ink-2" data-testid={`more-count-${m.id}`}>
+                <span className="shrink-0 sb-num text-sm tnum text-sb-ink-2" data-testid={`more-count-${m.id}`}>
                   {m.count} {m.unit}
                 </span>
                 <span aria-hidden className="sb-go-dot">
@@ -58,8 +58,8 @@ export default async function OpsMorePage() {
               <Link href="/ops/members" prefetch={false} data-testid="more-link-members" className="sb-row min-h-16 w-full">
                 <Icon name="account" size={22} className="shrink-0 text-sb-ink-2" />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[15px] font-bold text-sb-ink">利用者</span>
-                  <span className="text-[13px] text-sb-ink-2">招待・役割の変更・利用の停止</span>
+                  <span className="text-[1rem] font-bold text-sb-ink">利用者</span>
+                  <span className="text-sm text-sb-ink-2">招待・役割の変更・利用の停止</span>
                 </span>
                 <span aria-hidden className="sb-go-dot">
                   <Icon name="chevron-right" size={18} />
@@ -69,7 +69,7 @@ export default async function OpsMorePage() {
           </ul>
         </section>
       ) : null}
-      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-sb-m bg-sb-sunken px-4 py-3 text-[13px] text-sb-ink-2" data-testid="dips-note">
+      <section aria-label="DIPS との接続" className="flex items-center gap-2 rounded-sb-m bg-sb-sunken px-4 py-3 text-sb-ink-2" data-testid="dips-note">
         <Icon name="unlinked" size={16} className="shrink-0 text-sb-ink-3" />
         <p>DIPS との接続：未接続。機体・操縦者はアプリの中で登録し、通報は DIPS で行った結果を手で記録します。</p>
       </section>
@@ -79,8 +79,8 @@ export default async function OpsMorePage() {
           <Link href="/ops/about" prefetch={false} data-testid="more-link-about" className="sb-row min-h-16 w-full">
             <Icon name="info" size={22} className="shrink-0 text-sb-ink-2" />
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="text-[15px] font-bold text-sb-ink">このアプリについて</span>
-              <span className="text-[13px] text-sb-ink-2">提供元・このアプリの範囲・免責</span>
+              <span className="text-[1rem] font-bold text-sb-ink">このアプリについて</span>
+              <span className="text-sm text-sb-ink-2">提供元・このアプリの範囲・免責</span>
             </span>
             <span aria-hidden className="sb-go-dot">
               <Icon name="chevron-right" size={18} />

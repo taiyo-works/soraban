@@ -10,7 +10,7 @@ import { clearBundles, clearCurrentMember, clearOtherMembersBundles, setCurrentM
 import { flushIncidentOutbox, incidentUnsentTotalForMember, planIdsWithIncidentOutbox } from "./incident-outbox";
 import { LOGOUT_UNSENT_WARNING, logoutGuard } from "@/lib/ops-outbox";
 import { Icon } from "@/components/ui/icons";
-import { buttonClass as dsButtonClass } from "@/components/ui/primitives";
+import { FieldErrorMark } from "@/components/ui/sb-parts";
 import {
   buttonDangerClass,
   buttonGhostClass,
@@ -134,11 +134,12 @@ export const RequiredTag = ({ required }: { readonly required?: boolean }) =>
     </span>
   );
 
-export const FieldError = ({ id, message }: { readonly id?: string; readonly message?: string }) =>
+export const FieldError = ({ id, message, testId }: { readonly id?: string; readonly message?: string; readonly testId?: string }) =>
   message ? (
-    <span id={id} role="alert" className="opx-field-error">
-      <span aria-hidden>! </span>
-      {message}
+    // 16-D D-1：role="alert" にしない（入力欄の aria-describedby で結ぶ。送信の結果は FormError が alert で 1 度だけ知らせる）。記号は SVG＋文字
+    <span id={id} className="opx-field-error sb-field-error" data-field-error="" {...(testId ? { "data-testid": testId } : {})}>
+      <FieldErrorMark />
+      <span>{message}</span>
     </span>
   ) : null;
 
@@ -175,8 +176,8 @@ export const Field = ({
   const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex min-w-0 flex-col gap-1.5 text-sm text-sb-ink">
-      <span className="flex items-center gap-2">
-        <label htmlFor={controlId} className="font-bold">
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <label htmlFor={controlId} className="font-bold [overflow-wrap:anywhere]">
           {label}
         </label>
         <RequiredTag required={required} />
@@ -208,7 +209,7 @@ export const FormError = ({ message }: { readonly message: string | null }) =>
 /** 入力欄のまとまり（狭い画面では 1 列、広い画面では 2 列）。 */
 export const Group = ({ title, children }: { readonly title: string; readonly children: ReactNode }) => (
   <fieldset className="flex min-w-0 flex-col gap-3">
-    <legend className="mb-1 text-[13px] font-bold tracking-wider text-sb-ink-2">{title}</legend>
+    <legend className="mb-1 text-sm font-bold tracking-wider text-sb-ink-2">{title}</legend>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
   </fieldset>
 );
@@ -438,32 +439,43 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
             <span>使用開始時の既存の総飛行時間</span>
             <RequiredTag required />
           </legend>
-          <div className="flex items-center gap-2">
-            <input
-              aria-label="既存の総飛行時間（時間）"
-              aria-invalid={flightError ? true : undefined}
-              aria-describedby={flightDescribedBy}
-              aria-required
-              className={`${inputClass.replace("w-full ", "")} tnum w-24 text-right`}
-              inputMode="numeric"
-              value={v.hours}
-              onChange={set("hours")}
-            />
-            <span className="text-sm text-sb-ink-2">時間</span>
-            <input
-              aria-label="既存の総飛行時間（分）"
-              aria-invalid={flightError ? true : undefined}
-              aria-describedby={flightDescribedBy}
-              aria-required
-              className={`${inputClass.replace("w-full ", "")} tnum w-20 text-right`}
-              inputMode="numeric"
-              value={v.minutes}
-              onChange={set("minutes")}
-            />
-            <span className="text-sm text-sb-ink-2">分</span>
+          {/* 16-D D-1：見えるラベル（時間・分）を入力欄の上に置く（単位は、これで読める）。読み上げ名は従来の aria-label のまま */}
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor={`${flightId}-hours`} className="sb-label">
+                時間
+              </label>
+              <input
+                id={`${flightId}-hours`}
+                aria-label="既存の総飛行時間（時間）"
+                aria-invalid={flightError ? true : undefined}
+                aria-describedby={flightDescribedBy}
+                aria-required
+                className={`${inputClass.replace("w-full ", "")} tnum w-24 text-right`}
+                inputMode="numeric"
+                value={v.hours}
+                onChange={set("hours")}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor={`${flightId}-minutes`} className="sb-label">
+                分
+              </label>
+              <input
+                id={`${flightId}-minutes`}
+                aria-label="既存の総飛行時間（分）"
+                aria-invalid={flightError ? true : undefined}
+                aria-describedby={flightDescribedBy}
+                aria-required
+                className={`${inputClass.replace("w-full ", "")} tnum w-20 text-right`}
+                inputMode="numeric"
+                value={v.minutes}
+                onChange={set("minutes")}
+              />
+            </div>
           </div>
           <FieldError id={flightErrorId} message={flightError} />
-          <span id={`${flightId}-hint`} className="text-xs leading-relaxed text-sb-ink-3">
+          <span id={`${flightId}-hint`} className="text-sm leading-relaxed text-sb-ink-3">
             この機体をそらばんで記録し始める前に飛んだ時間の合計。分は 0〜59 で入力します（なければ 0 時間 0 分）。
           </span>
         </fieldset>
@@ -480,10 +492,10 @@ export function AircraftForm({ initial }: { readonly initial?: AircraftFormValue
         </Field>
       ) : null}
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -524,7 +536,7 @@ export function VoidForm({ url, version, label }: { readonly url: string; readon
         <button type="submit" className={buttonDangerClass} disabled={busy}>
           {label}を取り消す
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -680,7 +692,7 @@ export function PilotForm({
       </Group>
 
       <fieldset className="flex min-w-0 flex-col gap-1">
-        <legend className="mb-1 sb-num text-[12px] uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
+        <legend className="mb-1 sb-num text-sm uppercase tracking-wider text-sb-ink-3">限定事項（該当するものを選ぶ）</legend>
         <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
           <label className={checkRowClass}>
             <input type="checkbox" className={checkboxClass} checked={v.limitationType} onChange={check("limitationType")} />
@@ -712,10 +724,10 @@ export function PilotForm({
         </Field>
       ) : null}
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -775,10 +787,10 @@ export function MemberInviteForm() {
         </Field>
       </div>
       <SubmitRow message={message}>
-        <button type="submit" className={buttonClass} disabled={busy}>
+        <button type="submit" data-variant="primary" className={buttonClass} disabled={busy}>
           招待する
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -847,7 +859,7 @@ export function MemberControls({
         <button type="submit" className={subtleButtonClass} disabled={busy}>
           変更する
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -915,11 +927,11 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
     await signOut();
   };
 
-  // 紙面の部品（ui/primitives）で描く。3 択は安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く。
+  // 共通のボタン（.opx-btn。16-N2 で旧い ui/primitives から替えた）で描く。3 択は安全な順（送る → やめる）に並べ、記録を捨てる操作は離して最後に置く。
   // 警告の面は注意の色 1 つ。左の太い線・二重の枠・「！」の文字は使わない（印はアイコン、意味は文）。
   return (
     <div className="flex flex-col gap-3">
-      <button type="button" className={dsButtonClass("secondary", "md", "w-full")} onClick={onClick} disabled={busy} data-testid="signout">
+      <button type="button" className={"opx-btn w-full"} onClick={onClick} disabled={busy} data-testid="signout">
         <Icon name="sign-out" size={18} />
         ログアウト
       </button>
@@ -933,23 +945,28 @@ export function SignOutButton({ provider, memberId }: { readonly provider: "neon
             </span>
           </p>
           <div className="flex flex-col gap-2">
-            <button type="button" className={dsButtonClass("primary", "md", "min-h-14 w-full")} onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
+            <button type="button" className={"opx-btn opx-btn-primary w-full"} data-variant="primary" onClick={() => void sendThenSignOut()} disabled={busy} data-testid="signout-send">
               送ってからログアウト
             </button>
-            <button type="button" className={dsButtonClass("secondary", "md", "min-h-14 w-full")} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
+            <button type="button" className={"opx-btn min-h-14 w-full"} onClick={() => setWarning(null)} disabled={busy} data-testid="signout-cancel">
               やめる
             </button>
             <button
               type="button"
-              className={dsButtonClass("secondary", "md", "min-h-14 w-full flex-col gap-0 py-1.5")}
+              className={"opx-btn min-h-14 w-full flex-col gap-0 py-1.5"}
               onClick={() => void signOut(true)}
               disabled={busy}
               data-testid="signout-keep"
             >
               <span>送信待ちを残してログアウト</span>
-              <span className="text-aux font-normal">（先読みは消します。同じ人がログインすると続きを送ります）</span>
+              {/* 16-N3：375 で文の途中（「ログインすると」の前後）で折れていた。文言は同じまま、文節ごとのまとまり（inline-block）にして、折れるのを文節の切れ目だけにする。 */}
+              <span className="text-aux font-normal [text-wrap:balance]">
+                <span className="inline-block">（先読みは消します。</span>
+                <span className="inline-block">同じ人がログインすると</span>
+                <span className="inline-block">続きを送ります）</span>
+              </span>
             </button>
-            <button type="button" className={dsButtonClass("danger", "md", "mt-2 min-h-14 w-full flex-col gap-0 py-1.5")} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
+            <button type="button" className={"opx-btn opx-btn-danger mt-2 min-h-14 w-full flex-col gap-0 py-1.5"} onClick={() => void signOut()} disabled={busy} data-testid="signout-discard">
               <span>送らずにログアウト</span>
               <span className="text-aux font-normal">（記録を捨てる）</span>
             </button>
@@ -976,7 +993,7 @@ export function GoogleSignInButton() {
   };
   return (
     <div className="flex flex-col gap-3">
-      <button type="button" className={`${buttonClass} w-full sm:w-auto sm:self-start`} onClick={onClick} disabled={busy}>
+      <button type="button" data-variant="primary" className={`${buttonClass} w-full sm:w-auto sm:self-start`} onClick={onClick} disabled={busy}>
         Google でログイン
       </button>
       <FormError message={message} />

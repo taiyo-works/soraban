@@ -1,0 +1,59 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g 'F-3|F-4|F-6'
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-f-db.spec.ts:262:7 › F-3 左メニュー（1280） › ホーム／計画／日誌（飛行記録・点検・事故・ヒヤリハット）／機体と書類（機体・操縦者・許可・承認・地点）、罫のあとに「調べる」＝判定。全役割で同じ（閲覧は全役割） (2.4s)
+  ✘   2 e2e/ops-db/sprint16-f-db.spec.ts:291:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ (35.4s)
+  -   3 e2e/ops-db/sprint16-f-db.spec.ts:326:7 › F-3 左メニュー（1280） › 1024 未満では左メニューは出ない（900）。現場・サインイン・権限なしでは下部ナビも左メニューも出ない
+  -   4 e2e/ops-db/sprint16-f-db.spec.ts:352:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回
+  -   5 e2e/ops-db/sprint16-f-db.spec.ts:352:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回
+  -   6 e2e/ops-db/sprint16-f-db.spec.ts:385:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回
+  -   7 e2e/ops-db/sprint16-f-db.spec.ts:412:7 › F-6 上の状態の層 › 1 段目の画面（ホーム・計画・日誌・機体と書類）は、題 24px と補足 1 行 14px。題の文字は変えない
+  -   8 e2e/ops-db/sprint16-f-db.spec.ts:439:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ
+  -   9 e2e/ops-db/sprint16-f-db.spec.ts:439:9 › F-6 上の状態の層 › 主な操作は画面の下半分（390×844）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ
+  -  10 e2e/ops-db/sprint16-f-db.spec.ts:476:7 › F-6 上の状態の層 › 主ボタンは 1 画面 1 つ（K-8）：ホーム（予定のない日を含む）・計画の一覧・日誌・点検の一覧・機体と書類
+
+
+  1) e2e/ops-db/sprint16-f-db.spec.ts:291:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ 
+
+    Error: /
+
+    expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('ops-sidebar')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - / getByTestId('ops-sidebar') with timeout 30000ms
+      - waiting for getByTestId('ops-sidebar')
+
+
+      311 |       await page.goto(url);
+      312 |       const side = page.getByTestId("ops-sidebar");
+    > 313 |       await expect(side, url).toBeVisible();
+          |                               ^
+      314 |       await expect(side.locator('[aria-current="page"]'), url).toHaveCount(1);
+      315 |       await expect(side.getByTestId(`nav-${here}`), url).toHaveAttribute("aria-current", "page");
+      316 |       await expect(side.locator('[data-active="true"]'), url).toHaveCount(1);
+        at /home/user/soraban/e2e/ops-db/sprint16-f-db.spec.ts:313:31
+
+    Error Context: test-results/ops/sprint16-f-db-F-3-左メニュー（12-19ba9-・機体と書類の画面そのものでは親が現在地。常に-1-つ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-f-db-F-3-左メニュー（12-19ba9-・機体と書類の画面そのものでは親が現在地。常に-1-つ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-f-db-F-3-左メニュー（12-19ba9-・機体と書類の画面そのものでは親が現在地。常に-1-つ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-f-db.spec.ts:291:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ 
+  8 did not run
+  1 passed (42.4s)
+ ELIFECYCLE  Command failed with exit code 1.

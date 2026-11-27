@@ -1,0 +1,15 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint18-3-wording.spec.ts
+
+
+Running 4 tests using 1 worker
+
+  ✓  1 e2e/sprint18-3-wording.spec.ts:57:9 › 3-2・3-4・3-11 提供元の表記と題名（375×812） › フッターの site-provider に確認済みの 6 項目と境界の文。未確認の項目は出ない。見出しの副題・説明は新しい値 (2.2s)
+  ✓  2 e2e/sprint18-3-wording.spec.ts:57:9 › 3-2・3-4・3-11 提供元の表記と題名（1280×900） › フッターの site-provider に確認済みの 6 項目と境界の文。未確認の項目は出ない。見出しの副題・説明は新しい値 (2.3s)
+  ✓  3 e2e/sprint18-3-wording.spec.ts:104:7 › 3-8 禁止語・限定語の走査（公開の /） › 初期表示・プリセット 4 地点・機体と運航条件を開いた後・地点判定の PDF で、全面禁止語が 0、限定語が許可リストの外に 0 (9.6s)
+  ✓  4 e2e/sprint18-3-wording.spec.ts:149:7 › 3-8 禁止語・限定語の走査（公開の /） › 走査が働いていること：印の外に「申請します」、印の中に「代行」を差し込むと、それぞれ違反・全面禁止語になる。印を大きな要素に付けると違反になる (1.7s)
+
+  4 passed (18.9s)
+::notice title=🎭 Playwright Run Summary::  4 passed (18.9s)
+exit=0

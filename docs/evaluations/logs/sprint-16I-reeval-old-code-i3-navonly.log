@@ -1,0 +1,77 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/tmp-i3-navonly.spec.ts -g I-3
+
+
+Running 3 tests using 1 worker
+
+  ✘  1 e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る（下部ナビの背後に入らない） (1.1s)
+  ✘  2 e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、390×844 の最初の画面に全体が入る（下部ナビの背後に入らない） (886ms)
+  ✓  3 e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、1280×800 の最初の画面に全体が入る（下部ナビの背後に入らない） (777ms)
+
+
+  1) e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る（下部ナビの背後に入らない） 
+
+    Error: 注記の下端 760.765625 は下部ナビの上端（739）以内
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 739
+    Received:    760.765625
+
+      314 |       const limit = navBox ? navBox.y : vp.height;
+      315 |       if (vp.width < 640) expect(navVisible, "狭い画面は下部ナビがある").toBe(true);
+    > 316 |       expect(n.y + n.height, `注記の下端 ${n.y + n.height} は下部ナビの上端（${limit}）以内`).toBeLessThanOrEqual(limit);
+          |                                                                              ^
+      317 |       if (vp.width < 640) expect(n.y + n.height, `注記の下端 ${n.y + n.height} は 720 以内（ナビの手前に余白）`).toBeLessThanOrEqual(720);
+      318 |       // 実施日時を離陸より前に直すと注記は消える（今までと同じ）
+      319 |       await form(page).getByLabel("実施時刻", { exact: true }).fill("10:50");
+        at /home/user/soraban/e2e/ops-db/tmp-i3-navonly.spec.ts:316:78
+
+    Error Context: test-results/ops/tmp-i3-navonly-16-I-点検の入力--48244--の最初の画面に全体が入る（下部ナビの背後に入らない）/error-context.md
+
+    Error Context: test-results/ops/tmp-i3-navonly-16-I-点検の入力--48244--の最初の画面に全体が入る（下部ナビの背後に入らない）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/tmp-i3-navonly-16-I-点検の入力--48244--の最初の画面に全体が入る（下部ナビの背後に入らない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/tmp-i3-navonly-16-I-点検の入力--48244--の最初の画面に全体が入る（下部ナビの背後に入らない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、390×844 の最初の画面に全体が入る（下部ナビの背後に入らない） 
+
+    Error: 注記の下端 760.765625 は 720 以内（ナビの手前に余白）
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 720
+    Received:    760.765625
+
+      315 |       if (vp.width < 640) expect(navVisible, "狭い画面は下部ナビがある").toBe(true);
+      316 |       expect(n.y + n.height, `注記の下端 ${n.y + n.height} は下部ナビの上端（${limit}）以内`).toBeLessThanOrEqual(limit);
+    > 317 |       if (vp.width < 640) expect(n.y + n.height, `注記の下端 ${n.y + n.height} は 720 以内（ナビの手前に余白）`).toBeLessThanOrEqual(720);
+          |                                                                                                ^
+      318 |       // 実施日時を離陸より前に直すと注記は消える（今までと同じ）
+      319 |       await form(page).getByLabel("実施時刻", { exact: true }).fill("10:50");
+      320 |       await expect(note).toHaveCount(0);
+        at /home/user/soraban/e2e/ops-db/tmp-i3-navonly.spec.ts:317:96
+
+    Error Context: test-results/ops/tmp-i3-navonly-16-I-点検の入力--b64bf--の最初の画面に全体が入る（下部ナビの背後に入らない）/error-context.md
+
+    Error Context: test-results/ops/tmp-i3-navonly-16-I-点検の入力--b64bf--の最初の画面に全体が入る（下部ナビの背後に入らない）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/tmp-i3-navonly-16-I-点検の入力--b64bf--の最初の画面に全体が入る（下部ナビの背後に入らない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/tmp-i3-navonly-16-I-点検の入力--b64bf--の最初の画面に全体が入る（下部ナビの背後に入らない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、375×812 の最初の画面に全体が入る（下部ナビの背後に入らない） 
+    e2e/ops-db/tmp-i3-navonly.spec.ts:291:9 › 16-I 点検の入力 › I-3. 日誌から移ったとき、離陸より後の実施日時の注記は、実施日時の欄のすぐ下にあり、390×844 の最初の画面に全体が入る（下部ナビの背後に入らない） 
+  1 passed (8.5s)
+ ELIFECYCLE  Command failed with exit code 1.

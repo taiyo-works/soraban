@@ -33,19 +33,19 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
         back={BACK_TO.register}
         aside={
           manager ? (
-            <Link href="/ops/aircraft/new" className={buttonPrimaryClass}>
+            <Link href="/ops/aircraft/new" data-variant="primary" className={buttonPrimaryClass}>
               機体を登録
             </Link>
           ) : null
         }
       >
-        {manager ? null : <Note>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
+        {manager ? null : <Note body>機体の登録・訂正・取消は運航管理者だけが行えます。</Note>}
         {/* 機体の DIPS への登録は利用者本人が行う（Sprint 18-3） */}
         <p className="text-base leading-relaxed text-sb-ink-2" data-testid="boundary-registration">{BOUNDARY_REGISTRATION}</p>
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/aircraft" includeVoided={includeVoided} />
-        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
+        <p className="sb-num text-sm font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
         <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された機体はありません。</p>
@@ -59,7 +59,7 @@ export default async function AircraftListPage({ searchParams }: { readonly sear
                   href={`/ops/aircraft/${a.id}`}
                   className={`${listRowClass} ${GRID} ${a.voided ? "text-sb-ink-3" : ""}`}
                 >
-                  <span className="min-w-0 break-all sb-num text-[15px] text-sb-ink">
+                  <span className="min-w-0 break-all sb-num text-[1rem] text-sb-ink">
                     <CellLabel>登録記号</CellLabel>
                     {a.registrationMark}
                   </span>

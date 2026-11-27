@@ -1,0 +1,211 @@
+import fs from "node:fs";
+import { expect, request as pwRequest, test, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
+import { measureTextZoom, collectTapTargets, collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets, relativeLuminance, waitForSettledStyles } from "../field-checks";
+
+// 評価者の手動シナリオ（一時ファイル。実行後は logs に .txt で退避して削除する）
+const PORT = process.env.E2E_OPS_PORT ?? "3400";
+const BASE = `http://127.0.0.1:${PORT}`;
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16K-reeval";
+const OUT = "/home/user/soraban/docs/evaluations/logs/sprint-16K-reeval-manual-results.jsonl";
+fs.mkdirSync(SHOT, { recursive: true });
+const rec = (o: Record<string, unknown>) => fs.appendFileSync(OUT, JSON.stringify(o) + "\n");
+type Who = { readonly authUserId: string; readonly email: string };
+const seeded = (key: string): Who => ({ authUserId: key, email: `${key}@example.test` });
+const signIn = async (ctx: APIRequestContext, who: Who) => {
+  const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: who.authUserId, email: who.email, emailVerified: true, name: who.authUserId } });
+  expect(r.status()).toBe(200);
+};
+const apiAs = async (who: Who) => {
+  const ctx = await pwRequest.newContext({ baseURL: BASE });
+  await signIn(ctx, who);
+  return ctx;
+};
+const DAY = "2027-01-05";
+const HQ = { lat: 35.434238, lng: 133.380508 };
+const at = (hms: string) => new Date(`${DAY}T${hms}+09:00`);
+const stamp = Date.now().toString(36).toUpperCase();
+let seq = 0;
+const PILOT_NAME = `評価 氏名${stamp}`;
+const NOTE = `EVALNOTE${stamp}`;
+const prepare = async (page: Page) => {
+  const manager = await apiAs(seeded("a-manager"));
+  await signIn(page.request, seeded("a-manager"));
+  const registrationMark = `JUE16${stamp}${seq++}`;
+  const a = await manager.post("/api/ops/aircraft", { data: { registrationMark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${registrationMark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  expect(a.status(), await a.text()).toBe(201);
+  const aircraft = (await a.json()) as { id: string };
+  const p = await manager.post("/api/ops/pilots", { data: { fullName: `${PILOT_NAME}${seq++}`, hasLicense: false } });
+  expect(p.status(), await p.text()).toBe(201);
+  const pilot = (await p.json()) as { id: string };
+  const title = `E16K ${stamp}-${seq++}`;
+  const pl = await manager.post("/api/ops/plans", { data: { title, aircraftId: aircraft.id, pilotId: pilot.id, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "現場の空撮", placeName: "試験地点", latitude: HQ.lat, longitude: HQ.lng, flags: [] } });
+  expect(pl.status(), await pl.text()).toBe(201);
+  const plan = (await pl.json()) as { id: string };
+  return { manager, aircraft, pilot, plan, registrationMark };
+};
+const openField = async (page: Page, planId: string) => {
+  await page.goto(`/ops/plans/${planId}/field`);
+  await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+};
+const waitSw = (page: Page) => page.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 60_000 });
+const bundleKeys = (page: Page): Promise<string[]> =>
+  page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const r = indexedDB.open("soraban-ops");
+        r.onsuccess = () => {
+          try {
+            const q = r.result.transaction("field-bundles", "readonly").objectStore("field-bundles").getAllKeys();
+            q.onsuccess = () => resolve(q.result.map(String));
+            q.onerror = () => resolve([]);
+          } catch {
+            resolve([]);
+          }
+        };
+        r.onerror = () => resolve([]);
+      }),
+  );
+const waitBundle = (page: Page, planId: string) => expect.poll(async () => (await bundleKeys(page)).some((k) => k.endsWith(`:${planId}`)), { timeout: 30_000 }).toBe(true);
+const setOnline = async (page: Page, context: BrowserContext, online: boolean) => {
+  await context.setOffline(!online);
+  await page.evaluate((on) => window.dispatchEvent(new Event(on ? "online" : "offline")), online).catch(() => undefined);
+};
+const gray = async (page: Page, on: boolean) => {
+  const s = await page.context().newCDPSession(page);
+  await s.send("Emulation.setEmulatedVisionDeficiency", { type: on ? "achromatopsia" : "none" });
+};
+const FORBIDDEN = ["完璧", "保証", "必ず", "代行", "代理", "申請", "通報不要", "問題なし"];
+const wordHits = async (page: Page, label: string) => {
+  const text = await page.evaluate(() => document.body.innerText);
+  const hits = FORBIDDEN.filter((w) => text.includes(w));
+  rec({ kind: "words", label, hits });
+  return hits;
+};
+/** 見えている主ボタン（data-variant）と、主色（#1F5FE0）の面を持つ見えている要素の数 */
+const primaryProbe = async (page: Page, root: string) =>
+  page.evaluate((sel) => {
+    const rootEl = document.querySelector(sel) ?? document.body;
+    const vis = (e: Element) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden";
+    };
+    const ids = Array.from(rootEl.querySelectorAll('[data-variant="primary"]')).filter(vis).map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    const blue = Array.from(rootEl.querySelectorAll("button, a, [role=radio]"))
+      .filter(vis)
+      .filter((e) => getComputedStyle(e).backgroundColor === "rgb(31, 95, 224)")
+      .map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    return { ids, blue };
+  }, root);
+const sunlight = async (page: Page, root: string, min: number) => {
+  const G = 0.1;
+  const samples = (await collectTextSamples(page, root)).filter((s) => !s.disabled);
+  const worst = samples
+    .map((s) => {
+      const a = relativeLuminance(s.fg);
+      const b = relativeLuminance(s.bg);
+      return { id: s.testId ?? s.tag, r: (Math.max(a, b) + 0.05 + G) / (Math.min(a, b) + 0.05 + G) };
+    })
+    .sort((x, y) => x.r - y.r)[0];
+  return { n: samples.length, worst, ok: worst ? worst.r >= min : false };
+};
+const standards = async (page: Page, root: string, label: string, big?: string) => {
+  await waitForSettledStyles(page);
+  const out: Record<string, unknown> = { kind: "standards", label };
+  for (const [name, fn] of [
+    ["tap", () => expectTapTargets(page, root, label, big ? { bigTestId: big } : {})],
+    ["font18", () => expectFontSize(page, root, 18, label)],
+    ["contrast7", () => expectContrast(page, root, 7, label)],
+    ["noHScroll", () => expectNoHorizontalScroll(page, label)],
+  ] as const) {
+    try {
+      await fn();
+      out[name] = "ok";
+    } catch (e) {
+      out[name] = "FAIL " + String(e).slice(0, 300);
+    }
+  }
+  out.sun = await sunlight(page, root, 4.5);
+  out.mode = await page.locator("html").getAttribute("data-mode");
+  out.viewport = page.viewportSize();
+  rec(out);
+};
+const dumpStorage = async (page: Page) =>
+  page.evaluate(async () => {
+    const ls: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)!;
+      ls[k] = localStorage.getItem(k) ?? "";
+    }
+    const ss: Record<string, string> = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i)!;
+      ss[k] = sessionStorage.getItem(k) ?? "";
+    }
+    const idb: Record<string, Record<string, string[]>> = {};
+    const idbValues: string[] = [];
+    const dbs = (await indexedDB.databases?.()) ?? [];
+    for (const d of dbs) {
+      if (!d.name) continue;
+      await new Promise<void>((res) => {
+        const r = indexedDB.open(d.name!);
+        r.onsuccess = async () => {
+          const db = r.result;
+          idb[d.name!] = {};
+          for (const s of Array.from(db.objectStoreNames)) {
+            await new Promise<void>((res2) => {
+              const tx = db.transaction(s, "readonly");
+              const st = tx.objectStore(s);
+              const kq = st.getAllKeys();
+              const vq = st.getAll();
+              tx.oncomplete = () => {
+                idb[d.name!]![s] = kq.result.map(String);
+                for (const v of vq.result) idbValues.push(`${s}::` + JSON.stringify(v));
+                res2();
+              };
+              tx.onerror = () => res2();
+            });
+          }
+          db.close();
+          res();
+        };
+        r.onerror = () => res();
+      });
+    }
+    const cacheMap: Record<string, string[]> = {};
+    for (const n of await self.caches.keys()) cacheMap[n] = (await (await self.caches.open(n)).keys()).map((q) => new URL(q.url).pathname);
+    return { ls, ss, idb, idbValues, caches: cacheMap };
+  });
+
+test.use({ serviceWorkers: "allow", timezoneId: "America/Los_Angeles", hasTouch: true });
+for (const w of [320, 375, 390, 430]) {
+  test.describe(`R5 しきい値 ${w}`, () => {
+    test.use({ viewport: { width: w, height: 800 } });
+    test(`thr ${w}`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      for (const state of ["fresh", "stale"]) {
+        if (state === "stale") {
+          await setOnline(page, context, false);
+          await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+          await page.reload();
+          await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+        }
+        for (const z of [100, 110, 125, 150, 175, 200]) {
+          await page.evaluate((zz) => { document.documentElement.style.fontSize = zz + "%"; }, z);
+          await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+          const r = await page.evaluate(() => {
+            const b = document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!;
+            const root = document.querySelector<HTMLElement>('[data-testid="field-root"]')!;
+            return { pos: getComputedStyle(b).position, h: b.getBoundingClientRect().height, rootW: root.getBoundingClientRect().width, rem: parseFloat(getComputedStyle(document.documentElement).fontSize), sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth };
+          });
+          rec({ kind: "r5", w, state, z, ...r, share: r.h / 800 });
+        }
+        await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
+      }
+      await manager.dispose();
+    });
+  });
+}

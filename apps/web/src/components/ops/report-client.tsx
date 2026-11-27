@@ -33,7 +33,7 @@ import type { AttemptDto, PlanReportView, ReportDto } from "@/server/ops/reports
 import { DeadlineBox, ReportBadge, ReportBox, ReportStatusBadge, ReportStatusBox } from "./plan-ui";
 import { REPORT_NOTE_SHORT, VOIDED_NO_RECORD_LABEL, VOIDED_NO_RECORD_NOTE } from "@/lib/plan-main";
 import { loadDraft, saveDraft, clearDraft, reportDraftKey } from "./drafts";
-import { Field, fieldErrorsOf, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
+import { Field, fieldErrorsOf, FieldError, FormError, inputClass, messageFor, reloadAfterChange, send, useErrorFocus, type ApiResult } from "./ops-client";
 import { confirmBoxClass, confirmRowClass, joinJst, JstDateTimeField, splitJst } from "./report-parts";
 import { buttonDangerClass, buttonGhostClass, buttonOutlineBrandClass, buttonPrimaryClass, Badge, Note, Section } from "./ui";
 
@@ -175,7 +175,7 @@ function InputsPanel({
   );
   return (
     <div className="flex flex-col gap-4" data-testid="report-inputs">
-      <p className="opx-note text-xs leading-relaxed text-sb-ink-2">
+      <p className="opx-note opx-note-lg text-sb-ink-2">
         計画にない項目を入れます。入力は、この端末の下書きに残り（サーバーには、記録するときに送ります）、下の「DIPS の入力順の項目」に反映されます。
         {preview === "busy" ? <span role="status" className="ml-2 text-sb-ink-2" data-testid="report-preview-busy">更新中…</span> : null}
       </p>
@@ -183,17 +183,19 @@ function InputsPanel({
       <fieldset className="flex min-w-0 flex-col gap-2">
         <legend className="mb-1.5 flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-sb-ink">
           <span>飛行目的（複数選べます）</span>
-          <span className="sb-num text-xs font-normal tnum text-sb-ink-3" data-testid="report-purpose-count">{form.purposes.length} / {Object.keys(purposeCodes).length} 選択</span>
+          <span className="sb-num text-sm font-normal tnum text-sb-ink-3" data-testid="report-purpose-count">{form.purposes.length} / {Object.keys(purposeCodes).length} 選択</span>
         </legend>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,8rem),1fr))] gap-2">
           {Object.entries(purposeCodes).map(([code, label]) => {
             const n = Number(code);
             return (
-              <label key={code} className={`${confirmRowClass} gap-2 px-2.5 sm:gap-3 sm:px-3`}>
+              <label key={code} className={`${confirmRowClass} opx-check-dense gap-2 px-2.5 sm:gap-3 sm:px-3`}>
                 <input
                   type="checkbox"
                   className={confirmBoxClass}
                   checked={form.purposes.includes(n)}
+                  aria-invalid={errors["flightPurposes"] ? true : undefined}
+                  aria-describedby={errors["flightPurposes"] ? "report-err-flightPurposes" : undefined}
                   onChange={(e) => set("purposes", e.target.checked ? [...form.purposes, n].sort((a, b) => a - b) : form.purposes.filter((x) => x !== n))}
                   data-testid={`report-input-purpose-${code}`}
                 />
@@ -202,12 +204,7 @@ function InputsPanel({
             );
           })}
         </div>
-        {errors["flightPurposes"] ? (
-          <span role="alert" className="text-xs text-sb-v-no-fg font-bold">
-            <span aria-hidden>! </span>
-            {errors["flightPurposes"]}
-          </span>
-        ) : null}
+        <FieldError id="report-err-flightPurposes" message={errors["flightPurposes"]} />
       </fieldset>
       {form.purposes.includes(13) ? textField("otherBusinessText", "その他1（業務）の理由") : null}
       {form.purposes.includes(16) ? textField("otherNonBusinessText", "その他2（業務以外）の理由") : null}
@@ -248,19 +245,20 @@ function ItemRow({
   const canCopy = item.copyable && item.copyText !== null;
   return (
     <li
-      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-1.5 ${
+      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0 border-b border-sb-rule px-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_auto] sm:gap-x-5 sm:px-3 lg:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto] lg:gap-x-3 break-inside-avoid py-0.5 ${
         item.status === "missing" ? "bg-sb-sunken" : ""
-      }`}
+      } ${compact ? "max-sm:px-0" : ""}`}
       data-testid={`report-item-${item.key}`}
       data-status={item.status}
     >
       {/* 項目名（左）。必須は項目名に並べ、API 名・DIPS の画面での名前は 1 行の小さな字にまとめる */}
       <div className="col-start-1 row-start-1 flex min-w-0 flex-col">
-        <span className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium leading-snug text-sb-ink">
+        <span data-note="" className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium leading-snug text-sb-ink">
+          {item.status === "dips_only" ? <span aria-hidden className="sb-num text-sb-ink-3">－</span> : null}
           <span data-testid={`report-item-label-${item.key}`}>{item.label}</span>
           {item.required && item.status !== "dips_only" ? <span className="opx-required">必須</span> : null}
           {item.apiField || item.dipsScreenLabel ? (
-            <span className="break-all text-xs font-normal leading-snug text-sb-ink-3">
+            <span className="break-all text-sm font-normal leading-snug text-sb-ink-3">
               {item.apiField ? <span className="sb-num">{item.apiField}</span> : null}
               {item.apiField && item.dipsScreenLabel ? "／" : ""}
               {item.dipsScreenLabel ? <>DIPS の画面：{item.dipsScreenLabel}</> : null}
@@ -284,7 +282,7 @@ function ItemRow({
             </button>
           ) : null}
           {copied ? (
-            <span role="status" className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-base px-1.5 text-xs leading-5 text-sb-ink" data-testid={`report-copied-${item.key}`}>
+            <span role="status" className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-base px-1.5 text-sm leading-5 text-sb-ink" data-testid={`report-copied-${item.key}`}>
               <span aria-hidden className="sb-num font-bold text-sb-ink">✓</span>コピーしました
             </span>
           ) : null}
@@ -294,57 +292,56 @@ function ItemRow({
       {/* 値・補足 */}
       <div className={`flex min-w-0 flex-col gap-1 sm:col-span-1 sm:col-start-2 sm:row-start-1 ${canCopy || copied ? "col-start-1 row-start-2" : "col-span-2 row-start-2"}`}>
         {item.status === "filled" ? (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-sunken px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
-            {item.unit ? <span className="ml-1 text-xs text-sb-ink-2">{item.unit}</span> : null}
+            {item.unit ? <span className="ml-1 text-sb-ink-2">{item.unit}</span> : null}
           </span>
         ) : item.status === "missing" ? (
-          <span className="inline-flex items-start gap-2 text-sm font-medium text-sb-ink" data-testid={`report-item-value-${item.key}`}>
-            <span aria-hidden className="mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-hover sb-num text-xs font-bold leading-none">!</span>
+          <span className="inline-flex items-start gap-2 font-medium text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+            <span aria-hidden data-note="" className="mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-st-warn-face sb-num text-sm font-bold leading-none">!</span>
             <span>{MISSING_VALUE_LABEL}</span>
           </span>
         ) : item.status === "dips_only" ? (
-          <span className="inline-flex items-start gap-1 text-xs leading-snug text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
-            <span aria-hidden className="w-4 shrink-0 text-center sb-num text-sb-ink-3">－</span>
+          <span data-note="" className="text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
             <span>{item.apiField && item.value ? item.value.replace(`（${item.apiField}）`, "") : (item.value ?? DIPS_ONLY_LABEL)}</span>
           </span>
         ) : item.status === "not_applicable" ? (
-          <span className="inline-flex items-start gap-2 text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
+          <span data-note="" className="inline-flex items-start gap-2 text-sm text-sb-ink-2" data-testid={`report-item-value-${item.key}`}>
             <span aria-hidden className="w-5 shrink-0 text-center sb-num text-sb-ink-3">－</span>
             <span>{NOT_APPLICABLE_LABEL}</span>
           </span>
         ) : (
-          <span className="min-w-0 break-all rounded-sb-m bg-sb-surface px-2 py-0.5 sb-num text-sm tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
+          <span className="min-w-0 break-all rounded-sb-m bg-sb-sunken px-2 py-0.5 sb-num tnum text-sb-ink" data-testid={`report-item-value-${item.key}`}>
             {item.value}
           </span>
         )}
         {item.key === "skill_number" && maskedLicense ? (
-          <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="report-license-masked-note">
+          <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="report-license-masked-note">
             {LICENSE_MASKED_NOTE}
           </p>
         ) : null}
         {isRoute ? (
-          <div className="flex flex-col gap-1.5 opx-note" data-testid="report-route">
-            <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="report-route-guide">
+          <div className="flex flex-col gap-1.5 opx-note opx-note-lg" data-testid="report-route">
+            <p className="text-sb-ink-2" data-testid="report-route-guide">
               {ROUTE_GUIDE}
             </p>
             {item.apiValue ? (
-              <details className="text-xs text-sb-ink-3">
-                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sb-ink underline-offset-2 hover:underline">API 形式（参考）</summary>
-                <p className="break-all sb-num tnum" data-testid="report-route-geojson">{item.apiValue}</p>
+              <details className="text-sb-ink-3">
+                <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sb-ink underline-offset-2 hover:underline">API 形式（参考）</summary>
+                <p data-note="" className="break-all sb-num tnum" data-testid="report-route-geojson">{item.apiValue}</p>
               </details>
             ) : null}
           </div>
         ) : null}
         {showApi ? (
-          <p className="break-all sb-num text-xs leading-relaxed tnum text-sb-ink-3" data-testid={`report-item-api-${item.key}`}>
+          <p data-note="" className="break-all sb-num text-sm leading-relaxed tnum text-sb-ink-3" data-testid={`report-item-api-${item.key}`}>
             API 形式：{item.apiValue}
           </p>
         ) : null}
         {item.warnings.length > 0 ? (
-          <ul className="flex flex-col gap-1 text-xs leading-relaxed text-sb-ink-2" data-testid={`report-item-warnings-${item.key}`}>
+          <ul className="flex flex-col gap-1 text-sb-ink-2" data-testid={`report-item-warnings-${item.key}`}>
             {item.warnings.map((w) => (
-              <li key={w.code} className="flex gap-2 opx-note">
+              <li key={w.code} className="flex gap-2 opx-note opx-note-lg">
                 <span aria-hidden className="sb-num font-bold text-sb-ink">!</span>
                 <span>{w.message}</span>
               </li>
@@ -433,39 +430,33 @@ function ManualFormFields({
       </Field>
       {withConfirmations ? (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-xs text-sb-ink-3">確認（どちらも必要です）</legend>
+          <legend className="mb-1 text-sm text-sb-ink-3">確認（どちらも必要です）</legend>
           <label className={confirmRowClass}>
             <input
               type="checkbox"
               className={confirmBoxClass}
               checked={m.confirmedDipsDone}
+              aria-invalid={errors["confirmedDipsDone"] ? true : undefined}
+              aria-describedby={errors["confirmedDipsDone"] ? `${testPrefix}-err-confirmedDipsDone` : undefined}
               onChange={(e) => setM((s) => ({ ...s, confirmedDipsDone: e.target.checked }))}
               data-testid={`${testPrefix}-confirm-done`}
             />
             <span>{MANUAL_CONFIRM_DIPS_DONE}</span>
           </label>
-          {errors["confirmedDipsDone"] ? (
-            <span role="alert" className="text-xs text-sb-v-no-fg font-bold">
-              <span aria-hidden>! </span>
-              {errors["confirmedDipsDone"]}
-            </span>
-          ) : null}
+          <FieldError id={`${testPrefix}-err-confirmedDipsDone`} message={errors["confirmedDipsDone"]} />
           <label className={confirmRowClass}>
             <input
               type="checkbox"
               className={confirmBoxClass}
               checked={m.confirmedMatchesLatest}
+              aria-invalid={errors["confirmedMatchesLatest"] ? true : undefined}
+              aria-describedby={errors["confirmedMatchesLatest"] ? `${testPrefix}-err-confirmedMatchesLatest` : undefined}
               onChange={(e) => setM((s) => ({ ...s, confirmedMatchesLatest: e.target.checked }))}
               data-testid={`${testPrefix}-confirm-latest`}
             />
             <span>{MANUAL_CONFIRM_MATCHES_LATEST}</span>
           </label>
-          {errors["confirmedMatchesLatest"] ? (
-            <span role="alert" className="text-xs text-sb-v-no-fg font-bold">
-              <span aria-hidden>! </span>
-              {errors["confirmedMatchesLatest"]}
-            </span>
-          ) : null}
+          <FieldError id={`${testPrefix}-err-confirmedMatchesLatest`} message={errors["confirmedMatchesLatest"]} />
         </fieldset>
       ) : null}
     </>
@@ -563,18 +554,18 @@ function RowActions({ report }: { readonly report: ReportDto }) {
             e.preventDefault();
             void submit();
           }}
-          className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-surface px-3 py-3 sm:px-4"
+          className="flex flex-col gap-3 rounded-sb-m border border-sb-rule bg-sb-sunken px-3 py-3 sm:px-4"
           aria-label={open === "correct" ? "記録の訂正" : open === "retract" ? "記録の取り下げ" : open === "resolve" ? "結果不明の確定" : "失敗した送信の再送"}
           data-testid={`report-${open}-form`}
         >
           {open === "retract" ? (
-            <Note tone="red">
+            <Note tone="red" body>
               取り下げは「記録の誤り（通報していないのに記録した）」を直す操作です。通報を取り消す場合は、取消の記録を使います。元の記録は履歴に残ります。
             </Note>
           ) : null}
           {open === "resolve" ? (
             <>
-              <Note>DIPS の画面で確かめた結果を選んでください。自動では再送しません。</Note>
+              <Note body>DIPS の画面で確かめた結果を選んでください。自動では再送しません。</Note>
               <Field label="DIPS の画面で確かめた結果" required>
                 <select className={`${inputClass} min-h-12`} value={outcome} onChange={(e) => setOutcome(e.target.value as "reported" | "not_reported")} data-testid="report-resolve-outcome">
                   <option value="reported">通報されていた</option>
@@ -587,7 +578,7 @@ function RowActions({ report }: { readonly report: ReportDto }) {
           {open === "correct" ? <ManualFormFields m={m} setM={setM} errors={errors} testPrefix="correct" withConfirmations={false} /> : null}
           {open === "retry" ? (
             <>
-              <Note>同じ行・同じ冪等性キーで再送します（二重にはなりません）。{MOCK_ASSUMPTION_NOTE}</Note>
+              <Note body>同じ行・同じ冪等性キーで再送します（二重にはなりません）。{MOCK_ASSUMPTION_NOTE}</Note>
               <Field label="模擬のシナリオ（開発用）" required={false}>
                 <select className={`${inputClass} min-h-12`} value={scenario} onChange={(e) => setScenario(e.target.value as MockScenario)} data-testid="report-retry-scenario">
                   {SCENARIOS.map((s) => (
@@ -609,7 +600,7 @@ function RowActions({ report }: { readonly report: ReportDto }) {
           )}
           <FormError message={message} />
           <div>
-            <button type="submit" className={open === "retract" ? buttonDangerClass : buttonPrimaryClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
+            <button type="submit" className={open === "retract" ? buttonDangerClass : buttonOutlineBrandClass} disabled={busy || (open === "retry" && !confirmSend)} data-testid={`report-${open}-submit`}>
               {open === "correct" ? "訂正を保存する" : open === "retract" ? "取り下げる" : open === "resolve" ? "確定する" : "再送する"}
             </button>
           </div>
@@ -624,16 +615,16 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
   const glyph = { reported_manual: "✓", submitted_api: "✓", retracted: "－", failed: "×", unknown: "？", prepared: "…" }[r.effectiveState];
   const pair = (k: string, v: ReactNode, testId?: string, wide = false) => (
     <div className={`flex min-w-0 flex-col gap-0.5 ${wide ? "col-span-2 sm:col-span-4" : ""}`}>
-      <dt className="text-xs text-sb-ink-2">{k}</dt>
-      <dd className="min-w-0 break-all sb-num text-xs tnum text-sb-ink" {...(testId ? { "data-testid": testId } : {})}>
+      <dt className="text-sm text-sb-ink-2">{k}</dt>
+      <dd data-note="" className="min-w-0 break-all sb-num text-sm tnum text-sb-ink" {...(testId ? { "data-testid": testId } : {})}>
         {v}
       </dd>
     </div>
   );
-  const idBox = "inline-block max-w-full rounded-sb-m bg-sb-surface px-1.5 py-0.5 text-xs leading-relaxed";
+  const idBox = "inline-block max-w-full rounded-sb-m bg-sb-sunken px-1.5 py-0.5 text-sm leading-relaxed";
   return (
     <li
-      className={`flex flex-col gap-3 border-b border-sb-rule py-4 text-sm ${r.isEffective ? "opx-edge-hl" : ""}`}
+      className={`flex flex-col gap-3 border-b border-sb-rule py-4 ${r.isEffective ? "opx-edge-hl" : ""}`}
       data-testid="report-row"
       data-id={r.id}
       data-kind={r.kind}
@@ -655,44 +646,44 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
       </div>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-4">
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5">
-          <dt className="text-xs text-sb-ink-2">通報日時</dt>
-          <dd className="sb-num text-sm font-medium tnum text-sb-ink" data-testid="report-row-reported-at">{r.reportedAtJst ?? "—"}</dd>
+          <dt className="text-sm text-sb-ink-2">通報日時</dt>
+          <dd data-note="" className="sb-num text-sm font-medium tnum text-sb-ink" data-testid="report-row-reported-at">{r.reportedAtJst ?? "—"}</dd>
         </div>
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5">
-          <dt className="text-xs text-sb-ink-2">DIPS の番号</dt>
-          <dd className="min-w-0 break-all sb-num text-sm font-medium tnum text-sb-ink" data-testid="report-row-number">
+          <dt className="text-sm text-sb-ink-2">DIPS の番号</dt>
+          <dd data-note="" className="min-w-0 break-all sb-num text-sm font-medium tnum text-sb-ink" data-testid="report-row-number">
             {r.dipsNumber ?? (r.numberUnavailable ? "番号なし（表示されなかった）" : "—")}
           </dd>
         </div>
         <details className="col-span-2 sm:col-span-4" data-testid="report-row-details">
-          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
+          <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">記録の詳細（版・証跡 ID・記録した日時）</summary>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pb-2 sm:grid-cols-4">
         {pair("記録の版", r.version, "report-row-version")}
         {pair("計画の版", r.planVersion, "report-row-plan-version")}
         {pair("対応表の版", r.mapRevision, "report-row-map-revision")}
         {pair("判定の通し番号", r.snapshotSeq)}
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5 sm:col-span-4">
-          <dt className="text-xs text-sb-ink-2">地点判定の証跡 ID</dt>
-          <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-check-evidence">{r.checkEvidenceId}</span></dd>
+          <dt className="text-sm text-sb-ink-2">地点判定の証跡 ID</dt>
+          <dd data-note="" className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-check-evidence">{r.checkEvidenceId}</span></dd>
         </div>
         <div className="col-span-2 flex min-w-0 flex-col gap-0.5 sm:col-span-4">
-          <dt className="text-xs text-sb-ink-2">飛行の方法を含む判定の証跡 ID</dt>
-          <dd className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-diagnosis-evidence">{r.diagnosisEvidenceId}</span></dd>
+          <dt className="text-sm text-sb-ink-2">飛行の方法を含む判定の証跡 ID</dt>
+          <dd data-note="" className="min-w-0"><span className={`${idBox} break-all sb-num tnum text-sb-ink`} data-testid="report-row-diagnosis-evidence">{r.diagnosisEvidenceId}</span></dd>
         </div>
         {pair("記録した日時", r.createdAtJst, undefined, true)}
           </div>
         </details>
       </dl>
-      {r.memo ? <p className="break-all opx-note text-xs leading-relaxed text-sb-ink-2" data-testid="report-row-memo">メモ：{r.memo}</p> : null}
+      {r.memo ? <p className="break-all opx-note opx-note-lg text-sb-ink-2" data-testid="report-row-memo">メモ：{r.memo}</p> : null}
       {r.errorMessage ? (
-        <p className="opx-note text-xs leading-relaxed text-sb-ink" data-testid="report-row-error">
+        <p className="opx-note opx-note-lg text-sb-ink" data-testid="report-row-error">
           <span aria-hidden className="mr-1.5 sb-num font-bold">×</span>
           {r.errorMessage}
         </p>
       ) : null}
-      {r.externalStatusLabel ? <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="report-row-external-status">{r.externalStatusLabel}</p> : null}
+      {r.externalStatusLabel ? <p className="text-sb-ink-2" data-testid="report-row-external-status">{r.externalStatusLabel}</p> : null}
       {r.stale ? (
-        <p className="opx-note text-xs leading-relaxed text-sb-ink" data-testid="report-row-stale">
+        <p className="opx-note opx-note-lg text-sb-ink" data-testid="report-row-stale">
           <span aria-hidden className="mr-1.5 sb-num font-bold">!</span>
           送信の途中で止まった可能性があります。自動では再送しません。
         </p>
@@ -703,11 +694,11 @@ function ReportRow({ r }: { readonly r: ReportDto }) {
 }
 
 function AuditList({ audit }: { readonly audit: readonly AttemptDto[] }) {
-  if (audit.length === 0) return <p className="text-sm text-sb-ink-3" data-testid="report-audit-empty">監査の記録はまだありません。</p>;
+  if (audit.length === 0) return <p className="text-sb-ink-3" data-testid="report-audit-empty">監査の記録はまだありません。</p>;
   return (
     <ol className="flex flex-col border-t border-sb-rule" data-testid="report-audit">
       {audit.map((a) => (
-        <li key={a.id} className="flex flex-col gap-0.5 border-b border-sb-rule py-2 text-xs text-sb-ink-2" data-testid="report-audit-row" data-operation={a.operation} data-result={a.result}>
+        <li key={a.id} data-note="" className="flex flex-col gap-0.5 border-b border-sb-rule py-2 text-sm text-sb-ink-2" data-testid="report-audit-row" data-operation={a.operation} data-result={a.result}>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
             <span className="font-medium text-sb-ink">{a.operationLabel}</span>
             <span>{ATTEMPT_RESULT_LABEL[a.result] ?? a.result}</span>
@@ -845,7 +836,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
   };
 
   return (
-    <div className="flex flex-col gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
+    <div className="flex flex-col gap-4 sm:gap-6 [&_section[id]]:scroll-mt-28" data-testid="report-screen" data-adapter={view.adapter.name} data-kind={kind}>
         {/* 固定の文言：画面の先頭で最初に読める大きさと枠で置く（送信しない・記録するまで通報済みにならない・公式の手続き） */}
         {/* 固定の文言：短い版を先頭に置き、全文は 1 回で開く（DOM には全文が残る） */}
         <div
@@ -856,9 +847,9 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         >
           <span data-testid="report-notice-short">{view.adapter.name === "mock" ? REPORT_NOTICE_BY_CHANNEL.mock : REPORT_NOTE_SHORT}</span>
           <details>
-            <summary className="flex min-h-11 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
+            <summary className="flex min-h-12 cursor-pointer select-none flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal text-sb-ink">
               <span className="underline underline-offset-2">固定の文言の全文{view.adapter.name === "mock" ? "（模擬の前提を含む）" : ""}</span>
-              <span className="ml-auto flex items-center gap-x-2 text-xs text-sb-ink-2">
+              <span className="ml-auto flex min-w-0 flex-wrap items-center gap-x-2 text-sm text-sb-ink-2">
                 <span>送信元：</span>
                 <Badge tone={view.adapter.name === "mock" ? "amber" : "brand"} data-testid="report-adapter" data-adapter={view.adapter.name}>
                   {view.adapter.name === "mock" ? <span aria-hidden className="mr-1">◇</span> : null}
@@ -870,7 +861,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             <div className="flex flex-col gap-2 pb-1">
               <span>{notice}</span>
               {view.adapter.name === "mock" ? (
-                <span className="text-xs font-normal leading-relaxed text-sb-ink-2" data-testid="report-mock-assumption">{MOCK_ASSUMPTION_NOTE}{OFFICIAL_PROCEDURE_NOTE}</span>
+                <span className="text-sm font-normal leading-relaxed text-sb-ink-2" data-testid="report-mock-assumption">{MOCK_ASSUMPTION_NOTE}{OFFICIAL_PROCEDURE_NOTE}</span>
               ) : (
                 <span className="text-sm font-normal leading-relaxed text-sb-ink-2">{REPORT_SELF_REPORT_NOTE}</span>
               )}
@@ -881,7 +872,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       {voidedNone ? null : (
       <nav
           aria-label="通報の手順"
-          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-1 max-sm:-mt-3 lg:top-14"
+          className="sticky top-0 z-20 -mx-1 grid grid-cols-3 gap-1 rounded-sb-pill bg-sb-sunken p-0.5 max-sm:-mt-3 lg:top-14"
           data-testid="report-stepper"
         >
           {[
@@ -889,7 +880,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             ["#items", "② DIPS に入力", "report-step-items"],
             ["#record", "③ 結果を記録", "report-step-record"],
           ].map(([href, label, id]) => (
-            <a key={id} href={href} data-testid={id} className="flex min-h-11 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
+            <a key={id} href={href} data-testid={id} className="flex min-h-12 min-w-0 items-center justify-center rounded-sb-pill px-1 text-center text-sm font-bold leading-tight text-sb-ink hover:bg-sb-hover">
               {label}
             </a>
           ))}
@@ -899,8 +890,8 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
       <div className="flex flex-col gap-3 sm:gap-6 max-sm:-mt-3" data-testid="report-status-and-kinds">
       {voidedNone ? (
         <section id="status" aria-label="通報の要否と状況" className="flex scroll-mt-28 flex-col gap-2 rounded-sb-l bg-sb-base px-4 py-3 opx-shadow" data-testid="report-status-line" data-voided-none="1">
-          <p className="text-base font-bold text-sb-ink">{VOIDED_NO_RECORD_LABEL}</p>
-          <p className="text-sm leading-relaxed text-sb-ink-2">{VOIDED_NO_RECORD_NOTE}</p>
+          <p className="font-bold text-sb-ink">{VOIDED_NO_RECORD_LABEL}</p>
+          <p className="text-sb-ink-2">{VOIDED_NO_RECORD_NOTE}</p>
         </section>
       ) : null}
       {voidedNone ? null : (
@@ -909,7 +900,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         {view.warnings.length > 0 ? (
           <ul className="flex flex-col gap-1.5" data-testid="report-warnings">
             {view.warnings.map((w) => (
-              <li key={w.code} className="opx-note text-sm leading-relaxed text-sb-ink" data-code={w.code}>
+              <li key={w.code} className="opx-note opx-note-lg text-sb-ink" data-code={w.code}>
                 {w.message}
               </li>
             ))}
@@ -964,17 +955,17 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
           >
             <details data-testid="report-map-details">
               <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">項目の対応表について（版 {view.prepared.mapRevision}）・DIPS の通報画面の入力順とは照合していません</summary>
-            <div className="flex flex-col gap-1.5 text-xs leading-relaxed text-sb-ink-2" data-testid="report-map-info" >
-              <p>
+            <div className="flex flex-col gap-1.5 text-sm leading-relaxed text-sb-ink-2" data-testid="report-map-info" >
+              <p data-note="">
                 項目の対応表：版 <span className="sb-num tnum" data-testid="report-map-revision">{view.prepared.mapRevision}</span>・確認日{" "}
                 <span className="sb-num tnum" data-testid="report-map-verified">{view.prepared.mapVerifiedAt.slice(0, 10)}</span>
               </p>
-              <p>項目の並びは、DIPS 2.0 API 飛行計画通報ガイドライン 1.10 版の項目の並びです。DIPS の通報画面の入力順とは照合していません。</p>
-              <p>{COPY_AUDIT_NOTE}</p>
+              <p data-note="">項目の並びは、DIPS 2.0 API 飛行計画通報ガイドライン 1.10 版の項目の並びです。DIPS の通報画面の入力順とは照合していません。</p>
+              <p data-note="">{COPY_AUDIT_NOTE}</p>
             </div>
             </details>
             <p
-              className={`opx-edge-row !flex-row flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-sb-ink ${
+              className={`opx-edge-row !flex-row flex-wrap items-baseline gap-x-3 gap-y-1 text-base leading-relaxed text-sb-ink ${
                 view.prepared.missingRequiredCount > 0 ? "opx-edge-attn" : ""
               }`}
               data-testid="report-missing-count"
@@ -982,31 +973,31 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             >
               <span aria-hidden className="sb-num font-bold">{view.prepared.missingRequiredCount > 0 ? "!" : "✓"}</span>
               <span className="font-medium">
-                未入力の必須項目：<span className="sb-num text-base tnum">{view.prepared.missingRequiredCount}</span> 件
+                未入力の必須項目：<span className="sb-num tnum">{view.prepared.missingRequiredCount}</span> 件
               </span>
-              <span className="text-xs text-sb-ink-2">（未入力があっても記録はできます。DIPS で入力してください）</span>
+              <span data-note="" className="text-sm text-sb-ink-2">（未入力があっても記録はできます。DIPS で入力してください）</span>
             </p>
             {view.prepared.warnings.length > 0 ? (
               <ul className="flex flex-col gap-1.5" data-testid="report-prepare-warnings">
                 {view.prepared.warnings.map((w) => (
-                  <li key={`${w.code}-${w.message}`} className="flex gap-2 opx-note text-xs leading-relaxed text-sb-ink-2">
+                  <li key={`${w.code}-${w.message}`} className="flex gap-2 opx-note opx-note-lg text-sb-ink-2">
                     <span aria-hidden className="sb-num font-bold text-sb-ink">!</span>
                     <span>{w.message}</span>
                   </li>
                 ))}
               </ul>
             ) : null}
-            <div className="flex flex-col gap-6" data-testid="report-groups">
+            <div className="flex flex-col gap-2 sm:gap-4" data-testid="report-groups">
               {view.prepared.groups.map((g) => (
                 <section key={g.id} aria-label={g.label} className="flex flex-col" data-testid={`report-group-${g.id}`} data-needs-confirmation={g.needsConfirmation ? "1" : "0"}>
-                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-surface px-2 py-2 text-sm font-medium text-sb-ink sm:px-3">
+                  <h3 className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-sb-rule bg-sb-sunken px-2 py-1 text-sm font-medium text-sb-ink sm:px-3">
                     <span>{g.label}</span>
                     {g.needsConfirmation ? (
-                      <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-hover px-1.5 text-xs font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>
+                      <span className="inline-flex items-center gap-1 rounded-sb-m border border-sb-ink bg-sb-st-warn-face px-1.5 text-sm font-normal leading-5 text-sb-ink" data-testid={`report-group-mark-${g.id}`}>
                         {NEEDS_CONFIRMATION_MARK}
                       </span>
                     ) : null}
-                    <span className="ml-auto sb-num text-xs font-normal tnum text-sb-ink-3">{g.itemKeys.length} 項目</span>
+                    <span className="ml-auto sb-num text-sm font-normal tnum text-sb-ink-3">{g.itemKeys.length} 項目</span>
                   </h3>
                   <ul className="flex flex-col lg:block lg:columns-2 lg:gap-x-8">
                     {g.itemKeys.map((k) => {
@@ -1021,22 +1012,22 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
         </>
       ) : (
         <Section id="cancel-info" title="取り消す通報" aria-label="取り消す通報">
-          <p className="text-sm leading-relaxed text-sb-ink-2" data-testid="report-cancel-info">
+          <p className="text-sb-ink-2" data-testid="report-cancel-info">
             DIPS 2.0 の画面で通報を取り消し、その結果をここに記録してください。そらばんは取消を DIPS に送りません。
           </p>
           {view.effective ? (
-            <p className="sb-num text-xs tnum text-sb-ink-2">
+            <p data-note="" className="sb-num text-sm tnum text-sb-ink-2">
               取り消す通報：{view.effective.reportedAtJst ?? "—"}・{view.effective.dipsNumber ?? (view.effective.numberUnavailable ? "番号なし" : "—")}
             </p>
           ) : (
-            <Note>取り消せる有効な通報がありません。</Note>
+            <Note body>取り消せる有効な通報がありません。</Note>
           )}
         </Section>
       )}
 
       <Section id="record" title={isCancel ? "取消の結果を記録する" : direct ? "送信内容の確認と送信" : "通報の結果を記録する"} aria-label="通報の記録">
         {!view.permissions.record ? (
-          <Note>記録は、運航管理者と、この計画の操縦者本人だけが行えます。</Note>
+          <Note body>記録は、運航管理者と、この計画の操縦者本人だけが行えます。</Note>
         ) : !view.recordable.allowed ? (
           <div data-testid="report-record-blocked" data-reason={view.recordable.reason ?? ""}>
             <p className="opx-note opx-note-lg">
@@ -1048,7 +1039,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             </p>
           </div>
         ) : isCancel && !view.effective ? (
-          <Note>取り消せる有効な通報がありません。</Note>
+          <Note body>取り消せる有効な通報がありません。</Note>
         ) : (
           <form
             ref={formRef}
@@ -1064,13 +1055,13 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
             {direct && !isCancel ? (
               <>
                 <p
-                  className="flex items-start gap-3 rounded-sb-m border-2 border-dashed border-sb-ink bg-sb-hover px-3 py-3 text-sm font-medium leading-relaxed text-sb-ink"
+                  className="flex items-start gap-3 rounded-sb-m border-2 border-dashed border-sb-ink bg-sb-st-info-face px-3 py-3 font-medium text-sb-ink"
                   data-testid="mock-notice"
                 >
-                  <span aria-hidden className="mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-base sb-num text-xs font-bold leading-none">◇</span>
+                  <span aria-hidden data-note="" className="mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sb-m border border-sb-ink bg-sb-base sb-num text-sm font-bold leading-none">◇</span>
                   <span>{REPORT_NOTICE_BY_CHANNEL.mock}</span>
                 </p>
-                <p className="text-xs leading-relaxed text-sb-ink-2">{MOCK_ASSUMPTION_NOTE}</p>
+                <p className="text-sb-ink-2">{MOCK_ASSUMPTION_NOTE}</p>
                 <Field label="模擬のシナリオ（開発用）" required={false}>
                   <select className={`${inputClass} min-h-12`} value={scenario} onChange={(e) => setScenario(e.target.value as MockScenario)} data-testid="send-scenario">
                     {SCENARIOS.map((s) => (
@@ -1081,22 +1072,17 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
                   </select>
                 </Field>
                 <label className={confirmRowClass}>
-                  <input type="checkbox" className={confirmBoxClass} checked={confirmSend} onChange={(e) => setConfirmSend(e.target.checked)} data-testid="send-confirm" />
+                  <input type="checkbox" className={confirmBoxClass} checked={confirmSend} aria-invalid={errors["confirmSend"] ? true : undefined} aria-describedby={errors["confirmSend"] ? "send-err-confirmSend" : undefined} onChange={(e) => setConfirmSend(e.target.checked)} data-testid="send-confirm" />
                   <span>上の項目の内容を確認した（実際の DIPS には送信されません）</span>
                 </label>
-                {errors["confirmSend"] ? (
-                  <span role="alert" className="text-xs text-sb-v-no-fg font-bold">
-                    <span aria-hidden>! </span>
-                    {errors["confirmSend"]}
-                  </span>
-                ) : null}
+                <FieldError id="send-err-confirmSend" message={errors["confirmSend"]} />
               </>
             ) : (
               <ManualFormFields m={m} setM={setM} errors={errors} testPrefix="record" withConfirmations />
             )}
             <FormError message={message} />
             <div>
-              <button type="submit" className={buttonPrimaryClass} disabled={busy || (direct && !isCancel && !confirmSend)} data-testid={direct && !isCancel ? "send-submit" : "record-submit"}>
+              <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy || (direct && !isCancel && !confirmSend)} data-testid={direct && !isCancel ? "send-submit" : "record-submit"}>
                 {direct && !isCancel ? "送信する（模擬）" : isCancel ? "取消の結果を記録する" : "通報の結果を記録する"}
               </button>
             </div>
@@ -1106,7 +1092,7 @@ export function ReportScreen({ initial, memberId }: { readonly initial: PlanRepo
 
       <Section id="history" title="通報の履歴" aria-label="通報の履歴" description="新しい順です。訂正・取り下げ・確定は理由つきの新しい版として残り、元の値は消えません。">
         {view.reports.length === 0 ? (
-          <p className="text-sm text-sb-ink-3" data-testid="report-history-empty">
+          <p className="text-sb-ink-3" data-testid="report-history-empty">
             通報の記録はまだありません。
           </p>
         ) : (

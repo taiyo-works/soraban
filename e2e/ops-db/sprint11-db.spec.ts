@@ -289,7 +289,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       // 読み上げ名は項目名だけで、案内は説明（aria-describedby）として読まれる
       await expect(form.getByRole("textbox", { name: "飛行の目的", exact: true })).toHaveAccessibleDescription(/例：空撮/);
       await form.getByRole("radio", { name: "なし" }).check();
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
       await expect(page.getByTestId("flight-date")).toHaveText(FIELD_DAY);
       await expect(page.getByTestId("flight-takeoff")).toHaveText("09:30");
@@ -335,7 +335,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await form.getByLabel("飛行の目的").fill("インフラ点検");
       await form.getByRole("radio", { name: "なし" }).check();
       await page.route("**/api/ops/flights", (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.continue()));
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(form.getByText(/保存できませんでした。通信が戻ったら/)).toBeVisible();
       await expect(page).toHaveURL(/\/ops\/flights\/new$/);
       const draft = await draftText(page, "flight");
@@ -361,7 +361,9 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.goto(`/ops/inspections/new?aircraftId=${withInspection.id}`);
       const iform = page.getByRole("form", { name: "日常点検の入力" });
       await expect(iform.getByLabel("実施時刻", { exact: true })).toHaveValue("08:00");
-      await expect(page.getByRole("button", { name: "保存", exact: true })).toBeDisabled();
+      // 16-I I-2（意図の変更）：未完了でも保存は押せる。送らずに、未完了の数を文字で示す（以前は押せない）
+      await expect(page.getByRole("button", { name: "保存", exact: true })).toBeEnabled();
+      await expect(page.getByTestId("inspection-missing-count")).toHaveText("未記入 9 項目");
       await iform.getByRole("textbox", { name: "実施場所", exact: true }).fill("本社 駐車場");
       await page.getByRole("button", { name: "すべて正常" }).click();
       await page.getByRole("button", { name: "保存", exact: true }).click();
@@ -388,7 +390,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await form.getByRole("textbox", { name: "着陸場所", exact: true }).fill("本社");
       await form.getByLabel("飛行の目的").fill("試験飛行");
       await form.getByRole("radio", { name: "なし" }).check();
-      await page.getByRole("button", { name: "保存", exact: true }).click();
+      await page.getByRole("button", { name: "飛行記録を保存", exact: true }).click();
       await expect(page).toHaveURL(/\/ops\/flights\/[0-9a-f-]{36}$/);
       await expect(page.getByTestId("ops-change-notice")).toContainText("飛行日の日常点検がありません");
 
@@ -399,7 +401,7 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
       await page.getByRole("radiogroup", { name: "フレームの結果" }).getByRole("radio", { name: "異常" }).check();
       await page.getByRole("button", { name: "保存", exact: true }).click();
       const frame = page.getByTestId("inspection-item-frame");
-      await expect(frame.getByRole("alert")).toContainText("備考を入力してください");
+      await expect(frame.locator(".sb-field-error")).toContainText("備考を入力してください");
       await expect(frame.getByLabel("フレームの備考")).toHaveAttribute("aria-invalid", "true");
       await expect(page).toHaveURL(/\/ops\/inspections\/new/);
     });
@@ -433,10 +435,10 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
         for (const name of names) {
           const box = await page.getByRole("button", { name, exact: true }).boundingBox();
           expect(box, name).not.toBeNull();
-          expect(box!.height, name).toBeGreaterThanOrEqual(44);
+          expect(box!.height, name).toBeGreaterThanOrEqual(48);
         }
       };
-      await minHeight("/ops/flights/new", ["離陸：今", "着陸：今", "保存"]);
+      await minHeight("/ops/flights/new", ["離陸：今", "着陸：今", "飛行記録を保存"]);
       await minHeight("/ops/inspections/new", ["すべて正常", "保存"]);
     });
 
@@ -576,19 +578,19 @@ test.describe("Sprint 11 E2E-DB：飛行記録・日常点検記録", () => {
         await page.goto(path);
         const box = await page.locator("main").getByRole("link", { name, exact: false }).first().boundingBox();
         expect(box, `${path} ${name}`).not.toBeNull();
-        expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(44);
+        expect(box!.height, `${path} ${name}`).toBeGreaterThanOrEqual(48);
       }
-      // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは ホーム／計画／点検／日誌／登録 の 5 つ・60px 以上に）：スマホは下の 5 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
-      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections").boundingBox();
-      expect(tab!.height).toBeGreaterThanOrEqual(60);
+      // メニューは新しい部品（Sprint 12g-1b。12h PR ③a で下タブは 5 つ・60px 以上に、16-F で ホーム／計画／日誌／機体と書類 の 4 つ・64px 以上に）：スマホは下の 4 タブ、PC は左メニューの判定の項目とロゴが 44px 以上
+      const tab = await page.getByTestId("ops-bottom-nav").getByTestId("nav-journal").boundingBox();
+      expect(tab!.height).toBeGreaterThanOrEqual(64);
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto("/ops/flights");
       // boundingBox は待たない。左メニューが描かれてから測る
       await expect(page.getByTestId("ops-sidebar").getByTestId("nav-verdict")).toBeVisible();
       const home = await page.getByTestId("ops-sidebar").getByTestId("nav-verdict").boundingBox();
-      expect(home!.height).toBeGreaterThanOrEqual(44);
+      expect(home!.height).toBeGreaterThanOrEqual(48);
       const logo = await page.getByRole("link", { name: /そらばん 運航管理/ }).boundingBox();
-      expect(logo!.height).toBeGreaterThanOrEqual(44);
+      expect(logo!.height).toBeGreaterThanOrEqual(48);
     });
 
     test("20（画面）. ログアウトで下書きが消える", async ({ page }) => {

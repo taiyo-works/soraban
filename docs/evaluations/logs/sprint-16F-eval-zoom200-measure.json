@@ -1,0 +1,241 @@
+{
+ "zoom390 /ops": {
+  "lines": "1112",
+  "bad": [
+   "covered 737>728"
+  ],
+  "gap": "-9"
+ },
+ "zoom390 /ops/plans": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom390 /ops/journal": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "89"
+ },
+ "zoom390 /ops/more": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "110"
+ },
+ "zoom390 /ops/inspections": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom390 /ops/inspections/new": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom390 /ops/flights": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "179"
+ },
+ "zoom390 /ops/incidents": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom390 /ops/aircraft": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom390 /ops/pilots": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom390 /ops/permits": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "154"
+ },
+ "zoom390 /ops/places": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "102"
+ },
+ "zoom390 /ops/members": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom390 /ops/about": {
+  "lines": "1112",
+  "bad": [
+   "hscroll 446>390"
+  ],
+  "gap": "92"
+ },
+ "zoom390 /ops/plans/new": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom360 /ops": {
+  "lines": "1112",
+  "bad": [
+   "covered 687>624"
+  ],
+  "gap": "-63"
+ },
+ "zoom360 /ops/plans": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom360 /ops/journal": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom360 /ops/more": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "111"
+ },
+ "zoom360 /ops/inspections": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom360 /ops/inspections/new": {
+  "lines": "1112",
+  "bad": [
+   "hscroll 370>360"
+  ],
+  "gap": "88"
+ },
+ "zoom360 /ops/flights": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "179"
+ },
+ "zoom360 /ops/incidents": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom360 /ops/aircraft": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom360 /ops/pilots": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom360 /ops/permits": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "154"
+ },
+ "zoom360 /ops/places": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "102"
+ },
+ "zoom360 /ops/members": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom360 /ops/about": {
+  "lines": "1112",
+  "bad": [
+   "hscroll 446>360"
+  ],
+  "gap": "92"
+ },
+ "zoom360 /ops/plans/new": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "89"
+ },
+ "zoom430 /ops": {
+  "lines": "1112",
+  "bad": [
+   "covered 817>816"
+  ],
+  "gap": "-1"
+ },
+ "zoom430 /ops/plans": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "89"
+ },
+ "zoom430 /ops/journal": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom430 /ops/more": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "110"
+ },
+ "zoom430 /ops/inspections": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom430 /ops/inspections/new": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom430 /ops/flights": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "156"
+ },
+ "zoom430 /ops/incidents": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom430 /ops/aircraft": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom430 /ops/pilots": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "103"
+ },
+ "zoom430 /ops/permits": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "154"
+ },
+ "zoom430 /ops/places": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "102"
+ },
+ "zoom430 /ops/members": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "88"
+ },
+ "zoom430 /ops/about": {
+  "lines": "1112",
+  "bad": [
+   "hscroll 446>430"
+  ],
+  "gap": "93"
+ },
+ "zoom430 /ops/plans/new": {
+  "lines": "1112",
+  "bad": [],
+  "gap": "89"
+ }
+}

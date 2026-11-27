@@ -34,6 +34,7 @@ import {
 } from "@/lib/verdict-display";
 import { MonoText } from "./pdf-mono-text";
 import { PdfVerdictConclusion, PdfVerdictDetails } from "./pdf-verdict";
+import { tidyEngineText } from "@/lib/field-message";
 import { keepSpaces, registerJapaneseLineBreaking } from "./pdf-hyphenation";
 import { DISCLAIMER_JUDGEMENT } from "@/lib/disclaimers";
 import { PROVIDER } from "@/lib/provider-info";
@@ -522,7 +523,7 @@ export const RegulationPdfDocument = ({
           </View>
         ) : null}
 
-        {/* 段取り：要手続きの手続き（期限順）→ 手続き済み → 飛行の前後に必ず行うこと → 規制ごとの判定 */}
+        {/* 段取り：要手続きの手続き（期限順）→ 手続き済み → 飛行の前後に行うこと → 規制ごとの判定 */}
         {verdict ? <PdfVerdictDetails verdict={verdict} /> : null}
 
         {/* REGULATIONS（規制ごとの詳細） */}
@@ -563,8 +564,8 @@ export const RegulationPdfDocument = ({
               </Text>
             ) : null}
             <Text style={styles.regTitle}>{reg.title}</Text>
-            <Text style={styles.regSummary}>{keepSpaces(reg.summary)}</Text>
-            <Text style={styles.regNote}>{keepSpaces(regulationNoteDisplay(reg))}</Text>
+            <Text style={styles.regSummary}>{keepSpaces(tidyEngineText(reg.summary))}</Text>
+            <Text style={styles.regNote}>{keepSpaces(tidyEngineText(regulationNoteDisplay(reg)))}</Text>
             {shouldShowAirportMlitNote(reg, ctx?.pilotPermits) ? (
               <Text style={styles.regNote}>
                 {keepSpaces(`入力した許可について：${AIRPORT_MLIT_PERMIT_NOT_APPLIED_NOTE}`)}
@@ -592,7 +593,7 @@ export const RegulationPdfDocument = ({
                 <Text style={[styles.appliedTitle, { color: COLOR.brand }]}>適用した許可・同意・目的（元の判定は変えない）</Text>
                 {itemById.get(reg.id)!.appliedPermits.map((p) => (
                   <View key={p.id}>
-                    <Text style={[styles.appliedItem, { color: COLOR.ink }]}>・{p.condition}</Text>
+                    <Text style={[styles.appliedItem, { color: COLOR.ink }]}>・{tidyEngineText(p.condition)}</Text>
                     {p.machine ? (
                       <Text style={[styles.appliedMachine, { color: COLOR.inkMute }]}>{p.machine}</Text>
                     ) : null}
@@ -610,7 +611,7 @@ export const RegulationPdfDocument = ({
                 ) : null}
                 {reg.appliedExceptions.map((ex) => (
                   <View key={ex.id}>
-                    <Text style={styles.appliedItem}>・{ex.condition}</Text>
+                    <Text style={styles.appliedItem}>・{tidyEngineText(ex.condition)}</Text>
                     {ex.machine ? (
                       <Text style={styles.appliedMachine}>
                         {formatMachineCondition(ex.machine)}

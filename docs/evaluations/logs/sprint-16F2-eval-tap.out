@@ -1,0 +1,72 @@
+[
+ {
+  "id": "nav-more",
+  "edge": "left+3",
+  "ok": false,
+  "ms": 8014,
+  "url": "/ops"
+ },
+ {
+  "id": "nav-more",
+  "edge": "right-10,bottom-10",
+  "ok": true,
+  "ms": 36,
+  "url": "/ops/more"
+ },
+ {
+  "id": "nav-plans",
+  "edge": "left+3",
+  "ok": true,
+  "ms": 32,
+  "url": "/ops/plans"
+ },
+ {
+  "id": "nav-plans",
+  "edge": "right-10,bottom-10",
+  "ok": true,
+  "ms": 38,
+  "url": "/ops/plans"
+ },
+ {
+  "id": "nav-journal",
+  "edge": "left+3",
+  "ok": true,
+  "ms": 32,
+  "url": "/ops/journal"
+ },
+ {
+  "id": "nav-journal",
+  "edge": "right-10,bottom-10",
+  "ok": true,
+  "ms": 30,
+  "url": "/ops/journal"
+ },
+ {
+  "id": "nav-today",
+  "edge": "left+3",
+  "ok": true,
+  "ms": 10,
+  "url": "/ops"
+ },
+ {
+  "id": "nav-today",
+  "edge": "right-10,bottom-10",
+  "ok": true,
+  "ms": 8,
+  "url": "/ops"
+ },
+ {
+  "id": "nav-more",
+  "edge": "left+3",
+  "ok": true,
+  "ms": 33,
+  "url": "/ops/more"
+ },
+ {
+  "id": "nav-more",
+  "edge": "right-10,bottom-10",
+  "ok": true,
+  "ms": 34,
+  "url": "/ops/more"
+ }
+]

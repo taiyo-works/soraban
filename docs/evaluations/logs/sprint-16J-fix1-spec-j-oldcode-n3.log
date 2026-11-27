@@ -1,0 +1,10 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-j-db.spec.ts -g N-3
+
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-j-db.spec.ts:235:7 › 16-J 日をまたぐ着陸（N-3） › N-3. 着陸が翌日のカードは「翌日 HH:MM」と出る（日誌・飛行記録の一覧） (1.0s)
+
+  1 passed (5.6s)

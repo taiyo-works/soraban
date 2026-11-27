@@ -1,0 +1,134 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint16-d.spec.ts
+
+
+Running 20 tests using 1 worker
+
+  ✓   1 e2e/sprint16-d.spec.ts:29:7 › D-1 入力欄 › 通常：高さ 52 以上・角丸 12・面 sunken・縁 edge の 1px・ラベルは入力欄の上に見える (651ms)
+  ✘   2 e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない (715ms)
+
+::error file=e2e/sprint16-d.spec.ts,title=e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない,line=59,col=23::  1) e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない ───────%0A    Error: expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: "none"%0A    Received: "solid"%0A%0A      57 |     expect(s.bw).toBe("1px");%0A      58 |     expect(s.shadow).toBe(`${PRIMARY} 0px 0px 0px 1px inset`);%0A    > 59 |     expect(s.outline).toBe("none");%0A         |                       ^%0A      60 |   });%0A      61 |%0A      62 |   test("ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない", async ({ page }) => {%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:59:23
+  ✓   3 e2e/sprint16-d.spec.ts:62:7 › D-1 入力欄 › ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない (635ms)
+  ✓   4 e2e/sprint16-d.spec.ts:72:7 › D-1 入力欄 › エラー：縁が危険の印の色。下に記号（SVG）付きの 1 行。aria-describedby で結ぶ。role は alert にしない。入力すると消える (680ms)
+  ✓   5 e2e/sprint16-d.spec.ts:102:7 › D-1 入力欄 › 現場：高さ 56 以上 (677ms)
+  ✓   6 e2e/sprint16-d.spec.ts:111:7 › D-2 チェック行 › 行の高さ 72 以上・32 の丸いチェック・行全体が <label>・クリックで切り替わる。群の見出しに完了数/総数 (800ms)
+  ✓   7 e2e/sprint16-d.spec.ts:139:7 › D-2 チェック行 › K-7 チェック済みは記号（塗りの丸）と文字「済」。未チェックには「済」が出ない (755ms)
+  ✓   8 e2e/sprint16-d.spec.ts:165:7 › D-2 チェック行 › 群：折りたためる（summary を Enter で開閉）。畳んでも完了数/総数は見出しに残る (723ms)
+  ✓   9 e2e/sprint16-d.spec.ts:182:7 › D-2 チェック行 › 現場：行は 72 以上のまま・済みの色は濃い主色 (697ms)
+  ✓  10 e2e/sprint16-d.spec.ts:199:7 › D-3 ボトムシート › キーボードだけで：開く→見出しにフォーカス→段を変える→閉じる→元にフォーカスが戻る。3 段の高さ・暗幕・角丸・つまみ (2.0s)
+  ✓  11 e2e/sprint16-d.spec.ts:265:7 › D-3 ボトムシート › 「閉じる」ボタンと暗幕のクリックでも閉じ、そのつど元にフォーカスが戻る。ピークは暗幕なしで地の画面を操作できる (1.2s)
+  ✘  12 e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） (1.9s)
+
+::error file=e2e/sprint16-d.spec.ts,title=e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空）,line=314,col=82::  2) e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） %0A    Error: 動きを減らす%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: 0%0A    Received: 1%0A%0A      312 |     await page.getByTestId("cat-sheet-open").click();%0A      313 |     await page.getByTestId("sheet-expand").click();%0A    > 314 |     expect(await page.evaluate(() => document.getAnimations().length), "動きを減らす").toBe(0);%0A          |                                                                                  ^%0A      315 |     expect(await page.getByTestId("sheet").evaluate((el) => getComputedStyle(el).animationDuration)).toBe("0s");%0A      316 |   });%0A      317 |%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:314:82
+  ✘  13 e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない (1.4s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない,line=486,col=67::  3) e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない %0A    Error: 見本（シートを開いた状態） 文字 200%・390px: スクロールで届かない・下部ナビに隠れる主ボタン%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "button[cat-primary]「主ボタン（保存する）」",%0A    +   "button[cat-opx-primary]「運航管理の主ボタン」",%0A    +   "button「記録を追加する」",%0A    + ]%0A%0A       at field-checks.ts:486%0A%0A      484 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);%0A      485 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);%0A    > 486 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);%0A          |                                                                   ^%0A      487 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);%0A      488 |   }%0A      489 | };%0A        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:486:67)%0A        at /home/user/soraban/e2e/sprint16-d.spec.ts:324:5
+  ✓  14 e2e/sprint16-d.spec.ts:329:7 › D-4 スケルトン › カードの形の静止した帯（sunken）。帯は aria-hidden・親に aria-busy と「読み込み中」。動きなし (710ms)
+  ✓  15 e2e/sprint16-d.spec.ts:354:7 › D-4 スケルトン › K-6：見本の中に、animation-iteration-count が infinite の要素・動いているアニメーションがない (696ms)
+  ✓  16 e2e/sprint16-d.spec.ts:363:7 › D-5 空の状態と通信エラー › 空の状態：アイコン（装飾）・一文・主ボタン 1 つだけ (696ms)
+  ✓  17 e2e/sprint16-d.spec.ts:378:7 › D-5 空の状態と通信エラー › 通信エラー：該当のカードの中に一文と「再読み込み」。画面全体を止めない（ほかの部品は操作できる）。role は付けない (759ms)
+  ✓  18 e2e/sprint16-d.spec.ts:396:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本の操作（入力・チェック・シート・再読み込み）の前後で、端末のストレージの鍵が増えない (1.7s)
+  ✓  19 e2e/sprint16-d.spec.ts:411:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 見本全体：文字 200%（390・430）で、横スクロール・文字の切れ・入れ物の切れがない (946ms)
+  ✓  20 e2e/sprint16-d.spec.ts:416:7 › K-15 端末データ・K-5 入れ物の切れ（追加 1） › 入れ物の切れの検査が働く：子だけを持つ入れ物（直接の文字なし）が横に切れていると失敗し、除外の要素なら通る (843ms)
+
+
+  1) e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない ───────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "none"
+    Received: "solid"
+
+      57 |     expect(s.bw).toBe("1px");
+      58 |     expect(s.shadow).toBe(`${PRIMARY} 0px 0px 0px 1px inset`);
+    > 59 |     expect(s.outline).toBe("none");
+         |                       ^
+      60 |   });
+      61 |
+      62 |   test("ラベル：<label for> で入力欄に結ぶ。クリックでフォーカスが入る。プレースホルダーはラベルの代わりではない", async ({ page }) => {
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:59:23
+
+    Error Context: test-results/sprint16-d-D-1-入力欄-フォーカス：主-1c5e2-px＋内側-1px）。輪の-outline-は使わない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-1-入力欄-フォーカス：主-1c5e2-px＋内側-1px）。輪の-outline-は使わない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-1-入力欄-フォーカス：主-1c5e2-px＋内側-1px）。輪の-outline-は使わない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） 
+
+    Error: 動きを減らす
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      312 |     await page.getByTestId("cat-sheet-open").click();
+      313 |     await page.getByTestId("sheet-expand").click();
+    > 314 |     expect(await page.evaluate(() => document.getAnimations().length), "動きを減らす").toBe(0);
+          |                                                                                  ^
+      315 |     expect(await page.getByTestId("sheet").evaluate((el) => getComputedStyle(el).animationDuration)).toBe("0s");
+      316 |   });
+      317 |
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:314:82
+
+    Error Context: test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-3-ボトムシート-動き：通-ae017-は-0（操作の後の-getAnimations-が空）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない 
+
+    Error: 見本（シートを開いた状態） 文字 200%・390px: スクロールで届かない・下部ナビに隠れる主ボタン
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "button[cat-primary]「主ボタン（保存する）」",
+    +   "button[cat-opx-primary]「運航管理の主ボタン」",
+    +   "button「記録を追加する」",
+    + ]
+
+       at field-checks.ts:486
+
+      484 |     expect(r.clippedContainers, `${l}: 入れ物の切れ（overflow が hidden・clip の要素の scrollWidth が clientWidth を超える）`).toEqual([]);
+      485 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+    > 486 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+          |                                                                   ^
+      487 |     expect(r.navCoversLast, `${l}: 固定の下部ナビが最後の要素を隠している（px）`).toBe(0);
+      488 |   }
+      489 | };
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:486:67)
+        at /home/user/soraban/e2e/sprint16-d.spec.ts:324:5
+
+    Error Context: test-results/sprint16-d-D-3-ボトムシート-文字-2-f320e-開いても、横スクロール・文字の切れ・入れ物の切れがない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-d-D-3-ボトムシート-文字-2-f320e-開いても、横スクロール・文字の切れ・入れ物の切れがない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-d-D-3-ボトムシート-文字-2-f320e-開いても、横スクロール・文字の切れ・入れ物の切れがない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない ────────
+    e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） 
+    e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない 
+  17 passed (24.9s)
+::notice title=🎭 Playwright Run Summary::  3 failed%0A    e2e/sprint16-d.spec.ts:44:7 › D-1 入力欄 › フォーカス：主色の 2px の枠（縁 1px＋内側 1px）。輪の outline は使わない ────────%0A    e2e/sprint16-d.spec.ts:293:7 › D-3 ボトムシート › 動き：通常は --sb-dur-sheet（280ms）。現場と「動きを減らす」では 0（操作の後の getAnimations() が空） %0A    e2e/sprint16-d.spec.ts:318:7 › D-3 ボトムシート › 文字 200%（390・430）：シートを中間で開いても、横スクロール・文字の切れ・入れ物の切れがない %0A  17 passed (24.9s)
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,58 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-d-db.spec.ts
+
+
+Running 14 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の作成（390 幅） (716ms)
+  ✓   2 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） (530ms)
+  ✓   3 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） (493ms)
+  ✓   4 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） (500ms)
+  ✓   5 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 操縦者の登録（390 幅） (614ms)
+  ✓   6 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 場所の登録（390 幅） (473ms)
+  ✓   7 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 許可・承認の登録（390 幅） (481ms)
+  ✓   8 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 事故・重大インシデントの記録（390 幅） (537ms)
+  ✓   9 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） (503ms)
+  ✓  10 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 利用者（390 幅） (710ms)
+  ✓  11 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の訂正（390 幅） (546ms)
+  ✓  12 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 通報の作業台（390 幅） (675ms)
+  ✘  13 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の日誌（390 幅） (724ms)
+  ✓  14 e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の概要（390 幅） (588ms)
+
+
+  1) e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の日誌（390 幅） ──
+
+    Error: 計画の日誌: 入力欄がない
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1
+    Received:    0
+
+       at ../field-checks.ts:619
+
+      617 | export const expectFields = async (page: Page, rootSelector: string, label: string, opts: { field?: boolean; minCount?: number } = {}): Promise<FieldReport> => {
+      618 |   const r = await collectFieldReport(page, rootSelector, opts.field ?? false);
+    > 619 |   expect(r.count, `${label}: 入力欄がない`).toBeGreaterThanOrEqual(opts.minCount ?? 1);
+          |                                       ^
+      620 |   expect(r.noLabel, `${label}: 見えるラベルがない入力欄`).toEqual([]);
+      621 |   expect(r.notAbove, `${label}: ラベルが入力欄の上にない`).toEqual([]);
+      622 |   expect(r.badSize, `${label}: 入力欄の高さ・角丸`).toEqual([]);
+        at expectFields (/home/user/soraban/e2e/field-checks.ts:619:39)
+        at /home/user/soraban/e2e/ops-db/sprint16-d-db.spec.ts:68:7
+
+    Error Context: test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-4ab7f-高さ-52-以上・角丸-12-計画の日誌（390-幅）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-4ab7f-高さ-52-以上・角丸-12-計画の日誌（390-幅）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-d-db-D-1-実画面：全入力欄-4ab7f-高さ-52-以上・角丸-12-計画の日誌（390-幅）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-d-db.spec.ts:60:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の日誌（390 幅） ───
+  13 passed (13.3s)
+ ELIFECYCLE  Command failed with exit code 1.

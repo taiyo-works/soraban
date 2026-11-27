@@ -1,0 +1,14 @@
+dash rows 37 by status {"not_applicable:1":3,"dips_only:1":34}
+== about: head 30 lines, base 30; only-head 0, only-base 0
+== plans: head 88 lines, base 88; only-head 0, only-base 0
+== main: head 69 lines, base 69; only-head 0, only-base 0
+== overview: head 84 lines, base 84; only-head 0, only-base 0
+== report: head 458 lines, base 458; only-head 0, only-base 0
+== judgement: head 79 lines, base 79; only-head 0, only-base 0
+== permits: head 71 lines, base 71; only-head 0, only-base 0
+== permit: head 129 lines, base 129; only-head 0, only-base 0
+== incident: head 200 lines, base 200; only-head 0, only-base 0
+== aircraft: head 93 lines, base 93; only-head 0, only-base 0
+== places: head 20 lines, base 20; only-head 0, only-base 0
+head {"not_applicable:1":3,"dips_only:1":34}
+base {"not_applicable:1":3,"dips_only:1":34}

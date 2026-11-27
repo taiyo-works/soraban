@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:db /home/user/soraban
+> vitest run --config vitest.db.config.ts
+
+
+ RUN  v4.1.5 /home/user/soraban
+
+
+ Test Files  10 passed (10)
+      Tests  289 passed (289)
+   Start at  19:53:31
+   Duration  53.56s (transform 1.95s, setup 0ms, import 4.39s, tests 48.04s, environment 1ms)
+

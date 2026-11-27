@@ -40,7 +40,7 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
         <span className="flex flex-col gap-0.5">
           <LicenseNumber value={p.licenseNumber} />
           {p.licenseNumberMasked ? (
-            <span className="text-xs text-sb-ink-3">末尾 4 桁以外を伏せています。全桁は運航管理者と本人だけが見られます。</span>
+            <span className="text-sm text-sb-ink-3">末尾 4 桁以外を伏せています。全桁は運航管理者と本人だけが見られます。</span>
           ) : null}
         </span>
       ) : (
@@ -57,7 +57,7 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
             href={LICENSE_RENEWAL_SOURCE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center text-[13px] font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+            className="inline-flex min-h-12 items-center text-sm font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
           >
             更新の手続き（国土交通省）↗
           </a>
@@ -73,7 +73,7 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
         <span className="sb-num tnum" data-testid="pilot-recorded-total">
           {formatMinutes(p.recordedFlightMinutes)}
         </span>
-        <span className="text-xs text-sb-ink-3">
+        <span className="text-sm text-sb-ink-3">
           取消していない飛行記録 {p.recordedFlightCount} 件の飛行時間の合計（全機体）。そらばんで記録する前の飛行時間は含みません。
         </span>
       </span>,
@@ -101,11 +101,11 @@ export default async function PilotDetailPage({ params, searchParams }: { readon
           }
         />
         {p.voided ? (
-          <Note tone="red">
+          <Note tone="red" body>
             この操縦者は取り消されています。誤登録の記録として、登録内容と版の一覧を残しています。訂正はできません。
           </Note>
         ) : editNote ? (
-          <Note>{editNote}</Note>
+          <Note body>{editNote}</Note>
         ) : null}
         <DetailList rows={rows} data-testid="pilot-detail" />
       </div>

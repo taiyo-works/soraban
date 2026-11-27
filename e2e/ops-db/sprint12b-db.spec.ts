@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { gotoPlanOpen, onAllPlanScreens, openReportFolds } from "./plan-screen";
+import { walkWizard } from "./plan-wizard";
 
 // Sprint 12b の E2E-DB（契約 1・4・5・13・16・17・18 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバーを与えた next start に対して実行する。
@@ -342,7 +343,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     // 記録：二つの確認が無いと記録できない（エラーが出て、状況は「記録なし」のまま）
     await fillManual(page, "record", { date: "2027-01-05", time: "11:00", number: "FP-E2E-0001" });
     await page.getByTestId("record-submit").click();
-    await expect(page.getByTestId("report-record-form").getByRole("alert").first()).toBeVisible();
+    await expect(page.getByTestId("report-record-form").locator(".sb-field-error").first()).toBeVisible();
     await expect(page.getByTestId("plan-report-status")).toHaveAttribute("data-code", "no_record");
     expect((await getView(manager, plan.id)).reports).toHaveLength(0);
     // 未来の時刻は記録できない
@@ -645,7 +646,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     await page.getByTestId("procedure-done-at-small_drone_law-time").fill("09:00");
     await page.getByTestId("procedure-check-small_drone_law-facilityConsentObtained").check();
     await page.getByTestId("procedure-submit-small_drone_law").click();
-    await expect(page.getByTestId("procedure-form-small_drone_law").getByRole("alert").first()).toBeVisible();
+    await expect(page.getByTestId("procedure-form-small_drone_law").locator(".sb-field-error").first()).toBeVisible();
     await expect(page.getByTestId("procedure-small_drone_law")).toHaveAttribute("data-status", "none");
     await page.getByTestId("procedure-check-small_drone_law-policeNoticeDone").check();
     await page.getByTestId("procedure-submit-small_drone_law").click();
@@ -737,7 +738,7 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
             const lab = el.closest("label");
             if (lab) box = lab.getBoundingClientRect();
           }
-          if (box.height < 43.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 20)}] ${Math.round(box.height)}px`);
+          if (box.height < 47.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 20)}] ${Math.round(box.height)}px`);
         }
         return { found: out, checked: n };
       });
@@ -769,6 +770,8 @@ test.describe("Sprint 12b E2E-DB（手動）：通報内容のコピー・結果
     expect(box!.width).toBeLessThanOrEqual(375);
     await noHorizontalScroll(page, "計画の訂正フォーム");
     await page.goto("/ops/plans/new");
+    // 新規は 6 段（16-H1）。機体の選択は ④
+    await walkWizard(page, { placeName: "幅の確認", lat: "35.1", lng: "133.1", date: "2027-02-01", time: "09:00", duration: "10", title: "幅の確認", purpose: "確認" }, 4);
     await expect(page.getByTestId("plan-aircraft")).toBeVisible();
     const sel = await page.getByTestId("plan-aircraft").boundingBox();
     expect(sel!.x + sel!.width).toBeLessThanOrEqual(375);

@@ -1,0 +1,113 @@
+import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
+import { measureTextZoom } from "../e2e/field-checks";
+import fs from "node:fs";
+const BASE = "http://127.0.0.1:3400";
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16J-eval";
+fs.mkdirSync(SHOT, { recursive: true });
+const stamp = Date.now().toString(36).toUpperCase();
+const p2 = (n: number) => String(n).padStart(2, "0");
+const signIn = async (ctx: APIRequestContext, key: string) => {
+  const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: key, email: `${key}@example.test`, emailVerified: true, name: key } });
+  expect(r.status()).toBe(200);
+};
+let mgr: APIRequestContext; let pilotId = ""; let acId = ""; let mark = ""; let planId = "";
+let dayN = 22; const hr = 3 + Math.floor(Math.random() * 15);
+const slot = (min = 25, over = false) => {
+  const d0 = 24 + Math.floor(Math.random() * 7); const h0 = 1 + Math.floor(Math.random() * 20);
+  { const day = `2026-12-${p2(d0)}`; const nd = `2026-12-${p2(d0 + 1)}`; return over ? { takeoffAt: `${day}T23:30`, landingAt: `${nd}T00:10` } : { takeoffAt: `${day}T${p2(h0)}:00`, landingAt: `${day}T${p2(h0)}:${p2(min)}` }; }
+
+  dayN -= 1; if (dayN < 24 - 11) dayN = 23; const day = `2026-12-${p2(dayN)}`; const nd = `2026-12-${p2(dayN + 1)}`;
+  return over ? { takeoffAt: `${day}T23:30`, landingAt: `${nd}T00:10` } : { takeoffAt: `${day}T${p2(hr)}:00`, landingAt: `${day}T${p2(hr)}:${p2(min)}` };
+};
+const mkFlight = async (s0: { takeoffAt: string; landingAt: string }, mk?: () => { takeoffAt: string; landingAt: string }) => {
+  let s = s0; let r; for (let i = 0; i < 30; i++) { r = await mgr.post("/api/ops/flights", { data: { aircraftId: acId, pilotId, purpose: "空撮", takeoffPlace: "試験地点", landingPlace: "試験地点", safetyIssue: false, ...s } }); if (r.status() !== 409 || !mk) break; s = mk(); }
+  r = r!; void 0;
+  expect(r.status(), await r.text()).toBe(201); const j = (await r.json()) as { id: string; version?: number }; return { id: j.id, version: j.version ?? 1 };
+};
+test.beforeAll(async () => {
+  mgr = await pwRequest.newContext({ baseURL: BASE }); await signIn(mgr, "a-manager");
+  const pl = await pwRequest.newContext({ baseURL: BASE }); await signIn(pl, "a-pilot");
+  pilotId = ((await (await pl.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+  mark = `JU16J${stamp}9`.slice(0, 20);
+  const ac = await mgr.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  expect(ac.status()).toBe(201); acId = ((await ac.json()) as { id: string }).id;
+  await mkFlight(slot(25), () => slot(25)); await mkFlight(slot(40, true), () => slot(40, true));
+  const v = await mkFlight(slot(15), () => slot(15));
+  expect((await mgr.post(`/api/ops/flights/${v.id}/void`, { data: { expectedVersion: v.version, reason: "評価の取消" } })).status()).toBe(200);
+  const ins = await mgr.post("/api/ops/inspections", { data: { aircraftId: acId, pilotId, inspectedAt: "2026-12-30T09:00", timing: "pre_flight", placeName: "本社", items: Object.fromEntries(["general","propeller","frame","communication","propulsion","power","autopilot","controller","battery"].map((k) => [k, { result: "normal" }])) } });
+  expect(ins.status(), await ins.text()).toBe(201);
+  const plan = await mgr.post("/api/ops/plans", { data: { title: `評価 ${stamp}`, aircraftId: acId, pilotId, plannedStartAt: "2027-01-05T15:00", durationMinutes: 60, purpose: "測量", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] } });
+  expect(plan.status(), await plan.text()).toBe(201); planId = ((await plan.json()) as { id: string }).id;
+});
+
+const VPS = [[375, 812], [390, 844], [1280, 800]] as const;
+for (const [w, h] of VPS) {
+  test(`manual ${w}x${h}`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+    const page = await ctx.newPage(); await signIn(page.request, "a-manager");
+    const out: Record<string, unknown> = {};
+    const settle = async () => { await page.waitForLoadState("networkidle"); await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => 0)))); };
+    // J-1 journal
+    for (const tab of ["", "flights", "inspections", "incidents"]) {
+      await page.goto(`/ops/journal${tab ? `?tab=${tab}` : ""}`); await settle();
+      const chips = await page.locator('[data-testid="journal-tabs"] a').evaluateAll((els) => els.map((e) => { const cs = getComputedStyle(e); const b = getComputedStyle(e, "::before"); const r = e.getBoundingClientRect(); return { t: (e.textContent || "").trim(), cur: e.getAttribute("aria-current"), bs: cs.borderTopStyle, bw: cs.borderTopWidth, fw: cs.fontWeight, h: Math.round(r.height), w: Math.round(r.width), before: b.content, fs: cs.fontSize, color: cs.color }; }));
+      out[`tabs:${tab || "default"}`] = chips;
+      await page.screenshot({ path: `${SHOT}/journal-${tab || "default"}-${w}x${h}.png` });
+    }
+    await page.goto("/ops/journal?tab=flights"); await settle();
+    out.journal = await page.evaluate(() => {
+      const nav = document.querySelector('[data-testid="ops-bottom-nav"]')?.getBoundingClientRect();
+      const btn = document.querySelector('[data-testid="journal-new-flight"]')?.getBoundingClientRect();
+      const card = document.querySelector('[data-testid="journal-row"]')?.getBoundingClientRect();
+      const stat = document.querySelector(".sb-stat-num"); const cs = stat && getComputedStyle(stat);
+      const ov = Array.from(document.querySelectorAll('[data-testid="journal-row-takeoff-landing"]')).map((e) => e.textContent);
+      return { navTop: nav?.top, btnBottom: btn?.bottom, btnH: btn?.height, cardBottom: card?.bottom, cardTop: card?.top, fvn: cs?.fontVariantNumeric, fs: cs?.fontSize, fw: cs?.fontWeight, overnight: ov, innerH: innerHeight, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth };
+    });
+    // flights list
+    await page.goto("/ops/flights"); await settle();
+    out.flights = await page.locator('[data-testid="flight-row"]').first().innerText();
+    out.flightsMeta = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+    await page.screenshot({ path: `${SHOT}/flights-${w}x${h}.png` });
+    await page.goto("/ops/flights?includeVoided=1"); await settle();
+    const vrow = page.locator('[data-testid="flight-row"]:has([data-result="voided"])');
+    out.voidedCount = await vrow.count();
+    if (out.voidedCount) { out.voidedText = await vrow.first().innerText(); out.voidedStyle = await vrow.first().evaluate((e) => ({ bs: getComputedStyle(e).borderTopStyle })); await vrow.first().scrollIntoViewIfNeeded(); }
+    await page.screenshot({ path: `${SHOT}/flights-voided-${w}x${h}.png`, fullPage: true });
+    // chip vs voided dashed
+    // new flight (plan)
+    await page.goto(`/ops/flights/new?planId=${planId}`); await page.getByRole("form", { name: "飛行記録の入力" }).waitFor(); await settle();
+    out.newPlan = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('[data-testid^="flight-type-"]')).map((e) => { const l = e as HTMLElement; const inp = l.querySelector("input") as HTMLInputElement; return { id: l.dataset.testid, checked: inp.checked, text: l.innerText.trim(), cls: l.className, shadow: getComputedStyle(l).boxShadow, h: Math.round(l.getBoundingClientRect().height) }; });
+      const btns = Array.from(document.querySelectorAll('form[aria-label="飛行記録の入力"] button[type=submit], form[aria-label="飛行記録の入力"] button')).map((b) => (b.textContent || "").trim());
+      const secs = Array.from(document.querySelectorAll('[data-testid="flight-section"]')).map((s) => s.querySelector("h2,h3")?.textContent);
+      return { rows: rows.filter((r) => r.checked || r.id?.includes("night")), n: rows.length, btns, secs, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth };
+    });
+    await page.screenshot({ path: `${SHOT}/new-plan-${w}x${h}.png` });
+    await page.screenshot({ path: `${SHOT}/new-plan-full-${w}x${h}.png`, fullPage: true });
+    // inspection new: 済 shown
+    await page.goto("/ops/inspections/new"); await settle();
+    const lc = page.locator("label.sb-chk"); if (await lc.count()) { await lc.first().click({ timeout: 5000 }).catch(() => 0); }
+    out.inspLabels = await page.evaluate(() => Array.from(document.querySelectorAll("label.sb-chk")).slice(0, 3).map((l) => l.outerHTML.slice(0, 300)));
+    out.inspDone = await page.evaluate(() => { const l = document.querySelector("label.sb-chk"); const d = l?.querySelector(".sb-chk-done"); return { done: d ? getComputedStyle(d).display : "absent", txt: d?.textContent }; });
+    await page.screenshot({ path: `${SHOT}/insp-new-${w}x${h}.png` });
+    fs.writeFileSync(`${SHOT}/metrics-${w}x${h}.json`, JSON.stringify(out, null, 1));
+    await ctx.close();
+  });
+}
+
+for (const w of [320, 360]) {
+  test(`overflow ${w} (100% & 200%)`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: w, height: 700 } });
+    const page = await ctx.newPage(); await signIn(page.request, "a-manager");
+    const urls = ["/ops/journal?tab=flights", "/ops/journal?tab=inspections", "/ops/flights", "/ops/flights?includeVoided=1", `/ops/flights/new?planId=${planId}`, "/ops/inspections/new"];
+    const res: Record<string, unknown> = {};
+    for (const u of urls) {
+      await page.goto(u); await page.waitForLoadState("networkidle");
+      const base = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+      const z = await measureTextZoom(page, w).catch((e) => ({ err: String(e) }));
+      res[u] = { base, zoom: "scrollWidth" in (z as object) ? { sw: (z as any).scrollWidth, cw: (z as any).clientWidth, clipped: (z as any).clipped, clippedContainers: (z as any).clippedContainers, nav: (z as any).navCoversLast, unreach: (z as any).unreachablePrimary } : z };
+    }
+    fs.writeFileSync(`${SHOT}/overflow-${w}.json`, JSON.stringify(res, null, 1));
+    await ctx.close();
+  });
+}

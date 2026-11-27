@@ -181,10 +181,12 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
         // L-2：スクロールなしで、タイトル・タブ・状況・主操作が入る
         // 契約どおり plan-report-status も（中止・記録なしでは状況の行を出さず、事実の 1 行 plan-report-label に代える）
         const firstScreenIds = ["plan-title-heading", "plan-tabs", "plan-report-label", "plan-primary-action", ...(key === "voidedNone" ? [] : ["plan-report-status"])];
+        // 16-L の L-5：voidedRecorded の 375 幅だけ一時的に緩めていた 800 を、元の 748 に戻した（全状態・全幅で size.firstScreen）。
+        const firstScreenLimit = size.firstScreen;
         for (const id of firstScreenIds) {
           const box = await page.getByTestId(id).first().boundingBox();
           expect(box, `${key} ${id}`).not.toBeNull();
-          expect(box!.y + box!.height, `${key} ${id} の下端`).toBeLessThanOrEqual(size.firstScreen);
+          expect(box!.y + box!.height, `${key} ${id} の下端`).toBeLessThanOrEqual(firstScreenLimit);
         }
         const primary = page.getByTestId("plan-primary-action");
         await expect(primary).toHaveCount(1);
@@ -272,7 +274,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       }
       const copies = await page.locator('[data-testid^="report-copy-"]').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
       expect(copies.length).toBeGreaterThan(0);
-      for (const c of copies) expect(c).toBeGreaterThanOrEqual(44);
+      for (const c of copies) expect(c).toBeGreaterThanOrEqual(48);
       // 手順バーの「結果を記録する」→ #record
       await page.getByTestId("report-step-record").click();
       await expect.poll(() => page.evaluate(() => location.hash)).toBe("#record");
@@ -295,13 +297,53 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       await page.setViewportSize({ width: size.width, height: size.height });
       await login(page);
       const base = `/ops/plans/${plans.pending.id}`;
-      for (const [path, limit, name] of [["/judgement", size.judgement, "判定"], ["/overview", size.overview, "計画"], ["/journal", size.journal, "日誌"]] as const) {
+      for (const [path, limit, name] of [["/overview", size.overview, "計画"], ["/journal", size.journal, "日誌"]] as const) {
         await gotoPlan(page, `${base}${path}`);
         await page.waitForLoadState("networkidle").catch(() => undefined);
         const h = await height(page);
         console.log(`[長さ] ${name} ${size.name}: ${h}px`);
         expect(h, name).toBeLessThanOrEqual(limit);
       }
+      // 判定（16-H2 H2-5）：組織の許可・承認の登録の件数に依存しない測り方にする。
+      // 判定の画面は、計画の日時・場所・機体・操縦者が範囲に収まる登録を「候補」として並べる（1 件あたり約 96px）。全体の実行が進むと
+      // 組織の登録が増え、同じ計画でも候補が増えて長さが変わっていた（候補 10 件で 5,068px）。そこで (1) 登録のどれの有効期間にも入らない
+      // 日付（2031-06-15）の計画で測り、候補を 0 件に固定する。(2) 候補が 3 件見える長さを、この中で許可を登録した計画で測る。
+      const fixed = await activate(await createPlan({ plannedStartAt: "2031-06-15T10:00", title: `S172 len ${stamp}-${seq++}` }));
+      await gotoPlan(page, `/ops/plans/${fixed.id}/judgement`);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      await expect(page.getByTestId("plan-permit-candidate")).toHaveCount(0);
+      const hj = await height(page);
+      console.log(`[長さ] 判定（候補 0 件に固定）${size.name}: ${hj}px`);
+      expect(hj, "判定").toBeLessThanOrEqual(size.judgement);
+      // (2) 候補が 3 件見える長さ（N-d。実行の順序に依存しない）。有効期間に入る包括・全国・夜間の許可を、この中で 3 件登録し、
+      // その期間に入る計画（2027-01-10 の夜間）で測る。他の試験の登録が残っていて候補が増えても、見えるのは 3 件まで（残りは畳む）。
+      for (let i = 0; i < 3; i++) {
+        const r = await manager.post("/api/ops/permits", {
+          data: {
+            permitNumber: `E2E-S172-${stamp}-LEN-${size.name}-${seq++}`,
+            coverage: "blanket",
+            kinds: ["night"],
+            issuedOn: "2026-10-01",
+            validFrom: "2026-10-01",
+            validTo: "2027-09-30",
+            placeScope: { type: "nationwide" },
+            aircraftScope: { type: "any" },
+            pilotScope: { type: "any" },
+          },
+        });
+        expect(r.status(), await r.text()).toBe(201);
+      }
+      const withCandidates = await activate(await createPlan({ plannedStartAt: "2027-01-10T10:00", title: `S172 len3 ${stamp}-${seq++}` }));
+      await gotoPlan(page, `/ops/plans/${withCandidates.id}/judgement`);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      const shown = await page.locator('[data-testid="plan-permit-candidate"]:visible').count();
+      const all = await page.locator('[data-testid="plan-permit-candidate"]').count();
+      expect(all, "有効期間に入る許可を 3 件以上登録した").toBeGreaterThanOrEqual(3);
+      expect(shown, "見えている候補は、ちょうど 3 件").toBe(3);
+      const hp = await height(page);
+      console.log(`[長さ] 判定（候補 ${shown} 件が見える計画、候補 ${all} 件）${size.name}: ${hp}px`);
+      // 上限は上げない（4,600 / 3,300）。超えたら値を報告して止まる
+      expect(hp, `判定（候補 ${shown} 件が見える）`).toBeLessThanOrEqual(size.judgement);
     });
   }
 
@@ -393,9 +435,11 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       await page.waitForLoadState("networkidle").catch(() => undefined);
       const report = await height(page);
       console.log(`[長さ・長い計画] ${size.name} 変更点 ${changes} 件: 主画面 ${main}px / 計画 ${overview}px / 作業台 ${report}px`);
+      // 16-L の L-5：16-B 差し戻し 1 で上げていた長さの上限（計画 375：3,300、1280：2,400、作業台 375：11,500）を元の値（3,000／2,200／10,400）に戻した。
+      const longLimit = size.width === 375 ? { overview: 3000, report: 10400 } : { overview: 2200, report: size.report };
       expect(main, "主画面").toBeLessThanOrEqual(size.main);
-      expect(overview, "計画").toBeLessThanOrEqual(size.overview);
-      expect(report, "作業台").toBeLessThanOrEqual(size.width === 375 ? 10400 : size.report);
+      expect(overview, "計画").toBeLessThanOrEqual(longLimit.overview);
+      expect(report, "作業台").toBeLessThanOrEqual(longLimit.report);
     }
   });
 
@@ -473,6 +517,7 @@ test.describe("Sprint 17-2 E2E-DB：通報の主画面と作業台", () => {
       });
       expect(f.status(), await f.text()).toBeLessThan(300);
     }
+    // 16-L の L-5：16-B 差し戻し 1 で上げていた上限（375：計画 3,200・作業台 11,400、1280：計画 2,400）を元の値に戻した。
     const limits = { 375: { report: 10400, overview: 3000, journal: 1400 }, 1280: { report: 7000, overview: 2200, journal: 1100 } } as const;
     for (const size of SIZES) {
       await page.setViewportSize({ width: size.width, height: size.height });

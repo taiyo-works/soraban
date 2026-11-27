@@ -31,26 +31,106 @@ basis-permits-empty
 basis-plan-link
 basis-procedures
 boundary-registration
+cat-arrow-list
+cat-arrow-none-card
+cat-arrow-with-card
 cat-art-section
 cat-band
 cat-band-section
 cat-block
 cat-block-soft
+cat-bottomnav
+cat-bottomnav-sec
 cat-buttons
+cat-card
+cat-card-list
+cat-card-state
+cat-cards
+cat-check-disabled
+cat-check-focus
+cat-check-off
+cat-check-on
+cat-check-set
+cat-checks-section
+cat-choices
+cat-danger
+cat-decide
 cat-disabled
+cat-disabled-reason
+cat-dot-list
+cat-f-check
+cat-f-check-submit
+cat-f-disabled
+cat-f-error
+cat-f-focus
 cat-field
+cat-field-note
 cat-forms
 cat-grounds
 cat-input
+cat-inputs
+cat-inputs-section
+cat-lines
+cat-logo
+cat-logo-list
 cat-nav
 cat-normal
 cat-opx-danger
+cat-opx-disabled
+cat-opx-disabled-reason
 cat-opx-primary
 cat-opx-secondary
-cat-orange
+cat-opx-text
+cat-order
+cat-order-list
+cat-prep
+cat-prep-body
+cat-prep-cards
+cat-prep-rejudge
+cat-prep-reload
+cat-prep-rows
+cat-prep-rows-inspection
+cat-prep-rows-report
+cat-prep-rule
+cat-prep-verdicts
+cat-prim-face
+cat-prim-focus
+cat-prim-press
+cat-prim-soft
 cat-primary
+cat-primary-chips
+cat-primary-use
+cat-progress
+cat-progress-sample
+cat-radio-disabled
+cat-radio-focus
+cat-radio-no
+cat-radio-off
+cat-radio-on
+cat-radio-set
 cat-secondary
 cat-selected
+cat-sheet-open
+cat-sheet-open-peek
+cat-sheet-section
+cat-skeleton-section
+cat-state-labels
+cat-state-link
+cat-states-result
+cat-states-section
+cat-status
+cat-status-list
+cat-text
+cat-toc
+cat-type
+cat-type-body
+cat-type-card
+cat-type-colors
+cat-type-list
+cat-type-note
+cat-type-number
+cat-type-section
+cat-type-title
 cat-veil
 cat-veil-toggle
 cat-verdict
@@ -176,6 +256,7 @@ field-status-band
 field-status-connection
 field-status-prefetch
 field-status-prefetch-stale
+field-status-prefetch-stale-help
 field-status-saved
 field-status-unsent
 field-steps
@@ -186,7 +267,6 @@ field-undo-takeoff
 field-unsent
 field-wake-note
 field-window-notice
-filter-count
 flight-basis-link
 flight-date
 flight-detail
@@ -204,6 +284,8 @@ flight-mismatches
 flight-pilot-name
 flight-plan-link
 flight-plan-link-box
+flight-row
+flight-section
 flight-takeoff
 flight-takeoff-gap
 flight-takeoff-gaps
@@ -215,10 +297,27 @@ geocode-result
 hero-art
 history-item
 history-verdict
+home-all-body
 home-deadlines
+home-deadlines-count
 home-deadlines-empty
 home-deadlines-note
+home-deadlines-rest
+home-head
+home-next
+home-next-link
+home-next-place
+home-next-title
+home-next-when
 home-ops-link
+home-prep
+home-prep-note
+home-prep-rejudge
+home-prep-reload
+home-prep-title
+home-prep-when
+home-primary
+home-quick
 home-today-band
 home-today-empty
 home-today-flight
@@ -352,7 +451,10 @@ inspection-count
 inspection-detail
 inspection-disclaimer
 inspection-empty
+inspection-group-${g.key}
+inspection-group-note
 inspection-list
+inspection-missing-count
 inspection-new
 inspection-pending
 inspection-pending-cannot
@@ -362,6 +464,7 @@ inspection-pending-list
 inspection-pending-row
 inspection-pending-scope
 inspection-pending-title
+inspection-progress
 inspection-records
 inspection-row
 inspection-select
@@ -377,12 +480,35 @@ journal-new-inspection
 journal-range
 journal-row
 journal-row-link
+journal-row-minutes
+journal-row-takeoff-landing
+journal-row-times
+journal-row-total
 journal-tabs
 journal-to-inspections
 judge-pill-here
 judge-pill-search
+judgement-fetched-at
+judgement-next
+judgement-primary
 judgement-scope-plan
 judgement-scope-snapshot
+judgement-sheet-dataset
+judgement-sheet-dataset-ledger-updated
+judgement-sheet-datasets
+judgement-sheet-detail
+judgement-sheet-fetched-at
+judgement-sheet-procedure
+judgement-sheet-procedures
+judgement-sheet-reason
+judgement-sheet-refs
+judgement-sheet-verdict
+judgement-tile
+judgement-tile-stale
+judgement-tiles
+judgement-tiles-section
+judgement-total
+judgement-total-note
 layer-list
 layer-no-map-row
 legend-zones
@@ -566,7 +692,13 @@ plan-digest
 plan-dips-notice
 plan-disclaimer
 plan-duration
+plan-edit-basic
+plan-edit-cond
 plan-edit-link
+plan-edit-permit-no
+plan-edit-reason
+plan-edit-screen
+plan-edit-when
 plan-field-link
 plan-filter-attention
 plan-filter-pending
@@ -582,6 +714,7 @@ plan-judge-link
 plan-judged-at
 plan-judgement
 plan-judgement-details
+plan-judgement-full
 plan-judgement-purpose
 plan-judging
 plan-lat
@@ -597,6 +730,7 @@ plan-overview
 plan-permit-applied-note
 plan-permit-candidate
 plan-permit-candidates
+plan-permit-candidates-more
 plan-permit-conditions
 plan-permit-edit-link
 plan-permit-empty
@@ -631,6 +765,11 @@ plan-primary-action
 plan-procedures
 plan-procedures-details
 plan-purpose
+plan-quick
+plan-quick-date
+plan-quick-duration
+plan-quick-time
+plan-quick-time-empty
 plan-radius
 plan-reason
 plan-rejudge
@@ -651,6 +790,8 @@ plan-report-reasons
 plan-report-status
 plan-report-status-label
 plan-request-confirmation
+plan-review-error
+plan-review-errors
 plan-row
 plan-row-next
 plan-row-next-count
@@ -662,12 +803,14 @@ plan-snapshot-seq
 plan-snapshots-link
 plan-source-stale
 plan-stale-box
+plan-stale-readonly-note
 plan-stale-reasons
 plan-stale-sources
 plan-stale-sources-details
 plan-start
 plan-start-date
 plan-start-time
+plan-step-heading
 plan-steps
 plan-submit
 plan-tabs
@@ -678,6 +821,13 @@ plan-use-candidate
 plan-void-details
 plan-voided-no-record-note
 plan-weight-unknown
+plan-when-section
+plan-wizard-back
+plan-wizard-next
+plan-wizard-progress
+plan-wizard-progress-band
+plan-wizard-step-text
+plans-today
 procedure-card
 procedure-history-row
 procedure-none
@@ -715,30 +865,130 @@ prop: basis-permits-empty
 prop: basis-plan-link
 prop: basis-procedures
 prop: boundary-registration
+prop: cat-arrow-list
+prop: cat-arrow-none
+prop: cat-arrow-none-card
+prop: cat-arrow-with
+prop: cat-arrow-with-card
 prop: cat-art-section
 prop: cat-band
 prop: cat-band-section
 prop: cat-block
 prop: cat-block-soft
+prop: cat-bottomnav
+prop: cat-bottomnav-sec
 prop: cat-buttons
+prop: cat-card
+prop: cat-card-list
+prop: cat-card-state
+prop: cat-cards
+prop: cat-check-disabled
+prop: cat-check-focus
+prop: cat-check-off
+prop: cat-check-on
+prop: cat-check-set
+prop: cat-checks-section
+prop: cat-chk-group
+prop: cat-choices
+prop: cat-danger
+prop: cat-decide
 prop: cat-disabled
+prop: cat-disabled-reason
+prop: cat-dot-list
+prop: cat-dot-same
+prop: cat-dot-shapes
+prop: cat-empty
+prop: cat-error
+prop: cat-f-check
+prop: cat-f-check-submit
+prop: cat-f-disabled
+prop: cat-f-error
+prop: cat-f-focus
 prop: cat-field
+prop: cat-field-note
 prop: cat-forms
 prop: cat-grounds
 prop: cat-input
+prop: cat-inputs
+prop: cat-inputs-section
+prop: cat-lines
+prop: cat-logo
+prop: cat-logo-ink
+prop: cat-logo-list
+prop: cat-logo-primary
 prop: cat-nav
 prop: cat-normal
 prop: cat-opx-danger
+prop: cat-opx-disabled
+prop: cat-opx-disabled-reason
 prop: cat-opx-primary
 prop: cat-opx-secondary
-prop: cat-orange
+prop: cat-opx-text
+prop: cat-order
+prop: cat-order-adopted
+prop: cat-order-adopted-list
+prop: cat-order-direction
+prop: cat-order-direction-list
+prop: cat-order-list
+prop: cat-order-reasons-adopted
+prop: cat-order-reasons-direction
+prop: cat-prep
+prop: cat-prep-body
+prop: cat-prep-cards
+prop: cat-prep-rejudge
+prop: cat-prep-reload
+prop: cat-prep-rows
+prop: cat-prep-rows-inspection
+prop: cat-prep-rows-report
+prop: cat-prep-rule
+prop: cat-prep-verdicts
+prop: cat-prim-face
+prop: cat-prim-focus
+prop: cat-prim-press
+prop: cat-prim-soft
 prop: cat-primary
+prop: cat-primary-chips
+prop: cat-primary-use
+prop: cat-progress
+prop: cat-progress-sample
+prop: cat-radio-disabled
+prop: cat-radio-focus
+prop: cat-radio-no
+prop: cat-radio-off
+prop: cat-radio-on
+prop: cat-radio-set
 prop: cat-secondary
 prop: cat-selected
+prop: cat-sheet-open
+prop: cat-sheet-open-peek
+prop: cat-sheet-section
+prop: cat-skeleton
+prop: cat-skeleton-section
+prop: cat-state-danger
+prop: cat-state-flying
+prop: cat-state-info
+prop: cat-state-labels
+prop: cat-state-link
+prop: cat-state-safe
+prop: cat-state-warn
+prop: cat-states-result
+prop: cat-states-section
+prop: cat-status
+prop: cat-status-list
+prop: cat-text
+prop: cat-toc
+prop: cat-type
+prop: cat-type-body
+prop: cat-type-card
+prop: cat-type-colors
+prop: cat-type-list
+prop: cat-type-note
+prop: cat-type-number
+prop: cat-type-section
+prop: cat-type-title
 prop: cat-veil
 prop: cat-veil-toggle
 prop: cat-verdict
-prop: command-palette
 prop: coverage-details
 prop: create-plan-from-verdict
 prop: current-location
@@ -863,6 +1113,7 @@ prop: field-status-band
 prop: field-status-connection
 prop: field-status-prefetch
 prop: field-status-prefetch-stale
+prop: field-status-prefetch-stale-help
 prop: field-status-saved
 prop: field-status-unsent
 prop: field-steps
@@ -873,7 +1124,6 @@ prop: field-undo-takeoff
 prop: field-unsent
 prop: field-wake-note
 prop: field-window-notice
-prop: filter-count
 prop: flight-basis-link
 prop: flight-date
 prop: flight-detail
@@ -891,6 +1141,8 @@ prop: flight-mismatches
 prop: flight-pilot-name
 prop: flight-plan-link
 prop: flight-plan-link-box
+prop: flight-row
+prop: flight-section
 prop: flight-takeoff
 prop: flight-takeoff-gap
 prop: flight-takeoff-gaps
@@ -902,10 +1154,29 @@ prop: geocode-result
 prop: hero-art
 prop: history-item
 prop: history-verdict
+prop: home-all
+prop: home-all-body
 prop: home-deadlines
+prop: home-deadlines-count
 prop: home-deadlines-empty
 prop: home-deadlines-note
+prop: home-deadlines-rest
+prop: home-head
+prop: home-next
+prop: home-next-link
+prop: home-next-place
+prop: home-next-status
+prop: home-next-title
+prop: home-next-when
 prop: home-ops-link
+prop: home-prep
+prop: home-prep-note
+prop: home-prep-rejudge
+prop: home-prep-reload
+prop: home-prep-title
+prop: home-prep-when
+prop: home-primary
+prop: home-quick
 prop: home-today-band
 prop: home-today-empty
 prop: home-today-flight
@@ -1049,7 +1320,10 @@ prop: inspection-count
 prop: inspection-detail
 prop: inspection-disclaimer
 prop: inspection-empty
+prop: inspection-group-${g.key}
+prop: inspection-group-note
 prop: inspection-list
+prop: inspection-missing-count
 prop: inspection-new
 prop: inspection-pending
 prop: inspection-pending-cannot
@@ -1060,6 +1334,7 @@ prop: inspection-pending-list
 prop: inspection-pending-row
 prop: inspection-pending-scope
 prop: inspection-pending-title
+prop: inspection-progress
 prop: inspection-records
 prop: inspection-row
 prop: inspection-select
@@ -1075,13 +1350,37 @@ prop: journal-new-inspection
 prop: journal-range
 prop: journal-row
 prop: journal-row-link
+prop: journal-row-minutes
+prop: journal-row-takeoff-landing
+prop: journal-row-times
+prop: journal-row-total
 prop: journal-tabs
 prop: journal-to-inspections
 prop: judge-pill-here
 prop: judge-pill-search
 prop: judge-pills
+prop: judgement-fetched-at
+prop: judgement-next
+prop: judgement-primary
 prop: judgement-scope-plan
 prop: judgement-scope-snapshot
+prop: judgement-sheet
+prop: judgement-sheet-dataset
+prop: judgement-sheet-dataset-ledger-updated
+prop: judgement-sheet-datasets
+prop: judgement-sheet-detail
+prop: judgement-sheet-fetched-at
+prop: judgement-sheet-procedure
+prop: judgement-sheet-procedures
+prop: judgement-sheet-reason
+prop: judgement-sheet-refs
+prop: judgement-sheet-verdict
+prop: judgement-tile
+prop: judgement-tile-stale
+prop: judgement-tiles
+prop: judgement-tiles-section
+prop: judgement-total
+prop: judgement-total-note
 prop: landing
 prop: layer-list
 prop: layer-no-map-row
@@ -1144,6 +1443,8 @@ prop: ops-enter-plan
 prop: ops-header
 prop: ops-inspections
 prop: ops-journal
+prop: ops-loading
+prop: ops-loading-content
 prop: ops-logo
 prop: ops-me-email
 prop: ops-me-name
@@ -1271,7 +1572,13 @@ prop: plan-digest
 prop: plan-dips-notice
 prop: plan-disclaimer
 prop: plan-duration
+prop: plan-edit-basic
+prop: plan-edit-cond
 prop: plan-edit-link
+prop: plan-edit-permit-no
+prop: plan-edit-reason
+prop: plan-edit-screen
+prop: plan-edit-when
 prop: plan-field-link
 prop: plan-filter-attention
 prop: plan-filter-pending
@@ -1287,6 +1594,7 @@ prop: plan-judge-link
 prop: plan-judged-at
 prop: plan-judgement
 prop: plan-judgement-details
+prop: plan-judgement-full
 prop: plan-judgement-purpose
 prop: plan-judging
 prop: plan-lat
@@ -1302,6 +1610,7 @@ prop: plan-overview
 prop: plan-permit-applied-note
 prop: plan-permit-candidate
 prop: plan-permit-candidates
+prop: plan-permit-candidates-more
 prop: plan-permit-conditions
 prop: plan-permit-edit-link
 prop: plan-permit-empty
@@ -1336,6 +1645,13 @@ prop: plan-primary-action
 prop: plan-procedures
 prop: plan-procedures-details
 prop: plan-purpose
+prop: plan-quick
+prop: plan-quick-date
+prop: plan-quick-duration
+prop: plan-quick-time
+prop: plan-quick-time-empty
+prop: plan-quick-today
+prop: plan-quick-tomorrow
 prop: plan-radius
 prop: plan-reason
 prop: plan-rejudge
@@ -1356,6 +1672,18 @@ prop: plan-report-reasons
 prop: plan-report-status
 prop: plan-report-status-label
 prop: plan-request-confirmation
+prop: plan-review-aircraft
+prop: plan-review-coords
+prop: plan-review-duration
+prop: plan-review-error
+prop: plan-review-errors
+prop: plan-review-flags
+prop: plan-review-permit-numbers
+prop: plan-review-pilot
+prop: plan-review-place-name
+prop: plan-review-purpose
+prop: plan-review-start
+prop: plan-review-title
 prop: plan-row
 prop: plan-row-next
 prop: plan-row-next-action
@@ -1368,12 +1696,14 @@ prop: plan-snapshot-seq
 prop: plan-snapshots-link
 prop: plan-source-stale
 prop: plan-stale-box
+prop: plan-stale-readonly-note
 prop: plan-stale-reasons
 prop: plan-stale-sources
 prop: plan-stale-sources-details
 prop: plan-start
 prop: plan-start-date
 prop: plan-start-time
+prop: plan-step-heading
 prop: plan-steps
 prop: plan-submit
 prop: plan-tabs
@@ -1384,6 +1714,13 @@ prop: plan-use-candidate
 prop: plan-void-details
 prop: plan-voided-no-record-note
 prop: plan-weight-unknown
+prop: plan-when-section
+prop: plan-wizard-back
+prop: plan-wizard-next
+prop: plan-wizard-progress
+prop: plan-wizard-progress-band
+prop: plan-wizard-step-text
+prop: plans-today
 prop: procedure-card
 prop: procedure-history-row
 prop: procedure-none
@@ -1475,7 +1812,7 @@ prop: result-section
 prop: route
 prop: send-confirm
 prop: send-scenario
-prop: shortcut-sheet
+prop: sheet
 prop: signout
 prop: signout-cancel
 prop: signout-discard
@@ -1496,8 +1833,6 @@ prop: snapshot-reason
 prop: snapshot-row
 prop: snapshot-seq
 prop: takeoff
-prop: toast
-prop: toast-region
 prop: today-badge
 prop: today-card
 prop: today-card-aircraft
@@ -1576,14 +1911,6 @@ prop: version-op
 prop: version-reason
 prop: version-row
 prop: version-time
-prop: workspace-handle
-prop: workspace-input
-prop: workspace-map
-prop: workspace-maximize
-prop: workspace-peek
-prop: workspace-result
-prop: workspace-sheet
-prop: workspace-tabs
 pwa-install-guide
 pwa-prefetch-status
 pwa-update
@@ -1680,8 +2007,6 @@ snapshot-past
 snapshot-reason
 snapshot-row
 snapshot-seq
-toast
-toast-region
 today-badge
 today-card
 today-card-aircraft
@@ -1759,21 +2084,17 @@ version-op
 version-reason
 version-row
 version-time
-workspace-handle
-workspace-input
-workspace-map
-workspace-maximize
-workspace-peek
-workspace-result
-workspace-sheet
-workspace-tabs
 式: REFERENCE_LIST_ID
+式: `${id}-error`
 式: `${testIdPrefix}-${v}`
 式: `${testId}-any`
+式: `${testId}-body`
 式: `${testId}-cannot`
 式: `${testId}-changed`
+式: `${testId}-close`
 式: `${testId}-date`
 式: `${testId}-due`
+式: `${testId}-expand`
 式: `${testId}-label`
 式: `${testId}-link`
 式: `${testId}-list`
@@ -1781,10 +2102,15 @@ workspace-tabs
 式: `${testId}-next-day`
 式: `${testId}-note`
 式: `${testId}-option`
+式: `${testId}-root`
+式: `${testId}-scrim`
+式: `${testId}-shrink`
 式: `${testId}-source`
 式: `${testId}-stale`
+式: `${testId}-tag`
 式: `${testId}-text`
 式: `${testId}-time`
+式: `${testId}-title`
 式: `${testId}-toggle`
 式: `${testPrefix}-${v}`
 式: `${testPrefix}-confirm-done`
@@ -1793,6 +2119,13 @@ workspace-tabs
 式: `${testPrefix}-memo`
 式: `${testPrefix}-number-unavailable`
 式: `airspace-${flag}`
+式: `cat-bnav-${it.key}`
+式: `cat-chk-${i}`
+式: `cat-dot-same-${l.tone}`
+式: `cat-dot-shapes-${l.tone}`
+式: `cat-prep-card-${id}`
+式: `cat-prep-v-${s.id}`
+式: `cat-status-${s.key}`
 式: `field-docs-basis-${d.key}`
 式: `field-docs-confirm-${d.key}`
 式: `field-docs-item-${d.key}`
@@ -1805,6 +2138,9 @@ workspace-tabs
 式: `field-item-undo-${item}`
 式: `field-site-${f}-${o.value}`
 式: `field-step-${n}`
+式: `home-prep-${id}-note`
+式: `home-prep-${id}-text`
+式: `home-prep-${id}`
 式: `incident-contact-${c}`
 式: `incident-event-type-${o.key}`
 式: `incident-event-type-desc-${o.key}`
@@ -1814,6 +2150,7 @@ workspace-tabs
 式: `incident-kind-${k}`
 式: `incident-report-channel-${c}`
 式: `inspection-item-${it.key}`
+式: `inspection-mark-${key}`
 式: `inspection-result-${it.key}`
 式: `inspection-timing-${t ?? "all"}`
 式: `journal-tab-${key}`
@@ -1829,6 +2166,9 @@ workspace-tabs
 式: `permit-place-${val}`
 式: `plan-flag-${c.value}`
 式: `plan-permit-${c.value}`
+式: `plan-review-${c.n}`
+式: `plan-review-edit-${c.n}`
+式: `plan-review-error-fix-${n}`
 式: `plan-step-${n}`
 式: `plan-tab-${t.key}`
 式: `plan-view-${v.key}`
@@ -1863,7 +2203,6 @@ workspace-tabs
 式: `report-item-value-${item.key}`
 式: `report-item-warnings-${item.key}`
 式: `report-kind-${k}`
-式: `workspace-toggle-${side}`
 式: bare ? undefined : "plan-report"
 式: bare ? undefined : "plan-report-status-badge"
 式: bare ? undefined : "plan-stale"
@@ -1871,8 +2210,7 @@ workspace-tabs
 式: d.status === "unmet" ? `field-docs-fix-${d.key
 式: direct && !isCancel ? "send-submit" : "record-submit"
 式: id
-式: labelTestId
 式: part === "details" ? "verdict-details" : "verdict-summary"
 式: r.testId
-式: rowTestId?.(row)
 式: testId
+式: testId ? `${testId

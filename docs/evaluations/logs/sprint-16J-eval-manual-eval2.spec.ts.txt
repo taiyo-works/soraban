@@ -1,0 +1,61 @@
+import { expect, request as pwRequest, test } from "@playwright/test";
+import fs from "node:fs";
+const BASE = "http://127.0.0.1:3400";
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16J-eval";
+const stamp = Date.now().toString(36).toUpperCase();
+const signIn = async (ctx: any, key: string) => { const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: key, email: `${key}@example.test`, emailVerified: true, name: key } }); expect(r.status()).toBe(200); };
+test("flow: plan -> double-click save, storage, words, inspection mark", async ({ browser }) => {
+  const mgr = await pwRequest.newContext({ baseURL: BASE }); await signIn(mgr, "a-manager");
+  const pl = await pwRequest.newContext({ baseURL: BASE }); await signIn(pl, "a-pilot");
+  const pilotId = ((await (await pl.get("/api/ops/me")).json()) as { pilotId: string }).pilotId;
+  const mark = `JU16J${stamp}8`;
+  const ac = await mgr.post("/api/ops/aircraft", { data: { registrationMark: mark, modelName: "評価機2", manufacturer: "DJI", serialNumber: `SN-${mark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  const acId = ((await ac.json()) as { id: string }).id;
+  const plan = await mgr.post("/api/ops/plans", { data: { title: `評価2 ${stamp}`, aircraftId: acId, pilotId, plannedStartAt: "2027-01-05T15:00", durationMinutes: 60, purpose: "測量", placeName: "試験地点", latitude: 35.434238, longitude: 133.380508, flags: ["method_night"] } });
+  const planId = ((await plan.json()) as { id: string }).id;
+  const ctx = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  const page = await ctx.newPage(); await signIn(page.request, "a-manager");
+  const out: any = {};
+  await page.goto(`/ops/flights/new?planId=${planId}`);
+  const form = page.getByRole("form", { name: "飛行記録の入力" }); await form.waitFor();
+  // night row: 済 absent, toBeChecked
+  const night = page.getByTestId("flight-type-night");
+  out.nightChecked = await night.getByRole("checkbox").isChecked();
+  out.nightText = (await night.innerText()).trim();
+  out.nightDoneEls = await night.locator(".sb-chk-done").count();
+  // toggle another (day-time exotic): click 目視外 if exists
+  const all = await page.locator('[data-testid^="flight-type-"]').evaluateAll((e) => e.map((x) => ({ id: (x as HTMLElement).dataset.testid, t: (x as HTMLElement).innerText.trim() })));
+  out.allTypes = all;
+  const other = page.getByTestId(all.find((a) => a.id !== "flight-type-night")!.id!);
+  await other.click(); out.otherDone = await other.locator(".sb-chk-done").count(); out.otherShadow = await other.evaluate((e) => getComputedStyle(e).boxShadow);
+  await page.screenshot({ path: `${SHOT}/new-plan-toggle-375x812.png`, fullPage: true });
+  await other.click();
+  await form.getByRole("textbox", { name: "離陸場所", exact: true }).fill("試験地点");
+  await page.getByRole("radio", { name: "なし" }).check();
+  // date/time: use 今 buttons
+  await page.getByRole("button", { name: "離陸：今" }).click(); await page.getByRole("button", { name: "着陸：今" }).click();
+  const posts: any[] = [];
+  page.on("request", (r) => { if (r.url().endsWith("/api/ops/flights") && r.method() === "POST") posts.push(r.postDataJSON()); });
+  const save = page.getByRole("button", { name: "飛行記録を保存", exact: true });
+  out.saveBox = await save.boundingBox();
+  await save.dblclick();
+  await page.waitForTimeout(3000);
+  out.url = page.url(); out.posts = posts.length; out.postBody = posts[0];
+  out.errText = await page.locator('[role="alert"]').allInnerTexts();
+  const list = await (await mgr.get(`/api/ops/flights`)).text(); out.countInList = (list.match(new RegExp(mark, "g")) || []).length;
+  out.storage = await page.evaluate(async () => ({ local: Object.keys(localStorage).map((k) => [k, (localStorage.getItem(k) || "").slice(0, 80)]), session: Object.keys(sessionStorage), caches: await caches.keys().catch(() => []), idb: (indexedDB.databases ? (await indexedDB.databases()).map((d) => d.name) : []) }));
+  // words on screens
+  const words = /完璧|保証|必ず|代行|代理|申請|通報不要|問題なし/;
+  const hits: any = {};
+  for (const u of ["/ops/journal", "/ops/journal?tab=flights", "/ops/journal?tab=inspections", "/ops/flights", "/ops/flights?includeVoided=1", `/ops/flights/new?planId=${planId}`, "/ops/inspections/new"]) {
+    await page.goto(u); await page.waitForLoadState("networkidle");
+    const t = await page.locator("body").innerText(); const m = t.match(words); if (m) hits[u] = m[0];
+  }
+  out.wordHits = hits;
+  // inspection mark
+  await page.goto("/ops/inspections/new"); await page.waitForLoadState("networkidle");
+  const allNormal = page.getByRole("button", { name: "すべて正常" }); if (await allNormal.count()) await allNormal.first().click();
+  out.inspMarks = await page.locator('[data-testid^="inspection-mark-"]').allInnerTexts();
+  await page.screenshot({ path: `${SHOT}/insp-new-allnormal-375x812.png` });
+  fs.writeFileSync(`${SHOT}/flow.json`, JSON.stringify(out, null, 1));
+});

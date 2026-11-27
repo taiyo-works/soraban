@@ -1,0 +1,37 @@
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12h-pr3-db.spec.ts:181:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-3. 判定への入口：ホームと計画の作成画面の上部のピル（48px 以上・2 列・間 8px 以上）。押すと `/?start=…`、押すまで位置の要求は 0。360・375・768・1280px × 明・暗 (14.9s)
+  ✓  2 e2e/ops-db/sprint12h-pr3-db.spec.ts:345:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 320・360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上 (1.3m)
+MEASURE 375 step1 {"sc":false,"small":[],"docH":1823}
+MEASURE 375 step2 {"sc":false,"small":[],"docH":886}
+MEASURE 375 step3 {"sc":false,"small":[],"docH":1796}
+MEASURE 375 step4 {"sc":false,"small":[],"docH":4241}
+MEASURE 375 step5 {"sc":false,"small":[],"docH":2264}
+MEASURE 375 error1 {"sc":false,"small":[],"docH":1902}
+MEASURE 375 422 {"sc":false,"small":[],"docH":2709}
+  ✓  3 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 375 (4.0s)
+MEASURE 390 step1 {"sc":false,"small":[],"docH":1730}
+MEASURE 390 step2 {"sc":false,"small":[],"docH":886}
+MEASURE 390 step3 {"sc":false,"small":[],"docH":1796}
+MEASURE 390 step4 {"sc":false,"small":[],"docH":4220}
+MEASURE 390 step5 {"sc":false,"small":[],"docH":2222}
+MEASURE 390 error1 {"sc":false,"small":[],"docH":1809}
+MEASURE 390 422 {"sc":false,"small":[],"docH":2667}
+  ✓  4 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 390 (3.5s)
+MEASURE 1280 step1 {"sc":false,"small":[],"docH":1534}
+MEASURE 1280 step2 {"sc":false,"small":[],"docH":800}
+MEASURE 1280 step3 {"sc":false,"small":[],"docH":1468}
+MEASURE 1280 step4 {"sc":false,"small":[],"docH":2712}
+MEASURE 1280 step5 {"sc":false,"small":[],"docH":1720}
+MEASURE 1280 error1 {"sc":false,"small":[],"docH":1591}
+MEASURE 1280 422 {"sc":false,"small":[],"docH":2050}
+  ✓  5 e2e/ops-db/zz-design-h1-shots.spec.ts:26:7 › shots 1280 (4.2s)
+MEASURE 320x200 step1 {"scrollW":320,"clientW":320,"bad":["LI.min-w-0:346","A.sb-tab:346","SPAN.:342"]}
+MEASURE 320x200 step2 {"scrollW":320,"clientW":320,"bad":["LI.min-w-0:346","A.sb-tab:346","SPAN.:342"]}
+MEASURE 320x200 step3 {"scrollW":320,"clientW":320,"bad":["LI.min-w-0:346","A.sb-tab:346","SPAN.:342"]}
+MEASURE 320x200 step4 {"scrollW":327,"clientW":320,"bad":["LI.min-w-0:346","A.sb-tab:346","SPAN.:342"]}
+MEASURE 320x200 step5 {"scrollW":320,"clientW":320,"bad":["LI.min-w-0:346","A.sb-tab:346","SPAN.:342"]}
+  ✓  6 e2e/ops-db/zz-design-h1-shots.spec.ts:83:5 › 320 幅・文字 200% (2.4s)
+
+  6 passed (1.9m)

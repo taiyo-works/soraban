@@ -1,0 +1,275 @@
+
+ RUN  v4.1.5 /home/user/soraban-base
+
+ ❯ |web| apps/web/src/app/legacy-sweep.test.ts (6 tests | 3 failed) 83ms
+     × TS・TSX（テストを除く）に、旧い色・角丸の Tailwind 名、variant、旧い class の名前、旧い CSS 変数の参照が 0 56ms
+     × TS・TSX（テストを除く）に色の直書き（16 進・rgb・hsl）が 0。例外は HEX_EXEMPT の理由つきのファイルだけ 18ms
+     × CSS：旧い色の変数・旧い class が 0。16 進・rgb は soraban-tokens.css の値と --sb-map-*（地図の固定色）、見本の日差しの模擬の白い膜だけ 4ms
+ ❯ |web| apps/web/src/lib/wording-policy.test.ts (17 tests | 1 failed) 104ms
+     × 許可リストの文が、ソースの定数・凡例の文に実在する（定数が変わったら許可リストも直す） 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| apps/web/src/app/legacy-sweep.test.ts > N-2 旧トークン・色の直書きの検査は apps/web/src 全体 > TS・TSX（テストを除く）に、旧い色・角丸の Tailwind 名、variant、旧い class の名前、旧い CSS 変数の参照が 0
+AssertionError: expected [ …(19) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "components/ops/plan-ui.tsx: 旧い変数 var(--dur",
++   "components/ops/versions.tsx: 旧い Tailwind 名 font-display",
++   "components/ui/command-palette.tsx: 旧い Tailwind 名 text-fg-mute",
++   "components/ui/data.tsx: 旧い Tailwind 名 text-fg-mute",
++   "components/ui/data.tsx: 旧い class ds-table",
++   "components/ui/data.tsx: 旧い変数 var(--dur",
++   "components/ui/forms.tsx: 旧い Tailwind 名 text-fg",
++   "components/ui/forms.tsx: 旧い変数 var(--dur",
++   "components/ui/journey-line.tsx: 旧い Tailwind 名 border-fg",
++   "components/ui/overlays.tsx: 旧い Tailwind 名 md:rounded-ctl",
++   "components/ui/overlays.tsx: 旧い class ds-dialog",
++   "components/ui/primitives.tsx: 旧い Tailwind 名 bg-ok-bg",
++   "components/ui/primitives.tsx: 旧い class ds-skeleton",
++   "components/ui/primitives.tsx: 旧い変数 var(--ok-line",
++   "components/ui/tabs.tsx: 旧い Tailwind 名 border-line",
++   "components/ui/tabs.tsx: 旧い変数 var(--dur",
++   "components/ui/verdict-stamp.tsx: 旧い Tailwind 名 rounded-ctl",
++   "components/ui/workspace.tsx: 旧い Tailwind 名 rounded-ctl",
++   "components/ui/workspace.tsx: 旧い変数 var(--dur-sheet",
++ ]
+
+ ❯ apps/web/src/app/legacy-sweep.test.ts:73:17
+     71|       }
+     72|     }
+     73|     expect(bad).toEqual([]);
+       |                 ^
+     74|   });
+     75|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |web| apps/web/src/app/legacy-sweep.test.ts > N-2 旧トークン・色の直書きの検査は apps/web/src 全体 > TS・TSX（テストを除く）に色の直書き（16 進・rgb・hsl）が 0。例外は HEX_EXEMPT の理由つきのファイルだけ
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "components/ui/primitives.tsx: #000",
++ ]
+
+ ❯ apps/web/src/app/legacy-sweep.test.ts:83:17
+     81|       if (m) bad.push(`${f}: ${m}`);
+     82|     }
+     83|     expect(bad).toEqual([]);
+       |                 ^
+     84|   });
+     85|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |web| apps/web/src/app/legacy-sweep.test.ts > N-2 旧トークン・色の直書きの検査は apps/web/src 全体 > CSS：旧い色の変数・旧い class が 0。16 進・rgb は soraban-tokens.css の値と --sb-map-*（地図の固定色）、見本の日差しの模擬の白い膜だけ
+AssertionError: expected [ …(152) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "app/globals.css: var(--color-paper",
++   "app/globals.css: --color-paper: #f5f2ea;",
++   "app/globals.css: --color-paper-soft: #ede9dd;",
++   "app/globals.css: --color-paper-deep: #e7e1d1;",
++   "app/globals.css: --color-ink: #0e1421;",
++   "app/globals.css: --color-ink-soft: #2a2f3a;",
++   "app/globals.css: --color-ink-mute: #5b6170;",
++   "app/globals.css: --color-rule: #c9c2ad;",
++   "app/globals.css: --color-rule-soft: #d8d1bd;",
++   "app/globals.css: --color-indigo-50: #e9edf3;",
++   "app/globals.css: --color-indigo-100: #c3cedc;",
++   "app/globals.css: --color-indigo-300: #6c83a4;",
++   "app/globals.css: --color-indigo-500: #2f4868;",
++   "app/globals.css: --color-indigo-700: #1d3557;",
++   "app/globals.css: --color-indigo-900: #0e1d34;",
++   "app/globals.css: --color-signal-red: #b53a3a;",
++   "app/globals.css: --color-signal-red-soft: #f1d9d9;",
++   "app/globals.css: --color-signal-amber: #b97e1e;",
++   "app/globals.css: --color-signal-amber-soft: #f3e6c8;",
++   "app/globals.css: --color-signal-green: #3a7a4f;",
++   "app/globals.css: --color-signal-green-soft: #d6e6da;",
++   "app/globals.css: --color-signal-mute: #9da4b1;",
++   "app/globals.css: --color-signal-mute-soft: #e6e6e2;",
++   "app/globals.css: --color-verdict-no-fly: #a33232;",
++   "app/globals.css: --color-verdict-needs: #8a5a0e;",
++   "app/globals.css: --color-verdict-done: #1d3557;",
++   "app/globals.css: --color-verdict-clear: #2e6a42;",
++   "app/globals.css: --color-verdict-unknown: #4f5564;",
++   "app/globals.css: --bg-app: #f1ede1;",
++   "app/globals.css: --bg-surface: #fbf9f3;",
++   "app/globals.css: --bg-sunken: #ebe6d7;",
++   "app/globals.css: --fg: #171b22;",
++   "app/globals.css: --fg-soft: #3b3f47;",
++   "app/globals.css: --fg-mute: #5c5f66;",
++   "app/globals.css: --line: #d8d1bd;",
++   "app/globals.css: --line-strong: #857f6c;",
++   "app/globals.css: --accent: #1f4a99;",
++   "app/globals.css: --accent-soft: #e7ecf7;",
++   "app/globals.css: --accent-solid: #1f4a99;",
++   "app/globals.css: --accent-solid-hover: #183b7c;",
++   "app/globals.css: --accent-fg: #ffffff;",
++   "app/globals.css: --ok-fg: #1a6b3a;",
++   "app/globals.css: --ok-bg: #e6f4ea;",
++   "app/globals.css: --ok-line: #2e8b57;",
++   "app/globals.css: --warn-fg: #7a4a06;",
++   "app/globals.css: --warn-bg: #fdf1dc;",
++   "app/globals.css: --warn-line: #a86a0e;",
++   "app/globals.css: --danger-fg: #b3261e;",
++   "app/globals.css: --danger-bg: #fdeceb;",
++   "app/globals.css: --danger-line: #d14343;",
++   "app/globals.css: --info-fg: #1f4a99;",
++   "app/globals.css: --info-bg: #e7ecf7;",
++   "app/globals.css: --info-line: #2f5fb8;",
++   "app/globals.css: --neutral-fg: #48484a;",
++   "app/globals.css: --neutral-bg: #efeff4;",
++   "app/globals.css: --neutral-line: #77777c;",
++   "app/globals.css: --verdict-no-fly: #a33232;",
++   "app/globals.css: --verdict-needs: #8a5a0e;",
++   "app/globals.css: --verdict-done: #1d3557;",
++   "app/globals.css: --verdict-clear: #2e6a42;",
++   "app/globals.css: --verdict-unknown: #4f5564;",
++   "app/globals.css: --scrim: rgb(0 0 0 / 0.4);",
++   "app/globals.css: --bg-app: #f3f4f6;",
++   "app/globals.css: --bg-surface: #ffffff;",
++   "app/globals.css: --bg-sunken: #e9ebef;",
++   "app/globals.css: --fg: #0e1421;",
++   "app/globals.css: --fg-soft: #232a36;",
++   "app/globals.css: --fg-mute: #424a59;",
++   "app/globals.css: --line: #c4c9d2;",
++   "app/globals.css: --line-strong: #5c6573;",
++   "app/globals.css: --accent: #1f4a99;",
++   "app/globals.css: --accent-soft: #e7ecf7;",
++   "app/globals.css: --accent-solid: #1f4a99;",
++   "app/globals.css: --accent-solid-hover: #183b7c;",
++   "app/globals.css: --accent-fg: #ffffff;",
++   "app/globals.css: --ok-fg: #174c2c;",
++   "app/globals.css: --ok-bg: #e4f3ea;",
++   "app/globals.css: --ok-line: #174c2c;",
++   "app/globals.css: --warn-fg: #6b4004;",
++   "app/globals.css: --warn-bg: #fbf0d9;",
++   "app/globals.css: --warn-line: #6b4004;",
++   "app/globals.css: --danger-fg: #862020;",
++   "app/globals.css: --danger-bg: #fbe6e6;",
++   "app/globals.css: --danger-line: #862020;",
++   "app/globals.css: --info-fg: #17376f;",
++   "app/globals.css: --info-bg: #e6edfa;",
++   "app/globals.css: --info-line: #17376f;",
++   "app/globals.css: --neutral-fg: #2f3542;",
++   "app/globals.css: --neutral-bg: #e9ebef;",
++   "app/globals.css: --neutral-line: #2f3542;",
++   "app/globals.css: --bg-app: #0d1118;",
++   "app/globals.css: --bg-surface: #151b25;",
++   "app/globals.css: --bg-sunken: #1f2733;",
++   "app/globals.css: --fg: #ebe7da;",
++   "app/globals.css: --fg-soft: #cfcbbf;",
++   "app/globals.css: --fg-mute: #9ea3ad;",
++   "app/globals.css: --line: #2b3444;",
++   "app/globals.css: --line-strong: #7e8aa0;",
++   "app/globals.css: --accent: #8fb0f0;",
++   "app/globals.css: --accent-soft: #16213a;",
++   "app/globals.css: --accent-solid: #4a72c4;",
++   "app/globals.css: --accent-solid-hover: #3f66b8;",
++   "app/globals.css: --accent-fg: #ffffff;",
++   "app/globals.css: --ok-fg: #6fd38f;",
++   "app/globals.css: --ok-bg: #10261a;",
++   "app/globals.css: --ok-line: #3fa564;",
++   "app/globals.css: --warn-fg: #f0c060;",
++   "app/globals.css: --warn-bg: #2b200a;",
++   "app/globals.css: --warn-line: #c18f2a;",
++   "app/globals.css: --danger-fg: #ff9f98;",
++   "app/globals.css: --danger-bg: #321412;",
++   "app/globals.css: --danger-line: #e5645b;",
++   "app/globals.css: --info-fg: #8cb8ff;",
++   "app/globals.css: --info-bg: #0f1d36;",
++   "app/globals.css: --info-line: #4e8fe8;",
++   "app/globals.css: --neutral-fg: #d1d1d6;",
++   "app/globals.css: --neutral-bg: #2c2c2e;",
++   "app/globals.css: --neutral-line: #8e8e93;",
++   "app/globals.css: --verdict-no-fly: #e27a72;",
++   "app/globals.css: --verdict-needs: #dcaa4e;",
++   "app/globals.css: --verdict-done: #a9bedc;",
++   "app/globals.css: --verdict-clear: #74b98a;",
++   "app/globals.css: --verdict-unknown: #a3a39c;",
++   "app/globals.css: --scrim: rgb(0 0 0 / 0.6);",
++   "app/globals.css: --bg-app: #000000;",
++   "app/globals.css: --bg-surface: #1c1c1e;",
++   "app/globals.css: --bg-sunken: #2c2c2e;",
++   "app/globals.css: --fg: #ffffff;",
++   "app/globals.css: --fg-soft: #e5e5ea;",
++   "app/globals.css: --fg-mute: #b8b8be;",
++   "app/globals.css: --line: #48484a;",
++   "app/globals.css: --line-strong: #a1a1a6;",
++   "app/globals.css: --accent: #a6c0f4;",
++   "app/globals.css: --accent-soft: #16213a;",
++   "app/globals.css: --accent-solid: #a6c0f4;",
++   "app/globals.css: --accent-solid-hover: #bccff7;",
++   "app/globals.css: --accent-fg: #0b0d10;",
++   "app/globals.css: --ok-fg: #6fd38f;",
++   "app/globals.css: --ok-bg: #10261a;",
++   "app/globals.css: --ok-line: #6fd38f;",
++   "app/globals.css: --warn-fg: #f0c060;",
++   "app/globals.css: --warn-bg: #2b200a;",
++   "app/globals.css: --warn-line: #f0c060;",
++   "app/globals.css: --danger-fg: #ff9f98;",
++   "app/globals.css: --danger-bg: #321412;",
++   "app/globals.css: --danger-line: #ff9f98;",
++   "app/globals.css: --info-fg: #8cb8ff;",
++   "app/globals.css: --info-bg: #0f1d36;",
++   "app/globals.css: --info-line: #8cb8ff;",
++   "app/globals.css: --neutral-fg: #e5e5ea;",
++   "app/globals.css: --neutral-bg: #2c2c2e;",
++   "app/globals.css: --neutral-line: #e5e5ea;",
++ ]
+
+ ❯ apps/web/src/app/legacy-sweep.test.ts:118:17
+    116|       }
+    117|     }
+    118|     expect(bad).toEqual([]);
+       |                 ^
+    119|   });
+    120| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |web| apps/web/src/lib/wording-policy.test.ts > 語の一覧（lib/wording-policy.ts） > 許可リストの文が、ソースの定数・凡例の文に実在する（定数が変わったら許可リストも直す）
+AssertionError: expected [ { word: '必ず', …(2) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "sentence": "飛行の前に必ず DIPS でご確認ください",
++     "source": "components/regulation-map-layers.ts（地図の凡例の注記）",
++     "word": "必ず",
++   },
++ ]
+
+ ❯ apps/web/src/lib/wording-policy.test.ts:95:62
+     93|     expect(INCIDENT.INCIDENT_GUIDANCE_NOTICE_BASE).toContain("報告が必要かどう…
+     94|     // 16-N2：地図の凡例の注記の「必ず」は表示の側で外す（tidyEngineText）ので、許可リストに文はない。描く側が整え…
+     95|     expect(ALLOWED_SENTENCES.filter((a) => a.word === "必ず")).toEqual([…
+       |                                                              ^
+     96|     const map = readFileSync(path.join(SRC, "components", "regulation-…
+     97|     expect(map).toMatch(/tidyEngineText\(n\.note\)/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 19 passed (23)
+   Start at  03:51:15
+   Duration  1.18s (transform 806ms, setup 0ms, import 1.03s, tests 187ms, environment 0ms)
+

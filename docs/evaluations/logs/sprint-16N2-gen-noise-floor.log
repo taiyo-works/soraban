@@ -1,0 +1,10 @@
+DIFF ops-home-1280.png 96 px bbox 822 158 1239 517
+DIFF pub-top-1280.png 4366 px bbox 117 3772 664 5738
+DIFF pub-top-375.png 3986 px bbox 86 7533 254 10525
+files differing: 3
+STYLE-DIFF field-before-1280.txt 2 elements
+STYLE-DIFF pub-top-1280.txt 1 elements
+STYLE-DIFF pub-top-375.txt 1 elements
+files with diffs: 3
+  (path) 2 ('field-before-1280.txt', '>body#20>next-route-announcer', '>body#20>script')
+  width 2 ('pub-top-1280.txt', 'iv#2>main#0>section#1>div#3>section[result-details]#5>dl#0>div#1>dd[evidence-id]', '158.328px', '152.781px')

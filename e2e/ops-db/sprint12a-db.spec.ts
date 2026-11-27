@@ -1,5 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { gotoPlanOpen, onAllPlanScreens } from "./plan-screen";
+import { fillStep, tapNext } from "./plan-wizard";
 
 // Sprint 12a の E2E-DB（契約 2・9・11・13・14・16・17・18・20 の画面・通しの部分）。
 // DB と AUTH_PROVIDER=test・OPS_ENABLED=1・逆ジオコーダの模擬サーバー（e2e/mock-gsi-server.mjs）を与えた next start に対して実行する。
@@ -152,7 +153,7 @@ const tapSize = async (page: Page, testId: string) => {
   await expect(page.getByTestId(testId).first()).toBeVisible();
   const box = await page.getByTestId(testId).first().boundingBox();
   expect(box, testId).not.toBeNull();
-  expect(box!.height, `${testId} の高さ`).toBeGreaterThanOrEqual(43.5);
+  expect(box!.height, `${testId} の高さ`).toBeGreaterThanOrEqual(47.5);
 };
 
 const RUN_BASE = Date.UTC(2025, 0, 1) + Math.floor(Math.random() * 600) * 24 * 3600 * 1000;
@@ -230,15 +231,14 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await expect(page.getByTestId("plan-lng")).toHaveValue(String(HQ.lng));
 
     const title = `E2E フォームの計画 ${stamp}`;
-    await page.getByTestId("plan-title").fill(title);
-    await page.getByTestId("plan-aircraft").selectOption(weighted.id);
-    await page.getByTestId("plan-pilot").selectOption(selfPilot);
-    await page.getByTestId("plan-start-date").fill("2027-01-11");
-    await page.getByTestId("plan-start-time").fill("09:30");
-    await page.getByTestId("plan-duration").fill("45");
-    await page.getByTestId("plan-purpose").fill("橋梁の点検");
-    await page.getByTestId("plan-flag-method_night").check();
+    await tapNext(page);
+    await fillStep(page, 2, { date: "2027-01-11", time: "09:30", duration: "45" });
+    await tapNext(page);
+    await fillStep(page, 3, { title, purpose: "橋梁の点検", flags: ["method_night"] });
+    await tapNext(page);
+    await fillStep(page, 4, { aircraftId: weighted.id, pilotId: selfPilot });
     await expect(page.getByTestId("plan-aircraft").locator(`option[value="${weighted.id}"]`)).toContainText("最大離陸重量 0.9 kg");
+    await tapNext(page);
 
     // 保存中は「判定中」と出る（応答を遅らせて確かめる）
     await page.route("**/api/ops/plans", async (route) => {
@@ -276,7 +276,7 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     for (const id of ["plan-confirm-approve", "plan-confirm-return"]) await tapSize(page, id);
     // 差し戻しは理由が必須
     await page.getByTestId("plan-confirm-return").click();
-    await expect(page.getByRole("alert").filter({ hasText: "差し戻しの理由" }).first()).toBeVisible();
+    await expect(page.locator(".sb-field-error").filter({ hasText: "差し戻しの理由" }).first()).toBeVisible();
     // 確認する（自分が保存した版への確認なので「自己確認」と併記される）
     await page.getByTestId("plan-confirm-approve").click();
     await expect(page.getByTestId("plan-confirmation-status")).toContainText("確認済み（自己確認）");
@@ -581,14 +581,16 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     // 確定した後も、計画を保存するまでは送らない
     expect(sent.filter((s) => s.includes("35.123456") || s.includes("133.654321"))).toEqual([]);
 
-    await page.getByTestId("plan-title").fill(`E2E 現在地の計画 ${stamp}`);
-    await page.getByTestId("plan-aircraft").selectOption(weighted.id);
-    await page.getByTestId("plan-pilot").selectOption(selfPilot);
-    await page.getByTestId("plan-start-date").fill("2027-01-12");
-    await page.getByTestId("plan-start-time").fill("13:00");
-    await page.getByTestId("plan-duration").fill("20");
-    await page.getByTestId("plan-purpose").fill("現場確認");
     await page.getByTestId("plan-place-name").fill("現在地の試験");
+    await tapNext(page);
+    await fillStep(page, 2, { date: "2027-01-12", time: "13:00", duration: "20" });
+    await tapNext(page);
+    await fillStep(page, 3, { title: `E2E 現在地の計画 ${stamp}`, purpose: "現場確認" });
+    await tapNext(page);
+    await fillStep(page, 4, { aircraftId: weighted.id, pilotId: selfPilot });
+    await tapNext(page);
+    // 段を進めても、座標は保存まで送らない
+    expect(sent.filter((s) => s.includes("35.123456") || s.includes("133.654321"))).toEqual([]);
     await page.getByTestId("plan-submit").click();
     await page.waitForURL(/\/ops\/plans\/[0-9a-f-]{36}$/);
     const saved = sent.filter((s) => s.startsWith("POST") && s.includes("/api/ops/plans"));
@@ -651,21 +653,20 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await expect(page.getByTestId("plan-form")).toBeVisible();
     await expect(page.getByTestId("plan-lat")).toHaveValue(lat);
     await expect(page.getByTestId("plan-lng")).toHaveValue(lng);
-    await expect(page.getByTestId("plan-flag-method_night")).toBeChecked();
-    await expect(page.getByTestId("plan-start-date")).toHaveValue("2027-01-20");
     await expect(page.getByTestId("plan-handoff-note")).toContainText("900 g");
-    // 機体は引き継がない（利用者が選ぶ）
-    await expect(page.getByTestId("plan-aircraft")).toHaveValue("");
     await noHorizontalScroll(page, "引き継いだ計画のフォーム");
 
-    // 保存すると、サーバーが判定を実行する（機体の登録上の重量 0.9kg で判定）
-    await page.getByTestId("plan-title").fill(`E2E 判定から ${stamp}`);
-    await page.getByTestId("plan-aircraft").selectOption(weighted.id);
-    await page.getByTestId("plan-pilot").selectOption(selfPilot);
-    await page.getByTestId("plan-start-time").fill("08:00");
-    await page.getByTestId("plan-duration").fill("30");
-    await page.getByTestId("plan-purpose").fill("判定からの計画");
-    await page.getByTestId("plan-place-name").fill("判定画面の地点");
+    // 保存すると、サーバーが判定を実行する（機体の登録上の重量 0.9kg で判定）。引き継いだ値は各段の初期値（座標は ①、予定日は ②、方法は ③）
+    await fillStep(page, 1, { placeName: "判定画面の地点" });
+    await tapNext(page);
+    await expect(page.getByTestId("plan-start-date")).toHaveValue("2027-01-20");
+    await fillStep(page, 2, { time: "08:00", duration: "30" });
+    await tapNext(page);
+    await expect(page.getByTestId("plan-flag-method_night")).toBeChecked();
+    await fillStep(page, 3, { title: `E2E 判定から ${stamp}`, purpose: "判定からの計画" });
+    await tapNext(page);
+    await fillStep(page, 4, { aircraftId: weighted.id, pilotId: selfPilot });
+    await tapNext(page);
     await page.getByTestId("plan-submit").click();
     await page.waitForURL(/\/ops\/plans\/[0-9a-f-]{36}$/);
     await expect(page.getByTestId("plan-report-reasons")).toContainText("夜間飛行に当たるため");
@@ -709,6 +710,12 @@ test.describe("Sprint 12a E2E-DB：飛行計画・判定スナップショット
     await pp.goto(`/ops/plans/${others.id}/edit`);
     await expect(pp.getByRole("heading", { name: "権限がありません" })).toBeVisible();
     await pp.goto("/ops/plans/new");
+    await fillStep(pp, 1, { placeName: "操縦者の確認", lat: "35.1", lng: "133.1" });
+    await tapNext(pp);
+    await fillStep(pp, 2, { date: "2027-02-01", time: "09:00", duration: "10" });
+    await tapNext(pp);
+    await fillStep(pp, 3, { title: "操縦者の確認", purpose: "確認" });
+    await tapNext(pp);
     await expect(pp.getByTestId("plan-pilot")).toBeDisabled();
     await pilotCtx.close();
     const pilotApi = await apiAs(seeded("a-pilot"));

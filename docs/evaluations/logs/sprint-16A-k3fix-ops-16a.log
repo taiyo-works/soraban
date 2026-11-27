@@ -1,0 +1,12 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-a-db.spec.ts --retries=0
+
+
+Running 3 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-a-db.spec.ts:59:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-13. 要素の色がトークンの集合に入る（橙・旧い藍が無い）。現場は現場の値で (4.1s)
+  ✓  2 e2e/ops-db/sprint16-a-db.spec.ts:67:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-3. 文字は 4.5:1 以上（現場は 7:1 以上）。横スクロールなし。地は #F6F7F9 (3.5s)
+  ✓  3 e2e/ops-db/sprint16-a-db.spec.ts:81:7 › Sprint 16-A E2E-DB：新しいトークン（主色・地）が運航管理の画面に効いている › K-14. OS が暗でも明で描かれる。主ボタンの面は主色（現場は濃い主色）で、白い文字の比が 4.5 以上（現場 7） (3.1s)
+
+  3 passed (14.9s)

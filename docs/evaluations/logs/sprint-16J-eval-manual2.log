@@ -1,0 +1,10 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 eval.spec.ts:45:7 › manual 375x812 (7.5s)
+  ✓  2 eval.spec.ts:45:7 › manual 390x844 (7.7s)
+  ✓  3 eval.spec.ts:45:7 › manual 1280x800 (7.6s)
+  ✓  4 eval.spec.ts:99:7 › overflow 320 (100% & 200%) (4.9s)
+  ✓  5 eval.spec.ts:99:7 › overflow 360 (100% & 200%) (5.1s)
+
+  5 passed (34.1s)

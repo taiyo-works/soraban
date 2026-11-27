@@ -1,0 +1,93 @@
+[db:migrate] 適用 0016_incident_records.sql（25 ms）
+[db:migrate] 適用 0017_field_round_records.sql（4 ms）
+[db:migrate] 適用 0018_flight_areas.sql（4 ms）
+
+[db:seed:ops-test] テスト用の初期データを投入しました
+DBNAME=soraban_r1_manual_1795437931
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/zz-probe-r1.spec.ts
+
+
+Running 6 tests using 1 worker
+
+R1MEASURE {"w":375,"primaryH":56,"primaryW":235.921875,"primaryFs":"16px","secH":48,"secW":323}
+  ✓  1 e2e/ops-db/zz-probe-r1.spec.ts:51:7 › R1 home 375 (5.1s)
+R1MEASURE {"w":390,"primaryH":56,"primaryW":235.921875,"primaryFs":"16px","secH":48,"secW":338}
+  ✓  2 e2e/ops-db/zz-probe-r1.spec.ts:51:7 › R1 home 390 (4.9s)
+R1MEASURE {"w":1280,"primaryH":56,"primaryW":235.921875,"primaryFs":"16px","secH":48,"secW":201.15625}
+  ✓  3 e2e/ops-db/zz-probe-r1.spec.ts:51:7 › R1 home 1280 (5.0s)
+R1ZOOM normal 390 {"sw":326,"cw":326,"docSw":390,"docCw":390,"links":[{"t":"判定を見る →","l":149,"r":326,"inside":true},{"t":"計画の確認へ →","l":121,"r":326,"inside":true}]}
+R1ZOOM longleft 390 {"sw":625,"cw":326,"docSw":390,"docCw":390,"links":[{"t":"判定を見る →","l":149,"r":326,"inside":true},{"t":"計画の確認へ →","l":121,"r":326,"inside":true}]}
+  ✘  4 e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 390 (1.7s)
+R1ZOOM normal 430 {"sw":366,"cw":366,"docSw":430,"docCw":430,"links":[{"t":"判定を見る →","l":189,"r":366,"inside":true},{"t":"計画の確認へ →","l":161,"r":366,"inside":true}]}
+R1ZOOM longleft 430 {"sw":625,"cw":366,"docSw":430,"docCw":430,"links":[{"t":"判定を見る →","l":189,"r":366,"inside":true},{"t":"計画の確認へ →","l":161,"r":366,"inside":true}]}
+  ✘  5 e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 430 (1.8s)
+R1PLACES 390 {"docSw":390,"docCw":390,"names":[["フューチャーテック株式会社 本社",342]]}
+R1PLACES 430 {"docSw":430,"docCw":430,"names":[["フューチャーテック株式会社 本社",382]]}
+  ✓  6 e2e/ops-db/zz-probe-r1.spec.ts:103:5 › R1 places 200% 390/430 (1.4s)
+
+
+  1) e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 390 ───────────────────────────────────
+
+    Error: longleft nav scrollWidth
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 326
+    Received:    625
+
+      81 |       });
+      82 |       console.log("R1ZOOM", tag, w, JSON.stringify(m));
+    > 83 |       expect(m.sw, `${tag} nav scrollWidth`).toBeLessThanOrEqual(m.cw);
+         |                                              ^
+      84 |       expect(m.docSw).toBeLessThanOrEqual(m.docCw);
+      85 |       for (const l of m.links) expect(l.inside, `${tag} ${l.t}`).toBe(true);
+      86 |       await page.locator('[data-testid="plan-digest"]').first().scrollIntoViewIfNeeded();
+        at probe (/home/user/soraban/e2e/ops-db/zz-probe-r1.spec.ts:83:46)
+        at /home/user/soraban/e2e/ops-db/zz-probe-r1.spec.ts:100:5
+
+    Error Context: test-results/ops/zz-probe-r1-R1-plan-main-200-390/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/zz-probe-r1-R1-plan-main-200-390/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/zz-probe-r1-R1-plan-main-200-390/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 430 ───────────────────────────────────
+
+    Error: longleft nav scrollWidth
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 366
+    Received:    625
+
+      81 |       });
+      82 |       console.log("R1ZOOM", tag, w, JSON.stringify(m));
+    > 83 |       expect(m.sw, `${tag} nav scrollWidth`).toBeLessThanOrEqual(m.cw);
+         |                                              ^
+      84 |       expect(m.docSw).toBeLessThanOrEqual(m.docCw);
+      85 |       for (const l of m.links) expect(l.inside, `${tag} ${l.t}`).toBe(true);
+      86 |       await page.locator('[data-testid="plan-digest"]').first().scrollIntoViewIfNeeded();
+        at probe (/home/user/soraban/e2e/ops-db/zz-probe-r1.spec.ts:83:46)
+        at /home/user/soraban/e2e/ops-db/zz-probe-r1.spec.ts:100:5
+
+    Error Context: test-results/ops/zz-probe-r1-R1-plan-main-200-430/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/zz-probe-r1-R1-plan-main-200-430/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/zz-probe-r1-R1-plan-main-200-430/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 390 ────────────────────────────────────
+    e2e/ops-db/zz-probe-r1.spec.ts:67:7 › R1 plan main 200% 430 ────────────────────────────────────
+  4 passed (26.2s)
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12h-pr3-db.spec.ts:181:7 › Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目 › P3a-3. 判定への入口：ホームと計画の作成画面の上部のピル（48px 以上・2 列・間 8px 以上）。押すと `/?start=…`、押すまで位置の要求は 0。360・375・768・1280px × 明・暗 (12.2s)
+
+  1 passed (17.0s)

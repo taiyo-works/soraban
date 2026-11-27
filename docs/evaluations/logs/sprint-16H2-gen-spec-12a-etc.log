@@ -1,0 +1,186 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint12a-db.spec.ts e2e/ops-db/sprint18-2-db.spec.ts e2e/ops-db/sprint16-b-r1-db.spec.ts e2e/ops-db/sprint18-3-wording-db.spec.ts
+
+
+Running 63 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint12a-db.spec.ts:193:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 2. 偽の判定を本文に入れても、保存されるのはサーバーが実行した結果（夜間の計画は要手続き） (139ms)
+  ✓   2 e2e/ops-db/sprint12a-db.spec.ts:217:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 11・16・17・20. 計画をフォームで作る → 確認を依頼 → 確認（自己確認）→ 訂正すると「前の版への確認」 (10.4s)
+  ✓   3 e2e/ops-db/sprint12a-db.spec.ts:310:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 16. 通報の要否の 4 種（要・要・推奨・要確認）と、固定の文言。画面全文に禁止語がない (5.1s)
+  ✓   4 e2e/ops-db/sprint12a-db.spec.ts:370:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 9. 機体の最大離陸重量を変えると「判定が古い」と理由が出て、「判定をやり直す」で新しいスナップショットと版ができる (2.6s)
+  ✓   5 e2e/ops-db/sprint12a-db.spec.ts:407:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 13・14. 計画から飛行記録を作る（形態は DID・空港の導出を含む）→ 日誌の一覧から 2 タップで判定の根拠 (5.4s)
+  ✓   6 e2e/ops-db/sprint12a-db.spec.ts:493:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 17. よく使う地点：運航管理者が登録・訂正・取消でき、全役割が一覧を見られる。他の役割は 403・他の組織は 404 (3.9s)
+  ✓   7 e2e/ops-db/sprint12a-db.spec.ts:560:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 17. 現在地の座標は、「この地点を使う」で確定するまで入力欄に入らず、通信にも出ない（保存まで送らない） (2.1s)
+  ✓   8 e2e/ops-db/sprint12a-db.spec.ts:602:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 18. 運航管理が有効でログイン済み：`/` にリンクとボタンが出て、ボタンで入力（座標・重量・フラグ・許可・予定日）を引き継ぐ。結果は引き継がない (6.4s)
+  ✓   9 e2e/ops-db/sprint12a-db.spec.ts:680:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 認可：閲覧者は計画を作れない／操縦者は自分の計画だけ／確認は運航管理者だけ／他の組織は 404 (6.8s)
+  ✓  10 e2e/ops-db/sprint12a-db.spec.ts:752:7 › Sprint 12a E2E-DB：飛行計画・判定スナップショット・確認・日誌との紐付け › 20. 375px で横スクロールがなく、状態・通報の要否・判定の結論に文字があり、特許・出願の表示がない (8.6s)
+  ✓  11 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (777ms)
+  ✓  12 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (824ms)
+  ✓  13 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. ホーム 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (633ms)
+  ✓  14 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.1s)
+  ✓  15 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.0s)
+  ✓  16 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の一覧 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.1s)
+  ✓  17 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (687ms)
+  ✓  18 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (562ms)
+  ✓  19 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の作成 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (709ms)
+  ✓  20 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (647ms)
+  ✓  21 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (755ms)
+  ✓  22 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の一覧 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (704ms)
+  ✓  23 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (678ms)
+  ✓  24 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (622ms)
+  ✓  25 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 点検の入力 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (728ms)
+  ✓  26 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (661ms)
+  ✓  27 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (546ms)
+  ✓  28 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 日誌 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (666ms)
+  ✓  29 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (605ms)
+  ✓  30 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (698ms)
+  ✓  31 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 飛行記録の入力 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (746ms)
+  ✓  32 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (651ms)
+  ✓  33 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (665ms)
+  ✓  34 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 登録 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (672ms)
+  ✓  35 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 375px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (735ms)
+  ✓  36 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 390px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (656ms)
+  ✓  37 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 現場 1280px：印のない p・li・dd は 18px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (840ms)
+  ✓  38 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (761ms)
+  ✓  39 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (645ms)
+  ✓  40 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の主画面 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (767ms)
+  ✓  41 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (721ms)
+  ✓  42 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (815ms)
+  ✓  43 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 計画の概要 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (704ms)
+  ✘  44 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (6.9s)
+  ✘  45 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.0s)
+  ✘  46 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.0s)
+  ✓  47 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.0s)
+  ✓  48 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (996ms)
+  ✓  49 e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 通報の作業台 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (957ms)
+  ✓  50 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の作成：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.0s)
+  ✓  51 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 点検の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.1s)
+  ✓  52 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 飛行記録の入力：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (890ms)
+  ✓  53 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 判定：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (7.2s)
+  ✓  54 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 通報の作業台：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (1.4s)
+  ✓  55 e2e/ops-db/sprint16-b-r1-db.spec.ts:96:9 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5/K-5. 計画の概要：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (899ms)
+  ✓  56 e2e/ops-db/sprint16-b-r1-db.spec.ts:105:7 › Sprint 16-B 差し戻し 1 E2E-DB：文字 200%（R1-5。運航管理の追加分） › R1-5. 通報の作業台：目的の選択肢（report-input-purpose-*）が見える状態で 200% を測る (1.4s)
+  ✓  57 e2e/ops-db/sprint18-2-db.spec.ts:87:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-1・2-8：許可・承認と飛行禁止法の手続きがある計画で、許可・承認の記録のフォームは無く、飛行禁止法の記録は今までどおり。説明文が新しい文 (2.3s)
+  ✓  58 e2e/ops-db/sprint18-2-db.spec.ts:116:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-7・2-9：証跡 ID の見出しは「飛行の方法を含む判定の証跡 ID」（値と data-testid は同じ）。公式の手続きの文は 1 つの新しい文 (2.7s)
+  ✓  59 e2e/ops-db/sprint18-2-db.spec.ts:144:7 › Sprint 18-2 E2E-DB：運航管理の「申請」に見える機能・文言 › 2-10：運航管理の主要画面の main の本文に、申請の記録・申請支援・更新の申請の語が無い。古い公式の手続きの文も無い (6.5s)
+  ✓  60 e2e/ops-db/sprint18-3-wording-db.spec.ts:129:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › A：ホーム・計画の一覧・計画の各画面（通報の記録あり・なし、許可・承認と飛行禁止法の手続き） (20.0s)
+  ✓  61 e2e/ops-db/sprint18-3-wording-db.spec.ts:152:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › B：点検・飛行記録・日誌・事故・ヒヤリハット (8.5s)
+  ✓  62 e2e/ops-db/sprint18-3-wording-db.spec.ts:168:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › C：登録（機体・操縦者・許可・承認・地点・利用者・登録・このアプリについて） (12.4s)
+  ✓  63 e2e/ops-db/sprint18-3-wording-db.spec.ts:195:7 › Sprint 18-3 E2E-DB：禁止語・限定語の走査（運航管理） › D：圏外の殻（5 つ）・マニフェスト・操縦者と閲覧者のこのアプリについて (4.0s)
+
+
+  1) e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: 判定 375px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[judgement-tiles-section]「調べた項目だけです。項目を押すと、理由と」 14px / 行の高さ 1.50（16px・1.70 以上が必要）",
+    + ]
+
+       at ../field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-r1-db.spec.ts:81:9
+
+    Error Context: test-results/ops/sprint16-b-r1-db-Sprint-16-9532e-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-r1-db-Sprint-16-9532e-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-r1-db-Sprint-16-9532e-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: 判定 390px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[judgement-tiles-section]「調べた項目だけです。項目を押すと、理由と」 14px / 行の高さ 1.50（16px・1.70 以上が必要）",
+    + ]
+
+       at ../field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-r1-db.spec.ts:81:9
+
+    Error Context: test-results/ops/sprint16-b-r1-db-Sprint-16-6bd00-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-r1-db-Sprint-16-6bd00-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-r1-db-Sprint-16-6bd00-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+
+    Error: 判定 1280px: 本文 16px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（1 件）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "本文 p[judgement-tiles-section]「調べた項目だけです。項目を押すと、理由と」 14px / 行の高さ 1.50（16px・1.70 以上が必要）",
+    + ]
+
+       at ../field-checks.ts:247
+
+      245 |   expect(rep.checked, `${label}: 本文の検査の対象（p・li・dd）がない`).toBeGreaterThan(0);
+      246 |   expect(rep.misplaced, `${label}: data-note は p・li・dd・ul・ol・dl・span・time・small だけに付ける`).toEqual([]);
+    > 247 |   expect(rep.bad, `${label}: 本文 ${opts.body}px・行の高さ 1.7（補足 14px・1.5）に足りない p・li・dd（${rep.bad.length} 件）`).toEqual([]);
+          |                                                                                                          ^
+      248 | };
+      249 |
+      250 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:247:106)
+        at /home/user/soraban/e2e/ops-db/sprint16-b-r1-db.spec.ts:81:9
+
+    Error Context: test-results/ops/sprint16-b-r1-db-Sprint-16-ceafa-・1-5-以上。data-note-の置き場所が正しい/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-b-r1-db-Sprint-16-ceafa-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-b-r1-db-Sprint-16-ceafa-・1-5-以上。data-note-の置き場所が正しい/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+    e2e/ops-db/sprint16-b-r1-db.spec.ts:76:11 › Sprint 16-B 差し戻し 1 E2E-DB：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3/R1-4. 判定 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい 
+  60 passed (3.0m)
+ ELIFECYCLE  Command failed with exit code 1.

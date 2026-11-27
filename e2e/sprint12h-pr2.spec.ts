@@ -22,7 +22,7 @@ const openReady = async (page: Page, url = "/"): Promise<void> => {
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 };
 
-// ───────────────────────── Q-8 タップ 44px ─────────────────────────
+// ───────────────────────── Q-8 タップ 48px ─────────────────────────
 
 type TapReport = { readonly tooSmall: string[]; readonly count: number; readonly tight: string[] };
 
@@ -79,7 +79,7 @@ const measureTapTargets = (page: Page): Promise<TapReport> =>
     for (const el of candidates) {
       const r = el.getBoundingClientRect();
       rects.push({ el, r });
-      if (r.width < 43.5 || r.height < 43.5) tooSmall.push(`${describe(el)} ${Math.round(r.width * 10) / 10}×${Math.round(r.height * 10) / 10}`);
+      if (r.width < 47.5 || r.height < 47.5) tooSmall.push(`${describe(el)} ${Math.round(r.width * 10) / 10}×${Math.round(r.height * 10) / 10}`);
     }
     // 押す部品どうしの間隔は 8px 以上（案）：重ならず、隣り合う（縦か横で重なる）のに 8px 未満の組
     const tight: string[] = [];
@@ -109,12 +109,12 @@ const geoContext = async (browser: Browser, baseURL: string | undefined, viewpor
     permissions: ["geolocation"],
   });
 
-test.describe("Q-8 タップ 44px（`/` の押す部品）", () => {
+test.describe("Q-8 タップ 48px（`/` の押す部品）", () => {
   for (const vp of [
     { width: 375, height: 812 },
     { width: 360, height: 740 },
   ]) {
-    test(`${vp.width}×${vp.height}：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 43.5px 以上で、部品どうしの間隔が 8px 以上`, async ({ browser, baseURL }, testInfo) => {
+    test(`${vp.width}×${vp.height}：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上`, async ({ browser, baseURL }, testInfo) => {
       const ctx = await geoContext(browser, baseURL, vp);
       const page = await ctx.newPage();
       // 1 初期（判定の結果が出る前の最初の描画）。通信を止めて、結果の出ていない状態を測る
@@ -178,17 +178,18 @@ test.describe("Q-9 判定の 5 段（形と語。橙は使わない）", () => {
       expect(new Set(info.map((i) => i.key)).size).toBe(5);
       for (const i of info) {
         expect(i.shape.length, `${i.text} の形`).toBeGreaterThan(20);
-        expect(i.bg, `${i.text} は橙の塗りでない`).not.toBe("rgb(235, 161, 92)");
-        expect(i.bg).not.toBe("rgb(245, 203, 160)");
+        // 16-A：主色（操作の色）の面でも、薄い主色の面でもない（判定は状態色から引く。意図は同じ：操作の色を判定に流用しない）
+        expect(i.bg, `${i.text} は主色の塗りでない`).not.toBe("rgb(31, 95, 224)");
+        expect(i.bg).not.toBe("rgb(232, 240, 253)");
       }
-      // 結論の大きな印・規制ごとの札も橙でない
-      const orange = await page.evaluate(() =>
+      // 結論の大きな印・規制ごとの札も主色でない
+      const primary = await page.evaluate(() =>
         Array.from(document.querySelectorAll(".sb-vtag, .sb-v-big, [data-testid='regulation-verdict']")).filter((e) => {
           const c = getComputedStyle(e).backgroundColor;
-          return c === "rgb(235, 161, 92)" || c === "rgb(245, 203, 160)";
+          return c === "rgb(31, 95, 224)" || c === "rgb(232, 240, 253)";
         }).length,
       );
-      expect(orange).toBe(0);
+      expect(primary).toBe(0);
     });
   }
 
@@ -258,6 +259,8 @@ const lowContrastText = (page: Page) =>
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0 || cs.visibility === "hidden" || cs.display === "none") continue;
       if (el.closest(".sb-sr, .sr-only, script, style, [aria-hidden='true'], .maplibregl-canvas-container, .maplibregl-ctrl-attrib")) continue;
+      // 16-C：無効のボタンの文字は --sb-ink-disabled（WCAG 1.4.3 の対象外。field-checks の collectTextSamples と同じ扱い）
+      if (el.closest("button:disabled, [aria-disabled='true']")) continue;
       seen.add(el);
       const fg = toRgba(cs.color);
       let opacity = 1;
@@ -583,7 +586,7 @@ const overflowReport = (page: Page) =>
   });
 
 test.describe("Q-13 はみ出し 0", () => {
-  for (const width of [360, 375, 768, 1024, 1280, 1440]) {
+  for (const width of [320, 360, 375, 768, 1024, 1280, 1440]) {
     for (const scheme of ["light", "dark"] as const) {
       test(`${width}px・${scheme}：横スクロールなし。文字・ボタン・チップが親の枠から出ない`, async ({ page }, testInfo) => {
         await page.emulateMedia({ colorScheme: scheme });
@@ -841,29 +844,29 @@ test.describe("Q-26 動き", () => {
     }
   });
 
-  test("reducedMotion: reduce で、せり上がり・矢印の入れ替えの時間が 0", async ({ browser, baseURL }) => {
+  test("reducedMotion: reduce で、せり上がり・ボタンの動きの時間が 0", async ({ browser, baseURL }) => {
     const ctx = await browser.newContext({ baseURL, reducedMotion: "reduce", viewport: { width: 375, height: 812 } });
     const page = await ctx.newPage();
     await openReady(page);
     const r = await page.evaluate(() => {
       const cs = getComputedStyle(document.querySelector('[data-testid="verdict-conclusion"]')!);
-      const pill = getComputedStyle(document.querySelector(".sb-pill-arrow .sb-ar")!);
+      const pill = getComputedStyle(document.querySelector(".sb-pill")!);
       return { rise: cs.animationDuration, pill: pill.transitionDuration, token: getComputedStyle(document.documentElement).getPropertyValue("--sb-dur-rise").trim() };
     });
     // 0（globals.css の減らす指定は 0.01ms の !important を当てるため、算出値は 1e-5 秒）。体感できない 0.1ms 以下を 0 とみなす
     expect(parseFloat(r.rise)).toBeLessThanOrEqual(0.0001);
     expect(parseFloat(r.pill)).toBeLessThanOrEqual(0.0001);
     expect(r.token).toMatch(/^0(ms|s)$/);
-    // 矢印の入れ替え（2 つ目の矢印）は出さない
-    await expect(page.locator(".sb-pill-arrow .sb-a2").first()).toBeHidden();
+    // 16-C：右端の丸と矢印は外した（入れ替えの矢印は無い）
+    await expect(page.locator(".sb-pill-arrow")).toHaveCount(0);
     await ctx.close();
   });
 
-  test("通常：矢印の入れ替えは 0.5s（ホバー・フォーカス・押下）", async ({ page }) => {
+  test("通常：ボタンの背景は標準の動き 0.18s、押下の縮みは 0.12s（16-C。矢印の入れ替えは外した）", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await openReady(page);
-    const d = await page.evaluate(() => getComputedStyle(document.querySelector(".sb-pill-arrow .sb-ar")!).transitionDuration);
-    expect(d).toBe("0.5s");
+    const d = await page.evaluate(() => getComputedStyle(document.querySelector(".sb-pill")!).transitionDuration);
+    expect(d).toBe("0.18s, 0.12s");
   });
 });
 
@@ -933,8 +936,10 @@ test.describe("Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層
 
       await testInfo.attach("script-counts", { body: JSON.stringify(results, null, 2), contentType: "application/json" });
       const max = { "1-address": 2, "2-geo": 1, "3-detail": 2, "4-layer": 2 } as const;
+      for (const r of results) console.log(`[画面] Q-20 ${vp} ${r.script}: スクロール ${r.screens} 枚分・押す回数 ${r.taps}`);
       for (const r of results) {
         expect(r.taps, `${vp} ${r.script} の押す回数`).toBeLessThanOrEqual(max[r.script as keyof typeof max]);
+        // 16-M の M-6：16-B 差し戻し 1 の R1-8 で 375x812 の ③詳細だけ 2.2 に上げていた上限を、元の 2 に戻した（全台本・全幅で 2 画面分）。
         expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(2);
       }
       await ctx.close();
@@ -953,9 +958,11 @@ test.describe("B2 縦が長すぎない：規制カード・収録の一覧は�
     await expect(page.getByTestId("diagnosis-details")).toHaveCount(0);
     const h = await page.evaluate(() => document.documentElement.scrollHeight);
     await testInfo.attach("page-height-375", { body: String(h), contentType: "text/plain" });
+    console.log(`[長さ] / 375x812 ページ全体: ${h}px`);
     expect(h, "ページ全体の高さ（375px）").toBeLessThanOrEqual(16_646);
     expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);
     // Sprint 18-1：申請支援を止めて短くなった（前 12,086px → 後 11,244px の実測）。上の 2 つの上限は変えず、短くなった分が戻らないよう上限を足す。
+    // 16-M の M-6：16-B 差し戻し 1 の R1-8 で 12,600 に上げていた上限を、元の 12,000 に戻した。
     expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_000);
     await expect(page.getByTestId("coverage-details")).not.toHaveAttribute("open", "");
     const cards = page.locator('[data-testid^="regulation-card-"]');
@@ -1009,7 +1016,7 @@ test.describe("B2 縦が長すぎない：規制カード・収録の一覧は�
     await expect(dd).not.toHaveAttribute("open", "");
     expect((await hint()).text).toBe('"開く"');
     const box = (await summary.boundingBox())!;
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     await summary.focus();
     expect(await summary.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe("solid");
   });
@@ -1074,12 +1081,12 @@ test.describe("N1 結論の札と責任の注記", () => {
   });
 });
 
-test.describe("N2 文字は 12px 以上", () => {
+test.describe("N2 文字は 14px 以上", () => {
   for (const [w, h] of [[375, 812], [1280, 800]] as const) {
-    test(`${w}px：/ の文字（地図の層の状態の札を含む）はすべて 12px 以上`, async ({ page }) => {
+    test(`${w}px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: h });
       await openReady(page);
-      await expectFontSize(page, "main", 12, `${w}px`);
+      await expectFontSize(page, "main", 14, `${w}px`);
     });
   }
 });

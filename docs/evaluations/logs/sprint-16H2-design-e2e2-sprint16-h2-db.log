@@ -1,0 +1,19 @@
+
+Running 14 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h2-db.spec.ts:140:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1. 段 ②：今日・明日・30 分刻みの開始・飛行時間（15・30・60・90）のクイック選択。aria-pressed・押す部品 48px 以上・標準の入力欄も残る。保存した値が一致 (3.4s)
+  ✓   2 e2e/ops-db/sprint16-h2-db.spec.ts:257:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1・K-15. クイック選択はストレージに何も書かない (1.3s)
+  ✓   3 e2e/ops-db/sprint16-h2-db.spec.ts:275:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 断り書き：段 ① と ⑤ では同じ 2 つの断り書き（免責・DIPS の注記）が見え、段 ②〜④ では隠れる (1.9s)
+  ✓   4 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（375×812）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.3s)
+  ✓   5 e2e/ops-db/sprint16-h2-db.spec.ts:306:9 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ②（390×844）：主ボタン「次へ」は、最初の画面で下部ナビに重ならない（半分隠れない）。スクロールすれば押せる (1.3s)
+  ✓   6 e2e/ops-db/sprint16-h2-db.spec.ts:334:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2・H2-3. 判定の画面：総合（形と言葉）→ 項目のタイル → シートの詳細。取得時刻。主ボタンは「DIPS に出す内容を確認」1 つ (2.4s)
+  ✓   7 e2e/ops-db/sprint16-h2-db.spec.ts:505:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-2・R-2・N-4. 判定が古いとき：総合の語の前に「古い判定：」、再判定が主ボタンの 1 つだけで judgement-primary は副ボタン、再判定の導線は総合の直下。再判定後は judgement-primary の 1 つだけ (2.2s)
+  ✓   8 e2e/ops-db/sprint16-h2-db.spec.ts:557:7 › Sprint 16-H2 E2E-DB：計画作成 2 › N-e. 判定が古く、再判定の権限がない（閲覧だけの）利用者：主ボタンは judgement-primary の 1 つだけ。「判定のやり直しは、計画を変更できる人が行います」の案内が出て、再判定のボタンは出ない (1.2s)
+  ✓   9 e2e/ops-db/sprint16-h2-db.spec.ts:585:7 › Sprint 16-H2 E2E-DB：計画作成 2 › K-4・K-5・K-8. 判定の画面：320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし。シートを開いても横スクロールなし (35.1s)
+  ✓  10 e2e/ops-db/sprint16-h2-db.spec.ts:608:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4. 訂正の画面：段に分けず、節の見出し・新しい部品で載せ替え。plan-reason を残す。理由を入れて保存できる (2.0s)
+  ✓  11 e2e/ops-db/sprint16-h2-db.spec.ts:649:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-4・K-4・K-5. 訂正の画面：緯度・経度の欄は 320〜1440 の幅、文字 200%（320・390）でも切れず、横スクロールなし (2.5s)
+  ✓  12 e2e/ops-db/sprint16-h2-db.spec.ts:692:7 › Sprint 16-H2 E2E-DB：計画作成 2 › N-5・H2-4. 訂正の画面：文字 200% で、緯度・経度の欄が値を全部見せる（scrollWidth <= clientWidth） (1.5s)
+  ✓  13 e2e/ops-db/sprint16-h2-db.spec.ts:716:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 422 の一覧：項目名が重ならない（「緯度：緯度は…」→「緯度は…」）。段へ戻る導線は今のまま (1.9s)
+  ✓  14 e2e/ops-db/sprint16-h2-db.spec.ts:741:7 › Sprint 16-H2 E2E-DB：計画作成 2 › 段 ④：許可の欄のラベル「公安委員会への通報（飛行禁止法）」は 320・文字 200% でも折り返し、文書の幅が画面を超えない (2.0s)
+
+  14 passed (1.1m)

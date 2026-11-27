@@ -84,7 +84,7 @@ test.beforeAll(async () => {
 });
 
 test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・毎日使う流れの画面）", () => {
-  test("P3b1-1. 文字：12px 以上、コントラスト 4.5:1 以上（明・暗。375px）。主要 12 画面", async ({ page }) => {
+  test("P3b1-1. 文字：14px 以上、コントラスト 4.5:1 以上（明・暗。375px）。主要 12 画面", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -95,13 +95,13 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
         const samples = await collectTextSamples(page, "main");
         expect(samples.length, label).toBeGreaterThan(0);
         // 背後の大きな薄い番号（装飾。aria-hidden）は読ませない文字なので、数えない
-        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 12)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
+        const bad = samples.filter((t) => !t.disabled && !/^0\d$/.test(t.text) && (t.ratio < 4.5 || t.fontSize < 14)).map((t) => `${t.testId ?? t.tag}「${t.text}」 ${t.ratio.toFixed(2)}:1 ${t.fontSize}px`);
         expect(bad, `${label}`).toEqual([]);
       }
     }
   });
 
-  test("P3b1-2. 押す部品：高さ 43.5px 以上（ボタン・リンクのボタン・入力欄・select・summary・チップ・戻りリンク）。375×812・360×740。文の中のリンクは除く", async ({ page }) => {
+  test("P3b1-2. 押す部品：高さ 47.5px 以上（ボタン・リンクのボタン・入力欄・select・summary・チップ・戻りリンク）。375×812・360×740。文の中のリンクは除く", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const [w, h] of [[375, 812], [360, 740]] as const) {
       await page.setViewportSize({ width: w, height: h });
@@ -118,7 +118,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
             if (getComputedStyle(el).visibility === "hidden") continue;
             // 文の中の語句のリンク（段落・項目の値の中）は除く
             if (el.tagName === "A" && el.closest("p, dd")) continue;
-            if (r.height < 43.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
+            if (r.height < 47.5) out.push(`${el.tagName.toLowerCase()}[${el.getAttribute("data-testid") ?? (el.textContent ?? "").trim().slice(0, 16)}] ${r.width.toFixed(0)}×${r.height.toFixed(1)}`);
           }
           return out;
         });
@@ -131,7 +131,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 900 });
         for (const s of SCREENS) {
           const label = `${scheme} ${w}px ${s}`;
@@ -187,7 +187,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
               if (v === "0px" || v.endsWith("%")) continue;
               const px = parseFloat(v);
               if (px >= 100) continue; // ピル
-              if (![16, 8, 4].includes(px) && !(Math.abs(r.width - r.height) <= 1 && px >= Math.min(r.width, r.height) / 2 - 0.5)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} ${prop}=${v}`);
+              if (![16, 12, 8, 4].includes(px) && !(Math.abs(r.width - r.height) <= 1 && px >= Math.min(r.width, r.height) / 2 - 0.5)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} ${prop}=${v}`);
             }
             const sh = cs.boxShadow;
             if (shadowOutside(sh, token)) out.push(`${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 24)} boxShadow=${sh.slice(0, 40)}`);
@@ -199,7 +199,7 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
     }
   });
 
-  test("P3b1-5. 旧い見た目の部品がない：旧いボタン・札・見出しの名前（rounded-ctl・eyebrow・bearing-mark）と藍の地が 0。主ボタンは橙の面＋墨の文字（4.5:1 以上）", async ({ page }) => {
+  test("P3b1-5. 旧い見た目の部品がない：旧いボタン・札・見出しの名前（rounded-ctl・eyebrow・bearing-mark）と藍の地が 0。主ボタンは主色の面＋白の文字（4.5:1 以上）", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
@@ -208,24 +208,25 @@ test.describe("Sprint 12h PR ③b1 E2E-DB：運航管理の v2（共通部品・
         await page.goto(urlOf(s));
         await expect(page.locator("main h1").first(), label).toBeVisible();
         await expect(page.locator("main .eyebrow, main .bearing-mark, main [class*='rounded-ctl'], main [class*='rounded-sharp']"), label).toHaveCount(0);
-        const orange = await page.evaluate(() => {
+        const primary = await page.evaluate(() => {
           const p = document.createElement("div");
-          p.style.color = "var(--sb-orange)";
+          p.style.color = "var(--sb-primary)";
           document.body.appendChild(p);
           const v = getComputedStyle(p).color;
           p.remove();
           return v;
         });
-        const blueFaces = await page.evaluate(() =>
+        const blueFaces = await page.evaluate((own) =>
           Array.from(document.querySelectorAll<HTMLElement>("main button, main a")).filter((e) => {
-            const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
+            const bgc = getComputedStyle(e).backgroundColor;
+            const m = bgc.match(/[\d.]+/g)?.map(Number) ?? [];
             const [r = 0, g = 0, b = 0, a = 1] = m;
-            return a > 0.5 && b > r + 40 && b > g + 20; // 藍・青の面
-          }).length,
+            return a > 0.5 && b > r + 40 && b > g + 20 && bgc !== own; // 藍・青の面（主色の面は除く）
+          }).length, primary,
         );
         expect(blueFaces, `${label}: 藍の面のボタン`).toBe(0);
         const primaries = await page.locator("main .opx-btn-primary:not(:disabled), main .sb-pill-primary:not(:disabled)").evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
-        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(orange);
+        for (const f of primaries) expect(f, `${label}: 主ボタンの面`).toBe(primary);
       }
     }
   });

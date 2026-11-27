@@ -9,7 +9,7 @@
   color: var(--sb-ink);
   font-weight: 700;
   text-decoration: underline;
-  text-decoration-color: var(--sb-orange);
+  text-decoration-color: var(--sb-primary);
   text-decoration-thickness: 3px;
   text-underline-offset: 5px;
 }
@@ -21,13 +21,13 @@
 .opx-nc-time {
   font-family: var(--font-num), sans-serif;
   font-variant-numeric: tabular-nums;
-  font-size: 40px;
+  font-size: 2.5rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.25;
   letter-spacing: 0.02em;
 }
 .opx-nc-title {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   line-height: 1.5;
   letter-spacing: 0.05em;
@@ -37,10 +37,10 @@
 }
 @media (min-width: 1024px) {
   .opx-nc-time {
-    font-size: 52px;
+    font-size: 3.25rem;
   }
   .opx-nc-title {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
   .opx-nc-primary {
     align-self: flex-start;
@@ -48,7 +48,7 @@
     min-width: 320px;
   }
 }
-/* 行程：丸い印・段の名前・済／次／未。「次」の段だけ橙の面（形：チェック＝済、▶＝次、破線の輪＝未） */
+/* 行程：丸い印・段の名前・済／次／未。「次」の段だけ主色の面（形：チェック＝済、▶＝次、破線の輪＝未） */
 .opx-route {
   display: grid;
   gap: 2px;
@@ -65,7 +65,7 @@
   padding: 8px 0 6px;
   border-radius: var(--sb-r-m);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.5;
 }
 .opx-rs-dot {
   display: grid;
@@ -79,13 +79,15 @@
   height: 12px;
 }
 .opx-rs-name {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 .opx-rs-state {
-  font-size: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 500;
   color: var(--sb-ink-3);
   white-space: nowrap;
@@ -95,15 +97,15 @@
   color: var(--sb-on-dot);
 }
 .opx-rs-next {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .opx-rs-next .opx-rs-dot {
-  background: var(--sb-on-orange);
-  color: var(--sb-orange);
+  background: var(--sb-on-primary);
+  color: var(--sb-primary);
 }
 .opx-rs-next .opx-rs-state {
-  color: var(--sb-on-orange);
+  color: var(--sb-on-primary);
   font-weight: 700;
 }
 .opx-rs-todo .opx-rs-dot,
@@ -124,7 +126,8 @@
 }
 @media (max-width: 400px) {
   .opx-rs-name {
-    font-size: 12px;
+    font-size: 0.875rem;
+    line-height: 1.5;
     letter-spacing: 0;
   }
 }
@@ -168,8 +171,9 @@
   padding: 12px 14px;
   border: 1.5px solid transparent;
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
-  font-size: 14px;
+  background: var(--sb-sunken);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 .opx-edge-attn {
   border-style: dashed;
@@ -204,7 +208,7 @@
 .opx-box-warn {
   gap: 8px;
   border: var(--sb-mark-w) solid var(--sb-v-no-fg);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
 }
 .opx-box-bad {
   gap: 12px;
@@ -218,7 +222,7 @@
   gap: 8px;
   padding: 16px;
   border: 6px solid var(--sb-v-no-fg);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
 }
 .opx-band {
   display: flex;
@@ -231,41 +235,45 @@
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   color: var(--sb-ink);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.4;
   text-align: left;
 }
 .opx-band:hover {
   background: var(--sb-hover);
 }
-/* 面だけで見せる主ボタン（右端の丸と矢印なし）：選択中・現在地 */
+/* 面だけで見せる主ボタン（旧：選択中・現在地）。16-K 以降、選択中は .opx-btn-sel を使う。クラス名だけ残す */
 .opx-btn-primary.opx-btn-flat {
   justify-content: center;
-  padding: 4px 22px;
 }
-.opx-btn-primary.opx-btn-flat::before,
-.opx-btn-primary.opx-btn-flat::after {
-  display: none;
+/* 選択中・現在地（16-K designer N-3）：主色の面は主ボタンだけのものにする。選択は「薄い面（--sb-hover）＋墨の太い縁（--sb-mark-w）＋太字」で示し、
+ * 記号（◉・▶）は画面側が付ける。縁が太くなった分だけ横の余白を減らして、選んでも文字の位置・折り返しが変わらない。layer の外に置き、.opx-btn（layer）に勝たせる。 */
+.opx-btn.opx-btn-sel {
+  padding-inline: calc(20px - (var(--sb-mark-w) - 1px));
+  border: var(--sb-mark-w) solid var(--sb-ink);
+  background: var(--sb-hover);
+  color: var(--sb-ink);
+  font-weight: 700;
 }
 /* 常にカードの行（狭い画面でも広い画面でも。判定の履歴） */
 .opx-row.opx-row-card {
   align-items: start;
   padding: 14px 16px;
   border-bottom: 0;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 
 /* ===== フォーム（計画・飛行記録・点検の入力。見本：plan-new.html・journal.html） =====
- * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の橙線）にする。保存の帯（.opx-submit）は区画の外。 */
+ * フォームの直下の区画（section・fieldset）を白いカードにし、legend を見出し（左 5px の墨の線）にする。保存の帯（.opx-submit）は区画の外。 */
 .opx-form > section,
 .opx-form > fieldset {
   min-width: 0;
-  padding: 20px 16px;
+  padding: var(--sb-sp-4);
   border: 0;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
@@ -282,8 +290,8 @@
   margin: 0 0 16px;
   padding: 4px 0 4px 14px;
   border: 0;
-  border-left: 5px solid var(--sb-orange);
-  font-size: 20px;
+  border-left: 5px solid var(--sb-ink);
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.06em;
@@ -308,17 +316,30 @@
 .sb-sec-head[data-tone="danger"] {
   border-left-color: var(--sb-v-no-fg);
 }
-/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、橙の線も題の 1 行分に収める */
+/* 仕上げ：画面の題（.opx-h1、PC 28px）と節の見出しの差を付ける。節の見出しは一段小さく（20px、PC 22px）、墨の線も題の 1 行分に収める */
 .ops-v2 .sb-sec-head {
   min-height: 40px;
 }
 .ops-v2 .sb-sec-head h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 @media (min-width: 1024px) {
   .ops-v2 .sb-sec-head h2 {
-    font-size: 22px;
+    font-size: 1.375rem;
   }
+}
+/* 節の説明文（本文 16px）を持つ見出し：墨の線は見出しの行だけに掛け、説明は線の下に本文として置く（説明まで線で囲むと、本文が見出しの一部に見える） */
+.sb-sec-head:has(> .sb-sec-note-body) {
+  padding-left: 0;
+  border-left: 0;
+  gap: 6px;
+}
+.sb-sec-head:has(> .sb-sec-note-body) > h2 {
+  border-left: 5px solid var(--sb-ink);
+  padding: 4px 0 4px 14px;
+}
+.sb-sec-head[data-tone="danger"]:has(> .sb-sec-note-body) > h2 {
+  border-left-color: var(--sb-v-no-fg);
 }
 /* 見出しの右に件数（次にやること） */
 .sb-sec-head.sb-sec-row {
@@ -330,8 +351,8 @@
 /* ホームのスマホ：見出しを低くして、近づく期限が最初の画面から落ちないようにする（PC は見本どおりの大きさ） */
 @media (max-width: 1023px) {
   [data-testid="ops-today"] .sb-sec-head {
-    min-height: 36px;
-    margin-bottom: 6px;
+    min-height: 32px;
+    margin-bottom: 4px;
     padding: 2px 0 2px 12px;
     flex-direction: row;
     flex-wrap: wrap;
@@ -345,10 +366,716 @@
     flex-wrap: nowrap;
   }
   [data-testid="ops-today"] .sb-sec-head h2 {
-    font-size: 19px;
+    font-size: 1.1875rem;
   }
   [data-testid="ops-today"] .sb-row {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+/* ===== ホーム（Sprint 16-G）：準備カード・クイック操作 3 つ・空の状態 =====
+ * 準備カードは .sb-card.sb-card-state（帯の色＝3 行のうちいちばん重い状態。unknown は帯なし）。行は「記号（24px）・見出し・状態の文」。
+ * 記号は判定の 5 段の形（VerdictSign）。色は補助で、状態は形と文字が伝える。本文 16px・行間 1.7、補足 14px・行間 1.5（下限は変えない）。 */
+.home-prep {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sb-card.home-prep {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+/* 見出しの下に、日時と場所（補足）。長い場所の名前は折り返す（文字 200% でも切らない。省略記号は使わない） */
+/* 16-N3 N3-8（designer）：見出しと日時は 1 行に並べる（baseline）。日時は次の予定のカード（直下）にも出るので、行を分けて 1 行ぶん（約 22px）使うのをやめた。
+ * 文字が大きい・幅が足りないときは、日時が次の行へ折り返す（flex-wrap。切らない・省略しない）。DOM の順（見出し→日時）・読み上げは変えない。 */
+.home-prep-head {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: baseline;
+  gap: 0 12px;
+  min-width: 0;
+}
+.home-prep-title {
+  font-weight: 700;
+}
+.home-prep-when {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+  overflow-wrap: anywhere;
+}
+.home-prep-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-prep-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.home-prep-sign {
+  flex: none;
+  display: inline-flex;
+}
+.home-prep-sign .sb-vm {
+  width: 24px;
+  height: 24px;
+}
+.home-prep-k {
+  flex: none;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.home-prep-v {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.home-prep-note {
+  flex-basis: 100%;
+  padding-left: 32px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+}
+.home-prep-foot {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-3);
+}
+/* 判定の行：「判定は参考情報です」は、見出しの行の右に置く（画面の並びだけ。読む順は、文のあとに注記の DOM の順のまま）。
+ * 文は次の行に、記号の幅（32px）だけ下げて置く。最初の画面にクイック操作まで入れるため、行を 1 行ぶん低くする */
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-foot {
+  order: 2;
+  margin-left: auto;
+}
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-v {
+  order: 3;
+  flex-basis: calc(100% - 32px);
+  margin-left: 32px;
+}
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-note { order: 4; }
+.home-prep-row[data-testid="home-prep-judgement"] .home-prep-reload { order: 5; }
+.home-prep-row[data-tone="safe"] .home-prep-sign { color: var(--sb-st-safe-text); }
+.home-prep-row[data-tone="warn"] .home-prep-sign { color: var(--sb-st-warn-text); }
+.home-prep-row[data-tone="danger"] .home-prep-sign { color: var(--sb-st-danger-text); }
+.home-prep-row[data-tone="info"] .home-prep-sign { color: var(--sb-st-info-text); }
+.home-prep-row[data-tone="unknown"] .home-prep-sign { color: var(--sb-ink-3); }
+.home-prep-reload {
+  margin-left: 32px;
+}
+html[data-mode="field"] .home-prep-note,
+html[data-mode="field"] .home-prep-when,
+html[data-mode="field"] .home-prep-foot {
+  font-size: 1rem;
+}
+/* クイック操作：幅を 3 等分した副ボタン。記号を上、文字を下に置き、320px でも 3 つが 1 行に入る */
+.home-quick {
+  display: grid;
+  grid-template-columns: repeat(var(--home-quick-cols, 3), minmax(0, 1fr));
+  gap: 8px;
+}
+.home-quick[data-count="2"] { --home-quick-cols: 2; }
+.home-quick[data-count="1"] { --home-quick-cols: 1; }
+.home-quick-btn {
+  flex-direction: column;
+  gap: 2px;
+  min-height: 64px;
+  padding: 8px 4px;
+}
+.home-quick-label {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+html[data-mode="field"] .home-quick-btn {
+  min-height: 72px;
+}
+
+/* ホーム：次の予定のカードは余白を詰め（高さは 72px 以上のまま）、場所は 1 行で省略。近づく期限の見出しは枠の中の 1 行 */
+.home-next-card.sb-card {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.home-next-card .sb-card-list-text { gap: 2px; }
+.home-next-title,
+.home-next-place {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.home-dl-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 4px 0;
+}
+[data-testid="home-deadlines"] > .sb-block { padding-top: 4px !important; padding-bottom: 0 !important; }
+[data-testid="home-deadlines"] .sb-row { padding-top: 6px; padding-bottom: 6px; }
+/* 期限の行：1 行目に「種別・日付・残り日数」、2 行目に対象を行の全幅で置く（DOM の順・読む順は変えない。中の 2 つの span は display: contents で外す）。
+ * 対象（機体・許可番号・操縦者名）が長くて折り返しても、日付と残り日数の列に幅を取られないので、行が高くならない（3 行→2 行）。
+ * 残り日数の札は、この行だけ 24px の高さにして、1 行目を詰める（札は押す部品ではない）。 */
+[data-testid="ops-today"] [data-testid="deadline-link"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 8px;
+}
+[data-testid="ops-today"] [data-testid="deadline-link"] > span { display: contents; }
+/* 種別は縮めない（文字 200% で日付と札に幅を取られて 1 字ずつ折れないよう、足りなければ日付と札が次の行へ回る） */
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:first-child > span:first-child { order: 1; flex: 1 0 auto; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:last-child > :first-child { order: 2; flex: none; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:last-child > :last-child { order: 3; flex: none; }
+[data-testid="ops-today"] [data-testid="deadline-link"] > span:first-child > span:last-child { order: 4; flex: 0 0 100%; min-width: 0; }
+[data-testid="ops-today"] [data-testid="deadline-link"] .sb-tag { min-height: 24px; padding-top: 0; padding-bottom: 0; }
+.home-dl-head h2 {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+}
+@media (max-width: 1023px) {
+  /* スマホは、ホームの段の間を 12→8px に詰める（最初の画面に準備カードからクイック操作までを入れるため） */
+  [data-testid="ops-today"] { gap: 8px; }
+  [data-testid="ops-today"] > div > div, [data-testid="ops-today"] > div > div > div { gap: 8px; }
+}
+
+/* ===== 計画作成の 6 段（16-H1）：上に固定の進捗の帯（高さ 4・主色）と「2/6 日時」、段の見出し、確認のカード =====
+ * 色・寸法はトークンだけ。進捗の帯は見本（/ops/design の cat-progress）と同じ形。 */
+.opx-wiz-progress {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-inline: calc(var(--sb-sp-1) * -1);
+  padding: 8px var(--sb-sp-1) 6px;
+  background: var(--sb-base);
+}
+@media (min-width: 1024px) {
+  .opx-wiz-progress {
+    top: 56px;
+  }
+}
+.opx-wiz-bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--sb-pill);
+  background: var(--sb-sunken);
+}
+.opx-wiz-fill {
+  height: 100%;
+  background: var(--sb-primary);
+}
+.opx-wiz-step {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--sb-ink);
+  font-variant-numeric: tabular-nums;
+}
+.opx-wiz-heading {
+  margin: 0;
+  padding: 4px 0 4px 14px;
+  border-left: 5px solid var(--sb-ink);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink);
+  outline: none;
+}
+.opx-wiz-heading:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+}
+.opx-wiz-cardhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.opx-wiz-cardhead h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sb-ink);
+}
+.opx-wiz-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.opx-wiz-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+}
+@media (min-width: 640px) {
+  .opx-wiz-row {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+.opx-wiz-row dt {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.opx-wiz-row dd {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.opx-wiz-errlead {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sb-st-danger-text);
+}
+
+/* ===== 計画作成の 6 段：最初の画面で「今どの段か」と次の操作が見えるようにする（16-H1 designer）=====
+ * ・進捗の帯は画面の一番上（順序を先頭に）。固定なので、スクロールしても「n/6」が見える。
+ * ・段 ②〜④ では、地点を調べる案内と、段 ① ⑤ に出ている免責の断り書きを畳み、入力欄を最初の画面に近づける（断り書きは段 ① と段 ⑤ に残る）。
+ * ・文字の拡大・320px でも横にはみ出さないよう、行の中の並びは折り返す。 */
+main:has(> .opx-wiz-progress) > .opx-wiz-progress {
+  order: -1;
+}
+main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form[data-step="4"]) > [data-testid="judge-pills"],
+main:has(> .opx-wiz-progress):has(form[data-step="5"]) > [data-testid="judge-pills"],
+main:has(> .opx-wiz-progress):has(form[data-step="2"], form[data-step="3"], form[data-step="4"]) > div:first-child .opx-note {
+  display: none;
+}
+@media (max-width: 1023px) {
+  main:has(> .opx-wiz-progress) > div:first-child .opx-note {
+    padding: 6px 12px;
+  }
+  main:has(> .opx-wiz-progress) {
+    gap: 8px;
+  }
+  /* 帯は 1 行（左に「n/6 段の名前」、右に細い帯）。文字 200%・320px でも段の名前は読める形で 1 行に残し、帯の方を縮める（積まない） */
+  .opx-wiz-progress {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-block: 2px;
+  }
+  .opx-wiz-progress .opx-wiz-bar {
+    flex: 0 1 3rem;
+    min-width: 1.5rem;
+  }
+  .opx-wiz-progress .opx-wiz-step {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  /* 画面の題は、入力の段では一段小さく（題は残し、入力欄を最初の画面に近づける） */
+  main:has(> .opx-wiz-progress) h1.opx-h1 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+}
+.opx-wiz-heading {
+  overflow-wrap: anywhere;
+}
+
+/* 保存できなかった項目の一覧：1 件ずつ左に太い線（色に頼らない）、直す導線は下線つきの文字ボタン（高さ 48 以上は .opx-btn のまま） */
+.opx-wiz-errlist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-wiz-erritem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding-left: 12px;
+  border-left: 4px solid var(--sb-ink);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.opx-wiz-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.opx-wiz-erritem .opx-wiz-link {
+  justify-content: flex-start;
+  padding-inline: 0;
+}
+
+/* ===== 計画作成 段 ②：日時のクイック選択（16-H2 H2-1）=====
+ * 押す部品は 48px 以上・間 8px。選択中は薄い主色の面＋主色の 2px の縁＋チェックの記号（aria-pressed）。色・寸法はトークンだけ。 */
+.opx-quick-head {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 4px solid var(--sb-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--sb-ink);
+}
+.opx-quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sb-sp-2);
+}
+.opx-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(6.5rem, 100%), 1fr));
+  gap: var(--sb-sp-2);
+}
+.opx-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--sb-hit-min);
+  min-width: var(--sb-hit-min);
+  padding: 6px 16px;
+  border: 0;
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  box-shadow: inset 0 0 0 1px var(--sb-edge);
+  color: var(--sb-ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.opx-quick-btn:hover {
+  background: var(--sb-hover);
+}
+.opx-quick-btn:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+}
+.opx-quick-btn .opx-quick-mark {
+  display: none;
+  flex: none;
+  color: var(--sb-primary);
+}
+.opx-quick-btn[aria-pressed="true"] {
+  background: var(--sb-primary-soft);
+  box-shadow: inset 0 0 0 2px var(--sb-primary);
+  font-weight: 700;
+}
+.opx-quick-btn[aria-pressed="true"] .opx-quick-mark {
+  display: inline-block;
+}
+
+/* ===== 計画の判定の画面：総合・古い判定・項目のタイル・シートの詳細（16-H2 H2-2、designer）=====
+ * 区分は「左端の線の太さと形（実線・破線）＋札の形と言葉」で示し、色だけにしない（色なしでも見分けられる）。
+ * 線の太さは重さの順：飛行不可 8px・要手続き 6px・手続き済み 4px・手続き不要 3px・判定不能 4px の破線。 */
+.opx-stale-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-sp-2);
+  padding: var(--sb-sp-3) var(--sb-sp-3) var(--sb-sp-3) 14px;
+  border-left: 6px double var(--sb-ink);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.opx-stale-box > p:first-child {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.opx-stale-box ul {
+  margin: 0;
+}
+.opx-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+  gap: var(--sb-sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-tiles > li {
+  display: flex;
+}
+.opx-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--sb-hit-min);
+  padding: 12px 12px 10px 12px;
+  border: 0;
+  border-left: 6px solid var(--sb-ink);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-surface);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+  color: var(--sb-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.opx-tile:hover {
+  background: var(--sb-hover);
+}
+.opx-tile:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+}
+.opx-tile[data-verdict-key="no"] { border-left-width: 8px; border-left-color: var(--sb-v-no-fg); }
+.opx-tile[data-verdict-key="needs"] { border-left-width: 6px; border-left-color: var(--sb-v-needs-fg); }
+.opx-tile[data-verdict-key="done"] { border-left-width: 4px; border-left-color: var(--sb-v-done-fg); }
+.opx-tile[data-verdict-key="none"] { border-left-width: 3px; border-left-color: var(--sb-v-none-fg); }
+.opx-tile[data-verdict-key="unknown"] { border-left-width: 4px; border-left-style: dashed; border-left-color: var(--sb-v-unknown-fg); }
+.opx-tile-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.opx-tile-stale {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.opx-tile-more {
+  margin-top: auto;
+  align-self: flex-end;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--sb-ink-2);
+}
+.opx-tile-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-sp-4);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.opx-tile-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.opx-tile-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+.opx-tile-dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: 10px;
+  border-top: var(--sb-rule-w) solid var(--sb-rule);
+}
+.opx-tile-dl dt {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.opx-tile-dl dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.opx-tile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-tile-list > li[data-testid="judgement-sheet-procedure"] {
+  padding-left: 12px;
+  border-left: 4px solid var(--sb-ink);
+}
+.opx-tile-h3 {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 4px solid var(--sb-ink);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.opx-tile-aside {
+  margin: 4px 0 var(--sb-sp-3);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-2);
+}
+.opx-tile-ds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opx-tile-ds > li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 4px solid var(--sb-rule);
+  overflow-wrap: anywhere;
+}
+.opx-tile-ds-name {
+  font-weight: 700;
+}
+.opx-tile-ds-meta {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--sb-ink-2);
+}
+.opx-tile-ds-meta[data-testid="judgement-sheet-dataset-ledger-updated"] {
+  margin-top: 2px;
+  padding-left: 8px;
+  border-left: 3px double var(--sb-ink);
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.opx-tile-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sb-hit-min);
+  color: var(--sb-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--sb-primary);
+  text-underline-offset: 3px;
+}
+
+/* 現場の状態の帯（16-K fix designer・意見 8）。等倍では画面の上端に固定する。文字が大きいとき（html の文字が 200% 前後）は帯が 2 倍近い高さになり
+ * 画面の 4 割を超えるので、固定を外して流す（読む・押す場所を奪わない）。判定は rem の幅：コンテナクエリの rem は html の文字の大きさに従う
+ * （メディアクエリの rem は従わない）。16rem は、等倍では 256px（どの端末の幅も超える＝常に固定）、文字 200% では 512px、150% では 384px。 */
+[data-testid="field-root"] {
+  container-type: inline-size;
+  container-name: field;
+}
+.field-band {
+  position: sticky;
+  top: 0;
+}
+.field-band-compact {
+  display: none;
+}
+@container field (max-width: 16rem) {
+  .field-band {
+    position: static;
+  }
+  /* 16-N3 N3-1：固定が外れたとき（文字 125〜200%）の 1 行の帯。接続と送信待ちの件数だけ。折り返さない（nowrap）。文字の大きさは、端末の倍率（1.125rem）に追従しつつ、
+   * 1 行に入る大きさ（画面の幅 ÷ 18。圏外の「× 接続なし（圏外）」と件数で最長約 17.6 字分）で止め、18px（現場の下限）を下回らない：文字 200%・320 幅では 18px、
+   * 幅に余裕があれば大きくなる。幅は画面いっぱい（ページの左右の余白 1rem まで広げる）。本文はこの下で倍率どおりに拡大される。
+   * 直下の要素との間（main の gap）は負の余白で詰め、押す部品が帯に覆われないよう scroll-margin を取る。 */
+  .field-band-compact {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-inline: -1rem;
+    margin-bottom: -1.25rem;
+    /* 左右 8px（designer。以前は 2px で字が画面の端に付いた）。圏外＋3 桁の件数の最悪でも 1 行・横スクロール 0（320・200% で右端 315／320、間は 4px。実測は sprint-16N3-design-band.mjs） */
+    padding: 2px 8px;
+    border-bottom: 2px solid var(--sb-edge);
+    background: var(--sb-base);
+    font-size: max(18px, min(1.125rem, calc((100cqw + 2rem) / 18)));
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  [data-testid="field-root"] :is(a, button, input, select, textarea, summary) {
+    scroll-margin-top: 44px;
+  }
+  /* 16-N3 N3-2：文字が大きいとき、語（自動の文節）が列の幅より長いと、折り返しの余地がなく画面の右へはみ出した（320・200% で H3「飛行自粛要請の確認」・
+   * H4・「ホームへ戻る」・状態の語「指定されていない」。break-word は、flex の項目の最小の幅を縮めない）。anywhere で、必要なときだけ語の途中でも折る。 */
+  [data-testid="field-root"] > * {
+    overflow-wrap: anywhere;
+  }
+  /* 16-N3 N3-3：同じ日の他の計画へのチップの題名は、等倍では 1 行で省略（truncate）のまま。文字が大きいとき（上の帯の固定が外れる倍率）は省略せず折り返して全文を見せる。 */
+  .field-chip-title {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* 16-L の E-5：日誌から点検へ移ったとき（実施日時が先頭。data-date-first）、狭い画面で注記の全体を固定の下部ナビの手前に収める。
+ * 「今」のボタンを「実施時刻」の見出しの行の右に置き（押す部品は 48px のまま）、見出しと間隔を詰める。文言・順序・data-testid は変えない。 */
+@media (max-width: 639px) {
+  .opx-form[data-date-first] > fieldset {
+    padding-top: 12px;
+  }
+  .opx-form[data-date-first] > fieldset > legend {
+    margin-bottom: 8px;
+    padding-block: 0;
+  }
+  .opx-form[data-date-first] > .opx-step {
+    gap: 8px;
+  }
+  /* 見出しと「今」を同じ行（グリッドの 1 行目）に並べ、日付・時刻はその下の行に置く。行の高さは中身で決まるので、文字 200% で見出しが 2 行になっても
+   * 「今」が高くなっても、日付・時刻のラベルとは重ならない（固定の位置に頼らない）。見出し（legend）は float で「描かれる見出し」から外し、通常の子としてグリッドに載せる。 */
+  /* 16-N3 N3-4・N3-5：列は「2 列まで。1 列の最小幅を 8.5rem（rem なので文字の拡大で増える）」にした。等倍の 320 幅以上は 2 列のまま（見出し｜今、日付｜時刻）、
+   * 文字が大きくなって 2 列が入らなくなると 1 列（見出し・今・日付・時刻の順）に自然に落ちる。以前の固定の 2 列は、文字 200%・320 幅で 1 列 78px になり、
+   * 値が欄の外へ切れた。置き場所（grid-column・grid-row）は自動配置にして、列が 1 つになっても 2 列目の暗黙の列（はみ出し）を作らない。 */
+  .opx-form[data-date-first] [data-testid="inspected"] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(max(8.5rem, calc((100% - 8px) / 2)), 1fr));
+    column-gap: 8px;
+    row-gap: 8px;
+    align-items: start;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > legend {
+    float: left;
+    align-self: center;
+    min-height: 48px;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > div {
+    display: contents;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > div > button:first-child {
+    align-self: center;
+    justify-self: end;
+    width: auto;
+    min-width: 4rem;
+  }
+  .opx-form[data-date-first] [data-testid="inspected"] > :not(legend):not(div) {
+    grid-column: 1 / -1;
   }
 }

@@ -6,7 +6,7 @@
 // - 下書きごとの送信の識別子（clientRequestId）を付けて送るため、応答が分からないまま再送しても記録は 2 件にならない。
 // - 「現在地」ボタンは押したときだけ端末の位置を 1 回取得する。保存を押すまで送らない（保存すると離着陸場所として記録される）。
 // 判断（飛行時間・総飛行時間・認可）はサーバーと DB が行う。ここでの飛行時間の表示は同じ関数（lib/ops-time.ts）で求める。
-import { useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import {
   flightMinutesFromInput,
   formatHm,
@@ -17,6 +17,7 @@ import {
   type TimeErrorCode,
 } from "@/lib/ops-time";
 import {
+  INSPECTION_GROUPS,
   INSPECTION_ITEMS,
   INSPECTION_TIMING_LABELS,
   SPECIFIC_FLIGHT_TYPES,
@@ -51,6 +52,7 @@ import {
   versionOf,
   type ApiResult,
 } from "./ops-client";
+import { CheckGroup, CheckRow, SectionHead, StateShape } from "@/components/ui/sb-parts";
 import { Badge, buttonFieldClass, buttonGhostClass, buttonOutlineBrandClass, VERSION_NOTICE_TARGET } from "./ui";
 
 /** 通信できない（fetch が例外）場合も ApiResult にする。status 0。 */
@@ -72,18 +74,17 @@ const smallGhostClass = `${buttonGhostClass} opx-btn-sm`;
 
 /** 2 択・多択の選択肢（ラジオ・チェックボックスを枠付きの押しやすい大きさにする）。状態は文字と印で示し、色は補助。 */
 const choiceClass = (checked: boolean, tone: "brand" | "red" = "brand") =>
-  `flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 rounded-sb-m px-3.5 text-sm transition-colors ${
+  `flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 rounded-sb-m px-3.5 text-base transition-colors ${
     checked
       ? tone === "red"
         ? "border-2 border-sb-v-no-fg bg-sb-control font-bold text-sb-v-no-fg"
         : "border-2 border-sb-ink bg-sb-control font-bold text-sb-ink"
-      : "border-2 border-dashed border-sb-edge bg-sb-base text-sb-ink-2 hover:bg-sb-hover"
+      : "border-2 border-sb-rule bg-sb-surface text-sb-ink-2 hover:bg-sb-hover"
   }`;
-const choiceInputClass = "h-6 w-6 shrink-0 cursor-pointer";
-const brandAccent = "accent-sb-orange";
+const choiceRadioClass = "sb-radio";
 
 /**
- * 入力の段（見出し）。白いカードで、見出しは左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
+ * 入力の段（見出し）。白いカードで、見出しは左 5px の墨の線だけ（Sprint 16 H-5：背後の大きな薄い番号をやめた）。fieldset の名前は legend。
  */
 function Step({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (
@@ -91,6 +92,20 @@ function Step({ title, children }: { readonly title: string; readonly children: 
       <legend>{title}</legend>
       {children}
     </fieldset>
+  );
+}
+
+/**
+ * 飛行記録の入力の節（16-J J-2）：共通の節の見出し（SectionHead。左 5px の墨の線）に、入力欄を並べる。点検の入力は 16-I のまま Step を使う。
+ * 見出しは section の名前（aria-labelledby）にする。
+ */
+function FormSection({ title, note, children }: { readonly title: string; readonly note?: string; readonly children: ReactNode }) {
+  const id = useId();
+  return (
+    <section aria-labelledby={id} className="flex min-w-0 flex-col gap-4" data-testid="flight-section">
+      <SectionHead id={id} title={title} {...(note ? { note } : {})} />
+      {children}
+    </section>
   );
 }
 
@@ -111,23 +126,24 @@ function ChoiceGroup({
   /** ラジオのまとまりの読み上げ名。渡すと role="radiogroup" にし、誤りのときにフォーカスを移せるようにする。 */
   readonly radiogroupLabel?: string;
 }) {
+  const errId = `${useId()}-err`;
   return (
-    <fieldset className="flex min-w-0 flex-col gap-2">
+    <fieldset className="flex min-w-0 flex-col gap-2" aria-describedby={error ? errId : undefined}>
       <legend className="mb-1.5 flex items-center gap-2 text-sm text-sb-ink">
         <span>{legend}</span>
         <RequiredTag required={required} />
       </legend>
       <div
         className={`grid gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus ${
-          columns === 2 ? "grid-cols-2 sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
+          columns === 2 ? "grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] sm:max-w-sm" : "grid-cols-1 sm:grid-cols-2"
         }`}
         {...(radiogroupLabel
-          ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined }
+          ? { role: "radiogroup", tabIndex: -1, "aria-label": radiogroupLabel, "aria-invalid": error ? true : undefined, "aria-describedby": error ? errId : undefined }
           : {})}
       >
         {children}
       </div>
-      <FieldError message={error} />
+      <FieldError id={errId} message={error} />
     </fieldset>
   );
 }
@@ -168,6 +184,8 @@ type InspectionCandidate = {
 // ---- 部品 ----------------------------------------------------
 
 /** 日付と時刻（HH:MM）の入力。「今」ボタン付き。値は日本時間。 */
+const DATETIME_HINT = "日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。";
+
 function DateTimeInput({
   label,
   nowLabel,
@@ -179,6 +197,7 @@ function DateTimeInput({
   testId,
   onNow,
   stale,
+  externalHintId,
 }: {
   readonly label: string;
   readonly nowLabel?: string;
@@ -192,10 +211,12 @@ function DateTimeInput({
   readonly onNow?: (date: string, time: string) => void;
   /** 前回の入力の続きで、日時が今日でない（目立たせる）。 */
   readonly stale?: boolean;
+  /** 補足を欄の外（親が別の場所）に置くとき、その要素の id。aria-describedby の関連付けはこの id で保つ。 */
+  readonly externalHintId?: string;
 }) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
-  const hintId = `${id}-hint`;
+  const hintId = externalHintId ?? `${id}-hint`;
   const describedBy = [errorId, hintId].filter(Boolean).join(" ");
   const now = () => {
     const v = nowJstInput(new Date());
@@ -210,36 +231,53 @@ function DateTimeInput({
         {stale ? <Badge tone="amber" data-testid={`${testId}-stale`}>前回の入力のまま</Badge> : null}
       </legend>
       {/* 狭い画面：「今」を 1 行で大きく、その下に日付と時刻を 2 列。広い画面：1 行に並べる。 */}
-      <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+      {/* 16-N3 N3-4：日付と時刻は、列の最小幅を rem で持つ折り返し（9rem・7rem）。等倍の 320 以上は 2 列のまま、文字が大きくなると rem が増えて自然に 1 列になる
+          （以前の grid-cols-2 は、文字 200%・320 幅で 1 列 78px になり、値が欄の外へ切れた）。 */}
+      <div className="flex min-w-0 flex-wrap gap-2 sm:items-center">
         {nowLabel ? (
-          <button type="button" className={`${nowButtonClass} col-span-2`} onClick={now}>
+          <button type="button" className={`${nowButtonClass} basis-full sm:basis-auto`} onClick={now}>
             {nowLabel}
           </button>
         ) : null}
-        <input
-          type="date"
-          aria-label={`${label.replace(/時刻$/, "")}日`}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className={`${inputClass} tnum min-h-12 sm:w-[11rem]`}
-          value={date}
-          onChange={(e) => onChange(e.target.value, time)}
-        />
-        <input
-          type="time"
-          aria-label={label}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          step={60}
-          className={`${inputClass} tnum min-h-12 sm:w-[8.5rem]`}
-          value={time}
-          onChange={(e) => onChange(date, e.target.value)}
-        />
+        {/* 16-D D-1：見えるラベル（日付・時刻）を入力欄の上に置く。読み上げ名は従来の aria-label のまま */}
+        <div className="flex min-w-0 flex-[1_1_9rem] flex-col gap-1 sm:flex-none">
+          <label htmlFor={`${id}-date`} className="sb-label">
+            日付
+          </label>
+          <input
+            id={`${id}-date`}
+            type="date"
+            aria-label={`${label.replace(/時刻$/, "")}日`}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            className={`${inputClass} tnum min-h-12 sm:w-[11rem]`}
+            value={date}
+            onChange={(e) => onChange(e.target.value, time)}
+          />
+        </div>
+        <div className="flex min-w-0 flex-[1_1_7rem] flex-col gap-1 sm:flex-none">
+          <label htmlFor={`${id}-time`} className="sb-label">
+            時刻
+          </label>
+          <input
+            id={`${id}-time`}
+            type="time"
+            aria-label={label}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            step={60}
+            className={`${inputClass} tnum min-h-12 sm:w-[8.5rem]`}
+            value={time}
+            onChange={(e) => onChange(date, e.target.value)}
+          />
+        </div>
       </div>
       <FieldError id={errorId} message={error} />
-      <span id={hintId} className="text-xs text-sb-ink-3">
-        日本時間（24 時間制、分まで）。「今」は秒を切り捨てた現在の分を入れます。手で直せます。
-      </span>
+      {externalHintId ? null : (
+        <span id={hintId} className="text-sm text-sb-ink-3">
+          {DATETIME_HINT}
+        </span>
+      )}
     </fieldset>
   );
 }
@@ -292,25 +330,25 @@ function PlaceInput({
       <Field label={label} required error={errors[keys.name]} hint="地名・施設名など、正確な位置が分かる名前（100 文字以内）">
         <input className={`${inputClass} min-h-12`} value={name} onChange={(e) => onName(e.target.value)} />
       </Field>
-      <div className="flex flex-col gap-2 rounded-sb-m bg-sb-surface p-3">
+      <div className="flex flex-col gap-2 rounded-sb-m bg-sb-sunken p-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <button type="button" className={`${tallGhostClass}`} onClick={locate}>
             現在地を入れる
           </button>
           {hasPos ? (
-            <span className="sb-num text-xs tnum text-sb-ink-2">
+            <span className="sb-num text-sm tnum text-sb-ink-2">
               {pos.lat || "—"}, {pos.lng || "—"}
               {pos.acc ? `（精度 約 ${pos.acc} m）` : ""}
             </span>
           ) : null}
         </div>
         {status ? (
-          <span role="status" className="text-xs text-sb-ink-2">
+          <span role="status" className="text-sm text-sb-ink-2">
             {status}
           </span>
         ) : null}
         <details open={coordOpen || undefined} className="group/coord">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-xs text-sb-ink [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 text-sm text-sb-ink [&::-webkit-details-marker]:hidden">
             <span aria-hidden className="inline-block transition-transform group-open/coord:rotate-90">
               ›
             </span>
@@ -325,11 +363,11 @@ function PlaceInput({
                 <input className={`${inputClass} tnum`} inputMode="decimal" value={pos.lng} onChange={(e) => onPos({ ...pos, lng: e.target.value })} />
               </Field>
             </div>
-            <span className="text-xs text-sb-ink-3">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
+            <span className="text-sm text-sb-ink-3">世界測地系（WGS84）の 10 進度、小数 6 桁まで。</span>
           </div>
         </details>
-        <FieldError message={errors[keys.acc]} />
-        <span className="text-xs leading-relaxed text-sb-ink-3">
+        <FieldError id={`place-err-${keys.acc}`} message={errors[keys.acc]} />
+        <span className="text-sm leading-relaxed text-sb-ink-3">
           位置は「保存」を押したときに限り、飛行日誌の記載事項（場所）として送られます。位置を続けて記録することはありません。
         </span>
       </div>
@@ -354,7 +392,7 @@ function Warnings({ items, testId = "record-warnings" }: { readonly items: reado
   if (items.length === 0) return null;
   return (
     <div data-testid={testId} className="flex flex-col gap-1.5 rounded-sb-m border-[1.5px] border-dashed border-sb-ink bg-sb-base px-3 py-3">
-      <p className="text-[13px] font-bold text-sb-ink">確認してください（保存は止めません）</p>
+      <p className="text-sm font-bold text-sb-ink">確認してください（保存は止めません）</p>
       <ul className="flex flex-col gap-1 text-sm text-sb-ink">
         {items.map((w) => (
           <li key={w} className="flex gap-1.5">
@@ -389,10 +427,10 @@ function DraftBar({
     <div
       data-testid="draft-status"
       className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-sb-l px-4 py-3 ${
-        restored ? "border-[1.5px] border-sb-ink bg-sb-hover" : "bg-sb-sunken"
+        restored ? "border-[1.5px] border-sb-ink bg-sb-st-info-face" : "bg-sb-sunken"
       }`}
     >
-      <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-sb-ink-2">
+      <p className="min-w-0 flex-1 text-sb-ink-2">
         {restored ? (
           <>
             <span className="font-medium text-sb-ink">前回の入力の続きです。</span>
@@ -454,7 +492,7 @@ function SaveRow({
             <span className="mr-1.5 font-medium text-sb-v-needs-fg">未送信</span>
             {message}
           </p>
-          <button type="button" className={`${bigButtonClass} w-full sm:w-auto sm:self-start`} onClick={onRetry} disabled={busy}>
+          <button type="button" data-variant="primary" className={`${bigButtonClass} w-full sm:w-auto sm:self-start`} onClick={onRetry} disabled={busy}>
             再送する
           </button>
         </div>
@@ -469,7 +507,7 @@ function SaveRow({
         >
           {label}
         </button>
-        <span aria-live="polite" className="text-xs text-sb-ink-3">
+        <span aria-live="polite" className="text-sm text-sb-ink-3">
           {busy ? "送信しています…" : null}
         </span>
         {children}
@@ -951,7 +989,7 @@ export function FlightForm({
         />
       ) : null}
 
-      <Step title="機体・操縦者・日常点検">
+      <FormSection title="機体・操縦者・日常点検">
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。誤った場合は取り消して作り直してください。" : undefined}>
           <select
             className={`${inputClass} min-h-12`}
@@ -1003,9 +1041,9 @@ export function FlightForm({
             日常点検を入力する
           </a>
         ) : null}
-      </Step>
+      </FormSection>
 
-      <Step title="離陸">
+      <FormSection title="離陸">
         <PlaceInput
           label="離陸場所"
           name={v.takeoffPlace}
@@ -1028,9 +1066,9 @@ export function FlightForm({
             setV((s) => ({ ...s, takeoffDate: d, takeoffTime: t, landingDate: s.landingDate || d }));
           }}
         />
-      </Step>
+      </FormSection>
 
-      <Step title="着陸">
+      <FormSection title="着陸">
         <DateTimeInput
           label="着陸時刻"
           nowLabel="着陸：今"
@@ -1047,13 +1085,13 @@ export function FlightForm({
           }`}
           aria-live="polite"
         >
-          <span className="text-xs text-sb-ink-3">飛行時間</span>
+          <span className="text-sm text-sb-ink-3">飛行時間</span>
           {minutes && minutes.ok ? (
             <>
               <span className="sb-num text-3xl leading-none tnum text-sb-ink" data-testid="flight-minutes">
                 {formatHm(minutes.minutes)}
               </span>
-              {minutes.roundedUp ? <span className="text-xs text-sb-ink-2">（1 分未満は切り上げ）</span> : null}
+              {minutes.roundedUp ? <span className="text-sm text-sb-ink-2">（1 分未満は切り上げ）</span> : null}
             </>
           ) : (
             <span className="sb-num text-3xl leading-none text-sb-ink-3" data-testid="flight-minutes">
@@ -1061,12 +1099,12 @@ export function FlightForm({
             </span>
           )}
           {liveMinutesError ? (
-            <span className="basis-full text-xs text-sb-v-no-fg">
+            <span className="basis-full text-sm text-sb-v-no-fg">
               <span aria-hidden>! </span>
               {liveMinutesError}
             </span>
           ) : !minutes ? (
-            <span className="basis-full text-xs text-sb-ink-3">離陸・着陸の時刻を入れると、ここに表示します。</span>
+            <span className="basis-full text-sm text-sb-ink-3">離陸・着陸の時刻を入れると、ここに表示します。</span>
           ) : null}
         </div>
         <PlaceInput
@@ -1083,19 +1121,19 @@ export function FlightForm({
             離陸場所と同じにする
           </button>
         ) : null}
-      </Step>
+      </FormSection>
 
-      <Step title="飛行概要">
+      <FormSection title="飛行概要">
         <Field label="飛行の目的" required error={errors["purpose"]} hint="例：空撮、インフラ点検、測量（100 文字以内）">
           <input className={`${inputClass} min-h-12`} value={v.purpose} onChange={(e) => set("purpose", e.target.value)} />
         </Field>
         <Field label="経由地" required={false} error={errors["waypoints"]} hint="電源を切らずに経由した場所（200 文字以内）">
           <input className={inputClass} value={v.waypoints} onChange={(e) => set("waypoints", e.target.value)} />
         </Field>
-        <fieldset className="flex min-w-0 flex-col gap-3">
+        <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["specificFlightTypes"] ? "record-err-specificFlightTypes" : undefined}>
           <legend className="mb-1 text-sm text-sb-ink">
-            特定飛行の形態
-            <span className="ml-2 text-xs text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
+            <span className="font-semibold">特定飛行の形態</span>
+            <span className="mt-0.5 block text-sm text-sb-ink-3">該当するものをすべて選びます。なければ選びません。</span>
           </legend>
           {(
             [
@@ -1104,27 +1142,22 @@ export function FlightForm({
             ] as const
           ).map(([group, title]) => (
             <div key={group} className="flex flex-col gap-2">
-              <p aria-hidden className="sb-num text-[12px] uppercase tracking-wider text-sb-ink-3">
+              <p data-note="" aria-hidden className="mt-1 border-b border-sb-rule pb-1 text-base font-semibold text-sb-ink-2">
                 {title}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SPECIFIC_FLIGHT_TYPES.filter((t) => t.group === group).map((t) => {
                   const checked = v.specificFlightTypes.includes(t.key);
-                  return (
-                    <label key={t.key} className={choiceClass(checked)}>
-                      <input type="checkbox" className={`${choiceInputClass} ${brandAccent}`} checked={checked} onChange={() => toggleType(t.key)} />
-                      {t.label}
-                    </label>
-                  );
+                  return <CheckRow key={t.key} label={t.label} checked={checked} onChange={() => toggleType(t.key)} doneMark={false} rowTestId={`flight-type-${t.key}`} />;
                 })}
               </div>
             </div>
           ))}
-          <FieldError message={errors["specificFlightTypes"]} />
+          <FieldError id="record-err-specificFlightTypes" message={errors["specificFlightTypes"]} />
         </fieldset>
-      </Step>
+      </FormSection>
 
-      <Step title="安全に影響のあった事項・不具合">
+      <FormSection title="安全に影響のあった事項・不具合">
         <ChoiceGroup
           legend="飛行の安全に影響のあった事項"
           required
@@ -1141,7 +1174,7 @@ export function FlightForm({
               <input
                 type="radio"
                 name="safetyIssue"
-                className={`${choiceInputClass} ${brandAccent}`}
+                className={choiceRadioClass}
                 checked={v.safetyIssue === val}
                 onChange={() => set("safetyIssue", val)}
               />
@@ -1158,7 +1191,7 @@ export function FlightForm({
         <fieldset className="flex min-w-0 flex-col gap-3">
           <legend className="mb-1 flex items-center gap-2 text-sm text-sb-ink">
             <span>不具合（記事）</span>
-            <span className="text-xs text-sb-ink-3">{v.defects.length === 0 ? "なし" : `${v.defects.length} 件`}</span>
+            <span className="text-sm text-sb-ink-3">{v.defects.length === 0 ? "なし" : `${v.defects.length} 件`}</span>
           </legend>
           {v.defects.map((d, i) => {
             const upd = (k: keyof DefectState, val: string) =>
@@ -1169,7 +1202,7 @@ export function FlightForm({
             return (
               <div key={i} className="flex flex-col gap-3 rounded-sb-m border border-sb-rule p-3" data-testid="defect-row">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="sb-num text-xs tnum text-sb-ink-3">不具合 {i + 1}</span>
+                  <span className="sb-num text-sm tnum text-sb-ink-3">不具合 {i + 1}</span>
                   <button type="button" className={smallGhostClass} onClick={() => set("defects", v.defects.filter((_, j) => j !== i))}>
                     不具合 {i + 1} を外す
                   </button>
@@ -1203,9 +1236,9 @@ export function FlightForm({
           >
             不具合を加える
           </button>
-          <span className="text-xs text-sb-ink-3">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
+          <span className="text-sm text-sb-ink-3">処置日・処置・確認者は、処置の後に訂正で追記できます。</span>
         </fieldset>
-      </Step>
+      </FormSection>
 
       {isEdit ? (
         <Field label="訂正の理由" required error={errors["reason"]} hint="版の一覧に、訂正した人・日時とともに残ります。">
@@ -1213,7 +1246,7 @@ export function FlightForm({
         </Field>
       ) : null}
 
-      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "保存"} onRetry={() => void submit()} />
+      <SaveRow message={message} offline={offline} busy={busy} label={isEdit ? "訂正する" : "飛行記録を保存"} onRetry={() => void submit()} />
     </form>
   );
 }
@@ -1251,6 +1284,9 @@ export type InspectionFormInitial = {
   readonly items: readonly { readonly key: InspectionItemKey; readonly result: InspectionResult; readonly note: string | null }[];
   readonly specialNotes: string | null;
 };
+
+/** 未記入のまま保存を押したあと、その項目に出す案内（16-I I-2。サーバーの検証の文ではなく、送る前の画面の案内）。 */
+const MISSING_RESULT_MESSAGE = "正常か異常かを選んでください";
 
 const emptyItems = (): Record<InspectionItemKey, ItemState> =>
   Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "", note: "" }])) as Record<InspectionItemKey, ItemState>;
@@ -1333,6 +1369,8 @@ export function InspectionForm({
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
   const [restored, setRestored] = useState(false);
+  // 16-I I-2：未完了のまま保存を押したあと、未記入の項目に「選んでください」を出す（端末には残さない）
+  const [showMissing, setShowMissing] = useState(false);
   // 手で入れた実施日時が今日でない下書きを読み込んだとき、その日時（目立たせる。日時を直すと消える）
   const [staleDt, setStaleDt] = useState<string | null>(null);
   // 何も入力のない下書きの実施日時を今に入れ直したとき、その日時（知らせを出す。日時を直すと消える）
@@ -1382,10 +1420,17 @@ export function InspectionForm({
   const set = <K extends keyof InspectionState>(k: K, value: InspectionState[K]) => setV((s) => ({ ...s, [k]: value }));
   const setItem = (key: InspectionItemKey, patch: Partial<ItemState>) =>
     setV((s) => ({ ...s, items: { ...s.items, [key]: { ...s.items[key], ...patch } } }));
-  const allSelected = INSPECTION_ITEMS.every((it) => v.items[it.key].result !== "");
   const selectedCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result !== "").length;
   const abnormalCount = INSPECTION_ITEMS.filter((it) => v.items[it.key].result === "abnormal").length;
+  const missingCount = INSPECTION_ITEMS.length - selectedCount;
   const selectedAircraft = aircraft.find((a) => a.id === v.aircraftId);
+
+  /** 群（<details>）を開く。畳んだ群の中の項目へ移るとき・誤りを示すときに使う。 */
+  const openGroupOf = (key: InspectionItemKey) => {
+    const g = INSPECTION_GROUPS.find((x) => x.items.includes(key));
+    const el = g ? formRef.current?.querySelector<HTMLDetailsElement>(`[data-testid="inspection-group-${g.key}"]`) : null;
+    if (el) el.open = true;
+  };
 
   const discardDraft = () => {
     clearDraft(draftKey("inspection", memberId));
@@ -1397,9 +1442,21 @@ export function InspectionForm({
     setRestored(false);
     setStaleDt(null);
     setRefreshDt(null);
+    setShowMissing(false);
   };
 
   const submit = async () => {
+    // 16-I I-2：未完了のときは送らずに、表示の順で最初の未記入の項目の群を開き、そこへスクロールしてフォーカスを移す。
+    // サーバーの検証は変えない（全部選ばれているときだけ、今の API へ送る）。
+    const firstMissing = INSPECTION_GROUPS.flatMap((g) => g.items).find((k) => v.items[k].result === "");
+    if (firstMissing) {
+      setShowMissing(true);
+      setMessage(null);
+      openGroupOf(firstMissing);
+      // フォーカスは描画の後に移す（aria-invalid と誤りの文が付いてから。読み上げが誤りの文を拾えるように）
+      requestErrorFocus();
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const p = posBody(v.pos);
@@ -1431,6 +1488,9 @@ export function InspectionForm({
         setMessage(messageFor(r));
         // 別の利用者の記録と送信の識別子がぶつかった：識別子を作り直して、次の保存では新しい記録として送る
         if (r.data["error"] === "request_conflict") setV((s) => ({ ...s, clientRequestId: newRequestId() }));
+        // 畳んだ群の中に誤りがあるときは開く（誤りの項目へフォーカスを移せるように）
+        const errs = fieldErrorsOf(r);
+        for (const it of INSPECTION_ITEMS) if (errs[`items.${it.key}`] || errs[`items.${it.key}.note`]) openGroupOf(it.key);
       }
       requestErrorFocus();
       return;
@@ -1453,14 +1513,52 @@ export function InspectionForm({
     }
   };
 
+  // 未記入の項目だけを正常で埋める。選んであった「異常」「正常」は上書きしない（全部記入済みなら何も変わらない）
   const setAllNormal = () =>
     setV((s) => ({
       ...s,
-      items: Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal", note: s.items[it.key].note }])) as Record<
-        InspectionItemKey,
-        ItemState
-      >,
+      items: Object.fromEntries(
+        INSPECTION_ITEMS.map((it) => [it.key, s.items[it.key].result === "" ? { result: "normal", note: s.items[it.key].note } : s.items[it.key]]),
+      ) as Record<InspectionItemKey, ItemState>,
     }));
+
+  const draftBar = !isEdit ? (
+        <DraftBar
+          restored={restored}
+          canDiscard={restored || inspectionHasInput(v)}
+          onDiscard={discardDraft}
+          staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
+          refreshNote={refreshDt ? `実施日時を今（${refreshDt}）に入れ直しました。` : null}
+        />
+  ) : null;
+  // 16-I I-3：日誌から移ったとき（離陸の日時が渡されたとき）は、実施日時の欄を先頭にして、その直下に注記を置く。375×812 の最初の画面に注記の全体が入るよう、
+  // 下書きの案内は最初の群（機体・実施者・日時・場所）の後ろに置く（下書きの扱いは同じ。置き場所だけ）。
+  const dateFirst = flightTakeoffAt !== undefined && !isEdit;
+  // 日誌から移ったときだけ、実施時刻の補足を注記の後ろへ移す（欄との関連付け aria-describedby は同じ id で保つ）。注記を最初の画面に収めるため（差し戻し 1）
+  const dateHintId = useId();
+
+  const dateBlock = (
+    <DateTimeInput
+          label="実施時刻"
+          nowLabel="今"
+          testId="inspected"
+          date={v.date}
+          time={v.time}
+          error={errors["inspectedAt"]}
+          stale={staleDt !== null}
+          {...(dateFirst ? { externalHintId: dateHintId } : {})}
+          onChange={(d, t) => {
+            setStaleDt(null);
+            setRefreshDt(null);
+            // 手で直した日時も「今」で入れた日時も、利用者が入れた日時として保つ
+            setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
+          }}
+    />
+  );
+  const takeoffNote =
+    flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
+      <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
+    ) : null;
 
   return (
     <form
@@ -1470,19 +1568,19 @@ export function InspectionForm({
         void submit();
       }}
       className="opx-form flex flex-col gap-6"
+      {...(dateFirst ? { "data-date-first": "" } : {})}
       aria-label={isEdit ? "日常点検の訂正" : "日常点検の入力"}
     >
-      {!isEdit ? (
-        <DraftBar
-          restored={restored}
-          canDiscard={restored || inspectionHasInput(v)}
-          onDiscard={discardDraft}
-          staleNote={staleDt ? `実施日時が前回の入力（${staleDt}）のままです。` : null}
-          refreshNote={refreshDt ? `実施日時を今（${refreshDt}）に入れ直しました。` : null}
-        />
-      ) : null}
+      {!dateFirst ? draftBar : null}
 
       <Step title="機体・実施者・日時・場所">
+        {dateFirst ? dateBlock : null}
+        {dateFirst ? takeoffNote : null}
+        {dateFirst ? (
+          <span id={dateHintId} className="sb-insp-dt-hint text-sm text-sb-ink-3">
+            {DATETIME_HINT}
+          </span>
+        ) : null}
         <Field label="機体" required error={errors["aircraftId"]} hint={isEdit ? "機体は訂正で変えられません。" : undefined}>
           <select className={`${inputClass} min-h-12`} value={v.aircraftId} disabled={isEdit} onChange={(e) => set("aircraftId", e.target.value)}>
             <option value="">選んでください</option>
@@ -1504,32 +1602,15 @@ export function InspectionForm({
             ))}
           </select>
         </Field>
-        <DateTimeInput
-          label="実施時刻"
-          nowLabel="今"
-          testId="inspected"
-          date={v.date}
-          time={v.time}
-          error={errors["inspectedAt"]}
-          stale={staleDt !== null}
-          onChange={(d, t) => {
-            setStaleDt(null);
-            setRefreshDt(null);
-            // 手で直した日時も「今」で入れた日時も、利用者が入れた日時として保つ
-            setV((s) => ({ ...s, date: d, time: t, timeTouched: true }));
-          }}
-        />
+        {!dateFirst ? dateBlock : null}
         <ChoiceGroup legend="区分">
           {(["pre_flight", "post_flight"] as const).map((t) => (
             <label key={t} className={choiceClass(v.timing === t)}>
-              <input type="radio" name="timing" className={`${choiceInputClass} ${brandAccent}`} checked={v.timing === t} onChange={() => set("timing", t)} />
+              <input type="radio" name="timing" className={choiceRadioClass} checked={v.timing === t} onChange={() => set("timing", t)} />
               {INSPECTION_TIMING_LABELS[t]}
             </label>
           ))}
         </ChoiceGroup>
-        {flightTakeoffAt && !isEdit && v.timing === "pre_flight" && joinDt(v.date, v.time) && preInspectionTimingFor(joinDt(v.date, v.time), flightTakeoffAt, null) !== "before_takeoff" ? (
-          <Warnings items={[inspectionAfterFlightTakeoffNote(flightTakeoffAt.slice(11, 16))]} testId="inspection-after-takeoff" />
-        ) : null}
         <PlaceInput
           label="実施場所"
           name={v.placeName}
@@ -1541,73 +1622,109 @@ export function InspectionForm({
         />
       </Step>
 
+      {dateFirst ? draftBar : null}
+
       <Step title="点検項目（様式2）">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-relaxed text-sb-ink-3 sm:max-w-md">
+          <p data-note="" className="text-sb-ink-3 sm:max-w-md">
             9 項目すべてで「正常」「異常」のどちらかを選びます。「異常」の項目は備考が必須です。具体的な点検内容は機体の取扱説明書によります。
           </p>
-          <button type="button" className={`${bigButtonClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
+          <button type="button" className={`${tallGhostClass} w-full shrink-0 sm:w-auto`} onClick={setAllNormal}>
             すべて正常
           </button>
         </div>
-        <p className="flex flex-wrap items-baseline gap-x-3 sb-num text-xs tnum text-sb-ink-2" aria-live="polite">
+        <p data-note="" className="sb-insp-progress sb-num tnum" style={{ "--sb-prog": selectedCount / INSPECTION_ITEMS.length } as CSSProperties} data-testid="inspection-progress">
           <span>
-            選択 {selectedCount} / {INSPECTION_ITEMS.length}
+            記入済み {selectedCount}/{INSPECTION_ITEMS.length}
           </span>
-          {abnormalCount > 0 ? <span className="text-sb-v-no-fg">異常 {abnormalCount} 項目</span> : null}
+          {abnormalCount > 0 ? <span className="sb-insp-abn">異常 {abnormalCount} 項目</span> : null}
         </p>
-        <ol className="flex flex-col border-t border-sb-rule">
-          {INSPECTION_ITEMS.map((it, i) => {
-            const st = v.items[it.key];
-            const resultError = errors[`items.${it.key}`];
-            const noteError = errors[`items.${it.key}.note`];
-            const abnormal = st.result === "abnormal";
+        <p data-note="" className="sb-insp-note" data-testid="inspection-group-note">
+          見やすさのために分けています（様式2 の区分ではありません）。
+        </p>
+        <div className="flex flex-col gap-3">
+          {INSPECTION_GROUPS.map((g) => {
+            const done = g.items.filter((k) => v.items[k].result !== "").length;
             return (
-              <li
-                key={it.key}
-                className={`flex flex-col gap-2 border-b border-sb-rule py-2.5 pr-0.5 ${
-                  abnormal ? "-ml-3 border-l-2 border-l-sb-v-no-fg pl-2.5" : ""
-                }`}
-                data-testid={`inspection-item-${it.key}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                  <span className="flex min-w-0 items-baseline gap-2 text-sm text-sb-ink">
-                    <span aria-hidden className="sb-num text-xs tnum text-sb-ink-3">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    {it.label}
-                  </span>
-                  <div
-                    className="grid grid-cols-2 gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
-                    role="radiogroup"
-                    tabIndex={-1}
-                    aria-label={`${it.label}の結果`}
-                    aria-invalid={resultError ? true : undefined}
-                  >
-                    {(["normal", "abnormal"] as const).map((r) => (
-                      <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} w-[5.75rem]`}>
-                        <input
-                          type="radio"
-                          name={`item-${it.key}`}
-                          className={`${choiceInputClass} ${r === "abnormal" ? "accent-sb-v-no-fg" : brandAccent}`}
-                          checked={st.result === r}
-                          onChange={() => setItem(it.key, { result: r })}
-                        />
-                        {r === "normal" ? "正常" : "異常"}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <FieldError message={resultError} />
-                {abnormal || st.note || noteError ? (
-                  <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
-                    <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(it.key, { note: e.target.value })} />
-                  </Field>
-                ) : null}
-              </li>
+              <CheckGroup key={g.key} title={g.label} done={done} total={g.items.length} doneLabel="項目" testId={`inspection-group-${g.key}`}>
+                <ol className="sb-insp-list m-0 list-none p-0">
+                  {g.items.map((key) => {
+                    const it = INSPECTION_ITEMS.find((x) => x.key === key)!;
+                    const no = INSPECTION_ITEMS.findIndex((x) => x.key === key) + 1;
+                    const st = v.items[key];
+                    const resultError = errors[`items.${key}`] ?? (showMissing && st.result === "" ? MISSING_RESULT_MESSAGE : undefined);
+                    const noteError = errors[`items.${key}.note`];
+                    const abnormal = st.result === "abnormal";
+                    return (
+                      <li
+                        key={key}
+                        className="sb-insp-row"
+                        data-testid={`inspection-item-${it.key}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="flex min-w-0 items-baseline gap-2 font-bold text-sb-ink">
+                            <span aria-hidden className="sb-num tnum text-sb-ink-3">
+                              {String(no).padStart(2, "0")}
+                            </span>
+                            <span className="min-w-0 [overflow-wrap:anywhere]">{it.label}</span>
+                          </span>
+                          <span
+                            data-note=""
+                            aria-hidden="true"
+                            data-testid={`inspection-mark-${key}`}
+                            data-state={st.result || "none"}
+                            className="sb-insp-mark"
+                          >
+                            {st.result === "normal" ? (
+                              <>
+                                <StateShape tone="safe" />
+                                済
+                              </>
+                            ) : abnormal ? (
+                              <>
+                                <StateShape tone="danger" />
+                                異常
+                              </>
+                            ) : (
+                              "未記入"
+                            )}
+                          </span>
+                        </div>
+                        <div
+                          className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-2 rounded-sb-m outline-none focus-visible:ring-2 focus-visible:ring-sb-focus"
+                          role="radiogroup"
+                          tabIndex={-1}
+                          aria-label={`${it.label}の結果`}
+                          aria-invalid={resultError ? true : undefined}
+                          aria-describedby={resultError ? `inspection-err-result-${key}` : undefined}
+                        >
+                          {(["normal", "abnormal"] as const).map((r) => (
+                            <label key={r} className={`${choiceClass(st.result === r, r === "abnormal" ? "red" : "brand")} !min-h-14 !px-3`}>
+                              <input
+                                type="radio"
+                                name={`item-${key}`}
+                                className={r === "abnormal" ? "sb-check sb-check-no" : "sb-check"}
+                                checked={st.result === r}
+                                onChange={() => setItem(key, { result: r })}
+                              />
+                              {r === "normal" ? "正常" : "異常"}
+                            </label>
+                          ))}
+                        </div>
+                        <FieldError id={`inspection-err-result-${key}`} message={resultError} />
+                        {abnormal || st.note || noteError ? (
+                          <Field label={`${it.label}の備考`} required={abnormal} error={noteError} hint={abnormal ? "異常の内容と、行った処置を書きます。" : undefined}>
+                            <input className={`${inputClass} min-h-12`} value={st.note} onChange={(e) => setItem(key, { note: e.target.value })} />
+                          </Field>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </CheckGroup>
             );
           })}
-        </ol>
+        </div>
       </Step>
 
       <Field label="特記事項" required={false} error={errors["specialNotes"]} hint="取扱説明書の追加の点検項目など（500 文字以内）">
@@ -1626,13 +1743,10 @@ export function InspectionForm({
         busy={busy}
         label={isEdit ? "訂正する" : "保存"}
         onRetry={() => void submit()}
-        disabled={!allSelected}
       >
-        {!allSelected ? (
-          <span className="text-xs text-sb-ink-3">
-            9 項目すべてを選ぶと保存できます（残り {INSPECTION_ITEMS.length - selectedCount} 項目）
-          </span>
-        ) : null}
+        <span data-note="" className="sb-insp-missing" aria-live="polite" data-testid="inspection-missing-count" data-missing={missingCount}>
+          {missingCount > 0 ? `未記入 ${missingCount} 項目` : "9 項目すべて記入済み"}
+        </span>
       </SaveRow>
     </form>
   );

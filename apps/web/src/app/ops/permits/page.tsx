@@ -38,16 +38,16 @@ export default async function PermitListPage({
         back={returnTo ? { href: returnTo, label: "現場モードへ戻る" } : BACK_TO.register}
         aside={
           manager ? (
-            <Link prefetch={false} href="/ops/permits/new" className={buttonPrimaryClass} data-testid="permit-new-link">
+            <Link prefetch={false} href="/ops/permits/new" data-variant="primary" className={buttonPrimaryClass} data-testid="permit-new-link">
               許可・承認を登録
             </Link>
           ) : null
         }
       >
         <PermitDeclaration declaration={PERMIT_DECLARATION_NOTE} noDipsNote={PERMIT_NO_DIPS_NOTE} />
-        <Note>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
+        <Note body>登録した許可の番号を計画の許可番号の欄に入れると、計画の日時・場所・機体・操縦者が範囲に収まるときだけ判定に使われます。範囲外・期限切れ・失効・確認できないものは、要手続きのままです。</Note>
         <p className="opx-note" data-testid="permit-format-note">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
-        {manager ? null : <Note>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
+        {manager ? null : <Note body>許可・承認の登録・訂正・失効・取消は運航管理者だけが行えます。</Note>}
       </PageHeader>
 
       <form method="get" className="sb-block-soft flex flex-wrap items-end gap-3" data-testid="permit-filter" aria-label="許可・承認の絞り込み">
@@ -73,7 +73,7 @@ export default async function PermitListPage({
       </form>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/permits" includeVoided={includeVoided} />
-        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3" data-testid="permit-count">{rows.length} 件</p>
+        <p className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="permit-count">{rows.length} 件</p>
       </div>
 
       {rows.length === 0 ? (
@@ -85,14 +85,14 @@ export default async function PermitListPage({
             {rows.map((p) => (
               <li key={p.id}>
                 <Link prefetch={false} href={`/ops/permits/${p.id}`} className={`${listRowClass} ${GRID} ${p.voided ? "text-sb-ink-3" : ""}`} data-testid="permit-row" data-validity={p.validity}>
-                  <span className="min-w-0 break-all sb-num text-[15px] text-sb-ink" data-testid="permit-row-number">{p.permitNumber}</span>
+                  <span className="min-w-0 break-all sb-num text-[1rem] text-sb-ink" data-testid="permit-row-number">{p.permitNumber}</span>
                   <span className="flex min-w-0 flex-col gap-0.5 text-sb-ink-2">
                     <span data-testid="permit-row-kinds">
                       {p.coverageLabel}：{p.kinds.map((k) => k.label).join("、")}
                     </span>
-                    <span className="text-xs text-sb-ink-2" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
+                    <span className="text-sm text-sb-ink-2" data-testid="permit-row-scope">{permitScopeSummary(p)}</span>
                   </span>
-                  <span className="sb-num text-[13px] tnum text-sb-ink-2" data-testid="permit-row-period">
+                  <span className="sb-num text-sm tnum text-sb-ink-2" data-testid="permit-row-period">
                     {p.validFrom} 〜 {p.validTo}
                   </span>
                   <span className="flex flex-wrap items-center gap-1.5">

@@ -1,0 +1,16 @@
+375 half h=406.0 ratio=0.500 radius=20px 20px bottom=812.0
+ handle 36x4 aria-hidden=true
+  full h=730.8 ratio=0.900 radius=20px 20px bottom=812.0
+  peek h=120.0 ratio=0.148 radius=20px 20px bottom=812.0
+ peek tab x4 -> BUTTON[] inSheet=false
+ scrim count 0
+  sheet-expand 90x48
+  sheet-close 90x48
+1280 half h=400.0 ratio=0.500 radius=20px 20px bottom=800.0
+ handle 36x4 aria-hidden=true
+  full h=720.0 ratio=0.900 radius=20px 20px bottom=800.0
+  peek h=120.0 ratio=0.150 radius=20px 20px bottom=800.0
+ peek tab x4 -> BUTTON[] inSheet=false
+ scrim count 0
+  sheet-expand 90x48
+  sheet-close 90x48

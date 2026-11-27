@@ -1,0 +1,29 @@
+
+> soraban@0.0.0 test:e2e /home/user/base-a12
+> playwright test --retries=0 e2e/zz-eval-pr2.spec.ts -g 'Q-20|B2'
+
+
+Running 7 tests using 1 worker
+
+[EVAL-Q20] 375x812 [{"target":"current","viewport":"375x812","script":"1-address","taps":2,"scrollPx":0,"screens":0,"mapVisible":true,"answerVisible":true,"together":true,"mapShare":0.26},{"target":"current","viewport":"375x812","script":"2-geo","taps":1,"scrollPx":0,"screens":0,"mapVisible":true,"answerVisible":true,"together":true,"mapShare":0.24},{"target":"current","viewport":"375x812","script":"3-detail","taps":0,"scrollPx":1640,"screens":2,"mapVisible":false,"answerVisible":true,"together":false,"mapShare":0.03},{"target":"current","viewport":"375x812","script":"4-layer","taps":1,"scrollPx":931,"screens":1.1,"mapVisible":true,"answerVisible":false,"together":false,"mapShare":0.34}]
+[画面] Q-20 375x812 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 375x812 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 375x812 3-detail: スクロール 2 枚分・押す回数 0
+[画面] Q-20 375x812 4-layer: スクロール 1.1 枚分・押す回数 1
+  ✓  1 e2e/zz-eval-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 (12.7s)
+[EVAL-Q20] 1280x800 [{"target":"current","viewport":"1280x800","script":"1-address","taps":2,"scrollPx":0,"screens":0,"mapVisible":false,"answerVisible":true,"together":false,"mapShare":0.16},{"target":"current","viewport":"1280x800","script":"2-geo","taps":1,"scrollPx":0,"screens":0,"mapVisible":false,"answerVisible":true,"together":false,"mapShare":0.14},{"target":"current","viewport":"1280x800","script":"3-detail","taps":0,"scrollPx":830,"screens":1,"mapVisible":false,"answerVisible":true,"together":false,"mapShare":0.13},{"target":"current","viewport":"1280x800","script":"4-layer","taps":1,"scrollPx":332,"screens":0.4,"mapVisible":true,"answerVisible":true,"together":true,"mapShare":0.29}]
+[画面] Q-20 1280x800 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 1280x800 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 1280x800 3-detail: スクロール 1 枚分・押す回数 0
+[画面] Q-20 1280x800 4-layer: スクロール 0.4 枚分・押す回数 1
+  ✓  2 e2e/zz-eval-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 (13.5s)
+[長さ] / 375x812 ページ全体: 11646px
+  ✓  3 e2e/zz-eval-pr2.spec.ts:954:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている (1.6s)
+  ✓  4 e2e/zz-eval-pr2.spec.ts:975:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 畳んだままでも見える要約：規制カードの名称・段・判定・この地点の理由・出典・確認日・確からしさ。結論の札（確認日・出典つき）と免責 (1.6s)
+  ✓  5 e2e/zz-eval-pr2.spec.ts:994:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる (1.4s)
+  ✓  6 e2e/zz-eval-pr2.spec.ts:1025:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 収録の一覧は閉じていて、開くと一覧が出る (1.7s)
+  ✓  7 e2e/zz-eval-pr2.spec.ts:1036:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 「申請の準備」は無い：必要手続きのチェックリスト・提出期限・束ね PDF が出ない（Sprint 18-1） (1.8s)
+
+  7 passed (38.1s)
+::notice title=🎭 Playwright Run Summary::  7 passed (38.1s)
+exit 0

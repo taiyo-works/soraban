@@ -1,0 +1,208 @@
+{
+ "deadlineAria": "- region \"近づく期限\":\n  - heading \"近づく期限\" [level=2]\n  - text: 60 日以内・ほか 4 件\n  - list:\n    - listitem:\n      - link \"技能証明 四十字対象の操縦者名ですテスト太郎 更新の期限（満了の 1 か月前）を過ぎています 1/5（火） 今日まで\":\n        - /url: /ops/pilots/8cda609a-9343-45ab-80e0-e9dfa37c422d\n        - text: 技能証明 四十字対象の操縦者名ですテスト太郎 更新の期限（満了の 1 か月前）を過ぎています\n        - time: 1/5（火）\n        - text: 今日まで\n  - paragraph: 機体の期限は、記録する場所がまだないため出ません。",
+ "prepAria": "- region \"次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。\":\n  - heading \"次の飛行の準備\" [level=2]\n  - text: 1/5（火） 13:00〜13:30 米子市日吉津\n  - list:\n    - listitem: 通報 DIPS に出す内容を確認する\n    - listitem: 飛行前点検 未記録\n    - listitem: 判定（参考） 手続きが要る項目があります（1 件） 判定は参考情報です",
+ "mainAria": "- main:\n  - heading \"ホーム\" [level=1]\n  - paragraph:\n    - time: 1/5（火）\n    - text: 米子市日吉津\n  - region \"次の飛行の準備。通報、DIPS に出す内容を確認する。飛行前点検、未記録。判定、手続きが要る項目が 1 件あります。\":\n    - heading \"次の飛行の準備\" [level=2]\n    - text: 1/5（火） 13:00〜13:30 米子市日吉津\n    - list:\n      - listitem: 通報 DIPS に出す内容を確認する\n      - listitem: 飛行前点検 未記録\n      - listitem: 判定（参考） 手続きが要る項目があります（1 件） 判定は参考情報です\n  - region \"次の予定\":\n    - link \"予定 1/5（火） 13:00〜13:30 読み上げ MWUNR73Q 米子市日吉津\":\n      - /url: /ops/plans/e11be943-61c4-4ebd-b9b6-714500b0a202\n      - text: 予定\n      - time: 1/5（火）\n      - text: 13:00〜13:30 読み上げ MWUNR73Q 米子市日吉津\n  - link \"飛行計画を DIPS で通報する\":\n    - /url: /ops/plans/e11be943-61c4-4ebd-b9b6-714500b0a202/report\n  - region \"近づく期限\":\n    - heading \"近づく期限\" [level=2]\n    - text: 60 日以内・ほか 4 件\n    - list:\n      - listitem:\n        - link \"技能証明 四十字対象の操縦者名ですテスト太郎 更新の期限（満了の 1 か月前）を過ぎています 1/5（火） 今日まで\":\n          - /url: /ops/pilots/8cda609a-9343-45ab-80e0-e9dfa37c422d\n          - text: 技能証明 四十字対象の操縦者名ですテスト太郎 更新の期限（満了の 1 か月前）を過ぎています\n          - time: 1/5（火）\n          - text: 今日まで\n    - paragraph: 機体の期限は、記録する場所がまだないため出ません。\n  - navigation \"クイック操作\":\n    - link \"飛行前点検\":\n      - /url: /ops/inspections/new\n    - link \"新しい計画\":\n      - /url: /ops/plans/new\n    - link \"飛行記録\":\n      - /url: /ops/flights/new\n  - group: すべての予定 判定への入口・次にやること・直近の飛行 開く\n  - paragraph: 圏外用に端末へ保存した計画：0 件\n  - group: ホーム画面に追加する（圏外の現場で開くため）\n  - note: 判定は入力された情報の範囲での目安です。許可・承認の申請と飛行計画の通報は、利用者本人が DIPS 2.0 などの公式の手続きで行います。そらばんは DIPS に送信しません。",
+ "deadlineVisual": [
+  {
+   "n": "種別",
+   "top": 510,
+   "left": 30,
+   "text": "技能証明"
+  },
+  {
+   "n": "対象",
+   "top": 533,
+   "left": 30,
+   "text": "四十字対象の操縦者名ですテスト太郎　更新の期限（満了の 1 "
+  },
+  {
+   "n": "日付",
+   "top": 512,
+   "left": 172,
+   "text": "1/5（火）"
+  },
+  {
+   "n": "札",
+   "top": 509,
+   "left": 245,
+   "text": "○今日まで"
+  }
+ ],
+ "tabOrder": [
+  {
+   "id": "skip-to-main",
+   "top": 12,
+   "left": 12
+  },
+  {
+   "id": "ops-brand-mark",
+   "top": 0,
+   "left": 16
+  },
+  {
+   "id": "user-menu-button",
+   "top": 0,
+   "left": 297
+  },
+  {
+   "id": "home-next-link",
+   "top": 303,
+   "left": 16
+  },
+  {
+   "id": "home-primary",
+   "top": 403,
+   "left": 16
+  },
+  {
+   "id": "deadline-link",
+   "top": 503,
+   "left": 30
+  },
+  {
+   "id": "ops-enter-inspection",
+   "top": 641,
+   "left": 16
+  },
+  {
+   "id": "ops-enter-plan",
+   "top": 641,
+   "left": 133
+  },
+  {
+   "id": "ops-enter-flight",
+   "top": 641,
+   "left": 250
+  },
+  {
+   "id": "home-all-toggle",
+   "top": 726,
+   "left": 30
+  },
+  {
+   "id": "SUMMARY",
+   "top": 859,
+   "left": 16
+  },
+  {
+   "id": "nav-today",
+   "top": 1110,
+   "left": 8
+  },
+  {
+   "id": "nav-plans",
+   "top": 1110,
+   "left": 100
+  },
+  {
+   "id": "nav-journal",
+   "top": 1110,
+   "left": 192
+  },
+  {
+   "id": "nav-more",
+   "top": 1110,
+   "left": 283
+  },
+  {
+   "id": "skip-to-main",
+   "top": 378,
+   "left": 12
+  },
+  {
+   "id": "ops-brand-mark",
+   "top": 0,
+   "left": 16
+  },
+  {
+   "id": "user-menu-button",
+   "top": 0,
+   "left": 297
+  },
+  {
+   "id": "home-next-link",
+   "top": 303,
+   "left": 16
+  },
+  {
+   "id": "home-primary",
+   "top": 403,
+   "left": 16
+  },
+  {
+   "id": "deadline-link",
+   "top": 503,
+   "left": 30
+  },
+  {
+   "id": "ops-enter-inspection",
+   "top": 641,
+   "left": 16
+  },
+  {
+   "id": "ops-enter-plan",
+   "top": 641,
+   "left": 133
+  },
+  {
+   "id": "ops-enter-flight",
+   "top": 641,
+   "left": 250
+  },
+  {
+   "id": "home-all-toggle",
+   "top": 726,
+   "left": 30
+  },
+  {
+   "id": "SUMMARY",
+   "top": 859,
+   "left": 16
+  },
+  {
+   "id": "nav-today",
+   "top": 1110,
+   "left": 8
+  },
+  {
+   "id": "nav-plans",
+   "top": 1110,
+   "left": 100
+  },
+  {
+   "id": "nav-journal",
+   "top": 1110,
+   "left": 192
+  }
+ ],
+ "zoom-390": {
+  "navTop": 728,
+  "lastBottom": 640,
+  "gap": 88,
+  "primaryW": 326,
+  "primaryH": 85,
+  "scrollW": 390,
+  "innerW": 390,
+  "fs": "32px"
+ },
+ "zoom-430": {
+  "navTop": 816,
+  "lastBottom": 728,
+  "gap": 88,
+  "primaryW": 366,
+  "primaryH": 85,
+  "scrollW": 430,
+  "innerW": 430,
+  "fs": "32px"
+ },
+ "zoom-320": {
+  "navTop": 524,
+  "lastBottom": 436,
+  "gap": 89,
+  "primaryW": 256,
+  "primaryH": 127,
+  "scrollW": 320,
+  "innerW": 320,
+  "fs": "32px"
+ }
+}

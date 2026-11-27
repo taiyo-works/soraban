@@ -26,7 +26,7 @@ export async function OpsHomeEntry() {
         <section aria-label="ホーム" className="sb-block-soft flex flex-col gap-2 !p-3 text-sm" data-testid="home-today-band">
           <h2 className="sb-eyebrow">ホーム</h2>
           {band.card ? (
-            <a href={band.card.primary.href} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-sb-rule pb-2 text-sb-ink hover:bg-sb-hover" data-testid="home-today-flight">
+            <a href={band.card.primary.href} className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1 border-b border-sb-rule pb-2 text-sb-ink hover:bg-sb-hover" data-testid="home-today-flight">
               <span className="sb-num tnum">{band.card.timeLabel}</span>
               <span className="min-w-0 flex-1 break-words">{band.card.title}</span>
               <TodayBadge badge={band.card.badge} />
@@ -47,10 +47,6 @@ export async function OpsHomeEntry() {
           className="sb-pill sb-pill-secondary sb-pill-sm"
         >
           <span className="sb-pill-label">ホームへ</span>
-          <span className="sb-pill-arrow" aria-hidden="true">
-            <span className="sb-ar sb-a1">→</span>
-            <span className="sb-ar sb-a2">→</span>
-          </span>
         </Link>
       </p>
       <OpsBottomNavLazy />

@@ -37,18 +37,18 @@ export default async function PlanReportPage({
       return (
         <main className="flex max-w-xl flex-col gap-4" data-testid="report-unavailable">
           <h1 className="opx-h1">通報の機能を使えません</h1>
-          <Note tone="red">通報の送信元の設定が正しくありません。管理者に連絡してください。</Note>
+          <Note tone="red" body>通報の送信元の設定が正しくありません。管理者に連絡してください。</Note>
         </main>
       );
     }
     throw e;
   }
   return (
-    <main className="flex flex-col gap-8">
+    <main className="flex flex-col gap-4">
       <PageHeader
         eyebrow="通報の内容"
         back={safeReturnTo(sp["returnTo"]) ? { href: safeReturnTo(sp["returnTo"])!, label: "現場モードへ戻る" } : { href: `/ops/plans/${view.planId}`, label: "通報の状況" }}
-        title={<span className="break-words" data-testid="report-plan-title">{view.planTitle}</span>}
+        title={<span className="[overflow-wrap:anywhere]" data-testid="report-plan-title">{view.planTitle}</span>}
       />
       <PlanTabs planId={view.planId} current="report" />
       <HashScroll offset={REPORT_SCROLL_OFFSET_PX} offsetLg={REPORT_SCROLL_OFFSET_LG_PX} />

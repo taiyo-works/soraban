@@ -1,0 +1,398 @@
+{
+ "375 home": {
+  "nonInteractive": [
+   {
+    "kinds": "bg",
+    "inter": false,
+    "desc": "span.sb-brand-mark \"\" 44x44"
+   }
+  ],
+  "interactiveCount": 19,
+  "hscroll": false
+ },
+ "375 ops-home": {
+  "nonInteractive": [],
+  "interactiveCount": 10,
+  "hscroll": false
+ },
+ "375 plans": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 plan-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 overview": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "375 judgement": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "375 report": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "375 insp": {
+  "nonInteractive": [],
+  "interactiveCount": 9,
+  "hscroll": false
+ },
+ "375 insp-new": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "375 journal": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 flights": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 flight-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 aircraft": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "375 pilots": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "375 places": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "375 permits": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "375 incidents": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 incident-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "375 more": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "375 members": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "375 about": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "375 field": {
+  "nonInteractive": [],
+  "interactiveCount": 9,
+  "hscroll": false
+ },
+ "375 field-incident": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "375 design": {
+  "nonInteractive": [
+   {
+    "kinds": "bg,border-Top,border-Right,border-Bottom,border-Left",
+    "inter": false,
+    "desc": "span.sbx-dot \"\" 14x14"
+   }
+  ],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 home": {
+  "nonInteractive": [
+   {
+    "kinds": "bg",
+    "inter": false,
+    "desc": "span.sb-brand-mark \"\" 44x44"
+   }
+  ],
+  "interactiveCount": 19,
+  "hscroll": false
+ },
+ "390 ops-home": {
+  "nonInteractive": [],
+  "interactiveCount": 10,
+  "hscroll": false
+ },
+ "390 plans": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 plan-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 overview": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "390 judgement": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "390 report": {
+  "nonInteractive": [],
+  "interactiveCount": 3,
+  "hscroll": false
+ },
+ "390 insp": {
+  "nonInteractive": [],
+  "interactiveCount": 9,
+  "hscroll": false
+ },
+ "390 insp-new": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "390 journal": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 flights": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 flight-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 aircraft": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 pilots": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 places": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 permits": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 incidents": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 incident-new": {
+  "nonInteractive": [],
+  "interactiveCount": 4,
+  "hscroll": false
+ },
+ "390 more": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "390 members": {
+  "nonInteractive": [],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "390 about": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "390 field": {
+  "nonInteractive": [],
+  "interactiveCount": 9,
+  "hscroll": false
+ },
+ "390 field-incident": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "390 design": {
+  "nonInteractive": [
+   {
+    "kinds": "bg,border-Top,border-Right,border-Bottom,border-Left",
+    "inter": false,
+    "desc": "span.sbx-dot \"\" 14x14"
+   }
+  ],
+  "interactiveCount": 6,
+  "hscroll": false
+ },
+ "1280 home": {
+  "nonInteractive": [
+   {
+    "kinds": "bg",
+    "inter": false,
+    "desc": "span.sb-brand-mark \"\" 56x56"
+   }
+  ],
+  "interactiveCount": 19,
+  "hscroll": false
+ },
+ "1280 ops-home": {
+  "nonInteractive": [],
+  "interactiveCount": 7,
+  "hscroll": false
+ },
+ "1280 plans": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 plan-new": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 overview": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 judgement": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 report": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 insp": {
+  "nonInteractive": [],
+  "interactiveCount": 5,
+  "hscroll": false
+ },
+ "1280 insp-new": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 journal": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 flights": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 flight-new": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 aircraft": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 pilots": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 places": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 permits": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 incidents": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 incident-new": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 more": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 members": {
+  "nonInteractive": [],
+  "interactiveCount": 1,
+  "hscroll": false
+ },
+ "1280 about": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 field": {
+  "nonInteractive": [],
+  "interactiveCount": 9,
+  "hscroll": false
+ },
+ "1280 field-incident": {
+  "nonInteractive": [],
+  "interactiveCount": 0,
+  "hscroll": false
+ },
+ "1280 design": {
+  "nonInteractive": [
+   {
+    "kinds": "bg,border-Top,border-Right,border-Bottom,border-Left",
+    "inter": false,
+    "desc": "span.sbx-dot \"\" 14x14"
+   }
+  ],
+  "interactiveCount": 6,
+  "hscroll": false
+ }
+}

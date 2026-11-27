@@ -1,0 +1,240 @@
+HEAD 12a1336, DB k16_a1, build: YCD1WfM8pb7x4JsEsyb_g
+
+Running 4 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (32.1s)
+  -  2 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help
+  -  3 e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる
+  -  4 e2e/ops-db/sprint16-k-db.spec.ts:321:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByTestId('field-status-prefetch-stale')
+    Expected: "！古い可能性"
+    Received: "（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）"
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveText" getByTestId('field-status-prefetch-stale') with timeout 30000ms
+      - waiting for getByTestId('field-status-prefetch-stale')
+        63 × locator resolved to <strong class="ml-1" data-testid="field-status-prefetch-stale">（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）</strong>
+           - unexpected value "（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）"
+
+
+      197 |       await expect(stale).toBeVisible();
+      198 |       // 帯の中は短い印と文字だけ（K-7：記号＋文字）。説明は帯の外
+    > 199 |       await expect(stale).toHaveText("！古い可能性");
+          |                           ^
+      200 |       await expect(band.getByTestId("field-status-prefetch-stale")).toHaveCount(1);
+      201 |       await expect(band.getByTestId("field-status-prefetch-stale-help")).toHaveCount(0);
+      202 |       const help = page.getByTestId("field-status-prefetch-stale-help");
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:199:27
+
+    Error Context: test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-3-状態の帯-32-2f984--status-prefetch-stale-help/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+  3 did not run
+exit 1
+HEAD 12a1336, DB k16_a1, build: YCD1WfM8pb7x4JsEsyb_g
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (32.2s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByTestId('field-status-prefetch-stale')
+    Expected: "！古い可能性"
+    Received: "（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）"
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveText" getByTestId('field-status-prefetch-stale') with timeout 30000ms
+      - waiting for getByTestId('field-status-prefetch-stale')
+        63 × locator resolved to <strong class="ml-1" data-testid="field-status-prefetch-stale">（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）</strong>
+           - unexpected value "（古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）"
+
+
+      197 |       await expect(stale).toBeVisible();
+      198 |       // 帯の中は短い印と文字だけ（K-7：記号＋文字）。説明は帯の外
+    > 199 |       await expect(stale).toHaveText("！古い可能性");
+          |                           ^
+      200 |       await expect(band.getByTestId("field-status-prefetch-stale")).toHaveCount(1);
+      201 |       await expect(band.getByTestId("field-status-prefetch-stale-help")).toHaveCount(0);
+      202 |       const help = page.getByTestId("field-status-prefetch-stale-help");
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:199:27
+
+    Error Context: test-results/ops/sprint16-k-db-K2-3-状態の帯-37-fd38e--status-prefetch-stale-help/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-3-状態の帯-37-fd38e--status-prefetch-stale-help/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-3-状態の帯-37-fd38e--status-prefetch-stale-help/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help 
+exit 1
+HEAD 12a1336, DB k16_a1, build: YCD1WfM8pb7x4JsEsyb_g
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (2.0s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる 
+
+    Error: 離陸前（圏外）: 見えている主ボタン
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 17
+
+      Array [
+    +   "field-inspection-link",
+    +   "field-em-submit",
+    +   "field-carry-submit",
+    +   "field-restriction-submit",
+    +   "field-site-third_party-none",
+    +   "field-site-third_party-present",
+    +   "field-site-other_aircraft-none",
+    +   "field-site-other_aircraft-present",
+    +   "field-site-rain-none",
+    +   "field-site-rain-present",
+    +   "field-site-visibility-good",
+    +   "field-site-visibility-limited",
+    +   "field-site-submit",
+    +   "field-docs-confirm-permit",
+    +   "field-docs-confirm-remote_id",
+    +   "field-docs-confirm-license",
+    +   "field-docs-confirm-manual",
+        "field-flight-button",
+      ]
+
+      157 | const expectOnePrimary = async (page: Page, root: string, id: string, label: string): Promise<void> => {
+      158 |   const p = await primaryState(page, root);
+    > 159 |   expect(p.ids, `${label}: 見えている主ボタン`).toEqual([id]);
+          |                                        ^
+      160 |   expect(p.stray, `${label}: data-variant の無い主ボタン`).toBe(0);
+      161 | };
+      162 |
+        at expectOnePrimary (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:159:40)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:249:5
+
+    Error Context: test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる 
+exit 1
+HEAD 12a1336, DB k16_a1, build: YCD1WfM8pb7x4JsEsyb_g
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:321:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (1.2s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:321:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "opx-box"
+    Received string:    "mx-4 mt-3 flex flex-wrap items-center gap-3 rounded-sharp border-2 border-brand-700 bg-paper p-3 text-ink"
+
+      329 |     await expect(box).toBeVisible();
+      330 |     await waitForSettledStyles(page);
+    > 331 |     expect(await box.getAttribute("class")).toContain("opx-box");
+          |                                             ^
+      332 |     expect(await page.getByTestId("pwa-update-button").getAttribute("class")).toContain("opx-btn");
+      333 |     expect(await page.getByTestId("pwa-update-button").getAttribute("data-variant")).toBeNull();
+      334 |     expect((await primaryState(page, "body")).ids, "知らせが出ても主ボタンは増えない").toEqual(before);
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:331:45
+
+    Error Context: test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4f14f-部品で、主ボタンを足さない。押す部品は-48px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4f14f-部品で、主ボタンを足さない。押す部品は-48px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4f14f-部品で、主ボタンを足さない。押す部品は-48px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:321:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 
+exit 1
+--- 旧い offline-shells.tsx だけ（field-client・pwa-register は新）
+HEAD 12a1336, DB k16_a1, build: DvTbF6nt6R7Zj839U8chf
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (31.9s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる 
+
+    Error: 離陸前（圏外）: 現場モードの印
+
+    expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('html')
+    Expected: "field"
+    Received: ""
+    Timeout:  30000ms
+
+    Call log:
+      - 離陸前（圏外）: 現場モードの印 locator('html') with timeout 30000ms
+      - waiting for locator('html')
+        63 × locator resolved to <html lang="ja" class="noto_sans_jp_b82836c-module__S2N0dG__variable plus_jakarta_sans_c7f3dfe7-module__C3RHnW__variable h-full antialiased">…</html>
+           - unexpected value "null"
+
+
+      142 | };
+      143 | const expectFieldMode = async (page: Page, label: string): Promise<void> => {
+    > 144 |   await expect(page.locator("html"), `${label}: 現場モードの印`).toHaveAttribute("data-mode", "field");
+          |                                                           ^
+      145 | };
+      146 | /** 現場の画面の基準（12c 契約 15）。離陸・着陸は 80、押す部品 56、間 12、本文 18、7:1、日差しで 4.5。 */
+      147 | const expectFieldStandards = async (page: Page, root: string, label: string, big?: string): Promise<void> => {
+        at expectFieldMode (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:144:59)
+        at expectFieldStandards (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:148:9)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:251:11
+
+    Error Context: test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-K2-1・K2-2・K2-4e957-日が、現場の値・新しい部品・主ボタン-1-つで描かれる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:235:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる 
+exit 1

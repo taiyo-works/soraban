@@ -1,0 +1,696 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-n3-db.spec.ts
+
+
+Running 26 tests using 1 worker
+
+[band] 320・125%・button（full）: 帯 116.5px（行 28.1px）・位置 static・帯の幅 290/290・文書 320/320・ボタン 340〜460・帯の下端 -7371
+  ✘   1 e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 320 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（320px）。等倍は今の帯のまま (1.3s)
+[band] 360・125%・button（full）: 帯 88.4px（行 28.1px）・位置 static・帯の幅 330/330・文書 360/360・ボタン 340〜460・帯の下端 -7152
+  ✘   2 e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 360 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（360px）。等倍は今の帯のまま (969ms)
+[band] 390・125%・button（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 360/360・文書 390/390・ボタン 340〜460・帯の下端 88
+[band] 390・125%・bottom（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 360/360・文書 390/390・ボタン -769〜-649・帯の下端 88
+[band] 390・125%・top（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 360/360・文書 390/390・ボタン 7224〜7344・帯の下端 108
+[band] 390・150%・button（full）: 帯 139.0px（行 33.8px）・位置 static・帯の幅 354/354・文書 390/390・ボタン 328〜472・帯の下端 -8892
+  ✘   3 e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 390 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（390px）。等倍は今の帯のまま (1.2s)
+[band] 430・125%・button（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 400/400・文書 430/430・ボタン 340〜460・帯の下端 88
+[band] 430・125%・bottom（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 400/400・文書 430/430・ボタン -692〜-572・帯の下端 88
+[band] 430・125%・top（full）: 帯 88.4px（行 28.1px）・位置 sticky・帯の幅 400/400・文書 430/430・ボタン 6738〜6858・帯の下端 108
+[band] 430・150%・button（full）: 帯 105.3px（行 33.8px）・位置 static・帯の幅 394/394・文書 430/430・ボタン 328〜472・帯の下端 -8385
+  ✘   4 e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 430 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（430px）。等倍は今の帯のまま (1.2s)
+  ✘   5 e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 320 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（320px） (1.2s)
+  ✘   6 e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 360 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（360px） (912ms)
+[n3-2] 文書 368/320・H3 {"right":336.640625,"sw":291,"cw":291}・H4 {"right":367.6875,"sw":322,"cw":322}・戻る {"right":335.46875,"sw":301,"cw":301}・はみ出し field-back →335 / h3 →337 / h4 →368
+[n3-3] チップ [{"text":"朝の河川敷の橋梁点検撮影 MWX30THU","ellipsis":true,"sw":653,"cw":204,"h":160.390625,"lines":1,"right":288},{"text":"午後の山あいの送電線の巡視撮影 MWX30THU","ellipsis":true,"sw":762,"cw":206,"h":158.390625,"lines":1,"right":288}]
+  ✘   7 e2e/ops-db/sprint16-n3-db.spec.ts:240:7 › N3-2・N3-3 現場の 320・文字 200% › 文書の横スクロール 0。H3「飛行自粛要請の確認」・H4「飛行マニュアルの組み合わせ制限」・「ホームへ戻る」が画面の幅を超えない。同じ日のチップは題名が省略されない (880ms)
+[n3-4] 飛行記録の入力 320・200%: 離陸日=(空) 102/102（要 214・余 70） ; 離陸時刻=(空) 102/102（要 122・余 70） ; 着陸日=(空) 102/102（要 214・余 70） ; 着陸時刻=(空) 102/102（要 122・余 70）・文書 320/320
+  ✘   8 e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 飛行記録の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える (957ms)
+[n3-4] 点検の入力 320・200%: 実施日=2026-11-26 102/102（要 214・余 70） ; 実施時刻=13:58 102/102（要 122・余 70）・文書 320/320
+  ✘   9 e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 点検の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える (986ms)
+[n3-4] 計画作成の段 ② 320・200%: plan-start-date=(空) 222/222（要 234・余 190） ; plan-start-time=(空) 222/222（要 124・余 190）・文書 320/320
+  ✘  10 e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 計画作成の段 ②：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える (1.6s)
+[n3-5] 飛行記録の入力 360・100%: 離陸日=(空) 余 110.0 要 114.4（値 88.4＋絵と間 26.0） ; 着陸日=(空) 余 110.0 要 114.4（値 88.4＋絵と間 26.0）
+  ✘  11 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 100%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (884ms)
+[n3-5] 飛行記録の入力 360・200%: 離陸日=(空) 余 90.0 要 214.4（値 176.8＋絵と間 37.6） ; 着陸日=(空) 余 90.0 要 214.4（値 176.8＋絵と間 37.6）
+  ✘  12 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (964ms)
+[n3-5] 飛行記録の入力 375・100%: 離陸日=(空) 余 118.0 要 114.4（値 88.4＋絵と間 26.0） ; 着陸日=(空) 余 118.0 要 114.4（値 88.4＋絵と間 26.0）
+[n3-5] 点検の入力 375・100%: 実施日=2026-11-26 余 118.0 要 114.4（値 88.4＋絵と間 26.0）
+[n3-5] 計画作成の段 ② 375・100%: plan-start-date=(空) 余 277.0 要 124.0（値 98.0＋絵と間 26.0）
+  ✓  13 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 375 幅・文字 100%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (2.1s)
+[n3-5] 飛行記録の入力 375・200%: 離陸日=(空) 余 98.0 要 214.4（値 176.8＋絵と間 37.6） ; 着陸日=(空) 余 98.0 要 214.4（値 176.8＋絵と間 37.6）
+  ✘  14 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 375 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (726ms)
+[n3-5] 飛行記録の入力 390・100%: 離陸日=(空) 余 125.0 要 114.4（値 88.4＋絵と間 26.0） ; 着陸日=(空) 余 125.0 要 114.4（値 88.4＋絵と間 26.0）
+[n3-5] 点検の入力 390・100%: 実施日=2026-11-26 余 125.0 要 114.4（値 88.4＋絵と間 26.0）
+[n3-5] 計画作成の段 ② 390・100%: plan-start-date=(空) 余 292.0 要 124.0（値 98.0＋絵と間 26.0）
+  ✓  15 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 390 幅・文字 100%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (2.1s)
+[n3-5] 飛行記録の入力 390・200%: 離陸日=(空) 余 105.0 要 214.4（値 176.8＋絵と間 37.6） ; 着陸日=(空) 余 105.0 要 214.4（値 176.8＋絵と間 37.6）
+  ✘  16 e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 390 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない (868ms)
+[n3-6] 320・100%: 「そらばん」 16〜85（69/69・1 行） ; 「運航管理」 93〜149（57/57・1 行）・ボタン 242〜304（62×48）・header 高さ 48
+  ✓  17 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（320px・文字 100%）。header の部品は 48px 以上 (769ms)
+[n3-6] 320・200%: 「そらばん」 -99〜39（137/137・1 行） ; 「運航管理」 55〜168（113/113・1 行）・ボタン 192〜288（96×48）・header 高さ 96
+  ✘  18 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（320px・文字 200%）。header の部品は 48px 以上 (777ms)
+[n3-6] 360・100%: 「そらばん」 16〜85（69/69・1 行） ; 「運航管理」 93〜149（57/57・1 行）・ボタン 282〜344（62×48）・header 高さ 48
+  ✓  19 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（360px・文字 100%）。header の部品は 48px 以上 (674ms)
+[n3-6] 360・200%: 「そらばん」 -59〜79（137/137・1 行） ; 「運航管理」 95〜208（113/113・1 行）・ボタン 232〜328（96×48）・header 高さ 96
+  ✘  20 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（360px・文字 200%）。header の部品は 48px 以上 (827ms)
+[n3-6] 390・100%: 「そらばん」 16〜85（69/69・1 行） ; 「運航管理」 93〜149（57/57・1 行）・ボタン 312〜374（62×48）・header 高さ 48
+  ✓  21 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（390px・文字 100%）。header の部品は 48px 以上 (677ms)
+[n3-6] 390・200%: 「そらばん」 -29〜109（137/137・1 行） ; 「運航管理」 125〜238（113/113・1 行）・ボタン 262〜358（96×48）・header 高さ 96
+  ✘  22 e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（390px・文字 200%）。header の部品は 48px 以上 (910ms)
+  ✘  23 e2e/ops-db/sprint16-n3-db.spec.ts:443:5 › N3-7 準備カードの名前は見出しの文だけ。中の操作は読み上げで 1 回ずつ使える (30.9s)
+[n3-8] 余裕 -13.88px（クイック下端 752.9・ナビ上端 739.0）・題の行数 2・期限 技能証明四十字の氏名で期限の対象を長くする試験操縦者MWX3211JＡＢＣＤＥＦＧＨＩＪ 更新の期限（満了の 1 か月前）を過ぎています。1/6（水）○あと 1 日（4 行相当）
+  -  24 e2e/ops-db/sprint16-n3-db.spec.ts:485:7 › N3-8 ホームの余裕 › 375×812：計画の題が 2 行・期限の対象が 40 字でも、クイック操作の下端とナビの上端の間 8px 以上
+[signout-keep] 320: ・説明の高さ 71.4px
+  ✘  25 e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 320 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（320px） (2.1s)
+[signout-keep] 375: ・説明の高さ 71.4px
+  ✘  26 e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 375 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（375px） (1.9s)
+
+
+  1) e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 320 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（320px）。等倍は今の帯のまま 
+
+    Error: 320・125%・button（full）: 帯は固定
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "sticky"
+    Received: "static"
+
+      173 |           note("band", `${tag}: 帯 ${p.bandH.toFixed(1)}px（行 ${p.lineH.toFixed(1)}px）・位置 ${p.pos}・帯の幅 ${p.bandSw}/${p.bandCw}・文書 ${p.docSw}/${p.docCw}・ボタン ${p.buttonRect.top.toFixed(0)}〜${p.buttonRect.bottom.toFixed(0)}・帯の下端 ${p.bandBottom.toFixed(0)}`);
+      174 |           // (a) 固定の帯が画面の上端にあり、送信待ちの件数の文字が表示の中で、他の要素に覆われていない
+    > 175 |           expect(p.bandPos, `${tag}: 帯は固定`).toBe("sticky");
+          |                                             ^
+      176 |           expect(p.unsentInView, `${tag}: 送信待ちの件数が表示の中`).toBe(true);
+      177 |           expect(p.unsentOnTop, `${tag}: 送信待ちの件数の中心が帯の中の要素（覆われていない）`).toBe(true);
+      178 |           if (where === "button") {
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:175:45
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-現場の-1--27775-覆わず、帯は-1-行（320px）。等倍は今の帯のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-現場の-1--27775-覆わず、帯は-1-行（320px）。等倍は今の帯のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-現場の-1--27775-覆わず、帯は-1-行（320px）。等倍は今の帯のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 360 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（360px）。等倍は今の帯のまま 
+
+    Error: 360・125%・button（full）: 帯は固定
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "sticky"
+    Received: "static"
+
+      173 |           note("band", `${tag}: 帯 ${p.bandH.toFixed(1)}px（行 ${p.lineH.toFixed(1)}px）・位置 ${p.pos}・帯の幅 ${p.bandSw}/${p.bandCw}・文書 ${p.docSw}/${p.docCw}・ボタン ${p.buttonRect.top.toFixed(0)}〜${p.buttonRect.bottom.toFixed(0)}・帯の下端 ${p.bandBottom.toFixed(0)}`);
+      174 |           // (a) 固定の帯が画面の上端にあり、送信待ちの件数の文字が表示の中で、他の要素に覆われていない
+    > 175 |           expect(p.bandPos, `${tag}: 帯は固定`).toBe("sticky");
+          |                                             ^
+      176 |           expect(p.unsentInView, `${tag}: 送信待ちの件数が表示の中`).toBe(true);
+      177 |           expect(p.unsentOnTop, `${tag}: 送信待ちの件数の中心が帯の中の要素（覆われていない）`).toBe(true);
+      178 |           if (where === "button") {
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:175:45
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-現場の-1--fd85d-覆わず、帯は-1-行（360px）。等倍は今の帯のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-現場の-1--fd85d-覆わず、帯は-1-行（360px）。等倍は今の帯のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-現場の-1--fd85d-覆わず、帯は-1-行（360px）。等倍は今の帯のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 390 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（390px）。等倍は今の帯のまま 
+
+    Error: 390・150%・button（full）: 帯は固定
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "sticky"
+    Received: "static"
+
+      173 |           note("band", `${tag}: 帯 ${p.bandH.toFixed(1)}px（行 ${p.lineH.toFixed(1)}px）・位置 ${p.pos}・帯の幅 ${p.bandSw}/${p.bandCw}・文書 ${p.docSw}/${p.docCw}・ボタン ${p.buttonRect.top.toFixed(0)}〜${p.buttonRect.bottom.toFixed(0)}・帯の下端 ${p.bandBottom.toFixed(0)}`);
+      174 |           // (a) 固定の帯が画面の上端にあり、送信待ちの件数の文字が表示の中で、他の要素に覆われていない
+    > 175 |           expect(p.bandPos, `${tag}: 帯は固定`).toBe("sticky");
+          |                                             ^
+      176 |           expect(p.unsentInView, `${tag}: 送信待ちの件数が表示の中`).toBe(true);
+      177 |           expect(p.unsentOnTop, `${tag}: 送信待ちの件数の中心が帯の中の要素（覆われていない）`).toBe(true);
+      178 |           if (where === "button") {
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:175:45
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-現場の-1--5dbb9-覆わず、帯は-1-行（390px）。等倍は今の帯のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-現場の-1--5dbb9-覆わず、帯は-1-行（390px）。等倍は今の帯のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-現場の-1--5dbb9-覆わず、帯は-1-行（390px）。等倍は今の帯のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 430 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（430px）。等倍は今の帯のまま 
+
+    Error: 430・150%・button（full）: 帯は固定
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "sticky"
+    Received: "static"
+
+      173 |           note("band", `${tag}: 帯 ${p.bandH.toFixed(1)}px（行 ${p.lineH.toFixed(1)}px）・位置 ${p.pos}・帯の幅 ${p.bandSw}/${p.bandCw}・文書 ${p.docSw}/${p.docCw}・ボタン ${p.buttonRect.top.toFixed(0)}〜${p.buttonRect.bottom.toFixed(0)}・帯の下端 ${p.bandBottom.toFixed(0)}`);
+      174 |           // (a) 固定の帯が画面の上端にあり、送信待ちの件数の文字が表示の中で、他の要素に覆われていない
+    > 175 |           expect(p.bandPos, `${tag}: 帯は固定`).toBe("sticky");
+          |                                             ^
+      176 |           expect(p.unsentInView, `${tag}: 送信待ちの件数が表示の中`).toBe(true);
+      177 |           expect(p.unsentOnTop, `${tag}: 送信待ちの件数の中心が帯の中の要素（覆われていない）`).toBe(true);
+      178 |           if (where === "button") {
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:175:45
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-現場の-1--c21fc-覆わず、帯は-1-行（430px）。等倍は今の帯のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-現場の-1--c21fc-覆わず、帯は-1-行（430px）。等倍は今の帯のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-現場の-1--c21fc-覆わず、帯は-1-行（430px）。等倍は今の帯のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 320 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（320px） 
+
+    Error: page.evaluate: TypeError: Cannot set properties of null (setting 'textContent')
+        at eval (eval at evaluate (:370:30), <anonymous>:3:26)
+        at UtilityScript.evaluate (<anonymous>:372:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:370:30), <anonymous>:3:26)
+        at UtilityScript.evaluate (<anonymous>:372:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:211:20
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-f5c2d-の-1-行の帯は折り返さず、はみ出さない（320px）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-f5c2d-の-1-行の帯は折り返さず、はみ出さない（320px）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-f5c2d-の-1-行の帯は折り返さず、はみ出さない（320px）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 360 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（360px） 
+
+    Error: page.evaluate: TypeError: Cannot set properties of null (setting 'textContent')
+        at eval (eval at evaluate (:370:30), <anonymous>:3:26)
+        at UtilityScript.evaluate (<anonymous>:372:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:370:30), <anonymous>:3:26)
+        at UtilityScript.evaluate (<anonymous>:372:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:211:20
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-51e43-の-1-行の帯は折り返さず、はみ出さない（360px）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-51e43-の-1-行の帯は折り返さず、はみ出さない（360px）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-1-圏外・件数の-51e43-の-1-行の帯は折り返さず、はみ出さない（360px）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/ops-db/sprint16-n3-db.spec.ts:240:7 › N3-2・N3-3 現場の 320・文字 200% › 文書の横スクロール 0。H3「飛行自粛要請の確認」・H4「飛行マニュアルの組み合わせ制限」・「ホームへ戻る」が画面の幅を超えない。同じ日のチップは題名が省略されない 
+
+    Error: 画面の右端（320）を超える要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "field-back →335",
+    +   "h3 →337",
+    +   "h4 →368",
+    + ]
+
+      282 |     expect(r.h3, "H3 が見つかる").not.toBeNull();
+      283 |     expect(r.back, "ホームへ戻るが見つかる").not.toBeNull();
+    > 284 |     expect(r.wide, `画面の右端（${r.cw}）を超える要素`).toEqual([]);
+          |                                            ^
+      285 |     expect(r.sw, "文書の scrollWidth").toBeLessThanOrEqual(320);
+      286 |     for (const x of [r.h3, r.h4, r.back]) if (x) expect(x.right, "見出し・戻るの右端").toBeLessThanOrEqual(r.cw + 0.5);
+      287 |     // N3-3：チップの題名が省略（text-overflow: ellipsis で切る）されず、全文が読める。押す部品は 56px 以上
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:284:44
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-2・N3-3-現-98838-画面の幅を超えない。同じ日のチップは題名が省略されない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-2・N3-3-現-98838-画面の幅を超えない。同じ日のチップは題名が省略されない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-2・N3-3-現-98838-画面の幅を超えない。同じ日のチップは題名が省略されない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 飛行記録の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+
+    Error: 値とカレンダーの絵が収まらない
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "離陸日 余 70.0 < 要 214.4",
+    +   "離陸時刻 余 70.0 < 要 122.3",
+    +   "着陸日 余 70.0 < 要 214.4",
+    +   "着陸時刻 余 70.0 < 要 122.3",
+    + ]
+
+      374 |       expect(inputs.length, "日付・時刻の入力欄がある").toBeGreaterThan(0);
+      375 |       expect(inputs.filter((x) => x.clipped).map((x) => `${x.id} ${x.cw}<${x.sw}`), "入れ物の切れ").toEqual([]);
+    > 376 |       expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), "値とカレンダーの絵が収まらない").toEqual([]);
+          |                                                                                                                                         ^
+      377 |       expect(doc.sw, "文書の横スクロール").toBeLessThanOrEqual(doc.cw);
+      378 |     });
+      379 |   }
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:376:137
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6121-で入れ物の切れ-0・横スクロール-0。値の全文が見える/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6121-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6121-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 点検の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+
+    Error: 値とカレンダーの絵が収まらない
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "実施日 余 70.0 < 要 214.4",
+    +   "実施時刻 余 70.0 < 要 122.3",
+    + ]
+
+      374 |       expect(inputs.length, "日付・時刻の入力欄がある").toBeGreaterThan(0);
+      375 |       expect(inputs.filter((x) => x.clipped).map((x) => `${x.id} ${x.cw}<${x.sw}`), "入れ物の切れ").toEqual([]);
+    > 376 |       expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), "値とカレンダーの絵が収まらない").toEqual([]);
+          |                                                                                                                                         ^
+      377 |       expect(doc.sw, "文書の横スクロール").toBeLessThanOrEqual(doc.cw);
+      378 |     });
+      379 |   }
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:376:137
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-145a7-で入れ物の切れ-0・横スクロール-0。値の全文が見える/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-145a7-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-145a7-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 計画作成の段 ②：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+
+    Error: 値とカレンダーの絵が収まらない
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "plan-start-date 余 190.0 < 要 233.6",
+    + ]
+
+      374 |       expect(inputs.length, "日付・時刻の入力欄がある").toBeGreaterThan(0);
+      375 |       expect(inputs.filter((x) => x.clipped).map((x) => `${x.id} ${x.cw}<${x.sw}`), "入れ物の切れ").toEqual([]);
+    > 376 |       expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), "値とカレンダーの絵が収まらない").toEqual([]);
+          |                                                                                                                                         ^
+      377 |       expect(doc.sw, "文書の横スクロール").toBeLessThanOrEqual(doc.cw);
+      378 |     });
+      379 |   }
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:376:137
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d9e0b-で入れ物の切れ-0・横スクロール-0。値の全文が見える/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d9e0b-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d9e0b-で入れ物の切れ-0・横スクロール-0。値の全文が見える/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 100%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+
+    Error: 飛行記録の入力 360・100%
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "離陸日 余 110.0 < 要 114.4",
+    +   "着陸日 余 110.0 < 要 114.4",
+    + ]
+
+      391 |           note("n3-5", `${sc.name} ${w}・${z}%: ${inputs.map((x) => `${x.id}=${x.value || "(空)"} 余 ${x.avail.toFixed(1)} 要 ${x.need.toFixed(1)}（値 ${x.textW.toFixed(1)}＋絵と間 ${x.extra.toFixed(1)}）`).join(" ; ")}`);
+      392 |           expect(inputs.length, `${sc.name}: 日付欄がある`).toBeGreaterThan(0);
+    > 393 |           expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), `${sc.name} ${w}・${z}%`).toEqual([]);
+          |                                                                                                                                                   ^
+      394 |           expect(inputs.filter((x) => x.clipped).map((x) => x.id), `${sc.name}: 入れ物の切れ`).toEqual([]);
+      395 |         }
+      396 |       });
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:393:147
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6a04-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6a04-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-d6a04-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+
+    Error: 飛行記録の入力 360・200%
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "離陸日 余 90.0 < 要 214.4",
+    +   "着陸日 余 90.0 < 要 214.4",
+    + ]
+
+      391 |           note("n3-5", `${sc.name} ${w}・${z}%: ${inputs.map((x) => `${x.id}=${x.value || "(空)"} 余 ${x.avail.toFixed(1)} 要 ${x.need.toFixed(1)}（値 ${x.textW.toFixed(1)}＋絵と間 ${x.extra.toFixed(1)}）`).join(" ; ")}`);
+      392 |           expect(inputs.length, `${sc.name}: 日付欄がある`).toBeGreaterThan(0);
+    > 393 |           expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), `${sc.name} ${w}・${z}%`).toEqual([]);
+          |                                                                                                                                                   ^
+      394 |           expect(inputs.filter((x) => x.clipped).map((x) => x.id), `${sc.name}: 入れ物の切れ`).toEqual([]);
+      395 |         }
+      396 |       });
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:393:147
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-1c658-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-1c658-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-1c658-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 375 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+
+    Error: 飛行記録の入力 375・200%
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "離陸日 余 98.0 < 要 214.4",
+    +   "着陸日 余 98.0 < 要 214.4",
+    + ]
+
+      391 |           note("n3-5", `${sc.name} ${w}・${z}%: ${inputs.map((x) => `${x.id}=${x.value || "(空)"} 余 ${x.avail.toFixed(1)} 要 ${x.need.toFixed(1)}（値 ${x.textW.toFixed(1)}＋絵と間 ${x.extra.toFixed(1)}）`).join(" ; ")}`);
+      392 |           expect(inputs.length, `${sc.name}: 日付欄がある`).toBeGreaterThan(0);
+    > 393 |           expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), `${sc.name} ${w}・${z}%`).toEqual([]);
+          |                                                                                                                                                   ^
+      394 |           expect(inputs.filter((x) => x.clipped).map((x) => x.id), `${sc.name}: 入れ物の切れ`).toEqual([]);
+      395 |         }
+      396 |       });
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:393:147
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-2d2af-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-2d2af-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-2d2af-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 390 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+
+    Error: 飛行記録の入力 390・200%
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "離陸日 余 105.0 < 要 214.4",
+    +   "着陸日 余 105.0 < 要 214.4",
+    + ]
+
+      391 |           note("n3-5", `${sc.name} ${w}・${z}%: ${inputs.map((x) => `${x.id}=${x.value || "(空)"} 余 ${x.avail.toFixed(1)} 要 ${x.need.toFixed(1)}（値 ${x.textW.toFixed(1)}＋絵と間 ${x.extra.toFixed(1)}）`).join(" ; ")}`);
+      392 |           expect(inputs.length, `${sc.name}: 日付欄がある`).toBeGreaterThan(0);
+    > 393 |           expect(inputs.filter((x) => x.overlap).map((x) => `${x.id} 余 ${x.avail.toFixed(1)} < 要 ${x.need.toFixed(1)}`), `${sc.name} ${w}・${z}%`).toEqual([]);
+          |                                                                                                                                                   ^
+      394 |           expect(inputs.filter((x) => x.clipped).map((x) => x.id), `${sc.name}: 入れ物の切れ`).toEqual([]);
+      395 |         }
+      396 |       });
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:393:147
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-4・N3-5-日-0ace7-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-4・N3-5-日-0ace7-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-4・N3-5-日-0ace7-画作成の日付欄で、値の文字とカレンダーの絵が重ならない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（320px・文字 200%）。header の部品は 48px 以上 
+
+    Error: 「そらばん」の左端
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 0
+    Received:    -98.5625
+
+      427 |       for (const s of r.spans) {
+      428 |         expect(s.sw, `「${s.text}」の中身が切れている（scrollWidth ≦ clientWidth + 1）`).toBeLessThanOrEqual(s.cw + 1);
+    > 429 |         expect(s.left, `「${s.text}」の左端`).toBeGreaterThanOrEqual(0);
+          |                                          ^
+      430 |         expect(s.right, `「${s.text}」の右端が表示の幅の中`).toBeLessThanOrEqual(r.vw);
+      431 |       }
+      432 |       expect(word!.right, "「そらばん」は利用者メニューのボタンと重ならない").toBeLessThanOrEqual(r.btn.left + 0.5);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:429:42
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-6-header-259a4-字-200-）。header-の部品は-48px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-6-header-259a4-字-200-）。header-の部品は-48px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-6-header-259a4-字-200-）。header-の部品は-48px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（360px・文字 200%）。header の部品は 48px 以上 
+
+    Error: 「そらばん」の左端
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 0
+    Received:    -58.5625
+
+      427 |       for (const s of r.spans) {
+      428 |         expect(s.sw, `「${s.text}」の中身が切れている（scrollWidth ≦ clientWidth + 1）`).toBeLessThanOrEqual(s.cw + 1);
+    > 429 |         expect(s.left, `「${s.text}」の左端`).toBeGreaterThanOrEqual(0);
+          |                                          ^
+      430 |         expect(s.right, `「${s.text}」の右端が表示の幅の中`).toBeLessThanOrEqual(r.vw);
+      431 |       }
+      432 |       expect(word!.right, "「そらばん」は利用者メニューのボタンと重ならない").toBeLessThanOrEqual(r.btn.left + 0.5);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:429:42
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-6-header-fc828-字-200-）。header-の部品は-48px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-6-header-fc828-字-200-）。header-の部品は-48px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-6-header-fc828-字-200-）。header-の部品は-48px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（390px・文字 200%）。header の部品は 48px 以上 
+
+    Error: 「そらばん」の左端
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 0
+    Received:    -28.5625
+
+      427 |       for (const s of r.spans) {
+      428 |         expect(s.sw, `「${s.text}」の中身が切れている（scrollWidth ≦ clientWidth + 1）`).toBeLessThanOrEqual(s.cw + 1);
+    > 429 |         expect(s.left, `「${s.text}」の左端`).toBeGreaterThanOrEqual(0);
+          |                                          ^
+      430 |         expect(s.right, `「${s.text}」の右端が表示の幅の中`).toBeLessThanOrEqual(r.vw);
+      431 |       }
+      432 |       expect(word!.right, "「そらばん」は利用者メニューのボタンと重ならない").toBeLessThanOrEqual(r.btn.left + 0.5);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:429:42
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-6-header-3e9d2-字-200-）。header-の部品は-48px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-6-header-3e9d2-字-200-）。header-の部品は-48px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-6-header-3e9d2-字-200-）。header-の部品は-48px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) e2e/ops-db/sprint16-n3-db.spec.ts:443:5 › N3-7 準備カードの名前は見出しの文だけ。中の操作は読み上げで 1 回ずつ使える ──────────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: '次の飛行の準備', exact: true })
+    Expected: 1
+    Received: 0
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: '次の飛行の準備', exact: true }) with timeout 30000ms
+      - waiting for getByRole('region', { name: '次の飛行の準備', exact: true })
+        63 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      456 |   // カードの名前（アクセシビリティの木）は見出しの文だけ。以前の「通報、…。点検、…。」の 1 文は名前に使わない
+      457 |   const named = page.getByRole("region", { name: heading, exact: true });
+    > 458 |   await expect(named).toHaveCount(1);
+          |                       ^
+      459 |   const snap = await named.ariaSnapshot();
+      460 |   note("n3-7", snap.replaceAll("\n", " ⏎ ").slice(0, 600));
+      461 |   expect(snap.split("\n")[0], "カードの名前の行").toBe(`- region "${heading}":`);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:458:23
+
+    Error Context: test-results/ops/sprint16-n3-db-N3-7-準備カードの名前は見出しの文だけ。中の操作は読み上げで-1-回ずつ使える/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-N3-7-準備カードの名前は見出しの文だけ。中の操作は読み上げで-1-回ずつ使える/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-N3-7-準備カードの名前は見出しの文だけ。中の操作は読み上げで-1-回ずつ使える/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 320 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（320px） 
+
+    Error: 文節のまとまり
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 0
+
+      552 |         note("signout-keep", `${w}: ${r.segs.map((s) => `「${s.text}」${s.lines} 行`).join(" / ")}・説明の高さ ${r.noteH.toFixed(1)}px`);
+      553 |         expect(r.text).toBe("（先読みは消します。同じ人がログインすると続きを送ります）");
+    > 554 |         expect(r.segs.length, "文節のまとまり").toBe(3);
+          |                                          ^
+      555 |         for (const s of r.segs) {
+      556 |           expect(s.lines, `「${s.text}」は途中で折れない`).toBe(1);
+      557 |           expect(s.right, `「${s.text}」の右端が画面の中`).toBeLessThanOrEqual(r.vw);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:554:42
+
+    Error Context: test-results/ops/sprint16-n3-db-ログアウトの確認：si-20974-のまとまりごとに折れる）。文言は変えない（320px）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-ログアウトの確認：si-20974-のまとまりごとに折れる）。文言は変えない（320px）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-ログアウトの確認：si-20974-のまとまりごとに折れる）。文言は変えない（320px）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 375 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（375px） 
+
+    Error: 文節のまとまり
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 0
+
+      552 |         note("signout-keep", `${w}: ${r.segs.map((s) => `「${s.text}」${s.lines} 行`).join(" / ")}・説明の高さ ${r.noteH.toFixed(1)}px`);
+      553 |         expect(r.text).toBe("（先読みは消します。同じ人がログインすると続きを送ります）");
+    > 554 |         expect(r.segs.length, "文節のまとまり").toBe(3);
+          |                                          ^
+      555 |         for (const s of r.segs) {
+      556 |           expect(s.lines, `「${s.text}」は途中で折れない`).toBe(1);
+      557 |           expect(s.right, `「${s.text}」の右端が画面の中`).toBeLessThanOrEqual(r.vw);
+        at /home/user/soraban/e2e/ops-db/sprint16-n3-db.spec.ts:554:42
+
+    Error Context: test-results/ops/sprint16-n3-db-ログアウトの確認：si-68a5a-のまとまりごとに折れる）。文言は変えない（375px）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-n3-db-ログアウトの確認：si-68a5a-のまとまりごとに折れる）。文言は変えない（375px）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-n3-db-ログアウトの確認：si-68a5a-のまとまりごとに折れる）。文言は変えない（375px）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20 failed
+    e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 320 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（320px）。等倍は今の帯のまま 
+    e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 360 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（360px）。等倍は今の帯のまま 
+    e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 390 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（390px）。等倍は今の帯のまま 
+    e2e/ops-db/sprint16-n3-db.spec.ts:158:9 › N3-1 現場の 1 行の帯 430 › 文字 125・150・200% で、離陸のボタンの位置でも送信待ちの件数が帯に見え、ボタンを覆わず、帯は 1 行（430px）。等倍は今の帯のまま 
+    e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 320 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（320px） 
+    e2e/ops-db/sprint16-n3-db.spec.ts:204:11 › N3-1 圏外・件数の多いとき › 360 › 圏外の帯（「× 接続なし（圏外）」）と 3 桁の件数でも、文字 200% の 1 行の帯は折り返さず、はみ出さない（360px） 
+    e2e/ops-db/sprint16-n3-db.spec.ts:240:7 › N3-2・N3-3 現場の 320・文字 200% › 文書の横スクロール 0。H3「飛行自粛要請の確認」・H4「飛行マニュアルの組み合わせ制限」・「ホームへ戻る」が画面の幅を超えない。同じ日のチップは題名が省略されない 
+    e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 飛行記録の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+    e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 点検の入力：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+    e2e/ops-db/sprint16-n3-db.spec.ts:365:9 › N3-4・N3-5 日付・時刻の入力 › N3-4 計画作成の段 ②：320 幅・文字 200% で入れ物の切れ 0・横スクロール 0。値の全文が見える 
+    e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 100%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+    e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 360 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+    e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 375 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+    e2e/ops-db/sprint16-n3-db.spec.ts:383:11 › N3-4・N3-5 日付・時刻の入力 › N3-5 390 幅・文字 200%：点検・飛行記録・計画作成の日付欄で、値の文字とカレンダーの絵が重ならない 
+    e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（320px・文字 200%）。header の部品は 48px 以上 
+    e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（360px・文字 200%）。header の部品は 48px 以上 
+    e2e/ops-db/sprint16-n3-db.spec.ts:404:9 › N3-6 header の「そらばん」が欠けない（390px・文字 200%）。header の部品は 48px 以上 
+    e2e/ops-db/sprint16-n3-db.spec.ts:443:5 › N3-7 準備カードの名前は見出しの文だけ。中の操作は読み上げで 1 回ずつ使える ────────────
+    e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 320 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（320px） 
+    e2e/ops-db/sprint16-n3-db.spec.ts:527:11 › ログアウトの確認：signout-keep の説明文 › 375 › 文の途中で折り返さない（文節のまとまりごとに折れる）。文言は変えない（375px） 
+  1 skipped
+  5 passed (1.3m)
+ ELIFECYCLE  Command failed with exit code 1.

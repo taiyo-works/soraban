@@ -1,0 +1,25 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint12d-db.spec.ts e2e/ops-db/sprint17-db.spec.ts
+
+
+Running 16 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint12d-db.spec.ts:158:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-1. 「登録」から一覧へ：初期データの 6 件が文字と記号つきの有効性で区別され、固定の文言が出る。絞り込みが効く。375px で横スクロールなし (2.7s)
+  ✓   2 e2e/ops-db/sprint12d-db.spec.ts:203:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-2. 登録（運航管理者のみ）→ 詳細 → 訂正（理由必須・影響する計画の旨）→ 失効 → 取消 → 版の履歴。同じ番号は拒否 (6.7s)
+  ✓   3 e2e/ops-db/sprint12d-db.spec.ts:302:7 › Sprint 12d E2E-DB：許可・承認の登録（契約 12） › 12-3. 操縦者・閲覧者は閲覧だけ（登録の入口・訂正・失効・取消がなく、API は 403）。他の組織の登録は 404。「この登録を根拠にしている計画」が出る (2.7s)
+  ✓   4 e2e/ops-db/sprint12d-db.spec.ts:347:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-1. 登録した許可の番号を計画に入れると、範囲に収まる種類だけが判定に使われ、エンジンの「照合していません」が登録の文に置き換わる。番号なし・未登録は要手続きのまま (4.8s)
+  ✓   5 e2e/ops-db/sprint12d-db.spec.ts:394:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-2. 範囲外・期限切れ・失効・文章のみ・機体の限定・空港等周辺（参考）・手入力の DIPS の許可：すべて要手続きのままで、理由が出る (9.7s)
+  ✓   6 e2e/ops-db/sprint12d-db.spec.ts:454:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-3. 許可があっても、緊急用務空域は飛行不可のまま（結論は判定の部品のまま）。文言は「飛べる」と読めない (2.7s)
+  ✓   7 e2e/ops-db/sprint12d-db.spec.ts:470:7 › Sprint 12d E2E-DB：計画の照合（契約 13） › 13-4. 計画のフォーム：DIPS の許可・承認のチェックがなく、案内が出る。番号の登録の有無が入力中に分かり、候補の「番号を入れる」で欄に足せる。保存すると判定が変わる (3.2s)
+  ✓   8 e2e/ops-db/sprint12d-db.spec.ts:518:7 › Sprint 12d E2E-DB：根拠の辿りと鮮度（契約 14） › 14. 日誌から 4 タップ以内で、判定の根拠 → 許可の登録の版へ辿れる。登録を訂正すると「判定が古い」→ 再判定で新しい版を根拠にし、古いスナップショットは当時の版を指す (5.8s)
+  ✓   9 e2e/ops-db/sprint12d-db.spec.ts:598:7 › Sprint 12d E2E-DB：12b との関係と次にやること（契約 15） › 15. 申請の記録に依存せず、登録がなければ「取得した許可・承認を登録する」が出て（運航管理者のみ操作）、番号を入れて判定が手続き済みになると消える（Sprint 18-2） (6.0s)
+  ✓  10 e2e/ops-db/sprint12d-db.spec.ts:653:7 › Sprint 12d E2E-DB：通報内容と現場モード（契約 16） › 16. 結びついた登録があれば通報内容に許可書発行日・許可期間が出る（形式は※要確認）。なければ「DIPS で入力」。現場モードの携行品に番号ごとの状態が出る (2.9s)
+  ✓  11 e2e/ops-db/sprint17-db.spec.ts:124:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-1・S-2・S-3・J-1・J-4：5 つの画面にタブ（現在に aria-current）。現場には出ない。判定の本体は /judgement だけ。移動先に移したものが揃う (10.4s)
+  ✓  12 e2e/ops-db/sprint17-db.spec.ts:212:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-6：旧いアンカー 8 つ（#sec-verdict ほか）で通報の主画面を開くと、新しい場所へ移り、その節までスクロールされる（ビューポート内） (7.8s)
+  ✓  13 e2e/ops-db/sprint17-db.spec.ts:241:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › S-5・次にやることの行き先：確認・再判定・手続きは新しい画面へ。保存直後と一覧の行は通報の主画面 (4.8s)
+  ✓  14 e2e/ops-db/sprint17-db.spec.ts:273:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › J-2（17-1 の範囲）：判定の画面を一度も開かずに、確認の依頼 → 確認 → 通報の記録（新規）→ 変更 → 取消が、主画面・/report・/overview だけで完了する (12.6s)
+  ✓  15 e2e/ops-db/sprint17-db.spec.ts:330:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › J-3：判定が古い計画でも、通報の記録は止まらない（警告の表示だけ）。判定の行は主画面に残る (2.4s)
+  ✓  16 e2e/ops-db/sprint17-db.spec.ts:354:7 › Sprint 17-1 E2E-DB：計画の画面の分離 › R-1：壊れた % 表記の hash（#%zz・#%E0%A4%A）でも計画の画面が出る。#a%20b と # も正常 (2.5s)
+
+  16 passed (1.5m)

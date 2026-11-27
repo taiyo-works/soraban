@@ -40,7 +40,7 @@ const CHIP_BOX: Record<Tone, string> = {
   neutral: "border border-sb-rule bg-sb-base text-sb-ink",
   brand: "border border-transparent bg-sb-inverse text-sb-inverse-fg font-bold",
   green: "border-[1.5px] border-sb-ink bg-sb-base text-sb-ink font-bold",
-  amber: "border-[1.5px] border-dashed border-sb-ink bg-sb-hover text-sb-ink font-bold",
+  amber: "border-[1.5px] border-dashed border-sb-ink bg-sb-st-warn-face text-sb-ink font-bold",
   red: "border-[1.5px] border-sb-v-no-fg bg-sb-base text-sb-v-no-fg font-bold",
   mute: "border border-dashed border-sb-edge bg-sb-sunken text-sb-ink-3",
 };
@@ -61,9 +61,9 @@ function Chip({ tone, glyph, children, ...rest }: ChipProps) {
   return (
     <span
       {...attrs}
-      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 break-words rounded-sb-pill px-3 py-0.5 text-[12.5px] font-medium leading-5 ${CHIP_BOX[tone]}`}
+      className={`inline-flex min-h-7 max-w-full items-start gap-1.5 [overflow-wrap:anywhere] rounded-sb-pill px-3 py-0.5 text-sm font-medium leading-5 ${CHIP_BOX[tone]}`}
     >
-      <span aria-hidden className={`w-3 text-center sb-num text-[13px] font-bold leading-none ${CHIP_GLYPH[tone]}`}>
+      <span aria-hidden className={`inline-flex h-5 w-3 shrink-0 items-center justify-center sb-num text-sm font-bold leading-none ${CHIP_GLYPH[tone]}`}>
         {glyph}
       </span>
       {children}
@@ -131,19 +131,19 @@ export function ReportBox({
     return (
       <div className="flex flex-col gap-2" {...(head ? { "data-testid": "plan-report-box" } : { "data-testid": "plan-report-box-body" })} data-kind={report.kind}>
         {head ? (
-        <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
-          <span aria-hidden className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
+        <p className="flex items-start gap-3 text-base font-bold leading-relaxed text-sb-ink">
+          <span aria-hidden data-note="" className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}>
             {glyph}
           </span>
-          <span className="pt-0.5" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
+          <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-label">{voidedNoRecord ? VOIDED_NO_RECORD_LABEL : (heading ?? report.label)}</span>
         </p>
         ) : null}
         {!body ? null : voidedNoRecord ? (
           <>
-            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+            <p data-note="" className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
               {REPORT_NOTE_SHORT}
             </p>
-            <p className="pl-10 text-sm font-medium leading-relaxed text-sb-ink" data-testid="plan-voided-no-record-note">
+            <p className="pl-10 font-medium text-sb-ink" data-testid="plan-voided-no-record-note">
               {VOIDED_NO_RECORD_NOTE}
             </p>
           </>
@@ -151,10 +151,10 @@ export function ReportBox({
           <>
             {report.reasons.length > 0 ? (
               <details className="pl-10">
-                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+                <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
                   根拠を見る（{report.reasons.length} 件）
                 </summary>
-                <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
+                <ul className="flex list-disc flex-col gap-1 pl-5 pb-2 text-sb-ink-2" data-testid="plan-report-reasons">
                   {report.reasons.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
@@ -162,15 +162,15 @@ export function ReportBox({
               </details>
             ) : null}
             {report.exceptionNote ? (
-              <p className="opx-note ml-10" data-testid="plan-report-exception">
+              <p data-note="" className="opx-note ml-10" data-testid="plan-report-exception">
                 {report.exceptionNote}
               </p>
             ) : null}
-            <p className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
+            <p data-note="" className="pl-10 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-note-short">
               {REPORT_NOTE_SHORT}
             </p>
             <details className="pl-10">
-              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
+              <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">
                 固定の文言の全文
               </summary>
               <div className="pb-2">
@@ -188,24 +188,25 @@ export function ReportBox({
       data-testid="plan-report-box"
       data-kind={report.kind}
     >
-      <p className="flex items-start gap-3 text-base font-bold leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 text-base font-bold leading-relaxed text-sb-ink">
         <span
           aria-hidden
+          data-note=""
           className={`mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[REPORT_TONE[report.kind]]} ${CHIP_GLYPH[REPORT_TONE[report.kind]]}`}
         >
           {REPORT_GLYPH[report.kind]}
         </span>
-        <span className="pt-0.5" data-testid="plan-report-label">{report.label}</span>
+        <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-label">{report.label}</span>
       </p>
       {report.reasons.length > 0 ? (
-        <ul className="flex list-disc flex-col gap-1 pl-12 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-reasons">
+        <ul className="flex list-disc flex-col gap-1 pl-12 text-sb-ink-2" data-testid="plan-report-reasons">
           {report.reasons.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>
       ) : null}
       {report.exceptionNote ? (
-        <p className="opx-note ml-10" data-testid="plan-report-exception">
+        <p data-note="" className="opx-note ml-10" data-testid="plan-report-exception">
           {report.exceptionNote}
         </p>
       ) : null}
@@ -219,7 +220,7 @@ export function ReportBox({
 /** 「そらばんは DIPS に送信しません。…」の固定の文言。 */
 export function DipsNotice({ text = REPORT_FIXED_NOTE }: { readonly text?: string }) {
   return (
-    <p className="opx-note" data-testid="plan-dips-notice">
+    <p data-note="" className="opx-note" data-testid="plan-dips-notice">
       {text}
     </p>
   );
@@ -230,13 +231,13 @@ export function VerdictBadge({ level, unknownCount, bare }: { readonly level: st
   const label = VERDICT_LABEL[level as ItemVerdict] ?? level;
   const known = level in VERDICT_LABEL;
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-sb-ink" {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}>
+    <span className="inline-flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-sb-ink" {...(bare ? {} : { "data-testid": "plan-verdict", "data-level": level })}>
       {known ? (
         <VerdictTag level={level as ItemVerdict}>{label}</VerdictTag>
       ) : (
         <span>{label}</span>
       )}
-      {unknownCount ? <span className="text-xs font-normal text-sb-ink-2">（{unknownCountLabel(unknownCount)}）</span> : null}
+      {unknownCount ? <span className="text-sm font-normal text-sb-ink-2">（{unknownCountLabel(unknownCount)}）</span> : null}
     </span>
   );
 }
@@ -280,25 +281,25 @@ export function PlanDigest({
   readonly stale: boolean;
   readonly sourcesStale: boolean;
 }) {
-  const row = "flex min-h-12 items-center justify-between gap-x-3 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
+  const row = "flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-sb-rule px-4 py-2 last:border-b-0 hover:bg-sb-hover";
   const m = judgeLineModel({ level: verdictLevel, unknownCount, stale, sourcesStale });
   return (
     <nav aria-label="ほかの要点" className="overflow-hidden rounded-sb-l bg-sb-base opx-shadow" data-testid="plan-digest">
       <a href={`/ops/plans/${planId}/judgement`} className={row} data-testid="plan-judge-link">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1" data-testid="plan-judge-line" data-wording-scope="judgement">
+        <span className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 [overflow-wrap:anywhere]" data-testid="plan-judge-line" data-wording-scope="judgement">
           <span className="text-sm text-sb-ink-2">{JUDGE_LINE_PREFIX}</span>
           {m.kind === "ok" ? <VerdictBadge level={m.level} unknownCount={m.unknownCount} bare /> : <span className="text-sm font-bold text-sb-ink">{JUDGE_UNREADABLE}</span>}
           {m.stale ? <StaleBadge bare /> : null}
           {m.sourcesStale ? <SourceStaleBadge /> : null}
         </span>
-        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
+        <span className="ml-auto max-w-full whitespace-nowrap text-sm font-bold text-sb-ink">判定を見る →</span>
       </a>
       <a href={`/ops/plans/${planId}/overview#sec-confirm`} className={row} data-testid="plan-confirm-link">
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1 [overflow-wrap:anywhere]">
           <span className="text-sm text-sb-ink-2">確認：</span>
           <PlanStateBadge state={state} label={stateLabel} bare />
         </span>
-        <span className="shrink-0 whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
+        <span className="ml-auto max-w-full whitespace-nowrap text-sm font-bold text-sb-ink">計画の確認へ →</span>
       </a>
     </nav>
   );
@@ -406,7 +407,7 @@ export function NextActionItem({
       <Icon name={mark.icon} size={18} className={cx("mt-1 shrink-0", mark.tone)} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="text-[15px] font-bold leading-snug text-sb-ink" data-testid={`${testId}-label`}>
+          <span className="text-[1rem] font-bold leading-snug text-sb-ink" data-testid={`${testId}-label`}>
             {action.label}
           </span>
           <span className={cx("whitespace-nowrap text-aux", mark.text)}>{TIER_TEXT[action.tier]}</span>
@@ -428,7 +429,7 @@ export function NextActionItem({
       {action.canAct ? <Icon name="chevron-right" size={18} className="mt-1 shrink-0 self-start text-sb-ink-3" /> : null}
     </>
   );
-  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-11", flush ? "" : "px-3");
+  const box = cx("flex items-start gap-3 py-3 transition-colors duration-[var(--sb-dur)] [line-break:strict] [word-break:auto-phrase]", tall ? "min-h-14" : "min-h-12", flush ? "" : "px-3");
   return action.canAct ? (
     <a href={action.href} className={cx(box, "hover:bg-sb-hover")} data-testid={`${testId}-link`} data-action-id={action.id}>
       {body}
@@ -505,33 +506,33 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
   const started = deadline.state === "overdue_started";
   if (compact) {
     return (
-      <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 text-sm ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
-        <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
-          <span aria-hidden className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[13px] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
+      <div className={`flex flex-col gap-1 rounded-sb-m px-3 py-3 ${DEADLINE_BAR[deadline.state]}`} data-testid="plan-report-deadline" data-state={deadline.state}>
+        <p className="flex items-start gap-3 font-bold text-sb-ink">
+          <span aria-hidden data-note="" className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}>
             {DEADLINE_GLYPH[deadline.state]}
           </span>
-          <span className="pt-0.5" data-testid="plan-report-deadline-message">{deadline.message}</span>
+          <span className="min-w-0 pt-0.5 [overflow-wrap:anywhere]" data-testid="plan-report-deadline-message">{deadline.message}</span>
         </p>
         {deadline.guideAtJst ? (
-          <p className="pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
-            社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
+          <p className="min-w-0 pl-11 text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="plan-report-guide-at">
+            社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
           </p>
         ) : null}
         <details className="pl-11" {...(started ? { open: true } : {})}>
-          <summary className="inline-flex min-h-11 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
+          <summary className="inline-flex min-h-12 cursor-pointer select-none items-center text-sm text-sb-ink underline-offset-2 hover:underline">期限の注記</summary>
           <div className="flex flex-col gap-1.5 pb-2">
             {deadline.guideNote ? (
-              <p className="text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
+              <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
                 {deadline.guideNote}
               </p>
             ) : null}
             {deadline.penaltyNote ? (
-              <p className="text-[12px] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+              <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
                 {deadline.penaltyNote}
               </p>
             ) : null}
-            {deadline.outageNote ? <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-            <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+            {deadline.outageNote ? <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+            <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
           </div>
         </details>
       </div>
@@ -539,37 +540,38 @@ export function DeadlineBox({ deadline, compact = false }: { readonly deadline: 
   }
   return (
     <div
-      className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 text-sm ${DEADLINE_BAR[deadline.state]}`}
+      className={`flex flex-col gap-3 rounded-sb-l px-4 py-4 ${DEADLINE_BAR[deadline.state]}`}
       data-testid="plan-report-deadline"
       data-state={deadline.state}
     >
-      <p className="flex items-start gap-3 font-bold leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 font-bold text-sb-ink">
         <span
           aria-hidden
-          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-[13px] font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
+          data-note=""
+          className={`mt-px flex h-7 w-8 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold leading-none ${CHIP_BOX[DEADLINE_TONE[deadline.state]]}`}
         >
           {DEADLINE_GLYPH[deadline.state]}
         </span>
-        <span className={`pt-0.5 ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
+        <span className={`min-w-0 pt-0.5 [overflow-wrap:anywhere] ${started ? "text-base" : ""}`} data-testid="plan-report-deadline-message">{deadline.message}</span>
       </p>
       {deadline.guideAtJst ? (
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-at">
-          社内の目安の時刻：<span className="sb-num text-sm tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
+        <p className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5 pl-11 text-sb-ink-2 [overflow-wrap:anywhere]" data-testid="plan-report-guide-at">
+          社内の目安の時刻：<span className="sb-num tnum text-sb-ink">{deadline.guideAtJst}</span>（日本時間）
         </p>
       ) : null}
       {deadline.guideNote ? (
-        <p className="pl-11 text-xs leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
+        <p data-note="" className="pl-11 text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-guide-note">
           {deadline.guideNote}
         </p>
       ) : null}
       <div className="flex flex-col gap-1.5 border-t border-sb-rule pl-11 pt-2.5">
         {deadline.penaltyNote ? (
-          <p className="text-[12px] leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
+          <p data-note="" className="text-sm leading-relaxed text-sb-ink-2" data-testid="plan-report-penalty">
             {deadline.penaltyNote}
           </p>
         ) : null}
-        {deadline.outageNote ? <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
-        <p className="text-[12px] leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
+        {deadline.outageNote ? <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.outageNote}</p> : null}
+        <p data-note="" className="text-sm leading-relaxed text-sb-ink-2">{deadline.smallDroneLawNote}</p>
       </div>
     </div>
   );
@@ -580,20 +582,21 @@ export function ReportStatusBox({ status, changes }: { readonly status: ReportSt
   const tone = STATUS_TONE[status.code];
   return (
     <div className="flex flex-col gap-2" data-testid="plan-report-status" data-code={status.code}>
-      <p className="flex items-start gap-3 text-sm font-medium leading-snug text-sb-ink">
+      <p className="flex items-start gap-3 font-medium text-sb-ink">
         <span
           aria-hidden
+          data-note=""
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sb-pill sb-num text-sm font-bold ${CHIP_BOX[tone]} ${CHIP_GLYPH[tone]}`}
         >
           {status.mark}
         </span>
         <span className="pt-0.5" data-testid="plan-report-status-label">{status.label}</span>
       </p>
-      {status.detail && status.code !== "reported" ? <p className="pl-10 sb-num text-xs tnum text-sb-ink-2">{status.detail}</p> : null}
+      {status.detail && status.code !== "reported" ? <p data-note="" className="pl-10 sb-num text-sm tnum text-sb-ink-2">{status.detail}</p> : null}
       {changes.length > 0 ? (
-        <div className="opx-note ml-10 flex flex-col gap-1" data-testid="plan-report-changes">
-          <p className="text-xs font-medium text-sb-ink">通報時から変わった点</p>
-          <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-sb-ink-2">
+        <div className="opx-note opx-note-lg ml-10 flex flex-col gap-1" data-testid="plan-report-changes">
+          <p data-note="" className="text-sm font-medium text-sb-ink">通報時から変わった点</p>
+          <ul className="flex flex-col gap-0.5 text-sb-ink-2">
             {changes.map((c) => (
               <li key={c.key} data-testid="plan-report-change-row" data-key={c.key}>
                 {c.label}：<span className="sb-num tnum">{c.before}</span> → <span className="sb-num tnum">{c.after}</span>

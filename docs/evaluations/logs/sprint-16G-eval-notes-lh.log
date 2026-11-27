@@ -1,0 +1,16 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/zz-eval-16g-tmp.spec.ts
+
+
+Running 1 test using 1 worker
+
+HOME-REPORT 375 {"checked":7,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1}}
+HOME-REPORT-OPEN 375 {"checked":35,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1,"judge-pills":1,"today-card-reason":1,"today-card-date":1,"today-card-route":1,"today-card-route-count":1,"route":7,"home-deadlines-rest":1,"home-upcoming":1}}
+HOME-REPORT 390 {"checked":7,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1}}
+HOME-REPORT-OPEN 390 {"checked":35,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1,"judge-pills":1,"today-card-reason":1,"today-card-date":1,"today-card-route":1,"today-card-route-count":1,"route":7,"home-deadlines-rest":1,"home-upcoming":1}}
+HOME-REPORT 1280 {"checked":7,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1}}
+HOME-REPORT-OPEN 1280 {"checked":35,"bad":[],"misplaced":[],"marked":{"home-head":1,"home-deadlines-note":1,"judge-pills":1,"today-card-reason":1,"today-card-date":1,"today-card-route":1,"today-card-route-count":1,"route":7,"home-deadlines-rest":1,"home-upcoming":1}}
+  ✓  1 e2e/ops-db/zz-eval-16g-tmp.spec.ts:6:5 › home body/note report (2.4s)
+
+  1 passed (6.9s)

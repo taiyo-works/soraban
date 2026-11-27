@@ -1,0 +1,43 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static (1.6s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static 
+
+    Error: 390 新しい先読み・接続あり 文字 200%：帯の中で画面からはみ出す要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "field-status-prefetch 32.0〜527.3（画面 390）",
+    +   "span 32.0〜527.3（画面 390）",
+    + ]
+
+      501 |         const z = await probeZoomBand(page, w);
+      502 |         test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+    > 503 |         expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+          |                                                                    ^
+      504 |         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+      505 |         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+      506 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:503:68)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:510:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static 

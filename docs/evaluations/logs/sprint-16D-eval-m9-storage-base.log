@@ -1,0 +1,9 @@
+/ops {"ls":["soraban:ops-current-member"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/plans/new {"ls":["soraban:ops-current-member"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/flights/new {"ls":["soraban:ops-current-member","soraban:ops-draft:flight:7e967be9-5bc6-4ed8-93c2-cbb883ead16e"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/incidents/new {"ls":["soraban:ops-current-member","soraban:ops-draft:flight:7e967be9-5bc6-4ed8-93c2-cbb883ead16e"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/permits/new {"ls":["soraban:ops-current-member","soraban:ops-draft:flight:7e967be9-5bc6-4ed8-93c2-cbb883ead16e"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/aircraft/new {"ls":["soraban:ops-current-member","soraban:ops-draft:flight:7e967be9-5bc6-4ed8-93c2-cbb883ead16e"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+/ops/inspections/new {"ls":["soraban:ops-current-member","soraban:ops-draft:flight:7e967be9-5bc6-4ed8-93c2-cbb883ead16e","soraban:ops-draft:inspection:7e967be9-5bc6-4ed8-93c2-cbb883ead16e"],"ss":[],"idb":["soraban-ops"],"cache":["soraban-ops-local-mwtjd8t3"]}
+
+(以降のスクリプトの待機エラーは評価スクリプトの誤り：暗幕の背後のチェックを押そうとした／基準にはシートがない。ストレージの鍵の比較には影響しない)

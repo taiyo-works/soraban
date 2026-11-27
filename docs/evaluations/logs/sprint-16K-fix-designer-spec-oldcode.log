@@ -1,0 +1,196 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-k-db.spec.ts -g 'fix R-1 文字 200%'
+
+
+Running 4 tests using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static (1.5s)
+  -  2 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 375 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・375px）。固定は等倍 sticky・200% static
+  -  3 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static
+  -  4 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 430 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・430px）。固定は等倍 sticky・200% static
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static 
+
+    Error: 320 新しい先読み・接続あり 文字 200%：帯の中で画面からはみ出す要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "field-status-prefetch 32.0〜527.3（画面 320）",
+    +   "span 32.0〜527.3（画面 320）",
+    + ]
+
+      495 |         const z = await probeZoomBand(page, w);
+      496 |         test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+    > 497 |         expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+          |                                                                    ^
+      498 |         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+      499 |         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+      500 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:497:68)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:504:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static 
+  3 did not run
+ ELIFECYCLE  Command failed with exit code 1.
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-k-db.spec.ts -g 'fix R-1 文字 200% の帯 375'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 375 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・375px）。固定は等倍 sticky・200% static (1.5s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 375 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・375px）。固定は等倍 sticky・200% static 
+
+    Error: 375 新しい先読み・接続あり 文字 200%：帯の中で画面からはみ出す要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "field-status-prefetch 32.0〜527.3（画面 375）",
+    +   "span 32.0〜527.3（画面 375）",
+    + ]
+
+      495 |         const z = await probeZoomBand(page, w);
+      496 |         test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+    > 497 |         expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+          |                                                                    ^
+      498 |         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+      499 |         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+      500 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:497:68)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:504:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-93fb9-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-93fb9-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-93fb9-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 375 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・375px）。固定は等倍 sticky・200% static 
+ ELIFECYCLE  Command failed with exit code 1.
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-k-db.spec.ts -g 'fix R-1 文字 200% の帯 390'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static (1.5s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static 
+
+    Error: 390 新しい先読み・接続あり 文字 200%：帯の中で画面からはみ出す要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "field-status-prefetch 32.0〜527.3（画面 390）",
+    +   "span 32.0〜527.3（画面 390）",
+    + ]
+
+      495 |         const z = await probeZoomBand(page, w);
+      496 |         test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+    > 497 |         expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+          |                                                                    ^
+      498 |         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+      499 |         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+      500 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:497:68)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:504:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-a83ad-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 390 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・390px）。固定は等倍 sticky・200% static 
+ ELIFECYCLE  Command failed with exit code 1.
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-k-db.spec.ts -g 'fix R-1 文字 200% の帯 430'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 430 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・430px）。固定は等倍 sticky・200% static (1.4s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 430 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・430px）。固定は等倍 sticky・200% static 
+
+    Error: 430 新しい先読み・接続あり 文字 200%：帯の中で画面からはみ出す要素
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "field-status-prefetch 32.0〜527.3（画面 430）",
+    +   "span 32.0〜527.3（画面 430）",
+    + ]
+
+      495 |         const z = await probeZoomBand(page, w);
+      496 |         test.info().annotations.push({ type: "zoom200", description: `${w} ${state}: 帯 ${z.bandH.toFixed(1)}px・文書 scrollWidth ${z.sw}/${z.cw}・帯 ${z.bandSw}/${z.bandCw}・日時 ${z.dateText}（${z.dateRects} 片）・position ${z.bandPos}` });
+    > 497 |         expect(z.overflow, `${w} ${state} 文字 200%：帯の中で画面からはみ出す要素`).toEqual([]);
+          |                                                                    ^
+      498 |         expect(z.bandSw, `${w} ${state} 文字 200%：帯の横スクロール`).toBeLessThanOrEqual(z.bandCw);
+      499 |         expect(z.dateRects, `${w} ${state} 文字 200%：日時（${z.dateText}）は途中で割れない`).toBe(1);
+      500 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:497:68)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:504:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-4d93a-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-4d93a-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-4d93a-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:483:9 › fix R-1 文字 200% の帯 430 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・430px）。固定は等倍 sticky・200% static 
+ ELIFECYCLE  Command failed with exit code 1.

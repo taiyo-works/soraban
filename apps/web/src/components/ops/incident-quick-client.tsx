@@ -32,8 +32,8 @@ import { IncidentFactNotice, IncidentOfficialNotice, IncidentSafetyFirst } from 
 const BTN = "opx-btn w-full";
 const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
 const BTN_OUTLINE = BTN;
-// 選択中の面（橙。右端の丸と矢印は付けない：押すと進む意味になるため）
-const BTN_SEL = "opx-btn opx-btn-primary opx-btn-flat opx-btn-field w-full";
+// 選択中の面（薄い面＋墨の太い縁＋太字＋◉。主色の面にしない：「記録する」だけが主色。16-K designer N-3）
+const BTN_SEL = "opx-btn opx-btn-sel opx-btn-field w-full";
 const BTN_WARN = "opx-btn opx-btn-danger w-full";
 // 「記録する」は画面でいちばん押してほしい操作：ほかの選択肢より一段高く・大きく
 const BTN_RECORD = `${BTN_PRIMARY} min-h-16 text-xl`;
@@ -146,7 +146,7 @@ export function IncidentQuickClient({
       {/* ② 事実の記録の注意 */}
       <IncidentFactNotice large />
 
-      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-orange pl-3">
+      <header className="flex flex-col gap-1 border-l-[length:8px] border-sb-ink pl-3">
         <h1 className="text-2xl font-bold leading-snug">事故・ヒヤリハットの簡易記録</h1>
         <p data-testid="incident-quick-plan">{planTitle}</p>
       </header>
@@ -175,7 +175,7 @@ export function IncidentQuickClient({
             </p>
           </div>
           {!savedRejected ? (
-            <a href={saved.recordId ? incidentHref(saved.recordId, "correct") : `${INCIDENTS_HREF}?detailPending=1`} className={BTN_PRIMARY} data-testid="incident-quick-detail">
+            <a href={saved.recordId ? incidentHref(saved.recordId, "correct") : `${INCIDENTS_HREF}?detailPending=1`} data-variant="primary" className={BTN_PRIMARY} data-testid="incident-quick-detail">
               詳細を記入する
             </a>
           ) : null}
@@ -209,7 +209,7 @@ export function IncidentQuickClient({
             時刻：いま（押した時刻で記録します）
           </p>
           {/* ⑥ 記録する */}
-          <button type="button" className={`${BTN_RECORD} tracking-[0.2em]`} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
+          <button type="button" data-variant="primary" className={`${BTN_RECORD} tracking-[0.2em]`} disabled={!ready} onClick={onRecord} data-testid="incident-quick-submit">
             記録する
           </button>
           {!ready ? (

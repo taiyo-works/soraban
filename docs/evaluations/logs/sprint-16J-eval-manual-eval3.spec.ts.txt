@@ -1,0 +1,13 @@
+import { expect, request as pwRequest, test } from "@playwright/test";
+test("which inputs clip at 200%", async ({ browser }) => {
+  const mgr = await pwRequest.newContext({ baseURL: "http://127.0.0.1:3400" });
+  await mgr.post("/api/test-auth/sign-in", { data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" } });
+  const plans = await (await mgr.get("/api/ops/plans")).json() as any; const id = (plans.items ?? plans)[0]?.id;
+  const ctx = await browser.newContext({ viewport: { width: 320, height: 700 } }); const page = await ctx.newPage();
+  await page.request.post("/api/test-auth/sign-in", { data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" }, headers: {} }).catch(() => 0);
+  await ctx.request.post("http://127.0.0.1:3400/api/test-auth/sign-in", { data: { authUserId: "a-manager", email: "a-manager@example.test", emailVerified: true, name: "a-manager" } });
+  await page.goto(`http://127.0.0.1:3400/ops/flights/new?planId=${id}`); await page.waitForLoadState("networkidle");
+  await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+  const r = await page.evaluate(() => Array.from(document.querySelectorAll("input")).filter((i) => i.scrollWidth > i.clientWidth + 1).map((i) => ({ type: i.type, name: i.name || i.id, v: i.value, sw: i.scrollWidth, cw: i.clientWidth, aria: i.getAttribute("aria-label") })));
+  console.log(JSON.stringify(r)); expect(1).toBe(1);
+});

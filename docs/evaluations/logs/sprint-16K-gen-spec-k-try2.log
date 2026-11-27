@@ -1,0 +1,11 @@
+HEAD 6fa1974, DB k16_a1, build: 1OOLecGCYqNUKoEqUBJ2L
+
+Running 4 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (2.4s)
+  ✓  2 e2e/ops-db/sprint16-k-db.spec.ts:180:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.7s)
+  ✓  3 e2e/ops-db/sprint16-k-db.spec.ts:233:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (6.6s)
+  ✓  4 e2e/ops-db/sprint16-k-db.spec.ts:319:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (863ms)
+
+  4 passed (15.6s)
+exit 0

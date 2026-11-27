@@ -1,0 +1,16 @@
+
+Running 11 tests using 1 worker
+
+  ✓   1 e2e/ops-db/zz-eval16k.spec.ts:189:9 › M1 現場の 4 状態 320 › online 320 (3.8s)
+  ✓   2 e2e/ops-db/zz-eval16k.spec.ts:189:9 › M1 現場の 4 状態 375 › online 375 (3.7s)
+  ✓   3 e2e/ops-db/zz-eval16k.spec.ts:189:9 › M1 現場の 4 状態 1280 › online 1280 (3.3s)
+  ✓   4 e2e/ops-db/zz-eval16k.spec.ts:271:9 › M2 帯 320 › stale 320 (2.3s)
+  ✓   5 e2e/ops-db/zz-eval16k.spec.ts:271:9 › M2 帯 375 › stale 375 (2.4s)
+  ✓   6 e2e/ops-db/zz-eval16k.spec.ts:271:9 › M2 帯 1280 › stale 1280 (2.5s)
+  ✓   7 e2e/ops-db/zz-eval16k.spec.ts:329:7 › M3 圏外の記録と再送 375 › offline flow (15.3s)
+  ✓   8 e2e/ops-db/zz-eval16k.spec.ts:425:9 › M4 圏外の画面 320 › offline screens 320 (3.8s)
+  ✓   9 e2e/ops-db/zz-eval16k.spec.ts:425:9 › M4 圏外の画面 375 › offline screens 375 (3.4s)
+  ✓  10 e2e/ops-db/zz-eval16k.spec.ts:425:9 › M4 圏外の画面 1280 › offline screens 1280 (3.4s)
+  ✓  11 e2e/ops-db/zz-eval16k.spec.ts:463:7 › M5 権限・API › viewer / anon / boundary (938ms)
+
+  11 passed (45.9s)

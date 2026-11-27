@@ -1,0 +1,12 @@
+import { launch, signedCtx } from "./lib.mjs";
+const AC = "9c29615d-b3d2-415c-8d29-2e990530bc19";
+const b = await launch();
+const ctx = await signedCtx(b, "a-pilot", { viewport: { width: 375, height: 812 }, serviceWorkers: "block" });
+const page = await ctx.newPage();
+await page.goto(`/ops/inspections/new?aircraftId=${AC}`);
+await page.getByRole("form", { name: "日常点検の入力" }).waitFor();
+await page.getByRole("button", { name: "保存", exact: true }).click();
+await page.getByRole("radiogroup", { name: "プロペラの結果" }).getByRole("radio", { name: "異常" }).check();
+await page.waitForTimeout(800);
+console.log(JSON.stringify(await page.evaluate(async () => ({ ls: Object.keys(localStorage), draft: Object.keys(JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => k.includes("draft:inspection"))))), ss: Object.keys(sessionStorage), caches: await caches.keys(), vib: typeof navigator.vibrate }))));
+await b.close();

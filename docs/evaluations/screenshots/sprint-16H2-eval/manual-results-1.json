@@ -1,0 +1,114 @@
+[
+ {
+  "k": "S1 主ボタン 375",
+  "ok": true,
+  "d": "[\"judgement-primary\"]"
+ },
+ {
+  "k": "S1 長さ 375（候補が増えた DB）",
+  "ok": true,
+  "d": "3919px"
+ },
+ {
+  "k": "S1 主ボタン 1280",
+  "ok": true,
+  "d": "[\"judgement-primary\"]"
+ },
+ {
+  "k": "S1 長さ 1280（候補が増えた DB）",
+  "ok": true,
+  "d": "2605px"
+ },
+ {
+  "k": "S2 機体訂正 200",
+  "ok": true,
+  "d": "200"
+ },
+ {
+  "k": "S2 stale 主ボタン 375",
+  "ok": true,
+  "d": "[\"plan-rejudge\"]"
+ },
+ {
+  "k": "S2 stale-box が総合の直下 375",
+  "ok": true,
+  "d": "{\"totalBottom\":717.625,\"boxTop\":891,\"tilesTop\":1092.375,\"totalText\":\"古い判定：手続きが要る項目があります（1 件）\",\"key\":\"needs_procedure\",\"svgs\":0,\"signs\":[]}"
+ },
+ {
+  "k": "S2 タイルに古い判定 375",
+  "ok": true,
+  "d": "7/7"
+ },
+ {
+  "k": "S2 シート見出しに古い判定 375",
+  "ok": true,
+  "d": "夜間飛行（古い判定）"
+ },
+ {
+  "k": "S2 stale 主ボタン 1280",
+  "ok": true,
+  "d": "[\"plan-rejudge\"]"
+ },
+ {
+  "k": "S2 stale-box が総合の直下 1280",
+  "ok": true,
+  "d": "{\"totalBottom\":580.671875,\"boxTop\":717.859375,\"tilesTop\":892.046875,\"totalText\":\"古い判定：手続きが要る項目があります（1 件）\",\"key\":\"needs_procedure\",\"svgs\":0,\"signs\":[]}"
+ },
+ {
+  "k": "S2 タイルに古い判定 1280",
+  "ok": true,
+  "d": "7/7"
+ },
+ {
+  "k": "S2 シート見出しに古い判定 1280",
+  "ok": true,
+  "d": "夜間飛行（古い判定）"
+ },
+ {
+  "k": "S2 再判定後 judgement-primary が主ボタン",
+  "ok": true,
+  "d": "[\"judgement-primary\"] stale-box=0"
+ },
+ {
+  "k": "S3 viewer 主ボタン 375",
+  "ok": true,
+  "d": "[\"judgement-primary\"] note=1 rejudge=0"
+ },
+ {
+  "k": "S3 viewer 主ボタン 1280",
+  "ok": true,
+  "d": "[\"judgement-primary\"] note=1 rejudge=0"
+ },
+ {
+  "k": "S4 フォーカスが新しい見出しへ",
+  "ok": true,
+  "d": "{\"tag\":\"H2\",\"text\":\"航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行\",\"inDialog\":true} tile=航空法第132条の85第1項第2号 — 人口集中地区(DID)上空の飛行"
+ },
+ {
+  "k": "S4 isComposing の Esc で閉じない",
+  "ok": true
+ },
+ {
+  "k": "S4 keyCode 229 の Esc で閉じない",
+  "ok": true
+ },
+ {
+  "k": "S4 閉じるとそのタイルへ戻る",
+  "ok": true
+ },
+ {
+  "k": "S4 タイル数",
+  "ok": true,
+  "d": "7"
+ },
+ {
+  "k": "S5 手続きの名前・提出先・期限",
+  "ok": true,
+  "d": "[\"飛行承認（夜間飛行）\\n提出先：国土交通省（DIPS 2.0）\\n期限：2026-12-25 まで（飛行予定日 2027-01-10 の 10 開庁日以上前。土日・国民の祝日を除く）\"]"
+ },
+ {
+  "k": "S5 シートに禁止語なし",
+  "ok": true,
+  "d": ""
+ }
+]

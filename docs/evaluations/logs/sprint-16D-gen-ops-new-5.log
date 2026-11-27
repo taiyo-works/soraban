@@ -1,0 +1,28 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-d-db.spec.ts
+
+
+Running 19 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の作成（390 幅） (737ms)
+  ✓   2 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 点検の入力（390 幅） (544ms)
+  ✓   3 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の入力（390 幅） (671ms)
+  ✓   4 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 機体の登録（390 幅） (577ms)
+  ✓   5 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 操縦者の登録（390 幅） (592ms)
+  ✓   6 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 場所の登録（390 幅） (431ms)
+  ✓   7 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 許可・承認の登録（390 幅） (492ms)
+  ✓   8 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 事故・重大インシデントの記録（390 幅） (701ms)
+  ✓   9 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 飛行記録の一覧（絞り込み）（390 幅） (457ms)
+  ✓  10 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 利用者（390 幅） (482ms)
+  ✓  11 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の訂正（390 幅） (640ms)
+  ✓  12 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 通報の作業台（390 幅） (637ms)
+  ✓  13 e2e/ops-db/sprint16-d-db.spec.ts:59:9 › D-1 実画面：全入力欄に見えるラベル（上）・高さ 52 以上・角丸 12 › 計画の概要（390 幅） (469ms)
+  ✓  14 e2e/ops-db/sprint16-d-db.spec.ts:87:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 機体の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.1s)
+  ✓  15 e2e/ops-db/sprint16-d-db.spec.ts:110:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 許可・承認の登録：必須が空のまま保存すると、項目ごとのエラーが出る (1.2s)
+  ✓  16 e2e/ops-db/sprint16-d-db.spec.ts:123:7 › D-1 実画面：エラーは縁が危険の印の色・下に記号付きの 1 行・aria-describedby で結ぶ・role は alert にしない › 点検の入力：異常にして備考なしで保存すると、その項目の備考に誤りが示される (1.1s)
+  ✓  17 e2e/ops-db/sprint16-d-db.spec.ts:143:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 許可・承認の登録（opx-check-row）：72 以上・丸 32・チェックすると行末に「済」 (869ms)
+  ✓  18 e2e/ops-db/sprint16-d-db.spec.ts:166:7 › D-2 実画面：チェック行は 72 以上・32 の丸・済みは「済」 › 計画の訂正・通報（チェックの丸が 32）：ラベル付きのチェックはすべて 32 の丸 (638ms)
+  ✓  19 e2e/ops-db/sprint16-d-db.spec.ts:181:7 › D-4 実画面：運航管理の読み込み中は静止したスケルトン › ops の枠の読み込み中の表示は、aria-busy と「読み込み中」を持つ静止した帯（動きなし） (129ms)
+
+  19 passed (16.7s)

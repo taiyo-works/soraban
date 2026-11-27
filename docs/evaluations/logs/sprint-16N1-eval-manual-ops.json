@@ -1,0 +1,308 @@
+{
+ "unknownPlan": "491f17fc-61bb-4827-a26c-453713c6e775",
+ "knownPlan": "39581c10-88cd-4869-8e0b-3dce5a389a7e",
+ "ops-375-a-manager-unknown-judgement": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": "未確認の項目があります（4 件）",
+  "totalKey": "unknown",
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n未確認の項目があります（4 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-375-a-manager-unknown-snapshot": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-375-a-manager-known-judgement": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "totalKey": "needs_procedure",
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": "warn"
+ },
+ "ops-375-a-manager-known-snapshot": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-375-a-viewer-unknown-judgement": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": "未確認の項目があります（4 件）",
+  "totalKey": "unknown",
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n未確認の項目があります（4 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-375-a-viewer-unknown-snapshot": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-375-a-viewer-known-judgement": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "totalKey": "needs_procedure",
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": "warn"
+ },
+ "ops-375-a-viewer-known-snapshot": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-manager-unknown-judgement": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": "未確認の項目があります（4 件）",
+  "totalKey": "unknown",
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n未確認の項目があります（4 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-manager-unknown-snapshot": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-manager-known-judgement": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "totalKey": "needs_procedure",
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": "warn"
+ },
+ "ops-1280-a-manager-known-snapshot": {
+  "who": "a-manager",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-viewer-unknown-judgement": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": "未確認の項目があります（4 件）",
+  "totalKey": "unknown",
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n未確認の項目があります（4 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-viewer-unknown-snapshot": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": "判定不能 4 件（データ未整備）",
+  "tobeConc": 0,
+  "tobeBody": 0,
+  "helpPhrase": false,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n判定不能 4 件（データ未整備）",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ },
+ "ops-1280-a-viewer-known-judgement": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": "手続きが要る項目があります（1 件）",
+  "totalKey": "needs_procedure",
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n手続きが要る項目があります（1 件）\n\n判定の段：要手続き\n\n判定の取得時刻（日本時間）：2027-01-05 12:00\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": "warn"
+ },
+ "ops-1280-a-viewer-known-snapshot": {
+  "who": "a-viewer",
+  "level": "要手続き",
+  "total": null,
+  "totalKey": null,
+  "unknownCount": null,
+  "tobeConc": 1,
+  "tobeBody": 1,
+  "helpPhrase": true,
+  "bannedConc": [],
+  "bannedBody": [],
+  "conc": "結論\n\n要手続き\n\n手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。",
+  "lt14": 0,
+  "small": [
+   "本文へ移動:1x1"
+  ],
+  "hscroll": 0,
+  "cardState": null
+ }
+}

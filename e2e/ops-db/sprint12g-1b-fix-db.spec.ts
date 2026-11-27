@@ -1,6 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll } from "../field-checks";
-import { expandNextActions, openUserMenu } from "../ops-menu";
+import { expandNextActions, openAllPlans, openUserMenu } from "../ops-menu";
 
 // Sprint 12g-1b 段階 A の差し戻し（独立評価の指摘 I-2・I-3・M-1〜M-8・M-11）の E2E-DB。組織B で確かめる。
 // サーバーの現在時刻は OPS_TEST_NOW（JST 2027-01-05 12:00）。
@@ -91,7 +91,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
   test("I-3. スキップリンク「本文へ移動」と Tab の順（スマホは 上バー → 本文 → 下タブ）。主要画面の題名", async ({ page }) => {
     await signIn(page.request, seeded("b-manager"));
     // 題名は画面ごと（テンプレート「○○ — そらばん」）
-    for (const [path, name] of [["/ops", "ホーム"], ["/ops/plans", "計画"], ["/ops/journal", "日誌"], ["/ops/more", "登録"]] as const) {
+    for (const [path, name] of [["/ops", "ホーム"], ["/ops/plans", "計画"], ["/ops/journal", "日誌"], ["/ops/more", "機体と書類"]] as const) {
       await page.goto(path);
       await expect(page).toHaveTitle(`${name} — そらばん`);
     }
@@ -120,7 +120,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await expect(skip).toBeFocused();
     await expect(skip).toBeInViewport();
     const box = (await skip.boundingBox())!;
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     // 上バー（ホームへ戻るリンク・利用者メニュー）→ 本文 → 下タブの順
     const idx = (id: string) => order.indexOf(id);
     expect(idx("ops-brand-mark")).toBeGreaterThan(0);
@@ -158,17 +158,17 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       await expect(page.getByTestId("today-empty")).toBeVisible();
       await expect(page.getByTestId("today-empty-action")).toHaveCount(1);
       await expect(page.getByTestId("today-empty-action")).toHaveText("地点を判定する");
-      await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "計画を作る" })).toHaveCount(0);
       // 残った 1 つが主ボタン（56px 以上）
       expect((await page.getByTestId("today-empty-action").boundingBox())!.height).toBeGreaterThanOrEqual(56);
       await ctx.close();
     }
-    // 運航管理者には両方が出る
+    // 運航管理者には（16-G HM-4 から）主ボタン「計画を作る」だけが出る。「地点を判定する」は「すべての予定」の中のピルから
     const ctx = await browser.newContext({ baseURL: BASE, viewport: { width: 375, height: 812 } });
     await signIn(ctx.request, seeded("b-manager"));
     const page = await ctx.newPage();
     await page.goto("/ops");
-    await expect(page.getByTestId("today-empty-action")).toHaveText(["飛行計画を作る", "地点を判定する"]);
+    await expect(page.getByTestId("today-empty-action")).toHaveText(["計画を作る"]);
     await ctx.close();
     await bm.dispose();
   });
@@ -222,6 +222,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     expect((await page.getByTestId("ops-header").boundingBox())!.height).toBeLessThanOrEqual(48);
     await expect(page.getByTestId("ops-header")).not.toContainText("ホーム");
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await openAllPlans(page); // 16-G：今日のカード・次にやること・直近の飛行・ピルは「すべての予定」の中
     // M-4：日付（ISO でなく 1/5（火））。年は今日と同じなので付かない
     await expect(page.getByTestId("today-date")).toHaveText("1/5（火）");
     await expect(page.getByTestId("today-card-date")).toHaveText("1/5（火）");
@@ -235,15 +236,20 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const toggle = page.getByTestId("today-next-more-toggle");
     await expect(toggle).toHaveText(`ほか ${total - 3} 件を見る`);
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     // 次にやることの総数の表示は残る
     // （見出しの数は、上位 8 件に収まらない分も含めた総数。行の数以上になる）
     const headline = Number(/(\d+) 件/.exec(await page.getByTestId("today-next-actions").locator("h2 + span").innerText())?.[1]);
     expect(headline).toBeGreaterThanOrEqual(total);
-    // 最初の画面（スマホ）の下端までに、近づく期限の見出しが入る位置まで届く（長い一覧が期限を押し出さない）
-    const deadlineTop = (await page.getByTestId("home-deadlines").boundingBox())!.y;
-    const nextTop = (await page.getByTestId("today-next-actions").boundingBox())!.y;
-    expect(deadlineTop - nextTop).toBeLessThan(900);
+    // 最初の画面（スマホ）の下端までに、近づく期限の見出しが入る位置まで届く（長い一覧が期限を押し出さない。16-G：期限は上段に移った）
+    // 16-G：期限（60 日以内）が無いときは段ごと出さない。ある日は上段（次にやることより上）にあり、最初の画面から落ちない
+    if ((await page.getByTestId("home-deadlines").count()) === 0) {
+      await expect(page.getByTestId("home-deadlines-empty")).toHaveCount(1);
+    } else {
+      const deadlineTop = (await page.getByTestId("home-deadlines").boundingBox())!.y;
+      const nextTop = (await page.getByTestId("today-next-actions").boundingBox())!.y;
+      expect(deadlineTop - nextTop).toBeLessThan(900);
+    }
     // キーボードで開く（Enter）→ 全件が見える → もう一度で閉じる。フォーカスはボタンのまま
     await toggle.focus();
     await page.keyboard.press("Enter");
@@ -283,8 +289,15 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     const dl = page.getByTestId("home-deadlines");
     await expect(dl).toBeVisible();
     await expect(dl).not.toContainText(/\d{4}-\d{2}-\d{2}/);
-    for (const t of await dl.getByTestId("deadline-row").locator("time").allInnerTexts()) expect(t).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
-    if (r.status() === 201) await expect(dl).toContainText("2026/12/20（日）");
+    // 16-G（差し戻し 1）：上段には 1 件だけで、2 件目以降は畳んだ「すべての予定」の中にある。畳んだ中を開いて、ページ全体の期限の行の日付を全件測る
+    await openAllPlans(page);
+    const times = page.locator('[data-testid="deadline-row"] time');
+    await expect(times.first()).toBeVisible();
+    const texts = await times.allInnerTexts();
+    expect(texts.length, "期限の行（上段＋畳んだ中）").toBeGreaterThanOrEqual(1);
+    for (const t of texts) expect(t.trim()).toMatch(/^(\d{4}\/)?\d{1,2}\/\d{1,2}（[日月火水木金土]）$/);
+    if ((await page.getByTestId("home-deadlines-rest").count()) > 0) await expect(page.getByTestId("home-deadlines-rest")).not.toContainText(/\d{4}-\d{2}-\d{2}/);
+    if (r.status() === 201) expect(texts.map((t) => t.trim())).toContain("2026/12/20（日）");
     await bm.dispose();
   });
 
@@ -295,8 +308,8 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       const link = page.getByRole("main").getByRole("link", { name }).first();
       await expect(link, path).toBeVisible();
       const b = (await link.boundingBox())!;
-      expect(b.width, `${path} 戻りリンクの幅`).toBeGreaterThanOrEqual(44);
-      expect(b.height, `${path} 戻りリンクの高さ`).toBeGreaterThanOrEqual(44);
+      expect(b.width, `${path} 戻りリンクの幅`).toBeGreaterThanOrEqual(48);
+      expect(b.height, `${path} 戻りリンクの高さ`).toBeGreaterThanOrEqual(48);
     }
   });
 
@@ -306,16 +319,16 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     await page.goto("/ops/more");
     const iconOf = async (testId: string): Promise<string> => page.getByTestId(testId).locator("svg").first().evaluate((s) => s.innerHTML);
     expect(await iconOf("nav-verdict")).not.toBe(await iconOf("nav-places"));
-    // 点検のアイコンは、ほかの 5 項目（ホーム・判定・計画・日誌・登録）のどれとも別の絵（Sprint 12h PR ③a）
+    // 点検のアイコンは、ほかの項目（ホーム・判定・計画・日誌・機体と書類）のどれとも別の絵（Sprint 12h PR ③a。16-F から点検は日誌の子）
     const inspection = await iconOf("nav-inspections");
-    for (const k of ["nav-today", "nav-verdict", "nav-plans", "nav-journal", "nav-more"]) expect(inspection, `点検と ${k}`).not.toBe(await iconOf(k));
+    for (const k of ["nav-today", "nav-verdict", "nav-plans", "nav-journal", "nav-more", "nav-flights", "nav-incidents"]) expect(inspection, `点検と ${k}`).not.toBe(await iconOf(k));
     expect(await iconOf("nav-pilots")).not.toBe(await iconOf("more-link-members"));
     expect(await iconOf("user-menu-button")).not.toBe(await iconOf("nav-pilots"));
     // 鍵（lock）の図形（rect の角丸 3 と M8.5 10.5V8…）が dips-note にない。点線の輪（stroke-dasharray）だけ
     const svg = await page.getByTestId("dips-note").locator("svg").first().evaluate((s) => s.innerHTML);
     expect(svg).toContain("stroke-dasharray");
     expect(svg).not.toContain("M8.5 10.5V8");
-    await expectNoHorizontalScroll(page, "登録");
+    await expectNoHorizontalScroll(page, "機体と書類");
   });
 
   test("独創性：行程表が「次の飛行」の主役。7 つの欄（等幅の通し番号）・「次」の押印・次の段の作業。375・320px で折り返さない", async ({ page }) => {
@@ -336,6 +349,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
     for (const w of [375, 320]) {
       await page.setViewportSize({ width: w, height: 812 });
       await page.goto("/ops");
+      await openAllPlans(page); // 16-G：今日のカードは「すべての予定」の中
       const card = page.getByTestId("today-card");
       await expect(card).toHaveAttribute("data-plan-id", plan.id);
       const route = card.getByTestId("route");
@@ -355,7 +369,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       expect(await route.locator('li[data-stage-state="done"] .opx-rs-dot svg path').count()).toBeGreaterThanOrEqual(1);
       const todoBorder = await route.locator('li[data-stage-state="todo"] .opx-rs-dot').first().evaluate((e) => getComputedStyle(e).borderTopStyle);
       expect(todoBorder).toBe("dashed");
-      // 「次」の欄はちょうど 1 つ。橙の面が塗られ、文字は「次」
+      // 「次」の欄はちょうど 1 つ。主色の面が塗られ、文字は「次」
       const next = route.locator('li[data-stage-state="next"]');
       await expect(next).toHaveCount(1);
       await expect(next.locator(".opx-rs-state")).toHaveText("次");
@@ -381,7 +395,7 @@ test.describe("Sprint 12g-1b A 差し戻し：利用者メニューのフォー�
       const link = card.getByTestId("today-card-next-link");
       await expect(link).toHaveAttribute("data-action-id", "request_confirmation");
       await expect(link).toHaveText("確認を依頼する");
-      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(48);
       await expect(card.getByTestId("today-card-route-count")).toHaveText("済 1 / 7");
     }
     await clearPlans(bm);

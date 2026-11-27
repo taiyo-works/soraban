@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DEADLINE_GUIDE_DISCLAIMER, DEADLINE_PAST_GUIDE_MESSAGE } from "@soraban/dips";
-import { NEXT_ACTIONS_INITIAL, splitDueLabel, TodayEmpty, TodayNextActions } from "./today-ui";
+import { HomePrimary, NEXT_ACTIONS_INITIAL, splitDueLabel, TodayEmpty, TodayNextActions } from "./today-ui";
 import type { TodayNextAction } from "@/server/ops/today-logic";
 
 const empty = {
@@ -29,12 +29,15 @@ const action = (n: number, extra: Partial<TodayNextAction> = {}): TodayNextActio
   }) as TodayNextAction;
 
 describe("ホームの部品（Sprint 12g-1b 差し戻し）", () => {
-  it("M-3. 空の日：計画を作れない役割には「飛行計画を作る」を出さず、「地点を判定する」を主ボタンにする", () => {
+  it("M-3（16-G HM-4 で改訂）. 空の日：計画を作れる役割は、アイコン・一文・主ボタン「計画を作る」だけ。作れない役割には「計画を作る」を出さず、「地点を判定する」を主ボタンにする", () => {
     const can = renderToStaticMarkup(createElement(TodayEmpty, { empty, canPlan: true }));
-    expect(can).toContain("飛行計画を作る");
-    expect(can).toContain("地点を判定する");
+    expect(can).toContain("計画を作る");
+    expect(can).not.toContain("地点を判定する");
+    expect(can).toContain("<svg");
+    expect(can.match(/data-testid="today-empty-action"/g)).toHaveLength(1);
+    expect(can.match(/data-variant="primary"/g)).toHaveLength(1);
     const cannot = renderToStaticMarkup(createElement(TodayEmpty, { empty, canPlan: false }));
-    expect(cannot).not.toContain("飛行計画を作る");
+    expect(cannot).not.toContain("計画を作る");
     expect(cannot).toContain("地点を判定する");
     expect(cannot.match(/data-testid="today-empty-action"/g)).toHaveLength(1);
   });
@@ -59,5 +62,19 @@ describe("ホームの部品（Sprint 12g-1b 差し戻し）", () => {
     expect(six).toContain("6 件");
     expect(six).toContain("1/20（水）");
     expect(six).not.toContain("2027-01-20");
+  });
+});
+
+describe("ホームの主ボタン（16-G 差し戻し 1）", () => {
+  const html = (a: TodayNextAction | null) => renderToStaticMarkup(createElement(HomePrimary, { action: a, canPlan: true }));
+
+  it("行動があればその行動、無ければ「新しい計画」。計画名の添え書きは出さない（最初の画面に入らないため）", () => {
+    const h = html(action(1));
+    expect(h).toContain("作業 1");
+    expect(h).toContain('data-testid="home-primary"');
+    expect(h).not.toContain("home-primary-plan");
+    const n = html(null);
+    expect(n).toContain("新しい計画");
+    expect(n).toContain('data-action-id="new_plan"');
   });
 });

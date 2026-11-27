@@ -133,7 +133,7 @@ export default function Home() {
               このページは、地点がどの法令・条例に当たるかを出典つきで確かめる判定のページです（判定は補助）。
             </p>
             {/* 運航管理の位置付け（Sprint 11a B2）。提供中の機能として画面名・件数・予定の日付は書かない。 */}
-            <p data-testid="site-ops-note" className="sb-ops-note">
+            <p data-testid="site-ops-note" data-note="" className="sb-ops-note">
               通報の記録・点検・飛行日誌は、運航管理の画面で扱います（社内で試験運用中）。
             </p>
             {/* 運航管理が有効でログイン済みの利用者にだけ出す入口（Sprint 12a J）。動的な部分は Suspense の内側に閉じ込め、
@@ -145,11 +145,11 @@ export default function Home() {
               {SITE_FACTS.map(([label, value]) => (
                 <div key={label}>
                   <dt>{label}</dt>
-                  <dd>{value}</dd>
+                  <dd data-note="">{value}</dd>
                 </div>
               ))}
             </dl>
-            <p data-testid="site-disclaimer" className="sb-disclaimer-short">
+            <p data-testid="site-disclaimer" data-note="" className="sb-disclaimer-short">
               判定結果は参考情報です。飛行の可否は、国土交通省（DIPS 2.0）・警察・各自治体で最終確認してください。
             </p>
           </div>
@@ -183,18 +183,18 @@ export default function Home() {
             title="収録の一覧を見る"
             note={`${COVERAGE_LAYERS.length} 区分・出典と確認日つき`}
           >
-          <p className="max-w-2xl text-sm leading-relaxed text-sb-ink-2">
+          <p className="max-w-2xl text-sb-ink-2">
             地点を指定すると、航空法（人口集中地区・空港等周辺）、小型無人機等飛行禁止法、都道府県と市町村の条例に照らした判定を、データの出典と確認日とともに表示します。
           </p>
           <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {COVERAGE_LAYERS.map((layer) => (
               <li key={layer.title} className="sb-block flex flex-col gap-2 !p-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="sb-tag shrink-0 font-bold text-sb-ink">{layer.source}</span>
-                  <span className="text-xs text-sb-ink-3">{layer.coverage}</span>
+                  <span data-note="" className="sb-tag shrink-0 font-bold text-sb-ink">{layer.source}</span>
+                  <span data-note="" className="text-sm text-sb-ink-3">{layer.coverage}</span>
                 </div>
-                <p className="text-[15px] font-bold leading-snug text-sb-ink">{layer.title}</p>
-                <p className="text-xs leading-relaxed text-sb-ink-3">
+                <p className="text-[1rem] font-bold text-sb-ink">{layer.title}</p>
+                <p data-note="" className="text-sm leading-relaxed text-sb-ink-3">
                   {layer.dataset}
                   <span aria-hidden className="mx-1.5 text-sb-edge">
                     ／
@@ -213,13 +213,13 @@ export default function Home() {
             <h2 id="disclaimer-heading" className="text-sm font-bold text-sb-ink">
               免責事項
             </h2>
-            <p className="max-w-3xl text-sm leading-[1.9] text-sb-ink-2">
+            <p data-note="" className="max-w-3xl text-sm leading-[1.9] text-sb-ink-2">
               {DISCLAIMER_JUDGEMENT}緊急用務空域等の動的情報は反映していません。公式の情報：{" "}
               <a
                 href="https://www.dips.mlit.go.jp/portal/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold text-sb-ink underline decoration-sb-orange decoration-2 underline-offset-4"
+                className="font-bold text-sb-ink underline decoration-sb-primary decoration-2 underline-offset-4"
               >
                 国土交通省 DIPS
               </a>
@@ -227,13 +227,13 @@ export default function Home() {
             </p>
           </div>
           <footer className="mt-6 flex flex-col gap-2 border-t border-sb-rule pt-5 text-sm text-sb-ink-3">
-            <p className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
+            <p data-note="" className="text-sb-ink-2">© 2026 {PROVIDER.name}</p>
             {/* 提供元の 6 項目（Sprint 18-3）と境界の文。値は lib/provider-info.ts・lib/boundary.ts の定数から。 */}
             <ProviderInfo testId="site-provider" className="max-w-3xl" compact />
-            <p data-testid="site-boundary" className="max-w-3xl text-sm leading-relaxed text-sb-ink-2">
+            <p data-testid="site-boundary" data-note="" className="max-w-3xl text-sm leading-relaxed text-sb-ink-2">
               {BOUNDARY_FULL}
             </p>
-            <p className="max-w-3xl leading-relaxed">
+            <p data-note="" className="max-w-3xl leading-relaxed">
               出典：国土交通省「国土数値情報（人口集中地区 A16 令和2年、用途地域 A29 令和元年度）」、空港は公開資料（地形図・空港要覧）からの概算（そらばん作成）、国土地理院ジオコーダ・住所検索・ベクタータイル、{ADDRESS_INDEX_AVAILABLE ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（住所検索の索引、公共データ利用規約 第1.0版）、" : ""}警察庁・防衛省（小型無人機等飛行禁止法）、鳥取県・島根県内 12 市町村例規集（鳥取・米子・倉吉・境港・三朝・湯梨浜・八頭・松江・出雲・安来・雲南・大田）、鳥取県・島根県例規集、文化庁国指定文化財等データベース
             </p>
           </footer>

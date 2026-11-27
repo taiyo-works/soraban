@@ -18,7 +18,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
             tabIndex={-1}
           >
             <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1.5">
-              <span className="sb-num text-xs tnum text-sb-ink-3">版 {v.versionNo}</span>
+              <span className="sb-num text-sm tnum text-sb-ink-3">版 {v.versionNo}</span>
               <Badge tone={OP_TONE[v.op]} data-testid="version-op">
                 {OP_LABELS[v.op]}
               </Badge>
@@ -26,13 +26,13 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
             <div className="flex min-w-0 flex-col gap-1">
               <p className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sb-ink">
                 <span className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-sb-ink-3">日時</span>
-                  <time dateTime={v.createdAt} className="sb-num text-[13px] tnum" data-testid="version-time">
+                  <span className="text-sm text-sb-ink-3">日時</span>
+                  <time dateTime={v.createdAt} className="sb-num text-sm tnum" data-testid="version-time">
                     {v.createdAtJst}
                   </time>
                 </span>
                 <span className="flex min-w-0 items-baseline gap-1.5">
-                  <span className="shrink-0 text-xs text-sb-ink-3">操作した人</span>
+                  <span className="shrink-0 text-sm text-sb-ink-3">操作した人</span>
                   <span className="break-all" data-testid="version-actor">
                     {v.actorName}
                   </span>
@@ -40,13 +40,13 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
               </p>
               {v.reason ? (
                 <p className="break-all leading-relaxed text-sb-ink-2" data-testid="version-reason">
-                  <span className="text-xs text-sb-ink-3">理由：</span>
+                  <span className="text-sm text-sb-ink-3">理由：</span>
                   {v.reason}
                 </p>
               ) : null}
               {v.changedFields.length > 0 ? (
                 <p className="leading-relaxed text-sb-ink-2" data-testid="version-changed">
-                  <span className="text-xs text-sb-ink-3">変わった項目：</span>
+                  <span className="text-sm text-sb-ink-3">変わった項目：</span>
                   {v.changedFields.join("、")}
                 </p>
               ) : null}
@@ -63,10 +63,10 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
       {older.length > 0 ? (
         <details data-testid="version-list-older">
           <summary className="flex min-h-12 cursor-pointer select-none items-center text-sm font-bold text-sb-ink">古い版 {older.length} 件を見る（最新 {shown.length} 件は下に出ています）</summary>
-          <ol className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(row)}</ol>
+          <ol data-note="" className="flex flex-col border-t border-sb-rule lg:grid lg:grid-cols-2 lg:gap-x-8">{older.map(row)}</ol>
         </details>
       ) : null}
-      <ol className={`flex flex-col border-t border-sb-rule${recent !== undefined ? " lg:grid lg:grid-cols-2 lg:gap-x-8" : ""}`} data-testid="version-list">
+      <ol data-note="" className={`flex flex-col border-t border-sb-rule${recent !== undefined ? " lg:grid lg:grid-cols-2 lg:gap-x-8" : ""}`} data-testid="version-list">
         {shown.map(row)}
       </ol>
     </Section>
@@ -76,7 +76,7 @@ export function VersionList({ versions, recent }: { readonly versions: readonly 
 export function Forbidden({ message = "この操作は運航管理者だけが行えます。" }: { readonly message?: string }) {
   return (
     <main className="flex max-w-xl flex-col gap-4">
-      <h1 className="font-display text-2xl font-light leading-tight text-sb-ink sm:text-3xl">権限がありません</h1>
+      <h1 className="text-2xl font-light leading-tight text-sb-ink sm:text-3xl">権限がありません</h1>
       <p className="opx-note">{message}</p>
     </main>
   );

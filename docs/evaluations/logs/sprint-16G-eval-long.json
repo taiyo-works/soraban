@@ -1,0 +1,2497 @@
+[
+ {
+  "pilotCreate": 201
+ },
+ {
+  "pilotCreate": 201
+ },
+ {
+  "placeLen": 30
+ },
+ {
+  "label": "long-base",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 855,
+  "gapToNav": -115,
+  "place": {
+   "top": 121,
+   "bottom": 163,
+   "h": 42,
+   "w": 343
+  },
+  "when": {
+   "top": 209,
+   "bottom": 272,
+   "h": 63,
+   "w": 305
+  },
+  "nextPlace": {
+   "top": 476,
+   "bottom": 516,
+   "h": 40,
+   "w": 275
+  },
+  "prep": {
+   "top": 171,
+   "bottom": 404,
+   "h": 233,
+   "w": 343
+  },
+  "next": {
+   "top": 412,
+   "bottom": 524,
+   "h": 111,
+   "w": 343
+  },
+  "primary": {
+   "top": 532,
+   "bottom": 588,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 133,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 600,
+   "bottom": 782,
+   "h": 182,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-base",
+  "w": 390,
+  "h": 844,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 390,
+  "innerW": 390,
+  "navTop": 771,
+  "quickBottom": 834,
+  "gapToNav": -62,
+  "place": {
+   "top": 121,
+   "bottom": 163,
+   "h": 42,
+   "w": 358
+  },
+  "when": {
+   "top": 209,
+   "bottom": 272,
+   "h": 63,
+   "w": 320
+  },
+  "nextPlace": {
+   "top": 476,
+   "bottom": 516,
+   "h": 40,
+   "w": 290
+  },
+  "prep": {
+   "top": 171,
+   "bottom": 404,
+   "h": 233,
+   "w": 358
+  },
+  "next": {
+   "top": 412,
+   "bottom": 524,
+   "h": 111,
+   "w": 358
+  },
+  "primary": {
+   "top": 532,
+   "bottom": 588,
+   "h": 56,
+   "w": 358
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 330,
+   "whatLines": 1,
+   "whatW": 148,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 600,
+   "bottom": 761,
+   "h": 161,
+   "w": 358
+  }
+ },
+ {
+  "label": "long-base",
+  "w": 320,
+  "h": 640,
+  "zoom": 0,
+  "hide": [],
+  "scrollW": 320,
+  "innerW": 320,
+  "navTop": 561,
+  "quickBottom": 1026,
+  "gapToNav": -465,
+  "place": {
+   "top": 121,
+   "bottom": 163,
+   "h": 42,
+   "w": 288
+  },
+  "when": {
+   "top": 209,
+   "bottom": 272,
+   "h": 63,
+   "w": 250
+  },
+  "nextPlace": {
+   "top": 606,
+   "bottom": 666,
+   "h": 60,
+   "w": 220
+  },
+  "prep": {
+   "top": 171,
+   "bottom": 488,
+   "h": 316,
+   "w": 288
+  },
+  "next": {
+   "top": 496,
+   "bottom": 674,
+   "h": 179,
+   "w": 288
+  },
+  "primary": {
+   "top": 682,
+   "bottom": 738,
+   "h": 56,
+   "w": 288
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 260,
+   "whatLines": 1,
+   "whatW": 78,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 750,
+   "bottom": 932,
+   "h": 182,
+   "w": 288
+  }
+ },
+ {
+  "label": "long-hide-today-place",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [
+   "today-place"
+  ],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 788,
+  "gapToNav": -48,
+  "place": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0,
+   "w": 0
+  },
+  "when": {
+   "top": 142,
+   "bottom": 205,
+   "h": 63,
+   "w": 305
+  },
+  "nextPlace": {
+   "top": 409,
+   "bottom": 449,
+   "h": 40,
+   "w": 275
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 337,
+   "h": 233,
+   "w": 343
+  },
+  "next": {
+   "top": 345,
+   "bottom": 457,
+   "h": 111,
+   "w": 343
+  },
+  "primary": {
+   "top": 465,
+   "bottom": 521,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 133,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 533,
+   "bottom": 715,
+   "h": 182,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-hide-home-prep-when",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [
+   "home-prep-when"
+  ],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 792,
+  "gapToNav": -52,
+  "place": {
+   "top": 121,
+   "bottom": 163,
+   "h": 42,
+   "w": 343
+  },
+  "when": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0,
+   "w": 0
+  },
+  "nextPlace": {
+   "top": 413,
+   "bottom": 453,
+   "h": 40,
+   "w": 275
+  },
+  "prep": {
+   "top": 171,
+   "bottom": 341,
+   "h": 170,
+   "w": 343
+  },
+  "next": {
+   "top": 349,
+   "bottom": 461,
+   "h": 111,
+   "w": 343
+  },
+  "primary": {
+   "top": 469,
+   "bottom": 525,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 133,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 537,
+   "bottom": 719,
+   "h": 182,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-hide-home-next-place",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [
+   "home-next-place"
+  ],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 815,
+  "gapToNav": -76,
+  "place": {
+   "top": 121,
+   "bottom": 163,
+   "h": 42,
+   "w": 343
+  },
+  "when": {
+   "top": 209,
+   "bottom": 272,
+   "h": 63,
+   "w": 305
+  },
+  "nextPlace": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0,
+   "w": 0
+  },
+  "prep": {
+   "top": 171,
+   "bottom": 404,
+   "h": 233,
+   "w": 343
+  },
+  "next": {
+   "top": 412,
+   "bottom": 484,
+   "h": 72,
+   "w": 343
+  },
+  "primary": {
+   "top": 492,
+   "bottom": 548,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 133,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 560,
+   "bottom": 742,
+   "h": 182,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-hide-today-place+home-prep-when",
+  "w": 375,
+  "h": 812,
+  "zoom": 0,
+  "hide": [
+   "today-place",
+   "home-prep-when"
+  ],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 739,
+  "quickBottom": 725,
+  "gapToNav": 15,
+  "place": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0,
+   "w": 0
+  },
+  "when": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0,
+   "w": 0
+  },
+  "nextPlace": {
+   "top": 346,
+   "bottom": 386,
+   "h": 40,
+   "w": 275
+  },
+  "prep": {
+   "top": 104,
+   "bottom": 274,
+   "h": 170,
+   "w": 343
+  },
+  "next": {
+   "top": 282,
+   "bottom": 394,
+   "h": 111,
+   "w": 343
+  },
+  "primary": {
+   "top": 402,
+   "bottom": 458,
+   "h": 56,
+   "w": 343
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 96,
+   "rowW": 315,
+   "whatLines": 1,
+   "whatW": 133,
+   "whatFs": 16,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 3
+  },
+  "lowLH": [
+   {
+    "id": "home-next-when",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "home-next-place",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-badge",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "DT",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "break-words text-sm text-sb-ink-2",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "TIME",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-num text-sm text-sb-ink-3",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-plans-link",
+    "tag": "A",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-strong",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag sb-tag-deadline",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "sb-tag",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "",
+    "tag": "SPAN",
+    "ratio": 1.4,
+    "note": false
+   },
+   {
+    "id": "today-next-action-plan",
+    "tag": "SPAN",
+    "ratio": 1.429,
+    "note": false
+   },
+   {
+    "id": "today-next-more-toggle",
+    "tag": "BUTTON",
+    "ratio": 1.429,
+    "note": false
+   }
+  ],
+  "deadlinesBox": {
+   "top": 470,
+   "bottom": 652,
+   "h": 182,
+   "w": 343
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 390,
+  "h": 844,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 390,
+  "innerW": 390,
+  "navTop": 728,
+  "quickBottom": 2521,
+  "gapToNav": -1793,
+  "place": {
+   "top": 243,
+   "bottom": 369,
+   "h": 126,
+   "w": 326
+  },
+  "when": {
+   "top": 441,
+   "bottom": 693,
+   "h": 252,
+   "w": 288
+  },
+  "nextPlace": {
+   "top": 1504,
+   "bottom": 1664,
+   "h": 160,
+   "w": 258
+  },
+  "prep": {
+   "top": 377,
+   "bottom": 1261,
+   "h": 884,
+   "w": 326
+  },
+  "next": {
+   "top": 1269,
+   "bottom": 1672,
+   "h": 404,
+   "w": 326
+  },
+  "primary": {
+   "top": 1680,
+   "bottom": 1765,
+   "h": 85,
+   "w": 326
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 297,
+   "rowW": 298,
+   "whatLines": 1,
+   "whatW": 160,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 5
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1789,
+   "bottom": 2345,
+   "h": 555,
+   "w": 326
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 430,
+  "h": 932,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 430,
+  "innerW": 430,
+  "navTop": 816,
+  "quickBottom": 2283,
+  "gapToNav": -1467,
+  "place": {
+   "top": 243,
+   "bottom": 369,
+   "h": 126,
+   "w": 366
+  },
+  "when": {
+   "top": 441,
+   "bottom": 609,
+   "h": 168,
+   "w": 328
+  },
+  "nextPlace": {
+   "top": 1307,
+   "bottom": 1467,
+   "h": 160,
+   "w": 298
+  },
+  "prep": {
+   "top": 377,
+   "bottom": 1064,
+   "h": 687,
+   "w": 366
+  },
+  "next": {
+   "top": 1072,
+   "bottom": 1475,
+   "h": 404,
+   "w": 366
+  },
+  "primary": {
+   "top": 1483,
+   "bottom": 1569,
+   "h": 85,
+   "w": 366
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 297,
+   "rowW": 338,
+   "whatLines": 1,
+   "whatW": 200,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 5
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1593,
+   "bottom": 2148,
+   "h": 555,
+   "w": 366
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 320,
+  "h": 640,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 320,
+  "innerW": 320,
+  "navTop": 524,
+  "quickBottom": 3373,
+  "gapToNav": -2848,
+  "place": {
+   "top": 243,
+   "bottom": 411,
+   "h": 168,
+   "w": 256
+  },
+  "when": {
+   "top": 538,
+   "bottom": 874,
+   "h": 336,
+   "w": 218
+  },
+  "nextPlace": {
+   "top": 1957,
+   "bottom": 2237,
+   "h": 280,
+   "w": 188
+  },
+  "prep": {
+   "top": 419,
+   "bottom": 1620,
+   "h": 1201,
+   "w": 256
+  },
+  "next": {
+   "top": 1628,
+   "bottom": 2245,
+   "h": 617,
+   "w": 256
+  },
+  "primary": {
+   "top": 2253,
+   "bottom": 2380,
+   "h": 127,
+   "w": 256
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 457,
+   "rowW": 228,
+   "whatLines": 1,
+   "whatW": 228,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 8
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 2404,
+   "bottom": 3196,
+   "h": 792,
+   "w": 256
+  }
+ },
+ {
+  "label": "long-z2",
+  "w": 375,
+  "h": 812,
+  "zoom": 2,
+  "hide": [],
+  "scrollW": 375,
+  "innerW": 375,
+  "navTop": 696,
+  "quickBottom": 2658,
+  "gapToNav": -1962,
+  "place": {
+   "top": 243,
+   "bottom": 411,
+   "h": 168,
+   "w": 311
+  },
+  "when": {
+   "top": 483,
+   "bottom": 735,
+   "h": 252,
+   "w": 273
+  },
+  "nextPlace": {
+   "top": 1601,
+   "bottom": 1761,
+   "h": 160,
+   "w": 243
+  },
+  "prep": {
+   "top": 419,
+   "bottom": 1357,
+   "h": 938,
+   "w": 311
+  },
+  "next": {
+   "top": 1365,
+   "bottom": 1769,
+   "h": 404,
+   "w": 311
+  },
+  "primary": {
+   "top": 1777,
+   "bottom": 1862,
+   "h": 85,
+   "w": 311
+  },
+  "clipped": [],
+  "deadline": {
+   "rowH": 337,
+   "rowW": 283,
+   "whatLines": 1,
+   "whatW": 145,
+   "whatFs": 32,
+   "timeInBox": true,
+   "tagInBox": true,
+   "timeText": "1/8（金）",
+   "text": "技能証明 操縦者名十八文字のテスト太郎ですよCMWUNNLQR 更新の期限（満了の 1 か月前）を過ぎています 1/8（金） ○ あと 3 日",
+   "subjectLines": 6
+  },
+  "lowLH": [],
+  "deadlinesBox": {
+   "top": 1886,
+   "bottom": 2481,
+   "h": 595,
+   "w": 311
+  }
+ }
+]

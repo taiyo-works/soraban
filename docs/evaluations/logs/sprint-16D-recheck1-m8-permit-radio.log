@@ -1,0 +1,36 @@
+375 radios 7 {"w":24,"cls":"sb-radio mt-0.5","border":"rgb(31, 95, 224)","rowH":48,"rowMinH":"48px"}
+375 place-type初期 ●○○
+375 行クリック後 ○●○
+375 ArrowDown後 ○○● focus: permit-place-text
+375 ArrowUp後 ○●○
+375 Space後 ○●○
+375 Tab後のフォーカス INPUT:permit-circle-name
+375 Shift+Tab 戻り permit-place-circles
+375 選択+フォーカスの radio {"out":"solid 3px rgb(31, 95, 224) off 3px","bg":"rgb(255, 255, 255)","border":"rgb(31, 95, 224)","rowFocusRing":"rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(31, 95, 224) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"}
+375 scope any 数 2
+375 listed クリック true false
+375 disabled 数 0
+1280 radios 7 {"w":24,"cls":"sb-radio mt-0.5","border":"rgb(31, 95, 224)","rowH":48,"rowMinH":"48px"}
+1280 place-type初期 ●○○
+1280 行クリック後 ○●○
+1280 ArrowDown後 ○○● focus: permit-place-text
+1280 ArrowUp後 ○●○
+1280 Space後 ○●○
+1280 Tab後のフォーカス INPUT:permit-circle-name
+1280 Shift+Tab 戻り permit-place-circles
+1280 選択+フォーカスの radio {"out":"solid 3px rgb(31, 95, 224) off 3px","bg":"rgb(255, 255, 255)","border":"rgb(31, 95, 224)","rowFocusRing":"rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(31, 95, 224) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"}
+1280 scope any 数 2
+1280 listed クリック true false
+1280 disabled 数 0
+375field radios 7 {"w":24,"cls":"sb-radio mt-0.5","border":"rgb(31, 95, 224)","rowH":48,"rowMinH":"48px"}
+375field place-type初期 ●○○
+375field 行クリック後 ○●○
+375field ArrowDown後 ○○● focus: permit-place-text
+375field ArrowUp後 ○●○
+375field Space後 ○●○
+375field Tab後のフォーカス INPUT:permit-circle-name
+375field Shift+Tab 戻り permit-place-circles
+375field 選択+フォーカスの radio {"out":"solid 3px rgb(31, 95, 224) off 3px","bg":"rgb(255, 255, 255)","border":"rgb(31, 95, 224)","rowFocusRing":"rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(31, 95, 224) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"}
+375field scope any 数 2
+375field listed クリック true false
+375field disabled 数 0

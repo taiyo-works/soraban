@@ -56,20 +56,20 @@ export function PlanFrame({
   readonly children: ReactNode;
 }) {
   return (
-    <main className="flex flex-col gap-8 lg:gap-4">
-      <div className="flex flex-col gap-4">
+    <main className="flex flex-col gap-3 lg:gap-3">
+      <div className="flex flex-col gap-3 lg:gap-4">
         <PageHeader
-          eyebrow={eyebrow}
+          meta={eyebrow}
           back={back ?? { href: "/ops/plans", label: "飛行計画の一覧" }}
-          title={<span className="break-words" data-testid="plan-title-heading">{plan.title}</span>}
+          title={<span className="[overflow-wrap:anywhere]" data-testid="plan-title-heading">{plan.title}</span>}
         >
           <div className="flex flex-wrap items-center gap-2">
             <PlanStateBadge state={plan.state} label={plan.stateLabel} />
             {plan.freshness.stale ? <StaleBadge /> : null}
-            <span className="sb-num text-[12px] tnum text-sb-ink-3">版 {plan.version}</span>
+            <span className="sb-num text-sm tnum text-sb-ink-3">版 {plan.version}</span>
           </div>
         </PageHeader>
-        {plan.voided ? <Note tone="red">この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
+        {plan.voided ? <Note tone="red" body>この計画は中止されています。記載内容と判定の履歴、版の一覧は残しています。</Note> : null}
         <PlanTabs planId={plan.id} {...(current ? { current } : {})} />
       </div>
       <HashScroll />

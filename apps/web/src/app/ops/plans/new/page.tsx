@@ -1,7 +1,7 @@
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
 import { JudgePills } from "@/components/ops/judge-pills";
 import { DipsNotice } from "@/components/ops/plan-ui";
-import { PlanForm } from "@/components/ops/plans-client";
+import { PlanWizard } from "@/components/ops/plan-wizard";
 import { Forbidden } from "@/components/ops/versions";
 import { Note, PageHeader } from "@/components/ops/ui";
 import { parsePlanHandoff } from "@/lib/plan-options";
@@ -21,6 +21,10 @@ export default async function PlanNewPage({
   if (denied) return <Forbidden message={denied} />;
   const handoff = parsePlanHandoff(await searchParams);
   const { aircraft, pilots, fixedPilotId, places } = await planFormOptions(ctx, me);
+  // 判定画面から引き継いだ入力が 1 つでもあるか（段 ① に注記を出す）
+  const hasHandoff = Boolean(
+    handoff.lat || handoff.lng || handoff.weightG || handoff.plannedDate || handoff.purpose || handoff.access || handoff.observer || handoff.flags.length > 0 || handoff.permits.length > 0,
+  );
   const permitHelper = await permitHelperFor(ctx, null);
   return (
     <main className="flex flex-col gap-6">
@@ -29,13 +33,14 @@ export default async function PlanNewPage({
         <DipsNotice />
       </PageHeader>
       <JudgePills lead="地点がまだ決まっていないときは、先に判定画面で調べられます" />
-      <PlanForm
+      <PlanWizard
         aircraft={aircraft}
         pilots={pilots}
         fixedPilotId={fixedPilotId}
         places={places}
         initial={initialFromHandoff(handoff)}
         permitHelper={permitHelper}
+        handoff={hasHandoff}
         {...(handoff.weightG ? { handoffWeightG: handoff.weightG } : {})}
       />
     </main>

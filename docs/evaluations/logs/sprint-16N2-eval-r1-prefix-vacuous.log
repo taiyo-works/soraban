@@ -1,0 +1,10 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-n2-db.spec.ts -g '一貫性'
+
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-n2-db.spec.ts:91:7 › N-3 `/` と `/ops` の一貫性 › 同じ役割の部品（地・本文・主ボタン・副ボタン・入力欄・判定の札・フォーカスの輪）の計算されたスタイルが `/` と `/ops` で一致する (10.0s)
+
+  1 passed (14.4s)

@@ -1,0 +1,82 @@
+# 文字 200% の横スクロールの原因（390 幅。要素ごとの右端）
+ZZ 計画の作成 scrollWidth=415 n=1
+R=415 w=79 ws=normal minw=auto 「任意」
+      span.opx-optional w=79 disp=flex
+      span.flex.items-center.gap-2 w=135 disp=flex
+      div.flex.min-w-0.flex-col.gap-1.5 w=135 disp=flex
+      div.grid.grid-cols-2.gap-3.sm:gap-4 w=294 disp=grid
+ZZ 判定 scrollWidth=554 n=10
+R=521 w=289 ws=normal minw=0px 「機体登録（DRS）＋リモートID」
+      span.font-medium.text-sb-ink w=289 disp=inline
+      span. w=290 disp=block
+      li[verdict-duty].grid.grid-cols-[4.5rem_1fr].items-baseline.gap-x-3 w=262 disp=grid
+      ul[verdict-duties].flex.flex-col.divide-y.divide-sb-rule w=326 disp=flex
+R=522 w=290 ws=normal minw=0px 「100g 以上の機体の前提です（判定」
+      span.block.text-sb-ink-3 w=290 disp=block
+      span. w=290 disp=block
+      li[verdict-duty].grid.grid-cols-[4.5rem_1fr].items-baseline.gap-x-3 w=262 disp=grid
+      ul[verdict-duties].flex.flex-col.divide-y.divide-sb-rule w=326 disp=flex
+R=458 w=226 ws=normal minw=0px 「緊急用務空域の指定の確認」
+      span.font-medium.text-sb-ink w=226 disp=inline
+      span. w=322 disp=block
+      li[verdict-duty].grid.grid-cols-[4.5rem_1fr].items-baseline.gap-x-3 w=262 disp=grid
+      ul[verdict-duties].flex.flex-col.divide-y.divide-sb-rule w=326 disp=flex
+R=554 w=322 ws=normal minw=0px 「飛行の直前に、緊急用務空域が指定され」
+      span.block.text-sb-ink-3 w=322 disp=block
+      span. w=322 disp=block
+      li[verdict-duty].grid.grid-cols-[4.5rem_1fr].items-baseline.gap-x-3 w=262 disp=grid
+      ul[verdict-duties].flex.flex-col.divide-y.divide-sb-rule w=326 disp=flex
+R=418 w=174 ws=normal minw=auto 「手続き不要」
+      span.inline-flex.items-center.gap-1.5.font-medium w=174 disp=flex
+      td.flex.gap-2.py-0.5.pr-2 w=306 disp=flex
+      tr[verdict-item].block.rounded-sb-l.border-b-0.border-l-4 w=326 disp=block
+      tbody.flex.flex-col.gap-2.md:table-row-group w=326 disp=flex
+R=418 w=174 ws=normal minw=auto 「手続き不要」
+      span.inline-flex.items-center.gap-1.5.font-medium w=174 disp=flex
+      td.flex.gap-2.py-0.5.pr-2 w=306 disp=flex
+      tr[verdict-item].block.rounded-sb-l.border-b-0.border-l-4 w=326 disp=block
+      tbody.flex.flex-col.gap-2.md:table-row-group w=326 disp=flex
+--
+ZZ 通報の作業台 scrollWidth=477 n=6
+R=393 w=113 ws=normal minw=auto 「報道取材」
+      span. w=113 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+R=422 w=142 ws=normal minw=auto 「農林水産業」
+      span. w=142 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+R=393 w=113 ws=normal minw=auto 「環境調査」
+      span. w=113 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+R=477 w=197 ws=normal minw=auto 「インフラ点検・保守」
+      span. w=197 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+R=422 w=142 ws=normal minw=auto 「事故・災害対応等」
+      span. w=142 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+R=429 w=149 ws=normal minw=auto 「その他2(業務以外)」
+      span. w=149 disp=block
+      label.opx-check-row.!items-start.border-[1.5px].border-transparent w=155 disp=flex
+      div.grid.grid-cols-2.gap-2 w=326 disp=grid
+      fieldset.flex.min-w-0.flex-col.gap-2 w=326 disp=flex
+--
+ZZ 計画の概要 scrollWidth=442 n=0
+
+
+ZZ 計画の概要 scrollWidth=442 n=1
+R=442 「件あります（開く）」
+      summary.flex.min-h-12.cursor-pointer.select-none w=78 disp=flex
+      details[plan-stale-sources-details]. w=78 disp=block
+      dd[plan-stale-sources]. w=78 disp=block
+      div.grid.grid-cols-[7rem_minmax(0,1fr)].gap-x-3.border-b w=326 disp=grid
+      dl[plan-confirm-facts].flex.flex-col.border-t.border-sb-rule w=326 disp=flex
+

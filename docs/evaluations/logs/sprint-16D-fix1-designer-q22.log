@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint12h-pr2.spec.ts -g Q-22
+
+
+Running 3 tests using 1 worker
+
+  ✓  1 e2e/sprint12h-pr2.spec.ts:686:7 › Q-22 キーボードとランドマーク › 最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 結論 → 地図 で、DOM の順と同じ (2.3s)
+  ✓  2 e2e/sprint12h-pr2.spec.ts:729:7 › Q-22 キーボードとランドマーク › フォーカスの輪が見える（3px の輪・要素から離す。--sb-focus）。入力欄・ボタン・チェック・リンクのどれでも消えない (2.0s)
+  ✓  3 e2e/sprint12h-pr2.spec.ts:757:7 › Q-22 キーボードとランドマーク › 地図のドラッグ以外の操作はキーボードでできる：層の切り替え（Space）、現在地ボタン（Enter）、地点の例（Enter）、住所の入力（Enter で検索） (3.4s)
+
+  3 passed (10.6s)
+::notice title=🎭 Playwright Run Summary::  3 passed (10.6s)

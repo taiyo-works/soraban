@@ -66,6 +66,16 @@ ${table(judgement, false)}
 ${table(engineShinsei, false)}
 直すかどうかは専門家の回答の後（§4.6）。直す場合は \`packages/regulations\` の文言の変更になり、判定の基準のテスト（\`sprint11d-verdict-baseline.json\`・\`diagnose-core.test.ts\`）の作り直しが要る。
 `;
+// 手書きの追記（Sprint 16 の K-12。新しく足した画面の文言）は、印より後ろをそのまま残す（走査の出力から作る部分だけを作り直す）
+const MANUAL = "<!-- 手書きの追記（Sprint 16）ここから。scripts/wording-inventory.mjs は、この印より後ろを書き換えない -->";
+let tail = "";
+try {
+  const old = readFileSync(out, "utf8");
+  const i = old.indexOf(MANUAL);
+  if (i >= 0) tail = `\n${old.slice(i)}`;
+} catch {
+  // 出力の文書がまだ無い
+}
 mkdirSync(path.dirname(out), { recursive: true });
-writeFileSync(out, text);
+writeFileSync(out, text + tail);
 console.log(`wrote ${out}: 違反 ${violation.length}、許可リスト ${allowed.length}、判定エンジン由来 ${judgement.length}`);

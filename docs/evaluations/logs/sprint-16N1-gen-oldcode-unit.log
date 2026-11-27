@@ -1,0 +1,40 @@
+Expected: "手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。"
+Received: "<div data-testid="verdict-summary" data-level="needs_procedure" class="flex flex-col gap-7"><div class="flex flex-col items-stretch gap-3"><div data-testid="verdict-conclusion" class="sb-block flex min-w-0 flex-1 flex-col gap-2.5 sb-rise sb-card-state" data-state="warn" aria-labelledby="verdict-heading"><div class="flex items-center gap-3.5"><div class="sb-v-big sb-vb-needs" data-verdict-key="needs"><svg viewBox="0 0 24 24" class="" aria-hidden="true"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"></path><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path><circle cx="12" cy="17" r="1.3" fill="currentColor"></circle></svg></div><div class="min-w-0"><p id="verdict-heading" tabindex="-1" data-note="" class="sb-v-eyebrow">結論</p><p data-testid="verdict-level" class="sb-v-word" data-verdict-key="needs">要手続き</p></div></div><div aria-hidden="true" class="flex items-end gap-1" data-scale-level="needs_procedure"><span class="flex h-10 w-11 items-center justify-center border-b-4 border-transparent text-sb-ink-3 opacity-60"><svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"></rect><path d="M8.6 8.6 L15.4 15.4 M15.4 8.6 L8.6 15.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"></path></svg></span><span class="flex h-10 w-11 items-center justify-center border-b-4 text-sb-v-needs-fg border-current"><svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true"><path d="M12 3.6 L21.2 19.6 H2.8 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"></path><path d="M12 9.6 V14.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path><circle cx="12" cy="17" r="1.3" fill="currentColor"></circle></svg></span><span class="flex h-10 w-11 items-center justify-center border-b-4 border-transparent text-sb-ink-3 opacity-60"><svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2.2"></circle><path d="M7.8 12.4 L10.9 15.4 L16.4 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span class="flex h-10 w-11 items-center justify-center border-b-4 border-transparent text-sb-ink-3 opacity-60"><svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="3.4"></circle></svg></span></div><div class="flex flex-col gap-1.5 border-t border-sb-rule pt-2.5"><p data-testid="verdict-unknown-count" data-note="" class="inline-flex items-center gap-2 text-sm font-bold text-sb-ink"><svg viewBox="0 0 24 24" class="sb-vm" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"></rect><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><circle cx="12" cy="16.9" r="1.2" fill="currentColor"></circle></svg>判定不能 1 件（データ未整備）</p></div><p class="sb-lead !text-sb-ink">手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。</p></div></div></div>"
+ ❯ apps/web/src/components/verdict-help-n1.test.ts:64:23
+     62|       expect(hidesVerdictHelp(v, tk)).toBe(hidden);
+     63|       if (hidden) {
+     64|         expect(h).not.toContain(help(v.level));
+       |                       ^
+     65|         expect(h).not.toContain(help("needs_procedure"));
+     66|         expect(h).not.toContain("飛べ");
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > PDF：判定不能 1 件＋要手続き
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > PDF：判定不能だけ
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > PDF：過去の判定（total なし）で unknownCount>0
+AssertionError: expected '結論要手続き判定不能 1 件（データ未整備）手続きを済ませれば飛べます。下…' not to contain '飛べ'
+Expected: "飛べ"
+Received: "結論要手続き判定不能 1 件（データ未整備）手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。"
+ ❯ apps/web/src/components/verdict-help-n1.test.ts:75:25
+     73|         const t = pdf(v);
+     74|         if (hidden) {
+     75|           expect(t).not.toContain("飛べ");
+       |                         ^
+     76|           expect(t).not.toContain(help(v.level));
+     77|         } else expect(t).toContain(help(v.level).replace(/\s/g, ""));
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > 画面：項目 0 件（総合 unknown）
+AssertionError: expected '<div data-testid="verdict-summary" da…' not to contain '手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。'
+Expected: "手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。"
+Received: "<div data-testid="verdict-summary" data-level="needs_procedure" class="flex flex-col gap-7"><div class="flex flex-col items-stretch gap-3"><div data-testid="verdict-conclusion" class="sb-block flex min-w-0 flex-1 flex-col gap-2.5 sb-rise " aria-labelledby="verdict-heading"><div class="flex items-center gap-3.5"><div class="sb-v-big sb-vb-unknown" data-verdict-key="unknown"><svg viewBox="0 0 24 24" class="" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.6"></rect><path d="M9.7 9.6 a2.4 2.4 0 1 1 3.5 2.1 c-.8.5-1.2 1-1.2 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><circle cx="12" cy="16.9" r="1.2" fill="currentColor"></circle></svg></div><div class="min-w-0"><p id="verdict-heading" tabindex="-1" data-note="" class="sb-v-eyebrow">結論</p><p data-testid="judgement-total" data-total-key="unknown" data-stale="false" class="sb-v-total">総合</p><p data-note="" class="sb-v-sub">判定の段：<span data-testid="verdict-level" data-verdict-key="needs">要手続き</span></p></div></div><p class="sb-lead !text-sb-ink">手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。</p></div></div></div>"
+ ❯ apps/web/src/components/verdict-help-n1.test.ts:64:23
+     62|       expect(hidesVerdictHelp(v, tk)).toBe(hidden);
+     63|       if (hidden) {
+     64|         expect(h).not.toContain(help(v.level));
+       |                       ^
+     65|         expect(h).not.toContain(help("needs_procedure"));
+     66|         expect(h).not.toContain("飛べ");
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+ Test Files  1 failed (1)
+      Tests  7 failed | 8 passed (15)
+   Start at  21:01:45
+   Duration  1.27s (transform 750ms, setup 0ms, import 1.09s, tests 40ms, environment 0ms)

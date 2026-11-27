@@ -1,0 +1,51 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-g-db.spec.ts --repeat-each=3
+
+
+Running 36 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (2.7s)
+  ✓   2 e2e/ops-db/sprint16-g-db.spec.ts:163:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ (850ms)
+  ✓   3 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (987ms)
+  ✓   4 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (981ms)
+  ✓   5 e2e/ops-db/sprint16-g-db.spec.ts:227:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない (793ms)
+  ✓   6 e2e/ops-db/sprint16-g-db.spec.ts:245:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない (613ms)
+  ✓   7 e2e/ops-db/sprint16-g-db.spec.ts:254:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中 (1.5s)
+  ✓   8 e2e/ops-db/sprint16-g-db.spec.ts:294:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） (2.1s)
+  ✓   9 e2e/ops-db/sprint16-g-db.spec.ts:344:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない (821ms)
+  ✓  10 e2e/ops-db/sprint16-g-db.spec.ts:371:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」 (557ms)
+[16-G gen3] 375x812 long place: quick bottom 729.5, nav top 739.0, margin 9.5
+  ✓  11 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 375×812 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (870ms)
+[16-G gen3] 390x844 long place: quick bottom 708.5, nav top 771.0, margin 62.5
+  ✓  12 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 390×844 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (795ms)
+  ✓  13 e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (997ms)
+  ✓  14 e2e/ops-db/sprint16-g-db.spec.ts:163:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ (744ms)
+  ✓  15 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (783ms)
+  ✓  16 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (870ms)
+  ✓  17 e2e/ops-db/sprint16-g-db.spec.ts:227:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない (815ms)
+  ✓  18 e2e/ops-db/sprint16-g-db.spec.ts:245:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない (759ms)
+  ✓  19 e2e/ops-db/sprint16-g-db.spec.ts:254:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中 (1.3s)
+  ✓  20 e2e/ops-db/sprint16-g-db.spec.ts:294:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） (1.9s)
+  ✓  21 e2e/ops-db/sprint16-g-db.spec.ts:344:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない (833ms)
+  ✓  22 e2e/ops-db/sprint16-g-db.spec.ts:371:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」 (535ms)
+[16-G gen3] 375x812 long place: quick bottom 729.5, nav top 739.0, margin 9.5
+  ✓  23 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 375×812 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (867ms)
+[16-G gen3] 390x844 long place: quick bottom 708.5, nav top 771.0, margin 62.5
+  ✓  24 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 390×844 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (863ms)
+  ✓  25 e2e/ops-db/sprint16-g-db.spec.ts:117:7 › Sprint 16-G E2E-DB：ホーム › HM-1 DOM の順：題・準備カード・次の予定・主ボタン・（期限）・クイック操作・すべての予定。準備カードは 3 行と 1 文の読み上げ、判定は参考の注記つき (1.1s)
+  ✓  26 e2e/ops-db/sprint16-g-db.spec.ts:163:7 › Sprint 16-G E2E-DB：ホーム › HM-2・K-8 主ボタンは 1 つ。準備カードの計画の押せる次の行動（無ければ「新しい計画」）で、行き先は一覧の同じ行と同じ (899ms)
+  ✓  27 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (824ms)
+  ✓  28 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (919ms)
+  ✓  29 e2e/ops-db/sprint16-g-db.spec.ts:227:7 › Sprint 16-G E2E-DB：ホーム › HM-1 畳み：判定のピル・今日のカード・次にやること・直近の飛行は「すべての予定」に畳まれ、開くと出る。ピルの行き先は変わらない (938ms)
+  ✓  30 e2e/ops-db/sprint16-g-db.spec.ts:245:7 › Sprint 16-G E2E-DB：ホーム › 端末データ：ホームを開いても、氏名・場所・計画名を localStorage・sessionStorage に残さない (591ms)
+  ✓  31 e2e/ops-db/sprint16-g-db.spec.ts:254:7 › Sprint 16-G E2E-DB：ホーム › HM-1 ④ 期限：60 日以内のものだけ。無ければ段を出さない（畳んだ中に無い旨の 1 行）。ある日は近い順に 1 件。残りは「すべての予定」の中 (1.3s)
+  ✓  32 e2e/ops-db/sprint16-g-db.spec.ts:294:7 › Sprint 16-G E2E-DB：ホーム › 差し戻し 1：通報の行は、受付番号があるときだけ「受付番号を記録済み」（安全）。番号が表示されなかった記録は「記録あり（受付番号なし）」（注意・△） (1.9s)
+  ✓  33 e2e/ops-db/sprint16-g-db.spec.ts:344:7 › Sprint 16-G E2E-DB：ホーム › HM-4 空の状態（計画が 0 件）：アイコン・一文・主ボタン「計画を作る」だけ。準備カード・次の予定は出ない (858ms)
+  ✓  34 e2e/ops-db/sprint16-g-db.spec.ts:371:7 › Sprint 16-G E2E-DB：ホーム › 権限：閲覧者にはクイック操作と「新しい計画」を出さない。閲覧者の空の日の主ボタンは「地点を判定する」 (637ms)
+[16-G gen3] 375x812 long place: quick bottom 729.5, nav top 739.0, margin 9.5
+  ✓  35 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 375×812 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (884ms)
+[16-G gen3] 390x844 long place: quick bottom 708.5, nav top 771.0, margin 62.5
+  ✓  36 e2e/ops-db/sprint16-g-db.spec.ts:380:9 › Sprint 16-G E2E-DB：ホーム › 2026-11-24 の判断：約 30 字の長い場所名でも 390×844 の最初の画面で、クイック操作が下部ナビの上端より 8px 以上上。場所名は最初の画面に 1 回だけ (903ms)
+
+  36 passed (50.9s)

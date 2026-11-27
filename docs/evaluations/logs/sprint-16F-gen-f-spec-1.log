@@ -1,0 +1,57 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts
+
+
+Running 14 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-f-db.spec.ts:72:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 375・390・430・360 で 4 つ（ホーム／計画／日誌／機体と書類）、高さ 64 以上・折り返さない・文字 14 以上・現在地は主色＋薄い主色の面＋aria-current・影は float＋上の 1px の線 (23.5s)
+  ✘   2 e2e/ops-db/sprint16-f-db.spec.ts:146:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 (540ms)
+  -   3 e2e/ops-db/sprint16-f-db.spec.ts:207:7 › F-2・F-5 点検の現在地と互換 › 点検の一覧は日誌が現在地、戻りリンク「日誌」（48px 以上）。新規・詳細でも現在地は日誌
+  -   4 e2e/ops-db/sprint16-f-db.spec.ts:224:7 › F-2・F-5 点検の現在地と互換 › F-5 既存の URL は直接開いて 200（リダイレクトなし）・見出し・現在地。?planId・timing・returnTo を保つ
+  -   5 e2e/ops-db/sprint16-f-db.spec.ts:260:7 › F-3 左メニュー（1280） › ホーム／計画／日誌（飛行記録・点検・事故・ヒヤリハット）／機体と書類（機体・操縦者・許可・承認・地点）、罫のあとに「調べる」＝判定。全役割で同じ（閲覧は全役割）
+  -   6 e2e/ops-db/sprint16-f-db.spec.ts:289:7 › F-3 左メニュー（1280） › 現在地：子が現在地のとき親は祖先（太字だけ）。日誌・機体と書類の画面そのものでは親が現在地。常に 1 つ
+  -   7 e2e/ops-db/sprint16-f-db.spec.ts:324:7 › F-3 左メニュー（1280） › 1024 未満では左メニューは出ない（900）。現場・サインイン・権限なしでは下部ナビも左メニューも出ない
+  -   8 e2e/ops-db/sprint16-f-db.spec.ts:350:9 › F-4 点検へ 1 回 › ホームの最初の画面（375×812、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回
+  -   9 e2e/ops-db/sprint16-f-db.spec.ts:350:9 › F-4 点検へ 1 回 › ホームの最初の画面（390×844、スクロールなし）に「飛行前点検」（ops-enter-inspection）が見える。押すと点検の入力へ 1 回
+  -  10 e2e/ops-db/sprint16-f-db.spec.ts:383:7 › F-4 点検へ 1 回 › 閲覧者（記録を作れない役割）にはクイック操作を出さない。日誌のタブ journal-tab-inspections から点検の一覧へ 1 回、左メニューの日誌の子（nav-inspections）からも 1 回
+  -  11 e2e/ops-db/sprint16-f-db.spec.ts:410:7 › F-6 上の状態の層 › 1 段目の画面（ホーム・計画・日誌・機体と書類）は、題 24px と補足 1 行 14px。題の文字は変えない
+  -  12 e2e/ops-db/sprint16-f-db.spec.ts:437:9 › F-6 上の状態の層 › 主な操作は画面の下半分（375×812）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ
+  -  13 e2e/ops-db/sprint16-f-db.spec.ts:437:9 › F-6 上の状態の層 › 主な操作は画面の下半分（390×844）：ホーム・計画の作成・点検の入力の主ボタンの上端は高さの 40% より下（最初の画面に入らないものは末尾）。主ボタンは 1 画面 1 つ
+  -  14 e2e/ops-db/sprint16-f-db.spec.ts:474:7 › F-6 上の状態の層 › 主ボタンは 1 画面 1 つ（K-8）：ホーム（予定のない日を含む）・計画の一覧・日誌・点検の一覧・機体と書類
+
+
+  1) e2e/ops-db/sprint16-f-db.spec.ts:146:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 
+
+    Error: locator.evaluate: Error: strict mode violation: getByTestId('nav-more') resolved to 2 elements:
+        1) <a href="/ops/more" data-active="false" class="sb-side-link" data-testid="nav-more">…</a> aka getByTestId('ops-sidebar').getByTestId('nav-more')
+        2) <a class="sb-tab" href="/ops/more" data-active="false" data-testid="nav-more">…</a> aka getByTestId('ops-bottom-nav').getByTestId('nav-more')
+
+    Call log:
+      - waiting for getByTestId('nav-more')
+
+
+      151 |       await page.setViewportSize({ width: w, height: 844 });
+      152 |       await waitForSettledStyles(page);
+    > 153 |       const normal = await page.getByTestId("nav-more").evaluate((e) => (e.lastElementChild as HTMLElement).getBoundingClientRect().height);
+          |                                                         ^
+      154 |       expect(normal, `${w}px 等倍は 1 行`).toBeLessThan(24);
+      155 |       await page.evaluate(() => {
+      156 |         document.documentElement.style.fontSize = "32px";
+        at /home/user/soraban/e2e/ops-db/sprint16-f-db.spec.ts:153:57
+
+    Error Context: test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-f-db-F-1-下部ナビ（4-項-66792--行（横スクロール・切れ・隠れなし）。ふだんは-1-行/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-f-db.spec.ts:146:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 
+  12 did not run
+  1 passed (28.5s)
+ ELIFECYCLE  Command failed with exit code 1.

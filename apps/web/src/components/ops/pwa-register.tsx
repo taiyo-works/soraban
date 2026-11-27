@@ -76,9 +76,9 @@ export function PwaRegister() {
     else window.location.reload();
   };
   return (
-    <div role="status" className="mx-4 mt-3 flex flex-wrap items-center gap-3 rounded-sharp border-2 border-brand-700 bg-paper p-3 text-ink" data-testid="pwa-update">
+    <div role="status" className="opx-box mx-4 mt-3 flex-row flex-wrap items-center text-sb-ink" data-testid="pwa-update">
       <p className="min-w-0 flex-1">新しい版があります。入力中の内容は消えません。区切りのよいときに更新してください（次に開いたときにも反映されます）。</p>
-      <button type="button" className="min-h-14 rounded-sharp border-2 border-brand-700 bg-brand-700 px-4 font-bold text-paper" onClick={update} data-testid="pwa-update-button">
+      <button type="button" className="opx-btn" onClick={update} data-testid="pwa-update-button">
         更新する
       </button>
     </div>

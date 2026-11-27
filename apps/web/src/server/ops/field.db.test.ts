@@ -22,6 +22,7 @@ import * as reports from "./reports";
 import * as svc from "./service";
 import { OpsError, type OpsContext } from "./service";
 import type { OpsDb } from "./store";
+import * as store from "./store";
 import * as today from "./today";
 
 const ADMIN_URL = resolveTestDatabaseUrl();
@@ -1031,6 +1032,77 @@ describe.skipIf(!ADMIN_URL)("現場の事実の記録（flight_field_events）�
       await rec.createFlight(mgr(O), flightInput(O, "2027-01-05T12:00", "2027-01-05T12:03", { takeoffEventId: takeoffId }));
       t = await today.getToday(mgr(O));
       expect(ids(t)).not.toContain("write_journal");
+    });
+
+    it("HM-5（サーバー側）：判定のスナップショットの問い合わせだけが失敗しても、ホームは返り、準備カードの判定の行だけ load_failed になる", async () => {
+      const O = await makeOrg("todayhm5");
+      const p1 = await approvedPlan(O, { title: "判定の取得に失敗する日", plannedStartAt: "2027-01-05T13:00" });
+      const p2 = await newPlan(O, { title: "夕方の飛行", plannedStartAt: "2027-01-05T16:00" });
+      // 正常なときは counts（比べる基準）
+      const ok = await today.getToday(mgr(O));
+      expect(ok.card!.prep.judgement.kind).toBe("counts");
+      // judgement_snapshots への問い合わせだけを失敗させる包んだ db（permits.db.test.ts の wrapped と同じ形）。件数を数える問い合わせ（snapshotItemCounts。一覧の問い合わせは通す）だけが対象
+      let failed = 0;
+      const wrapped = {
+        query: (sql: string, ...a: unknown[]) => {
+          if (/judgement_snapshots/.test(sql) && /count\(\*\) filter/.test(sql)) {
+            failed++;
+            return Promise.reject(new Error("injected: judgement_snapshots の問い合わせの失敗"));
+          }
+          return (app.query as (...x: unknown[]) => unknown)(sql, ...a);
+        },
+        connect: () => app.connect(),
+      } as unknown as OpsDb;
+      const t = await today.getToday(ctxOf(O.manager, { db: wrapped }));
+      expect(failed).toBeGreaterThan(0);
+      expect(t.card!.prep.judgement).toEqual({ kind: "load_failed" });
+      // 他の部分は返る：カード・他の 2 行・残りの予定・次にやること
+      expect(t.card).toMatchObject({ planId: p1.id, title: "判定の取得に失敗する日" });
+      expect(t.card!.prep.report).toBe("confirm");
+      expect(t.card!.prep.inspection).toBe("missing");
+      expect(t.rest.map((r) => r.planId)).toEqual([p2.id]);
+      expect(t.nextActions.length).toBeGreaterThan(0);
+    });
+
+    it("判定の項目の数え方：5 段以外の verdict（null・欠落・想定外の値・項目が null）は unknown に数える。良い側には数えない", async () => {
+      const O = await makeOrg("todaycount");
+      const p = await newPlan(O, { title: "件数の確認", plannedStartAt: "2027-01-05T13:00" });
+      const items = [
+        { verdict: "no_fly" },
+        { verdict: "needs_procedure" },
+        { verdict: "procedure_done" },
+        { verdict: "no_procedure" },
+        { verdict: "unknown" },
+        { verdict: null },
+        {},
+        { verdict: "bogus" },
+        { verdict: "NO_FLY" },
+        null,
+        "文字",
+      ];
+      const ins = await owner.query<{ id: string }>(
+        `insert into judgement_snapshots (id, org_id, plan_id, reason, input, result, verdict_level, verdict_unknown_count, category, engine_version, checked_at,
+           check_evidence_id, diagnosis_evidence_id, datasets, procedures_revision, procedures_verified_at, created_by_member_id)
+         select gen_random_uuid(), org_id, plan_id, 'manual', input, jsonb_build_object('verdict', jsonb_build_object('items', $2::jsonb)), verdict_level, verdict_unknown_count, category, engine_version, checked_at,
+                check_evidence_id, diagnosis_evidence_id, datasets, procedures_revision, procedures_verified_at, created_by_member_id
+           from judgement_snapshots where plan_id = $1 order by seq desc limit 1
+         returning id`,
+        [p.id, JSON.stringify(items)],
+      );
+      const c = await store.snapshotItemCounts(app as unknown as OpsDb, O.id, ins.rows[0]!.id);
+      expect(c).toEqual({ no_fly: 1, needs_procedure: 1, procedure_done: 1, no_procedure: 1, unknown: 7 });
+      // 項目が配列でない（空）ときは 0 件。記録なしの null とは区別する
+      const empty = await owner.query<{ id: string }>(
+        `insert into judgement_snapshots (id, org_id, plan_id, reason, input, result, verdict_level, verdict_unknown_count, category, engine_version, checked_at,
+           check_evidence_id, diagnosis_evidence_id, datasets, procedures_revision, procedures_verified_at, created_by_member_id)
+         select gen_random_uuid(), org_id, plan_id, 'manual', input, '{}'::jsonb, verdict_level, verdict_unknown_count, category, engine_version, checked_at,
+                check_evidence_id, diagnosis_evidence_id, datasets, procedures_revision, procedures_verified_at, created_by_member_id
+           from judgement_snapshots where plan_id = $1 order by seq desc limit 1
+         returning id`,
+        [p.id],
+      );
+      expect(await store.snapshotItemCounts(app as unknown as OpsDb, O.id, empty.rows[0]!.id)).toEqual({ no_fly: 0, needs_procedure: 0, procedure_done: 0, no_procedure: 0, unknown: 0 });
+      expect(await store.snapshotItemCounts(app as unknown as OpsDb, O.id, randomUUID())).toBeNull();
     });
 
     it("今日の計画が無ければ次の計画、中止した計画は対象外、操縦者役割は自分の飛行を先に", async () => {

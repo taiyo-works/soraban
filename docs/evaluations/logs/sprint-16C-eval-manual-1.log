@@ -1,0 +1,100 @@
+CAT normal 375 cat-primary {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":56,"w":202,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+CAT normal 375 cat-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 375 cat-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(31, 95, 224)","h":48,"w":122,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT normal 375 cat-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 375 cat-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px dashed rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 375 cat-opx-primary {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":56,"w":186,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+CAT normal 375 cat-opx-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 375 cat-opx-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(31, 95, 224)","h":48,"w":122,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT normal 375 cat-opx-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 375 cat-opx-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px dashed rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CARD normal 375 cat-card {"bg":"rgb(255, 255, 255)","radius":"16px","pad":"16px","shadow":"rgb(225, 229, 235) 0px 0px 0px 1px inset","h":86.4,"beforeW":"auto","beforeBg":"rgba(0, 0, 0, 0)"}
+CARD normal 375 cat-card-list {"bg":"rgb(255, 255, 255)","radius":"16px","pad":"16px","shadow":"rgb(225, 229, 235) 0px 0px 0px 1px inset","h":115.4,"beforeW":"auto","beforeBg":"rgba(0, 0, 0, 0)"}
+CARD normal 375 cat-card-state {"bg":"rgb(253, 241, 220)","radius":"16px","pad":"16px 16px 16px 22px","shadow":"rgb(225, 229, 235) 0px 0px 0px 1px inset","h":113.6,"beforeW":"6px","beforeBg":"rgb(154, 91, 0)"}
+STATE normal 375 info {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(234, 238, 243)","color":"rgb(63, 75, 94)","dot":[8,8],"dotHidden":"true","text":"待機中","dy":0.5,"dyBox":0}
+STATE normal 375 flying {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(225, 242, 248)","color":"rgb(8, 80, 106)","dot":[8,8],"dotHidden":"true","text":"飛行中","dy":0.5,"dyBox":0}
+STATE normal 375 safe {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(230, 244, 236)","color":"rgb(14, 90, 53)","dot":[8,8],"dotHidden":"true","text":"飛行済","dy":0.5,"dyBox":0}
+STATE normal 375 danger {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(253, 232, 230)","color":"rgb(138, 26, 18)","dot":[8,8],"dotHidden":"true","text":"中止","dy":0.5,"dyBox":0}
+FOCUS normal 375 solid 3px rgb(31, 95, 224) off 3px r 12px
+CAT normal 1280 cat-primary {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":56,"w":202,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(31, 95, 224)","h":48,"w":122,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px dashed rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-opx-primary {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":56,"w":186,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-opx-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-opx-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(31, 95, 224)","h":48,"w":122,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-opx-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px solid rgb(107, 117, 134)","shadow":"none","grad":"none"}
+CAT normal 1280 cat-opx-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":48,"w":106,"radius":"12px","fw":"600","fs":"16px","border":"1px dashed rgb(107, 117, 134)","shadow":"none","grad":"none"}
+FOCUS normal 1280 solid 3px rgb(31, 95, 224) off 3px r 12px
+CAT field 375 cat-primary {"bg":"rgb(24, 72, 176)","color":"rgb(255, 255, 255)","h":64,"w":222,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(24, 72, 176)","shadow":"none","grad":"none"}
+CAT field 375 cat-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 375 cat-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(24, 72, 176)","h":56,"w":132,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT field 375 cat-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 375 cat-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px dashed rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 375 cat-opx-primary {"bg":"rgb(24, 72, 176)","color":"rgb(255, 255, 255)","h":64,"w":204,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(24, 72, 176)","shadow":"none","grad":"none"}
+CAT field 375 cat-opx-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 375 cat-opx-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(24, 72, 176)","h":56,"w":132,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT field 375 cat-opx-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 375 cat-opx-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px dashed rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CARD field 375 cat-card {"bg":"rgb(255, 255, 255)","radius":"16px","pad":"16px","shadow":"rgb(138, 147, 161) 0px 0px 0px 1.5px inset","h":123.8,"beforeW":"auto","beforeBg":"rgba(0, 0, 0, 0)"}
+CARD field 375 cat-card-list {"bg":"rgb(255, 255, 255)","radius":"16px","pad":"16px","shadow":"rgb(138, 147, 161) 0px 0px 0px 1.5px inset","h":125.2,"beforeW":"auto","beforeBg":"rgba(0, 0, 0, 0)"}
+CARD field 375 cat-card-state {"bg":"rgb(253, 241, 220)","radius":"16px","pad":"16px 16px 16px 22px","shadow":"rgb(138, 147, 161) 0px 0px 0px 1.5px inset","h":123.8,"beforeW":"6px","beforeBg":"rgb(107, 63, 0)"}
+STATE field 375 info {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(234, 238, 243)","color":"rgb(46, 56, 72)","dot":[8,8],"dotHidden":"true","text":"待機中","dy":0.5,"dyBox":0}
+STATE field 375 flying {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(225, 242, 248)","color":"rgb(8, 80, 106)","dot":[8,8],"dotHidden":"true","text":"飛行中","dy":0.5,"dyBox":0}
+STATE field 375 safe {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(230, 244, 236)","color":"rgb(14, 90, 53)","dot":[8,8],"dotHidden":"true","text":"飛行済","dy":0.5,"dyBox":0}
+STATE field 375 danger {"h":28,"pad":"0px 10px","fs":"14px","fw":"600","bg":"rgb(253, 232, 230)","color":"rgb(138, 26, 18)","dot":[8,8],"dotHidden":"true","text":"中止","dy":0.5,"dyBox":0}
+FOCUS field 375 solid 3px rgb(24, 72, 176) off 3px r 12px
+CAT field 1280 cat-primary {"bg":"rgb(24, 72, 176)","color":"rgb(255, 255, 255)","h":64,"w":222,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(24, 72, 176)","shadow":"none","grad":"none"}
+CAT field 1280 cat-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 1280 cat-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(24, 72, 176)","h":56,"w":132,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT field 1280 cat-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 1280 cat-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px dashed rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 1280 cat-opx-primary {"bg":"rgb(24, 72, 176)","color":"rgb(255, 255, 255)","h":64,"w":204,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(24, 72, 176)","shadow":"none","grad":"none"}
+CAT field 1280 cat-opx-secondary {"bg":"rgb(238, 241, 245)","color":"rgb(20, 24, 31)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 1280 cat-opx-text {"bg":"rgba(0, 0, 0, 0)","color":"rgb(24, 72, 176)","h":56,"w":132,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgba(0, 0, 0, 0)","shadow":"none","grad":"none"}
+CAT field 1280 cat-opx-danger {"bg":"rgb(238, 241, 245)","color":"rgb(138, 26, 18)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px solid rgb(74, 84, 102)","shadow":"none","grad":"none"}
+CAT field 1280 cat-opx-disabled {"bg":"rgb(238, 241, 245)","color":"rgb(138, 147, 161)","h":56,"w":114,"radius":"12px","fw":"600","fs":"18px","border":"1px dashed rgb(74, 84, 102)","shadow":"none","grad":"none"}
+FOCUS field 1280 solid 3px rgb(24, 72, 176) off 3px r 12px
+K8 / 未ログイン 375 ["BUTTON:この地点を判定する"] stray []
+K8 / ログイン済み 直後 375 ["create-plan-from-verdict:この判定で飛行計画を作る"]
+K8 / ログイン済み 結果あり 375 ["create-plan-from-verdict:この判定で飛行計画を作る"] stray []
+  submit class sb-pill sb-pill-secondary sb-pill-block {"h":48,"bg":"rgb(238, 241, 245)"}
+  create-plan {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":48,"w":211.9,"radius":"12px","fw":"600","fs":"14px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+K8 / 判定中の観測 375 {"min":1,"max":1,"n":187,"hist":{"1":187}}
+K8 / 未ログイン 390 ["BUTTON:この地点を判定する"] stray []
+K8 / ログイン済み 直後 390 ["create-plan-from-verdict:この判定で飛行計画を作る"]
+K8 / ログイン済み 結果あり 390 ["create-plan-from-verdict:この判定で飛行計画を作る"] stray []
+  submit class sb-pill sb-pill-secondary sb-pill-block {"h":48,"bg":"rgb(238, 241, 245)"}
+  create-plan {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":48,"w":211.9,"radius":"12px","fw":"600","fs":"14px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+K8 / 判定中の観測 390 {"min":1,"max":1,"n":185,"hist":{"1":185}}
+K8 / 未ログイン 1280 ["BUTTON:この地点を判定する"] stray []
+K8 / ログイン済み 直後 1280 ["create-plan-from-verdict:この判定で飛行計画を作る"]
+K8 / ログイン済み 結果あり 1280 ["create-plan-from-verdict:この判定で飛行計画を作る"] stray []
+  submit class sb-pill sb-pill-secondary sb-pill-block {"h":48,"bg":"rgb(238, 241, 245)"}
+  create-plan {"bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","h":48,"w":211.9,"radius":"12px","fw":"600","fs":"14px","border":"1px solid rgb(31, 95, 224)","shadow":"none","grad":"none"}
+K8 / 判定中の観測 1280 {"min":1,"max":1,"n":187,"hist":{"1":187}}
+LOGIN / zoom 390 100% {"sw":390,"cw":390} 200% {"sw":390,"cw":390}
+LOGIN / zoom 430 100% {"sw":430,"cw":430} 200% {"sw":430,"cw":430}
+K8 ops home 375 ["today-card-primary:現場モードを開く"] stray []
+K8 ops plans 375 ["plan-new-link:飛行計画を作る"] stray []
+K8 ops inspections 375 ["inspection-new:新しい点検"] stray []
+K8 ops journal 375 ["journal-new-flight:飛行記録を入力"] stray []
+K8 ops main 375 ["plan-primary-action:確認を依頼する"] stray []
+K8 ops home 390 ["today-card-primary:現場モードを開く"] stray []
+K8 ops plans 390 ["plan-new-link:飛行計画を作る"] stray []
+K8 ops inspections 390 ["inspection-new:新しい点検"] stray []
+K8 ops journal 390 ["journal-new-flight:飛行記録を入力"] stray []
+K8 ops main 390 ["plan-primary-action:確認を依頼する"] stray []
+K8 ops home 1280 ["today-card-primary:現場モードを開く"] stray []
+K8 ops plans 1280 ["plan-new-link:飛行計画を作る"] stray []
+K8 ops inspections 1280 ["inspection-new:新しい点検"] stray []
+K8 ops journal 1280 ["journal-new-flight:飛行記録を入力"] stray []
+K8 ops main 1280 ["plan-primary-action:確認を依頼する"] stray []
+CARRY1 /ops today-card-primary {"w":330,"h":56,"textCx":195,"btnCx":195,"kids":0,"before":"none","after":"none","bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","text":"現場モードを開く"}
+CARRY1 /ops/journal journal-new-flight {"w":358,"h":56,"textCx":195,"btnCx":195,"kids":0,"before":"none","after":"none","bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","text":"飛行記録を入力"}
+CARRY1 /ops/plans/dddf2598-a0ce-4ba9-975b-d848816612e5 plan-primary-action {"w":326,"h":56,"textCx":195,"btnCx":195,"kids":0,"before":"none","after":"none","bg":"rgb(31, 95, 224)","color":"rgb(255, 255, 255)","text":"確認を依頼する"}
+CARRY2 [{"id":"plan-state","dy":0,"text":"下書き"},{"id":"plan-report","dy":0,"text":"通報：要"}]
+FOOTER 375 [{"tag":"DT","t":"提供元","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"フューチャーテック株式会社","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"代表者","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"代表取締役 長谷岡 千春","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"所在地","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"〒689-3553 鳥取県西","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"電話","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"0859-27-1227","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"メール","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"info@futuretec","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"受付時間","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"9:00〜17:00","fs":"14px","lh":1.5,"note":true}]
+FOOTER 390 [{"tag":"DT","t":"提供元","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"フューチャーテック株式会社","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"代表者","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"代表取締役 長谷岡 千春","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"所在地","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"〒689-3553 鳥取県西","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"電話","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"0859-27-1227","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"メール","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"info@futuretec","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"受付時間","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"9:00〜17:00","fs":"14px","lh":1.5,"note":true}]
+FOOTER 1280 [{"tag":"DT","t":"提供元","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"フューチャーテック株式会社","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"代表者","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"代表取締役 長谷岡 千春","fs":"14px","lh":1.5,"note":true},{"tag":"DT","t":"所在地","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"〒689-3553 鳥取県西","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"電話","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"0859-27-1227","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"メール","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"info@futuretec","fs":"16px","lh":1.7,"note":false},{"tag":"DT","t":"受付時間","fs":"14px","lh":1.6,"note":false},{"tag":"DD","t":"9:00〜17:00","fs":"14px","lh":1.5,"note":true}]

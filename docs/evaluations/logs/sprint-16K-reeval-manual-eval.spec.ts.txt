@@ -1,0 +1,361 @@
+import fs from "node:fs";
+import { expect, request as pwRequest, test, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
+import { measureTextZoom, collectTapTargets, collectTextSamples, expectContrast, expectFontSize, expectNoHorizontalScroll, expectTapTargets, relativeLuminance, waitForSettledStyles } from "../field-checks";
+
+// 評価者の手動シナリオ（一時ファイル。実行後は logs に .txt で退避して削除する）
+const PORT = process.env.E2E_OPS_PORT ?? "3400";
+const BASE = `http://127.0.0.1:${PORT}`;
+const SHOT = "/home/user/soraban/docs/evaluations/screenshots/sprint-16K-reeval";
+const OUT = "/home/user/soraban/docs/evaluations/logs/sprint-16K-reeval-manual-results.jsonl";
+fs.mkdirSync(SHOT, { recursive: true });
+const rec = (o: Record<string, unknown>) => fs.appendFileSync(OUT, JSON.stringify(o) + "\n");
+type Who = { readonly authUserId: string; readonly email: string };
+const seeded = (key: string): Who => ({ authUserId: key, email: `${key}@example.test` });
+const signIn = async (ctx: APIRequestContext, who: Who) => {
+  const r = await ctx.post("/api/test-auth/sign-in", { data: { authUserId: who.authUserId, email: who.email, emailVerified: true, name: who.authUserId } });
+  expect(r.status()).toBe(200);
+};
+const apiAs = async (who: Who) => {
+  const ctx = await pwRequest.newContext({ baseURL: BASE });
+  await signIn(ctx, who);
+  return ctx;
+};
+const DAY = "2027-01-05";
+const HQ = { lat: 35.434238, lng: 133.380508 };
+const at = (hms: string) => new Date(`${DAY}T${hms}+09:00`);
+const stamp = Date.now().toString(36).toUpperCase();
+let seq = 0;
+const PILOT_NAME = `評価 氏名${stamp}`;
+const NOTE = `EVALNOTE${stamp}`;
+const prepare = async (page: Page) => {
+  const manager = await apiAs(seeded("a-manager"));
+  await signIn(page.request, seeded("a-manager"));
+  const registrationMark = `JUE16${stamp}${seq++}`;
+  const a = await manager.post("/api/ops/aircraft", { data: { registrationMark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${registrationMark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+  expect(a.status(), await a.text()).toBe(201);
+  const aircraft = (await a.json()) as { id: string };
+  const p = await manager.post("/api/ops/pilots", { data: { fullName: `${PILOT_NAME}${seq++}`, hasLicense: false } });
+  expect(p.status(), await p.text()).toBe(201);
+  const pilot = (await p.json()) as { id: string };
+  const title = `E16K ${stamp}-${seq++}`;
+  const pl = await manager.post("/api/ops/plans", { data: { title, aircraftId: aircraft.id, pilotId: pilot.id, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "現場の空撮", placeName: "試験地点", latitude: HQ.lat, longitude: HQ.lng, flags: [] } });
+  expect(pl.status(), await pl.text()).toBe(201);
+  const plan = (await pl.json()) as { id: string };
+  return { manager, aircraft, pilot, plan, registrationMark };
+};
+const openField = async (page: Page, planId: string) => {
+  await page.goto(`/ops/plans/${planId}/field`);
+  await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+};
+const waitSw = (page: Page) => page.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 60_000 });
+const bundleKeys = (page: Page): Promise<string[]> =>
+  page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const r = indexedDB.open("soraban-ops");
+        r.onsuccess = () => {
+          try {
+            const q = r.result.transaction("field-bundles", "readonly").objectStore("field-bundles").getAllKeys();
+            q.onsuccess = () => resolve(q.result.map(String));
+            q.onerror = () => resolve([]);
+          } catch {
+            resolve([]);
+          }
+        };
+        r.onerror = () => resolve([]);
+      }),
+  );
+const waitBundle = (page: Page, planId: string) => expect.poll(async () => (await bundleKeys(page)).some((k) => k.endsWith(`:${planId}`)), { timeout: 30_000 }).toBe(true);
+const setOnline = async (page: Page, context: BrowserContext, online: boolean) => {
+  await context.setOffline(!online);
+  await page.evaluate((on) => window.dispatchEvent(new Event(on ? "online" : "offline")), online).catch(() => undefined);
+};
+const gray = async (page: Page, on: boolean) => {
+  const s = await page.context().newCDPSession(page);
+  await s.send("Emulation.setEmulatedVisionDeficiency", { type: on ? "achromatopsia" : "none" });
+};
+const FORBIDDEN = ["完璧", "保証", "必ず", "代行", "代理", "申請", "通報不要", "問題なし"];
+const wordHits = async (page: Page, label: string) => {
+  const text = await page.evaluate(() => document.body.innerText);
+  const hits = FORBIDDEN.filter((w) => text.includes(w));
+  rec({ kind: "words", label, hits });
+  return hits;
+};
+/** 見えている主ボタン（data-variant）と、主色（#1F5FE0）の面を持つ見えている要素の数 */
+const primaryProbe = async (page: Page, root: string) =>
+  page.evaluate((sel) => {
+    const rootEl = document.querySelector(sel) ?? document.body;
+    const vis = (e: Element) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden";
+    };
+    const ids = Array.from(rootEl.querySelectorAll('[data-variant="primary"]')).filter(vis).map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    const blue = Array.from(rootEl.querySelectorAll("button, a, [role=radio]"))
+      .filter(vis)
+      .filter((e) => getComputedStyle(e).backgroundColor === "rgb(31, 95, 224)")
+      .map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    return { ids, blue };
+  }, root);
+const sunlight = async (page: Page, root: string, min: number) => {
+  const G = 0.1;
+  const samples = (await collectTextSamples(page, root)).filter((s) => !s.disabled);
+  const worst = samples
+    .map((s) => {
+      const a = relativeLuminance(s.fg);
+      const b = relativeLuminance(s.bg);
+      return { id: s.testId ?? s.tag, r: (Math.max(a, b) + 0.05 + G) / (Math.min(a, b) + 0.05 + G) };
+    })
+    .sort((x, y) => x.r - y.r)[0];
+  return { n: samples.length, worst, ok: worst ? worst.r >= min : false };
+};
+const standards = async (page: Page, root: string, label: string, big?: string) => {
+  await waitForSettledStyles(page);
+  const out: Record<string, unknown> = { kind: "standards", label };
+  for (const [name, fn] of [
+    ["tap", () => expectTapTargets(page, root, label, big ? { bigTestId: big } : {})],
+    ["font18", () => expectFontSize(page, root, 18, label)],
+    ["contrast7", () => expectContrast(page, root, 7, label)],
+    ["noHScroll", () => expectNoHorizontalScroll(page, label)],
+  ] as const) {
+    try {
+      await fn();
+      out[name] = "ok";
+    } catch (e) {
+      out[name] = "FAIL " + String(e).slice(0, 300);
+    }
+  }
+  out.sun = await sunlight(page, root, 4.5);
+  out.mode = await page.locator("html").getAttribute("data-mode");
+  out.viewport = page.viewportSize();
+  rec(out);
+};
+const dumpStorage = async (page: Page) =>
+  page.evaluate(async () => {
+    const ls: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)!;
+      ls[k] = localStorage.getItem(k) ?? "";
+    }
+    const ss: Record<string, string> = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i)!;
+      ss[k] = sessionStorage.getItem(k) ?? "";
+    }
+    const idb: Record<string, Record<string, string[]>> = {};
+    const idbValues: string[] = [];
+    const dbs = (await indexedDB.databases?.()) ?? [];
+    for (const d of dbs) {
+      if (!d.name) continue;
+      await new Promise<void>((res) => {
+        const r = indexedDB.open(d.name!);
+        r.onsuccess = async () => {
+          const db = r.result;
+          idb[d.name!] = {};
+          for (const s of Array.from(db.objectStoreNames)) {
+            await new Promise<void>((res2) => {
+              const tx = db.transaction(s, "readonly");
+              const st = tx.objectStore(s);
+              const kq = st.getAllKeys();
+              const vq = st.getAll();
+              tx.oncomplete = () => {
+                idb[d.name!]![s] = kq.result.map(String);
+                for (const v of vq.result) idbValues.push(`${s}::` + JSON.stringify(v));
+                res2();
+              };
+              tx.onerror = () => res2();
+            });
+          }
+          db.close();
+          res();
+        };
+        r.onerror = () => res();
+      });
+    }
+    const cacheMap: Record<string, string[]> = {};
+    for (const n of await self.caches.keys()) cacheMap[n] = (await (await self.caches.open(n)).keys()).map((q) => new URL(q.url).pathname);
+    return { ls, ss, idb, idbValues, caches: cacheMap };
+  });
+
+test.use({ serviceWorkers: "allow", timezoneId: "America/Los_Angeles", hasTouch: true });
+test.describe.configure({ mode: "serial" });
+
+const LONG_NAME = "あいうえおかきくけこさしすせそたちつてと長い名前の操縦者";
+const setStale = async (page: Page, context: BrowserContext, planId: string) => {
+  await setOnline(page, context, false);
+  await page.clock.setFixedTime(new Date(at("12:00:00").getTime() + 13 * 3600_000));
+  await page.reload();
+  await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+  await expect(page.getByTestId("field-status-prefetch-stale")).toBeVisible();
+};
+const bandProbe = (page: Page) =>
+  page.evaluate(() => {
+    const de = document.documentElement;
+    const band = document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!;
+    const parts: Record<string, { rects: number; r: number; l: number }> = {};
+    for (const [k, sel] of Object.entries({
+      conn: '[data-testid="field-status-connection"]',
+      unsent: '[data-testid="field-status-unsent"]',
+      saved: '[data-testid="field-status-saved"]',
+      pre: '[data-testid="field-status-prefetch"]',
+    })) {
+      const e = document.querySelector<HTMLElement>(sel);
+      if (!e) continue;
+      const rs = Array.from(e.getClientRects());
+      parts[k] = { rects: rs.length, r: Math.max(...rs.map((x) => x.right)), l: Math.min(...rs.map((x) => x.left)) };
+    }
+    // 値（nowrap の塊）が割れていないか：whitespace nowrap の要素の getClientRects が 1
+    const nowraps = Array.from(band.querySelectorAll<HTMLElement>("*")).filter((e) => getComputedStyle(e).whiteSpace === "nowrap").map((e) => ({ t: e.textContent, rects: e.getClientRects().length, r: e.getBoundingClientRect().right, l: e.getBoundingClientRect().left }));
+    const inner = Array.from(band.querySelectorAll<HTMLElement>("*")).filter((e) => e.getBoundingClientRect().right > de.clientWidth + 0.5 || e.getBoundingClientRect().left < -0.5).map((e) => e.getAttribute("data-testid") ?? e.tagName);
+    const wide = Array.from(document.body.querySelectorAll<HTMLElement>("*")).filter((e) => e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().right > de.clientWidth + 0.5).map((e) => (e.getAttribute("data-testid") ?? e.tagName) + "→" + Math.round(e.getBoundingClientRect().right)).slice(0, 6);
+    return { sw: de.scrollWidth, cw: de.clientWidth, bandH: band.getBoundingClientRect().height, pos: getComputedStyle(band).position, nowraps, inner, wide, bandSw: band.scrollWidth, bandCw: band.clientWidth, text: band.innerText.replace(/\n/g, " | ") };
+  });
+
+for (const w of [320, 375, 390, 430]) {
+  test.describe(`R1 文字 200% ${w}`, () => {
+    test.use({ viewport: { width: w, height: 800 } });
+    test(`zoom ${w}`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      const post = async (body: Record<string, unknown>, hm: string) => {
+        const r = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), occurredAt: `${DAY}T${hm}`, ...body } });
+        expect(r.status(), await r.text()).toBe(201);
+      };
+      await post({ kind: "check", item: "emergency_airspace", result: "designated", source: "mlit-emergency-airspace-qa" }, "11:55");
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      const states: Array<[string, () => Promise<void>]> = [
+        ["fresh-online", async () => undefined],
+        ["stale-offline", async () => setStale(page, context, plan.id)],
+        ["stale-online", async () => { await setOnline(page, context, true); await expect(page.getByTestId("field-status-connection")).toContainText("接続あり"); }],
+      ];
+      for (const [name, go] of states) {
+        await go();
+        await waitForSettledStyles(page);
+        // (a) html{font-size:200%} を style タグで
+        await page.addStyleTag({ content: "html{font-size:200% !important}" });
+        await page.waitForTimeout(400);
+        const pr = await bandProbe(page);
+        rec({ kind: "r1-style200", w, state: name, ...pr });
+        await page.screenshot({ path: `${SHOT}/${w}-200style-${name}.png` });
+        rec({ kind: "r1-clip", w, state: name, items: await page.evaluate(() => Array.from(document.body.querySelectorAll<HTMLElement>("*")).filter((e) => { const cs = getComputedStyle(e); return (cs.overflowX === "hidden" || cs.overflowX === "clip") && e.scrollWidth > e.clientWidth + 1 && e.getBoundingClientRect().width > 0 && (e.checkVisibility?.({ checkVisibilityCSS: true }) ?? true); }).slice(0, 4).map((e) => ({ t: (e.textContent ?? "").slice(0, 16), cls: String(e.className).slice(0, 50), chain: ((): string[] => { const c: string[] = []; let x: HTMLElement | null = e; while (x && c.length < 5) { c.push((x.getAttribute("data-testid") ?? x.tagName.toLowerCase())); x = x.parentElement; } return c; })(), inField: !!e.closest('[data-testid="field-root"]') }))) });
+        rec({ kind: "r1-wide", w, state: name, wide: await page.evaluate(() => Array.from(document.body.querySelectorAll<HTMLElement>("*")).filter((e) => e.getBoundingClientRect().right > document.documentElement.clientWidth + 0.5 && e.getBoundingClientRect().width > 0).slice(0, 8).map((e) => ({ tag: e.tagName, t: (e.textContent ?? "").slice(0, 18), testid: e.getAttribute("data-testid"), r: Math.round(e.getBoundingClientRect().right) }))) });
+        await page.evaluate(() => window.scrollTo(0, 350));
+        await page.waitForTimeout(150);
+        rec({ kind: "r1-style200-scrolled", w, state: name, bandTop: await page.getByTestId("field-status-band").evaluate((e) => e.getBoundingClientRect().top) });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.evaluate(() => { document.querySelectorAll("style").forEach((s) => { if ((s.textContent ?? "").includes("200% !important")) s.remove(); }); });
+        // (b) measureTextZoom
+        const z = await measureTextZoom(page, w);
+        rec({ kind: "r1-mtz", w, state: name, sw: z.scrollWidth, cw: z.clientWidth, clipped: z.clipped, clippedContainers: z.clippedContainers, navCoversLast: z.navCoversLast, unreachablePrimary: z.unreachablePrimary, unscaled: z.unscaled.slice(0, 3) });
+      }
+      await manager.dispose();
+    });
+  });
+}
+
+// 等倍・150%・長い名前
+for (const w of [320, 375]) {
+  test.describe(`R2 等倍・150%・長い名前 ${w}`, () => {
+    test.use({ viewport: { width: w, height: 812 } });
+    test(`base ${w}`, async ({ page, context }) => {
+      const manager = await apiAs(seeded("a-manager"));
+      await signIn(page.request, seeded("a-manager"));
+      const registrationMark = `JUE16R${stamp}${seq++}`;
+      const a = await manager.post("/api/ops/aircraft", { data: { registrationMark, modelName: "評価機", manufacturer: "DJI", serialNumber: `SN-${registrationMark}`, typeCertified: false, initialFlightMinutes: 0, maxTakeoffWeightKg: 0.9 } });
+      const aircraft = (await a.json()) as { id: string };
+      const p = await manager.post("/api/ops/pilots", { data: { fullName: `${LONG_NAME}${seq++}`, hasLicense: false } });
+      const pilot = (await p.json()) as { id: string };
+      const pl = await manager.post("/api/ops/plans", { data: { title: `E16R ${stamp}-${seq++}`, aircraftId: aircraft.id, pilotId: pilot.id, plannedStartAt: `${DAY}T13:00`, durationMinutes: 60, purpose: "現場の空撮", placeName: "試験地点", latitude: HQ.lat, longitude: HQ.lng, flags: [] } });
+      const plan = (await pl.json()) as { id: string };
+      const post = async (body: Record<string, unknown>, hm: string) => {
+        const r = await manager.post(`/api/ops/plans/${plan.id}/field-events`, { data: { clientEventId: crypto.randomUUID(), occurredAt: `${DAY}T${hm}`, ...body } });
+        expect(r.status(), await r.text()).toBe(201);
+      };
+      await post({ kind: "check", item: "emergency_airspace", result: "designated", source: "mlit-emergency-airspace-qa" }, "11:55");
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      const layout = async (label: string) => {
+        await waitForSettledStyles(page);
+        const info = await page.evaluate(() => {
+          const g = (id: string) => { const e = document.querySelector<HTMLElement>(`[data-testid="${id}"]`); if (!e) return null; const r = e.getBoundingClientRect(); return { top: Math.round(r.top + scrollY), bottom: Math.round(r.bottom + scrollY), left: Math.round(r.left), right: Math.round(r.right), h: Math.round(r.height) }; };
+          const de = document.documentElement;
+          return { sw: de.scrollWidth, cw: de.clientWidth, band: g("field-status-band"), title: g("field-plan-title"), who: g("field-plan-who"), back: g("field-back"), btn: g("field-flight-button"), warn: g("field-emergency-warning"), help: g("field-status-prefetch-stale-help"), pos: getComputedStyle(document.querySelector('[data-testid="field-status-band"]')!).position, vh: innerHeight };
+        });
+        rec({ kind: "r2-layout", w, label, ...info });
+      };
+      for (const [lbl, fs] of [["100", ""], ["150", "150%"], ["200", "200%"]] as const) {
+        await setOnline(page, context, true);
+        await page.reload();
+        await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+        await page.addStyleTag({ content: fs ? `html{font-size:${fs} !important}` : "/* none */" });
+        await page.waitForTimeout(300);
+        await layout(`${lbl}-fresh`);
+        const pr = await bandProbe(page);
+        rec({ kind: "r2-band", w, lbl, state: "fresh", ...pr });
+        await page.screenshot({ path: `${SHOT}/${w}-longname-${lbl}-fresh.png` });
+        // 古い・圏外
+        await setStale(page, context, plan.id);
+        await page.addStyleTag({ content: fs ? `html{font-size:${fs} !important}` : "/* none */" });
+        await page.waitForTimeout(300);
+        await layout(`${lbl}-stale`);
+        const pr2 = await bandProbe(page);
+        rec({ kind: "r2-band", w, lbl, state: "stale", ...pr2 });
+        await page.screenshot({ path: `${SHOT}/${w}-longname-${lbl}-stale.png` });
+        await page.evaluate(() => window.scrollTo(0, 400));
+        await page.waitForTimeout(200);
+        rec({ kind: "r2-scrolled", w, lbl, bandTop: await page.getByTestId("field-status-band").evaluate((e) => e.getBoundingClientRect().top), scrollY: await page.evaluate(() => scrollY) });
+        await page.screenshot({ path: `${SHOT}/${w}-longname-${lbl}-stale-scrolled.png` });
+        await page.evaluate(() => window.scrollTo(0, 0));
+      }
+      await manager.dispose();
+    });
+  });
+}
+
+// R3：150% で圏外・送信待ちの見え方（離着陸の操作位置から帯が見えるか）
+for (const w of [320, 375]) {
+  test.describe(`R3 150% 送信待ち ${w}`, () => {
+    test.use({ viewport: { width: w, height: 740 } });
+    test(`pending ${w}`, async ({ page, context }) => {
+      const { manager, plan } = await prepare(page);
+      await page.clock.setFixedTime(at("11:56:00"));
+      await openField(page, plan.id);
+      await waitSw(page);
+      await waitBundle(page, plan.id);
+      await setOnline(page, context, false);
+      await page.reload();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      await page.getByTestId("field-inspection-link").click();
+      await expect(page.getByTestId("offline-banner")).toBeVisible();
+      await page.getByTestId("offline-inspection-all-normal").click();
+      await page.getByTestId("offline-inspection-save").click();
+      await expect(page.locator('[data-testid="field-root"][data-hydrated="true"]')).toBeVisible();
+      const btn = page.getByTestId("field-flight-button");
+      await page.waitForTimeout(1600);
+      await btn.click();
+      await expect(btn).toHaveText("着陸");
+      for (const [lbl, fs] of [["100", ""], ["150", "150%"], ["200", "200%"]] as const) {
+        await page.addStyleTag({ content: fs ? `html{font-size:${fs} !important}` : "/* none */" });
+        await page.waitForTimeout(300);
+        await btn.scrollIntoViewIfNeeded();
+        await btn.evaluate((e) => e.scrollIntoView({ block: "center" }));
+        await page.waitForTimeout(200);
+        const info = await page.evaluate(() => {
+          const band = document.querySelector<HTMLElement>('[data-testid="field-status-band"]')!.getBoundingClientRect();
+          const un = document.querySelector<HTMLElement>('[data-testid="field-status-unsent"]')!;
+          const ur = un.getBoundingClientRect();
+          const bt = document.querySelector<HTMLElement>('[data-testid="field-flight-button"]')!.getBoundingClientRect();
+          return { unsent: un.textContent, unsentVisible: ur.bottom > 0 && ur.top < innerHeight, bandTop: band.top, btnTop: bt.top, btnBottom: bt.bottom, vh: innerHeight, scrollY, pos: getComputedStyle(document.querySelector('[data-testid="field-status-band"]')!).position };
+        });
+        rec({ kind: "r3-pending", w, lbl, ...info });
+        await page.screenshot({ path: `${SHOT}/${w}-pending-${lbl}-atbtn.png` });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.evaluate(() => { document.querySelectorAll("style").forEach((s) => { if ((s.textContent ?? "").includes("!important")) s.remove(); }); });
+      }
+      await manager.dispose();
+    });
+  });
+}

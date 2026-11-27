@@ -1,0 +1,11 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-h2-db.spec.ts -g H2-1
+
+
+Running 2 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-h2-db.spec.ts:140:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1. 段 ②：今日・明日・30 分刻みの開始・飛行時間（15・30・60・90）のクイック選択。aria-pressed・押す部品 48px 以上・標準の入力欄も残る。保存した値が一致 (3.3s)
+  ✓  2 e2e/ops-db/sprint16-h2-db.spec.ts:257:7 › Sprint 16-H2 E2E-DB：計画作成 2 › H2-1・K-15. クイック選択はストレージに何も書かない (1.3s)
+
+  2 passed (9.0s)

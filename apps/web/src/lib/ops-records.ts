@@ -15,6 +15,16 @@ export const INSPECTION_ITEMS = [
 ] as const;
 
 export type InspectionItemKey = (typeof INSPECTION_ITEMS)[number]["key"];
+
+/**
+ * 点検の入力で 9 項目を系統の群に分けて見せるための並び（Sprint 16-I）。項目の名前・意味・保存の形（キー）は変えない。
+ * 9 項目はどれもちょうど 1 つの群に入る（ops-records.test.ts が確かめる）。項目の番号は様式2 の番号（INSPECTION_ITEMS の順）のまま。
+ */
+export const INSPECTION_GROUPS: readonly { readonly key: string; readonly label: string; readonly items: readonly InspectionItemKey[] }[] = [
+  { key: "body", label: "機体", items: ["general", "propeller", "frame"] },
+  { key: "link", label: "通信・制御", items: ["communication", "autopilot", "controller"] },
+  { key: "power", label: "動力・電源", items: ["propulsion", "power", "battery"] },
+];
 export type InspectionResult = "normal" | "abnormal";
 export const INSPECTION_RESULT_LABELS: Readonly<Record<InspectionResult, string>> = { normal: "正常", abnormal: "異常" };
 

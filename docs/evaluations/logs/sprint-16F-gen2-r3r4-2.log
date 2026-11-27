@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-f-db.spec.ts -g 'R-3|文字 200%'
+
+
+Running 2 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-f-db.spec.ts:163:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › 文字 200%（390・430）：「機体と書類」は省略せず、収まらないときだけ「機体と｜書類」で 2 行（横スクロール・切れ・隠れなし）。ふだんは 1 行 (3.4s)
+[R-3] 320px /ops/more: 項目名 2 行、下部ナビ 79.375px、本文の末尾 536.265625px、下部ナビの上端 560.625px、余裕 24.359375px
+[R-3] 320px /ops/journal: 項目名 2 行、下部ナビ 79.375px、本文の末尾 535.578125px、下部ナビの上端 560.625px、余裕 25.046875px
+  ✓  2 e2e/ops-db/sprint16-f-db.spec.ts:226:7 › F-1 下部ナビ（4 項目）：寸法・現在地・影 › R-3 幅 320px・等倍：「機体と書類」が 2 行になっても、下部ナビの高さと本文の末尾の余裕（下部ナビの上端まで 4px 以上）を測る (1.1s)
+
+  2 passed (8.7s)

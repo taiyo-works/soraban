@@ -1408,3 +1408,38 @@ export const firstVersionOf = async (
       [orgId, entityType, entityId],
     )
   ).rows[0] ?? null;
+
+/** 判定のスナップショットの項目を、段階ごとに数える（ホームの準備カード。Sprint 16-G）。結果の全体は読まず、件数だけ返す。
+ * 5 段（no_fly・needs_procedure・unknown・procedure_done・no_procedure）以外の verdict（null・欠落・想定外の値）は、unknown に数える（良い側に数えない）。 */
+export type SnapshotItemCounts = {
+  readonly no_fly: number;
+  readonly needs_procedure: number;
+  readonly unknown: number;
+  readonly procedure_done: number;
+  readonly no_procedure: number;
+};
+
+export const snapshotItemCounts = async (db: Queryable, orgId: string, snapshotId: string): Promise<SnapshotItemCounts | null> => {
+  const r = await db.query<{ no_fly: string; needs_procedure: string; unknown: string; procedure_done: string; no_procedure: string }>(
+    `select count(*) filter (where x->>'verdict' = 'no_fly') as no_fly,
+            count(*) filter (where x->>'verdict' = 'needs_procedure') as needs_procedure,
+            count(*) filter (where x is not null and coalesce(x->>'verdict', '') not in ('no_fly', 'needs_procedure', 'procedure_done', 'no_procedure')) as unknown,
+            count(*) filter (where x->>'verdict' = 'procedure_done') as procedure_done,
+            count(*) filter (where x->>'verdict' = 'no_procedure') as no_procedure
+       from judgement_snapshots s
+       left join lateral jsonb_array_elements(
+              case when jsonb_typeof(s.result->'verdict'->'items') = 'array' then s.result->'verdict'->'items' else '[]'::jsonb end) x on true
+      where s.org_id = $1 and s.id = $2
+      group by s.id`,
+    [orgId, snapshotId],
+  );
+  const row = r.rows[0];
+  if (!row) return null;
+  return {
+    no_fly: Number(row.no_fly),
+    needs_procedure: Number(row.needs_procedure),
+    unknown: Number(row.unknown),
+    procedure_done: Number(row.procedure_done),
+    no_procedure: Number(row.no_procedure),
+  };
+};

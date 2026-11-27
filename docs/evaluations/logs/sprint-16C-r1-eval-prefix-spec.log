@@ -1,0 +1,155 @@
+[db:migrate] 適用 0016_incident_records.sql（33 ms）
+[db:migrate] 適用 0017_field_round_records.sql（6 ms）
+[db:migrate] 適用 0018_flight_areas.sql（5 ms）
+
+[db:seed:ops-test] テスト用の初期データを投入しました
+DBNAME=soraban_r1_pre_1795437759
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-c-db.spec.ts -g 'K-8|差し戻し 1'
+
+
+Running 18 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (847ms)
+  ✓   2 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (694ms)
+  ✓   3 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホーム 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (543ms)
+  ✓   4 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (659ms)
+  ✓   5 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (509ms)
+  ✓   6 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 計画の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (606ms)
+  ✓   7 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (471ms)
+  ✓   8 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (535ms)
+  ✓   9 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 点検の一覧 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (540ms)
+  ✓  10 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 375px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (645ms)
+  ✓  11 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 390px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (482ms)
+  ✓  12 e2e/ops-db/sprint16-c-db.spec.ts:139:11 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › 日誌 1280px：見えている data-variant="primary" は 1 つ。クラスだけの主ボタンは無い (613ms)
+  ✓  13 e2e/ops-db/sprint16-c-db.spec.ts:153:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ（data-variant="primary"） › ホームに今日の計画がある状態でも 1 つ（計画を開く） (522ms)
+  ✘  14 e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 375px：見えている data-variant="primary" は 1 つで、判定するは副 (4.6s)
+  ✘  15 e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 390px：見えている data-variant="primary" は 1 つで、判定するは副 (4.6s)
+  ✘  16 e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 1280px：見えている data-variant="primary" は 1 つで、判定するは副 (4.7s)
+  ✓  17 e2e/ops-db/sprint16-c-db.spec.ts:232:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 計画の主画面（plan-digest の判定を見る・計画の確認へ） (1.2s)
+  ✘  18 e2e/ops-db/sprint16-c-db.spec.ts:250:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 登録（場所）/ops/places（place-row-name） (767ms)
+
+
+  1) e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 375px：見えている data-variant="primary" は 1 つで、判定するは副 
+
+    Error: 375px：主の高さ
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 55.5
+    Received:    48
+
+      174 |       // 16-C 差し戻し 1：主は標準寸法（高さ 56 以上・文字 16px 以上）。副の「判定する」より小さく見えない
+      175 |       const pb = (await plan.boundingBox())!;
+    > 176 |       expect(pb.height, `${w}px：主の高さ`).toBeGreaterThanOrEqual(55.5);
+          |                                        ^
+      177 |       expect(await plan.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)), `${w}px：主の文字`).toBeGreaterThanOrEqual(16);
+      178 |       const sb = (await page.locator('button[type="submit"].sb-pill:visible').first().boundingBox())!;
+      179 |       expect(pb.height, `${w}px：主は副より小さくない`).toBeGreaterThanOrEqual(sb.height);
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:176:40
+
+    Error Context: test-results/ops/sprint16-c-db-K-8-ログイン済み・判-d28eb-riant-primary-は-1-つで、判定するは副/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-K-8-ログイン済み・判-d28eb-riant-primary-は-1-つで、判定するは副/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-K-8-ログイン済み・判-d28eb-riant-primary-は-1-つで、判定するは副/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 390px：見えている data-variant="primary" は 1 つで、判定するは副 
+
+    Error: 390px：主の高さ
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 55.5
+    Received:    48
+
+      174 |       // 16-C 差し戻し 1：主は標準寸法（高さ 56 以上・文字 16px 以上）。副の「判定する」より小さく見えない
+      175 |       const pb = (await plan.boundingBox())!;
+    > 176 |       expect(pb.height, `${w}px：主の高さ`).toBeGreaterThanOrEqual(55.5);
+          |                                        ^
+      177 |       expect(await plan.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)), `${w}px：主の文字`).toBeGreaterThanOrEqual(16);
+      178 |       const sb = (await page.locator('button[type="submit"].sb-pill:visible').first().boundingBox())!;
+      179 |       expect(pb.height, `${w}px：主は副より小さくない`).toBeGreaterThanOrEqual(sb.height);
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:176:40
+
+    Error Context: test-results/ops/sprint16-c-db-K-8-ログイン済み・判-eaa02-riant-primary-は-1-つで、判定するは副/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-K-8-ログイン済み・判-eaa02-riant-primary-は-1-つで、判定するは副/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-K-8-ログイン済み・判-eaa02-riant-primary-は-1-つで、判定するは副/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 1280px：見えている data-variant="primary" は 1 つで、判定するは副 
+
+    Error: 1280px：主の高さ
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 55.5
+    Received:    48
+
+      174 |       // 16-C 差し戻し 1：主は標準寸法（高さ 56 以上・文字 16px 以上）。副の「判定する」より小さく見えない
+      175 |       const pb = (await plan.boundingBox())!;
+    > 176 |       expect(pb.height, `${w}px：主の高さ`).toBeGreaterThanOrEqual(55.5);
+          |                                        ^
+      177 |       expect(await plan.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)), `${w}px：主の文字`).toBeGreaterThanOrEqual(16);
+      178 |       const sb = (await page.locator('button[type="submit"].sb-pill:visible').first().boundingBox())!;
+      179 |       expect(pb.height, `${w}px：主は副より小さくない`).toBeGreaterThanOrEqual(sb.height);
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:176:40
+
+    Error Context: test-results/ops/sprint16-c-db-K-8-ログイン済み・判-a41d6-riant-primary-は-1-つで、判定するは副/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-K-8-ログイン済み・判-a41d6-riant-primary-は-1-つで、判定するは副/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-K-8-ログイン済み・判-a41d6-riant-primary-は-1-つで、判定するは副/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/ops-db/sprint16-c-db.spec.ts:250:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 登録（場所）/ops/places（place-row-name） 
+
+    Error: /ops/places 文字 200%・390px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 390
+    Received:    416
+
+       at ../field-checks.ts:443
+
+      441 |     const l = `${label} 文字 200%・${w}px`;
+      442 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    > 443 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+          |                                              ^
+      444 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+      445 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+      446 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:443:46)
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:255:5
+
+    Error Context: test-results/ops/sprint16-c-db-16-C-差し戻し-1：-1bad2--ops-places（place-row-name）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-16-C-差し戻し-1：-1bad2--ops-places（place-row-name）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-16-C-差し戻し-1：-1bad2--ops-places（place-row-name）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 375px：見えている data-variant="primary" は 1 つで、判定するは副 
+    e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 390px：見えている data-variant="primary" は 1 つで、判定するは副 
+    e2e/ops-db/sprint16-c-db.spec.ts:164:9 › K-8 ログイン済み・判定結果ありの `/`：主ボタンは 1 つ（この判定で飛行計画を作る） › 1280px：見えている data-variant="primary" は 1 つで、判定するは副 
+    e2e/ops-db/sprint16-c-db.spec.ts:250:7 › 16-C 差し戻し 1：文字 200%（390・430）で切れ・横スクロールがない 2 画面 › 登録（場所）/ops/places（place-row-name） 
+  14 passed (31.6s)
+ ELIFECYCLE  Command failed with exit code 1.

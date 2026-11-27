@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 eval2.spec.ts:7:5 › flow: plan -> double-click save, storage, words, inspection mark (10.6s)
+
+  1 passed (11.5s)

@@ -1,0 +1,5 @@
++[db:migrate] 適用 0002_evidence_log.sql（7 ms）
++[db:migrate] 適用 0003_evidence_log_datasets.sql（5 ms）
++[db:migrate] 適用 0009_evidence_log_verdict.sql（3 ms）
++  ✓  325 e2e/sprint18-1.spec.ts:171:7 › 1-4 /api/diagnose の応答に prefill が無い › verdict・procedures・evidenceId はある。prefill は無い (22ms)
++  await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);

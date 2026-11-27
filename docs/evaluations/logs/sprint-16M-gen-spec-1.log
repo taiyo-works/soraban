@@ -1,0 +1,271 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint16-m.spec.ts e2e/sprint16-b.spec.ts
+
+
+Running 66 tests using 1 worker
+
+  ✓   1 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.1s)
+  ✓   2 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.1s)
+  ✓   3 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.2s)
+  ✓   4 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.2s)
+  ✓   5 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (999ms)
+  ✓   6 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (815ms)
+  ✓   7 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (709ms)
+  ✓   8 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (835ms)
+  ✓   9 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (772ms)
+  ✓  10 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (708ms)
+  ✓  11 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (825ms)
+  ✓  12 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (658ms)
+  ✓  13 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (784ms)
+  ✓  14 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (704ms)
+  ✓  15 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (720ms)
+  ✓  16 e2e/sprint16-b.spec.ts:81:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (7.5s)
+  ✓  17 e2e/sprint16-b.spec.ts:86:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.2s)
+  ✓  18 e2e/sprint16-b.spec.ts:109:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (3.8s)
+  ✓  19 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.5s)
+  ✓  20 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.4s)
+  ✓  21 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.2s)
+  ✓  22 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  23 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  24 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  25 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  26 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  27 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  28 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (838ms)
+  ✓  29 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (957ms)
+  ✓  30 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (927ms)
+  ✓  31 e2e/sprint16-b.spec.ts:172:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 印のない 14px の p は失敗する。16px・1.7 の p は通る (185ms)
+  ✓  32 e2e/sprint16-b.spec.ts:179:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する (174ms)
+  ✓  33 e2e/sprint16-b.spec.ts:186:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す (234ms)
+  ✓  34 e2e/sprint16-b.spec.ts:192:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す (250ms)
+  ✓  35 e2e/sprint16-b.spec.ts:201:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く (179ms)
+  ✓  36 e2e/sprint16-b.spec.ts:207:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 大きな文字（本文の基準より 2px 以上大きい）は行の高さ 1.25 以上で通る。本文の大きさは 1.7 のまま (354ms)
+  ✓  37 e2e/sprint16-b.spec.ts:224:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ (200ms)
+  ✓  38 e2e/sprint16-m.spec.ts:66:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1a. 結論のカードは判定の帯のカード：状態の面と左端 6px の帯（375px）。判定の段の語と形は従来のまま (1.5s)
+  ✓  39 e2e/sprint16-m.spec.ts:87:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1b. 判定の札：規制ごとの判定・規制カードの判定は、形（SVG）と言葉を持つ札（5 段の言葉は変えない） (1.4s)
+  ✓  40 e2e/sprint16-m.spec.ts:105:7 › 16-M M-1 判定の帯のカードと状態の札 › M-1c. 手続きの票・規制ごとの判定の行は判定の帯（375px）。768px 以上は表の行のまま (2.1s)
+  ✓  41 e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_fly：結論の帯の状態は danger。判定の段の行は 5 段の言葉のまま (1.2s)
+  ✓  42 e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. needs_procedure：結論の帯の状態は warn。判定の段の行は 5 段の言葉のまま (1.4s)
+  ✘  43 e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま (31.1s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま,line=23,col=51::  1) e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま %0A    Error: expect(locator).toBeVisible() failed%0A%0A    Locator: getByTestId('verdict-level')%0A    Expected: visible%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toBeVisible" getByTestId('verdict-level') with timeout 30000ms%0A      - waiting for getByTestId('verdict-level')%0A%0A%0A      21 |   await Promise.all([check, diag]);%0A      22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);%0A    > 23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();%0A         |                                                   ^%0A      24 | };%0A      25 |%0A      26 | type Json = Record<string, unknown>;%0A        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:23:51)%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:134:7
+  ✓  44 e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. procedure_done：結論の帯の状態は info。判定の段の行は 5 段の言葉のまま (1.5s)
+  ✓  45 e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. no_procedure：結論の帯の状態は safe。判定の段の行は 5 段の言葉のまま (1.6s)
+  ✓  46 e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_fly：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (1.4s)
+  ✓  47 e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. needs_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (1.5s)
+  ✘  48 e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (31.1s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない,line=22,col=49::  2) e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    Error: expect(locator).toHaveText(expected) failed%0A%0A    Locator: getByTestId('evidence-id')%0A    Expected pattern: /^ev_[0-9a-f]{16}$/%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toHaveText" getByTestId('evidence-id') with timeout 30000ms%0A      - waiting for getByTestId('evidence-id')%0A%0A%0A      20 |   await page.goto("/");%0A      21 |   await Promise.all([check, diag]);%0A    > 22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);%0A         |                                                 ^%0A      23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();%0A      24 | };%0A      25 |%0A        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:22:49)%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:149:7
+  ✓  49 e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. procedure_done：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (1.3s)
+  ✓  50 e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. no_procedure：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない (1.5s)
+  ✓  51 e2e/sprint16-m.spec.ts:162:7 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2b. 総合の語は結論のカードの中にあり、確認日・出典つきの札と境界の注記は結論のまま（N1 を弱めない） (1.6s)
+  ✓  52 e2e/sprint16-m.spec.ts:174:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3a. 主ボタンは「この地点を判定する」だけ（初期・結果あり・飛行不可・判定不能の各状態） (1.7s)
+  ✘  53 e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる (1.5s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる,line=280,col=45::  3) e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる %0A    Error: 地図の上の部品: 高さが足りない押す部品%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 8%0A%0A    - Array []%0A    + Array [%0A    +   " 高さ 48.0",%0A    +   " 高さ 48.0",%0A    +   " 高さ 48.0",%0A    +   " 高さ 48.0",%0A    +   "MapLibre 高さ 17.0",%0A    +   "国土地理院 高さ 17.0",%0A    + ]%0A%0A       at field-checks.ts:280%0A%0A      278 |     .filter((t) => t.height < (t.testId === opts.bigTestId ? 80 : 56) - 0.5)%0A      279 |     .map((t) => `${t.testId ?? t.text} 高さ ${t.height.toFixed(1)}`);%0A    > 280 |   expect(tooShort, `${label}: 高さが足りない押す部品`).toEqual([]);%0A          |                                             ^%0A      281 |   const tight: string[] = [];%0A      282 |   for (let i = 0; i < targets.length; i++) {%0A      283 |     for (let j = i + 1; j < targets.length; j++) {%0A        at expectTapTargets (/home/user/soraban/e2e/field-checks.ts:280:45)%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:215:5
+  ✓  54 e2e/sprint16-m.spec.ts:220:7 › 16-M M-4 静的なシェルと申請支援 › M-4a. 静的な HTML に見出し・入力欄・主ボタンが入り、申請支援・結論の値は入っていない。画面にも申請支援は出ない (1.8s)
+  ✓  55 e2e/sprint16-m.spec.ts:244:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5a. 節の見出しは「飛行の前後に行うこと」。「必ず」を含む旧い見出しは出ない (1.4s)
+  ✓  56 e2e/sprint16-m.spec.ts:255:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5b. 初期の状態：描画後の本文（畳んだ所を開いた全文・属性）に「必ず」が 0。地図の注記は「…でご確認ください」 (1.5s)
+  ✓  57 e2e/sprint16-m.spec.ts:264:7 › 16-M M-5 「必ず」が描画後の本文に 0 › M-5c. エンジンの文に「必ず」が入っていても、規制カード・手続き・義務・結論の説明の表示では外れる（エンジンの応答は変えない） (1.6s)
+  ✓  58 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. no_fly：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.1s)
+  ✘  59 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (30.9s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも）,line=22,col=49::  4) e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） %0A    Error: expect(locator).toHaveText(expected) failed%0A%0A    Locator: getByTestId('evidence-id')%0A    Expected pattern: /^ev_[0-9a-f]{16}$/%0A    Timeout: 30000ms%0A    Error: element(s) not found%0A%0A    Call log:%0A      - Expect "toHaveText" getByTestId('evidence-id') with timeout 30000ms%0A      - waiting for getByTestId('evidence-id')%0A%0A%0A      20 |   await page.goto("/");%0A      21 |   await Promise.all([check, diag]);%0A    > 22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);%0A         |                                                 ^%0A      23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();%0A      24 | };%0A      25 |%0A        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:22:49)%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:297:7
+  ✓  60 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. procedure_done：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.3s)
+  ✓  61 e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. no_procedure：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） (7.3s)
+  ✓  62 e2e/sprint16-m.spec.ts:303:7 › 16-M 共通条件 › K-3. 初期の状態（要手続き）：結論・詳細の文字は 4.5:1 以上。面の上の補足の文字も (10.3s)
+  ✓  63 e2e/sprint16-m.spec.ts:313:7 › 16-M 共通条件 › K-4. 320・360・375・390・430・768・1024・1280 の幅で横スクロールがない（結果あり） (3.2s)
+  ✓  64 e2e/sprint16-m.spec.ts:321:7 › 16-M 共通条件 › K-5. 文字 200%（390・430 幅）：結論・手続き・規制ごとの判定が切れず、横スクロールがない (7.8s)
+  ✘  65 e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ (3.3s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ,line=342,col=18::  5) e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ ────────────────%0A    Error: expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 1%0A%0A      Object {%0A        "band": "rgb(154, 91, 0)",%0A    -   "face": "rgb(253, 241, 221)",%0A    +   "face": "rgb(253, 241, 220)",%0A        "page": "rgb(246, 247, 249)",%0A      }%0A%0A      340 |     const light = await read("light");%0A      341 |     const dark = await read("dark");%0A    > 342 |     expect(dark).toEqual(light);%0A          |                  ^%0A      343 |   });%0A      344 |%0A      345 |   test("K-15. 端末のストレージに新しい鍵を作らない（判定・条件の変更・例の選択のあとで、鍵の集合が増えない）", async ({ page }) => {%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:342:18
+  ✓  66 e2e/sprint16-m.spec.ts:345:7 › 16-M 共通条件 › K-15. 端末のストレージに新しい鍵を作らない（判定・条件の変更・例の選択のあとで、鍵の集合が増えない） (1.9s)
+
+
+  1) e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('verdict-level')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('verdict-level') with timeout 30000ms
+      - waiting for getByTestId('verdict-level')
+
+
+      21 |   await Promise.all([check, diag]);
+      22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);
+    > 23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();
+         |                                                   ^
+      24 | };
+      25 |
+      26 | type Json = Record<string, unknown>;
+        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:23:51)
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:134:7
+
+    Error Context: test-results/sprint16-m-16-M-M-1-判定の帯のカ-eae5b-なし（未確認の灰）。判定の段の行は-5-段の言葉のまま/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-1-判定の帯のカ-eae5b-なし（未確認の灰）。判定の段の行は-5-段の言葉のまま/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-1-判定の帯のカ-eae5b-なし（未確認の灰）。判定の段の行は-5-段の言葉のまま/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByTestId('evidence-id')
+    Expected pattern: /^ev_[0-9a-f]{16}$/
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByTestId('evidence-id') with timeout 30000ms
+      - waiting for getByTestId('evidence-id')
+
+
+      20 |   await page.goto("/");
+      21 |   await Promise.all([check, diag]);
+    > 22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);
+         |                                                 ^
+      23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();
+      24 | };
+      25 |
+        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:22:49)
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:149:7
+
+    Error Context: test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-2-結論の総合の-63a80-可」「安全」「OK」「問題なし」「通報不要」を出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる 
+
+    Error: 地図の上の部品: 高さが足りない押す部品
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   " 高さ 48.0",
+    +   " 高さ 48.0",
+    +   " 高さ 48.0",
+    +   " 高さ 48.0",
+    +   "MapLibre 高さ 17.0",
+    +   "国土地理院 高さ 17.0",
+    + ]
+
+       at field-checks.ts:280
+
+      278 |     .filter((t) => t.height < (t.testId === opts.bigTestId ? 80 : 56) - 0.5)
+      279 |     .map((t) => `${t.testId ?? t.text} 高さ ${t.height.toFixed(1)}`);
+    > 280 |   expect(tooShort, `${label}: 高さが足りない押す部品`).toEqual([]);
+          |                                             ^
+      281 |   const tight: string[] = [];
+      282 |   for (let i = 0; i < targets.length; i++) {
+      283 |     for (let j = i + 1; j < targets.length; j++) {
+        at expectTapTargets (/home/user/soraban/e2e/field-checks.ts:280:45)
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:215:5
+
+    Error Context: test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-3-主ボタンは--1e9f1-ムの部品は-48px-の円で、隣と-8px-以上離れる/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByTestId('evidence-id')
+    Expected pattern: /^ev_[0-9a-f]{16}$/
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByTestId('evidence-id') with timeout 30000ms
+      - waiting for getByTestId('evidence-id')
+
+
+      20 |   await page.goto("/");
+      21 |   await Promise.all([check, diag]);
+    > 22 |   await expect(page.getByTestId("evidence-id")).toHaveText(/^ev_[0-9a-f]{16}$/);
+         |                                                 ^
+      23 |   await expect(page.getByTestId("verdict-level")).toBeVisible();
+      24 | };
+      25 |
+        at openReady (/home/user/soraban/e2e/sprint16-m.spec.ts:22:49)
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:297:7
+
+    Error Context: test-results/sprint16-m-16-M-共通条件-K-3-u-88e77-定・規制カードの文字は-4-5-1-以上（面の上でも）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-共通条件-K-3-u-88e77-定・規制カードの文字は-4-5-1-以上（面の上でも）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-共通条件-K-3-u-88e77-定・規制カードの文字は-4-5-1-以上（面の上でも）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ ────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "band": "rgb(154, 91, 0)",
+    -   "face": "rgb(253, 241, 221)",
+    +   "face": "rgb(253, 241, 220)",
+        "page": "rgb(246, 247, 249)",
+      }
+
+      340 |     const light = await read("light");
+      341 |     const dark = await read("dark");
+    > 342 |     expect(dark).toEqual(light);
+          |                  ^
+      343 |   });
+      344 |
+      345 |   test("K-15. 端末のストレージに新しい鍵を作らない（判定・条件の変更・例の選択のあとで、鍵の集合が増えない）", async ({ page }) => {
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:342:18
+
+    Error Context: test-results/sprint16-m-16-M-共通条件-K-14-OS-が暗でも明で描く：結論のカードの面・帯の色が明と同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-共通条件-K-14-OS-が暗でも明で描く：結論のカードの面・帯の色が明と同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-共通条件-K-14-OS-が暗でも明で描く：結論のカードの面・帯の色が明と同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま 
+    e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない 
+    e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる 
+    e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） 
+    e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ ─────────────────
+  61 passed (4.5m)
+::notice title=🎭 Playwright Run Summary::  5 failed%0A    e2e/sprint16-m.spec.ts:131:9 › 16-M M-1 判定の帯のカードと状態の札 › M-1d. unknown：結論の帯の状態は なし（未確認の灰）。判定の段の行は 5 段の言葉のまま %0A    e2e/sprint16-m.spec.ts:146:9 › 16-M M-2 結論の総合の文言（§8.2 の公開の / の行） › M-2a. unknown：総合の語が §8.2 のとおり。「飛行可」「安全」「OK」「問題なし」「通報不要」を出さない %0A    e2e/sprint16-m.spec.ts:196:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる %0A    e2e/sprint16-m.spec.ts:294:9 › 16-M 共通条件 › K-3. unknown：結論・手続き・規制ごとの判定・規制カードの文字は 4.5:1 以上（面の上でも） %0A    e2e/sprint16-m.spec.ts:327:7 › 16-M 共通条件 › K-14. OS が暗でも明で描く：結論のカードの面・帯の色が明と同じ ─────────────────%0A  61 passed (4.5m)
+ ELIFECYCLE  Command failed with exit code 1.
+exit=1

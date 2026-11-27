@@ -1,0 +1,22 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-b-db.spec.ts --repeat-each=3
+
+
+Running 12 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-b-db.spec.ts:61:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-1/K-2. 文字はすべて 14px 以上（375・390・1280 幅）。入力欄の値は 16px 以上（現場は 18px 以上） (12.3s)
+  ✓   2 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.7s)
+  ✓   3 e2e/ops-db/sprint16-b-db.spec.ts:90:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-4. 320 幅で横スクロールがない（全画面） (3.6s)
+  ✓   4 e2e/ops-db/sprint16-b-db.spec.ts:99:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-2. 文字の大きさのトークンは rem：運航管理の画面でも本文 16px・補足 14px（現場は本文 18px）。200% で 2 倍 (1.2s)
+  ✓   5 e2e/ops-db/sprint16-b-db.spec.ts:61:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-1/K-2. 文字はすべて 14px 以上（375・390・1280 幅）。入力欄の値は 16px 以上（現場は 18px 以上） (11.1s)
+  ✓   6 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.4s)
+  ✓   7 e2e/ops-db/sprint16-b-db.spec.ts:90:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-4. 320 幅で横スクロールがない（全画面） (3.4s)
+  ✓   8 e2e/ops-db/sprint16-b-db.spec.ts:99:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-2. 文字の大きさのトークンは rem：運航管理の画面でも本文 16px・補足 14px（現場は本文 18px）。200% で 2 倍 (1.4s)
+  ✓   9 e2e/ops-db/sprint16-b-db.spec.ts:61:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-1/K-2. 文字はすべて 14px 以上（375・390・1280 幅）。入力欄の値は 16px 以上（現場は 18px 以上） (11.5s)
+  ✓  10 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-5. 文字 200%（390・430 幅）：ホーム・計画の一覧・点検の一覧・日誌で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届き下部ナビに隠れない (2.9s)
+  ✓  11 e2e/ops-db/sprint16-b-db.spec.ts:90:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-4/K-4. 320 幅で横スクロールがない（全画面） (3.6s)
+  ✓  12 e2e/ops-db/sprint16-b-db.spec.ts:99:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem 化・200%・320 幅 › B-2. 文字の大きさのトークンは rem：運航管理の画面でも本文 16px・補足 14px（現場は本文 18px）。200% で 2 倍 (1.3s)
+
+  12 passed (1.1m)
+exit 0

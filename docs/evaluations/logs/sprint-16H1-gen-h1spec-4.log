@@ -1,0 +1,54 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-h1-db.spec.ts
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h1-db.spec.ts:99:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-1. 6 段・上に固定の進捗の帯（高さ 4・主色）・「2/6 日時」・progressbar の値と読み上げ。主ボタンは各段で 1 つ (2.7s)
+  ✓   2 e2e/ops-db/sprint16-h1-db.spec.ts:139:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-2. 段の移動は再読み込みなし・?step=n が履歴に積まれ、戻る・進むで入力が消えない (2.6s)
+  ✓   3 e2e/ops-db/sprint16-h1-db.spec.ts:184:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-3. 各段の「次へ」で、漏れがあれば進まず、該当の欄へフォーカス＋記号付きの 1 行のエラー（保存のときにまとめて出さない） (2.8s)
+  ✓   4 e2e/ops-db/sprint16-h1-db.spec.ts:230:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-3. サーバーの検証（422）は段 ⑤ の保存のときに、該当の段へ戻す導線と一緒に出る。直して保存できる (2.8s)
+  ✓   5 e2e/ops-db/sprint16-h1-db.spec.ts:257:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-4. 段 ⑤：①〜④の読み取りのカード＋各「修正」（48px の文字ボタン）。主ボタンは「計画を保存」1 つ。保存した値が入力と一致 (2.7s)
+  ✘   6 e2e/ops-db/sprint16-h1-db.spec.ts:309:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 端末データ：段の間の入力は端末（localStorage・sessionStorage・IndexedDB・Cache）に書かれない。入力の途中の離脱は確認し、保存の後は出さない (3.8s)
+  -   7 e2e/ops-db/sprint16-h1-db.spec.ts:380:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 入力が無い（何も触っていない）ときは、離れる確認を出さない
+  -   8 e2e/ops-db/sprint16-h1-db.spec.ts:401:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-7. 判定画面からの引き継ぎは各段の初期値。注記（plan-handoff-note）は段 ① に出る
+  -   9 e2e/ops-db/sprint16-h1-db.spec.ts:429:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › K-4・K-5. 各段が 320〜1440 の幅で横スクロールなし。文字 200%（390・430）で切れ・横スクロールなし、主ボタンに届く
+  -  10 e2e/ops-db/sprint16-h1-db.spec.ts:459:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › 押す部品：段の操作（次へ・戻る・保存・修正・入力欄）は高さ 48px 以上、本文 16px 以上
+
+
+  1) e2e/ops-db/sprint16-h1-db.spec.ts:309:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 端末データ：段の間の入力は端末（localStorage・sessionStorage・IndexedDB・Cache）に書かれない。入力の途中の離脱は確認し、保存の後は出さない 
+
+    Error: タブを閉じようとしたとき beforeunload のダイアログが出る
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "beforeunload"
+    Received array: []
+
+      365 |     });
+      366 |     await second.close({ runBeforeUnload: true });
+    > 367 |     expect(seen, "タブを閉じようとしたとき beforeunload のダイアログが出る").toContain("beforeunload");
+          |                                                         ^
+      368 |     // 保存の後は出さない（beforeunload も取り消さない）
+      369 |     const count = dialogs.length;
+      370 |     accept = true;
+        at /home/user/soraban/e2e/ops-db/sprint16-h1-db.spec.ts:367:57
+
+    Error Context: test-results/ops/sprint16-h1-db-Sprint-16-H-7ee02-かれない。入力の途中の離脱は確認し、保存の後は出さない/error-context.md
+
+    Error Context: test-results/ops/sprint16-h1-db-Sprint-16-H-7ee02-かれない。入力の途中の離脱は確認し、保存の後は出さない/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-h1-db-Sprint-16-H-7ee02-かれない。入力の途中の離脱は確認し、保存の後は出さない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-h1-db-Sprint-16-H-7ee02-かれない。入力の途中の離脱は確認し、保存の後は出さない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-h1-db.spec.ts:309:7 › Sprint 16-H1 E2E-DB：計画作成の 6 段 › H1-5. 端末データ：段の間の入力は端末（localStorage・sessionStorage・IndexedDB・Cache）に書かれない。入力の途中の離脱は確認し、保存の後は出さない 
+  4 did not run
+  5 passed (22.2s)
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,233 @@
+
+ RUN  v4.1.5 /home/user/soraban
+
+ ❯ |web| apps/web/src/components/ops/field-offline-tokens.test.ts (11 tests | 7 failed) 25ms
+     × components/ops/offline-shells.tsx：旧い名前・旧い部品・色の直書きが 0 8ms
+     × components/ops/pwa-register.tsx：旧い名前・旧い部品・色の直書きが 0 1ms
+     × offline-shells：すべての <main> が現場モードの印を置く（today・field・inspection・journal・読み込み・見つからない・圏外では行えない） 3ms
+     × pwa-register：新しい版の知らせは新しい部品（opx-box・opx-btn）で、主ボタンを足さない（K-8） 1ms
+     × field-client：data-variant を持つのは離着陸のボタンと日誌へのリンクだけ。確認・保存・リンクは副 2ms
+     × offline-shells：主ボタン（data-variant）は保存の 1 つずつ（点検・日誌） 1ms
+     × field-client：帯には短い印と文字（！古い可能性）だけを置き、説明は帯の外の field-status-prefetch-stale-help 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-1 現場・圏外・PWA の案内は新しいトークンだけ > components/ops/offline-shells.tsx：旧い名前・旧い部品・色の直書きが 0
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-1 現場・圏外・PWA の案内は新しいトークンだけ > components/ops/pwa-register.tsx：旧い名前・旧い部品・色の直書きが 0
+AssertionError: expected 'rounded-sharp' to be null
+
+- Expected:
+null
+
++ Received:
+"rounded-sharp"
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:33:46
+     31|     it(`${f}：旧い名前・旧い部品・色の直書きが 0`, () => {
+     32|       const src = stripComments(read(f));
+     33|       expect(src.match(LEGACY)?.[0] ?? null).toBeNull();
+       |                                              ^
+     34|       expect(src.match(OLD_PARTS)?.[0] ?? null).toBeNull();
+     35|       expect(src.match(HEX_OR_RGB)?.[0] ?? null).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-1 現場・圏外・PWA の案内は新しいトークンだけ > offline-shells：すべての <main> が現場モードの印を置く（today・field・inspection・journal・読み込み・見つからない・圏外では行えない）
+AssertionError: expected +0 to be 7 // Object.is equality
+
+- Expected
++ Received
+
+- 7
++ 0
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:44:19
+     42|     expect(mains).toBeGreaterThanOrEqual(6);
+     43|     // <main> ごとに 1 つ、加えて現場の画面（FieldClient を返す枠）で 1 つ
+     44|     expect(marks).toBe(mains + 1);
+       |                   ^
+     45|     for (const m of src.split("<main").slice(1)) expect(m.slice(0, m.i…
+     46|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-1 現場・圏外・PWA の案内は新しいトークンだけ > pwa-register：新しい版の知らせは新しい部品（opx-box・opx-btn）で、主ボタンを足さない（K-8）
+AssertionError: expected '"use client";\n\n\n\n\n\n\nimport { u…' to match /opx-box/
+
+- Expected:
+/opx-box/
+
++ Received:
+"\"use client\";
+
+
+
+
+
+
+import { useEffect, useRef, useState } from \"react\";
+import { SW_SCOPE, SW_URL } from \"@/lib/pwa\";
+
+
+export const CLIENT_BUILD_ID = process.env.SORABAN_BUILD_ID ?? \"dev\";
+
+export const PWA_NEW_VERSION_EVENT = \"soraban:new-version\";
+
+
+export const reportServerBuild = (build: string | null | undefined): void => {
+  if (typeof window === \"undefined\" || !build || build === CLIENT_BUILD_ID || CLIENT_BUILD_ID === \"dev\") return;
+  window.dispatchEvent(new CustomEvent(PWA_NEW_VERSION_EVENT, { detail: { build } }));
+};
+
+export function PwaRegister() {
+  const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
+  const [mismatch, setMismatch] = useState(false);
+  const userAsked = useRef(false);
+
+  useEffect(() => {
+    const onMismatch = () => setMismatch(true);
+    window.addEventListener(PWA_NEW_VERSION_EVENT, onMismatch);
+    if (process.env.NODE_ENV !== \"production\" || !(\"serviceWorker\" in navigator)) {
+      return () => window.removeEventListener(PWA_NEW_VERSION_EVENT, onMismatch);
+    }
+    let cancelled = false;
+    const sw = navigator.serviceWorker;
+
+    const onControllerChange = () => {
+      if (userAsked.current) window.location.reload();
+    };
+    sw.addEventListener(\"controllerchange\", onControllerChange);
+    const watch = (reg: ServiceWorkerRegistration) => {
+      if (reg.waiting && sw.controller) setWaiting(reg.waiting);
+      reg.addEventListener(\"updatefound\", () => {
+        const w = reg.installing;
+        if (!w) return;
+        w.addEventListener(\"statechange\", () => {
+
+          if (w.state === \"installed\" && sw.controller && !cancelled) setWaiting(w);
+        });
+      });
+    };
+    const register = async () => {
+      try {
+        const reg = await sw.register(`${SW_URL}?v=${encodeURIComponent(CLIENT_BUILD_ID)}`, { scope: SW_SCOPE, updateViaCache: \"none\" });
+        if (!cancelled) watch(reg);
+      } catch {
+
+      }
+    };
+    void register();
+
+    void sw.getRegistration(SW_SCOPE).then((reg) => {
+      if (reg && !cancelled) watch(reg);
+    });
+    return () => {
+      cancelled = true;
+      sw.removeEventListener(\"controllerchange\", onControllerChange);
+      window.removeEventListener(PWA_NEW_VERSION_EVENT, onMismatch);
+    };
+  }, []);
+
+  if (!waiting && !mismatch) return null;
+  const update = () => {
+    userAsked.current = true;
+    if (waiting) waiting.postMessage({ type: \"SKIP_WAITING\" });
+    else window.location.reload();
+  };
+  return (
+    <div role=\"status\" className=\"mx-4 mt-3 flex flex-wrap items-center gap-3 rounded-sharp border-2 border-brand-700 bg-paper p-3 text-ink\" data-testid=\"pwa-update\">
+      <p className=\"min-w-0 flex-1\">新しい版があります。入力中の内容は消えません。区切りのよいときに更新してください（次に開いたときにも反映されます）。</p>
+      <button type=\"button\" className=\"min-h-14 rounded-sharp border-2 border-brand-700 bg-brand-700 px-4 font-bold text-paper\" onClick={update} data-testid=\"pwa-update-button\">
+        更新する
+      </button>
+    </div>
+  );
+}
+"
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:49:17
+     47|   it("pwa-register：新しい版の知らせは新しい部品（opx-box・opx-btn）で、主ボタンを足さない（K-8）", (…
+     48|     const src = stripComments(read("components/ops/pwa-register.tsx"));
+     49|     expect(src).toMatch(/opx-box/);
+       |                 ^
+     50|     expect(src).toMatch(/opx-btn/);
+     51|     expect(src).not.toMatch(/data-variant/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-4 現場の主ボタンは 1 つの状態に 1 つ > field-client：data-variant を持つのは離着陸のボタンと日誌へのリンクだけ。確認・保存・リンクは副
+AssertionError: expected 12 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 12
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:60:19
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-4 現場の主ボタンは 1 つの状態に 1 つ > offline-shells：主ボタン（data-variant）は保存の 1 つずつ（点検・日誌）
+AssertionError: expected +0 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:69:65
+     67|   it("offline-shells：主ボタン（data-variant）は保存の 1 つずつ（点検・日誌）", () => {
+     68|     const src = stripComments(read("components/ops/offline-shells.tsx"…
+     69|     expect([...src.matchAll(/data-variant="primary"/g)].length).toBe(2…
+       |                                                                 ^
+     70|     expect(src).toMatch(/data-variant="primary"[^>]*BTN_PRIMARY[^>]*on…
+     71|     expect(src).toMatch(/data-variant="primary"[^>]*BTN_PRIMARY[^>]*on…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  |web| apps/web/src/components/ops/field-offline-tokens.test.ts > 16-K K2-3 状態の帯 > field-client：帯には短い印と文字（！古い可能性）だけを置き、説明は帯の外の field-status-prefetch-stale-help
+AssertionError: expected 'data-testid="field-status-band"\n    …' to match /！古い可能性/
+
+- Expected:
+/！古い可能性/
+
++ Received:
+"data-testid=\"field-status-band\"
+      data-online={online ? \"true\" : \"false\"}
+    >
+      <span className=\"font-bold\" data-testid=\"field-status-connection\">
+        {online ? \"● 接続あり\" : \"× 接続なし（圏外）\"}
+      </span>
+      <span className=\"font-bold\" data-testid=\"field-status-unsent\" data-count={unsent}>
+        送信待ち {unsent} 件
+      </span>
+      <span data-testid=\"field-status-saved\">最後に保存 {meta.savedAt ? dayTime(meta.savedAt) : \"—\"}</span>
+      <span data-testid=\"field-status-prefetch\">
+        先読みの最終更新 {bundle ? dayTime(bundle.fetchedAt) : \"なし\"}
+        {bundleStale ? (
+          <strong className=\"ml-1\" data-testid=\"field-status-prefetch-stale\">
+            （古い可能性があります。登録が変わっていないか、電波のある場所で開き直してください）
+          </strong>
+        ) : null}
+      </span>
+    "
+
+ ❯ apps/web/src/components/ops/field-offline-tokens.test.ts:80:18
+     78|     const band = src.slice(src.indexOf('data-testid="field-status-band…
+     79|     expect(band).toMatch(/data-testid="field-status-prefetch-stale"/);
+     80|     expect(band).toMatch(/！古い可能性/);
+       |                  ^
+     81|     expect(band).not.toMatch(/field-status-prefetch-stale-help/);
+     82|     expect(band).not.toMatch(/登録が変わっていないか/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 4 passed (11)
+   Start at  09:33:46
+   Duration  224ms (transform 28ms, setup 0ms, import 43ms, tests 25ms, environment 0ms)
+

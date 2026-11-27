@@ -57,6 +57,7 @@ import {
 } from "@/lib/history";
 import { RegulationCard } from "./regulation-card";
 import { VerdictSummary } from "./verdict-summary";
+import { judgementTotal } from "@/lib/judgement-total";
 import { VERDICT_CHECK_FAILED_NOTE, VERDICT_LABEL } from "@/lib/verdict-display";
 import {
   buildPilotPermits,
@@ -1256,10 +1257,10 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
     readonly desc: string;
   }) => (
     <label key={p.key} className={`sb-check-row ${p.state ? "is-on" : ""}`}>
-      <input type="checkbox" checked={p.state} onChange={(e) => p.set(e.target.checked)} className="sb-check mt-0.5" />
+      <input type="checkbox" checked={p.state} onChange={(e) => p.set(e.target.checked)} className="sb-check" />
       <span className="flex flex-1 flex-col gap-0.5 leading-snug">
         <span className="text-sm font-bold text-sb-ink">{p.label}</span>
-        <span className="text-xs text-sb-ink-3">{p.desc}</span>
+        <span className="text-sm text-sb-ink-3">{p.desc}</span>
       </span>
     </label>
   );
@@ -1267,7 +1268,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
   return (
     <div className="sb-check-grid">
       {/* ─── INPUT FORM ───────────────────────────────── */}
-      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-5" data-testid="input-block">
+      <form onSubmit={handleSubmit} className="sb-block sb-area-input flex flex-col gap-3" data-testid="input-block">
         {/* 住所または緯度・経度（入力欄と 2 つのボタンは最初の画面に入る） */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
@@ -1304,7 +1305,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
           />
           {geocodeResults.length > 1 ? (
             <div className="flex flex-col gap-1">
-              <p className="text-xs text-sb-ink-2">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
+              <p className="text-sb-ink-2">候補が {geocodeResults.length} 件あります。選ぶと判定します。</p>
               <ul className="flex flex-col gap-2">
                 {geocodeResults.map((r) => (
                   <li key={`${r.source}-${r.level}-${r.lat}-${r.lng}`}>
@@ -1318,12 +1319,12 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                     >
                       <span className="flex w-full flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                         <span className="text-sm font-bold text-sb-ink">{r.title}</span>
-                        <span className="sb-num text-xs text-sb-ink-3">
+                        <span className="sb-num text-sm text-sb-ink-3">
                           {round6(r.lat)}, {round6(r.lng)}
                         </span>
                       </span>
-                      <span className="text-xs leading-relaxed text-sb-ink-2">{GEOCODE_LEVEL_NOTE[r.level]}</span>
-                      <span className="text-xs text-sb-ink-3">出典：{GEOCODE_SOURCE_LABEL[r.source]}</span>
+                      <span className="text-sm leading-relaxed text-sb-ink-2">{GEOCODE_LEVEL_NOTE[r.level]}</span>
+                      <span className="text-sm text-sb-ink-3">出典：{GEOCODE_SOURCE_LABEL[r.source]}</span>
                     </button>
                   </li>
                 ))}
@@ -1334,7 +1335,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
         <div data-testid="current-location" className="flex flex-col gap-3">
           <div className="sb-btn-row !mt-0">
-            <PillButton type="submit" variant="primary" block disabled={isChecking}>
+            <PillButton type="submit" variant={opsEntryAvailable && canExportPdf ? "secondary" : "primary"} block disabled={isChecking}>
               {isChecking ? "判定中…" : "この地点を判定する"}
             </PillButton>
             <PillButton
@@ -1375,10 +1376,11 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             verdict={screenVerdict}
             pending={verdictPending}
             failed={conclusionFailed}
+            {...(screenVerdict !== undefined && !verdictPending && !conclusionFailed ? { total: judgementTotal(screenVerdict, false) } : {})}
             {...(checkFailed ? { failedNote: VERDICT_CHECK_FAILED_NOTE } : {})}
             onRetry={retryVerdict}
             meta={
-              <p className="sb-num text-[13px] text-sb-ink-3">
+              <p data-note="" className="sb-num text-sm text-sb-ink-3">
                 {lat}°N · {lng}°E
                 {showResultDetail && result.resolvedAddress ? ` — ${result.resolvedAddress}` : ""}
               </p>
@@ -1389,7 +1391,6 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   // 判定の入力（座標・機体の重さ・フラグ・許可・予定日）だけを計画のフォームに引き継ぐ。結果は引き継がない（保存でサーバーが再実行する）。
                   <PillLink
                     variant="primary"
-                    small
                     href={buildPlanHandoffHref({
                       lat,
                       lng,
@@ -1429,7 +1430,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
           <p className="sb-note-card is-ok flex flex-col gap-0.5 !text-sb-ink" role="status" data-testid="location-note">
             {locationNote.title ? <span className="text-sm font-bold">{locationNote.title}</span> : null}
             <span>{locationNote.text}</span>
-            {locationNote.source ? <span className="text-xs text-sb-ink-3">出典：{locationNote.source}</span> : null}
+            {locationNote.source ? <span className="text-sm text-sb-ink-3">出典：{locationNote.source}</span> : null}
           </p>
         ) : null}
         <RegulationMap center={center} prefCode={prefCode} onPick={handlePick} candidate={geoCandidate ?? locatedCircle} />
@@ -1479,9 +1480,9 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 </div>
               </div>
 
-              {/* 判定の見分け方（5 段。形と言葉をセットで。橙は使わない） */}
+              {/* 判定の見分け方（5 段。形と言葉をセットで。色だけに頼らない） */}
               <div className="sb-block-soft flex flex-col gap-2" aria-label="判定の見分け方" data-testid="verdict-legend" role="group">
-                <p className="text-sm font-bold text-sb-ink">判定の見分け方</p>
+                <p data-note="" className="text-sm font-bold text-sb-ink">判定の見分け方</p>
                 <div className="flex flex-wrap gap-2">
                   {VERDICT_LEGEND_ORDER.map((l) => (
                     <VerdictTag key={l} level={l}>
@@ -1491,23 +1492,23 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 </div>
               </div>
 
-              {/* audit meta */}
-              <dl className="sb-block-soft grid grid-cols-2 gap-x-6 gap-y-3 text-xs text-sb-ink-3 sm:grid-cols-4">
-                <div className="col-span-2 flex flex-col gap-0.5">
+              {/* audit meta（項目名と値を 1 行に並べる。幅が足りない値は次の行へ折り返す） */}
+              <dl data-note="" className="sb-block-soft flex flex-col gap-y-1.5 text-sm text-sb-ink-3 sm:grid sm:grid-cols-4 sm:gap-x-6 sm:gap-y-3">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:col-span-2 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">証跡 ID</dt>
                   <dd className="sb-num text-sm text-sb-ink" data-testid="evidence-id">
                     {result.evidenceId}
                   </dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">確からしさ</dt>
                   <dd className="text-sm text-sb-ink">{CONFIDENCE_LABEL[result.overallConfidence]}</dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">判定の版</dt>
                   <dd className="sb-num text-sm text-sb-ink">{result.engineVersion}</dd>
                 </div>
-                <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-4">
+                <div className="flex flex-wrap items-baseline gap-x-3 sm:col-span-4 sm:flex-col sm:items-start sm:gap-0.5">
                   <dt className="font-bold text-sb-ink-2">判定日時</dt>
                   <dd className="text-sm text-sb-ink">{new Date(result.checkedAt).toLocaleString("ja-JP")}</dd>
                 </div>
@@ -1519,7 +1520,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
       {/* ─── 詳細な指定（座標・条件・飛行方法・地点の例）。入力欄は状態で動くので、form の外でも判定に使われる ─── */}
       <section className="sb-block sb-area-wide flex flex-col gap-5" aria-label="詳細な指定" data-testid="detail-block">
-        <p className="sb-hint" data-testid="geocode-attribution">
+        <p data-note="" className="sb-hint" data-testid="geocode-attribution">
             出典：
             {addressIndexAvailable
               ? "アドレス・ベース・レジストリ（デジタル庁）を加工して作成（鳥取県・島根県の町字・住居表示）／"
@@ -1532,8 +1533,13 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             座標で指定する
             <span className="ml-2 font-normal text-sb-ink-3">（Google Maps 「座標をコピー」 / URL に対応）</span>
           </legend>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          {/* 16-D D-1：見えるラベルを入力欄の上に置く（読み上げ名は従来の aria-label と同じ文字のまま） */}
+          <label htmlFor="combined-input" className="sb-label">
+            座標または Google マップの URL
+          </label>
+          <div className="flex items-center gap-2">
             <input
+              id="combined-input"
               type="text"
               aria-label="座標または Google マップの URL"
               value={combined}
@@ -1560,19 +1566,20 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 });
               }}
               placeholder="例: 35.4278, 133.3314 ／ Google マップの URL（https://maps.google.com/...@35.4283,133.3306,15z）"
-              className={`${fieldClass} sb-num`}
+              className={`${fieldClass} sb-num min-w-0 flex-1`}
             />
-            <button type="button" onClick={() => applyCombined(combined)} disabled={combined.trim().length === 0} className="sb-text-btn">
+            <button type="button" onClick={() => applyCombined(combined)} disabled={combined.trim().length === 0} className="sb-text-btn shrink-0">
               反映
             </button>
           </div>
           {combinedStatus !== null ? (
-            <p className={`sb-num text-xs font-bold ${combinedStatus.ok ? "text-sb-v-none-fg" : "text-sb-v-no-fg"}`} role="status">
+            <p className={`sb-num text-sm font-bold ${combinedStatus.ok ? "text-sb-v-none-fg" : "text-sb-v-no-fg"}`} role="status">
               <span aria-hidden>{combinedStatus.ok ? "✓ " : "× "}</span>
               {combinedStatus.message}
             </p>
           ) : null}
-          <div className="grid grid-cols-2 gap-3">
+          {/* 16-D 追加 1：文字 200% で 2 列のままだと、緯度・経度の入力欄が文字で切れた（入れ物の切れ）。列の最小幅を rem で持ち、幅が足りないときは縦に積む（等倍の 375 以上は 2 列のまま） */}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
             <label className="flex flex-col gap-1.5">
               <span className="sb-field-text">緯度（北緯・度）</span>
               <input
@@ -1605,10 +1612,10 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
         {/* 機体・運航条件 — ClauseGraph の例外節と照合される。折りたたみが標準（上級設定）。
             既定 = 最も厳しい解釈でまず判定し、必要なときだけ展開する */}
         <details className="flex flex-col gap-3 border-t border-sb-rule pt-5 [&>summary::-webkit-details-marker]:hidden">
-          <summary className="sb-eyebrow flex min-h-11 cursor-pointer select-none list-none items-center gap-1">
+          <summary className="sb-eyebrow flex min-h-12 cursor-pointer select-none list-none items-center gap-1">
             機体・運航条件
             <span className="ml-2 font-normal text-sb-ink-3">（例外節を自動適用 / タップで展開）</span>
-            <span aria-hidden className="ml-auto text-xs text-sb-ink-3 [details[open]_&]:rotate-90">
+            <span aria-hidden className="ml-auto text-sm text-sb-ink-3 [details[open]_&]:rotate-90">
               ▸
             </span>
           </summary>
@@ -1637,7 +1644,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   className={
                     isModelAircraftWeight
                       ? "sb-note-card is-warn "
-                      : "text-xs leading-relaxed text-sb-ink-3"
+                      : "text-sm leading-relaxed text-sb-ink-3"
                   }
                 >
                   {isModelAircraftWeight
@@ -1659,7 +1666,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   <option value="public_duty">公務（警察・消防・自治体）</option>
                   <option value="city_event">市が主催・後援する行事</option>
                 </select>
-                <span className="text-xs text-sb-ink-3">史跡・公園・県条例の例外節と照合</span>
+                <span className="text-sm text-sb-ink-3">史跡・公園・県条例の例外節と照合</span>
               </label>
             </div>
 
@@ -1667,14 +1674,14 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             <div className="flex flex-col gap-2">
               <span className="sb-field-text">取得済みの許可</span>
               <div data-testid="dips-permits" className="flex flex-col gap-2">
-                <p className="text-xs leading-snug text-sb-ink-3">
+                <p className="text-sb-ink-3">
                   国交省 DIPS の許可・承認（種類ごと。範囲・期間は照合しません。空港等周辺は個別の許可のため入力に含めません）
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{dipsItems.map(renderPermit)}</div>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{permitItems.map(renderPermit)}</div>
-              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の橙線でひとまとまりに見せる */}
-              <div className="border-l-4 border-sb-orange pl-2">
+              {/* 飛行禁止法では同意と通報が一組で要るため、2 つを隣り合わせて左の線でひとまとまりに見せる */}
+              <div className="border-l-4 border-sb-edge pl-2">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{pairItems.map(renderPermit)}</div>
               </div>
             </div>
@@ -1699,18 +1706,18 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 const isAuto = autoAirspaceFlags.includes(flag);
                 const checked = effectiveAirspaceFlags.includes(flag);
                 return (
-                  <label key={flag} data-testid={`airspace-${flag}`} className={`sb-check-row ${checked ? "is-on" : ""}`}>
+                  <label key={flag} data-testid={`airspace-${flag}`} className={`sb-check-row sb-check-dense ${checked ? "is-on" : ""}`}>
                     <input
                       type="checkbox"
                       checked={checked}
                       disabled={isAuto}
                       title={isAuto ? "地点判定から自動検出（この地点では外せません）" : undefined}
                       onChange={() => toggleAirspaceFlag(flag)}
-                      className="sb-check mt-0.5"
+                      className="sb-check"
                     />
                     <span className="text-sm font-bold leading-snug text-sb-ink">
                       {SPECIFIC_FLIGHT_FLAG_LABEL[flag]}
-                      {isAuto ? <span className="sb-num ml-1 text-xs font-normal text-sb-ink-3">（自動検出）</span> : null}
+                      {isAuto ? <span className="sb-num ml-1 text-sm font-normal text-sb-ink-3">（自動検出）</span> : null}
                     </span>
                   </label>
                 );
@@ -1735,7 +1742,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                     : ""}
                 </span>
                 {autoDidStatus === "unverified" && !userAirspaceFlags.includes("airspace_did") ? (
-                  <label className="flex min-h-11 cursor-pointer items-center gap-2">
+                  <label className="flex min-h-12 cursor-pointer items-center gap-2">
                     <input
                       type="checkbox"
                       checked={didConfirmedNotApplicable}
@@ -1755,8 +1762,8 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             {FLIGHT_METHOD_FLAGS.map((flag) => {
               const checked = methodFlags.includes(flag);
               return (
-                <label key={flag} className={`sb-check-row ${checked ? "is-on" : ""}`}>
-                  <input type="checkbox" checked={checked} onChange={() => toggleMethodFlag(flag)} className="sb-check mt-0.5" />
+                <label key={flag} className={`sb-check-row sb-check-dense ${checked ? "is-on" : ""}`}>
+                  <input type="checkbox" checked={checked} onChange={() => toggleMethodFlag(flag)} className="sb-check" />
                   <span className="text-sm font-bold leading-snug text-sb-ink">{SPECIFIC_FLIGHT_FLAG_LABEL[flag]}</span>
                 </label>
               );
@@ -1768,7 +1775,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             <label className="flex flex-col gap-1.5">
               <span className="sb-field-text flex items-center gap-2">飛行予定日</span>
               <input type="date" value={plannedDate} onChange={(e) => setPlannedDate(e.target.value)} className={`${fieldClass} sb-num`} />
-              <span className="text-xs leading-relaxed text-sb-ink-3">
+              <span className="text-sm leading-relaxed text-sb-ink-3">
                 飛行の予定日（判定の条件に使います）
               </span>
             </label>
@@ -1781,7 +1788,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 <option value="yes">立入管理措置あり（第三者の上空で飛ばさない＝カテゴリー II）</option>
                 <option value="no_third_party">立入管理措置なし（第三者の上空＝カテゴリー III／レベル4）</option>
               </select>
-              <span className="text-xs leading-relaxed text-sb-ink-3">第三者上空はレベル4（一等＋第一種機体認証が必須）の切り分けに使用</span>
+              <span className="text-sm leading-relaxed text-sb-ink-3">第三者上空はレベル4（一等＋第一種機体認証が必須）の切り分けに使用</span>
             </label>
           </div>
 
@@ -1794,7 +1801,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                 <option value="with">補助者あり</option>
                 <option value="without">補助者なし（より上位の運航要件）</option>
               </select>
-              <span className="text-xs leading-relaxed text-sb-ink-3">補助者の有無を判定の条件に使います</span>
+              <span className="text-sm leading-relaxed text-sb-ink-3">補助者の有無を判定の条件に使います</span>
             </label>
           ) : null}
 
@@ -1807,7 +1814,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
 
         {/* 地点の例 */}
         <div className="flex flex-col gap-3 border-t border-sb-rule pt-5">
-          <p className="sb-eyebrow">
+          <p data-note="" className="sb-eyebrow">
             地点の例
             <span className="ml-2 font-normal text-sb-ink-3">（県別。押すとその地点で判定）</span>
           </p>
@@ -1818,13 +1825,13 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   type="button"
                   onClick={() => selectPreset(preset)}
                   title={preset.hint}
-                  className="sb-check-row h-full w-full flex-col !gap-1 text-left"
+                  className="sb-check-row h-full w-full flex-col !gap-0 !py-1.5 text-left"
                 >
                   <span className="flex items-center gap-2">
                     <span className="sb-tag !min-h-6 !px-2  font-bold text-sb-ink">{preset.group}</span>
                     <span className="text-sm font-bold text-sb-ink">{preset.name}</span>
                   </span>
-                  <span className="text-xs leading-snug text-sb-ink-3">{preset.hint}</span>
+                  <span className="text-sm leading-snug text-sb-ink-3">{preset.hint}</span>
                 </button>
               </li>
             ))}
@@ -1834,7 +1841,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
         {/* 免責（入力前＝初期状態でも常に表示）。判定結果や診断パネルが出る前から、
             「本機能は補助であり最終確認は DIPS／航空局で」を画面に出しておく契約
             （sprint-4：免責を入力前・結果表示・チェックリスト・プリフィルの全画面状態に表示）。 */}
-        <p className="sb-note-card border-l-4 border-sb-ink ">
+        <p data-note="" className="sb-note-card border-l-4 border-sb-ink ">
           <span className="font-bold text-sb-ink">免責</span> {DISCLAIMER_JUDGEMENT}
         </p>
       </section>
@@ -1862,9 +1869,9 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             <div className="flex flex-col gap-0.5">
               <h3 id="history-heading" className="text-base font-bold text-sb-ink">
                 判定履歴
-                <span className="ml-2 text-xs font-normal text-sb-ink-3">（ローカル保存 / 最大 50 件）</span>
+                <span className="ml-2 text-sm font-normal text-sb-ink-3">（ローカル保存 / 最大 50 件）</span>
               </h3>
-              <p className="sb-num text-xs text-sb-ink-3">{history.length} 件</p>
+              <p data-note="" className="sb-num text-sm text-sb-ink-3">{history.length} 件</p>
             </div>
             <button type="button" onClick={handleClearHistory} className="sb-text-btn">
               全削除
@@ -1897,7 +1904,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   <button
                     type="button"
                     onClick={() => restoreFromHistory(h)}
-                    className="flex min-h-11 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
+                    className="flex min-h-12 flex-1 items-center gap-3 rounded-sb-m px-1 text-left transition-colors hover:bg-sb-hover"
                     title={
                       applicationSupport
                         ? `証跡 ${h.evidenceId} を復元して再判定（申請支援の条件・進捗も復元）`
@@ -1915,7 +1922,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                         data-legacy={vd.legacy ? "true" : "false"}
                         {...(vd.pending ? { "data-pending": "true" } : {})}
                         data-level={vd.level ?? ""}
-                        className="text-xs font-bold text-sb-ink-2"
+                        className="text-sm font-bold text-sb-ink-2"
                       >
                         {vd.label}
                         {vd.unknownCount !== undefined && vd.unknownCount > 0
@@ -1925,7 +1932,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                       <span className="text-sm text-sb-ink">
                         {h.resolvedAddress ?? `${h.loc.lat.toFixed(4)}°N · ${h.loc.lng.toFixed(4)}°E`}
                       </span>
-                      <span className="sb-num text-xs text-sb-ink-3">
+                      <span className="sb-num text-sm text-sb-ink-3">
                         {dateStr}
                         {h.ctx?.droneWeightG !== undefined ? ` · ${h.ctx.droneWeightG}g` : ""}
                         {h.ctx?.purpose && h.ctx.purpose !== "general" ? ` · ${PURPOSE_SHORT[h.ctx.purpose] ?? h.ctx.purpose}` : ""}
@@ -1952,7 +1959,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
                   <button
                     type="button"
                     onClick={() => handleRemoveHistory(h.evidenceId)}
-                    className="sb-text-btn !min-w-11 !px-0"
+                    className="sb-text-btn !min-w-12 !px-0"
                     aria-label="この履歴を削除"
                     title="削除"
                   >
@@ -1963,7 +1970,7 @@ export function RegulationChecker({ addressIndexAvailable = false, applicationSu
             })}
           </ul>
           {history.length > 10 ? (
-            <p className="sb-num text-xs text-sb-ink-3">
+            <p className="sb-num text-sm text-sb-ink-3">
               ... and {history.length - 10} more (oldest will be evicted at 50)
             </p>
           ) : null}

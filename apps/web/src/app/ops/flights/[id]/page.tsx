@@ -35,7 +35,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
   const options = correctable ? await recordFormOptions(ctx, me) : null;
   const coord = (lat: number | null, lng: number | null, acc: number | null) =>
     lat === null || lng === null ? null : (
-      <span className="block sb-num text-xs text-sb-ink-2 tnum">
+      <span className="block sb-num text-sm text-sb-ink-2 tnum">
         {lat}, {lng}（WGS84）{acc !== null ? `／精度 約 ${acc} m` : ""}
       </span>
     );
@@ -46,13 +46,13 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
       <span key="p" className="flex flex-col">
         <span data-testid="flight-pilot-name">{f.pilotName}</span>
         {f.pilotLicenseNumber ? (
-          <span className="text-xs text-sb-ink-2">
+          <span className="text-sm text-sb-ink-2">
             技能証明書番号：<LicenseNumber value={f.pilotLicenseNumber} data-testid="flight-license" />
           </span>
         ) : (
-          <span className="text-xs text-sb-ink-3">技能証明なし</span>
+          <span className="text-sm text-sb-ink-3">技能証明なし</span>
         )}
-        <span className="text-xs text-sb-ink-3">（記録した時点の内容）</span>
+        <span className="text-sm text-sb-ink-3">（記録した時点の内容）</span>
       </span>,
     ],
     ["飛行の目的", f.purpose],
@@ -97,11 +97,11 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           {f.defects.map((d, i) => (
             <li key={i} className="flex flex-col gap-0.5 border-l-2 border-sb-rule pl-2">
               <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="sb-num text-xs tnum text-sb-ink-3">{d.occurredOn}</span>
+                <span className="sb-num text-sm tnum text-sb-ink-3">{d.occurredOn}</span>
                 <span>{d.description}</span>
                 {d.actionOn === null && d.action === null ? <Badge tone="neutral">処置は未記載</Badge> : null}
               </span>
-              <span className="text-xs text-sb-ink-2">
+              <span className="text-sm text-sb-ink-2">
                 処置：{d.actionOn ?? "—"} {d.action ?? ""}／確認者：{d.confirmerName ?? "—"}
               </span>
             </li>
@@ -150,7 +150,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           ],
         ] as [string, React.ReactNode][])
       : []),
-    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
+    ["日常点検", f.dailyInspectionId ? <a key="i" href={`/ops/inspections/${f.dailyInspectionId}`} className="-my-2 inline-flex min-h-12 items-center text-sb-ink underline underline-offset-2">紐付けた点検を見る</a> : "紐付けなし"],
   ];
   return (
     <main className="flex flex-col gap-10">
@@ -168,9 +168,9 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
           }
         />
         {f.voided ? (
-          <Note tone="red">この飛行記録は取り消されています。総飛行時間には数えません。記載内容と版の一覧は残しています。</Note>
+          <Note tone="red" body>この飛行記録は取り消されています。総飛行時間には数えません。記載内容と版の一覧は残しています。</Note>
         ) : correctable ? null : (
-          <Note>訂正は運航管理者と、記録の操縦者本人だけが行えます。</Note>
+          <Note body>訂正は運航管理者と、記録の操縦者本人だけが行えます。</Note>
         )}
         <dl
           aria-label="飛行の要点"
@@ -194,7 +194,7 @@ export default async function FlightDetailPage({ params }: { readonly params: Pr
             ] as const
           ).map(([k, val, cls]) => (
             <div key={k} className={`flex flex-col gap-1 bg-sb-base px-3 py-2.5 ${cls}`}>
-              <dt className="text-xs text-sb-ink-3">{k}</dt>
+              <dt className="text-sm text-sb-ink-3">{k}</dt>
               <dd className="sb-num text-lg leading-tight tnum text-sb-ink">{val}</dd>
             </div>
           ))}

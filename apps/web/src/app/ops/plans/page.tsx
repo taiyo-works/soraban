@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, Note, PageHeader } from "@/components/ops/ui";
+import { formatDay } from "@/lib/ops-day";
 import { DipsNotice, NextActionItem, PlanStateBadge, ReportBadge, ReportStatusBadge, StaleBadge, VerdictBadge } from "@/components/ops/plan-ui";
 import { jstDate } from "@/lib/ops-time";
 import { PLAN_JUDGEMENT_DISCLAIMER } from "@soraban/regulations";
@@ -62,15 +63,21 @@ export default async function PlanListPage({
     <main className="flex flex-col gap-6">
       <PageHeader
         title="飛行計画"
+        meta={
+          // 16-F（F-6）：題の補足 1 行（14px。ホームの日付と同じ形）
+          <span className="opx-num" data-testid="plans-today">
+            今日 <time dateTime={today}>{formatDay(today, today)}</time>
+          </span>
+        }
         aside={
           denied === null ? (
-            <Link prefetch={false} href="/ops/plans/new" className="opx-btn opx-btn-primary" data-testid="plan-new-link">
+            <Link prefetch={false} href="/ops/plans/new" data-variant="primary" className="opx-btn opx-btn-primary" data-testid="plan-new-link">
               飛行計画を作る
             </Link>
           ) : null
         }
       >
-        {denied !== null ? <Note>{denied}</Note> : null}
+        {denied !== null ? <Note body>{denied}</Note> : null}
         <Note>{PLAN_JUDGEMENT_DISCLAIMER}</Note>
       </PageHeader>
       <div className="flex flex-col gap-3">
@@ -93,11 +100,11 @@ export default async function PlanListPage({
           ) : null}
         </div>
       </div>
-      <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3" data-testid="plan-count">
+      <p data-note="" className="sb-num text-sm font-bold tnum text-sb-ink-3" data-testid="plan-count">
         {rows.length} 件
       </p>
       {rows.length === 0 ? (
-        <p className="sb-block-soft text-center text-sm text-sb-ink-2">該当する飛行計画はありません。</p>
+        <p className="sb-block-soft text-center text-sb-ink-2">該当する飛行計画はありません。</p>
       ) : (
         <ul className="flex flex-col gap-3" data-testid="plan-list">
           {rows.map((p) => (
@@ -112,7 +119,7 @@ export default async function PlanListPage({
                   </span>
                   {p.voided ? <Badge tone="red">中止</Badge> : null}
                 </span>
-                <span className="text-xs text-sb-ink-2">
+                <span className="text-sm text-sb-ink-2">
                   <span className="sb-num">{p.registrationMark}</span>
                   <span aria-hidden className="mx-1.5 text-sb-ink-3">
                     ／
@@ -132,10 +139,10 @@ export default async function PlanListPage({
                 </span>
               </Link>
               {p.nextAction ? (
-                <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-surface" data-testid="plan-row-next">
+                <div className="rounded-b-sb-l border-t border-sb-rule bg-sb-sunken" data-testid="plan-row-next">
                   <NextActionItem action={p.nextAction} testId="plan-row-next-action" />
                   {p.nextActionCount > 1 ? (
-                    <p className="px-3 pb-2.5 pl-[2.625rem] text-xs text-sb-ink-3" data-testid="plan-row-next-count">
+                    <p data-note="" className="px-3 pb-2.5 pl-[2.625rem] text-sm text-sb-ink-3" data-testid="plan-row-next-count">
                       ほか {p.nextActionCount - 1} 件（詳細で確認できます）
                     </p>
                   ) : null}

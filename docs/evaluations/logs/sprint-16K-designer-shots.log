@@ -1,0 +1,17 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts zz-16k-designer-shots
+
+
+Running 4 tests using 1 worker
+
+MEASURE 320 {"preflight":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":320,"innerW":320},"inflight":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":320,"innerW":320},"landed":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":320,"innerW":320},"fieldOffline":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":320,"innerW":320},"offJournal":{"blue":["offline-journal-save"],"dv":["offline-journal-save"],"band":null,"scrollW":320,"innerW":320},"offInspection":{"blue":["offline-inspection-save"],"dv":["offline-inspection-save"],"band":null,"scrollW":320,"innerW":320},"offToday":{"blue":[],"dv":[],"band":null,"scrollW":320,"innerW":320}}
+  ✓  1 e2e/ops-db/zz-16k-designer-shots.spec.ts:72:9 › shots 320 › flow 320 (7.3s)
+BAND 320 stale-offline 100%=92.00 200%=227.00
+  ✓  2 e2e/ops-db/zz-16k-designer-shots.spec.ts:138:9 › shots 320 › stale+emergency 320 (2.0s)
+MEASURE 375 {"preflight":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":375,"innerW":375},"inflight":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":375,"innerW":375},"landed":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":375,"innerW":375},"fieldOffline":{"blue":["field-flight-button"],"dv":["field-flight-button"],"band":69.5,"scrollW":375,"innerW":375},"offJournal":{"blue":["offline-journal-save"],"dv":["offline-journal-save"],"band":null,"scrollW":375,"innerW":375},"offInspection":{"blue":["offline-inspection-save"],"dv":["offline-inspection-save"],"band":null,"scrollW":375,"innerW":375},"offToday":{"blue":[],"dv":[],"band":null,"scrollW":375,"innerW":375}}
+  ✓  3 e2e/ops-db/zz-16k-designer-shots.spec.ts:72:9 › shots 375 › flow 375 (7.4s)
+BAND 375 stale-offline 100%=92.00 200%=227.00
+  ✓  4 e2e/ops-db/zz-16k-designer-shots.spec.ts:138:9 › shots 375 › stale+emergency 375 (1.8s)
+
+  4 passed (22.4s)

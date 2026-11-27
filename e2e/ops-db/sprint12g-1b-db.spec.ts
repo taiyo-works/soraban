@@ -1,6 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { expectNoHorizontalScroll } from "../field-checks";
-import { openUserMenu } from "../ops-menu";
+import { openAllPlans, openUserMenu } from "../ops-menu";
 
 // Sprint 12g-1b 段階 A の E2E-DB：ホーム（次の飛行・行程・近づく期限・直近の飛行）、登録、日誌の事故・ヒヤリハット、利用者メニュー。
 // サーバーの現在時刻は OPS_TEST_NOW（playwright.ops.config.ts、JST 2027-01-05 12:00）。組織B で確かめる（組織A は他の試験の計画が多い）。
@@ -81,11 +81,10 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await expect(page.getByTestId("today-card")).toHaveCount(0);
     await expect(page.getByTestId("today-empty")).toBeVisible();
     await expect(page.getByTestId("today-empty-message")).not.toHaveText("");
-    await expect(page.getByTestId("today-empty-action")).toHaveCount(2);
-    await expect(page.getByTestId("today-empty-action").first()).toHaveText("飛行計画を作る");
-    // 同じ画面に「飛行計画を作る」は 1 つだけ（予定のない日はカードの中。右上には出さない）
-    await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(1);
-    await expect(page.getByTestId("ops-enter-plan")).toHaveCount(0);
+    // 16-G（HM-4）：空の状態はアイコン・一文・主ボタン「計画を作る」だけ。クイック操作の「新しい計画」（ops-enter-plan）は副ボタンとして別に出る
+    await expect(page.getByTestId("today-empty-action")).toHaveCount(1);
+    await expect(page.getByTestId("today-empty-action")).toHaveText("計画を作る");
+    await expect(page.getByTestId("ops-enter-plan")).toHaveText("新しい計画");
     // 先頭：何もない旨と次の一手 → すぐ下に近づく期限
     const empty = (await page.getByTestId("today-empty").boundingBox())!;
     const dl = page.getByTestId("deadline-row");
@@ -94,13 +93,9 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     expect(rows.length).toBeGreaterThanOrEqual(2);
     const first = (await dl.first().boundingBox())!;
     expect(empty.y).toBeLessThan(first.y);
-    // 最初の画面（高さ 812px から下の 5 タブの 60px を除いた範囲）に、期限の最初の行が全部入る。
-    // Sprint 12h PR ③a：上部に判定のピル（見出し＋2 つのピル＋間隔）が入ったので、その高さの分だけ、枠を下げて測る。
-    // ピルより下の配置が、これまでと同じ余裕（タブは 56 → 60px で 4px 厳しくなった）に収まることを確かめる
-    const pillsBox = (await page.getByTestId("judge-pills").boundingBox())!;
-    const pillsBlock = (await empty.y) - pillsBox.y; // ピルの区画の上端から、空のカードの上端まで（ピルの高さと間隔）
-    expect(pillsBlock).toBeGreaterThan(48);
-    expect(first.y + first.height - pillsBlock).toBeLessThanOrEqual(812 - 60);
+    // 最初の画面（高さ 812px から下の 5 タブの 60px を除いた範囲＝752px）に、期限の最初の行が全部入る。
+    // 16-G：判定のピルは「すべての予定」（畳んだ中）に移ったので、これまでのピルの区画の分の補正（pillsBlock）は外した。上限 752 は変えていない（より厳しい測り方）
+    expect(first.y + first.height).toBeLessThanOrEqual(812 - 60);
     // 期限の並び：近い順。技能証明は氏名、許可・承認は番号。技能証明書の番号は出ない。機体の期限は出ない旨の 1 行
     await expect(dl.nth(0)).toContainText(pilotName);
     await expect(dl.nth(0)).toContainText("あと 15 日");
@@ -145,15 +140,17 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
 
     await signIn(page.request, seeded("b-manager"));
     await page.goto("/ops");
+    // 16-G：今日のカードの詳細・行程・次にやること・直近の飛行は「すべての予定」の中。準備カードと次の予定が先に出る
+    await expect(page.getByTestId("home-prep")).toBeVisible();
+    await expect(page.getByTestId("home-next-link")).toHaveAttribute("href", `/ops/plans/${today.id}`);
+    await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
+    await openAllPlans(page);
     const card = page.getByTestId("today-card");
     await expect(card).toHaveAttribute("data-plan-id", today.id);
-    // 予定のある日は、「飛行計画を作る」は右上の 1 つだけ（現場モードを開くが主ボタン）
-    await expect(page.getByRole("link", { name: "飛行計画を作る" })).toHaveCount(1);
-    await expect(page.getByTestId("ops-enter-plan")).toBeVisible();
     await expect(page.getByTestId("today-card-reason")).toHaveText("今日の飛行");
-    // 主ボタンは 1 つ（カードの中）。高さ 56px 以上
+    // ホームの主ボタンは 1 つ（home-primary）。カードの中の入口は副ボタン（K-8）。高さ 48px 以上
     await expect(card.getByTestId("today-card-primary")).toHaveText("現場モードを開く");
-    expect((await card.getByTestId("today-card-primary").boundingBox())!.height).toBeGreaterThanOrEqual(56);
+    expect((await card.getByTestId("today-card-primary").boundingBox())!.height).toBeGreaterThanOrEqual(48);
     // 行程：判定→計画→確認→通報→点検→飛行→日誌。文字と済／次／未
     const stages = card.getByTestId("route").locator("li");
     await expect(stages).toHaveCount(7);
@@ -206,8 +203,8 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     const btn = page.getByTestId("user-menu-button");
     await expect(btn).toBeVisible();
     const box = (await btn.boundingBox())!;
-    expect(box.width).toBeGreaterThanOrEqual(44);
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(48);
+    expect(box.height).toBeGreaterThanOrEqual(48);
     await expect(page.getByTestId("ops-me-name")).toHaveCount(0);
     await openUserMenu(page);
     await expect(page.getByTestId("ops-me-name")).toHaveText("組織B 管理者");
@@ -220,7 +217,7 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await info.click();
     await expect(page.getByTestId("user-menu").getByText("利用者の招待・役割の変更・停止ができます", { exact: false })).toBeVisible();
     await expect(page.getByTestId("signout")).toBeVisible();
-    expect((await page.getByTestId("signout").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await page.getByTestId("signout").boundingBox())!.height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalScroll(page, "利用者メニュー");
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
@@ -248,21 +245,20 @@ test.describe("Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者�
     await expect(page.getByTestId("journal-new-flight")).toHaveCount(0);
     await page.goto("/ops/incidents");
     await expect(page.getByTestId("incident-list-page")).toBeVisible();
-    // 一覧の戻り先は日誌、機体・操縦者・許可・承認・地点の一覧の戻り先は登録、計画の一覧には戻りリンクがない
+    // 一覧の戻り先は日誌、機体・操縦者・許可・承認・地点の一覧の戻り先は機体と書類（16-F で表示名を「登録」から変更）、計画の一覧には戻りリンクがない
     await expect(page.getByTestId("incident-list-page").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     for (const p of ["/ops/aircraft", "/ops/pilots", "/ops/permits", "/ops/places"]) {
       await page.goto(p);
-      const back = page.locator("main").getByRole("link", { name: /登録/ }).first();
+      const back = page.locator("main").getByRole("link", { name: /機体と書類/ }).first();
       await expect(back, p).toHaveAttribute("href", "/ops/more");
-      expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(44);
+      expect((await back.boundingBox())!.height, p).toBeGreaterThanOrEqual(48);
     }
-    // 点検は 1 段目の画面（Sprint 12h PR ③a）：戻りリンクを置かない（計画の一覧と同じ検査）。飛行記録の一覧の戻り先は日誌のまま
+    // 点検の一覧は 16-F から日誌の下の画面：戻りリンク「日誌」（行き先 /ops/journal）。飛行記録の一覧の戻り先も日誌のまま。計画の一覧には戻りリンクを置かない
     await page.goto("/ops/flights");
     await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     await page.goto("/ops/inspections");
     await expect(page.getByTestId("ops-inspections")).toBeVisible();
-    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
-    await expect(page.locator("main").getByRole("link", { name: /日誌|一覧へ戻る|戻る/ })).toHaveCount(0);
+    await expect(page.locator("main").getByRole("link", { name: /日誌/ }).first()).toHaveAttribute("href", "/ops/journal");
     await page.goto("/ops/plans");
     await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
     await ctx.close();

@@ -1,0 +1,33 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts sprint16-k-db --repeat-each=3
+
+
+Running 24 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (2.3s)
+  ✓   2 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.8s)
+  ✓   3 e2e/ops-db/sprint16-k-db.spec.ts:237:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (6.2s)
+  ✓   4 e2e/ops-db/sprint16-k-db.spec.ts:324:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (928ms)
+  ✓   5 e2e/ops-db/sprint16-k-db.spec.ts:362:7 › fix1 N-6 主ボタンの数え方 375×812 › 着陸後で日誌が未記入の飛行が 2 件以上：主ボタンは離陸の 1 つ、日誌へのリンクは副 (776ms)
+  ✓   6 e2e/ops-db/sprint16-k-db.spec.ts:373:7 › fix1 N-6 主ボタンの数え方 375×812 › 日誌を書けない人（閲覧者）が、着陸した飛行のある計画を開く：主ボタンは 1 つ以下で、日誌へのリンクは主にならない (817ms)
+  ✓   7 e2e/ops-db/sprint16-k-db.spec.ts:387:7 › fix1 N-6 主ボタンの数え方 375×812 › 計画の中止後（着陸した飛行あり・日誌未記入）：主ボタンは離陸の 1 つ（押せない） (902ms)
+  ✓   8 e2e/ops-db/sprint16-k-db.spec.ts:404:7 › fix1 R-1・N-1 警告と説明の並び 375×812 › 緊急用務空域が指定されていて先読みが古い：並びは 帯 → 警告 → 説明 → header。説明は古い可能性の印と aria-describedby で結ぶ (1.7s)
+  ✓   9 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.6s)
+  ✓  10 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.5s)
+  ✓  11 e2e/ops-db/sprint16-k-db.spec.ts:237:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (6.3s)
+  ✓  12 e2e/ops-db/sprint16-k-db.spec.ts:324:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (934ms)
+  ✓  13 e2e/ops-db/sprint16-k-db.spec.ts:362:7 › fix1 N-6 主ボタンの数え方 375×812 › 着陸後で日誌が未記入の飛行が 2 件以上：主ボタンは離陸の 1 つ、日誌へのリンクは副 (941ms)
+  ✓  14 e2e/ops-db/sprint16-k-db.spec.ts:373:7 › fix1 N-6 主ボタンの数え方 375×812 › 日誌を書けない人（閲覧者）が、着陸した飛行のある計画を開く：主ボタンは 1 つ以下で、日誌へのリンクは主にならない (780ms)
+  ✓  15 e2e/ops-db/sprint16-k-db.spec.ts:387:7 › fix1 N-6 主ボタンの数え方 375×812 › 計画の中止後（着陸した飛行あり・日誌未記入）：主ボタンは離陸の 1 つ（押せない） (840ms)
+  ✓  16 e2e/ops-db/sprint16-k-db.spec.ts:404:7 › fix1 R-1・N-1 警告と説明の並び 375×812 › 緊急用務空域が指定されていて先読みが古い：並びは 帯 → 警告 → 説明 → header。説明は古い可能性の印と aria-describedby で結ぶ (1.4s)
+  ✓  17 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 320×740 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (2.4s)
+  ✓  18 e2e/ops-db/sprint16-k-db.spec.ts:181:9 › K2-3 状態の帯 375×812 › 先読みの「古い可能性」が出ても、帯は 100px 以下（圏外・接続あり）。説明は帯の下の field-status-prefetch-stale-help (1.5s)
+  ✓  19 e2e/ops-db/sprint16-k-db.spec.ts:237:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › 離陸前・飛行中・着陸後と、圏外の点検・日誌・今日が、現場の値・新しい部品・主ボタン 1 つで描かれる (6.8s)
+  ✓  20 e2e/ops-db/sprint16-k-db.spec.ts:324:7 › K2-1・K2-2・K2-4 現場と圏外の画面 375×812 › K2-1：新しい版の知らせ（pwa-update）は新しい部品で、主ボタンを足さない。押す部品は 48px 以上 (971ms)
+  ✓  21 e2e/ops-db/sprint16-k-db.spec.ts:362:7 › fix1 N-6 主ボタンの数え方 375×812 › 着陸後で日誌が未記入の飛行が 2 件以上：主ボタンは離陸の 1 つ、日誌へのリンクは副 (875ms)
+  ✓  22 e2e/ops-db/sprint16-k-db.spec.ts:373:7 › fix1 N-6 主ボタンの数え方 375×812 › 日誌を書けない人（閲覧者）が、着陸した飛行のある計画を開く：主ボタンは 1 つ以下で、日誌へのリンクは主にならない (728ms)
+  ✓  23 e2e/ops-db/sprint16-k-db.spec.ts:387:7 › fix1 N-6 主ボタンの数え方 375×812 › 計画の中止後（着陸した飛行あり・日誌未記入）：主ボタンは離陸の 1 つ（押せない） (1.0s)
+  ✓  24 e2e/ops-db/sprint16-k-db.spec.ts:404:7 › fix1 R-1・N-1 警告と説明の並び 375×812 › 緊急用務空域が指定されていて先読みが古い：並びは 帯 → 警告 → 説明 → header。説明は古い可能性の印と aria-describedby で結ぶ (1.6s)
+
+  24 passed (51.1s)

@@ -1,0 +1,6 @@
+     × TS・TSX（テストを除く）に、旧い色・角丸の Tailwind 名、variant、旧い class の名前、旧い CSS 変数の参照が 0 47ms
+     × TS・TSX（テストを除く）に色の直書き（16 進・rgb・hsl）が 0。例外は HEX_EXEMPT の理由つきのファイルだけ 15ms
+     × CSS：旧い色の変数・旧い class が 0。16 進・rgb は soraban-tokens.css の値と --sb-map-*（地図の固定色）、見本の日差しの模擬の白い膜だけ 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 19 passed (22)
+（注）3 件の落ち方は、旧コードを apps/web/src に戻した作業ツリーでの実行。wording-policy の新しい検査（許可リストの必ずの行・tidyEngineText の確認）は、旧コードの別の作業ツリーでの先の実行で落ちた（4 件失敗: この 3 件＋「許可リストの文が…実在する」）。この実行では wording-policy.test.ts も旧い版に戻るため、その件は出ない。

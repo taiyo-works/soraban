@@ -56,7 +56,7 @@ export default async function AircraftDetailPage({ params, searchParams }: { rea
       "使用開始時の既存の総飛行時間",
       <span key="m" className="tnum">
         {Math.floor(a.initialFlightMinutes / 60)} 時間 {a.initialFlightMinutes % 60} 分
-        <span className="ml-1 sb-num text-xs text-sb-ink-3">（{formatMinutes(a.initialFlightMinutes)}）</span>
+        <span className="ml-1 sb-num text-sm text-sb-ink-3">（{formatMinutes(a.initialFlightMinutes)}）</span>
       </span>,
     ],
     [
@@ -65,9 +65,9 @@ export default async function AircraftDetailPage({ params, searchParams }: { rea
         <span className="sb-num tnum" data-testid="aircraft-total">
           {formatMinutes(a.totalFlightMinutes)}
         </span>
-        <span className="text-xs text-sb-ink-3">
+        <span className="text-sm text-sb-ink-3">
           既存の総飛行時間 ＋ 取消していない飛行記録 {a.flightCount} 件の飛行時間の合計。
-          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-11 items-center text-sb-ink underline underline-offset-2">
+          <a href={`/ops/flights?aircraftId=${a.id}`} className="ml-1 inline-flex min-h-12 items-center text-sb-ink underline underline-offset-2">
             この機体の飛行記録
           </a>
         </span>
@@ -89,11 +89,11 @@ export default async function AircraftDetailPage({ params, searchParams }: { rea
           }
         />
         {a.voided ? (
-          <Note tone="red">
+          <Note tone="red" body>
             この機体は取り消されています。誤登録の記録として、登録内容と版の一覧を残しています。訂正はできません。
           </Note>
         ) : manager ? null : (
-          <Note>訂正・取消は運航管理者だけが行えます。</Note>
+          <Note body>訂正・取消は運航管理者だけが行えます。</Note>
         )}
         <DetailList rows={rows} data-testid="aircraft-detail" />
       </div>

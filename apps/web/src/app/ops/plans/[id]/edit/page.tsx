@@ -40,7 +40,7 @@ export default async function PlanEditPage({ params }: { readonly params: Promis
         },
       ];
   return (
-    <main className="flex flex-col gap-6">
+    <main className="flex flex-col gap-6" data-testid="plan-edit-screen">
       <PageHeader title="飛行計画の訂正" back={{ href: `/ops/plans/${plan.id}`, label: "飛行計画の詳細" }}>
         <Note>{PLAN_JUDGEMENT_DISCLAIMER}</Note>
         <DipsNotice />

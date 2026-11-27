@@ -1,0 +1,84 @@
+== home /ops: <16 52 / <14 0 / p・li・dd(<16) 8
+   14px p.text-sm font-bold text-sb-ink-2 ×4 例「飛ばす前に、地点を判定する」 tid=judge-pills
+   14px p.opx-num text-sm text-sb-ink-3 ×1 例「済」 tid=today-card-route-count
+   14px p.sb-sec-note ×2 例「60 日以内」 tid=home-deadlines
+   14px p.text-sm text-sb-ink-3 ×1 例「機体の期限は、記録する場所がまだないため出ません。」 tid=home-deadlines-note
+== plans /ops/plans: <16 31 / <14 0 / p・li・dd(<16) 4
+   14px p.opx-note ×2 例「判定は入力された情報の範囲での目安です。許可・承認の申請」 tid=ops-root
+   14px p.sb-num text-sm font-bold tnum text- ×1 例「1」 tid=plan-count
+   14px p.px-3 pb-2.5 pl-[2.625rem] text-sm t ×1 例「ほか」 tid=plan-row-next-count
+== plannew /ops/plans/new: <16 93 / <14 0 / p・li・dd(<16) 10
+   14px p.opx-note ×4 例「判定は入力された情報の範囲での目安です。許可・承認の申請」 tid=ops-root
+   14px p.text-sm font-bold text-sb-ink-2 ×1 例「地点がまだ決まっていないときは、先に判定画面で調べられま」 tid=judge-pills
+   14px p.text-sm leading-relaxed text-sb-ink ×4 例「座標は直接入れるほか、現在地や住所から探せます。候補は「」 tid=plan-place-helper
+   14px p.text-sm font-medium text-sb-ink ×1 例「登録済みの許可・承認」 tid=plan-permit-candidates
+== insp /ops/inspections: <16 25 / <14 0 / p・li・dd(<16) 5
+   14px p.sb-num text-sm text-sb-ink-3 ×3 例「1 件」 tid=inspection-pending-count
+   14px p.text-sm text-sb-ink-3 ×1 例「今日の計画で、飛行前の点検の記録がまだないものです。」 tid=inspection-pending-scope
+   14px p.sb-block-soft text-table text-sb-in ×1 例「日常点検の記録はありません。」 tid=inspection-empty
+== inspnew /ops/inspections/new: <16 73 / <14 0 / p・li・dd(<16) 3
+   14px p.text-sm leading-relaxed text-sb-ink ×2 例「飛行の前（または後）に行った日常点検の結果を入力します。」 tid=ops-root
+   14px p.min-w-0 flex-1 text-sm leading-rela ×1 例「入力中の内容はこの端末に下書きとして残り、再読み込みや通」 tid=draft-status
+== journal /ops/journal: <16 15 / <14 0 / p・li・dd(<16) 2
+   14px p.sb-num text-sm text-sb-ink-3 ×1 例「最近」 tid=journal-range
+   14px p.sb-block-soft text-sm text-sb-ink-2 ×1 例「最近」 tid=journal-empty
+== flightnew /ops/flights/new: <16 74 / <14 0 / p・li・dd(<16) 4
+   14px p.text-sm leading-relaxed text-sb-ink ×1 例「1 回の飛行（電源を入れて離陸し、着陸して電源を切るまで」 tid=ops-root
+   14px p.min-w-0 flex-1 text-sm leading-rela ×1 例「入力中の内容はこの端末に下書きとして残り、再読み込みや通」 tid=draft-status
+   14px p.sb-num text-sm uppercase tracking-w ×2 例「飛行禁止空域」 tid=ops-root
+== more /ops/more: <16 18 / <14 0 / p・li・dd(<16) 1
+   14px p. ×1 例「DIPS との接続：未接続。機体・操縦者はアプリの中で登」 tid=dips-note
+== overview /ops/plans/{id}/overview: <16 64 / <14 0 / p・li・dd(<16) 19
+   14px p.opx-eyebrow ×1 例「計画」 tid=ops-root
+   14px dd. ×8 例「60 分」 tid=plan-overview
+   14px p.sb-sec-note ×4 例「小型無人機等飛行禁止法の同意・通報を、済んだら記録します」 tid=ops-root
+   14px p.text-sm text-sb-ink-3 ×1 例「この計画の判定には、記録する手続き（小型無人機等飛行禁止」 tid=procedure-none
+   14px li. ×4 例「空港（山陰・但馬の供用中空港）— 公開資料からの概算」 tid=plan-stale-sources-details
+   14px p.opx-note ×1 例「下書きです。確認を依頼すると、運航管理者が確認できます。」 tid=ops-root
+== judge /ops/plans/{id}/judgement: <16 109 / <14 0 / p・li・dd(<16) 17
+   14px p.opx-eyebrow ×1 例「判定（補助）」 tid=ops-root
+   14px p.opx-note ×2 例「判定は入力された情報の範囲での目安です。許可・承認の申請」 tid=plan-disclaimer
+   14px p.sb-sec-note ×2 例「結論と、判定の根拠です。計画を保存したときに、サーバーが」 tid=ops-root
+   14px p.sb-v-eyebrow ×1 例「結論」 tid=verdict-conclusion
+   14px p.inline-flex items-center gap-2 text ×1 例「判定不能 4 件（データ未整備）」 tid=verdict-unknown-count
+   14px p.sb-lead !text-sb-ink ×1 例「手続きを済ませれば飛べます。下の手続きを期限までに済ませ」 tid=verdict-conclusion
+   14px p.sb-eyebrow !text-sb-ink-2 ×3 例「要手続きの手続き（期限順）」 tid=verdict-procedures-section
+   14px p.opx-note opx-note-red ×1 例「範囲外・期限切れ・失効・取消・未登録・確認できないものは」 tid=ops-root
+   14px p.sb-num text-sm tnum text-sb-ink-2 ×1 例「照合した飛行の日付：」 tid=plan-permit-window
+   14px p.sb-block-soft text-sm text-sb-ink-2 ×1 例「許可・承認の番号が入っていません。DIPS の許可・承認」 tid=plan-permit-empty
+   14px p.text-sm font-medium text-sb-ink ×1 例「範囲に収まる登録済みの許可・承認（候補）」 tid=plan-permit-candidates
+   14px p.text-sm leading-relaxed text-sb-ink ×1 例「番号を計画の許可番号の欄に入れて保存すると、判定に使われ」 tid=plan-permit-candidates
+   14px p. ×1 例「許可・承認は、利用者本人が DIPS 2.0 などの公式」 tid=plan-permit-applied-note
+== pjournal /ops/plans/{id}/journal: <16 18 / <14 0 / p・li・dd(<16) 7
+   14px p.opx-eyebrow ×1 例「日誌」 tid=ops-root
+   14px p.text-sm text-sb-ink-3 ×3 例「結びついた飛行記録はありません。」 tid=plan-flights-empty
+   14px p.self-start sb-num text-sm tnum text ×1 例「0」 tid=incident-linked-count
+   14px p.sb-block-soft text-center text-sm t ×1 例「この飛行に結び付いた事故・ヒヤリハットの記録はありません」 tid=incident-empty
+   14px p.opx-note !text-sm ×1 例「この記録は、起きたことの事実を残すためのものです。国への」 tid=incident-linked-fact
+== report /ops/plans/{id}/report: <16 424 / <14 0 / p・li・dd(<16) 25
+   14px p.opx-eyebrow ×1 例「通報の内容」 tid=ops-root
+   14px li.opx-note text-sm leading-relaxed te ×1 例「計画が下書きのため、通報の記録はできません。先に確認を依」 tid=report-warnings
+   14px li. ×1 例「DID の該当を確認できない（判定不能）ため、要として扱」 tid=plan-report-reasons
+   14px p.opx-note ×1 例「そらばんは DIPS に送信しません。通報は DIPS 」 tid=plan-dips-notice
+   14px p.flex flex-wrap items-baseline gap-x ×1 例「社内の目安の時刻：」 tid=plan-report-guide-at
+   14px p.pl-11 text-sm leading-relaxed text- ×1 例「社内の目安であり、法定の期限ではありません。」 tid=plan-report-guide-note
+   14px p.text-sm leading-relaxed text-sb-ink ×3 例「通報システムの障害で飛行開始までに通報できない場合は、飛」 tid=plan-report-deadline
+   14px p.opx-note text-sm leading-relaxed te ×1 例「計画にない項目を入れます。入力は、この端末の下書きに残り」 tid=report-inputs
+   14px p.sb-sec-note ×3 例「項目ごとに「コピー」を押して、DIPS 2.0 の通報画」 tid=report-screen
+   14px p. ×3 例「項目の対応表：版」 tid=report-map-info
+   14px p.break-all sb-num text-sm leading-re ×7 例「API 形式：」 tid=report-item-api-airspace
+   14px p.text-sm text-sb-ink-3 ×2 例「通報の記録はまだありません。」 tid=report-history-empty
+== field /ops/plans/{id}/field: <16 0 / <14 0 / p・li・dd(<16) 0
+== aircraft /ops/aircraft: <16 43 / <14 0 / p・li・dd(<16) 1
+   14px p.sb-num text-sm font-bold tnum text- ×1 例「4」 tid=ops-root
+== permits /ops/permits: <16 49 / <14 0 / p・li・dd(<16) 4
+   14px p.opx-eyebrow ×1 例「登録（利用者の申告）」 tid=ops-root
+   14px p.opx-note ×2 例「登録した許可の番号を計画の許可番号の欄に入れると、計画の」 tid=ops-root
+   14px p.sb-num text-sm font-bold tnum text- ×1 例「6」 tid=permit-count
+== incidents /ops/incidents: <16 81 / <14 0 / p・li・dd(<16) 4
+   14px p.opx-eyebrow ×1 例「起きたことの記録」 tid=incident-list-page
+   14px p.opx-note !text-sm ×2 例「この記録は、起きたことの事実を残すためのものです。国への」 tid=incident-fact-notice
+   14px p.sb-num text-sm tnum text-sb-ink-2 ×1 例「6」 tid=incident-count
+== design /ops/design: <16 16 / <14 0 / p・li・dd(<16) 5
+   14px p.sbx-note ×4 例「地は薄いグレー、面は白、くぼみは一段濃いグレー。影は使わ」 tid=design-catalog
+   14px p.sb-sec-note ×1 例「背後の大きな数字はやめた」 tid=cat-orange

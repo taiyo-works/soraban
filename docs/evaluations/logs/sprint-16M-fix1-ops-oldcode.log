@@ -1,0 +1,44 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-m-db.spec.ts:22:7 › Sprint 16-M 修正 1：過去の判定に帯を付けない（N-2） › N-2. スナップショットの画面の結論のカードは帯なし。いまの判定の画面は帯あり。札の data-testid は同じ (31.8s)
+
+
+  1) e2e/ops-db/sprint16-m-db.spec.ts:22:7 › Sprint 16-M 修正 1：過去の判定に帯を付けない（N-2） › N-2. スナップショットの画面の結論のカードは帯なし。いまの判定の画面は帯あり。札の data-testid は同じ 
+
+    Error: expect(locator).not.toHaveClass(expected) failed
+
+    Locator: getByTestId('verdict-conclusion')
+    Expected pattern: not /sb-card-state/
+    Received string: "sb-block flex min-w-0 flex-1 flex-col gap-2.5 sb-rise sb-card-state"
+    Timeout: 30000ms
+
+    Call log:
+      - Expect "not toHaveClass" getByTestId('verdict-conclusion') with timeout 30000ms
+      - waiting for getByTestId('verdict-conclusion')
+        63 × locator resolved to <div data-state="warn" data-testid="verdict-conclusion" aria-labelledby="verdict-heading" class="sb-block flex min-w-0 flex-1 flex-col gap-2.5 sb-rise sb-card-state">…</div>
+           - unexpected value "sb-block flex min-w-0 flex-1 flex-col gap-2.5 sb-rise sb-card-state"
+
+
+      53 |     const past = page.getByTestId("verdict-conclusion");
+      54 |     await expect(past).toBeVisible();
+    > 55 |     await expect(past).not.toHaveClass(/sb-card-state/);
+         |                            ^
+      56 |     await expect(past).not.toHaveAttribute("data-state", /.+/);
+      57 |     await expect(past.getByTestId("verdict-level")).toBeVisible();
+      58 |     const band = await past.evaluate((e) => getComputedStyle(e, "::before").content);
+        at /home/user/soraban/e2e/ops-db/sprint16-m-db.spec.ts:55:28
+
+    Error Context: test-results/ops/sprint16-m-db-Sprint-16-M--6de30-定の画面は帯あり。札の-data-testid-は同じ/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-m-db-Sprint-16-M--6de30-定の画面は帯あり。札の-data-testid-は同じ/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-m-db-Sprint-16-M--6de30-定の画面は帯あり。札の-data-testid-は同じ/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-m-db.spec.ts:22:7 › Sprint 16-M 修正 1：過去の判定に帯を付けない（N-2） › N-2. スナップショットの画面の結論のカードは帯なし。いまの判定の画面は帯あり。札の data-testid は同じ 
+exit=1

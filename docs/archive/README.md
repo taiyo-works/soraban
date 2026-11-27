@@ -8,3 +8,4 @@
 | `soraban_6day_sprint.md`、`soraban_6day_sprint_v2.md` | 2026-04 の 6 日間スプリント指示書（4/30 デモ） | デモは終了。スプリントは `docs/sprints/` が正 |
 | `SanFlightGuard_Setup.md`、`soraban_hinomori_Setup.md` | 2026-04 の開発キックオフ指示書（旧名称・旧環境） | 名称・環境・リポジトリが現行と異なる |
 | `yonago-regulations-mock.md` | 4/30 デモ用の米子市の mock 規制データ | デモ用。判定は制度データと出典台帳が正 |
+| `sprint-16-white-orange-2026-10-31.md` | 旧い Sprint 16（白基調・橙の統一）の計画と契約（2026-10-31〜11-02） | 2026-11-22 のユーザー決定（主色を空色、橙はロゴだけ）で作り直した。現行は `docs/sprints/sprint-16.md` |

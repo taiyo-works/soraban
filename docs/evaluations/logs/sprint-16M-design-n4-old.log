@@ -1,0 +1,49 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint16-m.spec.ts -g M-3
+
+
+Running 3 tests using 1 worker
+
+  ✓  1 e2e/sprint16-m.spec.ts:176:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3a. 主ボタンは「この地点を判定する」だけ（初期・結果あり・飛行不可・判定不能の各状態） (1.8s)
+  ✓  2 e2e/sprint16-m.spec.ts:198:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3b. 地図のズームの部品は 48px の円で、隣と 8px 以上離れる (1.5s)
+  ✘  3 e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない） (2.3s)
+
+::error file=e2e/sprint16-m.spec.ts,title=e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない）,line=232,col=120::  1) e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない） %0A    Error: 0 番（キーボードのフォーカス中）：角丸 4px%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: true%0A    Received: false%0A%0A      230 |       });%0A      231 |     const expectRound = (s: Awaited<ReturnType<typeof shape>>, what: string) => {%0A    > 232 |       for (const rad of [s.tl, s.br]) expect(rad.includes("%") || parseFloat(rad) >= s.w / 2 - 1, `${what}：角丸 ${rad}`).toBe(true);%0A          |                                                                                                                        ^%0A      233 |       expect(s.shadow, `${what}：縁（inset の影）が残る`).toMatch(/inset/);%0A      234 |       expect(s.shadow, `${what}：縁は none でない`).not.toBe("none");%0A      235 |     };%0A        at expectRound (/home/user/soraban/e2e/sprint16-m.spec.ts:232:120)%0A        at /home/user/soraban/e2e/sprint16-m.spec.ts:243:7
+
+
+  1) e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない） 
+
+    Error: 0 番（キーボードのフォーカス中）：角丸 4px
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      230 |       });
+      231 |     const expectRound = (s: Awaited<ReturnType<typeof shape>>, what: string) => {
+    > 232 |       for (const rad of [s.tl, s.br]) expect(rad.includes("%") || parseFloat(rad) >= s.w / 2 - 1, `${what}：角丸 ${rad}`).toBe(true);
+          |                                                                                                                        ^
+      233 |       expect(s.shadow, `${what}：縁（inset の影）が残る`).toMatch(/inset/);
+      234 |       expect(s.shadow, `${what}：縁は none でない`).not.toBe("none");
+      235 |     };
+        at expectRound (/home/user/soraban/e2e/sprint16-m.spec.ts:232:120)
+        at /home/user/soraban/e2e/sprint16-m.spec.ts:243:7
+
+    Error Context: test-results/sprint16-m-16-M-M-3-主ボタンは--c7fc3--の四角・box-shadow-none-に負けない）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-m-16-M-M-3-主ボタンは--c7fc3--の四角・box-shadow-none-に負けない）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-m-16-M-M-3-主ボタンは--c7fc3--の四角・box-shadow-none-に負けない）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない） 
+  2 passed (9.2s)
+::notice title=🎭 Playwright Run Summary::  1 failed%0A    e2e/sprint16-m.spec.ts:219:7 › 16-M M-3 主ボタンは 1 つ・地図の上の部品は 48 の円 › M-3c. 地図の部品は、キーボードのフォーカス中・クリック後も円と縁を保つ（maplibre-gl の :focus:first-child の四角・box-shadow:none に負けない） %0A  2 passed (9.2s)
+ ELIFECYCLE  Command failed with exit code 1.
+exit=1

@@ -1,0 +1,25 @@
+
+> soraban@0.0.0 db:migrate /home/user/soraban
+> tsx packages/db/src/cli.ts migrate
+
+[db:migrate] 接続先 host=localhost port=5432 database=ev16m_a
+[db:migrate] マイグレーションファイル: 0001, 0002, 0003, 0004, 0005, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0016, 0017, 0018
+[db:migrate] 適用予定: 0001, 0002, 0003, 0004, 0005, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0016, 0017, 0018
+[db:migrate] 適用 0001_initial_schema.sql（399 ms）
+[db:migrate] 適用 0002_evidence_log.sql（11 ms）
+[db:migrate] 適用 0003_evidence_log_datasets.sql（4 ms）
+[db:migrate] 適用 0004_ops_org_members.sql（17 ms）
+[db:migrate] 適用 0005_ops_aircraft_pilots.sql（22 ms）
+[db:migrate] 適用 0006_record_versions.sql（17 ms）
+[db:migrate] 適用 0007_ops_daily_inspections_flights.sql（28 ms）
+[db:migrate] 適用 0008_record_versions_flight_entities.sql（6 ms）
+[db:migrate] 適用 0009_evidence_log_verdict.sql（3 ms）
+[db:migrate] 適用 0010_flight_plans_snapshots.sql（40 ms）
+[db:migrate] 適用 0011_plan_versions_confirmations.sql（14 ms）
+[db:migrate] 適用 0012_flight_reports.sql（21 ms）
+[db:migrate] 適用 0013_report_attempts_procedure_records.sql（19 ms）
+[db:migrate] 適用 0014_flight_field_events.sql（22 ms）
+[db:migrate] 適用 0015_permit_registrations.sql（16 ms）
+[db:migrate] 適用 0016_incident_records.sql（31 ms）
+[db:migrate] 適用 0017_field_round_records.sql（5 ms）
+[db:migrate] 適用 0018_flight_areas.sql（5 ms）

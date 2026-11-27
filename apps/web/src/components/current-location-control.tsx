@@ -73,7 +73,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => onConfirm(candidate)} className="sb-text-btn !bg-sb-orange !border-sb-ink !text-sb-on-orange">
+            <button type="button" onClick={() => onConfirm(candidate)} className="sb-text-btn !bg-sb-primary !border-sb-primary !text-sb-on-primary">
               この地点で判定
             </button>
             <button type="button" onClick={onCancel} className="sb-text-btn">
@@ -82,7 +82,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
           </div>
         </div>
       ) : null}
-      <p className="sb-hint" data-testid="current-location-privacy">
+      <p data-note="" className="sb-hint" data-testid="current-location-privacy">
         {CURRENT_LOCATION_JUDGE_NOTE}
       </p>
       {unavailableReason ? (
@@ -92,7 +92,7 @@ export function CurrentLocationNotes({ candidate, unavailableReason, error, onCo
       ) : null}
       {error ? (
         <p className="sb-note-card is-error flex flex-col gap-0.5" role="alert" data-testid="current-location-error">
-          <span className="text-xs font-bold text-sb-v-no-fg">現在地を取得できませんでした</span>
+          <span className="text-sm font-bold text-sb-v-no-fg">現在地を取得できませんでした</span>
           <span>{error}</span>
         </p>
       ) : null}

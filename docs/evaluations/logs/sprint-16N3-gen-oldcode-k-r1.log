@@ -1,0 +1,42 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-k-db.spec.ts -g 'fix R-1 文字 200% の帯 320'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static (2.1s)
+
+
+  1) e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static 
+
+    Error: 320 新しい先読み・接続あり 文字 200%：現場の横スクロール（画面より右にはみ出す要素 field-back.opx-btn →335 / h3.text-xl →337 / h4.text-xl →368）
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 320
+    Received:    368
+
+      506 |         expect(z.bandPos, `${w} ${state} 文字 200%：帯の固定を外す（意見 8）`).toBe("static");
+      507 |         // 16-N3 N3-2：320 も含めて文書の横スクロール 0（以前は 320 を除外していた。見出し・「ホームへ戻る」・状態の語が 368px まで出ていた）
+    > 508 |         expect(z.sw, `${w} ${state} 文字 200%：現場の横スクロール（画面より右にはみ出す要素 ${z.wide.join(" / ")}）`).toBeLessThanOrEqual(z.cw);
+          |                                                                                             ^
+      509 |       };
+      510 |       await expect(page.getByTestId("field-status-prefetch-stale")).toHaveCount(0);
+      511 |       await check("新しい先読み・接続あり");
+        at check (/home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:508:93)
+        at /home/user/soraban/e2e/ops-db/sprint16-k-db.spec.ts:511:7
+
+    Error Context: test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-k-db-fix-R-1-文字-2-44f7d-px）。固定は等倍-sticky・200-static/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-k-db.spec.ts:489:9 › fix R-1 文字 200% の帯 320 › 帯が新しい（接続あり）・古い（圏外）・古いまま接続あり、のどれでも、帯の中身がはみ出さず、日時は割れない（文字 200%・320px）。固定は等倍 sticky・200% static 
+ ELIFECYCLE  Command failed with exit code 1.

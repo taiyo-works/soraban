@@ -1,0 +1,18 @@
+DB=soraban_ev16d_p3b2b6_1795456593
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts -g P3b2b-6 --repeat-each=6
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (6.4s)
+  ✓  2 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (6.5s)
+  ✓  3 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (5.2s)
+  ✓  4 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (6.3s)
+  ✓  5 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (5.5s)
+  ✓  6 e2e/ops-db/sprint12h-pr3b2b-db.spec.ts:230:7 › Sprint 12h PR ③b2b E2E-DB：運航管理の v2（現場・事故・通報・判定の履歴） › P3b2b-6. 現場の印（Q-11）：現場の 2 画面を開いている間だけ data-mode=field。離れると外れる（行き来を繰り返しても）。`/` と他の画面には付かない (5.5s)
+
+  6 passed (44.9s)
+::notice title=🎭 Playwright Run Summary::  6 passed (44.9s)
+exit 0 DB=soraban_ev16d_p3b2b6_1795456593

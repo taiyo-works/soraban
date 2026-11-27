@@ -1,0 +1,22 @@
+
+Running 16 tests using 1 worker
+
+  ✓   1 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:98:7 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1a. 段 ①〜⑤ を順に進め、各段で禁止語・限定語の走査（violationsOf）が 0 件 (2.8s)
+  ✓   2 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 1：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (1.5s)
+  ✓   3 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 2：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (1.6s)
+  ✓   4 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 3：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.0s)
+  ✓   5 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 4：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.3s)
+  ✓   6 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:127:9 › R-1. 段 ①〜⑤：禁止語・限定語の走査（18-3）と本文 16px・行の高さ 1.7（16-B R1-3/R1-4） › R-1b. 段 5：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上（375・390・1280px） (2.2s)
+  ✓   7 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:140:7 › R-3・N-1・N-2. サーバーの 422 が段へ戻る導線で、fieldset・欄に結ばれる › R-3・N-1. 422（flags・pilotPermits）→ ③・④へ戻る。fieldset の aria-describedby に plan-err-flags・plan-err-pilotPermits、記号付きの 1 行。直すと下の誤りの 1 行も消え、保存できる (3.0s)
+  ✓   8 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:179:7 › R-3・N-1・N-2. サーバーの 422 が段へ戻る導線で、fieldset・欄に結ばれる › N-2. 422（savedPlaceId・thirdPartyOverflight）→ ① の「よく使う地点」の欄と ③ の「立入管理措置／第三者上空」の欄に、結ばれた記号付きの 1 行 (2.4s)
+  ✓   9 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:219:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力のあと、段 ① でブラウザの戻る → 確認。取り消すと留まり（入力は残る）、もう一度戻ると再び確認。離れるを選ぶと前の画面へ (1.5s)
+  ✓  10 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:248:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 入力が無いときは、ブラウザの戻るで確認を出さない (1.3s)
+  ✓  11 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:261:7 › R-4. ブラウザの戻る（番兵の履歴） › R-4. 段の間の戻る・進む（段 ② から ① など）では確認を出さない (1.9s)
+  ✓  12 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:282:7 › N-3・N-5・N-6・N-7 › N-3. 履歴の移動で ⑤ に着いたとき、①〜④に漏れがあれば、漏れのある最初の段へ戻す (2.1s)
+  ✓  13 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:301:7 › N-3・N-5・N-6・N-7 › N-5. 各段で URL のクエリは step だけ。history.state に入力値（氏名・座標・計画名・目的・メモ）が無い (2.1s)
+  ✓  14 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:318:7 › N-3・N-5・N-6・N-7 › N-5. 引き継ぎの URL でも、各段のクエリは引き継ぎの鍵と step だけ。入力した値は URL・history.state に出ない (1.7s)
+  ✓  15 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:336:7 › N-3・N-5・N-6・N-7 › N-6. 引き継ぎの値があっても、入力の前は beforeunload が取り消されない。入力すると取り消される (1.0s)
+  ✓  16 e2e/ops-db/sprint16-h1-fix1-db.spec.ts:350:7 › N-3・N-5・N-6・N-7 › N-7. この画面に /ops/plans/new そのもの（クエリ違いを含む）へのリンクが無い (1.9s)
+
+  16 passed (35.6s)
+exit=0

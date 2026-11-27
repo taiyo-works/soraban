@@ -34,13 +34,13 @@ export default async function PlaceDetailPage({ params }: { readonly params: Pro
             </span>
           }
         />
-        {p.voided ? <Note tone="red">この地点は取り消されています。計画のフォームでは選べません。記載内容と版の一覧は残しています。</Note> : null}
+        {p.voided ? <Note tone="red" body>この地点は取り消されています。計画のフォームでは選べません。記載内容と版の一覧は残しています。</Note> : null}
         <DetailList
           data-testid="place-detail"
           rows={[
             ["名称", p.name],
             ["住所", p.addressText ?? "—"],
-            ["座標（WGS84）", <span key="c" className="sb-num text-xs tnum" data-testid="place-coords">{p.latitude}, {p.longitude}</span>],
+            ["座標（WGS84）", <span key="c" className="sb-num text-sm tnum" data-testid="place-coords">{p.latitude}, {p.longitude}</span>],
             ["メモ", p.note ?? "—"],
           ]}
         />

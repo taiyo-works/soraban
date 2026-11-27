@@ -36,7 +36,7 @@ export function FieldPrefetch({ memberId }: { readonly memberId: string }) {
     };
   }, [memberId]);
   return (
-    <div className="flex flex-col gap-2 text-base text-sb-ink-2">
+    <div className="flex flex-col gap-2 text-base leading-relaxed text-sb-ink-2">
       {status ? (
         <p data-testid="pwa-prefetch-status" data-count={status.count}>
           圏外用に端末へ保存した計画：{status.count} 件{status.at ? `（${jstTime(new Date(status.at))} 更新）` : ""}

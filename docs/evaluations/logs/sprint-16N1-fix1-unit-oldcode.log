@@ -1,0 +1,52 @@
+
+ RUN  v4.1.5 /home/user/soraban
+
+ ❯ |web| apps/web/src/components/verdict-help-n1.test.ts (18 tests | 3 failed) 29ms
+     × PDF：項目 0 件（総合 unknown） 5ms
+     × 画面：項目 0 件（total なし。PDF・スナップショット） 3ms
+     × PDF：項目 0 件（total なし。PDF・スナップショット） 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > PDF：項目 0 件（総合 unknown）
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > PDF：項目 0 件（total なし。PDF・スナップショット）
+AssertionError: expected '結論要手続き手続きを済ませれば飛べます。下の手続きを期限までに済ませてくだ…' not to contain '飛べ'
+
+Expected: "飛べ"
+Received: "結論要手続き手続きを済ませれば飛べます。下の手続きを期限までに済ませてください。"
+
+ ❯ apps/web/src/components/verdict-help-n1.test.ts:75:23
+     73|       const t = pdf(v);
+     74|       if (hidden) {
+     75|         expect(t).not.toContain("飛べ");
+       |                       ^
+     76|         expect(t).not.toContain(help(v.level).replace(/\s/g, ""));
+     77|       } else expect(t).toContain(help(v.level).replace(/\s/g, ""));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |web| apps/web/src/components/verdict-help-n1.test.ts > 16-N1 判定不能のときの説明文 > 画面：項目 0 件（total なし。PDF・スナップショット）
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ apps/web/src/components/verdict-help-n1.test.ts:63:39
+     61|     it(`画面：${name}`, () => {
+     62|       const h = screen(v, tk);
+     63|       expect(hidesVerdictHelp(v, tk)).toBe(hidden);
+       |                                       ^
+     64|       if (hidden) {
+     65|         expect(h).not.toContain(help(v.level));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 15 passed (18)
+   Start at  22:08:40
+   Duration  1.17s (transform 693ms, setup 0ms, import 1.02s, tests 29ms, environment 0ms)
+

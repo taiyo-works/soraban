@@ -1,0 +1,50 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts sprint16-c-db -g 'ログアウトの確認'
+
+
+Running 1 test using 1 worker
+
+  ✘  1 e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） (32.0s)
+
+
+  1) e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） 
+
+    Error: シートの中の主ボタン
+
+    expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByTestId('user-menu').locator('[data-variant="primary"]:visible')
+    Expected: 1
+    Received: 0
+    Timeout:  30000ms
+
+    Call log:
+      - シートの中の主ボタン getByTestId('user-menu').locator('[data-variant="primary"]:visible') with timeout 30000ms
+      - waiting for getByTestId('user-menu').locator('[data-variant="primary"]:visible')
+        63 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      181 |     await waitForSettledStyles(page);
+      182 |     const menu = page.getByTestId("user-menu");
+    > 183 |     await expect(menu.locator('[data-variant="primary"]:visible'), "シートの中の主ボタン").toHaveCount(1);
+          |                                                                                  ^
+      184 |     await expect(page.getByTestId("signout-send")).toHaveAttribute("data-variant", "primary");
+      185 |     for (const id of ["signout", "signout-cancel", "signout-keep", "signout-discard"]) await expect(page.getByTestId(id)).not.toHaveAttribute("data-variant", "primary");
+      186 |     const stray = await menu.locator(".opx-btn-primary:not([data-variant]):not(.opx-btn-flat)").evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).length);
+        at /home/user/soraban/e2e/ops-db/sprint16-c-db.spec.ts:183:82
+
+    Error Context: test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-c-db-C-6-K-8-ログアウ-e8821-スだけの主ボタンは無い（16-N2-レビュー-R-3）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-c-db.spec.ts:165:7 › C-6 / K-8 ログアウトの確認（送信待ちがある状態）：利用者メニューのシートの中で主ボタンは 1 つ › signout-send だけが data-variant="primary"。クラスだけの主ボタンは無い（16-N2 レビュー R-3） 
+ ELIFECYCLE  Command failed with exit code 1.

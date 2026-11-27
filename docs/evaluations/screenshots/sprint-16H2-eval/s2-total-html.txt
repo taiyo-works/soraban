@@ -1,0 +1,1 @@
+<p data-testid="judgement-total" data-total-key="needs_procedure" data-stale="true" class="sb-v-total">古い判定：手続きが要る項目があります（1 件）</p>

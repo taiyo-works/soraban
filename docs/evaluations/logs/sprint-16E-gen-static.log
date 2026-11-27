@@ -1,0 +1,27 @@
+
+> soraban@0.0.0 typecheck /home/user/soraban
+> pnpm -r typecheck
+
+Scope: 6 of 7 workspace projects
+apps/scraper typecheck$ tsc --noEmit
+packages/db typecheck$ tsc --noEmit
+packages/geo typecheck$ tsc --noEmit
+packages/geo typecheck: Done
+apps/scraper typecheck: Done
+packages/db typecheck: Done
+packages/dips typecheck$ tsc --noEmit
+packages/regulations typecheck$ tsc --noEmit
+packages/dips typecheck: Done
+packages/regulations typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+
+> soraban@0.0.0 lint /home/user/soraban
+> pnpm -r lint
+
+Scope: 6 of 7 workspace projects
+apps/web lint$ eslint
+apps/web lint: /home/user/soraban/apps/web/src/components/ops/report-client.tsx
+apps/web lint:   244:9  warning  'compact' is assigned a value but never used  @typescript-eslint/no-unused-vars
+apps/web lint: ✖ 1 problem (0 errors, 1 warning)
+apps/web lint: Done

@@ -1,0 +1,43 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 e2e/sprint9.spec.ts:78:7 › C・E. 現在地（本番相当サーバー） › 開いただけでは位置を要求せず、押すまで通信がない。押すと判定の通信が 1 回ずつ（check・diagnose）で、与えた座標（小数 6 桁）だけを送り、要求本文に精度・時刻・指定方法がない。結果に「現在地（精度 約 30 m）」を添える (4.8s)
+  ✓  2 e2e/sprint9.spec.ts:153:7 › C・E. 現在地（本番相当サーバー） › 精度 150m では、精度が低い旨と「この位置で判定しますか」の確認を 1 回出し、確認の前は判定の通信がない。『この地点で判定』で 1 回ずつ判定する (5.3s)
+  ✓  3 e2e/sprint9.spec.ts:186:7 › C・E. 現在地（本番相当サーバー） › 確認で取消した後は判定せず、localStorage・Cookie に現在地の座標と精度がない (4.8s)
+  ✓  4 e2e/sprint9.spec.ts:219:7 › C・E. 現在地（本番相当サーバー） › `/?start=here`・`/?start=search`：位置の要求は 0 のまま、フォーカスだけが「現在地で判定」・住所の入力欄に移る（押すのは利用者） (6.0s)
+  ✓  5 e2e/sprint9.spec.ts:240:7 › C・E. 現在地（本番相当サーバー） › 位置情報を許可しないと、許可されていない旨と案内を表示し、それまでの地点と判定結果は変わらない (3.1s)
+  ✓  6 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (5.8s)
+  ✘  7 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (2.0m)
+  ✓  8 e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す (4.6s)
+  ✓  9 e2e/sprint9.spec.ts:387:7 › A・B. 住所検索 › 出典の表示（同梱索引があるときだけ ABR を示す）と、台帳の 2 件の出典 (2.1s)
+
+
+  1) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/tmp/claude-0/-home-user/3a0be5e9-1995-5895-af4d-44ce47f73d07/scratchpad/basewt/e2e/sprint9.spec.ts:15:40)
+        at /tmp/claude-0/-home-user/3a0be5e9-1995-5895-af4d-44ce47f73d07/scratchpad/basewt/e2e/sprint9.spec.ts:328:20
+
+    Error Context: test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+  8 passed (2.7m)

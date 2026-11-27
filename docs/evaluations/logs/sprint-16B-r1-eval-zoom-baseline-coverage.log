@@ -1,0 +1,11 @@
+/ops {"total":85,"missing":0,"unscaled":[]}
+/ops/plans {"total":53,"missing":0,"unscaled":[]}
+/ops/plans/new {"total":102,"missing":0,"unscaled":[]}
+/ops/inspections {"total":39,"missing":0,"unscaled":[]}
+/ops/inspections/new {"total":82,"missing":0,"unscaled":[]}
+/ops/journal {"total":21,"missing":0,"unscaled":[]}
+/ops/flights/new {"total":88,"missing":0,"unscaled":[]}
+/ops/plans/{id}/overview {"total":77,"missing":0,"unscaled":[]}
+/ops/plans/{id}/judgement {"total":102,"missing":0,"unscaled":[]}
+/ops/plans/{id}/report {"total":460,"missing":0,"unscaled":[]}
+/ {"total":523,"missing":0,"unscaled":[]}

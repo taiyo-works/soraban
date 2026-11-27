@@ -1,0 +1,28 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 --workers=1 e2e/sprint11d.spec.ts
+
+
+Running 16 tests using 1 worker
+
+  ✓   1 e2e/sprint11d.spec.ts:119:7 › A. 規則（契約 3） › 3. 空港の敷地内は全ての許可を入れても飛行不可。緊急用務空域も飛行不可 (7.5s)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+  ✓   2 e2e/sprint11d.spec.ts:143:7 › A. 規則（差し戻し 1 回目 F1） › 3. 空港の敷地内（出雲縁結び空港）は 50g・150m 以上・全ての許可でも飛行不可で、手続き不要にならない (10.2s)
+  ✓   3 e2e/sprint11d.spec.ts:171:7 › B. 地点と飛び方での結果 › 6. 米子市役所：許可なし → 要手続き（DID の許可と期限）。DID の DIPS 許可 → DID は手続き済み（条件付き） (2.3s)
+  ✓   4 e2e/sprint11d.spec.ts:202:7 › B. 地点と飛び方での結果 › 7. 空港等周辺（該当の可能性）：DIPS の全種類を入れても要手続きのまま、個別許可と調整の理由、空港等周辺の飛行許可が手続きに出る (4.5s)
+  ✓   5 e2e/sprint11d.spec.ts:222:7 › B. 地点と飛び方での結果 › 8・10. 美保基地の周辺：同意だけ → 要手続き、同意＋通報 → 飛行禁止法は手続き済み。通報の期限は飛行予定日の 2 日前。判定不能の件数が結論に出る (3.9s)
+  ✓   6 e2e/sprint11d.spec.ts:248:7 › B. 地点と飛び方での結果 › 9. どの規制にも当たらない地点：手続き不要（機体登録は前提）→ 夜間で要手続き → 夜間の承認で手続き済み。特定飛行で飛行計画の通報と飛行日誌 (4.8s)
+  ✓   7 e2e/sprint11d.spec.ts:275:7 › B. 地点と飛び方での結果 › 11. 手続きの並び：法的な重さ（国の法律 → 条例）、同じ重さでは期限の早い順（期限のないものは最後） (6.1s)
+  ✓   8 e2e/sprint11d.spec.ts:325:7 › C. 表示・PDF・履歴 › 12・13. 画面と地点判定の PDF：禁止語が出ず、結論・手続きと期限・手続き済みの元の判定と許可と条件が同じ言葉で出る (4.3s)
+  ✓   9 e2e/sprint11d.spec.ts:357:7 › C. 表示・PDF・履歴 › 14. 旧形式の履歴（verdict なし・0.3.0）が旧版の判定と分かる表示になり、旧値 mlit は DID 上空の許可として復元される (2.2s)
+  ✓  10 e2e/sprint11d.spec.ts:416:7 › C. 表示・PDF・履歴 › 14b. 区域外の地点で夜間を選ぶと、履歴の項目も要手続きになり、外すと手続き不要に戻る (4.4s)
+  ✓  11 e2e/sprint11d.spec.ts:431:7 › C. 表示・PDF・履歴 › 13b. 飛行の方法・飛行予定日だけを変えた後の PDF に、その診断の証跡 ID が出て、ファイル名も変わる (8.7s)
+  ✓  12 e2e/sprint11d.spec.ts:492:7 › C. 表示・PDF・履歴 › 15. C1：区域外で夜間を選んだ後に診断が失敗すると、結論・履歴・PDF のどれにも手続き不要が出ず、再試行で戻る (4.3s)
+  ✓  13 e2e/sprint11d.spec.ts:514:7 › C. 表示・PDF・履歴 › 15. C2：夜間を選んだまま新しい地点で判定し、診断が失敗しても、地点だけの判定で手続き不要と出さない (3.5s)
+  ✓  14 e2e/sprint11d.spec.ts:538:7 › C. 表示・PDF・履歴 › 16. F3：/api/check が失敗して地点を移すと、古い証跡 ID とカードを出さず、PDF を出さず、再試行で回復する (4.3s)
+  ✓  15 e2e/sprint11d.spec.ts:574:7 › C. 表示・PDF・履歴 › 17. 結論が未確定の間、カードに地点だけの判定の札を出さない (4.4s)
+  ✓  16 e2e/sprint11d.spec.ts:590:7 › C. 表示・PDF・履歴 › 18. 診断が応答しないと、上限の時間で「判定できません」になり、履歴は判定未確定 (24.4s)
+
+  16 passed (1.7m)
+::notice title=🎭 Playwright Run Summary::  16 passed (1.7m)
+exit=0

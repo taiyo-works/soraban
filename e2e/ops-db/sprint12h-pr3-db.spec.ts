@@ -1,5 +1,6 @@
 import { expect, request as pwRequest, test, type APIRequestContext, type Page } from "@playwright/test";
 import { collectTextSamples, expectNoHorizontalScroll } from "../field-checks";
+import { openAllPlans } from "../ops-menu";
 
 // Sprint 12h PR ③a の E2E-DB（docs/sprints/sprint-12h-pr3.md §8 の Q-3・Q-4・Q-6・Q-11・Q-13・Q-14・Q-17。T-16）。
 // メニュー（下タブ 5・左メニュー 6）、判定への入口のピル、点検の 1 段目、戻りリンク。画面の組み合わせ（幅×明暗）は 1 件の中で回す。
@@ -90,40 +91,42 @@ test.describe.configure({ mode: "serial" });
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
 test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・点検の 1 段目", () => {
-  test("P3a-1. 下タブ：ホーム／計画／点検／日誌／登録 の 5 つ（高さ 60px 以上・折り返さない・橙の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし", async ({ page }) => {
+  test("P3a-1. 下タブ：ホーム／計画／日誌／機体と書類 の 4 つ（16-F。高さ 64px 以上・折り返さない・薄い主色の面・文字 4.5:1）。375・360px × 明・暗。`/` で現在地なし。点検は日誌が現在地", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
       for (const w of [375, 360]) {
         await page.setViewportSize({ width: w, height: 740 });
-        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/inspections/new", "inspections"], ["/ops/journal", "journal"], ["/ops/more", "more"], ["/", null]] as const) {
+        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "journal"], ["/ops/inspections/new", "journal"], ["/ops/journal", "journal"], ["/ops/more", "more"], ["/", null]] as const) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
           const nav = page.getByTestId("ops-bottom-nav");
           await expect(nav, label).toBeVisible();
-          expect((await nav.locator("a").allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "点検", "日誌", "登録"]);
+          expect((await nav.locator("a").allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "日誌", "機体と書類"]);
           await expect(nav.getByTestId("nav-verdict"), label).toHaveCount(0);
+          await expect(nav.getByTestId("nav-inspections"), label).toHaveCount(0);
           const boxes = await nav.locator("a").evaluateAll((els) => els.map((e) => ({ r: e.getBoundingClientRect(), label: (e.lastElementChild as HTMLElement).getBoundingClientRect().height })));
           for (const b of boxes) {
-            expect(b.r.height, `${label} 高さ`).toBeGreaterThanOrEqual(60);
-            expect(b.r.width, `${label} 幅`).toBeGreaterThanOrEqual(w / 5 - 2);
+            expect(b.r.height, `${label} 高さ`).toBeGreaterThanOrEqual(64);
+            // 4 等分（左右 8px の余白・項目の間 8px。16-F）
+            expect(b.r.width, `${label} 幅`).toBeGreaterThanOrEqual((w - 16 - 24) / 4 - 2);
             expect(b.label, `${label} ラベルが折り返している`).toBeLessThan(24);
           }
-          // 現在地：aria-current は 1 つだけ（`/` は 0）。橙の面は、現在地のタブだけ
+          // 現在地：aria-current は 1 つだけ（`/` は 0）。薄い主色の面は、現在地のタブだけ
           await expect(nav.locator('[aria-current="page"]'), label).toHaveCount(current ? 1 : 0);
           if (current) await expect(nav.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
-          const orange = await rgbOf(page, "var(--sb-orange)");
-          const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e.firstElementChild as HTMLElement).backgroundColor));
-          expect(faces.filter((f) => f === orange).length, `${label} 橙の面`).toBe(current ? 1 : 0);
+          const soft = await rgbOf(page, "var(--sb-primary-soft)");
+          const faces = await nav.locator("a").evaluateAll((els) => els.map((e) => getComputedStyle(e as HTMLElement).backgroundColor));
+          expect(faces.filter((f) => f === soft).length, `${label} 薄い主色の面`).toBe(current ? 1 : 0);
           await expectNoHorizontalScroll(page, label);
-          // 文字は 4.5:1 以上、12px 以上（v2 の最小）
+          // 文字は 4.5:1 以上、14px 以上（16-B：12→14）
           const samples = await collectTextSamples(page, '[data-testid="ops-bottom-nav"]');
-          expect(samples.length, label).toBeGreaterThanOrEqual(5);
+          expect(samples.length, label).toBeGreaterThanOrEqual(4);
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
-            expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(12);
+            expect(s.fontSize, `${label} 「${s.text}」の大きさ`).toBeGreaterThanOrEqual(14);
           }
-          // 橙の面の上のアイコンは墨（3:1 以上）
+          // 薄い主色の面の上のアイコンは主色（3:1 以上）
           if (current) {
             const [fg, bg] = await nav.getByTestId(`nav-${current}`).evaluate((a) => {
               const face = a.firstElementChild as HTMLElement;
@@ -135,39 +138,39 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
               return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
             };
             const [l1, l2] = [lum(parse(fg)), lum(parse(bg))];
-            expect((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05), `${label} 橙の面の上のアイコン`).toBeGreaterThanOrEqual(3);
+            expect((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05), `${label} 薄い主色の面の上のアイコン`).toBeGreaterThanOrEqual(3);
           }
         }
       }
     }
   });
 
-  test("P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は橙の面・見出し 12px 以上。1280・1440px × 明・暗", async ({ page }) => {
+  test("P3a-2. 左メニュー：6 項目（ホーム／判定／計画／点検／日誌／登録）と登録の子 4 項目。項目 48px・幅 240px・現在地は薄い主色の面・見出し 12px 以上。1280・1440px × 明・暗", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
       for (const w of [1280, 1440]) {
         await page.setViewportSize({ width: w, height: 800 });
-        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/journal", "journal"], ["/ops/flights", "journal"], ["/ops/incidents", "journal"], ["/ops/more", "more"]] as const) {
+        for (const [url, current] of [["/ops", "today"], ["/ops/plans", "plans"], ["/ops/inspections", "inspections"], ["/ops/journal", "journal"], ["/ops/flights", "flights"], ["/ops/incidents", "incidents"], ["/ops/more", "more"]] as const) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
           const side = page.getByTestId("ops-sidebar");
           await expect(side, label).toBeVisible();
           await expect(page.getByTestId("ops-bottom-nav"), label).toBeHidden();
-          expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "判定", "計画", "点検", "日誌", "登録", "機体", "操縦者", "許可・承認", "地点"]);
+          expect((await side.locator('a[data-testid^="nav-"]').allInnerTexts()).map((t) => t.trim()), label).toEqual(["ホーム", "計画", "日誌", "飛行記録", "点検", "事故・ヒヤリハット", "機体と書類", "機体", "操縦者", "許可・承認", "地点", "判定"]);
           expect(Math.round((await side.boundingBox())!.width), `${label} 幅`).toBe(240);
-          for (const k of ["today", "verdict", "plans", "inspections", "journal", "more"]) {
+          for (const k of ["today", "verdict", "plans", "journal", "more"]) {
             expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           }
-          for (const k of ["aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(43.5);
+          for (const k of ["flights", "inspections", "incidents", "aircraft", "pilots", "permits", "places"]) expect((await side.getByTestId(`nav-${k}`).boundingBox())!.height, `${label} ${k}`).toBeGreaterThanOrEqual(47.5);
           await expect(side.locator('[aria-current="page"]'), label).toHaveCount(1);
           await expect(side.getByTestId(`nav-${current}`), label).toHaveAttribute("aria-current", "page");
-          const orange = await rgbOf(page, "var(--sb-orange)");
-          expect(await side.getByTestId(`nav-${current}`).evaluate((a) => getComputedStyle(a).backgroundColor), `${label} 橙の面`).toBe(orange);
+          const soft = await rgbOf(page, "var(--sb-primary-soft)");
+          expect(await side.getByTestId(`nav-${current}`).evaluate((a) => getComputedStyle(a).backgroundColor), `${label} 薄い主色の面`).toBe(soft);
           const samples = await collectTextSamples(page, '[data-testid="ops-sidebar"]');
           for (const s of samples) {
             expect(s.ratio, `${label} 「${s.text}」のコントラスト`).toBeGreaterThanOrEqual(4.5);
-            expect(s.fontSize, `${label} 「${s.text}」の大きさ（見出しも 12px 以上）`).toBeGreaterThanOrEqual(12);
+            expect(s.fontSize, `${label} 「${s.text}」の大きさ（見出しも 14px 以上）`).toBeGreaterThanOrEqual(14);
           }
           await expectNoHorizontalScroll(page, label);
         }
@@ -185,6 +188,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
         for (const url of ["/ops", "/ops/plans/new"]) {
           const label = `${scheme} ${w}px ${url}`;
           await page.goto(url);
+          if (url === "/ops") await openAllPlans(page); // 16-G：判定へのピルは「すべての予定」（畳んだ中）に移った
           const pills = page.getByTestId("judge-pills");
           await expect(pills, label).toBeVisible();
           const here = page.getByTestId("judge-pill-here");
@@ -204,7 +208,8 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
             expect(await p.locator(".sb-pill-label").evaluate((el) => el.getBoundingClientRect().height), `${label} ラベルが折り返している`).toBeLessThan(30);
           }
           // 最初の画面に入る。計画の作成画面では、固定の注意書き（判定の免責・DIPS の注記）のあとで、フォームより上
-          expect(a.y + a.height, label).toBeLessThan(w < 1024 ? (url === "/ops" ? 400 : 600) : 800);
+          // 16-G：ホームのピルは畳んだ中なので、最初の画面に入る検査は計画の作成画面だけ（ホームの最初の画面は 16-G の E2E で測る）
+          if (url !== "/ops") expect(a.y + a.height, label).toBeLessThan(w < 1024 ? 600 : 800);
           if (url === "/ops/plans/new") expect(a.y, `${label} フォームより上`).toBeLessThan((await page.locator("form").first().boundingBox())!.y);
           expect(await geoCalls(page), `${label} 位置の要求`).toEqual({ get: 0, watch: 0 });
           await expectNoHorizontalScroll(page, label);
@@ -215,6 +220,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await page.emulateMedia({ colorScheme: "light" });
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/ops");
+    await openAllPlans(page);
     await page.getByTestId("judge-pill-here").click();
     await page.waitForURL(/\/\?start=here$/);
     await expect(page.getByTestId("current-location-button")).toBeFocused();
@@ -236,16 +242,16 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await signIn(page.request, seeded("a-manager"));
     await page.goto("/ops/inspections");
     await expect(page.getByTestId("ops-inspections")).toBeVisible();
-    // 1 段目：戻りリンクなし。見出しは「点検」
+    // 16-F（F-2）：点検は日誌の下の画面。戻りリンクは「日誌」の 1 つ。見出しは「点検」
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/点検/);
-    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(0);
-    await expect(page.locator("main").getByRole("link", { name: /日誌/ })).toHaveCount(0);
+    await expect(page.locator("main a").filter({ hasText: "←" })).toHaveCount(1);
+    await expect(page.locator("main").getByRole("link", { name: /日誌/ })).toHaveAttribute("href", "/ops/journal");
     // 並び：新しい点検 → 未実施 → 記録
     const y = async (id: string): Promise<number> => (await page.getByTestId(id).boundingBox())!.y;
     const [yNew, yPending, yRecords] = [await y("inspection-new"), await y("inspection-pending"), await y("inspection-records")];
     expect(yNew).toBeLessThan(yPending);
     expect(yPending).toBeLessThan(yRecords);
-    await expect(page.getByTestId("inspection-new")).toHaveText("新しい点検");
+    await expect(page.getByTestId("inspection-new")).toHaveText("点検を記録");
     await expect(page.getByTestId("inspection-new")).toHaveAttribute("href", "/ops/inspections/new");
     expect((await page.getByTestId("inspection-new").boundingBox())!.height).toBeGreaterThanOrEqual(56);
     // 今日の計画で飛行前の点検がないものが出る（他の計画があっても、この計画の行がある）
@@ -269,7 +275,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     const list = page.getByTestId("inspection-list");
     await expect(list).toBeVisible();
     await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toHaveCount(1);
-    await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toContainText("✓ 正常");
+    await expect(list.locator('[data-testid="inspection-row"]', { hasText: aircraft.registrationMark })).toContainText("点検済み");
     await expect(page.getByTestId("inspection-timing-all")).toHaveAttribute("aria-current", "true");
     await page.getByTestId("inspection-timing-post_flight").click();
     await page.waitForURL(/timing=post_flight/);
@@ -297,12 +303,12 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     }
     if (!detailUrl.test(page.url())) await page.goto((await detailRow.getAttribute("href"))!);
     await page.waitForURL(detailUrl);
-    await expect(page.getByTestId("ops-bottom-nav").getByTestId("nav-inspections")).toHaveAttribute("aria-current", "page");
+    await expect(page.getByTestId("ops-bottom-nav").getByTestId("nav-journal")).toHaveAttribute("aria-current", "page");
     const back = page.locator("main").getByRole("link", { name: "点検の一覧" }).first();
     await expect(back).toHaveAttribute("href", "/ops/inspections");
     const bb = (await back.boundingBox())!;
-    expect(bb.width).toBeGreaterThanOrEqual(44);
-    expect(bb.height).toBeGreaterThanOrEqual(44);
+    expect(bb.width).toBeGreaterThanOrEqual(48);
+    expect(bb.height).toBeGreaterThanOrEqual(48);
     // 点検の入力の戻り先も「点検の一覧」
     await page.goto("/ops/inspections/new");
     await expect(page.locator("main").getByRole("link", { name: "点検の一覧" }).first()).toHaveAttribute("href", "/ops/inspections");
@@ -328,7 +334,7 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await page.goto("/ops/journal");
     await expect(page.getByTestId("journal-to-inspections")).toHaveAttribute("href", "/ops/inspections");
     await expect(page.getByTestId("journal-to-inspections")).toBeVisible();
-    expect((await page.getByTestId("journal-to-inspections").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await page.getByTestId("journal-to-inspections").boundingBox())!.height).toBeGreaterThanOrEqual(48);
     await expect(page.getByTestId("journal-tab-inspections")).toBeVisible();
     await page.getByTestId("journal-to-inspections").click();
     await page.waitForURL(/\/ops\/inspections$/);
@@ -336,25 +342,26 @@ test.describe("Sprint 12h PR ③a E2E-DB：メニュー・判定への入口・�
     await manager.dispose();
   });
 
-  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 43.5px 以上", async ({ page }) => {
+  test("P3a-6. はみ出し 0：ホーム・計画の一覧・計画の作成・点検・点検の入力・日誌・登録・`/` が、幅 320・360・375・768・1024・1280・1440px × 明・暗で横スクロールなし。押す部品は 47.5px 以上", async ({ page }) => {
     await signIn(page.request, seeded("a-manager"));
     for (const scheme of SCHEMES) {
       await page.emulateMedia({ colorScheme: scheme });
-      for (const w of [360, 375, 768, 1024, 1280, 1440]) {
+      for (const w of [320, 360, 375, 768, 1024, 1280, 1440]) {
         await page.setViewportSize({ width: w, height: 800 });
         for (const url of ["/ops", "/ops/plans", "/ops/plans/new", "/ops/inspections", "/ops/inspections/new", "/ops/journal", "/ops/more", "/"]) {
           await page.goto(url);
           await expect(page.locator("main").first()).toBeVisible();
           await expectNoHorizontalScroll(page, `${scheme} ${w}px ${url}`);
         }
-        // メニューと入口（今回の部品）の押す部品は 43.5px 以上
-        for (const sel of ['[data-testid="ops-bottom-nav"] a', '[data-testid="ops-sidebar"] a', '[data-testid="judge-pills"] a']) {
+        // メニューと入口（今回の部品）の押す部品は 47.5px 以上
+        for (const sel of ['[data-testid="ops-bottom-nav"] a', '[data-testid="ops-sidebar"] a', '[data-testid="judge-pills"] a', '[data-testid="home-quick"] a']) {
           for (const url of ["/ops"]) {
             await page.goto(url);
+            await openAllPlans(page); // 16-G：畳んだ中のピルも測る（幅 0 の要素は数えないので、開かないと何も測れない）
             const hs = await page.locator(sel).evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).map((e) => [e.getBoundingClientRect().width, e.getBoundingClientRect().height]));
             for (const [bw, bh] of hs) {
-              expect(bw, `${scheme} ${w}px ${sel} 幅`).toBeGreaterThanOrEqual(43.5);
-              expect(bh, `${scheme} ${w}px ${sel} 高さ`).toBeGreaterThanOrEqual(43.5);
+              expect(bw, `${scheme} ${w}px ${sel} 幅`).toBeGreaterThanOrEqual(47.5);
+              expect(bh, `${scheme} ${w}px ${sel} 高さ`).toBeGreaterThanOrEqual(47.5);
             }
           }
         }

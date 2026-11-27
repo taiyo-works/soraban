@@ -1,0 +1,275 @@
+
+> soraban@0.0.0 test /home/user/soraban
+> vitest run
+
+
+ RUN  v4.1.5 /home/user/soraban
+
+(node:4962) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4997) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ |web| apps/web/src/app/ops/ops-v2-conventions.test.ts (73 tests | 1 failed) 35ms
+     × ③b2a：許可・承認の期限の札（有効性・技能証明の更新）は判定の色を使わない（墨の面＋「！」／薄い橙の面） 4ms
+ ❯ |web| apps/web/src/app/sb-conventions.test.ts (10 tests | 1 failed) 32ms
+     × 減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。矢印の入れ替えは止まる（soraban-ui.css） 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| apps/web/src/app/sb-conventions.test.ts > Q-26 動き > 減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。矢印の入れ替えは止まる（soraban-ui.css）
+AssertionError: expected '\n\n:root {\n  \n  --sb-base: #F6F7F9…' to match /@media \(prefers-reduced-motion: redu…/
+
+- Expected:
+/@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root \{ --sb-dur: 0ms; --sb-dur-rise: 0ms; \}/
+
++ Received:
+"
+
+:root {
+  
+  --sb-base: #F6F7F9;
+  --sb-surface: #FFFFFF;
+  --sb-sunken: #EEF1F5;
+
+  
+  --sb-control: #FFFFFF;         
+  --sb-field: #FFFFFF;           
+  --sb-hover: #E8F0FD;           
+  --sb-mark-bg: #E8F0FD;         
+  --sb-inverse-bg: #14181F;      
+  --sb-inverse-fg: #F6F7F9;
+  --sb-on-dot: #FFFFFF;          
+
+  
+  --sb-ink: #14181F;
+  --sb-ink-2: #3F4B5E;
+  --sb-ink-3: #5B6573;
+  --sb-ph: #5B6573;
+  --sb-ink-disabled: #8A93A1;    
+
+  
+  --sb-rule: #E1E5EB;
+  --sb-edge: #6B7586;
+  --sb-focus: #1F5FE0;
+
+  
+  --sb-primary: #1F5FE0;
+  --sb-primary-press: #1C56CF;
+  --sb-primary-soft: #E8F0FD;    
+  --sb-on-primary: #FFFFFF;
+
+  
+  --sb-st-safe-mark: #17794A;    --sb-st-safe-face: #E6F4EC;    --sb-st-safe-text: #0E5A35;
+  --sb-st-warn-mark: #9A5B00;    --sb-st-warn-face: #FDF1DC;    --sb-st-warn-text: #6B3F00;
+  --sb-st-danger-mark: #B42318;  --sb-st-danger-face: #FDE8E6;  --sb-st-danger-text: #8A1A12;
+  --sb-st-info-mark: #3F4B5E;    --sb-st-info-face: #EAEEF3;    --sb-st-info-text: #3F4B5E;
+  --sb-st-flying-mark: #0E6B8C;  --sb-st-flying-face: #E1F2F8;  --sb-st-flying-text: #08506A;
+
+  
+  --sb-v-no-fill: var(--sb-st-danger-mark);     --sb-v-no-on: #FFFFFF;       --sb-v-no-fg: var(--sb-st-danger-text);
+  --sb-v-needs-fill: var(--sb-st-warn-mark);    --sb-v-needs-on: #FFFFFF;    --sb-v-needs-fg: var(--sb-st-warn-text);
+  --sb-v-done-fill: var(--sb-st-info-mark);     --sb-v-done-on: #FFFFFF;     --sb-v-done-fg: var(--sb-st-info-text);
+  --sb-v-none-fill: var(--sb-st-safe-mark);     --sb-v-none-on: #FFFFFF;     --sb-v-none-fg: var(--sb-st-safe-text);
+  --sb-v-unknown-fill: #FFFFFF;                 --sb-v-unknown-on: #5B6573;  --sb-v-unknown-fg: #5B6573;
+
+  
+  --sb-art-sky: #FFFFFF;
+  --sb-art-cloud: #FFFFFF;       
+  --sb-art-line: #14181F;        
+  --sb-tile-filter: none;        
+
+  
+  --sb-r-l: 16px;                
+  --sb-r-m: 8px;                 
+  --sb-r-s: 4px;                 
+  --sb-r-card: 16px;
+  --sb-r-control: 12px;
+  --sb-r-sheet: 20px;
+  --sb-pill: 9999px;             
+  --sb-shadow: none;             
+  --sb-shadow-float: 0 -4px 24px rgba(20, 24, 31, 0.08);   
+  --sb-rule-w: 1px;
+  --sb-mark-w: 2px;
+
+  
+  --sb-sp-1: 4px;  --sb-sp-2: 8px;  --sb-sp-3: 12px; --sb-sp-4: 16px; --sb-sp-5: 20px;
+  --sb-sp-6: 24px; --sb-sp-8: 32px; --sb-sp-10: 40px; --sb-sp-12: 48px;
+
+  
+  --sb-hit-min: 44px;            
+  --sb-hit: 48px;                
+  --sb-hit-primary: 56px;        
+  --sb-hit-row: 48px;            
+  --sb-fs-h: 22px;
+  --sb-fs-body: 15px;
+  --sb-fs-note: 12px;
+
+  
+  --sb-dur: 180ms;
+  --sb-dur-press: 120ms;
+  --sb-dur-sheet: 280ms;
+  --sb-dur-state: 300ms;
+  --sb-dur-rise: 600ms;
+  --sb-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+
+:root[data-mode=\"field\"] {
+  --sb-ink-2: #2E3848;
+  --sb-ink-3: #3F4B5E;
+  --sb-ph: #3F4B5E;
+  --sb-edge: #4A5466;
+  --sb-rule: #8A93A1;
+  --sb-focus: #1848B0;
+  --sb-primary: #1848B0;
+  --sb-primary-press: #123A91;
+  --sb-st-safe-mark: #0E5A35;   
+  --sb-st-warn-mark: #6B3F00;
+  --sb-st-danger-mark: #8A1A12;
+  --sb-st-info-text: #2E3848;
+  --sb-v-unknown-on: #3F4B5E;
+  --sb-v-unknown-fg: #3F4B5E;
+  --sb-shadow: none;
+  --sb-shadow-float: none;
+  --sb-rule-w: 1.5px;
+  --sb-mark-w: 2.5px;
+  --sb-hit-min: 56px;
+  --sb-hit: 56px;
+  --sb-hit-primary: 64px;
+  --sb-hit-row: 64px;
+  --sb-fs-h: 24px;
+  --sb-fs-body: 18px;
+  --sb-fs-note: 14px;
+  --sb-dur: 0ms;
+  --sb-dur-press: 0ms;
+  --sb-dur-sheet: 0ms;
+  --sb-dur-state: 0ms;
+  --sb-dur-rise: 0ms;
+}
+
+
+:root[data-theme=\"dark\"] {
+  --sb-base: #0E1116;
+  --sb-surface: #161B22;
+  --sb-sunken: #1E2530;
+  --sb-control: #1E2530;
+  --sb-field: #0E1116;
+  --sb-hover: #1B2A4A;
+  --sb-mark-bg: #1B2A4A;
+  --sb-inverse-bg: #EDF0F4;
+  --sb-inverse-fg: #0E1116;
+  --sb-on-dot: #0E1116;
+  --sb-ink: #EDF0F4;
+  --sb-ink-2: #C5CCD6;
+  --sb-ink-3: #9AA4B2;
+  --sb-ph: #9AA4B2;
+  --sb-ink-disabled: #5B6573;
+  --sb-rule: #2A3240;
+  --sb-edge: #7A8495;
+  --sb-focus: #6B9BFF;
+  --sb-primary: #6B9BFF;
+  --sb-primary-press: #5A8CF5;
+  --sb-primary-soft: #1B2A4A;
+  --sb-on-primary: #0E1116;
+  --sb-st-safe-mark: #3FB27F;    --sb-st-safe-face: #12281E;    --sb-st-safe-text: #8EDDB4;
+  --sb-st-warn-mark: #E0A030;    --sb-st-warn-face: #2E2410;    --sb-st-warn-text: #F2C879;
+  --sb-st-danger-mark: #F0746A;  --sb-st-danger-face: #321614;  --sb-st-danger-text: #FFA59E;
+  --sb-st-info-mark: #9AA4B2;    --sb-st-info-face: #1E2530;    --sb-st-info-text: #C5CCD6;
+  --sb-st-flying-mark: #4DB6D6;  --sb-st-flying-face: #0F2A35;  --sb-st-flying-text: #8AD3EA;
+  --sb-v-no-on: #0E1116;
+  --sb-v-needs-on: #0E1116;
+  --sb-v-done-on: #0E1116;
+  --sb-v-none-on: #0E1116;
+  --sb-v-unknown-fill: #0E1116;  --sb-v-unknown-on: #9AA4B2;  --sb-v-unknown-fg: #9AA4B2;
+  --sb-art-sky: #161B22;
+  --sb-art-cloud: #1E2530;
+  --sb-art-line: #C5CCD6;
+  --sb-tile-filter: brightness(0.8);
+  --sb-shadow: 0 0 0 1px #2A3240;
+  --sb-shadow-float: 0 0 0 1px #2A3240;
+}
+:root[data-theme=\"dark\"][data-mode=\"field\"] {
+  --sb-base: #080A0E;
+  --sb-surface: #10141A;
+  --sb-sunken: #181E27;
+  --sb-control: #181E27;
+  --sb-field: #080A0E;
+  --sb-ink: #F5F7FA;
+  --sb-ink-2: #DCE1E8;
+  --sb-ink-3: #C5CCD6;
+  --sb-ph: #BCC4CF;
+  --sb-rule: #6B7586;
+  --sb-edge: #A5AEBB;
+  --sb-focus: #8AB0FF;
+  --sb-primary: #8AB0FF;
+  --sb-primary-press: #7AA3FA;
+  --sb-st-safe-mark: #8EDDB4;
+  --sb-st-warn-mark: #F2C879;
+  --sb-st-danger-mark: #FFA59E;
+  --sb-st-info-text: #DCE1E8;
+  --sb-v-unknown-on: #C5CCD6;
+  --sb-v-unknown-fg: #C5CCD6;
+  --sb-shadow: none;
+  --sb-shadow-float: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --sb-dur: 0ms; --sb-dur-press: 0ms; --sb-dur-sheet: 0ms; --sb-dur-state: 0ms; --sb-dur-rise: 0ms; }
+}
+"
+
+ ❯ apps/web/src/app/sb-conventions.test.ts:138:20
+    136|   it("減らす指定と現場では、動きの時間のトークンが 0（soraban-tokens.css）。矢印の入れ替えは止まる（soraban…
+    137|     const tokens = stripComments(read("app/soraban-tokens.css"));
+    138|     expect(tokens).toMatch(/@media \(prefers-reduced-motion: reduce\)\…
+       |                    ^
+    139|     expect(tokens).toMatch(/:root\[data-mode="field"\]\s*\{[^}]*--sb-d…
+    140|     expect(ui).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| apps/web/src/app/ops/ops-v2-conventions.test.ts > Q-9 ③b1・Q-5 ③b2a／③b2b の画面・部品は v2 のトークンだけ > ③b2a：許可・承認の期限の札（有効性・技能証明の更新）は判定の色を使わない（墨の面＋「！」／薄い橙の面）
+AssertionError: expected '.opx-badge-soon {\n  border-color: tr…' to match /--sb-orange-hover/
+
+- Expected:
+/--sb-orange-hover/
+
++ Received:
+".opx-badge-soon {
+  border-color: transparent;
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
+  font-weight: 700;
+}"
+
+ ❯ apps/web/src/app/ops/ops-v2-conventions.test.ts:131:18
+    129|     expect(alert).not.toMatch(/--sb-v-/);
+    130|     const soon = /\.opx-badge-soon \{[^}]*\}/.exec(css)?.[0] ?? "";
+    131|     expect(soon).toMatch(/--sb-orange-hover/);
+       |                  ^
+    132|     expect(soon).not.toMatch(/--sb-v-/);
+    133|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 120 passed | 1 skipped (123)
+      Tests  2 failed | 3022 passed | 15 skipped (3039)
+   Start at  00:47:48
+   Duration  12.68s (transform 6.86s, setup 0ms, import 18.37s, tests 6.28s, environment 10ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

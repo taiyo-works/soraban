@@ -20,21 +20,21 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
         back={BACK_TO.register}
         aside={
           manager ? (
-            <Link prefetch={false} href="/ops/places/new" className={buttonPrimaryClass} data-testid="place-new-link">
+            <Link prefetch={false} href="/ops/places/new" data-variant="primary" className={buttonPrimaryClass} data-testid="place-new-link">
               地点を登録
             </Link>
           ) : null
         }
       >
         {manager ? (
-          <Note>登録した地点は、飛行計画のフォームで選べます。選ぶと名称と座標が計画に写ります。</Note>
+          <Note body>登録した地点は、飛行計画のフォームで選べます。選ぶと名称と座標が計画に写ります。</Note>
         ) : (
-          <Note>地点の登録・訂正・取消は運航管理者だけが行えます。</Note>
+          <Note body>地点の登録・訂正・取消は運航管理者だけが行えます。</Note>
         )}
       </PageHeader>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <VoidedToggle basePath="/ops/places" includeVoided={includeVoided} />
-        <p className="sb-num text-[13px] font-bold tnum text-sb-ink-3">{rows.length} 件</p>
+        <p className="sb-num text-sm font-bold tnum text-sb-ink-3">{rows.length} 件</p>
       </div>
       {rows.length === 0 ? (
         <p className="sb-block-soft text-center text-sm text-sb-ink-2">登録された地点はありません。</p>
@@ -44,14 +44,14 @@ export default async function PlaceListPage({ searchParams }: { readonly searchP
           {rows.map((p) => (
             <li key={p.id}>
               <Link prefetch={false} href={`/ops/places/${p.id}`} className={`${listRowClass} sm:grid-cols-1 ${p.voided ? "text-sb-ink-3" : ""}`} data-testid="place-row">
-                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="break-words font-medium text-sb-ink" data-testid="place-row-name">
+                <span className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="min-w-0 break-words [overflow-wrap:anywhere] font-medium text-sb-ink" data-testid="place-row-name">
                     {p.name}
                   </span>
                   {p.voided ? <Badge tone="red">取消済み</Badge> : null}
                 </span>
-                {p.addressText ? <span className="text-xs text-sb-ink-2">{p.addressText}</span> : null}
-                <span className="sb-num text-xs tnum text-sb-ink-2">
+                {p.addressText ? <span className="text-sm text-sb-ink-2">{p.addressText}</span> : null}
+                <span className="sb-num text-sm tnum text-sb-ink-2">
                   {p.latitude}, {p.longitude}（WGS84）
                 </span>
               </Link>

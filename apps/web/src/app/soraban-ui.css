@@ -71,14 +71,43 @@
 }
 
 /* ===== ページの骨格 ===== */
+/* 16-B：文字を大きくした（補足 12→14、本文 15→16）分、行の高さを詰めて画面の長さを保つ。
+ * 本文（16px）は方針どおり行の高さ 1.7・字間 0.01em（designer の磨き込み。字間を 0.03→0.01em にした分で、長さの上限に収める）。
+ * 補足（14px）の leading-relaxed は 1.625→1.5（方針の補足 1.5）。16px の本文に付いた leading-relaxed だけ 1.7（下の .text-base.leading-relaxed） */
+:root {
+  --leading-relaxed: 1.5;
+}
 .sb-page {
   color: var(--sb-ink);
   font-size: var(--sb-fs-body);
-  line-height: 1.75;
-  letter-spacing: 0.03em;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
   line-break: strict;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
+}
+/* 本文（16px）の段落は 1.7。補足（14px）の既定（text-sm の 1.43、leading-snug の 1.375）は方針の補足 1.5 に揃える。
+ * 見出し（leading-snug の 16px）は方針のカード見出し 1.45。明示の leading-*（tight など）は触らない */
+.text-base.leading-relaxed {
+  line-height: 1.7;
+}
+/* 補足の印 data-note（16-B 差し戻し 1：R1-1・R1-2）。印のある要素は 14px・行の高さ 1.5（補足）。大きさと行の高さを印から決めるので、
+ * 印と見た目がずれない（Tailwind の text-sm の 1.43、leading-snug の 1.375 などを、印があれば 1.5 に揃える）。印のない p・li・dd は本文（16px・1.7。現場 18px）。
+ * 付けてよい要素は p・li・dd・ul・ol・dl と、本文の中の span・time・small だけ（e2e/field-checks.ts が置き場所を検査する）。 */
+:is(p, li, dd, ul, ol, dl, span, time, small)[data-note] {
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+}
+/* 印のある要素の中の text-sm・leading-snug も 1.5（補足の中の子は、1.43・1.375 のままにしない） */
+:is(p, li, dd, ul, ol, dl)[data-note] :is(.text-sm, .leading-snug) {
+  line-height: 1.5;
+}
+.sb-page .text-sm:not([class*="leading-"]),
+.sb-page .text-sm.leading-snug {
+  line-height: 1.5;
+}
+.sb-page .leading-snug:not(.text-sm) {
+  line-height: 1.45;
 }
 .sb-page *:focus-visible {
   outline: 3px solid var(--sb-focus);
@@ -87,10 +116,13 @@
 .sb-num {
   font-family: var(--font-num), sans-serif;
   font-variant-numeric: tabular-nums;
+  /* 数字・日時は字間を空けない（折り返しを増やさない）。数字用の字体は空白が狭く、「2027-01-10 10:00」の日付と時刻がくっついて読めたので、語間だけ少し空ける */
+  letter-spacing: 0;
+  word-spacing: 0.12em;
 }
 .sb-band {
   position: relative;
-  padding: 28px 16px;
+  padding: 24px 12px;
 }
 .sb-band > * {
   max-width: 1120px;
@@ -114,12 +146,12 @@
   }
 }
 
-/* 見出し：左 5px の橙線だけ（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
+/* 見出し：左 5px の墨の線だけ（主色は操作と現在地だけに使う。飾りの線は墨）（Sprint 16 H-5：背後の大きな薄い数字はやめた） */
 .sb-sec-head {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 4px 0 4px 14px;
-  border-left: 5px solid var(--sb-orange);
+  border-left: 5px solid var(--sb-ink);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -129,7 +161,7 @@
 .sb-sec-head h2 {
   position: relative;
   z-index: 1;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1.4;
   letter-spacing: 0.06em;
   font-weight: 700;
@@ -147,35 +179,147 @@
 .sb-sec-note {
   position: relative;
   z-index: 1;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-3);
+}
+/* 節の説明文（Section の description）は本文：16px・1.7（補足の .sb-sec-note の上書き） */
+.sb-sec-note.sb-sec-note-body {
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
 }
 @media (min-width: 1024px) {
   .sb-sec-head h2 {
-    font-size: 26px;
+    font-size: 1.625rem;
   }
 }
 
-/* ブロック（影なし。罫で分ける：Sprint 16 H-2）。白の帯の中ではごく薄いグレー、他では白 */
-.sb-block {
-  background: var(--sb-base);
-  border-radius: var(--sb-r-l);
+/* カード 3 種（Sprint 16-C。.sb-card と .opx-card と .sb-block は同じ規則）。罫は inset の 1px（影は使わない）。
+ * 通常：面 --sb-surface・角丸 16・--sb-rule の 1px・内側 16。一覧：最小の高さ 72・カード全体が押せる（中は見出し→主情報→補足の 3 段まで）。
+ * 判定・状態：状態の面＋左端 6px の状態の印の色の帯（帯は角丸に沿って切る）。.sb-block-soft はくぼみの面（注記・補足） */
+.sb-block,
+.sb-card {
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  padding: 20px 16px;
+  padding: var(--sb-sp-4);
   min-width: 0;
 }
-.sb-band-white .sb-block {
-  background: var(--sb-surface);
-}
 .sb-block-soft {
-  border-radius: var(--sb-r-l);
+  border-radius: var(--sb-r-card);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  background: var(--sb-surface);
-  padding: 14px 16px;
+  background: var(--sb-sunken);
+  padding: 10px 12px;
 }
-.sb-band-off .sb-block-soft {
-  background: var(--sb-base);
+.sb-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 72px;
+  color: var(--sb-ink);
+  text-decoration: none;
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur-press) var(--sb-ease);
+}
+/* 矢印つきの一覧カード（G-1）：右端に chevron-right（aria-hidden の装飾）。押せる範囲・最小の高さ 72 は変えない */
+.sb-card-list-go {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sb-card-list-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.sb-card-list-arrow {
+  flex: none;
+  color: var(--sb-ink-2);
+}
+a.sb-card-list,
+button.sb-card-list {
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+}
+a.sb-card-list:hover,
+button.sb-card-list:hover {
+  background: var(--sb-hover);
+}
+a.sb-card-list:active,
+button.sb-card-list:active {
+  transform: scale(0.99);
+}
+.sb-card-state {
+  position: relative;
+  overflow: hidden;
+  background: var(--sb-state-face, var(--sb-surface));
+  transition: background var(--sb-dur-state) var(--sb-ease);
+}
+.sb-card.sb-card-state,
+.sb-block.sb-card-state,
+.opx-card.sb-card-state {
+  padding-left: calc(var(--sb-sp-4) + 6px);
+}
+.sb-card-state::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--sb-state-mark, var(--sb-edge));
+}
+.sb-card-state[data-state="safe"] { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); }
+.sb-card-state[data-state="warn"] { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); }
+.sb-card-state[data-state="danger"] { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); }
+.sb-card-state[data-state="info"] { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); }
+.sb-card-state[data-state="flying"] { --sb-state-face: var(--sb-st-flying-face); --sb-state-mark: var(--sb-st-flying-mark); }
+
+/* 状態ラベル（16-C）：高さ 28 以上・左右 10・角丸 999・文字 14/600。先頭に 8px の丸（aria-hidden）と文字。待機中＝情報、飛行中＝飛行中、飛行済＝安全、中止＝危険。
+ * 丸は inline-flex の中央に置き、文字の行の中心と縦に揃える。押せるラベル（a・button）は当たり判定 48px（見た目の高さは 28 のまま、疑似要素で広げる） */
+.sb-state {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-state-face, var(--sb-st-info-face));
+  color: var(--sb-state-text, var(--sb-st-info-text));
+  font-size: var(--sb-fs-note);
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.sb-state-dot {
+  /* G-1：点は状態ごとの形（待機中＝輪、飛行中＝三角、飛行済＝チェック、期限が近い＝警告の三角、中止＝×）。12px、色は状態の印の色。装飾で、状態は文字が担う */
+  flex: none;
+  display: block;
+  width: 12px;
+  height: 12px;
+  color: var(--sb-state-mark, var(--sb-st-info-mark));
+}
+.sb-state-info { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); --sb-state-text: var(--sb-st-info-text); }
+.sb-state-flying { --sb-state-face: var(--sb-st-flying-face); --sb-state-mark: var(--sb-st-flying-mark); --sb-state-text: var(--sb-st-flying-text); }
+.sb-state-safe { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); --sb-state-text: var(--sb-st-safe-text); }
+.sb-state-warn { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); --sb-state-text: var(--sb-st-warn-text); }
+.sb-state-danger { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); --sb-state-text: var(--sb-st-danger-text); }
+a.sb-state,
+button.sb-state {
+  cursor: pointer;
+}
+a.sb-state::after,
+button.sb-state::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: max(100%, var(--sb-hit-min));
+  transform: translateY(-50%);
 }
 @media (min-width: 1024px) {
   .sb-block {
@@ -183,202 +327,143 @@
   }
 }
 
-/* ===== ピルボタン（右端に墨の丸。矢印の入れ替えは動き 1 種類め） =====
- * 文字は面の中央に置く：右端の丸（--sb-pill-ar）と文字との間（--sb-pill-gap）と同じだけ左にも余白を取り、左右を対称にする。
- * 以前は左 22px・右に丸だけで、文字が丸の分だけ左に寄って見えた。丸は流れの中にあるので、ボタンの高さ（丸 + 上下 4px）は変わらない。 */
+/* ===== ボタン 5 種（Sprint 16-C。主・副・文字・危険・無効。`/` の .sb-pill と `/ops` の .opx-btn は同じ計算スタイル） =====
+ * 主：主色の面・白の文字・角丸 12・高さ 56（現場 64）・太さ 600。副：くぼみの面・墨の文字・--sb-edge の 1px の縁。文字：背景なし・主色の文字・高さ 48。
+ * 危険：副の形で文字だけ危険の文字色。無効：くぼみの面・--sb-ink-disabled の文字（破線の縁を残し、色だけに頼らない）。
+ * 押下：--sb-primary-press（主）＋ scale(.98)・--sb-dur-press。右端の丸と矢印は置かない（旧 v2 の意匠は 16-C で外した。クラス名は残す）。
+ * 同じ規則を運航管理側の .opx-btn が持つ（@layer components に置くため、値は同じトークンで二重に書く）。 */
 .sb-pill {
-  --sb-pill-ar: 44px;
-  --sb-pill-gap: 14px;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sb-pill-gap);
+  gap: 8px;
   min-height: var(--sb-hit);
-  padding: 4px;
-  border-radius: var(--sb-pill);
-  border: 1px solid transparent;
+  padding: 0 20px;
+  border-radius: var(--sb-r-control);
+  border: 1px solid var(--sb-edge);
   cursor: pointer;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 1rem;
   line-height: 1.3;
   text-align: center;
   text-decoration: none;
   color: var(--sb-ink);
-  background: transparent;
-  transition: background var(--sb-dur) var(--sb-ease);
-}
-.sb-pill-label {
-  /* 縮みにくくして、幅が足りないときは左の空き（下の ::before）から先に縮め、それでも足りないときだけ折り返す */
-  flex: 0 0.001 auto;
-  min-width: 0;
-}
-/* 左の空き：右の丸と同じ幅。文字が面の中央に来る。幅が足りないとき（1280px の左の列など）は 0 まで縮み、文字は「左の縁と丸のあいだ」の中央になる */
-.sb-pill:has(> .sb-pill-arrow)::before {
-  content: "";
-  width: var(--sb-pill-ar);
-  flex: 0 1000 auto;
-  min-width: 0;
-}
-/* 丸（矢印）の無いピル（見本の切り替えなど）は、左右とも同じ余白 */
-.sb-pill:not(:has(> .sb-pill-arrow)) {
-  padding: 4px 20px;
-}
-.sb-pill-arrow {
-  position: relative;
-  flex: none;
-  display: block;
-  width: var(--sb-pill-ar);
-  height: var(--sb-pill-ar);
-  border-radius: var(--sb-pill);
-  background: var(--sb-ink);
-  color: var(--sb-on-dot);
-  overflow: hidden;
+  background: var(--sb-sunken);
+  touch-action: manipulation;
   transition:
     background var(--sb-dur) var(--sb-ease),
-    color var(--sb-dur) var(--sb-ease);
+    transform var(--sb-dur-press) var(--sb-ease);
 }
-.sb-pill-arrow .sb-ar {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform var(--sb-dur) var(--sb-ease);
+.sb-pill:hover {
+  background: var(--sb-hover);
 }
-.sb-pill-arrow .sb-a2 {
-  transform: translateX(-130%);
+.sb-pill:active {
+  transform: scale(0.98);
 }
-.sb-pill:hover .sb-a1,
-.sb-pill:active .sb-a1,
-.sb-pill:focus-visible .sb-a1 {
-  transform: translateX(130%);
+.sb-pill-label {
+  min-width: 0;
 }
-.sb-pill:hover .sb-a2,
-.sb-pill:active .sb-a2,
-.sb-pill:focus-visible .sb-a2 {
-  transform: none;
+/* 文字だけのアイコン（探す・外部・保存）。円はない。文字の脇に置く装飾 */
+.sb-pill-icon {
+  flex: none;
+  display: block;
 }
-/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁で境界を持たせる（現場は .sb-pill の縁の太さを上書きしない） */
 .sb-pill-primary {
-  background: var(--sb-orange);
-  border-color: var(--sb-on-orange);
-  color: var(--sb-on-orange);
-  --sb-pill-ar: 48px;
+  background: var(--sb-primary);
+  border-color: var(--sb-primary);
+  color: var(--sb-on-primary);
   min-height: var(--sb-hit-primary);
-  font-size: 16px;
-}
-.sb-pill-primary .sb-pill-arrow {
-  background: var(--sb-on-orange);
-  color: var(--sb-on-orange-fg);
 }
 .sb-pill-primary:hover,
-.sb-pill-primary:active,
-.sb-pill-primary:focus-visible {
-  background: var(--sb-orange-hover);
-}
-.sb-pill-primary:hover .sb-pill-arrow,
-.sb-pill-primary:active .sb-pill-arrow,
-.sb-pill-primary:focus-visible .sb-pill-arrow {
-  background: var(--sb-on-orange-fg);
-  color: var(--sb-on-orange);
+.sb-pill-primary:active {
+  background: var(--sb-primary-press);
+  border-color: var(--sb-primary-press);
 }
 .sb-pill-secondary {
-  background: var(--sb-control);
+  background: var(--sb-sunken);
   border-color: var(--sb-edge);
 }
-.sb-pill-secondary:hover .sb-pill-arrow,
-.sb-pill-secondary:active .sb-pill-arrow,
-.sb-pill-secondary:focus-visible .sb-pill-arrow {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+.sb-pill-secondary:hover {
+  background: var(--sb-hover);
+}
+.sb-pill-text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--sb-primary);
+  min-height: var(--sb-hit-min);
+}
+.sb-pill-text:hover {
+  background: var(--sb-hover);
+}
+.sb-pill-danger {
+  background: var(--sb-sunken);
+  border-color: var(--sb-edge);
+  color: var(--sb-st-danger-text);
 }
 .sb-pill-sm {
-  --sb-pill-ar: 40px;
-  --sb-pill-gap: 10px;
   min-height: var(--sb-hit);
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
-/* 2 列に並べる小さなピル（運航管理の判定への入口）。360px でも 6 文字のラベルが折り返さないよう、対称の余白を取らず、
- * 左の余白と丸との間を詰めて、文字は「左の縁と丸のあいだ」の中央に置く（唯一の例外。幅が足りない） */
+/* 2 列に並べる小さなボタン（運航管理の判定への入口）：余白を詰める（360px でも 6 文字のラベルが折り返さない） */
 .sb-pill-tight {
-  --sb-pill-gap: 8px;
-  padding-left: 16px;
-}
-.sb-pill-tight::before {
-  display: none;
-}
-.sb-pill-tight .sb-pill-label {
-  flex: 1;
+  padding: 0 12px;
+  gap: 6px;
 }
 .sb-pill:disabled,
 .sb-pill[aria-disabled="true"] {
   background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-  border: 1.5px dashed var(--sb-edge);
+  color: var(--sb-ink-disabled);
+  border: 1px dashed var(--sb-edge);
   cursor: not-allowed;
-}
-.sb-pill:disabled .sb-pill-arrow,
-.sb-pill[aria-disabled="true"] .sb-pill-arrow {
-  background: var(--sb-edge);
-  color: var(--sb-base);
-}
-.sb-pill:disabled:hover .sb-a1,
-.sb-pill[aria-disabled="true"]:hover .sb-a1 {
   transform: none;
-}
-.sb-pill:disabled:hover .sb-a2,
-.sb-pill[aria-disabled="true"]:hover .sb-a2 {
-  transform: translateX(-130%);
 }
 .sb-pill-block {
   width: 100%;
 }
-:root[data-mode="field"] .sb-pill-arrow .sb-a2 {
-  display: none;
-}
-:root[data-mode="field"] .sb-pill:hover .sb-a1,
-:root[data-mode="field"] .sb-pill:active .sb-a1,
-:root[data-mode="field"] .sb-pill:focus-visible .sb-a1 {
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .sb-pill-arrow .sb-a2 {
-    display: none;
-  }
-  .sb-pill:hover .sb-a1,
-  .sb-pill:active .sb-a1,
-  .sb-pill:focus-visible .sb-a1 {
-    transform: none;
-  }
+/* 無効の理由（ボタンの下に 1 行）。補足の文字 */
+.sb-disabled-reason {
+  margin-top: 4px;
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+  color: var(--sb-ink-2);
 }
 
-/* 文字だけのボタン（住所検索・取消・再試行など）。押す高さは 44px 以上 */
+/* 文字だけのボタン（住所検索・取消・再試行など）。背景なし・主色の文字・高さ 48 以上 */
 .sb-text-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: var(--sb-hit-min);
   padding: 0 16px;
-  border-radius: var(--sb-pill);
-  border: 1.5px solid var(--sb-edge);
-  background: var(--sb-control);
-  color: var(--sb-ink);
-  font-size: 14px;
-  font-weight: 700;
+  border-radius: var(--sb-r-control);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sb-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--sb-dur) var(--sb-ease);
+  touch-action: manipulation;
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur-press) var(--sb-ease);
 }
 .sb-text-btn:hover,
 .sb-text-btn:active {
   background: var(--sb-hover);
 }
+.sb-text-btn:active {
+  transform: scale(0.98);
+}
 .sb-text-btn:disabled {
   background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-  border-style: dashed;
+  color: var(--sb-ink-disabled);
+  border: 1px dashed var(--sb-edge);
   cursor: not-allowed;
+  transform: none;
 }
 
 /* せり上がり（動き 2 種類め。判定結果が出たときの結論カードだけ。1 回） */
@@ -406,15 +491,16 @@
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   border: 1px solid var(--sb-rule);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.4;
   color: var(--sb-ink-2);
   font-weight: 500;
+  letter-spacing: 0;
 }
 .sb-tag-deadline {
-  background: var(--sb-orange-hover);
+  background: var(--sb-st-warn-face);
   border-color: transparent;
-  color: var(--sb-on-orange);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 .sb-tag-strong {
@@ -430,10 +516,12 @@
   min-height: 30px;
   padding: 3px 14px 3px 8px;
   border-radius: var(--sb-pill);
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.3;
-  white-space: nowrap;
+  line-height: 1.5;
+  /* 文字 200%・320 幅でも枠から出ない（長い語「判定不能（データ未整備）」が折り返せるように。通常の大きさでは 1 行に収まる） */
+  max-width: 100%;
+  white-space: normal;
 }
 .sb-vm {
   width: 20px;
@@ -500,13 +588,14 @@
   border-radius: var(--sb-r-m);
 }
 .sb-v-eyebrow {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-3);
   font-weight: 500;
   letter-spacing: 0.08em;
 }
 .sb-v-word {
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 0.08em;
@@ -516,7 +605,7 @@
 }
 @media (min-width: 1024px) {
   .sb-v-word {
-    font-size: 34px;
+    font-size: 2.125rem;
   }
   .sb-v-big {
     width: 76px;
@@ -531,23 +620,60 @@
 /* ===== 入力 ===== */
 .sb-label {
   display: block;
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
+/* 入力欄（Sprint 16-D D-1）：高さ 52 以上（現場 56＝--sb-hit）・角丸 12・面 --sb-sunken・--sb-edge の 1px の縁。
+ * フォーカスは、各画面共通の主色の輪（3px・離す。Q-22。D-1 の「2px 以上の主色の輪」を満たす）1 本だけ。枠は足さない（輪が二重に見えたため 16-D 磨き込みで外した）。エラーは縁が危険の印の色（下の 1 行は .sb-field-error。role=alert にしない）。ラベルは入力欄の上に常に出す（.sb-label）。 */
 .sb-input {
   width: 100%;
-  min-height: 52px;
-  border: 1.5px solid var(--sb-edge);
-  border-radius: var(--sb-r-m);
-  background: var(--sb-field);
+  min-height: max(52px, var(--sb-hit));
+  border: var(--sb-rule-w) solid var(--sb-edge);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-sunken);
   padding: 0 16px;
-  font-size: 16px;
+  font-size: var(--sb-fs-body);
   color: var(--sb-ink);
   letter-spacing: 0.03em;
 }
-.sb-input.sb-input-sm {
-  min-height: 48px;
+/* 日付・時刻の標準入力欄（16-N3 N3-4・N3-5）：左右の余白 16 → 8px、字間 0。値の文字とカレンダーの絵が重ならない幅を、狭い画面・文字 200% でも取るため
+ * （値＋絵＋間は、等倍で約 110px、文字 200% で約 200px）。 */
+.sb-input[type="date"],
+.sb-input[type="time"] {
+  padding-inline: 8px;
+  letter-spacing: 0;
+}
+.sb-input[aria-invalid="true"] {
+  border-color: var(--sb-st-danger-mark);
+  box-shadow: inset 0 0 0 1px var(--sb-st-danger-mark);
+}
+.sb-input:disabled {
+  border-style: dashed;
+  background: var(--sb-sunken);
+  color: var(--sb-ink-3);
+}
+/* 項目ごとのエラー：記号（SVG）＋文字の 1 行。入力欄の aria-describedby で結ぶ */
+.sb-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--sb-st-danger-text);
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.6;
+}
+/* 文の最小幅（word-break: auto-phrase で「入力してください」が割れない幅）が列幅を超えても、横にあふれさせず折り返す（16-D 差し戻し 1） */
+.sb-field-error > span:not(.sb-field-error-mark) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sb-field-error-mark {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
 }
 select.sb-input {
   appearance: none;
@@ -566,64 +692,123 @@ select.sb-input {
   opacity: 1;
 }
 .sb-hint {
-  font-size: 12.5px;
-  line-height: 1.7;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-3);
 }
 .sb-field-text {
-  font-size: 12.5px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 500;
   color: var(--sb-ink-2);
 }
 .sb-eyebrow {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--sb-ink-2);
 }
-/* チェック行・チェックの枠（見た目は丸め。行は 16・枠は 4） */
+/* チェック行・チェックの丸（Sprint 16-D D-2）：左に 32 の丸いチェック、行の高さ 72 以上（チェックを持つ行）、行全体が <label>。
+ * チェック済みは、チェックの記号＋行末の文字「済」（色だけに頼らない）。丸はチェックを持つ入力に共通（.sb-check）。 */
 input.sb-check {
+  appearance: none;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border: 2px solid var(--sb-edge);
+  border-radius: var(--sb-pill);
+  background: var(--sb-field);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  color: var(--sb-on-primary);
+}
+input.sb-check::after {
+  content: "";
+  width: 15px;
+  height: 8px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: translateY(-2px) rotate(-45deg) scale(0);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+input.sb-check:checked {
+  background: var(--sb-primary);
+  border-color: var(--sb-primary);
+}
+input.sb-check:checked::after {
+  transform: translateY(-2px) rotate(-45deg) scale(1);
+}
+input.sb-check:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+/* 点検の「異常」（16-I）：同じ 32 の丸で、選ぶと危険の印の色の面＋白い「×」（チェックの記号と形で見分ける。状態は行の文字「異常」も示す） */
+input.sb-check.sb-check-no::after {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  background: currentColor;
+  clip-path: polygon(20% 0, 50% 30%, 80% 0, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0 80%, 30% 50%, 0 20%);
+  transform: scale(0);
+}
+input.sb-check.sb-check-no:checked {
+  background: var(--sb-st-danger-mark);
+  border-color: var(--sb-st-danger-mark);
+}
+input.sb-check.sb-check-no:checked::after {
+  transform: scale(1);
+}
+/* ラジオ（素の radio の置き換え）：24 の輪＋選択で内側に主色の点。チェックの丸（32・チェックの記号）と形で見分け、選択は輪の太さ・点・行の枠（各画面の choice／radio 行）でも示す。
+ * 押す範囲は行全体（<label>）。「あり」側の危険の選択（異常）は .sb-radio-no で危険の印の色。 */
+input.sb-radio {
   appearance: none;
   flex: none;
   width: 24px;
   height: 24px;
   margin: 0;
   border: 2px solid var(--sb-edge);
-  border-radius: var(--sb-r-s);
+  border-radius: var(--sb-pill);
   background: var(--sb-field);
   display: inline-grid;
   place-content: center;
   cursor: pointer;
-  color: var(--sb-on-orange);
 }
-input.sb-check::after {
+input.sb-radio::after {
   content: "";
-  width: 11px;
-  height: 6px;
-  border-left: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
-  transform: translateY(-1px) rotate(-45deg) scale(0);
+  width: 10px;
+  height: 10px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-primary);
+  transform: scale(0);
   transition: transform var(--sb-dur) var(--sb-ease);
 }
-input.sb-check:checked {
-  background: var(--sb-orange);
-  border-color: var(--sb-ink);
+input.sb-radio:checked {
+  border-color: var(--sb-primary);
 }
-input.sb-check:checked::after {
-  transform: translateY(-1px) rotate(-45deg) scale(1);
+input.sb-radio:checked::after {
+  transform: scale(1);
 }
-input.sb-check:disabled {
+input.sb-radio.sb-radio-no:checked {
+  border-color: var(--sb-st-danger-mark);
+}
+input.sb-radio.sb-radio-no:checked::after {
+  background: var(--sb-st-danger-mark);
+}
+input.sb-radio:disabled {
   cursor: not-allowed;
   border-style: dashed;
 }
 .sb-check-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   min-height: var(--sb-hit-row);
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   cursor: pointer;
   transition: background var(--sb-dur) var(--sb-ease);
 }
@@ -633,15 +818,265 @@ input.sb-check:disabled {
 }
 .sb-check-row.is-on {
   background: var(--sb-hover);
-  /* 橙の薄い面は白の地との差が小さい（1.59:1）ので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
+  /* 薄い主色の面は地との差が小さいので、選択中は縁で境界を持たせる（Sprint 16 H-3） */
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
 }
 .sb-check-row:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
 }
+/* フォーカスの輪は行（押せる範囲）の 1 本に揃える。丸の 3px の輪と重ねない（16-D の再判定で二重に見えた。16-E designer） */
+.sb-check-row:has(:focus-visible) :is(input.sb-check, input.sb-radio):focus-visible {
+  outline: none;
+}
+/* チェックを持つ行は 72 以上（現場は --sb-hit-row の 64 より大きい 72 のまま）。チェックと文字は行の中央にそろえる */
+.sb-check-row:has(input.sb-check),
+.opx-check-row:has(input.sb-check) {
+  min-height: 72px;
+  align-items: center;
+  padding-block: 12px;
+}
+/* 短い選択肢を多数並べる所（通報の飛行目的など）は 56px まで詰める（押す部品の下限 48 は守る）。16-L の L-5 */
+.opx-check-row.opx-check-dense:has(input.sb-check) {
+  min-height: 56px;
+  padding-block: 8px;
+}
+/* 説明文を持つ複数行の行（items-start を付けた行）は、丸を先頭の行にそろえる */
+.opx-check-row.items-start:has(input.sb-check) {
+  align-items: flex-start;
+}
+/* チェック済みの行末の「済」（既存の行は疑似要素。読み上げには出さず、状態はチェックボックス自身が伝える） */
+:is(.sb-check-row, .opx-check-row):has(input.sb-check:checked)::after {
+  content: "済" / "";
+  flex: none;
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-primary);
+}
+/* 新しい部品（CheckRow）は本物の文字「済」を持つので、疑似要素は出さない */
+.sb-chk::after {
+  content: none !important;
+}
+.sb-chk .sb-chk-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sb-fs-body);
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.sb-chk .sb-chk-done {
+  display: none;
+  flex: none;
+  margin-left: auto;
+  font-size: var(--sb-fs-note);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-primary);
+}
+.sb-chk:has(input.sb-check:checked) .sb-chk-done {
+  display: inline;
+}
+/* 「済」を出さない行（doneMark={false}。特定飛行の形態など、該当するかを選ぶ欄）：選ばれている行は、塗りの丸＋チェックの記号に加えて、行の縁を 2px の墨にする（色なしでも、薄い縁の未選択の行と形・太さで分かる。16-J designer） */
+.sb-chk.is-on {
+  box-shadow: inset 0 0 0 2px var(--sb-ink);
+}
+.sb-chk.is-on .sb-chk-text {
+  font-weight: 700;
+}
+/* 群（CheckGroup）：見出しに「完了数/総数」・折りたためる（<details>） */
+.sb-chk-group {
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-chk-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--sb-hit);
+  padding: 8px 16px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--sb-r-card);
+}
+.sb-chk-group > summary::-webkit-details-marker {
+  display: none;
+}
+.sb-chk-group > summary:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 3px;
+}
+.sb-chk-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sb-fs-body);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink);
+}
+.sb-chk-count {
+  flex: none;
+  font-size: var(--sb-fs-body);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--sb-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.sb-chk-chev {
+  flex: none;
+  color: var(--sb-ink-2);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+.sb-chk-group[open] .sb-chk-chev {
+  transform: rotate(180deg);
+}
+.sb-chk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 12px 12px;
+}
 
-/* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を橙の経路が進む。スマホ 128px、PC 240px） ===== */
+/* ===== 点検の入力（Sprint 16-I 磨き込み。見本：design-direction-2026-11.md D-2 チェック行）=====
+ * 行は面を持たず罫で区切る（白い群の中に灰色の面を重ねない）。面と左の帯を使うのは「異常」の行だけで、そこに目が行く。
+ * 状態は記号＋文字（済・異常・未記入）。色は補助。.sb-insp-* は点検の入力だけの部品（スタイルだけ。識別子・aria は変えない） */
+.sb-chk-group:has(.sb-insp-list) > summary {
+  min-height: 56px;
+}
+.sb-chk-group:has(.sb-insp-list)[open] > summary {
+  border-bottom: var(--sb-rule-w) solid var(--sb-rule);
+  border-radius: var(--sb-r-card) var(--sb-r-card) 0 0;
+}
+.sb-chk-group:has(.sb-insp-list) .sb-chk-list {
+  padding: 0 12px 8px;
+}
+.sb-insp-list > li {
+  display: block;
+}
+.sb-insp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 72px;
+  padding: 12px 12px 14px;
+  border-left: 6px solid transparent;
+  background: transparent;
+}
+.sb-insp-row + .sb-insp-row {
+  box-shadow: inset 0 var(--sb-rule-w) 0 var(--sb-rule);
+}
+.sb-insp-row:has([data-state="abnormal"]) {
+  border-radius: var(--sb-r-m);
+  border-left-color: var(--sb-st-danger-mark);
+  background: var(--sb-st-danger-face);
+  box-shadow: none;
+}
+/* 異常の行の前後の罫は消す（面が区切りになる） */
+.sb-insp-row:has([data-state="abnormal"]) + .sb-insp-row {
+  box-shadow: none;
+}
+/* 結果の印：済＝実線なし・安全の文字、異常＝危険の文字、未記入＝破線の枠（記入を促す形）。どれも先頭の形＋文字で、色だけに頼らない */
+.sb-insp-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1.5px dashed var(--sb-edge);
+  border-radius: var(--sb-pill);
+  font-weight: 700;
+  color: var(--sb-ink-2);
+}
+.sb-insp-mark[data-state="normal"] {
+  border-color: transparent;
+  color: var(--sb-st-safe-text);
+}
+.sb-insp-mark[data-state="abnormal"] {
+  border: 1.5px solid var(--sb-st-danger-mark);
+  color: var(--sb-st-danger-text);
+}
+/* 進み具合：文字（記入済み n/9）の下に細い線。線は補助で、数は文字が担う */
+.sb-insp-progress {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding-bottom: 10px;
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-insp-progress::before,
+.sb-insp-progress::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 2px;
+}
+.sb-insp-progress::before {
+  right: 0;
+  background: var(--sb-sunken);
+}
+.sb-insp-progress::after {
+  width: calc(var(--sb-prog, 0) * 100%);
+  background: var(--sb-primary);
+  transition: width var(--sb-dur) var(--sb-ease);
+}
+.sb-insp-abn {
+  color: var(--sb-st-danger-text);
+}
+/* 群の補足：群のすぐ上（進み具合とは離し、群と対にする） */
+.sb-insp-note {
+  margin-bottom: -6px;
+  color: var(--sb-ink-2);
+}
+/* 未記入の数：保存の押す部品の上に、文字を濃く（スマホ）。広い画面は従来どおりボタンの右 */
+.sb-insp-missing {
+  order: -1;
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+.sb-insp-missing[data-missing="0"] {
+  color: var(--sb-st-safe-text);
+}
+@media (min-width: 640px) {
+  .sb-insp-missing {
+    order: 0;
+  }
+}
+/* 日誌から移ったときの注記（離陸より後の実施日時）：注意の面＋左の帯＋「!」。大きさは従来の補足（14px）のまま：16px にすると 375×812 の最初の画面（I-3）に全体が入らない。
+ * 余白を詰め、見出しの行は 1 行に収める。保存は止めない */
+.opx-form [data-testid="inspection-after-takeoff"] {
+  gap: 2px;
+  margin-top: -8px;
+  padding: 8px 10px;
+  border: 0;
+  border-left: 5px solid var(--sb-st-warn-mark);
+  border-radius: var(--sb-r-m);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
+}
+.opx-form [data-testid="inspection-after-takeoff"] :is(p, ul, li) {
+  color: var(--sb-ink);
+}
+.opx-form [data-testid="inspection-after-takeoff"] > p {
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+}
+.opx-form [data-testid="inspection-after-takeoff"] li > span[aria-hidden] {
+  font-weight: 700;
+  color: var(--sb-st-warn-text);
+}
+
+/* ===== ヒーロー（挿絵は `/` のトップだけ。C 案：見出しの下端の地図の帯の上を墨の経路が進む。スマホ 128px、PC 240px） ===== */
 .sb-hero {
   position: relative;
   height: 128px;
@@ -687,7 +1122,7 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   line-height: 1.2;
@@ -699,8 +1134,9 @@ input.sb-check:disabled {
   align-items: center;
   justify-content: center;
   border-radius: var(--sb-pill);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  /* G-1（2026-11-24）：ロゴの丸は墨。主色は「操作と現在地」だけに使い、押せるものに見せない */
+  background: var(--sb-ink);
+  color: var(--sb-inverse-fg);
 }
 .sb-brand-mark svg {
   width: 30px;
@@ -709,13 +1145,13 @@ input.sb-check:disabled {
 .sb-hero-sub {
   display: block;
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 1.5;
 }
 .sb-intro {
-  padding: 12px 16px 4px;
+  padding: 8px 16px 4px;
   background: var(--sb-base);
 }
 .sb-intro-inner {
@@ -723,10 +1159,10 @@ input.sb-check:disabled {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
 }
 .sb-lead {
-  font-size: 14px;
+  font-size: var(--sb-fs-body);
   line-height: 1.7;
   color: var(--sb-ink-2);
   max-width: 46rem;
@@ -736,16 +1172,16 @@ input.sb-check:disabled {
   color: var(--sb-ink);
 }
 .sb-ops-note {
-  border-left: 3px solid var(--sb-orange);
+  border-left: 3px solid var(--sb-edge);
   padding-left: 12px;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
   color: var(--sb-ink-3);
 }
 .sb-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: 4px 8px;
 }
 .sb-facts > div {
   display: inline-flex;
@@ -756,7 +1192,7 @@ input.sb-check:disabled {
   border-radius: var(--sb-pill);
   background: var(--sb-control);
   border: 1px solid var(--sb-rule);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 .sb-facts dt {
@@ -767,11 +1203,16 @@ input.sb-check:disabled {
   font-weight: 700;
   min-width: 0;
 }
+/* 値は本文（16px・1.7）。印 data-note のある dd は補足（14px・1.5）で、上の [data-note] の規則に任せる（詳細度が同じで後ろのこの規則が勝つのを避ける）。項目名の dt は補足 14px */
+.sb-facts dd:not([data-note]) {
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+}
 .sb-disclaimer-short {
   border-left: 3px solid var(--sb-ink);
   padding-left: 12px;
-  font-size: 12.5px;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-2);
   max-width: 46rem;
 }
@@ -789,10 +1230,10 @@ input.sb-check:disabled {
     margin-bottom: 8px;
   }
   .sb-band-first .sb-sec-head h2 {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
   .sb-block {
-    padding: 12px 14px 14px;
+    padding: 12px 14px 12px;
   }
 }
 @media (min-width: 1024px) {
@@ -811,7 +1252,7 @@ input.sb-check:disabled {
     padding: 40px 32px 0;
   }
   .sb-brand {
-    font-size: 46px;
+    font-size: 2.875rem;
   }
   .sb-brand-mark {
     width: 56px;
@@ -822,7 +1263,7 @@ input.sb-check:disabled {
   }
   .sb-hero-sub {
     max-width: none;
-    font-size: 19px;
+    font-size: 1.1875rem;
     margin-top: 6px;
   }
   .sb-intro {
@@ -834,7 +1275,7 @@ input.sb-check:disabled {
 .sb-check-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 @media (min-width: 1024px) {
   .sb-check-grid {
@@ -868,10 +1309,10 @@ input.sb-check:disabled {
 }
 .sb-note-card {
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.7;
+  background: var(--sb-sunken);
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-2);
 }
 .sb-note-card.is-warn {
@@ -886,7 +1327,7 @@ input.sb-check:disabled {
 
 /* ===== 地図と層 ===== */
 .sb-map-block {
-  padding: 12px;
+  padding: 8px;
 }
 .sb-map-frame {
   position: relative;
@@ -898,14 +1339,15 @@ input.sb-check:disabled {
 .sb-map-frame .maplibregl-canvas-container canvas {
   filter: var(--sb-tile-filter);
 }
-/* 地図の標準ズームボタンは 44px にする（押す部品の下限）。スマホはピンチで足りるが、キーボード・マウスのために残す */
+/* 地図の標準ズームボタンは 48px（--sb-hit-min。押す部品の下限）にする。スマホはピンチで足りるが、キーボード・マウスのために残す */
 .sb-map-frame .maplibregl-ctrl-group {
-  border-radius: var(--sb-r-m);
-  box-shadow: var(--sb-shadow);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 .sb-map-frame .maplibregl-ctrl-group button {
-  width: 44px;
-  height: 44px;
+  width: var(--sb-hit-min);
+  height: var(--sb-hit-min);
 }
 .sb-layer-list {
   display: grid;
@@ -924,6 +1366,8 @@ input.sb-check:disabled {
   min-height: var(--sb-hit-min);
   height: 100%;
   padding: 6px 10px 6px 8px;
+  line-height: 1.4;
+  letter-spacing: 0;
   border-radius: var(--sb-pill);
   cursor: pointer;
   background: var(--sb-control);
@@ -931,10 +1375,14 @@ input.sb-check:disabled {
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);
 }
+.sb-layer li {
+  line-height: 1.35;
+}
 .sb-layer.is-wide {
   align-items: flex-start;
   border-radius: var(--sb-r-l);
-  padding: 8px 12px 8px 8px;
+  padding: 6px 8px 6px 6px;
+  gap: 6px;
 }
 .sb-layer.is-off {
   background: transparent;
@@ -947,6 +1395,10 @@ input.sb-check:disabled {
 .sb-layer:has(:focus-visible) {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
+}
+/* フォーカスの輪は行（押せる範囲）の 1 本に揃える。丸の輪と重ねない（.sb-check-row と同じ流儀。16-E の任意の改善 2） */
+.sb-layer:has(:focus-visible) input.sb-check:focus-visible {
+  outline: none;
 }
 .sb-layer input.sb-check {
   width: 22px;
@@ -976,7 +1428,7 @@ input.sb-check:disabled {
 }
 .sb-layer-sources {
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   padding: 0 12px;
 }
 .sb-layer-sources > summary {
@@ -984,14 +1436,16 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
 }
 .sb-layer-sources[open] {
   padding-bottom: 12px;
 }
 .sb-layer-group {
-  font-size: 12.5px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   color: var(--sb-ink-2);
   margin: 10px 0 6px;
@@ -1003,9 +1457,9 @@ input.sb-check:disabled {
   padding: 0 8px;
   border-radius: var(--sb-pill);
   border: 1px solid var(--sb-edge);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--sb-ink-2);
 }
 
@@ -1014,7 +1468,7 @@ input.sb-check:disabled {
   border-radius: var(--sb-r-l);
   background: var(--sb-base);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  padding: 16px;
+  padding: 12px;
   min-width: 0;
 }
 .sb-src {
@@ -1025,7 +1479,8 @@ input.sb-check:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   background: var(--sb-sunken);
   color: var(--sb-ink);
@@ -1046,8 +1501,8 @@ input.sb-check:disabled {
   align-items: center;
   padding: 0 20px;
   border-radius: var(--sb-pill);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
   font-weight: 700;
   text-decoration: none;
 }
@@ -1055,37 +1510,30 @@ input.sb-check:disabled {
   top: 8px;
 }
 
-/* 公開の判定画面 `/` に置く運航管理の下メニューだけ、`.ds` の色の名前を v2 に付け替える（形・寸法は変えない。③ で置き換える）。
- * /ops 本体と見本（/ops/design）の `.ds` は触らない。 */
+/* 公開の判定画面 `/` に置く運航管理の下メニューだけ、根（.ds）の地を一段上の面（--sb-surface）にする（形・寸法は変えない）。
+ * 16-N2：旧い色の名前（--bg-app ほか）の付け替えは撤去し、地だけを直接指定する。/ops 本体の `.ds` は触らない。 */
 .ds.ds-sb {
-  --bg-app: var(--sb-surface);
-  --bg-surface: var(--sb-base);
-  --bg-sunken: var(--sb-sunken);
-  --fg: var(--sb-ink);
-  --fg-soft: var(--sb-ink-2);
-  --fg-mute: var(--sb-ink-3);
-  --line: var(--sb-rule);
-  --line-strong: var(--sb-edge);
-  --accent: var(--sb-ink);
-  --accent-soft: var(--sb-orange);
-  --accent-solid: var(--sb-orange);
-  --accent-solid-hover: var(--sb-orange-hover);
-  --accent-fg: var(--sb-on-orange);
+  background: var(--sb-surface);
 }
 
-/* 地図の出典表記の開閉ボタンも 44px（押す部品の下限）。出典の文は地図の右下に収める */
+/* 地図の出典表記の開閉ボタンも 48px（--sb-hit-min。押す部品の下限）。出典の文は地図の右下に収める。文字は 14px（--sb-fs-note）以上（MapLibre 既定の 12px を上げる） */
+.sb-map-frame .maplibregl-ctrl-attrib,
+.sb-map-frame .maplibregl-ctrl-attrib a {
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+}
 .sb-map-frame .maplibregl-ctrl-attrib-button {
-  width: 44px;
-  height: 44px;
+  width: var(--sb-hit-min);
+  height: var(--sb-hit-min);
   /* 44px に広げた枠で ⓘ の絵が並んで繰り返されないよう、中央に 1 つだけ置く */
   background-repeat: no-repeat;
   background-position: center;
 }
 .sb-map-frame .maplibregl-ctrl-attrib.maplibregl-compact {
-  min-height: 44px;
+  min-height: var(--sb-hit-min);
   border-radius: var(--sb-pill);
 }
-/* チェック行：選ばれている行・ホバーの行は面が橙になるので、薄い文字色は 4.5:1 を保つ濃さに上げる */
+/* チェック行：選ばれている行・ホバーの行は面が薄い主色になるので、薄い文字色は 4.5:1 を保つ濃さに上げる */
 .sb-check-row.is-on .text-sb-ink-3,
 .sb-check-row:hover .text-sb-ink-3,
 .sb-check-row.is-on .sb-hint,
@@ -1118,12 +1566,13 @@ input.sb-check:disabled {
   display: none;
 }
 .sb-disc-title {
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.4;
 }
 .sb-disc-note {
-  font-size: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-2);
 }
 /* 開閉の印：矢印の向き（閉＝下向き、開＝上向き）と、文字（開く／閉じる）。動きは付けない（動きは 2 つだけ） */
@@ -1135,7 +1584,8 @@ input.sb-check:disabled {
   gap: 6px;
   min-height: 44px;
   padding: 0 4px;
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   color: var(--sb-ink-2);
 }
@@ -1151,7 +1601,7 @@ input.sb-check:disabled {
 .sb-disc-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   padding-top: 12px;
 }
 .sb-disc[open] > summary {
@@ -1171,9 +1621,9 @@ input.sb-check:disabled {
   scroll-margin-top: 12px;
 }
 
-/* 地図の高さ：スマホは画面の高さの 40%（260〜380px）。PC（2 列）は 4:3 */
+/* 地図の高さ：スマホは画面の高さの 38.2%（260〜380px。N3 の下限は 38%）。PC（2 列）は 4:3 */
 .sb-map-canvas {
-  height: clamp(260px, 40svh, 380px);
+  height: clamp(260px, 38.2svh, 380px);
 }
 @media (min-width: 1024px) {
   .sb-map-canvas {
@@ -1193,47 +1643,71 @@ input.sb-check:disabled {
   }
 }
 
-/* ===== 運航管理のメニュー（Sprint 12h PR ③a。見本：warm-final/home.html の .tabbar／.tab） =====
- * 下タブ 5 つ（高さ 60px 以上）と、PC の左メニュー（項目 48px）。現在地は橙の面＋太字＋aria-current（色だけに頼らない）。 */
+/* ===== 運航管理のメニュー（Sprint 12h PR ③a。16-F で 4 項目に。見本：/ops/design の cat-bottomnav-sec が寸法と影の正） =====
+ * 下タブ 4 つ（高さ 64 以上＝安全領域を除く・文字 14 以上・折り返さない）と、PC の左メニュー（項目 48px）。
+ * 現在地は 主色のアイコンと文字＋薄い主色の面＋太字＋aria-current（色だけに頼らない）。浮くもの（下部ナビ）だけが --sb-shadow-float と上の 1px の線を持つ（現場では影なし＝トークン側）。
+ * 文字の拡大（200%）：ふだんは 1 行（語の途中で折らない）。拡大して 1 列に収まらないときだけ、項目名の <wbr>（「機体と｜書類」）で 2 行にし、
+ * 項目の高さは min-height なので伸びる（省略・アイコンだけにはしない。K-5）。 */
 .sb-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: var(--sb-base);
+  /* 列は等分（1fr）。ただし最小は項目名の幅（min-content）：文字 200%・幅 360px で「ホーム」（84px）が等分の 80px からはみ出さないよう、列が広がる（16-F 差し戻し 1 の R-4。ふだんの幅は等分のまま） */
+  grid-template-columns: repeat(4, minmax(min-content, 1fr));
+  gap: 8px;
+  padding: 0 8px env(safe-area-inset-bottom);
+  background: var(--sb-surface);
   border-top: var(--sb-rule-w) solid var(--sb-rule);
-  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: var(--sb-shadow-float);
 }
 .sb-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-height: 60px;
-  padding: 6px 0;
+  gap: 2px;
+  min-height: 64px;
+  margin-block: 4px;
+  padding: 4px;
+  border-radius: var(--sb-r-control);
   font-size: var(--sb-fs-note);
   font-weight: 500;
-  line-height: 1.2;
-  white-space: nowrap;
+  line-height: 1.3;
+  text-align: center;
+  word-break: keep-all;
   color: var(--sb-ink-2);
   touch-action: manipulation;
 }
-.sb-tab-ic {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 30px;
-  border-radius: var(--sb-pill);
+/* 16-F2：幅 359px 以下（320 など）・文字 200% の 4 列は、項目名の幅の合計が 280px（ホーム 84・計画 56・日誌 56・機体と 84）。
+ * 余白（列の間 8px×3＋左右 8px×2＋項目の左右 4px×8＝72px。必要な幅 352px で右端が 26px 切れた）を、列の間 2px×3＋左右 4px×2＋項目の左右 2px×8＝30px にして 310px に収める。
+ * 文字の大きさは変えない。360px 以上の寸法・見た目は 16-F のまま（360px の 200% は余白 72px でも 352px で収まる） */
+@media (max-width: 359px) {
+  .sb-tabs {
+    gap: 2px;
+    padding-inline: 4px;
+  }
+  .sb-tab {
+    padding-inline: 2px;
+  }
 }
-.sb-tab:hover .sb-tab-ic {
+.sb-tab:hover {
   background: var(--sb-hover);
 }
 .sb-tab[aria-current="page"] {
-  color: var(--sb-ink);
+  background: var(--sb-primary-soft);
+  color: var(--sb-primary);
   font-weight: 700;
 }
-.sb-tab[aria-current="page"] .sb-tab-ic {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+/* 現在地の形の手がかり（色なしでも分かる）：項目の上端に幅 24・高さ 3 の線。位置は絶対配置なので項目の寸法・並びは変えない */
+.sb-tab[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 24px;
+  height: 3px;
+  margin-left: -12px;
+  border-radius: 0 0 3px 3px;
+  background: var(--sb-primary);
 }
 .sb-tab:focus-visible,
 .sb-side-link:focus-visible {
@@ -1241,6 +1715,7 @@ input.sb-check:disabled {
   outline-offset: -3px;
 }
 .sb-side-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1261,14 +1736,31 @@ input.sb-check:disabled {
   color: var(--sb-ink);
 }
 .sb-side-link[aria-current="page"] {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  background: var(--sb-primary-soft);
+  color: var(--sb-ink);
   font-weight: 700;
 }
+/* 現在地の形の手がかり（色なしでも分かる）：左端に幅 4 の線。子の現在地では、子の縦線（罫）の上に重なる */
+.sb-side-link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--sb-primary);
+}
+.sb-side-link[aria-current="page"] svg {
+  color: var(--sb-primary);
+}
+/* 子：字下げを詰め（罫の左 16px）、アイコンと文字の間も 8px にして、左メニューの幅（240）で「事故・ヒヤリハット」が 1 行に入るようにする。
+ * 入らない（文字 200% など）ときは語の切れ目（「事故・｜ヒヤリハット」）で折る */
 .sb-side-sub {
   min-height: var(--sb-hit-min);
-  gap: 10px;
-  padding: 0 10px;
+  gap: 8px;
+  padding: 4px 8px;
+  text-wrap: balance;
 }
 
 /* ===== 一覧の行・絞り込みのチップ（Sprint 12h PR ③a。点検の一覧。見本：warm-final/inspections.html） ===== */
@@ -1278,7 +1770,7 @@ input.sb-check:disabled {
 .sb-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   min-height: var(--sb-hit-row);
   padding: 14px 0;
   color: inherit;
@@ -1287,16 +1779,17 @@ input.sb-check:disabled {
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--sb-pill);
-  background: var(--sb-ink);
-  color: var(--sb-on-dot);
+  width: 24px;
+  height: 24px;
+  color: var(--sb-ink-2);
+}
+.sb-go-dot svg {
+  width: 24px;
+  height: 24px;
 }
 a.sb-row:hover .sb-go-dot,
 a.sb-row:focus-visible .sb-go-dot {
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
+  color: var(--sb-primary);
 }
 .sb-chips {
   display: flex;
@@ -1310,18 +1803,344 @@ a.sb-row:focus-visible .sb-go-dot {
   min-height: var(--sb-hit-min);
   padding: 6px 16px;
   border-radius: var(--sb-pill);
+  /* 選ばれていない札は破線の縁（J-1 の E2E が実線＝選択中・破線＝それ以外で見分ける）。取消済みの記録の破線の縁とは、札（丸い形）とカード（角の丸い面）で形が違う */
   border: 2px dashed var(--sb-edge);
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.2;
-  color: var(--sb-ink-3);
+  color: var(--sb-ink-2);
 }
 .sb-chip:hover {
   background: var(--sb-hover);
 }
-.sb-chip[aria-current="true"] {
+.sb-chip[aria-current="true"],
+.sb-chip[aria-current="page"] {
   border: 2px solid var(--sb-ink);
   background: var(--sb-control);
   color: var(--sb-ink);
   font-weight: 700;
+}
+/* 選ばれている札は、太い縁・太字に加えて先頭にチェックの形（色や線の太さだけに頼らない）。装飾の疑似要素で、読み上げには出ない */
+.sb-chip[aria-current="true"]::before,
+.sb-chip[aria-current="page"]::before {
+  content: "" / "";
+  flex: none;
+  width: 13px;
+  height: 7px;
+  margin-top: -3px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+/* 数値の強調（16-J J-1。日誌の飛行記録の離陸・着陸の時刻と飛行時間。桁をそろえる tabular-nums は .sb-num が持つ。屋外で読めるよう 1.3rem（約 21px。360 幅でも時刻と飛行時間が 1 行に収まる最大）・太字） */
+.sb-stat-num {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* 点検の一覧（16-I 磨き込み）：取消済みのカードは、面を地に近づけて破線の縁にする（有効な記録の実線の縁と形で見分ける。状態は情報の「取消済み」と取り消し線の文字も示す）。
+ * 縁の太さの分だけ内側の余白を引いて、カードの高さを変えない */
+a.sb-card-list:has([data-result="voided"]) {
+  padding: calc(var(--sb-sp-4) - 1.5px);
+  border: 1.5px dashed var(--sb-edge);
+  background: var(--sb-base);
+  box-shadow: none;
+}
+a.sb-card-list:has([data-result="voided"]):hover {
+  background: var(--sb-hover);
+}
+
+/* ===== 空の状態・通信エラー（Sprint 16-D D-5） ===== */
+.sb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-empty-icon {
+  color: var(--sb-ink-3);
+}
+.sb-empty-message {
+  max-width: 28em;
+  text-wrap: balance;
+  line-break: strict;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+  color: var(--sb-ink);
+  text-wrap: pretty;
+}
+.sb-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sb-error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+  color: var(--sb-ink);
+  text-wrap: pretty;
+}
+.sb-error-message .sb-field-error-mark {
+  margin-top: 5px;
+  color: var(--sb-st-danger-mark);
+}
+
+/* ===== スケルトン（Sprint 16-D D-4）：カードの形の静止した帯。動かさない（V-6）。aria-hidden の帯と、親の aria-busy・読み上げの文「読み込み中」 ===== */
+.sb-skel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: var(--sb-sp-4);
+  background: var(--sb-surface);
+  border-radius: var(--sb-r-card);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-skel {
+  display: block;
+  height: 16px;
+  border-radius: var(--sb-r-control);
+  background: var(--sb-sunken);
+}
+.sb-skel-title {
+  width: 40%;
+  height: 22px;
+}
+.sb-skel-line:nth-of-type(odd) {
+  width: 92%;
+}
+.sb-skel-line:nth-of-type(even) {
+  width: 68%;
+}
+
+/* ===== ボトムシート（Sprint 16-D D-3）：上側の角丸 20・つまみ・高さ 3 段（120px・50%・90%）。暗幕は中間以上だけ。開閉と段の変更は --sb-dur-sheet（現場と動きを減らす指定で 0） ===== */
+.sb-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.sb-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--sb-scrim);
+  pointer-events: auto;
+  animation: sb-sheet-fade var(--sb-dur-sheet) var(--sb-ease);
+}
+.sb-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  height: 50dvh;
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  border-radius: var(--sb-r-sheet) var(--sb-r-sheet) 0 0;
+  border: var(--sb-rule-w) solid var(--sb-rule);
+  border-bottom: 0;
+  box-shadow: var(--sb-shadow-float);
+  pointer-events: auto;
+  transition: height var(--sb-dur-sheet) var(--sb-ease);
+  animation: sb-sheet-rise var(--sb-dur-sheet) var(--sb-ease);
+}
+.sb-sheet[data-stage="peek"] {
+  height: 120px;
+}
+.sb-sheet[data-stage="half"] {
+  height: 50dvh;
+}
+.sb-sheet[data-stage="full"] {
+  height: 90dvh;
+}
+.sb-sheet-handle {
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-edge);
+}
+.sb-sheet-head {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 4px 8px 4px 16px;
+}
+.sb-sheet-title {
+  flex: 1 1 8em;
+  min-width: 0;
+  font-size: var(--sb-fs-h);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--sb-ink);
+}
+.sb-sheet-title:focus-visible {
+  outline: 3px solid var(--sb-focus);
+  outline-offset: 2px;
+  border-radius: var(--sb-r-s);
+}
+.sb-sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.sb-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 16px 16px;
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@keyframes sb-sheet-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sb-sheet-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 判定の総合の語（計画の段 ⑥。16-H2）：結論の語より一段小さく、長い文でも折り返す */
+.sb-v-total {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--sb-ink);
+  overflow-wrap: anywhere;
+}
+.sb-v-sub {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--sb-ink-2);
+}
+.sb-v-sub > span {
+  font-weight: 700;
+  color: var(--sb-ink);
+}
+
+/* ===== 公開の `/`（Sprint 16-M） ===== */
+
+/* 判定の行：判定の帯のカード（.sb-card-state）と同じ見た目（状態の面＋左端 6px の帯）を、一覧の行（li＝.sb-vcard）と、
+ * 狭い幅の表の行（tr＝.sb-vrow。768px 以上は表の行のまま）に使う。状態は data-state（danger・warn・info・safe。判定不能は無指定＝帯なし）。
+ * 帯は角丸に沿って切る。面の中の補足の文字は、面の上でも 7:1 を保つ濃さ（--sb-ink-2）に上げる。 */
+.sb-vcard {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sb-r-l);
+  background: var(--sb-state-face, var(--sb-surface));
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+}
+.sb-vcard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--sb-state-mark, var(--sb-edge));
+}
+@media (max-width: 767px) {
+  .sb-vrow {
+    position: relative;
+    overflow: hidden;
+    background: var(--sb-state-face, var(--sb-surface));
+    box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
+  }
+  .sb-vrow::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: var(--sb-state-mark, var(--sb-edge));
+  }
+}
+.sb-vcard[data-state="safe"], .sb-vrow[data-state="safe"] { --sb-state-face: var(--sb-st-safe-face); --sb-state-mark: var(--sb-st-safe-mark); }
+.sb-vcard[data-state="warn"], .sb-vrow[data-state="warn"] { --sb-state-face: var(--sb-st-warn-face); --sb-state-mark: var(--sb-st-warn-mark); }
+.sb-vcard[data-state="danger"], .sb-vrow[data-state="danger"] { --sb-state-face: var(--sb-st-danger-face); --sb-state-mark: var(--sb-st-danger-mark); }
+.sb-vcard[data-state="info"], .sb-vrow[data-state="info"] { --sb-state-face: var(--sb-st-info-face); --sb-state-mark: var(--sb-st-info-mark); }
+@media (max-width: 767px) {
+  .sb-vrow [class*="text-sb-ink-3"] { color: var(--sb-ink-2); }
+}
+.sb-vcard [class*="text-sb-ink-3"] { color: var(--sb-ink-2); }
+
+/* 短い選択肢を並べる所（空域・飛行の方法）は 56px まで詰める（押す部品の下限 48 は守る。ops の .opx-check-dense と同じ値）。16-M */
+.sb-check-row.sb-check-dense:has(input.sb-check) {
+  min-height: 56px;
+  padding-block: 8px;
+}
+/* 結論のカード：判定の段の行は本文の行の高さを詰める（補足の 1.5。総合の語を出す画面。16-M） */
+.sb-card-state .sb-v-sub {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.sb-card-state .sb-v-total {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+/* 地図の上の部品（ズームほか）は 48px の円。面は白（--sb-surface）、縁は --sb-edge の 1px、隣とは 8px 離す（影は使わない）。16-M の M-3 */
+.sb-map-frame .maplibregl-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sb-map-frame .maplibregl-ctrl-group button,
+.sb-map-frame .maplibregl-ctrl-group button + button {
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--sb-surface);
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
+}
+/* maplibre-gl の既定は、フォーカス中の先頭・末尾の部品を角丸 4px の四角にし（:focus:first-child／:last-child）、クリック後は縁の影を消し（:focus:not(:focus-visible){box-shadow:none}）、キーボードでは青い光彩を足す。
+   どれも詳細度 0,3,1。クラスを重ねて 0,4,1 にし、フォーカス中・クリック後も円と縁（--sb-edge の 1px）を保つ。フォーカスの輪は .sb-page *:focus-visible の outline（3px・--sb-focus）が円に沿って出る。16-M の N-4 */
+.sb-map-frame .maplibregl-ctrl-group.maplibregl-ctrl-group button:focus,
+.sb-map-frame .maplibregl-ctrl-group.maplibregl-ctrl-group button:focus:is(:first-child, :last-child, :only-child) {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-edge);
+}
+
+/* 区切りの見出し（SectionHead）の件数：見出しが 2 行に折り返すと、2 桁の数（「06」）が 1 桁ずつ縦に割れていた（375px の「規制ごとの判定」）。
+   数は割らずに右端へ置く。見出しの文字だけが折り返す。16-M の designer */
+.sb-page div:has(> p.sb-eyebrow) > span.sb-num {
+  flex: none;
+  white-space: nowrap;
+}
+/* 手続きの票（768px 以上の表）：「出す先」の列が詰まり、1 語ずつ 4 行に折れていた（1280px）。列に最低の幅を持たせる（狭い幅のカードは対象外＝長さは変わらない）。 */
+@media (min-width: 768px) {
+  [data-testid="verdict-procedures"] td[data-label="出す先"] {
+    min-width: 8.5rem;
+  }
 }

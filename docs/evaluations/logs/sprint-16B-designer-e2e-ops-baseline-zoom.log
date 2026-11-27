@@ -1,0 +1,9 @@
+  ✓  1 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  ✘  2 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  ✘  3 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  ✘  4 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  ✘  5 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  ✘  6 e2e/ops-db/sprint16-b-db.spec.ts:82:7 › Sprint 16-B E2E-DB：文字の下限（14px）・本文 16px・rem �
+  5 failed
+  1 passed (18.8s)
+ ELIFECYCLE  Command failed with exit code 1.

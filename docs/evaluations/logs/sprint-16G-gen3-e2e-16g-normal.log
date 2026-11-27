@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts e2e/ops-db/sprint16-g-db.spec.ts -g HM-3
+
+
+Running 2 tests using 1 worker
+
+[16-G gen3] 375x812 normal: quick bottom 708.5, nav top 739.0, margin 30.5
+  ✓  1 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 375×812 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (1.2s)
+[16-G gen3] 390x844 normal: quick bottom 687.5, nav top 771.0, margin 83.5
+  ✓  2 e2e/ops-db/sprint16-g-db.spec.ts:189:9 › Sprint 16-G E2E-DB：ホーム › HM-3 390×844 の最初の画面（スクロールなし）に、準備カードの見出しと 1 行目・次の予定・クイック操作 3 つが入る。3 つは 1 行・48px 以上 (940ms)
+
+  2 passed (7.1s)

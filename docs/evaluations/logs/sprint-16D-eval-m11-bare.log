@@ -1,0 +1,12 @@
+/ops/permits/new [
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"全国\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"円で指定\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"文章のみ\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"限定しない\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"選ぶ\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"限定しない\" appearance=none",
+ "radio cls=\"sb-check mt-0.5\" 32x32 label=\"選ぶ\" appearance=none"
+]
+ tall labels []
+/ops/incidents/new []
+ tall labels ["159px \"人の死傷（重傷以上）操縦者や関係者のけがも含みます。悪天候などの外的な要因による\" inputs=1","181px \"第三者の物件の損壊（軽微なものも含む）他人が所有する物（建物・車・設備など）を傷\" inputs=1","202px \"機体の不具合による制御不能（これによる紛失を含む）通信の障害（通信できる範囲から\" inputs=1","329px \"操縦ミスなどによる操縦不能・機体の紛失（機体の不具合によらないもの）国土交通省の\" inputs=1"]

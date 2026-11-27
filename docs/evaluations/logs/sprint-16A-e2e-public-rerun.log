@@ -1,0 +1,211 @@
+
+Running 18 tests using 1 worker
+
+  ✓   1 e2e/sprint12h-pr2.spec.ts:863:7 › Q-26 動き › 通常：矢印の入れ替えは標準の動き 0.18s（ホバー・フォーカス・押下。16-A で 0.5s から変更） (1.3s)
+  ✘   2 e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /（公開の判定画面）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (1.6s)
+  ✓   3 e2e/sprint16-a.spec.ts:25:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /（公開の判定画面）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (1.3s)
+  ✘   4 e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（通常）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (721ms)
+  ✓   5 e2e/sprint16-a.spec.ts:25:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（通常）：文字は 4.5:1 以上（無効の部品を除く）。横スクロールなし (643ms)
+  ✘   6 e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（現場）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） (608ms)
+  ✓   7 e2e/sprint16-a.spec.ts:25:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-3. /ops/design（現場）：文字は 7:1 以上（無効の部品を除く）。横スクロールなし (686ms)
+  ✓   8 e2e/sprint16-a.spec.ts:38:7 › 16-A 公開側：K-3・K-13・K-14 › K-14. OS が暗でも、`/` と見本は明で描かれる（地 #F6F7F9・文字 #14181F）。強制の暗は見本の ?theme=dark だけ (1.5s)
+  ✘   9 e2e/sprint16-a.spec.ts:50:7 › 16-A 公開側：K-3・K-13・K-14 › 休眠の暗（見本の ?theme=dark）：文字は 4.5:1 以上で、色は暗のトークンの集合に入る (784ms)
+  ✓  10 e2e/sprint9.spec.ts:78:7 › C・E. 現在地（本番相当サーバー） › 開いただけでは位置を要求せず、押すまで通信がない。押すと判定の通信が 1 回ずつ（check・diagnose）で、与えた座標（小数 6 桁）だけを送り、要求本文に精度・時刻・指定方法がない。結果に「現在地（精度 約 30 m）」を添える (5.0s)
+  ✓  11 e2e/sprint9.spec.ts:153:7 › C・E. 現在地（本番相当サーバー） › 精度 150m では、精度が低い旨と「この位置で判定しますか」の確認を 1 回出し、確認の前は判定の通信がない。『この地点で判定』で 1 回ずつ判定する (5.8s)
+  ✓  12 e2e/sprint9.spec.ts:186:7 › C・E. 現在地（本番相当サーバー） › 確認で取消した後は判定せず、localStorage・Cookie に現在地の座標と精度がない (4.7s)
+  ✓  13 e2e/sprint9.spec.ts:219:7 › C・E. 現在地（本番相当サーバー） › `/?start=here`・`/?start=search`：位置の要求は 0 のまま、フォーカスだけが「現在地で判定」・住所の入力欄に移る（押すのは利用者） (6.5s)
+  ✓  14 e2e/sprint9.spec.ts:240:7 › C・E. 現在地（本番相当サーバー） › 位置情報を許可しないと、許可されていない旨と案内を表示し、それまでの地点と判定結果は変わらない (2.9s)
+  ✓  15 e2e/sprint9.spec.ts:269:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › タッチで 600ms 押すとその位置で判定し、300ms で離した場合は長押しとして扱わない（単タップでも指定しない） (5.8s)
+  ✘  16 e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり (2.0m)
+  ✓  17 e2e/sprint9.spec.ts:352:7 › A・B. 住所検索 › （フィクスチャ）結果に出典と精度の説明が表示され、町字の代表点では地図での指定を促す (4.3s)
+  ✓  18 e2e/sprint9.spec.ts:387:7 › A・B. 住所検索 › 出典の表示（同梱索引があるときだけ ABR を示す）と、台帳の 2 件の出典 (2.0s)
+
+
+  1) e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /（公開の判定画面）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+
+    Error: /（公開の判定画面）: 許可した集合の外の色（K-13）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 15
+
+    - Array []
+    + Array [
+    +   "map-pick-hint<span.mt-[0.4em]> background-color rgb(220, 38, 38)",
+    +   "layer-list<path> fill rgb(0, 0, 0)",
+    +   "layer-list<circle> stroke rgb(154, 52, 18)",
+    +   "layer-list<circle> fill rgb(220, 38, 38)",
+    +   "layer-list<circle> stroke rgb(153, 27, 27)",
+    +   "legend-zones<span.mt-0.5> background-color rgb(220, 38, 38)",
+    +   "legend-zones<span.mt-0.5> border-top rgb(153, 27, 27)",
+    +   "legend-zones<span.mt-0.5> border-right rgb(153, 27, 27)",
+    +   "legend-zones<span.mt-0.5> border-bottom rgb(153, 27, 27)",
+    +   "legend-zones<span.mt-0.5> border-left rgb(153, 27, 27)",
+    +   "legend-zones<span.mt-0.5> background-color rgb(245, 158, 11)",
+    +   "verdict-legend<path> fill rgb(0, 0, 0)",
+    +   "history-item<path> fill rgb(0, 0, 0)",
+    + ]
+
+       at color-set.ts:107
+
+      105 | export const expectColorsInTokenSet = async (page: Page, rootSelector: string, label: string): Promise<void> => {
+      106 |   const v = await collectColorViolations(page, rootSelector);
+    > 107 |   expect(v.map((x) => `${x.where} ${x.prop} ${x.color}`), `${label}: 許可した集合の外の色（K-13）`).toEqual([]);
+          |                                                                                         ^
+      108 | };
+      109 |
+        at expectColorsInTokenSet (/home/user/soraban/e2e/color-set.ts:107:89)
+        at /home/user/soraban/e2e/sprint16-a.spec.ts:22:7
+
+    Error Context: test-results/sprint16-a-16-A-公開側：K-3・K--3c391-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-a-16-A-公開側：K-3・K--3c391-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-a-16-A-公開側：K-3・K--3c391-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（通常）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+
+    Error: /ops/design（通常）: 許可した集合の外の色（K-13）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "cat-verdict-needs_procedure<path> fill rgb(0, 0, 0)",
+    +   "cat-verdict<path> fill rgb(0, 0, 0)",
+    + ]
+
+       at color-set.ts:107
+
+      105 | export const expectColorsInTokenSet = async (page: Page, rootSelector: string, label: string): Promise<void> => {
+      106 |   const v = await collectColorViolations(page, rootSelector);
+    > 107 |   expect(v.map((x) => `${x.where} ${x.prop} ${x.color}`), `${label}: 許可した集合の外の色（K-13）`).toEqual([]);
+          |                                                                                         ^
+      108 | };
+      109 |
+        at expectColorsInTokenSet (/home/user/soraban/e2e/color-set.ts:107:89)
+        at /home/user/soraban/e2e/sprint16-a.spec.ts:22:7
+
+    Error Context: test-results/sprint16-a-16-A-公開側：K-3・K--64557-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-a-16-A-公開側：K-3・K--64557-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-a-16-A-公開側：K-3・K--64557-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（現場）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+
+    Error: /ops/design（現場）: 許可した集合の外の色（K-13）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "cat-verdict-needs_procedure<path> fill rgb(0, 0, 0)",
+    +   "cat-verdict<path> fill rgb(0, 0, 0)",
+    + ]
+
+       at color-set.ts:107
+
+      105 | export const expectColorsInTokenSet = async (page: Page, rootSelector: string, label: string): Promise<void> => {
+      106 |   const v = await collectColorViolations(page, rootSelector);
+    > 107 |   expect(v.map((x) => `${x.where} ${x.prop} ${x.color}`), `${label}: 許可した集合の外の色（K-13）`).toEqual([]);
+          |                                                                                         ^
+      108 | };
+      109 |
+        at expectColorsInTokenSet (/home/user/soraban/e2e/color-set.ts:107:89)
+        at /home/user/soraban/e2e/sprint16-a.spec.ts:22:7
+
+    Error Context: test-results/sprint16-a-16-A-公開側：K-3・K--d3164-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-a-16-A-公開側：K-3・K--d3164-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-a-16-A-公開側：K-3・K--d3164-り・線・影）がトークンの集合に入る（橙・旧い藍が無い）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint16-a.spec.ts:50:7 › 16-A 公開側：K-3・K-13・K-14 › 休眠の暗（見本の ?theme=dark）：文字は 4.5:1 以上で、色は暗のトークンの集合に入る 
+
+    Error: 見本（暗）: 許可した集合の外の色（K-13）
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "cat-verdict-needs_procedure<path> fill rgb(0, 0, 0)",
+    +   "cat-verdict<path> fill rgb(0, 0, 0)",
+    + ]
+
+       at color-set.ts:107
+
+      105 | export const expectColorsInTokenSet = async (page: Page, rootSelector: string, label: string): Promise<void> => {
+      106 |   const v = await collectColorViolations(page, rootSelector);
+    > 107 |   expect(v.map((x) => `${x.where} ${x.prop} ${x.color}`), `${label}: 許可した集合の外の色（K-13）`).toEqual([]);
+          |                                                                                         ^
+      108 | };
+      109 |
+        at expectColorsInTokenSet (/home/user/soraban/e2e/color-set.ts:107:89)
+        at /home/user/soraban/e2e/sprint16-a.spec.ts:54:5
+
+    Error Context: test-results/sprint16-a-16-A-公開側：K-3・K--07622-字は-4-5-1-以上で、色は暗のトークンの集合に入る/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-a-16-A-公開側：K-3・K--07622-字は-4-5-1-以上で、色は暗のトークンの集合に入る/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-a-16-A-公開側：K-3・K--07622-字は-4-5-1-以上で、色は暗のトークンの集合に入る/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 120000ms exceeded.
+
+      13 |   names.some((n) => new URL(url).pathname === `/api/${n}`);
+      14 |
+    > 15 | const waitCheck = (page: Page) => page.waitForResponse((r) => r.url().endsWith("/api/check") && r.ok());
+         |                                        ^
+      16 | const waitDiagnose = (page: Page) =>
+      17 |   page.waitForResponse((r) => r.url().endsWith("/api/diagnose") && r.ok());
+      18 |
+        at waitCheck (/home/user/soraban/e2e/sprint9.spec.ts:15:40)
+        at /home/user/soraban/e2e/sprint9.spec.ts:328:20
+
+    Error Context: test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint9-D-長押し・右クリック・左クリック（-b6702-の右クリックメニューを出さない。左クリックも従来どおり/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /（公開の判定画面）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+    e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（通常）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+    e2e/sprint16-a.spec.ts:18:9 › 16-A 公開側：K-3・K-13・K-14 › A-7/K-13. /ops/design（現場）：要素の色（文字・背景・縁・輪・下線・塗り・線・影）がトークンの集合に入る（橙・旧い藍が無い） 
+    e2e/sprint16-a.spec.ts:50:7 › 16-A 公開側：K-3・K-13・K-14 › 休眠の暗（見本の ?theme=dark）：文字は 4.5:1 以上で、色は暗のトークンの集合に入る 
+    e2e/sprint9.spec.ts:306:7 › D. 長押し・右クリック・左クリック（本番相当サーバー） › デスクトップで右クリックするとその位置で判定し、ブラウザの右クリックメニューを出さない。左クリックも従来どおり 
+  13 passed (2.9m)

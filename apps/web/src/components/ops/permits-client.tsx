@@ -75,8 +75,9 @@ const toggle = (list: readonly string[], v: string): string[] => (list.includes(
 
 // 選択肢の行：枠で 1 行ずつ区切り（長い文言は折り返す）、選んだ行は墨の枠と薄い地で示す（チェックの記号と併用）。③b1 の計画の入力（plans-client.tsx）と同じ作り
 const rowClass =
-  "flex min-h-11 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-surface has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
-const box = `${checkboxClass} mt-0.5 h-5! w-5!`;
+  "flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m border border-sb-rule bg-sb-base px-3 py-2.5 text-sm leading-snug text-sb-ink hover:bg-sb-sunken has-[:checked]:border-sb-ink has-[:checked]:bg-sb-hover has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sb-focus";
+const box = `${checkboxClass} mt-0.5`;
+const radio = "sb-radio mt-0.5";
 
 /** 登録・訂正のフォーム。訂正では reason と expectedVersion を送る。 */
 export function PermitForm({
@@ -211,7 +212,7 @@ export function PermitForm({
         </Field>
       </Group>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-kinds">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["kinds"] ? "permit-err-kinds" : undefined} data-testid="permit-kinds">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">許可・承認の種類</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {kindChoices.map((c) => {
@@ -224,8 +225,8 @@ export function PermitForm({
             );
           })}
         </div>
-        <FieldError message={errors["kinds"]} />
-        <p className="text-xs leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
+        <FieldError id="permit-err-kinds" message={errors["kinds"]} />
+        <p className="text-sm leading-relaxed text-sb-ink-3">空港等周辺の許可は個別許可だけです。登録と照合は行いますが、判定の段（要手続き）は変えません。</p>
         {hasAirport ? (
           <Field label="空港名（1 行に 1 件・5 件まで）" required error={errors["airportNames"]} hint="どの空港の許可かの表記です（照合には使いません）。">
             <textarea className={inputClass} rows={2} value={v.airportNames} onChange={(e) => set("airportNames", e.target.value)} data-testid="permit-airport-names" />
@@ -233,7 +234,7 @@ export function PermitForm({
         ) : null}
       </fieldset>
 
-      <fieldset className="flex min-w-0 flex-col gap-3" data-testid="permit-place">
+      <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={errors["placeScope"] ? "permit-err-placeScope" : undefined} data-testid="permit-place">
         <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">場所の範囲</legend>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
           {(
@@ -246,17 +247,17 @@ export function PermitForm({
             const disabled = val === "nationwide" && (v.coverage === "individual" || hasAirport);
             return (
               <label key={val} className={`${rowClass} ${disabled ? "opacity-50" : ""}`}>
-                <input type="radio" name="place-type" className={box} checked={v.placeType === val} disabled={disabled} onChange={() => set("placeType", val)} data-testid={`permit-place-${val}`} />
+                <input type="radio" name="place-type" className={radio} checked={v.placeType === val} disabled={disabled} onChange={() => set("placeType", val)} data-testid={`permit-place-${val}`} />
                 {label}
               </label>
             );
           })}
         </div>
-        {v.coverage === "individual" ? <p className="text-xs leading-relaxed text-sb-ink-3">個別許可は全国を範囲にできません。</p> : null}
+        {v.coverage === "individual" ? <p className="text-sm leading-relaxed text-sb-ink-3">個別許可は全国を範囲にできません。</p> : null}
         {v.placeType === "circles" ? (
           <div className="flex flex-col gap-3" data-testid="permit-circles">
             {v.circles.map((c, i) => (
-              <div key={i} className="grid grid-cols-1 gap-3 rounded-sb-m bg-sb-surface p-3 sm:grid-cols-4" data-testid="permit-circle">
+              <div key={i} className="grid grid-cols-1 gap-3 rounded-sb-m bg-sb-sunken p-3 sm:grid-cols-4" data-testid="permit-circle">
                 <Field label={`円 ${i + 1} の名称（任意）`}>
                   <input className={inputClass} value={c.name} onChange={(e) => setCircle(i, { name: e.target.value })} data-testid="permit-circle-name" />
                 </Field>
@@ -281,7 +282,7 @@ export function PermitForm({
                 円を追加する
               </button>
             ) : null}
-            <p className="text-xs leading-relaxed text-sb-ink-3">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
+            <p className="text-sm leading-relaxed text-sb-ink-3">計画の場所（中心と半径）が、いずれか 1 つの円に完全に収まるときだけ範囲内とします。計画の半径が未入力なら、収まりを確かめられないため適用しません。</p>
           </div>
         ) : null}
         {v.placeType === "text" ? (
@@ -294,7 +295,7 @@ export function PermitForm({
             </p>
           </div>
         ) : null}
-        <FieldError message={errors["placeScope"]} />
+        <FieldError id="permit-err-placeScope" message={errors["placeScope"]} />
       </fieldset>
 
       <ScopePicker
@@ -355,10 +356,10 @@ export function PermitForm({
       ) : null}
 
       <SubmitRow message={message}>
-        <button type="submit" className={buttonPrimaryClass} disabled={busy} data-testid="permit-submit">
+        <button type="submit" data-variant="primary" className={buttonPrimaryClass} disabled={busy} data-testid="permit-submit">
           {editing ? "訂正する" : "登録する"}
         </button>
-        {busy ? <span className="text-xs text-sb-ink-3">送信しています…</span> : null}
+        {busy ? <span className="text-sm text-sb-ink-3">送信しています…</span> : null}
       </SubmitRow>
     </form>
   );
@@ -386,15 +387,15 @@ function ScopePicker({
   readonly emptyLabel: string;
 }) {
   return (
-    <fieldset className="flex min-w-0 flex-col gap-3" data-testid={testId}>
+    <fieldset className="flex min-w-0 flex-col gap-3" aria-describedby={error ? `${testId}-err` : undefined} data-testid={testId}>
       <legend className="mb-1 w-full border-b border-sb-rule pb-1.5 text-sm font-medium text-sb-ink">{title}</legend>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         <label className={rowClass}>
-          <input type="radio" name={`${testId}-type`} className={box} checked={type === "any"} onChange={() => onType("any")} data-testid={`${testId}-any`} />
+          <input type="radio" name={`${testId}-type`} className={radio} checked={type === "any"} onChange={() => onType("any")} data-testid={`${testId}-any`} />
           限定しない
         </label>
         <label className={rowClass}>
-          <input type="radio" name={`${testId}-type`} className={box} checked={type === "listed"} onChange={() => onType("listed")} data-testid={`${testId}-listed`} />
+          <input type="radio" name={`${testId}-type`} className={radio} checked={type === "listed"} onChange={() => onType("listed")} data-testid={`${testId}-listed`} />
           選ぶ
         </label>
       </div>
@@ -403,7 +404,7 @@ function ScopePicker({
           限定しない場合も、許可書に機体・操縦者の限定がないか許可書で確認してください。
         </p>
       ) : options.length === 0 ? (
-        <p className="text-xs text-sb-ink-3">{emptyLabel}</p>
+        <p className="text-sm text-sb-ink-3">{emptyLabel}</p>
       ) : (
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           {options.map((o) => (
@@ -414,7 +415,7 @@ function ScopePicker({
           ))}
         </div>
       )}
-      <FieldError message={error} />
+      <FieldError id={`${testId}-err`} message={error} />
     </fieldset>
   );
 }

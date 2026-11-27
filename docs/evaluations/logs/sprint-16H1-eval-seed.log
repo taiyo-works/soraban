@@ -1,0 +1,6 @@
+
+> soraban@0.0.0 db:seed:ops-test /home/user/soraban
+> tsx packages/db/src/ops-seed-cli.ts
+
+[db:seed:ops-test] テスト用の初期データを投入しました
+exit 0

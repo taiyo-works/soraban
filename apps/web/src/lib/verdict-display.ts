@@ -136,9 +136,12 @@ export const VERDICT_SECTION_TITLE = {
   noFly: "飛行できない理由",
   procedures: "要手続きの手続き（期限順）",
   done: "手続き済み（条件付き）",
-  duties: "飛行の前後に必ず行うこと",
+  duties: "飛行の前後に行うこと",
   items: "規制ごとの判定（元の判定 → 適用した許可 → 判定）",
 } as const;
+
+/** 画面の見出し（飛行ごとの義務の節）。画面・PDF 共通（16-M の M-5：「必ず」は不変条件 3 の禁止語なので言い換えた）。 */
+export const DUTIES_HEADING_SCREEN = VERDICT_SECTION_TITLE.duties;
 
 /** 段取り表の列（画面・PDF 共通）。 */
 export const PROCEDURE_COLUMNS = ["手続き", "出す先", "期限", "法的な重さ"] as const;
@@ -239,3 +242,13 @@ export const isModelAircraftDiagnosis = (d: {
   readonly droneWeightG?: number;
 }): boolean =>
   d.category === "I" && typeof d.droneWeightG === "number" && d.droneWeightG < DRONE_THRESHOLD_G;
+
+/**
+ * 16-N1（Q-L29）：結論の下の段の説明（VERDICT_HELP）を出さない条件。
+ * 判定不能の項目が 1 件以上、項目が 0 件、または総合の区分が unknown（項目 0 件の「未確認」を含む）のとき、
+ * 「飛べます」と読める文を未確認の状態で見せない。代わりの文は足さない。
+ */
+export const hidesVerdictHelp = (
+  verdict: Pick<FlightVerdict, "unknownCount" | "items">,
+  totalKey?: string,
+): boolean => verdict.unknownCount > 0 || verdict.items.length === 0 || verdict.items.some((i) => i.verdict === "unknown") || totalKey === "unknown";

@@ -1,0 +1,68 @@
+HEAD 035a685, DB l16_old1, build: 9qO8efIoinvs5kPLmbAH-
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-l-db.spec.ts --max-failures=0 --retries=0
+
+
+Running 10 tests using 1 worker
+
+  ✘   1 e2e/ops-db/sprint16-l-db.spec.ts:181:7 › L-1 載せ替えた画面の共通の基準 › 旧い名前の class 0・主ボタンは契約の数・押す部品 48px・文字 14px 以上・320〜430 幅の横スクロール 0（375×812） (18.8s)
+  -   2 e2e/ops-db/sprint16-l-db.spec.ts:204:7 › L-1 載せ替えた画面の共通の基準 › 文字 200%（320・390・430）：横スクロール 0・文字の切れ 0・主ボタンに届く・下部ナビが最後を隠さない
+  -   3 e2e/ops-db/sprint16-l-db.spec.ts:217:7 › L-1・K-8 事故・ヒヤリハットの詳細 › 運航管理者：主ボタンは訂正の保存の 1 つ。報告の記録・確認の記録のフォームを開いても 1 つのまま（フォームの送信は副ボタン）。閲覧者は 0
+  -   4 e2e/ops-db/sprint16-l-db.spec.ts:237:7 › L-1・K-8 事故・ヒヤリハットの詳細 › 事故・ヒヤリハットの記録（320 幅・文字 200%）：題と「考えられる要因」の見出しが折り返して横にはみ出さない
+  -   5 e2e/ops-db/sprint16-l-db.spec.ts:246:7 › §17 申し送り（16-L） › /ops/about：文字 200% の 320・360・390・430 で横スクロール 0（メールのリンクが折り返す）
+  -   6 e2e/ops-db/sprint16-l-db.spec.ts:265:7 › §17 申し送り（16-L） › 計画の一覧：plan-report のチップ（通報：…）が 320・文字 200% で折り返し、文書の幅が 320 以内
+  -   7 e2e/ops-db/sprint16-l-db.spec.ts:284:9 › §17 申し送り（16-L） › E-5 日誌から点検へ移ったとき（360×740） › 離陸より後の実施日時の注記は、最初の画面で下部ナビの上端の手前に全体が入る。「今」は 48px 以上で、日付・時刻の入力欄と重ならない
+  -   8 e2e/ops-db/sprint16-l-db.spec.ts:314:7 › L-3・L-4 判定の画面 › L-3. 判定不能の項目を含め、どのタイルのシートにも「必ず」が出ない。判定不能の文は「…で確認してください」で出る
+  -   9 e2e/ops-db/sprint16-l-db.spec.ts:337:7 › L-3・L-4 判定の画面 › L-4. 判定が古いとき：閲覧だけの利用者は主ボタン無し（judgement-primary は副ボタンで、案内が出る）。計画を変更できる運航管理者は再判定が主ボタンの 1 つ
+  -  10 e2e/ops-db/sprint16-l-db.spec.ts:360:7 › K-15 端末データ › 載せ替えた画面を開いても、localStorage・sessionStorage に新しい鍵が増えない
+
+
+  1) e2e/ops-db/sprint16-l-db.spec.ts:181:7 › L-1 載せ替えた画面の共通の基準 › 旧い名前の class 0・主ボタンは契約の数・押す部品 48px・文字 14px 以上・320〜430 幅の横スクロール 0（375×812） 
+
+    Error: 事故・ヒヤリハットの詳細: 見えている主ボタン
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+      Array [
+        "incident-submit",
+    +   "incident-follow-up-update-submit",
+      ]
+
+      190 |       const p = await primaryState(page);
+      191 |       if (typeof s.primaries === "number") expect(p.ids.length, `${s.name}: 見えている主ボタン ${JSON.stringify(p.ids)}`).toBe(s.primaries);
+    > 192 |       else expect(p.ids, `${s.name}: 見えている主ボタン`).toEqual(s.primaries);
+          |                                                  ^
+      193 |       expect(p.stray, `${s.name}: data-variant の無い主色のボタン`).toEqual([]);
+      194 |       expect(await smallTargets(page), `${s.name}: 48px 未満の押す部品`).toEqual([]);
+      195 |       expect(await tinyText(page), `${s.name}: 14px 未満の文字`).toEqual([]);
+        at /home/user/soraban/e2e/ops-db/sprint16-l-db.spec.ts:192:50
+
+    Error Context: test-results/ops/sprint16-l-db-L-1-載せ替えた画面の-bb929-320〜430-幅の横スクロール-0（375×812）/error-context.md
+
+    Error Context: test-results/ops/sprint16-l-db-L-1-載せ替えた画面の-bb929-320〜430-幅の横スクロール-0（375×812）/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ops/sprint16-l-db-L-1-載せ替えた画面の-bb929-320〜430-幅の横スクロール-0（375×812）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ops/sprint16-l-db-L-1-載せ替えた画面の-bb929-320〜430-幅の横スクロール-0（375×812）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e/ops-db/sprint16-l-db.spec.ts:181:7 › L-1 載せ替えた画面の共通の基準 › 旧い名前の class 0・主ボタンは契約の数・押す部品 48px・文字 14px 以上・320〜430 幅の横スクロール 0（375×812） 
+  9 did not run
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1
+== 文字 200%（320:     Error: このアプリについて 文字 200%・320px: 横スクロール   1 failed 
+== 運航管理者：主ボタン:     Error: expect(received).toEqual(expected) // deep equality   1 failed 
+== 事故・ヒヤリハットの記録（320:     Error: 事故・ヒヤリハットの記録 文字 200%・320px: 横スクロール   1 failed 
+== about:     Error: about 200% 320px: 横スクロール（446 > 320）   1 failed 
+== 計画の一覧：plan-report:     Error: 札の中身が札からはみ出さない   1 failed 
+== E-5:     Error: 注記の下端 739.953125 は下部ナビの上端（667）以内   1 failed 
+== L-3\.:     Error: タイル 0 のシート   1 failed 
+== L-4\.:     Error: 閲覧だけ・古いとき   1 failed 

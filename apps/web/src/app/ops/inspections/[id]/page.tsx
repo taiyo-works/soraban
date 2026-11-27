@@ -31,13 +31,13 @@ export default async function InspectionDetailPage({ params }: { readonly params
     ["実施年月日・時刻", <span key="d" className="sb-num tnum">{i.inspectedAtJst}</span>],
     ["区分", INSPECTION_TIMING_LABELS[i.timing]],
     ["機体（登録記号）", <span key="a" className="sb-num">{i.registrationMark}</span>],
-    ["実施者", <span key="p">{i.inspectorName}<span className="ml-1 text-xs text-sb-ink-3">（記録した時点の氏名）</span></span>],
+    ["実施者", <span key="p">{i.inspectorName}<span className="ml-1 text-sm text-sb-ink-3">（記録した時点の氏名）</span></span>],
     [
       "実施場所",
       <span key="pl" className="flex flex-col">
         <span>{i.placeName}</span>
         {i.latitude !== null ? (
-          <span className="sb-num text-xs text-sb-ink-2 tnum">
+          <span className="sb-num text-sm text-sb-ink-2 tnum">
             {i.latitude}, {i.longitude}（WGS84）{i.accuracyM !== null ? `／精度 約 ${i.accuracyM} m` : ""}
           </span>
         ) : null}
@@ -73,13 +73,13 @@ export default async function InspectionDetailPage({ params }: { readonly params
           aside={
             canEnterFlight ? (
               // 通常の画面遷移で開く（入力画面は下書きを端末から読み直すため。クライアント側の遷移の競合も避ける）
-              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} className={buttonFieldClass}>
+              <a href={`/ops/flights/new?aircraftId=${i.aircraftId}&inspectionId=${i.id}`} data-variant="primary" className={buttonFieldClass}>
                 この機体の飛行記録を入力
               </a>
             ) : null
           }
         />
-        {i.voided ? <Note tone="red">この日常点検は取り消されています。記載内容と版の一覧は残しています。</Note> : null}
+        {i.voided ? <Note tone="red" body>この日常点検は取り消されています。記載内容と版の一覧は残しています。</Note> : null}
         <DetailList rows={rows} data-testid="inspection-detail" />
       </div>
       {correctable && options ? (

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 // Sprint 12h PR ③b：デザインシステム v2（暖色・ピル・角丸 16/8/4）。見た目は app/ops/ops-v2.css の .opx-*（と soraban-ui.css の .sb-*）で、値は --sb-* だけ。
 // 色だけで意味を伝えないよう、状態は必ず文字で示し、形（実線・破線・反転）を併用する。
 
-// "alert"（期限切れ・失効など。墨の面＋「！」）と "soon"（期限が近い。薄い橙の面）は、期限の札用。判定の色（赤・琥珀・緑）は使わない（形と言葉で区別する）。
+// "alert"（期限切れ・失効など。墨の面＋「！」）と "soon"（期限が近い。状態「注意」の面）は、期限の札用。判定の色（赤・琥珀・緑）は使わない（形と言葉で区別する）。
 export type Tone = "neutral" | "brand" | "green" | "amber" | "red" | "mute";
 export type BadgeTone = Tone | "alert" | "soon";
 
@@ -78,10 +78,10 @@ export function PageHeader({
       ) : null}
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex min-w-0 flex-col gap-1">
-          {eyebrow ? <p className="opx-eyebrow">{eyebrow}</p> : null}
+          {eyebrow ? <p data-note="" className="opx-eyebrow">{eyebrow}</p> : null}
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1 className="opx-h1">{title}</h1>
-            {meta ? <span className="text-[13px] text-sb-ink-3">{meta}</span> : null}
+            {meta ? <span className="text-sm text-sb-ink-3">{meta}</span> : null}
           </div>
         </div>
         {aside}
@@ -91,7 +91,7 @@ export function PageHeader({
   );
 }
 
-/** 画面内の区切り（v2 の見出し：左 5px の橙線）。 */
+/** 画面内の区切り（v2 の見出し：左 5px の墨の線）。 */
 export function Section({
   title,
   description,
@@ -107,10 +107,10 @@ export function Section({
   readonly tone?: "default" | "danger";
 } & Record<`aria-${string}`, string>) {
   return (
-    <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4">
+    <section {...rest} {...(id ? { id } : {})} className="flex scroll-mt-4 flex-col gap-4 lg:gap-3">
       <div className="sb-sec-head" {...(tone === "danger" ? { "data-tone": "danger" } : {})}>
         <h2>{title}</h2>
-        {description ? <p className="sb-sec-note">{description}</p> : null}
+        {description ? <p className="sb-sec-note sb-sec-note-body">{description}</p> : null}
       </div>
       {children}
     </section>
@@ -118,8 +118,13 @@ export function Section({
 }
 
 /** 短い説明（権限・取消の意味など）。くぼみの面に置く。 */
-export function Note({ children, tone = "brand" }: { readonly children: ReactNode; readonly tone?: "brand" | "red" }) {
-  return <p className={`opx-note ${tone === "red" ? "opx-note-red" : ""}`.trim()}>{children}</p>;
+export function Note({ children, tone = "brand", body = false }: { readonly children: ReactNode; readonly tone?: "brand" | "red"; readonly body?: boolean }) {
+  // 既定は補足（定型の免責・断り書き。印 data-note="" で 14px・1.5）。body は本文（説明文。16px・1.7。印なし）
+  return (
+    <p className={`opx-note ${body ? "opx-note-lg " : ""}${tone === "red" ? "opx-note-red" : ""}`.trim()} {...(body ? {} : { "data-note": "" })}>
+      {children}
+    </p>
+  );
 }
 
 /** 常に見える固定の注意書き（折りたたまない）。くぼみの面。warn・danger は枠の形（破線・実線）でも区別する。 */
@@ -193,6 +198,8 @@ export function CellLabel({ children }: { readonly children: ReactNode }) {
 
 export const buttonPrimaryClass = "opx-btn opx-btn-primary";
 export const buttonGhostClass = "opx-btn";
+/** 文字ボタン（背景なし・主色の文字・高さ 48）。 */
+export const buttonTextClass = "opx-btn opx-btn-text";
 export const buttonDangerClass = "opx-btn opx-btn-danger";
 
 /** 屋外で手袋でも押せる大きさの主ボタン（高さ 56px 以上。現場は 64px）。 */

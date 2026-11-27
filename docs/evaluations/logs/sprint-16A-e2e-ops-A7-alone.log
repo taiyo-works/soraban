@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12g-1b-db.spec.ts:55:7 › Sprint 12g-1b A E2E-DB：ホーム・登録・日誌・利用者メニュー › A7. 予定のない日：何もない旨と次の一手が先頭、375×812 の最初の画面に期限の最初の行が入る（見本の S3＝0 回） (1.1s)
+
+  1 passed (4.8s)

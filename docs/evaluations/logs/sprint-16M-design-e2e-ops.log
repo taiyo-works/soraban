@@ -1,0 +1,7 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-m-db.spec.ts:22:7 › Sprint 16-M 修正 1：過去の判定に帯を付けない（N-2） › N-2. スナップショットの画面の結論のカードは帯なし。いまの判定の画面は帯あり。札の data-testid は同じ (1.8s)
+
+  1 passed (6.2s)
+exit=0

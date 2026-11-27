@@ -1,0 +1,548 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test e2e/sprint16-b.spec.ts e2e/sprint12h-pr2.spec.ts --retries=0
+
+
+Running 83 tests using 1 worker
+
+  ✘   1 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (2.5s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上,line=148,col=54::  1) e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 %0A    Error: 初期：43.5px 未満の部品%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 6%0A%0A    - Array []%0A    + Array [%0A    +   "button.maplibregl-ctrl-zoom-in 「」 44×44",%0A    +   "button.maplibregl-ctrl-zoom-out 「」 44×44",%0A    +   "button.maplibregl-ctrl-compass 「」 44×44",%0A    +   "summary.maplibregl-ctrl-attrib-button 「」 44×44",%0A    + ]%0A%0A      146 |       for (const [name, rep] of Object.entries(all)) {%0A      147 |         expect(rep.count, `${name}：測った部品の数`).toBeGreaterThan(8);%0A    > 148 |         expect(rep.tooSmall, `${name}：43.5px 未満の部品`).toEqual([]);%0A          |                                                      ^%0A      149 |         expect(rep.tight, `${name}：間隔が 8px 未満の押す部品の組`).toEqual([]);%0A      150 |       }%0A      151 |       await ctx.close();%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:148:54
+  ✘   2 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (2.4s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上,line=148,col=54::  2) e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 %0A    Error: 初期：43.5px 未満の部品%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 6%0A%0A    - Array []%0A    + Array [%0A    +   "button.maplibregl-ctrl-zoom-in 「」 44×44",%0A    +   "button.maplibregl-ctrl-zoom-out 「」 44×44",%0A    +   "button.maplibregl-ctrl-compass 「」 44×44",%0A    +   "summary.maplibregl-ctrl-attrib-button 「」 44×44",%0A    + ]%0A%0A      146 |       for (const [name, rep] of Object.entries(all)) {%0A      147 |         expect(rep.count, `${name}：測った部品の数`).toBeGreaterThan(8);%0A    > 148 |         expect(rep.tooSmall, `${name}：43.5px 未満の部品`).toEqual([]);%0A          |                                                      ^%0A      149 |         expect(rep.tight, `${name}：間隔が 8px 未満の押す部品の組`).toEqual([]);%0A      150 |       }%0A      151 |       await ctx.close();%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:148:54
+  ✓   3 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › light：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (1.7s)
+  ✓   4 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › dark：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (1.5s)
+  ✓   5 e2e/sprint12h-pr2.spec.ts:196:7 › Q-9 判定の 5 段（形と語。橙は使わない） › グレースケール（彩度 0）にしても、結論の語と形が読める（形と語が色に頼らない） (1.6s)
+  ✓   6 e2e/sprint12h-pr2.spec.ts:338:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・light (2.6s)
+  ✓   7 e2e/sprint12h-pr2.spec.ts:338:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・dark (2.8s)
+  ✓   8 e2e/sprint12h-pr2.spec.ts:338:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・light (3.0s)
+  ✓   9 e2e/sprint12h-pr2.spec.ts:338:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・dark (3.3s)
+  ✓  10 e2e/sprint12h-pr2.spec.ts:357:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える (2.4s)
+  ✓  11 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.3s)
+  ✓  12 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.3s)
+  ✓  13 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (3.2s)
+  ✓  14 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.3s)
+  ✓  15 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.4s)
+  ✓  16 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.7s)
+  ✓  17 e2e/sprint12h-pr2.spec.ts:411:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.5s)
+  ✓  18 e2e/sprint12h-pr2.spec.ts:429:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.5s)
+  ✓  19 e2e/sprint12h-pr2.spec.ts:444:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (3.8s)
+  ✓  20 e2e/sprint12h-pr2.spec.ts:462:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 動きを減らす設定と現場モードでは、結論へ瞬間に移る（滑らかなスクロールにしない） (4.6s)
+  ✓  21 e2e/sprint12h-pr2.spec.ts:488:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 判定の応答を待つ間に利用者がスクロールしたら、結論が出たあとに引き戻さない (8.0s)
+  ✓  22 e2e/sprint12h-pr2.spec.ts:511:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.3s)
+  ✓  23 e2e/sprint12h-pr2.spec.ts:539:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 通常は滑らかに移る（smooth）。初回の自動判定では動かさない (2.4s)
+  ✓  24 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 320px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓  25 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 320px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.0s)
+  ✓  26 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 360px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.7s)
+  ✓  27 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 360px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.3s)
+  ✓  28 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 375px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.7s)
+  ✓  29 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 375px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.3s)
+  ✓  30 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 768px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓  31 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 768px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.2s)
+  ✓  32 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1024px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.3s)
+  ✓  33 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1024px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.0s)
+  ✓  34 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1280px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.8s)
+  ✓  35 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1280px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.3s)
+  ✓  36 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1440px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.8s)
+  ✓  37 e2e/sprint12h-pr2.spec.ts:589:11 › Q-13 はみ出し 0 › 1440px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.5s)
+  ✓  38 e2e/sprint12h-pr2.spec.ts:616:7 › Q-21 地図の層（追加） › (a) 画面幅を 1023↔1024px に切り替えた直後（地図のサイズ変更中）に層を切り替えても、地図に反映される (5.6s)
+  ✓  39 e2e/sprint12h-pr2.spec.ts:633:7 › Q-21 地図の層（追加） › (b) 7 層を 1 つずつ off／on し、data-hidden-layers と MapLibre から読み戻した実際の visibility が一致する (13.0s)
+  ✓  40 e2e/sprint12h-pr2.spec.ts:668:7 › Q-21 地図の層（追加） › (c) 判定で島根県に移ると DID が島根県のものに替わり（data-did-pref）、スマホ幅・PC 幅のどちらでも同じ (6.7s)
+  ✓  41 e2e/sprint12h-pr2.spec.ts:684:7 › Q-22 キーボードとランドマーク › 最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 結論 → 地図 で、DOM の順と同じ (2.3s)
+  ✓  42 e2e/sprint12h-pr2.spec.ts:727:7 › Q-22 キーボードとランドマーク › フォーカスの輪が見える（3px の輪・要素から離す。--sb-focus）。入力欄・ボタン・チェック・リンクのどれでも消えない (2.2s)
+  ✓  43 e2e/sprint12h-pr2.spec.ts:755:7 › Q-22 キーボードとランドマーク › 地図のドラッグ以外の操作はキーボードでできる：層の切り替え（Space）、現在地ボタン（Enter）、地点の例（Enter）、住所の入力（Enter で検索） (3.7s)
+  ✓  44 e2e/sprint12h-pr2.spec.ts:780:7 › Q-24 根拠欄（既存の出典・確認日・版・改正・確からしさを整えて見せる） › 規制カードごとに、使用データ（名前・基準年・確認日・版）・反映済みの改正・出典・確からしさ・条文確認日が出る。出さないもの（判例・確認の状態の 3 段階）を出していない (2.4s)
+  ✓  45 e2e/sprint12h-pr2.spec.ts:822:7 › Q-26 動き › せり上がりは結論カードだけ（0.6s・1 回）。h1・site-lead・入力・地図は動かない (1.7s)
+  ✓  46 e2e/sprint12h-pr2.spec.ts:845:7 › Q-26 動き › reducedMotion: reduce で、せり上がり・矢印の入れ替えの時間が 0 (1.7s)
+  ✓  47 e2e/sprint12h-pr2.spec.ts:863:7 › Q-26 動き › 通常：矢印の入れ替えは標準の動き 0.18s（ホバー・フォーカス・押下。16-A で 0.5s から変更） (1.4s)
+  ✘  48 e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 (12.0s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812,line=939,col=68::  3) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 %0A    Error: 375x812 3-detail のスクロール量（画面の高さの何枚分か）%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 2%0A    Received:    2.2%0A%0A      937 |       for (const r of results) {%0A      938 |         expect(r.taps, `${vp} ${r.script} の押す回数`).toBeLessThanOrEqual(max[r.script as keyof typeof max]);%0A    > 939 |         expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(2);%0A          |                                                                    ^%0A      940 |       }%0A      941 |       await ctx.close();%0A      942 |     });%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:939:68
+  ✓  49 e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 (13.9s)
+  ✘  50 e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている (1.8s)
+
+::error file=e2e/sprint12h-pr2.spec.ts,title=e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている,line=960,col=47::  4) e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている %0A    Error: ページ全体の高さ（375px）。申請支援を止めた後の高さ%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 12000%0A    Received:    12704%0A%0A      958 |     expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);%0A      959 |     // Sprint 18-1：申請支援を止めて短くなった（前 12,086px → 後 11,244px の実測）。上の 2 つの上限は変えず、短くなった分が戻らないよう上限を足す。%0A    > 960 |     expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_000);%0A          |                                               ^%0A      961 |     await expect(page.getByTestId("coverage-details")).not.toHaveAttribute("open", "");%0A      962 |     const cards = page.locator('[data-testid^="regulation-card-"]');%0A      963 |     const n = await cards.count();%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:960:47
+  ✓  51 e2e/sprint12h-pr2.spec.ts:968:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 畳んだままでも見える要約：規制カードの名称・段・判定・この地点の理由・出典・確認日・確からしさ。結論の札（確認日・出典つき）と免責 (1.9s)
+  ✓  52 e2e/sprint12h-pr2.spec.ts:987:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる (1.8s)
+  ✓  53 e2e/sprint12h-pr2.spec.ts:1018:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 収録の一覧は閉じていて、開くと一覧が出る (1.7s)
+  ✓  54 e2e/sprint12h-pr2.spec.ts:1029:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 「申請の準備」は無い：必要手続きのチェックリスト・提出期限・束ね PDF が出ない（Sprint 18-1） (1.7s)
+  ✓  55 e2e/sprint12h-pr2.spec.ts:1043:7 › N1 結論の札と責任の注記 › 結論に「確認日」「出典つき」の札と境界の注記（BOUNDARY_SHORT）。代行・代理申請の語がない (1.7s)
+  ✓  56 e2e/sprint12h-pr2.spec.ts:1058:7 › N1 結論の札と責任の注記 › 「手続き済み」の記録の注記は、結論が「手続き済み」のときだけ付く (2.0s)
+  ✘  57 e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.7s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上,line=140,col=43::  5) e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ─────%0A    Error: 375px: 14px 未満の文字%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "regulation-map「|」 12px",%0A    +   "regulation-map「MapLibre」 12px",%0A    +   "regulation-map「国土地理院」 12px",%0A    + ]%0A%0A       at field-checks.ts:140%0A%0A      138 |   const samples = await collectTextSamples(page, rootSelector);%0A      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);%0A    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);%0A          |                                           ^%0A      141 | };%0A      142 |%0A      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:1083:7
+  ✘  58 e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.8s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上,line=140,col=43::  6) e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ────%0A    Error: 1280px: 14px 未満の文字%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "regulation-map「|」 12px",%0A    +   "regulation-map「MapLibre」 12px",%0A    +   "regulation-map「国土地理院」 12px",%0A    + ]%0A%0A       at field-checks.ts:140%0A%0A      138 |   const samples = await collectTextSamples(page, rootSelector);%0A      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);%0A    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);%0A          |                                           ^%0A      141 | };%0A      142 |%0A      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)%0A        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:1083:7
+  ✓  59 e2e/sprint12h-pr2.spec.ts:1090:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 375×812 (1.7s)
+  ✓  60 e2e/sprint12h-pr2.spec.ts:1090:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 390×700 (1.4s)
+  ✓  61 e2e/sprint12h-pr2.spec.ts:1090:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 360×740 (1.3s)
+  ✓  62 e2e/sprint12h-pr2.spec.ts:1090:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 393×727 (1.5s)
+  ✓  63 e2e/sprint12h-pr2.spec.ts:1102:7 › N4 結論より下の箱も v2 の丸み › 手続きの票・規制ごとの判定・飛行の前後の点検・規制カードの角が丸い（12px 以上） (1.6s)
+  ✓  64 e2e/sprint12h-pr2.spec.ts:1124:9 › N5 PC の最初の画面に 2 つのピル › 1280×800：「この地点を判定する」「現在地で判定」が最初の画面に入る (1.7s)
+  ✓  65 e2e/sprint12h-pr2.spec.ts:1124:9 › N5 PC の最初の画面に 2 つのピル › 1440×900：「この地点を判定する」「現在地で判定」が最初の画面に入る (1.7s)
+  ✘  66 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.2s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上）,line=140,col=43::  7) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    Error: /（公開の判定画面） 375px: 14px 未満の文字%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "regulation-map「|」 12px",%0A    +   "regulation-map「MapLibre」 12px",%0A    +   "regulation-map「国土地理院」 12px",%0A    + ]%0A%0A       at field-checks.ts:140%0A%0A      138 |   const samples = await collectTextSamples(page, rootSelector);%0A      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);%0A    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);%0A          |                                           ^%0A      141 | };%0A      142 |%0A      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+  ✘  67 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.6s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上）,line=140,col=43::  8) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    Error: /（公開の判定画面） 390px: 14px 未満の文字%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "regulation-map「|」 12px",%0A    +   "regulation-map「MapLibre」 12px",%0A    +   "regulation-map「国土地理院」 12px",%0A    + ]%0A%0A       at field-checks.ts:140%0A%0A      138 |   const samples = await collectTextSamples(page, rootSelector);%0A      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);%0A    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);%0A          |                                           ^%0A      141 | };%0A      142 |%0A      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+  ✘  68 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.4s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上）,line=140,col=43::  9) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    Error: /（公開の判定画面） 1280px: 14px 未満の文字%0A%0A    expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 1%0A    + Received  + 5%0A%0A    - Array []%0A    + Array [%0A    +   "regulation-map「|」 12px",%0A    +   "regulation-map「MapLibre」 12px",%0A    +   "regulation-map「国土地理院」 12px",%0A    + ]%0A%0A       at field-checks.ts:140%0A%0A      138 |   const samples = await collectTextSamples(page, rootSelector);%0A      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);%0A    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);%0A          |                                           ^%0A      141 | };%0A      142 |%0A      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };%0A        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+  ✓  69 e2e/sprint16-b.spec.ts:40:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.5s)
+  ✓  70 e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (1.0s)
+  ✓  71 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (647ms)
+  ✓  72 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (543ms)
+  ✓  73 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (706ms)
+  ✓  74 e2e/sprint16-b.spec.ts:40:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (658ms)
+  ✓  75 e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (622ms)
+  ✓  76 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (663ms)
+  ✓  77 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (637ms)
+  ✓  78 e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (664ms)
+  ✓  79 e2e/sprint16-b.spec.ts:40:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (523ms)
+  ✘  80 e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (709ms)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない,line=196,col=46::  10) e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない %0A    Error: /ops/design（現場） 320px: 横スクロールがある%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 320%0A    Received:    332%0A%0A       at field-checks.ts:196%0A%0A      194 |     clientWidth: document.documentElement.clientWidth,%0A      195 |   }));%0A    > 196 |   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);%0A          |                                              ^%0A      197 | };%0A      198 |%0A      199 | /** 文字 200%・320 幅の検査（Sprint 16-B）で使う幅。 */%0A        at expectNoHorizontalScroll (/home/user/soraban/e2e/field-checks.ts:196:46)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:74:7
+  ✘  81 e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (4.6s)
+
+::error file=e2e/field-checks.ts,title=e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く,line=334,col=46::  11) e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く %0A    Error: / 文字 200%・390px: 横スクロールがある%0A%0A    expect(received).toBeLessThanOrEqual(expected)%0A%0A    Expected: <= 390%0A    Received:    428%0A%0A       at field-checks.ts:334%0A%0A      332 |     const l = `${label} 文字 200%・${w}px`;%0A      333 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);%0A    > 334 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);%0A          |                                              ^%0A      335 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);%0A      336 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);%0A      337 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);%0A        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:334:46)%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:80:5
+  ✘  82 e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.6s)
+
+::error file=e2e/sprint16-b.spec.ts,title=e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される,line=103,col=46::  12) e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される %0A    Error: px 固定か切れのどちらかを検出して失敗する%0A%0A    expect(received).toMatch(expected)%0A%0A    Expected pattern: /200% にしても大きくならない文字|文字の切れ/%0A    Received string:  "検出の確認 文字 200%・390px: 横スクロールがある·%0A    expect(received).toBeLessThanOrEqual(expected)·%0A    Expected: <= 390%0A    Received:    428"%0A%0A      101 |       failed = String((e as Error).message);%0A      102 |     }%0A    > 103 |     expect(failed, "px 固定か切れのどちらかを検出して失敗する").toMatch(/200% にしても大きくならない文字|文字の切れ/);%0A          |                                              ^%0A      104 |   });%0A      105 |%0A      106 |   test("B-4. 文字の大きさの標本が十分ある（検査が空でない）", async ({ page }) => {%0A        at /home/user/soraban/e2e/sprint16-b.spec.ts:103:46
+  ✓  83 e2e/sprint16-b.spec.ts:106:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (4.1s)
+
+
+  1) e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 
+
+    Error: 初期：43.5px 未満の部品
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "button.maplibregl-ctrl-zoom-in 「」 44×44",
+    +   "button.maplibregl-ctrl-zoom-out 「」 44×44",
+    +   "button.maplibregl-ctrl-compass 「」 44×44",
+    +   "summary.maplibregl-ctrl-attrib-button 「」 44×44",
+    + ]
+
+      146 |       for (const [name, rep] of Object.entries(all)) {
+      147 |         expect(rep.count, `${name}：測った部品の数`).toBeGreaterThan(8);
+    > 148 |         expect(rep.tooSmall, `${name}：43.5px 未満の部品`).toEqual([]);
+          |                                                      ^
+      149 |         expect(rep.tight, `${name}：間隔が 8px 未満の押す部品の組`).toEqual([]);
+      150 |       }
+      151 |       await ctx.close();
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:148:54
+
+    Error Context: test-results/sprint12h-pr2-Q-8-タップ-48px-025f6-3-5→47-5）で、部品どうしの間隔が-8px-以上/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-Q-8-タップ-48px-025f6-3-5→47-5）で、部品どうしの間隔が-8px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-Q-8-タップ-48px-025f6-3-5→47-5）で、部品どうしの間隔が-8px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 
+
+    Error: 初期：43.5px 未満の部品
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "button.maplibregl-ctrl-zoom-in 「」 44×44",
+    +   "button.maplibregl-ctrl-zoom-out 「」 44×44",
+    +   "button.maplibregl-ctrl-compass 「」 44×44",
+    +   "summary.maplibregl-ctrl-attrib-button 「」 44×44",
+    + ]
+
+      146 |       for (const [name, rep] of Object.entries(all)) {
+      147 |         expect(rep.count, `${name}：測った部品の数`).toBeGreaterThan(8);
+    > 148 |         expect(rep.tooSmall, `${name}：43.5px 未満の部品`).toEqual([]);
+          |                                                      ^
+      149 |         expect(rep.tight, `${name}：間隔が 8px 未満の押す部品の組`).toEqual([]);
+      150 |       }
+      151 |       await ctx.close();
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:148:54
+
+    Error Context: test-results/sprint12h-pr2-Q-8-タップ-48px-7d586-3-5→47-5）で、部品どうしの間隔が-8px-以上/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-Q-8-タップ-48px-7d586-3-5→47-5）で、部品どうしの間隔が-8px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-Q-8-タップ-48px-7d586-3-5→47-5）で、部品どうしの間隔が-8px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 
+
+    Error: 375x812 3-detail のスクロール量（画面の高さの何枚分か）
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 2
+    Received:    2.2
+
+      937 |       for (const r of results) {
+      938 |         expect(r.taps, `${vp} ${r.script} の押す回数`).toBeLessThanOrEqual(max[r.script as keyof typeof max]);
+    > 939 |         expect(r.screens, `${vp} ${r.script} のスクロール量（画面の高さの何枚分か）`).toBeLessThanOrEqual(2);
+          |                                                                    ^
+      940 |       }
+      941 |       await ctx.close();
+      942 |     });
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:939:68
+
+    Error Context: test-results/sprint12h-pr2-Q-20-実画面の台本（-7defb-、ページのスクロールは-2-画面分以内-375x812/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-Q-20-実画面の台本（-7defb-、ページのスクロールは-2-画面分以内-375x812/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-Q-20-実画面の台本（-7defb-、ページのスクロールは-2-画面分以内-375x812/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている 
+
+    Error: ページ全体の高さ（375px）。申請支援を止めた後の高さ
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 12000
+    Received:    12704
+
+      958 |     expect(h, "ページ全体の高さ（375px）。畳んだ効果が残っている").toBeLessThanOrEqual(13_500);
+      959 |     // Sprint 18-1：申請支援を止めて短くなった（前 12,086px → 後 11,244px の実測）。上の 2 つの上限は変えず、短くなった分が戻らないよう上限を足す。
+    > 960 |     expect(h, "ページ全体の高さ（375px）。申請支援を止めた後の高さ").toBeLessThanOrEqual(12_000);
+          |                                               ^
+      961 |     await expect(page.getByTestId("coverage-details")).not.toHaveAttribute("open", "");
+      962 |     const cards = page.locator('[data-testid^="regulation-card-"]');
+      963 |     const n = await cards.count();
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:960:47
+
+    attachment #1: page-height-375 (text/plain) ────────────────────────────────────────────────────
+    12704
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sprint12h-pr2-B2-縦が長すぎない：規-d560c--646px）を超えない。畳んだ部分は既定で閉じている/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-B2-縦が長すぎない：規-d560c--646px）を超えない。畳んだ部分は既定で閉じている/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-B2-縦が長すぎない：規-d560c--646px）を超えない。畳んだ部分は既定で閉じている/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ─────
+
+    Error: 375px: 14px 未満の文字
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "regulation-map「|」 12px",
+    +   "regulation-map「MapLibre」 12px",
+    +   "regulation-map「国土地理院」 12px",
+    + ]
+
+       at field-checks.ts:140
+
+      138 |   const samples = await collectTextSamples(page, rootSelector);
+      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
+    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+          |                                           ^
+      141 | };
+      142 |
+      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:1083:7
+
+    Error Context: test-results/sprint12h-pr2-N2-文字は-14px--a8170-字（地図の層の状態の札を含む）はすべて-14px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-N2-文字は-14px--a8170-字（地図の層の状態の札を含む）はすべて-14px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-N2-文字は-14px--a8170-字（地図の層の状態の札を含む）はすべて-14px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ────
+
+    Error: 1280px: 14px 未満の文字
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "regulation-map「|」 12px",
+    +   "regulation-map「MapLibre」 12px",
+    +   "regulation-map「国土地理院」 12px",
+    + ]
+
+       at field-checks.ts:140
+
+      138 |   const samples = await collectTextSamples(page, rootSelector);
+      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
+    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+          |                                           ^
+      141 | };
+      142 |
+      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)
+        at /home/user/soraban/e2e/sprint12h-pr2.spec.ts:1083:7
+
+    Error Context: test-results/sprint12h-pr2-N2-文字は-14px--1fd3d-字（地図の層の状態の札を含む）はすべて-14px-以上/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint12h-pr2-N2-文字は-14px--1fd3d-字（地図の層の状態の札を含む）はすべて-14px-以上/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint12h-pr2-N2-文字は-14px--1fd3d-字（地図の層の状態の札を含む）はすべて-14px-以上/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+
+    Error: /（公開の判定画面） 375px: 14px 未満の文字
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "regulation-map「|」 12px",
+    +   "regulation-map「MapLibre」 12px",
+    +   "regulation-map「国土地理院」 12px",
+    + ]
+
+       at field-checks.ts:140
+
+      138 |   const samples = await collectTextSamples(page, rootSelector);
+      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
+    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+          |                                           ^
+      141 | };
+      142 |
+      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-38abc-入力欄の値は-16px-以上（現場は-18px-以上）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-38abc-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-38abc-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+
+    Error: /（公開の判定画面） 390px: 14px 未満の文字
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "regulation-map「|」 12px",
+    +   "regulation-map「MapLibre」 12px",
+    +   "regulation-map「国土地理院」 12px",
+    + ]
+
+       at field-checks.ts:140
+
+      138 |   const samples = await collectTextSamples(page, rootSelector);
+      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
+    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+          |                                           ^
+      141 | };
+      142 |
+      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-56e18-入力欄の値は-16px-以上（現場は-18px-以上）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-56e18-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-56e18-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+
+    Error: /（公開の判定画面） 1280px: 14px 未満の文字
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "regulation-map「|」 12px",
+    +   "regulation-map「MapLibre」 12px",
+    +   "regulation-map「国土地理院」 12px",
+    + ]
+
+       at field-checks.ts:140
+
+      138 |   const samples = await collectTextSamples(page, rootSelector);
+      139 |   const bad = samples.filter((s) => s.fontSize < min).map((s) => `${s.testId ?? s.tag}「${s.text}」 ${s.fontSize}px`);
+    > 140 |   expect(bad, `${label}: ${min}px 未満の文字`).toEqual([]);
+          |                                           ^
+      141 | };
+      142 |
+      143 | export type TapTarget = { readonly testId: string | null; readonly text: string; readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+        at expectFontSize (/home/user/soraban/e2e/field-checks.ts:140:43)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:26:9
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-9ae02-入力欄の値は-16px-以上（現場は-18px-以上）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-9ae02-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-9ae02-入力欄の値は-16px-以上（現場は-18px-以上）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない 
+
+    Error: /ops/design（現場） 320px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 320
+    Received:    332
+
+       at field-checks.ts:196
+
+      194 |     clientWidth: document.documentElement.clientWidth,
+      195 |   }));
+    > 196 |   expect(scrollWidth, `${label}: 横スクロールがある`).toBeLessThanOrEqual(clientWidth);
+          |                                              ^
+      197 | };
+      198 |
+      199 | /** 文字 200%・320 幅の検査（Sprint 16-B）で使う幅。 */
+        at expectNoHorizontalScroll (/home/user/soraban/e2e/field-checks.ts:196:46)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:74:7
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-06979--design（現場）：320-幅で横スクロールがない/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-06979--design（現場）：320-幅で横スクロールがない/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-06979--design（現場）：320-幅で横スクロールがない/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く 
+
+    Error: / 文字 200%・390px: 横スクロールがある
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 390
+    Received:    428
+
+       at field-checks.ts:334
+
+      332 |     const l = `${label} 文字 200%・${w}px`;
+      333 |     expect(r.textCount, `${l}: 文字を持つ要素がない`).toBeGreaterThan(0);
+    > 334 |     expect(r.scrollWidth, `${l}: 横スクロールがある`).toBeLessThanOrEqual(r.clientWidth);
+          |                                              ^
+      335 |     expect(r.clipped, `${l}: 文字の切れ`).toEqual([]);
+      336 |     expect(r.unscaled, `${l}: 200% にしても大きくならない文字（rem・em にする）`).toEqual([]);
+      337 |     expect(r.unreachablePrimary, `${l}: スクロールで届かない・下部ナビに隠れる主ボタン`).toEqual([]);
+        at expectTextZoom (/home/user/soraban/e2e/field-checks.ts:334:46)
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:80:5
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-1d6ae-・文字の切れ-0・文字が-2-倍になる・主ボタンに届く/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-1d6ae-・文字の切れ-0・文字が-2-倍になる・主ボタンに届く/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-1d6ae-・文字の切れ-0・文字が-2-倍になる・主ボタンに届く/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される 
+
+    Error: px 固定か切れのどちらかを検出して失敗する
+
+    expect(received).toMatch(expected)
+
+    Expected pattern: /200% にしても大きくならない文字|文字の切れ/
+    Received string:  "検出の確認 文字 200%・390px: 横スクロールがある·
+    expect(received).toBeLessThanOrEqual(expected)·
+    Expected: <= 390
+    Received:    428"
+
+      101 |       failed = String((e as Error).message);
+      102 |     }
+    > 103 |     expect(failed, "px 固定か切れのどちらかを検出して失敗する").toMatch(/200% にしても大きくならない文字|文字の切れ/);
+          |                                              ^
+      104 |   });
+      105 |
+      106 |   test("B-4. 文字の大きさの標本が十分ある（検査が空でない）", async ({ page }) => {
+        at /home/user/soraban/e2e/sprint16-b.spec.ts:103:46
+
+    Error Context: test-results/sprint16-b-16-B-公開側：文字の下限・-96233-verflow-hidden-の固定の高さは検出される/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-b-16-B-公開側：文字の下限・-96233-verflow-hidden-の固定の高さは検出される/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-b-16-B-公開側：文字の下限・-96233-verflow-hidden-の固定の高さは検出される/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12 failed
+    e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 
+    e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 
+    e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 
+    e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている 
+    e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ──────
+    e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ─────
+    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） 
+    e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない 
+    e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く 
+    e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される 
+  71 passed (4.3m)
+::notice title=🎭 Playwright Run Summary::  12 failed%0A    e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 %0A    e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 %0A    e2e/sprint12h-pr2.spec.ts:881:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 %0A    e2e/sprint12h-pr2.spec.ts:949:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている %0A    e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ──────%0A    e2e/sprint12h-pr2.spec.ts:1080:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 ─────%0A    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    e2e/sprint16-b.spec.ts:24:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） %0A    e2e/sprint16-b.spec.ts:72:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない %0A    e2e/sprint16-b.spec.ts:78:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く %0A    e2e/sprint16-b.spec.ts:83:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される %0A  71 passed (4.3m)
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1

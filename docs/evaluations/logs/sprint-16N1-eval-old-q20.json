@@ -1,0 +1,247 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/home/user/soraban/node_modules/.bin/playwright",
+      "test",
+      "--retries=0",
+      "--reporter=json",
+      "-g",
+      "Q-20",
+      "e2e/sprint12h-pr2.spec.ts"
+    ],
+    "configFile": "/home/user/soraban/playwright.config.ts",
+    "rootDir": "/home/user/soraban/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/user/soraban/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/user/soraban/e2e",
+        "testIgnore": [
+          "**/ops-db/**"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/user/soraban/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/user/soraban/e2e",
+        "snapshotDir": "/home/user/soraban/e2e",
+        "testIgnore": [
+          "**/ops-db/**"
+        ],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 120000,
+        "use": {
+          "baseURL": "http://127.0.0.1:3100",
+          "trace": "retain-on-failure",
+          "acceptDownloads": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium",
+          "launchOptions": {
+            "executablePath": "/opt/pw-browsers/chromium",
+            "args": [
+              "--no-sandbox"
+            ]
+          }
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "sprint12h-pr2.spec.ts",
+      "file": "sprint12h-pr2.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内",
+          "file": "sprint12h-pr2.spec.ts",
+          "line": 877,
+          "column": 6,
+          "specs": [
+            {
+              "title": "375x812",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 13188,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[画面] Q-20 375x812 1-address: スクロール 0 枚分・押す回数 2\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 375x812 2-geo: スクロール 0 枚分・押す回数 1\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 375x812 3-detail: スクロール 2 枚分・押す回数 0\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 375x812 4-layer: スクロール 1.1 枚分・押す回数 1\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-25T23:36:40.304Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "script-counts",
+                          "contentType": "application/json",
+                          "body": "WwogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMzc1eDgxMiIsCiAgICAic2NyaXB0IjogIjEtYWRkcmVzcyIsCiAgICAidGFwcyI6IDIsCiAgICAic2Nyb2xsUHgiOiAwLAogICAgInNjcmVlbnMiOiAwLAogICAgIm1hcFZpc2libGUiOiB0cnVlLAogICAgImFuc3dlclZpc2libGUiOiB0cnVlLAogICAgInRvZ2V0aGVyIjogdHJ1ZSwKICAgICJtYXBTaGFyZSI6IDAuMjYKICB9LAogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMzc1eDgxMiIsCiAgICAic2NyaXB0IjogIjItZ2VvIiwKICAgICJ0YXBzIjogMSwKICAgICJzY3JvbGxQeCI6IDAsCiAgICAic2NyZWVucyI6IDAsCiAgICAibWFwVmlzaWJsZSI6IHRydWUsCiAgICAiYW5zd2VyVmlzaWJsZSI6IHRydWUsCiAgICAidG9nZXRoZXIiOiB0cnVlLAogICAgIm1hcFNoYXJlIjogMC4yNAogIH0sCiAgewogICAgInRhcmdldCI6ICJjdXJyZW50IiwKICAgICJ2aWV3cG9ydCI6ICIzNzV4ODEyIiwKICAgICJzY3JpcHQiOiAiMy1kZXRhaWwiLAogICAgInRhcHMiOiAwLAogICAgInNjcm9sbFB4IjogMTY0MCwKICAgICJzY3JlZW5zIjogMiwKICAgICJtYXBWaXNpYmxlIjogZmFsc2UsCiAgICAiYW5zd2VyVmlzaWJsZSI6IHRydWUsCiAgICAidG9nZXRoZXIiOiBmYWxzZSwKICAgICJtYXBTaGFyZSI6IDAuMDMKICB9LAogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMzc1eDgxMiIsCiAgICAic2NyaXB0IjogIjQtbGF5ZXIiLAogICAgInRhcHMiOiAxLAogICAgInNjcm9sbFB4IjogOTMxLAogICAgInNjcmVlbnMiOiAxLjEsCiAgICAibWFwVmlzaWJsZSI6IHRydWUsCiAgICAiYW5zd2VyVmlzaWJsZSI6IGZhbHNlLAogICAgInRvZ2V0aGVyIjogZmFsc2UsCiAgICAibWFwU2hhcmUiOiAwLjM0CiAgfQpd"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f70f74bcae85e0c740dc-681809b16846e838e2d5",
+              "file": "sprint12h-pr2.spec.ts",
+              "line": 883,
+              "column": 9
+            },
+            {
+              "title": "1280x800",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 13754,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[画面] Q-20 1280x800 1-address: スクロール 0 枚分・押す回数 2\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 1280x800 2-geo: スクロール 0 枚分・押す回数 1\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 1280x800 3-detail: スクロール 1 枚分・押す回数 0\n"
+                        },
+                        {
+                          "text": "[画面] Q-20 1280x800 4-layer: スクロール 0.4 枚分・押す回数 1\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-25T23:36:53.675Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "script-counts",
+                          "contentType": "application/json",
+                          "body": "WwogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMTI4MHg4MDAiLAogICAgInNjcmlwdCI6ICIxLWFkZHJlc3MiLAogICAgInRhcHMiOiAyLAogICAgInNjcm9sbFB4IjogMCwKICAgICJzY3JlZW5zIjogMCwKICAgICJtYXBWaXNpYmxlIjogZmFsc2UsCiAgICAiYW5zd2VyVmlzaWJsZSI6IHRydWUsCiAgICAidG9nZXRoZXIiOiBmYWxzZSwKICAgICJtYXBTaGFyZSI6IDAuMTYKICB9LAogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMTI4MHg4MDAiLAogICAgInNjcmlwdCI6ICIyLWdlbyIsCiAgICAidGFwcyI6IDEsCiAgICAic2Nyb2xsUHgiOiAwLAogICAgInNjcmVlbnMiOiAwLAogICAgIm1hcFZpc2libGUiOiBmYWxzZSwKICAgICJhbnN3ZXJWaXNpYmxlIjogdHJ1ZSwKICAgICJ0b2dldGhlciI6IGZhbHNlLAogICAgIm1hcFNoYXJlIjogMC4xNAogIH0sCiAgewogICAgInRhcmdldCI6ICJjdXJyZW50IiwKICAgICJ2aWV3cG9ydCI6ICIxMjgweDgwMCIsCiAgICAic2NyaXB0IjogIjMtZGV0YWlsIiwKICAgICJ0YXBzIjogMCwKICAgICJzY3JvbGxQeCI6IDgzMCwKICAgICJzY3JlZW5zIjogMSwKICAgICJtYXBWaXNpYmxlIjogZmFsc2UsCiAgICAiYW5zd2VyVmlzaWJsZSI6IHRydWUsCiAgICAidG9nZXRoZXIiOiBmYWxzZSwKICAgICJtYXBTaGFyZSI6IDAuMTMKICB9LAogIHsKICAgICJ0YXJnZXQiOiAiY3VycmVudCIsCiAgICAidmlld3BvcnQiOiAiMTI4MHg4MDAiLAogICAgInNjcmlwdCI6ICI0LWxheWVyIiwKICAgICJ0YXBzIjogMSwKICAgICJzY3JvbGxQeCI6IDMzMiwKICAgICJzY3JlZW5zIjogMC40LAogICAgIm1hcFZpc2libGUiOiB0cnVlLAogICAgImFuc3dlclZpc2libGUiOiB0cnVlLAogICAgInRvZ2V0aGVyIjogdHJ1ZSwKICAgICJtYXBTaGFyZSI6IDAuMjkKICB9Cl0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f70f74bcae85e0c740dc-934fc5c4cdbad01e9d3b",
+              "file": "sprint12h-pr2.spec.ts",
+              "line": 883,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-25T23:36:37.693Z",
+    "duration": 29904.981,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -16,7 +16,7 @@ export default async function PermitNewPage() {
     <main className="flex flex-col gap-6">
       <PageHeader title="許可・承認の登録" back={{ href: "/ops/permits", label: "許可・承認の一覧" }}>
         <PermitDeclaration declaration={PERMIT_DECLARATION_NOTE} noDipsNote={PERMIT_NO_DIPS_NOTE} />
-        <p className="text-xs leading-relaxed text-sb-ink-3">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
+        <p className="text-sm leading-relaxed text-sb-ink-3">{PERMIT_FORMAT_UNVERIFIED_NOTE}</p>
       </PageHeader>
       <PermitForm
         kindChoices={PERMIT_KINDS.map((k) => ({ value: k, label: PERMIT_KIND_LABEL[k] }))}

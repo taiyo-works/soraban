@@ -1,62 +1,24 @@
 /* 運航管理 `/ops` の v2（そらばん デザインシステム v2。Sprint 12h PR ③b）。見本：docs/design/warm-final/（home・inspections・plan-new・journal）。
  * このファイルは app/ops/layout.tsx だけが読み込む（公開の `/` は読まない。`/` の CSS を増やさないため）。値は持たず、soraban-tokens.css の --sb-* だけを使う。
- * 構成：1 新しい名前の置き換え（.ds が持つ旧い名前を v2 の値に付け替え、触っていない画面も色が v2 になる）、2 ページの骨格、3 部品（.opx-*）。
- * 旧い名前（--bg-*、--fg-*、--color-ink ほか）は、③b2 で全画面が .opx-*／.sb-* に移ったあと、④ で消す。 */
+ * 構成：1 書体と文字の大きさ（旧い色の名前の付け替えは 16-N2 で撤去）、2 ページの骨格、3 部品（.opx-*）。 */
 
 @layer theme, base, components, utilities;
 
-/* ===== 1 旧い名前を v2 の値へ（運航管理の枠 .ops-v2 の中だけ。見本ページ /ops/design は枠を持たないので影響しない） ===== */
+/* ===== 1 運航管理の枠の書体と文字の大きさ（.ops-v2 の中だけ）=====
+ * 16-N2：Sprint 12g の旧い色の名前（--bg-*・--fg-*・--accent*・意味の 5 色・判定の色・--scrim ほか）の付け替えは撤去した（参照 0）。
+ * 残すのは、globals.css の `.ds` が持つ書体と文字の大きさの名前を、v2 の値に付け替えるものだけ。 */
 .ds.ops-v2 {
-  --bg-app: var(--sb-base);
-  --bg-surface: var(--sb-base);
-  --bg-sunken: var(--sb-sunken);
-  --fg: var(--sb-ink);
-  --fg-soft: var(--sb-ink-2);
-  --fg-mute: var(--sb-ink-3);
-  --line: var(--sb-rule);
-  --line-strong: var(--sb-edge);
-  /* 文字・リンク・フォーカスは墨。橙は面だけ（橙の細い文字は作らない） */
-  --accent: var(--sb-ink);
-  --accent-soft: var(--sb-hover);
-  --accent-solid: var(--sb-orange);
-  --accent-solid-hover: var(--sb-orange-hover);
-  --accent-fg: var(--sb-on-orange);
-  --ok-fg: var(--sb-v-none-fg);
-  --ok-bg: color-mix(in srgb, var(--sb-v-none-fill) 10%, var(--sb-base));
-  --ok-line: var(--sb-v-none-fg);
-  --warn-fg: var(--sb-v-needs-fg);
-  --warn-bg: color-mix(in srgb, var(--sb-v-needs-fill) 14%, var(--sb-base));
-  --warn-line: var(--sb-v-needs-fg);
-  --danger-fg: var(--sb-v-no-fg);
-  --danger-bg: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
-  --danger-line: var(--sb-v-no-fg);
-  --info-fg: var(--sb-ink-2);
-  --info-bg: var(--sb-sunken);
-  --info-line: var(--sb-edge);
-  --neutral-fg: var(--sb-ink-2);
-  --neutral-bg: var(--sb-sunken);
-  --neutral-line: var(--sb-edge);
-  --verdict-no-fly: var(--sb-v-no-fg);
-  --verdict-needs: var(--sb-v-needs-fg);
-  --verdict-done: var(--sb-v-done-fg);
-  --verdict-clear: var(--sb-v-none-fg);
-  --verdict-unknown: var(--sb-v-unknown-fg);
-  --r-journal: var(--sb-r-m);
-  --scrim: color-mix(in srgb, var(--sb-ink) 45%, transparent);
   --ds-font-sans: var(--font-noto-jp), "Soraban Latin Fallback", "Soraban JP Fallback", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
-  --fs-h1: var(--sb-fs-h);
   --fs-body: var(--sb-fs-body);
-  --fs-table: 14px;
+  --fs-table: 0.875rem;
   --fs-aux: var(--sb-fs-note);
-  --tap: var(--sb-hit-min);
 }
-/* 現場の画面（.field）は ③b2 で v2 の現場の値に付け替える。それまで枠の色・文字は旧いまま変えない */
 
 /* ===== 2 ページの骨格 ===== */
 .ds.ops-v2 {
   background: var(--sb-base);
   color: var(--sb-ink);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 html:has(.ops-v2),
 html:has(.ops-v2) body {
@@ -70,9 +32,7 @@ html:has(.ops-v2) body {
   outline: 3px solid var(--sb-focus);
   outline-offset: 3px;
 }
-.ds.ops-v2 :is(input, select, textarea):focus-visible {
-  outline-offset: 0;
-}
+/* 輪は全部品で要素から 3px 離す（design-system.md「オフセット 3px」、soraban-ui.css の .sb-input と同じ）。入力欄だけ offset 0 にする規則は特異性で効いておらず、二重の線に見えるため置かずに 3px を正とした（16-D 差し戻し 1） */
 .ds.ops-v2 ::selection {
   background: var(--sb-mark-bg);
   color: var(--sb-ink);
@@ -110,103 +70,84 @@ html:has(.ops-v2) body {
 /* ===== 3 部品 =====
  * @layer components に置く：Tailwind の部品（utilities）で、画面ごとに幅・高さ・余白を重ね書きできるようにする（.opx-btn に w-full など）。 */
 @layer components {
-/* ボタン：普通 48px、主ボタン 56px（現場 56／64px）。文字は 15px 太字。主ボタンは橙の面＋右端の墨の丸（矢印は文字の →） */
+/* ボタン 5 種（16-C。soraban-ui.css の .sb-pill と同じ計算スタイル）。主：主色の面・白の文字・角丸 12・高さ 56（現場 64）・太さ 600。
+ * 副（無印）：くぼみの面・墨の文字・--sb-edge の 1px の縁。文字（.opx-btn-text）：背景なし・主色の文字・高さ 48。危険：副の形で文字だけ危険の文字色。
+ * 無効：くぼみの面・--sb-ink-disabled の文字（破線の縁を残す）。押下：--sb-primary-press＋ scale(.98)。右端の丸と矢印は置かない（旧 v2 の意匠は外した）。 */
 .opx-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   min-height: var(--sb-hit);
-  padding: 0 22px;
-  border: 1.5px solid var(--sb-edge);
-  border-radius: var(--sb-pill);
-  background: var(--sb-control);
+  padding: 0 20px;
+  border: 1px solid var(--sb-edge);
+  border-radius: var(--sb-r-control);
+  background: var(--sb-sunken);
   color: var(--sb-ink);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   line-height: 1.3;
   text-align: center;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background var(--sb-dur) var(--sb-ease);
+  transition:
+    background var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur-press) var(--sb-ease);
 }
-.opx-btn:hover,
-.opx-btn:active {
+.opx-btn:hover {
   background: var(--sb-hover);
 }
-/* Sprint 16 H-3：橙の面は白の地との境界が 2.15:1 しかないので、墨の縁（通常 1px、現場 1.5px）で境界を持たせる。縁の色は暗でも墨の --sb-on-orange */
+.opx-btn:active {
+  transform: scale(0.98);
+}
 .opx-btn-primary {
   min-height: var(--sb-hit-primary);
-  /* 文字は面の中央：右端の丸（48px）と gap（12px）の分だけ左にも余白を取り、左右を対称にする（以前は左 26px で文字が丸の分だけ左に寄っていた） */
-  padding: 4px 4px 4px calc(4px + 48px + 12px);
-  border: var(--sb-rule-w) solid var(--sb-on-orange);
-  background: var(--sb-orange);
-  color: var(--sb-on-orange);
-  font-size: 16px;
-  justify-content: center;
-}
-.opx-btn-primary {
-  position: relative;
-}
-/* 右端の墨の丸（::after）と、その上の矢印（::before。マスクで形だけ描き、色は --sb-on-orange-fg）。
- * 文字（content: "→"）にしない：疑似要素の文字は読み上げ・アクセシブルネームに入り、ボタンの名前が「保存→」になる */
-.opx-btn-primary::after {
-  content: "";
-  flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--sb-pill);
-  background: var(--sb-on-orange);
-}
-.opx-btn-primary::before {
-  content: "";
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  width: 48px;
-  height: 48px;
-  margin-top: -24px;
-  background: var(--sb-on-orange-fg);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10 H15 M10.5 5.5 L15 10 L10.5 14.5'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
-  pointer-events: none;
+  border-color: var(--sb-primary);
+  background: var(--sb-primary);
+  color: var(--sb-on-primary);
 }
 .opx-btn-primary:hover,
 .opx-btn-primary:active {
-  background: var(--sb-orange-hover);
+  background: var(--sb-primary-press);
+  border-color: var(--sb-primary-press);
+}
+.opx-btn-text {
+  min-height: var(--sb-hit-min);
+  border-color: transparent;
+  background: transparent;
+  color: var(--sb-primary);
 }
 .opx-btn-danger {
-  border-color: var(--sb-v-no-fg);
-  color: var(--sb-v-no-fg);
+  color: var(--sb-st-danger-text);
 }
-.opx-btn-danger:hover,
-.opx-btn-danger:active {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 12%, var(--sb-base));
+.opx-btn-danger:hover {
+  background: var(--sb-st-danger-face);
 }
 /* 現場の大きな主ボタン（高さ 64px 以上。現場の値は --sb-hit-primary が持つ） */
 .opx-btn-field {
   min-height: max(var(--sb-hit-primary), 56px);
-  font-size: 17px;
+  font-size: 1.0625rem;
 }
 .opx-btn:disabled,
 .opx-btn[aria-disabled="true"] {
   background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-  border: 1.5px dashed var(--sb-edge);
+  color: var(--sb-ink-disabled);
+  border: 1px dashed var(--sb-edge);
   cursor: not-allowed;
-}
-.opx-btn-primary:disabled::after,
-.opx-btn-primary[aria-disabled="true"]::after {
-  background: var(--sb-edge);
-}
-.opx-btn-primary:disabled::before,
-.opx-btn-primary[aria-disabled="true"]::before {
-  background: var(--sb-base);
+  transform: none;
 }
 .opx-btn-sm {
   min-height: var(--sb-hit-min);
   padding: 0 16px;
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+/* 無効の理由（ボタンの下に 1 行。data-testid="…-disabled-reason"）。補足の文字 */
+.opx-disabled-reason {
+  margin-top: 4px;
+  font-size: var(--sb-fs-note);
+  line-height: 1.5;
+  color: var(--sb-ink-2);
 }
 
 /* 戻りリンク：丸いボタン形。幅・高さとも 44px 以上 */
@@ -222,7 +163,7 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-pill);
   background: var(--sb-control);
   color: var(--sb-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -233,7 +174,8 @@ html:has(.ops-v2) body {
 /* 画面の見出し */
 .opx-h1 {
   font-size: var(--sb-fs-h);
-  line-height: 1.4;
+  /* 16-F：題 24px の行間は方針書 §タイポ（画面タイトル 24 / 行間 1.35）に合わせる。1 行 32.4px */
+  line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--sb-ink);
@@ -241,9 +183,12 @@ html:has(.ops-v2) body {
 .opx-h1 {
   font-feature-settings: "palt" 1;
   text-wrap: balance;
+  /* 文字 200%・320 幅で、切れ目のない長い題（「事故・ヒヤリハットの記録」）が横にあふれない（16-L） */
+  overflow-wrap: anywhere;
 }
 .opx-eyebrow {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--sb-ink-2);
@@ -267,9 +212,9 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-pill);
   background: var(--sb-surface);
   color: var(--sb-ink-2);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .opx-badge-brand {
@@ -286,8 +231,8 @@ html:has(.ops-v2) body {
 }
 .opx-badge-amber {
   border: 1.5px dashed var(--sb-ink);
-  background: var(--sb-orange-hover);
-  color: var(--sb-on-orange);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 .opx-badge-red {
@@ -302,7 +247,7 @@ html:has(.ops-v2) body {
   color: var(--sb-ink-3);
 }
 /* 期限の札（許可・承認の有効性、技能証明の更新期限）：判定の色（赤・琥珀・緑）は使わない。形と言葉で区別する。
- * 期限切れ・失効＝墨の面に「！」、期限が近い＝薄い橙の面（ホームの「近づく期限」の札と同じ。v2 草案 §3） */
+ * 期限切れ・失効＝墨の面に「！」、期限が近い＝状態「注意」の面（ホームの「近づく期限」の札と同じ。v2 草案 §3） */
 .opx-badge-alert {
   border-color: transparent;
   background: var(--sb-inverse-bg);
@@ -311,8 +256,8 @@ html:has(.ops-v2) body {
 }
 .opx-badge-soon {
   border-color: transparent;
-  background: var(--sb-orange-hover);
-  color: var(--sb-on-orange);
+  background: var(--sb-st-warn-face);
+  color: var(--sb-ink);
   font-weight: 700;
 }
 /* 文言の先頭の印（×）を「！」に見せる：文字（テキスト・読み上げ）は変えず、見た目だけ。代替テキストを空にして読み上げに入れない */
@@ -329,15 +274,17 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-r-m);
   background: var(--sb-sunken);
   color: var(--sb-ink-2);
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 /* 本文として読ませる案内（不変条件 6: 本文 16px 以上）。.opx-note の 13px を、この案内だけ上書きする */
 .opx-note-lg {
-  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding-block: 8px;
 }
 .opx-note-red {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
   color: var(--sb-ink);
 }
@@ -348,7 +295,7 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-r-l);
   background: var(--sb-sunken);
   color: var(--sb-ink-2);
-  font-size: 13px;
+  font-size: 0.875rem;
   line-height: 1.8;
 }
 .opx-notice[data-meaning="warn"] {
@@ -357,7 +304,7 @@ html:has(.ops-v2) body {
   color: var(--sb-ink);
 }
 .opx-notice[data-meaning="danger"] {
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   border: 1.5px solid var(--sb-v-no-fg);
   color: var(--sb-ink);
 }
@@ -372,12 +319,12 @@ html:has(.ops-v2) body {
   box-shadow: var(--sb-shadow);
 }
 
-/* 白いカード（影なし。罫で分ける：Sprint 16 H-2） */
+/* カード（影なし。罫で分ける。16-C：.sb-card と同じ規則。面は白、角丸 16、1px の罫、内側 16） */
 .opx-card {
   min-width: 0;
-  padding: 20px 16px;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  padding: var(--sb-sp-4);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
 }
 @media (min-width: 1024px) {
@@ -391,7 +338,8 @@ html:has(.ops-v2) body {
   display: flex;
   flex-direction: column;
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 .opx-detail > div {
   display: grid;
@@ -404,13 +352,17 @@ html:has(.ops-v2) body {
   border-bottom: 0;
 }
 .opx-detail dt {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink-3);
 }
 .opx-detail dd {
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--sb-ink);
+  /* 値は本文（16px・1.7）。項目名の dt は補足 14px */
+  font-size: var(--sb-fs-body);
+  line-height: 1.7;
 }
 @media (min-width: 640px) {
   .opx-detail > div {
@@ -421,11 +373,12 @@ html:has(.ops-v2) body {
 
 /* 項目の並び（compact）：狭い画面でも項目名を左・値を右の 2 列にして、縦を詰める（Sprint 17-2） */
 .opx-detail-compact > div {
-  grid-template-columns: 7rem minmax(0, 1fr);
-  gap: 12px;
+  /* 文字 200%・320 幅では 8rem（256px）が幅を食うので、列の幅の 40% までに抑える（16-L） */
+  grid-template-columns: minmax(0, min(8rem, 40%)) minmax(0, 1fr);
+  gap: 8px;
   padding: 6px 0;
   align-items: baseline;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 @media (min-width: 640px) {
@@ -445,7 +398,7 @@ html:has(.ops-v2) body {
   }
 }
 
-/* 範囲の切り替え（チップ。現在地は実線＋太字、ほかは破線） */
+/* 範囲の切り替え（チップ。現在地は墨の 2px の縁＋太字、ほかは --sb-edge の実線。破線は「無効」だけの印） */
 .opx-seg {
   display: flex;
   flex-wrap: wrap;
@@ -455,11 +408,14 @@ html:has(.ops-v2) body {
   display: inline-flex;
   align-items: center;
   min-height: var(--sb-hit-min);
-  padding: 6px 16px;
-  border: 2px dashed var(--sb-edge);
+  padding: 7px 17px;
+  /* 16-C（designer）：選ばれていない選択肢は実線の縁。以前の破線は、16-C で「無効」の印（破線の縁＋薄い文字）になったので、押せる部品が無効に見えていた。
+   * 選択中の 2px の墨の縁と外寸は同じ（縁 1px＋余白 +1px）。文字は ink-2（白の上で 9 以上）、面は白 */
+  border: 1px solid var(--sb-edge);
   border-radius: var(--sb-pill);
-  color: var(--sb-ink-3);
-  font-size: 14px;
+  background: var(--sb-surface);
+  color: var(--sb-ink-2);
+  font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -468,6 +424,7 @@ html:has(.ops-v2) body {
 }
 .opx-seg > a[aria-current="page"],
 .opx-seg > a[aria-current="true"] {
+  padding: 6px 16px;
   border: 2px solid var(--sb-ink);
   background: var(--sb-control);
   color: var(--sb-ink);
@@ -479,11 +436,13 @@ html:has(.ops-v2) body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
+  min-height: 72px;
   padding: 14px 16px;
-  border-radius: var(--sb-r-l);
-  background: var(--sb-base);
+  border-radius: var(--sb-r-card);
+  background: var(--sb-surface);
   box-shadow: inset 0 0 0 var(--sb-rule-w) var(--sb-rule);
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--sb-ink);
   transition: background var(--sb-dur) var(--sb-ease);
 }
@@ -498,7 +457,8 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-r-m);
   background: var(--sb-sunken);
   color: var(--sb-ink-2);
-  font-size: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -520,7 +480,8 @@ html:has(.ops-v2) body {
 .opx-cell-label {
   margin-right: 8px;
   color: var(--sb-ink-3);
-  font-size: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 @media (min-width: 640px) {
   .opx-cell-label {
@@ -541,7 +502,7 @@ html:has(.ops-v2) body {
   border-radius: var(--sb-pill);
   background: var(--sb-inverse-bg);
   color: var(--sb-inverse-fg);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.4;
 }
@@ -553,22 +514,22 @@ html:has(.ops-v2) body {
   border: 1px dashed var(--sb-edge);
   border-radius: var(--sb-pill);
   color: var(--sb-ink-3);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 .opx-field-error {
   color: var(--sb-v-no-fg);
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.6;
 }
 .opx-form-error {
   padding: 10px 14px;
   border-radius: var(--sb-r-m);
-  background: color-mix(in srgb, var(--sb-v-no-fill) 9%, var(--sb-base));
+  background: var(--sb-st-danger-face);
   box-shadow: inset 0 0 0 1.5px var(--sb-v-no-fg);
   color: var(--sb-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.7;
 }
@@ -580,10 +541,14 @@ html:has(.ops-v2) body {
   min-height: var(--sb-hit-row);
   padding: 8px 14px;
   border-radius: var(--sb-r-m);
-  background: var(--sb-surface);
+  background: var(--sb-sunken);
   color: var(--sb-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   cursor: pointer;
+  /* 文字 200%・320 幅でも、長い選択肢の語（auto-phrase の 1 まとまり）が行からあふれないよう、折り返せるようにする（16-H2） */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .opx-check-row:hover {
   background: var(--sb-hover);
@@ -598,7 +563,7 @@ html:has(.ops-v2) body {
 }
 /* 余白の小さな文字（12px 未満にしない） */
 .opx-hint {
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--sb-ink-3);
 }
@@ -619,20 +584,21 @@ html:has(.ops-v2) body {
 }
 
 /* ===== 4 共通の .sb-*（unlayered）の上書き：@layer の外に置く（unlayered の規則は layer の規則に勝つため、ここに書かないと効かない） ===== */
+/* 16-C（designer）：`rounded-sb-l bg-sb-base opx-shadow` のカード（計画の一覧の行・主画面の「次にやること」・通報の状況ほか 12 か所）。
+ * 16-A で base がページの地（薄いグレー）になり、面も罫もないまま地に溶けていた（行の下の「次の予定」の足だけがくぼみで浮いて見えた）。
+ * カードの規則（白い面・1px の --sb-rule の罫）に合わせる。罫は outline で内側に描く：子の面（足のくぼみ・ホバー）の上にも罫が残り、角丸に沿う。
+ * クラス名は変えない。unlayered に置くので、utilities の bg-sb-base より先に効く。 */
+.opx-shadow {
+  background-color: var(--sb-surface);
+  outline: var(--sb-rule-w) solid var(--sb-rule);
+  outline-offset: calc(var(--sb-rule-w) * -1);
+}
 .ds.ops-v2 textarea.sb-input {
   min-height: 96px;
   padding: 12px 16px;
   line-height: 1.7;
 }
-.sb-input[aria-invalid="true"] {
-  border-color: var(--sb-v-no-fg);
-  box-shadow: inset 0 0 0 1px var(--sb-v-no-fg);
-}
-.sb-input:disabled {
-  border-style: dashed;
-  background: var(--sb-sunken);
-  color: var(--sb-ink-3);
-}
+/* 入力欄のエラー・無効・フォーカスの枠の規則は 16-D で soraban-ui.css（.sb-input）へ移した */
 /* 入力欄は、横に並べた行の中で縮める（既定の最小幅のままだと、日付と時刻の 2 つが 375px の列からはみ出す） */
 .ds.ops-v2 .sb-input {
   min-width: 0;
@@ -651,4 +617,39 @@ html:has(.ops-v2) body {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
+}
+
+/* 16-B：通報の作業台の「固定の文言の全文」の見出し行。文字を 14px にしても、送信元・方式の 2 つの札が折り返さず 1 行（48px）に収まるようにする */
+[data-testid="report-notice"] summary {
+  row-gap: 0;
+}
+[data-testid="report-notice"] summary > .ml-auto {
+  flex-wrap: wrap;
+  column-gap: 4px;
+  row-gap: 0;
+}
+[data-testid="report-notice"] summary > .ml-auto > * {
+  /* 16-L：文字 200%・320 幅では、札と送信元の語が行より広くなる。行の中に収まるときは今までどおり 1 行（flex-wrap が項目ごとに折り返す）、収まらないときだけ折り返す */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  letter-spacing: 0;
+}
+[data-testid="report-notice"] summary .opx-badge {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+/* 16-B（designer）：16px の固定の文言は行の高さ 1.5（前の 1.38 は詰めすぎ。方針の本文 1.7 には、最初の画面の上限があり届かない） */
+[data-testid="report-notice-short"],
+[data-testid="report-notice"] {
+  line-height: 1.5;
+}
+/* ホームの「ホーム画面に追加」の案内は 16px の本文：行の高さ 1.7 */
+[data-testid="pwa-install-guide"] {
+  line-height: 1.7;
+}
+
+/* ホームのクイック操作（16-F。点検は主役。主ボタンはカードの 1 つなので、これは副のまま）：アイコンだけ主色にして、上の「判定」の副ボタンと見分ける。寸法・位置は変えない */
+[data-testid="home-quick"] .opx-btn svg {
+  color: var(--sb-primary);
 }

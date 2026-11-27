@@ -1,0 +1,13 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --retries=0 e2e/ops-db/sprint16-n3-db.spec.ts -g 'N3-2・N3-3'
+
+
+Running 1 test using 1 worker
+
+[n3-2] 文書 320/320・H3 {"right":274,"sw":228,"cw":228}・H4 {"right":274,"sw":228,"cw":228}・戻る {"right":288,"sw":254,"cw":254}・はみ出し 
+[n3-3] チップ [{"text":"朝の河川敷の橋梁点検撮影 MWXAAOVC","ellipsis":false,"sw":204,"cw":204,"h":394.375,"lines":6,"right":288},{"text":"午後の山あいの送電線の巡視撮影 MWXAAOVC","ellipsis":false,"sw":206,"cw":206,"h":392.375,"lines":6,"right":288}]
+  ✓  1 e2e/ops-db/sprint16-n3-db.spec.ts:240:7 › N3-2・N3-3 現場の 320・文字 200% › 文書の横スクロール 0。H3「飛行自粛要請の確認」・H4「飛行マニュアルの組み合わせ制限」・「ホームへ戻る」が画面の幅を超えない。同じ日のチップは題名が省略されない (1.3s)
+
+  1 passed (5.1s)
+exit 0

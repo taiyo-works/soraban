@@ -1,0 +1,20 @@
+signin 200
+inspection inputs 20 url http://127.0.0.1:3603/ops/inspections/new
+inspection {"input":{"w":"3px","s":"solid","c":"rgb(31, 95, 224)","o":"3px"},"row":{"w":"3px","s":"none","c":"rgb(20, 24, 31)","o":"0px"},"rowCls":"flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 ro","rowTag":"LABEL","rect":[32,398.109375,159,48],"clip":[],"vw":390}
+flight inputs 12 url http://127.0.0.1:3603/ops/flights/new
+flight {"input":{"w":"3px","s":"solid","c":"rgb(31, 95, 224)","o":"3px"},"row":{"w":"3px","s":"none","c":"rgb(63, 75, 94)","o":"0px"},"rowCls":"flex min-h-12 min-w-0 cursor-pointer items-center gap-2.5 ro","rowTag":"LABEL","rect":[32,692.6875,326,48],"clip":[],"vw":390}
+incident inputs 26 url http://127.0.0.1:3603/ops/incidents/new
+incident {"input":{"w":"3px","s":"solid","c":"rgb(31, 95, 224)","o":"3px"},"row":{"w":"3px","s":"none","c":"rgb(20, 24, 31)","o":"0px"},"rowCls":"opx-check-row border-[1.5px] border-transparent has-[:checke","rowTag":"LABEL","rect":[16,630.796875,358,48],"clip":[],"vw":390}
+permit inputs 18 url http://127.0.0.1:3603/ops/permits/new
+permit {"input":{"w":"3px","s":"solid","c":"rgb(31, 95, 224)","o":"3px"},"row":{"w":"3px","s":"none","c":"rgb(20, 24, 31)","o":"0px"},"rowCls":"flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m ","rowTag":"LABEL","rect":[16,511.390625,358,54],"clip":[],"vw":390}
+plan inputs 12 url http://127.0.0.1:3603/ops/plans/new
+plan {"input":{"w":"3px","s":"solid","c":"rgb(31, 95, 224)","o":"3px"},"row":{"w":"3px","s":"none","c":"rgb(20, 24, 31)","o":"0px"},"rowCls":"flex min-h-12 cursor-pointer items-start gap-3 rounded-sb-m ","rowTag":"LABEL","rect":[32,721.46875,326,54],"clip":[],"vw":390}
+390 n 13 {"cls":"sb-layer is-on ","input":"3px solid rgb(31, 95, 224) 3px","row":"3px solid rgb(31, 95, 224) 3px","rect":[20,396.03125,171,48]}
+390 field 13 {"cls":"sb-layer is-on ","input":"3px solid rgb(24, 72, 176) 3px","row":"3px solid rgb(24, 72, 176) 3px","rect":[20,394.46875,171,56]}
+430 n 13 {"cls":"sb-layer is-on ","input":"3px solid rgb(31, 95, 224) 3px","row":"3px solid rgb(31, 95, 224) 3px","rect":[20,439.640625,191,48]}
+430 field 13 {"cls":"sb-layer is-on ","input":"3px solid rgb(24, 72, 176) 3px","row":"3px solid rgb(24, 72, 176) 3px","rect":[20,438.078125,191,56]}
+390 n 35 {"cls":"sb-check-row ","input":"3px none rgb(255, 255, 255) 3px","row":"3px solid rgb(31, 95, 224) 3px","rect":[26,384.1875,338,72]}
+390 field 35 {"cls":"sb-check-row ","input":"3px none rgb(255, 255, 255) 3px","row":"3px solid rgb(24, 72, 176) 3px","rect":[26,385.6875,338,72]}
+430 n 35 {"cls":"sb-check-row ","input":"3px none rgb(255, 255, 255) 3px","row":"3px solid rgb(31, 95, 224) 3px","rect":[26,428.484375,378,72]}
+430 field 35 {"cls":"sb-check-row ","input":"3px none rgb(255, 255, 255) 3px","row":"3px solid rgb(24, 72, 176) 3px","rect":[26,429.578125,378,72]}
+390 n 13 {"cls":"sb-layer is-on ","input":"3px solid rgb(31, 95, 224) 3px","row":"3px solid rgb(31, 95, 224) 3px","rect":[20,396.03125,171,48]}

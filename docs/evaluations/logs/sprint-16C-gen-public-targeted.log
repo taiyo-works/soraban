@@ -1,0 +1,222 @@
+
+> soraban@0.0.0 test:e2e /home/user/soraban
+> playwright test --retries=0 e2e/sprint16-c.spec.ts e2e/sprint16-b.spec.ts e2e/sprint16-1.spec.ts e2e/sprint12h-pr2.spec.ts --repeat-each=1
+
+
+Running 137 tests using 1 worker
+
+  ✓    1 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 375×812：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (2.9s)
+  ✓    2 e2e/sprint12h-pr2.spec.ts:117:9 › Q-8 タップ 48px（`/` の押す部品） › 360×740：初期・結果表示後・層の一覧を開いたとき・確認のパネルの 4 状態で、押す部品が幅・高さとも 47.5px 以上（16-B：43.5→47.5）で、部品どうしの間隔が 8px 以上 (2.7s)
+  ✓    3 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › light：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (1.5s)
+  ✓    4 e2e/sprint12h-pr2.spec.ts:160:9 › Q-9 判定の 5 段（形と語。橙は使わない） › dark：見分け方の札が 5 つあり、形（svg）・語・色がそれぞれ別。橙の塗りの札・印がない (1.1s)
+  ✓    5 e2e/sprint12h-pr2.spec.ts:196:7 › Q-9 判定の 5 段（形と語。橙は使わない） › グレースケール（彩度 0）にしても、結論の語と形が読める（形と語が色に頼らない） (1.5s)
+  ✓    6 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・light (2.3s)
+  ✓    7 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 375px・dark (2.5s)
+  ✓    8 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・light (2.6s)
+  ✓    9 e2e/sprint12h-pr2.spec.ts:340:11 › Q-11 実画面のコントラスト（文字 4.5:1・大きい文字 3:1・枠と印 3:1） › 1280px・dark (2.5s)
+  ✓   10 e2e/sprint12h-pr2.spec.ts:359:7 › Q-12 375×812 の最初の画面 › 免責の短文（site-disclaimer）・住所の入力欄・「この地点を判定する」「現在地で判定」の 2 つのボタンが最初の画面に入り、結論は 1 回のスクロール（1 画面分以内）で見える (2.1s)
+  ✓   11 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.0s)
+  ✓   12 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.2s)
+  ✓   13 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 3 世代（375×667）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.5s)
+  ✓   14 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.2s)
+  ✓   15 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.1s)
+  ✓   16 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › iPhone SE 第 1 世代（320×568）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (2.3s)
+  ✓   17 e2e/sprint12h-pr2.spec.ts:413:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：初期表示で、結論は 1 画面分のスクロールで見出しごと入る（余裕あり） (2.4s)
+  ✓   18 e2e/sprint12h-pr2.spec.ts:431:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：「この地点を判定する」を押すと、結論の上端が画面に入り、フォーカスが結論の見出しへ移る (2.2s)
+  ✓   19 e2e/sprint12h-pr2.spec.ts:446:9 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › Pixel 5（393×727）：地図をクリックして地点を選ぶと、同じように結論が画面に入る (3.0s)
+  ✓   20 e2e/sprint12h-pr2.spec.ts:464:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 動きを減らす設定と現場モードでは、結論へ瞬間に移る（滑らかなスクロールにしない） (4.2s)
+  ✓   21 e2e/sprint12h-pr2.spec.ts:490:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 判定の応答を待つ間に利用者がスクロールしたら、結論が出たあとに引き戻さない (7.8s)
+  ✓   22 e2e/sprint12h-pr2.spec.ts:513:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 現場モードでは、結論への移動が 1 フレームで確定する（滑らかにしない） (2.2s)
+  ✓   23 e2e/sprint12h-pr2.spec.ts:541:7 › B1 判定したあと、結論が画面に入る（スクロールを待たない・フォーカスも結論の見出しへ） › 通常は滑らかに移る（smooth）。初回の自動判定では動かさない (2.2s)
+  ✓   24 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 320px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.3s)
+  ✓   25 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 320px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓   26 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 360px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.2s)
+  ✓   27 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 360px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.2s)
+  ✓   28 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 375px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓   29 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 375px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.4s)
+  ✓   30 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 768px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.9s)
+  ✓   31 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 768px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓   32 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1024px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓   33 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1024px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.9s)
+  ✓   34 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1280px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.4s)
+  ✓   35 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1280px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (2.8s)
+  ✓   36 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1440px・light：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.3s)
+  ✓   37 e2e/sprint12h-pr2.spec.ts:591:11 › Q-13 はみ出し 0 › 1440px・dark：横スクロールなし。文字・ボタン・チップが親の枠から出ない (3.1s)
+  ✓   38 e2e/sprint12h-pr2.spec.ts:618:7 › Q-21 地図の層（追加） › (a) 画面幅を 1023↔1024px に切り替えた直後（地図のサイズ変更中）に層を切り替えても、地図に反映される (5.6s)
+  ✓   39 e2e/sprint12h-pr2.spec.ts:635:7 › Q-21 地図の層（追加） › (b) 7 層を 1 つずつ off／on し、data-hidden-layers と MapLibre から読み戻した実際の visibility が一致する (12.5s)
+  ✓   40 e2e/sprint12h-pr2.spec.ts:670:7 › Q-21 地図の層（追加） › (c) 判定で島根県に移ると DID が島根県のものに替わり（data-did-pref）、スマホ幅・PC 幅のどちらでも同じ (6.1s)
+  ✓   41 e2e/sprint12h-pr2.spec.ts:686:7 › Q-22 キーボードとランドマーク › 最初の Tab でスキップリンクが現れ、本文へ移る。main・header・見出しの階層がある。Tab 順は 入力 → 結論 → 地図 で、DOM の順と同じ (2.1s)
+  ✓   42 e2e/sprint12h-pr2.spec.ts:729:7 › Q-22 キーボードとランドマーク › フォーカスの輪が見える（3px の輪・要素から離す。--sb-focus）。入力欄・ボタン・チェック・リンクのどれでも消えない (2.0s)
+  ✓   43 e2e/sprint12h-pr2.spec.ts:757:7 › Q-22 キーボードとランドマーク › 地図のドラッグ以外の操作はキーボードでできる：層の切り替え（Space）、現在地ボタン（Enter）、地点の例（Enter）、住所の入力（Enter で検索） (2.8s)
+  ✓   44 e2e/sprint12h-pr2.spec.ts:782:7 › Q-24 根拠欄（既存の出典・確認日・版・改正・確からしさを整えて見せる） › 規制カードごとに、使用データ（名前・基準年・確認日・版）・反映済みの改正・出典・確からしさ・条文確認日が出る。出さないもの（判例・確認の状態の 3 段階）を出していない (2.1s)
+  ✓   45 e2e/sprint12h-pr2.spec.ts:824:7 › Q-26 動き › せり上がりは結論カードだけ（0.6s・1 回）。h1・site-lead・入力・地図は動かない (1.5s)
+  ✓   46 e2e/sprint12h-pr2.spec.ts:847:7 › Q-26 動き › reducedMotion: reduce で、せり上がり・ボタンの動きの時間が 0 (1.4s)
+  ✓   47 e2e/sprint12h-pr2.spec.ts:865:7 › Q-26 動き › 通常：ボタンの背景は標準の動き 0.18s、押下の縮みは 0.12s（16-C。矢印の入れ替えは外した） (1.1s)
+[画面] Q-20 375x812 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 375x812 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 375x812 3-detail: スクロール 2.1 枚分・押す回数 0
+[画面] Q-20 375x812 4-layer: スクロール 1.2 枚分・押す回数 1
+  ✓   48 e2e/sprint12h-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 375x812 (12.5s)
+[画面] Q-20 1280x800 1-address: スクロール 0 枚分・押す回数 2
+[画面] Q-20 1280x800 2-geo: スクロール 0 枚分・押す回数 1
+[画面] Q-20 1280x800 3-detail: スクロール 1 枚分・押す回数 0
+[画面] Q-20 1280x800 4-layer: スクロール 0.4 枚分・押す回数 1
+  ✓   49 e2e/sprint12h-pr2.spec.ts:883:9 › Q-20 実画面の台本（①住所 ②現在地 ③詳細 ④層）：押す回数 2・1・2・2 以内、ページのスクロールは 2 画面分以内 › 1280x800 (13.0s)
+[長さ] / 375x812 ページ全体: 12181px
+  ✓   50 e2e/sprint12h-pr2.spec.ts:954:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 375px：ページ全体の高さが main（同条件 16,646px）を超えない。畳んだ部分は既定で閉じている (1.6s)
+  ✓   51 e2e/sprint12h-pr2.spec.ts:975:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 畳んだままでも見える要約：規制カードの名称・段・判定・この地点の理由・出典・確認日・確からしさ。結論の札（確認日・出典つき）と免責 (1.7s)
+  ✓   52 e2e/sprint12h-pr2.spec.ts:994:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 開閉：キーボード（Enter・Space）で開閉でき、開いた状態は 矢印の向き・文字（開く／閉じる）で分かる (1.8s)
+  ✓   53 e2e/sprint12h-pr2.spec.ts:1025:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 収録の一覧は閉じていて、開くと一覧が出る (1.6s)
+  ✓   54 e2e/sprint12h-pr2.spec.ts:1036:7 › B2 縦が長すぎない：規制カード・収録の一覧は見出し（と要約）だけ、開くと中身（申請支援は Sprint 18-1 で止めた） › 「申請の準備」は無い：必要手続きのチェックリスト・提出期限・束ね PDF が出ない（Sprint 18-1） (1.9s)
+  ✓   55 e2e/sprint12h-pr2.spec.ts:1050:7 › N1 結論の札と責任の注記 › 結論に「確認日」「出典つき」の札と境界の注記（BOUNDARY_SHORT）。代行・代理申請の語がない (1.6s)
+  ✓   56 e2e/sprint12h-pr2.spec.ts:1065:7 › N1 結論の札と責任の注記 › 「手続き済み」の記録の注記は、結論が「手続き済み」のときだけ付く (1.9s)
+  ✓   57 e2e/sprint12h-pr2.spec.ts:1087:9 › N2 文字は 14px 以上 › 375px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.4s)
+  ✓   58 e2e/sprint12h-pr2.spec.ts:1087:9 › N2 文字は 14px 以上 › 1280px：/ の文字（地図の層の状態の札を含む）はすべて 14px 以上 (4.3s)
+  ✓   59 e2e/sprint12h-pr2.spec.ts:1097:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 375×812 (1.4s)
+  ✓   60 e2e/sprint12h-pr2.spec.ts:1097:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 390×700 (1.4s)
+  ✓   61 e2e/sprint12h-pr2.spec.ts:1097:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 360×740 (1.0s)
+  ✓   62 e2e/sprint12h-pr2.spec.ts:1097:9 › N3 地図の高さ（スマホは画面の高さの 40〜50%） › 393×727 (1.5s)
+  ✓   63 e2e/sprint12h-pr2.spec.ts:1109:7 › N4 結論より下の箱も v2 の丸み › 手続きの票・規制ごとの判定・飛行の前後の点検・規制カードの角が丸い（12px 以上） (1.4s)
+  ✓   64 e2e/sprint12h-pr2.spec.ts:1131:9 › N5 PC の最初の画面に 2 つのピル › 1280×800：「この地点を判定する」「現在地で判定」が最初の画面に入る (1.7s)
+  ✓   65 e2e/sprint12h-pr2.spec.ts:1131:9 › N5 PC の最初の画面に 2 つのピル › 1440×900：「この地点を判定する」「現在地で判定」が最初の画面に入る (1.6s)
+  ✓   66 e2e/sprint16-1.spec.ts:30:7 › A. 見本の表示と 404（R-5） › 1. フラグ無効のサーバーでは 404。配下の別のパスも 404 (210ms)
+  ✓   67 e2e/sprint16-1.spec.ts:38:7 › A. 見本の表示と 404（R-5） › 2. 有効のサーバーでは 200・noindex。見出しは 1 つ。外部通信・API 呼び出しがない。運航管理の枠が付かない。旧い見本の部品が無い (1.1s)
+  ✓   68 e2e/sprint16-1.spec.ts:63:7 › A. 見本の表示と 404（R-5） › 3. 判定の 5 段が形と言葉を持つ（色だけで区別しない） (678ms)
+  ✓   69 e2e/sprint16-1.spec.ts:76:9 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 4. 幅 375px：見本のページの地は #F6F7F9、面は白、くぼみは一段濃いグレー。横スクロールなし。影なし (599ms)
+  ✓   70 e2e/sprint16-1.spec.ts:76:9 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 4. 幅 1280px：見本のページの地は #F6F7F9、面は白、くぼみは一段濃いグレー。横スクロールなし。影なし (626ms)
+  ✓   71 e2e/sprint16-1.spec.ts:93:7 › B. 地・面・くぼみ（H-1・H-2・U-4。16-A：地 #F6F7F9・面 白） › 5. `/`：ページの地は #F6F7F9（帯の交互のベージュ・オフホワイトが無い）。見出しの背後の大きな数字が無い。ブロックは罫（内側の 1px の輪）で分け、外へ広がる影が無い (941ms)
+  ✓   72 e2e/sprint16-1.spec.ts:113:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 6. 見本（通常）：主ボタンは主色の面＋白の文字。面と地の比は 3 以上。橙系の文字・面が無い (644ms)
+  ✓   73 e2e/sprint16-1.spec.ts:153:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 7. 見本（現場）：主ボタン 64px 以上・縁 1.5px・影なし・動き 0。面は現場の濃い主色 (631ms)
+  ✓   74 e2e/sprint16-1.spec.ts:169:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 7b. 見本（現場）：判定の札は状態の語 20px 以上・56px 以上、本文 18px、押す部品 56px 以上 (615ms)
+  ✓   75 e2e/sprint16-1.spec.ts:182:7 › C. 主ボタンは主色の面（H-3・C-4。16-A：墨の縁は不要で、面と地の比 3 以上） › 8. `/` の主ボタン（.sb-pill-primary）も主色の面＋白の文字で、面と地の比が 3 以上 (1.7s)
+  ✓   76 e2e/sprint16-1.spec.ts:197:7 › D. 常に明るい表示（D-1・D-2） › 9. OS が暗でも `/` と見本は明で描かれる（body が #F6F7F9、color-scheme が light） (1.6s)
+  ✓   77 e2e/sprint16-1.spec.ts:210:7 › D. 常に明るい表示（D-1・D-2） › 10. 強制の暗（?theme=dark）は見本だけで効く（休眠の値の確認）。見本を離れて `/` を開くと付かない (1.4s)
+  ✓   78 e2e/sprint16-1.spec.ts:220:7 › D. 常に明るい表示（D-1・D-2） › 11. 日差しの模擬（?veil=1）：白い膜が画面を覆い、押す操作を妨げない（pointer-events: none） (772ms)
+  ✓   79 e2e/sprint16-1.spec.ts:238:9 › E. `/` の挿絵（Q2：線画） › 12. スマホ：挿絵に塗りの色（ティール・水色・グラデーション）が無い。塗りは墨と、白（背後の線を隠すだけ）だけ。橙は無い。高さは変えない (1.0s)
+  ✓   80 e2e/sprint16-1.spec.ts:238:9 › E. `/` の挿絵（Q2：線画） › 12. PC：挿絵に塗りの色（ティール・水色・グラデーション）が無い。塗りは墨と、白（背後の線を隠すだけ）だけ。橙は無い。高さは変えない (1.1s)
+  ✓   81 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.1s)
+  ✓   82 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.0s)
+  ✓   83 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /（公開の判定画面） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (4.1s)
+  ✓   84 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /（公開の判定画面）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (1.2s)
+  ✓   85 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /（公開の判定画面）：320 幅で横スクロールがない (822ms)
+  ✓   86 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (499ms)
+  ✓   87 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (582ms)
+  ✓   88 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（通常） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (688ms)
+  ✓   89 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（通常）：文字の大きさのトークンは rem（本文 16px・補足 14px）。html を 200% にすると本文もその分大きくなる (522ms)
+  ✓   90 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（通常）：320 幅で横スクロールがない (446ms)
+  ✓   91 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 375px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (645ms)
+  ✓   92 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 390px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (489ms)
+  ✓   93 e2e/sprint16-b.spec.ts:27:11 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-1/K-2. /ops/design（現場） 1280px：画面の文字はすべて 14px 以上。入力欄の値は 16px 以上（現場は 18px 以上） (684ms)
+  ✓   94 e2e/sprint16-b.spec.ts:43:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-2. /ops/design（現場）：文字の大きさのトークンは rem（本文 18px・補足 14px）。html を 200% にすると本文もその分大きくなる (573ms)
+  ✓   95 e2e/sprint16-b.spec.ts:75:9 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-4. /ops/design（現場）：320 幅で横スクロールがない (623ms)
+  ✓   96 e2e/sprint16-b.spec.ts:81:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4/K-5. `/`：文字 200%（390・430 幅）で、横スクロールなし・文字の切れ 0・文字が 2 倍になる・主ボタンに届く (7.6s)
+  ✓   97 e2e/sprint16-b.spec.ts:86:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › K-5 の検査自体が働く：px 固定の文字と、overflow:hidden の固定の高さは検出される (4.4s)
+  ✓   98 e2e/sprint16-b.spec.ts:109:7 › 16-B 公開側：文字の下限・rem 化・200%・320 幅 › B-4. 文字の大きさの標本が十分ある（検査が空でない） (3.9s)
+  ✓   99 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (948ms)
+  ✓  100 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.3s)
+  ✓  101 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（初期）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (1.2s)
+  ✓  102 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.2s)
+  ✓  103 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.1s)
+  ✓  104 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（判定の結果を出した状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.1s)
+  ✓  105 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.3s)
+  ✓  106 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.4s)
+  ✓  107 e2e/sprint16-b.spec.ts:142:11 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /（details を開いた状態）1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上。data-note の置き場所が正しい (7.5s)
+  ✓  108 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 375px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (660ms)
+  ✓  109 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 390px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (638ms)
+  ✓  110 e2e/sprint16-b.spec.ts:150:9 › 16-B 差し戻し 1 R1-3/R1-4 公開側：本文 16px・行の高さ 1.7、補足 14px・1.5（data-note） › R1-3. /ops/design 1280px：印のない p・li・dd は 16px・1.7 以上、data-note は 14px・1.5 以上 (675ms)
+  ✓  111 e2e/sprint16-b.spec.ts:172:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 印のない 14px の p は失敗する。16px・1.7 の p は通る (174ms)
+  ✓  112 e2e/sprint16-b.spec.ts:179:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › data-note を付けると通る。補足の行の高さが 1.5 未満なら失敗する (150ms)
+  ✓  113 e2e/sprint16-b.spec.ts:186:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の行の高さが 1.69 未満・normal なら失敗する。誤差 0.01 は許す (204ms)
+  ✓  114 e2e/sprint16-b.spec.ts:192:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › div・section などに data-note を付けると失敗する。ul・li・span・time・small は許す (261ms)
+  ✓  115 e2e/sprint16-b.spec.ts:201:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 本文の中の印のない子孫（span）は検査される。ボタン・リンクの中の文字は除く (175ms)
+  ✓  116 e2e/sprint16-b.spec.ts:207:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 大きな文字（本文の基準より 2px 以上大きい）は行の高さ 1.25 以上で通る。本文の大きさは 1.7 のまま (339ms)
+  ✓  117 e2e/sprint16-b.spec.ts:224:7 › 16-B 差し戻し 1 R1-3：本文の検査自体が働く（陰性の確認） › 現場（body: 18）では 16px の p が失敗する。非表示の p は対象外。opts を省略したときは従来の 14px の検査だけ (196ms)
+  ✓  118 e2e/sprint16-c.spec.ts:35:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 通常：主・副・文字・危険・無効の計算されたスタイル（cat-） (564ms)
+  ✓  119 e2e/sprint16-c.spec.ts:73:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 無効の理由：ボタンの下に 1 行（cat-disabled-reason）。aria-describedby で結ぶ。補足の文字 14px 以上 (484ms)
+  ✓  120 e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-primary） (767ms)
+  ✓  121 e2e/sprint16-c.spec.ts:103:9 › C-1 ボタン 5 種：`/` 系（.sb-pill） › 現場：主ボタン 64px 以上・濃い主色。副・文字・危険・無効は 56px 以上（cat-） (661ms)
+  ✓  122 e2e/sprint16-c.spec.ts:35:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 通常：主・副・文字・危険・無効の計算されたスタイル（cat-opx-） (485ms)
+  ✓  123 e2e/sprint16-c.spec.ts:73:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 無効の理由：ボタンの下に 1 行（cat-opx-disabled-reason）。aria-describedby で結ぶ。補足の文字 14px 以上 (609ms)
+  ✘  124 e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） (30.1s)
+
+::error file=e2e/sprint16-c.spec.ts,title=e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary）,line=97,col=91::  1) e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） %0A    Error: expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: "rgb(28, 86, 207)"%0A    Received: "rgb(31, 95, 224)"%0A%0A    Call Log:%0A    - Timeout 30000ms exceeded while waiting on the predicate%0A%0A       95 |       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);%0A       96 |       await page.mouse.down();%0A    >  97 |       await expect.poll(() => btn.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(PRIMARY_PRESS);%0A          |                                                                                           ^%0A       98 |       await expect.poll(() => btn.evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix\(0\.98, 0, 0, 0\.98, /);%0A       99 |       await page.mouse.up();%0A      100 |       await page.mouse.move(0, 0);%0A        at /home/user/soraban/e2e/sprint16-c.spec.ts:97:91
+  ✓  125 e2e/sprint16-c.spec.ts:103:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 現場：主ボタン 64px 以上・濃い主色。副・文字・危険・無効は 56px 以上（cat-opx-） (734ms)
+  ✓  126 e2e/sprint16-c.spec.ts:114:7 › C-2 `/` と `/ops` の主ボタンは同じ計算スタイル（見本の上で比べる。実画面の比較は sprint16-c-db） › 面・文字・高さ・角丸・太さ・縁が一致する。丸と矢印の疑似要素・子要素がない (690ms)
+  ✓  127 e2e/sprint16-c.spec.ts:130:7 › C-3 カード 3 種 › 通常：白い面・角丸 16・1px の罫（inset）・内側 16。影なし (612ms)
+  ✓  128 e2e/sprint16-c.spec.ts:142:7 › C-3 カード 3 種 › 一覧：最小の高さ 72・カード全体がリンク・中は見出し→主情報→補足の 3 段まで (539ms)
+  ✓  129 e2e/sprint16-c.spec.ts:160:7 › C-3 カード 3 種 › 判定・状態：状態の面＋左端 6px の状態の印の色の帯。帯は角丸に沿って切る (610ms)
+  ✓  130 e2e/sprint16-c.spec.ts:186:9 › C-4 状態ラベル（K-7：記号＋文字） › 待機中（info）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 8px の丸（aria-hidden）と文字。丸と文字の縦の中心が ±1px (442ms)
+  ✓  131 e2e/sprint16-c.spec.ts:186:9 › C-4 状態ラベル（K-7：記号＋文字） › 飛行中（flying）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 8px の丸（aria-hidden）と文字。丸と文字の縦の中心が ±1px (648ms)
+  ✓  132 e2e/sprint16-c.spec.ts:186:9 › C-4 状態ラベル（K-7：記号＋文字） › 飛行済（safe）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 8px の丸（aria-hidden）と文字。丸と文字の縦の中心が ±1px (623ms)
+  ✓  133 e2e/sprint16-c.spec.ts:186:9 › C-4 状態ラベル（K-7：記号＋文字） › 中止（danger）：高さ 28 以上・左右 10・角丸 999・14px/600・先頭に 8px の丸（aria-hidden）と文字。丸と文字の縦の中心が ±1px (623ms)
+  ✘  134 e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） (730ms)
+
+::error file=e2e/sprint16-c.spec.ts,title=e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる）,line=231,col=35::  2) e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） %0A    Error: 中心から -22px%0A%0A    expect(received).toBe(expected) // Object.is equality%0A%0A    Expected: true%0A    Received: false%0A%0A      229 |     for (const dy of [-22, 22]) {%0A      230 |       const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x, y) === document.querySelector('[data-testid="cat-state-link"]') || document.querySelector('[data-testid="cat-state-link"]')!.contains(document.elementFromPoint(x, y)), [cx, cy + dy] as const);%0A    > 231 |       expect(hit, `中心から ${dy}px`).toBe(true);%0A          |                                   ^%0A      232 |     }%0A      233 |   });%0A      234 |%0A        at /home/user/soraban/e2e/sprint16-c.spec.ts:231:35
+  ✓  135 e2e/sprint16-c.spec.ts:235:7 › C-4 状態ラベル（K-7：記号＋文字） › 色なし（グレースケール）でも 4 つは文字で区別できる：各ラベルは空でない文字を持ち、4 つとも文字が違う (654ms)
+  ✓  136 e2e/sprint16-c.spec.ts:245:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ › `/`（初期の状態）：見えている data-variant="primary" は 1 つ（375・390・1280） (2.8s)
+  ✓  137 e2e/sprint16-c.spec.ts:258:7 › C-6 / K-8 主ボタンは 1 画面に 1 つ › `/`：文字 200% でも主ボタンに届き、横スクロール・文字の切れがない（未ログイン） (8.0s)
+
+
+  1) e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rgb(28, 86, 207)"
+    Received: "rgb(31, 95, 224)"
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+       95 |       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+       96 |       await page.mouse.down();
+    >  97 |       await expect.poll(() => btn.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(PRIMARY_PRESS);
+          |                                                                                           ^
+       98 |       await expect.poll(() => btn.evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix\(0\.98, 0, 0, 0\.98, /);
+       99 |       await page.mouse.up();
+      100 |       await page.mouse.move(0, 0);
+        at /home/user/soraban/e2e/sprint16-c.spec.ts:97:91
+
+    Error Context: test-results/sprint16-c-C-1-ボタン-5-種：-op-5db3a--98-、120ms（cat-opx-primary）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-c-C-1-ボタン-5-種：-op-5db3a--98-、120ms（cat-opx-primary）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-c-C-1-ボタン-5-種：-op-5db3a--98-、120ms（cat-opx-primary）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） 
+
+    Error: 中心から -22px
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      229 |     for (const dy of [-22, 22]) {
+      230 |       const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x, y) === document.querySelector('[data-testid="cat-state-link"]') || document.querySelector('[data-testid="cat-state-link"]')!.contains(document.elementFromPoint(x, y)), [cx, cy + dy] as const);
+    > 231 |       expect(hit, `中心から ${dy}px`).toBe(true);
+          |                                   ^
+      232 |     }
+      233 |   });
+      234 |
+        at /home/user/soraban/e2e/sprint16-c.spec.ts:231:35
+
+    Error Context: test-results/sprint16-c-C-4-状態ラベル（K-7：記-f0aae-定は-48px-以上（上下の-20px-外でも押せる）/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sprint16-c-C-4-状態ラベル（K-7：記-f0aae-定は-48px-以上（上下の-20px-外でも押せる）/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/sprint16-c-C-4-状態ラベル（K-7：記-f0aae-定は-48px-以上（上下の-20px-外でも押せる）/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） 
+    e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） 
+  135 passed (5.8m)
+::notice title=🎭 Playwright Run Summary::  2 failed%0A    e2e/sprint16-c.spec.ts:88:9 › C-1 ボタン 5 種：`/ops` 系（.opx-btn） › 押下：主ボタンは --sb-primary-press に濃くなり scale(.98)、120ms（cat-opx-primary） %0A    e2e/sprint16-c.spec.ts:221:7 › C-4 状態ラベル（K-7：記号＋文字） › 押せるラベル：見た目は 28px のまま、当たり判定は 48px 以上（上下の 20px 外でも押せる） %0A  135 passed (5.8m)
+ ELIFECYCLE  Command failed with exit code 1.

@@ -10,6 +10,7 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { circlePolygon, type LatLng, type Polygon } from "@soraban/geo";
 import type { CurrentLocationCandidate } from "@/lib/current-location";
+import { tidyEngineText } from "@/lib/field-message";
 import { createLongPressDetector, type TouchPoint } from "@/lib/long-press";
 import { createRightClickPicker } from "@/lib/right-click";
 import { BASE_ZONE_COLORS, BASE_ZONE_LAYER_IDS, RED_HATCH_IMAGE_ID, makeHatchImage } from "./regulation-map-zones";
@@ -671,21 +672,21 @@ export function RegulationMap({
             className="sb-check"
           />
           <LayerSwatch kind={group.swatch} />
-          <span className="flex min-w-0 flex-1 flex-col gap-1 text-[13px] leading-snug">
+          <span className="flex min-w-0 flex-1 flex-col gap-1 text-sm leading-snug">
             <span aria-hidden="true" className="font-bold">
               {group.shortLabel}
             </span>
             {wide ? null : <span className="sb-sr">{group.label}</span>}
             {wide ? (
               <>
-                <span className="text-xs text-sb-ink-2">{group.label}</span>
+                <span className="text-sm text-sb-ink-2">{group.label}</span>
                 {group.detail ? <span className="sb-sr">{group.detail}</span> : null}
               </>
             ) : null}
             {group.zones ? (
-              <ul className="flex flex-col gap-1" data-testid="legend-zones">
+              <ul data-note="" className="flex flex-col gap-1" data-testid="legend-zones">
                 {group.zones.map((z) => (
-                  <li key={z.key} className="flex items-start gap-1.5 text-xs text-sb-ink">
+                  <li key={z.key} className="flex items-start gap-1.5 text-sm text-sb-ink">
                     <span
                       className="mt-0.5 inline-block h-3 w-3 shrink-0 rounded-sb-s border-2"
                       style={{
@@ -697,7 +698,7 @@ export function RegulationMap({
                     />
                     <span>
                       <strong className="font-bold">{z.label}</strong>
-                      <span className="text-sb-ink-2">：{z.note}</span>
+                      <span className="text-sb-ink-2">：{tidyEngineText(z.note)}</span>
                     </span>
                   </li>
                 ))}
@@ -715,7 +716,8 @@ export function RegulationMap({
         {/* 地点指定の操作の手がかり。タッチ端末では単タップで指定しないため、長押しを常に見える位置で示す。
             主な入力方式が精密なポインタ（pointer: fine）ならクリック・右クリック、それ以外は長押しを示す。 */}
         <p
-          className="flex items-start gap-2 border-b border-sb-rule bg-sb-surface px-3 py-1.5 text-xs leading-snug text-sb-ink"
+          className="flex items-start gap-2 border-b border-sb-rule bg-sb-sunken px-3 py-1.5 text-sm leading-snug text-sb-ink"
+          data-note=""
           data-testid="map-pick-hint"
         >
           <span aria-hidden className="mt-[0.4em] inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: MAP_COLORS.pin }} />
@@ -743,10 +745,10 @@ export function RegulationMap({
           <summary>各層の出典と状態（公式データ・概算）</summary>
           {rowsByGroup.map((g) => (
             <div key={g.name} data-group={g.name} className="flex flex-col gap-1.5">
-              <p className="sb-layer-group">{g.name}</p>
-              <ul className="flex flex-col gap-2">
+              <p data-note="" className="sb-layer-group">{g.name}</p>
+              <ul data-note="" className="flex flex-col gap-2">
                 {g.layers.map((l) => (
-                  <li key={l.key} className="text-xs leading-relaxed text-sb-ink-2" data-layer-row={l.key}>
+                  <li key={l.key} className="text-sm leading-relaxed text-sb-ink-2" data-layer-row={l.key}>
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="font-bold text-sb-ink">{l.label}</span>
                       <span className="sb-status" data-status={l.status}>
@@ -758,8 +760,8 @@ export function RegulationMap({
                   </li>
                 ))}
                 {g.notes.map((n) => (
-                  <li key={n.label} className="text-xs leading-relaxed text-sb-ink-2" data-testid="layer-no-map-row">
-                    <span className="font-bold text-sb-ink">{n.label}</span>：{n.note}
+                  <li key={n.label} className="text-sm leading-relaxed text-sb-ink-2" data-testid="layer-no-map-row">
+                    <span className="font-bold text-sb-ink">{n.label}</span>：{tidyEngineText(n.note)}
                   </li>
                 ))}
               </ul>

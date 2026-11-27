@@ -1,0 +1,14 @@
+
+Running 8 tests using 1 worker
+
+  ✓  1 e2e/ops-db/sprint16-n2-shots.spec.ts:100:9 › 375×812 › 公開の / (8.2s)
+  ✓  2 e2e/ops-db/sprint16-n2-shots.spec.ts:105:9 › 375×812 › ホーム・計画の一覧・日誌・点検の入力・登録・このアプリについて (16.0s)
+  ✓  3 e2e/ops-db/sprint16-n2-shots.spec.ts:124:9 › 375×812 › 計画作成 ①〜⑤ と、保存後の計画の画面・判定・現場 (14.5s)
+  ✓  4 e2e/ops-db/sprint16-n2-shots.spec.ts:151:9 › 375×812 › 利用者メニューとログアウトの確認 (3.9s)
+  ✓  5 e2e/ops-db/sprint16-n2-shots.spec.ts:100:9 › 1280×800 › 公開の / (8.3s)
+  ✓  6 e2e/ops-db/sprint16-n2-shots.spec.ts:105:9 › 1280×800 › ホーム・計画の一覧・日誌・点検の入力・登録・このアプリについて (15.8s)
+  ✓  7 e2e/ops-db/sprint16-n2-shots.spec.ts:124:9 › 1280×800 › 計画作成 ①〜⑤ と、保存後の計画の画面・判定・現場 (15.0s)
+  ✓  8 e2e/ops-db/sprint16-n2-shots.spec.ts:151:9 › 1280×800 › 利用者メニューとログアウトの確認 (4.2s)
+
+  8 passed (1.5m)
+exit=0

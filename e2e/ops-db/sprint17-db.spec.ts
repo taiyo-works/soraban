@@ -141,7 +141,7 @@ test.describe("Sprint 17-1 E2E-DB：計画の画面の分離", () => {
       if (current) await expect(planTab(page, current), url).toHaveAttribute("aria-current", "page");
       for (const key of ["overview", "report", "field", "journal"]) {
         const box = (await planTab(page, key).boundingBox())!;
-        expect(box.height, `${url} ${key}`).toBeGreaterThanOrEqual(44);
+        expect(box.height, `${url} ${key}`).toBeGreaterThanOrEqual(48);
         expect(box.width, `${url} ${key}`).toBeGreaterThanOrEqual(80);
       }
       const { sw, cw } = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));

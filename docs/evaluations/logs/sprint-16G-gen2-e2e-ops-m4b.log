@@ -1,0 +1,10 @@
+
+> soraban@0.0.0 test:e2e:ops /home/user/soraban
+> playwright test --config playwright.ops.config.ts --grep 'M-4\.'
+
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/ops-db/sprint12g-1b-fix-db.spec.ts:280:7 › Sprint 12g-1b A 差し戻し：利用者メニューのフォーカス・スキップリンク・題名・空の日・余白・次にやること・日付・戻りリンク › M-4. 年をまたぐ期限は年を付ける（過ぎた許可）。近づく期限の日付は 1/20（水）の形 (1.3s)
+
+  1 passed (5.8s)

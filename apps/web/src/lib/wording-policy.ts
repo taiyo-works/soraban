@@ -68,7 +68,9 @@ export const ALLOWED_SENTENCES: readonly AllowedSentence[] = [
   { word: "申請", sentence: OFFICIAL_PROCEDURE_NOTE_TEXT, source: "packages/dips OFFICIAL_PROCEDURE_NOTE（公式の手続きの文）" },
   { word: "保証", sentence: "制度の最新性・正確性は保証しません", source: "lib/disclaimers.ts DISCLAIMER_JUDGEMENT" },
   { word: "保証", sentence: "報告が必要かどうかを判断するものでも、保証するものでもありません", source: "lib/ops-incident.ts（事故・ヒヤリハットの目安）" },
-  { word: "必ず", sentence: "飛行の前に必ず DIPS でご確認ください", source: "components/regulation-map-layers.ts（地図の凡例の注記）" },
+  // 16-N2（N2-1）：「飛行の前に必ず DIPS でご確認ください」（地図の凡例の注記）の行を外した。16-M から、画面は `tidyEngineText` で「必ず」を外して描くので、
+  // この文は公開の `/`・ops・PDF のどこにも描かれない（走査の記録 0 件。docs/legal/screen-wording-inventory.md §2）。もとの定数（regulation-map-layers.ts の NO_LAYER_ROWS）は
+  // 表示の前に整える元の文のまま。許可リストに戻すと、描かれない文を許すことになるので戻さない。
 ];
 
 export type WordingHit = { readonly word: string; readonly index: number; readonly context: string };
@@ -298,4 +300,4 @@ export const glossaryAllowedFor = (source: string, literal: string, word: string
  * 判定の表示の自前の見出し（lib/verdict-display.ts の VERDICT_SECTION_TITLE.duties）。判定エンジンの文言ではなく、アプリ側の見出し。
  * 棚卸し（docs/legal/screen-wording-inventory.md）で「判定エンジン由来」と分けて載せる。
  */
-export const JUDGEMENT_OWN_HEADINGS: readonly string[] = ["飛行の前後に必ず行うこと"];
+export const JUDGEMENT_OWN_HEADINGS: readonly string[] = ["飛行の前後に行うこと"];

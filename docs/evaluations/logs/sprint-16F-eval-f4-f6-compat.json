@@ -1,0 +1,241 @@
+{
+ "home 375": {
+  "btn": [
+   257,
+   305,
+   48,
+   343
+  ],
+  "navTop": 739,
+  "text": "飛行前点検",
+  "fs": "16px",
+  "h1": "24px/32.4px",
+  "h1text": "ホーム",
+  "prim": [
+   {
+    "t": "現場モードを開く",
+    "top": 859
+   }
+  ],
+  "vh": 812,
+  "url": "http://127.0.0.1:3400/ops/inspections/new",
+  "ms": 118
+ },
+ "home 390": {
+  "btn": [
+   213,
+   261,
+   48,
+   358
+  ],
+  "navTop": 771,
+  "text": "飛行前点検",
+  "fs": "16px",
+  "h1": "24px/32.4px",
+  "h1text": "ホーム",
+  "prim": [
+   {
+    "t": "現場モードを開く",
+    "top": 815
+   }
+  ],
+  "vh": 844,
+  "url": "http://127.0.0.1:3400/ops/inspections/new",
+  "ms": 81
+ },
+ "viewerHome": {
+  "insp": false,
+  "quick": false,
+  "text": false,
+  "nav": [
+   "ホーム",
+   "計画",
+   "日誌",
+   "機体と書類"
+  ]
+ },
+ "viewerInspList": {
+  "new": false,
+  "h1": "点検"
+ },
+ "viewerNewStatus": 200,
+ "viewerNewText": "本文へ移動 そらばん 運航管理 権限がありません  閲覧者は記録を入力できません。  ホーム 計画 日誌 機体と書類",
+ "title /ops": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "ホーム",
+  "meta": [
+   "＋|16px"
+  ]
+ },
+ "title /ops/plans": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "飛行計画",
+  "meta": []
+ },
+ "title /ops/journal": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "日誌",
+  "meta": []
+ },
+ "title /ops/more": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "機体と書類",
+  "meta": []
+ },
+ "title /ops/inspections": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "点検",
+  "meta": []
+ },
+ "title /ops/plans/new": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "飛行計画の入力",
+  "meta": [
+   "判定は入力された情報の範囲での目安です。許可・承|14px"
+  ]
+ },
+ "title /ops/inspections/new": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "日常点検の入力",
+  "meta": [
+   "飛行の前（または後）に行った日常点検の結果を入力|16px"
+  ]
+ },
+ "title /ops/flights": {
+  "h1": "24px",
+  "lh": "32.4px",
+  "t": "飛行記録",
+  "meta": []
+ },
+ "prim /ops/plans/new": {
+  "e": [
+   {
+    "t": "計画を保存する",
+    "top": 5522,
+    "h": 56
+   }
+  ],
+  "vh": 812,
+  "dh": 5734
+ },
+ "prim /ops/inspections/new": {
+  "e": [
+   {
+    "t": "保存",
+    "top": 2697,
+    "h": 56
+   }
+  ],
+  "vh": 812,
+  "dh": 2893
+ },
+ "url /ops/inspections": {
+  "status": 200,
+  "url": "/ops/inspections",
+  "h1": "点検",
+  "cur": "日誌"
+ },
+ "url /ops/inspections/new": {
+  "status": 200,
+  "url": "/ops/inspections/new",
+  "h1": "日常点検の入力",
+  "cur": "日誌"
+ },
+ "url /ops/inspections/new?planId=f2b60d01-462d-427f-bde7-71e67993b52a&timing=before": {
+  "status": 200,
+  "url": "/ops/inspections/new?planId=f2b60d01-462d-427f-bde7-71e67993b52a&timing=before",
+  "h1": "日常点検の入力",
+  "cur": "日誌"
+ },
+ "url /ops/inspections/new?planId=f2b60d01-462d-427f-bde7-71e67993b52a&timing=after&returnTo=%2Fops%2Fplans%2Ff2b60d01-462d-427f-bde7-71e67993b52a": {
+  "status": 200,
+  "url": "/ops/inspections/new?planId=f2b60d01-462d-427f-bde7-71e67993b52a&timing=after&returnTo=%2Fops%2Fplans%2Ff2b60d01-462d-427f-bde7-71e67993b52a",
+  "h1": "日常点検の入力",
+  "cur": "日誌"
+ },
+ "url /ops/journal?tab=inspections": {
+  "status": 200,
+  "url": "/ops/journal?tab=inspections",
+  "h1": "日誌",
+  "cur": "日誌"
+ },
+ "url /ops/more": {
+  "status": 200,
+  "url": "/ops/more",
+  "h1": "機体と書類",
+  "cur": "機体と書類"
+ },
+ "url /ops/aircraft": {
+  "status": 200,
+  "url": "/ops/aircraft",
+  "h1": "機体",
+  "cur": "機体と書類"
+ },
+ "url /ops/pilots": {
+  "status": 200,
+  "url": "/ops/pilots",
+  "h1": "操縦者",
+  "cur": "機体と書類"
+ },
+ "url /ops/permits": {
+  "status": 200,
+  "url": "/ops/permits",
+  "h1": "許可・承認",
+  "cur": "機体と書類"
+ },
+ "url /ops/places": {
+  "status": 200,
+  "url": "/ops/places",
+  "h1": "よく使う地点",
+  "cur": "機体と書類"
+ },
+ "url /ops/members": {
+  "status": 200,
+  "url": "/ops/members",
+  "h1": "利用者",
+  "cur": "機体と書類"
+ },
+ "url /ops/about": {
+  "status": 200,
+  "url": "/ops/about",
+  "h1": "このアプリについて",
+  "cur": "機体と書類"
+ },
+ "url /ops/flights": {
+  "status": 200,
+  "url": "/ops/flights",
+  "h1": "飛行記録",
+  "cur": "日誌"
+ },
+ "url /ops/incidents": {
+  "status": 200,
+  "url": "/ops/incidents",
+  "h1": "事故・ヒヤリハット",
+  "cur": "日誌"
+ },
+ "url /ops/plans/f2b60d01-462d-427f-bde7-71e67993b52a": {
+  "status": 200,
+  "url": "/ops/plans/f2b60d01-462d-427f-bde7-71e67993b52a",
+  "h1": "評価の計画",
+  "cur": "計画"
+ },
+ "url /ops/journal": {
+  "status": 200,
+  "url": "/ops/journal",
+  "h1": "日誌",
+  "cur": "日誌"
+ },
+ "url /ops/plans": {
+  "status": 200,
+  "url": "/ops/plans",
+  "h1": "飛行計画",
+  "cur": "計画"
+ }
+}

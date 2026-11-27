@@ -8,6 +8,7 @@
 //   journal      日誌（飛行記録）の入力。離着陸の時刻は現場の記録から引き継ぐ。送信待ちに入れる。サーバーの警告は送信後に出る
 //   today        先読み済みの計画の一覧
 //   unavailable  圏外では行えない画面（計画の作成・通報・登録・一覧）：圏外であることと、戻ってから行うことを出す
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { useEffect, useMemo, useState } from "react";
 import { FIELD_STATE_MARK, fieldHref } from "@/lib/ops-field";
 import { enqueue } from "@/lib/ops-outbox";
@@ -18,17 +19,22 @@ import { composeFieldView, type FieldBundlePlan, type FieldViewDto } from "@/ser
 import { fieldState, outboxAsEvents, outboxAsInspections } from "@/server/ops/field-logic";
 import { newRequestId } from "./drafts";
 import { FieldClient } from "./field-client";
+import { FieldModeMark } from "./field-mode-mark";
 import { flushOutbox, loadPlanOutbox, markOutboxSaved, planOutboxUnsaved, updatePlanOutbox } from "./field-outbox";
 import { currentMember, listBundles, loadBundle } from "./field-store";
 
-const BTN =
-  "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-sharp px-5 py-2 text-lg font-bold touch-manipulation focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-60";
-const BTN_PRIMARY = `${BTN} border-2 border-brand-700 bg-brand-700 text-paper`;
-const BTN_OUTLINE = `${BTN} border-2 border-brand-700 bg-paper text-brand-700`;
-const BOX = "flex flex-col gap-3 rounded-sharp border-2 border-rule bg-paper p-3";
-const BOX_NOTE = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-amber bg-signal-amber-soft p-3 text-ink";
-const BOX_WARN = "flex flex-col gap-2 rounded-sharp border-2 border-l-8 border-signal-red bg-signal-red-soft p-3 text-ink";
-const MAIN = "flex flex-col gap-5 bg-paper pb-[env(safe-area-inset-bottom)] text-lg leading-relaxed text-ink touch-manipulation";
+// 見た目は field-client.tsx と同じ部品（ops-v2.css の .opx-btn／ops-v2-screens.css の .opx-box-*）。現場の値（56／64px・7:1・影なし・動きなし）は、
+// 各画面が <FieldModeMark /> で <html data-mode="field"> を付けている間だけ効く（Sprint 16-K K2-1）。主ボタン（data-variant="primary"）は 1 状態に 1 つ。
+const BTN = "opx-btn w-full";
+const BTN_PRIMARY = "opx-btn opx-btn-primary opx-btn-field w-full";
+// 選択中の面（薄い面＋墨の太い縁＋太字＋◉。主色の面にしない：主ボタンだけが主色。16-K designer N-3）
+const BTN_SEL = "opx-btn opx-btn-sel opx-btn-field w-full";
+const BOX = "opx-box";
+const BOX_NOTE = "opx-box opx-box-note";
+const BOX_WARN = "opx-box opx-box-warn";
+const MAIN = "flex flex-col gap-5 pb-[env(safe-area-inset-bottom)] text-lg leading-[1.7] text-sb-ink touch-manipulation";
+const HEADER = "flex flex-col gap-1 border-l-[length:8px] border-sb-ink pl-3";
+const INPUT = "sb-input !min-h-14 w-full px-3 !text-lg font-normal";
 
 export const OFFLINE_NOT_SAVED_MESSAGE = "この計画は端末に保存されていません。電波のある場所で一度開いてください。";
 export const OFFLINE_UNAVAILABLE_MESSAGE =
@@ -73,6 +79,8 @@ function OfflineBanner() {
 function Loading() {
   return (
     <main className={MAIN} data-testid="offline-loading">
+      <FieldModeMark />
+      <SkeletonCard />
       <p>端末に保存した内容を読み込んでいます…</p>
     </main>
   );
@@ -81,11 +89,12 @@ function Loading() {
 function Missing({ message, testId }: { readonly message: string; readonly testId: string }) {
   return (
     <main className={MAIN} data-testid="offline-root">
+      <FieldModeMark />
       <OfflineBanner />
       <p className={BOX_WARN} role="alert" data-testid={testId}>
         {message}
       </p>
-      <a href="/ops" className={BTN_OUTLINE} data-testid="offline-today-link">
+      <a href="/ops" className={BTN} data-testid="offline-today-link">
         端末に保存した今日の計画を見る
       </a>
     </main>
@@ -100,7 +109,12 @@ export function OfflineFieldShell() {
   if (!c.ready) return <Loading />;
   if (!c.memberId) return <Missing message={OFFLINE_NO_MEMBER_MESSAGE} testId="offline-no-member" />;
   if (!c.bundle || !initial) return <Missing message={OFFLINE_NOT_SAVED_MESSAGE} testId="offline-not-saved" />;
-  return <FieldClient initial={initial} memberId={c.memberId} bundle={c.bundle} />;
+  return (
+    <>
+      <FieldModeMark />
+      <FieldClient initial={initial} memberId={c.memberId} bundle={c.bundle} />
+    </>
+  );
 }
 
 // ---- 日常点検 ---------------------------------------------------------------
@@ -177,14 +191,15 @@ export function OfflineInspectionShell() {
 
   return (
     <main className={MAIN} data-testid="offline-root" aria-label="日常点検の入力（圏外）">
+      <FieldModeMark />
       <OfflineBanner />
-      <header className="flex flex-col gap-1 border-l-8 border-brand-700 pl-3">
-        <h1 className="text-2xl font-bold">日常点検の入力</h1>
+      <header className={HEADER}>
+        <h1 className="opx-h1">日常点検の入力</h1>
         <p data-testid="offline-inspection-plan">{b.plan.title}</p>
         <p>
-          <span className="font-mono">{b.plan.registrationMark}</span>（{b.plan.modelName}）／{b.plan.pilotName}／{b.plan.placeName}
+          <span className="sb-num">{b.plan.registrationMark}</span>（{b.plan.modelName}）／{b.plan.pilotName}／{b.plan.placeName}
         </p>
-        <p className="font-mono">実施時刻：保存した時刻（端末の時計）</p>
+        <p className="sb-num">実施時刻：保存した時刻（端末の時計）</p>
       </header>
       {!b.perms.canInspect || !b.perms.canRecord ? (
         <p className={BOX_WARN} data-testid="offline-inspection-noaccess">
@@ -205,7 +220,7 @@ export function OfflineInspectionShell() {
                 type="button"
                 role="radio"
                 aria-checked={timing === t}
-                className={timing === t ? BTN_PRIMARY : BTN_OUTLINE}
+                className={timing === t ? BTN_SEL : BTN}
                 data-testid={`offline-inspection-timing-${t}`}
                 onClick={() => setTiming(t)}
               >
@@ -216,7 +231,7 @@ export function OfflineInspectionShell() {
           </div>
           <button
             type="button"
-            className={BTN_OUTLINE}
+            className={BTN}
             data-testid="offline-inspection-all-normal"
             onClick={() => setItems((cur) => Object.fromEntries(INSPECTION_ITEMS.map((it) => [it.key, { result: "normal", note: cur[it.key].note }])) as Record<InspectionItemKey, ItemState>)}
           >
@@ -238,7 +253,7 @@ export function OfflineInspectionShell() {
                         type="button"
                         role="radio"
                         aria-checked={st.result === r}
-                        className={st.result === r ? BTN_PRIMARY : BTN_OUTLINE}
+                        className={st.result === r ? BTN_SEL : BTN}
                         data-testid={`offline-inspection-${it.key}-${r}`}
                         onClick={() => setItem(it.key, { result: r })}
                       >
@@ -251,7 +266,7 @@ export function OfflineInspectionShell() {
                     <label className="flex flex-col gap-1 font-bold">
                       {it.label}の備考（必須）
                       <input
-                        className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 text-lg font-normal text-ink"
+                        className={INPUT}
                         value={st.note}
                         maxLength={MAX_LONG_TEXT}
                         onChange={(e) => setItem(it.key, { note: e.target.value })}
@@ -271,12 +286,12 @@ export function OfflineInspectionShell() {
               {error}
             </p>
           ) : null}
-          <button type="button" className={BTN_PRIMARY} disabled={busy} onClick={() => void save()} data-testid="offline-inspection-save">
+          <button type="button" data-variant="primary" className={BTN_PRIMARY} disabled={busy} onClick={() => void save()} data-testid="offline-inspection-save">
             端末に保存する（電波が戻ると送ります）
           </button>
         </>
       )}
-      <a href={back} className={BTN_OUTLINE} data-testid="offline-back">
+      <a href={back} className={BTN} data-testid="offline-back">
         現場の画面へ戻る
       </a>
     </main>
@@ -356,12 +371,13 @@ export function OfflineJournalShell() {
 
   return (
     <main className={MAIN} data-testid="offline-root" aria-label="日誌の入力（圏外）">
+      <FieldModeMark />
       <OfflineBanner />
-      <header className="flex flex-col gap-1 border-l-8 border-brand-700 pl-3">
-        <h1 className="text-2xl font-bold">日誌（飛行記録）の入力</h1>
+      <header className={HEADER}>
+        <h1 className="opx-h1">日誌（飛行記録）の入力</h1>
         <p>{b.plan.title}</p>
         <p>
-          <span className="font-mono">{b.plan.registrationMark}</span>（{b.plan.modelName}）／{b.plan.pilotName}／{b.plan.placeName}
+          <span className="sb-num">{b.plan.registrationMark}</span>（{b.plan.modelName}）／{b.plan.pilotName}／{b.plan.placeName}
         </p>
       </header>
       {!b.perms.canJournal ? (
@@ -377,7 +393,7 @@ export function OfflineJournalShell() {
           <dl className={BOX} data-testid="offline-journal-flight">
             <div>
               <dt className="font-bold">離陸・着陸（現場の記録から）</dt>
-              <dd className="font-mono" data-testid="offline-journal-times">
+              <dd className="sb-num tabular-nums" data-testid="offline-journal-times">
                 {jstTime(new Date(flight.f.takeoffAt))} → {jstTime(new Date(flight.f.landingAt))}
               </dd>
             </div>
@@ -401,7 +417,7 @@ export function OfflineJournalShell() {
                   type="button"
                   role="radio"
                   aria-checked={safety === v}
-                  className={safety === v ? BTN_PRIMARY : BTN_OUTLINE}
+                  className={safety === v ? BTN_SEL : BTN}
                   data-testid={`offline-journal-safety-${v}`}
                   onClick={() => setSafety(v)}
                 >
@@ -416,7 +432,7 @@ export function OfflineJournalShell() {
                 <textarea
                   rows={3}
                   maxLength={MAX_LONG_TEXT}
-                  className="min-h-14 w-full rounded-sharp border-2 border-ink-soft bg-paper px-3 py-2 text-lg font-normal text-ink"
+                  className={`${INPUT} py-2`}
                   value={detail}
                   onChange={(e) => setDetail(e.target.value)}
                   data-testid="offline-journal-safety-detail"
@@ -432,12 +448,12 @@ export function OfflineJournalShell() {
               {error}
             </p>
           ) : null}
-          <button type="button" className={BTN_PRIMARY} disabled={busy} onClick={() => void save()} data-testid="offline-journal-save">
+          <button type="button" data-variant="primary" className={BTN_PRIMARY} disabled={busy} onClick={() => void save()} data-testid="offline-journal-save">
             端末に保存する（電波が戻ると送ります）
           </button>
         </>
       )}
-      <a href={back} className={BTN_OUTLINE} data-testid="offline-back">
+      <a href={back} className={BTN} data-testid="offline-back">
         現場の画面へ戻る
       </a>
     </main>
@@ -463,8 +479,9 @@ export function OfflineTodayShell() {
   if (!state.memberId) return <Missing message={OFFLINE_NO_MEMBER_MESSAGE} testId="offline-no-member" />;
   return (
     <main className={MAIN} data-testid="offline-root" aria-label="今日（圏外）">
+      <FieldModeMark />
       <OfflineBanner />
-      <h1 className="text-2xl font-bold">端末に保存した計画</h1>
+      <h1 className="opx-h1">端末に保存した計画</h1>
       {state.bundles.length === 0 ? (
         <p className={BOX_WARN} data-testid="offline-today-empty">
           端末に保存した計画はありません。電波のある場所で「ホーム」を開くと、今日と明日の計画を保存します。
@@ -473,8 +490,8 @@ export function OfflineTodayShell() {
         <ul className="flex flex-col gap-3">
           {state.bundles.map((b) => (
             <li key={b.planId}>
-              <a href={fieldHref(b.planId)} className={`${BTN_OUTLINE} flex-col !items-start`} data-testid="offline-today-plan">
-                <span className="font-mono">
+              <a href={fieldHref(b.planId)} className={`${BTN} flex-col !items-start py-2 !text-left`} data-testid="offline-today-plan">
+                <span className="sb-num tabular-nums">
                   {b.plan.plannedDate} {b.plan.timeLabel}
                 </span>
                 <span>{b.plan.title}</span>
@@ -492,14 +509,15 @@ export function OfflineTodayShell() {
 export function OfflineUnavailableShell() {
   return (
     <main className={MAIN} data-testid="offline-root" aria-label="圏外">
+      <FieldModeMark />
       <OfflineBanner />
       <p className={BOX_WARN} role="alert" data-testid="offline-unavailable">
         {OFFLINE_UNAVAILABLE_MESSAGE}
       </p>
-      <button type="button" className={BTN_OUTLINE} onClick={() => window.history.back()} data-testid="offline-unavailable-back">
+      <button type="button" className={BTN} onClick={() => window.history.back()} data-testid="offline-unavailable-back">
         前の画面へ戻る
       </button>
-      <a href="/ops" className={BTN_OUTLINE} data-testid="offline-today-link">
+      <a href="/ops" className={BTN} data-testid="offline-today-link">
         端末に保存した今日の計画を見る
       </a>
     </main>

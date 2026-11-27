@@ -9,6 +9,7 @@ import {
   OpsTopBarGate,
 } from "@/components/ops/ops-nav-gate";
 import { PwaRegister } from "@/components/ops/pwa-register";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { MANIFEST_URL, PWA_THEME_COLOR } from "@/lib/pwa";
 
 // 運航管理（Sprint 10）の画面の共通の枠。各ページは Cookie（本人確認）を読むため、Suspense の内側で描く。
@@ -45,7 +46,7 @@ export default function OpsLayout({
         fallback={
           <div className="ds ds-page ops-v2 flex flex-1 flex-col">
             <div className={OPS_CONTENT_CLASS}>
-              <p className="text-table text-sb-ink-3">読み込み中…</p>
+              <SkeletonCard testId="ops-loading" />
             </div>
           </div>
         }
@@ -68,7 +69,7 @@ export default function OpsLayout({
           }
         >
           <Suspense
-            fallback={<p className="text-table text-sb-ink-3">読み込み中…</p>}
+            fallback={<SkeletonCard testId="ops-loading-content" />}
           >
             {children}
           </Suspense>
