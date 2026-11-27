@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Page } from "@playwright/test";
-import { JUDGEMENT_OWN_HEADINGS, JUDGEMENT_SCOPE_SELECTOR, SCOPE_ALLOWED_TESTIDS, classifyLimited, findForbidden, findGlossaryAvoided, findPlaceholders } from "../apps/web/src/lib/wording-policy";
+import { JUDGEMENT_OWN_HEADINGS, JUDGEMENT_SCOPE_SELECTOR, SCOPE_ALLOWED_TESTIDS, classifyLimited, findForbidden, findGlossaryAvoidedInPage, findPlaceholders } from "../apps/web/src/lib/wording-policy";
 
 // Sprint 18-3 契約 §6.2：禁止語・限定語の走査。E2E（公開・運航管理）が共有する。語の一覧は apps/web/src/lib/wording-policy.ts。
 // - 対象：document.documentElement.textContent（畳み・display:none の中も含む。script/style/template は除く）と、全要素の aria-label・title・alt・placeholder、
@@ -126,13 +126,14 @@ export const scanPlaceholders = async (page: Page, route: string): Promise<ScanR
 /**
  * 用語集の使わない語の走査（Sprint 37 K-8。/ops の画面に当てる）。語と許可リストは lib/wording-policy.ts の GLOSSARY・GLOSSARY_ALLOWED。
  * 判定の領域の印の中も含めて、表示の文字・属性を調べる。scanPage・violationsOf の結果は変えない（別の種類 "glossary" で返す）。
+ * 語の検出は連続した文字列（outside・scoped[].text）で行う。
  * 注意：許可リストの文（例「送信待ち」）は表示の文字から部分文字列として取り除くため、短い文の項目があるあいだは、その語は E2E では実質的に許される。
  * 出どころごとの厳密な検査は単体（apps/web/src/lib/wording-glossary.test.ts）が受け持つ。
  */
 export const scanGlossary = async (page: Page, route: string, state = "初期"): Promise<ScanRecord[]> => {
   const c = await collectPageText(page);
-  const text = [c.outsideJoined, ...c.scoped.map((x) => x.joined), ...c.attrs].join("\n");
-  return findGlossaryAvoided(text).map((h) => ({ kind: "glossary" as const, route, state, word: h.word, sentence: h.context }));
+  // 語の検出は連続した文字列で行う（joined だと、隣り合うテキストノードにまたがる語を見逃す。lib/wording-policy.ts の findGlossaryAvoidedInPage）
+  return findGlossaryAvoidedInPage({ outside: c.outside, scoped: c.scoped.map((x) => x.text), attrs: c.attrs }).map((h) => ({ kind: "glossary" as const, route, state, word: h.word, sentence: h.context }));
 };
 
 /** 用語集の使わない語の記録を、読める文にする（violationsOf とは別に使う）。 */
