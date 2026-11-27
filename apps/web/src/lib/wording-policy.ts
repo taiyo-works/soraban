@@ -281,6 +281,15 @@ export const findGlossaryAvoided = (text: string, opts: { readonly useAllowList?
   return hits(rest, GLOSSARY_AVOID_WORDS);
 };
 
+/**
+ * 表示された文字（E2E の collectPageText の結果）から、用語集の使わない語を探す。
+ * 語の検出には、テキストノードを改行でつないだ文字列ではなく、連続した文字列（textContent）を使う。
+ * 改行でつなぐと、`飛行前<span>確認</span>` のように語が隣り合うテキストノードにまたがるとき、語の途中に改行が入って見逃すため。
+ * 領域（印の外・印の中・属性）の間は改行で区切る（領域をまたいだ誤検出を避ける）。
+ */
+export const findGlossaryAvoidedInPage = (page: { readonly outside: string; readonly scoped: readonly string[]; readonly attrs: readonly string[] }): WordingHit[] =>
+  findGlossaryAvoided([page.outside, ...page.scoped, ...page.attrs].join("\n"));
+
 /** 単体の走査用：source のファイルの 1 つのリテラル literal に出た word が、許可リストで許されているか。 */
 export const glossaryAllowedFor = (source: string, literal: string, word: string): GlossaryAllowed | undefined => {
   const t = literal.trim();

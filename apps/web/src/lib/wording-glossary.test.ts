@@ -13,6 +13,7 @@ import {
   GLOSSARY_AVOID_WORDS,
   LIMITED_WORDS,
   findGlossaryAvoided,
+  findGlossaryAvoidedInPage,
   glossaryAllowedFor,
 } from "./wording-policy";
 
@@ -91,6 +92,23 @@ describe("findGlossaryAvoided（E2E の表示の走査に使う）", () => {
     expect(findGlossaryAvoided("送信待ちを残してログアウト")).toEqual([]);
     expect(findGlossaryAvoided("申請期限は 3 日後です", { useAllowList: false, extraAllowed: ["申請期限は 3 日後です"] })).toEqual([]);
     expect(findGlossaryAvoided("申請期限は 3 日後です").map((h) => h.word)).toEqual(["申請期限"]);
+  });
+});
+
+describe("findGlossaryAvoidedInPage（E2E の scanGlossary が使う。連続した文字列で検出）", () => {
+  it("隣り合うテキストノードにまたがる語も見つける（`飛行前<span>確認</span>` の textContent は「飛行前確認」）", () => {
+    // 改行でつないだ文字列だと「飛行前\n確認」になり、見逃していた
+    expect(findGlossaryAvoided("飛行前\n確認")).toEqual([]);
+    expect(findGlossaryAvoidedInPage({ outside: "飛行前確認", scoped: [], attrs: [] }).map((h) => h.word)).toEqual(["飛行前確認"]);
+    expect(findGlossaryAvoidedInPage({ outside: "", scoped: ["飛行後確認"], attrs: [] }).map((h) => h.word)).toEqual(["飛行後確認"]);
+    expect(findGlossaryAvoidedInPage({ outside: "", scoped: [], attrs: ["aria-label=送信待ち"] }).map((h) => h.word)).toEqual([]);
+    expect(findGlossaryAvoidedInPage({ outside: "", scoped: [], attrs: ["aria-label=更新の申請"] }).map((h) => h.word)).toEqual(["更新の申請"]);
+  });
+  it("領域の間は改行で区切り、領域をまたぐ語は作らない", () => {
+    expect(findGlossaryAvoidedInPage({ outside: "飛行前", scoped: ["確認"], attrs: [] })).toEqual([]);
+  });
+  it("許可リストの文は取り除く", () => {
+    expect(findGlossaryAvoidedInPage({ outside: "送信待ちを残してログアウト", scoped: [], attrs: [] })).toEqual([]);
   });
 });
 
